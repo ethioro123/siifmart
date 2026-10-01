@@ -65,4 +65,14 @@ export const COMMON_UNITS = [
 // Get all categories as flat list for simple dropdowns
 export const ALL_CATEGORY_OPTIONS = Array.from(new Set(Object.entries(GROCERY_CATEGORIES).flatMap(([main, subs]) => [main, ...subs])));
 
-export const CURRENCY_SYMBOL = 'ETB';
+export let CURRENCY_SYMBOL = 'ETB';
+
+export function setCurrencySymbol(symbol: string) {
+  if (symbol) {
+    CURRENCY_SYMBOL = symbol;
+  }
+}
+
+export function getCurrencySymbol(): string {
+  return CURRENCY_SYMBOL;
+}

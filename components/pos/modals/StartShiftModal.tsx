@@ -1,36 +1,55 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { usePOS } from '../POSContext';
 import { useStore } from '../../../contexts/CentralStore';
 import { useData } from '../../../contexts/DataContext';
 import Modal from '../../Modal';
-import Button from '../../shared/Button';
 import { CURRENCY_SYMBOL } from '../../../constants';
 import { native } from '../../../utils/native';
 import { audioFeedback } from '../../../utils/audioFeedback';
-import { Store, User, Clock, ShieldCheck, DollarSign } from 'lucide-react';
+import { Store, User, Clock, ShieldCheck, DollarSign, ArrowLeft } from 'lucide-react';
 
 const PRESET_FLOATS = [1000, 2000, 3000, 5000];
 
 export const StartShiftModal: React.FC = () => {
+    const navigate = useNavigate();
     const { user } = useStore();
     const { activeSite } = useData();
-    const { isStartShiftModalOpen, setIsStartShiftModalOpen, handleStartShift } = usePOS();
+    const { isStartShiftModalOpen, setIsStartShiftModalOpen, handleStartShift, dismissStartShiftModal } = usePOS();
     const [openingFloat, setOpeningFloat] = useState<string>('2000');
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     const floatNum = parseFloat(openingFloat) || 0;
 
-    const handleSubmit = (e?: React.FormEvent) => {
+    const handleClose = () => {
+        if (dismissStartShiftModal) {
+            dismissStartShiftModal();
+        } else {
+            setIsStartShiftModalOpen(false);
+        }
+    };
+
+    const handleSubmit = async (e?: React.FormEvent) => {
         if (e) e.preventDefault();
-        if (floatNum < 0) return;
-        audioFeedback.playSaleComplete();
-        native.haptic();
-        handleStartShift(floatNum);
+        if (floatNum < 0 || isSubmitting) return;
+
+        setIsSubmitting(true);
+        try {
+            audioFeedback.playSaleComplete();
+            native.haptic();
+            await handleStartShift(floatNum);
+            setIsStartShiftModalOpen(false);
+        } catch (err) {
+            console.error('Failed to start shift:', err);
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
     return (
         <Modal
             isOpen={isStartShiftModalOpen}
-            onClose={() => {}}
+            onClose={handleClose}
             title="Start Cashier Shift"
             size="md"
         >
@@ -112,15 +131,24 @@ export const StartShiftModal: React.FC = () => {
                     </p>
                 </div>
 
-                {/* Submit Action */}
-                <div className="pt-2">
+                {/* Actions */}
+                <div className="flex items-center gap-3 pt-2">
+                    <button
+                        type="button"
+                        onClick={handleClose}
+                        className="flex-1 py-3.5 bg-stone-100 dark:bg-white/5 hover:bg-stone-200 dark:hover:bg-white/10 text-stone-700 dark:text-stone-300 rounded-2xl font-bold uppercase tracking-wider text-xs flex items-center justify-center gap-2 transition-colors cursor-pointer"
+                    >
+                        <ArrowLeft size={16} />
+                        <span>Cancel / Go Back</span>
+                    </button>
+
                     <button
                         type="submit"
-                        disabled={floatNum < 0}
-                        className="w-full py-4 bg-gradient-to-r from-[#1E3F27] via-[#2C5E3B] to-[#224429] hover:opacity-95 text-white rounded-2xl font-black uppercase tracking-widest text-sm flex items-center justify-center gap-2 shadow-lg active:scale-98 transition-all cursor-pointer border border-emerald-400/20"
+                        disabled={floatNum < 0 || isSubmitting}
+                        className="flex-2 py-3.5 bg-gradient-to-r from-[#1E3F27] via-[#2C5E3B] to-[#224429] hover:opacity-95 disabled:opacity-50 text-white rounded-2xl font-black uppercase tracking-widest text-xs flex items-center justify-center gap-2 shadow-lg active:scale-98 transition-all cursor-pointer border border-emerald-400/20"
                     >
-                        <DollarSign size={18} />
-                        <span>Start Shift ({CURRENCY_SYMBOL} {floatNum.toLocaleString()})</span>
+                        <DollarSign size={16} />
+                        <span>{isSubmitting ? 'Starting Shift...' : `Start Shift (${CURRENCY_SYMBOL} ${floatNum.toLocaleString()})`}</span>
                     </button>
                 </div>
             </form>

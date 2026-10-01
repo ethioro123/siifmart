@@ -17,20 +17,29 @@ export const UnknownBarcodeManagerPinStep: React.FC<UnknownBarcodeManagerPinStep
     onAuthorized,
     onBack
 }) => {
-    const { settings } = useData();
+    const { settings, employees } = useData();
     const [managerPin, setManagerPin] = useState('');
     const [errorMsg, setErrorMsg] = useState('');
 
-    // Dynamic authorized manager PIN from settings with failover
     const customPin = settings?.managerSecurityPin?.trim();
-    const VALID_MANAGER_PINS = customPin ? [customPin, '1234', '0000', '9999'] : ['1234', '0000', '9999', '7777', '1111'];
 
     const handleVerifyPin = () => {
-        if (VALID_MANAGER_PINS.includes(managerPin.trim())) {
+        const entered = managerPin.trim();
+        const matchesConfigured = customPin && entered === customPin;
+
+        // 4-Eyes Principle: Any authorized store supervisor/manager staff PIN
+        const managerStaff = (employees || []).filter(e =>
+            ['super_admin', 'admin', 'store_manager', 'shift_lead', 'operations_manager', 'ceo'].includes(e.role?.toLowerCase() || '')
+        );
+        const matchesStaffPin = managerStaff.some(m => m.code?.trim() === entered);
+
+        if (matchesConfigured || matchesStaffPin) {
             setErrorMsg('');
             onAuthorized();
         } else {
-            setErrorMsg('Invalid Manager PIN. Authorization rejected.');
+            setErrorMsg(customPin || managerStaff.length > 0
+                ? 'Invalid Manager PIN. Authorization rejected.'
+                : 'No Manager Security PIN configured in Settings. Authorization rejected.');
             setManagerPin('');
         }
     };

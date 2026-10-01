@@ -78,10 +78,15 @@ export const POSProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     const [returnConfig, setReturnConfig] = useState<Record<string, { qty: number, condition: ReturnCondition, reason: ReturnReason }>>({});
     const [isStartShiftModalOpen, setIsStartShiftModalOpen] = useState(false);
     const [isShiftModalOpen, setIsShiftModalOpen] = useState(false), [closingStep, setClosingStep] = useState(1);
-    const [cashDenominations, setCashDenominations] = useState<Record<string, number>>({ '200': 0, '100': 0, '50': 0, '10': 0, '5': 0, '1': 0 });
+    const isKenyaPOS = activeSite ? (activeSite.country === 'KE' || activeSite.currency === 'KES' || activeSite.currency === 'KSh') : (settings?.country === 'KE');
+    const [cashDenominations, setCashDenominations] = useState<Record<string, number>>(() => (isKenyaPOS ? ({ '1000': 0, '500': 0, '200': 0, '100': 0, '50': 0 } as Record<string, number>) : ({ '200': 0, '100': 0, '50': 0, '10': 0, '5': 0, '1': 0 } as Record<string, number>)));
     const [discrepancyReason, setDiscrepancyReason] = useState(''), [countedCash, setCountedCash] = useState(''), [shiftNotes, setShiftNotes] = useState('');
-    const activeShift = shifts.find((s: ShiftRecord) => s.cashierId === user?.id && s.status === 'Open');
+    const isCentralHQ = user?.role === 'super_admin' || user?.role === 'inventory_manager' || user?.role === 'store_manager';
+    const activeShift = shifts.find((s: ShiftRecord) =>
+        (s.cashierId === user?.id || (user?.code && s.cashierId === user?.code) || ((user as any)?.employeeId && s.cashierId === (user as any)?.employeeId)) && s.status === 'Open'
+    ) || (isCentralHQ ? shifts.find(s => s.siteId === activeSite?.id && s.status === 'Open') : undefined);
     const [shiftStartTime, setShiftStartTime] = useState(activeShift?.startTime || new Date().toISOString());
+    const [hasDismissedStartShiftModal, setHasDismissedStartShiftModal] = useState(false);
 
     // Price Change Notification Read State
     const [lastSeenPriceUpdate, setLastSeenPriceUpdate] = useState<number>(() => {
@@ -110,21 +115,27 @@ export const POSProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     const searchInputRef = React.useRef<HTMLInputElement>(null);
     const [weightPromptProduct, setWeightPromptProduct] = useState<Product | null>(null);
 
-    const handleStartShift = useCallback((openingFloat: number) => {
+    const handleStartShift = useCallback(async (openingFloat: number) => {
         if (!user) return;
-        startShift(user.id, openingFloat);
         setIsStartShiftModalOpen(false);
+        await startShift(user.id, openingFloat);
     }, [user, startShift]);
+
+    const dismissStartShiftModal = useCallback(() => {
+        setHasDismissedStartShiftModal(true);
+        setIsStartShiftModalOpen(false);
+    }, []);
 
     // --- Effects ---
     useEffect(() => {
         if (activeShift) {
             setShiftStartTime(activeShift.startTime);
             setIsStartShiftModalOpen(false);
-        } else if (user) {
+            setHasDismissedStartShiftModal(false);
+        } else if (user && !hasDismissedStartShiftModal) {
             setIsStartShiftModalOpen(true);
         }
-    }, [activeShift, user]);
+    }, [activeShift, user, hasDismissedStartShiftModal]);
 
     useEffect(() => {
         // Only autofocus search input on desktop/USB-scanner environments; avoid popping virtual keyboard on mobile
@@ -236,7 +247,7 @@ export const POSProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         cart, setCart, weightPromptProduct, setWeightPromptProduct,
         miscItem, setMiscItem, setIsMiscItemModalOpen, activeSite, addNotification,
         setCartDiscount, setAppliedDiscountCode, setAppliedDiscountCodeDetails,
-        setDiscountCodeInput, setDiscountCodeError, setIsRoundingEnabled
+        setDiscountCodeInput, setDiscountCodeError, setIsRoundingEnabled, user
     });
 
     const {
@@ -264,7 +275,8 @@ export const POSProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         closingStep, setClosingStep, cashDenominations, setCashDenominations,
         discrepancyReason, setDiscrepancyReason, countedCash, setCountedCash,
         shiftNotes, setShiftNotes, setIsShiftModalOpen, setIsProcessing,
-        activeShift, sales, closeShift, logout, navigate, addNotification
+        activeShift, sales, closeShift, logout, navigate, addNotification,
+        activeSite, user
     });
 
     const {
@@ -427,7 +439,7 @@ export const POSProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         miscItem, setMiscItem, isRoundingEnabled, setIsRoundingEnabled, roundingAdjustment, isReturnModalOpen, setIsReturnModalOpen,
         returnSearchId, setReturnSearchId, foundSaleForReturn, setFoundSaleForReturn, returnConfig,
         setReturnConfig, priceUpdatedProducts, isPriceUpdatesModalOpen, setIsPriceUpdatesModalOpen,
-        isStartShiftModalOpen, setIsStartShiftModalOpen, handleStartShift,
+        isStartShiftModalOpen, setIsStartShiftModalOpen, handleStartShift, dismissStartShiftModal,
         isShiftModalOpen, setIsShiftModalOpen, closingStep, setClosingStep, cashDenominations, setCashDenominations,
         discrepancyReason, setDiscrepancyReason, countedCash, setCountedCash, shiftNotes, setShiftNotes,
         lastSeenPriceUpdate, markPriceUpdatesAsRead,
@@ -476,7 +488,7 @@ export const POSProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         subtotal, tax, taxBreakdown, rawTotal, total, changeDue, isPaymentValid,
         filteredCustomers, needsStoreSelection, weightPromptProduct, isNativeApp,
         // Callbacks (stable via useCallback)
-        addToCart, handleScanProduct, confirmWeightEntry, handleStartShift
+        addToCart, handleScanProduct, confirmWeightEntry, handleStartShift, dismissStartShiftModal
     ]);
 
     return <POSContext.Provider value={value}>{children}</POSContext.Provider>;

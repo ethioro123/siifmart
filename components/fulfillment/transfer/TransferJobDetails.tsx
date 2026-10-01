@@ -194,8 +194,8 @@ export const TransferJobDetails: React.FC<TransferJobDetailsProps> = ({
                                     <div className="flex items-center gap-3 min-w-0">
                                         <div className="relative w-10 h-10 rounded-lg bg-white dark:bg-black/40 border border-stone-200 dark:border-white/10 flex items-center justify-center overflow-hidden shrink-0 shadow-sm">
                                             {product?.image ? <img src={product.image} alt="" className="w-full h-full object-cover" /> : <Box size={18} className="text-gray-300 dark:text-white/20" />}
-                                            {isDone && <div className="absolute inset-0 bg-green-500/10 backdrop-blur-[1px] flex items-center justify-center"><CheckCircle size={16} className="text-green-500" /></div>}
-                                            {hasDiscrepancy && <div className="absolute inset-0 bg-red-500/10 backdrop-blur-[1px] flex items-center justify-center"><XCircle size={16} className="text-red-500" /></div>}
+                                            {isDone && <div className="absolute inset-0 bg-green-500/20 flex items-center justify-center"><CheckCircle size={16} className="text-green-600 dark:text-green-400" /></div>}
+                                            {hasDiscrepancy && <div className="absolute inset-0 bg-red-500/20 flex items-center justify-center"><XCircle size={16} className="text-red-600 dark:text-red-400" /></div>}
                                         </div>
                                         <div className="min-w-0">
                                             <h4 className="text-gray-900 dark:text-white font-bold tracking-tight truncate uppercase text-xs leading-snug">{item.name || item.productName || product?.name || 'Unknown'}</h4>

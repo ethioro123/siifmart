@@ -44,6 +44,9 @@ export interface SaleRecord {
   fulfillmentStatus?: 'Pending' | 'Picking' | 'Packing' | 'Shipped' | 'Delivered';
   release_status?: 'AUTOMATIC' | 'PENDING' | 'RELEASED';
   receiptNumber?: string; // Friendly ID (e.g., REC-0001)
+  mobilePaymentChannel?: string;
+  mobileTransactionRef?: string;
+  customerPhone?: string;
 }
 
 export type ReturnReason = 'Defective' | 'Expired' | 'Customer Changed Mind' | 'Wrong Item';
@@ -87,8 +90,17 @@ export interface ShiftRecord {
   variance?: number;
   denominations?: Record<string, number>;
   discrepancyReason?: string;
-  status: 'Open' | 'Closed';
+  status: 'Open' | 'Closed' | 'Audited' | 'Flagged';
+  notes?: string;
+  closedBy?: string;
+  reconciledBy?: string;
+  reconciledAt?: string;
+  reconciliationStatus?: 'Pending' | 'Reconciled' | 'Discrepancy_Flagged';
+  hqNotes?: string;
+  createdAt?: string;
+  updatedAt?: string;
 }
+
 
 export interface HeldOrder {
   id: string;

@@ -4,9 +4,10 @@ import { Product, Site } from '../../../types';
 import { CURRENCY_SYMBOL } from '../../../constants';
 import { formatCompactNumber } from '../../../utils/formatting';
 import { getABCClass, getInventoryValue } from '../utils/inventoryHelpers';
-import { getSellUnit } from '../../../utils/units';
+import { getSellUnit, formatStockDisplay, formatProductSize, formatPackagingDescription } from '../../../utils/units';
 import { useStore } from '../../../contexts/CentralStore';
 import { canViewCostPrice } from '../../../utils/roles';
+import { Protected } from '../../Protected';
 
 interface InventoryMobileListProps {
     products: Product[];
@@ -21,6 +22,7 @@ interface InventoryMobileListProps {
     handleOpenEditProduct: (product: Product) => void;
     handleDeleteProduct: (id: string) => void;
     setSelectedViewProduct: (product: Product | null) => void;
+    currencySymbol?: string;
 }
 
 export const InventoryMobileList: React.FC<InventoryMobileListProps> = ({
@@ -35,7 +37,8 @@ export const InventoryMobileList: React.FC<InventoryMobileListProps> = ({
     handleOpenAdjust,
     handleOpenEditProduct,
     handleDeleteProduct,
-    setSelectedViewProduct
+    setSelectedViewProduct,
+    currencySymbol = CURRENCY_SYMBOL
 }) => {
     const { user } = useStore();
     const showCostPrice = canViewCostPrice(user?.role);
@@ -46,9 +49,6 @@ export const InventoryMobileList: React.FC<InventoryMobileListProps> = ({
             {products.map((product) => {
                 const abc = getABCClass(product, totalInventoryValue);
                 const isSelected = selectedIds.has(product.id);
-                const unitDef = getSellUnit(product.unit || '');
-                const sizeNum = parseFloat(product.size || '0');
-                const isWeightVol = (unitDef.category === 'weight' || unitDef.category === 'volume') && sizeNum > 0;
                 const stockVal = product.stock || 0;
                 const threshold = product.minStock !== undefined && product.minStock !== null && product.minStock > 0 ? product.minStock : 10;
                 const isOutOfStock = stockVal <= 0;
@@ -97,12 +97,21 @@ export const InventoryMobileList: React.FC<InventoryMobileListProps> = ({
                                     <span className="text-[8px] font-extrabold text-stone-600 bg-stone-100 dark:text-[#7A9E83] dark:bg-white/5 px-1.5 py-0.5 rounded">
                                         {product.category}
                                     </span>
+                                    {formatProductSize(product) && (
+                                        <span className="text-[8px] font-extrabold font-mono text-emerald-700 bg-emerald-500/10 dark:text-emerald-300 dark:bg-emerald-500/20 px-1.5 py-0.5 rounded border border-emerald-500/20">
+                                            {formatProductSize(product)}
+                                        </span>
+                                    )}
                                 </div>
                             </div>
                             {/* Status Badge */}
-                            <div className={`text-[10px] font-black font-mono px-2 py-0.5 rounded-lg ${colorClasses}`}>
-                                {stockVal}
-                                {isWeightVol ? ` × ${sizeNum}${unitDef.shortLabel.toLowerCase()}` : ` ${unitDef.shortLabel}`}
+                            <div className={`flex flex-col items-end text-[10px] font-black font-mono px-2 py-1 rounded-lg ${colorClasses}`}>
+                                <span>{formatStockDisplay(stockVal, product)}</span>
+                                {formatPackagingDescription(product, stockVal) && (
+                                    <span className="text-[8px] font-sans font-medium text-stone-600 dark:text-stone-300">
+                                        {formatPackagingDescription(product, stockVal)}
+                                    </span>
+                                )}
                             </div>
                         </div>
 
@@ -122,21 +131,21 @@ export const InventoryMobileList: React.FC<InventoryMobileListProps> = ({
                             <div className="flex flex-col items-center">
                                 <span className="text-[8px] text-gray-500 font-bold uppercase tracking-widest">Price</span>
                                 <span className="text-[10px] text-gray-900 dark:text-white font-mono font-bold mt-0.5">
-                                    {product.price && product.price > 0 ? formatCompactNumber(product.price, { currency: CURRENCY_SYMBOL }) : '—'}
+                                    {product.price && product.price > 0 ? formatCompactNumber(product.price, { currency: currencySymbol }) : '—'}
                                 </span>
                             </div>
                             {showCostPrice && (
                                 <div className="flex flex-col items-center">
                                     <span className="text-[8px] text-gray-500 font-bold uppercase tracking-widest">Cost</span>
                                     <span className="text-[10px] text-gray-900 dark:text-white font-mono font-bold mt-0.5">
-                                        {product.costPrice && product.costPrice > 0 ? formatCompactNumber(product.costPrice, { currency: CURRENCY_SYMBOL }) : '—'}
+                                        {product.costPrice && product.costPrice > 0 ? formatCompactNumber(product.costPrice, { currency: currencySymbol }) : '—'}
                                     </span>
                                 </div>
                             )}
                             <div className="flex flex-col items-end">
                                 <span className="text-[8px] text-gray-500 font-bold uppercase tracking-widest">Value</span>
                                 <span className="text-[10px] text-[#2C5E3B] dark:text-[#A9CBA2] font-mono font-bold mt-0.5">
-                                    {product.price && product.price > 0 ? formatCompactNumber(getInventoryValue(product), { currency: CURRENCY_SYMBOL }) : '—'}
+                                    {product.price && product.price > 0 ? formatCompactNumber(getInventoryValue(product), { currency: currencySymbol }) : '—'}
                                 </span>
                             </div>
                         </div>
@@ -154,24 +163,28 @@ export const InventoryMobileList: React.FC<InventoryMobileListProps> = ({
                             </span>
                             {!isReadOnly && (
                                 <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
-                                    <button
-                                        onClick={() => handleOpenAdjust(product)}
-                                        className="px-2.5 py-1 text-[10px] font-bold bg-[#2C5E3B]/10 hover:bg-[#2C5E3B]/20 text-[#2C5E3B] dark:bg-[#A9CBA2]/10 dark:hover:bg-[#A9CBA2]/20 dark:text-[#A9CBA2] rounded-lg transition-all"
-                                    >
-                                        Adjust
-                                    </button>
-                                    <button
-                                        onClick={() => handleOpenEditProduct(product)}
-                                        className="px-2.5 py-1 text-[10px] font-bold bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 rounded-lg transition-all"
-                                    >
-                                        Edit
-                                    </button>
-                                    <button
-                                        onClick={() => handleDeleteProduct(product.id)}
-                                        className="px-2.5 py-1 text-[10px] font-bold bg-red-500/10 hover:bg-red-500/20 text-red-500 rounded-lg transition-all"
-                                    >
-                                        Delete
-                                    </button>
+                                    <Protected permission="ADJUST_STOCK">
+                                        <button
+                                            onClick={() => handleOpenAdjust(product)}
+                                            className="px-2.5 py-1 text-[10px] font-bold bg-[#2C5E3B]/10 hover:bg-[#2C5E3B]/20 text-[#2C5E3B] dark:bg-[#A9CBA2]/10 dark:hover:bg-[#A9CBA2]/20 dark:text-[#A9CBA2] rounded-lg transition-all"
+                                        >
+                                            Adjust
+                                        </button>
+                                    </Protected>
+                                    <Protected permission="EDIT_PRODUCT">
+                                        <button
+                                            onClick={() => handleOpenEditProduct(product)}
+                                            className="px-2.5 py-1 text-[10px] font-bold bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 rounded-lg transition-all"
+                                        >
+                                            Edit
+                                        </button>
+                                        <button
+                                            onClick={() => handleDeleteProduct(product.id)}
+                                            className="px-2.5 py-1 text-[10px] font-bold bg-red-500/10 hover:bg-red-500/20 text-red-500 rounded-lg transition-all"
+                                        >
+                                            Delete
+                                        </button>
+                                    </Protected>
                                 </div>
                             )}
                         </div>

@@ -1,21 +1,21 @@
 import React from 'react';
 import { ComposedChart, Bar, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, AreaChart, Area } from 'recharts';
-import { Target, AlertCircle, Clock } from 'lucide-react';
+import { Target } from 'lucide-react';
 import { useFinance } from './FinanceContext';
-import { CURRENCY_SYMBOL } from '../../constants';
 
 export const BudgetTab: React.FC = () => {
     const {
         cashflowData,
         forecastData,
-        netTaxPayable
+        currencySymbol,
+        apAging
     } = useFinance();
 
     return (
         <div className="space-y-6 animate-in fade-in">
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 {/* Actual vs Budget Chart */}
-                <div className="lg:col-span-2 bg-cyber-gray border border-white/5 rounded-2xl p-6">
+                <div className="lg:col-span-2 bg-stone-900/60 dark:bg-stone-900/60 border border-stone-200/10 dark:border-white/5 rounded-2xl p-6">
                     <h3 className="font-bold text-white mb-6">Budget Variance Analysis (YTD)</h3>
                     <div className="h-[300px]">
                         <ResponsiveContainer width="100%" height="100%" minHeight={0}>
@@ -33,7 +33,7 @@ export const BudgetTab: React.FC = () => {
                 </div>
 
                 {/* Department Budgets */}
-                <div className="bg-cyber-gray border border-white/5 rounded-2xl p-6 flex flex-col">
+                <div className="bg-stone-900/60 dark:bg-stone-900/60 border border-stone-200/10 dark:border-white/5 rounded-2xl p-6 flex flex-col">
                     <h3 className="font-bold text-white mb-4">Department Utilization</h3>
                     <div className="flex-1 flex flex-col items-center justify-center py-10">
                         <div className="w-16 h-16 bg-white/5 rounded-full flex items-center justify-center mb-4">
@@ -49,7 +49,7 @@ export const BudgetTab: React.FC = () => {
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 {/* Cash Forecasting */}
-                <div className="lg:col-span-2 bg-cyber-gray border border-white/5 rounded-2xl p-6">
+                <div className="lg:col-span-2 bg-stone-900/60 dark:bg-stone-900/60 border border-stone-200/10 dark:border-white/5 rounded-2xl p-6">
                     <h3 className="font-bold text-white mb-2">Q3 Cash Flow Forecast (AI Projected)</h3>
                     <p className="text-xs text-gray-400 mb-6">Based on trailing 6-month revenue trends and seasonality factors.</p>
                     <div className="h-[250px]">
@@ -73,30 +73,30 @@ export const BudgetTab: React.FC = () => {
                     </div>
                 </div>
 
-                {/* AP Aging Widget */}
-                <div className="bg-cyber-gray border border-white/5 rounded-2xl p-6">
+                {/* AP Aging Widget (Calculated dynamically from real country purchase orders) */}
+                <div className="bg-stone-900/60 dark:bg-stone-900/60 border border-stone-200/10 dark:border-white/5 rounded-2xl p-6">
                     <h3 className="font-bold text-white mb-4">Accounts Payable Aging</h3>
                     <div className="space-y-3">
-                        <div className="flex justify-between items-center p-3 bg-green-500/5 border border-green-500/20 rounded-xl">
-                            <span className="text-xs text-gray-400 uppercase font-bold">Current</span>
-                            <span className="text-green-400 font-mono font-bold">{CURRENCY_SYMBOL} 120,000</span>
+                        <div className="flex justify-between items-center p-3 bg-emerald-500/5 border border-emerald-500/20 rounded-xl">
+                            <span className="text-xs text-gray-400 uppercase font-bold">Current (&le;30 Days)</span>
+                            <span className="text-emerald-400 font-mono font-bold">{currencySymbol} {apAging.current.toLocaleString()}</span>
                         </div>
                         <div className="flex justify-between items-center p-3 bg-blue-500/5 border border-blue-500/20 rounded-xl">
-                            <span className="text-xs text-gray-400 uppercase font-bold">1-30 Days</span>
-                            <span className="text-blue-400 font-mono font-bold">{CURRENCY_SYMBOL} 45,000</span>
+                            <span className="text-xs text-gray-400 uppercase font-bold">1-30 Days Overdue</span>
+                            <span className="text-blue-400 font-mono font-bold">{currencySymbol} {apAging.days1to30.toLocaleString()}</span>
                         </div>
-                        <div className="flex justify-between items-center p-3 bg-yellow-500/5 border border-yellow-500/20 rounded-xl">
-                            <span className="text-xs text-gray-400 uppercase font-bold">31-60 Days</span>
-                            <span className="text-yellow-400 font-mono font-bold">{CURRENCY_SYMBOL} 12,500</span>
+                        <div className="flex justify-between items-center p-3 bg-amber-500/5 border border-amber-500/20 rounded-xl">
+                            <span className="text-xs text-gray-400 uppercase font-bold">31-60 Days Overdue</span>
+                            <span className="text-amber-400 font-mono font-bold">{currencySymbol} {apAging.days31to60.toLocaleString()}</span>
                         </div>
-                        <div className="flex justify-between items-center p-3 bg-red-500/5 border border-red-500/20 rounded-xl">
-                            <span className="text-xs text-gray-400 uppercase font-bold">60+ Days</span>
-                            <span className="text-red-400 font-mono font-bold">{CURRENCY_SYMBOL} 8,000</span>
+                        <div className="flex justify-between items-center p-3 bg-rose-500/5 border border-rose-500/20 rounded-xl">
+                            <span className="text-xs text-gray-400 uppercase font-bold">60+ Days Overdue</span>
+                            <span className="text-rose-400 font-mono font-bold">{currencySymbol} {apAging.days60Plus.toLocaleString()}</span>
                         </div>
                         <div className="pt-4 border-t border-white/5 mt-2">
                             <div className="flex justify-between text-sm font-bold text-white">
                                 <span>Total Outstanding</span>
-                                <span>{CURRENCY_SYMBOL} 185,500</span>
+                                <span className="font-mono text-[#2C5E3B] dark:text-[#A9CBA2]">{currencySymbol} {apAging.totalOutstanding.toLocaleString()}</span>
                             </div>
                         </div>
                     </div>

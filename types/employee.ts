@@ -54,6 +54,9 @@ export interface Employee {
   attendanceRate?: number;
   address?: string;
   emergencyContact?: string;
+  nationalIdNumber?: string;
+  nationalIdPhoto?: string;
+  resumeUrl?: string;
   // Driver-specific fields
   driverType?: 'internal' | 'subcontracted' | 'owner_operator';
   vehicleType?: string; // e.g., "Van", "Truck", "Motorcycle"

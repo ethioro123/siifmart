@@ -1,6 +1,11 @@
-import React from 'react';
-import { ChevronDown, Trophy, TrendingUp, Zap, Crown, ClipboardList, Archive, PackageCheck, Truck, BoxIcon, User, MapPin, Globe, LogOut, Sun, Moon, RefreshCw } from 'lucide-react';
+import React, { useState } from 'react';
+import { ChevronDown, Trophy, TrendingUp, Zap, Crown, ClipboardList, Archive, PackageCheck, Truck, BoxIcon, User, MapPin, Globe, LogOut, Sun, Moon, RefreshCw, ShieldCheck, Lock } from 'lucide-react';
 import { formatRole } from '../../utils/formatting';
+import { useLanguage } from '../../contexts/LanguageContext';
+import { useData } from '../../contexts/DataContext';
+import { canSwitchCountry } from '../../utils/permissions';
+import { getCountryProfile, getRegisteredCountries, Country } from '../../utils/localization';
+import { evaluateGeofence } from '../../utils/geofence';
 
 interface UserMenuProps {
    user: any;
@@ -35,6 +40,43 @@ export function UserMenu({
    toggleTheme,
    onRefresh
 }: UserMenuProps) {
+   const { availableLanguages, countryProfile, isKenya } = useLanguage();
+   const { settings, updateSettings, effectiveCountry: ctxEffectiveCountry, isCeo: ctxIsCeo } = useData();
+   const [isSwitchingMarket, setIsSwitchingMarket] = useState(false);
+
+   const isCeoUser = ctxIsCeo ?? canSwitchCountry(user);
+   const currentMarket: Country = (ctxEffectiveCountry || settings?.country || 'ET') as Country;
+   const currentMarketProfile = getCountryProfile(currentMarket);
+
+   const handleSwitchMarket = async (targetCountry: Country) => {
+      if (targetCountry === currentMarket || !updateSettings || isSwitchingMarket) return;
+      setIsSwitchingMarket(true);
+      const profile = getCountryProfile(targetCountry);
+      try {
+         await updateSettings({
+            country: targetCountry,
+            currency: profile.currency,
+            timezone: profile.timezone,
+            dateFormat: profile.dateFormat,
+            taxRate: profile.taxRate,
+            defaultVatRate: profile.taxRate,
+            taxAuthority: profile.taxAuthority,
+            complianceStandard: profile.complianceStandard,
+            language: profile.supportedLanguages.some(l => l.code === settings?.language)
+               ? (settings?.language || 'en')
+               : (profile.supportedLanguages[0]?.code || 'en')
+         }, user?.name || 'CEO');
+
+         // Automatically refresh the application so the entire national tenant context re-hydrates cleanly
+         if (typeof window !== 'undefined') {
+            window.location.reload();
+         }
+      } catch (err) {
+         console.error('Failed to switch market:', err);
+         setIsSwitchingMarket(false);
+      }
+   };
+
    if (!user) return null;
 
    return (
@@ -84,12 +126,23 @@ export function UserMenu({
                      <p className="text-sm font-bold text-[#1E3F27] dark:text-white truncate">{user.name}</p>
                      <p className="text-[10px] font-mono text-[#2C5E3B] dark:text-[#A9CBA2] uppercase mb-1">{formatRole(user.role)}</p>
                      
-                     {user.loginLocation && (
-                        <div className="flex items-center gap-1.5 mb-3 text-[9px] font-medium text-stone-500 dark:text-gray-400/80 bg-stone-100/50 dark:bg-white/5 px-2 py-1 rounded-md border border-[#E2DCCE]/50 dark:border-white/5 w-fit">
-                           <MapPin size={9} className="text-[#2C5E3B] dark:text-[#A9CBA2] shrink-0" />
-                           <span className="truncate max-w-[200px]" title={user.loginLocation}>{user.loginLocation}</span>
-                        </div>
-                     )}
+                     {user.loginLocation && (() => {
+                        const geofence = evaluateGeofence(user.loginLocation, currentMarket);
+                        return (
+                           <div className={`flex items-center gap-1.5 mb-3 text-[9px] font-medium px-2 py-1 rounded-md border w-fit ${
+                              geofence.isForeignAnomaly
+                                 ? 'bg-red-500/10 text-red-600 dark:text-red-400 border-red-500/20'
+                                 : geofence.isOffPremise
+                                    ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20'
+                                    : 'text-stone-500 dark:text-gray-400/80 bg-stone-100/50 dark:bg-white/5 border-[#E2DCCE]/50 dark:border-white/5'
+                           }`}>
+                              <MapPin size={9} className={geofence.isForeignAnomaly ? 'text-red-500 shrink-0' : 'text-[#2C5E3B] dark:text-[#A9CBA2] shrink-0'} />
+                              <span className="truncate max-w-[200px]" title={geofence.anomalyReason || user.loginLocation}>
+                                 {geofence.isForeignAnomaly ? `⚠️ Foreign: ${geofence.displayLocation}` : user.loginLocation}
+                              </span>
+                           </div>
+                        );
+                     })()}
 
                      {/* Performance Highlights */}
                      {currentUserPoints && (
@@ -178,25 +231,102 @@ export function UserMenu({
                         </button>
                      )}
 
+                     {/* Market Instance Switcher (CEO Dual Market vs Staff Locked) */}
+                     <div
+                        className="mt-2 px-3 py-2 border-t border-[#E2DCCE] dark:border-white/5"
+                        onClick={(e) => e.stopPropagation()}
+                     >
+                        <div className="flex items-center justify-between mb-1.5">
+                           <p className="text-[10px] font-bold text-stone-400 dark:text-gray-500 uppercase tracking-widest">
+                              Market Instance
+                           </p>
+                           {isCeoUser ? (
+                              isSwitchingMarket ? (
+                                 <span className="text-[9px] font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400 bg-amber-500/10 px-1.5 py-0.5 rounded border border-amber-500/20 flex items-center gap-1 animate-pulse">
+                                    <RefreshCw size={9} className="animate-spin" /> Reloading...
+                                 </span>
+                              ) : (
+                                 <span className="text-[9px] font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-1.5 py-0.5 rounded border border-emerald-500/20 flex items-center gap-1">
+                                    <ShieldCheck size={9} /> CEO Control
+                                 </span>
+                              )
+                           ) : (
+                              <span className="text-[9px] font-bold uppercase tracking-wider text-stone-500 dark:text-stone-400 bg-stone-500/10 px-1.5 py-0.5 rounded border border-stone-500/20 flex items-center gap-1">
+                                 <Lock size={8} /> Branch Locked
+                              </span>
+                           )}
+                        </div>
+
+                        {isCeoUser ? (
+                           <div className="grid grid-cols-2 gap-1.5 p-1 bg-stone-100/80 dark:bg-white/5 rounded-xl border border-[#E2DCCE] dark:border-white/10 max-h-40 overflow-y-auto custom-scrollbar">
+                              {getRegisteredCountries().map((prof) => (
+                                 <button
+                                    key={prof.code}
+                                    type="button"
+                                    disabled={isSwitchingMarket}
+                                    onClick={() => handleSwitchMarket(prof.code)}
+                                    className={`flex items-center justify-center gap-1.5 py-1.5 px-2 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                                       currentMarket === prof.code
+                                          ? 'bg-white dark:bg-[#2C5E3B] text-[#1E3F27] dark:text-white shadow-xs border border-[#E2DCCE] dark:border-transparent'
+                                          : 'text-stone-500 dark:text-stone-400 hover:text-stone-800 dark:hover:text-white'
+                                    } ${isSwitchingMarket ? 'opacity-50 cursor-wait' : ''}`}
+                                    title={prof.name}
+                                 >
+                                    <span>{prof.flag}</span>
+                                    <span className="truncate">{prof.name.split(' ')[0]}</span>
+                                 </button>
+                              ))}
+                           </div>
+                        ) : (
+                           <div className="flex items-center justify-between bg-stone-100/60 dark:bg-white/5 rounded-lg px-2.5 py-1.5 border border-[#E2DCCE] dark:border-white/5">
+                              <span className="text-xs font-bold text-[#1E3F27] dark:text-white flex items-center gap-1.5">
+                                 <span>{currentMarketProfile.flag}</span>
+                                 <span className="truncate max-w-[150px]">{currentMarketProfile.name}</span>
+                              </span>
+                              <span className="text-[10px] font-mono text-stone-400 font-semibold">
+                                 {currentMarketProfile.currencySymbol}
+                              </span>
+                           </div>
+                        )}
+                     </div>
+
                      {/* Language Switcher */}
                      <div
                         className="mt-2 px-3 py-2 border-t border-[#E2DCCE] dark:border-white/5"
                         onClick={(e) => e.stopPropagation()}
                      >
-                        <p className="text-[10px] font-bold text-stone-400 dark:text-gray-500 uppercase tracking-widest mb-2">Display Language</p>
-                        <div className="flex items-center gap-2 bg-stone-100/60 dark:bg-white/5 rounded-lg p-1.5 border border-[#E2DCCE] dark:border-white/5 hover:border-[#2C5E3B]/30 dark:hover:border-[#A9CBA2]/30 transition-all">
-                           <Globe size={14} className="text-stone-400 dark:text-gray-400" />
-                           <select
-                              value={language}
-                              onChange={(e) => setLanguage(e.target.value as any)}
-                              className="bg-transparent text-[#1E3F27] dark:text-white text-xs outline-none border-none flex-1 cursor-pointer font-bold"
-                              title="Select Language"
-                           >
-                              <option value="en" className="bg-white dark:bg-gray-800">English</option>
-                              <option value="am" className="bg-white dark:bg-gray-800">Amharic (አማርኛ)</option>
-                              <option value="or" className="bg-white dark:bg-gray-800">Oromo (Afaan Oromoo)</option>
-                           </select>
+                        <div className="flex items-center justify-between mb-2">
+                           <p className="text-[10px] font-bold text-stone-400 dark:text-gray-500 uppercase tracking-widest">Display Language</p>
+                           <span className="text-[10px] font-mono font-bold text-[#2C5E3B] dark:text-[#A9CBA2] flex items-center gap-1">
+                              {currentMarketProfile.flag} {currentMarketProfile.code}
+                           </span>
                         </div>
+                        {availableLanguages.length <= 1 ? (
+                           <div className="flex items-center justify-between bg-stone-100/60 dark:bg-white/5 rounded-lg px-2.5 py-2 border border-[#E2DCCE] dark:border-white/5">
+                              <span className="text-xs font-bold text-[#1E3F27] dark:text-white flex items-center gap-1.5">
+                                 <Globe size={13} className="text-stone-400" /> {currentMarketProfile.supportedLanguages[0]?.label || 'English'}
+                              </span>
+                              <span className="text-[9px] font-bold uppercase tracking-wider text-amber-600 bg-amber-500/10 px-1.5 py-0.5 rounded border border-amber-500/20">
+                                 Locked
+                              </span>
+                           </div>
+                        ) : (
+                           <div className="flex items-center gap-2 bg-stone-100/60 dark:bg-white/5 rounded-lg p-1.5 border border-[#E2DCCE] dark:border-white/5 hover:border-[#2C5E3B]/30 dark:hover:border-[#A9CBA2]/30 transition-all">
+                              <Globe size={14} className="text-stone-400 dark:text-gray-400" />
+                              <select
+                                 value={language}
+                                 onChange={(e) => setLanguage(e.target.value as any)}
+                                 className="bg-transparent text-[#1E3F27] dark:text-white text-xs outline-none border-none flex-1 cursor-pointer font-bold"
+                                 title="Select Language"
+                              >
+                                 {availableLanguages.map(lang => (
+                                    <option key={lang.code} value={lang.code} className="bg-white dark:bg-gray-800">
+                                       {lang.label} ({lang.nativeLabel})
+                                    </option>
+                                 ))}
+                              </select>
+                           </div>
+                        )}
                      </div>
                       {/* Theme and Refresh shortcuts */}
                       <div className="mt-2 pt-2 border-t border-[#E2DCCE] dark:border-white/5 space-y-1">

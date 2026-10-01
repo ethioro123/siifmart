@@ -2,6 +2,7 @@ import React, { useRef, useEffect } from 'react';
 import { Supplier, Site } from '../../types';
 import { Truck, MapPin, ChevronDown, ChevronUp, Check, Info, X } from 'lucide-react';
 import { logger } from '../../utils/logger';
+import { formatDisplaySiteId } from '../../utils/siteIdGenerator';
 
 interface POSupplierLogisticsProps {
     // Supplier State
@@ -145,7 +146,12 @@ export const POSupplierLogistics: React.FC<POSupplierLogisticsProps> = ({
                 <div className="space-y-4">
                     {/* Destination Dropdown */}
                     <div className="space-y-1.5 relative" ref={siteDropdownRef}>
-                        <label className="text-[10px] text-stone-500 dark:text-gray-400 uppercase font-bold tracking-wider block">Receiving Destination</label>
+                        <div className="flex items-center justify-between">
+                            <label className="text-[10px] text-stone-500 dark:text-gray-400 uppercase font-bold tracking-wider block">
+                                Receiving Facility <span className="text-amber-600 dark:text-amber-400 font-bold">(Warehouse / DC Only)</span>
+                            </label>
+                            <span className="text-[9px] text-stone-400 italic">No direct store delivery</span>
+                        </div>
 
                         <div
                             className={`w-full bg-[#FAF8F5] dark:bg-black/30 border rounded-2xl px-4 py-2.5 text-xs text-[#1E3F27] dark:text-white cursor-pointer flex justify-between items-center transition-all ${isSiteDropdownOpen ? 'border-[#2C5E3B]' : 'border-[#E2DCCE] dark:border-white/10'}`}
@@ -153,8 +159,8 @@ export const POSupplierLogistics: React.FC<POSupplierLogisticsProps> = ({
                         >
                             <span className={destinationSiteIds.length === 0 ? 'text-stone-400 text-xs' : 'font-black text-[#1E3F27] dark:text-white'}>
                                 {destinationSiteIds.length === 0
-                                    ? 'Select receiving destination...'
-                                    : `${destinationSiteIds.length} location(s) assigned`}
+                                    ? 'Select receiving Warehouse or DC...'
+                                    : `${destinationSiteIds.length} storage hub(s) assigned`}
                             </span>
                             {isSiteDropdownOpen ? <ChevronUp size={14} className="text-[#2C5E3B] dark:text-[#A9CBA2]" /> : <ChevronDown size={14} className="text-stone-400" />}
                         </div>
@@ -163,17 +169,21 @@ export const POSupplierLogistics: React.FC<POSupplierLogisticsProps> = ({
                         {isSiteDropdownOpen && (
                             <div className="absolute z-50 w-full mt-2 bg-white dark:bg-[#18201B] border border-[#E2DCCE] dark:border-emerald-950/20 rounded-2xl shadow-xl p-2 max-h-56 overflow-y-auto">
                                 <div className="flex justify-between items-center px-2 py-1 border-b border-[#E2DCCE]/60 dark:border-white/5 mb-1.5">
-                                    <span className="text-[10px] text-stone-400 font-bold uppercase">Available Warehouses</span>
+                                    <span className="text-[10px] text-stone-400 font-bold uppercase">
+                                        Storage Hubs & DCs {sites.length > 0 && `(${sites[0]?.country === 'KE' ? '🇰🇪 Kenya Hub' : '🇪🇹 Ethiopia HQ'})`}
+                                    </span>
                                     <div className="flex gap-2">
                                         <button
                                             type="button"
                                             onClick={() => {
-                                                const warehouseIds = sites.filter(s => s.type === 'Warehouse' || s.type === 'Distribution Center').map(s => s.id);
-                                                setDestinationSiteIds(warehouseIds);
+                                                const receivingIds = sites
+                                                    .filter(s => (s.type === 'Warehouse' || s.type === 'Distribution Center') && s.status !== 'Closed')
+                                                    .map(s => s.id);
+                                                setDestinationSiteIds(receivingIds);
                                             }}
                                             className="text-[10px] text-[#2C5E3B] dark:text-[#A9CBA2] font-black hover:underline cursor-pointer"
                                         >
-                                            Select All
+                                            Select All Hubs
                                         </button>
                                         <span className="text-stone-300">|</span>
                                         <button
@@ -185,7 +195,7 @@ export const POSupplierLogistics: React.FC<POSupplierLogisticsProps> = ({
                                         </button>
                                     </div>
                                 </div>
-                                {sites.filter(s => s.type === 'Warehouse' || s.type === 'Distribution Center').map(s => (
+                                {sites.filter(s => (s.type === 'Warehouse' || s.type === 'Distribution Center') && s.status !== 'Closed').map(s => (
                                     <div
                                         key={s.id}
                                         onClick={() => {
@@ -206,7 +216,20 @@ export const POSupplierLogistics: React.FC<POSupplierLogisticsProps> = ({
                                             }`}>
                                             {destinationSiteIds.includes(s.id) && <Check size={10} />}
                                         </div>
-                                        <span className="text-xs">{s.name}</span>
+                                        <div className="flex-1 min-w-0">
+                                            <div className="flex items-center gap-1.5">
+                                                <span className="text-xs font-bold truncate">{s.name}</span>
+                                                <span className="text-[9px] px-1 py-0.5 rounded font-mono font-bold uppercase bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-500/20">
+                                                    {s.type === 'Distribution Center' ? 'DC' : 'Warehouse'}
+                                                </span>
+                                            </div>
+                                            <p className="text-[10px] text-stone-400 font-mono mt-0.5">
+                                                {formatDisplaySiteId(s)} • {s.address || 'Central Storage'}
+                                            </p>
+                                        </div>
+                                        <span className={`text-[9px] px-1.5 py-0.5 rounded font-mono font-bold ${s.country === 'KE' ? 'text-[#00A859] bg-[#00A859]/10 border border-[#00A859]/20' : 'text-[#2C5E3B] dark:text-[#A9CBA2] bg-[#2C5E3B]/10 border border-[#2C5E3B]/20'}`}>
+                                            {s.country === 'KE' ? '🇰🇪 KE' : '🇪🇹 ET'}
+                                        </span>
                                     </div>
                                 ))}
                             </div>
@@ -219,7 +242,9 @@ export const POSupplierLogistics: React.FC<POSupplierLogisticsProps> = ({
                                     const site = sites.find(s => s.id === id);
                                     return (
                                         <span key={id} className="text-[10px] bg-emerald-50 dark:bg-[#2C5E3B]/20 border border-emerald-200 dark:border-emerald-950/30 text-[#2C5E3B] dark:text-[#A9CBA2] px-2.5 py-0.5 rounded-lg flex items-center gap-1.5 font-bold">
-                                            {site?.name}
+                                            <span className="font-mono">{formatDisplaySiteId(site)}</span>
+                                            <span className="truncate max-w-[120px]">{site?.name}</span>
+                                            <span className="text-[8px] uppercase font-bold text-amber-700 dark:text-amber-400">[{site?.type === 'Distribution Center' ? 'DC' : 'WH'}]</span>
                                             <X
                                                 size={11}
                                                 className="cursor-pointer hover:text-red-600"

@@ -1,16 +1,16 @@
 import React from 'react';
 import { Loader2, User } from 'lucide-react';
-import { Employee } from '../../types';
+import { Employee, Site, UserRole } from '../../types';
 import { SYSTEM_ROLES } from '../../utils/roles';
 import EmployeeRow from '../EmployeeRow';
 
 interface DirectoryListProps {
    displayedEmployees: Employee[];
    isLoadingEmployees: boolean;
-   sites: any[];
+   sites: Site[];
    setSelectedEmployee: (emp: Employee) => void;
    canViewAll: boolean;
-   currentUser?: any;
+   currentUser?: { id?: string; role?: UserRole; siteId?: string } | null;
 }
 
 export default function DirectoryList({ displayedEmployees, isLoadingEmployees, sites, setSelectedEmployee, canViewAll, currentUser }: DirectoryListProps) {

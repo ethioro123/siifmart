@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { RotateCcw, Search, AlertTriangle, Package, CheckCircle, ArrowRight, RefreshCw } from 'lucide-react';
 import { Product, PendingInventoryChange, User } from '../../../types';
 import { useLanguage } from '../../../contexts/LanguageContext';
+import { useCreateInventoryRequestMutation } from '../../../hooks/useInventoryRequestMutations';
 import { logger } from '../../../utils/logger';
 
 interface CountOperationsProps {
@@ -14,7 +15,7 @@ interface CountOperationsProps {
     countSessionType: 'Cycle' | 'Spot';
     setCountSessionType: (type: 'Cycle' | 'Spot') => void;
     addNotification: (type: 'alert' | 'success' | 'info', message: string) => void;
-    inventoryRequestsService: any;
+    inventoryRequestsService?: any;
 }
 
 export const CountOperations: React.FC<CountOperationsProps> = ({
@@ -27,9 +28,9 @@ export const CountOperations: React.FC<CountOperationsProps> = ({
     countSessionType,
     setCountSessionType,
     addNotification,
-    inventoryRequestsService
 }) => {
     const { t } = useLanguage();
+    const createRequestMutation = useCreateInventoryRequestMutation();
     const [approvingVariance, setApprovingVariance] = useState<number | null>(null);
 
     return (
@@ -271,7 +272,7 @@ export const CountOperations: React.FC<CountOperationsProps> = ({
                                                             adjustmentReason: `Cycle Count Variance Approval`
                                                         };
 
-                                                        await inventoryRequestsService.create(request);
+                                                        await createRequestMutation.mutateAsync(request);
 
                                                         const newItems = [...countSessionItems];
                                                         newItems[idx].status = 'Approved';

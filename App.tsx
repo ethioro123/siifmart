@@ -58,7 +58,18 @@ import { initializeAvatarsBucket } from './services/imageStorage.service';
 export default function App() {
   useCapacitor();
   const { user, loading } = useStore();
-  const { activeSite, cleanupAdminProducts, isDataInitialLoading, loadError, loadingProgress } = useData();
+  const { activeSite, cleanupAdminProducts, isDataInitialLoading, loadError, loadingProgress, settings } = useData();
+
+  // Sync document title and brand accent color from system configuration
+  React.useEffect(() => {
+    if (settings?.storeName) {
+      document.title = `${settings.storeName} | Retail & Warehouse System`;
+    }
+    if (settings?.brandColor) {
+      document.documentElement.style.setProperty('--brand-accent', settings.brandColor);
+      document.documentElement.style.setProperty('--color-accent', settings.brandColor);
+    }
+  }, [settings?.storeName, settings?.brandColor]);
 
   React.useEffect(() => {
     if (native.isNative()) {

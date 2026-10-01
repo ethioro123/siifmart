@@ -1,7 +1,6 @@
 import React from 'react';
-import { CURRENCY_SYMBOL } from '../../constants';
 import { formatCompactNumber } from '../../utils/formatting';
-import { FileText, DollarSign, Percent, Calculator, ShieldCheck } from 'lucide-react';
+import { FileText, DollarSign, Percent, Calculator } from 'lucide-react';
 
 interface POTotalsSummaryProps {
     poNotes: string;
@@ -24,6 +23,7 @@ interface POTotalsSummaryProps {
     poTax: number;
     poDiscount: number;
     poTotal: number;
+    currencySymbol?: string;
 }
 
 export const POTotalsSummary: React.FC<POTotalsSummaryProps> = ({
@@ -33,7 +33,8 @@ export const POTotalsSummary: React.FC<POTotalsSummaryProps> = ({
     shippingCost, setShippingCost,
     discountRate, setDiscountRate,
     taxRate, setTaxRate,
-    poSubtotal, poTax, poDiscount, poTotal
+    poSubtotal, poTax, poDiscount, poTotal,
+    currencySymbol = 'ETB'
 }) => {
     return (
         <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -85,7 +86,7 @@ export const POTotalsSummary: React.FC<POTotalsSummaryProps> = ({
                 {/* Subtotal */}
                 <div className="flex justify-between items-center">
                     <span className="text-xs font-bold text-stone-500 dark:text-gray-400 uppercase tracking-wide">Net Subtotal</span>
-                    <span className="text-base font-black text-[#1E3F27] dark:text-white font-mono">{formatCompactNumber(poSubtotal, { currency: CURRENCY_SYMBOL })}</span>
+                    <span className="text-base font-black text-[#1E3F27] dark:text-white font-mono">{formatCompactNumber(poSubtotal, { currency: currencySymbol })}</span>
                 </div>
 
                 {/* Discount */}
@@ -96,7 +97,7 @@ export const POTotalsSummary: React.FC<POTotalsSummaryProps> = ({
                     <div className="flex items-center gap-2">
                         {discountRate > 0 && (
                             <span className="text-[10px] text-emerald-700 dark:text-[#A9CBA2] font-bold font-mono">
-                                - {formatCompactNumber(poDiscount, { currency: CURRENCY_SYMBOL })}
+                                - {formatCompactNumber(poDiscount, { currency: currencySymbol })}
                             </span>
                         )}
                         <div className="flex items-center bg-[#FAF8F5] dark:bg-black/30 rounded-xl border border-[#E2DCCE] dark:border-white/10 px-2.5 py-1 focus-within:border-[#2C5E3B]">
@@ -117,11 +118,18 @@ export const POTotalsSummary: React.FC<POTotalsSummaryProps> = ({
                 <div className="flex justify-between items-center">
                     <span className="text-xs font-bold text-stone-500 dark:text-gray-400 flex items-center gap-1.5">
                         <Percent size={13} className="text-amber-600 dark:text-amber-400" /> Regulatory Tax
+                        <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-700 dark:text-amber-400 font-black">
+                            {currencySymbol === 'KSh' ? 'KRA 16%' : 'ERCA 15%'}
+                        </span>
                     </span>
                     <div className="flex items-center gap-2">
-                        {taxRate > 0 && (
+                        {taxRate > 0 ? (
                             <span className="text-[10px] text-amber-700 dark:text-amber-300 font-bold font-mono">
-                                + {formatCompactNumber(poTax, { currency: CURRENCY_SYMBOL })}
+                                + {formatCompactNumber(poTax, { currency: currencySymbol })}
+                            </span>
+                        ) : (
+                            <span className="text-[9px] text-stone-400 dark:text-stone-500 font-bold uppercase tracking-tight">
+                                Exempt
                             </span>
                         )}
                         <div className="flex items-center bg-[#FAF8F5] dark:bg-black/30 rounded-xl border border-[#E2DCCE] dark:border-white/10 px-2.5 py-1 focus-within:border-[#2C5E3B]">
@@ -129,7 +137,7 @@ export const POTotalsSummary: React.FC<POTotalsSummaryProps> = ({
                                 type="number"
                                 min="0" max="100"
                                 className="w-10 bg-transparent text-right text-[#1E3F27] dark:text-white font-mono text-xs outline-none font-bold"
-                                value={taxRate || ''}
+                                value={taxRate === 0 ? '0' : (taxRate || '')}
                                 onChange={(e) => setTaxRate(parseFloat(e.target.value) || 0)}
                                 placeholder="0"
                             />
@@ -144,7 +152,7 @@ export const POTotalsSummary: React.FC<POTotalsSummaryProps> = ({
                         <DollarSign size={13} className="text-[#2C5E3B] dark:text-[#A9CBA2]" /> Freight / Shipping
                     </span>
                     <div className="flex items-center bg-[#FAF8F5] dark:bg-black/30 rounded-xl border border-[#E2DCCE] dark:border-white/10 px-2.5 py-1 focus-within:border-[#2C5E3B]">
-                        <span className="text-stone-400 text-[10px] mr-1 font-bold">{CURRENCY_SYMBOL}</span>
+                        <span className="text-stone-400 text-[10px] mr-1 font-bold">{currencySymbol}</span>
                         <input
                             type="number"
                             min="0"
@@ -166,7 +174,7 @@ export const POTotalsSummary: React.FC<POTotalsSummaryProps> = ({
                     </div>
                     <div className="text-right">
                         <div className="text-2xl font-black text-[#2C5E3B] dark:text-[#A9CBA2] font-mono tracking-tight">
-                            {formatCompactNumber(poTotal, { currency: CURRENCY_SYMBOL })}
+                            {formatCompactNumber(poTotal, { currency: currencySymbol })}
                         </div>
                     </div>
                 </div>

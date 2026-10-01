@@ -33,6 +33,8 @@ import { AdjustStockModal } from '../components/inventory/modals/AdjustStockModa
 import { DeleteProductConfirmModal } from '../components/inventory/modals/DeleteProductConfirmModal';
 import { filterBySite, isMultiSiteRole } from '../utils/locationAccess';
 import { useInventoryOverviewData } from '../hooks/useInventoryOverviewData';
+import { isAdminSite } from '../utils/countryAdmin';
+import { getCountryProfile, Country } from '../utils/localization';
 // Constants
 import { CURRENCY_SYMBOL } from '../constants';
 import { logger } from '../utils/logger';
@@ -41,7 +43,7 @@ type Tab = 'overview' | 'stock' | 'zones' | 'movements' | 'pending' | 'barcode_a
 
 export default function Inventory() {
     const { user, theme } = useStore();
-    const { products, allProducts, sites, employees, activeSite, addNotification, refreshData } = useData();
+    const { products, allProducts, sites, employees, activeSite, effectiveCountry, settings, addNotification, refreshData } = useData();
     const { createPutawayJob, barcodeApprovals } = useFulfillmentData();
 
     // --- MUTATIONS ---
@@ -67,11 +69,33 @@ export default function Inventory() {
     }, [activeTab]);
 
     // --- READ-ONLY & PERMISSIONS ---
+    const canApprove = user?.role === 'super_admin' || (user?.role as string)?.toLowerCase() === 'ceo';
     const isReadOnly = useMemo(() => {
         if (!activeSite) return true; // HQ View is Read-Only
         const type = activeSite.type;
         return !(type === 'Warehouse' || type === 'Distribution Center');
     }, [activeSite]);
+
+    // Active country & dynamic currency isolation
+    const activeCountry = (effectiveCountry || (settings?.country as Country) || 'ET') as Country;
+    const countryProfile = useMemo(() => getCountryProfile(activeCountry), [activeCountry]);
+    const currencySymbol = countryProfile.currencySymbol || 'ETB';
+
+    // Scoped barcode approvals for active national market and site
+    const scopedBarcodeApprovals = useMemo(() => {
+        if (!barcodeApprovals || !Array.isArray(barcodeApprovals)) return [];
+        const isCountryAdmin = isAdminSite(activeSite);
+        const countrySiteIds = new Set(sites.filter(s => (s.country || 'ET') === activeCountry).map(s => s.id));
+        return barcodeApprovals.filter(b => {
+            const bCountry = (b as any).country_code || (b as any).country;
+            if (bCountry && bCountry !== activeCountry) return false;
+            if (b.siteId) {
+                if (!countrySiteIds.has(b.siteId)) return false;
+                if (!isCountryAdmin && activeSite?.id && b.siteId !== activeSite.id) return false;
+            }
+            return true;
+        });
+    }, [barcodeApprovals, activeCountry, activeSite, sites]);
 
     // --- DATA PREPARATION (Overview) ---
     const [serverMetrics, setServerMetrics] = useState<any>(null);
@@ -86,20 +110,26 @@ export default function Inventory() {
     const [pendingChanges, setPendingChanges] = useState<PendingInventoryChange[]>([]);
     const loadPendingRequests = useCallback(async () => {
         try {
-            const requests = await inventoryRequestsService.getAll(activeSite?.id);
+            const isHqOrApprover = isAdminSite(activeSite) || canApprove;
+            const targetSiteId = isHqOrApprover ? undefined : activeSite?.id;
+            const requests = await inventoryRequestsService.getAll(targetSiteId, activeCountry);
             setPendingChanges(requests.filter(r => r.status === 'pending'));
         } catch (err) {
             logger.error('Inventory', 'Failed to load pending requests:', err);
         }
-    }, [activeSite?.id]);
+    }, [activeSite, canApprove, activeCountry]);
 
     useEffect(() => {
         loadPendingRequests();
     }, [loadPendingRequests, activeTab]); // Reload occasionally
 
     const pendingProducts = useMemo(() => {
-        return filteredProducts.filter(p => p.approvalStatus === 'pending' || (p as any).approval_status === 'pending');
-    }, [filteredProducts]);
+        const sourceProducts = (isAdminSite(activeSite) || canApprove) ? allProducts : filteredProducts;
+        return (Array.isArray(sourceProducts) ? sourceProducts : []).filter(
+            p => (p.status || (p as any).status) !== 'archived' &&
+                 (p.approvalStatus === 'pending' || (p as any).approval_status === 'pending')
+        );
+    }, [allProducts, filteredProducts, activeSite, canApprove]);
     const pendingCount = pendingProducts.length + pendingChanges.length;
 
 
@@ -201,9 +231,6 @@ export default function Inventory() {
 
     const totalInventoryValueCost = serverMetrics?.total_value_cost || activeSiteProducts.reduce((sum, p) => sum + ((p.stock || 0) * (p.costPrice || (p.price || 0) * 0.7)), 0);
     const totalInventoryValueRetail = serverMetrics?.total_value_retail || activeSiteProducts.reduce((sum, p) => sum + ((p.stock || 0) * (p.price || 0)), 0);
-
-    // Define permission helper (Only CEO approves changes to products in inventory)
-    const canApprove = user?.role === 'super_admin' || (user?.role as string)?.toLowerCase() === 'ceo';
 
     const { stockTurnoverRate, deadStockValue, lowStockCount, categoryData, abcData } = useInventoryOverviewData({
         theme,
@@ -339,7 +366,7 @@ export default function Inventory() {
                 activeTab={activeTab}
                 setActiveTab={setActiveTab}
                 hasViewedBarcodeAudit={hasViewedBarcodeAudit}
-                barcodeApprovalsCount={barcodeApprovals.length}
+                barcodeApprovalsCount={scopedBarcodeApprovals.length}
                 pendingCount={pendingCount}
                 theme={theme}
             />
@@ -357,6 +384,7 @@ export default function Inventory() {
                         stockTurnoverRate={stockTurnoverRate}
                         deadStockValue={deadStockValue}
                         lowStockCount={lowStockCount}
+                        currencySymbol={currencySymbol}
                     />
                 )}
                 {activeTab === 'stock' && (
@@ -369,6 +397,7 @@ export default function Inventory() {
                         handleOpenEditProduct={handleOpenEditProduct} handleDeleteProduct={handleDeleteProduct}
                         handleOpenAdjust={handleOpenAdjust} sites={sites} activeSite={activeSite || null}
                         isReadOnly={isReadOnly} allProducts={allProducts} user={user} itemsPerPage={PRODUCTS_PER_PAGE}
+                        currencySymbol={currencySymbol}
                     />
                 )}
                 {activeTab === 'zones' && <InventoryZones />}
@@ -377,7 +406,7 @@ export default function Inventory() {
                 )}
                 {activeTab === 'barcode_audit' && (
                     <InventoryBarcodeAudit
-                        barcodeApprovals={barcodeApprovals} sites={sites} employees={employees}
+                        barcodeApprovals={scopedBarcodeApprovals} sites={sites} employees={employees}
                         isReadOnly={isReadOnly} user={user} handleDeleteAuditRecord={handleDeleteAuditRecord}
                     />
                 )}
@@ -386,6 +415,7 @@ export default function Inventory() {
                         pendingProducts={pendingProducts} pendingChanges={pendingChanges} allProducts={allProducts}
                         canApprove={canApprove}
                         userRole={user?.role}
+                        currencySymbol={currencySymbol}
                         isSubmitting={approveRequestMutation.isPending || rejectRequestMutation.isPending}
                         onApproveProduct={handleApproveProduct} onApproveChange={handleApproveChange}
                         onRejectProduct={handleRejectProduct} onRejectChange={handleRejectChange} onBulkCleanup={handleBulkCleanup}
@@ -445,6 +475,7 @@ export default function Inventory() {
                 setAdjustReason={setAdjustReason}
                 onConfirm={handleAdjustStock}
                 isSubmitting={adjustStockMutation.isPending}
+                canApprove={canApprove}
             />
 
             <DeleteProductConfirmModal

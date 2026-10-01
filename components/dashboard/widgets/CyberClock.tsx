@@ -1,7 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { formatDateTime } from '../../../utils/formatting';
+import { useData } from '../../../contexts/DataContext';
+import { getCountryProfile, type Country } from '../../../utils/localization';
 
-export const CyberClock = () => {
+interface CyberClockProps {
+    country?: Country;
+}
+
+export const CyberClock: React.FC<CyberClockProps> = ({ country }) => {
+    const { effectiveCountry, settings } = useData();
+    const activeCountry = (country || effectiveCountry || settings?.country || 'ET') as Country;
+    const profile = getCountryProfile(activeCountry);
+    const timezone = profile.timezone || 'Africa/Addis_Ababa';
+
     const [time, setTime] = useState(new Date());
 
     useEffect(() => {
@@ -9,10 +20,20 @@ export const CyberClock = () => {
         return () => clearInterval(timer);
     }, []);
 
+    const getLocale = () => {
+        switch (activeCountry) {
+            case 'ET': return 'om-ET';
+            case 'KE': return 'en-KE';
+            case 'UG': return 'en-UG';
+            case 'RW': return 'en-RW';
+            case 'TZ': return 'en-TZ';
+            default: return 'en-US';
+        }
+    };
+
     const formatTime = (date: Date) => {
         try {
-            // Use 'medium' time to get the WB/WD (AM/PM) translation in Oromo
-            return new Intl.DateTimeFormat('om-ET', { timeStyle: 'medium' }).format(date);
+            return new Intl.DateTimeFormat(getLocale(), { timeStyle: 'medium', timeZone: timezone }).format(date);
         } catch {
             return formatDateTime(date, { showTime: true }).split(', ')[1];
         }
@@ -20,7 +41,7 @@ export const CyberClock = () => {
 
     const formatDate = (date: Date) => {
         try {
-            return new Intl.DateTimeFormat('om-ET', { dateStyle: 'full' }).format(date).toUpperCase();
+            return new Intl.DateTimeFormat(getLocale(), { dateStyle: 'full', timeZone: timezone }).format(date).toUpperCase();
         } catch {
             return formatDateTime(date).toUpperCase();
         }

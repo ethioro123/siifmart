@@ -3,7 +3,6 @@ import {
     ChevronUp, ChevronDown, Package, Map, Edit2, Save, Trash2, XCircle
 } from 'lucide-react';
 import { useMerchandising } from '../MerchandisingContext';
-import { CURRENCY_SYMBOL } from '../../../constants';
 
 export const PricingProductsTable: React.FC = () => {
     const {
@@ -26,7 +25,8 @@ export const PricingProductsTable: React.FC = () => {
         setSelectedLocationProduct,
         setIsLocationModalOpen,
         handleEditClick,
-        openProductControl
+        openProductControl,
+        currencySymbol
     } = useMerchandising();
 
     const startIndex = (currentPage - 1) * itemsPerPage;
@@ -215,7 +215,7 @@ export const PricingProductsTable: React.FC = () => {
                                     ) : (
                                         <div className="flex flex-col items-end">
                                             <span className="text-[#1E3F27] dark:text-white font-mono font-black text-xs">
-                                                {CURRENCY_SYMBOL} {retail.toLocaleString()}
+                                                {currencySymbol} {retail.toLocaleString()}
                                             </span>
                                             <span className="text-[10px] text-stone-400 font-mono">Cost: {cost.toLocaleString()}</span>
                                         </div>
@@ -227,7 +227,7 @@ export const PricingProductsTable: React.FC = () => {
                                     {p.competitorPrice ? (
                                         <div className="flex flex-col items-end">
                                             <span className="text-stone-500 dark:text-stone-400 font-mono text-xs">
-                                                {CURRENCY_SYMBOL} {p.competitorPrice.toLocaleString()}
+                                                {currencySymbol} {p.competitorPrice.toLocaleString()}
                                             </span>
                                             <span
                                                 className={`text-[10px] font-bold ${
@@ -296,7 +296,7 @@ export const PricingProductsTable: React.FC = () => {
                                         <div className="flex justify-center">
                                             {p.isOnSale ? (
                                                 <span className="px-2 py-0.5 rounded-md text-[10px] bg-amber-50 text-amber-800 dark:bg-amber-950/30 dark:text-amber-300 font-bold border border-amber-200 dark:border-amber-900/30">
-                                                    {CURRENCY_SYMBOL} {p.salePrice}
+                                                    {currencySymbol} {p.salePrice}
                                                 </span>
                                             ) : (
                                                 <span className="text-stone-400 text-xs">-</span>

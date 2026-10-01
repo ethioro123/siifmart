@@ -1,13 +1,12 @@
 import React, { useState } from 'react';
 import { PurchaseOrder, Supplier } from '../../types';
-import { CURRENCY_SYMBOL } from '../../constants';
 import { Search, MapPin, CheckCircle, Clock, Truck, XCircle, Printer, Edit3, Trash2 } from 'lucide-react';
 import { formatCompactNumber } from '../../utils/formatting';
 import { formatPONumber } from '../../utils/jobIdFormatter';
 import { ViewPOModal } from './ViewPOModal';
 import { useData } from '../../contexts/DataContext';
 import { useStore } from '../../contexts/CentralStore';
-import { purchaseOrdersService } from '../../services/supabase.service';
+import { usePurchaseOrderMutations } from '../../hooks/usePurchaseOrderMutations';
 import { logger } from '../../utils/logger';
 import { PurchaseOrdersMobileList } from './components/PurchaseOrdersMobileList';
 
@@ -29,6 +28,7 @@ interface PurchaseOrdersListProps {
 
     suppliers: Supplier[];
     sites: any[];
+    currencySymbol?: string;
 
     // Actions
     onEdit: (po: PurchaseOrder) => void;
@@ -39,72 +39,48 @@ export const PurchaseOrdersList: React.FC<PurchaseOrdersListProps> = ({
     orders, loading, totalCount, currentPage, onPageChange,
     searchTerm, onSearchChange, supplierFilter, onSupplierFilterChange,
     statusFilter, onStatusFilterChange, sort, onSortChange,
-    suppliers, sites, onEdit, onRefresh
+    suppliers, sites, currencySymbol = 'ETB', onEdit, onRefresh
 }) => {
     const { user, showToast } = useStore();
+    const { approvePOMutation, bulkApproveMutation, cancelPOMutation } = usePurchaseOrderMutations();
     const [selectedPO, setSelectedPO] = useState<PurchaseOrder | null>(null);
     const [selectedPOIds, setSelectedPOIds] = useState<string[]>([]);
-    const [isBulkApproving, setIsBulkApproving] = useState(false);
+    const isBulkApproving = bulkApproveMutation.isPending;
 
     const ITEMS_PER_PAGE = 20;
     const isCEO = user?.role === 'super_admin';
     const isProcurementManager = user?.role === 'procurement_manager';
     const canApprove = isProcurementManager || user?.role === 'finance_manager' || user?.role === 'admin' || isCEO;
-    const canFullDelete = isCEO; // Only Super Admin can delete anything non-received
 
     const handleBulkApprove = async () => {
-        if (!confirm(`Approve ${selectedPOIds.length} selected POs?`)) return;
-        setIsBulkApproving(true);
+        const ordersToApprove = orders.filter(p => selectedPOIds.includes(p.id));
+        if (ordersToApprove.length === 0) return;
         try {
-            const promises = selectedPOIds.map(id => {
-                const po = orders.find(p => p.id === id);
-                if (!po) return Promise.resolve();
-                return purchaseOrdersService.update(id, {
-                    ...po,
-                    status: 'Ordered',
-                    approvedBy: user?.name || 'Bulk Action',
-                    approvedAt: new Date().toISOString()
-                });
-            });
-            await Promise.all(promises);
-            showToast(`Approved ${selectedPOIds.length} POs`, 'success');
+            await bulkApproveMutation.mutateAsync(ordersToApprove);
             setSelectedPOIds([]);
             onRefresh();
         } catch (e) {
             logger.error('PurchaseOrdersList', "Bulk approve failed", e);
-            showToast("Bulk approve failed", 'error');
-        } finally {
-            setIsBulkApproving(false);
         }
     };
 
     const handleDeletePO = async (e: React.MouseEvent, po: PurchaseOrder) => {
         e.stopPropagation();
-        if (!confirm(`Delete PO ${formatPONumber(po)}?`)) return;
         try {
-            await purchaseOrdersService.delete(po.id);
-            showToast("PO Deleted", 'success');
+            await cancelPOMutation.mutateAsync({ po, reason: 'Cancelled by authorized user' });
             onRefresh();
         } catch (e) {
-            showToast("Failed to delete PO", 'error');
+            logger.error('PurchaseOrdersList', "Failed to cancel PO", e);
         }
     };
 
     const handleSingleApprove = async (e: React.MouseEvent, po: PurchaseOrder) => {
         e.stopPropagation();
-        if (!confirm(`Approve PO ${formatPONumber(po)}?`)) return;
         try {
-            await purchaseOrdersService.update(po.id, {
-                ...po,
-                status: 'Ordered',
-                approvedBy: user?.name || 'Unknown',
-                approvedAt: new Date().toISOString()
-            });
-            showToast(`PO ${formatPONumber(po)} Approved`, 'success');
+            await approvePOMutation.mutateAsync(po);
             onRefresh();
         } catch (e) {
             logger.error('PurchaseOrdersList', "Approve failed", e);
-            showToast("Approve failed", 'error');
         }
     };
 
@@ -268,7 +244,7 @@ export const PurchaseOrdersList: React.FC<PurchaseOrdersListProps> = ({
                                     <td className="p-4 text-xs text-gray-400 dark:text-gray-500 whitespace-nowrap">{po.date}</td>
                                     <td className="p-4 text-xs text-[#8C6239] dark:text-[#E2C899] whitespace-nowrap">{po.expectedDelivery || 'N/A'}</td>
                                     <td className="p-4 text-sm text-gray-600 dark:text-gray-300 font-mono text-right">{po.itemsCount}</td>
-                                    <td className="p-4 text-sm text-[#2C5E3B] dark:text-[#A9CBA2] font-mono text-right font-bold">{CURRENCY_SYMBOL} {po.totalAmount.toLocaleString()}</td>
+                                    <td className="p-4 text-sm text-[#2C5E3B] dark:text-[#A9CBA2] font-mono text-right font-bold">{po.currency || currencySymbol} {po.totalAmount.toLocaleString()}</td>
                                     <td className="p-4 text-center">
                                         <span className={`inline-flex items-center px-2 py-1 rounded text-[10px] font-bold uppercase border ${po.status === 'Received' ? 'text-green-400 border-green-500/20 bg-green-500/10' :
                                             po.status === 'Partially Received' ? 'text-amber-500 dark:text-amber-400 border-amber-500/20 bg-amber-500/10' :
@@ -315,17 +291,17 @@ export const PurchaseOrdersList: React.FC<PurchaseOrdersListProps> = ({
                                                  </button>
                                              )}
 
-                                             {/* Deletion Logic:
-                                                 1. Super Admin/Warehouse Manager can delete anything NOT received.
-                                                 2. Other staff can ONLY delete their own Draft POs.
+                                             {/* Cancellation Logic:
+                                                 Only Super Admin / CEO / Procurement Manager can cancel anything non-received.
+                                                 Staff can ONLY cancel their own Draft POs.
                                              */}
-                                             {((isCEO && po.status !== 'Received') || 
-                                               (user?.role === 'warehouse_manager' && po.status !== 'Received') ||
+                                             {((isCEO && po.status !== 'Received' && po.status !== 'Cancelled') || 
+                                               (isProcurementManager && po.status !== 'Received' && po.status !== 'Cancelled') ||
                                                (po.status === 'Draft' && (po.createdBy === user?.name || po.requestedBy === user?.name))) && (
                                                 <button
                                                     onClick={(e) => handleDeletePO(e, po)}
                                                     className="p-1 text-red-400 hover:text-red-300"
-                                                    title="Delete"
+                                                    title="Cancel PO"
                                                 >
                                                     <Trash2 size={14} />
                                                 </button>
@@ -356,6 +332,7 @@ export const PurchaseOrdersList: React.FC<PurchaseOrdersListProps> = ({
                     onEdit={onEdit}
                     handleDeletePO={handleDeletePO}
                     formatPONumber={formatPONumber}
+                    currencySymbol={currencySymbol}
                 />
             </div>
 

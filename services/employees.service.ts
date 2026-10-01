@@ -1,5 +1,71 @@
 import { supabase } from '../lib/supabase';
 import type { Employee } from '../types';
+import type { Country } from '../utils/localization';
+import { getRoleHierarchy } from '../utils/roles';
+
+export interface EmployeeFilters {
+    role?: string;
+    status?: string;
+    department?: string;
+    country?: Country;
+    countrySiteIds?: string[];
+}
+
+interface RawDbEmployee {
+    id: string;
+    site_id?: string;
+    name: string;
+    role: string;
+    email: string;
+    phone: string;
+    status: string;
+    join_date?: string;
+    department?: string;
+    avatar?: string;
+    performance_score?: number;
+    attendance_rate?: number;
+    specialization?: string;
+    salary?: number;
+    badges?: string[];
+    code?: string;
+    created_at?: string;
+    updated_at?: string;
+    last_login_gps?: string;
+    last_login_at?: string;
+    last_login_device?: string;
+    login_history?: unknown[];
+    address?: string;
+    emergency_contact?: string;
+    [key: string]: unknown;
+}
+
+interface LightweightEmployee {
+    id: string;
+    role: string;
+    name: string;
+    created_at?: string;
+}
+
+function mapDbEmployeeToEmployee(e: RawDbEmployee): Employee {
+    return {
+        ...e,
+        siteId: e.site_id || '',
+        site_id: e.site_id,
+        role: e.role as Employee['role'],
+        status: e.status as Employee['status'],
+        joinDate: e.join_date || (e.created_at ? e.created_at.split('T')[0] : e.created_at) || 'N/A',
+        performanceScore: e.performance_score ?? 0,
+        attendanceRate: e.attendance_rate ?? 0,
+        lastLoginGps: e.last_login_gps,
+        last_login_gps: e.last_login_gps,
+        lastLoginAt: e.last_login_at,
+        last_login_at: e.last_login_at,
+        lastLoginDevice: e.last_login_device,
+        last_login_device: e.last_login_device,
+        loginHistory: e.login_history,
+        login_history: e.login_history
+    } as Employee;
+}
 
 export const employeesService = {
     async getAll(siteId?: string) {
@@ -14,27 +80,43 @@ export const employeesService = {
 
         const { data, error } = await query;
         if (error) throw error;
-        return data.map((e: any) => ({
-            ...e,
-            siteId: e.site_id,
-            joinDate: e.join_date || (e.created_at ? e.created_at.split('T')[0] : e.created_at) || 'N/A',
-            performanceScore: e.performance_score,
-            attendanceRate: e.attendance_rate,
-            lastLoginGps: e.last_login_gps,
-            lastLoginAt: e.last_login_at,
-            lastLoginDevice: e.last_login_device,
-            loginHistory: e.login_history
-        }));
+        return (data as RawDbEmployee[]).map(mapDbEmployeeToEmployee);
     },
 
-    async getPaginated(siteId?: string, page: number = 1, limit: number = 20, searchTerm: string = '', filters?: any) {
+    async getPaginated(
+        siteId?: string,
+        page: number = 1,
+        limit: number = 20,
+        searchTerm: string = '',
+        filters?: EmployeeFilters
+    ) {
         // Step 1: Fetch ALL matching lightweight data (ID, Role, Name) to sort globally
         let query = supabase
             .from('employees')
             .select('id, role, name, created_at', { count: 'exact' });
 
-        // Filters
-        if (siteId && siteId !== 'All') query = query.eq('site_id', siteId);
+        // Specific site filter takes precedence (e.g. branch manager lock or dropdown selection)
+        if (siteId && siteId !== 'All') {
+            query = query.eq('site_id', siteId);
+        } else if (filters?.country) {
+            // Country tenant isolation
+            if (filters.country === 'ET') {
+                // Ethiopia is HQ / legacy baseline: include ET sites and unassigned/HQ corporate staff
+                if (filters.countrySiteIds && filters.countrySiteIds.length > 0) {
+                    query = query.or(`site_id.in.(${filters.countrySiteIds.join(',')}),site_id.is.null`);
+                } else {
+                    query = query.is('site_id', null);
+                }
+            } else {
+                // Non-Ethiopian country (e.g. KE)
+                // Strict isolation: only staff explicitly assigned to facilities in that country
+                if (!filters.countrySiteIds || filters.countrySiteIds.length === 0) {
+                    return { data: [], count: 0 };
+                }
+                query = query.in('site_id', filters.countrySiteIds);
+            }
+        }
+
         if (filters?.role && filters.role !== 'All') query = query.eq('role', filters.role);
         if (filters?.status && filters.status !== 'All') query = query.eq('status', filters.status);
         if (filters?.department && filters.department !== 'All') query = query.eq('department', filters.department);
@@ -47,60 +129,10 @@ export const employeesService = {
         const { data: allIds, error: idError, count } = await query;
         if (idError) throw idError;
 
-        // Step 2: Sort globally by Hierarchy in Memory
-        const ROLE_HIERARCHY: Record<string, number> = {
-            // Level 1 - Executive (100)
-            'super_admin': 100,
-            // Level 2 - Regional/Directors (80-95)
-            'regional_manager': 95,
-            'operations_manager': 90,
-            'finance_manager': 85,
-            'hr_manager': 85,
-            'procurement_manager': 82,
-            'supply_chain_manager': 80,
-            // Level 3 - Site Managers (50-70)
-            'store_manager': 70,
-            'warehouse_manager': 68,
-            'dispatch_manager': 65,
-            'logistics_manager': 65,
-            'inventory_manager': 65,
-            'assistant_manager': 60,
-            'shift_lead': 55,
-            'cs_manager': 60,
-            // Level 4 - Staff (10-40)
-            'supervisor': 50,
-            'auditor': 40,
-            'staff': 40,
-            'associate': 40,
-            'it_support': 35,
-            'dispatcher': 35,
-            'accountant': 35,
-            'data_analyst': 35,
-            'training_coordinator': 35,
-            'cashier': 30,
-            'loss_prevention': 30,
-            'driver': 30, // Elevated slightly from 20 to grouping
-            'sales_associate': 28,
-            'pos': 28,
-            'stock_clerk': 25,
-            'inventory_specialist': 25,
-            'customer_service': 25,
-            'merchandiser': 25,
-            'picker': 22,
-            'packer': 22,
-            'receiver': 22,
-            'returns_clerk': 22,
-            'forklift_operator': 20,
-            'security': 20,
-            'maintenance': 20,
-            'cleaner': 10,
-            'admin': 90, // Legacy
-            'hr': 85 // Legacy
-        };
-
-        const sortedData = (allIds || []).sort((a: any, b: any) => {
-            const rankA = ROLE_HIERARCHY[a.role] || 0;
-            const rankB = ROLE_HIERARCHY[b.role] || 0;
+        // Step 2: Sort globally by Hierarchy in Memory using shared role definitions
+        const sortedData = ((allIds || []) as LightweightEmployee[]).sort((a, b) => {
+            const rankA = getRoleHierarchy(a.role);
+            const rankB = getRoleHierarchy(b.role);
 
             if (rankA !== rankB) return rankB - rankA; // Highest rank first
             return a.name.localeCompare(b.name); // Then alphabetical
@@ -109,14 +141,13 @@ export const employeesService = {
         // Step 3: Slice for current page
         const from = (page - 1) * limit;
         const to = from + limit;
-        const pageIds = sortedData.slice(from, to).map((e: any) => e.id);
+        const pageIds = sortedData.slice(from, to).map(e => e.id);
 
         if (pageIds.length === 0) {
             return { data: [], count: count || 0 };
         }
 
         // Step 4: Fetch full details for the sliced IDs
-        // We order by field to maintain the sort order (requires manual re-sort or fetch and map)
         const { data: details, error: detailsError } = await supabase
             .from('employees')
             .select('*')
@@ -124,21 +155,12 @@ export const employeesService = {
 
         if (detailsError) throw detailsError;
 
-        // Step 5: Re-sort details to match the pageIds order (since .in() doesn't guarantee order)
-        const sortedDetails = pageIds.map(id => details.find((d: any) => d.id === id)).filter(Boolean);
+        // Step 5: Re-sort details to match the pageIds order
+        const detailsMap = new Map((details as RawDbEmployee[]).map(d => [d.id, d]));
+        const sortedDetails = pageIds.map(id => detailsMap.get(id)).filter((d): d is RawDbEmployee => Boolean(d));
 
         return {
-            data: sortedDetails.map((e: any) => ({
-                ...e,
-                siteId: e.site_id,
-                joinDate: e.join_date || (e.created_at ? e.created_at.split('T')[0] : e.created_at) || 'N/A',
-                performanceScore: e.performance_score,
-                attendanceRate: e.attendance_rate,
-                lastLoginGps: e.last_login_gps,
-                lastLoginAt: e.last_login_at,
-                lastLoginDevice: e.last_login_device,
-                loginHistory: e.login_history
-            })),
+            data: sortedDetails.map(mapDbEmployeeToEmployee),
             count: count || 0
         };
     },
@@ -151,17 +173,7 @@ export const employeesService = {
             .single();
 
         if (error) throw error;
-        return {
-            ...data,
-            siteId: data.site_id,
-            joinDate: data.join_date || (data.created_at ? data.created_at.split('T')[0] : data.created_at) || 'N/A',
-            performanceScore: data.performance_score,
-            attendanceRate: data.attendance_rate,
-            lastLoginGps: data.last_login_gps,
-            lastLoginAt: data.last_login_at,
-            lastLoginDevice: data.last_login_device,
-            loginHistory: data.login_history
-        };
+        return mapDbEmployeeToEmployee(data as RawDbEmployee);
     },
 
     async getByEmail(email: string) {
@@ -172,56 +184,85 @@ export const employeesService = {
             .single();
 
         if (error) throw error;
-        return {
-            ...data,
-            siteId: data.site_id,
-            joinDate: data.join_date || (data.created_at ? data.created_at.split('T')[0] : data.created_at) || 'N/A',
-            performanceScore: data.performance_score,
-            attendanceRate: data.attendance_rate,
-            lastLoginGps: data.last_login_gps,
-            lastLoginAt: data.last_login_at,
-            lastLoginDevice: data.last_login_device,
-            loginHistory: data.login_history
-        };
+        return mapDbEmployeeToEmployee(data as RawDbEmployee);
+    },
+
+    async getNextCode(): Promise<string> {
+        let maxCodeNumber = 39; // Baseline known employee codes in database
+        try {
+            const { data } = await supabase
+                .from('employees')
+                .select('code')
+                .order('code', { ascending: false })
+                .limit(20);
+
+            if (data && Array.isArray(data)) {
+                data.forEach((emp: { code?: string }) => {
+                    if (emp.code) {
+                        const match = emp.code.match(/SIIF-(\d+)/i);
+                        if (match) {
+                            const num = parseInt(match[1], 10);
+                            if (num > maxCodeNumber) maxCodeNumber = num;
+                        }
+                    }
+                });
+            }
+        } catch {
+            // fallback gracefully
+        }
+        return `SIIF-${(maxCodeNumber + 1).toString().padStart(4, '0')}`;
     },
 
     async create(employee: Omit<Employee, 'created_at' | 'updated_at'>) {
-        const dbEmployee = {
-            id: employee.id,
-            code: employee.code,
-            site_id: employee.siteId,
-            name: employee.name,
-            role: employee.role,
-            email: employee.email.toLowerCase(),
-            phone: employee.phone,
-            status: employee.status,
-            join_date: employee.joinDate,
-            department: employee.department,
-            avatar: employee.avatar,
-            performance_score: employee.performanceScore,
-            specialization: employee.specialization,
-            salary: employee.salary,
-            badges: employee.badges,
-            attendance_rate: employee.attendanceRate
-        };
-        const { data, error } = await supabase
-            .from('employees')
-            .insert(dbEmployee)
-            .select()
-            .single();
+        if (!employee.siteId || !employee.siteId.trim()) {
+            throw new Error('Workplace location is mandatory. Every employee must be assigned to an operating location.');
+        }
 
-        if (error) throw error;
-        return {
-            ...data,
-            siteId: data.site_id,
-            joinDate: data.join_date || (data.created_at ? data.created_at.split('T')[0] : data.created_at) || 'N/A',
-            performanceScore: data.performance_score,
-            attendanceRate: data.attendance_rate,
-            lastLoginGps: data.last_login_gps,
-            lastLoginAt: data.last_login_at,
-            lastLoginDevice: data.last_login_device,
-            loginHistory: data.login_history
-        };
+        let currentCode = employee.code;
+
+        for (let attempt = 0; attempt < 3; attempt++) {
+            const dbEmployee = {
+                id: employee.id,
+                code: currentCode,
+                site_id: employee.siteId,
+                name: employee.name,
+                role: employee.role,
+                email: employee.email.toLowerCase(),
+                phone: employee.phone,
+                status: employee.status,
+                join_date: employee.joinDate,
+                department: employee.department,
+                avatar: employee.avatar,
+                performance_score: employee.performanceScore,
+                specialization: employee.specialization,
+                salary: employee.salary,
+                badges: employee.badges,
+                attendance_rate: employee.attendanceRate
+            };
+            const { data, error } = await supabase
+                .from('employees')
+                .insert(dbEmployee)
+                .select()
+                .single();
+
+            if (!error) {
+                return mapDbEmployeeToEmployee(data as RawDbEmployee);
+            }
+
+            // If unique constraint violation on code, generate fresh next code and retry
+            if (error.code === '23505' && (error.message?.includes('code') || error.details?.includes('code'))) {
+                const currentNum = parseInt(currentCode.match(/SIIF-(\d+)/i)?.[1] || '0', 10);
+                const freshCode = await this.getNextCode();
+                const freshNum = parseInt(freshCode.match(/SIIF-(\d+)/i)?.[1] || '0', 10);
+                const nextNum = Math.max(currentNum + 1, freshNum);
+                currentCode = `SIIF-${nextNum.toString().padStart(4, '0')}`;
+                continue;
+            }
+
+            throw error;
+        }
+
+        throw new Error('Failed to create employee after retrying unique code assignment');
     },
 
     async update(id: string, updates: Partial<Employee>) {
@@ -266,17 +307,7 @@ export const employeesService = {
             .single();
 
         if (error) throw error;
-        return {
-            ...data,
-            siteId: data.site_id,
-            joinDate: data.join_date || (data.created_at ? data.created_at.split('T')[0] : data.created_at) || 'N/A',
-            performanceScore: data.performance_score,
-            attendanceRate: data.attendance_rate,
-            lastLoginGps: data.last_login_gps,
-            lastLoginAt: data.last_login_at,
-            lastLoginDevice: data.last_login_device,
-            loginHistory: data.login_history
-        };
+        return mapDbEmployeeToEmployee(data as RawDbEmployee);
     },
 
     async delete(id: string) {

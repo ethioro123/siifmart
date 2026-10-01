@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { WMSJob, Product } from '../../../../types';
-import { isWeightBased, isVolumeBased } from '../../../../utils/units';
+import { getSellUnit, formatPackagingDescription, isWeightBased, isVolumeBased } from '../../../../utils/units';
 import { generatePackLabelHTML } from '../../../../utils/labels/PackLabelGenerator';
 import { wmsJobsService } from '../../../../services/supabase.service';
 import { logger } from '../../../../utils/logger';
@@ -28,29 +28,21 @@ export const usePackLabelPrint = (deps: UsePackLabelPrintDeps) => {
     const [isPrinting, setIsPrinting] = useState(false);
 
     const getLabelQtyAndUnit = (item: any, product?: any) => {
-        if (product) {
-            const unit = product.unit;
-            const isWeightVol = isWeightBased(unit) || isVolumeBased(unit);
-            const sizeNum = product.size ? parseFloat(product.size as string) : 0;
-            if (isWeightVol && sizeNum > 0) {
-                const expected = item.expectedQty || (item as any).quantity || 0;
-                const picked = item.pickedQty !== undefined && item.pickedQty !== null ? item.pickedQty : expected;
-                const displayPickedCases = picked <= expected ? picked : (sizeNum > 0 ? picked / sizeNum : picked);
-                return {
-                    quantity: `${displayPickedCases} x ${sizeNum}`,
-                    unit
-                };
-            }
-        }
         if ((item as any).requestedMeasureQty !== undefined && (item as any).requestedMeasureQty !== null) {
             return {
-                quantity: (item as any).requestedMeasureQty,
+                quantity: `${(item as any).requestedMeasureQty}`,
                 unit: product?.unit || item.unit || 'KG'
             };
         }
+        const expected = item.expectedQty || (item as any).quantity || 0;
+        const picked = item.pickedQty !== undefined && item.pickedQty !== null ? item.pickedQty : expected;
+        const packDesc = formatPackagingDescription(product, picked);
+        const unitDef = getSellUnit(product?.unit || item.unit);
+        const unitLabel = unitDef.category === 'count' && unitDef.code !== 'UNIT' ? unitDef.shortLabel : 'pk';
+
         return {
-            quantity: item.pickedQty !== undefined && item.pickedQty !== null ? item.pickedQty : (item.expectedQty || 0),
-            unit: product?.unit || item.unit
+            quantity: packDesc ? `${picked} ${unitLabel} (${packDesc})` : `${picked} ${unitLabel}`,
+            unit: unitLabel
         };
     };
 
@@ -61,7 +53,7 @@ export const usePackLabelPrint = (deps: UsePackLabelPrintDeps) => {
             let trackingNum = selectedPackJob.trackingNumber;
             if (!trackingNum) {
                 trackingNum = generateTrackingNumber();
-                await wmsJobsService.update(selectedPackJob.id, { trackingNumber: trackingNum }).catch(console.error);
+                await wmsJobsService.update(selectedPackJob.id, { trackingNumber: trackingNum }).catch(err => logger.error('usePackLabelPrint', 'Failed to update trackingNumber', err));
             }
 
             const sourceSite = sites.find(s => s.id === selectedPackJob.siteId);
@@ -176,7 +168,7 @@ export const usePackLabelPrint = (deps: UsePackLabelPrintDeps) => {
             let trackingNum = selectedPackJob.trackingNumber;
             if (!trackingNum) {
                 trackingNum = generateTrackingNumber();
-                await wmsJobsService.update(selectedPackJob.id, { trackingNumber: trackingNum }).catch(console.error);
+                await wmsJobsService.update(selectedPackJob.id, { trackingNumber: trackingNum }).catch(err => logger.error('usePackLabelPrint', 'Failed to update trackingNumber', err));
             }
 
             const sourceSite = sites.find(s => s.id === selectedPackJob.siteId);

@@ -26,6 +26,7 @@ interface InventoryAdvancedFiltersProps {
     setFilters: React.Dispatch<React.SetStateAction<AdvancedFilterState>>;
     onReset: () => void;
     activeCount: number;
+    currencySymbol?: string;
 }
 
 const PRICE_PRESETS = [
@@ -41,7 +42,8 @@ export const InventoryAdvancedFilters: React.FC<InventoryAdvancedFiltersProps> =
     filters,
     setFilters,
     onReset,
-    activeCount
+    activeCount,
+    currencySymbol = CURRENCY_SYMBOL
 }) => {
     if (!isOpen) return null;
 
@@ -107,7 +109,7 @@ export const InventoryAdvancedFilters: React.FC<InventoryAdvancedFiltersProps> =
                 {/* 2. Price Range (Min & Max) + Quick Presets */}
                 <div className="space-y-2">
                     <label className="text-[10px] font-black text-gray-500 dark:text-gray-400 uppercase tracking-wider flex items-center gap-1.5">
-                        <DollarSign size={12} className="text-emerald-500" /> Price Range ({CURRENCY_SYMBOL.trim()})
+                        <DollarSign size={12} className="text-emerald-500" /> Price Range ({currencySymbol.trim()})
                     </label>
                     <div className="grid grid-cols-2 gap-2">
                         <input

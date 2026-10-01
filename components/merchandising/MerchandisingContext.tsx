@@ -25,6 +25,8 @@ export interface MerchandisingContextType {
    updateProduct: (p: Product) => Promise<any>;
    updatePricesBySKU: (sku: string, updates: any) => Promise<any>;
    addPromotion: (promo: any) => Promise<any>;
+   currencySymbol: string;
+   activeCountry: string;
 
    // Shared state
    activeTab: MerchandisingTab;

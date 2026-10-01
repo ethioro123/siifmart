@@ -5,22 +5,48 @@ import { useStore } from '../contexts/CentralStore';
 import { useData } from '../contexts/DataContext';
 import { generateQuarterlyReport } from '../utils/reportGenerator';
 import { DateRangeOption } from '../hooks/useDateFilter';
-import { CURRENCY_SYMBOL } from '../constants';
 import { logger } from '../utils/logger';
+import { getCountryProfile, Country } from '../utils/localization';
+import { isAdminSite } from '../utils/countryAdmin';
 import {
-   TAX_REGIONS,
+   getCountryTaxConfig,
    getQuarterInfo,
    getDateRangeLabels,
+   getDateRangeBounds,
    isWithinRange,
-   calculateEmployeeBonus
+   calculateEmployeeBonus,
+   calculateApAging,
+   computeWeeklyCashflow
 } from './financialsHelpers';
+import { useFinancialPayrollState } from './useFinancialPayrollState';
 
 const EXPENSES_PER_PAGE = 20;
 
 export function useFinancialsState() {
    const { user, theme } = useStore();
    const accentColor = theme === 'dark' ? '#A9CBA2' : '#2C5E3B';
-   const { employees, sales, expenses, allProducts, addExpense, deleteExpense, processPayroll, activeSite, addNotification, settings, sites, getStorePoints } = useData();
+   const {
+      employees,
+      sales,
+      allSales,
+      expenses,
+      allProducts,
+      allOrders,
+      addExpense,
+      deleteExpense,
+      processPayroll,
+      activeSite,
+      effectiveCountry,
+      addNotification,
+      settings,
+      sites,
+      getStorePoints
+   } = useData();
+
+   const activeCountry: Country = (effectiveCountry || settings?.country || 'ET') as Country;
+   const countryProfile = useMemo(() => getCountryProfile(activeCountry), [activeCountry]);
+   const currencySymbol = countryProfile.currencySymbol || 'ETB';
+   const isCountryAdmin = useMemo(() => isAdminSite(activeSite), [activeSite]);
 
    const [activeTab, setActiveTab] = useState<any>('overview');
    const [isAddExpenseOpen, setIsAddExpenseOpen] = useState(false);
@@ -31,16 +57,16 @@ export function useFinancialsState() {
    const [deleteInput, setDeleteInput] = useState('');
 
    const [isPayrollModalOpen, setIsPayrollModalOpen] = useState(false);
-   const [selectedRegion, setSelectedRegion] = useState<any>('SYSTEM');
 
-
-
-   const currentTaxConfig = selectedRegion === 'SYSTEM'
-      ? { ...TAX_REGIONS['SYSTEM'], rate: settings?.taxRate ?? 0 }
-      : TAX_REGIONS[selectedRegion];
+   // Sovereign Country Tax Configuration (100% isolated per country, config-gated by settings.taxRate)
+   const currentTaxConfig = useMemo(() => {
+      return getCountryTaxConfig(activeCountry, settings?.taxRate);
+   }, [activeCountry, settings?.taxRate]);
 
    const [newExpData, setNewExpData] = useState<Partial<ExpenseRecord>>({
-      category: 'Other', status: 'Pending', date: new Date().toISOString().split('T')[0]
+      category: 'Other',
+      status: 'Pending',
+      date: new Date().toISOString().split('T')[0]
    });
 
    const [dateRange, setDateRange] = useState<DateRangeOption>('This Quarter');
@@ -52,52 +78,20 @@ export function useFinancialsState() {
 
    const [serverFinancials, setServerFinancials] = useState<any>(null);
 
-   const [payrollSearch, setPayrollSearch] = useState('');
-   const [payrollRoleFilter, setPayrollRoleFilter] = useState('All');
-   const [payrollSort, setPayrollSort] = useState<'name' | 'salary' | 'department'>('name');
-   const [payrollSortDir, setPayrollSortDir] = useState<'asc' | 'desc'>('asc');
-   const [payrollPage, setPayrollPage] = useState(1);
-   const [payrollPerPage, setPayrollPerPage] = useState(10);
+   // Payroll Sub-State Hook
+   const payroll = useFinancialPayrollState(employees);
 
-
-
+   // 1. Fetch Paginated Expenses (Country & Site Scoped)
    useEffect(() => {
       if (activeTab === 'expenses') {
          const fetchExpenses = async () => {
             setExpensesLoading(true);
             try {
                const offset = (currentExpensesPage - 1) * EXPENSES_PER_PAGE;
-               const now = new Date();
-               let startDate: string | undefined;
-               let endDate: string | undefined;
+               const { startDate, endDate } = getDateRangeBounds(dateRange);
+               const querySiteId = isCountryAdmin ? undefined : activeSite?.id;
 
-               const { q, year } = getQuarterInfo(now);
-
-               if (dateRange === 'This Month') {
-                  const start = new Date(now.getFullYear(), now.getMonth(), 1);
-                  startDate = start.toISOString().split('T')[0];
-                  endDate = now.toISOString().split('T')[0];
-               } else if (dateRange === 'Last Month') {
-                  const start = new Date(now.getFullYear(), now.getMonth() - 1, 1);
-                  const end = new Date(now.getFullYear(), now.getMonth(), 0);
-                  startDate = start.toISOString().split('T')[0];
-                  endDate = end.toISOString().split('T')[0];
-               } else if (dateRange === 'This Quarter') {
-                  const start = new Date(year, (q - 1) * 3, 1);
-                  startDate = start.toISOString().split('T')[0];
-                  endDate = now.toISOString().split('T')[0];
-               } else if (dateRange === 'This Year') {
-                  const start = new Date(year, 0, 1);
-                  startDate = start.toISOString().split('T')[0];
-                  endDate = now.toISOString().split('T')[0];
-               } else if (dateRange === 'Last Year') {
-                  const start = new Date(year - 1, 0, 1);
-                  const end = new Date(year - 1, 11, 31);
-                  startDate = start.toISOString().split('T')[0];
-                  endDate = end.toISOString().split('T')[0];
-               }
-
-               const { data, count } = await expensesService.getAll(activeSite?.id, EXPENSES_PER_PAGE, offset, {
+               const { data, count } = await expensesService.getAll(querySiteId, EXPENSES_PER_PAGE, offset, {
                   startDate,
                   endDate
                });
@@ -112,37 +106,19 @@ export function useFinancialsState() {
          };
          fetchExpenses();
       }
-   }, [activeTab, currentExpensesPage, activeSite?.id, dateRange]);
+   }, [activeTab, currentExpensesPage, activeSite?.id, isCountryAdmin, dateRange]);
 
+   // 2. Fetch Server Financial Metrics with Country Isolation
    useEffect(() => {
       const fetchFinancials = async () => {
          try {
-            const { q, year } = getQuarterInfo(new Date());
-            const now = new Date();
-            let start: Date | undefined;
-            let end: Date | undefined;
-
-            if (dateRange === 'This Month') {
-               start = new Date(now.getFullYear(), now.getMonth(), 1);
-               end = now;
-            } else if (dateRange === 'Last Month') {
-               start = new Date(now.getFullYear(), now.getMonth() - 1, 1);
-               end = new Date(now.getFullYear(), now.getMonth(), 0);
-            } else if (dateRange === 'This Quarter') {
-               start = new Date(year, (q - 1) * 3, 1);
-               end = now;
-            } else if (dateRange === 'This Year') {
-               start = new Date(year, 0, 1);
-               end = now;
-            } else if (dateRange === 'Last Year') {
-               start = new Date(year - 1, 0, 1);
-               end = new Date(year - 1, 11, 31);
-            }
-
+            const { startDate, endDate } = getDateRangeBounds(dateRange);
+            const querySiteId = isCountryAdmin ? undefined : activeSite?.id;
             const data = await expensesService.getFinancialMetrics(
-               activeSite?.id,
-               start?.toISOString(),
-               end?.toISOString()
+               querySiteId,
+               startDate ? `${startDate}T00:00:00.000Z` : undefined,
+               endDate ? `${endDate}T23:59:59.999Z` : undefined,
+               activeCountry
             );
             setServerFinancials(data);
          } catch (err) {
@@ -151,10 +127,10 @@ export function useFinancialsState() {
       };
 
       fetchFinancials();
-   }, [dateRange, activeSite?.id]);
+   }, [dateRange, activeSite?.id, isCountryAdmin, activeCountry]);
 
-    const localGetDateRangeLabels = () => getDateRangeLabels(dateRange);
-    const localIsWithinRange = (dateString: string) => isWithinRange(dateString, dateRange);
+   const localGetDateRangeLabels = () => getDateRangeLabels(dateRange);
+   const localIsWithinRange = (dateString: string) => isWithinRange(dateString, dateRange);
 
    const getQuarterProgress = () => {
       const now = new Date();
@@ -164,17 +140,37 @@ export function useFinancialsState() {
       return Math.min(100, Math.max(0, (daysPassed / totalDays) * 100));
    };
 
-   const filteredExpenses = expenses.filter(e => localIsWithinRange(e.date));
-   const filteredSales = sales.filter(s => localIsWithinRange(s.created_at || new Date().toISOString()));
+   // 3. Resolve active datasets: Admin HQ consolidates all country sales/expenses; Branch scopes to site
+   const targetSales = useMemo(() => {
+      const baseSales = isCountryAdmin ? (allSales || []) : (sales || []);
+      return baseSales.filter(s => {
+         return isCountryAdmin ? true : (s.siteId === activeSite?.id || (s as any).site_id === activeSite?.id);
+      });
+   }, [isCountryAdmin, allSales, sales, activeSite?.id]);
 
+   const targetExpenses = useMemo(() => {
+      return (expenses || []).filter(e => {
+         return isCountryAdmin ? true : (e.siteId === activeSite?.id || (e as any).site_id === activeSite?.id);
+      });
+   }, [isCountryAdmin, expenses, activeSite?.id]);
+
+   const filteredExpenses = useMemo(() => {
+      return targetExpenses.filter(e => localIsWithinRange(e.date));
+   }, [targetExpenses, dateRange]);
+
+   const filteredSales = useMemo(() => {
+      return targetSales.filter(s => localIsWithinRange(s.created_at || s.date || new Date().toISOString()));
+   }, [targetSales, dateRange]);
+
+   // 4. Expense Breakdown
    const expenseBreakdownData = useMemo(() => {
-      if (serverFinancials?.expense_breakdown) {
-         return serverFinancials.expense_breakdown.map((item: any) => ({
-            name: item.name,
-            value: item.value
-         })).map((item: any, _: number, arr: any[]) => {
+      if (serverFinancials?.expense_breakdown && serverFinancials.expense_breakdown.length > 0) {
+         return serverFinancials.expense_breakdown.map((item: any, _: number, arr: any[]) => {
             const total = arr.reduce((s, i) => s + i.value, 0);
-            return { ...item, value: total > 0 ? parseFloat(((item.value / total) * 100).toFixed(1)) : 0 };
+            return {
+               name: item.name,
+               value: total > 0 ? parseFloat(((item.value / total) * 100).toFixed(1)) : 0
+            };
          });
       }
       const expensesByCategory = filteredExpenses.reduce((acc: Record<string, number>, exp: any) => {
@@ -183,113 +179,49 @@ export function useFinancialsState() {
          return acc;
       }, {} as Record<string, number>);
 
-      const totalRecordedExpenses = Object.values(expensesByCategory).reduce<number>((sum, val) => sum + (val as number), 0);
-      return Object.entries(expensesByCategory).map(([name, value]) => {
-         const val = value as number;
-         const total = totalRecordedExpenses as number;
-         return {
-            name,
-            value: total > 0 ? parseFloat(((val / total) * 100).toFixed(1)) : 0
-         };
-      });
+      const totalRecordedExpenses = Object.values(expensesByCategory).reduce<number>((sum, val) => sum + val, 0);
+      return Object.entries(expensesByCategory).map(([name, value]) => ({
+         name,
+         value: totalRecordedExpenses > 0 ? parseFloat(((value / totalRecordedExpenses) * 100).toFixed(1)) : 0
+      }));
    }, [filteredExpenses, serverFinancials]);
 
+   // 5. Cashflow Trend (Standardized keys: name, income, expense, revenue, expenses)
    const cashflowData = useMemo(() => {
-      if (serverFinancials?.cashflow_data) {
-         return serverFinancials.cashflow_data.map((d: any) => ({
-            name: new Date(d.name).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }),
-            income: d.income,
-            expense: d.expense
-         }));
+      if (serverFinancials?.cashflow_data && serverFinancials.cashflow_data.length > 0) {
+         return serverFinancials.cashflow_data.map((d: any) => {
+            const inc = Number(d.income) || 0;
+            const exp = Number(d.expense) || 0;
+            return {
+               name: new Date(d.name).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }),
+               income: inc,
+               expense: exp,
+               revenue: inc,
+               expenses: exp
+            };
+         });
       }
-
-      const getWeekNumber = (d: Date) => {
-         d = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
-         d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDay() || 7));
-         const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
-         return Math.ceil((((d.getTime() - yearStart.getTime()) / 86400000) + 1) / 7);
-      };
-
-      const salesByWeek = filteredSales.reduce((acc, s) => {
-         const date = new Date(s.created_at || s.date);
-         const week = `W${getWeekNumber(date)} `;
-         acc[week] = (acc[week] || 0) + s.total;
-         return acc;
-      }, {} as Record<string, number>);
-
-      const expensesByWeek = filteredExpenses.reduce((acc, e) => {
-         const date = new Date(e.date);
-         const week = `W${getWeekNumber(date)} `;
-         acc[week] = (acc[week] || 0) + e.amount;
-         return acc;
-      }, {} as Record<string, number>);
-
-      const allWeeks = Array.from(new Set([...Object.keys(salesByWeek), ...Object.keys(expensesByWeek)])).sort();
-      return allWeeks.map(week => ({
-         name: week,
-         income: salesByWeek[week] || 0,
-         expense: expensesByWeek[week] || 0
-      }));
+      return computeWeeklyCashflow(filteredSales, filteredExpenses);
    }, [filteredSales, filteredExpenses, serverFinancials]);
 
-   const filteredEmployees = employees.filter(emp => {
-      const matchesSearch = emp.name.toLowerCase().includes(payrollSearch.toLowerCase()) ||
-         emp.role.toLowerCase().includes(payrollSearch.toLowerCase());
-      const matchesRole = payrollRoleFilter === 'All' || emp.role === payrollRoleFilter;
-      return matchesSearch && matchesRole;
-   }).sort((a, b) => {
-      let valA = a[payrollSort] || '';
-      let valB = b[payrollSort] || '';
+   // 6. Core Financial Totals with Admin HQ Rollup & Fallback
+   const calculatedSalesTotal = filteredSales.reduce((sum, s) => sum + (Number(s.total) || 0), 0);
+   const calculatedRefundsTotal = filteredSales.filter(s => s.status === 'Refunded').reduce((sum, s) => sum + (Number(s.total) || 0), 0);
+   const calculatedOpEx = filteredExpenses.reduce((sum, e) => sum + (Number(e.amount) || 0), 0);
 
-      if (payrollSort === 'salary') {
-         valA = a.salary || 0;
-         valB = b.salary || 0;
-      }
+   const totalRevenue = (serverFinancials?.total_revenue && Number(serverFinancials.total_revenue) > 0)
+      ? Number(serverFinancials.total_revenue)
+      : calculatedSalesTotal;
 
-      if (valA < valB) return payrollSortDir === 'asc' ? -1 : 1;
-      if (valA > valB) return payrollSortDir === 'asc' ? 1 : -1;
-      return 0;
-   });
+   const totalRefunds = (serverFinancials?.total_refunds !== undefined && serverFinancials.total_refunds !== null)
+      ? Number(serverFinancials.total_refunds)
+      : calculatedRefundsTotal;
 
-   useEffect(() => {
-      setPayrollPage(1);
-   }, [payrollSearch, payrollRoleFilter]);
+   const totalOpEx = (serverFinancials?.total_expenses && Number(serverFinancials.total_expenses) > 0)
+      ? Number(serverFinancials.total_expenses)
+      : calculatedOpEx;
 
-   const payrollTotalPages = Math.ceil(filteredEmployees.length / payrollPerPage);
-   const payrollStartIndex = (payrollPage - 1) * payrollPerPage;
-   const payrollEndIndex = payrollStartIndex + payrollPerPage;
-   const paginatedEmployees = filteredEmployees.slice(payrollStartIndex, payrollEndIndex);
-
-   const getPayrollPageNumbers = () => {
-      const pages: (number | string)[] = [];
-      const maxVisible = 5;
-
-      if (payrollTotalPages <= maxVisible) {
-         for (let i = 1; i <= payrollTotalPages; i++) pages.push(i);
-      } else {
-         pages.push(1);
-         if (payrollPage > 3) pages.push('...');
-
-         const start = Math.max(2, payrollPage - 1);
-         const end = Math.min(payrollTotalPages - 1, payrollPage + 1);
-
-         for (let i = start; i <= end; i++) pages.push(i);
-
-         if (payrollPage < payrollTotalPages - 2) pages.push('...');
-         pages.push(payrollTotalPages);
-      }
-      return pages;
-   };
-
-   const uniqueRoles = ['All', ...Array.from(new Set(employees.map(e => e.role)))];
-
-   if (cashflowData.length === 0) {
-      cashflowData.push({ name: 'No Data', income: 0, expense: 0 });
-   }
-
-   const totalRevenue = serverFinancials?.total_revenue ?? filteredSales.reduce((sum, s) => sum + s.total, 0);
-   const totalSalaries = employees.reduce((sum, e) => sum + (e.salary || 0), 0);
-   const totalOpEx = serverFinancials?.total_expenses ?? filteredExpenses.reduce((sum, e) => sum + e.amount, 0);
+   const totalSalaries = employees.reduce((sum, e) => sum + (Number(e.salary) || 0), 0);
 
    const localCalculateEmployeeBonus = (emp: Employee): number => {
       return calculateEmployeeBonus(emp, sites, getStorePoints, settings);
@@ -299,20 +231,24 @@ export function useFinancialsState() {
 
    const totalInventoryValue = allProducts
       .filter(p => (p.status || (p as any).status) !== 'archived')
-      .reduce((sum, p) => sum + (p.stock * (p.costPrice || p.price * 0.7)), 0);
+      .reduce((sum, p) => sum + ((p.stock || 0) * (p.costPrice || p.price * 0.7)), 0);
 
    const totalExpenses = totalSalaries + totalOpEx;
-   const totalRefunds = serverFinancials?.total_refunds ?? filteredSales.filter(s => s.status === 'Refunded').reduce((sum, s) => sum + s.total, 0);
 
+   // 7. Sovereign Tax Calculation
    const taxRateDecimal = currentTaxConfig.rate / 100;
-   const estimatedTaxLiability = (totalRevenue - totalRefunds) * taxRateDecimal;
-   const inputTaxCredit = totalOpEx * taxRateDecimal;
+   const estimatedTaxLiability = Math.max(0, (totalRevenue - totalRefunds) * taxRateDecimal);
+   const inputTaxCredit = Math.max(0, totalOpEx * taxRateDecimal);
    const netTaxPayable = Math.max(0, estimatedTaxLiability - inputTaxCredit);
 
    const netProfit = totalRevenue - totalExpenses - netTaxPayable - totalRefunds;
    const profitMargin = totalRevenue > 0 ? (netProfit / totalRevenue) * 100 : 0;
 
-   const avgRevenue = totalRevenue / (cashflowData.length || 1);
+   // 8. Accounts Payable Aging from real country-scoped purchase orders
+   const apAging = useMemo(() => calculateApAging(allOrders || []), [allOrders]);
+
+   // 9. Forecast
+   const avgRevenue = totalRevenue / Math.max(1, cashflowData.length);
    const forecastData = [
       { month: 'Next M1', low: avgRevenue * 0.9, high: avgRevenue * 1.1, projection: avgRevenue * 1.05 },
       { month: 'Next M2', low: avgRevenue * 0.92, high: avgRevenue * 1.15, projection: avgRevenue * 1.08 },
@@ -321,25 +257,30 @@ export function useFinancialsState() {
 
    const COLORS = [accentColor, '#3b82f6', '#f59e0b', '#ef4444', '#a855f7', '#ec4899'];
 
+   // 10. Zero-Trust Expense Creation
    const handleAddExpense = async () => {
       if (!newExpData.description || !newExpData.amount) return;
       setIsSubmitting(true);
       try {
+         const userRole = (user?.role || '').toLowerCase();
+         const isPrivileged = ['admin', 'super_admin', 'ceo'].includes(userRole);
          const expense: ExpenseRecord = {
             id: `EXP-${Date.now()}`,
-            siteId: activeSite?.id || 'SITE-001',
-            date: newExpData.date!,
-            category: newExpData.category as any,
+            siteId: activeSite?.id || 'SITE-0001',
+            date: newExpData.date || new Date().toISOString().split('T')[0],
+            category: (newExpData.category as any) || 'Other',
             description: newExpData.description,
             amount: Number(newExpData.amount),
-            status: newExpData.status as any,
-            approvedBy: 'Admin'
+            status: isPrivileged ? ((newExpData.status as any) || 'Pending') : 'Pending',
+            approvedBy: isPrivileged ? (user?.name || 'Admin') : 'Pending HQ Approval'
          };
          await addExpense(expense);
          setIsAddExpenseOpen(false);
          setNewExpData({ category: 'Other', status: 'Pending', date: new Date().toISOString().split('T')[0] });
+         addNotification('success', 'Expense record submitted.');
       } catch (error) {
          logger.error('useFinancialsState', 'caught error', error as Error);
+         addNotification('alert', 'Failed to log expense');
       } finally {
          setIsSubmitting(false);
       }
@@ -373,6 +314,8 @@ export function useFinancialsState() {
 
    const handleExportPnL = () => {
       const data = {
+         country: activeCountry,
+         currency: currencySymbol,
          reportDate: new Date().toISOString(),
          metrics: {
             totalRevenue,
@@ -382,10 +325,13 @@ export function useFinancialsState() {
                payroll: totalSalaries
             },
             tax: {
-               region: currentTaxConfig.name,
+               authority: currentTaxConfig.authority,
+               taxName: currentTaxConfig.taxName,
+               rate: currentTaxConfig.rate,
                estimatedLiability: netTaxPayable
             },
-            netProfit
+            netProfit,
+            profitMargin: `${profitMargin.toFixed(1)}%`
          }
       };
 
@@ -394,7 +340,7 @@ export function useFinancialsState() {
       const url = URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = url;
-      link.download = `siifmart_pnl_report_${new Date().toISOString().split('T')[0]}.json`;
+      link.download = `siifmart_${activeCountry.toLowerCase()}_pnl_report_${new Date().toISOString().split('T')[0]}.json`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -407,7 +353,7 @@ export function useFinancialsState() {
    const handleConfirmPayroll = async () => {
       setIsSubmitting(true);
       try {
-         await processPayroll(activeSite?.id || 'SITE-001', user?.name || 'Admin');
+         await processPayroll(activeSite?.id || 'SITE-0001', user?.name || 'Admin');
          setIsPayrollModalOpen(false);
       } catch (error) {
          logger.error('useFinancialsState', 'caught error', error as Error);
@@ -418,11 +364,11 @@ export function useFinancialsState() {
 
    const handleGenerateFiling = () => {
       setIsSubmitting(true);
-      addNotification('info', `Generating ${currentTaxConfig.taxName} Filing Report for ${currentTaxConfig.name}...`);
+      addNotification('info', `Generating ${currentTaxConfig.taxName} Filing for ${currentTaxConfig.authority}...`);
       setTimeout(() => {
-         addNotification('success', `Tax Report Generated! Net Payable: ${CURRENCY_SYMBOL} ${netTaxPayable.toLocaleString()} `);
+         addNotification('success', `Tax Report Generated! Net Payable: ${currencySymbol} ${netTaxPayable.toLocaleString()}`);
          setIsSubmitting(false);
-      }, 1500);
+      }, 1200);
    };
 
    const handleDownloadBankFile = () => {
@@ -431,7 +377,7 @@ export function useFinancialsState() {
       setTimeout(() => {
          addNotification('success', 'Bank File Downloaded Successfully');
          setIsSubmitting(false);
-      }, 1500);
+      }, 1200);
    };
 
    const localGetQuarterInfo = (d = new Date()) => getQuarterInfo(d);
@@ -454,16 +400,15 @@ export function useFinancialsState() {
       activeSite, addNotification, settings, sites, getStorePoints, activeTab, setActiveTab, isAddExpenseOpen,
       setIsAddExpenseOpen, isSubmitting, setIsSubmitting, isDeleteExpenseModalOpen, setIsDeleteExpenseModalOpen,
       expenseToDelete, setExpenseToDelete, deleteInput, setDeleteInput, isPayrollModalOpen, setIsPayrollModalOpen,
-      selectedRegion, setSelectedRegion, currentTaxConfig, newExpData, setNewExpData, dateRange, setDateRange,
-      localExpenses, setLocalExpenses, expensesLoading, setExpensesLoading, totalExpensesCount, setTotalExpensesCount,
-      currentExpensesPage, setCurrentExpensesPage, serverFinancials, setServerFinancials, filteredExpenses, filteredSales,
-      expenseBreakdownData, cashflowData, payrollSearch, setPayrollSearch, payrollRoleFilter, setPayrollRoleFilter,
-      payrollSort, setPayrollSort, payrollSortDir, setPayrollSortDir, payrollPage, setPayrollPage, payrollPerPage,
-      setPayrollPerPage, filteredEmployees, payrollTotalPages, payrollStartIndex, payrollEndIndex, paginatedEmployees,
-      getPayrollPageNumbers, uniqueRoles, totalRevenue, totalSalaries, totalOpEx, calculateEmployeeBonus: localCalculateEmployeeBonus, totalBonuses,
-      totalInventoryValue, totalExpenses, totalRefunds, estimatedTaxLiability, inputTaxCredit, netTaxPayable, netProfit,
-      profitMargin, forecastData, COLORS, TAX_REGIONS, EXPENSES_PER_PAGE, getQuarterProgress, getDateRangeLabels: localGetDateRangeLabels,
-      getQuarterInfo: localGetQuarterInfo, handleAddExpense, handleDeleteExpense, handleConfirmDeleteExpense, handleExportPnL,
-      handleProcessPayroll, handleConfirmPayroll, handleGenerateFiling, handleDownloadBankFile, handleGenerateReport
+      effectiveCountry: activeCountry, countryProfile, currencySymbol, currentTaxConfig, newExpData, setNewExpData,
+      dateRange, setDateRange, localExpenses, setLocalExpenses, expensesLoading, setExpensesLoading, totalExpensesCount,
+      setTotalExpensesCount, currentExpensesPage, setCurrentExpensesPage, serverFinancials, setServerFinancials,
+      filteredExpenses, filteredSales, expenseBreakdownData, cashflowData, ...payroll, totalRevenue, totalSalaries,
+      totalOpEx, calculateEmployeeBonus: localCalculateEmployeeBonus, totalBonuses, totalInventoryValue, totalExpenses,
+      totalRefunds, estimatedTaxLiability, inputTaxCredit, netTaxPayable, netProfit, profitMargin, forecastData, COLORS,
+      EXPENSES_PER_PAGE, apAging, getQuarterProgress, getDateRangeLabels: localGetDateRangeLabels,
+      getQuarterInfo: localGetQuarterInfo, handleAddExpense, handleDeleteExpense, handleConfirmDeleteExpense,
+      handleExportPnL, handleProcessPayroll, handleConfirmPayroll, handleGenerateFiling, handleDownloadBankFile,
+      handleGenerateReport
    };
 }

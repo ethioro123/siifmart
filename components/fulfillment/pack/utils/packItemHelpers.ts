@@ -32,16 +32,13 @@ export const getItemMeasureQty = (
         return (item as any).requestedMeasureQty;
     }
     const prod = product !== undefined ? product : getProductForItem(item, job, products);
-    // Fall back to item's own unit/size when product not found
-    const unit = prod?.unit || item.unit;
-    const size = prod?.size || item.size;
-    if (unit && size) {
-        const isWeightVol = isWeightBased(unit) || isVolumeBased(unit);
-        const sizeNum = parseFloat(size as string) || 0;
-        if (isWeightVol && sizeNum > 1) {
-            const expected = item.expectedQty || (item as any).quantity || 0;
-            return expected * sizeNum;
-        }
+    const customAttrs = prod?.customAttributes || (prod as any)?.custom_attributes;
+    const sellBy = customAttrs?.commercial?.sellBy || '';
+    const isWeighted = customAttrs?.commercial?.isWeighted === true;
+
+    // Only return measure quantity if the item is a loose bulk item sold by weight/volume
+    if (sellBy === 'Weight' || sellBy === 'Volume' || isWeighted) {
+        return item.expectedQty || (item as any).quantity || null;
     }
     return null;
 };

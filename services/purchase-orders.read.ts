@@ -4,6 +4,8 @@
  */
 
 import { supabase } from '../lib/supabase';
+import { logger } from '../utils/logger';
+import { getEffectiveCountry, getCountryProfile } from '../utils/localization';
 
 // ============================================================================
 // getAll
@@ -14,8 +16,18 @@ export async function getAll(siteId?: string, limit: number = 500, offset: numbe
         .from('purchase_orders')
         .select('*, po_items(*, products(sku))', { count: 'exact' });
 
-    if (siteId) {
+    if (filters?.siteIds && Array.isArray(filters.siteIds)) {
+        if (filters.siteIds.length === 0) return { data: [], count: 0 };
+        query = query.in('site_id', filters.siteIds);
+    } else if (siteId) {
         query = query.eq('site_id', siteId);
+    }
+
+    // Tenant Scoping by Country:
+    // If siteIds is already filtering by the active country's sites, site_id IN (...) provides 100% tenant isolation.
+    // Explicit country_code filter is only applied if siteIds was not passed:
+    if (filters?.countryCode && !filters?.siteIds) {
+        query = query.eq('country_code', filters.countryCode);
     }
 
     // Apply Filters
@@ -48,10 +60,46 @@ export async function getAll(siteId?: string, limit: number = 500, offset: numbe
     // Apply pagination
     query = query.range(offset, offset + limit - 1);
 
-    const { data, error, count } = await query;
+    let { data, error, count } = await query;
+    if (error && (error.code === '42703' || error.message?.includes('country_code'))) {
+        logger.warn('PurchaseOrdersRead', 'purchase_orders.country_code column not present on DB, falling back to site-scoped query');
+        let retryQuery = supabase
+            .from('purchase_orders')
+            .select('*, po_items(*, products(sku))', { count: 'exact' });
+
+        if (filters?.siteIds && Array.isArray(filters.siteIds)) {
+            retryQuery = retryQuery.in('site_id', filters.siteIds);
+        } else if (siteId) {
+            retryQuery = retryQuery.eq('site_id', siteId);
+        }
+        if (filters) {
+            if (filters.status && filters.status !== 'All') {
+                retryQuery = retryQuery.eq('status', filters.status);
+            }
+            if (filters.startDate) {
+                retryQuery = retryQuery.gte('created_at', filters.startDate);
+            }
+            if (filters.endDate) {
+                retryQuery = retryQuery.lte('created_at', `${filters.endDate}T23:59:59`);
+            }
+            if (filters.search) {
+                const term = filters.search;
+                retryQuery = retryQuery.or(`po_number.ilike.%${term}%,supplier_name.ilike.%${term}%`);
+            }
+            if (filters.supplierId) {
+                retryQuery = retryQuery.eq('supplier_id', filters.supplierId);
+            }
+        }
+        retryQuery = retryQuery.order(sortBy, { ascending: sortDir === 'asc' });
+        retryQuery = retryQuery.range(offset, offset + limit - 1);
+        const retryRes = await retryQuery;
+        data = retryRes.data;
+        error = retryRes.error;
+        count = retryRes.count;
+    }
     if (error) throw error;
 
-    const mappedData = data.map((p: any) => {
+    const mappedData = (data || []).map((p: any) => {
         // Parse approval info from notes (stored as [APPROVED_BY:name:date] tag)
         let approvedBy = null;
         let approvedAt = null;
@@ -75,6 +123,9 @@ export async function getAll(siteId?: string, limit: number = 500, offset: numbe
             ...p,
             status: frontendStatus,
             date: p.order_date,
+            currency: p.currency || getCountryProfile(p.country_code || 'ET').currency,
+            countryCode: p.country_code || getEffectiveCountry({ country: p.country_code, currency: p.currency }),
+            country_code: p.country_code || getEffectiveCountry({ country: p.country_code, currency: p.currency }),
             requestedBy: p.requested_by,
             createdBy: p.created_by,
             receivedBy: p.received_by,
@@ -89,6 +140,7 @@ export async function getAll(siteId?: string, limit: number = 500, offset: numbe
             expectedDelivery: p.expected_delivery,
             shippingCost: p.shipping_cost,
             taxAmount: p.tax_amount,
+            discount: p.discount,
             paymentTerms: p.payment_terms,
             tempReq: p.temp_req,
             shelfLife: p.shelf_life,
@@ -114,7 +166,9 @@ export async function getAll(siteId?: string, limit: number = 500, offset: numbe
                     category: i.category || '',
                     identityType: i.identity_type || 'known',
                     packQuantity: deepAttrs.packQuantity || i.pack_quantity || 1,
-                    description: deepAttrs.text || '',
+                    caseSize: deepAttrs.caseSize || i.case_size || 0,
+                    packageType: deepAttrs.packageType || i.package_type || '',
+                    description: deepAttrs.text || i.description || '',
                     minStock: deepAttrs.minStock || i.min_stock || 0,
                     maxStock: deepAttrs.maxStock || i.max_stock || 0,
                     customAttributes: deepAttrs.customAttributes || i.custom_attributes || null
@@ -141,7 +195,7 @@ export async function getMetrics(siteId?: string, filters?: any) {
     const { data, error } = await supabase.rpc('get_procurement_metrics', params);
 
     if (error) {
-        console.error('Error fetching procurement metrics:', error);
+        logger.error('PurchaseOrdersRead', 'Error fetching procurement metrics', error as Error);
         return { totalSpend: 0, openPO: 0, pendingValue: 0, potentialRevenue: 0, categoryData: [], trendData: [] };
     }
     return data;
@@ -156,9 +210,15 @@ export async function getById(id: string) {
         .from('purchase_orders')
         .select('*, po_items(*, products(sku))')
         .eq('id', id)
-        .single();
+        .maybeSingle();
 
-    if (error) throw error;
+    if (error) {
+        if (error.code === 'PGRST116') return null;
+        logger.warn('PurchaseOrdersRead', 'Failed to fetch purchase order by ID', { id, error: error.message });
+        return null;
+    }
+
+    if (!data) return null;
 
     // Parse approval info from notes (stored as [APPROVED_BY:name:date] tag)
     let approvedBy = null;
@@ -183,6 +243,9 @@ export async function getById(id: string) {
         ...data,
         status: frontendStatus,
         date: data.order_date,
+        currency: data.currency || getCountryProfile(data.country_code || 'ET').currency,
+        countryCode: data.country_code || getEffectiveCountry({ country: data.country_code, currency: data.currency }),
+        country_code: data.country_code || getEffectiveCountry({ country: data.country_code, currency: data.currency }),
         requestedBy: data.requested_by,
         createdBy: data.created_by,
         receivedBy: data.received_by,
@@ -197,6 +260,7 @@ export async function getById(id: string) {
         expectedDelivery: data.expected_delivery,
         shippingCost: data.shipping_cost,
         taxAmount: data.tax_amount,
+        discount: data.discount,
         paymentTerms: data.payment_terms,
         tempReq: data.temp_req,
         shelfLife: data.shelf_life,
@@ -225,7 +289,9 @@ export async function getById(id: string) {
                 category: i.category || '',
                 identityType: i.identity_type || 'known',
                 packQuantity: deepAttrs.packQuantity || i.pack_quantity || 1,
-                description: deepAttrs.text || '',
+                caseSize: deepAttrs.caseSize || i.case_size || 0,
+                packageType: deepAttrs.packageType || i.package_type || '',
+                description: deepAttrs.text || i.description || '',
                 minStock: deepAttrs.minStock || i.min_stock || 0,
                 maxStock: deepAttrs.maxStock || i.max_stock || 0,
                 customAttributes: deepAttrs.customAttributes || i.custom_attributes || null

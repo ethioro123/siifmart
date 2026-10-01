@@ -4,7 +4,6 @@ import {
     Check, CheckSquare, RefreshCw, Save
 } from 'lucide-react';
 import { Product, Site } from '../../../types';
-import { CURRENCY_SYMBOL } from '../../../constants';
 
 export type PricingScope = 'single' | 'all' | 'custom';
 
@@ -27,6 +26,7 @@ interface Props {
     showCost: boolean;
     sites: Site[];
     allProducts: Product[];
+    currencySymbol?: string;
 }
 
 export const PricingTab: React.FC<Props> = ({
@@ -37,7 +37,8 @@ export const PricingTab: React.FC<Props> = ({
     isSaving,
     showCost,
     sites,
-    allProducts
+    allProducts,
+    currencySymbol = 'ETB'
 }) => {
     const margin = pricingCfg.price > 0 && pricingCfg.costPrice > 0
         ? ((pricingCfg.price - pricingCfg.costPrice) / pricingCfg.price * 100) : 0;
@@ -69,7 +70,7 @@ export const PricingTab: React.FC<Props> = ({
             <div>
                 <label className="text-[9px] font-bold uppercase text-stone-400 block mb-1.5">Retail Price</label>
                 <div className="relative">
-                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[#2C5E3B] dark:text-[#A9CBA2] font-black">{CURRENCY_SYMBOL}</span>
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[#2C5E3B] dark:text-[#A9CBA2] font-black">{currencySymbol}</span>
                     <input type="number" min="0" step="0.01" value={pricingCfg.price}
                         aria-label="Retail Price"
                         title="Retail Price"
@@ -88,7 +89,7 @@ export const PricingTab: React.FC<Props> = ({
                             </span>
                         </div>
                         <div className="relative">
-                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-400 font-mono">{CURRENCY_SYMBOL}</span>
+                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-400 font-mono">{currencySymbol}</span>
                             <input type="number" value={pricingCfg.costPrice}
                                 readOnly
                                 disabled
@@ -101,7 +102,7 @@ export const PricingTab: React.FC<Props> = ({
                 <div>
                     <label className="text-[9px] font-bold uppercase text-stone-400 block mb-1.5">Competitor Price</label>
                     <div className="relative">
-                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-400 font-mono">{CURRENCY_SYMBOL}</span>
+                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-400 font-mono">{currencySymbol}</span>
                         <input type="number" min="0" step="0.01" value={pricingCfg.competitorPrice || ''}
                             onChange={e => setPricingCfg(c => ({ ...c, competitorPrice: parseFloat(e.target.value) || 0 }))}
                             placeholder="0"
@@ -120,7 +121,7 @@ export const PricingTab: React.FC<Props> = ({
                 </div>
                 {pricingCfg.isOnSale && (
                     <div className="relative">
-                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-orange-500 font-mono">{CURRENCY_SYMBOL}</span>
+                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-orange-500 font-mono">{currencySymbol}</span>
                         <input type="number" min="0" step="0.01" value={pricingCfg.salePrice || ''}
                             onChange={e => setPricingCfg(c => ({ ...c, salePrice: parseFloat(e.target.value) || 0 }))}
                             placeholder="Sale price..."
@@ -263,7 +264,7 @@ export const PricingTab: React.FC<Props> = ({
                                         </div>
                                         {sitePrice !== null && (
                                             <span className="text-[9px] font-mono font-bold text-stone-500 dark:text-stone-400 bg-stone-100 dark:bg-black/30 px-1.5 py-0.5 rounded ml-1 flex-shrink-0">
-                                                {CURRENCY_SYMBOL}{sitePrice}
+                                                {currencySymbol} {sitePrice}
                                             </span>
                                         )}
                                     </label>

@@ -18,6 +18,7 @@ interface SalesDetailModalProps {
     auditLogs: any[];
     handleReprint: () => void;
     addNotification: (type: any, message: string) => void;
+    currencySymbol?: string;
 }
 
 export const SalesDetailModal: React.FC<SalesDetailModalProps> = ({
@@ -29,7 +30,8 @@ export const SalesDetailModal: React.FC<SalesDetailModalProps> = ({
     sites,
     auditLogs,
     handleReprint,
-    addNotification
+    addNotification,
+    currencySymbol = CURRENCY_SYMBOL
 }) => {
     return (
         <Modal
@@ -48,7 +50,7 @@ export const SalesDetailModal: React.FC<SalesDetailModalProps> = ({
                         </div>
                         <div className="text-right">
                             <p className="text-xs text-stone-500 dark:text-gray-555 uppercase font-black tracking-widest">Total Amount</p>
-                            <p className="text-2xl font-mono text-[#2C5E3B] dark:text-[#A9CBA2] font-black">{CURRENCY_SYMBOL} {selectedSale.total.toLocaleString()}</p>
+                            <p className="text-2xl font-mono text-[#2C5E3B] dark:text-[#A9CBA2] font-black">{currencySymbol} {selectedSale.total.toLocaleString()}</p>
                         </div>
                     </div>
 
@@ -75,9 +77,9 @@ export const SalesDetailModal: React.FC<SalesDetailModalProps> = ({
                         {detailTab === 'receipt' && (
                             <div className={`max-w-sm mx-auto bg-white text-black p-6 rounded shadow-xl relative ${settings.posReceiptFont === 'monospace' ? 'font-mono' : 'font-sans'}`}>
                                 {/* Logo */}
-                                {settings.posReceiptShowLogo && settings.posReceiptLogo && (
+                                {settings.posReceiptShowLogo && (settings.posReceiptLogo || settings.logoUrl) && (
                                     <div className="flex justify-center mb-4">
-                                        <img src={settings.posReceiptLogo} className="max-h-12 object-contain grayscale" alt="logo" />
+                                        <img src={settings.posReceiptLogo || settings.logoUrl} className="max-h-12 object-contain grayscale" alt="logo" />
                                     </div>
                                 )}
 
@@ -89,6 +91,11 @@ export const SalesDetailModal: React.FC<SalesDetailModalProps> = ({
                                     <p className="text-xs font-bold uppercase tracking-widest opacity-80">
                                         {settings.posReceiptHeader || 'SIIFMART RETAIL'}
                                     </p>
+                                    {settings.slogan && settings.slogan !== (settings.posReceiptHeader || 'SIIFMART RETAIL') && (
+                                        <p className="text-[9px] italic opacity-70 mt-0.5">
+                                            {settings.slogan}
+                                        </p>
+                                    )}
                                 </div>
 
                                 <div className="text-[10px] text-center space-y-0.5 mb-4 border-b-2 border-black/10 pb-4 border-dashed">
@@ -116,7 +123,7 @@ export const SalesDetailModal: React.FC<SalesDetailModalProps> = ({
                                         <div key={i} className="flex justify-between text-xs">
                                             <div>
                                                 <div className="font-bold">{item.name}</div>
-                                                <div className="text-[9px] opacity-60">{item.quantity} x {CURRENCY_SYMBOL} {formatPriceValue(item.price)}</div>
+                                                <div className="text-[9px] opacity-60">{item.quantity} x {currencySymbol} {formatPriceValue(item.price)}</div>
                                             </div>
                                             <div className="font-bold">{formatPriceValue(item.price * item.quantity)}</div>
                                         </div>
@@ -126,7 +133,26 @@ export const SalesDetailModal: React.FC<SalesDetailModalProps> = ({
                                 <div className="space-y-1 text-right mb-4">
                                     <div className="flex justify-between text-[10px] opacity-60"><span>Subtotal</span><span>{selectedSale.subtotal.toLocaleString()}</span></div>
                                     <div className="flex justify-between text-[10px] opacity-60"><span>Tax ({settings.taxRate || 0}%)</span><span>{selectedSale.tax.toLocaleString()}</span></div>
-                                    <div className="flex justify-between font-black text-base border-t border-black pt-2 mt-2"><span>TOTAL</span><span>{CURRENCY_SYMBOL} {selectedSale.total.toLocaleString()}</span></div>
+                                    <div className="flex justify-between font-black text-base border-t border-black pt-2 mt-2"><span>TOTAL</span><span>{currencySymbol} {selectedSale.total.toLocaleString()}</span></div>
+                                </div>
+
+                                <div className="text-[10px] font-bold border-t border-black/10 border-dashed pt-3 mb-4">
+                                    <div className="flex justify-between">
+                                        <span>PAID ({selectedSale.mobilePaymentChannel ? selectedSale.mobilePaymentChannel.replace(/_/g, ' ') : selectedSale.method.toUpperCase()})</span>
+                                        <span>{currencySymbol} {selectedSale.total.toLocaleString()}</span>
+                                    </div>
+                                    {selectedSale.mobileTransactionRef && (
+                                        <div className="flex justify-between text-[9px] opacity-75 font-mono mt-0.5">
+                                            <span>TX REF:</span>
+                                            <span className="font-bold">{selectedSale.mobileTransactionRef}</span>
+                                        </div>
+                                    )}
+                                    {selectedSale.customerPhone && (
+                                        <div className="flex justify-between text-[9px] opacity-60 font-mono">
+                                            <span>PHONE:</span>
+                                            <span>{selectedSale.customerPhone}</span>
+                                        </div>
+                                    )}
                                 </div>
 
                                 <div className="text-center space-y-1 pt-4 border-t border-black/10 border-dashed">
@@ -146,7 +172,7 @@ export const SalesDetailModal: React.FC<SalesDetailModalProps> = ({
                                     <div>
                                         <p className="text-sm font-bold text-[#1E3F27] dark:text-[#EAE5D9]">Transaction Completed</p>
                                         <p className="text-xs text-stone-400 dark:text-gray-550">{formatDateTime(selectedSale.date, { showTime: true })}</p>
-                                        <p className="text-xs text-stone-500 dark:text-gray-450 mt-1">Payment verified via {selectedSale.method} gateway.</p>
+                                        <p className="text-xs text-stone-500 dark:text-gray-450 mt-1">Payment verified via {selectedSale.mobilePaymentChannel || selectedSale.method}{selectedSale.mobileTransactionRef ? ` (Ref: ${selectedSale.mobileTransactionRef})` : ''} gateway.</p>
                                     </div>
                                 </div>
 

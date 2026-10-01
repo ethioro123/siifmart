@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { Search, Package, X } from 'lucide-react';
 import { Product } from '../../../types';
-import { getSellUnit, getEffectivePackageSize } from '../../../utils/units';
+import { getSellUnit, formatStockDisplay, formatProductSize, formatPackagingDescription } from '../../../utils/units';
 import { useLanguage } from '../../../contexts/LanguageContext';
 
 interface ProductSelectorProps {
@@ -80,22 +80,31 @@ export const ProductSelector: React.FC<ProductSelectorProps> = ({
                                     <div className="text-sm font-bold text-white group-hover:text-[#A9CBA2] transition-colors">
                                         {product.name}
                                     </div>
-                                    <div className="text-[10px] text-gray-500 font-mono">
-                                        {product.sku}
+                                    <div className="flex items-center gap-2 mt-0.5">
+                                        <span className="text-[10px] text-gray-500 font-mono">
+                                            {product.sku}
+                                        </span>
+                                        {formatProductSize(product) && (
+                                            <span className="text-[9px] font-mono text-emerald-400 bg-emerald-500/10 px-1.5 py-0.2 rounded border border-emerald-500/20">
+                                                {formatProductSize(product)}
+                                            </span>
+                                        )}
                                     </div>
                                 </div>
                             </div>
                             <div className="text-right">
                                 <div className="text-[10px] text-gray-500 uppercase font-bold">Stock</div>
                                 {(() => {
-                                    const unitDef = getSellUnit(product.unit || '');
-                                    const sizeNum = getEffectivePackageSize(product.unit, product.size);
-                                    const isWeightVol = (unitDef.category === 'weight' || unitDef.category === 'volume') && sizeNum > 0 && product.size;
                                     const displayStock = product.stock || 0;
-                                    const unitLabel = isWeightVol ? ` packs (${product.size}${unitDef.shortLabel})` : unitDef.code !== 'UNIT' ? ` ${unitDef.shortLabel}` : '';
+                                    const packDesc = formatPackagingDescription(product, displayStock);
                                     return (
                                         <div className={`text-xs font-mono font-bold ${displayStock > 0 ? 'text-green-400' : 'text-red-400'}`}>
-                                            {displayStock.toLocaleString()}{unitLabel}
+                                            <div>{formatStockDisplay(displayStock, product)}</div>
+                                            {packDesc && (
+                                                <div className="text-[9px] text-gray-400 font-sans font-medium">
+                                                    {packDesc}
+                                                </div>
+                                            )}
                                         </div>
                                     );
                                 })()}

@@ -68,7 +68,7 @@ export default function GamificationTab({
         <div className="space-y-6 animate-in fade-in">
             {/* Header Stats Card */}
             <div className={`p-6 rounded-3xl border relative overflow-hidden ${isWarehouse
-                ? 'bg-gradient-to-r from-cyber-primary/20 to-green-500/10 border-cyber-primary/20'
+                ? 'bg-gradient-to-r from-emerald-500/20 to-[#2C5E3B]/10 border-emerald-500/20'
                 : 'bg-gradient-to-r from-blue-500/20 to-purple-500/10 border-blue-500/20'
                 }`}>
                 <div className="flex flex-col md:flex-row items-center justify-between gap-6 relative z-10">
@@ -111,9 +111,9 @@ export default function GamificationTab({
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 {isWarehouse && empPoints ? (
                     <>
-                        <div className="bg-gray-50 dark:bg-black/30 p-5 rounded-2xl border border-gray-100 dark:border-white/5 text-center group hover:border-cyber-primary/30 transition-all">
-                            <div className="w-10 h-10 rounded-xl bg-cyber-primary/10 flex items-center justify-center mx-auto mb-3">
-                                <Trophy className="text-cyber-primary" size={20} />
+                        <div className="bg-gray-50 dark:bg-black/30 p-5 rounded-2xl border border-gray-100 dark:border-white/5 text-center group hover:border-emerald-500/30 transition-all">
+                            <div className="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center mx-auto mb-3">
+                                <Trophy className="text-emerald-600 dark:text-emerald-400" size={20} />
                             </div>
                             <p className="text-2xl font-black text-gray-900 dark:text-white">{empPoints.totalPoints.toLocaleString()}</p>
                             <p className="text-[10px] text-gray-500 dark:text-gray-400 uppercase font-black tracking-widest mt-1">Lifetime</p>
@@ -210,7 +210,7 @@ export default function GamificationTab({
                 {/* Point History Log (Simulation) */}
                 <div className="bg-gray-50 dark:bg-black/30 p-6 rounded-3xl border border-gray-100 dark:border-white/5">
                     <h4 className="text-sm font-black text-gray-900 dark:text-white uppercase tracking-widest mb-6 flex items-center gap-2">
-                        <TrendingUp size={18} className="text-cyber-primary" /> Recent Activity
+                        <TrendingUp size={18} className="text-[#2C5E3B] dark:text-[#A9CBA2]" /> Recent Activity
                     </h4>
                     <div className="space-y-3">
                         {[

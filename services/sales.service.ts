@@ -10,7 +10,10 @@ export const salesService = {
             .from('sales')
             .select('*, sale_items(*, products(category)), customers!left(*)', { count: 'exact' });
 
-        if (siteId) {
+        if (filters?.siteIds && Array.isArray(filters.siteIds)) {
+            if (filters.siteIds.length === 0) return { data: [], count: 0 };
+            query = query.in('site_id', filters.siteIds);
+        } else if (siteId) {
             query = query.eq('site_id', siteId);
         }
 

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Plus, Minus } from 'lucide-react';
+import { Plus, Minus, Shield } from 'lucide-react';
 import Modal from '../../Modal';
 import Button from '../../shared/Button';
 import { Product } from '../../../types';
@@ -16,6 +16,7 @@ interface AdjustStockModalProps {
     setAdjustReason: (reason: string) => void;
     onConfirm: () => void;
     isSubmitting: boolean;
+    canApprove?: boolean;
 }
 
 export const AdjustStockModal: React.FC<AdjustStockModalProps> = ({
@@ -29,13 +30,20 @@ export const AdjustStockModal: React.FC<AdjustStockModalProps> = ({
     adjustReason,
     setAdjustReason,
     onConfirm,
-    isSubmitting
+    isSubmitting,
+    canApprove = true
 }) => {
     if (!product) return null;
 
     return (
         <Modal isOpen={isOpen} onClose={onClose} title="Adjust Stock Level" size="md">
             <div className="space-y-6">
+                {!canApprove && (
+                    <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center gap-2 text-amber-700 dark:text-amber-400 text-xs font-bold">
+                        <Shield size={14} className="shrink-0" />
+                        <span>Central HQ Approval Required. Your adjustment request will route to HQ before inventory is modified.</span>
+                    </div>
+                )}
                 <div className="p-4 bg-gray-50 dark:bg-white/5 rounded-xl border border-gray-100 dark:border-white/10 flex items-center gap-4">
                     <div className="w-16 h-16 rounded-lg bg-gray-200 dark:bg-black/20 overflow-hidden">
                         {product.image && <img src={product.image} alt="" className="w-full h-full object-cover" />}
@@ -100,7 +108,7 @@ export const AdjustStockModal: React.FC<AdjustStockModalProps> = ({
                         disabled={!adjustQty || parseFloat(adjustQty) <= 0 || isSubmitting} 
                         loading={isSubmitting}
                     >
-                        Confirm Adjustment
+                        {canApprove ? 'Confirm Adjustment' : 'Submit for HQ Approval'}
                     </Button>
                 </div>
             </div>

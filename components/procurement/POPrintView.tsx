@@ -1,33 +1,47 @@
 import React from 'react';
-import { PurchaseOrder } from '../../types';
-import { CURRENCY_SYMBOL } from '../../constants';
+import { PurchaseOrder, SystemConfig } from '../../types';
+import { getCountryProfile } from '../../utils/localization';
 import { formatCompactNumber, formatDateTime } from '../../utils/formatting';
 import { formatPONumber } from '../../utils/jobIdFormatter';
-import { formatPOItemDescription } from './utils';
+import { formatPOItemDescription, getPOItemPackagingSummary } from './utils';
 
 interface POPrintViewProps {
     po: PurchaseOrder;
     sites: any[];
     user: any;
     allProducts: any[];
+    settings?: Partial<SystemConfig>;
 }
 
-export function generatePOHTML(po: PurchaseOrder, sites: any[], user: any, allProducts: any[]): string {
-    const siteName = sites?.find(s => s.id === po.siteId)?.name || po.destination || 'SIIFMART Main HQ';
+export function generatePOHTML(po: PurchaseOrder, sites: any[], user: any, allProducts: any[], settings?: Partial<SystemConfig>): string {
+    const site = sites?.find(s => s.id === po.siteId);
+    const currencySymbol = po.currency || site?.currency || (site?.country === 'KE' ? 'KSh' : getCountryProfile(settings?.country || 'ET').currencySymbol);
+    const siteName = site?.name || po.destination || 'SIIFMART Main HQ';
     const poDate = po.date || (po.created_at ? formatDateTime(po.created_at, { showTime: false }) : 'N/A');
     const subtotal = po.totalAmount - ((po.taxAmount || 0) + (po.shippingCost || 0));
 
     const itemsRows = (po.lineItems || []).map((item, i) => {
         const sku = item.sku || allProducts?.find(p => p.id === item.productId)?.sku || allProducts?.find(p => p.name === item.productName)?.sku || '—';
         const desc = formatPOItemDescription(item);
+        const pkg = getPOItemPackagingSummary(item, allProducts);
         return `
             <tr style="border-bottom: 1px solid #e5e7eb; page-break-inside: avoid;">
                 <td style="padding: 8px 6px; color: #4b5563; font-size: 11px;">${i + 1}</td>
                 <td style="padding: 8px 6px; font-family: monospace; color: #374151; font-size: 11px; font-weight: bold;">${sku}</td>
                 <td style="padding: 8px 6px; font-weight: 600; color: #111827; font-size: 11px;">${desc}</td>
-                <td style="padding: 8px 6px; text-align: center; font-weight: 700; color: #111827; font-size: 11px;">${item.quantity}</td>
-                <td style="padding: 8px 6px; text-align: right; color: #374151; font-size: 11px;">${formatCompactNumber(item.unitCost, { currency: CURRENCY_SYMBOL })}</td>
-                <td style="padding: 8px 6px; text-align: right; font-weight: 700; color: #111827; font-size: 11px;">${formatCompactNumber(item.totalCost, { currency: CURRENCY_SYMBOL })}</td>
+                <td style="padding: 8px 6px; font-size: 10px; color: #4b5563;">
+                    <div style="font-weight: 600; color: #111827;">${pkg.packBadge || pkg.manifestUnitName}</div>
+                    <div style="font-size: 9px; color: #6b7280;">${pkg.packDetail}</div>
+                </td>
+                <td style="padding: 8px 6px; text-align: center; font-weight: 700; color: #111827; font-size: 11px;">
+                    <div>${pkg.sellableQty.toLocaleString()} <span style="font-size: 9px; color: #6b7280; font-weight: normal;">${pkg.sellUnitLabel}</span></div>
+                    ${pkg.hasMultiplier ? `<div style="font-size: 9px; color: #8c6239; font-weight: normal;">(${item.quantity} ${pkg.manifestUnitName.toLowerCase()})</div>` : ''}
+                </td>
+                <td style="padding: 8px 6px; text-align: right; color: #374151; font-size: 11px;">
+                    <div>${formatCompactNumber(item.unitCost, { currency: currencySymbol })}</div>
+                    ${pkg.hasMultiplier ? `<div style="font-size: 9px; color: #6b7280;">~${formatCompactNumber(pkg.costPerSellableUnit, { currency: currencySymbol })}/${pkg.sellUnitLabel}</div>` : ''}
+                </td>
+                <td style="padding: 8px 6px; text-align: right; font-weight: 700; color: #111827; font-size: 11px;">${formatCompactNumber(item.totalCost, { currency: currencySymbol })}</td>
             </tr>
         `;
     }).join('');
@@ -64,9 +78,14 @@ export function generatePOHTML(po: PurchaseOrder, sites: any[], user: any, allPr
 </head>
 <body>
     <div class="header">
-        <div>
-            <h1 class="brand">SIIFMART HQ</h1>
-            <div class="subbrand">Supply Chain & Procurement</div>
+        <div style="display: flex; align-items: center; gap: 12px;">
+            ${(settings?.logoUrl || settings?.posReceiptLogo) ? `
+                <img src="${settings.logoUrl || settings.posReceiptLogo}" alt="Logo" style="max-height: 48px; max-width: 120px; object-fit: contain;" />
+            ` : ''}
+            <div>
+                <h1 class="brand">${settings?.storeName ? `${settings.storeName} HQ` : 'SIIFMART HQ'}</h1>
+                <div class="subbrand">${settings?.slogan || settings?.legalBusinessName || 'Supply Chain & Procurement'}</div>
+            </div>
         </div>
         <div>
             <div class="po-title">Purchase Order</div>
@@ -99,15 +118,16 @@ export function generatePOHTML(po: PurchaseOrder, sites: any[], user: any, allPr
         <thead>
             <tr>
                 <th style="width: 30px;">Item</th>
-                <th style="width: 90px;">SKU</th>
+                <th style="width: 80px;">SKU</th>
                 <th>Description</th>
-                <th style="width: 50px; text-align: center;">Qty</th>
-                <th style="width: 100px; text-align: right;">Unit Price</th>
-                <th style="width: 110px; text-align: right;">Total</th>
+                <th style="width: 110px;">Packaging</th>
+                <th style="width: 85px; text-align: center;">Qty (Sellable)</th>
+                <th style="width: 90px; text-align: right;">Unit Price</th>
+                <th style="width: 100px; text-align: right;">Total</th>
             </tr>
         </thead>
         <tbody>
-            ${itemsRows || '<tr><td colspan="6" style="padding: 16px; text-align: center; color: #6b7280; font-style: italic;">No items in this order</td></tr>'}
+            ${itemsRows || '<tr><td colspan="7" style="padding: 16px; text-align: center; color: #6b7280; font-style: italic;">No items in this order</td></tr>'}
         </tbody>
     </table>
 
@@ -122,21 +142,21 @@ export function generatePOHTML(po: PurchaseOrder, sites: any[], user: any, allPr
             <table class="totals-table">
                 <tr>
                     <td style="color: #6b7280; font-size: 10px; text-transform: uppercase; font-weight: 700;">Subtotal</td>
-                    <td style="text-align: right; font-weight: 600;">${CURRENCY_SYMBOL} ${subtotal.toLocaleString()}</td>
+                    <td style="text-align: right; font-weight: 600;">${currencySymbol} ${subtotal.toLocaleString()}</td>
                 </tr>
                 ${po.shippingCost && po.shippingCost > 0 ? `
                 <tr>
                     <td style="color: #6b7280; font-size: 10px; text-transform: uppercase; font-weight: 700;">Shipping</td>
-                    <td style="text-align: right; font-weight: 600;">${CURRENCY_SYMBOL} ${po.shippingCost.toLocaleString()}</td>
+                    <td style="text-align: right; font-weight: 600;">${currencySymbol} ${po.shippingCost.toLocaleString()}</td>
                 </tr>` : ''}
                 ${po.taxAmount && po.taxAmount > 0 ? `
                 <tr>
                     <td style="color: #6b7280; font-size: 10px; text-transform: uppercase; font-weight: 700;">Tax</td>
-                    <td style="text-align: right; font-weight: 600;">${CURRENCY_SYMBOL} ${po.taxAmount.toLocaleString()}</td>
+                    <td style="text-align: right; font-weight: 600;">${currencySymbol} ${po.taxAmount.toLocaleString()}</td>
                 </tr>` : ''}
                 <tr class="total-row">
                     <td style="text-transform: uppercase; padding-top: 8px;">Total</td>
-                    <td style="text-align: right; padding-top: 8px;">${CURRENCY_SYMBOL} ${po.totalAmount.toLocaleString()}</td>
+                    <td style="text-align: right; padding-top: 8px;">${currencySymbol} ${po.totalAmount.toLocaleString()}</td>
                 </tr>
             </table>
         </div>
@@ -149,14 +169,30 @@ export function generatePOHTML(po: PurchaseOrder, sites: any[], user: any, allPr
 </html>`;
 }
 
-export const POPrintView: React.FC<POPrintViewProps> = ({ po, sites, user, allProducts }) => {
+export const POPrintView: React.FC<POPrintViewProps> = ({ po, sites, user, allProducts, settings }) => {
+    const site = sites?.find(s => s.id === po.siteId);
+    const currencySymbol = po.currency || site?.currency || (site?.country === 'KE' ? 'KSh' : getCountryProfile(settings?.country || 'ET').currencySymbol);
+
     return (
         <div className="hidden print:block fixed inset-0 bg-white text-black font-sans z-[9999] p-8 min-h-screen break-inside-avoid w-full">
             {/* Header */}
             <div className="flex justify-between items-start border-b-2 border-black pb-4 mb-4">
-                <div>
-                    <h1 className="text-3xl font-bold tracking-tight text-black mb-1 leading-none">SIIFMART HQ</h1>
-                    <p className="text-gray-600 font-medium text-sm">Supply Chain & Procurement</p>
+                <div className="flex items-center gap-3">
+                    {(settings?.logoUrl || settings?.posReceiptLogo) && (
+                        <img 
+                            src={settings.logoUrl || settings.posReceiptLogo} 
+                            alt="Logo" 
+                            className="max-h-12 max-w-[120px] object-contain" 
+                        />
+                    )}
+                    <div>
+                        <h1 className="text-3xl font-bold tracking-tight text-black mb-1 leading-none">
+                            {settings?.storeName ? `${settings.storeName} HQ` : 'SIIFMART HQ'}
+                        </h1>
+                        <p className="text-gray-600 font-medium text-sm">
+                            {settings?.slogan || settings?.legalBusinessName || 'Supply Chain & Procurement'}
+                        </p>
+                    </div>
                 </div>
                 <div className="text-right">
                     <h2 className="text-2xl font-bold uppercase tracking-widest text-gray-800 mb-1 leading-none">Purchase Order</h2>
@@ -191,28 +227,46 @@ export const POPrintView: React.FC<POPrintViewProps> = ({ po, sites, user, allPr
             <table className="w-full mb-6 border-collapse">
                 <thead>
                     <tr className="border-y border-black text-xs">
-                        <th className="text-left py-2 px-1 font-bold text-black w-10">Item</th>
+                        <th className="text-left py-2 px-1 font-bold text-black w-8">Item</th>
                         <th className="text-left py-2 px-1 font-bold text-black w-24">SKU</th>
                         <th className="text-left py-2 px-1 font-bold text-black">Description</th>
-                        <th className="text-center py-2 px-1 font-bold text-black w-16">Qty</th>
+                        <th className="text-left py-2 px-1 font-bold text-black w-28">Packaging</th>
+                        <th className="text-center py-2 px-1 font-bold text-black w-20">Qty (Sellable)</th>
                         <th className="text-right py-2 px-1 font-bold text-black w-24">Unit Price</th>
                         <th className="text-right py-2 px-1 font-bold text-black w-28">Total</th>
                     </tr>
                 </thead>
                 <tbody className="text-xs">
-                    {po.lineItems?.map((item, i) => (
-                        <tr key={i} className="border-b border-gray-200 break-inside-avoid">
-                            <td className="py-2 px-1 text-gray-600">{i + 1}</td>
-                            <td className="py-2 px-1 font-mono text-gray-600">{item.sku || allProducts?.find(p => p.id === item.productId)?.sku || allProducts?.find(p => p.name === item.productName)?.sku || '—'}</td>
-                            <td className="py-2 px-1 font-semibold text-black">{formatPOItemDescription(item)}</td>
-                            <td className="py-2 px-1 text-center font-bold text-black">{item.quantity}</td>
-                            <td className="py-2 px-1 text-right text-gray-800">{formatCompactNumber(item.unitCost, { currency: CURRENCY_SYMBOL })}</td>
-                            <td className="py-2 px-1 text-right font-bold text-black">{formatCompactNumber(item.totalCost, { currency: CURRENCY_SYMBOL })}</td>
-                        </tr>
-                    ))}
+                    {po.lineItems?.map((item, i) => {
+                        const pkg = getPOItemPackagingSummary(item, allProducts);
+                        return (
+                            <tr key={i} className="border-b border-gray-200 break-inside-avoid">
+                                <td className="py-2 px-1 text-gray-600">{i + 1}</td>
+                                <td className="py-2 px-1 font-mono text-gray-600">{item.sku || allProducts?.find(p => p.id === item.productId)?.sku || allProducts?.find(p => p.name === item.productName)?.sku || '—'}</td>
+                                <td className="py-2 px-1 font-semibold text-black">{formatPOItemDescription(item)}</td>
+                                <td className="py-2 px-1 text-gray-700">
+                                    <div className="font-bold text-[11px] text-black">{pkg.packBadge || pkg.manifestUnitName}</div>
+                                    <div className="text-[10px] text-gray-500">{pkg.packDetail}</div>
+                                </td>
+                                <td className="py-2 px-1 text-center font-bold text-black">
+                                    <div>{pkg.sellableQty.toLocaleString()} <span className="text-[10px] font-normal text-gray-600">{pkg.sellUnitLabel}</span></div>
+                                    {pkg.hasMultiplier && (
+                                        <div className="text-[9px] font-normal text-[#8C6239]">({item.quantity} {pkg.manifestUnitName.toLowerCase()})</div>
+                                    )}
+                                </td>
+                                <td className="py-2 px-1 text-right text-gray-800">
+                                    <div>{formatCompactNumber(item.unitCost, { currency: currencySymbol })}</div>
+                                    {pkg.hasMultiplier && (
+                                        <div className="text-[9px] text-gray-500 font-mono">~{formatCompactNumber(pkg.costPerSellableUnit, { currency: currencySymbol })}/{pkg.sellUnitLabel}</div>
+                                    )}
+                                </td>
+                                <td className="py-2 px-1 text-right font-bold text-black">{formatCompactNumber(item.totalCost, { currency: currencySymbol })}</td>
+                            </tr>
+                        );
+                    })}
                     {(!po.lineItems || po.lineItems.length === 0) && (
                         <tr>
-                            <td colSpan={6} className="py-4 text-center text-gray-500 italic">No items in this order</td>
+                            <td colSpan={7} className="py-4 text-center text-gray-500 italic">No items in this order</td>
                         </tr>
                     )}
                 </tbody>
@@ -233,23 +287,23 @@ export const POPrintView: React.FC<POPrintViewProps> = ({ po, sites, user, allPr
                         <tbody>
                             <tr className="border-b border-gray-100">
                                 <td className="py-1.5 text-gray-500 font-bold uppercase text-[10px] tracking-wider">Subtotal</td>
-                                <td className="py-1.5 text-right font-semibold text-gray-800">{CURRENCY_SYMBOL} {(po.totalAmount - (po.taxAmount || 0)).toLocaleString()}</td>
+                                <td className="py-1.5 text-right font-semibold text-gray-800">{currencySymbol} {(po.totalAmount - (po.taxAmount || 0)).toLocaleString()}</td>
                             </tr>
                             {po.shippingCost && po.shippingCost > 0 ? (
                                 <tr className="border-b border-gray-100">
                                     <td className="py-1.5 text-gray-500 font-bold uppercase text-[10px] tracking-wider">Shipping</td>
-                                    <td className="py-1.5 text-right font-semibold text-gray-800">{CURRENCY_SYMBOL} {po.shippingCost.toLocaleString()}</td>
+                                    <td className="py-1.5 text-right font-semibold text-gray-800">{currencySymbol} {po.shippingCost.toLocaleString()}</td>
                                 </tr>
                             ) : null}
                             {po.taxAmount && po.taxAmount > 0 ? (
                                 <tr className="border-b border-gray-100">
                                     <td className="py-1.5 text-gray-500 font-bold uppercase text-[10px] tracking-wider">Tax</td>
-                                    <td className="py-1.5 text-right font-semibold text-gray-800">{CURRENCY_SYMBOL} {po.taxAmount.toLocaleString()}</td>
+                                    <td className="py-1.5 text-right font-semibold text-gray-800">{currencySymbol} {po.taxAmount.toLocaleString()}</td>
                                 </tr>
                             ) : null}
                             <tr className="border-t border-black">
                                 <td className="py-3 font-bold uppercase text-xs tracking-wider text-black">Total</td>
-                                <td className="py-3 text-right font-bold text-xl text-black">{CURRENCY_SYMBOL} {po.totalAmount.toLocaleString()}</td>
+                                <td className="py-3 text-right font-bold text-xl text-black">{currencySymbol} {po.totalAmount.toLocaleString()}</td>
                             </tr>
                         </tbody>
                     </table>

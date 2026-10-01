@@ -1,14 +1,14 @@
 import React from 'react';
 import { Package } from 'lucide-react';
 import { Product } from '../../../types';
-import { CURRENCY_SYMBOL } from '../../../constants';
 import { getSellUnit } from '../../../utils/units';
 
 interface Props {
     product: Product;
+    currencySymbol?: string;
 }
 
-export const ProfileTab: React.FC<Props> = ({ product }) => {
+export const ProfileTab: React.FC<Props> = ({ product, currencySymbol = 'ETB' }) => {
     const unitDef = getSellUnit(product.unit);
     return (
         <div className="space-y-4">
@@ -35,7 +35,7 @@ export const ProfileTab: React.FC<Props> = ({ product }) => {
                 </div>
                 <div className="p-3 bg-stone-50 dark:bg-black/20 rounded-xl border border-stone-200 dark:border-white/5">
                     <p className="text-[9px] text-stone-400 font-bold uppercase">Retail Price</p>
-                    <p className="text-sm font-black font-mono text-gray-900 dark:text-white mt-0.5">{CURRENCY_SYMBOL}{product.price}</p>
+                    <p className="text-sm font-black font-mono text-gray-900 dark:text-white mt-0.5">{currencySymbol} {product.price}</p>
                 </div>
             </div>
 

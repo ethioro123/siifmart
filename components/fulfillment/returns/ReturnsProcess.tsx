@@ -4,6 +4,7 @@ import { formatDateTime, formatCompactNumber } from '../../../utils/formatting';
 import { CURRENCY_SYMBOL } from '../../../constants';
 import { Product, User } from '../../../types';
 import Pagination from '../../shared/Pagination';
+import { useCreateInventoryRequestMutation } from '../../../hooks/useInventoryRequestMutations';
 
 interface ReturnsProcessProps {
     sales: any[];
@@ -17,7 +18,7 @@ interface ReturnsProcessProps {
     setReturnItems: (items: any[]) => void;
     processReturn: (saleId: string, returnItems: any[], totalRefund: number, processedBy: string) => void;
     addNotification: (type: 'success' | 'alert' | 'info', message: string, duration?: number) => void;
-    inventoryRequestsService: any;
+    inventoryRequestsService?: any;
 }
 
 const RETURN_ITEMS_PER_PAGE = 5;
@@ -34,8 +35,8 @@ export const ReturnsProcess: React.FC<ReturnsProcessProps> = ({
     setReturnItems,
     processReturn,
     addNotification,
-    inventoryRequestsService
 }) => {
+    const createRequestMutation = useCreateInventoryRequestMutation();
     const [returnSearch, setReturnSearch] = useState('');
     const [returnItemsPage, setReturnItemsPage] = useState(1);
 
@@ -347,7 +348,7 @@ export const ReturnsProcess: React.FC<ReturnsProcessProps> = ({
                                                         adjustmentQty: item.quantity,
                                                         adjustmentReason: `RMA Restock: ${foundSale.id}`
                                                     };
-                                                    await inventoryRequestsService.create(request);
+                                                    await createRequestMutation.mutateAsync(request);
                                                 }
                                             }
 

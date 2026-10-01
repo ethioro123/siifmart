@@ -2,18 +2,37 @@ import React, { useState } from 'react';
 import {
   Tag, Plus, Trash2, Edit2, CheckCircle, XCircle,
   Calendar, Copy, Eye, EyeOff, AlertTriangle, Percent, DollarSign,
-  Store, Loader2
+  Lock, Loader2
 } from 'lucide-react';
 import { useData } from '../../contexts/DataContext';
 import { useStore } from '../../contexts/CentralStore';
-import { DiscountCode } from '../../types';
-import { CURRENCY_SYMBOL } from '../../constants';
+import { DiscountCode, Site } from '../../types';
 import { DiscountCodeFormModal } from './components/DiscountCodeFormModal';
 import { formatCompactNumber, formatDateTime } from '../../utils/formatting';
+import { Country, getCountryProfile } from '../../utils/localization';
+import { canSwitchCountry } from '../../utils/permissions';
+import { useDiscountCodeMutations } from '../../hooks/useDiscountCodeMutations';
+import type { DiscountCodeInput } from '../../schemas/discount-code.schema';
+
+function getSiteCountry(s: Site): string {
+  if (s.country) return s.country;
+  if (s.currency === 'KES' || s.currency === 'KSh') return 'KE';
+  if (s.currency === 'UGX' || s.currency === 'USh') return 'UG';
+  if (s.currency === 'RWF') return 'RW';
+  if (s.currency === 'TZS' || s.currency === 'TSh') return 'TZ';
+  return 'ET';
+}
 
 const DiscountCodesSettings: React.FC = () => {
   const { user, showToast } = useStore();
-  const { discountCodes, addDiscountCode, updateDiscountCode, deleteDiscountCode, sites, addNotification } = useData();
+  const { discountCodes, addDiscountCode, updateDiscountCode, deleteDiscountCode, sites, effectiveCountry } = useData();
+
+  const activeCountry = (effectiveCountry || 'ET') as Country;
+  const profile = getCountryProfile(activeCountry);
+  const currentCurrency = profile.currencySymbol;
+
+  const isHQAdmin = ['super_admin', 'CEO', 'finance_manager', 'operations_manager'].includes(user?.role || '') || canSwitchCountry(user);
+  const { createMutation, updateMutation, deleteMutation, isPending } = useDiscountCodeMutations(activeCountry);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingCode, setEditingCode] = useState<DiscountCode | null>(null);
@@ -55,11 +74,19 @@ const DiscountCodesSettings: React.FC = () => {
   };
 
   const handleOpenCreate = () => {
+    if (!isHQAdmin) {
+      showToast('Permission denied: Only corporate HQ managers can create discount codes.', 'error');
+      return;
+    }
     resetForm();
     setIsModalOpen(true);
   };
 
   const handleOpenEdit = (code: DiscountCode) => {
+    if (!isHQAdmin) {
+      showToast('Permission denied: Only corporate HQ managers can edit discount codes.', 'error');
+      return;
+    }
     setEditingCode(code);
     setFormData({
       code: code.code,
@@ -78,18 +105,26 @@ const DiscountCodesSettings: React.FC = () => {
     setIsModalOpen(true);
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
+    if (!isHQAdmin) {
+      showToast('Permission denied: Only corporate HQ managers can create or modify discount codes.', 'error');
+      return;
+    }
+
     if (!formData.code.trim() || !formData.name.trim() || !formData.value) {
       showToast('Please fill in all required fields', 'error');
       return;
     }
 
-    const codeData: DiscountCode = {
-      id: editingCode?.id || `DC-${Date.now()}`,
+    const payload: DiscountCodeInput = {
+      id: editingCode?.id,
       code: formData.code.toUpperCase().trim(),
       name: formData.name.trim(),
       type: formData.type,
       value: parseFloat(formData.value),
+      country: activeCountry,
+      country_code: activeCountry,
+      currency: currentCurrency,
       minPurchaseAmount: formData.minPurchaseAmount ? parseFloat(formData.minPurchaseAmount) : undefined,
       maxDiscountAmount: formData.maxDiscountAmount ? parseFloat(formData.maxDiscountAmount) : undefined,
       validFrom: formData.validFrom,
@@ -98,27 +133,37 @@ const DiscountCodesSettings: React.FC = () => {
       usageCount: editingCode?.usageCount || 0,
       status: formData.status,
       applicableSites: formData.applicableSites.length > 0 ? formData.applicableSites : undefined,
-      createdBy: editingCode?.createdBy || user?.name || 'Unknown',
-      createdAt: editingCode?.createdAt || new Date().toISOString(),
-      description: formData.description.trim() || undefined
+      description: formData.description.trim() || undefined,
+      createdBy: editingCode?.createdBy || user?.name || 'HQ Admin',
     };
 
-    if (editingCode) {
-      updateDiscountCode(codeData);
-      showToast('Discount code updated', 'success');
-    } else {
-      addDiscountCode(codeData);
-      showToast('Discount code created', 'success');
+    try {
+      if (editingCode) {
+        await updateMutation.mutateAsync({ id: editingCode.id, input: payload });
+        updateDiscountCode({ ...payload, id: editingCode.id } as DiscountCode);
+      } else {
+        await createMutation.mutateAsync(payload);
+        addDiscountCode({ ...payload, id: `DC-${Date.now()}` } as DiscountCode);
+      }
+      setIsModalOpen(false);
+      resetForm();
+    } catch {
+      // Errors handled via mutation onError
     }
-
-    setIsModalOpen(false);
-    resetForm();
   };
 
-  const handleDelete = (id: string) => {
-    deleteDiscountCode(id);
-    setDeleteConfirm(null);
-    showToast('Discount code deleted', 'success');
+  const handleDelete = async (id: string) => {
+    if (!isHQAdmin) {
+      showToast('Permission denied: Only corporate HQ managers can delete discount codes.', 'error');
+      return;
+    }
+    try {
+      await deleteMutation.mutateAsync(id);
+      deleteDiscountCode(id);
+      setDeleteConfirm(null);
+    } catch {
+      // Errors handled via mutation onError
+    }
   };
 
   const handleCopyCode = (code: string) => {
@@ -143,7 +188,6 @@ const DiscountCodesSettings: React.FC = () => {
   const isExpired = (validUntil: string) => new Date(validUntil) < new Date();
   const isScheduled = (validFrom: string) => new Date(validFrom) > new Date();
 
-  // Auto-determine status based on dates
   const getEffectiveStatus = (code: DiscountCode): DiscountCode['status'] => {
     if (code.status === 'Disabled') return 'Disabled';
     if (isExpired(code.validUntil)) return 'Expired';
@@ -151,7 +195,8 @@ const DiscountCodesSettings: React.FC = () => {
     return 'Active';
   };
 
-  const activeStore = sites.filter(s => s.type === 'Store');
+  // Strictly filter store assignment candidates to the active country
+  const activeStore = sites.filter(s => s.type === 'Store' && (getSiteCountry(s) === activeCountry));
 
   return (
     <div className="space-y-6">
@@ -168,22 +213,30 @@ const DiscountCodesSettings: React.FC = () => {
             Manage authorized promotional codes for POS checkouts and marketing campaigns.
           </p>
         </div>
-        <button
-          onClick={handleOpenCreate}
-          className="bg-[#2C5E3B] hover:opacity-90 text-white px-5 py-2.5 rounded-2xl font-bold text-xs uppercase tracking-wider flex items-center gap-2 shadow-md cursor-pointer transition-all active:scale-95"
-        >
-          <Plus size={16} />
-          Create Code
-        </button>
+        {isHQAdmin ? (
+          <button
+            onClick={handleOpenCreate}
+            disabled={isPending}
+            className="bg-[#2C5E3B] hover:opacity-90 text-white px-5 py-2.5 rounded-2xl font-bold text-xs uppercase tracking-wider flex items-center gap-2 shadow-md cursor-pointer transition-all active:scale-95 disabled:opacity-50"
+          >
+            {isPending ? <Loader2 size={16} className="animate-spin" /> : <Plus size={16} />}
+            Create Code
+          </button>
+        ) : (
+          <div className="flex items-center gap-2 px-3 py-1.5 bg-stone-100 dark:bg-white/5 border border-stone-200 dark:border-white/10 rounded-xl text-xs text-stone-500 font-bold">
+            <Lock size={13} />
+            <span>HQ Managed</span>
+          </div>
+        )}
       </div>
 
       {/* Info Banner */}
       <div className="bg-emerald-50 dark:bg-[#2C5E3B]/20 border border-emerald-200 dark:border-emerald-950/30 rounded-2xl p-4 flex items-start gap-3">
         <AlertTriangle className="w-5 h-5 text-[#2C5E3B] dark:text-[#A9CBA2] mt-0.5 shrink-0" />
         <div className="text-xs text-[#1E3F27] dark:text-stone-200 leading-relaxed">
-          <strong className="font-bold">How it works:</strong> Create authorized codes here, then share them with customers.
-          Cashiers must enter a valid code at the checkout screen to apply any promotional discount.
-          Free-form ad-hoc discounts are strictly blocked to prevent unauthorized cashier price reductions.
+          <strong className="font-bold">Zero-Trust Guard:</strong> Create authorized codes here for marketing campaigns.
+          Cashiers must enter a valid code at the checkout screen to apply promotional discounts.
+          Free-form ad-hoc discounts are strictly blocked to eliminate unauthorized register price reductions.
         </div>
       </div>
 
@@ -227,13 +280,14 @@ const DiscountCodesSettings: React.FC = () => {
         {discountCodes.length === 0 ? (
           <div className="p-12 text-center">
             <Tag className="w-10 h-10 mx-auto text-stone-400 dark:text-gray-600 mb-3" />
-            <p className="text-stone-600 dark:text-gray-400 font-bold mb-1">No discount codes yet</p>
-            <p className="text-stone-400 dark:text-gray-500 text-xs">Create your first discount code to get started</p>
+            <p className="text-stone-600 dark:text-gray-400 font-bold mb-1">No discount codes for this market</p>
+            <p className="text-stone-400 dark:text-gray-500 text-xs">Create your first national discount code to get started</p>
           </div>
         ) : (
           <div className="divide-y divide-[#E2DCCE]/40 dark:divide-white/5">
             {discountCodes.map((code) => {
               const effectiveStatus = getEffectiveStatus(code);
+              const codeCurrency = code.currency || currentCurrency;
               return (
                 <div key={code.id} className="grid grid-cols-12 gap-4 p-4 items-center hover:bg-[#2C5E3B]/[0.02] transition-colors">
                   {/* Code */}
@@ -270,12 +324,12 @@ const DiscountCodesSettings: React.FC = () => {
                         <DollarSign className="w-3.5 h-3.5 text-[#2C5E3B] dark:text-[#A9CBA2]" />
                       )}
                       <span className="font-bold text-xs text-[#1E3F27] dark:text-white">
-                        {code.type === 'PERCENTAGE' ? `${code.value}%` : formatCompactNumber(code.value, { currency: CURRENCY_SYMBOL })}
+                        {code.type === 'PERCENTAGE' ? `${code.value}%` : formatCompactNumber(code.value, { currency: codeCurrency })}
                       </span>
                     </div>
                     {code.minPurchaseAmount && (
                       <p className="text-[10px] text-stone-400 dark:text-gray-500 mt-0.5 font-medium">
-                        Min: {formatCompactNumber(code.minPurchaseAmount, { currency: CURRENCY_SYMBOL })}
+                        Min: {formatCompactNumber(code.minPurchaseAmount, { currency: codeCurrency })}
                       </p>
                     )}
                   </div>
@@ -312,36 +366,45 @@ const DiscountCodesSettings: React.FC = () => {
 
                   {/* Actions */}
                   <div className="col-span-1 flex items-center justify-end gap-1">
-                    <button
-                      onClick={() => handleOpenEdit(code)}
-                      className="p-1.5 text-stone-400 hover:text-[#1E3F27] dark:hover:text-white hover:bg-stone-100 dark:hover:bg-white/10 rounded-xl transition-colors cursor-pointer"
-                      title="Edit Discount Code"
-                    >
-                      <Edit2 size={14} />
-                    </button>
-                    {deleteConfirm === code.id ? (
-                      <div className="flex items-center gap-1">
+                    {isHQAdmin ? (
+                      <>
                         <button
-                          onClick={() => handleDelete(code.id)}
-                          className="px-2 py-0.5 bg-red-600 text-white text-[10px] rounded-lg font-bold cursor-pointer"
+                          onClick={() => handleOpenEdit(code)}
+                          disabled={isPending}
+                          className="p-1.5 text-stone-400 hover:text-[#1E3F27] dark:hover:text-white hover:bg-stone-100 dark:hover:bg-white/10 rounded-xl transition-colors cursor-pointer"
+                          title="Edit Discount Code"
                         >
-                          Confirm
+                          <Edit2 size={14} />
                         </button>
-                        <button
-                          onClick={() => setDeleteConfirm(null)}
-                          className="px-2 py-0.5 bg-stone-500 text-white text-[10px] rounded-lg cursor-pointer"
-                        >
-                          Cancel
-                        </button>
-                      </div>
+                        {deleteConfirm === code.id ? (
+                          <div className="flex items-center gap-1">
+                            <button
+                              onClick={() => handleDelete(code.id)}
+                              disabled={isPending}
+                              className="px-2 py-0.5 bg-red-600 text-white text-[10px] rounded-lg font-bold cursor-pointer disabled:opacity-50"
+                            >
+                              Confirm
+                            </button>
+                            <button
+                              onClick={() => setDeleteConfirm(null)}
+                              className="px-2 py-0.5 bg-stone-500 text-white text-[10px] rounded-lg cursor-pointer"
+                            >
+                              Cancel
+                            </button>
+                          </div>
+                        ) : (
+                          <button
+                            onClick={() => setDeleteConfirm(code.id)}
+                            disabled={isPending}
+                            className="p-1.5 text-stone-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/20 rounded-xl transition-colors cursor-pointer"
+                            title="Delete Discount Code"
+                          >
+                            <Trash2 size={14} />
+                          </button>
+                        )}
+                      </>
                     ) : (
-                      <button
-                        onClick={() => setDeleteConfirm(code.id)}
-                        className="p-1.5 text-stone-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/20 rounded-xl transition-colors cursor-pointer"
-                        title="Delete Discount Code"
-                      >
-                        <Trash2 size={14} />
-                      </button>
+                      <span className="text-[10px] text-stone-400 font-mono">HQ Only</span>
                     )}
                   </div>
                 </div>
@@ -360,6 +423,7 @@ const DiscountCodesSettings: React.FC = () => {
         setFormData={setFormData}
         handleSave={handleSave}
         activeStore={activeStore}
+        currencySymbol={currentCurrency}
       />
     </div>
   );

@@ -1,5 +1,9 @@
 import { supabase } from '../lib/supabase';
 import type { Site } from '../types';
+import type { Country } from '../utils/localization';
+import { getEffectiveCountry, getCountryProfile } from '../utils/localization';
+import { getCountryAdminDefaults } from '../utils/countryAdmin';
+import { generateNextSiteCode, formatDisplaySiteId } from '../utils/siteIdGenerator';
 
 // Helper: fetch all replenishment source IDs for a list of site IDs
 async function fetchReplenishmentSourceIds(siteIds: string[]): Promise<Record<string, string[]>> {
@@ -35,8 +39,13 @@ async function upsertReplenishmentSources(siteId: string, sourceIds: string[]): 
 
 function mapSiteRow(s: any, replenishmentSourceIds: string[]): any {
     const ids = replenishmentSourceIds ?? [];
+    const country = s.country || getEffectiveCountry({ country: s.country, currency: s.currency });
+    const profile = getCountryProfile(country);
+    const currency = s.currency || profile.currency;
     return {
         ...s,
+        country,
+        currency,
         logisticsZoneId: s.logistics_zone_id,
         terminalCount: s.terminal_count,
         bonusEnabled: s.bonus_enabled,
@@ -47,7 +56,7 @@ function mapSiteRow(s: any, replenishmentSourceIds: string[]): any {
         taxJurisdictionId: s.tax_jurisdiction_id,
         fulfillmentStrategy: s.fulfillment_strategy,
         isFulfillmentNode: s.is_fulfillment_node,
-        code: s.code || s.id.substring(0, 8).toUpperCase(),
+        code: formatDisplaySiteId({ ...s, country, currency }) || s.code || s.id.substring(0, 8).toUpperCase(),
         siteNumber: s.site_number,
         barcodePrefix: s.barcode_prefix,
         // Legacy single-source field kept for backward compatibility
@@ -65,6 +74,37 @@ export const sitesService = {
             .order('created_at', { ascending: false });
 
         if (error) throw error;
+
+        // Auto-provision Administration HQ for active supported countries if missing
+        const supportedCountries: Country[] = ['ET', 'KE', 'UG', 'RW', 'TZ'];
+        for (const c of supportedCountries) {
+            const hasAdmin = data.some((s: any) =>
+                (s.country || 'ET').toUpperCase() === c &&
+                ['Administration', 'Administrative', 'HQ', 'Headquarters', 'Central Operations'].includes(s.type || '')
+            );
+            if (!hasAdmin) {
+                try {
+                    const defaults = getCountryAdminDefaults(c);
+                    const newAdmin = await this.create({
+                        name: defaults.name,
+                        code: defaults.code,
+                        type: defaults.type,
+                        address: defaults.address,
+                        status: defaults.status,
+                        manager: defaults.manager,
+                        country: defaults.country,
+                        currency: defaults.currency,
+                        region: defaults.region,
+                        isFulfillmentNode: false
+                    });
+                    if (newAdmin) {
+                        data.unshift(newAdmin);
+                    }
+                } catch {
+                    // Non-blocking in case of offline or RLS restrictions
+                }
+            }
+        }
 
         const siteIds = data.map((s: any) => s.id);
         const sourcesMap = await fetchReplenishmentSourceIds(siteIds);
@@ -86,31 +126,33 @@ export const sitesService = {
     },
 
     async create(site: Omit<Site, 'id' | 'created_at' | 'updated_at'>) {
+        const siteCountry = site.country || getEffectiveCountry({ country: site.country, currency: site.currency });
+        const siteCurrency = site.currency || getCountryProfile(siteCountry).currency;
+        const countryCode = (siteCountry || 'ET').toUpperCase();
+
         const { data: allSites } = await supabase
             .from('sites')
-            .select('code');
+            .select('code, site_number, country');
 
-        let nextId = 1;
+        let nextSiteNum = 1;
         if (allSites && allSites.length > 0) {
-            const maxId = allSites.reduce((max, s) => {
-                const match = s.code?.match(/SITE-(\d+)/);
-                if (match) {
-                    const num = parseInt(match[1], 10);
-                    return num > max ? num : max;
-                }
-                return max;
+            const maxId = allSites.reduce((max, s: any) => {
+                const siteNum = typeof s.site_number === 'number' ? s.site_number : 0;
+                return Math.max(max, siteNum);
             }, 0);
-            nextId = maxId + 1;
+            nextSiteNum = maxId + 1;
         }
 
-        const newCode = `SITE-${nextId.toString().padStart(4, '0')}`;
+        // Generate country-scoped human-readable site ID (e.g. KE-01, KE-02, UG-01, TZ-01, RW-01, ET-01)
+        const nextCountryCode = generateNextSiteCode(allSites || [], countryCode);
+        const resolvedCode = site.code && site.code !== 'GENERATED_BY_DB' ? site.code : nextCountryCode;
 
         // Resolve legacy single-source field from new multi-source array
         const sourceIds: string[] = site.replenishmentSourceIds ?? (site.replenishmentSourceId ? [site.replenishmentSourceId] : []);
 
-        const dbSite = {
+        const dbSite: Record<string, any> = {
             name: site.name,
-            code: newCode,
+            code: resolvedCode,
             type: site.type,
             address: site.address,
             status: site.status,
@@ -122,21 +164,34 @@ export const sitesService = {
             fulfillment_strategy: site.fulfillmentStrategy || 'NEAREST',
             is_fulfillment_node: site.isFulfillmentNode !== undefined ? site.isFulfillmentNode : true,
             barcode_prefix: (site.type === 'Warehouse' || site.type === 'Distribution Center')
-                ? nextId.toString().padStart(4, '0')
+                ? resolvedCode.replace(/^[A-Z]+-/, '').padStart(4, '0')
                 : null,
             // Keep legacy field in sync with first source
             replenishment_source_id: sourceIds[0] ?? null,
             logistics_zone_id: site.logisticsZoneId ?? null,
-            site_number: nextId
+            site_number: nextSiteNum,
+            country: siteCountry,
+            currency: siteCurrency
         };
 
-        const { data, error } = await supabase
+        let insertResult = await supabase
             .from('sites')
             .insert(dbSite)
             .select()
             .single();
 
-        if (error) throw error;
+        if (insertResult.error && (insertResult.error.message?.includes('column "country"') || insertResult.error.message?.includes('column "currency"'))) {
+            delete dbSite.country;
+            delete dbSite.currency;
+            insertResult = await supabase
+                .from('sites')
+                .insert(dbSite)
+                .select()
+                .single();
+        }
+
+        if (insertResult.error) throw insertResult.error;
+        const data = insertResult.data;
 
         // Write join table associations
         if (sourceIds.length > 0) {
@@ -155,6 +210,7 @@ export const sitesService = {
         const directFields: (keyof Site)[] = [
             'name', 'type', 'address', 'contact', 'status',
             'manager', 'capacity', 'language', 'latitude', 'longitude', 'region',
+            'country', 'currency'
         ];
         for (const field of directFields) {
             if (updates[field] !== undefined) dbUpdates[field] = updates[field];
@@ -192,14 +248,26 @@ export const sitesService = {
             dbUpdates.replenishment_source_id = sourceIds.length > 0 ? sourceIds[0] : null;
         }
 
-        const { data, error } = await supabase
+        let updateResult = await supabase
             .from('sites')
             .update(dbUpdates)
             .eq('id', id)
             .select()
             .single();
 
-        if (error) throw error;
+        if (updateResult.error && (updateResult.error.message?.includes('column "country"') || updateResult.error.message?.includes('column "currency"'))) {
+            delete dbUpdates.country;
+            delete dbUpdates.currency;
+            updateResult = await supabase
+                .from('sites')
+                .update(dbUpdates)
+                .eq('id', id)
+                .select()
+                .single();
+        }
+
+        if (updateResult.error) throw updateResult.error;
+        const data = updateResult.data;
 
         // Update join table if source IDs were explicitly provided
         if (shouldUpdateSources) {
@@ -213,7 +281,61 @@ export const sitesService = {
         return mapSiteRow(data, finalSourceIds);
     },
 
+    async ensureCountryAdministrationSite(country: Country): Promise<Site | null> {
+        const countryUpper = (country || 'ET').toUpperCase() as Country;
+        try {
+            const { data, error } = await supabase
+                .from('sites')
+                .select('*')
+                .eq('country', countryUpper)
+                .in('type', ['Administration', 'Administrative', 'HQ', 'Headquarters', 'Central Operations'])
+                .limit(1);
+
+            if (!error && data && data.length > 0) {
+                const sourcesMap = await fetchReplenishmentSourceIds([data[0].id]);
+                return mapSiteRow(data[0], sourcesMap[data[0].id] ?? []);
+            }
+
+            const defaults = getCountryAdminDefaults(countryUpper);
+            return await this.create({
+                name: defaults.name,
+                code: defaults.code,
+                type: defaults.type,
+                address: defaults.address,
+                status: defaults.status,
+                manager: defaults.manager,
+                country: defaults.country,
+                currency: defaults.currency,
+                region: defaults.region,
+                isFulfillmentNode: false
+            });
+        } catch (err) {
+            console.error(`Failed to ensure Administration HQ for country ${countryUpper}:`, err);
+            return null;
+        }
+    },
+
     async delete(id: string) {
+        // Zero-trust check: Cannot delete the primary Administration site for a country
+        const { data: targetSite } = await supabase
+            .from('sites')
+            .select('*')
+            .eq('id', id)
+            .maybeSingle();
+
+        if (targetSite && ['Administration', 'Administrative', 'HQ', 'Headquarters', 'Central Operations'].includes(targetSite.type)) {
+            const siteCountry = targetSite.country || 'ET';
+            const { data: adminSites } = await supabase
+                .from('sites')
+                .select('id')
+                .eq('country', siteCountry)
+                .in('type', ['Administration', 'Administrative', 'HQ', 'Headquarters', 'Central Operations']);
+
+            if (!adminSites || adminSites.length <= 1) {
+                throw new Error(`Cannot delete primary Administration HQ for country ${siteCountry}. Every country must retain an Administration central site.`);
+            }
+        }
+
         const { error } = await supabase
             .from('sites')
             .delete()

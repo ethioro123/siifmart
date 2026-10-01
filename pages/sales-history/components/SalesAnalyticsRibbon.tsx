@@ -11,9 +11,10 @@ interface SalesAnalyticsRibbonProps {
       avgTicket: number;
    };
    totalCount: number;
+   currencySymbol?: string;
 }
 
-export const SalesAnalyticsRibbon: React.FC<SalesAnalyticsRibbonProps> = ({ metrics, totalCount }) => {
+export const SalesAnalyticsRibbon: React.FC<SalesAnalyticsRibbonProps> = ({ metrics, totalCount, currencySymbol = CURRENCY_SYMBOL }) => {
    const { user } = useStore();
    const canViewRevenue = hasPermission(user?.role, 'VIEW_REVENUE');
 
@@ -25,7 +26,7 @@ export const SalesAnalyticsRibbon: React.FC<SalesAnalyticsRibbonProps> = ({ metr
                {!canViewRevenue && <Shield size={12} className="text-[#2C5E3B] dark:text-[#A9CBA2]" />}
             </div>
             <p className="text-xl font-mono font-black text-[#1E3F27] dark:text-[#EAE5D9] mt-1">
-               {canViewRevenue ? `${CURRENCY_SYMBOL} ${metrics.totalRev.toLocaleString()}` : '••••••'}
+               {canViewRevenue ? `${currencySymbol} ${metrics.totalRev.toLocaleString()}` : '••••••'}
             </p>
          </div>
          <div className="bg-white/80 dark:bg-[#18201B]/60 border border-[#E2DCCE] dark:border-emerald-950/20 backdrop-blur-md p-4 rounded-2xl shadow-sm transition-colors">
@@ -38,7 +39,7 @@ export const SalesAnalyticsRibbon: React.FC<SalesAnalyticsRibbonProps> = ({ metr
                {!canViewRevenue && <Shield size={12} className="text-amber-600 dark:text-amber-400" />}
             </div>
             <p className="text-xl font-mono font-black text-amber-700 dark:text-amber-455 mt-1">
-               {canViewRevenue ? `${CURRENCY_SYMBOL} ${metrics.avgTicket.toFixed(0)}` : '••••••'}
+               {canViewRevenue ? `${currencySymbol} ${metrics.avgTicket.toFixed(0)}` : '••••••'}
             </p>
          </div>
          <div className="bg-white/80 dark:bg-[#18201B]/60 border border-[#E2DCCE] dark:border-emerald-950/20 backdrop-blur-md p-4 rounded-2xl shadow-sm transition-colors">

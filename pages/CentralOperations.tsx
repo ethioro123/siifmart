@@ -1,15 +1,14 @@
-import React, { useMemo, useState, useEffect } from 'react';
+import React, { useMemo } from 'react';
 import { useData } from '../contexts/DataContext';
 import { useFulfillmentData } from '../components/fulfillment/FulfillmentDataProvider';
 import { useGamification } from '../contexts/GamificationContext';
 import { useStore } from '../contexts/CentralStore';
 import { useNavigate } from 'react-router-dom';
 import { generateQuarterlyReport } from '../utils/reportGenerator';
-import { productsService } from '../services/supabase.service';
 import {
     Activity, DollarSign, Box, Map as MapIcon, Download, Radio, Zap
 } from 'lucide-react';
-import { CURRENCY_SYMBOL } from '../constants';
+import { getCountryProfile, type Country } from '../utils/localization';
 import { calculateMetrics, DashboardMetrics } from '../utils/metrics';
 import { formatCompactNumber } from '../utils/formatting';
 import WidgetErrorBoundary from '../components/WidgetErrorBoundary';
@@ -35,41 +34,20 @@ import FiscalYearDeck from '../components/FiscalYearDeck';
 import { logger } from '../utils/logger';
 
 export default function CentralOperations() {
-    const { sites, employees, allSales, allOrders, allProducts, systemLogs, storePoints } = useData();
+    const { sites, employees, allSales, allOrders, allProducts, systemLogs, storePoints, effectiveCountry, settings } = useData();
     const { jobs } = useFulfillmentData();
     const { workerPoints } = useGamification();
     const { loading, theme } = useStore();
     const navigate = useNavigate();
     const accentColor = theme === 'dark' ? '#A9CBA2' : '#2C5E3B';
 
-    // --- SERVER-SIDE METRICS ---
-    const [serverMetrics, setServerMetrics] = useState<any>(null); // Inventory Snapshot
-    const [serverFinancials, setServerFinancials] = useState<any>(null); // Date-Filtered Financials
+    const activeCountry = (effectiveCountry || settings?.country || 'ET') as Country;
+    const countryProfile = useMemo(() => getCountryProfile(activeCountry), [activeCountry]);
+    const currencySymbol = countryProfile.currencySymbol || 'ETB';
 
     // Default to 'This Quarter' as requested
     const defaultRange: DateRangeOption = 'This Quarter';
-    const { dateRange, setDateRange, isWithinRange, startDate: filterStartDate, endDate: filterEndDate } = useDateFilter(defaultRange);
-
-
-    useEffect(() => {
-        const fetchMetrics = async () => {
-            try {
-                // 1. Fetch Inventory Snapshot (Always current)
-                const invData = await productsService.getMetrics();
-                setServerMetrics(invData);
-
-                // 2. Fetch Financials (Filtered by Date)
-                const startStr = filterStartDate ? filterStartDate.toISOString() : undefined;
-                const endStr = filterEndDate ? filterEndDate.toISOString() : undefined;
-
-                const finData = await productsService.getFinancialMetrics(undefined, startStr, endStr);
-                setServerFinancials(finData);
-            } catch (err) {
-                logger.error('CentralOperations', 'Failed to load server metrics:', err);
-            }
-        };
-        fetchMetrics();
-    }, [dateRange, filterStartDate, filterEndDate]);
+    const { dateRange, setDateRange, isWithinRange } = useDateFilter(defaultRange);
 
     // --- REPORT GENERATION ---
     const handleGenerateReport = () => {
@@ -123,20 +101,11 @@ export default function CentralOperations() {
     }, [filteredSales, allProducts, jobs, filteredOrders, employees]);
 
     const totalSites = sites?.length || 0;
-    const activeAlerts = serverMetrics?.active_alerts !== undefined ? serverMetrics.active_alerts : (metrics?.activeAlerts || 0);
-    const inventoryValue = serverMetrics?.total_value_cost || metrics?.totalNetworkStockValue || 0;
+    const activeAlerts = metrics?.activeAlerts || 0;
+    const inventoryValue = metrics?.totalNetworkStockValue || 0;
 
-    // Stock Status Data (Server-Side Snapshot)
+    // Stock Status Data (Scoped to Active Country Catalog)
     const stockStatusData = useMemo(() => {
-        if (serverMetrics) {
-            return [
-                { name: 'Optimal', value: serverMetrics.total_count - (serverMetrics.low_stock_count + serverMetrics.out_of_stock_count), color: '#10b981' },
-                { name: 'Low Stock', value: serverMetrics.low_stock_count, color: '#f59e0b' },
-                { name: 'Out of Stock', value: serverMetrics.out_of_stock_count, color: '#ef4444' },
-            ].filter(d => d.value > 0);
-        }
-
-        // Fallback
         const goodStock = (allProducts || []).filter(p => p.stock >= 10 && p.status !== 'out_of_stock').length;
         const lowStock = (allProducts || []).filter(p => (p.stock < 10 && p.stock > 0) || p.status === 'low_stock').length;
         const outStock = (allProducts || []).filter(p => p.stock === 0 || p.status === 'out_of_stock').length;
@@ -146,7 +115,7 @@ export default function CentralOperations() {
             { name: 'Low Stock', value: lowStock, color: '#f59e0b' },
             { name: 'Out of Stock', value: outStock, color: '#ef4444' },
         ].filter(d => d.value > 0);
-    }, [allProducts, serverMetrics]);
+    }, [allProducts]);
 
     // --- SITE PERFORMANCE (Filtered) ---
     const sitePerformance: SitePerformance[] = useMemo(() => {
@@ -257,9 +226,18 @@ export default function CentralOperations() {
                          className="hidden xl:block"
                     />
 
-                    <EthiopianDateWidget />
+                    {activeCountry === 'ET' ? (
+                        <EthiopianDateWidget />
+                    ) : (
+                        <div className="hidden lg:flex px-5 py-2 bg-gradient-to-r from-emerald-500/10 to-teal-500/5 dark:bg-white/5 backdrop-blur-md rounded-2xl border border-emerald-500/20 dark:border-white/10 h-[46px] flex-col justify-center items-end text-right relative overflow-hidden group shadow-inner">
+                            <p className="text-[8px] text-emerald-600 dark:text-emerald-400 font-black uppercase tracking-[0.25em] leading-none mb-1 shadow-sm">{countryProfile.name}</p>
+                            <p className="text-[10px] sm:text-[11px] font-mono font-bold text-gray-900 dark:text-emerald-400 leading-none tracking-widest truncate max-w-[250px] drop-shadow-sm">
+                                {countryProfile.timezone === 'Africa/Nairobi' ? 'EAT (UTC+3) • Nairobi' : countryProfile.timezone}
+                            </p>
+                        </div>
+                    )}
 
-                    <CyberClock />
+                    <CyberClock country={activeCountry} />
 
                     <div className="text-right px-6 py-2 bg-white/50 dark:bg-white/5 backdrop-blur-sm rounded-2xl border border-gray-200 dark:border-white/10 h-[46px] flex flex-col justify-center">
                         <p className="text-[10px] text-gray-500 font-bold uppercase leading-none mb-0.5">Active Sites</p>
@@ -288,10 +266,10 @@ export default function CentralOperations() {
                         year={dateRange === 'Last Year' ? new Date().getFullYear() - 1 : new Date().getFullYear()}
                         currentQuarter={dateRange === 'Last Year' ? 4 : Math.floor(new Date().getMonth() / 3) + 1}
                         metrics={{
-                            q1: { value: formatCompactNumber(filteredSales.filter(s => { const d = new Date(s.date); return d.getMonth() < 3 }).reduce((a, b) => a + b.total, 0), { currency: '$' }), label: 'Revenue', trend: '+10%' },
-                            q2: { value: formatCompactNumber(filteredSales.filter(s => { const d = new Date(s.date); return d.getMonth() >= 3 && d.getMonth() < 6 }).reduce((a, b) => a + b.total, 0), { currency: '$' }), label: 'Revenue' },
-                            q3: { value: formatCompactNumber(filteredSales.filter(s => { const d = new Date(s.date); return d.getMonth() >= 6 && d.getMonth() < 9 }).reduce((a, b) => a + b.total, 0), { currency: '$' }), label: 'Revenue' },
-                            q4: { value: formatCompactNumber(filteredSales.filter(s => { const d = new Date(s.date); return d.getMonth() >= 9 }).reduce((a, b) => a + b.total, 0), { currency: '$' }), label: 'Revenue' }
+                            q1: { value: formatCompactNumber(filteredSales.filter(s => { const d = new Date(s.date); return d.getMonth() < 3 }).reduce((a, b) => a + b.total, 0), { currency: currencySymbol }), label: 'Revenue', trend: '+10%' },
+                            q2: { value: formatCompactNumber(filteredSales.filter(s => { const d = new Date(s.date); return d.getMonth() >= 3 && d.getMonth() < 6 }).reduce((a, b) => a + b.total, 0), { currency: currencySymbol }), label: 'Revenue' },
+                            q3: { value: formatCompactNumber(filteredSales.filter(s => { const d = new Date(s.date); return d.getMonth() >= 6 && d.getMonth() < 9 }).reduce((a, b) => a + b.total, 0), { currency: currencySymbol }), label: 'Revenue' },
+                            q4: { value: formatCompactNumber(filteredSales.filter(s => { const d = new Date(s.date); return d.getMonth() >= 9 }).reduce((a, b) => a + b.total, 0), { currency: currencySymbol }), label: 'Revenue' }
                         }}
                     />
                 </div>
@@ -311,7 +289,7 @@ export default function CentralOperations() {
                     tooltipBg={tooltipBg}
                     tooltipBorder={tooltipBorder}
                     tooltipText={tooltipText}
-                    currencySymbol={CURRENCY_SYMBOL}
+                    currencySymbol={currencySymbol}
                     dateRange={dateRange}
                     inventoryValue={inventoryValue}
                 />
@@ -325,7 +303,7 @@ export default function CentralOperations() {
                     tooltipBg={tooltipBg}
                     tooltipBorder={tooltipBorder}
                     tooltipText={tooltipText}
-                    currencySymbol={CURRENCY_SYMBOL}
+                    currencySymbol={currencySymbol}
                     navigate={navigate}
                 />
 
@@ -334,7 +312,7 @@ export default function CentralOperations() {
                     metrics={metrics}
                     sitePerformance={sitePerformance}
                     allSales={allSales}
-                    currencySymbol={CURRENCY_SYMBOL}
+                    currencySymbol={currencySymbol}
                 />
 
                 {/* 4. OPERATIONAL PERFORMANCE & GAMIFICATION */}

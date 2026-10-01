@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import Modal from '../../components/Modal';
 import { PurchaseOrder, Product } from '../../types';
-import { CURRENCY_SYMBOL } from '../../constants';
+import { getCountryProfile } from '../../utils/localization';
 import { CheckCircle, XCircle, Printer, Edit3, Trash2, Package, Loader2, MapPin, ChevronDown, ChevronUp } from 'lucide-react';
 import { useData } from '../../contexts/DataContext';
 import { useStore } from '../../contexts/CentralStore';
@@ -9,7 +9,7 @@ import { purchaseOrdersService } from '../../services/supabase.service';
 import { formatCompactNumber } from '../../utils/formatting';
 import { formatDateTime } from '../../utils/formatting';
 import { formatPONumber } from '../../utils/jobIdFormatter';
-import { formatPOItemDescription } from './utils';
+import { formatPOItemDescription, getPOItemPackagingSummary } from './utils';
 import { POPrintView, generatePOHTML } from './POPrintView';
 import { printHtmlContent } from '../../utils/printHelper';
 import { logger } from '../../utils/logger';
@@ -23,10 +23,13 @@ interface ViewPOModalProps {
 }
 
 export const ViewPOModal: React.FC<ViewPOModalProps> = ({ isOpen, onClose, po, onEdit, onSuccess }) => {
-    const { allProducts, sites } = useData();
+    const { allProducts, sites, settings } = useData();
     const { user, showToast } = useStore();
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [expandedItems, setExpandedItems] = useState<Record<number, boolean>>({});
+
+    const site = po?.siteId ? sites.find(s => s.id === po.siteId) : undefined;
+    const currencySymbol = po?.currency || site?.currency || (site?.country === 'KE' ? 'KSh' : getCountryProfile(settings?.country || 'ET').currencySymbol);
 
     const toggleItem = (index: number) => {
         setExpandedItems(prev => ({
@@ -93,7 +96,7 @@ export const ViewPOModal: React.FC<ViewPOModalProps> = ({ isOpen, onClose, po, o
 
         try {
             await purchaseOrdersService.delete(po.id);
-            showToast(`PO ${formatPONumber(po)} deleted successfully`, 'success');
+            showToast(`PO ${formatPONumber(po)} cancelled successfully`, 'success');
             onSuccess();
             onClose();
         } catch (error) {
@@ -104,7 +107,7 @@ export const ViewPOModal: React.FC<ViewPOModalProps> = ({ isOpen, onClose, po, o
 
     const handlePrintPO = () => {
         if (!po) return;
-        const html = generatePOHTML(po, sites, user, allProducts);
+        const html = generatePOHTML(po, sites, user, allProducts, settings);
         printHtmlContent(html);
     };
 
@@ -200,9 +203,20 @@ export const ViewPOModal: React.FC<ViewPOModalProps> = ({ isOpen, onClose, po, o
                         <h3 className="text-[10px] font-black text-gray-500 dark:text-gray-400 uppercase tracking-widest">
                             Order Payload
                         </h3>
-                        <span className="text-[10px] font-black text-[#8C6239] dark:text-[#E2C899] uppercase tracking-widest">
-                            {po.lineItems?.reduce((sum, item) => sum + item.quantity, 0) || 0} Total Manifest Units
-                        </span>
+                        {(() => {
+                            const totalSellable = po.lineItems?.reduce((sum, item) => sum + getPOItemPackagingSummary(item, allProducts).sellableQty, 0) || 0;
+                            const totalManifest = po.lineItems?.reduce((sum, item) => sum + item.quantity, 0) || 0;
+                            return (
+                                <span className="text-[10px] font-black text-[#8C6239] dark:text-[#E2C899] uppercase tracking-widest flex items-center gap-1.5">
+                                    <span>{totalSellable.toLocaleString()} Total Sellable Units</span>
+                                    {totalManifest !== totalSellable && (
+                                        <span className="text-gray-400 dark:text-gray-500 font-bold lowercase">
+                                            ({totalManifest.toLocaleString()} manifest {totalManifest === 1 ? 'unit' : 'units'})
+                                        </span>
+                                    )}
+                                </span>
+                            );
+                        })()}
                     </div>
                     <div className="glass-panel rounded-2xl overflow-hidden shadow-sm dark:shadow-none">
                         <table className="w-full">
@@ -210,64 +224,107 @@ export const ViewPOModal: React.FC<ViewPOModalProps> = ({ isOpen, onClose, po, o
                                 <tr className="bg-gray-100/50 dark:bg-black/20 border-b border-gray-200 dark:border-white/5">
                                     <th className="text-left p-4 text-[10px] text-gray-500 dark:text-gray-500 font-black uppercase tracking-widest w-8">#</th>
                                     <th className="text-left p-4 text-[10px] text-gray-500 dark:text-gray-500 font-black uppercase tracking-widest w-24">SKU</th>
-                                    <th className="text-left p-4 text-[10px] text-gray-500 dark:text-gray-500 font-black uppercase tracking-widest min-w-[250px]">Manifest Description</th>
-                                    <th className="text-right p-4 text-[10px] text-gray-500 dark:text-gray-500 font-black uppercase tracking-widest w-20">Qty</th>
-                                    <th className="text-right p-4 text-[10px] text-gray-500 dark:text-gray-500 font-black uppercase tracking-widest w-24">Cost</th>
+                                    <th className="text-left p-4 text-[10px] text-gray-500 dark:text-gray-500 font-black uppercase tracking-widest min-w-[220px]">Manifest Description</th>
+                                    <th className="text-left p-4 text-[10px] text-gray-500 dark:text-gray-500 font-black uppercase tracking-widest w-36">Packaging</th>
+                                    <th className="text-right p-4 text-[10px] text-gray-500 dark:text-gray-500 font-black uppercase tracking-widest w-36">Qty (Sellable)</th>
+                                    <th className="text-right p-4 text-[10px] text-gray-500 dark:text-gray-500 font-black uppercase tracking-widest w-28">Cost</th>
                                     <th className="text-right p-4 text-[10px] text-gray-500 dark:text-gray-500 font-black uppercase tracking-widest w-24">Total</th>
                                     <th className="w-10 px-4"></th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-gray-200 dark:divide-white/5">
-                                {po.lineItems?.map((item, i) => (
-                                    <React.Fragment key={i}>
-                                        <tr
-                                            className={`hover:bg-stone-100/50 dark:hover:bg-white/5 transition-colors cursor-pointer ${expandedItems[i] ? 'bg-stone-200/50 dark:bg-black/20' : ''}`}
-                                            onClick={() => toggleItem(i)}
-                                        >
-                                            <td className="p-4 text-gray-400 dark:text-gray-500 text-[10px] font-black">{(i + 1).toString().padStart(2, '0')}</td>
-                                            <td className="p-4 text-gray-600 dark:text-gray-400 text-xs font-mono font-bold">{item.sku || allProducts?.find(p => p.id === item.productId)?.sku || allProducts?.find(p => p.name === item.productName)?.sku || '—'}</td>
-                                            <td className="p-4">
-                                                <div className="text-gray-900 dark:text-white font-black tracking-tight text-[clamp(11px,1.5vw,14px)] break-words leading-tight max-w-[400px]">{formatPOItemDescription(item)}</div>
-                                                {item.productId?.startsWith('CUSTOM') && (
-                                                    <span className="inline-block mt-1 text-[10px] bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 px-1.5 py-0.5 rounded font-black tracking-widest uppercase italic">Custom Resource</span>
-                                                )}
-                                            </td>
-                                            <td className="p-4 text-gray-900 dark:text-white text-right font-black tabular-nums">{item.quantity}</td>
-                                            <td className="p-4 text-gray-500 dark:text-gray-500 text-right font-black font-mono tabular-nums">{formatCompactNumber(item.unitCost, { currency: CURRENCY_SYMBOL })}</td>
-                                            <td className="p-4 text-[#2C5E3B] dark:text-[#A9CBA2] text-right font-black font-mono tabular-nums">{formatCompactNumber(item.totalCost, { currency: CURRENCY_SYMBOL })}</td>
-                                            <td className="p-4 text-gray-400 dark:text-gray-500">
-                                                {expandedItems[i] ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
-                                            </td>
-                                        </tr>
-                                        {expandedItems[i] && item.customAttributes && (
-                                            <tr className="bg-black/20">
-                                                <td colSpan={7} className="p-4 pl-12">
-                                                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-xs text-gray-400">
-                                                        {Object.entries(item.customAttributes).map(([category, attrs]) => (
-                                                            <div key={category} className="space-y-1">
-                                                                <h4 className="font-bold text-gray-500 uppercase text-[10px] mb-1">{category}</h4>
-                                                                {Object.entries(attrs).map(([key, value]) => {
-                                                                    if (!value) return null;
-                                                                    return (
-                                                                        <div key={key} className="flex justify-between border-b border-white/5 pb-0.5">
-                                                                            <span className="capitalize">{key.replace(/([A-Z])/g, ' $1').trim()}:</span>
-                                                                            <span className="text-gray-300 ml-2 text-right">
-                                                                                {value === true ? 'Yes' : String(value)}
-                                                                            </span>
-                                                                        </div>
-                                                                    );
-                                                                })}
-                                                            </div>
-                                                        ))}
+                                {po.lineItems?.map((item, i) => {
+                                    const pkg = getPOItemPackagingSummary(item, allProducts);
+                                    return (
+                                        <React.Fragment key={i}>
+                                            <tr
+                                                className={`hover:bg-stone-100/50 dark:hover:bg-white/5 transition-colors cursor-pointer ${expandedItems[i] ? 'bg-stone-200/50 dark:bg-black/20' : ''}`}
+                                                onClick={() => toggleItem(i)}
+                                            >
+                                                <td className="p-4 text-gray-400 dark:text-gray-500 text-[10px] font-black">{(i + 1).toString().padStart(2, '0')}</td>
+                                                <td className="p-4 text-gray-600 dark:text-gray-400 text-xs font-mono font-bold">{item.sku || allProducts?.find(p => p.id === item.productId)?.sku || allProducts?.find(p => p.name === item.productName)?.sku || '—'}</td>
+                                                <td className="p-4">
+                                                    <div className="text-gray-900 dark:text-white font-black tracking-tight text-[clamp(11px,1.5vw,14px)] break-words leading-tight max-w-[360px]">{formatPOItemDescription(item)}</div>
+                                                    <div className="flex items-center gap-1.5 mt-1 flex-wrap">
+                                                        {item.productId?.startsWith('CUSTOM') && (
+                                                            <span className="inline-block text-[10px] bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 px-1.5 py-0.5 rounded font-black tracking-widest uppercase italic">Custom Resource</span>
+                                                        )}
+                                                        {pkg.packBadge && (
+                                                            <span className="inline-block text-[9px] bg-amber-500/10 border border-amber-500/20 text-amber-700 dark:text-amber-400 px-1.5 py-0.5 rounded font-black tracking-wider uppercase">
+                                                                📦 {pkg.packBadge}
+                                                            </span>
+                                                        )}
                                                     </div>
                                                 </td>
+                                                <td className="p-4">
+                                                    <div className="text-xs font-bold text-gray-900 dark:text-white flex items-center gap-1">
+                                                        <span className="inline-block px-2 py-0.5 rounded-md bg-amber-500/10 border border-amber-500/20 text-amber-700 dark:text-amber-400 text-[10px] font-black uppercase">
+                                                            📦 {pkg.packBadge || pkg.manifestUnitName}
+                                                        </span>
+                                                    </div>
+                                                    <div className="text-[10px] text-gray-500 dark:text-gray-400 font-bold mt-1">
+                                                        {pkg.packDetail}
+                                                    </div>
+                                                </td>
+                                                <td className="p-4 text-right">
+                                                    <div className="text-gray-900 dark:text-white font-black tabular-nums text-sm">
+                                                        {pkg.sellableQty.toLocaleString()} <span className="text-[11px] font-bold text-gray-500 dark:text-gray-400">{pkg.sellUnitLabel}</span>
+                                                    </div>
+                                                    {pkg.hasMultiplier ? (
+                                                        <div className="text-[10px] text-[#2C5E3B] dark:text-[#A9CBA2] font-black whitespace-nowrap mt-0.5">
+                                                            {item.quantity} {pkg.manifestUnitName.toLowerCase()} ({pkg.unitsPerOrderUnit} {pkg.sellUnitLabel}/{pkg.manifestUnitName.replace(/s$/, '').toLowerCase()})
+                                                        </div>
+                                                    ) : (
+                                                        <div className="text-[10px] text-gray-400 font-medium">
+                                                            (individual units)
+                                                        </div>
+                                                    )}
+                                                </td>
+                                                <td className="p-4 text-right">
+                                                    <div className="text-gray-900 dark:text-white font-black font-mono tabular-nums text-xs">
+                                                        {formatCompactNumber(item.unitCost, { currency: currencySymbol })}{pkg.hasMultiplier ? ` /${pkg.manifestUnitName.replace(/s$/, '').toLowerCase()}` : ''}
+                                                    </div>
+                                                    {pkg.hasMultiplier && (
+                                                        <div className="text-[10px] text-gray-400 font-mono">
+                                                            ~{formatCompactNumber(pkg.costPerSellableUnit, { currency: currencySymbol })}/{pkg.sellUnitLabel}
+                                                        </div>
+                                                    )}
+                                                </td>
+                                                <td className="p-4 text-[#2C5E3B] dark:text-[#A9CBA2] text-right font-black font-mono tabular-nums">{formatCompactNumber(item.totalCost, { currency: currencySymbol })}</td>
+                                                <td className="p-4 text-gray-400 dark:text-gray-500">
+                                                    {expandedItems[i] ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                                                </td>
                                             </tr>
-                                        )}
-                                    </React.Fragment>
-                                ))}
+                                            {expandedItems[i] && item.customAttributes && (
+                                                <tr className="bg-black/20">
+                                                    <td colSpan={8} className="p-4 pl-12">
+                                                        <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-xs text-gray-400">
+                                                            {Object.entries(item.customAttributes).map(([category, attrs]) => (
+                                                                <div key={category} className="space-y-1">
+                                                                    <h4 className="font-bold text-gray-500 uppercase text-[10px] mb-1">{category}</h4>
+                                                                    {Object.entries(attrs).map(([key, value]) => {
+                                                                        if (!value) return null;
+                                                                        return (
+                                                                            <div key={key} className="flex justify-between border-b border-white/5 pb-0.5">
+                                                                                <span className="capitalize">{key.replace(/([A-Z])/g, ' $1').trim()}:</span>
+                                                                                <span className="text-gray-300 ml-2 text-right">
+                                                                                    {value === true ? 'Yes' : String(value)}
+                                                                                </span>
+                                                                            </div>
+                                                                        );
+                                                                    })}
+                                                                </div>
+                                                            ))}
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            )}
+                                        </React.Fragment>
+                                    );
+                                })}
                                 {(!po.lineItems || po.lineItems.length === 0) && (
                                     <tr>
-                                        <td colSpan={7} className="p-8 text-center text-gray-500 italic">No items in this order</td>
+                                        <td colSpan={8} className="p-8 text-center text-gray-500 italic">No items in this order</td>
                                     </tr>
                                 )}
                             </tbody>
@@ -280,23 +337,23 @@ export const ViewPOModal: React.FC<ViewPOModalProps> = ({ isOpen, onClose, po, o
                     <div className="w-full md:w-80 space-y-6 text-sm">
                         <div className="flex justify-between items-end border-b border-gray-100 dark:border-white/5 pb-2">
                             <span className="uppercase tracking-widest text-[10px] font-bold text-gray-500">Base Payload</span>
-                            <span className="font-mono text-gray-900 dark:text-white font-black tabular-nums">{CURRENCY_SYMBOL} {(po.totalAmount - ((po.taxAmount || 0) + (po.shippingCost || 0))).toLocaleString()}</span>
+                            <span className="font-mono text-gray-900 dark:text-white font-black tabular-nums">{currencySymbol} {(po.totalAmount - ((po.taxAmount || 0) + (po.shippingCost || 0))).toLocaleString()}</span>
                         </div>
                         {po.shippingCost && po.shippingCost > 0 ? (
                             <div className="flex justify-between items-end border-b border-gray-100 dark:border-white/5 pb-2">
                                 <span className="uppercase tracking-widest text-[10px] font-bold text-gray-400">Logistics</span>
-                                <span className="font-mono text-gray-600 dark:text-gray-300 font-bold tabular-nums">{CURRENCY_SYMBOL} {po.shippingCost.toLocaleString()}</span>
+                                <span className="font-mono text-gray-600 dark:text-gray-300 font-bold tabular-nums">{currencySymbol} {po.shippingCost.toLocaleString()}</span>
                             </div>
                         ) : null}
                         {po.taxAmount && po.taxAmount > 0 ? (
                             <div className="flex justify-between items-end border-b border-gray-100 dark:border-white/5 pb-2">
                                 <span className="uppercase tracking-widest text-[10px] font-bold text-gray-400">Tax</span>
-                                <span className="font-mono text-gray-600 dark:text-gray-300 font-bold tabular-nums">{CURRENCY_SYMBOL} {po.taxAmount.toLocaleString()}</span>
+                                <span className="font-mono text-gray-600 dark:text-gray-300 font-bold tabular-nums">{currencySymbol} {po.taxAmount.toLocaleString()}</span>
                             </div>
                         ) : null}
                         <div className="flex justify-between items-end pt-2">
                             <span className="uppercase tracking-widest text-xs font-black text-gray-900 dark:text-white">Total Authority</span>
-                            <span className="font-mono text-3xl font-black text-gray-900 dark:text-[#A9CBA2] tabular-nums tracking-tighter leading-none">{CURRENCY_SYMBOL} {po.totalAmount.toLocaleString()}</span>
+                            <span className="font-mono text-3xl font-black text-gray-900 dark:text-[#A9CBA2] tabular-nums tracking-tighter leading-none">{currencySymbol} {po.totalAmount.toLocaleString()}</span>
                         </div>
                     </div>
                 </div>
@@ -394,7 +451,7 @@ export const ViewPOModal: React.FC<ViewPOModalProps> = ({ isOpen, onClose, po, o
                 </div>
             </div>
             {/* === BRAND NEW DEDICATED PRINT UI (Highly efficient invoice layout) === */}
-            <POPrintView po={po} sites={sites} user={user} allProducts={allProducts} />
+            <POPrintView po={po} sites={sites} user={user} allProducts={allProducts} settings={settings} />
         </Modal>
     );
 };

@@ -2,13 +2,25 @@ import React, { useRef, useEffect } from 'react';
 import { Clock, Scan, CheckCircle } from 'lucide-react';
 import { usePOSCommand } from '../../POSCommandContext';
 import { useFulfillmentData } from '../../../fulfillment/FulfillmentDataProvider';
+import { useStore } from '../../../../contexts/CentralStore';
 import { useLanguage } from '../../../../contexts/LanguageContext';
 import { formatJobId } from '../../../../utils/jobIdFormatter';
 import { isWeightBased, isVolumeBased } from '../../../../utils/units';
 
 export const ReceivingForm: React.FC = () => {
     const { t } = useLanguage();
+    const { user } = useStore();
     const { jobs } = useFulfillmentData();
+
+    const isManagerOrHQ = [
+        'super_admin',
+        'admin',
+        'ceo',
+        'store_manager',
+        'operations_manager',
+        'inventory_manager',
+        'supervisor'
+    ].includes(user?.role?.toLowerCase() || '');
 
     const {
         selectedTransferForReceiving,
@@ -122,7 +134,9 @@ export const ReceivingForm: React.FC = () => {
                         <thead className="bg-[#F4F0E6] dark:bg-white/5 sticky top-0 backdrop-blur-md z-10 border-b border-[#E2DCCE] dark:border-white/10">
                             <tr>
                                 <th className="p-3 text-[10px] text-stone-500 dark:text-gray-400 uppercase font-black tracking-widest">{t('posCommand.itemDetails')}</th>
-                                <th className="p-3 text-[10px] text-stone-500 dark:text-gray-400 uppercase font-black tracking-widest text-center">{t('posCommand.expected')}</th>
+                                <th className="p-3 text-[10px] text-stone-500 dark:text-gray-400 uppercase font-black tracking-widest text-center">
+                                    {isManagerOrHQ ? t('posCommand.expected') : 'Expected (Blind)'}
+                                </th>
                                 <th className="p-3 text-[10px] text-stone-500 dark:text-gray-400 uppercase font-black tracking-widest text-center">{t('posCommand.received')}</th>
                                 <th className="p-3 text-[10px] text-stone-500 dark:text-gray-400 uppercase font-black tracking-widest">{t('posCommand.condition')}</th>
                             </tr>
@@ -145,15 +159,21 @@ export const ReceivingForm: React.FC = () => {
                                             <p className="text-xs font-mono text-stone-600 dark:text-gray-455 bg-[#FAF8F5] dark:bg-black/40 px-1.5 py-0.5 rounded border border-[#E2DCCE] dark:border-white/5">SKU: {item.sku}</p>
                                         </td>
                                         <td className="p-3 text-center">
-                                            <span className="text-sm font-mono text-stone-700 dark:text-gray-300">
-                                                {isWeightVol ? (
-                                                    `${casesExpected % 1 === 0 ? casesExpected : casesExpected.toFixed(2)} x ${sizeNum}`
-                                                ) : (
-                                                    casesExpected
-                                                )}
-                                                {' '}
-                                                {unit ? <span className="text-[10px] text-stone-500 dark:text-gray-555 uppercase">{unit}</span> : ''}
-                                            </span>
+                                            {isManagerOrHQ ? (
+                                                <span className="text-sm font-mono text-stone-700 dark:text-gray-300">
+                                                    {isWeightVol ? (
+                                                        `${casesExpected % 1 === 0 ? casesExpected : casesExpected.toFixed(2)} x ${sizeNum}`
+                                                    ) : (
+                                                        casesExpected
+                                                    )}
+                                                    {' '}
+                                                    {unit ? <span className="text-[10px] text-stone-500 dark:text-gray-555 uppercase">{unit}</span> : ''}
+                                                </span>
+                                            ) : (
+                                                <span className="px-2 py-0.5 rounded-full bg-stone-100 dark:bg-white/5 border border-stone-200 dark:border-white/10 text-[10px] font-bold text-stone-500 dark:text-stone-400 font-mono" title="Blind audit: Count units accurately">
+                                                    🔒 Blind Count
+                                                </span>
+                                            )}
                                         </td>
                                         <td className="p-3">
                                             <div className="flex items-center justify-center gap-2">
@@ -173,9 +193,9 @@ export const ReceivingForm: React.FC = () => {
                                                         handleUpdateTransferItem(index, 'receivedQty', isWeightVol ? val * sizeNum : Math.round(val));
                                                     }}
                                                     className={`w-14 bg-white dark:bg-black/50 border rounded text-center font-mono py-1 focus:outline-none transition-all ${
-                                                        isOverReceived
+                                                        isOverReceived && isManagerOrHQ
                                                             ? 'border-amber-500/50 text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-500/10'
-                                                            : isFullyReceived
+                                                            : isFullyReceived && isManagerOrHQ
                                                                 ? 'border-emerald-500/50 text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-500/10'
                                                                 : 'border-[#E2DCCE] dark:border-white/10 text-[#1E3F27] dark:text-white focus:border-[#2C5E3B] dark:focus:border-[#A9CBA2]'
                                                     }`}
@@ -190,7 +210,7 @@ export const ReceivingForm: React.FC = () => {
                                                     unit && <span className="text-[10px] text-stone-500 dark:text-gray-555 uppercase font-bold ml-1">{unit}</span>
                                                 )}
                                             </div>
-                                            {isOverReceived && (
+                                            {isOverReceived && isManagerOrHQ && (
                                                 <p className="text-[9px] text-amber-600 dark:text-amber-400 text-center mt-1 font-bold uppercase tracking-wider">{t('posCommand.overageDetected')}</p>
                                             )}
                                         </td>
@@ -223,29 +243,37 @@ export const ReceivingForm: React.FC = () => {
                 {/* Summary Footer */}
                 <div className="bg-[#FAF8F5] dark:bg-black/30 p-4 border-t border-[#E2DCCE] dark:border-white/10 flex items-center justify-between">
                     <div className="flex gap-6 flex-wrap font-mono">
-                        <div>
-                            <p className="text-[10px] text-stone-500 dark:text-gray-455 uppercase font-black tracking-widest">{t('posCommand.totalExpected')}</p>
-                            <div className="text-lg text-[#1E3F27] dark:text-white font-bold">
-                                {transferReceivingItems.map((item, idx) => {
-                                    const unit = item.unit || '';
-                                    const sizeNum = item.productSize || 0;
-                                    const isWeightVol = (isWeightBased(unit) || isVolumeBased(unit)) && sizeNum > 0;
-                                    const casesExpected = item.displayExpectedQty || item.expectedQty;
+                        {isManagerOrHQ ? (
+                            <div>
+                                <p className="text-[10px] text-stone-500 dark:text-gray-455 uppercase font-black tracking-widest">{t('posCommand.totalExpected')}</p>
+                                <div className="text-lg text-[#1E3F27] dark:text-white font-bold">
+                                    {transferReceivingItems.map((item, idx) => {
+                                        const unit = item.unit || '';
+                                        const sizeNum = item.productSize || 0;
+                                        const isWeightVol = (isWeightBased(unit) || isVolumeBased(unit)) && sizeNum > 0;
+                                        const casesExpected = item.displayExpectedQty || item.expectedQty;
 
-                                    const formatted = isWeightVol
-                                        ? `${casesExpected % 1 === 0 ? casesExpected : casesExpected.toFixed(2)} x ${sizeNum}`
-                                        : casesExpected.toString();
+                                        const formatted = isWeightVol
+                                            ? `${casesExpected % 1 === 0 ? casesExpected : casesExpected.toFixed(2)} x ${sizeNum}`
+                                            : casesExpected.toString();
 
-                                    return (
-                                        <span key={idx}>
-                                            {idx > 0 && <span className="text-stone-400 dark:text-gray-650 mx-1">·</span>}
-                                            {formatted}
-                                            {unit && <span className="text-[10px] text-stone-500 dark:text-gray-555 uppercase ml-0.5">{unit}</span>}
-                                        </span>
-                                    );
-                                })}
+                                        return (
+                                            <span key={idx}>
+                                                {idx > 0 && <span className="text-stone-400 dark:text-gray-650 mx-1">·</span>}
+                                                {formatted}
+                                                {unit && <span className="text-[10px] text-stone-500 dark:text-gray-555 uppercase ml-0.5">{unit}</span>}
+                                            </span>
+                                        );
+                                    })}
+                                </div>
                             </div>
-                        </div>
+                        ) : (
+                            <div className="flex items-center gap-2">
+                                <span className="px-2.5 py-1 bg-amber-500/10 text-amber-800 dark:text-amber-300 border border-amber-500/20 rounded-xl text-xs font-bold font-sans">
+                                    🔒 Zero-Trust Blind Audit Protocol Active (Expected counts hidden)
+                                </span>
+                            </div>
+                        )}
                         <div>
                             <p className="text-[10px] text-stone-500 dark:text-gray-455 uppercase font-black tracking-widest">{t('posCommand.totalScanned')}</p>
                             <div className={`text-lg font-bold ${

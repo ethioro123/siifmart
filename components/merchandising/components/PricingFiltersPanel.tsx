@@ -3,7 +3,7 @@ import {
     Search, Tags, Map, Calculator, Zap, Percent, RefreshCw, XCircle, CheckCircle
 } from 'lucide-react';
 import { useMerchandising } from '../MerchandisingContext';
-import { CURRENCY_SYMBOL, ALL_CATEGORY_OPTIONS } from '../../../constants';
+import { ALL_CATEGORY_OPTIONS } from '../../../constants';
 
 export const PricingFiltersPanel: React.FC = () => {
     const {
@@ -12,7 +12,8 @@ export const PricingFiltersPanel: React.FC = () => {
         isFilterPanelOpen,
         filters,
         setFilters,
-        sites
+        sites,
+        currencySymbol
     } = useMerchandising();
 
     if (!isFilterPanelOpen) {
@@ -101,7 +102,7 @@ export const PricingFiltersPanel: React.FC = () => {
                     </div>
                     <div className="space-y-3">
                         <div className="flex flex-col gap-1.5">
-                            <span className="text-[10px] text-stone-400 dark:text-stone-500 font-bold uppercase">Price Range ({CURRENCY_SYMBOL})</span>
+                            <span className="text-[10px] text-stone-400 dark:text-stone-500 font-bold uppercase">Price Range ({currencySymbol})</span>
                             <div className="flex gap-2">
                                 <div className="relative flex-1">
                                     <input
@@ -238,7 +239,8 @@ export const ActiveFilterChips: React.FC = () => {
         setSearchTerm,
         filters,
         setFilters,
-        sites
+        sites,
+        currencySymbol
     } = useMerchandising();
 
     const hasActiveFilters = searchTerm || Object.values(filters).some(v => Array.isArray(v) ? v.length > 0 : v !== null && v !== '');
@@ -298,9 +300,7 @@ export const ActiveFilterChips: React.FC = () => {
                 >
                     <Calculator size={10} className="text-green-600 dark:text-green-400" />
                     <span>
-                        {CURRENCY_SYMBOL}
-                        {filters.minPrice || '0'} - {CURRENCY_SYMBOL}
-                        {filters.maxPrice || '∞'}
+                        {currencySymbol} {filters.minPrice || '0'} - {currencySymbol} {filters.maxPrice || '∞'}
                     </span>
                     <button
                         onClick={() => setFilters({ ...filters, minPrice: '', maxPrice: '' })}

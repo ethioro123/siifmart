@@ -1,5 +1,7 @@
 import React, { createContext, useContext } from 'react';
 import type { ExpenseRecord, Employee, Site } from '../../types';
+import type { Country, CountryProfile } from '../../utils/localization';
+import type { CountryTaxConfig, ApAgingSummary } from '../../hooks/financialsHelpers';
 
 export type FinanceTab = 'overview' | 'expenses' | 'payroll' | 'tax' | 'budget';
 
@@ -20,6 +22,11 @@ export interface FinanceContextType {
     sites: Site[];
     getStorePoints: (siteId: string) => any;
 
+    // Multi-Country Sovereignty
+    effectiveCountry: Country;
+    countryProfile: CountryProfile;
+    currencySymbol: string;
+
     activeTab: FinanceTab;
     setActiveTab: (tab: FinanceTab) => void;
     isAddExpenseOpen: boolean;
@@ -34,9 +41,9 @@ export interface FinanceContextType {
     setDeleteInput: (val: string) => void;
     isPayrollModalOpen: boolean;
     setIsPayrollModalOpen: (open: boolean) => void;
-    selectedRegion: string;
-    setSelectedRegion: (region: any) => void;
-    currentTaxConfig: { name: string; taxName: string; rate: number; code: string };
+    selectedRegion?: string;
+    setSelectedRegion?: (region: any) => void;
+    currentTaxConfig: CountryTaxConfig;
     newExpData: Partial<ExpenseRecord>;
     setNewExpData: React.Dispatch<React.SetStateAction<Partial<ExpenseRecord>>>;
     dateRange: string;
@@ -91,8 +98,9 @@ export interface FinanceContextType {
     profitMargin: number;
     forecastData: any[];
     COLORS: string[];
-    TAX_REGIONS: any;
+    TAX_REGIONS?: any;
     EXPENSES_PER_PAGE: number;
+    apAging: ApAgingSummary;
 
     // Handlers
     getQuarterProgress: () => number;

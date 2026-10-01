@@ -10,6 +10,7 @@ interface LocationModalProps {
    products: Product[];
    sites: any[];
    allOrders: any[];
+   currencySymbol?: string;
 }
 
 export const LocationModal: React.FC<LocationModalProps> = ({
@@ -19,6 +20,7 @@ export const LocationModal: React.FC<LocationModalProps> = ({
    products,
    sites,
    allOrders,
+   currencySymbol = 'ETB',
 }) => {
    return (
       <Modal
@@ -104,7 +106,7 @@ export const LocationModal: React.FC<LocationModalProps> = ({
                                                 {incomingCost > 0 && incomingCost !== (p.costPrice || 0) && (
                                                    <div className={`text-[10px] flex items-center gap-1 ${incomingCost > (p.costPrice || 0) ? 'text-red-500 dark:text-red-400' : 'text-green-600 dark:text-green-400'}`}>
                                                       {incomingCost > (p.costPrice || 0) ? <TrendingUp size={10} /> : <TrendingDown size={10} />}
-                                                      New Cost: ${(incomingCost).toFixed(2)}
+                                                      New Cost: {currencySymbol} {(incomingCost).toFixed(2)}
                                                    </div>
                                                 )}
                                              </div>

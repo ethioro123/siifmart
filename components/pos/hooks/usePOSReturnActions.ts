@@ -33,7 +33,16 @@ export const usePOSReturnActions = ({
 }: UsePOSReturnActionsProps) => {
 
     const handleSearchForReturn = React.useCallback(() => {
-        const sale = sales.find(s => s.id === returnSearchId || s.receiptNumber === returnSearchId || s.id === `TX-${returnSearchId}`);
+        const query = returnSearchId.trim().toLowerCase();
+        if (!query) {
+            setFoundSaleForReturn(null);
+            return;
+        }
+        const sale = sales.find(s => {
+            const sId = (s.id || '').toLowerCase();
+            const rNum = (s.receiptNumber || '').toLowerCase();
+            return sId === query || rNum === query || `tx-${sId}` === query || sId.replace(/[^a-z0-9]/g, '') === query.replace(/[^a-z0-9]/g, '');
+        });
         if (sale) {
             setFoundSaleForReturn(sale);
             const initialConfig: Record<string, any> = {};
@@ -89,7 +98,7 @@ export const usePOSReturnActions = ({
             } catch (logErr) {
                 // Non-blocking audit log
             }
-            const tenderLabel = refundMethod === 'STORE_CREDIT' ? 'Store Credit' : refundMethod === 'TELEBIRR' ? 'Telebirr' : refundMethod === 'CBE_BIRR' ? 'CBE Birr' : 'Cash (HQ Approved)';
+            const tenderLabel = refundMethod === 'STORE_CREDIT' ? 'Store Credit' : refundMethod === 'TELEBIRR' ? 'Telebirr' : refundMethod === 'CBE_BIRR' ? 'CBE Birr' : (refundMethod as string) === 'M_PESA' ? 'M-Pesa' : 'Cash (HQ Approved)';
             addNotification('success', `Refund Issued via ${tenderLabel}: ${CURRENCY_SYMBOL} ${refundTotal.toLocaleString()}`);
         }
         setIsProcessing(false);

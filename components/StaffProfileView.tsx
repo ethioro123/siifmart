@@ -3,8 +3,9 @@ import { useStore } from '../contexts/CentralStore';
 import { useData } from '../contexts/DataContext';
 import { useGamification } from '../contexts/GamificationContext';
 import { hasPermission } from '../utils/permissions';
-import { getRoleHierarchy } from '../utils/roles';
+import { getRoleHierarchy, canEmployRole } from '../utils/roles';
 import { useStaffProfile } from '../hooks/useStaffProfile';
+import { AlertCircle, CheckCircle } from 'lucide-react';
 
 import StaffProfileHeader from './staff-profile/StaffProfileHeader';
 import StaffProfileNavigation from './staff-profile/StaffProfileNavigation';
@@ -34,6 +35,7 @@ interface StaffProfileViewProps {
     terminateInput?: string;
     setTerminateInput?: (val: string) => void;
     handleConfirmTermination?: () => void;
+    onApprove?: () => void;
 }
 
 export default function StaffProfileView(props: StaffProfileViewProps) {
@@ -55,15 +57,37 @@ export default function StaffProfileView(props: StaffProfileViewProps) {
     const canViewPayroll = hasPermission(user?.role, 'VIEW_PAYROLL') || isOwnProfile;
     const canTerminate = (user?.role === 'super_admin' || user?.role === 'hr' || user?.role === 'hr_manager') && userRoleLevel > targetRoleLevel && !isOwnProfile;
     const canDelete = user?.role === 'super_admin' && userRoleLevel > targetRoleLevel && !isOwnProfile;
+    const canApprove = (user?.role === 'super_admin' || user?.role === 'hr' || user?.role === 'hr_manager' || user?.role === 'admin') &&
+        canEmployRole(user?.role, employee.role) &&
+        employee.status === 'Pending Approval' &&
+        !isOwnProfile;
+
+    const handleApprove = () => {
+        if (props.onApprove) {
+            props.onApprove();
+        } else {
+            handleDirectApprove();
+        }
+    };
+
+    const handleDirectApprove = async () => {
+        try {
+            await updateEmployee({ ...employee, status: 'Active' }, user?.name || 'Admin');
+            addNotification('success', `✅ Approved: ${employee.name} is now Active.`);
+        } catch (err: any) {
+            addNotification('alert', `Failed to approve employee: ${err?.message || 'Unknown error'}`);
+        }
+    };
 
     const siteName = sites.find(s => s.id === employee.siteId || s.id === (employee as any).site_id)?.name || 'Headquarters';
     const currencySymbol = (employee as any).salaryCurrency || settings?.currency || 'ETB';
 
     return (
-        <div className="bg-white dark:bg-cyber-gray border border-gray-200 dark:border-white/5 rounded-2xl p-4 md:p-6 shadow-xl animate-in fade-in duration-500">
+        <div className="space-y-6 animate-in fade-in duration-300">
             <StaffProfileHeader 
                 employee={employee} isOwnProfile={isOwnProfile} canManageEmployees={canManage} 
                 canResetPassword={userRoleLevel > targetRoleLevel} canTerminate={canTerminate} canDelete={canDelete}
+                canApprove={canApprove} onApprove={handleApprove}
                 isOnline={isOnline}
                 onPhotoRequest={onRequestPhotoChange || (() => profile.profilePhotoInputRef.current?.click())}
                 onIdCard={() => profile.setIdCardOpen(true)} onMessage={() => profile.setIsMessageModalOpen(true)}
@@ -71,6 +95,31 @@ export default function StaffProfileView(props: StaffProfileViewProps) {
                 onTerminate={props.handleConfirmTermination || (() => {})} onDelete={() => {}}
                 photoInputRef={profile.profilePhotoInputRef} handleProfilePhotoSelect={profile.handleProfilePhotoSelect}
             />
+
+            {employee.status === 'Pending Approval' && (
+                <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-amber-500/10 via-amber-500/5 to-transparent border border-amber-500/30 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-xs">
+                    <div className="flex items-center gap-3.5">
+                        <div className="p-2.5 rounded-xl bg-amber-500/20 text-amber-600 dark:text-amber-400 flex-shrink-0">
+                            <AlertCircle size={22} />
+                        </div>
+                        <div>
+                            <h4 className="text-sm font-bold text-amber-950 dark:text-amber-200">Pending Onboarding Approval</h4>
+                            <p className="text-xs text-amber-800/90 dark:text-amber-300/80 mt-0.5">
+                                This employee was onboarded with "Pending Approval" status and requires HR / Super Admin sign-off before being granted active system access.
+                            </p>
+                        </div>
+                    </div>
+                    {canApprove && (
+                        <button
+                            onClick={handleApprove}
+                            className="px-4 py-2 rounded-xl bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 text-white font-bold text-xs flex items-center gap-2 transition-all flex-shrink-0 cursor-pointer shadow-md shadow-emerald-600/20 active:scale-98"
+                        >
+                            <CheckCircle size={15} />
+                            Approve Talent
+                        </button>
+                    )}
+                </div>
+            )}
 
             <StaffProfileNavigation 
                 activeProfileTab={profile.activeProfileTab} setActiveProfileTab={profile.setActiveProfileTab}

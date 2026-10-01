@@ -130,12 +130,12 @@ export const PutawayActiveJob: React.FC<PutawayActiveJobProps> = ({
             </div>
 
             {/* Footer Actions */}
-            <div className="p-6 border-t border-[#E2DCCE]/60 dark:border-white/10 bg-[#FAF8F5]/50 dark:bg-black/40 backdrop-blur-md">
+            <div className="p-4 sm:p-6 border-t border-[#E2DCCE]/60 dark:border-white/10 bg-[#FAF8F5]/90 dark:bg-black/60">
                 {progress === 100 ? (
                     <button
                         onClick={onCompleteJob}
                         disabled={isSubmitting}
-                        className="w-full h-16 bg-emerald-600 hover:bg-emerald-500 text-white font-black rounded-2xl flex items-center justify-center gap-3 transition-all border border-emerald-400/50 shadow-md uppercase tracking-[0.2em] text-xs disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="w-full h-14 sm:h-16 bg-emerald-600 hover:bg-emerald-500 text-white font-black rounded-2xl flex items-center justify-center gap-3 transition-colors border border-emerald-400/50 shadow-md uppercase tracking-[0.2em] text-xs disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                         {isSubmitting ? (
                             <Loader2 size={24} className="animate-spin" />

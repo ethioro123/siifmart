@@ -1,32 +1,46 @@
 import { supabase } from '../lib/supabase';
 import type { LogisticsZone } from '../types';
+import { logger } from '../utils/logger';
 
 export const logisticsZonesService = {
-    async getAll(): Promise<LogisticsZone[]> {
-        const { data, error } = await supabase
+    async getAll(country?: string): Promise<LogisticsZone[]> {
+        let query = supabase
             .from('logistics_zones')
             .select('*')
             .order('name', { ascending: true });
 
+        if (country) {
+            if (country === 'ET') {
+                query = query.or('country.eq.ET,country.is.null');
+            } else {
+                query = query.eq('country', country);
+            }
+        }
+
+        const { data, error } = await query;
+
         if (error) {
-            console.error('❌ Error fetching logistics zones:', error);
+            logger.error('logisticsZonesService', 'Error fetching logistics zones:', error);
             throw error;
         }
         return data || [];
     },
 
     async create(zone: Omit<LogisticsZone, 'id' | 'created_at' | 'updated_at'>): Promise<LogisticsZone> {
+        const payload: Record<string, unknown> = {
+            name: zone.name,
+            description: zone.description,
+            country: zone.country || 'ET'
+        };
+
         const { data, error } = await supabase
             .from('logistics_zones')
-            .insert({
-                name: zone.name,
-                description: zone.description
-            })
+            .insert(payload)
             .select()
             .single();
 
         if (error) {
-            console.error('❌ Error creating logistics zone:', error);
+            logger.error('logisticsZonesService', 'Error creating logistics zone:', error);
             throw error;
         }
         return data;
@@ -45,7 +59,7 @@ export const logisticsZonesService = {
             .single();
 
         if (error) {
-            console.error('❌ Error updating logistics zone:', error);
+            logger.error('logisticsZonesService', 'Error updating logistics zone:', error);
             throw error;
         }
         return data;
@@ -58,7 +72,7 @@ export const logisticsZonesService = {
             .eq('id', id);
 
         if (error) {
-            console.error('❌ Error deleting logistics zone:', error);
+            logger.error('logisticsZonesService', 'Error deleting logistics zone:', error);
             throw error;
         }
     }

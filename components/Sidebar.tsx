@@ -11,6 +11,7 @@ import { useData } from '../contexts/DataContext';
 import { UserRole } from '../types';
 import { getAvailableSections } from '../services/auth.service';
 import { native } from '../utils/native';
+import { findCountryAdminSite } from '../utils/countryAdmin';
 import Logo from './Logo';
 
 interface SidebarItemProps {
@@ -40,7 +41,7 @@ const SidebarItem: React.FC<SidebarItemProps> = ({ to, icon: Icon, label, onClic
 
 export default function Sidebar() {
   const { user, isSidebarOpen, toggleSidebar } = useStore();
-  const { activeSite, sites, setActiveSite } = useData();
+  const { activeSite, sites, setActiveSite, effectiveCountry } = useData();
   const navigate = useNavigate();
 
   if (!user) return null;
@@ -48,13 +49,10 @@ export default function Sidebar() {
   // Get available sections based on role AND site type
   const availableSections = getAvailableSections(user.role, activeSite?.type);
 
-  // CEO clicking "Central Operations": switch to the Administration site (SITE-0001)
+  // CEO clicking "Central Operations": switch to the Administration site for effective country
   const handleAdminClick = () => {
-    const adminSite = sites.find(s =>
-      s.code === 'SITE-0001' ||
-      s.name === 'Central Operations' ||
-      ['Administrative', 'Administration', 'HQ', 'Headquarters', 'Head Office'].includes(s.type || '')
-    );
+    const targetCountry = effectiveCountry || 'ET';
+    const adminSite = findCountryAdminSite(sites, targetCountry) || sites.find(s => (s.country || 'ET') === targetCountry);
     if (adminSite) {
       setActiveSite(adminSite.id);
     }
@@ -68,25 +66,25 @@ export default function Sidebar() {
   const getNavItems = (userRole: UserRole) => {
     const allItems = [
       // WMS DASHBOARD - Overview (Managers Only)
-      { to: "/wms-dashboard", icon: LayoutDashboard, label: "WMS Dashboard", section: "warehouse", roles: ['super_admin', 'warehouse_manager', 'dispatcher', 'inventory_specialist'] },
+      { to: "/wms-dashboard", icon: LayoutDashboard, label: "WMS Dashboard", section: "warehouse", roles: ['super_admin', 'warehouse_manager', 'dispatcher', 'inventory_specialist', 'operations_manager', 'regional_manager', 'supply_chain_manager'] },
 
       // NETWORK INVENTORY - Executive & Supply Chain Leadership
-      { to: "/network-inventory", icon: Globe, label: "Network View", section: "inventory", roles: ['super_admin', 'admin', 'supply_chain_manager', 'operations_manager', 'finance_manager', 'procurement_manager', 'auditor'] },
+      { to: "/network-inventory", icon: Globe, label: "Network View", section: "inventory", roles: ['super_admin', 'admin', 'supply_chain_manager', 'operations_manager', 'finance_manager', 'procurement_manager', 'auditor', 'regional_manager'] },
 
       // INVENTORY
-      { to: "/inventory", icon: Package, label: "Inventory", section: "inventory", roles: ['super_admin', 'store_manager', 'assistant_manager', 'shift_lead', 'warehouse_manager', 'dispatcher', 'dispatch_manager', 'auditor', 'procurement_manager', 'inventory_specialist', 'store_supervisor', 'pos'] },
+      { to: "/inventory", icon: Package, label: "Inventory", section: "inventory", roles: ['super_admin', 'store_manager', 'assistant_manager', 'shift_lead', 'warehouse_manager', 'dispatcher', 'dispatch_manager', 'auditor', 'procurement_manager', 'inventory_specialist', 'store_supervisor', 'pos', 'operations_manager', 'regional_manager', 'supply_chain_manager'] },
 
-      // FULFILLMENT (WMS) - Warehouse staff only
-      { to: "/wms-ops", icon: ClipboardList, label: "Fulfillment", section: "warehouse", roles: ['super_admin', 'admin', 'warehouse_manager', 'operations_manager', 'dispatch_manager', 'dispatcher', 'picker', 'packer', 'receiver', 'driver', 'inventory_specialist'] },
+      // FULFILLMENT (WMS) - Warehouse staff & operations leadership
+      { to: "/wms-ops", icon: ClipboardList, label: "Fulfillment", section: "warehouse", roles: ['super_admin', 'admin', 'warehouse_manager', 'operations_manager', 'dispatch_manager', 'dispatcher', 'picker', 'packer', 'receiver', 'driver', 'inventory_specialist', 'regional_manager', 'supply_chain_manager'] },
 
-      // PROCUREMENT - Warehouse and procurement only
-      { to: "/procurement", icon: Truck, label: "Procurement", section: "procurement", roles: ['super_admin', 'warehouse_manager', 'dispatcher', 'procurement_manager', 'finance_manager'] },
+      // PROCUREMENT - Warehouse, procurement & operational leadership
+      { to: "/procurement", icon: Truck, label: "Procurement", section: "procurement", roles: ['super_admin', 'warehouse_manager', 'dispatcher', 'procurement_manager', 'finance_manager', 'operations_manager', 'regional_manager', 'supply_chain_manager'] },
 
       // ROADMAP - CEO Only (Confidential Strategic Canvas)
       { to: "/roadmap", icon: Map, label: "Roadmap", section: "dashboard", roles: ['super_admin'] },
 
-      // CENTRAL OPERATIONS - CEO Only (handled separately via handleAdminClick)
-      { to: "/admin", icon: Activity, label: "Central Operations", section: "dashboard", roles: ['super_admin'] },
+      // CENTRAL OPERATIONS - CEO & Operations Leadership
+      { to: "/admin", icon: Activity, label: "Central Operations", section: "dashboard", roles: ['super_admin', 'admin', 'operations_manager', 'regional_manager'] },
 
       // POS
       { to: "/pos", icon: ShoppingCart, label: "POS Terminal", section: "pos", roles: ['super_admin', 'store_manager', 'assistant_manager', 'shift_lead', 'pos', 'store_supervisor'] },
@@ -95,7 +93,7 @@ export default function Sidebar() {
       { to: "/pos-dashboard", icon: Eye, label: "POS Command", section: "pos", roles: ['super_admin', 'store_manager', 'assistant_manager', 'shift_lead', 'pos', 'store_supervisor'] },
 
       // SALES - Management & Auditing (Cashiers blocked from historical revenue)
-      { to: "/sales", icon: FileText, label: "Sales History", section: "sales", roles: ['super_admin', 'store_manager', 'assistant_manager', 'shift_lead', 'auditor', 'finance_manager', 'cs_manager', 'store_supervisor'] },
+      { to: "/sales", icon: FileText, label: "Sales History", section: "sales", roles: ['super_admin', 'store_manager', 'assistant_manager', 'shift_lead', 'auditor', 'finance_manager', 'cs_manager', 'store_supervisor', 'operations_manager', 'regional_manager'] },
 
       // MERCHANDISING
       { to: "/pricing", icon: Tags, label: "Merchandising", section: "pricing", roles: ['super_admin', 'finance_manager', 'procurement_manager'] },
@@ -104,10 +102,10 @@ export default function Sidebar() {
       { to: "/finance", icon: DollarSign, label: "Financials", section: "finance", roles: ['super_admin', 'auditor', 'finance_manager'] },
 
       // CUSTOMERS
-      { to: "/customers", icon: Users, label: "Customers", section: "customers", roles: ['super_admin', 'store_manager', 'assistant_manager', 'shift_lead', 'pos', 'cs_manager', 'store_supervisor'] },
+      { to: "/customers", icon: Users, label: "Customers", section: "customers", roles: ['super_admin', 'store_manager', 'assistant_manager', 'shift_lead', 'pos', 'cs_manager', 'store_supervisor', 'operations_manager', 'regional_manager'] },
 
       // EMPLOYEES
-      { to: "/employees", icon: Briefcase, label: "Employees", section: "employees", roles: ['super_admin', 'admin', 'hr', 'store_manager', 'assistant_manager', 'shift_lead', 'store_supervisor'] },
+      { to: "/employees", icon: Briefcase, label: "Employees", section: "employees", roles: ['super_admin', 'admin', 'hr', 'hr_manager', 'store_manager', 'assistant_manager', 'shift_lead', 'store_supervisor', 'operations_manager', 'regional_manager'] },
 
       // SETTINGS
       { to: "/settings", icon: Settings, label: "Settings", section: "settings", roles: ['super_admin', 'admin', 'hr', 'it_support'] },
@@ -147,7 +145,13 @@ export default function Sidebar() {
       } else if (isHQ) {
         // In Administration HQ site (e.g. SITE-0001): SHOW Central Operations & HQ tools; HIDE WMS-only & POS-only site ops.
         if (['warehouse', 'pos'].includes(item.section)) {
-          isAllowedForSite = false;
+          // Operations, supply chain, and regional leaders at HQ must have access to fulfillment & warehouse supervision
+          const isOpsLeader = ['operations_manager', 'regional_manager', 'supply_chain_manager'].includes(userRole);
+          if (item.section === 'warehouse' && isOpsLeader) {
+            // Keep warehouse allowed for operational directors
+          } else {
+            isAllowedForSite = false;
+          }
         }
       }
 

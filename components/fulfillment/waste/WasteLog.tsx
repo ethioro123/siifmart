@@ -3,21 +3,22 @@ import { Plus, Trash2, Package, X, RefreshCw, AlertTriangle } from 'lucide-react
 import { Product, PendingInventoryChange, User } from '../../../types';
 import { formatCompactNumber } from '../../../utils/formatting';
 import { CURRENCY_SYMBOL } from '../../../constants';
+import { useCreateInventoryRequestMutation } from '../../../hooks/useInventoryRequestMutations';
 import { logger } from '../../../utils/logger';
 
 interface WasteLogProps {
     products: Product[];
     user: User | null;
     addNotification: (type: 'alert' | 'success' | 'info', message: string) => void;
-    inventoryRequestsService: any;
+    inventoryRequestsService?: any;
 }
 
 export const WasteLog: React.FC<WasteLogProps> = ({
     products,
     user,
     addNotification,
-    inventoryRequestsService
 }) => {
+    const createRequestMutation = useCreateInventoryRequestMutation();
     const [wasteBasket, setWasteBasket] = useState<{
         productId: string;
         quantity: number;
@@ -197,7 +198,7 @@ export const WasteLog: React.FC<WasteLogProps> = ({
                                             adjustmentQty: item.quantity,
                                             adjustmentReason: `Waste: ${item.reason}${item.notes ? ` (${item.notes})` : ''}`
                                         };
-                                        await inventoryRequestsService.create(request);
+                                        await createRequestMutation.mutateAsync(request);
                                     }
 
                                     setWasteBasket([]);

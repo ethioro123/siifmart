@@ -47,6 +47,20 @@ await productsService.update(id, { stock: newStock });
 - HQ/CEO views use `siteId === null` or aggregate across sites
 - Always check `products.filter(p => p.siteId === currentSiteId)`
 
+### Config-First Architecture & Controllability
+- **Whenever creating or auditing ANY logic in the system**, check: **"Does this logic need a setting to control it?"**
+- Operational thresholds (e.g. low stock levels, shift revenue targets, QC sample rates), workflow behaviors (e.g. blind receive vs verified receive, guest checkout, negative stock blocking, mandatory expiry), and compliance policies MUST be backed by a configurable setting in the appropriate settings panel.
+- Never hardcode business policies or magic numbers into components or services.
+
+### Country-Separated Configuration
+- **Every single setting in the entire system must be isolated and partitioned by country.**
+- A setting configured for one country (e.g. Ethiopia `ET`) MUST NEVER apply to, affect, or override another country (e.g. Kenya `KE`).
+- Settings storage (`system_config`), queries, and mutations must be explicitly scoped to `country_code`.
+
+### Database Migrations & Mandatory In-Chat SQL Delivery
+- **Every database change MUST have a migration file** in `/migrations/` named `YYYYMMDD_description.sql`.
+- **Mandatory In-Chat SQL Delivery**: Whenever ANY SQL migration, table, column, index, RPC function, or RLS policy is created or modified while coding, the AI MUST bring the complete, runnable, copy-pasteable SQL directly into the chat response every single time so the user can easily copy and execute it in Supabase SQL Editor. Never silently create or modify migration files without delivering the full runnable SQL in the chat.
+
 ---
 
 ## Role Hierarchy
@@ -64,6 +78,131 @@ const canApprove = ['super_admin', 'CEO'].includes(user?.role || '');
 ```
 
 ---
+
+## Ethiopia Zero-Trust Operating Model & Daily HQ Central Oversight
+
+> **Operating Reality**: SIIFMART operates across retail branches and warehouse hubs in Ethiopia (Addis Ababa, Dire Dawa, Adama, Harar, etc.).
+> **Security Baseline**: Branch managers and staff are **NOT trusted** with unilateral financial, inventory, or pricing powers. High shrinkage, cash-heavy transactions, and theft risks demand that **everything is monitored, verified, and daily looked after from HQ**.
+
+### 1. Zero Autonomous Branch Authority
+- **No Unilateral Stock Adjustments**: Branch managers CANNOT write off stock, adjust inventory levels, or declare shrinkage directly. All adjustments MUST be submitted as `inventory_requests` for **HQ approval**.
+- **No Local Price Overrides**: Prices and promotions are centrally controlled by HQ Merchandising. Cashiers and branch managers cannot alter product prices or create local discount codes.
+- **Dual-Control (4-Eyes Principle)**: Any refund above threshold, voided transaction, or manual drawer kick requires dual authorization (Cashier + Manager or Branch + HQ OTP).
+
+### 2. Mandatory Daily HQ Oversight Cadence
+- **Morning Opening Float**: Cashiers must record their opening cash float at register opening; HQ dashboard monitors all opening floats across all branches.
+- **Real-Time Shift & Cash Synchronization**: Shift transactions, cash drops, and payments (Cash, Telebirr, CBE Birr) must sync directly to Supabase — **NEVER store shifts in localStorage**.
+- **End-of-Day (EOD) Z-Report & Cash Reconciliation**: Every branch must submit physical cash counts vs system totals at close of day. Cash discrepancies trigger an alert to HQ Finance & Audit. Next-day opening requires cleared reconciliation.
+- **Daily Blind Cycle Counts**: HQ centrally schedules daily blind counts. Branch staff count items without seeing the system's expected quantity, preventing rubber-stamping.
+
+### 3. Supply Chain Chain-of-Custody
+- **Blind Receiving**: When receiving purchase orders or inter-branch transfers, staff must blind-count. Expected quantities are not shown upfront.
+- **Transfer Discrepancy Lock**: If shipped units != received units, the transfer status locks to `Discrepancy` and immediately alerts HQ Operations.
+
+### 4. Immutable Audit Trail & Geofencing
+- Every sensitive event (void, drawer kick, refund, price check, shift close) must write an immutable log to `system_logs` in Supabase with timestamp, user ID, branch ID, device ID, and GPS coordinates.
+- **Strict Site Scoping**: Branch users can NEVER view cross-site inventory counts, supplier costs, central profit margins, or other branches' financial data.
+
+---
+
+## Multi-Country Tenant Isolation & National Sovereignty Model
+
+> **Operating Reality**: SIIFMART operates across multiple sovereign East African nations (Ethiopia HQ `ET`, Kenya Hub `KE`, and extensible to Uganda `UG`, Rwanda `RW`, Tanzania `TZ`).
+> **Core Principle**: **One Platform, Distinct National Realities**. Absolute data isolation across countries. Zero cross-border data bleeding.
+
+### 1. Enterprise Architecture: Absolute Multi-Country Data Separation
+- **Zero Cross-Country Data Leakage**: Dashboards, sales KPIs, gross profit, stock counts, orders, shifts, and employee rosters in Kenya must **NEVER** mix, display, or aggregate Ethiopian data (and vice-versa).
+- **Zero Arithmetic Cross-Addition**: Under no circumstances may 1,000 ETB and 1,000 KSh be added together into a single sum.
+- **Non-CEO Staff Lockdown**: Cashiers, store managers, pickers, and drivers are hard-pinned to their assigned site's country via `getUserCountry()`. Any attempt to tamper with client storage, URL parameters, or network payloads to view another country is blocked.
+- **Executive Dual-Oversight (CEO / Super Admin Only)**: Only the `CEO` or `super_admin` can switch country instances (`canSwitchCountry()`). When switching, the entire application context (sites, active facility, products, sales, orders, employees) cleanly re-hydrates to that country.
+- **Physical Facility & Intra-Country Movement**: All facilities (Stores, Warehouses, Distribution Centers) are bound to one country. Standard stock movements are intra-country only; cross-border movements require international import/export customs clearance.
+- **Legacy Baseline & New Country Guarantee**: All historical data defaults to Ethiopia (`ET`). Any new country added starts 100% fresh as an isolated tenant with zero code refactoring.
+
+### 2. Merchandising Separation Rules
+- **National Assortment & Catalog Scope**: While a global barcode or SKU reference may exist in the master library, products are only sellable and visible if active for that country's sites. POS and inventory lookups never leak other countries' products.
+- **National Price Sovereignty**: Retail prices are explicitly entered and maintained in local currency (**`KSh`** in Kenya, **`ETB`** in Ethiopia). Never auto-convert retail shelf prices across borders using live exchange rates.
+- **Zero Autonomous Price Changes**: Branch managers and cashiers have zero authority to alter prices or create custom discounts. All markdowns require HQ approval.
+- **Campaign & Voucher Isolation**: Promotional campaigns (e.g. Mashujaa Day vs Enkutatash) and discount vouchers are country-bound. Kenyan vouchers return "Invalid code" at Ethiopian registers.
+- **Perishable Markdowns & Forecasting**: Perishable markdown schedules and AI demand forecasting models train and execute exclusively on local country sales history.
+
+### 3. Settings & System Configuration Separation Rules
+- **100% Country-Level Setting Isolation**: EVERY SINGLE setting in the system (POS terminal logic, WMS inbound/health/outbound policies, inventory thresholds, tax rates, tender gateways, receipt formats, shift targets, approval limits) MUST be strictly separated and isolated per country.
+- **Zero Cross-Country Setting Bleed**: Any setting set for one country MUST NEVER apply to, affect, or override another country. There is no concept of a "shared global operational setting" across national borders.
+- **Per-Country Database Scoping**: All configuration records in `system_config` or dedicated setting stores must be partitioned/keyed by `country_code` (e.g., `ET`, `KE`, `UG`). Queries and mutations must always be explicitly scoped to the active country.
+- **National Fiscal & Tax Compliance**: Distinct tax authorities (`KRA` 16% VAT vs `ERCA` 15% VAT vs `URA` 18% VAT), national tax ID formats (KRA PIN vs TIN), and local timezones (`Africa/Nairobi` vs `Africa/Addis_Ababa`).
+- **Tender & Gateway Segregation**: M-Pesa / Airtel Money strictly for Kenya; Telebirr / CBE Birr strictly for Ethiopia; MTN MoMo for Uganda. POS checkout options strictly hide foreign tenders.
+- **Receipt & Invoicing Templates**: Receipts format exclusively with the local currency symbol (**`KSh`**, **`ETB`**, **`USh`**), local tax ID, local support phone (`+254` vs `+251`), and fiscal QR compliance footers.
+- **Facility Country Immutability**: Facility `country` is required on creation and permanently locks the site's operating market and accounting ledger.
+- **Administrative Access Boundaries**: Branch staff are limited to local peripheral settings (printers, scanners) and strictly locked out of corporate localization, tax rates, and gateway credentials.
+
+### 4. Architecture: Multi-Country SKU & Merchandising Strategy
+- **Different Country, Different SKU Pattern**:
+  - Country-prefixed namespace: `ET-[CAT][SEQ]` for Ethiopia, `KE-[CAT][SEQ]` for Kenya, `UG-[CAT][SEQ]` for Uganda (e.g. `KE-FR001`, `ET-BV004`).
+  - Guarantees zero database collision and provides instant physical identification on shipping labels and box tags.
+  - Cross-Border Scanner Rejection: Scanning an Ethiopian item (`ET-BV002`) at a Kenyan POS or WMS Putaway dock instantly halts with *"Foreign SKU Detected: Item belongs to Ethiopia market."*
+- **Similar Strategy (Universal Engine)**:
+  - Universal category taxonomy (`FR`, `DY`, `MT`, `BV`, `SN`, `CL`, etc.).
+  - Universal sequential generation logic (`Max + 1` calculated independently per national catalog).
+  - Universal FEFO (First-Expired, First-Out) rotation and batch expiry tracking.
+  - Universal margin protection formulas (Landed Cost + Target Margin % = Base Retail).
+  - Universal markdown ladders (T-3 days: 10% off; T-1 day: 25% off; Expiry: 50% off).
+
+### 5. Config-First Architecture: Mandatory Logic Controllability
+- **Config-Gating Requirement**: Whenever creating or auditing ANY business logic, operational workflow, threshold, or policy in the system (WMS receiving/putaway/picking, POS checkout/returns/shifts, inventory valuation, stock adjustments, pricing rules), you MUST evaluate: **"Does this logic need a setting to control it?"**
+- **No Hardcoded Policies**: Hardcoding behavioral rules (e.g. blind count vs verified count, guest checkout allowed, negative stock blocking, mandatory expiry, shift target revenue, QC sample rates) without a controlling setting in the appropriate country configuration panel is strictly prohibited.
+- **Country-Scoped Setting Provisioning**: When introducing a new setting to control logic, the setting must be provisioned across all country configuration schemas with appropriate country-specific defaults.
+
+### 6. Single Global Country Switch & Invisible Multi-Tenancy Architecture
+- **Zero Per-Screen Country Selectors**: We do NOT create country selection chips, dropdowns, or partition switcher banners inside individual settings pages or tabs (POS settings, WMS settings, Inventory settings, General settings).
+- **Single Global Switch (CEO / Super Admin Only)**: Choosing between countries is performed exclusively by the CEO/Super Admin via **ONE central toggle/selection** in the global application header. When selected (e.g. Kenya `KE`), the entire system cleanly re-hydrates globally — all settings, facilities, dashboards, and inventories immediately reflect that country's tenant.
+- **Invisible Tenancy for Branch Staff & Clean Native Experience**: Non-CEO users (cashiers, store managers, pickers, drivers, branch accountants) must NEVER see country pickers, partition banners, or multi-tenant switches anywhere. To each user, the application is presented 100% as a native, single-nation system (e.g., fully Kenyan website for Kenyan branches). A user should not see or be aware of whether they are using a Kenyan or Ethiopian tenant.
+- **Automatic 100% Background Separation**: All settings panels, hooks, and services MUST enforce 100% data and setting separation automatically in the background. Settings pages automatically read from and write to the active country's partition (`countryConfigs[targetCountry]`) without requiring the user to manually target a country or choose between tenants in the form UI.
+
+---
+
+## Cybersecurity & Anti-Hacking Rules (Zero-Compromise Defense)
+
+> **Threat Model**: SIIFMART operates over public internet, cellular (Ethio Telecom), and store Wi-Fi networks in Ethiopia. Threat actors include rogue employees, malicious insiders using DevTools/cURL, stolen POS tablets, and external attackers probing public Supabase endpoints.
+
+### 1. Server-Enforced Row-Level Security (Never Trust the Client)
+- **RLS on EVERY Table**: Every Supabase table MUST have `ENABLE ROW LEVEL SECURITY`. Never rely on client-side React routes (`<ProtectedRoute>`) as security boundaries — an attacker can bypass the UI and make HTTP requests directly to Supabase PostgREST endpoints using the public `anon` key.
+- **Tenant & Site Isolation**: All queries must enforce site boundaries at the DB policy level so staff cannot query other branches:
+  ```sql
+  -- Branch staff can only read/write rows belonging to their assigned site
+  CREATE POLICY site_isolation_policy ON sales
+    FOR SELECT TO authenticated
+    USING (site_id = (SELECT site_id FROM employees WHERE id = auth.uid()) OR (auth.jwt() ->> 'role') IN ('super_admin', 'CEO'));
+  ```
+- **Append-Only Immutable Logs**: Audit and transaction logs (`system_logs`, `points_transactions`, `stock_movements`) must NEVER have `UPDATE` or `DELETE` RLS policies granted to non-admin roles.
+
+### 2. Zero Hardcoded Secrets & Key Separation
+- **No Private Keys in Client Bundles**: The frontend app bundle MUST ONLY contain the Supabase `anon` public key.
+- **Service-Role Key Protection**: The `service_role` key bypasses all RLS. It must **NEVER** be placed in client `.env`, `CentralStore`, or any file bundled by Vite. Privileged actions requiring service-role authority must run exclusively inside secure Supabase Edge Functions.
+- **No Plain-Text Credentials**: Hardcoded test passwords (e.g. `siif123`, `Oromo123`), quick-login credentials, or API secret tokens must never exist in frontend code or git commits.
+
+### 3. Financial & Pricing Anti-Tampering
+- **No Client Price Authority**: Never trust unit prices, cart totals, or discount amounts sent by the browser. When a sale is processed:
+  - Unit prices must match server catalog prices.
+  - Cart totals, tax breakdowns, and discounts must be verified before persisting to `sales`.
+  - A cashier modifying HTML inputs or intercepting network requests to pay 1 Birr for a 1,000 Birr item must be rejected immediately and logged as a security alert.
+
+### 4. Input Sanitization & Injection Defense
+- **Zod Schema Validation**: Validate all mutation payloads with Zod schemas (`/schemas/`) before submitting to the database.
+- **No SQL Injection**: Always use Supabase parameterized query builders (`.eq()`, `.in()`). Never construct raw SQL strings with user input.
+- **Mass-Assignment Defense**: Every service `update()` method must explicitly whitelist writable DB columns. Never pass `{ ...updates }` directly to Supabase.
+- **Cross-Site Scripting (XSS)**: Never use `dangerouslySetInnerHTML` with raw user inputs (notes, customer names, receipt previews). Sanitize any dynamically rendered HTML.
+
+### 5. Session Hardening & Staff PIN Security
+- **Hashed Fast-Switch PINs**: 4-digit/6-digit cashier fast-switch PINs must be cryptographically hashed (e.g. bcrypt/argon2). Never store PINs in plaintext in `employees` table.
+- **Brute-Force Lockout**: Enforce exponential backoff and lock the register after 3 failed PIN attempts.
+- **Short-Lived Sessions**: Sensitive managerial actions expire after inactivity; require re-authentication.
+
+### 6. Geofencing & Anti-Theft Device Tracking
+- **Location Spoofing Deterrence**: Clock-ins, register float openings, and high-value approvals must log GPS coordinates, device user-agent, and client IP to detect unauthorized off-premise access.
+
+---
+
+
 
 ## Naming Conventions
 
@@ -504,14 +643,24 @@ When editing or creating any file, the AI MUST:
 ---
 
 ## Don'ts
+- ❌ Don't trust branch managers or staff with autonomous stock, price, or discount overrides (enforce HQ approval)
+- ❌ Don't store shifts, cash reconciliations, permissions, or discounts in `localStorage`
+- ❌ Don't expose expected stock quantities during cycle counts or transfer receiving (enforce blind counting)
+- ❌ Don't allow soft-deletes or silent deletion of transaction, shift, or audit logs
+- ❌ Don't skip role checks or allow cross-site data exposure to branch staff
+- ❌ Don't hardcode passwords, test accounts, master PINs, or API keys in client code
+- ❌ Don't trust client-supplied unit prices, totals, or discounts without server catalog verification
+- ❌ Don't rely on frontend route guards for security — enforce RLS on every DB table
+- ❌ Don't use `dangerouslySetInnerHTML` with unsanitized user content
+- ❌ Don't expose the Supabase `service_role` key to frontend bundles or client environment variables
 - ❌ Don't use inline styles (use Tailwind or CSS variables)
 - ❌ Don't call services directly for mutations
 - ❌ Don't skip role checks for sensitive actions
-- ❌ Don't hardcode site IDs
+- ❌ Don't hardcode site IDs or credentials
 - ❌ Don't create duplicate mutation logic in components
 - ❌ Don't push to GitHub without incrementing/verifying the version number in [LoginPage.tsx](file:///Users/shukriidriss/Downloads/siifmart%2080/components/LoginPage.tsx)
 - ❌ Don't let any file exceed 500 lines — split into new files instead
-- ❌ Don't leave `console.log` statements — remove or replace with `console.error`/`console.warn`
+- ❌ Don't leave `console.log` statements — remove or replace with `logger` from `/utils/logger.ts`
 - ❌ Don't use `any` type — always define proper TypeScript types
 - ❌ Don't create a new service if one already exists for that domain — extend it
 - ❌ Don't put hooks in `/utils/` — they belong in `/hooks/`
@@ -521,3 +670,18 @@ When editing or creating any file, the AI MUST:
 - ❌ Don't spread full objects into Supabase `update()` — use explicit allowlists
 - ❌ Don't add a TypeScript field without updating the service mapper (read) and allowlist (write)
 - ❌ Don't use the old `cyber-*` design tokens — use the sand/emerald/amber palette
+- ❌ Don't mix data or KPIs across countries (e.g. never display Ethiopian metrics on a Kenyan dashboard)
+- ❌ Don't auto-convert retail shelf prices between countries using live exchange rates
+- ❌ Don't allow non-CEO staff to view or switch to another country (enforce branch lockdown)
+- ❌ Don't generate new SKUs without the active country prefix (`ET-`, `KE-`, `UG-`, etc.)
+- ❌ Don't allow cross-border tender processing (e.g. M-Pesa in Ethiopia or Telebirr in Kenya)
+- ❌ Don't perform selective rule checks — when asked to validate any code or logic, check against EVERY rule in this document, not just the ones that seem contextually relevant
+- ❌ Don't hardcode operational business logic, thresholds, or workflow behaviors without a configurable setting to control them
+- ❌ Don't allow any setting to apply across multiple countries — every single setting must be 100% separated per country
+- ❌ Don't mutate or fetch system settings without passing the active country scope (`country_code`)
+- ❌ Don't add country selectors, dropdowns, or partition switcher banners inside individual settings pages or tabs (country switching belongs ONLY in the central CEO global switch)
+- ❌ Don't expose tenancy selection or multi-tenant mechanics to non-CEO branch users (the application must render seamlessly as a native national platform)
+- ❌ Don't require users to manually target a country when configuring settings — the system must automatically bind and isolate settings per active country in the background
+- ❌ Don't create or modify SQL migrations without bringing the complete, runnable SQL to the chat for the user to run in Supabase
+
+

@@ -22,6 +22,7 @@ interface InventoryToolbarProps {
     selectedIds: Set<string>;
     setSelectedIds: React.Dispatch<React.SetStateAction<Set<string>>>;
     handleBulkAction: (action: string) => void;
+    currencySymbol?: string;
 }
 
 const SORT_OPTIONS = [
@@ -50,7 +51,8 @@ export const InventoryToolbar: React.FC<InventoryToolbarProps> = ({
     sites,
     selectedIds,
     setSelectedIds,
-    handleBulkAction
+    handleBulkAction,
+    currencySymbol = 'ETB'
 }) => {
     const [isAdvancedOpen, setIsAdvancedOpen] = useState(false);
 
@@ -316,7 +318,7 @@ export const InventoryToolbar: React.FC<InventoryToolbarProps> = ({
 
                         {(filters.minPrice || filters.maxPrice) && (
                             <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[10px] font-bold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
-                                <DollarSign size={10} /> {filters.minPrice || 0} - {filters.maxPrice || '∞'} ETB
+                                <DollarSign size={10} /> {filters.minPrice || 0} - {filters.maxPrice || '∞'} {currencySymbol}
                                 <button type="button" onClick={() => setFilters((p: any) => ({ ...p, minPrice: '', maxPrice: '' }))} className="hover:text-red-500 ml-1">
                                     <X size={10} />
                                 </button>
@@ -369,6 +371,7 @@ export const InventoryToolbar: React.FC<InventoryToolbarProps> = ({
                 setFilters={setFilters}
                 onReset={handleResetAll}
                 activeCount={activeFiltersCount}
+                currencySymbol={currencySymbol}
             />
 
             {/* Bulk Selection Toolbar */}

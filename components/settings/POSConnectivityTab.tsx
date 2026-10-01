@@ -1,6 +1,8 @@
 import React from 'react';
 import { Globe, Smartphone, CreditCard, UserCheck, Printer, Save, Banknote } from 'lucide-react';
 import { GlassCard, SectionHeader, ToggleRow } from './POSSettingsUI';
+import { MobileGatewaysSettingsCard } from './MobileGatewaysSettingsCard';
+import { SystemConfig } from '../../types';
 
 interface POSConnectivityTabProps {
   payments: {
@@ -21,13 +23,19 @@ interface POSConnectivityTabProps {
   }>>;
   isSavingPayments: boolean;
   handleSaveSection: (section: 'workflow' | 'payments' | 'branding') => void;
+  settings?: Partial<SystemConfig>;
+  onSaveGateways?: (updates: Partial<SystemConfig>) => Promise<void>;
+  isSavingGateways?: boolean;
 }
 
 export function POSConnectivityTab({
   payments,
   setPayments,
   isSavingPayments,
-  handleSaveSection
+  handleSaveSection,
+  settings,
+  onSaveGateways,
+  isSavingGateways
 }: POSConnectivityTabProps) {
   return (
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -145,6 +153,17 @@ export function POSConnectivityTab({
           </button>
         </div>
       </GlassCard>
+
+      {/* MOBILE PAYMENT GATEWAYS CONFIGURATION (KENYA & ETHIOPIA) */}
+      {payments.payment_mobile_money && (
+        <div className="animate-in fade-in slide-in-from-bottom-2 duration-300">
+          <MobileGatewaysSettingsCard
+            settings={settings}
+            onSave={onSaveGateways || (async () => {})}
+            isSaving={Boolean(isSavingGateways)}
+          />
+        </div>
+      )}
     </div>
   );
 }

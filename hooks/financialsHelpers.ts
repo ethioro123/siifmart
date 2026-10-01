@@ -1,16 +1,38 @@
-import { Employee, DEFAULT_POS_BONUS_TIERS, DEFAULT_POS_ROLE_DISTRIBUTION } from '../types';
+import { Employee, DEFAULT_POS_BONUS_TIERS, DEFAULT_POS_ROLE_DISTRIBUTION, PurchaseOrder } from '../types';
 import { calculateStoreBonus } from '../components/StoreBonusDisplay';
 import { DateRangeOption } from './useDateFilter';
+import { Country, getCountryProfile } from '../utils/localization';
 
-export const TAX_REGIONS: any = {
-    'SYSTEM': { name: 'System Default', taxName: 'Tax', rate: 0, code: 'N/A' },
-    'ET': { name: 'Ethiopia', taxName: 'VAT', rate: 15, code: 'ETB' },
-    'KE': { name: 'Kenya', taxName: 'VAT', rate: 16, code: 'KES' },
-    'UG': { name: 'Uganda', taxName: 'VAT', rate: 18, code: 'UGX' },
-    'US': { name: 'USA (Avg)', taxName: 'Sales Tax', rate: 8.25, code: 'USD' },
-    'EU': { name: 'Europe (Avg)', taxName: 'VAT', rate: 20, code: 'EUR' },
-    'AE': { name: 'UAE', taxName: 'VAT', rate: 5, code: 'AED' },
-};
+export interface CountryTaxConfig {
+    name: string;
+    taxName: string;
+    rate: number;
+    code: string;
+    authority: string;
+}
+
+export interface ApAgingSummary {
+    current: number;
+    days1to30: number;
+    days31to60: number;
+    days60Plus: number;
+    totalOutstanding: number;
+}
+
+export function getCountryTaxConfig(country?: Country, settingsTaxRate?: number): CountryTaxConfig {
+    const profile = getCountryProfile(country || 'ET');
+    const effectiveRate = typeof settingsTaxRate === 'number' && settingsTaxRate >= 0
+        ? settingsTaxRate
+        : profile.taxRate;
+
+    return {
+        name: profile.name.replace(/\s*\(.*\)/, '').trim(),
+        taxName: profile.code === 'ET' ? 'VAT (ERCA)' : profile.code === 'KE' ? 'VAT (KRA)' : 'VAT',
+        rate: effectiveRate,
+        code: profile.currencySymbol,
+        authority: profile.taxAuthority
+    };
+}
 
 export const getQuarterInfo = (d = new Date()) => {
     const q = Math.floor(d.getMonth() / 3) + 1;
@@ -38,6 +60,43 @@ export const getDateRangeLabels = (dateRange: DateRangeOption) => {
             return "All Available Data";
     }
 };
+
+export function getDateRangeBounds(dateRange: DateRangeOption): { startDate?: string; endDate?: string } {
+    const now = new Date();
+    const { q, year } = getQuarterInfo(now);
+
+    if (dateRange === 'This Month') {
+        return {
+            startDate: new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0],
+            endDate: now.toISOString().split('T')[0]
+        };
+    }
+    if (dateRange === 'Last Month') {
+        return {
+            startDate: new Date(now.getFullYear(), now.getMonth() - 1, 1).toISOString().split('T')[0],
+            endDate: new Date(now.getFullYear(), now.getMonth(), 0).toISOString().split('T')[0]
+        };
+    }
+    if (dateRange === 'This Quarter') {
+        return {
+            startDate: new Date(year, (q - 1) * 3, 1).toISOString().split('T')[0],
+            endDate: now.toISOString().split('T')[0]
+        };
+    }
+    if (dateRange === 'This Year') {
+        return {
+            startDate: new Date(year, 0, 1).toISOString().split('T')[0],
+            endDate: now.toISOString().split('T')[0]
+        };
+    }
+    if (dateRange === 'Last Year') {
+        return {
+            startDate: new Date(year - 1, 0, 1).toISOString().split('T')[0],
+            endDate: new Date(year - 1, 11, 31).toISOString().split('T')[0]
+        };
+    }
+    return {};
+}
 
 export const isWithinRange = (dateString: string, dateRange: DateRangeOption) => {
     if (dateRange === 'All Time') return true;
@@ -95,3 +154,80 @@ export const calculateEmployeeBonus = (
 
     return roleConfig ? (storeBonus.bonus * roleConfig.percentage) / 100 : 0;
 };
+
+export function calculateApAging(orders: PurchaseOrder[]): ApAgingSummary {
+    const now = Date.now();
+    const summary: ApAgingSummary = {
+        current: 0,
+        days1to30: 0,
+        days31to60: 0,
+        days60Plus: 0,
+        totalOutstanding: 0
+    };
+
+    const payableOrders = (orders || []).filter(po => {
+        const status = po.status || '';
+        return ['Approved', 'Ordered', 'Partially Received', 'Received', 'Pending'].includes(status);
+    });
+
+    for (const po of payableOrders) {
+        const amount = Number(po.totalAmount ?? (po as any).total_amount ?? 0);
+        if (amount <= 0) continue;
+
+        const poDate = po.date ? new Date(po.date).getTime() : now;
+        const ageInDays = Math.floor((now - poDate) / (1000 * 3600 * 24));
+
+        if (ageInDays <= 30) {
+            summary.current += amount;
+        } else if (ageInDays <= 60) {
+            summary.days1to30 += amount;
+        } else if (ageInDays <= 90) {
+            summary.days31to60 += amount;
+        } else {
+            summary.days60Plus += amount;
+        }
+        summary.totalOutstanding += amount;
+    }
+
+    return summary;
+}
+
+export function computeWeeklyCashflow(filteredSales: any[], filteredExpenses: any[]) {
+    const getWeekNumber = (d: Date) => {
+        d = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+        d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDay() || 7));
+        const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+        return Math.ceil((((d.getTime() - yearStart.getTime()) / 86400000) + 1) / 7);
+    };
+
+    const salesByWeek = filteredSales.reduce((acc, s) => {
+        const date = new Date(s.created_at || s.date || new Date());
+        const week = `W${getWeekNumber(date)}`;
+        acc[week] = (acc[week] || 0) + (Number(s.total) || 0);
+        return acc;
+    }, {} as Record<string, number>);
+
+    const expensesByWeek = filteredExpenses.reduce((acc, e) => {
+        const date = new Date(e.date || new Date());
+        const week = `W${getWeekNumber(date)}`;
+        acc[week] = (acc[week] || 0) + (Number(e.amount) || 0);
+        return acc;
+    }, {} as Record<string, number>);
+
+    const allWeeks = Array.from(new Set([...Object.keys(salesByWeek), ...Object.keys(expensesByWeek)])).sort();
+    if (allWeeks.length === 0) {
+        return [{ name: 'Current Period', income: 0, expense: 0, revenue: 0, expenses: 0 }];
+    }
+
+    return allWeeks.map(week => {
+        const income = salesByWeek[week] || 0;
+        const expense = expensesByWeek[week] || 0;
+        return {
+            name: week,
+            income,
+            expense,
+            revenue: income,
+            expenses: expense
+        };
+    });
+}

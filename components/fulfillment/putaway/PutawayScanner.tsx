@@ -6,6 +6,8 @@ import { normalizeLocation } from '../../../utils/locationTracking';
 import { formatJobId } from '../../../utils/jobIdFormatter';
 import { decodeLocation, isLocationBarcode, extractPrefixFromBarcode, extractSkuFromScan } from '../../../utils/locationEncoder';
 import { useScanOnly } from '../../../hooks/useScanOnly';
+import { useData } from '../../../contexts/DataContext';
+import { validateCrossBorderSku } from '../../../utils/skuValidation';
 import { logger } from '../../../utils/logger';
 import { PutawayScannerLocationCard } from './components/PutawayScannerLocationCard';
 
@@ -19,11 +21,7 @@ interface PutawayScannerProps {
     onScanLocation: (location: string) => void;
     onScanItem: (barcode: string) => void;
     isProcessing: boolean;
-    recommendation?: {
-        location: string;
-        type: 'ASSIGNED' | 'SUGGESTED';
-        label: string;
-    } | null;
+    recommendation?: { location: string; type: 'ASSIGNED' | 'SUGGESTED'; label: string } | null;
     occupants?: Product[];
     allProducts: Product[];
     activeSiteId?: string;
@@ -46,6 +44,7 @@ export const PutawayScanner: React.FC<PutawayScannerProps> = ({
     expectedPrefix,
     t
 }) => {
+    const { effectiveCountry } = useData();
     const [step, setStep] = useState<'LOCATION' | 'ITEM'>('LOCATION');
     const [inputVal, setInputVal] = useState('');
     const [showSuccess, setShowSuccess] = useState(false);
@@ -229,6 +228,18 @@ export const PutawayScanner: React.FC<PutawayScannerProps> = ({
             } else {
                 const itemName = currentItem?.name || 'Item';
                 const decodedSku = extractSkuFromScan(val);
+
+                // Sovereign Multi-Country SKU check (§4 Architecture)
+                const countryCheck = validateCrossBorderSku(decodedSku, effectiveCountry || 'ET');
+                if (!countryCheck.isValid && countryCheck.isForeign) {
+                    playBeep('error');
+                    setErrorMsg(countryCheck.errorMessage || 'Foreign SKU Detected');
+                    setShowError(true);
+                    setInputVal('');
+                    setTimeout(() => setShowError(false), 3000);
+                    return;
+                }
+
                 try {
                     await onScanItem(decodedSku);
                 } catch (err: any) {
@@ -260,13 +271,13 @@ export const PutawayScanner: React.FC<PutawayScannerProps> = ({
     return (
         <div className="fixed inset-0 z-[200] bg-stone-50 dark:bg-black flex flex-col transition-colors duration-500 overflow-hidden">
             {/* Top Navigation Bar */}
-            <div className="p-3.5 sm:p-4 bg-[#FAF8F5]/90 dark:bg-[#1C2620]/90 border-b border-[#E2DCCE]/60 dark:border-white/10 flex justify-between items-center backdrop-blur-md shrink-0">
-                <div className="flex items-center gap-3">
-                    <button onClick={onClose} className="p-2 -ml-1 text-stone-500 hover:text-stone-900 dark:text-stone-400 dark:hover:text-white transition-all rounded-xl hover:bg-stone-100 dark:hover:bg-white/10 active:scale-95" aria-label={t('warehouse.dismiss')}>
+            <div className="p-3.5 sm:p-4 bg-[#FAF8F5]/90 dark:bg-[#1C2620]/90 border-b border-[#E2DCCE]/60 dark:border-white/10 flex justify-between items-center shrink-0">
+                <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+                    <button onClick={onClose} className="p-2 -ml-1 text-stone-500 hover:text-stone-900 dark:text-stone-400 dark:hover:text-white transition-colors rounded-xl hover:bg-stone-100 dark:hover:bg-white/10 active:scale-95 min-h-[44px] min-w-[44px] flex items-center justify-center shrink-0" aria-label={t('warehouse.dismiss')}>
                         <X size={22} />
                     </button>
-                    <div>
-                        <h3 className="font-black text-stone-900 dark:text-white text-base sm:text-lg uppercase tracking-tight">
+                    <div className="min-w-0">
+                        <h3 className="font-black text-stone-900 dark:text-white text-base sm:text-lg uppercase tracking-tight truncate">
                             {step === 'LOCATION' ? t('warehouse.scanLocation') : t('warehouse.scanSkuToConfirm')}
                         </h3>
                         <p className="text-[10px] text-[#2C5E3B] dark:text-[#A9CBA2] font-black uppercase tracking-widest">

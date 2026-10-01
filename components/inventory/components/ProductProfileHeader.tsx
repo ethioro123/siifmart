@@ -8,11 +8,13 @@ import { formatStockDisplay, getSellUnit } from '../../../utils/units';
 interface ProductProfileHeaderProps {
     product: Product;
     showCostPrice: boolean;
+    currencySymbol?: string;
 }
 
 export const ProductProfileHeader: React.FC<ProductProfileHeaderProps> = ({
     product,
-    showCostPrice
+    showCostPrice,
+    currencySymbol = CURRENCY_SYMBOL
 }) => {
     const price = product.price || 0;
     const cost = product.costPrice || (product as any).cost || 0;
@@ -107,7 +109,7 @@ export const ProductProfileHeader: React.FC<ProductProfileHeaderProps> = ({
                     </span>
                     <div className="flex items-baseline gap-1.5">
                         <span className="text-lg sm:text-xl font-mono font-black text-[#2C5E3B] dark:text-[#A9CBA2] tracking-tight">
-                            {CURRENCY_SYMBOL} {formatPriceValue(product.price)}
+                            {currencySymbol} {formatPriceValue(product.price)}
                         </span>
                         <span className="text-[10px] font-bold text-stone-400 uppercase font-mono">
                             /{sellUnit?.shortLabel || 'unit'}
@@ -115,7 +117,7 @@ export const ProductProfileHeader: React.FC<ProductProfileHeaderProps> = ({
                     </div>
                     {product.salePrice && product.salePrice > 0 && (
                         <span className="inline-block mt-1 text-[9px] font-bold text-amber-600 dark:text-amber-400 font-mono">
-                            Promo: {CURRENCY_SYMBOL} {formatPriceValue(product.salePrice)}
+                            Promo: {currencySymbol} {formatPriceValue(product.salePrice)}
                         </span>
                     )}
                 </div>
@@ -142,7 +144,7 @@ export const ProductProfileHeader: React.FC<ProductProfileHeaderProps> = ({
                     </span>
                     <div className="flex items-baseline gap-1.5">
                         <span className="text-lg sm:text-xl font-mono font-black text-stone-900 dark:text-white tracking-tight">
-                            {CURRENCY_SYMBOL} {totalAssetValue.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
+                            {currencySymbol} {totalAssetValue.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
                         </span>
                     </div>
                     <span className="text-[9px] font-bold text-stone-400 uppercase block mt-1 font-mono">
@@ -162,7 +164,7 @@ export const ProductProfileHeader: React.FC<ProductProfileHeaderProps> = ({
                             </span>
                         </div>
                         <span className="text-[9px] font-bold text-stone-400 uppercase block mt-1 font-mono">
-                            Cost: {CURRENCY_SYMBOL}{formatPriceValue(cost)}
+                            Cost: {currencySymbol}{formatPriceValue(cost)}
                         </span>
                     </div>
                 ) : (

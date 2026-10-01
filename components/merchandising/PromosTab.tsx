@@ -1,10 +1,9 @@
 import React from 'react';
 import { Plus, BarChart3, Tags, Sparkles } from 'lucide-react';
 import { useMerchandising } from './MerchandisingContext';
-import { CURRENCY_SYMBOL } from '../../constants';
 
 export const PromosTab: React.FC = () => {
-   const { promotions, setIsPromoModalOpen } = useMerchandising();
+   const { promotions, setIsPromoModalOpen, currencySymbol } = useMerchandising();
 
    const activeCount = promotions.filter(p => p.status === 'Active').length;
 
@@ -67,7 +66,7 @@ export const PromosTab: React.FC = () => {
                         <div>
                            <p className="text-[10px] text-stone-400 uppercase font-bold mb-0.5">Discount Offer</p>
                            <p className="text-base font-black text-[#2C5E3B] dark:text-[#A9CBA2] font-mono">
-                              {promo.type === 'FIXED' ? CURRENCY_SYMBOL : ''}
+                              {promo.type === 'FIXED' ? `${currencySymbol} ` : ''}
                               {promo.value}
                               {promo.type === 'PERCENTAGE' ? '%' : ''} OFF
                            </p>

@@ -1,12 +1,11 @@
 import React from 'react';
 import {
-    DollarSign, TrendingUp, RefreshCw, AlertTriangle, XCircle, BarChart3, PieChart as PieIcon
+    TrendingUp, RefreshCw, AlertTriangle, XCircle, BarChart3, PieChart as PieIcon
 } from 'lucide-react';
 import {
     BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
     PieChart, Pie, Cell
 } from 'recharts';
-import { motion } from 'framer-motion';
 import { formatCompactNumber } from '../../utils/formatting';
 import { CURRENCY_SYMBOL } from '../../constants';
 import { Product, ServerMetrics } from '../../types';
@@ -17,11 +16,12 @@ interface InventoryOverviewProps {
     totalInventoryValueRetail: number;
     serverMetrics: ServerMetrics | null;
     filteredProducts: Product[];
-    categoryData: any[];
-    abcData: any[];
+    categoryData: Array<{ name: string; value: number }>;
+    abcData: Array<{ name: string; value: number; color?: string }>;
     stockTurnoverRate?: number;
     deadStockValue?: number;
     lowStockCount?: number;
+    currencySymbol?: string;
 }
 
 const getCOLORS = (theme: string) => [
@@ -31,7 +31,15 @@ const getCOLORS = (theme: string) => [
     '#ef4444'                                // Fallback
 ];
 
-const MetricCard = ({ title, value, sub, icon: Icon, color = 'emerald' }: any) => {
+interface MetricCardProps {
+    title: string;
+    value: string | number;
+    sub: string;
+    icon: React.ElementType;
+    color?: 'emerald' | 'amber' | 'red';
+}
+
+const MetricCard = ({ title, value, sub, icon: Icon, color = 'emerald' }: MetricCardProps) => {
     const isAmber = color === 'amber';
     const isRed = color === 'red';
 
@@ -58,20 +66,21 @@ const MetricCard = ({ title, value, sub, icon: Icon, color = 'emerald' }: any) =
 };
 
 export const InventoryOverview: React.FC<InventoryOverviewProps> = ({
-    totalInventoryValueCost,
     totalInventoryValueRetail,
-    serverMetrics,
-    filteredProducts,
     categoryData,
     abcData,
-    stockTurnoverRate = 3.4,
+    stockTurnoverRate = 0,
     deadStockValue = 0,
-    lowStockCount = 0
+    lowStockCount = 0,
+    currencySymbol
 }) => {
     const { theme } = useStore();
     const colors = getCOLORS(theme);
 
-    const displayTurnRate = stockTurnoverRate > 0 ? `${stockTurnoverRate}x` : '2.8x';
+    // Calculate real dynamic velocity (Zero fake magic numbers)
+    const displayTurnRate = stockTurnoverRate > 0 ? `${stockTurnoverRate.toFixed(1)}x` : '0.0x';
+    const activeCurrency = currencySymbol || CURRENCY_SYMBOL;
+    const hasInventory = categoryData.length > 0 || abcData.some(d => (d.value || 0) > 0);
 
     return (
         <div className="space-y-6 animate-in fade-in">
@@ -79,7 +88,7 @@ export const InventoryOverview: React.FC<InventoryOverviewProps> = ({
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 <MetricCard
                     title="Potential Revenue"
-                    value={formatCompactNumber(totalInventoryValueRetail, { currency: CURRENCY_SYMBOL })}
+                    value={formatCompactNumber(totalInventoryValueRetail, { currency: activeCurrency })}
                     sub="Retail On-Hand Valuation"
                     icon={TrendingUp}
                     color="emerald"
@@ -100,10 +109,10 @@ export const InventoryOverview: React.FC<InventoryOverviewProps> = ({
                 />
                 <MetricCard
                     title="Dead Stock Value"
-                    value={formatCompactNumber(deadStockValue, { currency: CURRENCY_SYMBOL })}
+                    value={formatCompactNumber(deadStockValue, { currency: activeCurrency })}
                     sub="> 90 Days Slow Moving"
                     icon={XCircle}
-                    color="red"
+                    color={deadStockValue > 0 ? "red" : "emerald"}
                 />
             </div>
 
@@ -117,43 +126,51 @@ export const InventoryOverview: React.FC<InventoryOverviewProps> = ({
                             Inventory Valuation by Category
                         </h3>
                     </div>
-                    <div className="h-[280px]">
-                        <ResponsiveContainer width="100%" height="100%" minWidth={0}>
-                            <BarChart data={categoryData} margin={{ top: 10, right: 10, left: 0, bottom: 20 }}>
-                                <defs>
-                                    <linearGradient id="barGradientWoody" x1="0" y1="0" x2="0" y2="1">
-                                        <stop offset="0%" stopColor={theme === 'dark' ? '#A9CBA2' : '#2C5E3B'} stopOpacity={0.9} />
-                                        <stop offset="100%" stopColor={theme === 'dark' ? '#A9CBA2' : '#2C5E3B'} stopOpacity={0.35} />
-                                    </linearGradient>
-                                </defs>
-                                <CartesianGrid strokeDasharray="3 3" stroke={theme === 'dark' ? 'rgba(169, 203, 162, 0.06)' : 'rgba(44, 94, 59, 0.06)'} vertical={false} />
-                                <XAxis
-                                    dataKey="name"
-                                    axisLine={false}
-                                    tickLine={false}
-                                    tick={{ fill: theme === 'dark' ? '#7A9E83' : '#4D6E56', fontSize: 10, fontWeight: 700 }}
-                                />
-                                <YAxis
-                                    axisLine={false}
-                                    tickLine={false}
-                                    tick={{ fill: theme === 'dark' ? '#7A9E83' : '#4D6E56', fontSize: 10, fontWeight: 700 }}
-                                />
-                                <Tooltip
-                                    contentStyle={{
-                                        backgroundColor: theme === 'dark' ? '#18201B' : '#ffffff',
-                                        border: `1px solid ${theme === 'dark' ? '#2c5e3b' : '#E2DCCE'}`,
-                                        borderRadius: '16px',
-                                        fontSize: '12px',
-                                        fontWeight: 'bold',
-                                        color: theme === 'dark' ? '#EAE5D9' : '#1E3F27',
-                                        boxShadow: '0 4px 16px rgba(34,50,38,0.08)'
-                                    }}
-                                    cursor={{ fill: theme === 'dark' ? 'rgba(255,255,255,0.03)' : 'rgba(44,94,59,0.03)' }}
-                                />
-                                <Bar dataKey="value" fill="url(#barGradientWoody)" radius={[8, 8, 0, 0]} barSize={36} />
-                            </BarChart>
-                        </ResponsiveContainer>
-                    </div>
+                    {categoryData.length > 0 ? (
+                        <div className="h-[280px]">
+                            <ResponsiveContainer width="100%" height="100%" minWidth={0}>
+                                <BarChart data={categoryData} margin={{ top: 10, right: 10, left: 0, bottom: 20 }}>
+                                    <defs>
+                                        <linearGradient id="barGradientWoody" x1="0" y1="0" x2="0" y2="1">
+                                            <stop offset="0%" stopColor={theme === 'dark' ? '#A9CBA2' : '#2C5E3B'} stopOpacity={0.9} />
+                                            <stop offset="100%" stopColor={theme === 'dark' ? '#A9CBA2' : '#2C5E3B'} stopOpacity={0.35} />
+                                        </linearGradient>
+                                    </defs>
+                                    <CartesianGrid strokeDasharray="3 3" stroke={theme === 'dark' ? 'rgba(169, 203, 162, 0.06)' : 'rgba(44, 94, 59, 0.06)'} vertical={false} />
+                                    <XAxis
+                                        dataKey="name"
+                                        axisLine={false}
+                                        tickLine={false}
+                                        tick={{ fill: theme === 'dark' ? '#7A9E83' : '#4D6E56', fontSize: 10, fontWeight: 700 }}
+                                    />
+                                    <YAxis
+                                        axisLine={false}
+                                        tickLine={false}
+                                        tick={{ fill: theme === 'dark' ? '#7A9E83' : '#4D6E56', fontSize: 10, fontWeight: 700 }}
+                                    />
+                                    <Tooltip
+                                        contentStyle={{
+                                            backgroundColor: theme === 'dark' ? '#18201B' : '#ffffff',
+                                            border: `1px solid ${theme === 'dark' ? '#2c5e3b' : '#E2DCCE'}`,
+                                            borderRadius: '16px',
+                                            fontSize: '12px',
+                                            fontWeight: 'bold',
+                                            color: theme === 'dark' ? '#EAE5D9' : '#1E3F27',
+                                            boxShadow: '0 4px 16px rgba(34,50,38,0.08)'
+                                        }}
+                                        cursor={{ fill: theme === 'dark' ? 'rgba(255,255,255,0.03)' : 'rgba(44,94,59,0.03)' }}
+                                    />
+                                    <Bar dataKey="value" fill="url(#barGradientWoody)" radius={[8, 8, 0, 0]} barSize={36} />
+                                </BarChart>
+                            </ResponsiveContainer>
+                        </div>
+                    ) : (
+                        <div className="h-[280px] flex flex-col items-center justify-center text-center p-6 border border-dashed border-[#E2DCCE] dark:border-white/10 rounded-2xl">
+                            <BarChart3 size={36} className="text-stone-300 dark:text-gray-600 mb-2" />
+                            <p className="text-xs font-bold text-stone-500 dark:text-gray-400">No Category Valuation</p>
+                            <p className="text-[11px] text-stone-400 dark:text-gray-500 mt-0.5">Stock is currently empty for this facility</p>
+                        </div>
+                    )}
                 </div>
 
                 {/* ABC Analysis */}
@@ -165,42 +182,50 @@ export const InventoryOverview: React.FC<InventoryOverviewProps> = ({
                                 ABC Classification (Pareto)
                             </h3>
                         </div>
-                        <div className="h-[180px]">
-                            <ResponsiveContainer width="100%" height="100%" minWidth={0}>
-                                <PieChart>
-                                    <Pie
-                                        data={abcData}
-                                        cx="50%"
-                                        cy="50%"
-                                        innerRadius={52}
-                                        outerRadius={72}
-                                        paddingAngle={4}
-                                        dataKey="value"
-                                    >
-                                        {abcData.map((entry: any, index: number) => {
-                                            const segmentColor = entry.color || colors[index % colors.length];
-                                            return (
-                                                <Cell key={`cell-${index}`} fill={segmentColor} stroke="none" />
-                                            );
-                                        })}
-                                    </Pie>
-                                    <Tooltip
-                                        contentStyle={{
-                                            backgroundColor: theme === 'dark' ? '#18201B' : '#ffffff',
-                                            border: `1px solid ${theme === 'dark' ? '#2c5e3b' : '#E2DCCE'}`,
-                                            borderRadius: '14px',
-                                            fontSize: '12px',
-                                            fontWeight: 'bold',
-                                            color: theme === 'dark' ? '#EAE5D9' : '#1E3F27'
-                                        }}
-                                    />
-                                </PieChart>
-                            </ResponsiveContainer>
-                        </div>
+                        {hasInventory ? (
+                            <div className="h-[180px]">
+                                <ResponsiveContainer width="100%" height="100%" minWidth={0}>
+                                    <PieChart>
+                                        <Pie
+                                            data={abcData}
+                                            cx="50%"
+                                            cy="50%"
+                                            innerRadius={52}
+                                            outerRadius={72}
+                                            paddingAngle={4}
+                                            dataKey="value"
+                                        >
+                                            {abcData.map((entry, index) => {
+                                                const segmentColor = entry.color || colors[index % colors.length];
+                                                return (
+                                                    <Cell key={`cell-${index}`} fill={segmentColor} stroke="none" />
+                                                );
+                                            })}
+                                        </Pie>
+                                        <Tooltip
+                                            contentStyle={{
+                                                backgroundColor: theme === 'dark' ? '#18201B' : '#ffffff',
+                                                border: `1px solid ${theme === 'dark' ? '#2c5e3b' : '#E2DCCE'}`,
+                                                borderRadius: '14px',
+                                                fontSize: '12px',
+                                                fontWeight: 'bold',
+                                                color: theme === 'dark' ? '#EAE5D9' : '#1E3F27'
+                                            }}
+                                        />
+                                    </PieChart>
+                                </ResponsiveContainer>
+                            </div>
+                        ) : (
+                            <div className="h-[180px] flex flex-col items-center justify-center text-center p-4 border border-dashed border-[#E2DCCE] dark:border-white/10 rounded-2xl">
+                                <PieIcon size={32} className="text-stone-300 dark:text-gray-600 mb-2" />
+                                <p className="text-xs font-bold text-stone-500 dark:text-gray-400">No SKUs to Classify</p>
+                                <p className="text-[11px] text-stone-400 dark:text-gray-500 mt-0.5">Add products to populate ABC Pareto</p>
+                            </div>
+                        )}
                     </div>
 
                     <div className="space-y-2.5 pt-3 border-t border-[#E2DCCE]/60 dark:border-white/5">
-                        {abcData.map((item: any, i: number) => {
+                        {abcData.map((item, i) => {
                             const markerColor = item.color || colors[i % colors.length];
                             return (
                                 <div key={i} className="flex justify-between items-center text-xs">

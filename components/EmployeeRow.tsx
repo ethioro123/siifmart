@@ -1,28 +1,38 @@
 // EmployeeRow.tsx - Clean minimal employee row component
 import React from 'react';
-import { MapPin, ChevronRight } from 'lucide-react';
-import { Employee, Site, WorkerPoints } from '../types';
+import { MapPin, ChevronRight, AlertTriangle } from 'lucide-react';
+import { Employee, Site, WorkerPoints, UserRole } from '../types';
 import { formatRole } from '../utils/formatting';
 import { canViewLocation } from '../utils/roles';
+import { evaluateGeofence, formatSiteAssignment } from '../utils/geofence';
+
+interface RoleConfigLike {
+    label: string;
+    styles?: {
+        text?: string;
+        bg?: string;
+        border?: string;
+    };
+}
 
 interface EmployeeRowProps {
     employee: Employee;
     sites: Site[];
-    roleConfig: any;
-    pendingTasks: number;
+    roleConfig?: RoleConfigLike;
+    pendingTasks?: number;
     onSelect: () => void;
-    onMessage: () => void;
+    onMessage?: () => void;
     onResetPassword?: () => void;
     onDelete?: () => void;
     onApprove?: () => void;
-    canResetPassword: boolean;
-    canDelete: boolean;
-    canApprove: boolean;
-    isSuperAdmin: boolean;
+    canResetPassword?: boolean;
+    canDelete?: boolean;
+    canApprove?: boolean;
+    isSuperAdmin?: boolean;
     workerPoints?: WorkerPoints;
     estimatedBonus?: number;
     bonusTierName?: string;
-    currentUser?: any;
+    currentUser?: { id?: string; role?: UserRole; siteId?: string } | null;
     key?: React.Key;
 }
 
@@ -33,11 +43,11 @@ export default function EmployeeRow({
     onSelect,
     currentUser,
 }: EmployeeRowProps) {
-    const employeeSite = sites.find(s => s.id === employee.siteId || s.id === employee.site_id);
     const isPending = employee.status === 'Pending Approval';
-    
     const isOwn = currentUser?.id === employee.id;
     const canSeeLocation = canViewLocation(currentUser?.role, employee.role, isOwn);
+    const siteInfo = formatSiteAssignment(employee.siteId, employee.role, sites);
+    const geofence = employee.lastLoginGps ? evaluateGeofence(employee.lastLoginGps) : null;
 
     return (
         <div
@@ -47,7 +57,7 @@ export default function EmployeeRow({
             {/* Avatar */}
             <div className="relative flex-shrink-0 select-none">
                 <img
-                    src={employee.avatar || `https://ui-avatars.com/api/?name=${employee.name}&background=2C5E3B&color=ffffff&bold=true`}
+                    src={employee.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(employee.name)}&background=2C5E3B&color=ffffff&bold=true`}
                     alt={employee.name}
                     className="w-10 h-10 rounded-full object-cover border border-[#E2DCCE] dark:border-white/10"
                 />
@@ -73,15 +83,29 @@ export default function EmployeeRow({
             </div>
 
             {/* Location - Hidden on mobile */}
-            <div className="hidden md:flex flex-col gap-0.5 text-xs text-stone-500 dark:text-gray-400 min-w-[140px] max-w-[180px] font-medium">
+            <div className="hidden md:flex flex-col gap-0.5 text-xs text-stone-500 dark:text-gray-400 min-w-[140px] max-w-[200px] font-medium">
                 <div className="flex items-center gap-1.5">
                     <MapPin size={12} className="flex-shrink-0 text-stone-400 dark:text-gray-500" />
-                    <span className="truncate">{employeeSite?.name || 'Unassigned'}</span>
+                    {siteInfo.isWarning ? (
+                        <span className="truncate text-amber-600 dark:text-amber-400 font-semibold flex items-center gap-1" title="Branch personnel requires store/warehouse assignment">
+                            <AlertTriangle size={11} className="flex-shrink-0" />
+                            {siteInfo.label}
+                        </span>
+                    ) : (
+                        <span className="truncate">{siteInfo.label}</span>
+                    )}
                 </div>
-                {canSeeLocation && employee.lastLoginGps ? (
-                    <span className="text-[10px] text-gray-400 dark:text-stone-500 font-mono truncate pl-3.5" title={employee.lastLoginGps}>
-                        {employee.lastLoginGps.replace('GPS: ', '')}
-                    </span>
+                {canSeeLocation && geofence ? (
+                    geofence.isForeignAnomaly ? (
+                        <span className="inline-flex items-center gap-1 text-[9px] px-1.5 py-0.5 mt-0.5 rounded bg-rose-50 dark:bg-rose-500/10 text-rose-700 dark:text-rose-400 font-bold border border-rose-200 dark:border-rose-500/20 truncate" title={`Security Alert: ${geofence.anomalyReason}`}>
+                            <AlertTriangle size={10} className="text-rose-500 flex-shrink-0" />
+                            Foreign / Off-Premise
+                        </span>
+                    ) : (
+                        <span className="text-[10px] text-gray-400 dark:text-stone-500 font-mono truncate pl-3.5" title={employee.lastLoginGps}>
+                            {geofence.displayLocation}
+                        </span>
+                    )
                 ) : employee.lastLoginGps ? (
                     <span className="text-[10px] text-stone-300 dark:text-stone-600 italic truncate pl-3.5 select-none" title="Location is hidden due to hierarchy permissions">
                         Protected

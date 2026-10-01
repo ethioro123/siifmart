@@ -34,6 +34,7 @@ interface InventoryStockListProps {
     allProducts: Product[];
     user: any;
     itemsPerPage: number;
+    currencySymbol?: string;
 }
 
 export const InventoryStockList: React.FC<InventoryStockListProps> = ({
@@ -59,7 +60,8 @@ export const InventoryStockList: React.FC<InventoryStockListProps> = ({
     isReadOnly,
     allProducts,
     user,
-    itemsPerPage
+    itemsPerPage,
+    currencySymbol
 }) => {
     const [selectedViewProduct, setSelectedViewProduct] = useState<Product | null>(null);
 
@@ -148,6 +150,7 @@ export const InventoryStockList: React.FC<InventoryStockListProps> = ({
                         handleOpenEditProduct={handleOpenEditProduct}
                         handleDeleteProduct={handleDeleteProduct}
                         setSelectedViewProduct={setSelectedViewProduct}
+                        currencySymbol={currencySymbol}
                     />
 
                     <InventoryMobileList
@@ -163,6 +166,7 @@ export const InventoryStockList: React.FC<InventoryStockListProps> = ({
                         handleOpenEditProduct={handleOpenEditProduct}
                         handleDeleteProduct={handleDeleteProduct}
                         setSelectedViewProduct={setSelectedViewProduct}
+                        currencySymbol={currencySymbol}
                     />
 
                     {products.length === 0 && (
@@ -214,6 +218,7 @@ export const InventoryStockList: React.FC<InventoryStockListProps> = ({
                 product={selectedViewProduct}
                 isOpen={!!selectedViewProduct}
                 onClose={() => setSelectedViewProduct(null)}
+                currencySymbol={currencySymbol}
             />
         </div>
     );

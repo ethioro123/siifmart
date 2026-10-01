@@ -1,11 +1,12 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useData } from '../../contexts/DataContext';
-import { MOCK_PRICING_RULES } from '../../constants';
+import { MOCK_PRICING_RULES, CURRENCY_SYMBOL } from '../../constants';
 import type { Product, Promotion, PricingRule } from '../../types';
 import type { MerchandisingContextType, MerchandisingTab } from './MerchandisingContext';
 import { useMerchandisingFilters } from './hooks/useMerchandisingFilters';
 import { matchRuleProduct, calculateRulePrice } from './utils/ruleEvaluator';
 import { logger } from '../../utils/logger';
+import { getCountryProfile, Country } from '../../utils/localization';
 
 const getMargin = (price: number, cost: number) => {
    if (!price || !cost) return 0;
@@ -22,8 +23,21 @@ export const useMerchandisingState = (): MerchandisingContextType => {
       addPromotion,
       sites,
       allOrders,
-      refreshData
+      refreshData,
+      effectiveCountry,
+      settings
    } = useData();
+
+   const activeCountry = (effectiveCountry || settings?.country || 'ET') as Country;
+   const countryProfile = useMemo(() => getCountryProfile(activeCountry), [activeCountry]);
+   const currencySymbol = countryProfile.currencySymbol || CURRENCY_SYMBOL;
+
+   const countryPromotions = useMemo(() => {
+      return (promotions || []).filter(p => {
+         const pCountry = p.country_code || p.country;
+         return !pCountry || pCountry.toUpperCase() === activeCountry.toUpperCase();
+      });
+   }, [promotions, activeCountry]);
 
    const [activeTab, setActiveTab] = useState<MerchandisingTab>('pricing');
    const [pricingRules, setPricingRules] = useState<PricingRule[]>(MOCK_PRICING_RULES);
@@ -106,12 +120,15 @@ export const useMerchandisingState = (): MerchandisingContextType => {
       setIsSubmitting(true);
       try {
          addPromotion({
+            id: `promo-${Date.now()}`,
             code: newPromo.code.toUpperCase(),
             type: newPromo.type,
             value: newPromo.value,
             expiryDate: newPromo.expiryDate,
             usageCount: 0,
-            status: 'Active'
+            status: 'Active',
+            country: activeCountry,
+            country_code: activeCountry
          } as any);
 
          addNotification('success', `Campaign '${newPromo.code}' launched successfully.`);
@@ -360,13 +377,15 @@ export const useMerchandisingState = (): MerchandisingContextType => {
 
    return {
       products,
-      promotions,
+      promotions: countryPromotions,
       sites,
       allOrders,
       refreshData,
       addNotification,
       updateProduct,
       updatePricesBySKU,
+      currencySymbol,
+      activeCountry,
       addPromotion: async (promo: any) => {
          addPromotion(promo);
       },

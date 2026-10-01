@@ -1,6 +1,5 @@
 import React from 'react';
 import { X, Printer, Minus, Plus, RefreshCw, Box, Tags, Eye, EyeOff, LayoutTemplate, ScanLine, QrCode } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
 
 interface ReceiveReprintModalProps {
     reprintItem: {
@@ -48,11 +47,7 @@ export const ReceiveReprintModal: React.FC<ReceiveReprintModalProps> = ({
 
     return (
         <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-[300] p-2 sm:p-4 overflow-x-hidden animate-in fade-in duration-300">
-            <motion.div
-                initial={{ opacity: 0, scale: 0.9, y: 20 }}
-                animate={{ opacity: 1, scale: 1, y: 0 }}
-                className="relative glass-panel rounded-3xl w-full max-w-2xl overflow-hidden flex flex-col max-h-[90vh]"
-            >
+            <div className="relative glass-panel rounded-3xl w-full max-w-2xl overflow-hidden flex flex-col max-h-[90vh] animate-in zoom-in-95 duration-200">
                 {/* 🌟 Background Glows (Futuristic Accents) */}
                 <div className="hidden md:block absolute top-0 right-0 w-64 h-64 bg-[#2C5E3B]/10 dark:bg-[#A9CBA2]/5 blur-[100px] rounded-full pointer-events-none" />
                 <div className="hidden md:block absolute bottom-0 left-0 w-64 h-64 bg-amber-600/10 dark:bg-amber-700/5 blur-[80px] rounded-full pointer-events-none" />
@@ -212,7 +207,7 @@ export const ReceiveReprintModal: React.FC<ReceiveReprintModalProps> = ({
                     </button>
                     <p className="text-[9px] text-center text-slate-400 dark:text-zinc-600 mt-6 uppercase tracking-[0.3em] font-black">Unified Template System v2.4</p>
                 </div>
-            </motion.div>
+            </div>
         </div>
     );
 };

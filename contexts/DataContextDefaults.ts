@@ -2,6 +2,7 @@ import { SystemConfig } from '../types';
 
 export const DEFAULT_CONFIG: SystemConfig = {
   storeName: 'SIIFMART',
+  country: 'ET',
   currency: 'ETB',
   taxRate: 0,
   lowStockThreshold: 10,
@@ -32,5 +33,26 @@ export const DEFAULT_CONFIG: SystemConfig = {
   language: 'en',
   warehouseBonusEligibility: {},
   posBonusEligibility: {},
-  taxJurisdictions: []
+  taxJurisdictions: [],
+  // Kenya Mobile Gateways
+  mpesaTillEnabled: true,
+  mpesaTillNumber: '882910',
+  mpesaTillName: 'SIIFMART MAIN STORE',
+  mpesaStkEnabled: true,
+  mpesaStkShortcode: '174379',
+  mpesaPasskey: '',
+  mpesaConsumerKey: '',
+  mpesaConsumerSecret: '',
+  mpesaEnvironment: 'sandbox',
+  mpesaPaybillEnabled: false,
+  mpesaPaybillNumber: '400200',
+  mpesaPaybillAccount: 'SIIFMART',
+  airtelMoneyEnabled: true,
+  airtelTillNumber: '554433',
+  airtelMerchantName: 'SIIFMART AIRTEL',
+  // Ethiopia Mobile Gateways
+  telebirrEnabled: true,
+  telebirrMerchantId: 'TB-998811',
+  cbeBirrEnabled: true,
+  cbeBirrMerchantCode: 'CBE-445566'
 };

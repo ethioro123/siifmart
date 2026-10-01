@@ -1,6 +1,6 @@
 import React from 'react';
 import { RotateCcw, CheckCircle } from 'lucide-react';
-import { SELL_UNITS, getEffectivePackageSize } from '../../../../utils/units';
+import { SELL_UNITS, getSellUnit, formatPackagingDescription, getEffectivePackageSize } from '../../../../utils/units';
 import { isLocationBarcode, decodeLocation } from '../../../../utils/locationEncoder';
 import { PickScannerSubmitButton } from './PickScannerSubmitButton';
 
@@ -118,14 +118,11 @@ export const PickScannerForm: React.FC<PickScannerFormProps> = ({
                         <div className="mb-4 text-center mt-2 animate-in fade-in duration-300">
                             <p className="text-xs font-black uppercase tracking-widest text-[#2C5E3B] dark:text-[#A9CBA2]">
                                 {t('warehouse.expected')}: {(() => {
-                                    const measureQty = getItemMeasureQty(currentItem);
-                                    if (measureQty) {
-                                        const expected = currentItem?.expectedQty || 1;
-                                        const unitDef = currentProduct?.unit ? currentProduct.unit : '';
-                                        const sizeNum = getEffectivePackageSize(unitDef, currentProduct?.size);
-                                        return <>{expected} x {sizeNum} {unitDef}</>;
-                                    }
-                                    return currentItem?.expectedQty || 1;
+                                    const expected = currentItem?.expectedQty || 1;
+                                    const packDesc = formatPackagingDescription(currentProduct, expected);
+                                    const unitDef = getSellUnit(currentProduct?.unit || currentItem?.unit);
+                                    const unitLabel = unitDef.category === 'count' && unitDef.code !== 'UNIT' ? unitDef.shortLabel : 'pk';
+                                    return <>{expected} {unitLabel} {packDesc ? `(${packDesc})` : ''}</>;
                                 })()}
                             </p>
 
@@ -133,10 +130,8 @@ export const PickScannerForm: React.FC<PickScannerFormProps> = ({
                                 <button
                                     type="button"
                                     onClick={(e) => {
-                                        const measureQty = getItemMeasureQty(currentItem, currentProduct);
-                                        const expectedCases = currentItem.expectedQty || 1;
-                                        const quickVal = measureQty !== null ? measureQty : expectedCases;
-                                        setQtyVal(quickVal.toString());
+                                        const expected = currentItem.expectedQty || 1;
+                                        setQtyVal(expected.toString());
                                         setTimeout(() => {
                                             const formElem = (e.target as HTMLElement).closest('form');
                                             if (formElem) formElem.requestSubmit();
@@ -146,10 +141,11 @@ export const PickScannerForm: React.FC<PickScannerFormProps> = ({
                                 >
                                     <CheckCircle size={18} />
                                     Confirm Full Pick ({(() => {
-                                        const measureQty = getItemMeasureQty(currentItem, currentProduct);
-                                        const expectedCases = currentItem.expectedQty || 1;
-                                        const unitDef = currentProduct?.unit || '';
-                                        return measureQty !== null ? `${measureQty} ${unitDef} (${expectedCases} cases)` : `${expectedCases} cases`;
+                                        const expected = currentItem.expectedQty || 1;
+                                        const packDesc = formatPackagingDescription(currentProduct, expected);
+                                        const unitDef = getSellUnit(currentProduct?.unit || currentItem?.unit);
+                                        const unitLabel = unitDef.category === 'count' && unitDef.code !== 'UNIT' ? unitDef.shortLabel : 'pk';
+                                        return packDesc ? `${expected} ${unitLabel} (${packDesc})` : `${expected} ${unitLabel}`;
                                     })()})
                                 </button>
                             )}

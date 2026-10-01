@@ -18,6 +18,8 @@ export const DATA_CONTEXT_FALLBACK: DataContextType = {
   heldOrders: [],
   sites: [],
   activeSite: undefined,
+  effectiveCountry: 'ET',
+  isCeo: false,
   notifications: [],
   systemLogs: [],
   promotions: [],
@@ -52,7 +54,9 @@ export const DATA_CONTEXT_FALLBACK: DataContextType = {
   processReturn: () => { },
   closeShift: () => { },
   startShift: () => { },
+  reconcileShift: async () => { },
   triggerSync: () => { },
+
   posCheckQueue: async () => { },
   addSupplier: async () => { },
   adjustStock: async () => { },

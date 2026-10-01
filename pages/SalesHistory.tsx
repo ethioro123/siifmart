@@ -12,6 +12,7 @@ import { formatDateTime } from '../utils/formatting';
 
 import { useStore } from '../contexts/CentralStore';
 import { canViewAllSites } from '../utils/permissions';
+import { getCountryProfile, Country } from '../utils/localization';
 
 // --- Sub-Components ---
 import { SalesAnalyticsRibbon } from './sales-history/components/SalesAnalyticsRibbon';
@@ -24,7 +25,17 @@ import { logger } from '../utils/logger';
 const ITEMS_PER_PAGE = 20;
 
 export default function SalesHistory() {
-   const { movements, sites, addNotification, settings, allSales, posSyncStatus, posPendingSyncCount } = useData();
+   const { movements, sites, addNotification, settings, allSales, posSyncStatus, posPendingSyncCount, effectiveCountry } = useData();
+
+   const activeCountry = (effectiveCountry || settings?.country || 'ET') as Country;
+   const countryProfile = useMemo(() => getCountryProfile(activeCountry), [activeCountry]);
+   const currencySymbol = countryProfile.currencySymbol || CURRENCY_SYMBOL;
+
+   const countrySites = useMemo(() => {
+      return (sites || []).filter(s => (s.country || 'ET') === activeCountry);
+   }, [sites, activeCountry]);
+
+   const countrySiteIds = useMemo(() => countrySites.map(s => s.id), [countrySites]);
 
    // --- DATA STATE ---
    const [sales, setSales] = useState<SaleRecord[]>([]);
@@ -39,6 +50,14 @@ export default function SalesHistory() {
    const [statusFilter, setStatusFilter] = useState('All');
    const [methodFilter, setMethodFilter] = useState('All');
    const [storeFilter, setStoreFilter] = useState(restricted && user?.siteId ? user.siteId : 'All');
+
+   // Auto reset storeFilter when country changes
+   useEffect(() => {
+      if (storeFilter !== 'All' && !countrySiteIds.includes(storeFilter)) {
+         setStoreFilter('All');
+         setCurrentPage(1);
+      }
+   }, [countrySiteIds, storeFilter]);
 
    const [dateRange, setDateRange] = useState({
       start: new Date(new Date().setFullYear(new Date().getFullYear() - 1)).toISOString().split('T')[0], // Default to last 1 year
@@ -57,6 +76,18 @@ export default function SalesHistory() {
    const fetchSales = useCallback(async () => {
       setLoading(true);
       try {
+         // Determine target site IDs for country isolation
+         const effectiveSiteId = restricted ? (user?.siteId || 'NONE') : (storeFilter === 'All' ? undefined : storeFilter);
+         const targetSiteIds = effectiveSiteId ? [effectiveSiteId] : countrySiteIds;
+
+         // If restricted user has no site, or there are no sites in this country, return empty
+         if (targetSiteIds.length === 0 || (restricted && (!user?.siteId || !countrySiteIds.includes(user.siteId)))) {
+            setSales([]);
+            setTotalCount(0);
+            setLoading(false);
+            return;
+         }
+
          // Check if online before attempting fetch
          if (!navigator.onLine) {
             throw new Error('Offline');
@@ -68,11 +99,11 @@ export default function SalesHistory() {
             status: statusFilter,
             method: methodFilter,
             startDate: dateRange.start,
-            endDate: dateRange.end
+            endDate: dateRange.end,
+            siteIds: targetSiteIds
          };
 
          // Call service with pagination and filters
-         const effectiveSiteId = restricted ? (user?.siteId || 'NONE') : (storeFilter === 'All' ? undefined : storeFilter);
          const { data, count } = await salesService.getAll(
             effectiveSiteId,
             ITEMS_PER_PAGE,
@@ -86,13 +117,11 @@ export default function SalesHistory() {
          logger.warn('SalesHistory', 'Network fetch failed or offline, falling back to local data:');
 
          // Fallback to local allSales filtering
-         let filtered = [...(allSales || [])];
+         const effectiveSiteId = restricted ? (user?.siteId || 'NONE') : (storeFilter === 'All' ? undefined : storeFilter);
+         const targetSiteIds = effectiveSiteId ? [effectiveSiteId] : countrySiteIds;
+         let filtered = [...(allSales || [])].filter(s => targetSiteIds.includes(s.siteId));
 
          // Apply Filters Locally
-         const effectiveSiteId = restricted ? (user?.siteId || 'NONE') : storeFilter;
-         if (effectiveSiteId !== 'All') {
-            filtered = filtered.filter(s => s.siteId === effectiveSiteId);
-         }
          if (statusFilter !== 'All') {
             filtered = filtered.filter(s => s.status === statusFilter);
          }
@@ -131,7 +160,7 @@ export default function SalesHistory() {
       } finally {
          setLoading(false);
       }
-   }, [currentPage, searchTerm, statusFilter, methodFilter, storeFilter, dateRange, addNotification, allSales, restricted, user?.siteId]);
+   }, [currentPage, searchTerm, statusFilter, methodFilter, storeFilter, dateRange, addNotification, allSales, restricted, user?.siteId, countrySiteIds]);
 
    // Debounce Search
    useEffect(() => {
@@ -197,7 +226,7 @@ export default function SalesHistory() {
 
    const handleReprint = () => {
       if (!selectedSale) return;
-      triggerReceiptPrint(selectedSale, settings, sites);
+      triggerReceiptPrint(selectedSale, settings, countrySites, currencySymbol);
    };
 
    return (
@@ -253,7 +282,7 @@ export default function SalesHistory() {
          </div>
 
          {/* --- ANALYTICS RIBBON (PAGE LEVEL) --- */}
-         <SalesAnalyticsRibbon metrics={metrics} totalCount={totalCount} />
+         <SalesAnalyticsRibbon metrics={metrics} totalCount={totalCount} currencySymbol={currencySymbol} />
 
          {/* --- SMART TOOLBAR --- */}
          <SalesToolbar
@@ -268,7 +297,7 @@ export default function SalesHistory() {
             storeFilter={storeFilter}
             setStoreFilter={setStoreFilter}
             restricted={restricted}
-            sites={sites}
+            sites={countrySites}
             handleFilterChange={handleFilterChange}
          />
 
@@ -330,7 +359,7 @@ export default function SalesHistory() {
                            </td>
                            <td className="p-4 text-xs text-stone-650 dark:text-gray-400 text-right font-mono font-bold">{sale.items.length}</td>
                            <td className="p-4 text-sm font-mono text-[#1E3F27] dark:text-white font-bold text-right">
-                              {CURRENCY_SYMBOL} {sale.total.toLocaleString()}
+                              {currencySymbol} {sale.total.toLocaleString()}
                            </td>
                            <td className="p-4 text-center">
                               <span className={`inline-flex items-center px-2.5 py-1 rounded-[4px] text-[10px] font-black uppercase border ${
@@ -357,7 +386,7 @@ export default function SalesHistory() {
 
             {/* Pagination Footer */}
             <div className="p-4 border-t border-[#E2DCCE] dark:border-white/10 flex justify-between items-center bg-[#FAF8F5]/80 dark:bg-black/25">
-               <p className="text-xs text-stone-500 dark:text-gray-550">
+               <p className="text-xs text-stone-500 dark:text-gray-555">
                   Showing <span className="text-[#1E3F27] dark:text-white font-bold">{totalCount > 0 ? (currentPage - 1) * ITEMS_PER_PAGE + 1 : 0}</span> to <span className="text-[#1E3F27] dark:text-white font-bold">{Math.min(currentPage * ITEMS_PER_PAGE, totalCount)}</span> of {totalCount} entries
                </p>
                <div className="flex gap-2">
@@ -388,10 +417,11 @@ export default function SalesHistory() {
             detailTab={detailTab}
             setDetailTab={setDetailTab}
             settings={settings}
-            sites={sites}
+            sites={countrySites}
             auditLogs={auditLogs}
             handleReprint={handleReprint}
             addNotification={addNotification}
+            currencySymbol={currencySymbol}
          />
       </div>
    );

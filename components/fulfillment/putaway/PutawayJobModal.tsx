@@ -203,7 +203,7 @@ export const PutawayJobModal: React.FC<PutawayJobModalProps> = ({
                                                     </div>
                                                 )}
                                                 {isDone && (
-                                                    <div className="absolute inset-0 bg-emerald-500/20 backdrop-blur-sm flex items-center justify-center">
+                                                    <div className="absolute inset-0 bg-emerald-500/30 flex items-center justify-center">
                                                         <div className="p-2.5 bg-white dark:bg-black/80 rounded-full shadow-2xl border-2 border-emerald-500/50 scale-110">
                                                             <CheckCircle size={32} className="text-emerald-500 dark:text-emerald-400 stroke-[3]" />
                                                         </div>

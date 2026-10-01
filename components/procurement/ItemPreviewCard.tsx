@@ -1,5 +1,4 @@
 import React from 'react';
-import { CURRENCY_SYMBOL } from '../../constants';
 import { formatPriceValue } from '../../utils/formatting';
 import { Info } from 'lucide-react';
 import { formatPackBadge } from './utils';
@@ -11,8 +10,11 @@ interface ItemPreviewCardProps {
     unit: string;
     category: string;
     description: string;
-    price: number;
+    price?: number;
+    cost?: number;
+    retailPrice?: number;
     image: string;
+    currencySymbol?: string;
     customAttributes?: any;
 }
 
@@ -23,10 +25,15 @@ export const ItemPreviewCard: React.FC<ItemPreviewCardProps> = ({
     unit,
     category,
     description,
-    price,
+    price = 0,
+    cost,
+    retailPrice,
     image,
+    currencySymbol = 'ETB',
     customAttributes
 }) => {
+    const effectiveCost = cost !== undefined ? cost : price;
+    const effectiveRetail = retailPrice !== undefined ? retailPrice : 0;
     // Helper to render attribute badge (Ultra Compact)
     const AttrBadge = ({ label, value, color, icon: Icon }: { label: string, value?: string | number | boolean | null, color?: string, icon?: any }) => {
         if (value === null || value === undefined || value === '') return null;
@@ -64,9 +71,20 @@ export const ItemPreviewCard: React.FC<ItemPreviewCardProps> = ({
                         {customAttributes?.identity?.subcategory ? ` • ${customAttributes.identity.subcategory}` : ''}
                     </p>
                 </div>
-                {(price > 0) && (
-                    <div className="text-right whitespace-nowrap">
-                        <span className="text-xs font-black text-emerald-600 dark:text-emerald-400">{CURRENCY_SYMBOL} {formatPriceValue(price)}</span>
+                {(effectiveCost > 0 || effectiveRetail > 0) && (
+                    <div className="text-right whitespace-nowrap flex flex-col items-end gap-0.5">
+                        {effectiveRetail > 0 && (
+                            <div className="flex items-center gap-1">
+                                <span className="text-[8px] uppercase font-bold text-stone-400">Retail:</span>
+                                <span className="text-xs font-black text-[#2C5E3B] dark:text-[#A9CBA2] font-mono">{currencySymbol} {formatPriceValue(effectiveRetail)}</span>
+                            </div>
+                        )}
+                        {effectiveCost > 0 && (
+                            <div className="flex items-center gap-1">
+                                <span className="text-[8px] uppercase font-bold text-stone-400">Cost:</span>
+                                <span className="text-[11px] font-bold text-stone-600 dark:text-stone-300 font-mono">{currencySymbol} {formatPriceValue(effectiveCost)}</span>
+                            </div>
+                        )}
                     </div>
                 )}
             </div>

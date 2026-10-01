@@ -67,11 +67,15 @@ export interface Product {
   size?: string;
   unit?: string;
   packQuantity?: number;
+  packageType?: string;
+  caseSize?: number;
   customAttributes?: any;    // Full 6-layer PO attribute model
   description?: string;      // PO attribute description summary
   needsReview?: boolean;
   receivingNotes?: string;
   pack_quantity?: number; // Supabase compatibility
+  package_type?: string; // Supabase compatibility
+  case_size?: number; // Supabase compatibility
   custom_attributes?: any; // Supabase compatibility
   preferredSupplierId?: string;
 }
@@ -95,9 +99,16 @@ export interface BarcodeApproval {
   reviewedAt?: string;
   reviewed_at?: string;
   rejectionReason?: string;
-  rejection_reason?: string;
   resolutionTime?: number; // seconds
   resolution_time?: number; // Supabase compatibility
+  countryCode?: string;
+  country_code?: string; // Supabase compatibility
+  productName?: string;
+  productSku?: string;
+  scannedBy?: string;
+  scannedAt?: string;
+  confidence?: number;
+  type?: string;
   product?: Partial<Product>;
 }
 
@@ -113,6 +124,8 @@ export interface PendingInventoryChange {
   product_sku?: string; // Supabase compatibility
   siteId: string;
   site_id?: string; // Supabase compatibility
+  countryCode?: string;
+  country_code?: string; // Supabase compatibility
   changeType: InventoryChangeType;
   change_type?: InventoryChangeType; // Supabase compatibility
   requestedBy: string;
@@ -163,6 +176,8 @@ export interface Promotion {
   status: 'Active' | 'Expired' | 'Scheduled';
   usageCount: number;
   expiryDate: string;
+  country?: string;
+  country_code?: string;
 }
 
 export interface DiscountCode {
@@ -171,6 +186,9 @@ export interface DiscountCode {
   name: string; // Friendly name for display
   type: 'PERCENTAGE' | 'FIXED';
   value: number;
+  country?: string; // Country partition scope (ET, KE, UG, RW, TZ)
+  country_code?: string;
+  currency?: string;
   minPurchaseAmount?: number; // Minimum cart subtotal to apply
   maxDiscountAmount?: number; // Cap on discount for percentage types
   validFrom: string;
@@ -262,6 +280,12 @@ export interface POItem {
   size?: string;
   unit?: string;
   packQuantity?: number; // Added for PO consistency
+  packageType?: string;
+  caseSize?: number;
+  pack_quantity?: number;
+  case_size?: number;
+  package_type?: string;
+  custom_attributes?: any;
   category?: string;
   description?: string;
   minStock?: number;
@@ -313,6 +337,9 @@ export interface PurchaseOrder {
   incoterms?: 'EXW' | 'FOB' | 'CIF' | 'DDP' | string;
   destination?: string;
   discount?: number;
+  currency?: string;
+  countryCode?: string;
+  country_code?: string;
   tempReq?: 'Ambient' | 'Chilled' | 'Frozen';
   shelfLife?: string;
   dockSlot?: string;

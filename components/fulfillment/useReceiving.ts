@@ -11,72 +11,8 @@ import { logger } from '../../utils/logger';
 import { useReceivingSplit } from './useReceivingSplit';
 
 
-// ─── Utility ────────────────────────────────────────────────────────────────
-
-/**
- * Converts PO order quantity to sellable units.
- * 
- * Example: Order 100 bags of 10kg walnuts, sell by kg
- *   → 100 × 10 = 1,000 sellable kg
- * 
- * Example: Order 5 cases of Coke (24 bottles per case)
- *   → 5 × 24 = 120 sellable units
- * 
- * For products where size type matches sell unit directly (e.g., both kg),
- * it multiplies orderQty × sizeValue.
- * 
- * For cross-unit conversions (e.g., kg bag sold by gram),
- * it converts through base units.
- */
-export const convertToSellableUnits = (orderQty: number, item: any): number => {
-    if (!item || !orderQty) return orderQty || 0;
-
-    const attrs = item.customAttributes || (item as any).custom_attributes;
-    const sizeValue = parseFloat(item.size || attrs?.packaging?.unitSize || '0');
-    const sizeType = (attrs?.physical?.sizeType || attrs?.physical?.unit || '').toLowerCase().trim();
-    const sellUnit = (item.unit || attrs?.commercial?.sellUnit || '').toUpperCase().trim();
-    const sellBy = attrs?.commercial?.sellBy || (['KG', 'G', 'L', 'ML'].includes(sellUnit) ? (['KG', 'G'].includes(sellUnit) ? 'Weight' : 'Volume') : 'Unit');
-    const packQty = parseInt(attrs?.packaging?.packQty || '0');
-    const caseSize = parseInt(attrs?.packaging?.caseSize || '0');
-
-    // Step 1: Pack / Case Multipliers (for count-based selling)
-    const hasCases = caseSize >= 1;
-    const hasPacks = packQty > 1 && !hasCases;
-    const unitsPerOrderUnit = hasCases ? caseSize * packQty : hasPacks ? packQty : (item.packQuantity && item.packQuantity > 1 ? item.packQuantity : 1);
-
-    if (unitsPerOrderUnit > 1) {
-        if (['UNIT', 'PACK', 'DOZEN', 'EA', 'PCS', ''].includes(sellUnit)) {
-            return orderQty * unitsPerOrderUnit;
-        }
-    }
-
-    // Step 2: Size-based conversion ONLY for products explicitly sold by Weight or Volume (e.g. bulk walnuts sold by kg)
-    // Physical packet sizes like 400g (e.g. Buna Tea 400g) are unit sizes and DO NOT multiply the order quantity!
-    if ((sellBy === 'Weight' || sellBy === 'Volume') && sizeValue > 0 && sizeType) {
-        let sizeInBase = sizeValue;
-        let sizeCategory = '';
-        if (['kg', 'kilogram', 'kilograms', 'kgs'].includes(sizeType)) { sizeInBase = sizeValue * 1000; sizeCategory = 'weight'; }
-        else if (['g', 'gram', 'grams', 'gr'].includes(sizeType)) { sizeInBase = sizeValue; sizeCategory = 'weight'; }
-        else if (['l', 'litre', 'liter', 'litres', 'liters', 'lt'].includes(sizeType)) { sizeInBase = sizeValue * 1000; sizeCategory = 'volume'; }
-        else if (['ml', 'millilitre', 'milliliter', 'millilitres', 'milliliters'].includes(sizeType)) { sizeInBase = sizeValue; sizeCategory = 'volume'; }
-
-        let sellInBase = 1;
-        let sellCategory = '';
-        if (sellUnit === 'KG') { sellInBase = 1000; sellCategory = 'weight'; }
-        else if (sellUnit === 'G') { sellInBase = 1; sellCategory = 'weight'; }
-        else if (sellUnit === 'L') { sellInBase = 1000; sellCategory = 'volume'; }
-        else if (sellUnit === 'ML') { sellInBase = 1; sellCategory = 'volume'; }
-
-        // Only convert if sizeCategory === sellCategory AND sellUnit is NOT count-based
-        if (sizeCategory && sizeCategory === sellCategory && ['KG', 'G', 'L', 'ML'].includes(sellUnit)) {
-            const sellUnitsPerPackage = sizeInBase / sellInBase;
-            logger.info('useReceiving', `Converted: ${orderQty} × ${sellUnitsPerPackage} = ${orderQty * sellUnitsPerPackage} ${sellUnit}`);
-            return orderQty * sellUnitsPerPackage;
-        }
-    }
-
-    return orderQty;
-};
+import { convertToSellableUnits } from '../procurement/utils';
+export { convertToSellableUnits };
 
 // ─── Hook Dependencies ──────────────────────────────────────────────────────
 
@@ -219,6 +155,8 @@ export const useReceiving = (deps: UseReceivingDeps) => {
                             brand: lineItem.brand || globalProduct?.brand || '',
                             unit: lineItem.unit || globalProduct?.unit || 'UNIT',
                             packQuantity: lineItem.packQuantity || globalProduct?.packQuantity || 1,
+                            packageType: lineItem.packageType || globalProduct?.packageType || lineItem.customAttributes?.packaging?.packageType || globalProduct?.customAttributes?.packaging?.packageType || '',
+                            caseSize: lineItem.caseSize || globalProduct?.caseSize || lineItem.customAttributes?.packaging?.caseSize || globalProduct?.customAttributes?.packaging?.caseSize || undefined,
                             customAttributes: lineItem.customAttributes || globalProduct?.customAttributes || null,
                             description: lineItem.description || globalProduct?.description || '',
                             minStock: lineItem.minStock || globalProduct?.minStock || 0,

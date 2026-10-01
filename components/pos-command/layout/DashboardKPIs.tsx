@@ -8,12 +8,13 @@ import { CURRENCY_SYMBOL } from '../../../constants';
 export const DashboardKPIs: React.FC = () => {
     const { t } = useLanguage();
     const { user } = useStore();
-    const { cashInDrawer, personalSales, txCount, returnCount } = usePOSCommand();
+    const { cashInDrawer, personalSales, txCount, shiftTxCount, returnCount, dateRange } = usePOSCommand();
     const [isRevealed, setIsRevealed] = useState(false);
 
     const isCentralHQ = [
         'super_admin',
-        'ceo'
+        'ceo',
+        'admin'
     ].includes(user?.role?.toLowerCase() || '');
 
     return (
@@ -54,7 +55,7 @@ export const DashboardKPIs: React.FC = () => {
                 value={
                     isCentralHQ
                         ? isRevealed ? `${CURRENCY_SYMBOL} ${personalSales.toLocaleString()}` : '••••••••'
-                        : `${txCount} Completed Orders`
+                        : `${shiftTxCount} Completed Orders`
                 }
                 subtitle={isCentralHQ ? t('pos.todayShift') : "Current Active Shift"}
                 color="forest"
@@ -71,6 +72,7 @@ export const DashboardKPIs: React.FC = () => {
             <KPICard
                 title={t('pos.transactions')}
                 value={txCount.toString()}
+                subtitle={`${dateRange} Volume`}
                 trend="+18%"
                 trendUp={true}
                 color="sage"
@@ -81,6 +83,7 @@ export const DashboardKPIs: React.FC = () => {
             <KPICard
                 title={t('pos.returns')}
                 value={returnCount.toString()}
+                subtitle={`${dateRange} Total`}
                 trend={returnCount === 0 ? "0 Returns" : "-5%"}
                 trendUp={returnCount === 0}
                 color={returnCount > 0 ? "red" : "sage"}

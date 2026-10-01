@@ -1,14 +1,21 @@
 import { Product, SaleRecord, WarehouseZone, StockMovement, WMSJob, Supplier, PurchaseOrder, Customer, Employee, Promotion, PricingRule, EmployeeTask, ExpenseRecord, Site } from '../types';
 
 export const MOCK_SITES: Site[] = [
-  { id: 'Administration', code: 'ADMIN', name: 'Central Operations', type: 'Administration', address: 'Addis Ababa, Bole', status: 'Active', manager: 'Shukri Kamal' },
-  { id: 'WH-001', code: 'WH-001', name: 'Main Distribution Hub', type: 'Warehouse', address: 'Addis Ababa, Zone 4', status: 'Active', capacity: 85, manager: 'Lensa Merga' },
-  { id: 'ST-001', code: 'ST-001', name: 'Bole Retail Branch', type: 'Store', address: 'Bole Road, Addis Ababa', status: 'Active', terminalCount: 4, manager: 'Abdi Rahman' },
-  { id: 'ST-002', code: 'ST-002', name: 'Ambo Retail Store', type: 'Store', address: 'Ambo, West Shewa', status: 'Active', terminalCount: 3, manager: 'Sara Mohammed' },
-  { id: 'ST-003', code: 'ST-003', name: 'Adama Retail Outlet', type: 'Store', address: 'Adama, East Shewa', status: 'Active', terminalCount: 3, manager: 'Hanna Girma' },
-  { id: 'ST-004', code: 'ST-004', name: 'Jimma Retail Hub', type: 'Store', address: 'Jimma, Oromia', status: 'Active', terminalCount: 3, manager: 'Ahmed Hassan' },
-  { id: 'ST-005', code: 'ST-005', name: 'Harar Retail Center', type: 'Store', address: 'Harar, Harari', status: 'Active', terminalCount: 3, manager: 'Solomon Tesfaye' },
-  { id: 'ST-006', code: 'ST-006', name: 'Dire Dawa Retail Store', type: 'Store', address: 'Dire Dawa', status: 'Active', terminalCount: 3, manager: 'Fatima Yusuf' },
+  { id: 'Administration', code: 'ET-01', name: 'Central Operations', type: 'Administration', address: 'Addis Ababa, Bole', status: 'Active', manager: 'Shukri Kamal', country: 'ET', currency: 'ETB' },
+  { id: 'WH-001', code: 'ET-02', name: 'Main Distribution Hub', type: 'Warehouse', address: 'Addis Ababa, Zone 4', status: 'Active', capacity: 85, manager: 'Lensa Merga', country: 'ET', currency: 'ETB' },
+  { id: 'ST-001', code: 'ET-03', name: 'Bole Retail Branch', type: 'Store', address: 'Bole Road, Addis Ababa', status: 'Active', terminalCount: 4, manager: 'Abdi Rahman', country: 'ET', currency: 'ETB' },
+  { id: 'ST-002', code: 'ET-04', name: 'Ambo Retail Store', type: 'Store', address: 'Ambo, West Shewa', status: 'Active', terminalCount: 3, manager: 'Sara Mohammed', country: 'ET', currency: 'ETB' },
+  { id: 'ST-003', code: 'ET-05', name: 'Adama Retail Outlet', type: 'Store', address: 'Adama, East Shewa', status: 'Active', terminalCount: 3, manager: 'Hanna Girma', country: 'ET', currency: 'ETB' },
+  { id: 'ST-004', code: 'ET-06', name: 'Jimma Retail Hub', type: 'Store', address: 'Jimma, Oromia', status: 'Active', terminalCount: 3, manager: 'Ahmed Hassan', country: 'ET', currency: 'ETB' },
+  { id: 'ST-005', code: 'ET-07', name: 'Harar Retail Center', type: 'Store', address: 'Harar, Harari', status: 'Active', terminalCount: 3, manager: 'Solomon Tesfaye', country: 'ET', currency: 'ETB' },
+  { id: 'ST-006', code: 'ET-08', name: 'Dire Dawa Retail Store', type: 'Store', address: 'Dire Dawa', status: 'Active', terminalCount: 3, manager: 'Fatima Yusuf', country: 'ET', currency: 'ETB' },
+  { id: 'ST-007', code: 'ET-09', name: 'Merkato Retail Store', type: 'Store', address: 'Merkato, Addis Ababa', status: 'Active', terminalCount: 4, manager: 'Amina Ali', country: 'ET', currency: 'ETB' },
+  { id: 'KE-ADMIN', code: 'KE-01', name: 'Kenya Central Operations', type: 'Administration', address: 'Nairobi Central Business District, Kenyatta Avenue', status: 'Active', manager: 'HQ Administration', country: 'KE', currency: 'KSh' },
+  { id: 'KE-WH-001', code: 'KE-02', name: 'Nairobi Central Distribution Hub', type: 'Warehouse', address: 'Industrial Area, Nairobi', status: 'Active', capacity: 90, manager: 'John Kamau', country: 'KE', currency: 'KSh' },
+  { id: 'KE-ST-001', code: 'KE-03', name: 'Westlands Retail Store', type: 'Store', address: 'Westlands, Nairobi', status: 'Active', terminalCount: 4, manager: 'Faith Muthoni', country: 'KE', currency: 'KSh' },
+  { id: 'UG-ADMIN', code: 'UG-01', name: 'Uganda Central Operations', type: 'Administration', address: 'Kampala Central Business District, Kampala Road', status: 'Active', manager: 'HQ Administration', country: 'UG', currency: 'USh' },
+  { id: 'RW-ADMIN', code: 'RW-01', name: 'Rwanda Central Operations', type: 'Administration', address: 'Kigali City Center, KN 3 Ave', status: 'Active', manager: 'HQ Administration', country: 'RW', currency: 'RWF' },
+  { id: 'TZ-ADMIN', code: 'TZ-01', name: 'Tanzania Central Operations', type: 'Administration', address: 'Dar es Salaam City Centre, Samora Avenue', status: 'Active', manager: 'HQ Administration', country: 'TZ', currency: 'TSh' },
 ];
 
 export const MOCK_EMPLOYEES: Employee[] = [
@@ -44,6 +51,7 @@ export const MOCK_EMPLOYEES: Employee[] = [
   { id: 'EMP-025', code: 'SIIF-025', siteId: 'ST-006', name: 'Fatima Yusuf', role: 'store_manager', email: 'fatima.yusuf@siifmart.com', phone: '+251 911 000 025', status: 'Active', joinDate: '2021-12-01', department: 'Retail Operations', avatar: 'https://ui-avatars.com/api/?name=Fatima+Yusuf&background=EA580C&color=fff', performanceScore: 89, specialization: 'Store Management', salary: 32000, badges: ['Customer Champion'], attendanceRate: 93 },
   { id: 'EMP-026', code: 'SIIF-026', siteId: 'ST-002', name: 'Helen Kebede', role: 'shift_lead', email: 'helen.kebede@siifmart.com', phone: '+251 911 000 026', status: 'Active', joinDate: '2022-08-01', department: 'Retail Operations', avatar: 'https://ui-avatars.com/api/?name=Helen+Kebede&background=16A34A&color=fff', performanceScore: 88, specialization: 'Shift Management', salary: 24000, badges: ['Organized', 'Supportive'], attendanceRate: 94 },
   { id: 'EMP-027', code: 'SIIF-027', siteId: 'ST-003', name: 'Yonas Tadesse', role: 'shift_lead', email: 'yonas.tadesse@siifmart.com', phone: '+251 911 000 027', status: 'Active', joinDate: '2022-09-01', department: 'Retail Operations', avatar: 'https://ui-avatars.com/api/?name=Yonas+Tadesse&background=2563EB&color=fff', performanceScore: 87, specialization: 'Shift Management', salary: 24000, badges: ['Dependable'], attendanceRate: 93 },
+  { id: 'EMP-036', code: 'SIIF-036', siteId: 'ST-007', name: 'Amina Ali', role: 'store_manager', email: 'siif-0036@siifmart.com', phone: '+251 911 000 036', status: 'Active', joinDate: '2022-01-01', department: 'Retail Operations', avatar: 'https://ui-avatars.com/api/?name=Amina+Ali&background=10B981&color=fff', performanceScore: 94, specialization: 'Store Management', salary: 32000, badges: ['Store Leader', 'Inventory Accuracy'], attendanceRate: 98 },
 ];
 
 export const MOCK_TASKS: EmployeeTask[] = [

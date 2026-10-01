@@ -1,8 +1,217 @@
 import { supabase } from '../lib/supabase';
 import type { SystemConfig } from '../types';
+import { getEffectiveCountry, getCountryProfile, COUNTRY_LEGAL_DEFAULTS } from '../utils/localization';
+
+// Columns confirmed to exist on the remote Supabase system_config table via schema probe.
+// Any update payload MUST be filtered through this allowlist to prevent PostgREST PGRST204 errors.
+const LIVE_SYSTEM_CONFIG_COLUMNS = new Set([
+    'accounting_method',
+    'bin_scan',
+    'brand_color',
+    'created_at',
+    'currency',
+    'cycle_count_strategy',
+    'date_format',
+    'default_credit_limit',
+    'default_vat_rate',
+    'enable_loyalty',
+    'enable_wms',
+    'enforce_regional_zoning',
+    'expense_approval_limit',
+    'fefo_rotation',
+    'fiscal_year_start',
+    'id',
+    'language',
+    'legal_business_name',
+    'logo_url',
+    'low_stock_threshold',
+    'max_petty_cash',
+    'multi_currency',
+    'number_format',
+    'payment_card',
+    'payment_cash',
+    'payment_mobile_money',
+    'payment_store_credit',
+    'picking_method',
+    'pos_auto_print',
+    'pos_block_negative_stock',
+    'pos_digital_receipts',
+    'pos_guest_checkout',
+    'pos_receipt_address',
+    'pos_receipt_email',
+    'pos_receipt_enable_qr',
+    'pos_receipt_font',
+    'pos_receipt_footer',
+    'pos_receipt_header',
+    'pos_receipt_logo',
+    'pos_receipt_phone',
+    'pos_receipt_policy',
+    'pos_receipt_qr_link',
+    'pos_receipt_show_logo',
+    'pos_receipt_social_handle',
+    'pos_receipt_tax_id',
+    'pos_receipt_width',
+    'pos_register_mode',
+    'pos_terminal_id',
+    'putaway_logic',
+    'qc_block_on_failure',
+    'qc_sampling_rate',
+    'receiving_logic',
+    'registered_address',
+    'require_expiry',
+    'require_shift_closure',
+    'reserve_stock_buffer',
+    'rotation_policy',
+    'scale_ip_address',
+    'scanner_com_port',
+    'slogan',
+    'store_name',
+    'strict_scanning',
+    'support_contact',
+    'support_phone',
+    'tax_inclusive',
+    'tax_jurisdictions',
+    'tax_on_purchasing',
+    'tax_on_selling',
+    'tax_rate',
+    'tax_vat_number',
+    'timezone',
+    'updated_at',
+    'updated_by',
+    'webhook_customer_signup',
+    'webhook_inventory_low',
+    'webhook_order_created',
+    'withholding_tax'
+]);
+
+// Map TypeScript camelCase property names to PostgreSQL snake_case column names
+const FIELD_TO_DB_MAP: Record<string, string> = {
+    storeName: 'store_name',
+    slogan: 'slogan',
+    logoUrl: 'logo_url',
+    brandColor: 'brand_color',
+    legalBusinessName: 'legal_business_name',
+    taxVatNumber: 'tax_vat_number',
+    registeredAddress: 'registered_address',
+    supportContact: 'support_contact',
+    supportPhone: 'support_phone',
+    country: 'country',
+    currency: 'currency',
+    timezone: 'timezone',
+    dateFormat: 'date_format',
+    numberFormat: 'number_format',
+    language: 'language',
+    taxRate: 'tax_rate',
+    defaultVatRate: 'default_vat_rate',
+    taxAuthority: 'tax_authority',
+    complianceStandard: 'compliance_standard',
+    eTimsEnabled: 'e_tims_enabled',
+    countryConfigs: 'country_configs',
+    rolePolicies: 'role_policies',
+    rolePermissions: 'role_permissions',
+    lowStockThreshold: 'low_stock_threshold',
+    fefoRotation: 'fefo_rotation',
+    binScan: 'bin_scan',
+    enableLoyalty: 'enable_loyalty',
+    enableWMS: 'enable_wms',
+    multiCurrency: 'multi_currency',
+    requireShiftClosure: 'require_shift_closure',
+    posTerminalId: 'pos_terminal_id',
+    posRegisterMode: 'pos_register_mode',
+    posGuestCheckout: 'pos_guest_checkout',
+    posBlockNegativeStock: 'pos_block_negative_stock',
+    posDigitalReceipts: 'pos_digital_receipts',
+    posAutoPrint: 'pos_auto_print',
+    payment_cash: 'payment_cash',
+    payment_card: 'payment_card',
+    payment_mobile_money: 'payment_mobile_money',
+    payment_store_credit: 'payment_store_credit',
+    fiscalYearStart: 'fiscal_year_start',
+    accountingMethod: 'accounting_method',
+    taxInclusive: 'tax_inclusive',
+    taxOnSelling: 'tax_on_selling',
+    taxOnPurchasing: 'tax_on_purchasing',
+    withholdingTax: 'withholding_tax',
+    maxPettyCash: 'max_petty_cash',
+    expenseApprovalLimit: 'expense_approval_limit',
+    defaultCreditLimit: 'default_credit_limit',
+    receivingLogic: 'receiving_logic',
+    qcSamplingRate: 'qc_sampling_rate',
+    qcBlockOnFailure: 'qc_block_on_failure',
+    putawayLogic: 'putaway_logic',
+    rotationPolicy: 'rotation_policy',
+    requireExpiry: 'require_expiry',
+    cycleCountStrategy: 'cycle_count_strategy',
+    pickingMethod: 'picking_method',
+    strictScanning: 'strict_scanning',
+    reserveStockBuffer: 'reserve_stock_buffer',
+    webhookOrderCreated: 'webhook_order_created',
+    webhookInventoryLow: 'webhook_inventory_low',
+    webhookCustomerSignup: 'webhook_customer_signup',
+    scaleIpAddress: 'scale_ip_address',
+    scannerComPort: 'scanner_com_port',
+    posReceiptLogo: 'pos_receipt_logo',
+    posReceiptShowLogo: 'pos_receipt_show_logo',
+    posReceiptHeader: 'pos_receipt_header',
+    posReceiptFooter: 'pos_receipt_footer',
+    posReceiptAddress: 'pos_receipt_address',
+    posReceiptPhone: 'pos_receipt_phone',
+    posReceiptEmail: 'pos_receipt_email',
+    posReceiptTaxId: 'pos_receipt_tax_id',
+    posReceiptPolicy: 'pos_receipt_policy',
+    posReceiptSocialHandle: 'pos_receipt_social_handle',
+    posReceiptEnableQR: 'pos_receipt_enable_qr',
+    posReceiptQRLink: 'pos_receipt_qr_link',
+    posReceiptWidth: 'pos_receipt_width',
+    posReceiptFont: 'pos_receipt_font',
+    taxJurisdictions: 'tax_jurisdictions',
+    exchangeRates: 'exchange_rates',
+    bonusEnabled: 'bonus_enabled',
+    bonusTiers: 'bonus_tiers',
+    bonusPayoutFrequency: 'bonus_payout_frequency',
+    warehousePointsEligibleRoles: 'warehouse_points_eligible_roles',
+    warehousePointRules: 'warehouse_point_rules',
+    posBonusEnabled: 'pos_bonus_enabled',
+    posBonusTiers: 'pos_bonus_tiers',
+    posBonusPayoutFrequency: 'pos_bonus_payout_frequency',
+    posRoleDistribution: 'pos_role_distribution',
+    posPointRules: 'pos_point_rules',
+    enforceRegionalZoning: 'enforce_regional_zoning',
+    mpesaTillEnabled: 'mpesa_till_enabled',
+    mpesaTillNumber: 'mpesa_till_number',
+    mpesaTillName: 'mpesa_till_name',
+    mpesaStkEnabled: 'mpesa_stk_enabled',
+    mpesaStkShortcode: 'mpesa_stk_shortcode',
+    mpesaPasskey: 'mpesa_passkey',
+    mpesaConsumerKey: 'mpesa_consumer_key',
+    mpesaConsumerSecret: 'mpesa_consumer_secret',
+    mpesaEnvironment: 'mpesa_environment',
+    mpesaPaybillEnabled: 'mpesa_paybill_enabled',
+    mpesaPaybillNumber: 'mpesa_paybill_number',
+    mpesaPaybillAccount: 'mpesa_paybill_account',
+    airtelMoneyEnabled: 'airtel_money_enabled',
+    airtelTillNumber: 'airtel_till_number',
+    airtelMerchantName: 'airtel_merchant_name',
+    telebirrEnabled: 'telebirr_enabled',
+    telebirrMerchantId: 'telebirr_merchant_id',
+    cbeBirrEnabled: 'cbe_birr_enabled',
+    cbeBirrMerchantCode: 'cbe_birr_merchant_code'
+};
 
 export const systemConfigService = {
     async getSettings(): Promise<SystemConfig> {
+        let localOverrides: Partial<SystemConfig> | undefined;
+        try {
+            if (typeof window !== 'undefined') {
+                const saved = localStorage.getItem('siifmart_system_config');
+                if (saved) {
+                    localOverrides = JSON.parse(saved);
+                }
+            }
+        } catch {
+            // Non-blocking localStorage read error
+        }
+
         try {
             const { data, error } = await supabase
                 .from('system_config')
@@ -18,126 +227,48 @@ export const systemConfigService = {
             // If no record found, return the default mapped object
             if (!data) {
                 console.warn('⚠️ No system_config record found. Using default application settings.');
-                return this._mapSettings({}); // _mapSettings handles empty object
+                return this._mapSettings({}, localOverrides);
             }
 
-            return this._mapSettings(data);
+            return this._mapSettings(data, localOverrides);
         } catch (err) {
             console.warn('⚠️ Settings load failed, using fallback logic:', err);
-            return this._mapSettings({});
+            return this._mapSettings({}, localOverrides);
         }
     },
 
     async updateSettings(updates: Partial<SystemConfig>, userName: string): Promise<SystemConfig> {
-        const dbUpdates: any = {
-            ...updates,
+        // Enforce explicit column allowlist: only send columns confirmed to exist in system_config
+        const finalUpdates: Record<string, unknown> = {
+            id: '00000000-0000-0000-0000-000000000001',
             updated_at: new Date().toISOString(),
             updated_by: userName
         };
 
-        // Map camelCase to snake_case for DB columns
-        const mapping: Record<string, string> = {
-            storeName: 'store_name',
-            logoUrl: 'logo_url',
-            brandColor: 'brand_color',
-            legalBusinessName: 'legal_business_name',
-            taxVatNumber: 'tax_vat_number',
-            registeredAddress: 'registered_address',
-            supportContact: 'support_contact',
-            supportPhone: 'support_phone',
-            taxRate: 'tax_rate',
-            lowStockThreshold: 'low_stock_threshold',
-            fefoRotation: 'fefo_rotation',
-            binScan: 'bin_scan',
-            enableLoyalty: 'enable_loyalty',
-            enableWMS: 'enable_wms',
-            multiCurrency: 'multi_currency',
-            requireShiftClosure: 'require_shift_closure',
-            posTerminalId: 'pos_terminal_id',
-            posRegisterMode: 'pos_register_mode',
-            posGuestCheckout: 'pos_guest_checkout',
-            posBlockNegativeStock: 'pos_block_negative_stock',
-            posDigitalReceipts: 'pos_digital_receipts',
-            posAutoPrint: 'pos_auto_print',
-            payment_cash: 'payment_cash',
-            payment_card: 'payment_card',
-            payment_mobile_money: 'payment_mobile_money',
-            payment_store_credit: 'payment_store_credit',
-            fiscalYearStart: 'fiscal_year_start',
-            accountingMethod: 'accounting_method',
-            taxInclusive: 'tax_inclusive',
-            defaultVatRate: 'default_vat_rate',
-            withholdingTax: 'withholding_tax',
-            maxPettyCash: 'max_petty_cash',
-            expenseApprovalLimit: 'expense_approval_limit',
-            defaultCreditLimit: 'default_credit_limit',
-            receivingLogic: 'receiving_logic',
-            qcSamplingRate: 'qc_sampling_rate',
-            qcBlockOnFailure: 'qc_block_on_failure',
-            putawayLogic: 'putaway_logic',
-            rotationPolicy: 'rotation_policy',
-            requireExpiry: 'require_expiry',
-            cycleCountStrategy: 'cycle_count_strategy',
-            pickingMethod: 'picking_method',
-            strictScanning: 'strict_scanning',
-            dateFormat: 'date_format',
-            numberFormat: 'number_format',
-            currency: 'currency',
-            timezone: 'timezone',
-            language: 'language',
-            logo_url: 'logo_url', // fallback
-            tax_vat_number: 'tax_vat_number', // fallback
-            posReceiptLogo: 'pos_receipt_logo',
-            posReceiptShowLogo: 'pos_receipt_show_logo',
-            posReceiptHeader: 'pos_receipt_header',
-            posReceiptFooter: 'pos_receipt_footer',
-            posReceiptAddress: 'pos_receipt_address',
-            posReceiptPhone: 'pos_receipt_phone',
-            posReceiptEmail: 'pos_receipt_email',
-            posReceiptTaxId: 'pos_receipt_tax_id',
-            posReceiptPolicy: 'pos_receipt_policy',
-            posReceiptSocialHandle: 'pos_receipt_social_handle',
-            posReceiptEnableQR: 'pos_receipt_enable_qr',
-            posReceiptQRLink: 'pos_receipt_qr_link',
-            posReceiptWidth: 'pos_receipt_width',
-            posReceiptFont: 'pos_receipt_font',
-            taxJurisdictions: 'tax_jurisdictions',
-            exchangeRates: 'exchange_rates',
-            // Gamification fields
-            bonusEnabled: 'bonus_enabled',
-            bonusTiers: 'bonus_tiers',
-            bonusPayoutFrequency: 'bonus_payout_frequency',
-            warehousePointsEligibleRoles: 'warehouse_points_eligible_roles',
-            warehousePointRules: 'warehouse_point_rules',
-            posBonusEnabled: 'pos_bonus_enabled',
-            posBonusTiers: 'pos_bonus_tiers',
-            posBonusPayoutFrequency: 'pos_bonus_payout_frequency',
-            posRoleDistribution: 'pos_role_distribution',
-            posPointRules: 'pos_point_rules',
-            enforceRegionalZoning: 'enforce_regional_zoning'
-        };
+        for (const [key, value] of Object.entries(updates)) {
+            if (value === undefined) continue;
+            const dbKey = FIELD_TO_DB_MAP[key] || key;
+            if (LIVE_SYSTEM_CONFIG_COLUMNS.has(dbKey)) {
+                finalUpdates[dbKey] = value;
+            }
+        }
 
-        const finalUpdates: any = {};
-        Object.entries(dbUpdates).forEach(([key, value]) => {
-            const dbKey = mapping[key] || key;
-            finalUpdates[dbKey] = value;
-        });
+        try {
+            const { data, error } = await supabase
+                .from('system_config')
+                .upsert(finalUpdates)
+                .select()
+                .single();
 
-        // Ensure we don't try to update id
-        delete finalUpdates.id;
-
-        const { data, error } = await supabase
-            .from('system_config')
-            .upsert({
-                ...finalUpdates,
-                id: '00000000-0000-0000-0000-000000000001',
-                updated_at: new Date().toISOString()
-            })
-            .select()
-            .single();
-
-        if (error) throw error;
-        return this._mapSettings(data);
+            if (error) {
+                console.error('Failed to update system_config in Supabase:', error);
+                throw error;
+            }
+            return this._mapSettings(data, updates);
+        } catch (err) {
+            console.error('Failed to update system_config:', err);
+            throw err;
+        }
     },
 
     async uploadFile(file: File, path: string): Promise<string> {
@@ -194,91 +325,130 @@ export const systemConfigService = {
         }
     },
 
-    _mapSettings(data: any): SystemConfig {
+    _mapSettings(data: any, overrides?: Partial<SystemConfig>): SystemConfig {
+        const country = getEffectiveCountry({
+            country: overrides?.country || data.country,
+            currency: overrides?.currency || data.currency,
+            timezone: overrides?.timezone || data.timezone
+        });
+        const profile = getCountryProfile(country);
+        const isKe = country === 'KE';
+
         return {
-            storeName: data.store_name,
-            slogan: data.slogan,
-            logoUrl: data.logo_url,
-            brandColor: data.brand_color,
-            legalBusinessName: data.legal_business_name,
-            taxVatNumber: data.tax_vat_number,
-            registeredAddress: data.registered_address,
-            supportContact: data.support_contact,
-            supportPhone: data.support_phone,
-            currency: data.currency,
-            timezone: data.timezone,
-            dateFormat: data.date_format,
-            numberFormat: data.number_format,
-            language: data.language,
-            taxRate: data.tax_rate,
-            lowStockThreshold: data.low_stock_threshold,
-            fefoRotation: data.fefo_rotation,
-            binScan: data.bin_scan,
-            enableLoyalty: data.enable_loyalty,
-            enableWMS: data.enable_wms,
-            multiCurrency: data.multi_currency,
-            requireShiftClosure: data.require_shift_closure,
-            posTerminalId: data.pos_terminal_id,
-            posRegisterMode: data.pos_register_mode,
-            posGuestCheckout: data.pos_guest_checkout,
-            posBlockNegativeStock: data.pos_block_negative_stock,
-            posDigitalReceipts: data.pos_digital_receipts,
-            posAutoPrint: data.pos_auto_print,
-            payment_cash: data.payment_cash,
-            payment_card: data.payment_card,
-            payment_mobile_money: data.payment_mobile_money,
-            payment_store_credit: data.payment_store_credit,
-            fiscalYearStart: data.fiscal_year_start,
-            accountingMethod: data.accounting_method,
-            taxInclusive: data.tax_inclusive,
-            defaultVatRate: data.default_vat_rate,
-            withholdingTax: data.withholding_tax,
-            maxPettyCash: data.max_petty_cash,
-            expenseApprovalLimit: data.expense_approval_limit,
-            defaultCreditLimit: data.default_credit_limit,
-            receivingLogic: data.receiving_logic,
-            qcSamplingRate: data.qc_sampling_rate,
-            qcBlockOnFailure: data.qc_block_on_failure,
-            putawayLogic: data.putaway_logic,
-            rotationPolicy: data.rotation_policy,
-            requireExpiry: data.require_expiry,
-            cycleCountStrategy: data.cycle_count_strategy,
-            exchangeRates: data.exchange_rates,
-            pickingMethod: data.picking_method,
-            strictScanning: data.strict_scanning,
-            reserveStockBuffer: data.reserve_stock_buffer,
-            webhookOrderCreated: data.webhook_order_created,
-            webhookInventoryLow: data.webhook_inventory_low,
-            webhookCustomerSignup: data.webhook_customer_signup,
-            scaleIpAddress: data.scale_ip_address,
-            scannerComPort: data.scanner_com_port,
-            posReceiptLogo: data.pos_receipt_logo,
-            posReceiptShowLogo: data.pos_receipt_show_logo,
-            posReceiptHeader: data.pos_receipt_header,
-            posReceiptFooter: data.pos_receipt_footer,
-            posReceiptAddress: data.pos_receipt_address,
-            posReceiptPhone: data.pos_receipt_phone,
-            posReceiptEmail: data.pos_receipt_email,
-            posReceiptTaxId: data.pos_receipt_tax_id,
-            posReceiptPolicy: data.pos_receipt_policy,
-            posReceiptSocialHandle: data.pos_receipt_social_handle,
-            posReceiptEnableQR: data.pos_receipt_enable_qr,
-            posReceiptQRLink: data.pos_receipt_qr_link,
-            posReceiptWidth: data.pos_receipt_width,
-            posReceiptFont: data.pos_receipt_font,
-            taxJurisdictions: data.tax_jurisdictions || [],
+            storeName: overrides?.storeName ?? data.store_name ?? 'SIIFMART',
+            slogan: overrides?.slogan ?? data.slogan,
+            logoUrl: overrides?.logoUrl ?? data.logo_url,
+            brandColor: overrides?.brandColor ?? data.brand_color,
+            legalBusinessName: overrides?.legalBusinessName ?? data.legal_business_name ?? COUNTRY_LEGAL_DEFAULTS[country]?.legalBusinessName,
+            taxVatNumber: overrides?.taxVatNumber ?? data.tax_vat_number ?? COUNTRY_LEGAL_DEFAULTS[country]?.taxVatNumber,
+            registeredAddress: overrides?.registeredAddress ?? data.registered_address ?? COUNTRY_LEGAL_DEFAULTS[country]?.registeredAddress,
+            supportContact: overrides?.supportContact ?? data.support_contact,
+            supportPhone: overrides?.supportPhone ?? data.support_phone,
+            country,
+            currency: overrides?.currency ?? (data.currency === 'KES' ? 'KSh' : (data.currency || profile.currency)),
+            timezone: overrides?.timezone ?? (data.timezone || profile.timezone),
+            dateFormat: overrides?.dateFormat ?? data.date_format ?? profile.dateFormat ?? 'DD/MM/YYYY',
+            numberFormat: overrides?.numberFormat ?? data.number_format ?? profile.numberFormat ?? '1,000.00',
+            language: overrides?.language ?? (country !== 'ET' && (data.language === 'am' || data.language === 'or')
+                ? 'en'
+                : (data.language || 'en')),
+            taxRate: overrides?.taxRate ?? data.tax_rate ?? profile.taxRate,
+            taxAuthority: overrides?.taxAuthority ?? data.tax_authority ?? profile.taxAuthority,
+            complianceStandard: overrides?.complianceStandard ?? data.compliance_standard ?? profile.complianceStandard,
+            eTimsEnabled: overrides?.eTimsEnabled ?? data.e_tims_enabled ?? isKe,
+            countryConfigs: overrides?.countryConfigs ?? data.country_configs,
+            rolePolicies: overrides?.rolePolicies ?? data.role_policies,
+            rolePermissions: overrides?.rolePermissions ?? data.role_permissions,
+            lowStockThreshold: overrides?.lowStockThreshold ?? data.low_stock_threshold ?? 10,
+            fefoRotation: overrides?.fefoRotation ?? data.fefo_rotation ?? true,
+            binScan: overrides?.binScan ?? data.bin_scan ?? false,
+            enableLoyalty: overrides?.enableLoyalty ?? data.enable_loyalty ?? false,
+            enableWMS: overrides?.enableWMS ?? data.enable_wms ?? false,
+            multiCurrency: overrides?.multiCurrency ?? data.multi_currency ?? false,
+            requireShiftClosure: overrides?.requireShiftClosure ?? data.require_shift_closure ?? true,
+            posTerminalId: overrides?.posTerminalId ?? data.pos_terminal_id ?? 'TERM-001',
+            posRegisterMode: overrides?.posRegisterMode ?? data.pos_register_mode ?? 'cashier',
+            posGuestCheckout: overrides?.posGuestCheckout ?? data.pos_guest_checkout ?? true,
+            posBlockNegativeStock: overrides?.posBlockNegativeStock ?? data.pos_block_negative_stock ?? false,
+            posDigitalReceipts: overrides?.posDigitalReceipts ?? data.pos_digital_receipts ?? true,
+            posAutoPrint: overrides?.posAutoPrint ?? data.pos_auto_print ?? false,
+            payment_cash: overrides?.payment_cash ?? data.payment_cash ?? true,
+            payment_card: overrides?.payment_card ?? data.payment_card ?? true,
+            payment_mobile_money: overrides?.payment_mobile_money ?? data.payment_mobile_money ?? true,
+            payment_store_credit: overrides?.payment_store_credit ?? data.payment_store_credit ?? false,
+            fiscalYearStart: overrides?.fiscalYearStart ?? data.fiscal_year_start ?? '01/01',
+            accountingMethod: overrides?.accountingMethod ?? data.accounting_method ?? 'accrual',
+            taxInclusive: overrides?.taxInclusive ?? data.tax_inclusive ?? true,
+            taxOnSelling: overrides?.taxOnSelling ?? data.tax_on_selling ?? true,
+            taxOnPurchasing: overrides?.taxOnPurchasing ?? data.tax_on_purchasing ?? true,
+            defaultVatRate: overrides?.defaultVatRate ?? data.default_vat_rate ?? (isKe ? 16 : 15),
+            withholdingTax: overrides?.withholdingTax ?? data.withholding_tax ?? 2,
+            maxPettyCash: overrides?.maxPettyCash ?? data.max_petty_cash ?? 5000,
+            expenseApprovalLimit: overrides?.expenseApprovalLimit ?? data.expense_approval_limit ?? 10000,
+            defaultCreditLimit: overrides?.defaultCreditLimit ?? data.default_credit_limit ?? 50000,
+            receivingLogic: overrides?.receivingLogic ?? data.receiving_logic ?? 'blind',
+            qcSamplingRate: overrides?.qcSamplingRate ?? data.qc_sampling_rate ?? 10,
+            qcBlockOnFailure: overrides?.qcBlockOnFailure ?? data.qc_block_on_failure ?? true,
+            putawayLogic: overrides?.putawayLogic ?? data.putaway_logic ?? 'system',
+            rotationPolicy: overrides?.rotationPolicy ?? data.rotation_policy ?? 'fefo',
+            requireExpiry: overrides?.requireExpiry ?? data.require_expiry ?? true,
+            cycleCountStrategy: overrides?.cycleCountStrategy ?? data.cycle_count_strategy ?? 'abc',
+            exchangeRates: overrides?.exchangeRates ?? data.exchange_rates ?? [],
+            pickingMethod: overrides?.pickingMethod ?? data.picking_method ?? 'zone',
+            strictScanning: overrides?.strictScanning ?? data.strict_scanning ?? true,
+            reserveStockBuffer: overrides?.reserveStockBuffer ?? data.reserve_stock_buffer ?? 5,
+            webhookOrderCreated: overrides?.webhookOrderCreated ?? data.webhook_order_created,
+            webhookInventoryLow: overrides?.webhookInventoryLow ?? data.webhook_inventory_low,
+            webhookCustomerSignup: overrides?.webhookCustomerSignup ?? data.webhook_customer_signup,
+            scaleIpAddress: overrides?.scaleIpAddress ?? data.scale_ip_address,
+            scannerComPort: overrides?.scannerComPort ?? data.scanner_com_port,
+            posReceiptLogo: overrides?.posReceiptLogo ?? data.pos_receipt_logo,
+            posReceiptShowLogo: overrides?.posReceiptShowLogo ?? data.pos_receipt_show_logo ?? true,
+            posReceiptHeader: overrides?.posReceiptHeader ?? data.pos_receipt_header ?? 'SIIFMART RETAIL',
+            posReceiptFooter: overrides?.posReceiptFooter ?? data.pos_receipt_footer ?? 'Thank you for shopping with us!',
+            posReceiptAddress: overrides?.posReceiptAddress ?? data.pos_receipt_address,
+            posReceiptPhone: overrides?.posReceiptPhone ?? data.pos_receipt_phone,
+            posReceiptEmail: overrides?.posReceiptEmail ?? data.pos_receipt_email,
+            posReceiptTaxId: overrides?.posReceiptTaxId ?? data.pos_receipt_tax_id,
+            posReceiptPolicy: overrides?.posReceiptPolicy ?? data.pos_receipt_policy ?? 'Items may be returned within 7 days with valid receipt.',
+            posReceiptSocialHandle: overrides?.posReceiptSocialHandle ?? data.pos_receipt_social_handle,
+            posReceiptEnableQR: overrides?.posReceiptEnableQR ?? data.pos_receipt_enable_qr ?? true,
+            posReceiptQRLink: overrides?.posReceiptQRLink ?? data.pos_receipt_qr_link,
+            posReceiptWidth: overrides?.posReceiptWidth ?? data.pos_receipt_width ?? '80mm',
+            posReceiptFont: overrides?.posReceiptFont ?? data.pos_receipt_font ?? 'sans-serif',
+            taxJurisdictions: overrides?.taxJurisdictions ?? data.tax_jurisdictions ?? [],
             // Gamification fields
-            bonusEnabled: data.bonus_enabled ?? true,
-            bonusTiers: data.bonus_tiers || [],
-            bonusPayoutFrequency: data.bonus_payout_frequency || 'monthly',
-            warehousePointsEligibleRoles: data.warehouse_points_eligible_roles || [],
-            warehousePointRules: data.warehouse_point_rules || [],
-            posBonusEnabled: data.pos_bonus_enabled ?? true,
-            posBonusTiers: data.pos_bonus_tiers || [],
-            posBonusPayoutFrequency: data.pos_bonus_payout_frequency || 'monthly',
-            posRoleDistribution: data.pos_role_distribution || [],
-            posPointRules: data.pos_point_rules || [],
-            enforceRegionalZoning: data.enforce_regional_zoning ?? false
+            bonusEnabled: overrides?.bonusEnabled ?? data.bonus_enabled ?? true,
+            bonusTiers: overrides?.bonusTiers ?? data.bonus_tiers ?? [],
+            bonusPayoutFrequency: overrides?.bonusPayoutFrequency ?? data.bonus_payout_frequency ?? 'monthly',
+            warehousePointsEligibleRoles: overrides?.warehousePointsEligibleRoles ?? data.warehouse_points_eligible_roles ?? [],
+            warehousePointRules: overrides?.warehousePointRules ?? data.warehouse_point_rules ?? [],
+            posBonusEnabled: overrides?.posBonusEnabled ?? data.pos_bonus_enabled ?? true,
+            posBonusTiers: overrides?.posBonusTiers ?? data.pos_bonus_tiers ?? [],
+            posBonusPayoutFrequency: overrides?.posBonusPayoutFrequency ?? data.pos_bonus_payout_frequency ?? 'monthly',
+            posRoleDistribution: overrides?.posRoleDistribution ?? data.pos_role_distribution ?? [],
+            posPointRules: overrides?.posPointRules ?? data.pos_point_rules ?? [],
+            enforceRegionalZoning: overrides?.enforceRegionalZoning ?? data.enforce_regional_zoning ?? false,
+            // Mobile payment gateways
+            mpesaTillEnabled: overrides?.mpesaTillEnabled ?? data.mpesa_till_enabled ?? true,
+            mpesaTillNumber: overrides?.mpesaTillNumber ?? data.mpesa_till_number ?? '882910',
+            mpesaTillName: overrides?.mpesaTillName ?? data.mpesa_till_name ?? 'SIIFMART MAIN STORE',
+            mpesaStkEnabled: overrides?.mpesaStkEnabled ?? data.mpesa_stk_enabled ?? true,
+            mpesaStkShortcode: overrides?.mpesaStkShortcode ?? data.mpesa_stk_shortcode ?? '174379',
+            mpesaPasskey: overrides?.mpesaPasskey ?? data.mpesa_passkey ?? '',
+            mpesaConsumerKey: overrides?.mpesaConsumerKey ?? data.mpesa_consumer_key ?? '',
+            mpesaConsumerSecret: overrides?.mpesaConsumerSecret ?? data.mpesa_consumer_secret ?? '',
+            mpesaEnvironment: overrides?.mpesaEnvironment ?? data.mpesa_environment ?? 'sandbox',
+            mpesaPaybillEnabled: overrides?.mpesaPaybillEnabled ?? data.mpesa_paybill_enabled ?? false,
+            mpesaPaybillNumber: overrides?.mpesaPaybillNumber ?? data.mpesa_paybill_number ?? '400200',
+            mpesaPaybillAccount: overrides?.mpesaPaybillAccount ?? data.mpesa_paybill_account ?? 'SIIFMART',
+            airtelMoneyEnabled: overrides?.airtelMoneyEnabled ?? data.airtel_money_enabled ?? true,
+            airtelTillNumber: overrides?.airtelTillNumber ?? data.airtel_till_number ?? '554433',
+            airtelMerchantName: overrides?.airtelMerchantName ?? data.airtel_merchant_name ?? 'SIIFMART AIRTEL',
+            telebirrEnabled: overrides?.telebirrEnabled ?? data.telebirr_enabled ?? true,
+            telebirrMerchantId: overrides?.telebirrMerchantId ?? data.telebirr_merchant_id ?? 'TB-998811',
+            cbeBirrEnabled: overrides?.cbeBirrEnabled ?? data.cbe_birr_enabled ?? true,
+            cbeBirrMerchantCode: overrides?.cbeBirrMerchantCode ?? data.cbe_birr_merchant_code ?? 'CBE-445566'
         };
     }
 };

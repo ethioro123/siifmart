@@ -1,7 +1,6 @@
 import React from 'react';
-import { Search, Loader2, CheckCircle, Briefcase } from 'lucide-react';
+import { Search, Loader2, CheckCircle } from 'lucide-react';
 import { useFinance } from './FinanceContext';
-import { CURRENCY_SYMBOL } from '../../constants';
 
 export const PayrollTab: React.FC = () => {
     const {
@@ -30,14 +29,15 @@ export const PayrollTab: React.FC = () => {
         calculateEmployeeBonus,
         handleProcessPayroll,
         handleDownloadBankFile,
-        isSubmitting
+        isSubmitting,
+        currencySymbol
     } = useFinance();
 
     const PAYROLL_PER_PAGE_OPTIONS = [10, 25, 50, 100];
 
     return (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 animate-in fade-in">
-            <div className="lg:col-span-2 bg-cyber-gray border border-white/5 rounded-2xl overflow-x-auto">
+            <div className="lg:col-span-2 bg-stone-900/60 dark:bg-stone-900/60 border border-stone-200/10 dark:border-white/5 rounded-2xl overflow-x-auto">
                 <div className="p-6 border-b border-white/5">
                     <h3 className="font-bold text-white">Payroll Registry</h3>
                     <p className="text-xs text-gray-400 mt-1">Monthly compensation breakdown based on active employees.</p>
@@ -52,14 +52,14 @@ export const PayrollTab: React.FC = () => {
                             placeholder="Search employees..."
                             value={payrollSearch}
                             onChange={(e) => setPayrollSearch(e.target.value)}
-                            className="w-full bg-black/30 border border-white/10 rounded-lg pl-10 pr-4 py-2 text-sm text-white focus:border-cyber-primary outline-none"
+                            className="w-full bg-black/30 border border-white/10 rounded-lg pl-10 pr-4 py-2 text-sm text-white focus:border-[#2C5E3B] dark:focus:border-[#A9CBA2] outline-none"
                             aria-label="Search employees"
                         />
                     </div>
                     <select
                         value={payrollRoleFilter}
                         onChange={(e) => setPayrollRoleFilter(e.target.value)}
-                        className="bg-black/30 border border-white/10 rounded-lg px-4 py-2 text-sm text-white outline-none focus:border-cyber-primary"
+                        className="bg-black/30 border border-white/10 rounded-lg px-4 py-2 text-sm text-white outline-none focus:border-[#2C5E3B] dark:focus:border-[#A9CBA2]"
                         aria-label="Filter by role"
                     >
                         {uniqueRoles.map(role => <option key={role} value={role}>{role}</option>)}
@@ -100,7 +100,7 @@ export const PayrollTab: React.FC = () => {
                                         {emp.avatar ? (
                                             <img src={emp.avatar} alt={emp.name} className="w-full h-full object-cover" />
                                         ) : (
-                                            <div className="w-full h-full flex items-center justify-center bg-cyber-primary/10 text-cyber-primary text-[10px] font-bold">
+                                            <div className="w-full h-full flex items-center justify-center bg-[#2C5E3B]/10 text-[#2C5E3B] dark:text-[#A9CBA2] text-[10px] font-bold">
                                                 {emp.name.split(' ').map((n: string) => n[0]).join('').toUpperCase()}
                                             </div>
                                         )}
@@ -114,17 +114,17 @@ export const PayrollTab: React.FC = () => {
                                 </td>
                                 <td className="p-4 text-[11px] text-gray-500 font-medium">{emp.department}</td>
                                 <td className="p-4 text-sm font-mono text-white text-right font-bold">
-                                    {CURRENCY_SYMBOL} {(emp.salary || 0).toLocaleString()}
+                                    {currencySymbol} {(Number(emp.salary) || 0).toLocaleString()}
                                 </td>
                                 <td className="p-4 text-sm font-mono text-right">
                                     {calculateEmployeeBonus(emp) > 0 ? (
-                                        <span className="text-green-400 font-bold">+{CURRENCY_SYMBOL} {calculateEmployeeBonus(emp).toLocaleString()}</span>
+                                        <span className="text-emerald-400 font-bold">+{currencySymbol} {calculateEmployeeBonus(emp).toLocaleString()}</span>
                                     ) : (
                                         <span className="text-gray-500">—</span>
                                     )}
                                 </td>
-                                <td className="p-4 text-sm font-mono text-cyber-primary text-right font-bold">
-                                    {CURRENCY_SYMBOL} {((emp.salary || 0) + calculateEmployeeBonus(emp)).toLocaleString()}
+                                <td className="p-4 text-sm font-mono text-[#2C5E3B] dark:text-[#A9CBA2] text-right font-bold">
+                                    {currencySymbol} {((Number(emp.salary) || 0) + calculateEmployeeBonus(emp)).toLocaleString()}
                                 </td>
                             </tr>
                         ))}
@@ -137,7 +137,7 @@ export const PayrollTab: React.FC = () => {
                         {/* Info */}
                         <div className="flex items-center gap-4">
                             <span className="text-xs text-gray-400">
-                                Showing <span className="text-white font-bold">{payrollStartIndex + 1}</span> to <span className="text-white font-bold">{Math.min(payrollEndIndex, filteredEmployees.length)}</span> of <span className="text-cyber-primary font-bold">{filteredEmployees.length}</span> employees
+                                Showing <span className="text-white font-bold">{payrollStartIndex + 1}</span> to <span className="text-white font-bold">{Math.min(payrollEndIndex, filteredEmployees.length)}</span> of <span className="text-[#2C5E3B] dark:text-[#A9CBA2] font-bold">{filteredEmployees.length}</span> employees
                             </span>
                             <select
                                 value={payrollPerPage}
@@ -145,7 +145,7 @@ export const PayrollTab: React.FC = () => {
                                     setPayrollPerPage(Number(e.target.value));
                                     setPayrollPage(1);
                                 }}
-                                className="bg-black/50 border border-white/10 rounded-lg px-2 py-1 text-xs text-white outline-none focus:border-cyber-primary/50 cursor-pointer"
+                                className="bg-black/50 border border-white/10 rounded-lg px-2 py-1 text-xs text-white outline-none focus:border-[#2C5E3B]/50 cursor-pointer"
                                 aria-label="Items per page"
                             >
                                 {PAYROLL_PER_PAGE_OPTIONS.map(n => (
@@ -187,7 +187,7 @@ export const PayrollTab: React.FC = () => {
                                             onClick={() => setPayrollPage(page)}
                                             className={`w-6 h-6 rounded text-xs font-bold transition-all ${
                                                 payrollPage === page
-                                                    ? 'bg-cyber-primary text-black'
+                                                    ? 'bg-[#2C5E3B] text-white'
                                                     : 'text-gray-400 hover:text-white hover:bg-white/10'
                                             }`}
                                         >
@@ -226,29 +226,29 @@ export const PayrollTab: React.FC = () => {
                 )}
             </div>
 
-            <div className="bg-cyber-gray border border-white/5 rounded-2xl p-6 h-fit">
+            <div className="bg-stone-900/60 dark:bg-stone-900/60 border border-stone-200/10 dark:border-white/5 rounded-2xl p-6 h-fit">
                 <h3 className="font-bold text-white mb-6">Payroll Summary</h3>
                 <div className="space-y-4 mb-6">
                     <div className="p-4 bg-black/20 rounded-xl border border-white/5">
                         <p className="text-gray-400 text-xs uppercase font-bold mb-1">Base Salaries</p>
-                        <p className="text-2xl font-mono font-bold text-white">{CURRENCY_SYMBOL} {totalSalaries.toLocaleString()}</p>
+                        <p className="text-2xl font-mono font-bold text-white">{currencySymbol} {totalSalaries.toLocaleString()}</p>
                     </div>
                     {totalBonuses > 0 && (
-                        <div className="p-4 bg-green-500/10 rounded-xl border border-green-500/20">
-                            <p className="text-green-400 text-xs uppercase font-bold mb-1">Performance Bonuses</p>
-                            <p className="text-2xl font-mono font-bold text-green-400">+{CURRENCY_SYMBOL} {totalBonuses.toLocaleString()}</p>
-                            <p className="text-[10px] text-green-400/60 mt-1">Based on store performance & role distribution</p>
+                        <div className="p-4 bg-emerald-500/10 rounded-xl border border-emerald-500/20">
+                            <p className="text-emerald-400 text-xs uppercase font-bold mb-1">Performance Bonuses</p>
+                            <p className="text-2xl font-mono font-bold text-emerald-400">+{currencySymbol} {totalBonuses.toLocaleString()}</p>
+                            <p className="text-[10px] text-emerald-400/60 mt-1">Based on store performance & role distribution</p>
                         </div>
                     )}
-                    <div className="p-4 bg-cyber-primary/10 rounded-xl border border-cyber-primary/20">
-                        <p className="text-cyber-primary text-xs uppercase font-bold mb-1">Total Monthly Payout</p>
-                        <p className="text-3xl font-mono font-bold text-cyber-primary">{CURRENCY_SYMBOL} {(totalSalaries + totalBonuses).toLocaleString()}</p>
+                    <div className="p-4 bg-[#2C5E3B]/10 rounded-xl border border-[#2C5E3B]/20">
+                        <p className="text-[#2C5E3B] dark:text-[#A9CBA2] text-xs uppercase font-bold mb-1">Total Monthly Payout</p>
+                        <p className="text-3xl font-mono font-bold text-[#2C5E3B] dark:text-[#A9CBA2]">{currencySymbol} {(totalSalaries + totalBonuses).toLocaleString()}</p>
                         <p className="text-[10px] text-gray-500 mt-2">{employees.length} Active Employees</p>
                     </div>
                 </div>
                 <button
                     onClick={handleProcessPayroll}
-                    className="w-full py-4 bg-cyber-primary text-black font-bold rounded-xl mb-3 hover:bg-cyber-accent transition-colors flex items-center justify-center gap-2"
+                    className="w-full py-4 woody-btn-primary font-bold rounded-xl mb-3 flex items-center justify-center gap-2"
                 >
                     <CheckCircle size={18} /> Process Run
                 </button>

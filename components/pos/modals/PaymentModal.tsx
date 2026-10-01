@@ -1,13 +1,17 @@
 import React from 'react';
 import { usePOS } from '../POSContext';
 import { useLanguage } from '../../../contexts/LanguageContext';
+import { useData } from '../../../contexts/DataContext';
 import Modal from '../../Modal';
 import { CURRENCY_SYMBOL } from '../../../constants';
 import { PaymentMethod } from '../../../types';
 import { Banknote, CreditCard, Smartphone, RefreshCcw, Check } from 'lucide-react';
+import { usePOSMobilePayment } from '../hooks/usePOSMobilePayment';
+import { MobilePaymentSection } from './MobilePaymentSection';
 
 export const PaymentModal: React.FC = () => {
-    const { t } = useLanguage();
+    const { t, isKenya, isEthiopia, countryProfile } = useLanguage();
+    const { settings } = useData();
     const {
         isPaymentModalOpen,
         setIsPaymentModalOpen,
@@ -20,7 +24,31 @@ export const PaymentModal: React.FC = () => {
         handleProcessPayment,
         isPaymentValid,
         isProcessing,
+        selectedCustomer
     } = usePOS();
+
+    const mobilePayment = usePOSMobilePayment({
+        isKenya,
+        isEthiopia,
+        total,
+        selectedCustomer,
+        settings
+    });
+
+    const isMobileReady = selectedPaymentMethod === 'Mobile Money' ? mobilePayment.isMobilePaymentReady() : true;
+    const canComplete = isPaymentValid && isMobileReady && !isProcessing;
+
+    const handleComplete = () => {
+        if (selectedPaymentMethod === 'Mobile Money') {
+            handleProcessPayment({
+                channel: mobilePayment.getChannelLabel(mobilePayment.channel),
+                ref: mobilePayment.transactionRef || undefined,
+                phone: mobilePayment.customerPhone ? `+254${mobilePayment.customerPhone}` : undefined
+            });
+        } else {
+            handleProcessPayment();
+        }
+    };
 
     const quickCashAmounts = React.useMemo(() => {
         const exact = Math.ceil(total);
@@ -61,7 +89,7 @@ export const PaymentModal: React.FC = () => {
                     {[
                         { id: 'Cash', icon: <Banknote size={22} />, label: t('pos.cash') },
                         { id: 'Card', icon: <CreditCard size={22} />, label: t('pos.card') },
-                        { id: 'Mobile Money', icon: <Smartphone size={22} />, label: t('pos.mobile') }
+                        { id: 'Mobile Money', icon: <Smartphone size={22} />, label: isKenya ? 'M-Pesa' : t('pos.mobile') }
                     ].map(method => (
                         <button
                             key={method.id}
@@ -148,12 +176,21 @@ export const PaymentModal: React.FC = () => {
                     </div>
                 )}
 
-                {selectedPaymentMethod !== 'Cash' && (
+                {selectedPaymentMethod === 'Mobile Money' && (
+                    <MobilePaymentSection
+                        mobilePayment={mobilePayment}
+                        total={total}
+                        isKenya={isKenya}
+                        isEthiopia={isEthiopia}
+                    />
+                )}
+
+                {selectedPaymentMethod === 'Card' && (
                     <div className="p-4 bg-blue-500/10 border border-blue-500/20 rounded-2xl flex items-start gap-3">
                         <RefreshCcw className="w-5 h-5 text-blue-600 dark:text-blue-400 mt-0.5 animate-spin" />
                         <div>
                             <p className="text-blue-700 dark:text-blue-400 text-sm font-bold">Waiting for Terminal...</p>
-                            <p className="text-stone-500 dark:text-gray-400 text-xs mt-0.5">Ask customer to tap card or scan QR code.</p>
+                            <p className="text-stone-500 dark:text-gray-400 text-xs mt-0.5">Ask customer to tap card or swipe.</p>
                         </div>
                     </div>
                 )}
@@ -169,8 +206,8 @@ export const PaymentModal: React.FC = () => {
                     </button>
                     <button
                         type="button"
-                        onClick={handleProcessPayment}
-                        disabled={!isPaymentValid || isProcessing}
+                        onClick={handleComplete}
+                        disabled={!canComplete}
                         className="flex-[2] py-3.5 px-6 bg-[#2C5E3B] hover:bg-[#1B3520] disabled:bg-stone-200 dark:disabled:bg-white/5 text-white disabled:text-stone-400 dark:disabled:text-stone-600 rounded-2xl font-black text-sm uppercase tracking-wider disabled:cursor-not-allowed transition-all shadow-md active:scale-95 flex items-center justify-center gap-2 cursor-pointer"
                     >
                         {isProcessing ? (
@@ -178,7 +215,7 @@ export const PaymentModal: React.FC = () => {
                         ) : (
                             <Check size={18} />
                         )}
-                        <span>{isPaymentValid ? t('pos.completeSale') : 'Enter Tendered Amount'}</span>
+                        <span>{canComplete ? t('pos.completeSale') : selectedPaymentMethod === 'Cash' ? 'Enter Tendered Amount' : 'Enter Payment Details'}</span>
                     </button>
                 </div>
             </div>

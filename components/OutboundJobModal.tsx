@@ -8,7 +8,7 @@ import { WMSJob, User, Site, Product } from '../types';
 import { formatJobId } from '../utils/jobIdFormatter';
 import { generatePackLabelHTML } from '../utils/labels/PackLabelGenerator';
 import { useLanguage } from '../contexts/LanguageContext';
-import { isWeightBased, isVolumeBased } from '../utils/units';
+import { getSellUnit, formatPackagingDescription, isWeightBased, isVolumeBased } from '../utils/units';
 import Button from './shared/Button';
 import { logger } from '../utils/logger';
 import { printHtmlContent } from '../utils/printHelper';
@@ -75,29 +75,21 @@ export const OutboundJobModal: React.FC<OutboundJobModalProps> = ({
 
     const getLabelQtyAndUnit = (item: any, product?: any) => {
         const prod = product || getProduct(item);
-        if (prod) {
-            const unit = prod.unit;
-            const isWeightVol = isWeightBased(unit) || isVolumeBased(unit);
-            const sizeNum = prod.size ? parseFloat(prod.size as string) : 0;
-            if (isWeightVol && sizeNum > 0) {
-                const expected = item.expectedQty || (item as any).quantity || 0;
-                const picked = item.pickedQty !== undefined && item.pickedQty !== null ? item.pickedQty : expected;
-                const displayPickedCases = picked <= expected ? picked : (sizeNum > 0 ? picked / sizeNum : picked);
-                return {
-                    quantity: `${displayPickedCases} x ${sizeNum}`,
-                    unit
-                };
-            }
-        }
         if ((item as any).requestedMeasureQty !== undefined && (item as any).requestedMeasureQty !== null) {
             return {
-                quantity: (item as any).requestedMeasureQty,
-                unit: product?.unit || item.unit || 'KG'
+                quantity: `${(item as any).requestedMeasureQty}`,
+                unit: prod?.unit || item.unit || 'KG'
             };
         }
+        const expected = item.expectedQty || (item as any).quantity || 0;
+        const picked = item.pickedQty !== undefined && item.pickedQty !== null ? item.pickedQty : expected;
+        const packDesc = formatPackagingDescription(prod, picked);
+        const unitDef = getSellUnit(prod?.unit || item.unit);
+        const unitLabel = unitDef.category === 'count' && unitDef.code !== 'UNIT' ? unitDef.shortLabel : 'pk';
+
         return {
-            quantity: item.pickedQty !== undefined && item.pickedQty !== null ? item.pickedQty : (item.expectedQty || (item as any).quantity || 0),
-            unit: prod?.unit || item.unit
+            quantity: packDesc ? `${picked} ${unitLabel} (${packDesc})` : `${picked} ${unitLabel}`,
+            unit: unitLabel
         };
     };
 

@@ -3,6 +3,21 @@ import type { PurchaseOrder } from '../types';
 import { wmsJobsService } from './wms-jobs.service';
 import { generateNextPONumber } from '../utils/jobIdFormatter';
 import { getAll, getMetrics, getById } from './purchase-orders.read';
+import { logger } from '../utils/logger';
+import { systemLogsService } from './system-logs.service';
+import { getEffectiveCountry } from '../utils/localization';
+
+async function validateWarehouseDestination(siteId?: string): Promise<void> {
+    if (!siteId) return;
+    try {
+        const { data: s } = await supabase.from('sites').select('name, type').eq('id', siteId).maybeSingle();
+        if (s && s.type !== 'Warehouse' && s.type !== 'Distribution Center') {
+            throw new Error(`Procurement policy violation: Purchase orders can only be sent to a Warehouse or Distribution Center. Selected site "${s.name}" is a ${s.type}.`);
+        }
+    } catch (err) {
+        if (err instanceof Error && err.message.includes('Procurement policy violation')) throw err;
+    }
+}
 
 export const purchaseOrdersService = {
     // Re-export read operations so consumers can import from one place
@@ -35,10 +50,13 @@ export const purchaseOrdersService = {
 
                 poNumber = generateNextPONumber(lastValidPONumber);
             } catch (error) {
-                console.warn('Failed to generate sequential PO number, using fallback:', error);
+                logger.warn('PurchaseOrdersService', 'Failed to generate sequential PO number, using fallback', { error: String(error) });
                 poNumber = `AUTO-${Date.now().toString().slice(-8)}`;
             }
         }
+
+        // Enforce enterprise procurement policy: Purchase orders can only be sent to Warehouse or Distribution Center
+        await validateWarehouseDestination(po.siteId);
 
         const dbPO = {
             id: poId,
@@ -63,10 +81,18 @@ export const purchaseOrdersService = {
             po_number: poNumber,
             requested_by: po.requestedBy,
             created_by: po.createdBy,
-            priority: po.priority
+            priority: po.priority,
+            currency: po.currency || 'ETB',
+            country_code: po.countryCode || po.country_code || getEffectiveCountry({ country: po.countryCode || po.country_code, currency: po.currency })
         };
 
-        const { error: poError } = await supabase.from('purchase_orders').insert(dbPO);
+        let { error: poError } = await supabase.from('purchase_orders').insert(dbPO);
+        if (poError && (poError.code === '42703' || poError.message?.includes('country_code'))) {
+            logger.warn('PurchaseOrdersService', 'purchase_orders.country_code column not present on DB, inserting without country_code');
+            const { country_code: _, ...fallbackPO } = dbPO;
+            const retry = await supabase.from('purchase_orders').insert(fallbackPO);
+            poError = retry.error;
+        }
         if (poError) throw poError;
 
         // Create PO items
@@ -87,11 +113,13 @@ export const purchaseOrdersService = {
                 unit: item.unit || null,
                 category: item.category || null,
                 identity_type: item.identityType || 'known',
-                pack_quantity: item.packQuantity || 1,
+                pack_quantity: item.packQuantity || item.pack_quantity || 1,
+                case_size: item.caseSize || item.case_size || 0,
+                package_type: item.packageType || item.package_type || item.customAttributes?.packaging?.packageType || null,
                 description: item.description || null,
                 min_stock: item.minStock || 0,
                 max_stock: item.maxStock || 0,
-                custom_attributes: item.customAttributes || null
+                custom_attributes: item.customAttributes || item.custom_attributes || null
             };
         });
 
@@ -99,24 +127,52 @@ export const purchaseOrdersService = {
         let { error: itemsError } = await supabase.from('po_items').insert(itemsWithPOId);
 
         if (itemsError && itemsError.code === 'PGRST204') {
-            console.warn('⚠️ po_items migration not run yet. Falling back to basic columns. Run supabase_add_po_item_columns.sql to fix.');
-            const basicItems = itemsWithPOId.map(({ pack_quantity, description, min_stock, max_stock, custom_attributes, ...rest }: any) => rest);
+            logger.warn('PurchaseOrdersService', '⚠️ po_items migration not run yet. Falling back to basic columns.');
+            const basicItems = itemsWithPOId.map(({ pack_quantity, case_size, package_type, description, min_stock, max_stock, custom_attributes, ...rest }: any) => rest);
             const retry = await supabase.from('po_items').insert(basicItems);
             itemsError = retry.error;
         }
 
         if (itemsError) {
-            console.error('PO Items Insert Error:', itemsError);
+            logger.error('PurchaseOrdersService', 'PO Items Insert Error', itemsError);
             throw new Error(`PO Items Insert Failed: ${itemsError.message} (PO ID: ${poId})`);
         }
 
-        return await getById(poId);
+        // Audit log PO creation
+        await systemLogsService.create({
+            user_name: po.createdBy || 'System',
+            action: 'PURCHASE_ORDER_CREATED',
+            module: 'Procurement',
+            details: `Created PO ${poNumber} (${po.currency || 'ETB'} ${po.totalAmount}) for site ${po.siteId}`
+        });
+
+        // Gracefully attempt re-fetch via getById without crashing on RLS/PostgREST 406
+        let fetchedPO: PurchaseOrder | null = null;
+        try {
+            fetchedPO = await getById(poId);
+        } catch (fetchErr) {
+            logger.warn('PurchaseOrdersService', 'getById after create bypassed due to RLS/filtering', { error: String(fetchErr) });
+        }
+
+        if (fetchedPO) return fetchedPO;
+
+        // Return synthesized created PO record if RLS prevents immediate SELECT
+        return {
+            ...po,
+            id: poId,
+            poNumber,
+            po_number: poNumber,
+            status: po.status || 'Draft',
+            lineItems: items,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+        } as PurchaseOrder;
     },
 
     async update(id: string, updates: Partial<PurchaseOrder>) {
         const dbUpdates: any = {};
 
-        const currentPO = await getById(id);
+        const currentPO = await getById(id).catch(() => null);
         const currentNotes = currentPO?.notes || '';
         const effectiveStatus = updates.status || currentPO.status;
 
@@ -138,7 +194,7 @@ export const purchaseOrdersService = {
         if (updates.lineItems && updates.lineItems.length > 0) {
             const { error: deleteError } = await supabase.from('po_items').delete().eq('po_id', id);
             if (deleteError) {
-                console.error('Failed to delete existing PO items during update:', deleteError);
+                logger.error('PurchaseOrdersService', 'Failed to delete existing PO items during update', deleteError);
                 throw deleteError;
             }
 
@@ -159,7 +215,9 @@ export const purchaseOrdersService = {
                     unit: item.unit || null,
                     category: item.category || null,
                     identity_type: item.identityType || 'known',
-                    pack_quantity: item.packQuantity || 1,
+                    pack_quantity: item.packQuantity || item.pack_quantity || 1,
+                    case_size: item.caseSize || item.case_size || 0,
+                    package_type: item.packageType || item.package_type || item.customAttributes?.packaging?.packageType || null,
                     description: item.description || null,
                     min_stock: item.minStock || 0,
                     max_stock: item.maxStock || 0,
@@ -169,7 +227,7 @@ export const purchaseOrdersService = {
 
             const { error: insertError } = await supabase.from('po_items').insert(itemsWithPOId);
             if (insertError) {
-                console.error('Failed to insert new PO items during update:', insertError);
+                logger.error('PurchaseOrdersService', 'Failed to insert new PO items during update', insertError);
                 throw insertError;
             }
         }
@@ -226,9 +284,12 @@ export const purchaseOrdersService = {
                     }
                 }
             } catch (err) {
-                console.error('Failed to auto-create Receiving Job:', err);
+                logger.error('PurchaseOrdersService', 'Failed to auto-create Receiving Job', err as Error);
             }
         }
+
+        // Enforce enterprise procurement policy: Purchase orders can only be routed to Warehouse or Distribution Center
+        await validateWarehouseDestination(updates.siteId);
 
         // Map camelCase to snake_case for scalar fields
         if (updates.siteId !== undefined) { dbUpdates.site_id = updates.siteId; }
@@ -253,26 +314,47 @@ export const purchaseOrdersService = {
         if (updates.discount !== undefined) { dbUpdates.discount = updates.discount; }
         if (updates.incoterms !== undefined) { dbUpdates.incoterms = updates.incoterms; }
         if (updates.priority !== undefined) { dbUpdates.priority = updates.priority; }
+        if (updates.currency !== undefined) { dbUpdates.currency = updates.currency; }
+        if (updates.countryCode !== undefined) { dbUpdates.country_code = updates.countryCode; }
+        if (updates.country_code !== undefined) { dbUpdates.country_code = updates.country_code; }
 
         // Remove undefined values
         Object.keys(dbUpdates).forEach(key => {
             if (dbUpdates[key] === undefined) delete dbUpdates[key];
         });
 
-        const { error } = await supabase
+        let { error } = await supabase
             .from('purchase_orders')
             .update(dbUpdates)
-            .eq('id', id)
-            .select()
-            .single();
+            .eq('id', id);
+
+        if (error && (error.code === '42703' || error.message?.includes('country_code'))) {
+            logger.warn('PurchaseOrdersService', 'purchase_orders.country_code column not present on DB, updating without country_code');
+            const fallback = { ...dbUpdates };
+            delete fallback.country_code;
+            const retry = await supabase
+                .from('purchase_orders')
+                .update(fallback)
+                .eq('id', id);
+            error = retry.error;
+        }
 
         if (error) {
-            console.error('PO Update Error:', error);
-            console.error('Update payload:', dbUpdates);
+            logger.error('PurchaseOrdersService', 'PO Update Error', error);
             throw error;
         }
 
-        return await getById(id);
+        if (updates.status === 'Approved') {
+            await systemLogsService.create({
+                user_name: updates.approvedBy || 'System',
+                action: 'PURCHASE_ORDER_APPROVED',
+                module: 'Procurement',
+                details: `Approved PO ${currentPO?.poNumber || id}`
+            });
+        }
+
+        const updated = await getById(id).catch(() => null);
+        return updated || ({ ...updates, id } as any);
     },
 
     async receive(id: string, shouldCreateJob = true) {
@@ -285,7 +367,7 @@ export const purchaseOrdersService = {
             .eq('id', id);
 
         if (error) {
-            console.error('Failed to update PO status:', error);
+            logger.error('PurchaseOrdersService', 'Failed to update PO status', error);
             throw error;
         }
 
@@ -347,7 +429,7 @@ export const purchaseOrdersService = {
                 notes: `Auto-generated Putaway for PO ${po.poNumber || po.id}`
             } as any);
         } catch (e) {
-            console.error('Failed to create Putaway job during PO receive:', e);
+            logger.error('PurchaseOrdersService', 'Failed to create Putaway job during PO receive', e as Error);
         }
 
         // Close the associated RECEIVE job if it exists
@@ -364,14 +446,35 @@ export const purchaseOrdersService = {
                 await supabase.from('wms_jobs').update({ status: 'Completed' }).eq('id', job.id);
             }
         } catch (e) {
-            console.error('Failed to close WMS job during PO receive:', e);
+            logger.error('PurchaseOrdersService', 'Failed to close WMS job during PO receive', e as Error);
         }
 
         return await getById(id);
     },
 
     async delete(id: string) {
-        const { error } = await supabase.from('purchase_orders').delete().eq('id', id);
-        if (error) throw error;
+        // Zero-Trust Chain-of-Custody: Soft-cancel rather than destructive SQL deletion
+        return await this.cancel(id, 'Deleted by manager');
+    },
+
+    async cancel(id: string, reason?: string) {
+        const currentPO = await getById(id);
+        const currentNotes = currentPO?.notes || '';
+        const cancelTag = reason ? `\n[CANCELLED: ${reason}]` : '\n[CANCELLED]';
+
+        const { error } = await supabase
+            .from('purchase_orders')
+            .update({ 
+                status: 'Cancelled',
+                notes: currentNotes + cancelTag,
+                updated_at: new Date().toISOString()
+            })
+            .eq('id', id);
+
+        if (error) {
+            logger.error('PurchaseOrdersService', 'Failed to cancel PO', error as Error);
+            throw error;
+        }
+        return await getById(id);
     }
 };

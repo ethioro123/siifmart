@@ -6,7 +6,7 @@ import {
 import { WMSJob, User, Site, Product, Employee } from '../../../types';
 import { formatJobId } from '../../../utils/jobIdFormatter';
 import { useLanguage } from '../../../contexts/LanguageContext';
-import { isWeightBased, isVolumeBased } from '../../../utils/units';
+import { formatProductSize, formatPackagingDescription, getSellUnit, isWeightBased, isVolumeBased } from '../../../utils/units';
 import { sortPickItemsByOptimalRoute } from '../../../utils/fulfillmentRoute';
 
 export const formatBeautifulLocation = (loc: string | undefined, theme: 'purple' | 'cyan' | 'woody' = 'woody', t?: (key: string) => string) => {
@@ -91,14 +91,12 @@ export const PickJobModal: React.FC<PickJobModalProps> = ({
             return (item as any).requestedMeasureQty;
         }
         const prod = product || getProduct(item);
-        if (prod) {
-            const unit = prod.unit;
-            const isWeightVol = isWeightBased(unit) || isVolumeBased(unit);
-            const sizeNum = prod.size ? parseFloat(prod.size as string) : 0;
-            if (isWeightVol && sizeNum > 0) {
-                const expected = item.expectedQty || (item as any).quantity || 0;
-                return expected * sizeNum;
-            }
+        const customAttrs = prod?.customAttributes || prod?.custom_attributes;
+        const sellBy = customAttrs?.commercial?.sellBy || '';
+        const isWeighted = customAttrs?.commercial?.isWeighted === true;
+
+        if (sellBy === 'Weight' || sellBy === 'Volume' || isWeighted) {
+            return item.expectedQty || (item as any).quantity || null;
         }
         return null;
     };
@@ -258,6 +256,11 @@ export const PickJobModal: React.FC<PickJobModalProps> = ({
                                                     <span className="text-[8px] md:text-[9px] font-mono font-black text-gray-955 dark:text-[#A9CBA2] bg-stone-50 dark:bg-black/40 px-1.5 md:px-2 py-0.5 rounded border border-[#E2DCCE]/60 dark:border-white/5 uppercase tracking-tighter w-fit">
                                                         {item.sku || product?.sku || t('warehouse.picking.noSKUCaps')}
                                                     </span>
+                                                    {formatProductSize(product || item) && (
+                                                        <span className="text-[8px] md:text-[9px] font-mono font-bold text-emerald-700 bg-emerald-500/10 dark:text-emerald-400 dark:bg-emerald-500/20 px-1.5 md:px-2 py-0.5 rounded border border-emerald-500/20 uppercase tracking-wider w-fit">
+                                                            {formatProductSize(product || item)}
+                                                        </span>
+                                                    )}
                                                     {product?.barcode && (
                                                         <div className="flex items-center gap-1 md:gap-1.5 text-[8px] md:text-[9px] text-[#2C5E3B] dark:text-[#A9CBA2] font-bold uppercase tracking-widest w-fit font-mono">
                                                             <Barcode size={8} className="md:w-[10px] md:h-[10px]" />
@@ -281,14 +284,23 @@ export const PickJobModal: React.FC<PickJobModalProps> = ({
                                                 <div className="text-left md:text-right">
                                                     <span className="text-[8px] md:text-[9px] text-gray-550 dark:text-gray-600 font-black uppercase tracking-[0.2em] block mb-0.5 md:mb-1">{t('warehouse.expected')}</span>
                                                     {(() => {
-                                                        let expected = item.expectedQty || (item as any).quantity || 0;
-                                                        const measureQty = getItemMeasureQty(item, product);
-                                                        if (measureQty && expected === item.expectedQty) {
-                                                            const unitDef = product?.unit ? product.unit : '';
-                                                            const sizeNum = product?.size ? parseFloat(product.size as string) : 0;
-                                                            return <span className="text-sm md:text-lg font-mono font-black text-gray-900 dark:text-white">{expected} x {sizeNum} <span className="text-[8px] md:text-[10px] text-gray-555 font-bold uppercase tracking-widest">{unitDef}</span></span>;
-                                                        }
-                                                        return <span className="text-sm md:text-lg font-mono font-black text-gray-900 dark:text-white">{expected}</span>;
+                                                        const expected = item.expectedQty || (item as any).quantity || 0;
+                                                        const packDesc = formatPackagingDescription(product, expected);
+                                                        const unitDef = getSellUnit(product?.unit || item.unit);
+                                                        const unitLabel = unitDef.category === 'count' && unitDef.code !== 'UNIT' ? unitDef.shortLabel : 'pk';
+
+                                                        return (
+                                                            <div className="flex flex-col items-start md:items-end">
+                                                                <span className="text-sm md:text-lg font-mono font-black text-gray-900 dark:text-white">
+                                                                    {expected} <span className="text-[8px] md:text-[10px] text-gray-555 font-bold uppercase tracking-widest">{unitLabel}</span>
+                                                                </span>
+                                                                {packDesc && (
+                                                                    <span className="text-[8px] md:text-[9px] font-mono font-bold text-gray-500 dark:text-gray-400 uppercase">
+                                                                        ({packDesc})
+                                                                    </span>
+                                                                )}
+                                                            </div>
+                                                        );
                                                     })()}
                                                 </div>
                                                 {isDone ? (
@@ -297,15 +309,22 @@ export const PickJobModal: React.FC<PickJobModalProps> = ({
                                                         {(() => {
                                                             const expected = item.expectedQty || (item as any).quantity || 0;
                                                             const picked = item.pickedQty !== undefined && item.pickedQty !== null ? item.pickedQty : 0;
-                                                            const measureQty = getItemMeasureQty(item, product);
+                                                            const packDesc = formatPackagingDescription(product, picked);
+                                                            const unitDef = getSellUnit(product?.unit || item.unit);
+                                                            const unitLabel = unitDef.category === 'count' && unitDef.code !== 'UNIT' ? unitDef.shortLabel : 'pk';
 
-                                                            if (measureQty && expected === item.expectedQty) {
-                                                                const unitDef = product?.unit ? product.unit : '';
-                                                                const sizeNum = product?.size ? parseFloat(product.size as string) : 0;
-                                                                const displayPickedCases = picked <= expected ? picked : (sizeNum > 0 ? picked / sizeNum : picked);
-                                                                return <span className="text-sm md:text-lg font-mono font-black text-green-600 dark:text-green-400">{displayPickedCases} x {sizeNum} <span className="text-[8px] md:text-[10px] text-green-600/60 dark:text-green-500/60 font-bold uppercase tracking-widest">{unitDef}</span></span>;
-                                                            }
-                                                            return <span className="text-sm md:text-lg font-mono font-black text-green-600 dark:text-green-400">{picked}</span>;
+                                                            return (
+                                                                <div className="flex flex-col items-end">
+                                                                    <span className="text-sm md:text-lg font-mono font-black text-green-600 dark:text-green-400">
+                                                                        {picked} <span className="text-[8px] md:text-[10px] text-green-600/60 dark:text-green-500/60 font-bold uppercase tracking-widest">{unitLabel}</span>
+                                                                    </span>
+                                                                    {packDesc && (
+                                                                        <span className="text-[8px] md:text-[9px] font-mono font-bold text-teal-600 dark:text-teal-400 uppercase">
+                                                                            ({packDesc})
+                                                                        </span>
+                                                                    )}
+                                                                </div>
+                                                            );
                                                         })()}
                                                     </div>
                                                 ) : (

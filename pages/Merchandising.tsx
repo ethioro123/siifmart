@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Tags, Target, TrendingUp, DollarSign, LineChart as LineChartIcon, TrendingDown, BrainCircuit, Layers, Percent } from 'lucide-react';
 
 // Split Modals
@@ -57,8 +57,30 @@ export default function Pricing() {
       isProductControlOpen,
       setIsProductControlOpen,
       selectedControlProduct,
-      refreshData
+      refreshData,
+      currencySymbol
    } = state;
+
+   const { avgMargin, priceIndex } = useMemo(() => {
+      if (!products || products.length === 0) {
+         return { avgMargin: '0.0%', priceIndex: '100.0' };
+      }
+      const validProducts = products.filter(p => p.price > 0);
+      const totalMargin = validProducts.reduce((sum, p) => {
+         const cost = p.costPrice || (p.price * 0.7);
+         return sum + (((p.price - cost) / p.price) * 100);
+      }, 0);
+      const calculatedAvgMargin = validProducts.length > 0 
+         ? (totalMargin / validProducts.length).toFixed(1) + '%' 
+         : '0.0%';
+
+      const compProducts = validProducts.filter(p => p.competitorPrice && p.competitorPrice > 0);
+      const calculatedPriceIndex = compProducts.length > 0
+         ? ((compProducts.reduce((sum, p) => sum + (p.price / p.competitorPrice!), 0) / compProducts.length) * 100).toFixed(1)
+         : '100.0';
+
+      return { avgMargin: calculatedAvgMargin, priceIndex: calculatedPriceIndex };
+   }, [products]);
 
    return (
       <MerchandisingProvider value={state}>
@@ -76,12 +98,12 @@ export default function Pricing() {
                   <div className="px-4 py-2 bg-[#2C5E3B]/10 dark:bg-[#A9CBA2]/10 border border-[#2C5E3B]/20 dark:border-[#A9CBA2]/20 rounded-xl flex items-center gap-2">
                      <Target size={16} className="text-[#2C5E3B] dark:text-[#A9CBA2]" />
                      <span className="text-xs text-stone-500 dark:text-gray-400">Price Index:</span>
-                     <span className="text-sm font-bold text-[#1E3F27] dark:text-white font-mono">98.5</span>
+                     <span className="text-sm font-bold text-[#1E3F27] dark:text-white font-mono">{priceIndex}</span>
                   </div>
                   <div className="px-4 py-2 bg-green-500/10 border border-green-500/20 rounded-xl flex items-center gap-2">
                      <TrendingUp size={16} className="text-green-600 dark:text-green-400" />
                      <span className="text-xs text-stone-500 dark:text-gray-400">Avg Margin:</span>
-                     <span className="text-sm font-bold text-[#1E3F27] dark:text-white font-mono">32.5%</span>
+                     <span className="text-sm font-bold text-[#1E3F27] dark:text-white font-mono">{avgMargin}</span>
                   </div>
                </div>
             </div>
@@ -172,6 +194,7 @@ export default function Pricing() {
                setNewPromo={setNewPromo}
                handleCreatePromo={handleCreatePromo}
                isSubmitting={isSubmitting}
+               currencySymbol={currencySymbol}
             />
 
             {/* Create Rule Modal */}
@@ -205,6 +228,7 @@ export default function Pricing() {
                products={products}
                sites={sites}
                allOrders={allOrders}
+               currencySymbol={currencySymbol}
             />
 
             {/* --- PRODUCT CONTROL MODAL --- */}
@@ -213,6 +237,7 @@ export default function Pricing() {
                isOpen={isProductControlOpen}
                onClose={() => setIsProductControlOpen(false)}
                onSaved={refreshData}
+               currencySymbol={currencySymbol}
             />
          </div>
       </MerchandisingProvider>

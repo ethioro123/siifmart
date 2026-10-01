@@ -7,6 +7,7 @@ import { formatPOItemDescription, formatPackBadge } from '../../procurement/util
 import { getSellUnit } from '../../../utils/units';
 import { hasPermission } from '../../../utils/permissions';
 import { convertToSellableUnits } from '../useReceiving';
+import { useData } from '../../../contexts/DataContext';
 
 interface ReceiveListProps {
     paginatedReceiveOrders: PurchaseOrder[];
@@ -57,6 +58,8 @@ export const ReceiveList: React.FC<ReceiveListProps> = ({
     user,
     employees
 }) => {
+    const { settings, effectiveCountry } = useData();
+    const isBlindReceiving = settings?.receivingLogic === 'blind' || (!settings?.receivingLogic && effectiveCountry === 'ET');
 
     if (filteredReceiveOrdersLength === 0) {
         return (
@@ -189,7 +192,12 @@ export const ReceiveList: React.FC<ReceiveListProps> = ({
                                                                 const label = itemUnit.shortLabel.toLowerCase();
                                                                 return (
                                                                     <span className={`text-lg font-black tabular-nums tracking-tighter leading-none ${isComplete ? 'text-stone-400 dark:text-stone-500' : 'text-slate-900 dark:text-white'}`}>
-                                                                        {receivedQty}<span className="text-stone-400 dark:text-stone-600">/{expectedSellable}</span>
+                                                                        {receivedQty}
+                                                                        {isBlindReceiving && !isComplete ? (
+                                                                            <span className="text-[9px] font-black text-amber-600 dark:text-amber-400 uppercase ml-1">Blind</span>
+                                                                        ) : (
+                                                                            <span className="text-stone-400 dark:text-stone-600">/{expectedSellable}</span>
+                                                                        )}
                                                                         <span className="text-[10px] font-black text-stone-400 dark:text-stone-500 ml-1 uppercase">× {sizeNum}{label}</span>
                                                                     </span>
                                                                 );
@@ -197,23 +205,30 @@ export const ReceiveList: React.FC<ReceiveListProps> = ({
 
                                                             return (
                                                                 <span className={`text-xl font-black tabular-nums tracking-tighter leading-none ${isComplete ? 'text-stone-400 dark:text-stone-500' : 'text-[#1E3F27] dark:text-[#A9CBA2]'}`}>
-                                                                    {receivedQty}<span className="text-stone-400 dark:text-stone-600">/{expectedSellable}</span>
+                                                                    {receivedQty}
+                                                                    {isBlindReceiving && !isComplete ? (
+                                                                        <span className="text-[9px] font-black text-amber-600 dark:text-amber-400 uppercase ml-1">Blind</span>
+                                                                    ) : (
+                                                                        <span className="text-stone-400 dark:text-stone-600">/{expectedSellable}</span>
+                                                                    )}
                                                                 </span>
                                                             );
                                                         })()}
                                                     </div>
                                                 </div>
-                                                <div className="space-y-2">
-                                                    <div className="flex justify-between items-center px-1">
-                                                        <span className="text-[8px] font-black text-stone-400 uppercase tracking-widest">{t('warehouse.inboundVelocity')}</span>
-                                                        <span className={`text-[8px] font-black uppercase tracking-widest ${isComplete ? 'text-stone-400' : 'text-[#2C5E3B] dark:text-[#A9CBA2]'}`}>{isComplete ? t('warehouse.completePercent') : `${Math.round((receivedQty / item.quantity) * 100)}${t('warehouse.receivedPercent')}`}</span>
+                                                {!isBlindReceiving && (
+                                                    <div className="space-y-2">
+                                                        <div className="flex justify-between items-center px-1">
+                                                            <span className="text-[8px] font-black text-stone-400 uppercase tracking-widest">{t('warehouse.inboundVelocity')}</span>
+                                                            <span className={`text-[8px] font-black uppercase tracking-widest ${isComplete ? 'text-stone-400' : 'text-[#2C5E3B] dark:text-[#A9CBA2]'}`}>{isComplete ? t('warehouse.completePercent') : `${Math.round((receivedQty / item.quantity) * 100)}${t('warehouse.receivedPercent')}`}</span>
+                                                        </div>
+                                                        <ProgressBar
+                                                            progress={(receivedQty / item.quantity) * 100}
+                                                            containerClassName="h-1.5 bg-slate-100 dark:bg-white/5 rounded-full overflow-hidden"
+                                                            fillClassName={`h-full transition-all duration-700 relative ${isComplete ? 'bg-[#224429] dark:bg-[#EAE5D9]' : 'bg-[#2C5E3B] dark:bg-[#A9CBA2] shadow-[0_0_8px_rgba(44,94,59,0.3)]'}`}
+                                                        />
                                                     </div>
-                                                    <ProgressBar
-                                                        progress={(receivedQty / item.quantity) * 100}
-                                                        containerClassName="h-1.5 bg-slate-100 dark:bg-white/5 rounded-full overflow-hidden"
-                                                        fillClassName={`h-full transition-all duration-700 relative ${isComplete ? 'bg-[#224429] dark:bg-[#EAE5D9]' : 'bg-[#2C5E3B] dark:bg-[#A9CBA2] shadow-[0_0_8px_rgba(44,94,59,0.3)]'}`}
-                                                    />
-                                                </div>
+                                                )}
                                                 {
                                                     isComplete ? (
                                                         <button onClick={() => setReprintItem({

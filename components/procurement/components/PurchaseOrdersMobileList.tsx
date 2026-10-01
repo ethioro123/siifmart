@@ -1,7 +1,6 @@
 import React from 'react';
 import { Edit3, Trash2 } from 'lucide-react';
 import { PurchaseOrder } from '../../../types';
-import { CURRENCY_SYMBOL } from '../../../constants';
 
 interface PurchaseOrdersMobileListProps {
     orders: PurchaseOrder[];
@@ -16,6 +15,7 @@ interface PurchaseOrdersMobileListProps {
     onEdit: (po: PurchaseOrder) => void;
     handleDeletePO: (e: React.MouseEvent, po: PurchaseOrder) => void;
     formatPONumber: (po: PurchaseOrder) => string;
+    currencySymbol?: string;
 }
 
 export const PurchaseOrdersMobileList: React.FC<PurchaseOrdersMobileListProps> = ({
@@ -30,7 +30,8 @@ export const PurchaseOrdersMobileList: React.FC<PurchaseOrdersMobileListProps> =
     handleSingleApprove,
     onEdit,
     handleDeletePO,
-    formatPONumber
+    formatPONumber,
+    currencySymbol = 'ETB'
 }) => {
     return (
         <div className="md:hidden space-y-4">
@@ -115,7 +116,7 @@ export const PurchaseOrdersMobileList: React.FC<PurchaseOrdersMobileListProps> =
                                 </div>
                                 <div className="flex flex-col items-end">
                                     <span className="text-[8px] text-gray-500 font-sans font-bold uppercase tracking-widest">Amount</span>
-                                    <span className="text-[10px] text-[#2C5E3B] dark:text-[#A9CBA2] font-bold mt-0.5">{CURRENCY_SYMBOL} {po.totalAmount.toLocaleString()}</span>
+                                    <span className="text-[10px] text-[#2C5E3B] dark:text-[#A9CBA2] font-bold mt-0.5">{po.currency || currencySymbol} {po.totalAmount.toLocaleString()}</span>
                                 </div>
                             </div>
                         </div>
@@ -150,14 +151,14 @@ export const PurchaseOrdersMobileList: React.FC<PurchaseOrdersMobileListProps> =
                                         <Edit3 size={12} />
                                     </button>
                                 )}
-                                {((isCEO && po.status !== 'Received') ||
-                                    (user?.role === 'warehouse_manager' && po.status !== 'Received') ||
+                                {((isCEO && po.status !== 'Received' && po.status !== 'Cancelled') ||
+                                    (user?.role === 'procurement_manager' && po.status !== 'Received' && po.status !== 'Cancelled') ||
                                     (po.status === 'Draft' && (po.createdBy === user?.name || po.requestedBy === user?.name))) && (
                                     <button
                                         onClick={(e) => handleDeletePO(e, po)}
                                         className="p-1 bg-red-500/10 hover:bg-red-500/20 text-red-500 rounded-lg"
-                                        title="Delete PO"
-                                        aria-label="Delete Purchase Order"
+                                        title="Cancel PO"
+                                        aria-label="Cancel Purchase Order"
                                     >
                                         <Trash2 size={12} />
                                     </button>

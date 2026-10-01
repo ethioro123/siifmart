@@ -125,23 +125,76 @@ export const getGroupedUnits = () => ({
     volume: SELL_UNITS.filter(u => u.category === 'volume'),
 });
 
-/** Format a product size display string */
+/** Format a product size display string without double-unit duplication */
 export const formatProductSize = (product?: { size?: string | number; unit?: string; customAttributes?: any; custom_attributes?: any } | null): string => {
     if (!product || product.size === undefined || product.size === null || product.size === '') return '';
     const customAttrs = product.customAttributes || product.custom_attributes;
     const physicalType = customAttrs?.physical?.sizeType || customAttrs?.physical?.unit || '';
     const sizeStr = String(product.size).trim();
 
+    // If sizeStr already has an alphabetical unit suffix (e.g. "1kg", "500g", "250ml", "1L", "200 g"),
+    // return it directly to strictly prevent double-unit suffixes like "1kgkg" or "500gg".
+    if (/[a-zA-Z]+$/.test(sizeStr)) {
+        return sizeStr;
+    }
+
     if (physicalType) {
-        return sizeStr.toLowerCase().endsWith(physicalType.toLowerCase()) ? sizeStr : `${sizeStr}${physicalType}`.trim();
+        return `${sizeStr}${physicalType}`.trim();
     }
     if (product.unit) {
         const unitDef = getSellUnit(product.unit);
-        if (unitDef.category !== 'count') {
-            return sizeStr.toLowerCase().endsWith(unitDef.shortLabel.toLowerCase()) ? sizeStr : `${sizeStr}${unitDef.shortLabel}`.trim();
+        if (unitDef.category !== 'count' && unitDef.code !== 'UNIT') {
+            return `${sizeStr}${unitDef.shortLabel}`.trim();
         }
     }
     return sizeStr;
+};
+
+/**
+ * Format how an item is packed into cases, bales, boxes, or bundles.
+ * E.g. "12/Bale", "1 Bale", "12 Bales", "1 Bale + 3 pk".
+ */
+export const formatPackagingDescription = (
+    product?: {
+        packQuantity?: number;
+        pack_quantity?: number;
+        packageType?: string;
+        package_type?: string;
+        customAttributes?: any;
+        custom_attributes?: any;
+    } | null,
+    currentQty?: number
+): string => {
+    if (!product) return '';
+    const customAttrs = product.customAttributes || product.custom_attributes;
+    const packQty = product.packQuantity ||
+        product.pack_quantity ||
+        parseInt(customAttrs?.packaging?.packQty || customAttrs?.logistics?.packQuantity || '0', 10) || 1;
+    const pkgType = product.packageType ||
+        product.package_type ||
+        customAttrs?.packaging?.packageType ||
+        customAttrs?.logistics?.packageType ||
+        (packQty > 1 ? 'Pack' : '');
+
+    if (packQty <= 1 && !pkgType) return '';
+
+    if (currentQty !== undefined && currentQty !== null && packQty > 1 && pkgType) {
+        const fullPacks = Math.floor(currentQty / packQty);
+        const remainder = currentQty % packQty;
+        const pluralType = pkgType.endsWith('s') ? pkgType : (fullPacks === 1 ? pkgType : `${pkgType}s`);
+        if (remainder === 0 && fullPacks > 0) {
+            return `${fullPacks} ${pluralType}`;
+        }
+        if (fullPacks > 0) {
+            return `${fullPacks} ${pluralType} + ${remainder} pk`;
+        }
+        return `${currentQty} pk (${packQty}/${pkgType})`;
+    }
+
+    if (packQty > 1 && pkgType) {
+        return `${packQty}/${pkgType}`;
+    }
+    return pkgType || '';
 };
 
 /**
@@ -174,14 +227,23 @@ export const getEffectivePackageSize = (unit?: string | null, rawSize?: string |
  *   Buna Tea 400g   → "20 ea (400g)"
  *   Dalo Sugar 5kg  → "20 ea (5kg)"
  *   Vera Oil 1L     → "210 ea (1L)"
- *   Sha Onions KG   → "105 ea"         (no size attribute = just ea)
+ *   Sha Onions KG   → "105 kg"         (loose bulk weight)
  *   Symphony Tissue  → "13 ea"          (no size = just ea)
- *   Case of 24 Coke  → "5 case"         (pack_quantity handled separately)
+ *   Case of 24 Coke  → "48 pk (300ml) • 2 Cases" (with packaging)
  */
 export const formatStockDisplay = (
     stock: number,
-    product?: { size?: string | number; unit?: string; packQuantity?: number; customAttributes?: any; custom_attributes?: any } | null,
-    options?: { compact?: boolean }
+    product?: {
+        size?: string | number;
+        unit?: string;
+        packQuantity?: number;
+        pack_quantity?: number;
+        packageType?: string;
+        package_type?: string;
+        customAttributes?: any;
+        custom_attributes?: any;
+    } | null,
+    options?: { compact?: boolean; showPackaging?: boolean }
 ): string => {
     const stockStr = stock.toLocaleString(undefined, { maximumFractionDigits: 2 });
     if (!product) return stockStr;
@@ -189,10 +251,12 @@ export const formatStockDisplay = (
     const unitObj = getSellUnit(product.unit);
     const customAttrs = product.customAttributes || product.custom_attributes;
     const sellBy = customAttrs?.commercial?.sellBy || '';
+    const isWeighted = customAttrs?.commercial?.isWeighted === true;
 
-    // Check if the product is sold as a loose bulk item (Weight/Volume without case pack size multiplier)
+    // Check if the product is sold as a loose bulk item (Weight/Volume without discrete prepackaging)
+    // Only loose if explicitly sold by Weight/Volume OR weighed at scale OR has no size attribute.
     const isLooseBulk = (unitObj.category === 'weight' || unitObj.category === 'volume') &&
-        (!product.size || String(product.size) === '1' || String(product.size) === '0' || sellBy === 'Weight' || sellBy === 'Volume');
+        (sellBy === 'Weight' || sellBy === 'Volume' || isWeighted || !product.size || String(product.size) === '0');
 
     if (isLooseBulk) {
         // Displays directly in volume/weight: e.g. "184.5 kg", "210 L", "42.1 kg"
@@ -204,7 +268,7 @@ export const formatStockDisplay = (
     let countLabel = 'ea';
     if (unitObj.category === 'count' && unitObj.code !== 'UNIT') {
         countLabel = unitObj.shortLabel;
-    } else if (product.packQuantity && product.packQuantity > 1) {
+    } else if ((product.packQuantity && product.packQuantity > 1) || (product.pack_quantity && product.pack_quantity > 1)) {
         countLabel = 'pk';
     }
 
@@ -212,7 +276,17 @@ export const formatStockDisplay = (
         return `${stockStr} ${countLabel}`;
     }
 
-    if (physSize && physSize.toLowerCase() !== countLabel.toLowerCase()) {
+    const hasPhysSize = !!(physSize && physSize.toLowerCase() !== countLabel.toLowerCase());
+    const packDesc = options?.showPackaging ? formatPackagingDescription(product, stock) : '';
+
+    if (packDesc) {
+        if (hasPhysSize) {
+            return `${stockStr} ${countLabel} (${physSize}) • ${packDesc}`;
+        }
+        return `${stockStr} ${countLabel} • ${packDesc}`;
+    }
+
+    if (hasPhysSize) {
         return `${stockStr} ${countLabel} (${physSize})`;
     }
     return `${stockStr} ${countLabel}`;

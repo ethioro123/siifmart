@@ -1,5 +1,6 @@
 import { supabase } from '../lib/supabase';
 import type { StockMovement } from '../types';
+import { logger } from '../utils/logger';
 
 export const stockMovementsService = {
     async getAll(siteId?: string, productId?: string, limit: number = 50, offset: number = 0, filters?: { search?: string; type?: string }, sort?: { key: string; direction: 'asc' | 'desc' }) {
@@ -67,18 +68,38 @@ export const stockMovementsService = {
         return { data: mappedData, count: count || 0 };
     },
 
-    async create(movement: Omit<StockMovement, 'id' | 'created_at'>) {
+    async create(movement: any) {
+        const payload: Record<string, any> = {
+            site_id: movement.site_id || movement.siteId,
+            product_id: movement.product_id || movement.productId,
+            product_name: movement.product_name || movement.productName,
+            type: movement.type,
+            quantity: movement.quantity,
+            movement_date: movement.movement_date || movement.movementDate || movement.date || new Date().toISOString(),
+            performed_by: movement.performed_by || movement.performedBy || movement.user || 'System',
+            reason: movement.reason,
+            batch_number: movement.batch_number || movement.batchNumber
+        };
+
+        // Remove undefined keys
+        Object.keys(payload).forEach(key => {
+            if (payload[key] === undefined) delete payload[key];
+        });
+
         const { data, error } = await supabase
             .from('stock_movements')
-            .insert(movement)
+            .insert(payload)
             .select()
             .single();
 
-        if (error) throw error;
+        if (error) {
+            logger.error('stockMovementsService', 'Failed to create movement:', error);
+            throw error;
+        }
         return data;
     },
 
-    // NEW: Server-Side Warehouse Analytics
+    // Server-Side Warehouse Analytics
     async getAnalytics(siteId?: string, startDate?: string, endDate?: string) {
         const params: any = {};
         if (siteId && siteId !== 'All') params.p_site_id = siteId;
@@ -87,7 +108,7 @@ export const stockMovementsService = {
 
         const { data, error } = await supabase.rpc('get_warehouse_metrics', params);
         if (error) {
-            console.error('Error fetching warehouse metrics:', error);
+            logger.error('stockMovementsService', 'Error fetching warehouse metrics:', error);
             return null;
         }
         return data;

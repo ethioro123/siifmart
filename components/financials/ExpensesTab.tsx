@@ -1,7 +1,6 @@
 import React from 'react';
 import { Filter, Plus, CheckCircle, Clock, AlertCircle, Trash2, CreditCard } from 'lucide-react';
 import { useFinance } from './FinanceContext';
-import { CURRENCY_SYMBOL } from '../../constants';
 import { formatCompactNumber } from '../../utils/formatting';
 
 export const ExpensesTab: React.FC = () => {
@@ -13,11 +12,12 @@ export const ExpensesTab: React.FC = () => {
         expensesLoading,
         setIsAddExpenseOpen,
         handleDeleteExpense,
-        EXPENSES_PER_PAGE
+        EXPENSES_PER_PAGE,
+        currencySymbol
     } = useFinance();
 
     return (
-        <div className="bg-cyber-gray border border-white/5 rounded-2xl overflow-x-auto animate-in fade-in">
+        <div className="bg-stone-900/60 dark:bg-stone-900/60 border border-stone-200/10 dark:border-white/5 rounded-2xl overflow-x-auto animate-in fade-in">
             <div className="p-4 border-b border-white/5 flex justify-between items-center">
                 <div className="flex items-center gap-4">
                     <h3 className="font-bold text-white">Operational Expenses</h3>
@@ -28,7 +28,7 @@ export const ExpensesTab: React.FC = () => {
                 </div>
                 <button
                     onClick={() => setIsAddExpenseOpen(true)}
-                    className="bg-cyber-primary text-black px-4 py-2 rounded-lg font-bold text-sm hover:bg-cyber-accent transition-colors flex items-center gap-2"
+                    className="woody-btn-primary px-4 py-2 rounded-xl font-bold text-sm flex items-center gap-2"
                 >
                     <Plus size={16} /> Log Expense
                 </button>
@@ -56,14 +56,14 @@ export const ExpensesTab: React.FC = () => {
                                     </span>
                                 </td>
                                 <td className="p-4 text-sm text-gray-300">{exp.description}</td>
-                                <td className="p-4 text-sm font-mono text-white text-right font-bold">{CURRENCY_SYMBOL} {exp.amount.toLocaleString()}</td>
+                                <td className="p-4 text-sm font-mono text-white text-right font-bold">{currencySymbol} {exp.amount.toLocaleString()}</td>
                                 <td className="p-4 text-center">
                                     <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold uppercase border ${
                                         exp.status === 'Paid'
-                                            ? 'bg-green-500/10 text-green-400 border-green-500/20'
+                                            ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
                                             : exp.status === 'Pending'
-                                                ? 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20'
-                                                : 'bg-red-500/10 text-red-400 border-red-500/20'
+                                                ? 'bg-amber-500/10 text-amber-400 border-amber-500/20'
+                                                : 'bg-rose-500/10 text-rose-400 border-rose-500/20'
                                     }`}>
                                         {exp.status === 'Paid' && <CheckCircle size={10} />}
                                         {exp.status === 'Pending' && <Clock size={10} />}
@@ -73,7 +73,7 @@ export const ExpensesTab: React.FC = () => {
                                 </td>
                                 <td className="p-4 text-xs text-gray-500">{exp.approvedBy}</td>
                                 <td className="p-4 text-right">
-                                    <button onClick={() => handleDeleteExpense(exp.id)} className="text-gray-600 hover:text-red-400" aria-label="Delete Expense">
+                                    <button onClick={() => handleDeleteExpense(exp.id)} className="text-gray-600 hover:text-rose-400 transition-colors" aria-label="Delete Expense">
                                         <Trash2 size={16} />
                                     </button>
                                 </td>

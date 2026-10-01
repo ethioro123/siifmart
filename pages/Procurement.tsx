@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Truck, Plus, Filter, Download, RefreshCw } from 'lucide-react';
 import { useData } from '../contexts/DataContext';
 import { useStore } from '../contexts/CentralStore';
@@ -12,10 +12,21 @@ import { CreatePOModal } from '../components/procurement/CreatePOModal';
 import { Protected } from '../components/Protected';
 import { formatDateTime } from '../utils/formatting';
 import { logger } from '../utils/logger';
+import { getCountryProfile, type Country } from '../utils/localization';
 
 export default function Procurement() {
     const { user } = useStore();
-    const { suppliers: allSuppliers, sites } = useData(); // Global suppliers validation & sites
+    const { suppliers: allSuppliers, sites, settings, effectiveCountry } = useData(); // Global suppliers validation & sites
+
+    const activeCountry: Country = (effectiveCountry || (settings?.country as Country) || 'ET');
+    const countryProfile = getCountryProfile(activeCountry);
+    const currencySymbol = countryProfile.currencySymbol;
+    const countrySiteIds = useMemo(() => {
+        return sites
+            .filter(s => (s.country || 'ET') === activeCountry)
+            .map(s => s.id);
+    }, [sites, activeCountry]);
+    const countrySiteIdsKey = countrySiteIds.join(',');
 
     // UI State
     const [activeTab, setActiveTab] = useState<'overview' | 'orders' | 'suppliers'>('overview');
@@ -70,7 +81,11 @@ export default function Procurement() {
                 // Original fetched ALL orders for metrics?
                 // Let's assume we need to fetch a summary or "all" for metrics.
                 // Using purchaseOrdersService.getAll with large limit for stats for now (or implement a stats RPC)
-                const res = await purchaseOrdersService.getAll(undefined, 1000, 0, { isRequest: false });
+                const res = await purchaseOrdersService.getAll(undefined, 1000, 0, {
+                    isRequest: false,
+                    siteIds: countrySiteIds,
+                    countryCode: activeCountry
+                });
                 const allPOs: PurchaseOrder[] = res.data;
 
                 const filteredPOs = allPOs.filter(po => isWithinRange(po.date));
@@ -82,9 +97,9 @@ export default function Procurement() {
                     .filter(po => ['Pending', 'Ordered', 'Approved'].includes(po.status))
                     .reduce((sum, po) => sum + (po.totalAmount || 0), 0);
 
-                // Potential Revenue (mock logic from original: totalCost * 1.5)
+                // Potential Revenue (From line items retail prices, fallback 1.5x cost)
                 const potentialRevenue = filteredPOs.reduce((sum, po) =>
-                    sum + (po.lineItems?.reduce((isum, item) => isum + (item.totalCost * 1.5), 0) || 0), 0);
+                    sum + (po.lineItems?.reduce((isum, item) => isum + (item.retailPrice ? item.quantity * item.retailPrice : item.totalCost * 1.5), 0) || 0), 0);
 
                 // Category Data
                 const categorySpend: Record<string, number> = {};
@@ -125,7 +140,9 @@ export default function Procurement() {
                     status: statusFilter !== 'All' ? statusFilter : undefined,
                     supplierId: poSupplierFilter !== 'All' ? poSupplierFilter : undefined,
                     search: searchTerm,
-                    isRequest: false
+                    isRequest: false,
+                    siteIds: countrySiteIds,
+                    countryCode: activeCountry
                 };
 
                 const res = await purchaseOrdersService.getAll(undefined, ITEMS_PER_PAGE, offset, filters);
@@ -142,7 +159,7 @@ export default function Procurement() {
         } finally {
             setLoading(false);
         }
-    }, [activeTab, currentPage, supplierPage, statusFilter, searchTerm, dateRange, poSort, poSupplierFilter, isWithinRange]);
+    }, [activeTab, currentPage, supplierPage, statusFilter, searchTerm, dateRange, poSort, poSupplierFilter, isWithinRange, countrySiteIdsKey, activeCountry]);
 
     useEffect(() => {
         fetchData();
@@ -216,6 +233,7 @@ export default function Procurement() {
                         dateRange={dateRange}
                         setDateRange={setDateRange}
                         suppliers={allSuppliers}
+                        currencySymbol={currencySymbol}
                     />
                 )}
 
@@ -236,6 +254,7 @@ export default function Procurement() {
                         onSortChange={setPoSort}
                         suppliers={allSuppliers}
                         sites={sites}
+                        currencySymbol={currencySymbol}
                         onEdit={handleEditPO}
                         onRefresh={fetchData}
                     />

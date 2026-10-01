@@ -29,6 +29,7 @@ import { useJobCompletion } from './useJobCompletion';
 import { useJobMaintenance } from './useJobMaintenance';
 import { useTransfers } from './useTransfers';
 import { logger } from '../../utils/logger';
+import { isAdminSite } from '../../utils/countryAdmin';
 
 // convertToSellableUnits is now imported from ./useReceiving
 
@@ -107,7 +108,8 @@ export const FulfillmentDataProvider = ({ children }: { children: ReactNode }) =
         refreshData: refreshInfo,
         adjustStock,
         setProducts,
-        setAllProducts
+        setAllProducts,
+        effectiveCountry
     } = useData(); // Dependency on DataContext
 
     const { user } = useStore();
@@ -174,6 +176,10 @@ export const FulfillmentDataProvider = ({ children }: { children: ReactNode }) =
                 ) : undefined;
                 const employeeId = !isGlobalRole ? (currentEmployee?.id || user?.id) : undefined;
 
+                const isCountryAdmin = isAdminSite(activeSite);
+                const targetSiteId = isCountryAdmin ? undefined : activeSiteId;
+                const activeCountryCode = effectiveCountry || settings?.country || 'ET';
+
                 const [
                     loadedJobs,
                     loadedTransfers,
@@ -185,7 +191,7 @@ export const FulfillmentDataProvider = ({ children }: { children: ReactNode }) =
                     transfersService.getAll(activeSiteId),
                     jobAssignmentsService.getAll(activeSiteId),
                     warehouseZonesService.getAll(activeSiteId),
-                    barcodeApprovalsService.getAuditLog()
+                    barcodeApprovalsService.getAuditLog(targetSiteId, activeCountryCode)
                 ]);
 
 

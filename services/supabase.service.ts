@@ -46,3 +46,7 @@ export { discrepancyService } from './discrepancy.service';
 // HR
 export { tasksService } from './tasks.service';
 export { schedulesService } from './schedules.service';
+
+// Shifts & Cash Balancing (Zero-Trust)
+export { shiftsService } from './shifts.service';
+

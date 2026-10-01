@@ -3,7 +3,6 @@ import { DollarSign, Package, TrendingUp, Building, Clock, Calendar } from 'luci
 import { ResponsiveContainer, PieChart, Pie, Cell, Tooltip, AreaChart, Area, CartesianGrid, XAxis, YAxis } from 'recharts';
 import DateRangeSelector from '../../components/DateRangeSelector';
 import { formatCompactNumber } from '../../utils/formatting';
-import { CURRENCY_SYMBOL } from '../../constants';
 import { Supplier } from '../../types';
 import { DateRangeOption } from '../../hooks/useDateFilter';
 import { useStore } from '../../contexts/CentralStore';
@@ -22,10 +21,11 @@ interface ProcurementDashboardProps {
     dateRange: DateRangeOption;
     setDateRange: (range: DateRangeOption) => void;
     suppliers: Supplier[];
+    currencySymbol?: string;
 }
 
 export const ProcurementDashboard: React.FC<ProcurementDashboardProps> = ({
-    metrics, dateRange, setDateRange, suppliers
+    metrics, dateRange, setDateRange, suppliers, currencySymbol = 'ETB'
 }) => {
     const { theme } = useStore();
     const accentColor = theme === 'dark' ? '#A9CBA2' : '#2C5E3B';
@@ -126,13 +126,13 @@ export const ProcurementDashboard: React.FC<ProcurementDashboardProps> = ({
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 relative z-0">
                 <KpiCard
                     title={`Total Spend (${dateRange === 'All Time' ? 'Life' : dateRange.replace('This ', '')})`}
-                    value={formatCompactNumber(metrics.totalSpend, { currency: CURRENCY_SYMBOL })}
+                    value={formatCompactNumber(metrics.totalSpend, { currency: currencySymbol })}
                     sub="Across all categories"
                     icon={DollarSign}
                     color="text-[#2C5E3B] dark:text-[#A9CBA2]"
                 />
-                <KpiCard title="Open Orders" value={metrics.openPO} sub={`Value: ${formatCompactNumber(metrics.pendingValue, { currency: CURRENCY_SYMBOL })}`} icon={Package} color="text-[#8C6239] dark:text-[#E2C899]" />
-                <KpiCard title="Potential Revenue" value={formatCompactNumber(metrics.potentialRevenue, { currency: CURRENCY_SYMBOL })} sub="From current PO items" icon={TrendingUp} color="text-emerald-600 dark:text-[#A9CBA2]" />
+                <KpiCard title="Open Orders" value={metrics.openPO} sub={`Value: ${formatCompactNumber(metrics.pendingValue, { currency: currencySymbol })}`} icon={Package} color="text-[#8C6239] dark:text-[#E2C899]" />
+                <KpiCard title="Potential Revenue" value={formatCompactNumber(metrics.potentialRevenue, { currency: currencySymbol })} sub="From current PO items" icon={TrendingUp} color="text-emerald-600 dark:text-[#A9CBA2]" />
                 <KpiCard title="Active Vendors" value={suppliers.filter(s => s.status === 'Active').length} sub="Top rated first" icon={Building} color="text-amber-600 dark:text-amber-400" />
                 <KpiCard title="On-Time Delivery" value="94.2%" sub="Last 30 Days" icon={Clock} color="text-[#8C6239] dark:text-[#E2C899]" />
             </div>
@@ -141,8 +141,8 @@ export const ProcurementDashboard: React.FC<ProcurementDashboardProps> = ({
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <div className="glass-panel rounded-2xl p-6">
                     <h3 className="font-bold text-gray-900 dark:text-white mb-6 text-sm uppercase tracking-widest text-[#4D6E56] dark:text-[#7A9E83]">Spend by Category</h3>
-                    <div className="h-[300px] touch-pan-y">
-                        <ResponsiveContainer width="100%" height="100%" minWidth={0}>
+                    <div className="h-[300px] w-full min-w-0 touch-pan-y">
+                        <ResponsiveContainer width="100%" height={300} minWidth={0} minHeight={300}>
                             <PieChart>
                                 <Pie data={metrics.categoryData} cx="50%" cy="50%" innerRadius={60} outerRadius={80} paddingAngle={5} dataKey="value">
                                     {metrics.categoryData.map((entry, index) => (
@@ -168,8 +168,8 @@ export const ProcurementDashboard: React.FC<ProcurementDashboardProps> = ({
 
                 <div className="glass-panel rounded-2xl p-6">
                     <h3 className="font-bold text-gray-900 dark:text-white mb-6 text-sm uppercase tracking-widest text-[#4D6E56] dark:text-[#7A9E83]">Monthly Spend Trend</h3>
-                    <div className="h-[300px] touch-pan-y">
-                        <ResponsiveContainer width="100%" height="100%" minWidth={0}>
+                    <div className="h-[300px] w-full min-w-0 touch-pan-y">
+                        <ResponsiveContainer width="100%" height={300} minWidth={0} minHeight={300}>
                             <AreaChart data={metrics.trendData}>
                                 <defs>
                                     <linearGradient id="colorSpend" x1="0" y1="0" x2="0" y2="1">

@@ -157,6 +157,8 @@ export function usePutawayStock() {
                                 size: poItem.size || sourceProduct.size,
                                 unit: poItem.unit || sourceProduct.unit,
                                 packQuantity: poItem.packQuantity || sourceProduct.packQuantity,
+                                packageType: poItem.packageType || sourceProduct.packageType,
+                                caseSize: poItem.caseSize || sourceProduct.caseSize,
                                 description: poItem.description || sourceProduct.description,
                                 minStock: poItem.minStock || sourceProduct.minStock,
                                 maxStock: poItem.maxStock || sourceProduct.maxStock,

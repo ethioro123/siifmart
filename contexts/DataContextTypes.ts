@@ -7,6 +7,7 @@ import {
   StorePoints, WorkerBonusShare, BonusTier, WarehouseZone, FulfillmentPlan,
   StaffSchedule, PendingInventoryChange, BarcodeApproval
 } from '../types';
+import type { Country } from '../utils/localization';
 
 export interface DataContextType {
   // State
@@ -23,6 +24,8 @@ export interface DataContextType {
   heldOrders: HeldOrder[];
   sites: Site[];
   activeSite: Site | undefined;
+  effectiveCountry?: Country;
+  isCeo?: boolean;
   notifications: Notification[];
   systemLogs: SystemLog[];
   promotions: Promotion[];
@@ -66,7 +69,9 @@ export interface DataContextType {
   processReturn: (saleId: string, items: ReturnItem[], totalRefund: number, user: string) => void;
   closeShift: (shift: ShiftRecord) => void;
   startShift: (cashierId: string, openingFloat: number) => void;
+  reconcileShift: (shiftId: string, hqUserName: string, status?: 'Reconciled' | 'Discrepancy_Flagged', hqNotes?: string) => Promise<void>;
   triggerSync: () => void;
+
   posCheckQueue: () => Promise<void>;
 
   addSupplier: (supplier: Supplier) => Promise<void>;

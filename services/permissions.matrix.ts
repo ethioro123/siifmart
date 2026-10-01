@@ -6,21 +6,25 @@
 import type { UserRole } from './auth.service';
 import type { Permission } from './permissions.service';
 
+const FULL_ACCESS_PERMISSIONS: Permission[] = [
+    // Full access to everything
+    'dashboard.view', 'admin.view',
+    'pos.view', 'pos.create_sale', 'pos.refund', 'pos.hold_order', 'pos.void_sale',
+    'inventory.view', 'inventory.create', 'inventory.edit', 'inventory.delete', 'inventory.adjust', 'inventory.count', 'inventory.transfer',
+    'warehouse.view', 'warehouse.view_tasks', 'warehouse.receive', 'warehouse.pick', 'warehouse.pack', 'warehouse.dispatch', 'warehouse.putaway', 'warehouse.count',
+    'procurement.view', 'procurement.create_po', 'procurement.edit_po', 'procurement.approve_po', 'procurement.delete_po', 'procurement.receive',
+    'finance.view', 'finance.view_reports', 'finance.create_expense', 'finance.approve_expense', 'finance.edit_expense', 'finance.delete_expense', 'finance.manage_payroll', 'finance.view_payroll',
+    'sales.view', 'sales.view_reports', 'sales.create', 'sales.refund',
+    'customers.view', 'customers.create', 'customers.edit', 'customers.delete', 'customers.view_history', 'customers.manage_loyalty',
+    'employees.view', 'employees.create', 'employees.edit', 'employees.delete', 'employees.approve', 'employees.view_salary', 'employees.edit_salary', 'employees.manage_attendance',
+    'pricing.view', 'pricing.edit', 'pricing.create_promo', 'pricing.approve_promo',
+    'settings.view', 'settings.edit', 'settings.manage_sites', 'settings.manage_roles', 'settings.view_logs', 'settings.manage_integrations'
+];
+
 export const ACTION_PERMISSIONS: Record<UserRole, Permission[]> = {
-    super_admin: [
-        // Full access to everything
-        'dashboard.view', 'admin.view',
-        'pos.view', 'pos.create_sale', 'pos.refund', 'pos.hold_order', 'pos.void_sale',
-        'inventory.view', 'inventory.create', 'inventory.edit', 'inventory.delete', 'inventory.adjust', 'inventory.count', 'inventory.transfer',
-        'warehouse.view', 'warehouse.view_tasks', 'warehouse.receive', 'warehouse.pick', 'warehouse.pack', 'warehouse.dispatch', 'warehouse.putaway', 'warehouse.count',
-        'procurement.view', 'procurement.create_po', 'procurement.edit_po', 'procurement.approve_po', 'procurement.delete_po', 'procurement.receive',
-        'finance.view', 'finance.view_reports', 'finance.create_expense', 'finance.approve_expense', 'finance.edit_expense', 'finance.delete_expense', 'finance.manage_payroll', 'finance.view_payroll',
-        'sales.view', 'sales.view_reports', 'sales.create', 'sales.refund',
-        'customers.view', 'customers.create', 'customers.edit', 'customers.delete', 'customers.view_history', 'customers.manage_loyalty',
-        'employees.view', 'employees.create', 'employees.edit', 'employees.delete', 'employees.approve', 'employees.view_salary', 'employees.edit_salary', 'employees.manage_attendance',
-        'pricing.view', 'pricing.edit', 'pricing.create_promo', 'pricing.approve_promo',
-        'settings.view', 'settings.edit', 'settings.manage_sites', 'settings.manage_roles', 'settings.view_logs', 'settings.manage_integrations'
-    ],
+    super_admin: FULL_ACCESS_PERMISSIONS,
+    CEO: FULL_ACCESS_PERMISSIONS,
+    ceo: FULL_ACCESS_PERMISSIONS,
 
     admin: [
         'dashboard.view',

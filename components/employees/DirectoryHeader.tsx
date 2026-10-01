@@ -1,5 +1,6 @@
 import React from 'react';
-import { Search, XCircle, LayoutGrid, List, ClipboardList, MapPin, Filter, ChevronDown } from 'lucide-react';
+import { Search, XCircle, LayoutGrid, List, ClipboardList, ChevronDown } from 'lucide-react';
+import { Employee, Site } from '../../types';
 import { SYSTEM_ROLES } from '../../utils/roles';
 
 interface DirectoryHeaderProps {
@@ -13,7 +14,7 @@ interface DirectoryHeaderProps {
    setFilterDepartment: (dept: string) => void;
    filterSite: string;
    setFilterSite: (site: string) => void;
-   sites: any[];
+   sites: Site[];
    layoutMode: 'grid' | 'list';
    setLayoutMode: (mode: 'grid' | 'list') => void;
    isTaskQueueOpen: boolean;
@@ -23,7 +24,7 @@ interface DirectoryHeaderProps {
    canViewAll: boolean;
    restricted: boolean;
    setCurrentPage: (page: number) => void;
-   visibleEmployees: any[];
+   visibleEmployees: Employee[];
 }
 
 export default function DirectoryHeader({
@@ -99,7 +100,7 @@ export default function DirectoryHeader({
                            className="appearance-none bg-white dark:bg-[#18201B]/60 hover:bg-stone-50 dark:hover:bg-white/5 border border-[#E2DCCE] dark:border-white/10 rounded-xl pl-3 pr-8 py-2.5 text-sm text-[#1E3F27] dark:text-gray-300 focus:outline-none focus:border-[#2C5E3B] dark:focus:border-[#A9CBA2] cursor-pointer transition-colors max-w-[150px]"
                         >
                            <option value="All" className="bg-[#FAF8F5] dark:bg-[#18201B] text-[#1E3F27] dark:text-white">{filter.default}</option>
-                           {filter.options.map((opt: any) => (
+                           {filter.options.map((opt: { value: string; label: string }) => (
                               <option key={opt.value} value={opt.value} className="bg-[#FAF8F5] dark:bg-[#18201B] text-[#1E3F27] dark:text-white">{opt.label}</option>
                            ))}
                         </select>

@@ -65,18 +65,13 @@ export function useApproveInventoryRequestMutation(createPutawayJob?: Function) 
                 success = true;
             }
 
-            // 2. DELETE the pending request
+            // 2. Update status to 'approved' to preserve tamper-proof audit trail
             if (success) {
-                try {
-                    await inventoryRequestsService.delete(change.id);
-                } catch (deleteErr) {
-                    // Fallback: try updating status
-                    await inventoryRequestsService.update(change.id, {
-                        status: 'approved',
-                        approvedBy: user?.name,
-                        approvedAt: new Date().toISOString()
-                    });
-                }
+                await inventoryRequestsService.update(change.id, {
+                    status: 'approved',
+                    approvedBy: user?.name,
+                    approvedAt: new Date().toISOString()
+                });
                 return { success: true, change };
             } else {
                 throw new Error('Failed to apply change to production');
@@ -108,16 +103,12 @@ export function useRejectInventoryRequestMutation() {
 
     return useMutation({
         mutationFn: async ({ change, reason }: { change: PendingInventoryChange, reason: string }) => {
-            try {
-                await inventoryRequestsService.delete(change.id);
-            } catch (deleteErr) {
-                await inventoryRequestsService.update(change.id, {
-                    status: 'rejected',
-                    rejectedBy: user?.name,
-                    rejectedAt: new Date().toISOString(),
-                    rejectionReason: reason
-                });
-            }
+            await inventoryRequestsService.update(change.id, {
+                status: 'rejected',
+                rejectedBy: user?.name,
+                rejectedAt: new Date().toISOString(),
+                rejectionReason: reason
+            });
             return { change, reason };
         },
         onSuccess: (data) => {
@@ -161,6 +152,32 @@ export function useBulkCleanupRequestsMutation() {
         onError: (error: any) => {
             logger.error('useInventoryRequestMutations', 'Cleanup failed:', error);
             addNotification('alert', 'Failed to clear all requests');
+        }
+    });
+}
+
+export function useCreateInventoryRequestMutation() {
+    const queryClient = useQueryClient();
+    const { addNotification, logSystemEvent } = useData();
+    const { user } = useStore();
+
+    return useMutation({
+        mutationFn: async (request: Omit<PendingInventoryChange, 'id'>) => {
+            const created = await inventoryRequestsService.create(request);
+            return { created, request };
+        },
+        onSuccess: (data) => {
+            queryClient.invalidateQueries({ queryKey: ['inventory_requests'] });
+            logSystemEvent(
+                'Inventory Request Created',
+                `Pending request created for ${data.request.changeType} "${data.request.productName}"`,
+                user?.name || 'Staff',
+                'Inventory'
+            );
+        },
+        onError: (error: any) => {
+            logger.error('useInventoryRequestMutations', 'Creation failed:', error);
+            addNotification('alert', `Failed to submit inventory request: ${error?.message || 'Unknown error'}`);
         }
     });
 }

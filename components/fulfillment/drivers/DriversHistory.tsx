@@ -110,7 +110,7 @@ export const DriversHistory: React.FC<DriversHistoryProps> = ({
     const paginatedHistory = useMemo(() => filteredHistory.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE), [filteredHistory, currentPage]);
 
     return (
-        <div className="bg-white dark:bg-[#0a0a0b] border-2 border-gray-100 dark:border-white/10 rounded-[1.5rem] sm:rounded-[2rem] lg:rounded-[3rem] p-4 sm:p-6 lg:p-12 shadow-xl relative overflow-hidden group/log mb-6 sm:mb-10 transition-all">
+        <div className="bg-white dark:bg-[#0a0a0b] border-2 border-gray-100 dark:border-white/10 rounded-[1.5rem] sm:rounded-[2rem] lg:rounded-[3rem] p-4 sm:p-6 lg:p-12 shadow-xl relative overflow-hidden group/log mb-6 sm:mb-10">
             <div className="absolute inset-0 bg-[linear-gradient(rgba(240,240,240,0)_50%,rgba(0,0,0,0.02)_50%),linear-gradient(90deg,rgba(0,0,0,0.01),rgba(0,0,0,0.01),rgba(0,0,0,0.01))] z-0 pointer-events-none bg-[length:100%_4px,3px_100%] opacity-40 dark:opacity-20" />
             
             <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4 sm:gap-8 mb-6 sm:mb-12 relative z-10">
@@ -130,7 +130,7 @@ export const DriversHistory: React.FC<DriversHistoryProps> = ({
                     <div className="absolute left-4 sm:left-6 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-[#2C5E3B] transition-colors pointer-events-none">
                         <Search size={18} className="sm:w-[20px] sm:h-[20px]" />
                     </div>
-                    <input type="text" placeholder={t('warehouse.driverHub.searchHistory')} aria-label={t('warehouse.driverHub.searchHistory')} title={t('warehouse.driverHub.searchHistory')} value={searchQuery} onChange={(e) => { setSearchQuery(e.target.value); setCurrentPage(1); }} className="w-full bg-gray-50 dark:bg-black/60 border-2 border-gray-100 dark:border-white/10 rounded-[1.2rem] sm:rounded-[1.5rem] pl-12 sm:pl-16 pr-4 sm:pr-8 py-3 sm:py-5 text-xs sm:text-sm text-gray-900 dark:text-white focus:outline-none focus:border-[#2C5E3B]/50 transition-all font-mono uppercase tracking-[0.1em] sm:tracking-[0.15em] placeholder:text-gray-400 dark:placeholder:text-gray-805 shadow-inner" />
+                    <input type="text" placeholder={t('warehouse.driverHub.searchHistory')} aria-label={t('warehouse.driverHub.searchHistory')} title={t('warehouse.driverHub.searchHistory')} value={searchQuery} onChange={(e) => { setSearchQuery(e.target.value); setCurrentPage(1); }} className="w-full bg-gray-50 dark:bg-black/60 border-2 border-gray-100 dark:border-white/10 rounded-[1.2rem] sm:rounded-[1.5rem] pl-12 sm:pl-16 pr-4 sm:pr-8 py-3 sm:py-5 text-xs sm:text-sm text-gray-900 dark:text-white focus:outline-none focus:border-[#2C5E3B]/50 transition-colors font-mono uppercase tracking-[0.1em] sm:tracking-[0.15em] placeholder:text-gray-400 dark:placeholder:text-gray-805 shadow-inner min-h-[48px]" />
                 </div>
             </div>
  
@@ -140,14 +140,14 @@ export const DriversHistory: React.FC<DriversHistoryProps> = ({
                         {paginatedHistory.map((job: any) => {
                             const destSite = sites.find(s => s.id === job.destSiteId);
                             return (
-                                <div key={job.id} onClick={() => { setSelectedJob(job); setIsDetailsOpen(true); }} className="flex flex-col md:flex-row items-start md:items-center gap-4 md:gap-8 bg-gray-50/50 dark:bg-white/[0.03] hover:bg-gray-100 dark:hover:bg-white/[0.06] border-2 border-gray-50 dark:border-white/5 hover:border-[#2C5E3B]/30 rounded-[1.2rem] sm:rounded-[1.5rem] lg:rounded-[2rem] p-4 sm:p-5 lg:p-7 transition-all group/item cursor-pointer shadow-sm hover:shadow-[#2C5E3B]/5 w-full">
+                                <div key={job.id} onClick={() => { setSelectedJob(job); setIsDetailsOpen(true); }} className="flex flex-col md:flex-row items-start md:items-center gap-4 md:gap-8 bg-gray-50/50 dark:bg-white/[0.03] hover:bg-gray-100 dark:hover:bg-white/[0.06] border-2 border-gray-50 dark:border-white/5 hover:border-[#2C5E3B]/30 rounded-[1.2rem] sm:rounded-[1.5rem] lg:rounded-[2rem] p-4 sm:p-5 lg:p-7 transition-colors group/item cursor-pointer shadow-sm hover:shadow-[#2C5E3B]/5 w-full min-h-[52px]">
                                     <div className="w-full md:w-40 flex flex-col justify-center shrink-0">
                                         <span className="text-[10px] sm:text-[11px] font-black text-[#2C5E3B] dark:text-[#A9CBA2]/50 group-hover/item:text-[#2C5E3B] dark:group-hover/item:text-[#A9CBA2] transition-colors uppercase tracking-wider sm:tracking-widest">{formatJobId(job)}</span>
                                         <p className="text-[9px] sm:text-[10px] text-gray-400 dark:text-gray-600 font-bold mt-1 uppercase tracking-wider italic">{formatDateTime(job.updatedAt || job.createdAt)}</p>
                                     </div>
                                     <div className="h-px md:h-12 w-full md:w-px bg-gray-250 dark:bg-white/5" />
                                     <div className="flex-1 flex items-center gap-3 sm:gap-5 min-w-0 w-full">
-                                        <div className="p-3 sm:p-4 bg-white dark:bg-black/40 rounded-xl sm:rounded-2xl border-2 border-gray-100 dark:border-white/5 shadow-sm group-hover/item:border-[#2C5E3B]/20 transition-all shrink-0">
+                                        <div className="p-3 sm:p-4 bg-white dark:bg-black/40 rounded-xl sm:rounded-2xl border-2 border-gray-100 dark:border-white/5 shadow-sm group-hover/item:border-[#2C5E3B]/20 transition-colors shrink-0">
                                             <Package size={18} className="text-gray-300 dark:text-gray-505 group-hover/item:text-[#2C5E3B] dark:group-hover/item:text-white transition-colors sm:w-[22px] sm:h-[22px]" />
                                         </div>
                                         <div className="min-w-0">
@@ -168,7 +168,7 @@ export const DriversHistory: React.FC<DriversHistoryProps> = ({
                                             <span className="text-[9px] sm:text-[10px] text-green-700 dark:text-green-400 uppercase font-black tracking-widest italic">{t('warehouse.driverHub.delivered')}</span>
                                         </div>
                                         {job.status === 'Completed' && (
-                                            <button onClick={(e) => { e.stopPropagation(); setReturnJob(job); }} className="flex items-center gap-1.5 sm:gap-2 bg-amber-50 dark:bg-amber-500/5 hover:bg-amber-100 dark:hover:bg-amber-500/15 px-3 py-1.5 sm:px-5 sm:py-2.5 rounded-xl sm:rounded-2xl border-2 border-amber-100 dark:border-amber-500/10 hover:border-amber-400 dark:hover:border-amber-500/30 transition-all text-amber-700 dark:text-amber-400 shadow-sm group/btn active:scale-95">
+                                            <button onClick={(e) => { e.stopPropagation(); setReturnJob(job); }} className="flex items-center gap-1.5 sm:gap-2 bg-amber-50 dark:bg-amber-500/5 hover:bg-amber-100 dark:hover:bg-amber-500/15 px-3 py-2 sm:px-5 sm:py-2.5 rounded-xl sm:rounded-2xl border-2 border-amber-100 dark:border-amber-500/10 hover:border-amber-400 dark:hover:border-amber-500/30 transition-colors text-amber-700 dark:text-amber-400 shadow-sm group/btn active:scale-95 min-h-[44px]">
                                                 <Undo2 size={12} className="group-hover/btn:-rotate-45 transition-transform sm:w-[14px] sm:h-[14px]" />
                                                 <span className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest">{t('warehouse.driverHub.return')}</span>
                                             </button>

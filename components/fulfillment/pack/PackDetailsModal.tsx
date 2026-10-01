@@ -3,7 +3,7 @@ import { X, Calendar, User, Package, Archive, Box, MapPin, Printer, ArrowRight, 
 import { WMSJob, Product } from '../../../types';
 import { formatDateTime } from '../../../utils/formatting';
 import { formatJobId } from '../../../utils/jobIdFormatter';
-import { formatProductSize, isWeightBased, isVolumeBased } from '../../../utils/units';
+import { formatProductSize, formatPackagingDescription, getSellUnit, isWeightBased, isVolumeBased } from '../../../utils/units';
 import { useLanguage } from '../../../contexts/LanguageContext';
 
 import { useStore } from '../../../contexts/CentralStore';
@@ -280,14 +280,22 @@ export const PackDetailsModal: React.FC<PackDetailsModalProps> = ({
                                                     {(() => {
                                                         const expected = item.expectedQty || (item as any).quantity || 0;
                                                         const picked = item.pickedQty !== undefined && item.pickedQty !== null ? item.pickedQty : 0;
-                                                        const measureQty = getItemMeasureQty(item, productInfo);
-                                                        if (measureQty) {
-                                                            const unitDef = productInfo?.unit ? productInfo.unit : '';
-                                                            const sizeNum = productInfo?.size ? parseFloat(productInfo.size as string) : 0;
-                                                            const displayPickedCases = picked <= expected ? picked : (sizeNum > 0 ? picked / sizeNum : picked);
-                                                            return <span className="text-sm md:text-lg font-mono font-black text-teal-400">{displayPickedCases} x {sizeNum} / {expected} x {sizeNum} <span className="text-[8px] md:text-[10px] text-teal-500/60 font-bold uppercase tracking-widest leading-none">{unitDef}</span></span>;
-                                                        }
-                                                        return <span className="text-sm md:text-lg font-mono font-black text-teal-400">{picked} / {expected}</span>;
+                                                        const packDesc = formatPackagingDescription(productInfo, expected);
+                                                        const unitDef = getSellUnit(productInfo?.unit || item.unit);
+                                                        const unitLabel = unitDef.category === 'count' && unitDef.code !== 'UNIT' ? unitDef.shortLabel : 'pk';
+
+                                                        return (
+                                                            <div className="flex flex-col items-end">
+                                                                <span className="text-sm md:text-lg font-mono font-black text-teal-400">
+                                                                    {picked} / {expected} <span className="text-[8px] md:text-[10px] text-teal-500/60 font-bold uppercase tracking-widest">{unitLabel}</span>
+                                                                </span>
+                                                                {packDesc && (
+                                                                    <span className="text-[8px] md:text-[9px] font-mono font-bold text-teal-400/80 uppercase">
+                                                                        ({packDesc})
+                                                                    </span>
+                                                                )}
+                                                            </div>
+                                                        );
                                                     })()}
                                                 </p>
                                             </div>

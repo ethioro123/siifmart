@@ -22,10 +22,16 @@ const RESERVED = '0000';
 export const extractSitePrefix = (siteCode?: string): string => {
     if (!siteCode) return PREFIX;
 
-    // Check for SITE-XXXX format
-    const siteMatch = siteCode.match(/SITE-(\d+)/i);
+    // Check for country-scoped format: KE-01, ET-02, UG-03
+    const countrySiteMatch = siteCode.match(/^[A-Z]{2}-(\d+)/i);
+    if (countrySiteMatch) {
+        return (parseInt(countrySiteMatch[1], 10) % 10000).toString().padStart(4, '0');
+    }
+
+    // Check for SITE-[COUNTRY]-XXXX or SITE-XXXX format
+    const siteMatch = siteCode.match(/SITE-(?:[A-Z]{2}-)?(\d+)/i);
     if (siteMatch) {
-        return (parseInt(siteMatch[1]) % 10000).toString().padStart(4, '0');
+        return (parseInt(siteMatch[1], 10) % 10000).toString().padStart(4, '0');
     }
 
     // Fallback: Deterministic Hash to avoid collisions (e.g. WH-A vs WH-B)

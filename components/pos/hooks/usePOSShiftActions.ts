@@ -1,5 +1,5 @@
 import React from 'react';
-import { ShiftRecord, SaleRecord } from '../../../types';
+import { ShiftRecord, SaleRecord, Site, User } from '../../../types';
 
 interface UsePOSShiftActionsProps {
     closingStep: number;
@@ -20,6 +20,8 @@ interface UsePOSShiftActionsProps {
     logout: any;
     navigate: any;
     addNotification: (type: 'alert' | 'success' | 'info', message: string, userId?: string, isGlobal?: boolean) => void;
+    activeSite?: Site | undefined;
+    user?: User | null;
 }
 
 export const usePOSShiftActions = ({
@@ -40,7 +42,9 @@ export const usePOSShiftActions = ({
     closeShift,
     logout,
     navigate,
-    addNotification
+    addNotification,
+    activeSite,
+    user
 }: UsePOSShiftActionsProps) => {
 
     const handleCloseShift = React.useCallback(() => {
@@ -55,12 +59,27 @@ export const usePOSShiftActions = ({
     const getShiftSummary = React.useCallback(() => {
         if (!activeShift) return { cash: 0, card: 0, mobile: 0, total: 0, expected: 0 };
         const startTime = new Date(activeShift.startTime).getTime();
-        const currentShiftSales = sales.filter(s => new Date(s.date).getTime() >= startTime);
+        const siteId = activeShift?.siteId || activeSite?.id;
+        const isCentralHQ = user?.role === 'super_admin' || user?.role === 'inventory_manager' || user?.role === 'store_manager';
+
+        const currentShiftSales = sales.filter(s => {
+            const saleTime = new Date(s.date).getTime();
+            if (saleTime < startTime) return false;
+            // Site Scoping: Never aggregate sales from other branches
+            if (siteId && s.siteId !== siteId && (s as any).site_id !== siteId) return false;
+            // Cashier Scoping: match cashier if set
+            if (activeShift?.cashierId) {
+                const matchCashier = (s as any).cashierId === activeShift.cashierId || (s as any).cashier_id === activeShift.cashierId;
+                if (!matchCashier && !isCentralHQ) return false;
+            }
+            return true;
+        });
+
         const cash = currentShiftSales.filter(s => s.method === 'Cash').reduce((sum, s) => sum + s.total, 0);
         const card = currentShiftSales.filter(s => s.method === 'Card').reduce((sum, s) => sum + s.total, 0);
-        const mobile = currentShiftSales.filter(s => s.method === 'Mobile Money').reduce((sum, s) => sum + s.total, 0);
+        const mobile = currentShiftSales.filter(s => s.method === 'Mobile Money' || (s.method as any) === 'Telebirr' || (s.method as any) === 'CBE Birr').reduce((sum, s) => sum + s.total, 0);
         return { cash, card, mobile, total: cash + card + mobile, expected: (activeShift.openingFloat || 0) + cash };
-    }, [activeShift, sales]);
+    }, [activeShift, sales, activeSite, user]);
 
     const handleSubmitShift = React.useCallback(async () => {
         if (!activeShift) return;

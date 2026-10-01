@@ -14,6 +14,10 @@
 - **Error Handling**: Services throw errors, hooks catch with `onError` + toast — never swallow errors
 - **Logging**: Use `logger` from `/utils/logger.ts` — never raw `console.log` / `console.error`
 - **Error Boundaries**: New page routes MUST be wrapped in `<ModuleErrorBoundary moduleName="X">`
+- **Config-Gating**: Whenever creating or auditing logic, check if it needs a setting to control it — never hardcode operational policies
+- **Country-Isolated Settings**: Every setting must be 100% separated per country; settings in one country must never apply to another
+- **Invisible Tenancy & Single Global Switch**: Country switching is done exclusively by the CEO via ONE central toggle in the top navigation. Settings pages must NEVER contain per-screen country selectors. Non-CEO users see a seamless, native national platform with zero awareness of multi-tenancy. All separation is enforced automatically in the background.
+- **Mandatory In-Chat SQL Delivery**: Whenever ANY SQL migration, table, column, index, RPC function, or RLS policy is created or modified while coding, ALWAYS output the complete, runnable, copy-pasteable SQL snippet directly in the chat response so the user can easily copy and execute it in Supabase SQL Editor. Never silently create or alter migrations without bringing the full runnable SQL to the chat.
 
 ## File Size Limit (ENFORCED)
 No file may exceed **500 lines**. Before editing a large file, split it using these patterns:
@@ -78,6 +82,13 @@ No file may exceed **500 lines**. Before editing a large file, split it using th
 - ❌ Don't skip writing tests for new services/utils
 - ❌ Don't eagerly import pages — use `React.lazy()` in App.tsx
 - ❌ Don't push without incrementing version in LoginPage.tsx
+- ❌ Don't hardcode operational business logic, thresholds, or workflow behaviors without a configurable setting to control them
+- ❌ Don't allow any setting to apply across multiple countries — every single setting must be 100% separated per country
+- ❌ Don't mutate or fetch system settings without passing the active country scope (`country_code`)
+- ❌ Don't add country selectors or partition switchers inside individual settings pages (country switching belongs ONLY in the central CEO global switch)
+- ❌ Don't expose tenancy mechanics to non-CEO users (the app must render as a seamless native national platform)
+- ❌ Don't require users to manually target a country when configuring settings — bind and isolate per active country automatically
+- ❌ Don't create or modify SQL migrations without bringing the complete, runnable SQL to the chat for the user to run in Supabase
 
 ## References
 - Full rules: `.agent/RULES.md`

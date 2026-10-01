@@ -10,6 +10,7 @@ interface PromoModalProps {
    setNewPromo: (promo: Partial<Promotion>) => void;
    handleCreatePromo: () => void;
    isSubmitting: boolean;
+   currencySymbol?: string;
 }
 
 export const PromoModal: React.FC<PromoModalProps> = ({
@@ -19,6 +20,7 @@ export const PromoModal: React.FC<PromoModalProps> = ({
    setNewPromo,
    handleCreatePromo,
    isSubmitting,
+   currencySymbol = 'ETB',
 }) => {
    return (
       <Modal isOpen={isOpen} onClose={onClose} title="Create Promotional Campaign">
@@ -43,7 +45,7 @@ export const PromoModal: React.FC<PromoModalProps> = ({
                      aria-label="Promo Type"
                   >
                      <option value="PERCENTAGE">Percentage (%)</option>
-                     <option value="FIXED">Fixed Discount (ETB)</option>
+                     <option value="FIXED">Fixed Discount ({currencySymbol})</option>
                   </select>
                </div>
                <div className="space-y-1">

@@ -1,30 +1,28 @@
 import React, { useState } from 'react';
 import Modal from '../../Modal';
-import { CheckCircle, AlertTriangle, ArrowLeft, ShieldAlert, CheckCircle2, Loader2, Lock } from 'lucide-react';
+import { CheckCircle, AlertTriangle, ArrowLeft, ShieldAlert, CheckCircle2, Loader2, Lock, Printer } from 'lucide-react';
 import { usePOSCommand } from '../POSCommandContext';
 import { useLanguage } from '../../../contexts/LanguageContext';
 import { useStore } from '../../../contexts/CentralStore';
 import { useData } from '../../../contexts/DataContext';
 import PinPad from '../../pos/PinPad';
 import { CURRENCY_SYMBOL } from '../../../constants';
+import { generateZReportReceiptHtml } from '../utils/receiptTemplate';
 
 export const ShiftClosureModal: React.FC = () => {
     const { t } = useLanguage();
     const { user } = useStore();
-    const { settings } = useData();
+    const { settings, employees, activeSite } = useData();
     const {
         isClosingShift, setIsClosingShift, closingStep, setClosingStep,
         cashDenominations, handleUpdateDenomination,
         getShiftSummary, isSubmittingShift, handleSubmitShift,
-        discrepancyReason, setDiscrepancyReason
+        discrepancyReason, setDiscrepancyReason, activeShift
     } = usePOSCommand();
 
     const [isManagerPinStep, setIsManagerPinStep] = useState(false);
     const [managerPin, setManagerPin] = useState('');
     const [pinError, setPinError] = useState('');
-
-    const customPin = settings?.managerSecurityPin?.trim();
-    const VALID_MANAGER_PINS = customPin ? [customPin, '1234', '0000', '9999'] : ['1234', '0000', '9999', '7777', '1111'];
 
     const isManagerOrAdmin = [
         'super_admin',
@@ -54,14 +52,50 @@ export const ShiftClosureModal: React.FC = () => {
         }
     };
 
+    const handlePrintZReport = () => {
+        const html = generateZReportReceiptHtml(
+            {
+                ...activeShift,
+                actualCash: actualCashCounted,
+                variance,
+                denominations: cashDenominations,
+                discrepancyReason
+            },
+            summary,
+            activeSite?.name || 'SIIFMART Store',
+            user?.name
+        );
+        const printWindow = window.open('', '_blank', 'width=350,height=600');
+        if (printWindow) {
+            printWindow.document.write(html);
+            printWindow.document.close();
+            printWindow.focus();
+            setTimeout(() => {
+                printWindow.print();
+            }, 300);
+        }
+    };
+
     const handleVerifyManagerPin = () => {
-        if (VALID_MANAGER_PINS.includes(managerPin.trim())) {
+        const entered = managerPin.trim();
+        const customPin = settings?.managerSecurityPin?.trim();
+        const matchesConfigured = customPin && entered === customPin;
+
+        // 4-Eyes Principle: Any authorized store supervisor/manager staff PIN
+        const managerStaff = (employees || []).filter(e =>
+            ['super_admin', 'admin', 'store_manager', 'shift_lead', 'operations_manager', 'ceo'].includes(e.role?.toLowerCase() || '')
+        );
+        const matchesStaffPin = managerStaff.some(m => m.code?.trim() === entered);
+
+        if (matchesConfigured || matchesStaffPin) {
             setPinError('');
             setIsManagerPinStep(false);
             setManagerPin('');
             handleSubmitShift();
         } else {
-            setPinError('Invalid Manager PIN. Variance authorization rejected.');
+            setPinError(customPin || managerStaff.length > 0
+                ? 'Invalid Manager / Supervisor PIN. Variance authorization rejected.'
+                : 'No Manager Security PIN configured in Settings. Authorization rejected.');
             setManagerPin('');
         }
     };
@@ -233,6 +267,15 @@ export const ShiftClosureModal: React.FC = () => {
                             >
                                 <ArrowLeft size={16} />
                                 {t('posCommand.recount')}
+                            </button>
+                            <button
+                                type="button"
+                                onClick={handlePrintZReport}
+                                className="px-4 py-3.5 bg-white dark:bg-white/5 hover:bg-[#2C5E3B]/10 text-[#2C5E3B] dark:text-[#A9CBA2] font-bold rounded-2xl border border-[#2C5E3B]/30 transition-all flex items-center justify-center gap-1.5 select-none cursor-pointer text-xs"
+                                title="Print Physical Z-Report Slip"
+                            >
+                                <Printer size={15} />
+                                <span>Z-Report</span>
                             </button>
                             <button
                                 type="button"

@@ -263,6 +263,8 @@ export const useReceivingSplit = (deps: UseReceivingSplitDeps) => {
                                 brand: item.brand || globalProduct?.brand || '',
                                 unit: item.unit || globalProduct?.unit || 'UNIT',
                                 packQuantity: item.packQuantity || globalProduct?.packQuantity || 1,
+                                packageType: item.packageType || globalProduct?.packageType || item.customAttributes?.packaging?.packageType || globalProduct?.customAttributes?.packaging?.packageType || '',
+                                caseSize: item.caseSize || globalProduct?.caseSize || item.customAttributes?.packaging?.caseSize || globalProduct?.customAttributes?.packaging?.caseSize || undefined,
                                 customAttributes: item.customAttributes || globalProduct?.customAttributes || null,
                                 description: item.description || globalProduct?.description || '',
                                 minStock: item.minStock || globalProduct?.minStock || 0,

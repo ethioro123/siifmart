@@ -88,6 +88,7 @@ export default function EmployeeModals({
                <StaffProfileView
                   employee={selectedEmployee}
                   onClose={() => setSelectedEmployee(null)}
+                  onApprove={approveProps?.onOpen ? () => approveProps.onOpen(selectedEmployee) : undefined}
                   {...terminateProps}
                />
             )}

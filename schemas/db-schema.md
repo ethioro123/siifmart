@@ -95,6 +95,8 @@
 | `fulfillment_status` | |
 | `receipt_number` | |
 | `release_status` | |
+| `country_code` | VARCHAR(10) default 'ET' (Tenant isolation) |
+| `currency` | VARCHAR(10) default 'ETB' (Local tender) |
 
 ---
 
@@ -141,7 +143,7 @@
 | `terminal_count` | |
 | `created_at` | auto |
 | `updated_at` | auto |
-| `code` | |
+| `code` | Human-readable Country-Scoped Site ID (e.g. 'KE-01', 'KE-02', 'UG-01', 'ET-01') |
 | `tax_jurisdiction_id` | |
 | `warehouse_bonus_enabled` | |
 | `bonus_enabled` | |
@@ -152,6 +154,8 @@
 | `replenishment_source_id` | FK → sites |
 | `region` | |
 | `logistics_zone_id` | |
+| `country` | 'ET' or 'KE' (operating market) |
+| `currency` | 'ETB' or 'KSh' (site local currency) |
 
 ---
 
@@ -185,6 +189,39 @@
 | `created_by` | |
 | `priority` | |
 | `received_by` | Name of employee who physically received the goods |
+| `currency` | 'ETB' or 'KSh' (transaction currency) |
+| `country_code` | 'ET' or 'KE' (multi-country tenant isolation) |
+
+---
+
+## `po_items`
+
+| Column | Notes |
+|--------|-------|
+| `id` | PK (UUID) |
+| `po_id` | FK → purchase_orders.id |
+| `product_id` | FK → products.id (nullable for custom items) |
+| `product_name` | Full manifest product title |
+| `sku` | Master SKU (e.g. KE-GR001) |
+| `quantity` | Manifest order quantity (e.g. 12 bales) |
+| `unit_cost` | Wholesale cost per manifest unit |
+| `total_cost` | Line total (quantity × unit_cost) |
+| `retail_price` | Target consumer retail price per sellable unit |
+| `image` | Product image URL |
+| `brand` | Product brand name |
+| `size` | Net package size (e.g. 1kg, 500g) |
+| `unit` | Consumer sell unit (e.g. kg, pk, ea) |
+| `category` | Product category taxonomy |
+| `identity_type` | 'known' \| 'variant' \| 'new' |
+| `received_qty` | Physically received quantity |
+| `rejected_qty` | Rejected quantity during inbound QC |
+| `pack_quantity` | Consumer units per package/bale (e.g. 12) |
+| `case_size` | Packs per case (0 if direct pack) |
+| `package_type` | Manifest package type (Bale, Case, Carton, Box, Sack) |
+| `description` | Additional manifest / supplier notes |
+| `min_stock` | Threshold minimum stock |
+| `max_stock` | Threshold maximum stock |
+| `custom_attributes` | JSONB 6-layer enterprise attributes |
 
 ---
 
@@ -494,9 +531,30 @@
 |--------|-------|
 | `id` | PK |
 | `created_at` | auto |
+| `updated_at` | auto |
 | `site_id` | FK → sites |
-| `status` | |
+| `status` | Open / Closed / Audited / Flagged |
 | `notes` | |
+| `shift_number` | text |
+| `cashier_id` | text |
+| `cashier_name` | text |
+| `start_time` | timestamptz |
+| `end_time` | timestamptz |
+| `opening_float` | numeric |
+| `cash_sales` | numeric |
+| `card_sales` | numeric |
+| `mobile_sales` | numeric |
+| `expenses` | numeric |
+| `expected_cash` | numeric |
+| `actual_cash` | numeric |
+| `variance` | numeric |
+| `denominations` | jsonb |
+| `discrepancy_reason` | text |
+| `closed_by` | text |
+| `reconciled_by` | text (HQ approver) |
+| `reconciled_at` | timestamptz |
+| `reconciliation_status` | Pending / Reconciled / Discrepancy_Flagged |
+| `hq_notes` | text |
 
 ---
 
@@ -523,17 +581,142 @@
 
 ## `system_config`
 
+> Live remote Supabase schema verified via probe on 2026-09-28. Columns marked with ⚠️ are pending DB migration application and are safely filtered out by `config.service.ts` allowlist.
+
+| Column | Status | Notes |
+|--------|--------|-------|
+| `id` | ✅ Live | PK (uuid) |
+| `store_name` | ✅ Live | text |
+| `slogan` | ✅ Live | text |
+| `logo_url` | ✅ Live | text |
+| `brand_color` | ✅ Live | text |
+| `legal_business_name` | ✅ Live | text |
+| `tax_vat_number` | ✅ Live | text |
+| `registered_address` | ✅ Live | text |
+| `support_contact` | ✅ Live | text |
+| `support_phone` | ✅ Live | text |
+| `currency` | ✅ Live | text ('ETB', 'KES', 'KSh', etc.) |
+| `timezone` | ✅ Live | text ('Africa/Addis_Ababa', 'Africa/Nairobi') |
+| `date_format` | ✅ Live | text ('DD/MM/YYYY', etc.) |
+| `number_format` | ✅ Live | text ('1,000.00', etc.) |
+| `language` | ✅ Live | text ('en', 'am', 'or') |
+| `tax_rate` | ✅ Live | numeric (15 for ET, 16 for KE) |
+| `default_vat_rate` | ✅ Live | numeric |
+| `low_stock_threshold` | ✅ Live | integer |
+| `fefo_rotation` | ✅ Live | boolean |
+| `bin_scan` | ✅ Live | boolean |
+| `enable_loyalty` | ✅ Live | boolean |
+| `enable_wms` | ✅ Live | boolean |
+| `multi_currency` | ✅ Live | boolean |
+| `require_shift_closure` | ✅ Live | boolean |
+| `pos_terminal_id` | ✅ Live | text |
+| `pos_register_mode` | ✅ Live | text ('cashier', 'kiosk') |
+| `pos_guest_checkout` | ✅ Live | boolean |
+| `pos_block_negative_stock` | ✅ Live | boolean |
+| `pos_digital_receipts` | ✅ Live | boolean |
+| `pos_auto_print` | ✅ Live | boolean |
+| `payment_cash` | ✅ Live | boolean |
+| `payment_card` | ✅ Live | boolean |
+| `payment_mobile_money` | ✅ Live | boolean |
+| `payment_store_credit` | ✅ Live | boolean |
+| `fiscal_year_start` | ✅ Live | text |
+| `accounting_method` | ✅ Live | text |
+| `tax_inclusive` | ✅ Live | boolean |
+| `tax_on_selling` | ⚠️ Pending Migration | boolean (default true) — toggle VAT/Tax on retail sales / POS |
+| `tax_on_purchasing` | ⚠️ Pending Migration | boolean (default true) — toggle VAT/Tax on purchase orders / buying |
+| `withholding_tax` | ✅ Live | numeric |
+| `max_petty_cash` | ✅ Live | numeric |
+| `expense_approval_limit` | ✅ Live | numeric |
+| `default_credit_limit` | ✅ Live | numeric |
+| `receiving_logic` | ✅ Live | text |
+| `qc_sampling_rate` | ✅ Live | numeric |
+| `qc_block_on_failure` | ✅ Live | boolean |
+| `putaway_logic` | ✅ Live | text |
+| `rotation_policy` | ✅ Live | text |
+| `require_expiry` | ✅ Live | boolean |
+| `cycle_count_strategy` | ✅ Live | text |
+| `picking_method` | ✅ Live | text |
+| `strict_scanning` | ✅ Live | boolean |
+| `reserve_stock_buffer` | ✅ Live | numeric |
+| `webhook_order_created` | ✅ Live | text |
+| `webhook_inventory_low` | ✅ Live | text |
+| `webhook_customer_signup` | ✅ Live | text |
+| `scale_ip_address` | ✅ Live | text |
+| `scanner_com_port` | ✅ Live | text |
+| `pos_receipt_logo` | ✅ Live | text |
+| `pos_receipt_show_logo` | ✅ Live | boolean |
+| `pos_receipt_header` | ✅ Live | text |
+| `pos_receipt_footer` | ✅ Live | text |
+| `pos_receipt_address` | ✅ Live | text |
+| `pos_receipt_phone` | ✅ Live | text |
+| `pos_receipt_email` | ✅ Live | text |
+| `pos_receipt_tax_id` | ✅ Live | text |
+| `pos_receipt_policy` | ✅ Live | text |
+| `pos_receipt_social_handle` | ✅ Live | text |
+| `pos_receipt_enable_qr` | ✅ Live | boolean |
+| `pos_receipt_qr_link` | ✅ Live | text |
+| `pos_receipt_width` | ✅ Live | text |
+| `pos_receipt_font` | ✅ Live | text |
+| `tax_jurisdictions` | ✅ Live | jsonb |
+| `enforce_regional_zoning` | ✅ Live | boolean |
+| `updated_at` | ✅ Live | timestamptz |
+| `updated_by` | ✅ Live | text |
+| `country` | ⚠️ Pending Migration | text ('ET', 'KE') — derived via currency/timezone |
+| `tax_authority` | ⚠️ Pending Migration | text — mapped in client |
+| `compliance_standard` | ⚠️ Pending Migration | text — mapped in client |
+| `e_tims_enabled` | ⚠️ Pending Migration | boolean — mapped in client |
+| `country_configs` | ⚠️ Pending Migration | jsonb — stored locally/in-memory |
+| `bonus_enabled` | ⚠️ Pending Migration | boolean |
+| `bonus_tiers` | ⚠️ Pending Migration | jsonb |
+| `bonus_payout_frequency` | ⚠️ Pending Migration | text |
+| `warehouse_points_eligible_roles` | ⚠️ Pending Migration | jsonb |
+| `warehouse_point_rules` | ⚠️ Pending Migration | jsonb |
+| `pos_bonus_enabled` | ⚠️ Pending Migration | boolean |
+| `pos_bonus_tiers` | ⚠️ Pending Migration | jsonb |
+| `pos_bonus_payout_frequency` | ⚠️ Pending Migration | text |
+| `pos_role_distribution` | ⚠️ Pending Migration | jsonb |
+| `pos_point_rules` | ⚠️ Pending Migration | jsonb |
+| `mpesa_till_enabled` | ⚠️ Pending Migration | boolean |
+| `mpesa_till_number` | ⚠️ Pending Migration | text |
+| `mpesa_till_name` | ⚠️ Pending Migration | text |
+| `mpesa_stk_enabled` | ⚠️ Pending Migration | boolean |
+| `mpesa_stk_shortcode` | ⚠️ Pending Migration | text |
+| `mpesa_passkey` | ⚠️ Pending Migration | text |
+| `mpesa_environment` | ⚠️ Pending Migration | text |
+| `mpesa_paybill_enabled` | ⚠️ Pending Migration | boolean |
+| `mpesa_paybill_number` | ⚠️ Pending Migration | text |
+| `airtel_money_enabled` | ⚠️ Pending Migration | boolean |
+| `airtel_till_number` | ⚠️ Pending Migration | text |
+| `telebirr_enabled` | ⚠️ Pending Migration | boolean |
+| `telebirr_merchant_id` | ⚠️ Pending Migration | text |
+| `cbe_birr_enabled` | ⚠️ Pending Migration | boolean |
+| `cbe_birr_merchant_code` | ⚠️ Pending Migration | text |
+
+---
+
+## `discount_codes`
+
 | Column | Notes |
 |--------|-------|
-| `id` | PK |
-| `bonus_enabled` | boolean (Warehouse gamification toggle) |
-| `bonus_tiers` | jsonb (Warehouse bonus tiers) |
-| `bonus_payout_frequency` | text |
-| `warehouse_points_eligible_roles` | jsonb |
-| `warehouse_point_rules` | jsonb (Custom WMS point rules) |
-| `pos_bonus_enabled` | boolean (POS team bonus toggle) |
-| `pos_bonus_tiers` | jsonb (POS team bonus tiers) |
-| `pos_bonus_payout_frequency` | text |
-| `pos_role_distribution` | jsonb (Role percentage distribution) |
-| `pos_point_rules` | jsonb (Custom POS point rules) |
+| `id` | PK (text) |
+| `code` | text (unique) |
+| `name` | text |
+| `type` | PERCENTAGE / FIXED |
+| `value` | numeric |
+| `min_purchase_amount` | numeric |
+| `max_discount_amount` | numeric |
+| `valid_from` | timestamptz |
+| `valid_until` | timestamptz |
+| `usage_limit` | integer |
+| `usage_count` | integer |
+| `per_customer_limit` | integer |
+| `status` | Active / Expired / Disabled / Scheduled |
+| `country_code` | text (e.g. 'ET', 'KE') |
+| `currency` | text (e.g. 'ETB', 'KSh') |
+| `applicable_sites` | text[] |
+| `description` | text |
+| `created_by` | text |
+| `created_at` | timestamptz (auto) |
+| `updated_at` | timestamptz (auto) |
+
 

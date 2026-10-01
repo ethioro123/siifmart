@@ -133,7 +133,16 @@ export const usePOSProductFilters = ({
             baseList = combined;
         }
         
+        const siteCountry = activeSite?.country || (activeSite?.currency === 'KES' || activeSite?.currency === 'KSh' ? 'KE' : activeSite?.currency === 'UGX' || activeSite?.currency === 'USh' ? 'UG' : 'ET');
+        
         let filtered = baseList.filter(p => {
+            // Guard: Multi-Country National Catalog Scope (no cross-border catalog bleed)
+            const explicitCountry = (p as any).country || (p as any).country_code;
+            if (explicitCountry && explicitCountry !== siteCountry) return false;
+            if (siteCountry === 'ET' && p.sku?.startsWith('KE-')) return false;
+            if (siteCountry === 'KE' && p.sku?.startsWith('ET-')) return false;
+            if (siteCountry === 'UG' && (p.sku?.startsWith('ET-') || p.sku?.startsWith('KE-'))) return false;
+
             const searchLower = searchTerm.toLowerCase();
             const matchesSearch = 
                 (p.name || '').toLowerCase().includes(searchLower) || 

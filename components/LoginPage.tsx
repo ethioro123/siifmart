@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Lock, Mail, Sun, Moon, AlertCircle, Loader, Eye, EyeOff, ArrowLeft, CheckCircle, LayoutDashboard } from 'lucide-react';
 import { useStore } from '../contexts/CentralStore';
+import { useData } from '../contexts/DataContext';
 import { authService } from '../services/auth.service';
 import { logger } from '../utils/logger';
 
@@ -90,6 +91,7 @@ const QUICK_ACCOUNTS_BY_SITE = [
 
 export default function LoginPage() {
   const { login, toggleTheme, theme } = useStore();
+  const { settings } = useData();
   const [mode, setMode] = useState<Mode>('login');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -187,16 +189,24 @@ export default function LoginPage() {
           <div className="relative group mb-4 select-none">
             {/* Elegant logo back-glow */}
             <div className="absolute inset-0 bg-gradient-to-tr from-[#2C5E3B] via-[#4A855A] to-amber-600 rounded-2xl blur-lg opacity-40 group-hover:opacity-60 transition-opacity duration-500" />
-            <div className="relative w-16 h-16 rounded-2xl bg-gradient-to-tr from-[#1E3F27] via-[#2C5E3B] to-amber-700 flex items-center justify-center shadow-[0_8px_20px_rgba(44,94,59,0.25)] transform group-hover:scale-105 group-hover:rotate-3 transition-all duration-500">
-              <LayoutDashboard size={30} className="text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.15)]" />
+            <div className="relative w-16 h-16 rounded-2xl bg-gradient-to-tr from-[#1E3F27] via-[#2C5E3B] to-amber-700 flex items-center justify-center shadow-[0_8px_20px_rgba(44,94,59,0.25)] transform group-hover:scale-105 group-hover:rotate-3 transition-all duration-500 overflow-hidden">
+              {(settings?.logoUrl || settings?.posReceiptLogo) ? (
+                <img src={settings.logoUrl || settings.posReceiptLogo} alt="Logo" className="w-full h-full object-contain p-2" />
+              ) : (
+                <LayoutDashboard size={30} className="text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.15)]" />
+              )}
             </div>
           </div>
           
           <h1 className="text-2xl font-extrabold tracking-tight text-[#1E3F27] dark:text-[#EAE5D9] flex items-center gap-1.5 select-none">
-            SIIF<span className="bg-clip-text text-transparent bg-gradient-to-r from-[#2C5E3B] to-amber-600 dark:from-[#A9CBA2] dark:to-[#DFD5C6] font-black">MART</span>
+            {(!settings?.storeName || settings.storeName.toUpperCase() === 'SIIFMART') ? (
+              <>SIIF<span className="bg-clip-text text-transparent bg-gradient-to-r from-[#2C5E3B] to-amber-600 dark:from-[#A9CBA2] dark:to-[#DFD5C6] font-black">MART</span></>
+            ) : (
+              settings.storeName
+            )}
           </h1>
-          <p className="text-[10px] text-[#4D6E56] dark:text-[#7A9E83] uppercase tracking-[0.25em] font-bold mt-2 select-none">
-            {mode === 'login' ? 'Operations Access Portal' : 'Security Recovery'}
+          <p className="text-[10px] text-[#4D6E56] dark:text-[#7A9E83] uppercase tracking-[0.25em] font-bold mt-2 select-none text-center px-4">
+            {mode === 'login' ? (settings?.slogan || 'Operations Access Portal') : 'Security Recovery'}
           </p>
         </div>
 
@@ -342,7 +352,7 @@ export default function LoginPage() {
         )}
 
         <div className="mt-8 pt-6 border-t border-[#E2DCCE]/40 dark:border-white/[0.04] text-center select-none">
-          <p className="text-[10px] text-[#4D6E56] dark:text-[#7A9E83] font-semibold tracking-wider uppercase">SiifMart Operations v3.5.3</p>
+          <p className="text-[10px] text-[#4D6E56] dark:text-[#7A9E83] font-semibold tracking-wider uppercase">SiifMart Operations v3.5.6</p>
         </div>
       </div>
     </div>

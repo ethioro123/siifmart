@@ -6,7 +6,7 @@ import { Product, Site } from '../../../types';
 import { CURRENCY_SYMBOL } from '../../../constants';
 import { formatCompactNumber } from '../../../utils/formatting';
 import { getABCClass, getInventoryValue, LocationDropdown } from '../utils/inventoryHelpers';
-import { getSellUnit, formatStockDisplay } from '../../../utils/units';
+import { getSellUnit, formatStockDisplay, formatProductSize, formatPackagingDescription } from '../../../utils/units';
 import { CompactLocationDisplay } from '../../ProductLocationDisplay';
 import { Protected } from '../../Protected';
 import { useStore } from '../../../contexts/CentralStore';
@@ -28,6 +28,7 @@ interface InventoryDesktopTableProps {
     handleOpenEditProduct: (product: Product) => void;
     handleDeleteProduct: (id: string) => void;
     setSelectedViewProduct: (product: Product | null) => void;
+    currencySymbol?: string;
 }
 
 export const InventoryDesktopTable: React.FC<InventoryDesktopTableProps> = ({
@@ -45,7 +46,8 @@ export const InventoryDesktopTable: React.FC<InventoryDesktopTableProps> = ({
     handleOpenAdjust,
     handleOpenEditProduct,
     handleDeleteProduct,
-    setSelectedViewProduct
+    setSelectedViewProduct,
+    currencySymbol = CURRENCY_SYMBOL
 }) => {
     const { user } = useStore();
     const showCostPrice = canViewCostPrice(user?.role);
@@ -204,6 +206,16 @@ export const InventoryDesktopTable: React.FC<InventoryDesktopTableProps> = ({
                                             <span className="text-[9px] font-extrabold text-stone-600 bg-stone-100 dark:text-stone-300 dark:bg-white/5 px-2 py-0.5 rounded border border-stone-200 dark:border-white/5 uppercase tracking-wider">
                                                 {product.category}
                                             </span>
+                                            {formatProductSize(product) && (
+                                                <span className="text-[9px] font-extrabold font-mono text-emerald-700 bg-emerald-500/10 dark:text-emerald-300 dark:bg-emerald-500/20 px-2 py-0.5 rounded border border-emerald-500/25 dark:border-emerald-500/25 uppercase tracking-wider">
+                                                    {formatProductSize(product)}
+                                                </span>
+                                            )}
+                                            {formatPackagingDescription(product) && (
+                                                <span className="text-[9px] font-extrabold font-mono text-teal-700 bg-teal-500/10 dark:text-teal-300 dark:bg-teal-500/20 px-2 py-0.5 rounded border border-teal-500/25 dark:border-teal-500/25 uppercase tracking-wider">
+                                                    {formatPackagingDescription(product)}
+                                                </span>
+                                            )}
                                             {product.approvalStatus === 'pending' && (
                                                 <span className="text-[9px] font-extrabold bg-amber-500/10 text-amber-600 dark:text-amber-400 px-2 py-0.5 rounded border border-amber-500/20 uppercase tracking-wider shadow-sm animate-pulse">
                                                     ⏳ Review
@@ -275,9 +287,15 @@ export const InventoryDesktopTable: React.FC<InventoryDesktopTableProps> = ({
                                         : isLowStock
                                         ? 'bg-yellow-500/10 text-yellow-500 border border-yellow-500/30 shadow-yellow-500/5'
                                         : 'bg-green-500/10 text-green-500 border border-green-500/30';
+                                    const packDesc = formatPackagingDescription(product, stockVal);
                                     return (
-                                        <div className={`inline-flex items-center justify-center min-w-[50px] px-3 py-1.5 rounded-2xl text-[12px] font-black font-mono shadow-sm transition-all ${colorClasses}`}>
-                                            {formatStockDisplay(stockVal, product)}
+                                        <div className={`inline-flex flex-col items-center justify-center min-w-[50px] px-3 py-1.5 rounded-2xl text-[12px] font-black font-mono shadow-sm transition-all ${colorClasses}`}>
+                                            <span>{formatStockDisplay(stockVal, product)}</span>
+                                            {packDesc && (
+                                                <span className="text-[9px] font-bold text-stone-600 dark:text-stone-300 font-sans tracking-tight mt-0.5">
+                                                    {packDesc}
+                                                </span>
+                                            )}
                                         </div>
                                     );
                                 })()}
@@ -291,9 +309,9 @@ export const InventoryDesktopTable: React.FC<InventoryDesktopTableProps> = ({
                             <td className="p-5 text-right">
                                 <div className="flex flex-col items-end">
                                     <span className="text-[13px] font-black text-gray-900 dark:text-white font-mono tracking-tighter group-hover:text-[#2C5E3B] dark:group-hover:text-[#A9CBA2] transition-colors">
-                                        {product.price && product.price > 0 ? formatCompactNumber(product.price, { currency: CURRENCY_SYMBOL }) : '—'}
+                                        {product.price && product.price > 0 ? formatCompactNumber(product.price, { currency: currencySymbol }) : '—'}
                                         {product.unit && product.price > 0 && getSellUnit(product.unit).code !== 'UNIT' && (
-                                            <span className="text-[9px] text-gray-500 font-bold">/{getSellUnit(product.unit).shortLabel}</span>
+                                             <span className="text-[9px] text-gray-500 font-bold">/{getSellUnit(product.unit).shortLabel}</span>
                                         )}
                                     </span>
                                     <span className="text-[9px] text-gray-500 font-bold uppercase tracking-widest mt-0.5">Retail Price</span>
@@ -303,7 +321,7 @@ export const InventoryDesktopTable: React.FC<InventoryDesktopTableProps> = ({
                                 <td className="p-5 text-right">
                                     <div className="flex flex-col items-end">
                                         <span className="text-[13px] font-black text-gray-900 dark:text-white font-mono tracking-tighter group-hover:text-[#2C5E3B] dark:group-hover:text-[#A9CBA2] transition-colors">
-                                            {product.costPrice && product.costPrice > 0 ? formatCompactNumber(product.costPrice, { currency: CURRENCY_SYMBOL }) : '—'}
+                                            {product.costPrice && product.costPrice > 0 ? formatCompactNumber(product.costPrice, { currency: currencySymbol }) : '—'}
                                             {product.costPrice !== undefined && product.costPrice !== null && product.costPrice > 0 && getSellUnit(product.unit || '').code !== 'UNIT' && (
                                                 <span className="text-[9px] text-gray-500 font-bold">/{getSellUnit(product.unit || '').shortLabel}</span>
                                             )}
@@ -315,7 +333,7 @@ export const InventoryDesktopTable: React.FC<InventoryDesktopTableProps> = ({
                             <td className="p-5 text-right">
                                 <div className="inline-flex flex-col items-end bg-gray-100 dark:bg-black/20 p-2 rounded-xl border border-gray-100 dark:border-white/[0.03]">
                                     <span className="text-[12px] font-black text-[#2C5E3B] dark:text-[#A9CBA2] font-mono tracking-tighter">
-                                        {product.price && product.price > 0 ? formatCompactNumber(getInventoryValue(product), { currency: CURRENCY_SYMBOL }) : '—'}
+                                        {product.price && product.price > 0 ? formatCompactNumber(getInventoryValue(product), { currency: currencySymbol }) : '—'}
                                     </span>
                                     <span className="text-[9px] text-gray-600 font-bold uppercase tracking-widest font-sans">Inventory Value</span>
                                 </div>

@@ -3,6 +3,7 @@ import { X, Package, Undo2, AlertTriangle, CheckCircle, Loader2 } from 'lucide-r
 import { WMSJob, Product } from '../../../types';
 import { formatJobId } from '../../../utils/jobIdFormatter';
 import { useLanguage } from '../../../contexts/LanguageContext';
+import { useCreateInventoryRequestMutation } from '../../../hooks/useInventoryRequestMutations';
 import { logger } from '../../../utils/logger';
 
 interface ReturnToWarehouseModalProps {
@@ -11,7 +12,7 @@ interface ReturnToWarehouseModalProps {
     user: any;
     onClose: () => void;
     addNotification: (type: string, message: string) => void;
-    inventoryRequestsService: any;
+    inventoryRequestsService?: any;
     wmsJobsService?: any;  // For marking source job and cancelling active jobs
     jobs?: WMSJob[];       // Full jobs array to find active downstream jobs
     returnType?: 'warehouse' | 'procurement'; // 'procurement' requires procurement mgr / super_admin approval
@@ -51,6 +52,7 @@ export const ReturnToWarehouseModal: React.FC<ReturnToWarehouseModalProps> = ({
     returnType = 'warehouse'
 }) => {
     const { t } = useLanguage();
+    const createRequestMutation = useCreateInventoryRequestMutation();
     const [step, setStep] = useState<'select' | 'confirm' | 'done'>('select');
     const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -107,7 +109,7 @@ export const ReturnToWarehouseModal: React.FC<ReturnToWarehouseModalProps> = ({
                     approvalRole: returnType === 'procurement' ? 'procurement_manager' : 'warehouse_manager'
                 };
 
-                await inventoryRequestsService.create(request);
+                await createRequestMutation.mutateAsync(request);
             }
 
             // --- MARK SOURCE JOB LINE ITEMS AS RETURNED ---
@@ -169,7 +171,7 @@ export const ReturnToWarehouseModal: React.FC<ReturnToWarehouseModalProps> = ({
     };
 
     return (
-        <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-in fade-in duration-200">
+        <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/80 animate-in fade-in duration-200">
             <div className="bg-[#0f0f11] w-full max-w-2xl max-h-[90vh] rounded-2xl sm:rounded-3xl border border-white/10 shadow-2xl flex flex-col overflow-hidden">
 
                 {/* Header */}

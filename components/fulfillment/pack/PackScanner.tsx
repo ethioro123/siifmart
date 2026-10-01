@@ -78,17 +78,13 @@ export const PackScanner: React.FC<PackScannerProps> = ({
         if ((item as any).requestedMeasureQty !== undefined && (item as any).requestedMeasureQty !== null) {
             return (item as any).requestedMeasureQty;
         }
-        // Use product if provided, otherwise attempt product lookup, finally fall back to item's own fields
         const prod = productInfo !== undefined ? productInfo : getProduct(item);
-        const unit = prod?.unit || item.unit;
-        const size = prod?.size || item.size;
-        if (unit && size) {
-            const isWeightVol = isWeightBased(unit) || isVolumeBased(unit);
-            const sizeNum = getEffectivePackageSize(unit, size);
-            if (isWeightVol && sizeNum > 1) {
-                const expected = item.expectedQty || (item as any).quantity || 0;
-                return expected * sizeNum;
-            }
+        const customAttrs = prod?.customAttributes || (prod as any)?.custom_attributes;
+        const sellBy = customAttrs?.commercial?.sellBy || '';
+        const isWeighted = customAttrs?.commercial?.isWeighted === true;
+
+        if (sellBy === 'Weight' || sellBy === 'Volume' || isWeighted) {
+            return item.expectedQty || (item as any).quantity || null;
         }
         return null;
     };
@@ -254,16 +250,16 @@ export const PackScanner: React.FC<PackScannerProps> = ({
     return (
         <div className="fixed inset-0 z-[200] bg-[#FAF8F5] dark:bg-[#1C2620] flex flex-col transition-colors duration-500">
             {/* Top Bar */}
-            <div className="p-4 bg-[#EAE5D9] dark:bg-[#1C2620]/80 border-b border-[#E2DCCE] dark:border-[#A9CBA2]/10 flex justify-between items-center text-gray-900 dark:text-[#EAE5D9]">
-                <div className="flex items-center gap-3">
-                    <button onClick={onClose} className="p-2 -ml-2 text-gray-500 dark:text-[#A9CBA2]/70 hover:text-gray-900 dark:hover:text-[#EAE5D9]" aria-label={t('warehouse.dismiss')}>
+            <div className="p-3 sm:p-4 bg-[#EAE5D9] dark:bg-[#1C2620]/80 border-b border-[#E2DCCE] dark:border-[#A9CBA2]/10 flex justify-between items-center text-gray-900 dark:text-[#EAE5D9]">
+                <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+                    <button onClick={onClose} className="p-2 -ml-1 text-gray-500 dark:text-[#A9CBA2]/70 hover:text-gray-900 dark:hover:text-[#EAE5D9] transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center shrink-0" aria-label={t('warehouse.dismiss')}>
                         <X size={24} />
                     </button>
-                    <div>
-                        <h3 className="font-bold text-lg uppercase tracking-wider">
+                    <div className="min-w-0">
+                        <h3 className="font-bold text-base sm:text-lg uppercase tracking-wider truncate">
                             {step === 'SCAN' ? t('warehouse.scanProductBarcode') : t('warehouse.putaway.progress')}
                         </h3>
-                        <p className="text-xs text-[#2C5E3B] dark:text-[#A9CBA2] font-mono">JOB: {formatJobId(job)}</p>
+                        <p className="text-xs text-[#2C5E3B] dark:text-[#A9CBA2] font-mono truncate">JOB: {formatJobId(job)}</p>
                     </div>
                 </div>
                 <div className="flex items-center gap-2">
@@ -277,7 +273,7 @@ export const PackScanner: React.FC<PackScannerProps> = ({
                         }}
                         title="Toggle Fullscreen"
                         aria-label="Toggle Fullscreen"
-                        className="p-2 bg-gray-200 dark:bg-white/5 hover:bg-gray-300 dark:hover:bg-white/10 rounded-xl text-gray-550 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
+                        className="p-2 bg-gray-200 dark:bg-white/5 hover:bg-gray-300 dark:hover:bg-white/10 rounded-xl text-gray-550 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center"
                     >
                         <Maximize2 size={20} />
                     </button>

@@ -35,13 +35,13 @@ export default function Finance() {
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                <div>
                   <h2 className="text-2xl font-bold text-white flex items-center gap-2">
-                     <DollarSign className="text-cyber-primary" />
+                     <DollarSign className="text-[#2C5E3B] dark:text-[#A9CBA2]" />
                      Financial Command Center
                   </h2>
                   <div className="flex items-center gap-2 mt-1">
                      <p className="text-gray-400 text-sm">Enterprise Resource Planning (ERP) & Accounting.</p>
                      <span className="text-gray-600 text-xs">|</span>
-                     <span className="text-cyber-primary text-xs font-mono">{state.getDateRangeLabels()}</span>
+                     <span className="text-[#2C5E3B] dark:text-[#A9CBA2] text-xs font-mono">{state.getDateRangeLabels()}</span>
                   </div>
 
                   {/* Fiscal Quarter Progress */}
@@ -53,7 +53,7 @@ export default function Finance() {
                         </div>
                         <div className="h-1 bg-white/10 rounded-full overflow-hidden">
                            <div
-                              className="h-full bg-cyber-primary transition-all duration-500"
+                              className="h-full bg-[#2C5E3B] dark:bg-[#A9CBA2] transition-all duration-500"
                               ref={(el) => { if (el) el.style.width = `${state.getQuarterProgress()}%`; }}
                            />
                         </div>
@@ -66,23 +66,16 @@ export default function Finance() {
                      onChange={(val) => state.setDateRange(val)}
                   />
 
-                  {/* Region Selector */}
-                  <div className="flex items-center bg-black/30 border border-white/10 rounded-xl px-3 h-10 transition-all hover:border-cyber-primary/50">
-                     <Globe size={14} className="text-gray-400 mr-2" />
-                     <select
-                        aria-label="Select Tax Region"
-                        value={state.selectedRegion}
-                        onChange={(e) => state.setSelectedRegion(e.target.value as any)}
-                        className="bg-transparent border-none text-xs text-white outline-none uppercase font-bold cursor-pointer"
-                     >
-                        {Object.entries(state.TAX_REGIONS).map(([key, val]: any) => (
-                           <option key={key} value={key} className="text-black">{val.name} ({val.rate}%)</option>
-                        ))}
-                     </select>
+                  {/* Sovereign Tax Authority Badge (Invisible Tenancy: Auto-Derived, No Dropdown) */}
+                  <div className="flex items-center bg-black/30 border border-white/10 rounded-xl px-3 h-10 transition-all hover:border-[#2C5E3B]/50">
+                     <Globe size={14} className="text-[#2C5E3B] dark:text-[#A9CBA2] mr-2" />
+                     <span className="text-xs font-bold text-white uppercase tracking-wider">
+                        {state.currentTaxConfig.taxName} ({state.currentTaxConfig.rate}%)
+                     </span>
                   </div>
 
-                  <div className="h-10 px-4 flex items-center gap-2 bg-green-500/10 border border-green-500/20 rounded-xl">
-                     <TrendingUp size={16} className="text-green-500" />
+                  <div className="h-10 px-4 flex items-center gap-2 bg-emerald-500/10 border border-emerald-500/20 rounded-xl">
+                     <TrendingUp size={16} className="text-emerald-500" />
                      <span className="text-[10px] text-gray-400 uppercase font-bold">Net Margin:</span>
                      <span className="text-sm font-bold text-white font-mono">{state.profitMargin.toFixed(1)}%</span>
                   </div>

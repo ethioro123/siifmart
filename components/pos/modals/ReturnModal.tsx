@@ -11,9 +11,9 @@ import { formatCompactNumber } from '../../../utils/formatting';
 import { RotateCcw, Minus, Plus, AlertTriangle, Loader2, ShieldAlert, CheckCircle2, Lock } from 'lucide-react';
 
 export const ReturnModal: React.FC = () => {
-    const { t } = useLanguage();
+    const { t, isKenya } = useLanguage();
     const { user } = useStore();
-    const { settings } = useData();
+    const { settings, employees } = useData();
     const {
         isReturnModalOpen,
         setIsReturnModalOpen,
@@ -31,11 +31,8 @@ export const ReturnModal: React.FC = () => {
     const [isPinStep, setIsPinStep] = useState(false);
     const [hqOtp, setHqOtp] = useState('');
     const [pinError, setPinError] = useState('');
-    const [refundMethod, setRefundMethod] = useState<'STORE_CREDIT' | 'TELEBIRR' | 'CBE_BIRR' | 'CASH'>('STORE_CREDIT');
+    const [refundMethod, setRefundMethod] = useState<'STORE_CREDIT' | 'TELEBIRR' | 'CBE_BIRR' | 'M_PESA' | 'CASH'>('STORE_CREDIT');
     const [customerPhone, setCustomerPhone] = useState('');
-
-    const customPin = settings?.managerSecurityPin?.trim();
-    const VALID_HQ_OTPS = customPin ? [customPin, '888999', '555123', '777456', '1234'] : ['888999', '555123', '777456', '1234'];
 
     const totalRefundAmount = foundSaleForReturn
         ? foundSaleForReturn.items.reduce((sum, item) => sum + (item.price * (returnConfig[item.id]?.qty || 0)), 0)
@@ -60,14 +57,26 @@ export const ReturnModal: React.FC = () => {
     };
 
     const handleVerifyHqOtp = () => {
-        if (VALID_HQ_OTPS.includes(hqOtp.trim())) {
+        const entered = hqOtp.trim();
+        const customPin = settings?.managerSecurityPin?.trim();
+        const matchesConfigured = customPin && entered === customPin;
+
+        // 4-Eyes / Central HQ Dual Control: HQ Admin or Store Manager authorized OTP
+        const hqStaff = (employees || []).filter(e =>
+            ['super_admin', 'admin', 'store_manager', 'finance_manager', 'auditor', 'ceo'].includes(e.role?.toLowerCase() || '')
+        );
+        const matchesHqStaff = hqStaff.some(m => m.code?.trim() === entered);
+
+        if (matchesConfigured || matchesHqStaff) {
             setPinError('');
             setIsPinStep(false);
-            const verifiedOtp = hqOtp.trim();
+            const verifiedOtp = entered;
             setHqOtp('');
             handleProcessReturn('CASH', customerPhone, verifiedOtp);
         } else {
-            setPinError('Invalid Central HQ Authorization OTP. Cash refund rejected.');
+            setPinError(customPin || hqStaff.length > 0 
+                ? 'Invalid Central HQ Authorization OTP. Cash refund rejected.' 
+                : 'No Manager Security PIN configured in Settings. Cash refund rejected.');
             setHqOtp('');
         }
     };
@@ -263,26 +272,41 @@ export const ReturnModal: React.FC = () => {
                                     >
                                         Store Credit
                                     </button>
-                                    <button
-                                        type="button"
-                                        onClick={() => setRefundMethod('TELEBIRR')}
-                                        className={`p-2.5 rounded-xl border text-xs font-bold transition-all text-center cursor-pointer ${refundMethod === 'TELEBIRR'
-                                            ? 'bg-[#0070BA] text-white border-[#0070BA] shadow-sm'
-                                            : 'bg-white dark:bg-black/20 text-stone-700 dark:text-gray-300 border-[#E2DCCE] dark:border-white/10 hover:border-blue-500/40'
-                                            }`}
-                                    >
-                                        Telebirr
-                                    </button>
-                                    <button
-                                        type="button"
-                                        onClick={() => setRefundMethod('CBE_BIRR')}
-                                        className={`p-2.5 rounded-xl border text-xs font-bold transition-all text-center cursor-pointer ${refundMethod === 'CBE_BIRR'
-                                            ? 'bg-[#6A1B9A] text-white border-[#6A1B9A] shadow-sm'
-                                            : 'bg-white dark:bg-black/20 text-stone-700 dark:text-gray-300 border-[#E2DCCE] dark:border-white/10 hover:border-purple-500/40'
-                                            }`}
-                                    >
-                                        CBE Birr
-                                    </button>
+                                    {isKenya ? (
+                                        <button
+                                            type="button"
+                                            onClick={() => setRefundMethod('M_PESA')}
+                                            className={`p-2.5 rounded-xl border text-xs font-bold transition-all text-center cursor-pointer ${refundMethod === 'M_PESA'
+                                                ? 'bg-[#00A859] text-white border-[#00A859] shadow-sm'
+                                                : 'bg-white dark:bg-black/20 text-stone-700 dark:text-gray-300 border-[#E2DCCE] dark:border-white/10 hover:border-emerald-500/40'
+                                                }`}
+                                        >
+                                            M-Pesa (Safaricom)
+                                        </button>
+                                    ) : (
+                                        <>
+                                            <button
+                                                type="button"
+                                                onClick={() => setRefundMethod('TELEBIRR')}
+                                                className={`p-2.5 rounded-xl border text-xs font-bold transition-all text-center cursor-pointer ${refundMethod === 'TELEBIRR'
+                                                    ? 'bg-[#0070BA] text-white border-[#0070BA] shadow-sm'
+                                                    : 'bg-white dark:bg-black/20 text-stone-700 dark:text-gray-300 border-[#E2DCCE] dark:border-white/10 hover:border-blue-500/40'
+                                                    }`}
+                                            >
+                                                Telebirr
+                                            </button>
+                                            <button
+                                                type="button"
+                                                onClick={() => setRefundMethod('CBE_BIRR')}
+                                                className={`p-2.5 rounded-xl border text-xs font-bold transition-all text-center cursor-pointer ${refundMethod === 'CBE_BIRR'
+                                                    ? 'bg-[#6A1B9A] text-white border-[#6A1B9A] shadow-sm'
+                                                    : 'bg-white dark:bg-black/20 text-stone-700 dark:text-gray-300 border-[#E2DCCE] dark:border-white/10 hover:border-purple-500/40'
+                                                    }`}
+                                            >
+                                                CBE Birr
+                                            </button>
+                                        </>
+                                    )}
                                     <button
                                         type="button"
                                         onClick={() => setRefundMethod('CASH')}

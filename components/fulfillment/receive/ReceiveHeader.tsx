@@ -105,7 +105,7 @@ export const ReceiveHeader: React.FC<ReceiveHeaderProps> = ({
             {/* UNRESOLVED ITEMS QUEUE */}
             {
                 unresolvedScans.length > 0 && (
-                    <div className="bg-slate-50 dark:bg-zinc-900/30 border border-slate-200 dark:border-zinc-800 rounded-xl md:rounded-2xl p-3 md:p-5 shrink-0 backdrop-blur-sm shadow-sm">
+                    <div className="bg-slate-50 dark:bg-zinc-900/30 border border-slate-200 dark:border-zinc-800 rounded-xl md:rounded-2xl p-3 md:p-5 shrink-0 shadow-sm">
                         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 md:gap-3 mb-3 md:mb-4">
                             <div className="flex items-center gap-3">
                                 <div className="p-2 bg-slate-100 dark:bg-white/5 rounded-lg border border-slate-200 dark:border-white/10">

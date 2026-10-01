@@ -1,13 +1,15 @@
 import { useState, useEffect, useMemo } from 'react';
-import { Employee, UserRole } from '../types';
+import { Employee, Site, UserRole } from '../types';
 import { employeesService } from '../services/supabase.service';
 import { canViewAllSites, hasPermission } from '../utils/permissions';
 import { getRoleHierarchy } from '../utils/roles';
+import { Country } from '../utils/localization';
 import { logger } from '../utils/logger';
+import type { EmployeeFilters } from '../services/employees.service';
 
 interface UseEmployeeDataProps {
-   user: any;
-   activeSite: any;
+   user: { id?: string; role?: UserRole; siteId?: string } | null;
+   activeSite: Site | null;
    filterSite: string;
    filterRole: string;
    filterStatus: string;
@@ -15,6 +17,9 @@ interface UseEmployeeDataProps {
    searchTerm: string;
    currentPage: number;
    ITEMS_PER_PAGE: number;
+   country?: Country;
+   countrySites?: Site[];
+   fallbackEmployees?: Employee[];
 }
 
 export function useEmployeeData({
@@ -26,7 +31,10 @@ export function useEmployeeData({
    filterDepartment,
    searchTerm,
    currentPage,
-   ITEMS_PER_PAGE
+   ITEMS_PER_PAGE,
+   country = 'ET',
+   countrySites = [],
+   fallbackEmployees = []
 }: UseEmployeeDataProps) {
    const [paginatedEmployees, setPaginatedEmployees] = useState<Employee[]>([]);
    const [totalPages, setTotalPages] = useState(1);
@@ -39,6 +47,7 @@ export function useEmployeeData({
    const canViewAll = canManageEmployees || isDepartmentManager;
 
    useEffect(() => {
+      let isMounted = true;
       const fetchEmployees = async () => {
          setIsLoadingEmployees(true);
          try {
@@ -50,11 +59,16 @@ export function useEmployeeData({
                querySiteId = filterSite;
             }
 
-            // Build filters object
-            const queryFilters = {
+            // Derive site IDs belonging to the active country
+            const countrySiteIds = countrySites.map(s => s.id);
+
+            // Build country-scoped filters object
+            const queryFilters: EmployeeFilters = {
                role: filterRole,
                status: filterStatus,
-               department: filterDepartment
+               department: filterDepartment,
+               country,
+               countrySiteIds
             };
 
             const { data, count } = await employeesService.getPaginated(
@@ -65,13 +79,39 @@ export function useEmployeeData({
                queryFilters
             );
 
+            if (!isMounted) return;
             setPaginatedEmployees(data || []);
             setTotalCount(count);
-            setTotalPages(Math.ceil(count / ITEMS_PER_PAGE));
+            setTotalPages(Math.max(1, Math.ceil(count / ITEMS_PER_PAGE)));
          } catch (error) {
-            logger.error('useEmployeeData', 'Failed to fetch employees:', error);
+            logger.error('useEmployeeData', 'Failed to fetch employees, using scoped fallback:', error);
+            if (!isMounted) return;
+
+            // Resilient in-memory fallback using country-scoped employees
+            let filtered = [...fallbackEmployees];
+            if (restricted && user?.siteId) {
+               filtered = filtered.filter(e => e.siteId === user.siteId);
+            } else if (filterSite && filterSite !== 'All') {
+               filtered = filtered.filter(e => e.siteId === filterSite);
+            }
+            if (filterRole !== 'All') filtered = filtered.filter(e => e.role === filterRole);
+            if (filterStatus !== 'All') filtered = filtered.filter(e => e.status === filterStatus);
+            if (filterDepartment !== 'All') filtered = filtered.filter(e => e.department === filterDepartment);
+            if (searchTerm) {
+               const term = searchTerm.toLowerCase();
+               filtered = filtered.filter(e => 
+                  e.name.toLowerCase().includes(term) || 
+                  e.email.toLowerCase().includes(term) || 
+                  (e.phone && e.phone.includes(term))
+               );
+            }
+
+            const from = (currentPage - 1) * ITEMS_PER_PAGE;
+            setPaginatedEmployees(filtered.slice(from, from + ITEMS_PER_PAGE));
+            setTotalCount(filtered.length);
+            setTotalPages(Math.max(1, Math.ceil(filtered.length / ITEMS_PER_PAGE)));
          } finally {
-            setIsLoadingEmployees(false);
+            if (isMounted) setIsLoadingEmployees(false);
          }
       };
 
@@ -79,8 +119,15 @@ export function useEmployeeData({
          fetchEmployees();
       }, 300);
 
-      return () => clearTimeout(timer);
-   }, [currentPage, searchTerm, filterRole, filterStatus, filterDepartment, filterSite, activeSite?.id, restricted, user?.siteId, ITEMS_PER_PAGE]);
+      return () => {
+         isMounted = false;
+         clearTimeout(timer);
+      };
+   }, [
+      currentPage, searchTerm, filterRole, filterStatus, filterDepartment,
+      filterSite, activeSite?.id, restricted, user?.siteId, ITEMS_PER_PAGE,
+      country, countrySites, fallbackEmployees
+   ]);
 
    const displayedEmployees = useMemo(() => {
       return [...paginatedEmployees].sort((a, b) => {

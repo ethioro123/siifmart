@@ -11,6 +11,7 @@ import { UnitTab, UnitConfig, SellMode } from './product-control/UnitTab';
 import { PricingTab, PricingConfig } from './product-control/PricingTab';
 import { StockTab, StockConfig } from './product-control/StockTab';
 import { getSellUnit } from '../../utils/units';
+import { getCountryProfile } from '../../utils/localization';
 
 type ModalTab = 'profile' | 'unit' | 'pricing' | 'stock';
 
@@ -19,6 +20,7 @@ interface Props {
     isOpen: boolean;
     onClose: () => void;
     onSaved?: () => void;
+    currencySymbol?: string;
 }
 
 function modeFromUnit(unitCode?: string): SellMode {
@@ -29,9 +31,11 @@ function modeFromUnit(unitCode?: string): SellMode {
     return 'count';
 }
 
-export const ProductControlModal: React.FC<Props> = ({ product, isOpen, onClose, onSaved }) => {
+export const ProductControlModal: React.FC<Props> = ({ product, isOpen, onClose, onSaved, currencySymbol }) => {
     const { user, showToast } = useStore();
-    const { refreshData, updateProduct, updatePricesBySKU, sites, allProducts } = useData();
+    const { refreshData, updateProduct, updatePricesBySKU, sites, allProducts, effectiveCountry, settings } = useData();
+    const activeCountry = (effectiveCountry || settings?.country || 'ET') as any;
+    const dynamicCurrency = currencySymbol || getCountryProfile(activeCountry).currencySymbol || 'ETB';
     const showCost = canViewCostPrice(user?.role);
     const canDirectEdit = user?.role === 'super_admin';
 
@@ -286,7 +290,7 @@ export const ProductControlModal: React.FC<Props> = ({ product, isOpen, onClose,
                 {/* Tab Content */}
                 <div className="p-6 overflow-y-auto flex-1">
                     {activeTab === 'profile' && (
-                        <ProfileTab product={product} />
+                        <ProfileTab product={product} currencySymbol={dynamicCurrency} />
                     )}
 
                     {activeTab === 'unit' && (
@@ -312,6 +316,7 @@ export const ProductControlModal: React.FC<Props> = ({ product, isOpen, onClose,
                             showCost={showCost}
                             sites={sites || []}
                             allProducts={allProducts || []}
+                            currencySymbol={dynamicCurrency}
                         />
                     )}
 

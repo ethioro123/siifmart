@@ -101,7 +101,7 @@ export const FinancialSection = ({
                                 </defs>
                                 <CartesianGrid strokeDasharray="3 3" stroke={chartGridColor} vertical={false} />
                                 <XAxis dataKey="name" stroke={chartAxisColor} fontSize={11} tickLine={false} axisLine={false} />
-                                <YAxis stroke={chartAxisColor} fontSize={11} tickLine={false} axisLine={false} tickFormatter={(val) => `${val / 1000}k`} />
+                                <YAxis stroke={chartAxisColor} fontSize={11} tickLine={false} axisLine={false} allowDecimals={false} domain={[0, (dataMax: number) => Math.max(dataMax, 1000)]} tickFormatter={(val) => val === 0 ? '0' : `${val >= 1000 ? (val / 1000).toLocaleString() : val}k`} />
                                 <Tooltip contentStyle={{ backgroundColor: tooltipBg, backdropFilter: 'blur(10px)', border: `1px solid ${tooltipBorder}`, borderRadius: '12px' }} itemStyle={{ color: tooltipText, fontSize: '12px' }} />
                                 <Area type="monotone" dataKey="revenue" stroke={accentColor} strokeWidth={3} fillOpacity={1} fill="url(#colorRevenue)" />
                             </AreaChart>

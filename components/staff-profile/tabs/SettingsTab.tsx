@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Key, User, Shield, MapPin, Building, Briefcase, DollarSign, Save, Loader2, ChevronDown, Star, Phone, Home, PhoneCall } from 'lucide-react';
 import { Employee, UserRole } from '../../../types';
-import { SYSTEM_ROLES, getRoleHierarchy } from '../../../utils/roles';
+import { SYSTEM_ROLES, canEmployRole } from '../../../utils/roles';
 import { autoSelectSiteForRole, getRecommendedDepartment, canRoleBeAtSiteType } from '../../../utils/roleSegregation';
 import { formatRole } from '../../../utils/formatting';
 import { logger } from '../../../utils/logger';
@@ -69,15 +69,12 @@ export default function SettingsTab({
         setEditEmergencyContact(employee.emergencyContact || '');
     }, [employee.id]);
 
-    // ---------- Role logic ----------
-    const currentUserLevel = currentUser ? getRoleHierarchy(currentUser.role) : 0;
-
     const getAssignableRoles = useCallback((): UserRole[] => {
         if (!currentUser) return [];
         return SYSTEM_ROLES
-            .filter(r => getRoleHierarchy(r.id) < currentUserLevel)
+            .filter(r => canEmployRole(currentUser.role, r.id))
             .map(r => r.id);
-    }, [currentUser, currentUserLevel]);
+    }, [currentUser]);
 
     const canAdjustPayroll = ['super_admin', 'hr_manager', 'hr', 'admin'].includes(currentUser?.role || '');
 
@@ -106,6 +103,10 @@ export default function SettingsTab({
 
     const handleSave = async () => {
         if (!updateEmployee || !hasChanges) return;
+        if (editRole !== employee.role && !canEmployRole(currentUser?.role, editRole)) {
+            logger.warn('SettingsTab', 'Unauthorized role assignment attempt blocked', { targetRole: editRole });
+            return;
+        }
         setIsSaving(true);
         setSaveSuccess(false);
         try {

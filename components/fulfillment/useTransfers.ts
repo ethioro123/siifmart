@@ -26,7 +26,7 @@ export const useTransfers = (deps: UseTransfersDeps) => {
     const { transfers, sites, setJobs, setTransfers, addNotification, logSystemEvent } = deps;
 
     const requestTransfer = useCallback(async (transfer: TransferRecord) => {
-        console.log('📦 requestTransfer called:', {
+        logger.info('useTransfers', 'requestTransfer called', {
             id: transfer.id,
             sourceSiteId: transfer.sourceSiteId,
             destSiteId: transfer.destSiteId,

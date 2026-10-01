@@ -253,8 +253,10 @@ export const TransferRequestModal: React.FC<TransferRequestModalProps> = ({
                                                 const isAdminSite = s.type === 'Administration';
                                                 if (isSelf || isAdminSite) return false;
 
+                                                const sourceSiteObj = sites.find(x => x.id === (transferSourceSite || activeSite?.id));
+                                                if (sourceSiteObj && (s.country || 'ET') !== (sourceSiteObj.country || 'ET')) return false;
+
                                                 if (settings?.enforceRegionalZoning && user?.role !== 'super_admin') {
-                                                    const sourceSiteObj = sites.find(x => x.id === (transferSourceSite || activeSite?.id));
                                                     if (sourceSiteObj) {
                                                         const sourceZone = sourceSiteObj.logisticsZoneId || '';
                                                         const destZone = s.logisticsZoneId || '';

@@ -1,15 +1,26 @@
 import React from 'react';
 import { SystemConfig } from '../../types';
-import { CURRENCY_SYMBOL } from '../../constants';
+import { getCountryProfile, Country } from '../../utils/localization';
 import { formatDateTime } from '../../utils/formatting';
 
 interface ReceiptPreviewProps {
-  settings: Partial<SystemConfig>;
+  settings: Partial<SystemConfig> & { country?: Country };
+}
+
+function escapeHtml(str: string): string {
+  if (!str) return '';
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
 }
 
 export function ReceiptPreview({ settings }: ReceiptPreviewProps) {
   const {
     storeName = 'SIIFMART',
+    logoUrl,
     posReceiptLogo,
     posReceiptShowLogo = true,
     posReceiptHeader = 'SIIFMART RETAIL',
@@ -23,17 +34,37 @@ export function ReceiptPreview({ settings }: ReceiptPreviewProps) {
     posReceiptEnableQR = true,
     posReceiptQRLink = 'https://siifmart.com/feedback',
     posReceiptWidth = '80mm',
-    posReceiptFont = 'sans-serif'
+    posReceiptFont = 'sans-serif',
+    slogan
   } = settings;
 
-  const displayStoreName = storeName || 'SIIFMART';
+  // ── NATIONAL CURRENCY & PROFILE (never use a global constant across countries) ──
+  // Resolve from the settings country/currency field so every receipt preview
+  // always renders the correct local currency — ETB, KSh, USh, etc.
+  const countryProfile = getCountryProfile(settings as { country?: string; currency?: string });
+  const RECEIPT_CURRENCY = countryProfile.currencySymbol;
+  const isKenya = settings?.country === 'KE' || settings?.currency === 'KES' || settings?.currency === 'KSh';
+
+  const displayStoreName = escapeHtml(storeName || 'SIIFMART');
+  const displayLogo = posReceiptLogo || logoUrl;
+  const displayHeader = escapeHtml(posReceiptHeader || 'SIIFMART RETAIL');
+  const displaySlogan = slogan && slogan !== displayHeader ? escapeHtml(slogan) : '';
   const is80mm = posReceiptWidth === '80mm';
   const paperWidth = is80mm ? '80mm' : '58mm';
+
+  const cleanAddress = escapeHtml(posReceiptAddress || '');
+  const cleanPhone = escapeHtml(posReceiptPhone || '');
+  const cleanEmail = escapeHtml(posReceiptEmail || '');
+  const cleanTaxId = escapeHtml(posReceiptTaxId || '');
+  const cleanFooter = escapeHtml(posReceiptFooter || '');
+  const cleanSocial = escapeHtml(posReceiptSocialHandle || '');
+  const cleanPolicy = escapeHtml(posReceiptPolicy || '');
 
   const html = `
     <!DOCTYPE html>
     <html>
     <head>
+      <meta charset="utf-8">
       <style>
         @page { size: ${paperWidth} auto; margin: 0; }
         body { 
@@ -97,24 +128,26 @@ export function ReceiptPreview({ settings }: ReceiptPreviewProps) {
       </style>
     </head>
     <body>
-        ${posReceiptShowLogo && posReceiptLogo ? `
+        ${posReceiptShowLogo && displayLogo ? `
           <div class="flex justify-center mb-4">
-            <img src="${posReceiptLogo}" class="logo" />
+            <img src="${encodeURI(displayLogo)}" class="logo" alt="Receipt Logo" />
           </div>
         ` : ''}
         
         <div class="text-center border-b-2-dashed pb-4 mb-4">
           <h2 class="text-xl font-black uppercase tracking-tighter leading-none mb-1">${displayStoreName}</h2>
-          <p class="text-[10px] font-bold uppercase tracking-widest opacity-80">${posReceiptHeader}</p>
+          <p class="text-[10px] font-bold uppercase tracking-widest opacity-80">${displayHeader}</p>
+          ${displaySlogan ? `<p class="text-[9px] italic opacity-70 mt-0.5">${displaySlogan}</p>` : ''}
         </div>
 
         <div class="text-[10px] text-center space-y-05 mb-4 border-b-2-dashed pb-4">
-          ${posReceiptAddress ? `<p>${posReceiptAddress}</p>` : ''}
+          ${cleanAddress ? `<p>${cleanAddress}</p>` : ''}
           <div class="flex justify-center gap-2">
-            ${posReceiptPhone ? `<p>Tel: ${posReceiptPhone}</p>` : ''}
-            ${posReceiptEmail ? `<p>Email: ${posReceiptEmail}</p>` : ''}
+            ${cleanPhone ? `<p>Tel: ${cleanPhone}</p>` : ''}
+            ${cleanEmail ? `<p>Email: ${cleanEmail}</p>` : ''}
           </div>
-          ${posReceiptTaxId ? `<p class="font-bold">TIN: ${posReceiptTaxId}</p>` : ''}
+          ${cleanTaxId ? `<p class="font-bold">${isKenya ? 'KRA PIN' : 'TIN'}: ${cleanTaxId}</p>` : ''}
+          ${isKenya ? '<p class="text-[8px] opacity-70">eTIMS Compliant - Valid Tax Invoice</p>' : ''}
         </div>
 
         <div class="text-[10px] space-y-1 mb-4">
@@ -127,40 +160,40 @@ export function ReceiptPreview({ settings }: ReceiptPreviewProps) {
           <div class="flex justify-between text-[10px]">
               <div>
                   <div class="font-bold">MacBook Pro 14"</div>
-                  <div class="text-[9px] opacity-60">1 x ${CURRENCY_SYMBOL}2,499.00</div>
+                  <div class="text-[9px] opacity-60">1 x ${RECEIPT_CURRENCY}2,499.00</div>
               </div>
-              <div class="font-bold">${CURRENCY_SYMBOL}2,499.00</div>
+              <div class="font-bold">${RECEIPT_CURRENCY}2,499.00</div>
           </div>
           <div class="flex justify-between text-[10px]">
               <div>
                   <div class="font-bold">Magic Mouse</div>
-                  <div class="text-[9px] opacity-60">2 x ${CURRENCY_SYMBOL}79.00</div>
+                  <div class="text-[9px] opacity-60">2 x ${RECEIPT_CURRENCY}79.00</div>
               </div>
-              <div class="font-bold">${CURRENCY_SYMBOL}158.00</div>
+              <div class="font-bold">${RECEIPT_CURRENCY}158.00</div>
           </div>
         </div>
 
         <div class="space-y-1 text-right mb-4">
-          <div class="flex justify-between text-[10px] opacity-60"><span>Subtotal</span><span>${CURRENCY_SYMBOL}2,657.00</span></div>
-          <div class="flex justify-between text-[10px] opacity-60"><span>Tax (${settings.taxRate || 0}%)</span><span>${CURRENCY_SYMBOL}${(2657 * (settings.taxRate || 0) / 100).toFixed(2)}</span></div>
-          <div class="flex justify-between font-black text-base border-t-black pt-2 mt-2"><span>TOTAL</span> <span>${CURRENCY_SYMBOL}3,055.55</span></div>
+          <div class="flex justify-between text-[10px] opacity-60"><span>Subtotal</span><span>${RECEIPT_CURRENCY}2,657.00</span></div>
+          <div class="flex justify-between text-[10px] opacity-60"><span>Tax (${settings.taxRate || 0}%)</span><span>${RECEIPT_CURRENCY}${(2657 * (settings.taxRate || 0) / 100).toFixed(2)}</span></div>
+          <div class="flex justify-between font-black text-base border-t-black pt-2 mt-2"><span>TOTAL</span> <span>${RECEIPT_CURRENCY}3,055.55</span></div>
         </div>
 
         <div class="text-[10px] font-bold border-t-dashed pt-4 mb-4">
           <div class="flex justify-between">
             <span>PAID (CARD)</span>
-            <span>${CURRENCY_SYMBOL}3,055.55</span>
+            <span>${RECEIPT_CURRENCY}3,055.55</span>
           </div>
         </div>
 
         <div class="text-center space-y-1 pt-4 border-t-dashed">
-          <p class="text-xs font-bold leading-tight mb-2">${posReceiptFooter}</p>
-          ${posReceiptSocialHandle ? `<p class="text-[10px] opacity-70 font-medium">${posReceiptSocialHandle}</p>` : ''}
-          ${posReceiptPolicy ? `<p class="text-[9px] italic opacity-60 leading-tight">${posReceiptPolicy}</p>` : ''}
+          <p class="text-xs font-bold leading-tight mb-2">${cleanFooter}</p>
+          ${cleanSocial ? `<p class="text-[10px] opacity-70 font-medium">${cleanSocial}</p>` : ''}
+          ${cleanPolicy ? `<p class="text-[9px] italic opacity-60 leading-tight">${cleanPolicy}</p>` : ''}
 
           ${posReceiptEnableQR ? `
             <div class="flex justify-center mt-4">
-               <img src="https://chart.googleapis.com/chart?cht=qr&chs=100x100&chl=${encodeURIComponent(posReceiptQRLink)}" style="width: 64px; height: 64px;" />
+               <img src="https://chart.googleapis.com/chart?cht=qr&chs=100x100&chl=${encodeURIComponent(posReceiptQRLink)}" style="width: 64px; height: 64px;" alt="Survey QR" />
             </div>
           ` : ''}
         </div>

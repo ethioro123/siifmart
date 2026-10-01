@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  Lock, ArrowLeft, Printer, Box, Power, LayoutDashboard
+  Lock, ArrowLeft, Printer, Box, Power, Play, PackageCheck
 } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
 import Protected from '../components/Protected';
@@ -12,6 +12,7 @@ import { POSCommandProvider, usePOSCommand } from '../components/pos-command/POS
 import { POSCommandModals } from '../components/pos-command/POSCommandModals';
 import { DashboardKPIs } from '../components/pos-command/layout/DashboardKPIs';
 import { ShiftProgress } from '../components/pos-command/layout/ShiftProgress';
+import { ShiftReconciliationTable } from '../components/pos-command/layout/ShiftReconciliationTable';
 import { POSCommandCharts } from '../components/pos-command/layout/POSCommandCharts';
 import { RecentTransactions } from '../components/pos-command/layout/RecentTransactions';
 
@@ -42,7 +43,10 @@ const POSCommandContent: React.FC = () => {
     setPin,
     handleLockScreen,
     handleReprint,
+    handleStartShift,
     handleEndShift,
+    isStartShiftModalOpen,
+    setIsStartShiftModalOpen,
     setIsReceivingModalOpen,
     setIsStockListOpen,
     setIsPrintHubOpen,
@@ -53,9 +57,9 @@ const POSCommandContent: React.FC = () => {
   const [pinError, setPinError] = useState('');
 
   const handleUnlock = () => {
-    const validPins = [user?.code, '1234', '0000', '9999'].filter(Boolean);
-    if (!validPins.includes(pin.trim())) {
-      setPinError(t('pos.invalidPin') || 'Invalid PIN. Enter your staff code or 1234.');
+    const userPin = user?.code?.trim();
+    if (!userPin || pin.trim() !== userPin) {
+      setPinError(t('pos.invalidPin') || 'Invalid PIN. Enter your staff PIN.');
       setPin('');
       return;
     }
@@ -64,7 +68,15 @@ const POSCommandContent: React.FC = () => {
     setPinError('');
   };
 
-  const currentShift = shifts.find(s => s.cashierId === user?.id && s.status === 'Open');
+  const currentShift = activeShift;
+
+  const handleBack = () => {
+    if (window.history.state && typeof window.history.state.idx === 'number' && window.history.state.idx > 0) {
+      navigate(-1);
+    } else {
+      navigate('/pos');
+    }
+  };
 
   const { lastSeenUpdates } = usePOSCommand();
 
@@ -131,115 +143,122 @@ const POSCommandContent: React.FC = () => {
             <div className="absolute top-0 left-1/2 -translate-x-1/2 w-1/3 h-[1px] bg-gradient-to-r from-transparent via-[#2C5E3B]/30 to-transparent" />
           </div>
 
-          {/* Left — Logo + Title */}
-          <div className="relative z-10 flex items-center gap-5">
-            <div className="relative">
-              <button
-                title={t('common.back') || 'Back'}
-                aria-label={t('common.back') || 'Back'}
-                onClick={() => navigate('/pos')}
-                className="p-3.5 bg-white/70 dark:bg-white/5 hover:bg-[#2C5E3B]/10 text-[#4D6E56] dark:text-gray-400 hover:text-[#2C5E3B] dark:hover:text-[#A9CBA2] rounded-2xl transition-all active:scale-95 border border-[#E2DCCE] dark:border-white/5 hover:border-[#2C5E3B]/30 shadow-sm hover:shadow-md backdrop-blur-sm"
-              >
-                <ArrowLeft size={22} />
-              </button>
-              {updatedProductCount > 0 && (
-                <span className="absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] px-1 bg-red-500 text-white text-[10px] font-black rounded-full flex items-center justify-center shadow-md ring-2 ring-white dark:ring-[#18201B] animate-pulse">
-                  {updatedProductCount > 99 ? '99+' : updatedProductCount}
-                </span>
-              )}
-            </div>
+          {/* Left — Back Action + Store & Shift Status */}
+          <div className="relative z-10 flex flex-wrap items-center gap-3">
+            <button
+              title={t('common.back') || 'Back'}
+              aria-label={t('common.back') || 'Back'}
+              onClick={handleBack}
+              className="px-3.5 py-2.5 bg-white/70 dark:bg-white/5 hover:bg-[#2C5E3B]/10 text-[#4D6E56] dark:text-gray-300 hover:text-[#2C5E3B] dark:hover:text-[#A9CBA2] rounded-xl transition-all active:scale-95 border border-[#E2DCCE] dark:border-white/10 shadow-xs flex items-center gap-2 text-xs font-bold cursor-pointer"
+            >
+              <ArrowLeft size={16} />
+              <span>{t('common.back') || 'Back'}</span>
+            </button>
 
-            {/* Logo icon */}
-            <div className="relative group select-none">
-              <div className="absolute inset-0 bg-gradient-to-tr from-[#2C5E3B] via-[#4A855A] to-amber-600 rounded-2xl blur-md opacity-30 group-hover:opacity-50 transition-opacity duration-500" />
-              <div className="relative w-12 h-12 rounded-2xl bg-gradient-to-tr from-[#1E3F27] via-[#2C5E3B] to-amber-700 flex items-center justify-center shadow-[0_8px_20px_rgba(44,94,59,0.2)] transform group-hover:scale-105 group-hover:rotate-3 transition-all duration-500">
-                <LayoutDashboard size={22} className="text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.15)]" />
-              </div>
-            </div>
+            <span className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white/70 dark:bg-white/5 border border-[#E2DCCE] dark:border-white/10 text-xs font-bold text-[#1E3F27] dark:text-[#EAE5D9] shadow-xs">
+              <span className="w-2 h-2 rounded-full bg-amber-500" />
+              {activeSite?.name || t('posCommand.loadingLocation')}
+            </span>
 
-            <div>
-              <div>
-                <h1 className="text-2xl font-extrabold tracking-tight text-[#1E3F27] dark:text-[#EAE5D9]">
-                  SIIF<span className="bg-clip-text text-transparent bg-gradient-to-r from-[#2C5E3B] to-amber-600 dark:from-[#A9CBA2] dark:to-[#DFD5C6] font-black">MART</span>
-                </h1>
-                <p className="text-[10px] text-[#4D6E56] dark:text-[#7A9E83] uppercase tracking-[0.25em] font-bold mt-0.5 select-none">{t('posCommand.dashboardHeader')}</p>
-              </div>
-              <div className="flex items-center gap-3 mt-2 text-xs font-mono">
-                <span className="text-[#4D6E56]/70 dark:text-gray-500 uppercase tracking-widest">{t('pos.activeShift')}:</span>
-                <span className={`px-2 py-0.5 rounded-lg border flex items-center gap-1.5 text-[10px] font-bold ${currentShift ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-700 dark:text-emerald-400' : 'bg-red-500/10 border-red-500/20 text-red-600 dark:text-red-400'}`}>
-                  <div className={`w-1.5 h-1.5 rounded-full ${currentShift ? 'bg-emerald-500 animate-pulse' : 'bg-red-500'}`} />
-                  {currentShift ? formatShiftId(currentShift) : t('posCommand.noActiveShift')}
+            {currentShift ? (
+              <span className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-xs font-bold text-emerald-800 dark:text-emerald-300 shadow-xs">
+                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                <span>Active Shift: {formatShiftId(currentShift)}</span>
+                <span className="text-[10px] opacity-75 font-mono">
+                  ({new Date(currentShift.startTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })})
                 </span>
-                <span className="text-[#4D6E56]/50 dark:text-gray-600">•</span>
-                <span className="text-[#4D6E56] dark:text-gray-400 font-sans font-bold tracking-wide">
-                  {activeSite?.name || t('posCommand.loadingLocation')}
-                </span>
-              </div>
-            </div>
+              </span>
+            ) : (
+              <span className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-stone-200/60 dark:bg-white/5 border border-[#E2DCCE] dark:border-white/10 text-xs font-semibold text-stone-600 dark:text-stone-400 shadow-xs">
+                <span className="w-2 h-2 rounded-full bg-stone-400" />
+                <span>Drawer Inactive • No Active Shift</span>
+              </span>
+            )}
           </div>
 
-          {/* Right — Action buttons */}
-          <div className="flex flex-wrap items-center gap-2.5 relative z-50 bg-white/60 dark:bg-black/20 p-2 rounded-2xl border border-[#E2DCCE]/50 dark:border-white/5 backdrop-blur-sm">
-            <DateRangeSelector value={dateRange} onChange={setDateRange} />
-
-            <div className="w-px h-8 bg-[#E2DCCE] dark:bg-white/10 mx-1" />
-
-            <button
-              onClick={() => setIsReceivingModalOpen(true)}
-              className="px-4 py-2.5 bg-[#224429] dark:bg-[#2C5E3B]/20 hover:bg-[#1B3520] dark:hover:bg-[#2C5E3B]/30 text-[#FAF8F5] dark:text-[#A9CBA2] text-[11px] font-bold uppercase tracking-widest rounded-2xl border border-transparent dark:border-[#2C5E3B]/30 transition-all flex items-center gap-2 shadow-sm hover:shadow-md active:scale-[0.98] group"
-            >
-              <Box size={14} className="group-hover:-translate-y-0.5 transition-transform" />
-              {t('posCommand.receiveLabel')}
-            </button>
-
-            <div className="relative">
+          {/* Right — Clean Segmented Action Groups */}
+          <div className="flex flex-wrap items-center gap-3 relative z-50">
+            {/* Primary Shift Action */}
+            {currentShift ? (
               <button
-                onClick={() => setIsStockListOpen(true)}
-                className="px-4 py-2.5 bg-white/80 dark:bg-white/5 hover:bg-[#2C5E3B]/10 text-[#2C4D35] dark:text-gray-300 hover:text-[#1E3F27] dark:hover:text-white text-[11px] font-bold uppercase tracking-widest rounded-2xl border border-[#E2DCCE] dark:border-white/5 hover:border-[#2C5E3B]/20 transition-all flex items-center gap-2 group shadow-sm cursor-pointer"
+                onClick={handleEndShift}
+                className="px-4 py-2.5 bg-red-500/10 hover:bg-red-500/20 text-red-600 dark:text-red-400 text-xs font-bold uppercase tracking-wider rounded-2xl border border-red-500/30 transition-all flex items-center gap-2 shadow-xs hover:shadow-sm active:scale-95 cursor-pointer"
+                title="End Shift and Reconcile Cash Drawer"
               >
-                <Box size={14} className="opacity-70 group-hover:opacity-100 transition-opacity" />
-                {t('posCommand.stockListLabel')}
+                <Power size={14} />
+                <span>{t('posCommand.endShift') || 'End Shift'}</span>
               </button>
-              {updatedProductCount > 0 && (
-                <span className="absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] px-1 bg-amber-500 text-white text-[10px] font-black rounded-full flex items-center justify-center shadow-md ring-2 ring-white dark:ring-[#18201B]">
-                  {updatedProductCount > 99 ? '99+' : updatedProductCount}
-                </span>
-              )}
+            ) : (
+              <button
+                onClick={() => setIsStartShiftModalOpen(true)}
+                className="px-5 py-2.5 bg-[#2C5E3B] hover:bg-[#1E3F27] text-white text-xs font-bold uppercase tracking-wider rounded-2xl shadow-md hover:shadow-lg transition-all flex items-center gap-2 active:scale-95 cursor-pointer ring-2 ring-[#2C5E3B]/20"
+                title="Input opening float and start daily cashier shift"
+              >
+                <Play size={14} className="fill-current" />
+                <span>Start Shift</span>
+              </button>
+            )}
+
+            {/* Store Inventory Operations */}
+            <div className="flex items-center bg-white/70 dark:bg-white/5 rounded-2xl border border-[#E2DCCE] dark:border-white/10 p-1 shadow-xs backdrop-blur-sm">
+              <div className="relative">
+                <button
+                  onClick={() => setIsStockListOpen(true)}
+                  className="px-3.5 py-2 hover:bg-[#2C5E3B]/10 text-[#2C4D35] dark:text-gray-300 hover:text-[#1E3F27] dark:hover:text-white text-xs font-bold rounded-xl transition-all flex items-center gap-1.5 cursor-pointer"
+                  title="Stock Catalog & Pricing"
+                >
+                  <Box size={14} />
+                  <span>Stock List</span>
+                </button>
+                {updatedProductCount > 0 && (
+                  <span className="absolute -top-1 -right-1 min-w-[16px] h-[16px] px-1 bg-amber-500 text-white text-[9px] font-black rounded-full flex items-center justify-center shadow-xs">
+                    {updatedProductCount > 99 ? '99+' : updatedProductCount}
+                  </span>
+                )}
+              </div>
+
+              <button
+                onClick={() => setIsReceivingModalOpen(true)}
+                className="px-3.5 py-2 hover:bg-[#2C5E3B]/10 text-[#2C4D35] dark:text-gray-300 hover:text-[#1E3F27] dark:hover:text-white text-xs font-bold rounded-xl transition-all flex items-center gap-1.5 cursor-pointer"
+                title="Receive Stock"
+              >
+                <PackageCheck size={14} />
+                <span>Receive</span>
+              </button>
             </div>
 
-            <button
-              onClick={() => setIsPrintHubOpen(true)}
-              className="px-4 py-2.5 bg-white/80 dark:bg-white/5 hover:bg-[#2C5E3B]/10 text-[#2C4D35] dark:text-gray-300 hover:text-[#1E3F27] dark:hover:text-white text-[11px] font-bold uppercase tracking-widest rounded-2xl border border-[#E2DCCE] dark:border-white/5 hover:border-[#2C5E3B]/20 transition-all flex items-center gap-2 group shadow-sm cursor-pointer"
-            >
-              <Printer size={14} className="opacity-70 group-hover:opacity-100 transition-opacity" />
-              {t('posCommand.printHubLabel') || 'Print Hub'}
-            </button>
+            {/* Terminal Controls */}
+            <div className="flex items-center bg-white/70 dark:bg-white/5 rounded-2xl border border-[#E2DCCE] dark:border-white/10 p-1 shadow-xs backdrop-blur-sm">
+              <button
+                onClick={handleReprint}
+                className="px-3 py-2 hover:bg-[#2C5E3B]/10 text-stone-600 dark:text-stone-300 hover:text-[#1E3F27] dark:hover:text-white text-xs font-bold rounded-xl transition-all flex items-center gap-1.5 cursor-pointer"
+                title="Reprint Last Sale"
+              >
+                <Printer size={14} />
+                <span>Reprint</span>
+              </button>
 
-            <button
-              onClick={handleLockScreen}
-              className="px-4 py-2.5 bg-white/80 dark:bg-white/5 hover:bg-[#2C5E3B]/10 text-[#2C4D35] dark:text-gray-300 hover:text-[#1E3F27] dark:hover:text-white text-[11px] font-bold uppercase tracking-widest rounded-2xl border border-[#E2DCCE] dark:border-white/5 hover:border-[#2C5E3B]/20 transition-all flex items-center gap-2 group shadow-sm"
-            >
-              <Lock size={14} className="opacity-70 group-hover:opacity-100 transition-opacity" />
-              {t('posCommand.lockScreen')}
-            </button>
+              <button
+                onClick={() => setIsPrintHubOpen(true)}
+                className="px-3 py-2 hover:bg-[#2C5E3B]/10 text-stone-600 dark:text-stone-300 hover:text-[#1E3F27] dark:hover:text-white text-xs font-bold rounded-xl transition-all flex items-center gap-1.5 cursor-pointer"
+                title="Print Hub"
+              >
+                <Printer size={14} />
+                <span>Print Hub</span>
+              </button>
 
-            <button
-              onClick={handleReprint}
-              className="px-4 py-2.5 bg-white/80 dark:bg-white/5 hover:bg-[#2C5E3B]/10 text-[#2C4D35] dark:text-gray-300 hover:text-[#1E3F27] dark:hover:text-white text-[11px] font-bold uppercase tracking-widest rounded-2xl border border-[#E2DCCE] dark:border-white/5 hover:border-[#2C5E3B]/20 transition-all flex items-center gap-2 group shadow-sm"
-            >
-              <Printer size={14} className="opacity-70 group-hover:opacity-100 transition-opacity" />
-              {t('posCommand.reprintLast')}
-            </button>
+              <button
+                onClick={handleLockScreen}
+                className="px-3 py-2 hover:bg-stone-200/60 dark:hover:bg-white/10 text-stone-600 dark:text-stone-300 hover:text-[#1E3F27] dark:hover:text-white text-xs font-bold rounded-xl transition-all flex items-center gap-1.5 cursor-pointer"
+                title="Lock Terminal Screen"
+              >
+                <Lock size={14} />
+                <span>Lock</span>
+              </button>
+            </div>
 
-            <div className="w-px h-8 bg-[#E2DCCE] dark:bg-white/10 mx-1" />
-
-            <button
-              onClick={handleEndShift}
-              className="px-5 py-2.5 bg-red-500/10 hover:bg-red-500/20 text-red-600 dark:text-red-400 text-[11px] font-bold uppercase tracking-[0.15em] rounded-2xl border border-red-500/20 hover:border-red-500/30 transition-all flex items-center gap-2 shadow-sm hover:shadow-md active:scale-[0.98] group"
-            >
-              <Power size={14} className="group-hover:rotate-180 transition-transform duration-500 ease-out" />
-              <span>{t('posCommand.endShift')}</span>
-            </button>
+            {/* Date Filter */}
+            <DateRangeSelector value={dateRange} onChange={setDateRange} />
           </div>
         </div>
 
@@ -278,6 +297,9 @@ const POSCommandContent: React.FC = () => {
 
         {/* ===== CHARTS ===== */}
         <POSCommandCharts />
+
+        {/* ===== HQ SHIFT & CASH RECONCILIATION ===== */}
+        <ShiftReconciliationTable />
 
         {/* ===== RECENT TRANSACTIONS ===== */}
         <RecentTransactions />

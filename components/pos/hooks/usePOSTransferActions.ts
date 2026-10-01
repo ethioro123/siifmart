@@ -73,7 +73,7 @@ export const usePOSTransferActions = ({
                 sku: item.sku,
                 name: product?.name || item.name || 'Unknown Product',
                 expectedQty: item.quantity,
-                receivedQty: item.quantity,
+                receivedQty: 0,
                 condition: 'Good' as const,
                 notes: ''
             };

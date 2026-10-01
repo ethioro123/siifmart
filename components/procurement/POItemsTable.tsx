@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
 import { POItem } from '../../types';
-import { CURRENCY_SYMBOL } from '../../constants';
 import { formatCompactNumber } from '../../utils/formatting';
 import { Package, Trash2, Edit3, FileText, Check, X } from 'lucide-react';
-import { formatPOItemDescription } from './utils';
+import { formatPOItemDescription, getPOItemPackagingSummary } from './utils';
 
 interface POItemsTableProps {
     items: POItem[];
+    currencySymbol?: string;
     onUpdateItem: (index: number, updatedItem: POItem) => void;
     onRemoveItem: (index: number) => void;
     onFullEdit: (index: number) => void;
@@ -14,6 +14,7 @@ interface POItemsTableProps {
 
 export const POItemsTable: React.FC<POItemsTableProps> = ({
     items,
+    currencySymbol = 'ETB',
     onUpdateItem,
     onRemoveItem,
     onFullEdit
@@ -60,75 +61,105 @@ export const POItemsTable: React.FC<POItemsTableProps> = ({
                     <thead>
                         <tr className="bg-[#FAF8F5] dark:bg-black/30 border-b border-[#E2DCCE]/60 dark:border-white/5 text-[10px] text-stone-500 dark:text-gray-400 uppercase tracking-widest font-black">
                             <th className="p-4 pl-6">Product Details</th>
-                            <th className="p-4 text-right w-24">Qty</th>
+                            <th className="p-4 text-left w-36">Packaging</th>
+                            <th className="p-4 text-right w-28">Sellable Qty</th>
                             <th className="p-4 text-right w-32">Unit Cost</th>
                             <th className="p-4 text-right w-32">Total</th>
                             <th className="p-4 text-right pr-6 w-32">Actions</th>
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-[#E2DCCE]/40 dark:divide-white/5">
-                        {items.map((item, i) => (
-                            <tr key={i} className="hover:bg-[#FAF8F5] dark:hover:bg-white/5 transition-colors group/row">
-                                <td className="p-4 pl-6">
-                                    <div className="flex items-center gap-4">
-                                        <div className="w-10 h-10 rounded-xl bg-emerald-50 dark:bg-[#2C5E3B]/20 flex items-center justify-center border border-emerald-200 dark:border-emerald-950/30">
-                                            <Package size={18} className="text-[#2C5E3B] dark:text-[#A9CBA2]" />
-                                        </div>
-                                        <div>
-                                            <div className="text-[#1E3F27] dark:text-white text-sm font-black tracking-tight">
-                                                {formatPOItemDescription(item)}
+                        {items.map((item, i) => {
+                            const pkg = getPOItemPackagingSummary(item);
+                            return (
+                                <tr key={i} className="hover:bg-[#FAF8F5] dark:hover:bg-white/5 transition-colors group/row">
+                                    <td className="p-4 pl-6">
+                                        <div className="flex items-center gap-4">
+                                            <div className="w-10 h-10 rounded-xl bg-emerald-50 dark:bg-[#2C5E3B]/20 flex items-center justify-center border border-emerald-200 dark:border-emerald-950/30">
+                                                <Package size={18} className="text-[#2C5E3B] dark:text-[#A9CBA2]" />
                                             </div>
-                                            <div className="text-xs text-stone-500 dark:text-stone-400 font-mono mt-0.5 flex items-center gap-2">
-                                                <span className="bg-stone-100 dark:bg-black/40 px-2 py-0.5 rounded-md text-[10px] border border-stone-200 dark:border-white/10 font-bold">{item.sku}</span>
-                                                {item.identityType === 'new' && (
-                                                    <span className="text-[9px] px-2 py-0.5 border border-amber-300 dark:border-amber-900/30 rounded-md bg-amber-50 dark:bg-amber-950/30 text-amber-800 dark:text-amber-300 font-black tracking-widest">
-                                                        CUSTOM
-                                                    </span>
+                                            <div>
+                                                <div className="text-[#1E3F27] dark:text-white text-sm font-black tracking-tight">
+                                                    {formatPOItemDescription(item)}
+                                                </div>
+                                                <div className="text-xs text-stone-500 dark:text-stone-400 font-mono mt-0.5 flex items-center gap-2 flex-wrap">
+                                                    <span className="bg-stone-100 dark:bg-black/40 px-2 py-0.5 rounded-md text-[10px] border border-stone-200 dark:border-white/10 font-bold">{item.sku}</span>
+                                                    {item.identityType === 'new' && (
+                                                        <span className="text-[9px] px-2 py-0.5 border border-amber-300 dark:border-amber-900/30 rounded-md bg-amber-50 dark:bg-amber-950/30 text-amber-800 dark:text-amber-300 font-black tracking-widest">
+                                                            CUSTOM
+                                                        </span>
+                                                    )}
+                                                    {pkg.packBadge && (
+                                                        <span className="text-[9px] bg-amber-500/10 border border-amber-500/20 text-amber-700 dark:text-amber-400 px-1.5 py-0.5 rounded font-black tracking-wider uppercase">
+                                                            📦 {pkg.packBadge}
+                                                        </span>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td className="p-4">
+                                        <div className="text-xs font-bold text-[#1E3F27] dark:text-white">
+                                            {pkg.packBadge || pkg.manifestUnitName}
+                                        </div>
+                                        <div className="text-[10px] text-stone-500 dark:text-stone-400 font-medium mt-0.5">
+                                            {pkg.packDetail}
+                                        </div>
+                                    </td>
+                                    <td className="p-4 text-right font-mono">
+                                        {editingIndex === i && editValues ? (
+                                            <div className="relative group/edit">
+                                                <input
+                                                    type="number"
+                                                    aria-label="Edit Quantity"
+                                                    className="w-20 bg-white dark:bg-black/40 border border-[#2C5E3B] text-stone-900 dark:text-white rounded-xl px-3 py-1.5 text-right text-xs outline-none font-black font-mono"
+                                                    autoFocus
+                                                    value={editValues.qty}
+                                                    onChange={e => setEditValues({ ...editValues, qty: parseInt(e.target.value) || 0 })}
+                                                />
+                                            </div>
+                                        ) : (
+                                            <div>
+                                                <div className="text-[#1E3F27] dark:text-white font-black text-sm">
+                                                    {pkg.sellableQty.toLocaleString()} <span className="text-xs text-stone-500 font-bold">{pkg.sellUnitLabel}</span>
+                                                </div>
+                                                {pkg.hasMultiplier && (
+                                                    <div className="text-[10px] text-[#8C6239] dark:text-[#E2C899] font-bold">
+                                                        ({item.quantity} {pkg.manifestUnitName.toLowerCase()})
+                                                    </div>
                                                 )}
                                             </div>
+                                        )}
+                                    </td>
+                                    <td className="p-4 text-right font-mono">
+                                        {editingIndex === i && editValues ? (
+                                            <div className="relative group/edit">
+                                                <input
+                                                    type="number"
+                                                    aria-label="Edit Price"
+                                                    className="w-24 bg-white dark:bg-black/40 border border-[#2C5E3B] text-stone-900 dark:text-white rounded-xl px-3 py-1.5 text-right text-xs outline-none font-black font-mono"
+                                                    value={editValues.price}
+                                                    onChange={e => setEditValues({ ...editValues, price: parseFloat(e.target.value) || 0 })}
+                                                />
+                                            </div>
+                                        ) : (
+                                            <div>
+                                                <div className="text-stone-700 dark:text-stone-300 font-bold">
+                                                    {formatCompactNumber(item.unitCost, { currency: currencySymbol })}
+                                                </div>
+                                                {pkg.hasMultiplier && (
+                                                    <div className="text-[10px] text-stone-400 font-mono">
+                                                        ~{formatCompactNumber(pkg.costPerSellableUnit, { currency: currencySymbol })}/{pkg.sellUnitLabel}
+                                                    </div>
+                                                )}
+                                            </div>
+                                        )}
+                                    </td>
+                                    <td className="p-4 text-right font-mono">
+                                        <div className="text-[#2C5E3B] dark:text-[#A9CBA2] font-black tabular-nums">
+                                            {formatCompactNumber(editingIndex === i && editValues ? editValues.qty * editValues.price : item.totalCost, { currency: currencySymbol })}
                                         </div>
-                                    </div>
-                                </td>
-                                <td className="p-4 text-right font-mono">
-                                    {editingIndex === i && editValues ? (
-                                        <div className="relative group/edit">
-                                            <input
-                                                type="number"
-                                                aria-label="Edit Quantity"
-                                                className="w-20 bg-white dark:bg-black/40 border border-[#2C5E3B] text-stone-900 dark:text-white rounded-xl px-3 py-1.5 text-right text-xs outline-none font-black font-mono"
-                                                autoFocus
-                                                value={editValues.qty}
-                                                onChange={e => setEditValues({ ...editValues, qty: parseInt(e.target.value) || 0 })}
-                                            />
-                                        </div>
-                                    ) : (
-                                        <span className="text-[#1E3F27] dark:text-white font-black bg-[#FAF8F5] dark:bg-white/5 px-2.5 py-1 rounded-lg border border-[#E2DCCE] dark:border-white/5">
-                                            {item.quantity}
-                                        </span>
-                                    )}
-                                </td>
-                                <td className="p-4 text-right font-mono">
-                                    {editingIndex === i && editValues ? (
-                                        <div className="relative group/edit">
-                                            <input
-                                                type="number"
-                                                aria-label="Edit Price"
-                                                className="w-24 bg-white dark:bg-black/40 border border-[#2C5E3B] text-stone-900 dark:text-white rounded-xl px-3 py-1.5 text-right text-xs outline-none font-black font-mono"
-                                                value={editValues.price}
-                                                onChange={e => setEditValues({ ...editValues, price: parseFloat(e.target.value) || 0 })}
-                                            />
-                                        </div>
-                                    ) : (
-                                        <span className="text-stone-600 dark:text-stone-400 font-bold">
-                                            {formatCompactNumber(item.unitCost, { currency: CURRENCY_SYMBOL })}
-                                        </span>
-                                    )}
-                                </td>
-                                <td className="p-4 text-right font-mono">
-                                    <div className="text-[#2C5E3B] dark:text-[#A9CBA2] font-black tabular-nums">
-                                        {formatCompactNumber(editingIndex === i && editValues ? editValues.qty * editValues.price : item.totalCost, { currency: CURRENCY_SYMBOL })}
-                                    </div>
-                                </td>
+                                    </td>
                                 <td className="p-4 text-right pr-6">
                                     {editingIndex === i ? (
                                         <div className="flex justify-end gap-2">
@@ -156,8 +187,9 @@ export const POItemsTable: React.FC<POItemsTableProps> = ({
                                     )}
                                 </td>
                             </tr>
-                        ))}
-                        {items.length === 0 && (
+                        );
+                    })}
+                    {items.length === 0 && (
                             <tr>
                                 <td colSpan={5} className="p-12 text-center">
                                     <div className="flex flex-col items-center justify-center">

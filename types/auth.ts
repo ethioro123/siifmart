@@ -1,6 +1,6 @@
 export type UserRole =
   // Level 1 - Executive
-  | 'super_admin'
+  | 'super_admin' | 'CEO' | 'ceo'
   // Level 2 - Regional/Directors
   | 'regional_manager' | 'operations_manager' | 'finance_manager'
   | 'hr_manager' | 'procurement_manager' | 'supply_chain_manager'

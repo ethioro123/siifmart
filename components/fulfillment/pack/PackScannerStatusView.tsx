@@ -2,6 +2,7 @@ import React from 'react';
 import { CheckCircle, AlertTriangle, ScanLine, Package } from 'lucide-react';
 import { Product } from '../../../types';
 import { useLanguage } from '../../../contexts/LanguageContext';
+import { formatProductSize, formatPackagingDescription } from '../../../utils/units';
 
 interface PackScannerStatusViewProps {
     step: 'SCAN' | 'CONFIRM_QTY';
@@ -136,7 +137,7 @@ export const PackScannerStatusView: React.FC<PackScannerStatusViewProps> = ({
                             <div className="bg-stone-50 dark:bg-black/20 p-2 rounded-lg border border-stone-200/60 dark:border-white/5">
                                 <span className="text-[8px] text-gray-400 font-extrabold uppercase tracking-widest block leading-none mb-1">Unit / Size</span>
                                 <span className="text-gray-900 dark:text-white font-bold truncate block">
-                                    {matchedProduct?.size ? `${matchedProduct.size}${matchedProduct.unit ? matchedProduct.unit.toLowerCase() : ''}` : matchedItem.unit || 'Unit'}
+                                    {formatProductSize(matchedProduct) || matchedItem.unit || 'Unit'}
                                 </span>
                             </div>
                             <div className="bg-stone-50 dark:bg-black/20 p-2 rounded-lg border border-stone-200/60 dark:border-white/5">
@@ -154,6 +155,11 @@ export const PackScannerStatusView: React.FC<PackScannerStatusViewProps> = ({
                                 <span className="text-2xl font-mono font-black text-gray-900 dark:text-white leading-none">
                                     {matchedItem.expectedQty || 1}
                                 </span>
+                                {formatPackagingDescription(matchedProduct, matchedItem.expectedQty || 1) && (
+                                    <span className="text-[9px] font-mono font-bold text-gray-500 dark:text-gray-400 block mt-1">
+                                        ({formatPackagingDescription(matchedProduct, matchedItem.expectedQty || 1)})
+                                    </span>
+                                )}
                             </div>
                             <div className="text-gray-400 text-lg font-bold">&rarr;</div>
                             <div>
@@ -161,6 +167,11 @@ export const PackScannerStatusView: React.FC<PackScannerStatusViewProps> = ({
                                 <span className="text-2xl font-mono font-black text-[#2C5E3B] dark:text-[#A9CBA2] leading-none">
                                     {matchedItem.pickedQty || 0}
                                 </span>
+                                {formatPackagingDescription(matchedProduct, matchedItem.pickedQty || 0) && (
+                                    <span className="text-[9px] font-mono font-bold text-[#2C5E3B] dark:text-[#A9CBA2] block mt-1">
+                                        ({formatPackagingDescription(matchedProduct, matchedItem.pickedQty || 0)})
+                                    </span>
+                                )}
                             </div>
                         </div>
 

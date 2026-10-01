@@ -3,7 +3,6 @@ import { Package, Loader2, Calculator, TrendingDown, Percent, CheckCircle2, Arro
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Line } from 'recharts';
 import { useMerchandising } from './MerchandisingContext';
 import { formatCompactNumber } from '../../utils/formatting';
-import { CURRENCY_SYMBOL } from '../../constants';
 
 export const MarkdownTab: React.FC = () => {
    const {
@@ -13,7 +12,8 @@ export const MarkdownTab: React.FC = () => {
       isMarkdownSimulating,
       calculateMarkdown,
       addNotification,
-      updateProduct
+      updateProduct,
+      currencySymbol
    } = useMerchandising();
 
    const [targetExitDate, setTargetExitDate] = useState('');
@@ -71,7 +71,7 @@ export const MarkdownTab: React.FC = () => {
             isOnSale: true,
             salePrice: stage2Price
          });
-         addNotification('success', `Activated 10% clearance promotion (${CURRENCY_SYMBOL} ${stage2Price}) for "${selectedMarkdownProduct.name}".`);
+         addNotification('success', `Activated 10% clearance promotion (${currencySymbol} ${stage2Price}) for "${selectedMarkdownProduct.name}".`);
       } catch (err: any) {
          addNotification('alert', `Failed to apply markdown: ${err.message || 'Unknown error'}`);
       }
@@ -150,11 +150,11 @@ export const MarkdownTab: React.FC = () => {
                         </div>
                         <div className="flex justify-between text-xs">
                            <span className="text-stone-500 dark:text-stone-400">Current Price</span>
-                           <span className="text-[#1E3F27] dark:text-white font-mono font-bold">{formatCompactNumber(selectedMarkdownProduct.price, { currency: CURRENCY_SYMBOL })}</span>
+                           <span className="text-[#1E3F27] dark:text-white font-mono font-bold">{formatCompactNumber(selectedMarkdownProduct.price, { currency: currencySymbol })}</span>
                         </div>
                         <div className="flex justify-between text-xs">
                            <span className="text-stone-500 dark:text-stone-400">Break-Even Cost</span>
-                           <span className="text-stone-600 dark:text-stone-300 font-mono">{formatCompactNumber(selectedMarkdownProduct.costPrice || selectedMarkdownProduct.price * 0.7, { currency: CURRENCY_SYMBOL })}</span>
+                           <span className="text-stone-600 dark:text-stone-300 font-mono">{formatCompactNumber(selectedMarkdownProduct.costPrice || selectedMarkdownProduct.price * 0.7, { currency: currencySymbol })}</span>
                         </div>
                      </div>
                   )}
@@ -259,7 +259,7 @@ export const MarkdownTab: React.FC = () => {
                   <div className="p-3 bg-[#FAF8F5] dark:bg-black/30 rounded-2xl border border-[#E2DCCE] dark:border-white/10">
                      <span className="text-[10px] text-stone-500 font-bold uppercase tracking-wider block">Est. Clearance Rev</span>
                      <span className="text-xs font-black font-mono text-[#2C5E3B] dark:text-[#A9CBA2] mt-0.5 block">
-                        {CURRENCY_SYMBOL} {formatCompactNumber(projectedTotalRevenue)}
+                        {currencySymbol} {formatCompactNumber(projectedTotalRevenue)}
                      </span>
                   </div>
                   <div className="p-3 bg-[#FAF8F5] dark:bg-black/30 rounded-2xl border border-[#E2DCCE] dark:border-white/10">

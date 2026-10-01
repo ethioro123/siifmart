@@ -1,4 +1,8 @@
 import { BonusTier, POSRoleDistribution, WarehousePointRule, StorePointRule } from './gamification';
+import type { Country } from '../utils/localization';
+import type { RolePolicy, RolePermissionCategory, ManagedRoleId } from './roles';
+export * from './wms';
+export * from './roles';
 
 export interface Notification {
   id: string;
@@ -51,6 +55,8 @@ export interface Site {
   capacity?: number; // For Warehouses (%)
   terminalCount?: number; // For Stores
   language?: 'en' | 'am' | 'or'; // Site-specific language preference
+  country?: Country; // Operating market (e.g. Ethiopia 'ET', Kenya 'KE', or any registered country)
+  currency?: string; // Optional site currency override (ETB, KES, KSh, USh, etc.)
   latitude?: number; // For map visualization
   longitude?: number; // For map visualization
   bonusEnabled?: boolean; // Whether this site earns POS team bonuses (default: true)
@@ -73,6 +79,7 @@ export interface LogisticsZone {
   id: string;
   name: string;
   description?: string;
+  country?: Country;
   created_at?: string;
   updated_at?: string;
 }
@@ -91,6 +98,11 @@ export interface SystemConfig {
   multiCurrency: boolean;
   requireShiftClosure: boolean;
   taxJurisdictions?: TaxJurisdiction[];
+  country?: Country;
+  countryConfigs?: Record<string, Partial<SystemConfig>>;
+  taxAuthority?: string;
+  complianceStandard?: string;
+  eTimsEnabled?: boolean;
   timezone?: string;
   dateFormat?: 'DD/MM/YYYY' | 'MM/DD/YYYY' | 'YYYY-MM-DD';
   numberFormat?: '1,000.00' | '1.000,00';
@@ -128,10 +140,35 @@ export interface SystemConfig {
   payment_card?: boolean;
   payment_mobile_money?: boolean;
   payment_store_credit?: boolean;
+  // Kenya Mobile Gateways
+  mpesaTillEnabled?: boolean;
+  mpesaTillNumber?: string;
+  mpesaTillName?: string;
+  mpesaStkEnabled?: boolean;
+  mpesaStkShortcode?: string;
+  mpesaPasskey?: string;
+  mpesaConsumerKey?: string;
+  mpesaConsumerSecret?: string;
+  mpesaEnvironment?: 'sandbox' | 'production';
+  mpesaPaybillEnabled?: boolean;
+  mpesaPaybillNumber?: string;
+  mpesaPaybillAccount?: string;
+  airtelMoneyEnabled?: boolean;
+  airtelTillNumber?: string;
+  airtelMerchantName?: string;
+  // Ethiopia Mobile Gateways
+  telebirrEnabled?: boolean;
+  telebirrMerchantId?: string;
+  cbeBirrEnabled?: boolean;
+  cbeBirrMerchantCode?: string;
   fiscalYearStart?: string;
   accountingMethod?: 'accrual' | 'cash';
   taxInclusive?: boolean;
+  taxOnSelling?: boolean;
+  taxOnPurchasing?: boolean;
   defaultVatRate?: number;
+  compoundTax?: boolean;
+  taxExemptions?: boolean;
   withholdingTax?: number;
   maxPettyCash?: number;
   expenseApprovalLimit?: number;
@@ -171,6 +208,10 @@ export interface SystemConfig {
   warehouseBonusEligibility?: Record<string, boolean>;
   posBonusEligibility?: Record<string, boolean>;
   enforceRegionalZoning?: boolean;
+  posDailyRevenueTarget?: number;
+  posDailyTxTarget?: number;
+  rolePolicies?: Record<ManagedRoleId, RolePolicy>;
+  rolePermissions?: RolePermissionCategory;
 }
 
 export interface ExpenseRecord {
@@ -358,123 +399,4 @@ export interface ServerMetrics {
   site_performance: Array<{ name: string; revenue: number; transactions: number }>;
   sales_by_category: Array<{ name: string; value: number }>;
   top_products: Array<{ name: string; sales: number; count: number }>;
-}
-
-export interface JobItem {
-  productId: string;
-  name: string;
-  sku: string;
-  image?: string;
-  expectedQty: number;
-  orderedQty?: number;
-  quantity?: number;
-  pickedQty: number;
-  status: 'Pending' | 'Picked' | 'Short' | 'Skipped' | 'Completed' | 'Resolved' | 'Discrepancy' | 'Discontinued';
-  batchNumber?: string;
-  expiryDate?: string;
-  receivedQty?: number;
-  condition?: 'Good' | 'Damaged' | 'Short';
-  receivedAt?: string;
-  cost?: number;
-  retailPrice?: number;
-  unit?: string;
-  containerId?: string;
-  barcode?: string;
-  startedAt?: string;
-  started_at?: string;
-  location?: string;
-  suggestedLocation?: string;
-  returnedQty?: number;
-  returnedAt?: string;
-  size?: string;
-  brand?: string;
-  packed?: boolean;
-  packedQty?: number;
-  packQuantity?: number;
-  category?: string;
-  customAttributes?: any;
-  description?: string;
-  minStock?: number;
-  maxStock?: number;
-}
-
-export interface WMSJob {
-  id: string;
-  siteId: string;
-  site_id?: string;
-  type: 'PICK' | 'PACK' | 'PUTAWAY' | 'TRANSFER' | 'DISPATCH' | 'REPLENISH' | 'COUNT' | 'WASTE' | 'RETURNS' | 'DRIVER' | 'RECEIVE';
-  priority: 'Critical' | 'High' | 'Normal';
-  status: 'Pending' | 'In-Progress' | 'Completed' | 'Cancelled' | 'Dispatched' | 'Deleted';
-  items: number;
-  items_count?: number;
-  lineItems: JobItem[];
-  line_items?: JobItem[];
-  assignedTo?: string;
-  startedAt?: string;
-  location: string;
-  orderRef: string;
-  notes?: string;
-  sourceSiteId?: string;
-  source_site_id?: string;
-  destSiteId?: string;
-  dest_site_id?: string;
-  jobNumber?: string;
-  poNumber?: string;
-  transferStatus?: 'Draft' | 'Requested' | 'Approved' | 'Picking' | 'Picked' | 'Packed' | 'Shipped' | 'In-Transit' | 'Delivered' | 'Received' | 'Completed' | 'Cancelled' | 'Rejected';
-  requestedBy?: string;
-  approvedBy?: string;
-  shippedAt?: string;
-  shipped_at?: string;
-  deliveredAt?: string;
-  delivered_at?: string;
-  receivedAt?: string;
-  receivedBy?: string;
-  received_by?: string;
-  trackingNumber?: string;
-  tracking_number?: string;
-  hasDiscrepancy?: boolean;
-  discrepancyDetails?: string;
-  createdAt?: string;
-  created_at?: string;
-  updatedAt?: string;
-  updated_at?: string;
-  deliveryMethod?: 'Internal' | 'External';
-  createdBy?: string;
-  created_by?: string;
-  completedBy?: string;
-  completed_by?: string;
-  completedAt?: string;
-  completed_at?: string;
-  externalCarrierName?: string;
-  external_carrier_name?: string;
-  assignedBy?: string;
-  assigned_by?: string;
-}
-
-export type JobAssignmentStatus = 'Assigned' | 'Accepted' | 'In-Progress' | 'Paused' | 'Completed' | 'Cancelled';
-
-export interface JobAssignment {
-  id: string;
-  jobId: string;
-  job_id?: string;
-  employeeId: string;
-  employee_id?: string;
-  employeeName: string;
-  employee_name?: string;
-  assignedAt: string;
-  assigned_at?: string;
-  startedAt?: string;
-  started_at?: string;
-  completedAt?: string;
-  completed_at?: string;
-  status: JobAssignmentStatus;
-  notes?: string;
-  estimatedDuration?: number;
-  estimated_duration?: number;
-  actualDuration?: number;
-  actual_duration?: number;
-  unitsProcessed?: number;
-  units_processed?: number;
-  accuracyRate?: number;
-  accuracy_rate?: number;
 }

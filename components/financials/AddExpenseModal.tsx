@@ -10,7 +10,8 @@ export const AddExpenseModal: React.FC = () => {
         isSubmitting,
         newExpData,
         setNewExpData,
-        handleAddExpense
+        handleAddExpense,
+        currencySymbol
     } = useFinance();
 
     return (
@@ -20,7 +21,7 @@ export const AddExpenseModal: React.FC = () => {
                     <label className="text-xs text-gray-400 uppercase font-bold mb-1 block">Description</label>
                     <input
                         aria-label="Expense Description"
-                        className="w-full bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-white outline-none focus:border-cyber-primary"
+                        className="w-full bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-white outline-none focus:border-[#2C5E3B] dark:focus:border-[#A9CBA2]"
                         value={newExpData.description || ''}
                         onChange={e => setNewExpData({ ...newExpData, description: e.target.value })}
                         placeholder="e.g. Office Supplies"
@@ -28,11 +29,11 @@ export const AddExpenseModal: React.FC = () => {
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                     <div>
-                        <label className="text-xs text-gray-400 uppercase font-bold mb-1 block">Amount</label>
+                        <label className="text-xs text-gray-400 uppercase font-bold mb-1 block">Amount ({currencySymbol})</label>
                         <input
                             aria-label="Expense Amount"
                             type="number"
-                            className="w-full bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-white outline-none focus:border-cyber-primary font-mono"
+                            className="w-full bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-white outline-none focus:border-[#2C5E3B] dark:focus:border-[#A9CBA2] font-mono"
                             value={newExpData.amount || ''}
                             onChange={e => setNewExpData({ ...newExpData, amount: parseFloat(e.target.value) })}
                         />
@@ -42,7 +43,7 @@ export const AddExpenseModal: React.FC = () => {
                         <input
                             aria-label="Expense Date"
                             type="date"
-                            className="w-full bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-white outline-none focus:border-cyber-primary"
+                            className="w-full bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-white outline-none focus:border-[#2C5E3B] dark:focus:border-[#A9CBA2]"
                             value={newExpData.date}
                             onChange={e => setNewExpData({ ...newExpData, date: e.target.value })}
                         />
@@ -53,7 +54,7 @@ export const AddExpenseModal: React.FC = () => {
                         <label className="text-xs text-gray-400 uppercase font-bold mb-1 block">Category</label>
                         <select
                             aria-label="Expense Category"
-                            className="w-full bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-white outline-none"
+                            className="w-full bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-white outline-none focus:border-[#2C5E3B] dark:focus:border-[#A9CBA2]"
                             value={newExpData.category}
                             onChange={e => setNewExpData({ ...newExpData, category: e.target.value as any })}
                         >
@@ -69,7 +70,7 @@ export const AddExpenseModal: React.FC = () => {
                         <label className="text-xs text-gray-400 uppercase font-bold mb-1 block">Status</label>
                         <select
                             aria-label="Expense Status"
-                            className="w-full bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-white outline-none"
+                            className="w-full bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-white outline-none focus:border-[#2C5E3B] dark:focus:border-[#A9CBA2]"
                             value={newExpData.status}
                             onChange={e => setNewExpData({ ...newExpData, status: e.target.value as any })}
                         >
@@ -82,7 +83,7 @@ export const AddExpenseModal: React.FC = () => {
                 <button
                     onClick={handleAddExpense}
                     disabled={isSubmitting}
-                    className="w-full py-3 bg-cyber-primary text-black font-bold rounded-xl mt-2 hover:bg-cyber-accent transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="w-full py-3 woody-btn-primary font-bold rounded-xl mt-2 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                     {isSubmitting ? <Loader2 className="animate-spin" size={20} /> : null} {isSubmitting ? 'Saving...' : 'Save Record'}
                 </button>

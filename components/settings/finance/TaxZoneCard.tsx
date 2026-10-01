@@ -1,14 +1,16 @@
 import React from 'react';
-import { Globe, Trash2, MapPin, Plus, Percent, Layers } from 'lucide-react';
+import { Globe, Trash2, MapPin, Plus, Layers } from 'lucide-react';
+import type { TaxJurisdiction, Site } from '../../../types';
 
 interface TaxZoneCardProps {
-    zone: any;
+    zone: TaxJurisdiction;
     onDelete: () => void;
     onAddRule: () => void;
     onDeleteRule: (zoneId: string, ruleIndex: number) => void;
-    sites: any[];
+    sites: Site[];
     onAssignSite: (siteId: string, zoneId: string | null) => void;
     onUnassignSite: (siteId: string) => void;
+    isAuthorized?: boolean;
 }
 
 export const TaxZoneCard: React.FC<TaxZoneCardProps> = ({
@@ -18,12 +20,13 @@ export const TaxZoneCard: React.FC<TaxZoneCardProps> = ({
     onDeleteRule,
     sites,
     onAssignSite,
-    onUnassignSite
+    onUnassignSite,
+    isAuthorized = true,
 }) => {
-    const assignedSites = sites.filter((s: any) => s.taxJurisdictionId === zone.id);
-    const availableSites = sites.filter((s: any) => !s.taxJurisdictionId);
+    const assignedSites = sites.filter((s) => s.taxJurisdictionId === zone.id);
+    const availableSites = sites.filter((s) => !s.taxJurisdictionId);
 
-    const effectiveRate = zone.rules.reduce((sum: number, r: any) => sum + (r.rate || 0), 0);
+    const effectiveRate = (zone.rules || []).reduce((sum: number, r) => sum + (r.rate || 0), 0);
 
     return (
         <div className="bg-[#FAF8F5] dark:bg-black/30 border border-[#E2DCCE] dark:border-white/10 rounded-3xl p-5 hover:border-[#2C5E3B]/40 transition-all group">
@@ -36,7 +39,7 @@ export const TaxZoneCard: React.FC<TaxZoneCardProps> = ({
                         <h4 className="font-black text-sm text-[#1E3F27] dark:text-white">{zone.name}</h4>
                         <div className="flex items-center gap-2 mt-1">
                             <span className="text-[9px] uppercase font-black tracking-wide text-stone-500 bg-white/60 dark:bg-white/5 px-2 py-0.5 rounded-lg">{zone.type}</span>
-                            {zone.rules.length > 0 && (
+                            {(zone.rules || []).length > 0 && (
                                 <span className="text-[10px] font-mono font-bold text-[#2C5E3B] dark:text-[#A9CBA2] bg-emerald-50 dark:bg-[#2C5E3B]/20 px-2 py-0.5 rounded-lg">
                                     {effectiveRate.toFixed(1)}% Total
                                 </span>
@@ -44,9 +47,16 @@ export const TaxZoneCard: React.FC<TaxZoneCardProps> = ({
                         </div>
                     </div>
                 </div>
-                <button onClick={onDelete} title="Delete Jurisdiction" className="text-stone-400 hover:text-red-600 opacity-0 group-hover:opacity-100 transition-all p-1.5 rounded-lg cursor-pointer">
-                    <Trash2 size={16} />
-                </button>
+                {isAuthorized && (
+                    <button
+                        type="button"
+                        onClick={onDelete}
+                        title="Delete Jurisdiction"
+                        className="text-stone-400 hover:text-red-600 opacity-0 group-hover:opacity-100 transition-all p-1.5 rounded-lg cursor-pointer"
+                    >
+                        <Trash2 size={16} />
+                    </button>
+                )}
             </div>
 
             {/* Assigned Sites */}
@@ -58,16 +68,19 @@ export const TaxZoneCard: React.FC<TaxZoneCardProps> = ({
                     {assignedSites.length === 0 && (
                         <span className="text-[10px] text-amber-700 dark:text-amber-400 italic">No locations linked</span>
                     )}
-                    {assignedSites.map((s: any) => (
+                    {assignedSites.map((s) => (
                         <span key={s.id} className="text-[10px] font-bold bg-white dark:bg-white/5 border border-[#E2DCCE] dark:border-white/10 px-2 py-1 rounded-xl text-[#1E3F27] dark:text-gray-300 flex items-center gap-1.5">
                             {s.name}
-                            <button
-                                onClick={() => onUnassignSite(s.id)}
-                                className="text-stone-400 hover:text-red-600 font-black cursor-pointer"
-                                title="Unassign"
-                            >
-                                ×
-                            </button>
+                            {isAuthorized && (
+                                <button
+                                    type="button"
+                                    onClick={() => onUnassignSite(s.id)}
+                                    className="text-stone-400 hover:text-red-600 font-black cursor-pointer ml-1"
+                                    title="Unassign"
+                                >
+                                    ×
+                                </button>
+                            )}
                         </span>
                     ))}
                 </div>
@@ -77,29 +90,35 @@ export const TaxZoneCard: React.FC<TaxZoneCardProps> = ({
             <div className="space-y-2 mb-4">
                 <div className="flex justify-between items-center">
                     <p className="text-[10px] text-stone-500 dark:text-gray-400 uppercase font-black flex items-center gap-1">
-                        <Layers size={10} /> Tax Rules ({zone.rules.length})
+                        <Layers size={10} /> Tax Rules ({(zone.rules || []).length})
                     </p>
-                    <button
-                        onClick={onAddRule}
-                        className="text-[10px] text-[#2C5E3B] dark:text-[#A9CBA2] font-black uppercase tracking-wider flex items-center gap-1 hover:underline cursor-pointer"
-                    >
-                        <Plus size={10} /> Add Rule
-                    </button>
+                    {isAuthorized && (
+                        <button
+                            type="button"
+                            onClick={onAddRule}
+                            className="text-[10px] text-[#2C5E3B] dark:text-[#A9CBA2] font-black uppercase tracking-wider flex items-center gap-1 hover:underline cursor-pointer"
+                        >
+                            <Plus size={10} /> Add Rule
+                        </button>
+                    )}
                 </div>
 
                 <div className="space-y-1.5">
-                    {zone.rules.map((rule: any, idx: number) => (
+                    {(zone.rules || []).map((rule, idx) => (
                         <div key={idx} className="flex justify-between items-center p-2 bg-white/70 dark:bg-black/20 rounded-xl border border-[#E2DCCE]/60 dark:border-white/5 text-xs">
                             <span className="text-stone-700 dark:text-gray-300 font-bold">{rule.name}</span>
                             <div className="flex items-center gap-2">
                                 <span className="font-mono font-bold text-[#2C5E3B] dark:text-[#A9CBA2]">{rule.rate}%</span>
-                                <button
-                                    onClick={() => onDeleteRule(zone.id, idx)}
-                                    className="text-stone-400 hover:text-red-600 cursor-pointer"
-                                    title="Delete rule"
-                                >
-                                    ×
-                                </button>
+                                {isAuthorized && (
+                                    <button
+                                        type="button"
+                                        onClick={() => onDeleteRule(zone.id, idx)}
+                                        className="text-stone-400 hover:text-red-600 cursor-pointer"
+                                        title="Delete rule"
+                                    >
+                                        ×
+                                    </button>
+                                )}
                             </div>
                         </div>
                     ))}
@@ -107,7 +126,7 @@ export const TaxZoneCard: React.FC<TaxZoneCardProps> = ({
             </div>
 
             {/* Quick Assign Dropdown */}
-            {availableSites.length > 0 && (
+            {isAuthorized && availableSites.length > 0 && (
                 <div className="pt-3 border-t border-[#E2DCCE]/60 dark:border-white/10 flex items-center gap-2">
                     <select
                         onChange={(e) => {
@@ -120,7 +139,7 @@ export const TaxZoneCard: React.FC<TaxZoneCardProps> = ({
                         defaultValue=""
                     >
                         <option value="" disabled>+ Assign Location...</option>
-                        {availableSites.map((s: any) => (
+                        {availableSites.map((s) => (
                             <option key={s.id} value={s.id}>{s.name}</option>
                         ))}
                     </select>

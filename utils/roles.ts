@@ -165,3 +165,44 @@ export const canViewCostPrice = (role: string | undefined): boolean => {
     return true;
 };
 
+/**
+ * Determines whether a manager with `userRole` is authorized to hire/onboard `candidateRole`.
+ * Core Rule: HR and above employees cannot employ their level or above; they can only employ roles strictly less than their own role.
+ */
+export const canEmployRole = (
+    userRole: UserRole | string | undefined,
+    candidateRole: UserRole | string
+): boolean => {
+    if (!userRole) return false;
+
+    // CEO / Super Admin can employ anyone below CEO
+    if (userRole === 'super_admin' || userRole === 'CEO') {
+        return candidateRole !== 'super_admin' && candidateRole !== 'CEO';
+    }
+
+    const userHierarchy = getRoleHierarchy(userRole);
+    const candidateHierarchy = getRoleHierarchy(candidateRole);
+
+    // Must be strictly below user in the role hierarchy rank
+    if (candidateHierarchy >= userHierarchy) {
+        return false;
+    }
+
+    const userLevel = SYSTEM_ROLES.find(r => r.id === userRole)?.level || 4;
+    const candidateLevel = SYSTEM_ROLES.find(r => r.id === candidateRole)?.level || 4;
+
+    // Staff (Level 4) have no hiring authority
+    if (userLevel >= 4 || userHierarchy < 55) {
+        return false;
+    }
+
+    // HR and above (Level 2 & above, hierarchy >= 82) cannot employ their level or above
+    // They can ONLY employ roles strictly less than their role (Level 3 Site Managers & Level 4 Staff)
+    const isHrOrAbove = userLevel <= 2 || userHierarchy >= 82;
+    if (isHrOrAbove && candidateLevel <= userLevel) {
+        return false;
+    }
+
+    return true;
+};
+

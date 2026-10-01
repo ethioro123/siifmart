@@ -1,5 +1,5 @@
 import React from 'react';
-import { Product, CartItem, Site } from '../../../types';
+import { Product, CartItem, Site, User } from '../../../types';
 import { needsQuantityPrompt, getSellUnit, normalizeQuantity } from '../../../utils/units';
 
 interface UsePOSCartActionsProps {
@@ -18,6 +18,7 @@ interface UsePOSCartActionsProps {
     setDiscountCodeInput: React.Dispatch<React.SetStateAction<string>>;
     setDiscountCodeError: React.Dispatch<React.SetStateAction<string>>;
     setIsRoundingEnabled: React.Dispatch<React.SetStateAction<boolean>>;
+    user?: User | null;
 }
 
 export const usePOSCartActions = ({
@@ -35,7 +36,8 @@ export const usePOSCartActions = ({
     setAppliedDiscountCodeDetails,
     setDiscountCodeInput,
     setDiscountCodeError,
-    setIsRoundingEnabled
+    setIsRoundingEnabled,
+    user
 }: UsePOSCartActionsProps) => {
 
     const addToCart = React.useCallback((product: Product) => {
@@ -153,7 +155,7 @@ export const usePOSCartActions = ({
                     await systemLogsService.create({
                         module: 'POS_VOID_AUDIT',
                         action: 'CART_CLEARED_OR_VOIDED',
-                        user_name: 'Cashier',
+                        user_name: user?.name || 'Cashier',
                         details: `Cart containing ${cart.length} item types (${itemsList}) worth ETB ${cartTotal.toLocaleString()} was cleared/voided.`
                     });
                 } catch {

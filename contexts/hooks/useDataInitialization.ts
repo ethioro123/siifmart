@@ -2,7 +2,11 @@ import React, { useEffect, useCallback } from 'react';
 import { sitesService, systemConfigService, productsService, salesService, purchaseOrdersService, employeesService, suppliersService } from '../../services/supabase.service';
 import { setGlobalTimezone } from '../../utils/formatting';
 import { DEFAULT_CONFIG } from '../DataContextDefaults';
+import { setCurrencySymbol } from '../../constants/categories';
 import type { User, Site, SystemConfig, Product, SaleRecord, PurchaseOrder, Employee, Supplier } from '../../types';
+import type { Country } from '../../utils/localization';
+import { getCountryProfile } from '../../utils/localization';
+import { findCountryAdminSite, isAdminSite, getCountryAdminDefaults } from '../../utils/countryAdmin';
 import { logger } from '../../utils/logger';
 
 interface UseDataInitializationProps {
@@ -55,12 +59,10 @@ export function useDataInitialization({
 
     if (user && sites.length > 0 && !activeSiteId) {
       if (canSwitchSites) {
-        // CEO / super_admin: default to the Administration / Central Operations site (SITE-0001)
-        const adminSite = sites.find(s =>
-          s.code === 'SITE-0001' ||
-          s.name === 'Central Operations' ||
-          ['Administrative', 'Administration', 'HQ', 'Headquarters', 'Head Office'].includes(s.type || '')
-        );
+        // CEO / super_admin: default to the Administration / Central Operations site for the active country
+        const activeCountry = (settings?.country || 'ET') as Country;
+        const countrySites = sites.filter(s => (s.country || 'ET') === activeCountry);
+        const adminSite = findCountryAdminSite(countrySites, activeCountry) || countrySites[0];
         if (adminSite) {
           setActiveSiteId(adminSite.id);
         }
@@ -74,15 +76,15 @@ export function useDataInitialization({
     }
 
     if (user?.siteId && sites.length > 0) {
-      const userSite = sites.find(s => s.id === user.siteId);
+      const userSite = sites.find(s => s.id === user.siteId || (s as any).code === user.siteId);
 
       if (!userSite) {
         logger.error('useDataInitialization', `❌ User's siteId "${user.siteId}" not found in sites list!`, new Error(String(`❌ User's siteId "${user.siteId}" not found in sites list!`)));
         return;
       }
 
-      if ((!canSwitchSites) && (!activeSiteId || activeSiteId !== user.siteId)) {
-        setActiveSiteId(user.siteId);
+      if ((!canSwitchSites) && (!activeSiteId || (activeSiteId !== userSite.id && activeSiteId !== userSite.code))) {
+        setActiveSiteId(userSite.id);
       }
       userSiteSyncRef.current = true;
     }
@@ -91,6 +93,51 @@ export function useDataInitialization({
   const loadSites = useCallback(async () => {
     try {
       const loadedSites = await sitesService.getAll();
+
+      // Ensure active country has its Administration HQ provisioned
+      const activeCountry = (settings?.country || 'ET') as Country;
+      const hasActiveAdmin = loadedSites.some(s => (s.country || 'ET').toUpperCase() === activeCountry.toUpperCase() && isAdminSite(s));
+      if (!hasActiveAdmin) {
+        try {
+          const autoAdmin = await sitesService.ensureCountryAdministrationSite(activeCountry);
+          if (autoAdmin) {
+            loadedSites.unshift(autoAdmin);
+          } else {
+            const defaults = getCountryAdminDefaults(activeCountry);
+            const fallbackAdmin: Site = {
+              id: `${activeCountry}-ADMIN`,
+              code: defaults.code,
+              name: defaults.name,
+              type: defaults.type as any,
+              address: defaults.address,
+              status: defaults.status as any,
+              manager: defaults.manager,
+              country: defaults.country,
+              currency: defaults.currency,
+              region: defaults.region,
+              isFulfillmentNode: false
+            };
+            loadedSites.unshift(fallbackAdmin);
+          }
+        } catch {
+          const defaults = getCountryAdminDefaults(activeCountry);
+          const fallbackAdmin: Site = {
+            id: `${activeCountry}-ADMIN`,
+            code: defaults.code,
+            name: defaults.name,
+            type: defaults.type as any,
+            address: defaults.address,
+            status: defaults.status as any,
+            manager: defaults.manager,
+            country: defaults.country,
+            currency: defaults.currency,
+            region: defaults.region,
+            isFulfillmentNode: false
+          };
+          loadedSites.unshift(fallbackAdmin);
+        }
+      }
+
       setSites(loadedSites);
 
       try {
@@ -128,12 +175,23 @@ export function useDataInitialization({
     try {
       const loadedSettings = await systemConfigService.getSettings();
       setSettings(loadedSettings);
+      if (loadedSettings.country === 'KE' || loadedSettings.currency === 'KES' || loadedSettings.currency === 'KSh') {
+        setCurrencySymbol('KSh');
+      } else if (loadedSettings.currency) {
+        setCurrencySymbol(loadedSettings.currency);
+      } else {
+        const prof = getCountryProfile(loadedSettings.country);
+        setCurrencySymbol(prof.currencySymbol);
+      }
     } catch (error: any) {
       logger.error('useDataInitialization', '❌ Failed to load system settings:', error?.message || error);
       try {
         const saved = localStorage.getItem('siifmart_system_config');
         if (saved) {
-          setSettings({ ...DEFAULT_CONFIG, ...JSON.parse(saved) });
+          const parsed = JSON.parse(saved);
+          setSettings({ ...DEFAULT_CONFIG, ...parsed });
+          const prof = getCountryProfile(parsed.country || parsed.currency);
+          setCurrencySymbol(prof.currencySymbol);
         }
       } catch (e) {}
     }

@@ -202,7 +202,7 @@ export const PickList: React.FC<PickListProps> = ({
                                             {['super_admin', 'warehouse_manager'].includes(user?.role as string) && (
                                                 <button
                                                     onClick={(e) => handleDelete(e, job.id)}
-                                                    className="w-8 h-6 ml-2 rounded border bg-white/5 border-white/10 text-red-500 hover:text-white hover:bg-red-500 hover:border-red-500 transition-colors flex items-center justify-center shrink-0"
+                                                    className="w-9 h-9 ml-1 rounded-lg border bg-white/5 border-white/10 text-red-500 hover:text-white hover:bg-red-500 hover:border-red-500 transition-colors flex items-center justify-center shrink-0"
                                                     title="Delete Job"
                                                 >
                                                     <Trash2 size={12} />
@@ -270,7 +270,7 @@ export const PickList: React.FC<PickListProps> = ({
                     </>
                 ) : (
                     /* Empty State */
-                    <div className="flex-1 flex flex-col items-center justify-center py-20 space-y-4 glass-panel-pushed rounded-3xl border border-dashed border-[#E2DCCE]/60 dark:border-[#A9CBA2]/10 shadow-sm transition-all m-4">
+                    <div className="flex-1 flex flex-col items-center justify-center py-20 space-y-4 glass-panel-pushed rounded-3xl border border-dashed border-[#E2DCCE]/60 dark:border-[#A9CBA2]/10 shadow-sm m-4">
                         <div className="p-6 md:p-8 bg-slate-50 dark:bg-white/[0.05] rounded-full border border-slate-100 dark:border-white/5 shadow-inner">
                             <Package size={48} className="text-slate-300 dark:text-zinc-750" />
                         </div>

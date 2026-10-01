@@ -29,7 +29,7 @@ export const DriverTools: React.FC<DriverToolsProps> = ({
                 <button
                     key={i}
                     onClick={btn.action}
-                    className="flex-1 flex flex-col items-center justify-center gap-1 py-2 rounded-lg bg-gray-50 dark:bg-white/5 hover:bg-gray-100 dark:hover:bg-white/10 active:scale-95 transition-all border border-gray-200 dark:border-white/5 shadow-sm"
+                    className="flex-1 flex flex-col items-center justify-center gap-1 py-2 rounded-lg bg-gray-50 dark:bg-white/5 hover:bg-gray-100 dark:hover:bg-white/10 active:scale-95 transition-colors border border-gray-200 dark:border-white/5 shadow-sm min-h-[44px]"
                 >
                     <div className={`p-1.5 rounded-md ${btn.bg}`}>
                         <btn.icon size={14} className={btn.color} />

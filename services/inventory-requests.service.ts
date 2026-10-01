@@ -1,20 +1,23 @@
 import { supabase } from '../lib/supabase';
 import type { PendingInventoryChange } from '../types';
+import { logger } from '../utils/logger';
 
 export const inventoryRequestsService = {
-    async getAll(siteId?: string): Promise<PendingInventoryChange[]> {
-        const query = supabase.from('inventory_requests').select('*');
-        if (siteId) query.eq('site_id', siteId);
+    async getAll(siteId?: string, countryCode?: string): Promise<PendingInventoryChange[]> {
+        let query = supabase.from('inventory_requests').select('*');
+        if (siteId) query = query.eq('site_id', siteId);
+        if (countryCode) query = query.eq('country_code', countryCode.toUpperCase());
 
         const { data, error } = await query.order('requested_at', { ascending: false });
         if (error) throw error;
 
-        return data.map((r: any) => ({
+        return (data || []).map((r: any) => ({
             id: r.id,
             productId: r.product_id,
             productName: r.product_name,
             productSku: r.product_sku,
             siteId: r.site_id,
+            countryCode: r.country_code,
             changeType: r.change_type,
             requestedBy: r.requested_by,
             requestedAt: r.requested_at,
@@ -32,9 +35,11 @@ export const inventoryRequestsService = {
     },
 
     async create(request: Omit<PendingInventoryChange, 'id'>) {
+        const country = (request.countryCode || (request as any).country_code || 'ET').toUpperCase();
         const { data, error } = await supabase.from('inventory_requests').insert({
             site_id: request.siteId,
-            product_id: request.productId,
+            country_code: country,
+            product_id: request.productId || null,
             product_name: request.productName,
             product_sku: request.productSku,
             change_type: request.changeType,
@@ -51,7 +56,6 @@ export const inventoryRequestsService = {
     },
 
     async update(id: string, updates: Partial<PendingInventoryChange>) {
-
         const dbUpdates: any = {
             status: updates.status,
             approved_by: updates.approvedBy,
@@ -66,7 +70,6 @@ export const inventoryRequestsService = {
             if (dbUpdates[key] === undefined) delete dbUpdates[key];
         });
 
-
         const { data, error } = await supabase
             .from('inventory_requests')
             .update(dbUpdates)
@@ -75,7 +78,7 @@ export const inventoryRequestsService = {
             .single();
 
         if (error) {
-            console.error('❌ inventoryRequestsService.update FAILED:', error);
+            logger.error('inventoryRequestsService', 'update FAILED:', error);
             throw error;
         }
 
@@ -85,7 +88,7 @@ export const inventoryRequestsService = {
     async delete(id: string) {
         const { error } = await supabase.from('inventory_requests').delete().eq('id', id);
         if (error) {
-            console.error('❌ inventoryRequestsService.delete FAILED:', error);
+            logger.error('inventoryRequestsService', 'delete FAILED:', error);
             throw error;
         }
     }

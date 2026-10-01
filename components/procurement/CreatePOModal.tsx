@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import Modal from '../../components/Modal';
 import { PurchaseOrder, POItem, Supplier } from '../../types';
-import { CURRENCY_SYMBOL } from '../../constants';
 import { Loader2 } from 'lucide-react';
 import { formatCompactNumber } from '../../utils/formatting';
+import { getCountryProfile, getEffectiveCountry, type Country } from '../../utils/localization';
 import { useData } from '../../contexts/DataContext';
 import { useStore } from '../../contexts/CentralStore';
 import { purchaseOrdersService, productsService, suppliersService } from '../../services/supabase.service';
@@ -33,8 +33,14 @@ export const CreatePOModal: React.FC<CreatePOModalProps> = ({
         allProducts,
         suppliers: contextSuppliers,
         sites,
-        addProduct
+        addProduct,
+        settings,
+        effectiveCountry
     } = useData();
+
+    const activeCountry: Country = (effectiveCountry || (settings?.country as Country) || 'ET');
+    const countryProfile = getCountryProfile(activeCountry);
+    const currencySymbol = countryProfile.currencySymbol;
 
     // Direct supplier fetch fallback — if DataContext suppliers are empty, fetch directly
     const [localSuppliers, setLocalSuppliers] = useState<Supplier[]>([]);
@@ -49,6 +55,17 @@ export const CreatePOModal: React.FC<CreatePOModalProps> = ({
     }, [isOpen, contextSuppliers.length]);
 
     const allSuppliers = contextSuppliers.length > 0 ? contextSuppliers : localSuppliers;
+
+    const countryWarehouses = useMemo(() => {
+        return sites.filter(s =>
+            (s.country || 'ET') === activeCountry &&
+            (s.type === 'Warehouse' || s.type === 'Distribution Center') &&
+            s.status !== 'Closed'
+        );
+    }, [sites, activeCountry]);
+
+    const isPurchasingTaxEnabled = (settings?.countryConfigs?.[activeCountry]?.taxOnPurchasing ?? settings?.taxOnPurchasing) !== false;
+    const defaultTaxRate = isPurchasingTaxEnabled ? (countryProfile.taxRate ?? (activeCountry === 'KE' ? 16 : 15)) : 0;
 
     // Form State
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -69,7 +86,7 @@ export const CreatePOModal: React.FC<CreatePOModalProps> = ({
     const [incoterms, setIncoterms] = useState('');
     const [shippingCost, setShippingCost] = useState(0);
     const [discountRate, setDiscountRate] = useState(0);
-    const [taxRate, setTaxRate] = useState(0);
+    const [taxRate, setTaxRate] = useState<number>(defaultTaxRate);
     const [poRequestedBy, setPoRequestedBy] = useState('');
 
     // Items
@@ -81,7 +98,6 @@ export const CreatePOModal: React.FC<CreatePOModalProps> = ({
     const poTax = poSubtotal * (taxRate / 100);
     const poDiscount = poSubtotal * (discountRate / 100);
     const poTotal = poSubtotal + poTax + shippingCost - poDiscount;
-
 
     // Initialize
     useEffect(() => {
@@ -101,36 +117,43 @@ export const CreatePOModal: React.FC<CreatePOModalProps> = ({
 
                 setNewPOItems(editingPO.lineItems || []);
                 setPoNotes(editingPO.notes || '');
-                setDestinationSiteIds([editingPO.siteId]); // Editing usually single site
+                // Enforce destination must be a Warehouse or Distribution Center
+                const validWh = countryWarehouses.find(s => s.id === editingPO.siteId);
+                setDestinationSiteIds(validWh ? [editingPO.siteId] : (countryWarehouses[0] ? [countryWarehouses[0].id] : []));
                 setExpectedDate(editingPO.expectedDelivery || '');
                 setPoPriority(editingPO.priority as any || 'Normal');
                 setPaymentTerms(editingPO.paymentTerms || '');
                 setShippingCost(editingPO.shippingCost || 0);
 
-                // We don't have tax/discount fields in the PO object currently, assuming 0 or add backend support later
-                setDiscountRate(0);
-                setTaxRate(0);
+                const poItemsSubtotal = (editingPO.lineItems || []).reduce((sum, item) => sum + (item.totalCost || item.quantity * item.unitCost), 0);
+                if (editingPO.taxAmount !== undefined && poItemsSubtotal > 0) {
+                    setTaxRate(Math.round((editingPO.taxAmount / poItemsSubtotal) * 100));
+                } else {
+                    setTaxRate(defaultTaxRate);
+                }
+                if (editingPO.discount !== undefined && poItemsSubtotal > 0) {
+                    setDiscountRate(Math.round((editingPO.discount / poItemsSubtotal) * 100));
+                } else {
+                    setDiscountRate(0);
+                }
 
             } else {
-                // Defaults for new PO
-                const warehouses = sites.filter(s => s.type === 'Warehouse' || s.type === 'Distribution Center');
-
-                // [FIX] Default to User's Current Site if applicable
                 let defaultSiteId = '';
-                if (user?.siteId && warehouses.find(w => w.id === user.siteId)) {
+                if (user?.siteId && countryWarehouses.find(w => w.id === user.siteId)) {
                     defaultSiteId = user.siteId;
                 } else {
-                    defaultSiteId = warehouses.length > 0 ? warehouses[0].id : '';
+                    defaultSiteId = countryWarehouses.length > 0 ? countryWarehouses[0].id : '';
                 }
 
                 setDestinationSiteIds(defaultSiteId ? [defaultSiteId] : []);
+                setTaxRate(defaultTaxRate);
+                setDiscountRate(0);
             }
         } else {
             // Reset when closed
             resetPOForm();
         }
-    }, [isOpen, editingPO, user, sites]);
-
+    }, [isOpen, editingPO, user, countryWarehouses, activeCountry, defaultTaxRate]);
 
     const resetPOForm = () => {
         setNewPOSupplier('');
@@ -140,7 +163,7 @@ export const CreatePOModal: React.FC<CreatePOModalProps> = ({
         setShippingCost(0);
         setPoNotes('');
         setDiscountRate(0);
-        setTaxRate(0);
+        setTaxRate(defaultTaxRate);
         setPaymentTerms('');
         setIncoterms('');
         setDestinationSiteIds([]);
@@ -193,7 +216,14 @@ export const CreatePOModal: React.FC<CreatePOModalProps> = ({
             return;
         }
         if (destinationSiteIds.length === 0) {
-            showToast("Select a destination site.", 'warning');
+            showToast("Select a receiving Warehouse or Distribution Center.", 'warning');
+            return;
+        }
+        const invalidSites = destinationSiteIds
+            .map(id => sites.find(s => s.id === id))
+            .filter(s => s && s.type !== 'Warehouse' && s.type !== 'Distribution Center');
+        if (invalidSites.length > 0) {
+            showToast("Procurement orders can only be sent to a Warehouse or Distribution Center.", 'error');
             return;
         }
         if (!isManualVendor && !newPOSupplier) {
@@ -288,6 +318,9 @@ export const CreatePOModal: React.FC<CreatePOModalProps> = ({
                 const siteTotalAmount = siteSubtotal + shippingCost - (siteSubtotal * discountRate / 100) + (siteSubtotal * taxRate / 100); // Updated total with new tax
 
                 const isEditMode = Boolean(editingPO?.id);
+                const destSite = sites.find(s => s.id === siteId);
+                const poCurrency = destSite?.currency || (destSite?.country === 'KE' ? 'KSh' : currencySymbol);
+
                 const newPO: PurchaseOrder = {
                     id: (isEditMode && editingPO?.id) ? editingPO.id : crypto.randomUUID(),
                     siteId: siteId,
@@ -301,11 +334,15 @@ export const CreatePOModal: React.FC<CreatePOModalProps> = ({
                     lineItems: siteItems,
                     shippingCost: shippingCost,
                     taxAmount: siteSubtotal * (taxRate / 100),
+                    discount: siteSubtotal * (discountRate / 100),
                     notes: poNotes,
                     paymentTerms: paymentTerms,
                     priority: poPriority,
                     createdBy: user?.name,
                     requestedBy: poRequestedBy,
+                    currency: poCurrency,
+                    countryCode: destSite?.country || getEffectiveCountry({ country: destSite?.country, currency: poCurrency }),
+                    country_code: destSite?.country || getEffectiveCountry({ country: destSite?.country, currency: poCurrency }),
                 };
 
                 if (isEditMode) {
@@ -339,7 +376,7 @@ export const CreatePOModal: React.FC<CreatePOModalProps> = ({
                 <div className="flex flex-col">
                     <span className="text-[10px] text-stone-500 dark:text-stone-400 uppercase font-bold tracking-wider leading-none">Total Value</span>
                     <span className="text-lg font-mono text-[#2C5E3B] dark:text-[#A9CBA2] tracking-tight font-black">
-                        {CURRENCY_SYMBOL} {formatCompactNumber(poTotal)}
+                        {currencySymbol} {formatCompactNumber(poTotal)}
                     </span>
                 </div>
             </div>
@@ -388,7 +425,7 @@ export const CreatePOModal: React.FC<CreatePOModalProps> = ({
                     setDestinationSiteIds={setDestinationSiteIds}
                     isSiteDropdownOpen={isSiteDropdownOpen}
                     setIsSiteDropdownOpen={setIsSiteDropdownOpen}
-                    sites={sites}
+                    sites={countryWarehouses}
                     quantityDistribution={quantityDistribution}
                     setQuantityDistribution={setQuantityDistribution}
                     expectedDate={expectedDate}
@@ -402,6 +439,8 @@ export const CreatePOModal: React.FC<CreatePOModalProps> = ({
                 {/* 2. Add Item Form */}
                 <POItemForm
                     products={allProducts}
+                    country={activeCountry}
+                    currencySymbol={currencySymbol}
                     onAdd={handleAddItem}
                     onUpdate={handleUpdateItem}
                     onCancelEdit={() => setFullEditingIndex(null)}
@@ -411,6 +450,7 @@ export const CreatePOModal: React.FC<CreatePOModalProps> = ({
                 {/* 3. Items Table */}
                 <POItemsTable
                     items={newPOItems}
+                    currencySymbol={currencySymbol}
                     onUpdateItem={handleInlineUpdate}
                     onRemoveItem={handleRemoveItem}
                     onFullEdit={handleFullEdit}
@@ -436,6 +476,7 @@ export const CreatePOModal: React.FC<CreatePOModalProps> = ({
                     poTax={poTax}
                     poDiscount={poDiscount}
                     poTotal={poTotal}
+                    currencySymbol={currencySymbol}
                 />
 
             </div>

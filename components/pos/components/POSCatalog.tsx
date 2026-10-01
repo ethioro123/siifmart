@@ -118,19 +118,28 @@ export const POSCatalog: React.FC<POSCatalogProps> = ({
                                             const ts = new Date(priceTime).getTime();
                                             if (ts > cutoff && ts > (lastSeenPriceUpdate || 0)) {
                                                 return (
-                                                    <button
-                                                        type="button"
+                                                    <span
+                                                        role="button"
+                                                        tabIndex={0}
                                                         onClick={(e) => {
                                                             e.stopPropagation();
                                                             setIsPriceUpdatesModalOpen(true);
                                                             native.haptic();
+                                                        }}
+                                                        onKeyDown={(e) => {
+                                                            if (e.key === 'Enter' || e.key === ' ') {
+                                                                e.preventDefault();
+                                                                e.stopPropagation();
+                                                                setIsPriceUpdatesModalOpen(true);
+                                                                native.haptic();
+                                                            }
                                                         }}
                                                         className="absolute top-1.5 left-1.5 bg-blue-600 hover:bg-blue-700 text-white px-1.5 py-0.5 rounded-md text-[7px] font-black uppercase tracking-wider shadow-xs flex items-center gap-1 z-10 transition-colors cursor-pointer active:scale-95"
                                                         title="Price updated recently - tap to confirm"
                                                     >
                                                         <span className="w-1 h-1 rounded-full bg-white animate-pulse" />
                                                         Changed
-                                                    </button>
+                                                    </span>
                                                 );
                                             }
                                         }
@@ -164,19 +173,28 @@ export const POSCatalog: React.FC<POSCatalogProps> = ({
                                                     const ts = new Date(priceTime).getTime();
                                                     if (ts > cutoff && ts > (lastSeenPriceUpdate || 0)) {
                                                         return (
-                                                            <button
-                                                                type="button"
+                                                            <span
+                                                                role="button"
+                                                                tabIndex={0}
                                                                 onClick={(e) => {
                                                                     e.stopPropagation();
                                                                     setIsPriceUpdatesModalOpen(true);
                                                                     native.haptic();
+                                                                }}
+                                                                onKeyDown={(e) => {
+                                                                    if (e.key === 'Enter' || e.key === ' ') {
+                                                                        e.preventDefault();
+                                                                        e.stopPropagation();
+                                                                        setIsPriceUpdatesModalOpen(true);
+                                                                        native.haptic();
+                                                                    }
                                                                 }}
                                                                 className="inline-flex items-center gap-0.5 text-[7px] font-black text-blue-600 dark:text-blue-400 hover:underline uppercase mb-0.5 tracking-wider cursor-pointer"
                                                                 title="Price updated recently - tap to confirm"
                                                             >
                                                                 <span className="w-1 h-1 rounded-full bg-blue-500 animate-pulse" />
                                                                 Updated
-                                                            </button>
+                                                            </span>
                                                         );
                                                     }
                                                 }

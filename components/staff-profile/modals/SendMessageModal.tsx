@@ -28,12 +28,12 @@ export default function SendMessageModal({
                 <textarea
                     value={messageInput}
                     onChange={(e) => setMessageInput(e.target.value)}
-                    className="w-full bg-gray-50 dark:bg-black/50 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-4 text-gray-900 dark:text-white mb-6 focus:border-cyber-primary transition-all min-h-[150px] outline-none placeholder:text-gray-400"
+                    className="w-full bg-gray-50 dark:bg-black/50 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-4 text-gray-900 dark:text-white mb-6 focus:border-[#2C5E3B] dark:focus:border-emerald-500 transition-all min-h-[150px] outline-none placeholder:text-gray-400"
                     placeholder="Type your communication here..."
                 />
                 <div className="flex justify-end gap-4">
-                    <button onClick={onClose} className="px-6 py-3 text-gray-500 dark:text-gray-400 font-bold hover:text-gray-900 dark:hover:text-white transition-colors uppercase text-xs tracking-widest">Cancel</button>
-                    <button onClick={handleConfirmSendMessage} className="px-8 py-3 bg-cyber-primary hover:bg-cyber-accent text-black font-black rounded-xl uppercase text-xs tracking-[0.2em] shadow-lg">Send Message</button>
+                    <button onClick={onClose} className="px-6 py-3 text-gray-500 dark:text-gray-400 font-bold hover:text-gray-900 dark:hover:text-white transition-colors uppercase text-xs tracking-widest cursor-pointer">Cancel</button>
+                    <button onClick={handleConfirmSendMessage} className="px-8 py-3 bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 text-white font-bold rounded-xl text-xs uppercase tracking-wider shadow-lg cursor-pointer">Send Message</button>
                 </div>
             </div>
         </Modal>

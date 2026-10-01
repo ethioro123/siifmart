@@ -2,7 +2,7 @@ import React from 'react';
 import { Product } from '../../../../types';
 import { isLocationBarcode, decodeLocation } from '../../../../utils/locationEncoder';
 import { normalizeLocation } from '../../../../utils/locationTracking';
-import { getSellUnit } from '../../../../utils/units';
+import { getSellUnit, formatProductSize, formatPackagingDescription } from '../../../../utils/units';
 
 interface PickScannerInstructionPanelProps {
     step: 'LOCATION' | 'ITEM' | 'QUANTITY';
@@ -55,14 +55,11 @@ export const PickScannerInstructionPanel: React.FC<PickScannerInstructionPanelPr
                 <p className="text-[#2C5E3B] dark:text-[#A9CBA2] font-mono text-base sm:text-xl break-all">{currentItem?.sku}</p>
                 <p className="text-gray-550 text-xs sm:text-sm mt-1 sm:mt-2">{t('warehouse.expected')}: <span className="text-gray-900 dark:text-white font-bold">
                     {(() => {
-                        let expected = currentItem?.expectedQty || 1;
-                        const measureQty = getItemMeasureQty(currentItem);
-                        if (measureQty) {
-                            const unitDef = currentProduct?.unit ? currentProduct.unit : '';
-                            const sizeNum = currentProduct?.size ? parseFloat(currentProduct.size as string) : 0;
-                            return <>{expected} x {sizeNum} <span className="text-xs uppercase text-gray-500 dark:text-gray-400">{unitDef}</span></>;
-                        }
-                        return expected;
+                        const expected = currentItem?.expectedQty || 1;
+                        const packDesc = formatPackagingDescription(currentProduct, expected);
+                        const unitDef = getSellUnit(currentProduct?.unit || currentItem?.unit);
+                        const unitLabel = unitDef.category === 'count' && unitDef.code !== 'UNIT' ? unitDef.shortLabel : 'pk';
+                        return <>{expected} {unitLabel} {packDesc ? <span className="text-xs font-mono text-gray-500 dark:text-gray-400">({packDesc})</span> : null}</>;
                     })()}
                 </span></p>
             </div>
@@ -75,15 +72,21 @@ export const PickScannerInstructionPanel: React.FC<PickScannerInstructionPanelPr
             <p className={`text-lg sm:text-2xl font-bold mt-1 sm:mt-2 break-words max-w-sm mx-auto transition-colors ${isItemMatched ? 'text-green-600 dark:text-green-400' : 'text-gray-900 dark:text-white'}`}>
                 {currentItem?.name}
             </p>
-            <p className="text-[#2C5E3B] dark:text-[#A9CBA2] font-mono text-base sm:text-xl mt-0.5 sm:mt-1 break-all">{currentItem?.sku}</p>
-            <span className="font-bold text-gray-900 dark:text-white text-xs sm:text-sm">{(() => {
-                let expected = currentItem?.expectedQty || 1;
+            <div className="flex items-center justify-center gap-2 mt-0.5 sm:mt-1">
+                <p className="text-[#2C5E3B] dark:text-[#A9CBA2] font-mono text-base sm:text-xl break-all">{currentItem?.sku}</p>
+                {formatProductSize(currentProduct || currentItem) && (
+                    <span className="text-xs font-mono font-bold text-emerald-700 bg-emerald-500/10 dark:text-emerald-400 dark:bg-emerald-500/20 px-2 py-0.5 rounded border border-emerald-500/30">
+                        {formatProductSize(currentProduct || currentItem)}
+                    </span>
+                )}
+            </div>
+            <span className="font-bold text-gray-900 dark:text-white text-xs sm:text-sm mt-1 block">{(() => {
+                const expected = currentItem?.expectedQty || 1;
+                const packDesc = formatPackagingDescription(currentProduct, expected);
                 const unitDef = getSellUnit(currentProduct?.unit || currentItem?.unit);
-                const sizeStr = currentProduct?.size || currentItem?.size;
-                const isWeightVol = (unitDef.category === 'weight' || unitDef.category === 'volume') && !!sizeStr;
-                const unitText = isWeightVol ? `packs (${sizeStr}${unitDef.shortLabel})` : unitDef.code !== 'UNIT' ? unitDef.shortLabel : '';
+                const unitLabel = unitDef.category === 'count' && unitDef.code !== 'UNIT' ? unitDef.shortLabel : 'pk';
 
-                return <>{expected} {unitText ? <span className="text-[10px] uppercase text-gray-500 font-bold ml-0.5">{unitText}</span> : null}</>;
+                return <>{expected} <span className="text-[10px] uppercase text-gray-500 font-bold ml-0.5">{unitLabel}</span> {packDesc ? <span className="text-[10px] font-mono text-teal-600 dark:text-teal-400 ml-1">({packDesc})</span> : null}</>;
             })()}</span>
             {!isItemMatched && (currentItem?.expectedQty || 1) > 0 && (
                 <div className="mt-3">

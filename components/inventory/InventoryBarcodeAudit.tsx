@@ -5,6 +5,7 @@ import {
 import { formatDateTime } from '../../utils/formatting';
 import { Site, Employee } from '../../types';
 import { useData } from '../../contexts/DataContext';
+import { isAdminSite } from '../../utils/countryAdmin';
 import { BarcodeAuditDetailsModal } from './components/BarcodeAuditDetailsModal';
 import { BarcodeImageLightbox } from './components/BarcodeImageLightbox';
 
@@ -27,7 +28,8 @@ export const InventoryBarcodeAudit: React.FC<InventoryBarcodeAuditProps> = ({
     user,
     handleDeleteAuditRecord
 }) => {
-    const { allProducts } = useData();
+    const { allProducts, activeSite } = useData();
+    const isCountryAdmin = useMemo(() => isReadOnly || isAdminSite(activeSite), [isReadOnly, activeSite]);
 
     // --- LOCAL STATE ---
     const [barcodeSearch, setBarcodeSearch] = useState('');
@@ -66,12 +68,26 @@ export const InventoryBarcodeAudit: React.FC<InventoryBarcodeAuditProps> = ({
         return site?.name || siteId;
     };
 
-    // --- REAL AUDIT RECORDS ONLY (ENRICHED WITH CATALOG PRODUCT METADATA) ---
+    // --- REAL AUDIT RECORDS ONLY (SCOPED BY COUNTRY & SITE) ---
     const allMappings = useMemo(() => {
+        const allowedSiteIds = new Set(sites.map(s => s.id));
         return (barcodeApprovals || [])
             .filter(b => {
                 const bc = b.barcode || b.new_barcode || b.target_barcode;
-                return bc && String(bc).trim().length > 0;
+                if (!bc || String(bc).trim().length === 0) return false;
+
+                const siteId = b.site_id || b.siteId;
+                // Zero Cross-Country Data Leakage: strictly match country-scoped sites
+                if (siteId && allowedSiteIds.size > 0 && !allowedSiteIds.has(siteId)) {
+                    return false;
+                }
+
+                // Strict Site Scoping: branch staff can only see their assigned site's records
+                if (!isCountryAdmin && activeSite?.id && siteId && siteId !== activeSite.id) {
+                    return false;
+                }
+
+                return true;
             })
             .map(b => {
                 const bc = b.barcode || b.new_barcode || b.target_barcode;

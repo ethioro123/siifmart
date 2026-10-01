@@ -30,10 +30,10 @@ export default function TerminateEmployeeModal({
                         <p className="text-xs text-orange-600 dark:text-orange-200 dark:opacity-80">This will revoke all active access and set status to 'Terminated'.</p>
                     </div>
                 </div>
-                <div className="p-4 bg-gray-50 dark:bg-black/40 border border-gray-200 dark:border-white/5 rounded-xl mb-6">
-                    <p className="text-[10px] text-gray-500 uppercase font-black tracking-widest mb-1">Target Personnel</p>
-                    <p className="text-gray-900 dark:text-white font-bold">{employee.name}</p>
-                    <p className="text-[10px] text-cyber-primary font-mono">{employee.id}</p>
+                <div className="p-4 bg-stone-50 dark:bg-black/40 border border-[#E2DCCE] dark:border-white/5 rounded-xl mb-6">
+                    <p className="text-[10px] text-stone-500 uppercase font-bold tracking-wider mb-1">Target Personnel</p>
+                    <p className="text-stone-900 dark:text-white font-bold">{employee.name}</p>
+                    <p className="text-[10px] text-[#2C5E3B] dark:text-[#A9CBA2] font-mono">{employee.id}</p>
                 </div>
                 <div className="space-y-4 mb-6">
                     <p className="text-[10px] text-gray-500 uppercase font-bold tracking-widest block text-center">Type "TERMINATE" to confirm action</p>

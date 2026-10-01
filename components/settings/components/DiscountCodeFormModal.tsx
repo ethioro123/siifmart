@@ -2,7 +2,6 @@ import React from 'react';
 import { Percent, DollarSign, Store, CheckCircle } from 'lucide-react';
 import { DiscountCode, Site } from '../../../types';
 import Modal from '../../Modal';
-import { CURRENCY_SYMBOL } from '../../../constants';
 
 interface DiscountCodeFormModalProps {
   isOpen: boolean;
@@ -38,6 +37,7 @@ interface DiscountCodeFormModalProps {
   }>>;
   handleSave: () => void;
   activeStore: Site[];
+  currencySymbol?: string;
 }
 
 export const DiscountCodeFormModal: React.FC<DiscountCodeFormModalProps> = ({
@@ -48,6 +48,7 @@ export const DiscountCodeFormModal: React.FC<DiscountCodeFormModalProps> = ({
   setFormData,
   handleSave,
   activeStore,
+  currencySymbol = 'ETB',
 }) => {
   return (
     <Modal
@@ -131,7 +132,7 @@ export const DiscountCodeFormModal: React.FC<DiscountCodeFormModalProps> = ({
                 className="w-full bg-[#FAF8F5] dark:bg-black/30 border border-[#E2DCCE] dark:border-white/10 rounded-2xl px-4 py-2.5 text-[#1E3F27] dark:text-white focus:border-[#2C5E3B] outline-none transition-all pr-10 font-bold"
               />
               <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-stone-400 font-bold text-xs">
-                {formData.type === 'PERCENTAGE' ? '%' : CURRENCY_SYMBOL}
+                {formData.type === 'PERCENTAGE' ? '%' : currencySymbol}
               </span>
             </div>
           </div>
@@ -184,7 +185,7 @@ export const DiscountCodeFormModal: React.FC<DiscountCodeFormModalProps> = ({
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div>
             <label className="block text-xs font-bold text-stone-600 dark:text-gray-400 uppercase mb-1.5">
-              Min Purchase ({CURRENCY_SYMBOL})
+              Min Purchase ({currencySymbol})
             </label>
             <input
               type="number"
@@ -196,7 +197,7 @@ export const DiscountCodeFormModal: React.FC<DiscountCodeFormModalProps> = ({
           </div>
           <div>
             <label className="block text-xs font-bold text-stone-600 dark:text-gray-400 uppercase mb-1.5">
-              Max Cap ({CURRENCY_SYMBOL})
+              Max Cap ({currencySymbol})
             </label>
             <input
               type="number"

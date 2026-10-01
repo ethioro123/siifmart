@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { X, Trash2, Plus, Box, Check, ScanBarcode, ChevronRight, Clock, AlertTriangle, Loader2 } from 'lucide-react';
 import { Product, PurchaseOrder, WMSJob } from '../../../types';
 import Badge from '../../shared/Badge';
-import { motion, AnimatePresence } from 'framer-motion';
 import { useStore } from '../../../contexts/CentralStore';
 import { useScanOnly } from '../../../hooks/useScanOnly';
 import { logger } from '../../../utils/logger';
@@ -152,11 +151,10 @@ export const ReceiveSplitModal: React.FC<ReceiveSplitModalProps> = ({
                 {/* 📊 Progress Dashboard */}
                 <div className="px-4 md:px-8 py-4 md:py-6 bg-white/40 dark:bg-[#1C2620]/20 border-b border-[#E2DCCE]/40 dark:border-[#A9CBA2]/[0.04] flex flex-wrap gap-4 md:gap-8 items-center relative overflow-hidden">
                     {/* Progress Bar Background */}
-                    <div className="absolute bottom-0 left-0 h-1 bg-slate-100 dark:bg-gray-800 w-full">
-                        <motion.div
-                            initial={{ width: 0 }}
-                            animate={{ width: `${progress}%` }}
-                            className={`h-full ${remaining === 0 ? 'bg-[#2C5E3B] dark:bg-[#A9CBA2] shadow-[0_0_15px_rgba(44,94,59,0.35)] dark:shadow-[0_0_15px_rgba(169,203,162,0.35)]' : 'bg-[#2C5E3B]/70 dark:bg-[#A9CBA2]/70 shadow-[0_0_15px_rgba(44,94,59,0.2)] dark:shadow-[0_0_15px_rgba(169,203,162,0.2)]'}`}
+                    <div className="absolute bottom-0 left-0 h-1 bg-slate-100 dark:bg-gray-800 w-full overflow-hidden">
+                        <div
+                            ref={el => el?.style.setProperty('width', `${Math.min(100, Math.max(0, progress))}%`)}
+                            className={`h-full transition-all duration-300 ${remaining === 0 ? 'bg-[#2C5E3B] dark:bg-[#A9CBA2]' : 'bg-[#2C5E3B]/70 dark:bg-[#A9CBA2]/70'}`}
                         />
                     </div>
 
@@ -202,15 +200,11 @@ export const ReceiveSplitModal: React.FC<ReceiveSplitModalProps> = ({
                 <div className="flex flex-1 overflow-hidden relative">
                     {/* 📦 Main Content - List of Splits */}
                     <div className="flex-1 overflow-y-auto p-4 md:p-8 space-y-3 md:space-y-4 custom-scrollbar">
-                        <AnimatePresence>
-                            {splitVariants.map((variant, index) => (
-                                <motion.div
-                                    key={variant.id}
-                                    initial={{ opacity: 0, y: 20 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    exit={{ opacity: 0, scale: 0.95 }}
-                                    className="group relative glass-panel-pushed hover:border-[#2C5E3B]/40 dark:hover:border-[#A9CBA2]/20 hover:bg-[#FAF8F5]/80 dark:hover:bg-[#1C2620]/40 rounded-xl md:rounded-2xl p-4 md:p-6 transition-all duration-300 shadow-sm hover:shadow-md"
-                                >
+                        {splitVariants.map((variant, index) => (
+                            <div
+                                key={variant.id}
+                                className="group relative glass-panel-pushed hover:border-[#2C5E3B]/40 dark:hover:border-[#A9CBA2]/20 hover:bg-[#FAF8F5]/80 dark:hover:bg-[#1C2620]/40 rounded-xl md:rounded-2xl p-4 md:p-6 transition-colors shadow-sm hover:shadow-md animate-in fade-in duration-200"
+                            >
                                     <div className="hidden md:block absolute top-0 left-0 w-1 h-full bg-[#2C5E3B] dark:bg-[#A9CBA2] rounded-l-2xl opacity-10 group-hover:opacity-100 transition-opacity shadow-[2px_0_10px_rgba(44,94,59,0.3)]" />
 
                                     <div className="flex flex-col gap-4 md:gap-8">
@@ -320,9 +314,7 @@ export const ReceiveSplitModal: React.FC<ReceiveSplitModalProps> = ({
                                                     </Badge>
                                                 )}
                                                 {(variant.barcodes || []).map(code => (
-                                                    <motion.span
-                                                        initial={{ scale: 0.8, opacity: 0 }}
-                                                        animate={{ scale: 1, opacity: 1 }}
+                                                    <span
                                                         key={code}
                                                         className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#2C5E3B]/10 dark:bg-[#A9CBA2]/10 border border-[#2C5E3B]/20 dark:border-[#A9CBA2]/20 text-xs text-[#2C5E3B] dark:text-[#A9CBA2] font-mono group/badge hover:bg-[#2C5E3B]/20 dark:hover:bg-[#A9CBA2]/20 transition-colors cursor-default shadow-sm"
                                                     >
@@ -334,7 +326,7 @@ export const ReceiveSplitModal: React.FC<ReceiveSplitModalProps> = ({
                                                         >
                                                             <X size={10} />
                                                         </button>
-                                                    </motion.span>
+                                                    </span>
                                                 ))}
                                             </div>
                                         </div>
@@ -353,9 +345,8 @@ export const ReceiveSplitModal: React.FC<ReceiveSplitModalProps> = ({
                                             </div>
                                         )}
                                     </div>
-                                </motion.div>
+                                </div>
                             ))}
-                        </AnimatePresence>
 
                         <button
                             onClick={() => {

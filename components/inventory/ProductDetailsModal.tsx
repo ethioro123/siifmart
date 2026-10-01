@@ -20,6 +20,7 @@ interface ProductDetailsModalProps {
     product: Product | null;
     isOpen: boolean;
     onClose: () => void;
+    currencySymbol?: string;
 }
 
 const DetailField = ({ label, value, icon: Icon, colorClass, highlight }: { label: string; value: React.ReactNode; icon?: any; colorClass?: string; highlight?: boolean }) => {
@@ -40,10 +41,11 @@ const DetailField = ({ label, value, icon: Icon, colorClass, highlight }: { labe
     );
 };
 
-export const ProductDetailsModal: React.FC<ProductDetailsModalProps> = ({ product, isOpen, onClose }) => {
-    const { movements, employees, refreshData, deleteProduct, allProducts, sites } = useData();
+export const ProductDetailsModal: React.FC<ProductDetailsModalProps> = ({ product, isOpen, onClose, currencySymbol }) => {
+    const { movements, employees, refreshData, deleteProduct, allProducts, sites, activeSite, effectiveCountry, settings } = useData();
     const { user, showToast } = useStore();
     const showCostPrice = canViewCostPrice(user?.role);
+    const activeCurrency = currencySymbol || (activeSite as any)?.currency || (effectiveCountry === 'KE' || settings?.country === 'KE' ? 'KSh' : CURRENCY_SYMBOL);
 
     const [isEditingThresholds, setIsEditingThresholds] = React.useState(false);
     const [minVal, setMinVal] = React.useState<number | ''>('');
@@ -198,7 +200,7 @@ export const ProductDetailsModal: React.FC<ProductDetailsModalProps> = ({ produc
         <Modal isOpen={isOpen} onClose={onClose} title="Product Profile & Inventory Console" size="xl" footer={modalFooter}>
             <div className="flex flex-col gap-6 text-[#1E3F27] dark:text-[#EAE5D9]">
                 {/* Executive Hero Product Profile Header */}
-                <ProductProfileHeader product={product} showCostPrice={showCostPrice} />
+                <ProductProfileHeader product={product} showCostPrice={showCostPrice} currencySymbol={activeCurrency} />
 
                 {/* Multi-Site & Store Stock Locations */}
                 <ProductLocationBreakdown product={product} locationBreakdown={locationBreakdown} />
@@ -241,14 +243,14 @@ export const ProductDetailsModal: React.FC<ProductDetailsModalProps> = ({ produc
                         <h3 className="text-[10px] font-black uppercase tracking-wider">Financial & Pricing Details</h3>
                     </div>
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                        <DetailField label="Retail Price" value={`${CURRENCY_SYMBOL} ${formatPriceValue(product.price)}`} icon={DollarSign} />
-                        <DetailField label="Promo Price" value={salePrice > 0 ? `${CURRENCY_SYMBOL} ${formatPriceValue(salePrice)}` : null} icon={Tag} highlight />
+                        <DetailField label="Retail Price" value={`${activeCurrency} ${formatPriceValue(product.price)}`} icon={DollarSign} />
+                        <DetailField label="Promo Price" value={salePrice > 0 ? `${activeCurrency} ${formatPriceValue(salePrice)}` : null} icon={Tag} highlight />
                         <DetailField label="Discount" value={salePrice > 0 && discountPct > 0 ? `${discountPct.toFixed(1)}%` : null} icon={Percent} highlight />
-                        {compPrice > 0 && <DetailField label="Competitor Price" value={`${CURRENCY_SYMBOL} ${formatPriceValue(compPrice)}`} icon={compDiff > 0 ? TrendingDown : TrendingUp} colorClass={compDiff > 0 ? 'text-red-500' : 'text-green-500'} />}
+                        {compPrice > 0 && <DetailField label="Competitor Price" value={`${activeCurrency} ${formatPriceValue(compPrice)}`} icon={compDiff > 0 ? TrendingDown : TrendingUp} colorClass={compDiff > 0 ? 'text-red-500' : 'text-green-500'} />}
                         {showCostPrice && (
                             <>
-                                <DetailField label="Cost Price (COGS)" value={cost > 0 ? `${CURRENCY_SYMBOL} ${formatPriceValue(cost)}` : null} icon={Lock} colorClass="text-stone-400" />
-                                <DetailField label="Gross Profit" value={grossProfit > 0 ? `${CURRENCY_SYMBOL} ${grossProfit.toFixed(2)}` : null} icon={TrendingUp} />
+                                <DetailField label="Cost Price (COGS)" value={cost > 0 ? `${activeCurrency} ${formatPriceValue(cost)}` : null} icon={Lock} colorClass="text-stone-400" />
+                                <DetailField label="Gross Profit" value={grossProfit > 0 ? `${activeCurrency} ${grossProfit.toFixed(2)}` : null} icon={TrendingUp} />
                                 <DetailField label="Gross Margin" value={marginPct > 0 ? `${marginPct.toFixed(1)}%` : null} icon={Percent} />
                                 <DetailField label="Markup Rate" value={markupPct > 0 ? `${markupPct.toFixed(1)}%` : null} icon={Percent} />
                             </>

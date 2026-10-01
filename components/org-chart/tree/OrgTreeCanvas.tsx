@@ -104,34 +104,47 @@ export const OrgTreeCanvas: React.FC<OrgTreeCanvasProps> = ({
         setIsDragging(false);
     };
 
-    // Zoom on wheel with meta/ctrl key or trackpad pinch
-    const handleWheel = (e: React.WheelEvent) => {
-        e.preventDefault();
-        const zoomFactor = 1.08;
-        if (e.ctrlKey || e.metaKey) {
-            // Zoom at pointer
-            const rect = containerRef.current?.getBoundingClientRect();
-            const pointerX = rect ? e.clientX - rect.left : 400;
-            const pointerY = rect ? e.clientY - rect.top : 300;
+    // Zoom on wheel with meta/ctrl key or trackpad pinch (passive: false to allow e.preventDefault())
+    useEffect(() => {
+        const container = containerRef.current;
+        if (!container) return;
 
-            const newScale = e.deltaY < 0
-                ? Math.min(scale * zoomFactor, 2.5)
-                : Math.max(scale / zoomFactor, 0.25);
+        const onWheel = (e: WheelEvent) => {
+            e.preventDefault();
+            const zoomFactor = 1.08;
+            if (e.ctrlKey || e.metaKey) {
+                // Zoom at pointer
+                const rect = container.getBoundingClientRect();
+                const pointerX = rect ? e.clientX - rect.left : 400;
+                const pointerY = rect ? e.clientY - rect.top : 300;
 
-            const scaleRatio = newScale / scale;
-            const newPanX = pointerX - (pointerX - pan.x) * scaleRatio;
-            const newPanY = pointerY - (pointerY - pan.y) * scaleRatio;
+                setScale(currentScale => {
+                    const newScale = e.deltaY < 0
+                        ? Math.min(currentScale * zoomFactor, 2.5)
+                        : Math.max(currentScale / zoomFactor, 0.25);
 
-            setScale(newScale);
-            setPan({ x: newPanX, y: newPanY });
-        } else {
-            // Normal 2D pan
-            setPan(prev => ({
-                x: prev.x - e.deltaX,
-                y: prev.y - e.deltaY
-            }));
-        }
-    };
+                    const scaleRatio = newScale / currentScale;
+                    setPan(currentPan => ({
+                        x: pointerX - (pointerX - currentPan.x) * scaleRatio,
+                        y: pointerY - (pointerY - currentPan.y) * scaleRatio
+                    }));
+
+                    return newScale;
+                });
+            } else {
+                // Normal 2D pan
+                setPan(prev => ({
+                    x: prev.x - e.deltaX,
+                    y: prev.y - e.deltaY
+                }));
+            }
+        };
+
+        container.addEventListener('wheel', onWheel, { passive: false });
+        return () => {
+            container.removeEventListener('wheel', onWheel);
+        };
+    }, []);
 
     const handleZoomIn = () => setScale(s => Math.min(s * 1.2, 2.5));
     const handleZoomOut = () => setScale(s => Math.max(s / 1.2, 0.25));
@@ -143,7 +156,6 @@ export const OrgTreeCanvas: React.FC<OrgTreeCanvasProps> = ({
             onMouseMove={handleMouseMove}
             onMouseUp={handleMouseUp}
             onMouseLeave={handleMouseUp}
-            onWheel={handleWheel}
             className={`w-full h-[680px] min-h-[600px] relative overflow-hidden select-none cursor-grab active:cursor-grabbing rounded-xl border ${
                 isDark ? 'bg-[#121814] border-[#2C4D35]' : 'bg-[#FAF8F5] border-[#E2DCCE]'
             }`}

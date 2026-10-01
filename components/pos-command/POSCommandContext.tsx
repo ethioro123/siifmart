@@ -9,6 +9,7 @@ import { useLanguage } from '../../contexts/LanguageContext';
 import { formatJobId } from '../../utils/jobIdFormatter';
 import { printHtmlContent } from '../../utils/printHelper';
 import { CURRENCY_SYMBOL } from '../../constants';
+import { generateReprintReceiptHtml } from './utils/receiptTemplate';
 
 // Hooks
 import { usePOSReceiving } from './hooks/usePOSReceiving';
@@ -27,6 +28,7 @@ interface POSCommandContextType {
     cashInDrawer: number;
     personalSales: number;
     txCount: number;
+    shiftTxCount: number;
     returnCount: number;
     totalRevenue: number;
     getShiftSummary: () => any;
@@ -68,7 +70,9 @@ interface POSCommandContextType {
     isPrintHubOpen: boolean;
     setIsPrintHubOpen: React.Dispatch<React.SetStateAction<boolean>>;
 
-    // Shift Closing State
+    // Shift Starting & Closing State
+    isStartShiftModalOpen: boolean;
+    setIsStartShiftModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
     isClosingShift: boolean;
     setIsClosingShift: React.Dispatch<React.SetStateAction<boolean>>;
     closingStep: number;
@@ -94,6 +98,7 @@ interface POSCommandContextType {
     handleCloseReceivingModal: () => void;
     handleLockScreen: () => void;
     handleReprint: () => void;
+    handleStartShift: (openingFloat: number) => Promise<void>;
     handleEndShift: () => void;
     handleSubmitShift: () => Promise<void>;
     handleUpdateDenomination: (den: number, quantity: number) => void;
@@ -107,7 +112,7 @@ export const POSCommandProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     const { user, logout } = useStore();
     const {
         sales, addNotification, activeSite, shifts,
-        allProducts, adjustStock, addProduct, refreshData, closeShift, logSystemEvent
+        allProducts, adjustStock, addProduct, refreshData, startShift, closeShift, logSystemEvent
     } = useData();
     const { jobs, transfers, refreshJobs } = useFulfillmentData();
     const { workerPoints } = useGamification();
@@ -144,7 +149,8 @@ export const POSCommandProvider: React.FC<{ children: React.ReactNode }> = ({ ch
         localStorage.setItem('siifmart_pos_updates_last_seen', String(now));
     };
 
-    // Shift Closing
+    // Shift Starting & Closing
+    const [isStartShiftModalOpen, setIsStartShiftModalOpen] = useState(false);
     const [isClosingShift, setIsClosingShift] = useState(false);
     const [closingStep, setClosingStep] = useState(1);
     const [cashDenominations, setCashDenominations] = useState<Record<string, number>>({
@@ -175,8 +181,9 @@ export const POSCommandProvider: React.FC<{ children: React.ReactNode }> = ({ ch
 
     // --- COMPUTED DATA ---
     // Prioritize current cashier's active shift. If user is central manager/admin without an active shift, view site's shift.
-    const activeShift = shifts.find(s => s.cashierId === user?.id && s.status === 'Open')
-        || (isCentralHQ ? shifts.find(s => s.siteId === activeSite?.id && s.status === 'Open') : undefined);
+    const activeShift = shifts.find(s =>
+        (s.cashierId === user?.id || (user?.code && s.cashierId === user?.code) || (user?.employeeId && s.cashierId === user?.employeeId)) && s.status === 'Open'
+    ) || (isCentralHQ ? shifts.find(s => s.siteId === activeSite?.id && s.status === 'Open') : undefined);
 
     const getShiftSummary = () => {
         const todayStart = new Date();
@@ -240,7 +247,7 @@ export const POSCommandProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     todayStart.setHours(0, 0, 0, 0);
     const shiftStartTime = activeShift ? new Date(activeShift.startTime).getTime() : todayStart.getTime();
 
-    const txCount = sales.filter(s => {
+    const shiftTxCount = sales.filter(s => {
         const saleTime = new Date(s.date).getTime();
         const matchesTime = saleTime >= shiftStartTime;
         const siteId = activeShift?.siteId || activeSite?.id;
@@ -249,15 +256,15 @@ export const POSCommandProvider: React.FC<{ children: React.ReactNode }> = ({ ch
         return matchesTime && matchesSite && matchesCashier && (s.status as string) !== 'Cancelled';
     }).length;
 
-    const returnCount = sales.filter(s => {
-        const saleTime = new Date(s.date).getTime();
-        const matchesTime = saleTime >= shiftStartTime;
-        const siteId = activeShift?.siteId || activeSite?.id;
-        const matchesSite = !siteId || s.siteId === siteId || (s as any).site_id === siteId;
-        return matchesTime && matchesSite && (s.status === 'Refunded' || s.status === 'Partially Refunded');
-    }).length;
+    const txCount = filteredSales.filter(s => (s.status as string) !== 'Cancelled').length;
 
-    const totalRevenue = personalSales;
+    const returnCount = filteredSales.filter(s => s.status === 'Refunded' || s.status === 'Partially Refunded').length;
+
+    const totalRevenue = isCentralHQ
+        ? filteredSales
+            .filter(s => (s.status as string) !== 'Cancelled' && s.status !== 'Refunded')
+            .reduce((sum, s) => sum + (Number(s.total) || 0), 0)
+        : personalSales;
 
     // Gamification & Charts
     const myPoints = workerPoints.find(wp => wp.employeeId === user?.id || wp.employeeName === user?.name);
@@ -311,79 +318,37 @@ export const POSCommandProvider: React.FC<{ children: React.ReactNode }> = ({ ch
 
     // --- OTHER HANDLERS ---
     const handleLockScreen = () => setIsLocked(true);
+
     const handleReprint = () => {
         const siteId = activeShift?.siteId || activeSite?.id || user?.siteId;
-        const siteSales = sales.filter(s => !siteId || s.siteId === siteId || (s as any).site_id === siteId);
+        const siteSales = sales
+            .filter(s => !siteId || s.siteId === siteId || (s as any).site_id === siteId)
+            .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
         const lastSale = siteSales[0];
         if (!lastSale) {
             addNotification('alert', t('posCommand.noSalesFound') || 'No recent sales found to reprint.');
             return;
         }
 
-        const receiptHTML = `
-      <!DOCTYPE html>
-      <html>
-      <head>
-        <title>Receipt - ${lastSale.receiptNumber || lastSale.id}</title>
-        <style>
-          @page { size: 80mm auto; margin: 0; }
-          body { font-family: system-ui, -apple-system, sans-serif; width: 80mm; margin: 0; padding: 20px; color: #000; background: #fff; font-size: 11px; }
-          .text-center { text-align: center; } .text-right { text-align: right; }
-          .flex { display: flex; } .justify-between { justify-content: space-between; }
-          .font-bold { font-weight: 700; } .font-black { font-weight: 900; }
-          .border-b { border-bottom: 1px dashed #999; } .my-2 { margin: 8px 0; } .py-1 { padding: 4px 0; }
-        </style>
-      </head>
-      <body>
-        <div class="text-center">
-          <h2 style="margin: 0; font-size: 16px;">${activeSite?.name || 'SIIFMART'}</h2>
-          <p style="margin: 2px 0; font-size: 10px; color: #555;">REPRINT RECEIPT</p>
-          <p style="margin: 2px 0; font-size: 10px;">${lastSale.receiptNumber || `REC-${lastSale.id.slice(0, 8).toUpperCase()}`}</p>
-          <p style="margin: 2px 0; font-size: 9px; color: #666;">${new Date(lastSale.date).toLocaleString()}</p>
-        </div>
-        <div class="border-b my-2"></div>
-        <div>
-          ${(lastSale.items || []).map((item: any) => `
-            <div class="flex justify-between py-1">
-              <span>${item.quantity}x ${item.name}</span>
-              <span class="font-bold">${CURRENCY_SYMBOL} ${(item.price * item.quantity).toLocaleString()}</span>
-            </div>
-          `).join('')}
-        </div>
-        <div class="border-b my-2"></div>
-        <div class="flex justify-between py-1">
-          <span>Subtotal:</span>
-          <span>${CURRENCY_SYMBOL} ${(lastSale.subtotal || lastSale.total).toLocaleString()}</span>
-        </div>
-        <div class="flex justify-between py-1">
-          <span>Tax:</span>
-          <span>${CURRENCY_SYMBOL} ${(lastSale.tax || 0).toLocaleString()}</span>
-        </div>
-        <div class="flex justify-between py-1 font-black" style="font-size: 13px;">
-          <span>TOTAL:</span>
-          <span>${CURRENCY_SYMBOL} ${lastSale.total.toLocaleString()}</span>
-        </div>
-        <div class="flex justify-between py-1">
-          <span>Payment (${lastSale.method}):</span>
-          <span>${CURRENCY_SYMBOL} ${(lastSale.amountTendered || lastSale.total).toLocaleString()}</span>
-        </div>
-        ${lastSale.change ? `
-          <div class="flex justify-between py-1">
-            <span>Change:</span>
-            <span>${CURRENCY_SYMBOL} ${lastSale.change.toLocaleString()}</span>
-          </div>
-        ` : ''}
-        <div class="border-b my-2"></div>
-        <div class="text-center" style="font-size: 9px; color: #777; margin-top: 10px;">
-          <p>Cashier: ${lastSale.cashierName || user?.name || 'Staff'}</p>
-          <p>Thank you for shopping with SIIFMART!</p>
-        </div>
-      </body>
-      </html>
-        `;
+        const receiptHTML = generateReprintReceiptHtml(
+            lastSale,
+            activeSite?.name || 'SIIFMART',
+            user?.name || 'Staff'
+        );
 
         printHtmlContent(receiptHTML);
         addNotification('success', `Reprinted receipt #${lastSale.receiptNumber || lastSale.id.slice(0, 8)}`);
+    };
+
+    const handleStartShift = async (openingFloat: number) => {
+        if (!user) return;
+        try {
+            await startShift(user.id, openingFloat);
+            addNotification('success', t('pos.shiftStarted') || 'Shift started successfully with drawer float.');
+        } catch (error) {
+            logger.error('POSCommandContext', 'Failed to start shift:', error as Error);
+            addNotification('alert', 'Failed to start shift. Please try again.');
+        }
     };
 
     const handleEndShift = () => {
@@ -450,7 +415,7 @@ export const POSCommandProvider: React.FC<{ children: React.ReactNode }> = ({ ch
 
     const value: POSCommandContextType = {
         dateRange, setDateRange, isWithinRange, filteredSales,
-        activeShift, cashInDrawer, personalSales, txCount, returnCount, totalRevenue,
+        activeShift, cashInDrawer, personalSales, txCount, shiftTxCount, returnCount, totalRevenue,
         getShiftSummary, myPoints, siteWorkerPoints, hourlyData, paymentChartData,
         isLocked, setIsLocked, pin, setPin,
         
@@ -479,10 +444,11 @@ export const POSCommandProvider: React.FC<{ children: React.ReactNode }> = ({ ch
         isStockListOpen, setIsStockListOpen, stockSearch, setStockSearch,
         lastSeenUpdates, markUpdatesAsRead,
         isPrintHubOpen, setIsPrintHubOpen,
+        isStartShiftModalOpen, setIsStartShiftModalOpen,
         isClosingShift, setIsClosingShift, closingStep, setClosingStep,
         cashDenominations, setCashDenominations, discrepancyReason, setDiscrepancyReason, isSubmittingShift,
         txPage, setTxPage, TX_PER_PAGE,
-        handleLockScreen, handleReprint, handleEndShift, handleSubmitShift, handleUpdateDenomination
+        handleLockScreen, handleReprint, handleStartShift, handleEndShift, handleSubmitShift, handleUpdateDenomination
     };
 
     return <POSCommandContext.Provider value={value}>{children}</POSCommandContext.Provider>;

@@ -1,18 +1,26 @@
 import React from 'react';
-import { Loader2, User } from 'lucide-react';
-import { Employee } from '../../types';
+import { Loader2, User, AlertTriangle } from 'lucide-react';
+import { Employee, Site, UserRole } from '../../types';
 import { SYSTEM_ROLES, canViewLocation } from '../../utils/roles';
+import { evaluateGeofence, formatSiteAssignment } from '../../utils/geofence';
 
 interface DirectoryGridProps {
    displayedEmployees: Employee[];
    isLoadingEmployees: boolean;
-   sites: any[];
+   sites: Site[];
    setSelectedEmployee: (emp: Employee) => void;
-   currentUser?: any;
+   currentUser?: { id?: string; role?: UserRole; siteId?: string } | null;
    onlineIds?: Set<string>;
 }
 
-export default function DirectoryGrid({ displayedEmployees, isLoadingEmployees, sites, setSelectedEmployee, currentUser, onlineIds = new Set() }: DirectoryGridProps) {
+export default function DirectoryGrid({
+   displayedEmployees,
+   isLoadingEmployees,
+   sites,
+   setSelectedEmployee,
+   currentUser,
+   onlineIds = new Set()
+}: DirectoryGridProps) {
    if (isLoadingEmployees && displayedEmployees.length === 0) {
       return (
          <div className="col-span-full flex justify-center py-12">
@@ -27,6 +35,9 @@ export default function DirectoryGrid({ displayedEmployees, isLoadingEmployees, 
             const roleConfig = SYSTEM_ROLES.find(r => r.id === employee.role) || SYSTEM_ROLES[8];
             const isOwn = currentUser?.id === employee.id;
             const canSeeLocation = canViewLocation(currentUser?.role, employee.role, isOwn);
+            const siteInfo = formatSiteAssignment(employee.siteId, employee.role, sites);
+            const geofence = employee.lastLoginGps ? evaluateGeofence(employee.lastLoginGps) : null;
+
             return (
                <div
                   key={employee.id}
@@ -36,7 +47,7 @@ export default function DirectoryGrid({ displayedEmployees, isLoadingEmployees, 
                   <div className="flex items-start gap-4">
                      <div className="relative flex-shrink-0 select-none">
                         <img
-                           src={employee.avatar || `https://ui-avatars.com/api/?name=${employee.name}&background=2C5E3B&color=ffffff&bold=true`}
+                           src={employee.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(employee.name)}&background=2C5E3B&color=ffffff&bold=true`}
                            className="w-12 h-12 rounded-full object-cover border border-[#E2DCCE] dark:border-white/10"
                            alt={employee.name}
                         />
@@ -52,20 +63,48 @@ export default function DirectoryGrid({ displayedEmployees, isLoadingEmployees, 
                      </div>
 
                      <div className="flex-1 min-w-0">
-                        <h3 className="text-sm font-bold text-[#1E3F27] dark:text-white truncate">{employee.name}</h3>
+                        <div className="flex items-center justify-between gap-1">
+                           <h3 className="text-sm font-bold text-[#1E3F27] dark:text-white truncate">{employee.name}</h3>
+                           {employee.status === 'Pending Approval' && (
+                              <span className="text-[9px] px-1.5 py-0.5 rounded bg-amber-50 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400 font-bold border border-amber-200 dark:border-amber-500/20 flex-shrink-0">
+                                 Pending
+                              </span>
+                           )}
+                        </div>
                         <p className={`text-xs mt-0.5 font-semibold ${roleConfig.styles.text}`}>{roleConfig.label}</p>
-                        <p className="text-[11px] text-stone-500 dark:text-gray-400 mt-1.5 truncate font-medium">
-                           {sites.find(s => s.id === employee.siteId)?.name || 'Unassigned'}
-                        </p>
-                        {canSeeLocation && employee.lastLoginGps ? (
-                           <p className="text-[10px] text-stone-400 dark:text-stone-500 font-mono mt-0.5 truncate" title={employee.lastLoginGps}>
-                              📍 {employee.lastLoginGps.replace('GPS: ', '')}
+                        
+                        {/* Site Scoping / Unassigned Warning */}
+                        {siteInfo.isWarning ? (
+                           <p className="text-[11px] text-amber-600 dark:text-amber-400 mt-1.5 truncate font-semibold flex items-center gap-1" title="Branch personnel requires store/warehouse assignment">
+                              <AlertTriangle size={11} className="flex-shrink-0" />
+                              <span>{siteInfo.label}</span>
                            </p>
+                        ) : (
+                           <p className="text-[11px] text-stone-500 dark:text-gray-400 mt-1.5 truncate font-medium">
+                              {siteInfo.label}
+                           </p>
+                        )}
+
+                        {/* Location & Geofence Anomaly Detection */}
+                        {canSeeLocation && geofence ? (
+                           geofence.isForeignAnomaly ? (
+                              <div className="flex items-center gap-1 mt-1" title={`Security Alert: ${geofence.anomalyReason || 'Off-Premise anomaly detected'}`}>
+                                 <span className="inline-flex items-center gap-1 text-[9px] px-1.5 py-0.5 rounded bg-rose-50 dark:bg-rose-500/10 text-rose-700 dark:text-rose-400 font-bold border border-rose-200 dark:border-rose-500/20 truncate">
+                                    <AlertTriangle size={10} className="text-rose-500 flex-shrink-0" />
+                                    Foreign / Off-Premise
+                                 </span>
+                              </div>
+                           ) : (
+                              <p className="text-[10px] text-stone-400 dark:text-stone-500 font-mono mt-0.5 truncate" title={employee.lastLoginGps}>
+                                 📍 {geofence.displayLocation}
+                              </p>
+                           )
                         ) : employee.lastLoginGps ? (
                            <p className="text-[10px] text-stone-300 dark:text-stone-600 italic mt-0.5 truncate select-none" title="Location is hidden due to hierarchy permissions">
                               📍 Protected
                            </p>
                         ) : null}
+
                         {employee.lastLoginAt && (
                            (() => {
                               const date = new Date(employee.lastLoginAt);

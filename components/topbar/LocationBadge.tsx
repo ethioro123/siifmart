@@ -1,6 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Building, Store, ChevronDown, Check, MapPin, ExternalLink } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { canSwitchCountry } from '../../utils/permissions';
+import { formatDisplaySiteId } from '../../utils/siteIdGenerator';
 
 interface LocationBadgeProps {
    user: any;
@@ -52,7 +54,7 @@ export function LocationBadge({ user, sites, employees, activeSite, setActiveSit
    const siteType = displaySite?.type;
 
    const isWarehouse = siteType === 'Warehouse' || siteType === 'Distribution Center';
-   const isCeo = user?.role === 'super_admin' || (user?.role as string) === 'CEO';
+   const isCeo = canSwitchCountry(user);
    const canSwitchSites = !!setActiveSite && isCeo && sites.length > 1;
 
    const handleSelectSite = (siteId: string) => {
@@ -90,9 +92,9 @@ export function LocationBadge({ user, sites, employees, activeSite, setActiveSit
                <span className="text-[11px] sm:text-[13px] font-bold text-[#1E3F27] dark:text-[#EAE5D9] truncate leading-tight">
                   {locationName}
                </span>
-               {displaySite?.code && (
+               {(displaySite?.code || displaySite?.id) && (
                   <span className="font-mono text-[9px] text-[#4D6E56] dark:text-[#7A9E83] font-semibold leading-none truncate">
-                     {displaySite.code}
+                     {formatDisplaySiteId(displaySite)}
                   </span>
                )}
             </div>
@@ -149,7 +151,7 @@ export function LocationBadge({ user, sites, employees, activeSite, setActiveSit
                               )}
                               <div className="min-w-0">
                                  <p className="text-xs font-semibold truncate leading-tight">{site.name}</p>
-                                 <p className="text-[9px] font-mono opacity-60 leading-none">{site.code || site.type}</p>
+                                 <p className="text-[9px] font-mono opacity-60 leading-none">{formatDisplaySiteId(site)} • {site.type}</p>
                               </div>
                            </div>
                            {isSelected && <Check size={14} className="text-[#2C5E3B] dark:text-[#A9CBA2] flex-shrink-0" />}

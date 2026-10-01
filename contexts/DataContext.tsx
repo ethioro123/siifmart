@@ -28,31 +28,10 @@ import { useRealtimeUpdates } from './hooks/useRealtimeUpdates';
 import { useDataInitialization } from './hooks/useDataInitialization';
 import { usePromotionsAndPOSState } from './hooks/usePromotionsAndPOSState';
 import { useLoadingProgress } from './hooks/useLoadingProgress';
-
-const isUUID = (id: string) => /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
-
-import { TRANSLATIONS, Language } from '../utils/translations';
+import { useCountryScoping } from './hooks/useCountryScoping';
 import { logger } from '../utils/logger';
 
-const getTranslation = (path: string): string => {
-  let lang: Language = 'en';
-  try {
-    lang = (localStorage.getItem('siifmart_language') as Language) || 'en';
-  } catch (e) {
-    logger.warn('DataContext', 'Failed to read language settings from localStorage in getTranslation');
-  }
-  const keys = path.split('.');
-  let current: any = TRANSLATIONS;
-
-  for (const key of keys) {
-    if (current[key] === undefined) return path;
-    current = current[key];
-  }
-
-  if (typeof current === 'object' && current[lang]) return current[lang];
-  if (typeof current === 'object' && current['en']) return current['en'];
-  return path;
-};
+const isUUID = (id: string) => /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
 
 const DataContext = createContext<DataContextType | undefined>(undefined);
 
@@ -88,9 +67,8 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
 
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [customers, setCustomers] = useState<Customer[]>([]);
-  const [shifts, setShifts] = useState<ShiftRecord[]>(() => {
-    try { const s = localStorage.getItem('siifmart_pos_shifts'); return s ? JSON.parse(s) : []; } catch { return []; }
-  });
+  const [shifts, setShifts] = useState<ShiftRecord[]>([]);
+
 
 
   const {
@@ -103,26 +81,14 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
   } = useNotificationState({ user: user || undefined });
 
   const {
-    discountCodes,
-    setDiscountCodes,
-    addDiscountCode,
-    updateDiscountCode,
-    deleteDiscountCode,
-    validateDiscountCode,
-    useDiscountCode
+    discountCodes, setDiscountCodes, addDiscountCode, updateDiscountCode,
+    deleteDiscountCode, validateDiscountCode, useDiscountCode
   } = useDiscountCodesState({ addNotification });
 
   const {
-    promotions,
-    setPromotions,
-    heldOrders,
-    setHeldOrders,
-    loadHeldOrders,
-    holdOrder,
-    releaseHold,
-    addPromotion,
-    updatePromotion,
-    deletePromotion
+    promotions, setPromotions, heldOrders, setHeldOrders,
+    loadHeldOrders, holdOrder, releaseHold, addPromotion,
+    updatePromotion, deletePromotion
   } = usePromotionsAndPOSState({ addNotification });
 
   useEffect(() => {
@@ -192,6 +158,7 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
     if (queries.tasks.data) setTasks(queries.tasks.data);
     if (queries.expenses.data) setExpenses(queries.expenses.data);
     if (queries.systemLogs.data) setSystemLogs(queries.systemLogs.data);
+    if (queries.shifts.data) setShifts(queries.shifts.data);
 
     // If query hook is managing loading, sync it
     if (!queries.isLoadingCritical && isDataInitialLoading) {
@@ -201,8 +168,9 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
     queries.products.data, queries.employees.data, queries.orders.data, queries.sales.data,
     queries.storePoints.data, queries.tasks.data, queries.expenses.data,
     queries.systemLogs.data, queries.suppliers.data, queries.customers.data,
-    queries.movements.data, queries.isLoadingCritical, activeSiteId, sites
+    queries.movements.data, queries.shifts.data, queries.isLoadingCritical, activeSiteId, sites
   ]);
+
 
   // Offline cold-start hydration from posDB
   useEffect(() => {
@@ -347,37 +315,68 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
     }
   }, [activeSiteId, queries, loadSites, addNotification]);
 
-  const value = useMemo<DataContextType>(() => ({
+  const {
+    scopedSites,
+    scopedAllOrders,
+    scopedAllSales,
+    scopedEmployees,
+    scopedMovements,
+    scopedShifts,
+    scopedExpenses, scopedAllProducts, scopedProducts, scopedCustomers, scopedSuppliers,
+    scopedDiscountCodes, scopedSettings, effectiveCountry, isCeo
+  } = useCountryScoping({
+    country: settings?.country || 'ET',
     settings,
-    products,
-    orders,
-    suppliers,
-    sales,
-    expenses,
-    movements,
-
-    employees,
-    customers,
-    shifts,
-    heldOrders,
+    user,
     sites,
+    activeSiteId,
+    setActiveSiteId,
+    allOrders,
+    allSales,
+    employees,
+    movements,
+    shifts,
+    expenses,
+    allProducts,
+    products,
+    suppliers,
+    customers,
+    discountCodes
+  });
+
+  const value = useMemo<DataContextType>(() => ({
+    settings: scopedSettings || settings,
+    products: scopedProducts,
+    orders,
+    suppliers: scopedSuppliers,
+    sales,
+    expenses: scopedExpenses,
+    movements: scopedMovements,
+
+    employees: scopedEmployees,
+    customers: scopedCustomers,
+    shifts: scopedShifts,
+    heldOrders,
+    sites: scopedSites,
     activeSite,
+    effectiveCountry,
+    isCeo,
     notifications,
     systemLogs,
     promotions,
 
     tasks,
     setTasks,
-    allProducts,
-    allSales,
-    allOrders,
+    allProducts: scopedAllProducts,
+    allSales: scopedAllSales,
+    allOrders: scopedAllOrders,
     setProducts,
     setAllProducts,
     setOrders,
     setAllOrders,
     setSales,
     setAllSales,
-    discountCodes,
+    discountCodes: scopedDiscountCodes,
     loadingProgress,
     isDataInitialLoading,
     loadError,
@@ -412,9 +411,11 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
     // Employee Actions (from hook)
     closeShift: employeeActions.closeShift,
     startShift: employeeActions.startShift,
+    reconcileShift: employeeActions.reconcileShift,
     addEmployee: employeeActions.addEmployee,
     updateEmployee: employeeActions.updateEmployee,
     deleteEmployee: employeeActions.deleteEmployee,
+
 
     // Customer Actions (from hook)
     addCustomer: customerActions.addCustomer,
@@ -465,11 +466,10 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
     posPendingSyncCount: pendingCount,
     posLatencyMs
   }), [
-    settings, products, orders, suppliers, sales, expenses, movements,
-    employees, customers, shifts, heldOrders, sites, activeSite,
-    notifications, systemLogs, promotions,
-    tasks, storePoints, allProducts,
-    allSales, allOrders, discountCodes, isDataInitialLoading, loadError, syncStatus, pendingCount, posLatencyMs,
+    settings, scopedSettings, scopedProducts, orders, scopedSuppliers, sales, scopedExpenses, scopedMovements,
+    scopedEmployees, scopedCustomers, scopedShifts, heldOrders, scopedSites, activeSite,
+    effectiveCountry, isCeo, notifications, systemLogs, promotions, tasks, storePoints, scopedAllProducts,
+    scopedAllSales, scopedAllOrders, scopedDiscountCodes, isDataInitialLoading, loadError, syncStatus, pendingCount, posLatencyMs,
     siteActions, productActions, poActions, saleActions, employeeActions, customerActions, financeActions, gamificationActions,
     triggerSync, holdOrder, releaseHold, markNotificationsRead, addNotification, clearNotification, clearAllNotifications,
     logSystemEvent, exportSystemData, resetData, refreshData, addPromotion, updatePromotion, deletePromotion,

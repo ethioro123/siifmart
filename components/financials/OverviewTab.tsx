@@ -3,7 +3,6 @@ import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 import { Activity, PieChart as PieIcon } from 'lucide-react';
 import { useFinance } from './FinanceContext';
 import { formatCompactNumber } from '../../utils/formatting';
-import { CURRENCY_SYMBOL } from '../../constants';
 
 export const OverviewTab: React.FC = () => {
     const {
@@ -15,17 +14,18 @@ export const OverviewTab: React.FC = () => {
         cashflowData,
         expenseBreakdownData,
         accentColor,
-        COLORS
+        COLORS,
+        currencySymbol
     } = useFinance();
 
     const getColorClass = (index: number) => {
         const classes = [
-            'bg-cyber-primary',
+            'bg-[#2C5E3B] dark:bg-[#A9CBA2]',
             'bg-blue-500',
             'bg-amber-500',
-            'bg-red-500',
+            'bg-rose-500',
             'bg-purple-500',
-            'bg-pink-500'
+            'bg-emerald-500'
         ];
         return classes[index % classes.length];
     };
@@ -34,43 +34,43 @@ export const OverviewTab: React.FC = () => {
         <div className="space-y-6 animate-in fade-in">
             {/* Top Metrics */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-                <div className="bg-cyber-gray border border-white/5 rounded-2xl p-5 flex flex-col justify-between min-h-[120px]">
+                <div className="bg-stone-900/60 dark:bg-stone-900/60 border border-stone-200/10 dark:border-white/5 rounded-2xl p-5 flex flex-col justify-between min-h-[120px]">
                     <div>
                         <p className="text-gray-400 text-[10px] uppercase font-bold tracking-wider">Total Revenue</p>
-                        <h3 className="text-2xl font-mono font-bold text-white mt-1">{formatCompactNumber(totalRevenue, { currency: CURRENCY_SYMBOL })}</h3>
+                        <h3 className="text-2xl font-mono font-bold text-white mt-1">{formatCompactNumber(totalRevenue, { currency: currencySymbol })}</h3>
                     </div>
                     <div className="mt-2 flex items-center gap-1.5">
-                        <Activity size={12} className="text-cyber-primary" />
+                        <Activity size={12} className="text-[#2C5E3B] dark:text-[#A9CBA2]" />
                         <span className="text-[10px] text-gray-500 font-bold">Base metric</span>
                     </div>
                 </div>
 
-                <div className="bg-cyber-gray border border-white/5 rounded-2xl p-5 flex flex-col justify-between min-h-[120px]">
+                <div className="bg-stone-900/60 dark:bg-stone-900/60 border border-stone-200/10 dark:border-white/5 rounded-2xl p-5 flex flex-col justify-between min-h-[120px]">
                     <div>
                         <p className="text-gray-400 text-[10px] uppercase font-bold tracking-wider">Total Expenses</p>
-                        <h3 className="text-2xl font-mono font-bold text-white mt-1">{formatCompactNumber(totalExpenses, { currency: CURRENCY_SYMBOL })}</h3>
+                        <h3 className="text-2xl font-mono font-bold text-white mt-1">{formatCompactNumber(totalExpenses, { currency: currencySymbol })}</h3>
                     </div>
                     <div className="mt-2 flex items-center gap-1.5">
-                        <Activity size={12} className="text-red-500" />
+                        <Activity size={12} className="text-rose-500" />
                         <span className="text-[10px] text-gray-500 font-bold">Operational costs</span>
                     </div>
                 </div>
 
-                <div className="bg-cyber-gray border border-white/5 rounded-2xl p-5 flex flex-col justify-between min-h-[120px]">
+                <div className="bg-stone-900/60 dark:bg-stone-900/60 border border-stone-200/10 dark:border-white/5 rounded-2xl p-5 flex flex-col justify-between min-h-[120px]">
                     <div>
                         <p className="text-gray-400 text-[10px] uppercase font-bold tracking-wider">Total Refunds</p>
-                        <h3 className="text-2xl font-mono font-bold text-white mt-1">{formatCompactNumber(totalRefunds, { currency: CURRENCY_SYMBOL })}</h3>
+                        <h3 className="text-2xl font-mono font-bold text-white mt-1">{formatCompactNumber(totalRefunds, { currency: currencySymbol })}</h3>
                     </div>
                     <div className="mt-2 flex items-center gap-1.5">
-                        <Activity size={12} className="text-yellow-500" />
+                        <Activity size={12} className="text-amber-500" />
                         <span className="text-[10px] text-gray-500 font-bold">Returns value</span>
                     </div>
                 </div>
 
-                <div className="bg-cyber-gray border border-white/5 rounded-2xl p-5 flex flex-col justify-between min-h-[120px]">
+                <div className="bg-stone-900/60 dark:bg-stone-900/60 border border-stone-200/10 dark:border-white/5 rounded-2xl p-5 flex flex-col justify-between min-h-[120px]">
                     <div>
                         <p className="text-gray-400 text-[10px] uppercase font-bold tracking-wider">Inventory Asset Value</p>
-                        <h3 className="text-2xl font-mono font-bold text-white mt-1">{formatCompactNumber(totalInventoryValue, { currency: CURRENCY_SYMBOL })}</h3>
+                        <h3 className="text-2xl font-mono font-bold text-white mt-1">{formatCompactNumber(totalInventoryValue, { currency: currencySymbol })}</h3>
                     </div>
                     <div className="mt-2 flex items-center gap-1.5">
                         <Activity size={12} className="text-blue-500" />
@@ -78,15 +78,15 @@ export const OverviewTab: React.FC = () => {
                     </div>
                 </div>
 
-                <div className="bg-cyber-gray border border-white/5 rounded-2xl p-5 flex flex-col justify-between min-h-[120px]">
+                <div className="bg-stone-900/60 dark:bg-stone-900/60 border border-stone-200/10 dark:border-white/5 rounded-2xl p-5 flex flex-col justify-between min-h-[120px]">
                     <div>
                         <p className="text-gray-400 text-[10px] uppercase font-bold tracking-wider">Net Profit</p>
-                        <h3 className={`text-2xl font-mono font-bold mt-1 ${netProfit >= 0 ? 'text-cyber-primary' : 'text-red-500'}`}>
-                            {formatCompactNumber(netProfit, { currency: CURRENCY_SYMBOL })}
+                        <h3 className={`text-2xl font-mono font-bold mt-1 ${netProfit >= 0 ? 'text-[#2C5E3B] dark:text-[#A9CBA2]' : 'text-rose-500'}`}>
+                            {formatCompactNumber(netProfit, { currency: currencySymbol })}
                         </h3>
                     </div>
                     <div className="mt-2 flex items-center gap-1.5">
-                        <Activity size={12} className={netProfit >= 0 ? 'text-cyber-primary' : 'text-red-500'} />
+                        <Activity size={12} className={netProfit >= 0 ? 'text-[#2C5E3B] dark:text-[#A9CBA2]' : 'text-rose-500'} />
                         <span className="text-[10px] text-gray-500 font-bold">Bottom-line earnings</span>
                     </div>
                 </div>
@@ -95,7 +95,7 @@ export const OverviewTab: React.FC = () => {
             {/* Charts Row */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 {/* Cashflow Trend */}
-                <div className="bg-cyber-gray border border-white/5 rounded-3xl p-6 lg:col-span-2">
+                <div className="bg-stone-900/60 dark:bg-stone-900/60 border border-stone-200/10 dark:border-white/5 rounded-3xl p-6 lg:col-span-2">
                     <h4 className="text-white font-bold text-sm uppercase tracking-wider mb-6">Cashflow Trend</h4>
                     <div className="h-[300px]">
                         <ResponsiveContainer width="100%" height="100%">
@@ -125,7 +125,7 @@ export const OverviewTab: React.FC = () => {
                 </div>
 
                 {/* Expense Breakdown */}
-                <div className="bg-cyber-gray border border-white/5 rounded-3xl p-6 flex flex-col justify-between">
+                <div className="bg-stone-900/60 dark:bg-stone-900/60 border border-stone-200/10 dark:border-white/5 rounded-3xl p-6 flex flex-col justify-between">
                     <h4 className="text-white font-bold text-sm uppercase tracking-wider mb-4">Expense Breakdown</h4>
                     {expenseBreakdownData.length > 0 ? (
                         <>

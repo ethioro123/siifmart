@@ -6,8 +6,6 @@ import {
 import { useMerchandising } from './MerchandisingContext';
 import { CreatePOModal } from '../procurement/CreatePOModal';
 import { Product, PurchaseOrder } from '../../types';
-import { CURRENCY_SYMBOL } from '../../constants';
-import { formatCompactNumber } from '../../utils/formatting';
 
 export const ForecastTab: React.FC = () => {
    const { products, addNotification, refreshData } = useMerchandising();

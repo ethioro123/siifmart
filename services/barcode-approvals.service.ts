@@ -10,6 +10,7 @@ export const barcodeApprovalsService = {
         barcode: string;
         image_url?: string;
         site_id?: string;
+        country_code?: string;
         created_by?: string;
         resolution_time?: number;
     }) {
@@ -17,7 +18,8 @@ export const barcodeApprovalsService = {
             product_id: approval.product_id,
             barcode: approval.barcode,
             image_url: approval.image_url || null,
-            status: 'approved'
+            status: 'approved',
+            country_code: (approval.country_code || 'ET').toUpperCase()
         };
 
         // Only pass site_id if it is a valid UUID format
@@ -34,7 +36,7 @@ export const barcodeApprovalsService = {
             const { data, error } = await supabase
                 .from('barcode_approvals')
                 .insert(insertPayload)
-                .select('id, product_id, barcode, image_url, status, site_id, created_at')
+                .select('id, product_id, barcode, image_url, status, site_id, country_code, created_at')
                 .maybeSingle();
 
             if (error) {
@@ -54,7 +56,7 @@ export const barcodeApprovalsService = {
         }
     },
 
-    async getAuditLog(siteId?: string, limit: number = 1000) {
+    async getAuditLog(siteId?: string, countryCode?: string, limit: number = 1000) {
         try {
             let query = supabase
                 .from('barcode_approvals')
@@ -68,6 +70,9 @@ export const barcodeApprovalsService = {
             if (siteId) {
                 query = query.eq('site_id', siteId);
             }
+            if (countryCode) {
+                query = query.eq('country_code', countryCode.toUpperCase());
+            }
 
             const { data, error } = await query;
             if (error) {
@@ -80,6 +85,9 @@ export const barcodeApprovalsService = {
 
                 if (siteId) {
                     fallbackQuery = fallbackQuery.eq('site_id', siteId);
+                }
+                if (countryCode) {
+                    fallbackQuery = fallbackQuery.eq('country_code', countryCode.toUpperCase());
                 }
 
                 const { data: fallbackData, error: fallbackError } = await fallbackQuery;

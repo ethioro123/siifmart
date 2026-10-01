@@ -1,7 +1,7 @@
 import React from 'react';
 import { CheckCircle } from 'lucide-react';
 import { WMSJob, Product } from '../../../../types';
-import { getSellUnit } from '../../../../utils/units';
+import { getSellUnit, formatProductSize, formatPackagingDescription } from '../../../../utils/units';
 
 interface PickScannerPickedListProps {
     job: WMSJob;
@@ -31,27 +31,40 @@ export const PickScannerPickedList: React.FC<PickScannerPickedListProps> = ({
                 </span>
             </div>
             <div className="bg-white dark:bg-white/[0.03] border border-gray-200 dark:border-white/10 rounded-2xl overflow-hidden divide-y divide-gray-100 dark:divide-white/5 shadow-sm dark:shadow-none">
-                {pickedItems.map((item: any, idx: number) => (
-                    <div key={idx} className="flex items-center justify-between px-4 py-3">
-                        <div className="flex-1 min-w-0 mr-3">
-                            <p className="text-gray-900 dark:text-white text-sm font-bold truncate">{item.name}</p>
-                            <p className="text-gray-550 text-[10px] font-mono">{item.sku}</p>
-                        </div>
-                        <span className="bg-green-50 dark:bg-green-500/15 text-green-600 dark:text-green-400 text-xs font-mono font-black px-2 py-0.5 rounded-lg border border-green-200 dark:border-green-500/20 whitespace-nowrap">
-                            {(() => {
-                                let expected = item.expectedQty || 1;
-                                let picked = item.pickedQty || 0;
-                                const prod = getProduct(item);
-                                const unitDef = getSellUnit(prod?.unit || item.unit);
-                                const sizeStr = prod?.size || item.size;
-                                const isWeightVol = (unitDef.category === 'weight' || unitDef.category === 'volume') && !!sizeStr;
-                                const unitText = isWeightVol ? `packs (${sizeStr}${unitDef.shortLabel})` : unitDef.code !== 'UNIT' ? unitDef.shortLabel : '';
+                {pickedItems.map((item: any, idx: number) => {
+                    const prod = getProduct(item);
+                    return (
+                        <div key={idx} className="flex items-center justify-between px-4 py-3">
+                            <div className="flex-1 min-w-0 mr-3">
+                                <p className="text-gray-900 dark:text-white text-sm font-bold truncate">{item.name}</p>
+                                <div className="flex items-center gap-2 mt-0.5">
+                                    <span className="text-gray-550 text-[10px] font-mono">{item.sku}</span>
+                                    {formatProductSize(prod || item) && (
+                                        <span className="text-[9px] font-mono text-emerald-700 bg-emerald-500/10 dark:text-emerald-400 dark:bg-emerald-500/20 px-1 py-0.2 rounded border border-emerald-500/20">
+                                            {formatProductSize(prod || item)}
+                                        </span>
+                                    )}
+                                </div>
+                            </div>
+                            <span className="bg-green-50 dark:bg-green-500/15 text-green-600 dark:text-green-400 text-xs font-mono font-black px-2 py-0.5 rounded-lg border border-green-200 dark:border-green-500/20 whitespace-nowrap">
+                                {(() => {
+                                    let expected = item.expectedQty || 1;
+                                    let picked = item.pickedQty || 0;
+                                    const packDesc = formatPackagingDescription(prod, picked);
+                                    const unitDef = getSellUnit(prod?.unit || item.unit);
+                                    const unitLabel = unitDef.category === 'count' && unitDef.code !== 'UNIT' ? unitDef.shortLabel : 'pk';
 
-                                return <>{picked} / {expected} {unitText ? <span className="text-[9px] uppercase font-bold text-gray-500 ml-0.5">{unitText}</span> : null}</>;
-                            })()}
-                        </span>
-                    </div>
-                ))}
+                                    return (
+                                        <>
+                                            {picked} / {expected} <span className="text-[9px] uppercase font-bold text-gray-500 ml-0.5">{unitLabel}</span>
+                                            {packDesc && <span className="text-[9px] font-mono text-teal-600 dark:text-teal-400 ml-1">({packDesc})</span>}
+                                        </>
+                                    );
+                                })()}
+                            </span>
+                        </div>
+                    );
+                })}
             </div>
         </div>
     );

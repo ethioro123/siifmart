@@ -9,7 +9,7 @@ import { formatJobId } from '../../../utils/jobIdFormatter';
 import { useLanguage } from '../../../contexts/LanguageContext';
 import { ProgressBar } from '../../shared/ProgressBar';
 import { getProductForItem, getItemMeasureQty as getItemMeasureQtyShared } from './utils/packItemHelpers';
-import { getSellUnit } from '../../../utils/units';
+import { getSellUnit, formatProductSize, formatPackagingDescription } from '../../../utils/units';
 import { PackJobMaterialsPanel } from './components/PackJobMaterialsPanel';
 import { PackJobHeader } from './components/PackJobHeader';
 
@@ -221,10 +221,9 @@ export const PackJobModal: React.FC<PackJobModalProps> = ({
 
                                 const expected = item.expectedQty || (item as any).quantity || 0;
                                 const picked = item.pickedQty || 0;
+                                const packDesc = formatPackagingDescription(product, expected);
                                 const unitDef = getSellUnit(product?.unit || item.unit);
-                                const sizeStr = product?.size || item.size;
-                                const isWeightVol = (unitDef.category === 'weight' || unitDef.category === 'volume') && !!sizeStr;
-                                const unitText = isWeightVol ? `packs (${sizeStr}${unitDef.shortLabel})` : unitDef.code !== 'UNIT' ? unitDef.shortLabel : '';
+                                const unitLabel = unitDef.category === 'count' && unitDef.code !== 'UNIT' ? unitDef.shortLabel : 'pk';
 
                                 return (
                                     <div key={idx} className={`group relative bg-white dark:bg-white/[0.02] border ${isScanningThis ? 'border-[#2C5E3B] dark:border-[#A9CBA2] bg-[#2C5E3B]/5 dark:bg-[#A9CBA2]/10 shadow-lg shadow-[#2C5E3B]/5 dark:shadow-[#A9CBA2]/5' :
@@ -243,8 +242,8 @@ export const PackJobModal: React.FC<PackJobModalProps> = ({
                                                         </div>
                                                     )}
                                                     {isDone && (
-                                                        <div className="absolute inset-0 bg-green-100/60 dark:bg-green-500/30 backdrop-blur-[1px] flex items-center justify-center">
-                                                            <CheckCircle size={16} className="text-green-600 dark:text-green-400" />
+                                                        <div className="absolute inset-0 bg-green-200/80 dark:bg-green-500/40 flex items-center justify-center">
+                                                            <CheckCircle size={16} className="text-green-700 dark:text-green-300" />
                                                         </div>
                                                     )}
                                                 </div>
@@ -258,6 +257,11 @@ export const PackJobModal: React.FC<PackJobModalProps> = ({
                                                         <span className="text-[9px] font-mono font-bold text-gray-600 dark:text-[#A9CBA2] bg-stone-100 dark:bg-black/40 px-1.5 py-0.2 rounded border border-[#E2DCCE]/60 dark:border-white/5 uppercase tracking-tighter">
                                                             {item.sku || product?.sku || 'NO SKU'}
                                                         </span>
+                                                        {formatProductSize(product || item) && (
+                                                            <span className="text-[9px] font-mono text-emerald-700 bg-emerald-500/10 dark:text-emerald-400 dark:bg-emerald-500/20 px-1.5 py-0.2 rounded border border-emerald-500/20">
+                                                                {formatProductSize(product || item)}
+                                                            </span>
+                                                        )}
                                                         {product?.barcode && (
                                                             <div className="flex items-center gap-1 text-[9px] text-gray-500 font-bold uppercase tracking-widest hidden sm:flex">
                                                                 <Barcode size={9} />
@@ -272,10 +276,12 @@ export const PackJobModal: React.FC<PackJobModalProps> = ({
                                             <div className="flex items-center gap-2 shrink-0">
                                                 <div className="text-right">
                                                     <span className={`text-xs font-mono font-black ${isDone ? 'text-green-600 dark:text-green-400' : 'text-gray-900 dark:text-white'}`}>
-                                                        {picked} <span className="text-gray-400 font-normal">/ {expected}</span>
+                                                        {picked} <span className="text-gray-400 font-normal">/ {expected} {unitLabel}</span>
                                                     </span>
-                                                    {unitText && (
-                                                        <span className="text-[8px] text-gray-500 font-extrabold uppercase block leading-none">{unitText}</span>
+                                                    {packDesc && (
+                                                        <span className="text-[8px] text-teal-600 dark:text-teal-400 font-extrabold uppercase block leading-none mt-0.5">
+                                                            ({packDesc})
+                                                        </span>
                                                     )}
                                                 </div>
 

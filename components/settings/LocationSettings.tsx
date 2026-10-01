@@ -1,23 +1,30 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
-    Building, Store, Plus, Globe, MapPin, Lock
+    Building, Store, Plus, Globe, Lock
 } from 'lucide-react';
 import { useData } from '../../contexts/DataContext';
 import { useStore } from '../../contexts/CentralStore';
 import { Protected } from '../Protected';
-import { Site } from '../../types';
+import type { Site, LogisticsZone } from '../../types';
 import { logisticsZonesService } from '../../services/supabase.service';
+import { supabase } from '../../lib/supabase';
 import { SiteModal } from './SiteModal';
 import { DeleteSiteModal } from './DeleteSiteModal';
 import { ZoneManagerModal } from './ZoneManagerModal';
 import { SiteCard } from './SiteCard';
+import { LocationEmptyState } from './locations/LocationEmptyState';
+import { LocationCategoryView } from './locations/LocationCategoryView';
+import { LocationZoneView } from './locations/LocationZoneView';
 import { generateLocationBarcodesCSV } from './locationBarcodeHelper';
 import { logger } from '../../utils/logger';
+import { getCountryProfile, Country } from '../../utils/localization';
+import { isAdminSite } from '../../utils/countryAdmin';
+import { generateNextSiteCode } from '../../utils/siteIdGenerator';
 
 const SectionHeader = ({ title, desc }: { title: string, desc: string }) => (
-    <div className="mb-6 pb-4 border-b border-white/5">
-        <h3 className="text-xl font-bold text-white">{title}</h3>
-        <p className="text-sm text-gray-400 mt-1">{desc}</p>
+    <div className="mb-6 pb-4 border-b border-[#E2DCCE]/60 dark:border-white/5">
+        <h3 className="text-lg font-black text-[#1E3F27] dark:text-[#EAE5D9] tracking-tight">{title}</h3>
+        <p className="text-xs text-[#4D6E56] dark:text-[#7A9E83] mt-0.5">{desc}</p>
     </div>
 );
 
@@ -25,8 +32,11 @@ export default function LocationSettings() {
     const { user } = useStore();
     const {
         settings, updateSettings, sites, addSite, updateSite, deleteSite,
-        addNotification, refreshData
+        addNotification, refreshData, effectiveCountry
     } = useData();
+
+    const activeCountry: Country = (effectiveCountry || settings?.country || 'ET') as Country;
+    const countryProfile = getCountryProfile(activeCountry);
 
     // Site Modal State
     const [isSiteModalOpen, setIsSiteModalOpen] = useState(false);
@@ -35,14 +45,14 @@ export default function LocationSettings() {
     const [expandedSiteId, setExpandedSiteId] = useState<string | null>(null);
     const [locationViewMode, setLocationViewMode] = useState<'category' | 'zone'>('category');
 
-    // Independent Logistics Zones State
-    const [logisticsZones, setLogisticsZones] = useState<any[]>([]);
+    // Logistics Zones State
+    const [logisticsZones, setLogisticsZones] = useState<LogisticsZone[]>([]);
     const [isLoadingZones, setIsLoadingZones] = useState(false);
     const [isZoneManagerOpen, setIsZoneManagerOpen] = useState(false);
     const [isZoneSaving, setIsZoneSaving] = useState(false);
 
     // Zone Form / Editing state
-    const [editingZone, setEditingZone] = useState<any | null>(null);
+    const [editingZone, setEditingZone] = useState<LogisticsZone | null>(null);
     const [zoneNameInput, setZoneNameInput] = useState('');
     const [zoneDescInput, setZoneDescInput] = useState('');
 
@@ -58,80 +68,108 @@ export default function LocationSettings() {
     const [siteToDelete, setSiteToDelete] = useState<Site | null>(null);
     const [deleteConfirmText, setDeleteConfirmText] = useState('');
     const [isDeleting, setIsDeleting] = useState(false);
-
     const [isGenerating, setIsGenerating] = useState(false);
 
-    const fetchZones = async () => {
+    const fetchZones = useCallback(async () => {
         setIsLoadingZones(true);
         try {
-            const data = await logisticsZonesService.getAll();
+            const data = await logisticsZonesService.getAll(activeCountry);
             setLogisticsZones(data);
         } catch (error) {
             logger.error('LocationSettings', 'Failed to load logistics zones:', error);
         } finally {
             setIsLoadingZones(false);
         }
-    };
+    }, [activeCountry]);
 
     useEffect(() => {
         fetchZones();
-    }, []);
+    }, [fetchZones]);
 
     const generateBarcodes = async (site: Partial<Site> & { barcodePrefix?: string }) => {
         await generateLocationBarcodesCSV(site, addNotification, setIsGenerating);
     };
 
+    const handleOpenAddSite = () => {
+        setNewSite({
+            type: 'Store',
+            status: 'Active',
+            country: activeCountry,
+            currency: countryProfile.currencySymbol
+        });
+        setIsSiteModalOpen(true);
+    };
+
     const handleSaveSite = async () => {
         if (!newSite.name || !newSite.type) {
-            addNotification('alert', "Name and Type are required");
+            addNotification('alert', 'Name and Type are required');
             return;
         }
 
         setIsSavingSite(true);
         try {
+            const siteCountry = newSite.country || activeCountry;
+            const siteCurrency = newSite.currency || (siteCountry === 'KE' ? 'KSh' : 'ETB');
+
+            const commonData = {
+                name: newSite.name,
+                type: newSite.type,
+                address: newSite.address || '',
+                status: newSite.status || 'Active',
+                manager: newSite.manager,
+                capacity: newSite.capacity,
+                terminalCount: newSite.terminalCount,
+                zoneCount: newSite.zoneCount,
+                aisleCount: newSite.aisleCount,
+                bayCount: newSite.bayCount,
+                replenishmentSourceIds: newSite.replenishmentSourceIds ?? [],
+                replenishmentSourceId: (newSite.replenishmentSourceIds ?? [])[0],
+                logisticsZoneId: newSite.logisticsZoneId || undefined,
+                country: siteCountry,
+                currency: siteCurrency
+            };
+
             if (newSite.id) {
                 const siteData: Site = {
+                    ...commonData,
                     id: newSite.id,
-                    name: newSite.name,
-                    type: newSite.type,
-                    address: newSite.address || '',
-                    status: newSite.status || 'Active',
-                    manager: newSite.manager,
-                    capacity: newSite.capacity,
-                    terminalCount: newSite.terminalCount,
-                    zoneCount: newSite.zoneCount,
-                    aisleCount: newSite.aisleCount,
-                    bayCount: newSite.bayCount,
-                    code: newSite.code || newSite.name?.substring(0, 3).toUpperCase() || 'UNK',
-                    replenishmentSourceIds: newSite.replenishmentSourceIds ?? [],
-                    replenishmentSourceId: (newSite.replenishmentSourceIds ?? [])[0],
-                    logisticsZoneId: newSite.logisticsZoneId || undefined
+                    code: newSite.code || newSite.name?.substring(0, 3).toUpperCase() || 'UNK'
                 };
                 await updateSite(siteData, user?.name || 'Admin');
+                addNotification('success', `Location "${newSite.name}" updated successfully`);
+
+                // Tamper-Proof Audit Logging
+                await supabase.from('system_logs').insert({
+                    action: 'Location Updated',
+                    details: `Updated facility "${newSite.name}" (${siteCountry}) by ${user?.name || user?.email}`,
+                    user_name: user?.name || user?.email || 'Admin',
+                    module: 'Settings'
+                });
             } else {
+                const countryCode = (siteCountry || 'ET').toUpperCase();
+                const nextCountrySiteCode = generateNextSiteCode(sites, countryCode);
                 const siteData: Omit<Site, 'id'> = {
-                    name: newSite.name,
-                    type: newSite.type,
-                    address: newSite.address || '',
-                    status: newSite.status || 'Active',
-                    manager: newSite.manager,
-                    capacity: newSite.capacity,
-                    terminalCount: newSite.terminalCount,
-                    zoneCount: newSite.zoneCount,
-                    aisleCount: newSite.aisleCount,
-                    bayCount: newSite.bayCount,
-                    code: 'GENERATED_BY_DB',
-                    replenishmentSourceIds: newSite.replenishmentSourceIds ?? [],
-                    replenishmentSourceId: (newSite.replenishmentSourceIds ?? [])[0],
-                    logisticsZoneId: newSite.logisticsZoneId || undefined
+                    ...commonData,
+                    code: newSite.code || nextCountrySiteCode
                 };
                 await addSite(siteData as Site, user?.name || 'Admin');
+                addNotification('success', `Location "${newSite.name}" (${nextCountrySiteCode}) registered successfully for ${countryProfile.name}`);
+
+                // Tamper-Proof Audit Logging
+                await supabase.from('system_logs').insert({
+                    action: 'Location Created',
+                    details: `Registered new facility "${newSite.name}" [${nextCountrySiteCode}] in ${countryProfile.name} (${siteCountry}) by ${user?.name || user?.email}`,
+                    user_name: user?.name || user?.email || 'Admin',
+                    module: 'Settings'
+                });
             }
             setIsSiteModalOpen(false);
             setNewSite({});
-        } catch (error: any) {
-            logger.error('LocationSettings', '❌ Error saving site:', error);
-            const errorMsg = error?.message || error?.details || 'Failed to save location. Please try again.';
+            refreshData();
+        } catch (error: unknown) {
+            logger.error('LocationSettings', 'Error saving site:', error);
+            const err = error as { message?: string; details?: string };
+            const errorMsg = err?.message || err?.details || 'Failed to save location. Please try again.';
             addNotification('alert', `Error: ${errorMsg}`);
         } finally {
             setIsSavingSite(false);
@@ -142,6 +180,14 @@ export default function LocationSettings() {
         const site = sites.find((s: Site) => s.id === id);
         if (!site) return;
 
+        if (isAdminSite(site)) {
+            const countryAdminCount = sites.filter(s => (s.country || activeCountry) === (site.country || activeCountry) && isAdminSite(s)).length;
+            if (countryAdminCount <= 1) {
+                addNotification('alert', `Cannot delete "${site.name}". Every country must retain an Administration Central HQ.`);
+                return;
+            }
+        }
+
         setSiteToDelete(site);
         setDeleteConfirmText('');
         setIsDeleteModalOpen(true);
@@ -150,7 +196,7 @@ export default function LocationSettings() {
     const confirmDeleteSite = async () => {
         if (!siteToDelete) return;
 
-        if (deleteConfirmText !== "DELETE") {
+        if (deleteConfirmText !== 'DELETE') {
             addNotification('alert', 'Please type "DELETE" to confirm.');
             return;
         }
@@ -159,9 +205,18 @@ export default function LocationSettings() {
         try {
             await deleteSite(siteToDelete.id, user?.name || 'Admin');
             addNotification('success', `Location "${siteToDelete.name}" has been deleted`);
+
+            await supabase.from('system_logs').insert({
+                action: 'Location Deleted',
+                details: `Deleted facility "${siteToDelete.name}" (${siteToDelete.country || activeCountry}) by ${user?.name || user?.email}`,
+                user_name: user?.name || user?.email || 'Admin',
+                module: 'Settings'
+            });
+
             setIsDeleteModalOpen(false);
             setSiteToDelete(null);
             setDeleteConfirmText('');
+            refreshData();
         } catch (error) {
             logger.error('LocationSettings', 'Error deleting site:', error);
             addNotification('alert', 'Failed to delete location');
@@ -186,7 +241,8 @@ export default function LocationSettings() {
             } else {
                 await logisticsZonesService.create({
                     name: zoneNameInput.trim(),
-                    description: zoneDescInput.trim()
+                    description: zoneDescInput.trim(),
+                    country: activeCountry
                 });
                 addNotification('success', 'Logistics Zone created successfully');
             }
@@ -195,8 +251,9 @@ export default function LocationSettings() {
             setEditingZone(null);
             fetchZones();
             refreshData();
-        } catch (error: any) {
-            addNotification('alert', `Failed to save Logistics Zone: ${error.message}`);
+        } catch (error: unknown) {
+            const err = error as Error;
+            addNotification('alert', `Failed to save Logistics Zone: ${err.message}`);
         } finally {
             setIsZoneSaving(false);
         }
@@ -209,8 +266,9 @@ export default function LocationSettings() {
             addNotification('success', 'Logistics Zone deleted successfully');
             fetchZones();
             refreshData();
-        } catch (error: any) {
-            addNotification('alert', `Failed to delete Logistics Zone: ${error.message}`);
+        } catch (error: unknown) {
+            const err = error as Error;
+            addNotification('alert', `Failed to delete Logistics Zone: ${err.message}`);
         }
     };
 
@@ -233,220 +291,95 @@ export default function LocationSettings() {
     return (
         <Protected permission="MANAGE_SITES" fallback={
             <div className="max-w-4xl">
-                <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-8 text-center">
+                <div className="bg-red-500/10 border border-red-500/20 rounded-3xl p-8 text-center">
                     <Lock className="w-16 h-16 text-red-400 mx-auto mb-4" />
                     <h3 className="text-xl font-bold text-white mb-2">Access Restricted</h3>
-                    <p className="text-gray-400">Only the CEO can manage locations.</p>
+                    <p className="text-gray-400">Only the CEO can manage physical facilities.</p>
                 </div>
             </div>
         }>
             <div className="w-full space-y-6 animate-in fade-in slide-in-from-right-4">
-                <div className="flex justify-between items-start mb-6">
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
                     <div>
-                        <SectionHeader title="Physical Locations" desc="Manage Warehouses, Distribution Centers, and Retail Stores across Ethiopia." />
-                        <div className="flex flex-wrap items-center gap-4 mt-4">
-                            <div className="flex items-center gap-2 text-sm">
-                                <Building className="text-purple-400" size={16} />
-                                <span className="text-gray-400">{sites.filter((s: Site) => s.type === 'Administration').length} Administration</span>
+                        <SectionHeader
+                            title="Physical Locations"
+                            desc={`Manage Warehouses, Distribution Centers, and Retail Stores across ${countryProfile.name}.`}
+                        />
+                        <div className="flex flex-wrap items-center gap-4 mt-2">
+                            <div className="flex items-center gap-2 text-xs font-bold text-purple-700 dark:text-purple-300">
+                                <Building size={15} />
+                                <span>{sites.filter((s: Site) => s.type === 'Administration').length} Administration</span>
                             </div>
-                            <div className="flex items-center gap-2 text-sm">
-                                <Building className="text-blue-400" size={16} />
-                                <span className="text-gray-400">{sites.filter((s: Site) => s.type === 'Warehouse').length} Warehouses</span>
+                            <div className="flex items-center gap-2 text-xs font-bold text-blue-700 dark:text-blue-300">
+                                <Building size={15} />
+                                <span>{sites.filter((s: Site) => s.type === 'Warehouse').length} Warehouses</span>
                             </div>
-                            <div className="flex items-center gap-2 text-sm">
-                                <Store className="text-green-400" size={16} />
-                                <span className="text-gray-400">{sites.filter((s: Site) => s.type === 'Store').length} Stores</span>
+                            <div className="flex items-center gap-2 text-xs font-bold text-[#2C5E3B] dark:text-[#A9CBA2]">
+                                <Store size={15} />
+                                <span>{sites.filter((s: Site) => s.type === 'Store').length} Stores</span>
                             </div>
                         </div>
-                        <div className="flex items-center gap-2 mt-4 bg-white/5 p-1 rounded-xl w-fit border border-white/5">
+
+                        <div className="flex items-center gap-1.5 mt-4 bg-[#FAF8F5] dark:bg-black/30 p-1 rounded-2xl w-fit border border-[#E2DCCE] dark:border-white/10">
                             <button
+                                type="button"
                                 onClick={() => setLocationViewMode('category')}
-                                className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                                className={`px-3.5 py-1.5 rounded-xl text-xs font-black uppercase tracking-wider transition-all cursor-pointer ${
                                     locationViewMode === 'category'
-                                        ? 'bg-cyber-primary text-black shadow-[0_0_10px_rgba(0,255,157,0.2)]'
-                                        : 'text-gray-400 hover:text-white'
+                                        ? 'bg-[#2C5E3B] text-white shadow-sm'
+                                        : 'text-stone-500 dark:text-gray-400 hover:text-[#1E3F27] dark:hover:text-white'
                                 }`}
                             >
                                 By Category
                             </button>
                             <button
+                                type="button"
                                 onClick={() => setLocationViewMode('zone')}
-                                className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                                className={`px-3.5 py-1.5 rounded-xl text-xs font-black uppercase tracking-wider transition-all cursor-pointer ${
                                     locationViewMode === 'zone'
-                                        ? 'bg-cyber-primary text-black shadow-[0_0_10px_rgba(0,255,157,0.2)]'
-                                        : 'text-gray-400 hover:text-white'
+                                        ? 'bg-[#2C5E3B] text-white shadow-sm'
+                                        : 'text-stone-500 dark:text-gray-400 hover:text-[#1E3F27] dark:hover:text-white'
                                 }`}
                             >
                                 By Logistics Zone
                             </button>
                         </div>
                     </div>
+
                     <div className="flex items-center gap-3">
                         <button
+                            type="button"
                             onClick={() => setIsZoneManagerOpen(true)}
-                            className="bg-yellow-500/10 text-yellow-400 hover:bg-yellow-500/20 border border-yellow-500/30 px-5 py-3 rounded-xl font-bold text-sm flex items-center gap-2 transition-all"
+                            className="bg-amber-50 dark:bg-amber-950/20 text-amber-800 dark:text-amber-400 hover:bg-amber-100 dark:hover:bg-amber-950/40 border border-amber-200 dark:border-amber-900/30 px-4 py-2.5 rounded-2xl font-black text-xs uppercase tracking-wider flex items-center gap-2 transition-all cursor-pointer shadow-sm"
                         >
-                            <Globe size={18} /> Manage Zones
+                            <Globe size={15} /> Manage Zones
                         </button>
                         <button
-                            onClick={() => { setNewSite({ type: 'Store', status: 'Active' }); setIsSiteModalOpen(true); }}
-                            className="bg-cyber-primary text-black px-6 py-3 rounded-xl font-bold text-sm flex items-center gap-2 hover:bg-cyber-accent shadow-[0_0_15px_rgba(0,255,157,0.2)] transition-all"
+                            type="button"
+                            onClick={handleOpenAddSite}
+                            className="bg-[#2C5E3B] text-white hover:bg-[#1E3F27] px-5 py-2.5 rounded-2xl font-black text-xs uppercase tracking-wider flex items-center gap-2 transition-all cursor-pointer shadow-sm"
                         >
-                            <Plus size={18} /> Add Location
+                            <Plus size={16} /> Add Location
                         </button>
                     </div>
                 </div>
 
                 {sites.length === 0 ? (
-                    <div className="bg-black/20 border-2 border-dashed border-white/10 rounded-2xl p-12 text-center">
-                        <MapPin className="w-16 h-16 text-gray-600 mx-auto mb-4" />
-                        <h3 className="text-xl font-bold text-white mb-2">No Locations Yet</h3>
-                        <p className="text-gray-400 mb-6">Start by adding your first warehouse or store.</p>
-                        <button
-                            onClick={() => { setNewSite({ type: 'Store', status: 'Active' }); setIsSiteModalOpen(true); }}
-                            className="bg-cyber-primary text-black px-6 py-3 rounded-xl font-bold text-sm inline-flex items-center gap-2 hover:bg-cyber-accent"
-                        >
-                            <Plus size={18} /> Add First Location
-                        </button>
-                    </div>
+                    <LocationEmptyState
+                        countryName={countryProfile.name}
+                        onAddLocation={handleOpenAddSite}
+                    />
                 ) : locationViewMode === 'zone' ? (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 items-start">
-                        {logisticsZones.map(zone => {
-                            const zoneSites = sites.filter((s: Site) => s.logisticsZoneId === zone.id);
-                            return (
-                                <div key={zone.id} className="bg-black/15 border border-white/5 rounded-2xl p-4 flex flex-col gap-3 min-h-[300px] hover:border-white/10 transition-colors">
-                                    <div className="flex flex-col gap-1 border-b border-white/5 pb-2.5">
-                                        <div className="flex items-center gap-2">
-                                            <span className="w-2 h-2 rounded-full bg-yellow-500 shrink-0 shadow-[0_0_8px_rgba(234,179,8,0.5)]" />
-                                            <h5 className="text-white font-bold text-xs uppercase tracking-wider truncate" title={zone.name}>{zone.name}</h5>
-                                            <span className="text-[9px] text-gray-400 bg-white/5 px-1.5 py-0.5 rounded font-mono font-bold shrink-0 ml-auto">
-                                                {zoneSites.length}
-                                            </span>
-                                        </div>
-                                        {zone.description && (
-                                            <p className="text-[10px] text-gray-500 truncate" title={zone.description}>
-                                                {zone.description}
-                                            </p>
-                                        )}
-                                    </div>
-
-                                    {zoneSites.length === 0 ? (
-                                        <div className="flex-1 flex flex-col items-center justify-center py-8 text-center opacity-40">
-                                            <MapPin size={16} className="text-gray-600 mb-1" />
-                                            <span className="text-[10px] text-gray-500 italic">No locations</span>
-                                        </div>
-                                    ) : (
-                                        <div className="flex flex-col gap-2.5 max-h-[500px] overflow-y-auto custom-scrollbar pr-1">
-                                            {zoneSites.map((site: Site) => renderSiteCard(site))}
-                                        </div>
-                                    )}
-                                </div>
-                            );
-                        })}
-
-                        {(() => {
-                            const unassignedSites = sites.filter((s: Site) => !s.logisticsZoneId);
-                            return (
-                                <div key="unassigned" className="bg-black/15 border border-white/5 rounded-2xl p-4 flex flex-col gap-3 min-h-[300px] hover:border-white/10 transition-colors">
-                                    <div className="flex flex-col gap-1 border-b border-white/5 pb-2.5">
-                                        <div className="flex items-center gap-2">
-                                            <span className="w-2 h-2 rounded-full bg-gray-500 shrink-0 shadow-[0_0_8px_rgba(156,163,175,0.5)]" />
-                                            <h5 className="text-white font-bold text-xs uppercase tracking-wider truncate">Unassigned / Free Zone</h5>
-                                            <span className="text-[9px] text-gray-400 bg-white/5 px-1.5 py-0.5 rounded font-mono font-bold shrink-0 ml-auto">
-                                                {unassignedSites.length}
-                                            </span>
-                                        </div>
-                                        <p className="text-[10px] text-gray-500 truncate">
-                                            Locations with no zoning restrictions
-                                        </p>
-                                    </div>
-
-                                    {unassignedSites.length === 0 ? (
-                                        <div className="flex-1 flex flex-col items-center justify-center py-8 text-center opacity-40">
-                                            <MapPin size={16} className="text-gray-600 mb-1" />
-                                            <span className="text-[10px] text-gray-500 italic">No locations</span>
-                                        </div>
-                                    ) : (
-                                        <div className="flex flex-col gap-2.5 max-h-[500px] overflow-y-auto custom-scrollbar pr-1">
-                                            {unassignedSites.map((site: Site) => renderSiteCard(site))}
-                                        </div>
-                                    )}
-                                </div>
-                            );
-                        })()}
-                    </div>
+                    <LocationZoneView
+                        sites={sites}
+                        logisticsZones={logisticsZones}
+                        renderSiteCard={renderSiteCard}
+                    />
                 ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 items-start">
-                        {[
-                            {
-                                types: ['Administration', 'Administrative', 'Central Operations', 'HQ', 'Headquarters'],
-                                label: 'Administration',
-                                desc: 'Central Operations',
-                                dotColor: 'bg-purple-500',
-                                shadowColor: 'shadow-[0_0_8px_rgba(168,85,247,0.5)]',
-                                iconColor: 'bg-purple-500/20 text-purple-300'
-                            },
-                            {
-                                types: ['Warehouse'],
-                                label: 'Warehouse',
-                                desc: 'Storage & Fulfillment',
-                                dotColor: 'bg-blue-500',
-                                shadowColor: 'shadow-[0_0_8px_rgba(59,130,246,0.5)]',
-                                iconColor: 'bg-blue-500/20 text-blue-400'
-                            },
-                            {
-                                types: ['Distribution Center'],
-                                label: 'Distribution Center',
-                                desc: 'Regional Hub',
-                                dotColor: 'bg-cyan-500',
-                                shadowColor: 'shadow-[0_0_8px_rgba(6,182,212,0.5)]',
-                                iconColor: 'bg-cyan-500/20 text-cyan-400'
-                            },
-                            {
-                                types: ['Store'],
-                                label: 'Retail Store',
-                                desc: 'Customer-facing',
-                                dotColor: 'bg-green-500',
-                                shadowColor: 'shadow-[0_0_8px_rgba(34,197,94,0.5)]',
-                                iconColor: 'bg-green-500/20 text-green-400'
-                            },
-                            {
-                                types: ['Dark Store'],
-                                label: 'Online Store',
-                                desc: 'Online Fulfillment',
-                                dotColor: 'bg-orange-500',
-                                shadowColor: 'shadow-[0_0_8px_rgba(249,115,22,0.5)]',
-                                iconColor: 'bg-orange-500/20 text-orange-400'
-                            }
-                        ].map(cat => {
-                            const catSites = sites.filter((s: Site) => cat.types.includes(s.type));
-
-                            return (
-                                <div key={cat.label} className="bg-black/15 border border-white/5 rounded-2xl p-4 flex flex-col gap-3 min-h-[300px] hover:border-white/10 transition-colors">
-                                    <div className="flex items-center gap-2 border-b border-white/5 pb-2.5">
-                                        <span
-                                            className={`w-2 h-2 rounded-full ${cat.dotColor} ${cat.shadowColor} shrink-0`}
-                                        />
-                                        <h5 className="text-white font-bold text-xs uppercase tracking-wider truncate" title={cat.label}>{cat.label}s</h5>
-                                        <span className="text-[9px] text-gray-400 bg-white/5 px-1.5 py-0.5 rounded font-mono font-bold shrink-0 ml-auto">
-                                            {catSites.length}
-                                        </span>
-                                    </div>
-
-                                    {catSites.length === 0 ? (
-                                        <div className="flex-1 flex flex-col items-center justify-center py-8 text-center opacity-40">
-                                            <MapPin size={16} className="text-gray-600 mb-1" />
-                                            <span className="text-[10px] text-gray-500 italic">No locations</span>
-                                        </div>
-                                    ) : (
-                                        <div className="flex flex-col gap-2.5 max-h-[500px] overflow-y-auto custom-scrollbar pr-1">
-                                            {catSites.map((site: Site) => renderSiteCard(site))}
-                                        </div>
-                                    )}
-                                </div>
-                            );
-                        })}
-                    </div>
+                    <LocationCategoryView
+                        sites={sites}
+                        renderSiteCard={renderSiteCard}
+                    />
                 )}
 
                 <SiteModal
@@ -461,6 +394,7 @@ export default function LocationSettings() {
                     isGenerating={isGenerating}
                     generateBarcodes={generateBarcodes}
                     handleSaveSite={handleSaveSite}
+                    existingSites={sites}
                 />
 
                 <DeleteSiteModal

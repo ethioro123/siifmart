@@ -326,8 +326,8 @@ export function canRoleBeAtSiteType(role: UserRole, siteType: string): boolean {
 function normalizeSiteType(siteType: string): 'Administration' | 'Warehouse' | 'Store' | 'Any' {
     const lower = siteType.toLowerCase();
 
-    // Check for HQ/Headquarters/Administrative
-    if (lower === 'hq' || lower.includes('headquarters') || lower.includes('administrative')) {
+    // Check for HQ/Headquarters/Administrative/Administration/Central Operations
+    if (lower === 'hq' || lower.includes('headquarters') || lower.includes('admin') || lower.includes('central operations')) {
         return 'Administration';
     }
 

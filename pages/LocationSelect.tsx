@@ -5,6 +5,7 @@ import { useStore } from '../contexts/CentralStore'; // For user role access
 import { Building, Store, MapPin, Search, ChevronRight, LayoutDashboard, ArrowRight, ChevronDown } from 'lucide-react';
 import { native } from '../utils/native';
 import { motion, AnimatePresence } from 'framer-motion';
+import { formatDisplaySiteId } from '../utils/siteIdGenerator';
 
 export default function LocationSelect() {
     const { sites, setActiveSite, activeSite } = useData();
@@ -124,10 +125,15 @@ export default function LocationSelect() {
                                             className="flex items-center justify-between p-4 cursor-pointer gap-4"
                                         >
                                             <div className="flex-1 min-w-0">
-                                                <h3 className="text-sm font-semibold text-stone-100 group-hover:text-green-400 transition-colors truncate">
-                                                    {site.name}
-                                                </h3>
-                                                <p className="text-xs text-stone-400 mt-1 truncate flex items-center gap-1.5">
+                                                <div className="flex items-center gap-2 mb-1">
+                                                    <span className="font-mono text-[10px] font-black px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                                                        {formatDisplaySiteId(site)}
+                                                    </span>
+                                                    <h3 className="text-sm font-semibold text-stone-100 group-hover:text-green-400 transition-colors truncate">
+                                                        {site.name}
+                                                    </h3>
+                                                </div>
+                                                <p className="text-xs text-stone-400 truncate flex items-center gap-1.5">
                                                     <MapPin size={12} className="text-stone-500 flex-shrink-0" />
                                                     <span>{site.address}</span>
                                                 </p>
@@ -219,10 +225,15 @@ export default function LocationSelect() {
                                             className="flex items-center justify-between p-4 cursor-pointer gap-4"
                                         >
                                             <div className="flex-1 min-w-0">
-                                                <h3 className="text-sm font-semibold text-stone-100 group-hover:text-blue-400 transition-colors truncate">
-                                                    {site.name}
-                                                </h3>
-                                                <p className="text-xs text-stone-400 mt-1 truncate flex items-center gap-1.5">
+                                                <div className="flex items-center gap-2 mb-1">
+                                                    <span className="font-mono text-[10px] font-black px-1.5 py-0.5 rounded bg-blue-500/10 text-blue-400 border border-blue-500/20">
+                                                        {formatDisplaySiteId(site)}
+                                                    </span>
+                                                    <h3 className="text-sm font-semibold text-stone-100 group-hover:text-blue-400 transition-colors truncate">
+                                                        {site.name}
+                                                    </h3>
+                                                </div>
+                                                <p className="text-xs text-stone-400 truncate flex items-center gap-1.5">
                                                     <MapPin size={12} className="text-stone-500 flex-shrink-0" />
                                                     <span>{site.address}</span>
                                                 </p>

@@ -7,49 +7,96 @@ interface UseDiscountCodesStateProps {
 
 export function useDiscountCodesState({ addNotification }: UseDiscountCodesStateProps) {
   const [discountCodes, setDiscountCodes] = useState<DiscountCode[]>([
+    // ETHIOPIA PROMOTIONAL CODES (ET)
     {
-      id: 'DC-001',
+      id: 'DC-ET-001',
       code: 'WELCOME10',
       name: 'Welcome Discount',
       type: 'PERCENTAGE',
       value: 10,
+      country: 'ET',
+      country_code: 'ET',
+      currency: 'ETB',
       validFrom: '2024-01-01',
       validUntil: '2027-12-31',
       usageCount: 0,
       status: 'Active',
-      createdBy: 'System',
+      createdBy: 'System HQ',
       createdAt: new Date().toISOString(),
       description: '10% off for new customers'
     },
     {
-      id: 'DC-002',
+      id: 'DC-ET-002',
       code: 'SAVE50',
       name: 'Fixed Discount',
       type: 'FIXED',
       value: 50,
+      country: 'ET',
+      country_code: 'ET',
+      currency: 'ETB',
       minPurchaseAmount: 200,
       validFrom: '2024-01-01',
       validUntil: '2027-12-31',
       usageCount: 0,
       status: 'Active',
-      createdBy: 'System',
+      createdBy: 'System HQ',
       createdAt: new Date().toISOString(),
       description: '50 ETB off on orders over 200 ETB'
     },
     {
-      id: 'DC-003',
+      id: 'DC-ET-003',
       code: 'VIP2026',
       name: 'VIP Member Discount',
       type: 'PERCENTAGE',
       value: 15,
+      country: 'ET',
+      country_code: 'ET',
+      currency: 'ETB',
       maxDiscountAmount: 500,
       validFrom: '2024-01-01',
       validUntil: '2027-12-31',
       usageCount: 0,
       status: 'Active',
-      createdBy: 'System',
+      createdBy: 'System HQ',
       createdAt: new Date().toISOString(),
       description: '15% off (max 500 ETB) for VIP members'
+    },
+
+    // KENYA PROMOTIONAL CODES (KE) - 100% Isolated
+    {
+      id: 'DC-KE-001',
+      code: 'KARIBU10',
+      name: 'Karibu Discount',
+      type: 'PERCENTAGE',
+      value: 10,
+      country: 'KE',
+      country_code: 'KE',
+      currency: 'KSh',
+      validFrom: '2024-01-01',
+      validUntil: '2027-12-31',
+      usageCount: 0,
+      status: 'Active',
+      createdBy: 'System HQ',
+      createdAt: new Date().toISOString(),
+      description: '10% off for new Kenyan customers'
+    },
+    {
+      id: 'DC-KE-002',
+      code: 'MASHUJAA50',
+      name: 'Mashujaa Savings',
+      type: 'FIXED',
+      value: 50,
+      country: 'KE',
+      country_code: 'KE',
+      currency: 'KSh',
+      minPurchaseAmount: 250,
+      validFrom: '2024-01-01',
+      validUntil: '2027-12-31',
+      usageCount: 0,
+      status: 'Active',
+      createdBy: 'System HQ',
+      createdAt: new Date().toISOString(),
+      description: '50 KSh off on orders over 250 KSh'
     }
   ]);
 
@@ -68,11 +115,22 @@ export function useDiscountCodesState({ addNotification }: UseDiscountCodesState
     addNotification('info', 'Discount code deleted');
   }, [addNotification]);
 
-  const validateDiscountCode = useCallback((code: string, siteId?: string, subtotal?: number): { valid: boolean; discountCode?: DiscountCode; error?: string } => {
-    const discountCode = discountCodes.find(dc => dc.code.toUpperCase() === code.toUpperCase());
+  const validateDiscountCode = useCallback((
+    code: string,
+    siteId?: string,
+    subtotal?: number,
+    targetCountry: string = 'ET'
+  ): { valid: boolean; discountCode?: DiscountCode; error?: string } => {
+    const discountCode = discountCodes.find(dc => dc.code.toUpperCase() === code.toUpperCase().trim());
 
     if (!discountCode) {
       return { valid: false, error: 'Invalid discount code' };
+    }
+
+    // National Campaign & Voucher Isolation: Check country match
+    const codeCountry = discountCode.country || discountCode.country_code || 'ET';
+    if (targetCountry && codeCountry !== targetCountry) {
+      return { valid: false, error: 'Invalid discount code for this market' };
     }
 
     if (discountCode.status !== 'Active') {
@@ -96,7 +154,7 @@ export function useDiscountCodesState({ addNotification }: UseDiscountCodesState
     }
 
     if (discountCode.minPurchaseAmount !== undefined && subtotal !== undefined && subtotal < discountCode.minPurchaseAmount) {
-      return { valid: false, error: `Minimum purchase of ${discountCode.minPurchaseAmount} required` };
+      return { valid: false, error: `Minimum purchase of ${discountCode.currency || ''} ${discountCode.minPurchaseAmount} required` };
     }
 
     if (discountCode.applicableSites && discountCode.applicableSites.length > 0 && siteId) {

@@ -1,6 +1,7 @@
 import { useCallback } from 'react';
 import type { Employee, ShiftRecord, Site, SystemLog } from '../../types';
-import { employeesService } from '../../services/supabase.service';
+import { employeesService, shiftsService } from '../../services/supabase.service';
+
 import { logger } from '../../utils/logger';
 
 interface UseEmployeeActionsDeps {
@@ -18,9 +19,13 @@ export function useEmployeeActions(deps: UseEmployeeActionsDeps) {
 
     const addEmployee = useCallback(async (employee: Employee, user?: string) => {
         try {
+            const targetSiteId = (employee.siteId || activeSite?.id || '').trim();
+            if (!targetSiteId) {
+                throw new Error('Workplace location is mandatory. Every employee must be assigned to an operating location.');
+            }
             const newEmployee = await employeesService.create({
                 ...employee,
-                siteId: employee.siteId || activeSite?.id || ''
+                siteId: targetSiteId
             });
             setEmployees(prev => [newEmployee, ...prev]);
             addNotification('success', `Employee ${employee.name} added`);
@@ -59,49 +64,95 @@ export function useEmployeeActions(deps: UseEmployeeActionsDeps) {
         try {
             const cashier = employees.find(e => e.id === cashierId);
             const staffName = cashier?.name || 'Staff Member';
+            const shiftId = crypto.randomUUID();
             const shift: ShiftRecord = {
-                id: crypto.randomUUID(),
-                siteId: activeSiteId || '',
+                id: shiftId,
+                siteId: activeSiteId || activeSite?.id || '',
                 cashierId,
                 cashierName: staffName,
                 startTime: new Date().toISOString(),
                 status: 'Open',
                 openingFloat,
                 cashSales: 0,
-                expectedCash: 0,
+                expectedCash: openingFloat,
                 actualCash: 0,
                 variance: 0,
-                discrepancyReason: ''
+                discrepancyReason: '',
+                reconciliationStatus: 'Pending'
             };
-            setShifts(prev => {
-                const updated = [shift, ...prev.filter(s => !(s.cashierId === cashierId && s.status === 'Open'))];
-                try { localStorage.setItem('siifmart_pos_shifts', JSON.stringify(updated)); } catch {}
-                return updated;
-            });
-            addNotification('success', 'Shift started');
-            logSystemEvent('Start Shift', `Started shift for ${staffName}`, staffName, 'HR');
+
+            // 1. Optimistic local state update
+            setShifts(prev => [shift, ...prev.filter(s => !(s.cashierId === cashierId && s.status === 'Open'))]);
+
+            // 2. Persist directly to Supabase with resilient fallback
+            try {
+                await shiftsService.create(shift);
+            } catch (dbErr) {
+                logger.warn('useEmployeeActions', `Supabase shift insert error (operating optimistically): ${dbErr}`);
+            }
+
+            addNotification('success', `Shift started with ${openingFloat.toLocaleString()} float`);
+            logSystemEvent('Start Shift', `Started shift for ${staffName} with float ${openingFloat}`, staffName, 'HR');
         } catch (error) {
             logger.error('useEmployeeActions', 'Failed to start shift:', error as Error);
             addNotification('alert', 'Failed to start shift');
         }
-    }, [activeSiteId, employees, addNotification, logSystemEvent]);
+    }, [activeSiteId, activeSite?.id, employees, addNotification, logSystemEvent, setShifts]);
 
     const closeShift = useCallback(async (shift: ShiftRecord) => {
         try {
             const cashier = employees.find(e => e.id === shift.cashierId);
             const staffName = shift.cashierName || cashier?.name || 'Staff Member';
-            setShifts(prev => {
-                const updated = prev.map(s => s.id === shift.id ? { ...s, ...shift, status: 'Closed' as const, endTime: new Date().toISOString() } : s);
-                try { localStorage.setItem('siifmart_pos_shifts', JSON.stringify(updated)); } catch {}
-                return updated;
-            });
-            addNotification('success', 'Shift closed');
-            logSystemEvent('Close Shift', `Closed shift for ${staffName}`, staffName, 'HR');
+            const endTime = new Date().toISOString();
+            const closedShift: ShiftRecord = {
+                ...shift,
+                status: 'Closed',
+                endTime,
+                closedBy: staffName
+            };
+
+            // 1. Optimistic local state update
+            setShifts(prev => prev.map(s => s.id === shift.id ? closedShift : s));
+
+            // 2. Persist directly to Supabase
+            await shiftsService.update(shift.id, closedShift);
+
+            addNotification('success', 'Shift closed & submitted for HQ audit');
+            logSystemEvent('Close Shift', `Closed shift for ${staffName}. Variance: ${closedShift.variance || 0}`, staffName, 'HR');
         } catch (error) {
             logger.error('useEmployeeActions', 'Failed to close shift:', error as Error);
-            addNotification('alert', 'Failed to close shift');
+            addNotification('alert', 'Failed to close shift in database');
         }
-    }, [employees, addNotification, logSystemEvent]);
+    }, [employees, addNotification, logSystemEvent, setShifts]);
 
-    return { addEmployee, updateEmployee, deleteEmployee, startShift, closeShift };
+    const reconcileShift = useCallback(async (
+        shiftId: string,
+        hqUserName: string,
+        status: 'Reconciled' | 'Discrepancy_Flagged' = 'Reconciled',
+        hqNotes?: string
+    ) => {
+        try {
+            // 1. Persist to Supabase
+            await shiftsService.reconcile(shiftId, hqUserName, status, hqNotes);
+
+            // 2. Update local state
+            setShifts(prev => prev.map(s => s.id === shiftId ? {
+                ...s,
+                status: status === 'Reconciled' ? 'Audited' : 'Flagged',
+                reconciledBy: hqUserName,
+                reconciledAt: new Date().toISOString(),
+                reconciliationStatus: status,
+                hqNotes: hqNotes || s.hqNotes
+            } : s));
+
+            addNotification('success', `Shift reconciliation signed off: ${status}`);
+            logSystemEvent('Reconcile Shift', `HQ ${hqUserName} reconciled shift ${shiftId}: ${status}`, hqUserName, 'Finance');
+        } catch (error) {
+            logger.error('useEmployeeActions', 'Failed to reconcile shift:', error as Error);
+            addNotification('alert', 'Failed to save reconciliation status');
+        }
+    }, [addNotification, logSystemEvent, setShifts]);
+
+    return { addEmployee, updateEmployee, deleteEmployee, startShift, closeShift, reconcileShift };
 }
+

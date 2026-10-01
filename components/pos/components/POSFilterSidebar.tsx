@@ -1,6 +1,7 @@
 import React from 'react';
 import { Filter, X, RotateCcw } from 'lucide-react';
 import { usePOS } from '../POSContext';
+import { CURRENCY_SYMBOL } from '../../../constants';
 
 interface POSFilterSidebarProps {
     isOpen: boolean;
@@ -117,7 +118,7 @@ export const POSFilterSidebar: React.FC<POSFilterSidebarProps> = ({
                         <label className="text-xs font-black uppercase tracking-wider text-[#4D6E56] dark:text-[#7A9E83]">Price Range</label>
                         <div className="flex items-center gap-3">
                             <div className="flex-1 flex items-center bg-white dark:bg-black/35 border border-[#E2DCCE] dark:border-emerald-950/20 rounded-xl px-3 py-2">
-                                <span className="text-stone-400 dark:text-stone-600 text-xs font-bold mr-1.5">$</span>
+                                <span className="text-stone-400 dark:text-stone-600 text-xs font-bold mr-1.5">{CURRENCY_SYMBOL}</span>
                                 <input
                                     type="number"
                                     placeholder="Min"
@@ -129,7 +130,7 @@ export const POSFilterSidebar: React.FC<POSFilterSidebarProps> = ({
                             </div>
                             <span className="text-[#4D6E56] text-xs font-bold">to</span>
                             <div className="flex-1 flex items-center bg-white dark:bg-black/35 border border-[#E2DCCE] dark:border-emerald-950/20 rounded-xl px-3 py-2">
-                                <span className="text-stone-400 dark:text-stone-600 text-xs font-bold mr-1.5">$</span>
+                                <span className="text-stone-400 dark:text-stone-600 text-xs font-bold mr-1.5">{CURRENCY_SYMBOL}</span>
                                 <input
                                     type="number"
                                     placeholder="Max"

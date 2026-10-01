@@ -8,6 +8,8 @@ import { decodeLocation, isLocationBarcode, extractPrefixFromBarcode, extractSku
 import { useScanOnly } from '../../../hooks/useScanOnly';
 import { isWeightBased, isVolumeBased, getSellUnit, getEffectivePackageSize, SELL_UNITS } from '../../../utils/units';
 import { useLanguage } from '../../../contexts/LanguageContext';
+import { useData } from '../../../contexts/DataContext';
+import { validateCrossBorderSku } from '../../../utils/skuValidation';
 import { PickScannerPickedList } from './components/PickScannerPickedList';
 import { PickScannerSummary } from './components/PickScannerSummary';
 import { PickScannerInstructionPanel } from './components/PickScannerInstructionPanel';
@@ -43,6 +45,7 @@ export const PickScanner: React.FC<PickScannerProps> = ({
     expectedPrefix
 }) => {
     const { t } = useLanguage();
+    const { effectiveCountry } = useData();
     const [step, setStep] = useState<'LOCATION' | 'ITEM' | 'QUANTITY'>('LOCATION');
     const [inputVal, setInputVal] = useState('');
     const [qtyVal, setQtyVal] = useState('');
@@ -74,14 +77,12 @@ export const PickScanner: React.FC<PickScannerProps> = ({
             return (item as any).requestedMeasureQty;
         }
         const prod = productInfo || getProduct(item);
-        if (prod) {
-            const unit = prod.unit;
-            const isWeightVol = isWeightBased(unit) || isVolumeBased(unit);
-            const sizeNum = getEffectivePackageSize(unit, prod.size || item.size);
-            if (isWeightVol && sizeNum > 0) {
-                const expected = item.expectedQty || (item as any).quantity || 0;
-                return expected * sizeNum;
-            }
+        const customAttrs = prod?.customAttributes || (prod as any)?.custom_attributes;
+        const sellBy = customAttrs?.commercial?.sellBy || '';
+        const isWeighted = customAttrs?.commercial?.isWeighted === true;
+
+        if (sellBy === 'Weight' || sellBy === 'Volume' || isWeighted) {
+            return item.expectedQty || (item as any).quantity || null;
         }
         return null;
     };
@@ -202,6 +203,18 @@ export const PickScanner: React.FC<PickScannerProps> = ({
             const product = getProduct(currentItem);
             const targetSku = currentItem.sku ? normalizeSku(currentItem.sku) : '';
             const decodedSku = extractSkuFromScan(val);
+
+            // Sovereign Multi-Country SKU check (§4 Architecture)
+            const countryCheck = validateCrossBorderSku(decodedSku, effectiveCountry || 'ET');
+            if (!countryCheck.isValid && countryCheck.isForeign) {
+                playBeep('error');
+                setErrorMsg(countryCheck.errorMessage || 'Foreign SKU Detected');
+                setShowError(true);
+                setInputVal('');
+                setTimeout(() => setShowError(false), 3000);
+                return;
+            }
+
             const scannedVal = normalizeSku(decodedSku);
             
             const matchesSku = scannedVal === targetSku;

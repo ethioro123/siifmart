@@ -12,6 +12,7 @@ import Toast from '../components/Toast';
 import { usePresence } from '../hooks/useRealtime';
 import { logger } from '../utils/logger';
 import { fetchLoginLocation } from '../utils/geolocationHelper';
+import { evaluateGeofence } from '../utils/geofence';
 interface User {
   id: string;
   name: string;
@@ -206,6 +207,16 @@ export function StoreProvider({ children }: { children: ReactNode }) {
               details: `Logged in from location: ${location}`,
               module: 'Security'
             }).catch(dbErr => logger.error('CentralStore', 'Non-blocking DB logging failure', dbErr as Error));
+
+            const geofence = evaluateGeofence(location);
+            if (geofence.isForeignAnomaly || geofence.isOffPremise) {
+              dbSystemLogsService.create({
+                user_name: profile.name,
+                action: 'GEOFENCE_ALERT',
+                details: `SECURITY ALERT: User ${profile.name} (${mappedRole}) authenticated from off-premise / foreign location: ${location}. ${geofence.anomalyReason || ''}`,
+                module: 'Security'
+              }).catch(() => {});
+            }
           } catch (err) {
             logger.error('CentralStore', 'Failed to log USER_LOGIN to database:', err);
           }
@@ -314,11 +325,11 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const checkSession = async () => {
-    // FAIL-SAFE: Ensure loading is ALWAYS set to false within 10 seconds
+    // FAIL-SAFE: Ensure loading is ALWAYS set to false within 15 seconds
     const failSafeTimeout = setTimeout(() => {
-      logger.warn('CentralStore', '⚠️ CentralStore: Session check fail-safe triggered after 10s');
+      logger.warn('CentralStore', '⚠️ CentralStore: Session check fail-safe triggered after 15s');
       setLoading(false);
-    }, 10000);
+    }, 15000);
 
     try {
       const session = await authService.getSession();

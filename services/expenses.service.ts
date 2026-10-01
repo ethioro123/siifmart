@@ -72,10 +72,14 @@ export const expensesService = {
     },
 
     async update(id: string, updates: Partial<ExpenseRecord>) {
-        const dbUpdates: any = { ...updates };
-        if (updates.siteId !== undefined) { dbUpdates.site_id = updates.siteId; delete dbUpdates.siteId; }
-        if (updates.date !== undefined) { dbUpdates.expense_date = updates.date; delete dbUpdates.date; }
-        if (updates.approvedBy !== undefined) { dbUpdates.approved_by = updates.approvedBy; delete dbUpdates.approvedBy; }
+        const dbUpdates: Record<string, any> = {};
+        if (updates.siteId !== undefined) dbUpdates.site_id = updates.siteId;
+        if (updates.date !== undefined) dbUpdates.expense_date = updates.date;
+        if (updates.category !== undefined) dbUpdates.category = updates.category;
+        if (updates.description !== undefined) dbUpdates.description = updates.description;
+        if (updates.amount !== undefined) dbUpdates.amount = updates.amount;
+        if (updates.status !== undefined) dbUpdates.status = updates.status;
+        if (updates.approvedBy !== undefined) dbUpdates.approved_by = updates.approvedBy;
 
         const { data, error } = await supabase
             .from('expenses')
@@ -103,10 +107,12 @@ export const expensesService = {
         return true;
     },
 
-    // NEW: Server-Side Financial Analytics
-    async getFinancialMetrics(siteId?: string, startDate?: string, endDate?: string) {
-        // Construct params, handling undefined which RPC might not like if not default, but we set defaults to NULL in SQL
-        const params: any = {};
+    // NEW: Server-Side Financial Analytics with Multi-Country Tenant Isolation
+    async getFinancialMetrics(siteId?: string, startDate?: string, endDate?: string, countryCode?: string) {
+        // Construct params with explicit country isolation
+        const params: Record<string, any> = {
+            p_country_code: countryCode || 'ET'
+        };
         if (siteId && siteId !== 'All') params.p_site_id = siteId;
         if (startDate) params.p_start_date = startDate;
         if (endDate) params.p_end_date = endDate;

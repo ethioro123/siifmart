@@ -3,9 +3,10 @@ import { CURRENCY_SYMBOL } from '../../../constants';
 import { SaleRecord, Site } from '../../../types';
 import { printHtmlContent } from '../../../utils/printHelper';
 
-export const triggerReceiptPrint = (selectedSale: SaleRecord, settings: any, sites: Site[]) => {
+export const triggerReceiptPrint = (selectedSale: SaleRecord, settings: any, sites: Site[], currencySymbol: string = CURRENCY_SYMBOL) => {
       const {
          storeName = 'SIIFMART',
+         logoUrl,
          posReceiptLogo,
          posReceiptShowLogo = true,
          posReceiptHeader = 'SIIFMART RETAIL',
@@ -19,11 +20,15 @@ export const triggerReceiptPrint = (selectedSale: SaleRecord, settings: any, sit
          posReceiptEnableQR = true,
          posReceiptQRLink = 'https://siifmart.com/feedback',
          posReceiptWidth = '80mm',
-         posReceiptFont = 'sans-serif'
+         posReceiptFont = 'sans-serif',
+         slogan
       } = settings;
 
       const saleSite = sites.find(s => s.id === selectedSale.siteId);
       const displayStoreName = storeName || saleSite?.name || 'SIIFMART';
+      const displayLogo = posReceiptLogo || logoUrl;
+      const displayHeader = posReceiptHeader || 'SIIFMART RETAIL';
+      const displaySlogan = slogan && slogan !== displayHeader ? slogan : '';
       const is80mm = posReceiptWidth === '80mm';
       const paperWidth = is80mm ? '80mm' : '58mm';
 
@@ -83,14 +88,15 @@ export const triggerReceiptPrint = (selectedSale: SaleRecord, settings: any, sit
                </style>
              </head>
              <body>
-                 ${posReceiptShowLogo && posReceiptLogo ? `
+                 ${posReceiptShowLogo && displayLogo ? `
                    <div class="flex justify-center mb-4">
-                     <img src="${posReceiptLogo}" class="logo" />
+                     <img src="${displayLogo}" class="logo" />
                    </div>
                  ` : ''}
                  <div class="text-center border-b-2-dashed pb-4 mb-4">
                    <h2 class="text-xl font-black uppercase tracking-tighter leading-none mb-1">${displayStoreName}</h2>
-                   <p class="text-[10px] font-bold uppercase tracking-widest opacity-80">${posReceiptHeader}</p>
+                   <p class="text-[10px] font-bold uppercase tracking-widest opacity-80">${displayHeader}</p>
+                   ${displaySlogan ? `<p class="text-[9px] italic opacity-70 mt-0.5">${displaySlogan}</p>` : ''}
                  </div>
                  <div class="text-[10px] text-center space-y-05 mb-4 border-b-2-dashed pb-4">
                     ${posReceiptAddress ? `<p>${posReceiptAddress}</p>` : ''}
@@ -124,7 +130,7 @@ export const triggerReceiptPrint = (selectedSale: SaleRecord, settings: any, sit
                        <div class="flex justify-between text-[10px]">
                           <div>
                              <div class="font-bold">${item.name}</div>
-                             <div class="text-[9px] opacity-60">${item.quantity} x ${CURRENCY_SYMBOL}${item.price.toFixed(2)}</div>
+                             <div class="text-[9px] opacity-60">${item.quantity} x ${currencySymbol}${item.price.toFixed(2)}</div>
                           </div>
                           <div class="font-bold">${(item.price * item.quantity).toLocaleString()}</div>
                        </div>
@@ -151,14 +157,26 @@ export const triggerReceiptPrint = (selectedSale: SaleRecord, settings: any, sit
                     ` : ''}
                     <div class="flex justify-between font-black text-base border-t-black pt-2 mt-2">
                        <span>TOTAL</span>
-                       <span>${CURRENCY_SYMBOL} ${selectedSale.total.toLocaleString()}</span>
+                       <span>${currencySymbol} ${selectedSale.total.toLocaleString()}</span>
                     </div>
                  </div>
                  <div class="text-[10px] font-bold border-t-dashed pt-4 mb-4">
                     <div class="flex justify-between">
-                       <span>PAID (${selectedSale.method.toUpperCase()})</span>
-                       <span>${CURRENCY_SYMBOL} ${selectedSale.total.toLocaleString()}</span>
+                       <span>PAID (${selectedSale.mobilePaymentChannel ? selectedSale.mobilePaymentChannel.replace(/_/g, ' ') : selectedSale.method.toUpperCase()})</span>
+                       <span>${currencySymbol} ${selectedSale.total.toLocaleString()}</span>
                     </div>
+                    ${selectedSale.mobileTransactionRef ? `
+                      <div class="flex justify-between text-[9px] opacity-75 font-mono mt-0.5">
+                        <span>TX REF:</span>
+                        <span class="font-bold">${selectedSale.mobileTransactionRef}</span>
+                      </div>
+                    ` : ''}
+                    ${selectedSale.customerPhone ? `
+                      <div class="flex justify-between text-[9px] opacity-60 font-mono">
+                        <span>PHONE:</span>
+                        <span>${selectedSale.customerPhone}</span>
+                      </div>
+                    ` : ''}
                  </div>
                  <div class="text-center space-y-1 pt-4 border-t-dashed">
                     <p class="text-xs font-bold leading-tight mb-2">${posReceiptFooter}</p>

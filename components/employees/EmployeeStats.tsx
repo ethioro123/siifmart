@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { User, Clock, ClipboardList, TrendingUp, ArrowRight } from 'lucide-react';
-import { Employee, EmployeeTask } from '../../types';
+import { Employee, EmployeeTask, ShiftRecord } from '../../types';
 
 interface StatCardProps {
    title: string;
@@ -37,15 +37,41 @@ const StatCard = ({ title, value, icon: Icon, color, onClick, active }: StatCard
 interface EmployeeStatsProps {
    employees: Employee[];
    tasks: EmployeeTask[];
+   shifts?: ShiftRecord[];
+   onlineIds?: Set<string>;
    isTaskQueueOpen: boolean;
    setIsTaskQueueOpen: (open: boolean) => void;
 }
 
-export default function EmployeeStats({ employees, tasks, isTaskQueueOpen, setIsTaskQueueOpen }: EmployeeStatsProps) {
+export default function EmployeeStats({
+   employees,
+   tasks,
+   shifts = [],
+   onlineIds = new Set(),
+   isTaskQueueOpen,
+   setIsTaskQueueOpen
+}: EmployeeStatsProps) {
+   // Real active shifts calculation (Zero fake math)
+   const activeShiftsCount = useMemo(() => {
+      const openShifts = shifts.filter(s => (s.status as string) === 'Open' || (s.status as string) === 'open' || !s.endTime);
+      if (openShifts.length > 0) return openShifts.length;
+      return onlineIds.size;
+   }, [shifts, onlineIds]);
+
+   // Real calculated average performance score (Zero hardcoded values)
+   const avgPerformanceText = useMemo(() => {
+      const rated = employees.filter(e => typeof e.performanceScore === 'number' && e.performanceScore > 0);
+      if (rated.length > 0) {
+         const avg = Math.round(rated.reduce((acc, e) => acc + (e.performanceScore || 0), 0) / rated.length);
+         return `${avg}%`;
+      }
+      return employees.length > 0 ? 'N/A' : '0%';
+   }, [employees]);
+
    return (
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
          <StatCard title="Total Workforce" value={employees.length} icon={User} color="text-sky-700 dark:text-sky-400" />
-         <StatCard title="Active Shift" value={Math.floor(employees.length * 0.7)} icon={Clock} color="text-emerald-700 dark:text-[#A9CBA2]" />
+         <StatCard title="Active Shift" value={activeShiftsCount} icon={Clock} color="text-emerald-700 dark:text-[#A9CBA2]" />
          <StatCard
             title="Pending Tasks"
             value={tasks.filter(t => t.status !== 'Completed').length}
@@ -54,7 +80,7 @@ export default function EmployeeStats({ employees, tasks, isTaskQueueOpen, setIs
             onClick={() => setIsTaskQueueOpen(!isTaskQueueOpen)}
             active={isTaskQueueOpen}
          />
-         <StatCard title="Avg Performance" value="88%" icon={TrendingUp} color="text-emerald-700 dark:text-[#A9CBA2]" />
+         <StatCard title="Avg Performance" value={avgPerformanceText} icon={TrendingUp} color="text-emerald-700 dark:text-[#A9CBA2]" />
       </div>
    );
 }

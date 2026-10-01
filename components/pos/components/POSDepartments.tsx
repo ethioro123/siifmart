@@ -2,6 +2,7 @@ import React from 'react';
 import { X, RotateCcw } from 'lucide-react';
 import { usePOS } from '../POSContext';
 import { native } from '../../../utils/native';
+import { CURRENCY_SYMBOL } from '../../../constants';
 
 export const POSDepartments: React.FC = () => {
     const {
@@ -126,14 +127,14 @@ export const POSDepartments: React.FC = () => {
                     
                     {minPriceFilter !== '' && (
                         <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[9px] font-bold bg-amber-600/10 text-amber-700 dark:text-amber-500 border border-amber-600/20">
-                            Min: ${minPriceFilter}
+                            Min: {CURRENCY_SYMBOL} {minPriceFilter}
                             <button onClick={() => setMinPriceFilter('')} title="Remove minimum price filter" aria-label="Remove minimum price filter" className="hover:text-red-500 ml-0.5"><X size={10} /></button>
                         </span>
                     )}
 
                     {maxPriceFilter !== '' && (
                         <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[9px] font-bold bg-amber-600/10 text-amber-700 dark:text-amber-500 border border-amber-600/20">
-                            Max: ${maxPriceFilter}
+                            Max: {CURRENCY_SYMBOL} {maxPriceFilter}
                             <button onClick={() => setMaxPriceFilter('')} title="Remove maximum price filter" aria-label="Remove maximum price filter" className="hover:text-red-500 ml-0.5"><X size={10} /></button>
                         </span>
                     )}

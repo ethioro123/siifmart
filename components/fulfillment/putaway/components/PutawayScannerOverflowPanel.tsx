@@ -35,7 +35,7 @@ export const PutawayScannerOverflowPanel: React.FC<PutawayScannerOverflowPanelPr
                         setIsOverflowMode(!isOverflowMode);
                         setAwaitingMismatchConfirmation(false);
                     }}
-                    className={`w-full sm:w-auto px-5 py-3 rounded-2xl text-xs font-black uppercase tracking-wider transition-all duration-300 flex items-center justify-center gap-2.5 border shadow-sm min-h-[44px] active:scale-[0.98] ${
+                    className={`w-full sm:w-auto px-5 py-3 rounded-2xl text-xs font-black uppercase tracking-wider transition-colors duration-300 flex items-center justify-center gap-2.5 border shadow-sm min-h-[44px] active:scale-[0.98] ${
                         isOverflowMode 
                             ? 'bg-amber-600 dark:bg-amber-500 text-white border-amber-500 shadow-amber-500/25 ring-2 ring-amber-400/40 animate-pulse' 
                             : 'bg-white/80 dark:bg-[#1C2620]/80 text-stone-700 dark:text-stone-300 border-[#E2DCCE]/80 dark:border-[#A9CBA2]/15 hover:bg-[#2C5E3B]/10 hover:text-[#2C5E3B] dark:hover:text-[#A9CBA2] hover:border-[#2C5E3B]/30'
@@ -48,7 +48,7 @@ export const PutawayScannerOverflowPanel: React.FC<PutawayScannerOverflowPanelPr
 
             {/* Overflow Mode Active Panel */}
             {isOverflowMode && (
-                <div className="p-4 sm:p-5 rounded-3xl bg-amber-50/90 dark:bg-amber-950/40 border-2 border-amber-400/60 dark:border-amber-500/40 text-center animate-in fade-in zoom-in-95 duration-200 shadow-lg shadow-amber-500/5 backdrop-blur-sm">
+                <div className="p-4 sm:p-5 rounded-3xl bg-amber-50/90 dark:bg-amber-950/40 border-2 border-amber-400/60 dark:border-amber-500/40 text-center animate-in fade-in zoom-in-95 duration-200 shadow-lg shadow-amber-500/5">
                     <div className="flex items-center justify-center gap-2 text-amber-700 dark:text-amber-300 mb-2">
                         <AlertTriangle size={16} className="shrink-0" />
                         <p className="text-[11px] font-black uppercase tracking-wider">
@@ -83,7 +83,7 @@ export const PutawayScannerOverflowPanel: React.FC<PutawayScannerOverflowPanelPr
                                                     setSelectingLoc(null);
                                                 }
                                             }}
-                                            className={`px-3.5 py-2 rounded-xl bg-white dark:bg-black/50 border border-amber-500/40 text-xs font-mono font-black text-amber-800 dark:text-amber-200 hover:bg-amber-600 hover:text-white dark:hover:bg-amber-500 dark:hover:text-black transition-all shadow-xs flex items-center gap-1.5 active:scale-95 ${
+                                            className={`px-3.5 py-2 rounded-xl bg-white dark:bg-black/50 border border-amber-500/40 text-xs font-mono font-black text-amber-800 dark:text-amber-200 hover:bg-amber-600 hover:text-white dark:hover:bg-amber-500 dark:hover:text-black transition-colors shadow-xs flex items-center gap-1.5 active:scale-95 min-h-[40px] ${
                                                 isAnySelecting ? 'opacity-60 cursor-not-allowed' : ''
                                             }`}
                                         >
@@ -103,7 +103,7 @@ export const PutawayScannerOverflowPanel: React.FC<PutawayScannerOverflowPanelPr
 
             {/* Occupants Warning */}
             {currentOccupants.length > 0 && (
-                <div className="p-4 sm:p-5 rounded-3xl bg-amber-50/70 dark:bg-amber-950/20 border border-amber-300/60 dark:border-amber-500/20 text-left animate-in slide-in-from-top-2 duration-300 shadow-sm backdrop-blur-sm">
+                <div className="p-4 sm:p-5 rounded-3xl bg-amber-50/70 dark:bg-amber-950/20 border border-amber-300/60 dark:border-amber-500/20 text-left animate-in slide-in-from-top-2 duration-300 shadow-sm">
                     <div className="flex items-center gap-2 mb-3 border-b border-amber-200 dark:border-amber-500/10 pb-2">
                         <Users size={14} className="text-amber-600 dark:text-amber-400" />
                         <span className="text-[10px] font-black uppercase text-amber-700 dark:text-amber-400 tracking-widest">

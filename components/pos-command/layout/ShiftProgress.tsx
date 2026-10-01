@@ -2,26 +2,70 @@ import React from 'react';
 import { usePOSCommand } from '../POSCommandContext';
 import { useLanguage } from '../../../contexts/LanguageContext';
 import { useStore } from '../../../contexts/CentralStore';
+import { useData } from '../../../contexts/DataContext';
 import { CURRENCY_SYMBOL } from '../../../constants';
-import { ShieldCheck, CheckCircle2, Zap } from 'lucide-react';
+import { ShieldCheck, CheckCircle2, Zap, Play } from 'lucide-react';
 
 export const ShiftProgress: React.FC = () => {
     const { t } = useLanguage();
     const { user } = useStore();
-    const { totalRevenue, getShiftSummary, txCount } = usePOSCommand();
+    const { settings } = useData();
+    const { totalRevenue, getShiftSummary, shiftTxCount, activeShift, setIsStartShiftModalOpen, dateRange } = usePOSCommand();
 
     const isCentralHQ = [
         'super_admin',
-        'ceo'
+        'ceo',
+        'admin'
     ].includes(user?.role?.toLowerCase() || '');
 
-    // For managers: Financial goal (ETB 5,000). For cashiers: Transaction goal (50 Orders).
-    const dailyRevenueTarget = 5000;
-    const dailyTxTarget = 50;
+    // Inactive drawer zero-state for cashiers without an active shift
+    if (!activeShift && !isCentralHQ) {
+        return (
+            <div className="bg-white/85 dark:bg-[#18201B]/60 lg:backdrop-blur-2xl border border-[#E2DCCE] dark:border-emerald-950/20 rounded-[32px] p-8 relative overflow-hidden shadow-[0_24px_80px_-12px_rgba(34,50,38,0.06)] dark:shadow-[0_32px_96px_-12px_rgba(5,8,6,0.65)]">
+                {/* Ambient glows */}
+                <div className="absolute top-0 right-0 w-[350px] h-[350px] bg-[#2C5E3B]/8 dark:bg-[#2C5E3B]/4 rounded-full blur-[100px] -mr-48 -mt-48 pointer-events-none" />
+                <div className="absolute bottom-0 left-0 w-[200px] h-[200px] bg-amber-600/8 dark:bg-amber-700/3 rounded-full blur-[80px] -ml-24 -mb-24 pointer-events-none" />
+                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-1/3 h-[1px] bg-gradient-to-r from-transparent via-[#2C5E3B]/25 to-transparent" />
+
+                <div className="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+                    <div className="space-y-2">
+                        <div className="flex items-center gap-2">
+                            <span className="w-2.5 h-2.5 rounded-full bg-amber-500" />
+                            <h3 className="text-xs font-black uppercase tracking-[0.2em] text-[#4D6E56] dark:text-[#7A9E83]">
+                                Cash Drawer Closed • Daily Shift Inactive
+                            </h3>
+                        </div>
+                        <h2 className="text-2xl font-black text-[#1E3F27] dark:text-[#EAE5D9] tracking-tight">
+                            Ready to begin today's register sales?
+                        </h2>
+                        <p className="text-xs text-stone-500 dark:text-stone-400 max-w-xl leading-relaxed">
+                            Count physical float cash in the register drawer and submit opening float to start sales. Real-time cash tracking and daily HQ audit reconciliation will activate immediately.
+                        </p>
+                    </div>
+
+                    <button
+                        onClick={() => setIsStartShiftModalOpen(true)}
+                        className="px-6 py-3.5 bg-[#2C5E3B] hover:bg-[#1E3F27] text-white text-xs font-bold uppercase tracking-wider rounded-2xl shadow-md hover:shadow-lg transition-all flex items-center gap-2.5 active:scale-95 cursor-pointer ring-4 ring-[#2C5E3B]/20 shrink-0"
+                    >
+                        <Play size={16} className="fill-current" />
+                        <span>Open Drawer & Start Shift</span>
+                    </button>
+                </div>
+            </div>
+        );
+    }
+
+    // Targets from Settings, scaled dynamically to the selected time filter
+    const rangeStr = String(dateRange);
+    const multiplier = rangeStr.includes('Quarter') ? 90 : rangeStr.includes('Month') ? 30 : rangeStr.includes('Year') ? 365 : 1;
+    const baseRevenueTarget = settings?.posDailyRevenueTarget || 50000;
+    const baseTxTarget = settings?.posDailyTxTarget || 50;
+    const dailyRevenueTarget = baseRevenueTarget * multiplier;
+    const dailyTxTarget = baseTxTarget * multiplier;
 
     const progressPercent = isCentralHQ
         ? Math.min((totalRevenue / dailyRevenueTarget) * 100, 100)
-        : Math.min((txCount / dailyTxTarget) * 100, 100);
+        : Math.min((shiftTxCount / dailyTxTarget) * 100, 100);
 
     return (
         <div className="bg-white/85 dark:bg-[#18201B]/60 lg:backdrop-blur-2xl border border-[#E2DCCE] dark:border-emerald-950/20 rounded-[32px] p-8 relative overflow-hidden shadow-[0_24px_80px_-12px_rgba(34,50,38,0.06)] dark:shadow-[0_32px_96px_-12px_rgba(5,8,6,0.65)]">
@@ -39,7 +83,7 @@ export const ShiftProgress: React.FC = () => {
                         <div className="flex items-center gap-2.5 mb-2">
                             <div className="w-2 h-2 rounded-full bg-[#2C5E3B] dark:bg-[#A9CBA2] animate-pulse shadow-[0_0_8px_rgba(44,94,59,0.6)]" />
                             <h3 className="text-[#4D6E56] dark:text-[#7A9E83] text-xs font-black uppercase tracking-[0.2em] select-none">
-                                {isCentralHQ ? t('posCommand.shiftTarget') : "Shift Order Target"}
+                                {dateRange} {isCentralHQ ? t('posCommand.shiftTarget') : "Order Target"}
                             </h3>
                         </div>
                         <div className="flex items-baseline gap-3">
@@ -55,7 +99,7 @@ export const ShiftProgress: React.FC = () => {
                             ) : (
                                 <>
                                     <span className="text-4xl font-mono font-black tracking-tighter text-[#1E3F27] dark:text-[#EAE5D9]">
-                                        {txCount} Orders
+                                        {shiftTxCount} Orders
                                     </span>
                                     <span className="text-[#4D6E56]/60 dark:text-gray-500 font-mono text-lg font-bold tracking-tighter">
                                         / {dailyTxTarget} Target
@@ -101,7 +145,7 @@ export const ShiftProgress: React.FC = () => {
                         ))
                     ) : (
                         [
-                            { label: "Completed Orders", display: `${txCount} Processed`, icon: CheckCircle2, accent: '#2C5E3B' },
+                            { label: "Completed Orders", display: `${shiftTxCount} Processed`, icon: CheckCircle2, accent: '#2C5E3B' },
                             { label: "Speed & Pace", display: "On Schedule", icon: Zap, accent: '#A9CBA2' },
                             { label: "Drawer Protocol", display: "Blind Active 🔒", icon: ShieldCheck, accent: '#2C5E3B' },
                         ].map(({ label, display, icon: Icon, accent }) => (

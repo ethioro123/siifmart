@@ -163,7 +163,23 @@ export const BuyingAttributes: React.FC<BuyingAttributesProps> = ({
                         <div className="col-span-2 space-y-1">
                             <label className="text-[10px] text-gray-500 dark:text-gray-400 uppercase font-black ml-1">Pack Type</label>
                             <div className="relative">
-                                <select title="Package Type" className="w-full bg-gray-50 dark:bg-black/40 border border-gray-200 dark:border-white/10 rounded-lg px-3 py-2 text-xs text-gray-900 dark:text-white focus:border-[#2C5E3B] dark:focus:border-[#A9CBA2] focus:ring-2 focus:ring-[#2C5E3B]/10 dark:focus:ring-[#A9CBA2]/10 outline-none appearance-none font-bold" value={customAttributes.packaging.packageType} onChange={e => setCustomAttributes((p: any) => ({ ...p, packaging: { ...p.packaging, packageType: e.target.value } }))}>
+                                <select 
+                                    title="Package Type" 
+                                    className="w-full bg-gray-50 dark:bg-black/40 border border-gray-200 dark:border-white/10 rounded-lg px-3 py-2 text-xs text-gray-900 dark:text-white focus:border-[#2C5E3B] dark:focus:border-[#A9CBA2] focus:ring-2 focus:ring-[#2C5E3B]/10 dark:focus:ring-[#A9CBA2]/10 outline-none appearance-none font-bold" 
+                                    value={customAttributes.packaging.packageType} 
+                                    onChange={e => {
+                                        const val = e.target.value;
+                                        const isBulk = ['Bale', 'Carton', 'Case', 'Box', 'Bundle', 'Crate', 'Sack', 'Tray', 'Multipack'].includes(val);
+                                        setCustomAttributes((p: any) => ({
+                                            ...p,
+                                            packaging: {
+                                                ...p.packaging,
+                                                packageType: val,
+                                                packQty: isBulk && (!p.packaging.packQty || p.packaging.packQty === '1') ? '12' : p.packaging.packQty
+                                            }
+                                        }));
+                                    }}
+                                >
                                     <option value="" className="bg-white dark:bg-gray-900 text-gray-500">Select...</option>
                                     {PACKAGE_TYPES.map(t => <option key={t} value={t} className="bg-white dark:bg-gray-900 text-gray-900 dark:text-white">{t}</option>)}
                                 </select>
@@ -176,14 +192,14 @@ export const BuyingAttributes: React.FC<BuyingAttributesProps> = ({
                                 <input
                                     type="checkbox"
                                     className="w-3 h-3 rounded border-gray-300 dark:border-white/10 bg-gray-50 dark:bg-black/40 text-[#2C5E3B] dark:text-[#A9CBA2]"
-                                    checked={(parseInt(customAttributes.packaging.packQty) > 1) || (parseInt(customAttributes.packaging.caseSize) > 1)}
+                                    checked={(parseInt(customAttributes.packaging.packQty) > 1) || (parseInt(customAttributes.packaging.caseSize) > 0) || ['Bale', 'Carton', 'Case', 'Box', 'Bundle', 'Crate', 'Sack', 'Tray', 'Multipack'].includes(customAttributes.packaging?.packageType)}
                                     onChange={e => {
                                         if (!e.target.checked) {
                                             // Reset pack/case when unchecked
                                             setCustomAttributes((p: any) => ({ ...p, packaging: { ...p.packaging, packQty: '', caseSize: '' } }));
                                         } else {
                                             // Enable with default values to signal intent
-                                            setCustomAttributes((p: any) => ({ ...p, packaging: { ...p.packaging, packQty: '6', caseSize: '' } }));
+                                            setCustomAttributes((p: any) => ({ ...p, packaging: { ...p.packaging, packQty: '12', caseSize: '' } }));
                                         }
                                     }}
                                 />
@@ -193,11 +209,11 @@ export const BuyingAttributes: React.FC<BuyingAttributesProps> = ({
                     </div>
 
                     {/* ── Pack / Case Details (only when enabled) ── */}
-                    {((parseInt(customAttributes.packaging.packQty) > 1) || (parseInt(customAttributes.packaging.caseSize) > 0)) && (
+                    {((parseInt(customAttributes.packaging.packQty) > 1) || (parseInt(customAttributes.packaging.caseSize) > 0) || ['Bale', 'Carton', 'Case', 'Box', 'Bundle', 'Crate', 'Sack', 'Tray', 'Multipack'].includes(customAttributes.packaging?.packageType)) && (
                         <div className="grid grid-cols-6 gap-4 pl-4 border-l-2 border-[#2C5E3B]/20 dark:border-white/10">
                             <div className="col-span-3 space-y-1">
-                                <label className="text-[10px] text-gray-500 dark:text-gray-400 uppercase font-black ml-1">Pack Qty <span className="text-[8px] text-gray-400 dark:text-gray-600 normal-case font-bold">(units per pack)</span></label>
-                                <input type="number" min="2" className="w-full bg-gray-50 dark:bg-black/40 border border-gray-200 dark:border-white/10 rounded-lg px-3 py-2 text-xs text-gray-900 dark:text-white focus:border-[#2C5E3B] dark:focus:border-[#A9CBA2] focus:ring-2 focus:ring-[#2C5E3B]/10 dark:focus:ring-[#A9CBA2]/10 outline-none transition-all placeholder-gray-400 dark:placeholder-gray-600 font-bold" placeholder="e.g. 6" value={customAttributes.packaging.packQty} onChange={e => setCustomAttributes((p: any) => ({ ...p, packaging: { ...p.packaging, packQty: e.target.value } }))} />
+                                <label className="text-[10px] text-gray-500 dark:text-gray-400 uppercase font-black ml-1">Pack Qty <span className="text-[8px] text-gray-400 dark:text-gray-600 normal-case font-bold">(units per {customAttributes.packaging?.packageType?.toLowerCase() || 'pack'})</span></label>
+                                <input type="number" min="2" className="w-full bg-gray-50 dark:bg-black/40 border border-gray-200 dark:border-white/10 rounded-lg px-3 py-2 text-xs text-gray-900 dark:text-white focus:border-[#2C5E3B] dark:focus:border-[#A9CBA2] focus:ring-2 focus:ring-[#2C5E3B]/10 dark:focus:ring-[#A9CBA2]/10 outline-none transition-all placeholder-gray-400 dark:placeholder-gray-600 font-bold" placeholder="e.g. 12" value={customAttributes.packaging.packQty} onChange={e => setCustomAttributes((p: any) => ({ ...p, packaging: { ...p.packaging, packQty: e.target.value } }))} />
                             </div>
                             <div className="col-span-3 space-y-1">
                                 <label className="text-[10px] text-gray-500 dark:text-gray-400 uppercase font-black ml-1">Case Size <span className="text-[8px] text-gray-400 dark:text-gray-600 normal-case font-bold">(packs per case)</span></label>

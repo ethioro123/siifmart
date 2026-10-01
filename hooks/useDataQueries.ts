@@ -4,13 +4,14 @@ import {
     customersService, suppliersService, wmsJobsService, stockMovementsService,
     transfersService, jobAssignmentsService, workerPointsService, storePointsService,
     tasksService, schedulesService, barcodeApprovalsService, warehouseZonesService,
-    expensesService, systemLogsService
+    expensesService, systemLogsService, shiftsService
 } from '../services/supabase.service';
 import {
     Product, Employee, PurchaseOrder, SaleRecord, Customer, Supplier, WMSJob,
     StockMovement, TransferRecord, JobAssignment, WorkerPoints, StorePoints,
-    EmployeeTask, StaffSchedule, BarcodeApproval, WarehouseZone, ExpenseRecord, SystemLog
+    EmployeeTask, StaffSchedule, BarcodeApproval, WarehouseZone, ExpenseRecord, SystemLog, ShiftRecord
 } from '../types';
+
 
 // Query Keys
 export const DATA_KEYS = {
@@ -32,7 +33,9 @@ export const DATA_KEYS = {
     zones: (siteId?: string) => ['zones', siteId],
     expenses: (siteId?: string) => ['expenses', siteId],
     systemLogs: () => ['systemLogs'],
+    shifts: (siteId?: string) => ['shifts', siteId],
 };
+
 
 interface UseDataQueriesProps {
     siteId: string;
@@ -145,9 +148,9 @@ export const useDataQueries = ({ siteId, enabled, onProgress }: UseDataQueriesPr
                 enabled: enabled && !!siteId
             },
             {
-                queryKey: DATA_KEYS.barcodeApprovals(undefined), // Always global
-                queryFn: trackProgress('barcodeApprovals', () => barcodeApprovalsService.getAuditLog(undefined).catch(() => [])),
-                enabled: enabled // Allow global fetch (siteId is optional)
+                queryKey: DATA_KEYS.barcodeApprovals(siteId),
+                queryFn: trackProgress('barcodeApprovals', () => barcodeApprovalsService.getAuditLog(siteId).catch(() => [])),
+                enabled: enabled && !!siteId
             },
             {
                 queryKey: DATA_KEYS.zones(siteId),
@@ -162,6 +165,11 @@ export const useDataQueries = ({ siteId, enabled, onProgress }: UseDataQueriesPr
             {
                 queryKey: DATA_KEYS.systemLogs(),
                 queryFn: trackProgress('systemLogs', () => systemLogsService.getAll().catch(() => [])),
+                enabled: enabled
+            },
+            {
+                queryKey: DATA_KEYS.shifts(siteId),
+                queryFn: trackProgress('shifts', () => shiftsService.getAll(siteId, 200).catch(() => [])),
                 enabled: enabled
             }
         ]
@@ -191,8 +199,10 @@ export const useDataQueries = ({ siteId, enabled, onProgress }: UseDataQueriesPr
         zones: tertiaryQueries[9] as UseQueryResult<WarehouseZone[], Error>,
         expenses: tertiaryQueries[10] as UseQueryResult<ExpenseRecord[], Error>,
         systemLogs: tertiaryQueries[11] as UseQueryResult<SystemLog[], Error>,
+        shifts: tertiaryQueries[12] as UseQueryResult<ShiftRecord[], Error>,
 
         // Meta
+
         isLoadingCritical: criticalQueries.some(q => q.isLoading),
         isErrorCritical: criticalQueries.some(q => q.isError),
         refetchAll: () => {

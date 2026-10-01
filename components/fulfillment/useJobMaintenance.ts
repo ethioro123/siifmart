@@ -235,7 +235,7 @@ export const useJobMaintenance = (deps: UseJobMaintenanceDeps) => {
                 status: 'Pending' as JobItem['status']
             };
 
-            console.log('📦 Creating PUTAWAY job for Inventory product:', {
+            logger.info('useJobMaintenance', 'Creating PUTAWAY job for Inventory product', {
                 productName: product.name,
                 quantity,
                 siteId: targetSiteId,

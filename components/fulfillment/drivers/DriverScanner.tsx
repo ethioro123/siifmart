@@ -26,7 +26,7 @@ export const DriverScanner: React.FC<DriverScannerProps> = ({
             <button
                 onClick={() => setDriverScannerOpen(false)}
                 title={t('warehouse.misc.closeScanner')}
-                className="absolute top-4 right-4 sm:top-10 sm:right-10 p-2.5 sm:p-4 min-w-[44px] min-h-[44px] flex items-center justify-center bg-white/10 hover:bg-white/20 rounded-full text-white transition-all shrink-0"
+                className="absolute top-4 right-4 sm:top-10 sm:right-10 p-2.5 sm:p-4 min-w-[44px] min-h-[44px] flex items-center justify-center bg-white/10 hover:bg-white/20 rounded-full text-white transition-colors shrink-0"
             >
                 <X size={20} className="sm:w-[32px] sm:h-[32px]" />
             </button>
@@ -67,13 +67,13 @@ export const DriverScanner: React.FC<DriverScannerProps> = ({
                             setDriverScannerOpen(false);
                             setSelectedJob(null);
                         }}
-                        className="w-full py-3.5 sm:py-4 bg-[#2C5E3B] text-white font-black uppercase tracking-widest rounded-2xl shadow-[0_0_20px_rgba(44,94,59,0.4)] hover:bg-[#3a7a4d] transition-all active:scale-95 text-xs sm:text-sm"
+                        className="w-full py-3.5 sm:py-4 bg-[#2C5E3B] text-white font-black uppercase tracking-widest rounded-2xl shadow-[0_0_20px_rgba(44,94,59,0.4)] hover:bg-[#3a7a4d] transition-colors active:scale-95 text-xs sm:text-sm min-h-[48px]"
                     >
                         {t('warehouse.driverHub.completeDeliveryBtn')}
                     </button>
                     <button
                         onClick={() => setDriverScannerOpen(false)}
-                        className="w-full py-3.5 sm:py-4 bg-white/5 text-white font-black uppercase tracking-widest rounded-2xl border border-white/10 hover:bg-white/10 transition-all text-xs sm:text-sm"
+                        className="w-full py-3.5 sm:py-4 bg-white/5 text-white font-black uppercase tracking-widest rounded-2xl border border-white/10 hover:bg-white/10 transition-colors text-xs sm:text-sm min-h-[48px]"
                     >
                         {t('warehouse.driverHub.abortScan')}
                     </button>

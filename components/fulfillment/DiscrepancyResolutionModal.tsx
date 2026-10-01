@@ -342,7 +342,7 @@ export function DiscrepancyResolutionModal({
                                             <div className="font-bold text-stone-850 dark:text-white">{a.label}</div>
                                             <div className="text-stone-500 dark:text-[#EAE5D9]/70 text-xs mt-1 leading-relaxed">{a.desc}</div>
                                         </div>
-                                        {!allowed && <div className="absolute inset-0 bg-black/60 flex items-center justify-center backdrop-blur-[1px]">
+                                        {!allowed && <div className="absolute inset-0 bg-black/75 flex items-center justify-center">
                                             <span className="bg-red-500/20 text-red-500 border border-red-500/50 px-2 py-1 rounded text-xs font-bold uppercase flex items-center gap-1">
                                                 <Lock size={10} /> Locked
                                             </span>

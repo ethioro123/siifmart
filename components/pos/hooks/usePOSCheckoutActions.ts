@@ -1,8 +1,9 @@
 import React from 'react';
-import { CartItem, PaymentMethod, SaleRecord, Customer, Site, SystemConfig, User } from '../../../types';
+import { CartItem, PaymentMethod, SaleRecord, Customer, Site, SystemConfig, User, DiscountCode } from '../../../types';
 import { formatDateTime } from '../../../utils/formatting';
 import { CURRENCY_SYMBOL } from '../../../constants';
 import { printHtmlContent } from '../../../utils/printHelper';
+import { getEffectiveCountry } from '../../../utils/localization';
 
 interface UsePOSCheckoutActionsProps {
     cart: CartItem[];
@@ -57,8 +58,8 @@ interface UsePOSCheckoutActionsProps {
     setDiscountCodeInput: React.Dispatch<React.SetStateAction<string>>;
     setDiscountCodeError: React.Dispatch<React.SetStateAction<string>>;
     setIsValidatingCode: React.Dispatch<React.SetStateAction<boolean>>;
-    validateDiscountCode: any;
-    useDiscountCode: any;
+    validateDiscountCode: (code: string, siteId?: string, subtotal?: number, targetCountry?: string) => { valid: boolean; discountCode?: DiscountCode; error?: string };
+    useDiscountCode: (id: string) => void;
 }
 
 export const usePOSCheckoutActions = ({
@@ -133,7 +134,8 @@ export const usePOSCheckoutActions = ({
         setIsValidatingCode(true);
         setDiscountCodeError('');
         setTimeout(() => {
-            const result = validateDiscountCode(discountCodeInput, activeSite?.id, subtotal);
+            const siteCountry = activeSite?.country || getEffectiveCountry(activeSite);
+            const result = validateDiscountCode(discountCodeInput, activeSite?.id, subtotal, siteCountry);
             if (result.valid && result.discountCode) {
                 applyDiscountFromCode(result.discountCode);
                 useDiscountCode(result.discountCode.id);
@@ -142,7 +144,7 @@ export const usePOSCheckoutActions = ({
             }
             setIsValidatingCode(false);
         }, 300);
-    }, [discountCodeInput, activeSite?.id, subtotal, validateDiscountCode, applyDiscountFromCode, setDiscountCodeError, setIsValidatingCode, useDiscountCode]);
+    }, [discountCodeInput, activeSite?.id, activeSite?.country, activeSite?.currency, subtotal, validateDiscountCode, applyDiscountFromCode, setDiscountCodeError, setIsValidatingCode, useDiscountCode]);
 
     const handleRemoveDiscount = React.useCallback(() => {
         setCartDiscount(0);
@@ -164,7 +166,7 @@ export const usePOSCheckoutActions = ({
         setIsPaymentModalOpen(true);
     }, [cart, total, addNotification, setAmountTendered, setSelectedPaymentMethod, setIsPaymentModalOpen]);
 
-    const handleProcessPayment = React.useCallback(async () => {
+    const handleProcessPayment = React.useCallback(async (mobileDetails?: { channel?: string; ref?: string; phone?: string }) => {
         if (!isPaymentValid) return;
         setIsProcessing(true);
         try {
@@ -207,7 +209,10 @@ export const usePOSCheckoutActions = ({
                 change,
                 cashierName: user?.name,
                 customerId: selectedCustomer?.id || undefined,
-                receiptNumber
+                receiptNumber,
+                mobilePaymentChannel: mobileDetails?.channel,
+                mobileTransactionRef: mobileDetails?.ref,
+                customerPhone: mobileDetails?.phone
             };
             setLastSale(saleObj);
             if (pointsResult) {
@@ -238,13 +243,16 @@ export const usePOSCheckoutActions = ({
 
     const handlePrintReceipt = React.useCallback(() => {
         const {
-            storeName = 'SIIFMART', posReceiptLogo, posReceiptShowLogo = true,
+            storeName = 'SIIFMART', logoUrl, posReceiptLogo, posReceiptShowLogo = true,
             posReceiptHeader = 'SIIFMART RETAIL', posReceiptFooter = 'Thank you for shopping with us!',
             posReceiptAddress, posReceiptPhone, posReceiptEmail, posReceiptTaxId, posReceiptPolicy,
             posReceiptSocialHandle, posReceiptEnableQR = true, posReceiptQRLink = 'https://siifmart.com/feedback',
-            posReceiptWidth = '80mm', posReceiptFont = 'sans-serif'
+            posReceiptWidth = '80mm', posReceiptFont = 'sans-serif', slogan
         } = settings;
         const displayStoreName = storeName || activeSite?.name || 'SIIFMART';
+        const displayLogo = posReceiptLogo || logoUrl;
+        const displayHeader = posReceiptHeader || 'SIIFMART RETAIL';
+        const displaySlogan = slogan && slogan !== displayHeader ? slogan : '';
         const paperWidth = posReceiptWidth === '80mm' ? '80mm' : '58mm';
         const receiptHTML = `
       <!DOCTYPE html>
@@ -259,10 +267,11 @@ export const usePOSCheckoutActions = ({
         </style>
       </head>
       <body>
-          ${posReceiptShowLogo && posReceiptLogo ? `<div class="flex justify-center mb-4"><img src="${posReceiptLogo}" class="logo" /></div>` : ''}
+          ${posReceiptShowLogo && displayLogo ? `<div class="flex justify-center mb-4"><img src="${displayLogo}" class="logo" /></div>` : ''}
           <div class="text-center border-b-2-dashed pb-4 mb-4">
             <h2 class="text-xl font-black uppercase tracking-tighter leading-none mb-1">${displayStoreName}</h2>
-            <p class="text-[10px] font-bold uppercase tracking-widest opacity-80">${posReceiptHeader}</p>
+            <p class="text-[10px] font-bold uppercase tracking-widest opacity-80">${displayHeader}</p>
+            ${displaySlogan ? `<p class="text-[9px] italic opacity-70 mt-0.5">${displaySlogan}</p>` : ''}
           </div>
           <div class="text-[10px] text-center space-y-05 mb-4 border-b-2-dashed pb-4">
             ${posReceiptAddress ? `<p>${posReceiptAddress}</p>` : ''}
@@ -270,7 +279,8 @@ export const usePOSCheckoutActions = ({
               ${posReceiptPhone ? `<p>Tel: ${posReceiptPhone}</p>` : ''}
               ${posReceiptEmail ? `<p>Email: ${posReceiptEmail}</p>` : ''}
             </div>
-            ${posReceiptTaxId ? `<p class="font-bold">TIN: ${posReceiptTaxId}</p>` : ''}
+            ${posReceiptTaxId ? `<p class="font-bold">${settings?.country === 'KE' || settings?.currency === 'KES' || settings?.currency === 'KSh' ? 'KRA PIN' : 'TIN'}: ${posReceiptTaxId}</p>` : ''}
+            ${settings?.country === 'KE' || settings?.currency === 'KES' || settings?.currency === 'KSh' ? '<p class="text-[8px] opacity-70">eTIMS Compliant - Valid Tax Invoice</p>' : ''}
           </div>
           <div class="text-[10px] space-y-1 mb-4">
             <div class="flex justify-between"><span class="opacity-60">DATE:</span> <span>${formatDateTime(new Date(), { showTime: true })}</span></div>
@@ -288,9 +298,21 @@ export const usePOSCheckoutActions = ({
           </div>
           <div class="text-[10px] font-bold border-t-dashed pt-4 mb-4">
             <div class="flex justify-between">
-              <span>PAID (${(lastSale?.method || 'CASH').toUpperCase()})</span>
+              <span>PAID (${lastSale?.mobilePaymentChannel ? lastSale.mobilePaymentChannel.replace(/_/g, ' ') : (lastSale?.method || 'CASH').toUpperCase()})</span>
               <span>${CURRENCY_SYMBOL}${(lastSale?.amountTendered || lastSale?.total || 0).toLocaleString()}</span>
             </div>
+            ${lastSale?.mobileTransactionRef ? `
+              <div class="flex justify-between text-[9px] opacity-75 font-mono mt-0.5">
+                <span>TX REF:</span>
+                <span class="font-bold">${lastSale.mobileTransactionRef}</span>
+              </div>
+            ` : ''}
+            ${lastSale?.customerPhone ? `
+              <div class="flex justify-between text-[9px] opacity-60 font-mono">
+                <span>PHONE:</span>
+                <span>${lastSale.customerPhone}</span>
+              </div>
+            ` : ''}
           </div>
           <div class="text-center space-y-1 pt-4 border-t-dashed">
             <p class="text-xs font-bold leading-tight mb-2">${posReceiptFooter}</p>
@@ -345,12 +367,19 @@ export const usePOSCheckoutActions = ({
         if (lastSale) {
             setIsReceiptModalOpen(true);
         } else if (sales.length > 0) {
-            setLastSale(sales[0]);
-            setIsReceiptModalOpen(true);
+            const siteSales = activeSite?.id ? sales.filter(s => s.siteId === activeSite.id || (s as any).site_id === activeSite.id) : sales;
+            const targetSales = siteSales.length > 0 ? siteSales : sales;
+            const sorted = [...targetSales].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+            if (sorted[0]) {
+                setLastSale(sorted[0]);
+                setIsReceiptModalOpen(true);
+            } else {
+                addNotification('info', "No recent transactions found in this session to reprint.");
+            }
         } else {
             addNotification('info', "No recent transactions found in this session to reprint.");
         }
-    }, [lastSale, sales, setLastSale, setIsReceiptModalOpen, addNotification]);
+    }, [lastSale, sales, activeSite, setLastSale, setIsReceiptModalOpen, addNotification]);
 
     return {
         handleInitiatePayment,

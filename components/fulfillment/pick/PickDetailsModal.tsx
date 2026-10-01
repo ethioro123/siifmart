@@ -4,7 +4,7 @@ import { WMSJob, Product } from '../../../types';
 import { useFulfillment } from '../FulfillmentContext';
 import { formatDateTime } from '../../../utils/formatting';
 import { formatJobId } from '../../../utils/jobIdFormatter';
-import { formatProductSize, isWeightBased, isVolumeBased, getSellUnit } from '../../../utils/units';
+import { formatProductSize, formatPackagingDescription, isWeightBased, isVolumeBased, getSellUnit } from '../../../utils/units';
 import { PickAmendModal } from './PickAmendModal';
 import { useLanguage } from '../../../contexts/LanguageContext';
 
@@ -73,14 +73,12 @@ export const PickDetailsModal: React.FC<PickDetailsModalProps> = ({
         if ((item as any).requestedMeasureQty !== undefined && (item as any).requestedMeasureQty !== null) {
             return (item as any).requestedMeasureQty;
         }
-        if (productInfo) {
-            const unit = productInfo.unit;
-            const isWeightVol = isWeightBased(unit) || isVolumeBased(unit);
-            const sizeNum = productInfo.size ? parseFloat(productInfo.size as string) : 0;
-            if (isWeightVol && sizeNum > 0) {
-                const expected = item.expectedQty || (item as any).quantity || 0;
-                return expected * sizeNum;
-            }
+        const customAttrs = productInfo?.customAttributes || productInfo?.custom_attributes;
+        const sellBy = customAttrs?.commercial?.sellBy || '';
+        const isWeighted = customAttrs?.commercial?.isWeighted === true;
+
+        if (sellBy === 'Weight' || sellBy === 'Volume' || isWeighted) {
+            return item.expectedQty || (item as any).quantity || null;
         }
         return null;
     };
@@ -272,15 +270,22 @@ export const PickDetailsModal: React.FC<PickDetailsModalProps> = ({
                                                     {(() => {
                                                         const expected = item.expectedQty || (item as any).quantity || 0;
                                                         const picked = item.pickedQty !== undefined && item.pickedQty !== null ? item.pickedQty : 0;
+                                                        const packDesc = formatPackagingDescription(productInfo, expected);
+                                                        const unitDef = getSellUnit(productInfo?.unit || item.unit);
+                                                        const unitLabel = unitDef.category === 'count' && unitDef.code !== 'UNIT' ? unitDef.shortLabel : 'pk';
 
-                                                        const measureQty = getItemMeasureQty(item, productInfo);
-                                                        if (measureQty && expected === item.expectedQty) {
-                                                            const unitDef = productInfo?.unit ? productInfo.unit : '';
-                                                            const sizeNum = productInfo?.size ? parseFloat(productInfo.size as string) : 0;
-                                                            const displayPickedCases = picked <= expected ? picked : (sizeNum > 0 ? picked / sizeNum : picked);
-                                                            return <span className="text-lg font-mono font-black text-green-400">{displayPickedCases} x {sizeNum} / {expected} x {sizeNum} <span className="text-[10px] text-green-500/60 font-bold uppercase tracking-widest">{unitDef}</span></span>;
-                                                        }
-                                                        return <span className="text-lg font-mono font-black text-green-400">{picked} / {expected}</span>;
+                                                        return (
+                                                            <div className="flex flex-col items-end">
+                                                                <span className="text-lg font-mono font-black text-green-400">
+                                                                    {picked} / {expected} <span className="text-xs uppercase font-bold text-green-500/70">{unitLabel}</span>
+                                                                </span>
+                                                                {packDesc && (
+                                                                    <span className="text-[10px] font-mono font-bold text-teal-400/80 uppercase tracking-wider">
+                                                                        ({packDesc})
+                                                                    </span>
+                                                                )}
+                                                            </div>
+                                                        );
                                                     })()}
                                                 </p>
                                             </div>

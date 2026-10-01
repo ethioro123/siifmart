@@ -95,6 +95,7 @@ export interface POSContextType {
     isStartShiftModalOpen: boolean;
     setIsStartShiftModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
     handleStartShift: (openingFloat: number) => void;
+    dismissStartShiftModal: () => void;
 
     isShiftModalOpen: boolean;
     setIsShiftModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
@@ -203,7 +204,7 @@ export interface POSContextType {
     handleValidateDiscountCode: () => void;
     handleRemoveDiscount: () => void;
     handleInitiatePayment: () => void;
-    handleProcessPayment: () => Promise<void>;
+    handleProcessPayment: (mobileDetails?: { channel?: string; ref?: string; phone?: string }) => Promise<void>;
     handlePrintReceipt: () => void;
     handleConfirmPrint: () => void;
     handleEmailReceipt: () => void;

@@ -4,7 +4,7 @@ import { Product, Supplier } from '../../types';
 import { Package, Search, Plus, Star } from 'lucide-react'; // Added Star if needed, checked usage
 import { useData } from '../../contexts/DataContext';
 import { useStore } from '../../contexts/CentralStore';
-import { CURRENCY_SYMBOL } from '../../constants';
+import { getCountryProfile } from '../../utils/localization';
 
 interface ProductCatalogModalProps {
     isOpen: boolean;
@@ -14,8 +14,9 @@ interface ProductCatalogModalProps {
 }
 
 export const ProductCatalogModal: React.FC<ProductCatalogModalProps> = ({ isOpen, onClose, supplier, onAddToPO }) => {
-    const { products, allProducts } = useData();
+    const { products, allProducts, settings, effectiveCountry } = useData();
     const { showToast } = useStore();
+    const currencySymbol = getCountryProfile(effectiveCountry || settings?.country || 'ET').currencySymbol;
     const [catalogSearch, setCatalogSearch] = useState('');
     const [catalogCategory, setCatalogCategory] = useState('All');
     const [catalogSort, setCatalogSort] = useState<'name' | 'priceAsc' | 'priceDesc' | 'stockAsc'>('name');
@@ -188,12 +189,12 @@ export const ProductCatalogModal: React.FC<ProductCatalogModalProps> = ({ isOpen
                                     <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-2">
                                         <div className="flex items-center gap-1.5">
                                             <span className="text-[10px] text-gray-500 uppercase font-bold">Retail</span>
-                                            <span className="text-gray-900 dark:text-white font-bold text-sm">{CURRENCY_SYMBOL} {product.price.toLocaleString()}</span>
+                                            <span className="text-gray-900 dark:text-white font-bold text-sm">{currencySymbol} {product.price.toLocaleString()}</span>
                                         </div>
                                         <div className="flex items-center gap-1.5">
                                             <span className="text-[10px] text-gray-500 uppercase font-bold border-l border-stone-200 dark:border-white/10 pl-4">Base Cost</span>
                                             <span className="text-[#2C5E3B] dark:text-[#A9CBA2] font-bold text-sm">
-                                                {CURRENCY_SYMBOL} {(product.costPrice || (product.price * 0.7)).toLocaleString()}
+                                                {currencySymbol} {(product.costPrice || (product.price * 0.7)).toLocaleString()}
                                             </span>
                                         </div>
                                         <div className="text-[10px] text-gray-500 border-l border-stone-200 dark:border-white/10 pl-4">
