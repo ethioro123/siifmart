@@ -119,7 +119,7 @@ export const useSmartReplenishState = ({
             setDistHubSectorIntegrity(totalItems > 0 ? (healthyItems / totalItems) * 100 : 100);
 
             // 2. Fetch staged draft WMS jobs from database
-            const allJobs = await wmsJobsService.getAll(undefined, 1000);
+            const allJobs = await wmsJobsService.getAll(undefined, 1000, undefined, settings?.country || 'ET');
             const drafts = allJobs.filter((j: WMSJob) => j.type === 'TRANSFER' && j.transferStatus === 'Draft' && j.status === 'Pending');
             setDbDraftJobs(drafts);
         } catch (err) {

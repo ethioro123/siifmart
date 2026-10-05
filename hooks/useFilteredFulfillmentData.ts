@@ -70,7 +70,8 @@ export const useFilteredFulfillmentData = ({
             // Site managers and department heads can see all jobs in their site queue
             'store_manager', 'logistics_manager', 'inventory_manager',
             'assistant_manager', 'shift_lead', 'inventory_specialist',
-            'dispatch_manager', 'supply_chain_manager'
+            'dispatch_manager', 'supply_chain_manager',
+            'fleet_maintenance_supervisor', 'replenishment_planner'
         ].includes((user?.role || '').toLowerCase());
 
         let roleFiltered = baseFiltered;

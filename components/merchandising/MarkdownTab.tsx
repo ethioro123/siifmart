@@ -219,12 +219,6 @@ export const MarkdownTab: React.FC = () => {
                   <div className="h-[280px]">
                      <ResponsiveContainer width="100%" height="100%" minHeight={0}>
                         <AreaChart data={glidePathData}>
-                           <defs>
-                              <linearGradient id="colorRev" x1="0" y1="0" x2="0" y2="1">
-                                 <stop offset="5%" stopColor="#2C5E3B" stopOpacity={0.25} />
-                                 <stop offset="95%" stopColor="#2C5E3B" stopOpacity={0.0} />
-                              </linearGradient>
-                           </defs>
                            <CartesianGrid strokeDasharray="3 3" stroke="#E2DCCE" vertical={false} opacity={0.6} />
                            <XAxis dataKey="week" stroke="#8C827A" fontSize={11} tickLine={false} />
                            <YAxis yAxisId="left" stroke="#8C827A" fontSize={11} tickLine={false} />
@@ -239,7 +233,7 @@ export const MarkdownTab: React.FC = () => {
                                  color: '#1E3F27'
                               }}
                            />
-                           <Area yAxisId="left" type="monotone" dataKey="revenue" stroke="#2C5E3B" strokeWidth={2.5} fillOpacity={1} fill="url(#colorRev)" name="Cumulative Revenue" />
+                           <Area yAxisId="left" type="monotone" dataKey="revenue" stroke="#2C5E3B" strokeWidth={2.5} fillOpacity={0.08} fill="#2C5E3B" name="Cumulative Revenue" />
                            <Line yAxisId="right" type="monotone" dataKey="price" stroke="#D97706" strokeWidth={2} dot={{ r: 3, fill: '#D97706' }} name="Price Point" />
                            <Line yAxisId="right" type="monotone" dataKey="stock" stroke="#DC2626" strokeDasharray="4 4" strokeWidth={2} dot={{ r: 3, fill: '#DC2626' }} name="Stock Level" />
                         </AreaChart>

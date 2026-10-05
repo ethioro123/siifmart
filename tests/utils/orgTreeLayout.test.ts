@@ -44,6 +44,10 @@ describe('orgTreeLayout helpers', () => {
         expect(getRoleDept('finance_manager')).toBe('finance');
         expect(getRoleDept('hr_manager')).toBe('hr');
         expect(getRoleDept('buyer')).toBe('procurement');
+        expect(getRoleDept('vendor_relations_manager')).toBe('procurement');
+        expect(getRoleDept('customs_import_specialist')).toBe('procurement');
+        expect(getRoleDept('inbound_qc_inspector')).toBe('procurement');
+        expect(getRoleDept('store_operations_auditor')).toBe('executive');
     });
 
     it('honors custom department override when provided on employee record', () => {
@@ -93,5 +97,41 @@ describe('useOrgTreeLayout hook', () => {
         // Employment status 'Active' is distinct from presence
         expect(mockEmployees[1].status).toBe('Active');
         expect(onlineIds.has(mockEmployees[1].id)).toBe(false);
+    });
+
+    it('wires Central Operations team members to operations_manager', () => {
+        const opsTeamEmployees: Employee[] = [
+            { id: 'ceo-1', name: 'CEO', role: 'super_admin', department: 'Executive', code: 'EMP-01', email: '', phone: '', status: 'Active', joinDate: '', avatar: '', performanceScore: 90, siteId: 'site-1' },
+            { id: 'ops-1', name: 'Ops Director', role: 'operations_manager', department: 'Operations', code: 'EMP-02', email: '', phone: '', status: 'Active', joinDate: '', avatar: '', performanceScore: 85, siteId: 'site-1' },
+            { id: 'aud-1', name: 'Store Auditor', role: 'store_operations_auditor', department: 'Executive', code: 'EMP-03', email: '', phone: '', status: 'Active', joinDate: '', avatar: '', performanceScore: 90, siteId: 'site-1' },
+            { id: 'da-1', name: 'Data Analyst', role: 'data_analyst', department: 'Executive', code: 'EMP-04', email: '', phone: '', status: 'Active', joinDate: '', avatar: '', performanceScore: 88, siteId: 'site-1' },
+            { id: 'sec-1', name: 'Security Mgr', role: 'security_manager', department: 'Security', code: 'EMP-05', email: '', phone: '', status: 'Active', joinDate: '', avatar: '', performanceScore: 85, siteId: 'site-1' },
+            { id: 'cs-1', name: 'CS Mgr', role: 'cs_manager', department: 'Store', code: 'EMP-06', email: '', phone: '', status: 'Active', joinDate: '', avatar: '', performanceScore: 87, siteId: 'site-1' },
+            { id: 'rep-1', name: 'CS Rep', role: 'customer_service', department: 'Store', code: 'EMP-07', email: '', phone: '', status: 'Active', joinDate: '', avatar: '', performanceScore: 91, siteId: 'site-1' },
+        ];
+
+        const { result } = renderHook(() => useOrgTreeLayout({
+            employees: opsTeamEmployees,
+            sites: [],
+            filters: { searchTerm: '', siteId: '', department: '', status: '' }
+        }));
+
+        const tree = result.current.rawTree;
+        expect(tree).not.toBeNull();
+        expect(tree?.id).toBe('ceo-1');
+
+        const opsNode = tree?.children.find(c => c.id === 'ops-1');
+        expect(opsNode).toBeDefined();
+
+        // Check that auditor and analyst report to ops-1
+        const childIds = opsNode?.children.map(c => c.id) || [];
+        expect(childIds).toContain('aud-1');
+        expect(childIds).toContain('da-1');
+        expect(childIds).toContain('sec-1');
+        expect(childIds).toContain('cs-1');
+
+        // Check that customer_service reports to cs_manager
+        const csNode = opsNode?.children.find(c => c.id === 'cs-1');
+        expect(csNode?.children.map(c => c.id)).toContain('rep-1');
     });
 });

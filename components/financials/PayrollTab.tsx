@@ -1,6 +1,10 @@
-import React from 'react';
-import { Search, Loader2, CheckCircle } from 'lucide-react';
+import React, { useState, useEffect, useCallback } from 'react';
+import { Search, Loader2, ShieldCheck } from 'lucide-react';
 import { useFinance } from './FinanceContext';
+import { salaryRequestsService } from '../../services/salary-requests.service';
+import { payrollRunsService } from '../../services/payroll-runs.service';
+import type { PayrollRun } from '../../types';
+import SalaryApprovalQueueModal from '../employees/SalaryApprovalQueueModal';
 
 export const PayrollTab: React.FC = () => {
     const {
@@ -30,36 +34,77 @@ export const PayrollTab: React.FC = () => {
         handleProcessPayroll,
         handleDownloadBankFile,
         isSubmitting,
-        currencySymbol
+        currencySymbol,
+        effectiveCountry,
+        activeSite
     } = useFinance();
+
+    const [isSalaryQueueOpen, setIsSalaryQueueOpen] = useState(false);
+    const [pendingSalaryCount, setPendingSalaryCount] = useState(0);
+    const [latestRun, setLatestRun] = useState<PayrollRun | null>(null);
+
+    const refreshPayrollState = useCallback(async () => {
+        try {
+            const [pendingSalaries, run] = await Promise.all([
+                salaryRequestsService.getPending(activeSite?.id, effectiveCountry),
+                payrollRunsService.getLatestRun(activeSite?.id, effectiveCountry)
+            ]);
+            setPendingSalaryCount(pendingSalaries.length);
+            setLatestRun(run);
+        } catch {
+            // Handled gracefully
+        }
+    }, [activeSite?.id, effectiveCountry]);
+
+    useEffect(() => {
+        refreshPayrollState();
+        const handleSalaryCreated = () => refreshPayrollState();
+        const handleSalaryApproved = () => refreshPayrollState();
+        const handleSalaryRejected = () => refreshPayrollState();
+        const handlePayrollUpdated = () => refreshPayrollState();
+
+        window.addEventListener('salary:request-created', handleSalaryCreated);
+        window.addEventListener('salary:request-approved', handleSalaryApproved);
+        window.addEventListener('salary:request-rejected', handleSalaryRejected);
+        window.addEventListener('payroll:updated', handlePayrollUpdated);
+        window.addEventListener('payroll:disbursed', handlePayrollUpdated);
+
+        return () => {
+            window.removeEventListener('salary:request-created', handleSalaryCreated);
+            window.removeEventListener('salary:request-approved', handleSalaryApproved);
+            window.removeEventListener('salary:request-rejected', handleSalaryRejected);
+            window.removeEventListener('payroll:updated', handlePayrollUpdated);
+            window.removeEventListener('payroll:disbursed', handlePayrollUpdated);
+        };
+    }, [refreshPayrollState]);
 
     const PAYROLL_PER_PAGE_OPTIONS = [10, 25, 50, 100];
 
     return (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 animate-in fade-in">
-            <div className="lg:col-span-2 bg-stone-900/60 dark:bg-stone-900/60 border border-stone-200/10 dark:border-white/5 rounded-2xl overflow-x-auto">
-                <div className="p-6 border-b border-white/5">
-                    <h3 className="font-bold text-white">Payroll Registry</h3>
-                    <p className="text-xs text-gray-400 mt-1">Monthly compensation breakdown based on active employees.</p>
+            <div className="lg:col-span-2 bg-white/90 dark:bg-stone-900/60 border border-[#E2DCCE] dark:border-white/5 rounded-2xl overflow-x-auto">
+                <div className="p-6 border-b border-[#E2DCCE] dark:border-white/5">
+                    <h3 className="font-bold text-[#1E3F27] dark:text-white">Payroll Registry</h3>
+                    <p className="text-xs text-stone-500 dark:text-gray-400 mt-1">Monthly compensation breakdown based on active employees.</p>
                 </div>
 
                 {/* Registry Controls */}
-                <div className="px-6 py-4 border-b border-white/5 flex flex-col md:flex-row gap-4">
+                <div className="px-6 py-4 border-b border-[#E2DCCE] dark:border-white/5 flex flex-col md:flex-row gap-4">
                     <div className="flex-1 relative">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-400 dark:text-gray-400" size={16} />
                         <input
                             type="text"
                             placeholder="Search employees..."
                             value={payrollSearch}
                             onChange={(e) => setPayrollSearch(e.target.value)}
-                            className="w-full bg-black/30 border border-white/10 rounded-lg pl-10 pr-4 py-2 text-sm text-white focus:border-[#2C5E3B] dark:focus:border-[#A9CBA2] outline-none"
+                            className="w-full bg-stone-100 dark:bg-black/30 border border-[#E2DCCE] dark:border-white/10 rounded-lg pl-10 pr-4 py-2 text-sm text-[#1E3F27] dark:text-white placeholder-stone-400 dark:placeholder-gray-500 focus:border-[#2C5E3B] dark:focus:border-[#A9CBA2] outline-none"
                             aria-label="Search employees"
                         />
                     </div>
                     <select
                         value={payrollRoleFilter}
                         onChange={(e) => setPayrollRoleFilter(e.target.value)}
-                        className="bg-black/30 border border-white/10 rounded-lg px-4 py-2 text-sm text-white outline-none focus:border-[#2C5E3B] dark:focus:border-[#A9CBA2]"
+                        className="bg-stone-100 dark:bg-black/30 border border-[#E2DCCE] dark:border-white/10 rounded-lg px-4 py-2 text-sm text-[#1E3F27] dark:text-white outline-none focus:border-[#2C5E3B] dark:focus:border-[#A9CBA2]"
                         aria-label="Filter by role"
                     >
                         {uniqueRoles.map(role => <option key={role} value={role}>{role}</option>)}
@@ -67,36 +112,36 @@ export const PayrollTab: React.FC = () => {
                 </div>
 
                 <table className="w-full text-left">
-                    <thead className="bg-black/20 border-b border-white/5">
+                    <thead className="bg-stone-100/80 dark:bg-black/20 border-b border-[#E2DCCE] dark:border-white/5">
                         <tr>
                             <th
-                                className="p-4 text-xs text-gray-500 uppercase cursor-pointer hover:text-white transition-colors"
+                                className="p-4 text-xs text-stone-500 dark:text-gray-500 uppercase cursor-pointer hover:text-[#1E3F27] dark:hover:text-white transition-colors"
                                 onClick={() => { setPayrollSort('name'); setPayrollSortDir(payrollSortDir === 'asc' ? 'desc' : 'asc'); }}
                             >
                                 Employee {payrollSort === 'name' && (payrollSortDir === 'asc' ? '↑' : '↓')}
                             </th>
-                            <th className="p-4 text-xs text-gray-500 uppercase">Role</th>
+                            <th className="p-4 text-xs text-stone-500 dark:text-gray-500 uppercase">Role</th>
                             <th
-                                className="p-4 text-xs text-gray-500 uppercase cursor-pointer hover:text-white transition-colors"
+                                className="p-4 text-xs text-stone-500 dark:text-gray-500 uppercase cursor-pointer hover:text-[#1E3F27] dark:hover:text-white transition-colors"
                                 onClick={() => { setPayrollSort('department'); setPayrollSortDir(payrollSortDir === 'asc' ? 'desc' : 'asc'); }}
                             >
                                 Department {payrollSort === 'department' && (payrollSortDir === 'asc' ? '↑' : '↓')}
                             </th>
                             <th
-                                className="p-4 text-xs text-gray-500 uppercase text-right cursor-pointer hover:text-white transition-colors"
+                                className="p-4 text-xs text-stone-500 dark:text-gray-500 uppercase text-right cursor-pointer hover:text-[#1E3F27] dark:hover:text-white transition-colors"
                                 onClick={() => { setPayrollSort('salary'); setPayrollSortDir(payrollSortDir === 'asc' ? 'desc' : 'asc'); }}
                             >
                                 Salary {payrollSort === 'salary' && (payrollSortDir === 'asc' ? '↑' : '↓')}
                             </th>
-                            <th className="p-4 text-xs text-gray-500 uppercase text-right">Bonus</th>
-                            <th className="p-4 text-xs text-gray-500 uppercase text-right">Total</th>
+                            <th className="p-4 text-xs text-stone-500 dark:text-gray-500 uppercase text-right">Bonus</th>
+                            <th className="p-4 text-xs text-stone-500 dark:text-gray-500 uppercase text-right">Total</th>
                         </tr>
                     </thead>
-                    <tbody className="divide-y divide-white/5">
+                    <tbody className="divide-y divide-[#E2DCCE] dark:divide-white/5">
                         {paginatedEmployees.map(emp => (
-                            <tr key={emp.id} className="hover:bg-white/5 group transition-colors">
+                            <tr key={emp.id} className="hover:bg-stone-50 dark:hover:bg-white/5 group transition-colors">
                                 <td className="p-4 flex items-center gap-3">
-                                    <div className="w-8 h-8 rounded-full bg-black/50 border border-white/10 overflow-hidden flex-shrink-0">
+                                    <div className="w-8 h-8 rounded-full bg-stone-200 dark:bg-black/50 border border-[#E2DCCE] dark:border-white/10 overflow-hidden flex-shrink-0">
                                         {emp.avatar ? (
                                             <img src={emp.avatar} alt={emp.name} className="w-full h-full object-cover" />
                                         ) : (
@@ -105,22 +150,22 @@ export const PayrollTab: React.FC = () => {
                                             </div>
                                         )}
                                     </div>
-                                    <span className="text-sm text-white font-bold truncate">{emp.name}</span>
+                                    <span className="text-sm text-[#1E3F27] dark:text-white font-bold truncate">{emp.name}</span>
                                 </td>
                                 <td className="p-4">
-                                    <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase border border-white/5 bg-white/5 text-gray-400 tracking-tighter">
+                                    <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase border border-[#E2DCCE] dark:border-white/5 bg-stone-100 dark:bg-white/5 text-stone-600 dark:text-gray-400 tracking-tighter">
                                         {emp.role}
                                     </span>
                                 </td>
-                                <td className="p-4 text-[11px] text-gray-500 font-medium">{emp.department}</td>
-                                <td className="p-4 text-sm font-mono text-white text-right font-bold">
+                                <td className="p-4 text-[11px] text-stone-500 dark:text-gray-500 font-medium">{emp.department}</td>
+                                <td className="p-4 text-sm font-mono text-[#1E3F27] dark:text-white text-right font-bold">
                                     {currencySymbol} {(Number(emp.salary) || 0).toLocaleString()}
                                 </td>
                                 <td className="p-4 text-sm font-mono text-right">
                                     {calculateEmployeeBonus(emp) > 0 ? (
-                                        <span className="text-emerald-400 font-bold">+{currencySymbol} {calculateEmployeeBonus(emp).toLocaleString()}</span>
+                                        <span className="text-emerald-600 dark:text-emerald-400 font-bold">+{currencySymbol} {calculateEmployeeBonus(emp).toLocaleString()}</span>
                                     ) : (
-                                        <span className="text-gray-500">—</span>
+                                        <span className="text-stone-400 dark:text-gray-500">—</span>
                                     )}
                                 </td>
                                 <td className="p-4 text-sm font-mono text-[#2C5E3B] dark:text-[#A9CBA2] text-right font-bold">
@@ -133,11 +178,11 @@ export const PayrollTab: React.FC = () => {
 
                 {/* Payroll Pagination Controls */}
                 {filteredEmployees.length > 0 && (
-                    <div className="p-4 border-t border-white/5 flex flex-col sm:flex-row items-center justify-between gap-4">
+                    <div className="p-4 border-t border-[#E2DCCE] dark:border-white/5 flex flex-col sm:flex-row items-center justify-between gap-4">
                         {/* Info */}
                         <div className="flex items-center gap-4">
-                            <span className="text-xs text-gray-400">
-                                Showing <span className="text-white font-bold">{payrollStartIndex + 1}</span> to <span className="text-white font-bold">{Math.min(payrollEndIndex, filteredEmployees.length)}</span> of <span className="text-[#2C5E3B] dark:text-[#A9CBA2] font-bold">{filteredEmployees.length}</span> employees
+                            <span className="text-xs text-stone-500 dark:text-gray-400">
+                                Showing <span className="text-[#1E3F27] dark:text-white font-bold">{payrollStartIndex + 1}</span> to <span className="text-[#1E3F27] dark:text-white font-bold">{Math.min(payrollEndIndex, filteredEmployees.length)}</span> of <span className="text-[#2C5E3B] dark:text-[#A9CBA2] font-bold">{filteredEmployees.length}</span> employees
                             </span>
                             <select
                                 value={payrollPerPage}
@@ -145,7 +190,7 @@ export const PayrollTab: React.FC = () => {
                                     setPayrollPerPage(Number(e.target.value));
                                     setPayrollPage(1);
                                 }}
-                                className="bg-black/50 border border-white/10 rounded-lg px-2 py-1 text-xs text-white outline-none focus:border-[#2C5E3B]/50 cursor-pointer"
+                                className="bg-stone-100 dark:bg-black/50 border border-[#E2DCCE] dark:border-white/10 rounded-lg px-2 py-1 text-xs text-[#1E3F27] dark:text-white outline-none focus:border-[#2C5E3B]/50 cursor-pointer"
                                 aria-label="Items per page"
                             >
                                 {PAYROLL_PER_PAGE_OPTIONS.map(n => (
@@ -161,8 +206,8 @@ export const PayrollTab: React.FC = () => {
                                 disabled={payrollPage === 1}
                                 className={`px-2 py-1 rounded-lg text-xs font-bold transition-all ${
                                     payrollPage === 1
-                                        ? 'text-gray-600 cursor-not-allowed'
-                                        : 'text-gray-400 hover:text-white hover:bg-white/10'
+                                        ? 'text-stone-300 dark:text-gray-600 cursor-not-allowed'
+                                        : 'text-stone-500 dark:text-gray-400 hover:text-[#1E3F27] dark:hover:text-white hover:bg-stone-100 dark:hover:bg-white/10'
                                 }`}
                             >
                                 «
@@ -172,8 +217,8 @@ export const PayrollTab: React.FC = () => {
                                 disabled={payrollPage === 1}
                                 className={`px-2 py-1 rounded-lg text-xs font-bold transition-all ${
                                     payrollPage === 1
-                                        ? 'text-gray-600 cursor-not-allowed'
-                                        : 'text-gray-400 hover:text-white hover:bg-white/10'
+                                        ? 'text-stone-300 dark:text-gray-600 cursor-not-allowed'
+                                        : 'text-stone-500 dark:text-gray-400 hover:text-[#1E3F27] dark:hover:text-white hover:bg-stone-100 dark:hover:bg-white/10'
                                 }`}
                             >
                                 Prev
@@ -188,13 +233,13 @@ export const PayrollTab: React.FC = () => {
                                             className={`w-6 h-6 rounded text-xs font-bold transition-all ${
                                                 payrollPage === page
                                                     ? 'bg-[#2C5E3B] text-white'
-                                                    : 'text-gray-400 hover:text-white hover:bg-white/10'
+                                                    : 'text-stone-500 dark:text-gray-400 hover:text-[#1E3F27] dark:hover:text-white hover:bg-stone-100 dark:hover:bg-white/10'
                                             }`}
                                         >
                                             {page}
                                         </button>
                                     ) : (
-                                        <span key={idx} className="text-gray-500 px-1 text-xs">...</span>
+                                        <span key={idx} className="text-stone-400 dark:text-gray-500 px-1 text-xs">...</span>
                                     )
                                 ))}
                             </div>
@@ -204,8 +249,8 @@ export const PayrollTab: React.FC = () => {
                                 disabled={payrollPage === payrollTotalPages}
                                 className={`px-2 py-1 rounded-lg text-xs font-bold transition-all ${
                                     payrollPage === payrollTotalPages
-                                        ? 'text-gray-600 cursor-not-allowed'
-                                        : 'text-gray-400 hover:text-white hover:bg-white/10'
+                                        ? 'text-stone-300 dark:text-gray-600 cursor-not-allowed'
+                                        : 'text-stone-500 dark:text-gray-400 hover:text-[#1E3F27] dark:hover:text-white hover:bg-stone-100 dark:hover:bg-white/10'
                                 }`}
                             >
                                 Next
@@ -215,8 +260,8 @@ export const PayrollTab: React.FC = () => {
                                 disabled={payrollPage === payrollTotalPages}
                                 className={`px-2 py-1 rounded-lg text-xs font-bold transition-all ${
                                     payrollPage === payrollTotalPages
-                                        ? 'text-gray-600 cursor-not-allowed'
-                                        : 'text-gray-400 hover:text-white hover:bg-white/10'
+                                        ? 'text-stone-300 dark:text-gray-600 cursor-not-allowed'
+                                        : 'text-stone-500 dark:text-gray-400 hover:text-[#1E3F27] dark:hover:text-white hover:bg-stone-100 dark:hover:bg-white/10'
                                 }`}
                             >
                                 »
@@ -226,36 +271,106 @@ export const PayrollTab: React.FC = () => {
                 )}
             </div>
 
-            <div className="bg-stone-900/60 dark:bg-stone-900/60 border border-stone-200/10 dark:border-white/5 rounded-2xl p-6 h-fit">
-                <h3 className="font-bold text-white mb-6">Payroll Summary</h3>
+            <div className="bg-white/90 dark:bg-stone-900/60 border border-[#E2DCCE] dark:border-white/5 rounded-2xl p-6 h-fit">
+                <h3 className="font-bold text-[#1E3F27] dark:text-white mb-6">Payroll Summary</h3>
                 <div className="space-y-4 mb-6">
-                    <div className="p-4 bg-black/20 rounded-xl border border-white/5">
-                        <p className="text-gray-400 text-xs uppercase font-bold mb-1">Base Salaries</p>
-                        <p className="text-2xl font-mono font-bold text-white">{currencySymbol} {totalSalaries.toLocaleString()}</p>
+                    <div className="p-4 bg-stone-100/80 dark:bg-black/20 rounded-xl border border-[#E2DCCE] dark:border-white/5">
+                        <p className="text-stone-500 dark:text-gray-400 text-xs uppercase font-bold mb-1">Base Salaries</p>
+                        <p className="text-2xl font-mono font-bold text-[#1E3F27] dark:text-white">{currencySymbol} {totalSalaries.toLocaleString()}</p>
                     </div>
                     {totalBonuses > 0 && (
-                        <div className="p-4 bg-emerald-500/10 rounded-xl border border-emerald-500/20">
-                            <p className="text-emerald-400 text-xs uppercase font-bold mb-1">Performance Bonuses</p>
-                            <p className="text-2xl font-mono font-bold text-emerald-400">+{currencySymbol} {totalBonuses.toLocaleString()}</p>
-                            <p className="text-[10px] text-emerald-400/60 mt-1">Based on store performance & role distribution</p>
+                        <div className="p-4 bg-emerald-50 dark:bg-emerald-500/10 rounded-xl border border-emerald-200 dark:border-emerald-500/20">
+                            <p className="text-emerald-700 dark:text-emerald-400 text-xs uppercase font-bold mb-1">Performance Bonuses</p>
+                            <p className="text-2xl font-mono font-bold text-emerald-700 dark:text-emerald-400">+{currencySymbol} {totalBonuses.toLocaleString()}</p>
+                            <p className="text-[10px] text-emerald-600/70 dark:text-emerald-400/60 mt-1">Based on store performance & role distribution</p>
                         </div>
                     )}
                     <div className="p-4 bg-[#2C5E3B]/10 rounded-xl border border-[#2C5E3B]/20">
                         <p className="text-[#2C5E3B] dark:text-[#A9CBA2] text-xs uppercase font-bold mb-1">Total Monthly Payout</p>
                         <p className="text-3xl font-mono font-bold text-[#2C5E3B] dark:text-[#A9CBA2]">{currencySymbol} {(totalSalaries + totalBonuses).toLocaleString()}</p>
-                        <p className="text-[10px] text-gray-500 mt-2">{employees.length} Active Employees</p>
+                        <p className="text-[10px] text-stone-500 dark:text-gray-500 mt-2">{employees.length} Active Employees</p>
                     </div>
                 </div>
+
+                {latestRun && (
+                    <div className="p-3 mb-3 bg-stone-100/80 dark:bg-black/40 rounded-xl border border-[#E2DCCE] dark:border-white/5 space-y-1.5">
+                        <div className="flex items-center justify-between">
+                            <span className="text-[10px] text-stone-500 dark:text-gray-400 uppercase font-bold tracking-wider">Dual Control</span>
+                            <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold font-mono ${
+                                latestRun.status === 'disbursed'
+                                    ? 'bg-emerald-50 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400'
+                                    : latestRun.status === 'approved'
+                                    ? 'bg-emerald-50 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400'
+                                    : 'bg-amber-50 dark:bg-amber-500/20 text-amber-700 dark:text-amber-400'
+                            }`}>
+                                {latestRun.status === 'disbursed'
+                                    ? 'Disbursed'
+                                    : latestRun.status === 'approved'
+                                    ? 'Dual Approved'
+                                    : latestRun.status === 'pending_finance'
+                                    ? 'Pending Finance'
+                                    : latestRun.status === 'pending_hr'
+                                    ? 'Pending HR'
+                                    : 'Pending Verification'}
+                            </span>
+                        </div>
+                        <div className="flex items-center justify-between text-[11px] text-stone-700 dark:text-gray-300">
+                            <span className="flex items-center gap-1">
+                                <span className={latestRun.hrApprovedBy ? 'text-emerald-600 dark:text-emerald-400 font-bold' : 'text-stone-400 dark:text-gray-500'}>
+                                    {latestRun.hrApprovedBy ? '✓ HR Certified' : '○ HR Pending'}
+                                </span>
+                            </span>
+                            <span className="text-stone-300 dark:text-gray-600">|</span>
+                            <span className="flex items-center gap-1">
+                                <span className={latestRun.financeApprovedBy ? 'text-blue-600 dark:text-blue-400 font-bold' : 'text-stone-400 dark:text-gray-500'}>
+                                    {latestRun.financeApprovedBy ? '✓ Finance Authorized' : '○ Finance Pending'}
+                                </span>
+                            </span>
+                        </div>
+                    </div>
+                )}
+
                 <button
                     onClick={handleProcessPayroll}
-                    className="w-full py-4 woody-btn-primary font-bold rounded-xl mb-3 flex items-center justify-center gap-2"
+                    className="w-full py-3.5 woody-btn-primary font-bold rounded-xl mb-3 flex items-center justify-center gap-2 cursor-pointer shadow-md"
                 >
-                    <CheckCircle size={18} /> Process Run
+                    <ShieldCheck size={18} /> Zero-Trust Payroll Run (HR + Finance)
                 </button>
-                <button onClick={handleDownloadBankFile} disabled={isSubmitting} className="w-full py-3 bg-white/5 hover:bg-white/10 text-white font-bold rounded-xl text-sm border border-white/10 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
+                <button
+                    type="button"
+                    onClick={() => setIsSalaryQueueOpen(true)}
+                    className="w-full py-3 mb-3 bg-emerald-50 dark:bg-emerald-500/10 hover:bg-emerald-100 dark:hover:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 font-bold rounded-xl text-xs uppercase tracking-wider border border-emerald-200 dark:border-emerald-500/30 flex items-center justify-between px-4 transition-colors cursor-pointer"
+                >
+                    <div className="flex items-center gap-2">
+                        <ShieldCheck size={16} />
+                        <span>Salary Approvals (4-Eyes)</span>
+                    </div>
+                    {pendingSalaryCount > 0 ? (
+                        <span className="bg-amber-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full font-mono">
+                            {pendingSalaryCount} Pending
+                        </span>
+                    ) : (
+                        <span className="text-emerald-600/70 dark:text-emerald-400/60 text-[10px] font-normal">
+                            Queue Clear
+                        </span>
+                    )}
+                </button>
+                <button
+                    onClick={handleDownloadBankFile}
+                    disabled={isSubmitting}
+                    className="w-full py-3 bg-stone-100 dark:bg-white/5 hover:bg-stone-200 dark:hover:bg-white/10 text-[#1E3F27] dark:text-white font-bold rounded-xl text-sm border border-[#E2DCCE] dark:border-white/10 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                >
                     {isSubmitting ? <Loader2 className="animate-spin" size={16} /> : null} {isSubmitting ? 'Downloading...' : 'Download Bank File'}
                 </button>
             </div>
+
+            {isSalaryQueueOpen && (
+                <SalaryApprovalQueueModal
+                    isOpen={isSalaryQueueOpen}
+                    onClose={() => setIsSalaryQueueOpen(false)}
+                    onRequestsUpdated={refreshPayrollState}
+                />
+            )}
         </div>
     );
 };

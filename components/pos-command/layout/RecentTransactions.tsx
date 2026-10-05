@@ -2,45 +2,52 @@ import React from 'react';
 import { usePOSCommand } from '../POSCommandContext';
 import { useLanguage } from '../../../contexts/LanguageContext';
 import { useData } from '../../../contexts/DataContext';
+import { useStore } from '../../../contexts/CentralStore';
+import { hasPermission } from '../../../utils/permissions';
 import { useNavigate } from 'react-router-dom';
 import { CURRENCY_SYMBOL } from '../../../constants';
 
 export const RecentTransactions: React.FC = () => {
     const { t } = useLanguage();
     const navigate = useNavigate();
+    const { user } = useStore();
     const { sales } = useData();
     const { filteredSales, txPage, setTxPage, TX_PER_PAGE } = usePOSCommand();
+    const canAccessSalesHistory = hasPermission(user?.role, 'ACCESS_SALES');
 
     return (
-        <div className="bg-white/85 dark:bg-[#18201B]/60 lg:backdrop-blur-2xl border border-[#E2DCCE] dark:border-emerald-950/20 rounded-[28px] overflow-hidden shadow-[0_4px_24px_-4px_rgba(34,50,38,0.04)] dark:shadow-[0_8px_32px_-4px_rgba(5,8,6,0.5)]">
+        <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl overflow-hidden shadow-xs">
             {/* Header */}
-            <div className="px-6 py-5 border-b border-[#E2DCCE]/60 dark:border-emerald-950/20 flex justify-between items-center bg-[#FAF8F5]/60 dark:bg-black/10">
-                <h3 className="font-extrabold text-[#1E3F27] dark:text-[#EAE5D9] tracking-tight">{t('posCommand.recentTransactions')}</h3>
-                <button
-                    onClick={() => navigate('/sales')}
-                    className="text-xs font-bold text-[#2C5E3B] dark:text-[#A9CBA2] hover:text-[#1E3F27] dark:hover:text-white transition-colors hover:underline underline-offset-2"
-                >
-                    {t('posCommand.viewAllHistory')}
-                </button>
+            <div className="px-6 py-5 border-b border-[var(--theme-border)] flex justify-between items-center bg-[var(--theme-bg-subtle)]">
+                <h3 className="font-bold text-[var(--theme-text-primary)] tracking-tight">{t('posCommand.recentTransactions')}</h3>
+                {canAccessSalesHistory && (
+                    <button
+                        type="button"
+                        onClick={() => navigate('/sales')}
+                        className="text-xs font-bold text-[var(--theme-text-primary)] hover:opacity-80 transition-opacity hover:underline underline-offset-2 cursor-pointer"
+                    >
+                        {t('posCommand.viewAllHistory')}
+                    </button>
+                )}
             </div>
 
             {/* Table */}
             <div className="overflow-x-auto">
                 <table className="w-full text-left">
-                    <thead className="bg-[#F4F0E6]/80 dark:bg-white/[0.03] border-b border-[#E2DCCE]/60 dark:border-emerald-950/20">
+                    <thead className="bg-[var(--theme-bg-subtle)] border-b border-[var(--theme-border)]">
                         <tr>
-                            <th className="px-5 py-3.5 text-left text-[10px] font-black text-[#4D6E56] dark:text-[#7A9E83] uppercase tracking-widest">{t('posCommand.receiptId')}</th>
-                            <th className="px-5 py-3.5 text-left text-[10px] font-black text-[#4D6E56] dark:text-[#7A9E83] uppercase tracking-widest">{t('posCommand.method')}</th>
-                            <th className="px-5 py-3.5 text-right text-[10px] font-black text-[#4D6E56] dark:text-[#7A9E83] uppercase tracking-widest">{t('inventory.price')}</th>
-                            <th className="px-5 py-3.5 text-center text-[10px] font-black text-[#4D6E56] dark:text-[#7A9E83] uppercase tracking-widest">{t('common.status')}</th>
+                            <th className="px-5 py-3.5 text-left text-[10px] font-bold text-[var(--theme-text-secondary)] uppercase tracking-wider">{t('posCommand.receiptId')}</th>
+                            <th className="px-5 py-3.5 text-left text-[10px] font-bold text-[var(--theme-text-secondary)] uppercase tracking-wider">{t('posCommand.method')}</th>
+                            <th className="px-5 py-3.5 text-right text-[10px] font-bold text-[var(--theme-text-secondary)] uppercase tracking-wider">{t('inventory.price')}</th>
+                            <th className="px-5 py-3.5 text-center text-[10px] font-bold text-[var(--theme-text-secondary)] uppercase tracking-wider">{t('common.status')}</th>
                         </tr>
                     </thead>
-                    <tbody className="divide-y divide-[#E2DCCE]/40 dark:divide-emerald-950/20">
+                    <tbody className="divide-y divide-[var(--theme-border)]">
                         {(() => {
                             if (filteredSales.length === 0) {
                                 return (
                                     <tr>
-                                        <td colSpan={4} className="px-5 py-8 text-center text-xs text-stone-400 dark:text-stone-500 font-bold">
+                                        <td colSpan={4} className="px-5 py-8 text-center text-xs text-[var(--theme-text-muted)] font-medium">
                                             {t('posCommand.noTransactionsFound') || 'No transactions found in this period.'}
                                         </td>
                                     </tr>
@@ -51,19 +58,19 @@ export const RecentTransactions: React.FC = () => {
                             const paginatedTx = filteredSales.slice(startIndex, startIndex + TX_PER_PAGE);
 
                             return paginatedTx.map((sale) => (
-                                <tr key={sale.id} className="hover:bg-[#2C5E3B]/[0.03] dark:hover:bg-white/[0.02] transition-colors">
-                                    <td className="px-5 py-4 text-sm font-mono font-bold text-[#1E3F27] dark:text-[#EAE5D9]">{sale.id.substring(0, 8).toUpperCase()}</td>
-                                    <td className="px-5 py-4 text-xs text-[#4D6E56] dark:text-[#7A9E83]">
+                                <tr key={sale.id} className="hover:bg-[var(--theme-bg-card-hover)] transition-colors">
+                                    <td className="px-5 py-4 text-sm font-mono font-bold text-[var(--theme-text-primary)]">{sale.id.substring(0, 8).toUpperCase()}</td>
+                                    <td className="px-5 py-4 text-xs text-[var(--theme-text-secondary)]">
                                         {sale.method === 'Cash' ? t('pos.cashSales') :
                                             sale.method === 'Card' ? t('pos.cardSales') :
                                                 sale.method === 'Mobile Money' ? t('pos.mobileSales') : sale.method}
                                     </td>
-                                    <td className="px-5 py-4 text-sm font-mono font-bold text-[#1E3F27] dark:text-[#EAE5D9] text-right">{CURRENCY_SYMBOL} {sale.total.toLocaleString()}</td>
+                                    <td className="px-5 py-4 text-sm font-mono font-bold text-[var(--theme-text-primary)] text-right">{CURRENCY_SYMBOL} {sale.total.toLocaleString()}</td>
                                     <td className="px-5 py-4 text-center">
                                         <span className={`px-2.5 py-1 rounded-xl text-[10px] font-bold uppercase border ${
                                             sale.status === 'Completed'
-                                                ? 'text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-400/10 border-emerald-200 dark:border-emerald-400/20'
-                                                : 'text-amber-700 dark:text-yellow-400 bg-amber-50 dark:bg-yellow-400/10 border-amber-200 dark:border-yellow-400/20'
+                                                ? 'text-emerald-500 bg-emerald-500/10 border-emerald-500/20'
+                                                : 'text-amber-500 bg-amber-500/10 border-amber-500/20'
                                         }`}>
                                             {sale.status === 'Completed' ? t('common.completed') : t('common.pending')}
                                         </span>
@@ -76,22 +83,22 @@ export const RecentTransactions: React.FC = () => {
             </div>
 
             {/* Pagination footer */}
-            <div className="px-5 py-4 bg-[#FAF8F5]/60 dark:bg-black/10 border-t border-[#E2DCCE]/60 dark:border-emerald-950/20 flex items-center justify-between">
-                <div className="text-[10px] text-[#4D6E56] dark:text-[#7A9E83] font-black uppercase tracking-wider select-none">
+            <div className="px-5 py-4 bg-[var(--theme-bg-subtle)] border-t border-[var(--theme-border)] flex items-center justify-between">
+                <div className="text-[10px] text-[var(--theme-text-secondary)] font-bold uppercase tracking-wider select-none">
                     {t('common.page')} {txPage} {t('common.of')} {Math.max(1, Math.ceil(filteredSales.length / TX_PER_PAGE))}
                 </div>
                 <div className="flex gap-2">
                     <button
                         onClick={() => setTxPage(p => Math.max(1, p - 1))}
                         disabled={txPage === 1}
-                        className="px-3.5 py-1.5 bg-white/80 dark:bg-white/5 hover:bg-[#2C5E3B]/10 text-[#2C4D35] dark:text-white text-[10px] font-bold rounded-xl border border-[#E2DCCE] dark:border-white/10 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+                        className="px-3.5 py-1.5 bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card-hover)] text-[var(--theme-text-primary)] text-[10px] font-bold rounded-xl border border-[var(--theme-border)] disabled:opacity-30 disabled:cursor-not-allowed transition-all cursor-pointer"
                     >
                         {t('common.previous')}
                     </button>
                     <button
                         onClick={() => setTxPage(p => Math.min(Math.ceil(filteredSales.length / TX_PER_PAGE), p + 1))}
                         disabled={txPage >= Math.ceil(filteredSales.length / TX_PER_PAGE)}
-                        className="px-3.5 py-1.5 bg-[#224429] dark:bg-[#2C5E3B] hover:bg-[#1B3520] dark:hover:bg-[#3a7a4d] text-white text-[10px] font-bold rounded-xl border border-transparent disabled:opacity-30 disabled:cursor-not-allowed transition-all shadow-sm"
+                        className="px-3.5 py-1.5 bg-[var(--theme-primary)] hover:opacity-90 text-[var(--theme-primary-text)] text-[10px] font-bold rounded-xl border border-transparent disabled:opacity-30 disabled:cursor-not-allowed transition-all shadow-xs cursor-pointer"
                     >
                         {t('common.next')}
                     </button>

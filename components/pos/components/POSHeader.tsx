@@ -1,17 +1,19 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-    ArrowLeft, Search, ArrowRight, X, Link, ShoppingBag,
+    ArrowLeft, Search, ArrowRight, X, Link,
     RefreshCw, WifiOff, CloudOff, CheckCircle, Trophy, SlidersHorizontal
 } from 'lucide-react';
 import { usePOS } from '../POSContext';
 import { useData } from '../../../contexts/DataContext';
 import { useLanguage } from '../../../contexts/LanguageContext';
-import { Protected } from '../../Protected';
 import Button from '../../shared/Button';
 import { CURRENCY_SYMBOL } from '../../../constants';
 import { formatCompactNumber } from '../../../utils/formatting';
 import { native } from '../../../utils/native';
+
+import { CyberClock } from '../../dashboard/widgets/CyberClock';
+import type { Country } from '../../../utils/localization';
 
 interface POSHeaderProps {
     setIsFilterPanelOpen: (open: boolean) => void;
@@ -31,7 +33,6 @@ export const POSHeader: React.FC<POSHeaderProps> = ({ setIsFilterPanelOpen, acti
         setUnknownBarcode,
         setCapturedBarcodeForModal,
         setIsUnknownBarcodeModalOpen,
-        setIsMiscItemModalOpen,
         currentStorePoints,
         storeBonus,
         userBonusShare,
@@ -40,7 +41,8 @@ export const POSHeader: React.FC<POSHeaderProps> = ({ setIsFilterPanelOpen, acti
         setIsPriceUpdatesModalOpen
     } = usePOS();
 
-    const { triggerSync, posSyncStatus, posPendingSyncCount, posLatencyMs, settings, products, activeSite } = useData();
+    const { triggerSync, posSyncStatus, posPendingSyncCount, posLatencyMs, settings, products, activeSite, effectiveCountry } = useData();
+    const activeCountry = (activeSite?.country || effectiveCountry || settings?.country || 'ET') as Country;
 
     // Calculate unseen price changes in active site (last 7 days)
     const siteId = activeSite?.id;
@@ -57,23 +59,23 @@ export const POSHeader: React.FC<POSHeaderProps> = ({ setIsFilterPanelOpen, acti
     const isNativeApp = typeof window !== 'undefined' && (window as any).Neutralino;
 
     return (
-        <div className="flex gap-4">
+        <div className="flex gap-3">
             <Button
                 variant="secondary"
                 onClick={() => navigate('/')}
-                icon={<ArrowLeft size={20} />}
+                icon={<ArrowLeft size={18} />}
                 title={t('pos.exitDashboard')}
                 aria-label="Exit to Dashboard"
-                className="hidden lg:flex p-3 bg-white/90 dark:bg-black/25 border border-[#E2DCCE] dark:border-emerald-950/20 rounded-2xl text-[#2C4D35] dark:text-[#A9CBA2] hover:text-[#1E3F27] dark:hover:text-white hover:scale-105 active:scale-95 transition-all shadow-[0_2px_12px_rgba(44,94,59,0.03)] dark:shadow-none"
+                className="hidden lg:flex p-2.5 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-card-hover)] active:scale-95 transition-all shadow-xs cursor-pointer"
             />
             <div className="flex-1 relative">
-                <div className="flex items-center bg-white/90 dark:bg-black/25 border border-[#E2DCCE] dark:border-emerald-950/20 rounded-2xl px-4 py-2.5 focus-within:border-[#2C5E3B] dark:focus-within:border-[#A9CBA2] focus-within:ring-4 focus-within:ring-[#2C5E3B]/10 dark:focus-within:ring-[#A9CBA2]/10 transition-all duration-300 group">
-                    <Search className="w-5 h-5 text-[#4D6E56] dark:text-[#7A9E83] group-focus-within:text-[#2C5E3B] dark:group-focus-within:text-[#A9CBA2] transition-colors flex-shrink-0" />
+                <div className="flex items-center bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 py-2 focus-within:border-[var(--theme-border-focus)] transition-colors group">
+                    <Search className="w-4 h-4 text-[var(--theme-text-secondary)] group-focus-within:text-[var(--theme-text-primary)] transition-colors flex-shrink-0" />
                     <input
                         ref={searchInputRef}
                         type="text"
                         placeholder={t('pos.searchProducts')}
-                        className="bg-transparent border-none ml-3 flex-1 text-[#1E3F27] dark:text-[#EAE5D9] outline-none placeholder-stone-400 dark:placeholder-stone-500 font-medium min-w-0"
+                        className="bg-transparent border-none ml-2.5 flex-1 text-[var(--theme-text-primary)] outline-none placeholder-[var(--theme-text-muted)] font-medium text-xs sm:text-sm min-w-0"
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                         onKeyDown={handleSearchKeyDown}
@@ -85,14 +87,14 @@ export const POSHeader: React.FC<POSHeaderProps> = ({ setIsFilterPanelOpen, acti
                                 setSearchTerm('');
                                 if (searchInputRef.current) searchInputRef.current.value = '';
                             }}
-                            className="ml-1.5 p-1 rounded-lg hover:bg-stone-200 dark:hover:bg-white/10 text-stone-400 hover:text-stone-600 dark:hover:text-stone-200 transition-colors flex-shrink-0"
+                            className="ml-1.5 p-1 rounded-lg hover:bg-[var(--theme-bg-card-hover)] text-[var(--theme-text-muted)] hover:text-[var(--theme-text-primary)] transition-colors flex-shrink-0 cursor-pointer"
                             aria-label="Clear Search"
                         >
-                            <X size={16} />
+                            <X size={15} />
                         </button>
                     ) : null}
                     {unseenPriceChanges.length > 0 && (
-                        <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-blue-500/10 border border-blue-400/30 text-blue-700 dark:text-blue-300 ml-2 flex-shrink-0">
+                        <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-lg bg-blue-500/10 border border-blue-500/20 text-blue-500 ml-2 flex-shrink-0">
                             <button
                                 type="button"
                                 onClick={() => {
@@ -102,15 +104,15 @@ export const POSHeader: React.FC<POSHeaderProps> = ({ setIsFilterPanelOpen, acti
                                 className="flex items-center gap-1.5 hover:underline cursor-pointer transition-transform active:scale-95"
                                 title="Review and confirm product price updates"
                             >
-                                <span className="w-2 h-2 rounded-full bg-blue-500 animate-pulse" />
-                                <span className="text-[10px] font-black uppercase tracking-wider">
+                                <span className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" />
+                                <span className="text-[10px] font-bold uppercase tracking-wider">
                                     {unseenPriceChanges.length} Price {unseenPriceChanges.length === 1 ? 'Change' : 'Changes'}
                                 </span>
                             </button>
                             <button
                                 type="button"
                                 onClick={markPriceUpdatesAsRead}
-                                className="ml-1 text-[9px] font-black uppercase px-1.5 py-0.5 rounded bg-blue-500 text-white hover:bg-blue-600 transition-colors cursor-pointer"
+                                className="ml-1 text-[9px] font-bold uppercase px-1.5 py-0.5 rounded bg-blue-500 text-white hover:bg-blue-600 transition-colors cursor-pointer"
                                 title="Dismiss price notifications"
                             >
                                 Dismiss
@@ -122,23 +124,23 @@ export const POSHeader: React.FC<POSHeaderProps> = ({ setIsFilterPanelOpen, acti
                 {/* Unknown Barcode Alert */}
                 {unknownBarcode && (
                     <div className="absolute left-0 right-0 top-full mt-2 z-50">
-                        <div className="bg-yellow-500/15 border border-yellow-500/30 rounded-2xl p-4 backdrop-blur-md shadow-lg animate-in fade-in slide-in-from-top-2">
+                        <div className="bg-[var(--theme-bg-card)] border border-amber-500/30 rounded-2xl p-4 shadow-lg animate-in fade-in slide-in-from-top-2">
                             <button
                                 onClick={() => setUnknownBarcode('')}
-                                className="absolute top-2 right-2 p-1.5 rounded-lg text-amber-700 dark:text-yellow-400/60 hover:text-amber-900 dark:hover:text-yellow-400 hover:bg-yellow-500/10 transition-colors"
+                                className="absolute top-2 right-2 p-1.5 rounded-lg text-[var(--theme-text-muted)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-subtle)] transition-colors cursor-pointer"
                                 aria-label="Dismiss"
                             >
                                 <X size={16} />
                             </button>
                             <div className="flex flex-col items-center gap-3">
                                 <div className="text-center">
-                                    <p className="text-amber-800 dark:text-yellow-400 text-sm font-medium mb-1">{t('pos.unknownBarcodeDetected')}</p>
-                                    <p className="text-amber-900 dark:text-yellow-300 text-2xl font-mono font-bold tracking-wider">{unknownBarcode}</p>
+                                    <p className="text-amber-500 text-xs font-semibold mb-1">{t('pos.unknownBarcodeDetected')}</p>
+                                    <p className="text-[var(--theme-text-primary)] text-xl font-mono font-bold tracking-wider">{unknownBarcode}</p>
                                 </div>
                                 <div className="flex items-center gap-2">
                                     <button
                                         onClick={() => setUnknownBarcode('')}
-                                        className="px-4 py-2 bg-white/90 dark:bg-white/5 border border-stone-200 dark:border-white/10 text-stone-700 dark:text-gray-300 hover:bg-white dark:hover:bg-white/10 rounded-xl text-sm font-bold transition-all shadow-sm"
+                                        className="px-3.5 py-1.5 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-card-hover)] rounded-xl text-xs font-bold transition-all cursor-pointer"
                                     >
                                         {t('pos.dismiss')}
                                     </button>
@@ -147,9 +149,9 @@ export const POSHeader: React.FC<POSHeaderProps> = ({ setIsFilterPanelOpen, acti
                                             setCapturedBarcodeForModal(unknownBarcode);
                                             setIsUnknownBarcodeModalOpen(true);
                                         }}
-                                        className="px-4 py-2 bg-amber-600 dark:bg-yellow-500 text-white dark:text-black hover:bg-amber-700 dark:hover:bg-yellow-400 rounded-xl text-sm font-bold flex items-center gap-2 transition-all shadow-sm"
+                                        className="px-3.5 py-1.5 bg-[var(--theme-primary)] text-[var(--theme-primary-text)] hover:opacity-90 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all shadow-xs cursor-pointer"
                                     >
-                                        <Link size={14} />
+                                        <Link size={13} />
                                         {t('pos.linkBarcode')}
                                     </button>
                                 </div>
@@ -162,93 +164,80 @@ export const POSHeader: React.FC<POSHeaderProps> = ({ setIsFilterPanelOpen, acti
             {/* Advanced Filter & Sort Button */}
             <button
                 onClick={() => setIsFilterPanelOpen(true)}
-                className="relative bg-white/90 dark:bg-black/25 border border-[#E2DCCE] dark:border-emerald-950/20 rounded-2xl px-4 py-3 text-xs font-bold text-[#2C4D35] dark:text-[#A9CBA2] hover:text-[#1E3F27] dark:hover:text-white transition-all duration-300 flex items-center gap-2 hover:scale-105 active:scale-95 shadow-[0_2px_12px_rgba(44,94,59,0.03)] dark:shadow-none"
+                className="relative bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3 py-2 text-xs font-bold text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-card-hover)] transition-colors flex items-center gap-1.5 active:scale-95 shadow-xs cursor-pointer shrink-0"
             >
-                <SlidersHorizontal size={16} className="text-[#2C5E3B] dark:text-[#A9CBA2]" />
-                <span>Filter & Sort</span>
+                <SlidersHorizontal size={14} className="text-[var(--theme-text-secondary)]" />
+                <span className="hidden sm:inline">Filter & Sort</span>
                 {activeFiltersCount > 0 && (
-                    <span className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-red-500 text-white rounded-full flex items-center justify-center text-[9px] font-extrabold shadow-sm">
+                    <span className="w-4 h-4 bg-rose-500 text-white rounded-full flex items-center justify-center text-[9px] font-bold">
                         {activeFiltersCount}
                     </span>
                 )}
             </button>
 
-            <Protected permission="ADD_PRODUCT">
-                <Button
-                    variant="secondary"
-                    onClick={() => setIsMiscItemModalOpen(true)}
-                    icon={<ShoppingBag size={16} />}
-                    className="bg-white/90 dark:bg-black/25 border border-[#E2DCCE] dark:border-emerald-950/20 rounded-2xl px-4 text-sm font-bold text-[#2C4D35] dark:text-[#A9CBA2] hover:text-[#1E3F27] dark:hover:text-white transition-all duration-300 flex items-center gap-2 hover:scale-105 active:scale-95 shadow-[0_2px_12px_rgba(44,94,59,0.03)] dark:shadow-none"
-                >
-                    {t('pos.miscItem')}
-                </Button>
-            </Protected>
-
-            <div className="hidden md:block">
-                {/* Sync Status & Latency Badge */}
+            {/* Sync Status Badge */}
+            <div className="hidden md:block shrink-0">
                 <button
                     onClick={() => triggerSync()}
-                    className={`flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-bold border transition-all duration-300 hover:scale-105 active:scale-95 ${posSyncStatus === 'offline' ? 'bg-red-500/10 border-red-500/20 text-red-500' :
-                        posSyncStatus === 'syncing' ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-500' :
-                            (posPendingSyncCount || 0) > 0 ? 'bg-yellow-500/10 border-yellow-500/20 text-yellow-500' :
-                                'bg-[#2C5E3B]/10 border-[#2C5E3B]/20 text-[#2C5E3B] dark:text-[#A9CBA2]'
+                    className={`flex items-center gap-1.5 px-2.5 py-2 rounded-xl text-xs font-bold border transition-colors cursor-pointer ${posSyncStatus === 'offline' ? 'bg-rose-500/10 border-rose-500/20 text-rose-500' :
+                        posSyncStatus === 'syncing' ? 'bg-blue-500/10 border-blue-500/20 text-blue-500' :
+                            (posPendingSyncCount || 0) > 0 ? 'bg-amber-500/10 border-amber-500/20 text-amber-500' :
+                                'bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] text-[var(--theme-text-primary)]'
                          }`}
                     title={posLatencyMs ? `Server Latency: ${posLatencyMs}ms (Click to force sync)` : 'Click to force sync'}
                 >
                     {posSyncStatus === 'syncing' ? (
-                        <RefreshCw size={14} className="animate-spin" />
+                        <RefreshCw size={13} className="animate-spin" />
                     ) : posSyncStatus === 'offline' ? (
-                        <WifiOff size={14} />
+                        <WifiOff size={13} />
                     ) : (posPendingSyncCount || 0) > 0 ? (
-                        <CloudOff size={14} />
+                        <CloudOff size={13} />
                     ) : (
-                        <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
                     )}
-                    <span>
+                    <span className="hidden lg:inline text-[11px]">
                         {posSyncStatus === 'offline' ? t('pos.offline') :
                             posSyncStatus === 'syncing' ? t('pos.syncing') :
                                 (posPendingSyncCount || 0) > 0 ? t('pos.syncPending') :
                                     posLatencyMs ? `${posLatencyMs}ms` : t('pos.online')}
-                        {((posPendingSyncCount || 0) > 0) && ` (${posPendingSyncCount} ${t('pos.queued')})`}
+                        {((posPendingSyncCount || 0) > 0) && ` (${posPendingSyncCount})`}
                     </span>
                 </button>
             </div>
 
-            {/* Store Bonus Widget */}
+            {/* Sovereign Terminal Clock */}
+            <div className="hidden xl:flex items-center shrink-0">
+                <CyberClock country={activeCountry} compact showCalendar={false} />
+            </div>
+
+            {/* Store Bonus Widget - Compact Apple Liquid Glass Pill with Hover Breakdown */}
             {settings.posBonusEnabled !== false && currentStorePoints && storeBonus && (
-                <div className="hidden lg:flex items-center gap-2 bg-gradient-to-r from-[#2C5E3B]/10 to-amber-600/10 border border-[#2C5E3B]/20 rounded-xl px-3 py-1.5">
-                    <div className={`w-8 h-8 rounded-lg bg-gradient-to-br ${storeBonus.tier.tierColor === 'gray' ? 'from-gray-400 to-gray-500' :
-                        storeBonus.tier.tierColor === 'amber' ? 'from-amber-500 to-amber-600' :
-                            storeBonus.tier.tierColor === 'yellow' ? 'from-yellow-400 to-yellow-500' :
-                                storeBonus.tier.tierColor === 'cyan' ? 'from-[#2C5E3B] to-[#2C5E3B]/80' :
-                                    storeBonus.tier.tierColor === 'purple' ? 'from-amber-600 to-amber-700' :
-                                        'from-gray-400 to-gray-500'
-                        } flex items-center justify-center`}>
-                        <Trophy size={16} className="text-white" />
+                <div className="relative group hidden lg:block shrink-0">
+                    <div className="flex items-center gap-1.5 bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card-hover)] border border-[var(--theme-border)] rounded-xl px-2.5 py-2 text-xs font-bold text-[var(--theme-text-primary)] cursor-pointer transition-colors shadow-xs">
+                        <Trophy size={14} className="text-amber-500 shrink-0" />
+                        <span className="font-mono tabular-nums text-[11px]">{currentStorePoints.monthlyPoints.toLocaleString()} {t('pos.pts')}</span>
                     </div>
-                    <div>
-                        <p className="text-xs font-bold text-[#1E3F27] dark:text-[#EAE5D9] flex items-center gap-1">
-                            {t('pos.teamBonus')}
-                            <span className={`px-1.5 py-0.5 rounded text-[8px] font-bold bg-gradient-to-r ${storeBonus.tier.tierColor === 'gray' ? 'from-gray-400 to-gray-500' :
-                                storeBonus.tier.tierColor === 'amber' ? 'from-amber-500 to-amber-600' :
-                                    storeBonus.tier.tierColor === 'yellow' ? 'from-yellow-400 to-yellow-500' :
-                                        storeBonus.tier.tierColor === 'cyan' ? 'from-[#2C5E3B] to-[#2C5E3B]/80' :
-                                            storeBonus.tier.tierColor === 'purple' ? 'from-amber-600 to-amber-700' :
-                                                'from-gray-400 to-gray-500'
-                                } text-white`}>
+
+                    {/* Popover Breakdown on Hover */}
+                    <div className="absolute right-0 top-full mt-2 hidden group-hover:block z-50 w-56 p-3 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl shadow-xl animate-in fade-in duration-200">
+                        <div className="flex items-center justify-between mb-1">
+                            <span className="text-xs font-bold text-[var(--theme-text-primary)]">{t('pos.teamBonus')}</span>
+                            <span className="px-1.5 py-0.5 rounded text-[8px] font-bold uppercase bg-[var(--theme-pill-bg)] text-[var(--theme-text-primary)] border border-[var(--theme-border)]">
                                 {storeBonus.tier.tierName}
                             </span>
-                        </p>
-                        <p className="text-[10px] text-[#4D6E56] dark:text-[#7A9E83]">{currentStorePoints.monthlyPoints.toLocaleString()} {t('pos.pts')}</p>
-                    </div>
-                    {userBonusShare && (
-                        <div className="text-right pl-2 border-l border-[#2C5E3B]/20">
-                            <p className="text-xs text-[#2C5E3B] dark:text-[#A9CBA2] font-bold">
-                                {formatCompactNumber(userBonusShare.amount, { currency: CURRENCY_SYMBOL, maxFractionDigits: 0 })}
-                            </p>
-                            <p className="text-[10px] text-[#4D6E56] dark:text-gray-500">{t('pos.yourShare')}</p>
                         </div>
-                    )}
+                        <p className="text-[11px] text-[var(--theme-text-secondary)]">
+                            {currentStorePoints.monthlyPoints.toLocaleString()} {t('pos.pts')}
+                        </p>
+                        {userBonusShare && (
+                            <div className="mt-2 pt-2 border-t border-[var(--theme-border)] flex items-center justify-between">
+                                <span className="text-[10px] text-[var(--theme-text-secondary)]">{t('pos.yourShare')}</span>
+                                <span className="text-xs font-mono font-bold text-[var(--theme-text-primary)]">
+                                    {formatCompactNumber(userBonusShare.amount, { currency: CURRENCY_SYMBOL, maxFractionDigits: 0 })}
+                                </span>
+                            </div>
+                        )}
+                    </div>
                 </div>
             )}
         </div>

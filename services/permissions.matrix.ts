@@ -13,10 +13,10 @@ const FULL_ACCESS_PERMISSIONS: Permission[] = [
     'inventory.view', 'inventory.create', 'inventory.edit', 'inventory.delete', 'inventory.adjust', 'inventory.count', 'inventory.transfer',
     'warehouse.view', 'warehouse.view_tasks', 'warehouse.receive', 'warehouse.pick', 'warehouse.pack', 'warehouse.dispatch', 'warehouse.putaway', 'warehouse.count',
     'procurement.view', 'procurement.create_po', 'procurement.edit_po', 'procurement.approve_po', 'procurement.delete_po', 'procurement.receive',
-    'finance.view', 'finance.view_reports', 'finance.create_expense', 'finance.approve_expense', 'finance.edit_expense', 'finance.delete_expense', 'finance.manage_payroll', 'finance.view_payroll',
+    'finance.view', 'finance.view_reports', 'finance.create_expense', 'finance.approve_expense', 'finance.edit_expense', 'finance.delete_expense', 'finance.void_expense', 'finance.reconcile_drawer', 'finance.manage_ap', 'finance.manage_gl', 'finance.manage_budget', 'finance.manage_payroll', 'finance.view_payroll',
     'sales.view', 'sales.view_reports', 'sales.create', 'sales.refund',
     'customers.view', 'customers.create', 'customers.edit', 'customers.delete', 'customers.view_history', 'customers.manage_loyalty',
-    'employees.view', 'employees.create', 'employees.edit', 'employees.delete', 'employees.approve', 'employees.view_salary', 'employees.edit_salary', 'employees.manage_attendance',
+    'employees.view', 'employees.create', 'employees.edit', 'employees.delete', 'employees.approve', 'employees.view_salary', 'employees.edit_salary', 'employees.propose_salary', 'employees.approve_salary', 'employees.manage_attendance',
     'pricing.view', 'pricing.edit', 'pricing.create_promo', 'pricing.approve_promo',
     'settings.view', 'settings.edit', 'settings.manage_sites', 'settings.manage_roles', 'settings.view_logs', 'settings.manage_integrations'
 ];
@@ -27,9 +27,12 @@ export const ACTION_PERMISSIONS: Record<UserRole, Permission[]> = {
     ceo: FULL_ACCESS_PERMISSIONS,
 
     admin: [
-        'dashboard.view',
+        'dashboard.view', 'admin.view',
         'settings.view', 'settings.edit', 'settings.manage_sites', 'settings.manage_roles', 'settings.view_logs', 'settings.manage_integrations',
-        'employees.view', 'employees.create', 'employees.edit'
+        'employees.view', 'employees.create', 'employees.edit',
+        'procurement.view', 'procurement.create_po', 'procurement.edit_po', 'procurement.approve_po', 'procurement.delete_po',
+        'inventory.view', 'inventory.create', 'inventory.edit',
+        'finance.view'
     ],
 
     warehouse_manager: [
@@ -49,17 +52,21 @@ export const ACTION_PERMISSIONS: Record<UserRole, Permission[]> = {
 
     finance_manager: [
         'dashboard.view',
-        'finance.view', 'finance.view_reports', 'finance.create_expense', 'finance.approve_expense', 'finance.edit_expense', 'finance.manage_payroll', 'finance.view_payroll',
+        'finance.view', 'finance.view_reports', 'finance.approve_expense', 'finance.edit_expense', 'finance.void_expense', 'finance.reconcile_drawer', 'finance.manage_ap', 'finance.manage_gl', 'finance.manage_budget', 'finance.manage_payroll', 'finance.view_payroll',
         'sales.view', 'sales.view_reports',
+        'pricing.view', 'pricing.edit', 'pricing.approve_promo',
+        'inventory.view',
+        'pos.view',
         'procurement.view', 'procurement.approve_po',
-        'employees.view', 'employees.view_salary', 'employees.edit_salary'
+        'employees.view', 'employees.view_salary', 'employees.approve_salary'
     ],
 
     procurement_manager: [
         'dashboard.view',
-        'procurement.view', 'procurement.create_po', 'procurement.edit_po', 'procurement.approve_po', 'procurement.delete_po', 'procurement.receive',
+        'procurement.view', 'procurement.create_po', 'procurement.edit_po', 'procurement.approve_po', 'procurement.delete_po',
+        'pricing.view',
         'inventory.view', 'inventory.transfer',
-        'warehouse.view', 'warehouse.receive',
+        'warehouse.view',
         'finance.view'
     ],
 
@@ -105,7 +112,7 @@ export const ACTION_PERMISSIONS: Record<UserRole, Permission[]> = {
 
     hr: [
         'dashboard.view',
-        'employees.view', 'employees.create', 'employees.edit', 'employees.approve', 'employees.view_salary', 'employees.edit_salary', 'employees.manage_attendance',
+        'employees.view', 'employees.create', 'employees.edit', 'employees.approve', 'employees.view_salary', 'employees.propose_salary', 'employees.manage_attendance',
         'finance.view_payroll', 'finance.manage_payroll'
     ],
 
@@ -113,9 +120,10 @@ export const ACTION_PERMISSIONS: Record<UserRole, Permission[]> = {
         'dashboard.view',
         'sales.view', 'sales.view_reports',
         'inventory.view',
+        'pos.view',
         'finance.view', 'finance.view_reports', 'finance.view_payroll',
         'employees.view',
-        'settings.view_logs'
+        'settings.view', 'settings.view_logs'
     ],
 
     driver: [
@@ -181,8 +189,7 @@ export const ACTION_PERMISSIONS: Record<UserRole, Permission[]> = {
 
     merchandiser: [
         'dashboard.view',
-        'inventory.view',
-        'pricing.view', 'pricing.edit'
+        'inventory.view'
     ],
 
     loss_prevention: [
@@ -198,7 +205,7 @@ export const ACTION_PERMISSIONS: Record<UserRole, Permission[]> = {
 
     accountant: [
         'dashboard.view',
-        'finance.view', 'finance.view_reports', 'finance.view_payroll',
+        'finance.view', 'finance.view_reports', 'finance.create_expense', 'finance.reconcile_drawer', 'finance.manage_ap', 'finance.manage_gl', 'finance.manage_budget', 'finance.view_payroll',
         'sales.view', 'sales.view_reports',
         'procurement.view'
     ],
@@ -224,33 +231,33 @@ export const ACTION_PERMISSIONS: Record<UserRole, Permission[]> = {
         'dashboard.view', 'admin.view',
         'pos.view', 'pos.create_sale', 'pos.refund', 'pos.hold_order', 'pos.void_sale',
         'inventory.view', 'inventory.create', 'inventory.edit', 'inventory.adjust', 'inventory.count', 'inventory.transfer',
-        'warehouse.view', 'warehouse.receive', 'warehouse.pick', 'warehouse.pack', 'warehouse.dispatch', 'warehouse.putaway', 'warehouse.count',
+        'warehouse.view', 'warehouse.view_tasks', 'warehouse.receive', 'warehouse.pick', 'warehouse.pack', 'warehouse.dispatch', 'warehouse.putaway', 'warehouse.count',
         'procurement.view', 'procurement.create_po', 'procurement.edit_po', 'procurement.approve_po', 'procurement.delete_po', 'procurement.receive',
-        'finance.view', 'finance.view_reports', 'finance.create_expense', 'finance.approve_expense',
+        'finance.view', 'finance.view_reports', 'finance.create_expense', 'finance.approve_expense', 'finance.view_payroll',
         'sales.view', 'sales.view_reports', 'sales.create', 'sales.refund',
         'customers.view', 'customers.create', 'customers.edit', 'customers.view_history', 'customers.manage_loyalty',
         'employees.view', 'employees.create', 'employees.edit', 'employees.approve', 'employees.manage_attendance',
         'pricing.view', 'pricing.edit', 'pricing.create_promo', 'pricing.approve_promo',
-        'settings.view', 'settings.edit', 'settings.manage_sites'
+        'settings.view', 'settings.edit', 'settings.manage_sites', 'settings.view_logs'
     ],
 
     operations_manager: [
         'dashboard.view', 'admin.view',
         'pos.view', 'pos.create_sale', 'pos.refund', 'pos.hold_order', 'pos.void_sale',
         'inventory.view', 'inventory.create', 'inventory.edit', 'inventory.adjust', 'inventory.count', 'inventory.transfer',
-        'warehouse.view', 'warehouse.receive', 'warehouse.pick', 'warehouse.pack', 'warehouse.dispatch', 'warehouse.putaway', 'warehouse.count',
+        'warehouse.view', 'warehouse.view_tasks', 'warehouse.receive', 'warehouse.pick', 'warehouse.pack', 'warehouse.dispatch', 'warehouse.putaway', 'warehouse.count',
         'procurement.view', 'procurement.create_po', 'procurement.edit_po', 'procurement.approve_po', 'procurement.delete_po', 'procurement.receive',
-        'finance.view', 'finance.view_reports', 'finance.create_expense', 'finance.approve_expense',
+        'finance.view', 'finance.view_reports', 'finance.create_expense', 'finance.approve_expense', 'finance.view_payroll',
         'sales.view', 'sales.view_reports', 'sales.create', 'sales.refund',
         'customers.view', 'customers.create', 'customers.edit', 'customers.view_history', 'customers.manage_loyalty',
         'employees.view', 'employees.create', 'employees.edit', 'employees.approve', 'employees.manage_attendance',
         'pricing.view', 'pricing.edit', 'pricing.create_promo', 'pricing.approve_promo',
-        'settings.view', 'settings.edit', 'settings.manage_sites'
+        'settings.view', 'settings.edit', 'settings.manage_sites', 'settings.view_logs'
     ],
 
     hr_manager: [
         'dashboard.view',
-        'employees.view', 'employees.create', 'employees.edit', 'employees.delete', 'employees.approve', 'employees.view_salary', 'employees.edit_salary', 'employees.manage_attendance',
+        'employees.view', 'employees.create', 'employees.edit', 'employees.approve', 'employees.view_salary', 'employees.propose_salary', 'employees.manage_attendance',
         'finance.view_payroll', 'finance.manage_payroll'
     ],
 
@@ -260,6 +267,15 @@ export const ACTION_PERMISSIONS: Record<UserRole, Permission[]> = {
         'warehouse.view', 'warehouse.receive', 'warehouse.pick', 'warehouse.pack', 'warehouse.dispatch', 'warehouse.putaway', 'warehouse.count',
         'procurement.view', 'procurement.create_po', 'procurement.edit_po', 'procurement.approve_po', 'procurement.receive',
         'finance.view'
+    ],
+
+    merchandising_manager: [
+        'dashboard.view', 'admin.view',
+        'pricing.view', 'pricing.edit', 'pricing.create_promo', 'pricing.approve_promo',
+        'inventory.view', 'inventory.create', 'inventory.edit',
+        'sales.view', 'sales.view_reports',
+        'procurement.view',
+        'customers.view'
     ],
 
     // ============================================================================
@@ -310,7 +326,7 @@ export const ACTION_PERMISSIONS: Record<UserRole, Permission[]> = {
 
     buyer: [
         'dashboard.view',
-        'procurement.view', 'procurement.create_po', 'procurement.edit_po', 'procurement.receive'
+        'procurement.view', 'procurement.create_po', 'procurement.edit_po'
     ],
 
     demand_planner: [
@@ -336,7 +352,93 @@ export const ACTION_PERMISSIONS: Record<UserRole, Permission[]> = {
 
     security_manager: [
         'dashboard.view',
-        'settings.view_logs',
+        'settings.view', 'settings.view_logs',
+        'inventory.view',
         'employees.view', 'employees.manage_attendance'
+    ],
+
+    payroll_specialist: [
+        'dashboard.view',
+        'finance.view', 'finance.view_reports', 'finance.view_payroll', 'finance.manage_payroll',
+        'employees.view', 'employees.view_salary'
+    ],
+
+    talent_recruiter: [
+        'dashboard.view',
+        'employees.view', 'employees.create', 'employees.edit'
+    ],
+
+    treasury_officer: [
+        'dashboard.view',
+        'finance.view', 'finance.view_reports', 'finance.reconcile_drawer', 'finance.manage_budget',
+        'pos.view',
+        'sales.view', 'sales.view_reports'
+    ],
+
+    tax_compliance_officer: [
+        'dashboard.view',
+        'finance.view', 'finance.view_reports',
+        'sales.view', 'sales.view_reports'
+    ],
+
+    credit_control_officer: [
+        'dashboard.view',
+        'finance.view', 'finance.view_reports',
+        'sales.view', 'sales.view_reports',
+        'customers.view', 'customers.view_history',
+        'procurement.view'
+    ],
+
+    vendor_relations_manager: [
+        'dashboard.view',
+        'procurement.view',
+        'pricing.view',
+        'inventory.view'
+    ],
+
+    customs_import_specialist: [
+        'dashboard.view',
+        'procurement.view',
+        'inventory.view'
+    ],
+
+    inbound_qc_inspector: [
+        'dashboard.view',
+        'procurement.view',
+        'warehouse.view',
+        'warehouse.view_tasks',
+        'warehouse.receive',
+        'inventory.view'
+    ],
+
+    replenishment_planner: [
+        'dashboard.view',
+        'inventory.view',
+        'inventory.transfer',
+        'warehouse.view',
+        'warehouse.view_tasks',
+        'procurement.view',
+        'sales.view'
+    ],
+
+    fleet_maintenance_supervisor: [
+        'dashboard.view',
+        'warehouse.view',
+        'warehouse.view_tasks',
+        'warehouse.dispatch',
+        'inventory.view',
+        'employees.view',
+        'employees.manage_attendance'
+    ],
+
+    store_operations_auditor: [
+        'dashboard.view',
+        'pos.view',
+        'sales.view',
+        'sales.view_reports',
+        'inventory.view',
+        'inventory.count',
+        'pricing.view',
+        'settings.view_logs'
     ]
 };

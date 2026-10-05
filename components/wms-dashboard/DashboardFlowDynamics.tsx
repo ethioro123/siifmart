@@ -21,24 +21,22 @@ export const DashboardFlowDynamics: React.FC<DashboardFlowDynamicsProps> = ({
     t
 }) => {
     return (
-        <div className="lg:col-span-2 bg-white/80 dark:bg-[#18201B]/70 border border-[#E2DCCE] dark:border-emerald-950/20 lg:backdrop-blur-2xl rounded-3xl p-4 sm:p-6 md:p-8 relative overflow-hidden shadow-sm transition-all duration-500">
-            <div className="hidden lg:block absolute top-0 right-0 w-64 h-64 bg-[#2C5E3B]/5 dark:bg-[#1E3F27]/3 rounded-full blur-[100px] -mr-32 -mt-32" />
-            <div className="flex items-center justify-between mb-10 relative">
+        <div className="lg:col-span-2 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-6 shadow-xs relative overflow-hidden">
+            <div className="flex items-center justify-between mb-8 relative">
                 <div>
-                    <h3 className="text-lg font-extrabold text-[#1E3F27] dark:text-[#EAE5D9] flex items-center gap-3">
-                        <div className="w-1.5 h-6 bg-[#2C5E3B] rounded-full shadow-[0_0_10px_rgba(44,94,59,0.3)]" />
+                    <h3 className="text-sm font-bold text-[var(--theme-text-primary)] uppercase tracking-wider">
                         Flow Dynamics
                     </h3>
-                    <p className="text-[#4D6E56] dark:text-[#7A9E83] text-[10px] mt-1 font-bold uppercase tracking-widest opacity-60">Daily item movement velocity</p>
+                    <p className="text-[var(--theme-text-secondary)] text-[10px] mt-1 font-bold uppercase tracking-widest">Daily item movement velocity</p>
                 </div>
-                <div className="flex items-center gap-6 p-2 bg-white/50 dark:bg-black/10 border border-[#E2DCCE]/60 dark:border-emerald-950/20 rounded-2xl shadow-sm">
-                    <div className="flex items-center gap-2 px-3 py-1 rounded-xl">
-                        <div className="w-2.5 h-2.5 bg-[#2C5E3B] dark:bg-[#A9CBA2] rounded-sm opacity-80" />
-                        <span className="text-[10px] font-bold text-[#4D6E56] dark:text-[#7A9E83] uppercase tracking-widest">Inbound</span>
+                <div className="flex items-center gap-4 p-2 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl">
+                    <div className="flex items-center gap-2 px-2.5 py-1">
+                        <div className="w-2.5 h-2.5 rounded-sm" style={{ backgroundColor: inboundColor }} />
+                        <span className="text-[10px] font-bold text-[var(--theme-text-secondary)] uppercase tracking-widest">Inbound</span>
                     </div>
-                    <div className="flex items-center gap-2 px-3 py-1 rounded-xl">
-                        <div className="w-2.5 h-2.5 bg-[#8C6239] dark:bg-[#E2C899] rounded-sm opacity-80" />
-                        <span className="text-[10px] font-bold text-[#4D6E56] dark:text-[#7A9E83] uppercase tracking-widest">Outbound</span>
+                    <div className="flex items-center gap-2 px-2.5 py-1">
+                        <div className="w-2.5 h-2.5 rounded-sm" style={{ backgroundColor: outboundColor }} />
+                        <span className="text-[10px] font-bold text-[var(--theme-text-secondary)] uppercase tracking-widest">Outbound</span>
                     </div>
                 </div>
             </div>
@@ -46,49 +44,39 @@ export const DashboardFlowDynamics: React.FC<DashboardFlowDynamicsProps> = ({
             <div className="h-[340px] w-full relative touch-pan-y">
                 <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
                     <BarChart data={data} barGap={12}>
-                        <defs>
-                            <linearGradient id="inboundGradient" x1="0" y1="0" x2="0" y2="1">
-                                <stop offset="0%" stopColor={inboundColor} stopOpacity={1} />
-                                <stop offset="100%" stopColor={inboundColor} stopOpacity={0.3} />
-                            </linearGradient>
-                            <linearGradient id="outboundGradient" x1="0" y1="0" x2="0" y2="1">
-                                <stop offset="0%" stopColor={outboundColor} stopOpacity={1} />
-                                <stop offset="100%" stopColor={outboundColor} stopOpacity={0.3} />
-                            </linearGradient>
-                        </defs>
-                        <CartesianGrid strokeDasharray="0" stroke={chartStroke} vertical={false} />
+                        <CartesianGrid strokeDasharray="3 3" stroke="var(--theme-border)" opacity={0.6} vertical={false} />
                         <XAxis
                             dataKey="name"
-                            stroke={chartText}
+                            stroke="var(--theme-text-secondary)"
                             fontSize={10}
-                            fontWeight={800}
+                            fontWeight={700}
                             tickLine={false}
                             axisLine={false}
-                            dy={15}
+                            dy={10}
                         />
                         <YAxis
-                            stroke={chartText}
+                            stroke="var(--theme-text-secondary)"
                             fontSize={10}
-                            fontWeight={800}
+                            fontWeight={700}
                             tickLine={false}
                             axisLine={false}
                             dx={-10}
                         />
                         <Tooltip
-                            cursor={{ fill: theme === 'dark' ? 'rgba(169,203,162,0.02)' : 'rgba(44,94,59,0.02)' }}
+                            cursor={{ fill: 'rgba(128,128,128,0.05)' }}
                             content={({ active, payload }) => {
                                 if (active && payload && payload.length) {
                                     return (
-                                        <div className="lg:backdrop-blur-2xl p-4 rounded-2xl shadow-2xl border bg-[#FAF8F5]/95 dark:bg-[#18201B]/95 border-[#E2DCCE] dark:border-emerald-950/20">
-                                            <p className="text-[10px] font-black text-[#4D6E56] dark:text-[#A9CBA2] uppercase tracking-[0.2em] mb-3">{payload[0].payload.date}</p>
-                                            <div className="space-y-2">
+                                        <div className="p-3 rounded-xl shadow-xl border bg-[var(--theme-bg-panel)] border-[var(--theme-border)]">
+                                            <p className="text-[10px] font-bold text-[var(--theme-text-secondary)] uppercase tracking-widest mb-2">{payload[0].payload.date}</p>
+                                            <div className="space-y-1.5">
                                                 {payload.map((entry: any, i: number) => (
-                                                    <div key={i} className="flex items-center justify-between gap-8">
+                                                    <div key={i} className="flex items-center justify-between gap-6">
                                                         <div className="flex items-center gap-2">
-                                                            <div className={`w-2 h-2 rounded-full ${entry.fill === 'url(#inboundGradient)' ? 'bg-[#2C5E3B] dark:bg-[#A9CBA2]' : 'bg-[#8C6239] dark:bg-[#E2C899]'}`} />
-                                                            <span className="text-xs font-bold text-[#1E3F27] dark:text-[#EAE5D9] uppercase tracking-tight">{entry.name}</span>
+                                                            <div className="w-2 h-2 rounded-full" style={{ backgroundColor: entry.name === 'Inbound' ? inboundColor : outboundColor }} />
+                                                            <span className="text-xs font-bold text-[var(--theme-text-secondary)] uppercase tracking-tight">{entry.name}</span>
                                                         </div>
-                                                        <span className="text-sm font-black text-[#1E3F27] dark:text-[#EAE5D9]">{entry.value}</span>
+                                                        <span className="text-sm font-bold text-[var(--theme-text-primary)]">{entry.value}</span>
                                                     </div>
                                                 ))}
                                             </div>
@@ -98,8 +86,8 @@ export const DashboardFlowDynamics: React.FC<DashboardFlowDynamicsProps> = ({
                                 return null;
                             }}
                         />
-                        <Bar name="Inbound" dataKey="inbound" fill="url(#inboundGradient)" radius={[6, 6, 0, 0]} />
-                        <Bar name="Outbound" dataKey="outbound" fill="url(#outboundGradient)" radius={[6, 6, 0, 0]} />
+                        <Bar name="Inbound" dataKey="inbound" fill={inboundColor} radius={[4, 4, 0, 0]} />
+                        <Bar name="Outbound" dataKey="outbound" fill={outboundColor} radius={[4, 4, 0, 0]} />
                     </BarChart>
                 </ResponsiveContainer>
             </div>

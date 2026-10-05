@@ -22,7 +22,7 @@ describe('employeesService - Code Generation & Conflict Resilience', () => {
         vi.clearAllMocks();
     });
 
-    it('generates next employee code above baseline 39 when DB has codes up to 39', async () => {
+    it('generates next employee code above baseline 39 when DB has codes up to 39 for Ethiopia', async () => {
         const mockSelect = vi.fn().mockReturnValue({
             order: vi.fn().mockReturnValue({
                 limit: vi.fn().mockResolvedValue({
@@ -40,11 +40,11 @@ describe('employeesService - Code Generation & Conflict Resilience', () => {
             select: mockSelect
         });
 
-        const nextCode = await employeesService.getNextCode();
-        expect(nextCode).toBe('SIIF-0040');
+        const nextCode = await employeesService.getNextCode('ET');
+        expect(nextCode).toBe('ET-SIIF0040');
     });
 
-    it('falls back to at least SIIF-0040 when DB query returns empty data', async () => {
+    it('falls back to at least ET-SIIF0040 when DB query returns empty data for Ethiopia', async () => {
         const mockSelect = vi.fn().mockReturnValue({
             order: vi.fn().mockReturnValue({
                 limit: vi.fn().mockResolvedValue({
@@ -59,7 +59,49 @@ describe('employeesService - Code Generation & Conflict Resilience', () => {
         });
 
         const nextCode = await employeesService.getNextCode();
-        expect(nextCode).toBe('SIIF-0040');
+        expect(nextCode).toBe('ET-SIIF0040');
+    });
+
+    it('generates KE-SIIF0001 for fresh Kenya tenant with zero cross-country bleed', async () => {
+        const mockSelect = vi.fn().mockReturnValue({
+            order: vi.fn().mockReturnValue({
+                limit: vi.fn().mockResolvedValue({
+                    data: [
+                        { code: 'SIIF-0039' },
+                        { code: 'ET-SIIF0040' }
+                    ],
+                    error: null
+                })
+            })
+        });
+
+        (supabase.from as any).mockReturnValue({
+            select: mockSelect
+        });
+
+        const nextCode = await employeesService.getNextCode('KE');
+        expect(nextCode).toBe('KE-SIIF0001');
+    });
+
+    it('increments Kenya sequence when existing Kenyan workers are present', async () => {
+        const mockSelect = vi.fn().mockReturnValue({
+            order: vi.fn().mockReturnValue({
+                limit: vi.fn().mockResolvedValue({
+                    data: [
+                        { code: 'KE-SIIF0043' },
+                        { code: 'ET-SIIF0050' }
+                    ],
+                    error: null
+                })
+            })
+        });
+
+        (supabase.from as any).mockReturnValue({
+            select: mockSelect
+        });
+
+        const nextCode = await employeesService.getNextCode('KE');
+        expect(nextCode).toBe('KE-SIIF0044');
     });
 
     it('retries with incremented code if 23505 unique constraint violation occurs on employees_code_key', async () => {
@@ -95,7 +137,7 @@ describe('employeesService - Code Generation & Conflict Resilience', () => {
                     select: vi.fn().mockReturnValue({
                         order: vi.fn().mockReturnValue({
                             limit: vi.fn().mockResolvedValue({
-                                data: [{ code: 'SIIF-0039' }],
+                                data: [{ code: 'ET-SIIF0039' }],
                                 error: null
                             })
                         })
@@ -107,12 +149,12 @@ describe('employeesService - Code Generation & Conflict Resilience', () => {
 
         const result = await employeesService.create({
             id: '6c38f106-4590-4ff3-ae68-b9ab657fff8e',
-            code: 'SIIF-0039',
-            siteId: 'site-ke-1',
+            code: 'ET-SIIF0039',
+            siteId: 'site-et-1',
             name: 'New Officer',
             role: 'cashier',
             email: 'officer@siifmart.com',
-            phone: '+254700000000',
+            phone: '+251911000039',
             status: 'Active',
             joinDate: '2026-09-30',
             department: 'Retail Operations',
@@ -125,7 +167,7 @@ describe('employeesService - Code Generation & Conflict Resilience', () => {
         });
 
         expect(callCount).toBe(2);
-        expect(result.code).toBe('SIIF-0040');
+        expect(result.code).toBe('ET-SIIF0040');
     });
 
     it('rejects employee creation when workplace location (siteId) is missing or empty', async () => {

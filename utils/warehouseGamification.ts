@@ -238,3 +238,34 @@ export function evaluateAchievements(
         pointsAwarded
     };
 }
+
+export interface DiscrepancyPenaltyResult {
+    penaltyPoints: number;
+    newAccuracy: number;
+    description: string;
+}
+
+/**
+ * Calculates gamification penalty and accuracy reduction when a Chain of Custody discrepancy is confirmed.
+ */
+export function calculateDiscrepancyPenalty(
+    currentAccuracy: number,
+    discrepancyCount: number,
+    totalExpected: number
+): DiscrepancyPenaltyResult {
+    const safeExpected = Math.max(1, totalExpected);
+    const errorRatio = Math.min(1, discrepancyCount / safeExpected);
+    
+    // Scale accuracy drop: at least 5% drop, proportional to error percentage
+    const accuracyDrop = Math.max(5, Math.round(errorRatio * 50));
+    const newAccuracy = Math.max(20, Math.min(100, Math.round(currentAccuracy - accuracyDrop)));
+
+    // Points deduction: base 20 points + 5 points per discrepant unit (capped at -150)
+    const penaltyPoints = -Math.min(150, 20 + (discrepancyCount * 5));
+
+    return {
+        penaltyPoints,
+        newAccuracy,
+        description: `Chain of Custody Discrepancy: ${discrepancyCount} unit(s) variance (-${accuracyDrop}% accuracy penalty)`
+    };
+}

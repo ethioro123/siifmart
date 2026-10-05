@@ -114,7 +114,7 @@ export const InventoryStockList: React.FC<InventoryStockListProps> = ({
 
     return (
         <div className="flex flex-col">
-            <div className="flex-1 glass-panel flex flex-col rounded-2xl">
+            <div className="flex-1 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] flex flex-col rounded-2xl overflow-hidden shadow-sm">
                 {/* Search, Filter Toolbar & Bulk Indicators */}
                 <InventoryToolbar
                     products={products}
@@ -170,41 +170,41 @@ export const InventoryStockList: React.FC<InventoryStockListProps> = ({
                     />
 
                     {products.length === 0 && (
-                        <div className="text-center py-12 text-gray-500">
+                        <div className="text-center py-12 text-[var(--theme-text-muted)]">
                             <Box size={48} className="mx-auto mb-4 opacity-50" />
-                            <p className="font-bold">No products found</p>
+                            <p className="font-bold text-[var(--theme-text-secondary)]">No products found</p>
                             <p className="text-xs mt-2">Try adjusting your filters or search term</p>
                         </div>
                     )}
                 </div>
 
                 {/* Product Pagination Controls */}
-                <div className="flex justify-between items-center p-6 border-t border-gray-100 dark:border-white/5 bg-gray-50 dark:bg-black/40 backdrop-blur-md rounded-b-3xl">
-                    <div className="text-[11px] font-black text-gray-500 uppercase tracking-widest flex items-center gap-3">
-                        <span className="w-1.5 h-1.5 rounded-full bg-[#2C5E3B] dark:bg-[#A9CBA2] animate-pulse" />
-                        Displays: <span className="text-white">{products.length}</span> <span className="text-gray-700">/</span> <span className="text-gray-400">{formatCompactNumber(totalCount)}</span> Records
+                <div className="flex justify-between items-center p-6 border-t border-[var(--theme-border)] bg-[var(--theme-bg-subtle)] rounded-b-2xl">
+                    <div className="text-[11px] font-bold text-[var(--theme-text-secondary)] uppercase tracking-wider flex items-center gap-3">
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                        Displays: <span className="text-[var(--theme-text-primary)] font-bold">{products.length}</span> <span className="text-[var(--theme-text-muted)]">/</span> <span className="text-[var(--theme-text-secondary)]">{formatCompactNumber(totalCount)}</span> Records
                     </div>
                     <div className="flex items-center gap-4">
                         <button
                             onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
                             disabled={currentPage === 1 || isLoading}
-                            className="px-4 py-2 bg-white/5 hover:bg-[#2C5E3B]/10 dark:hover:bg-[#A9CBA2]/10 disabled:opacity-30 disabled:hover:bg-white/5 rounded-xl text-[11px] font-black text-white transition-all border border-white/10 hover:border-[#2C5E3B]/40 dark:hover:border-[#A9CBA2]/40 flex items-center gap-2 group cursor-pointer"
+                            className="px-4 py-2 bg-[var(--theme-bg-card)] hover:bg-[var(--theme-bg-card-hover)] disabled:opacity-30 rounded-full text-xs font-bold text-[var(--theme-text-primary)] transition-all border border-[var(--theme-border)] flex items-center gap-2 group cursor-pointer"
                         >
                             <ChevronLeft size={14} className="group-hover:-translate-x-0.5 transition-transform" />
                             Prev
                         </button>
 
-                        <div className="flex items-center gap-2 bg-gray-100 dark:bg-black/40 px-3 py-1.5 rounded-xl border border-gray-200 dark:border-white/5">
-                            <span className="text-[10px] font-black text-gray-600 uppercase tracking-tighter">Page</span>
-                            <span className="text-[12px] font-black text-[#2C5E3B] dark:text-[#A9CBA2] font-mono">{currentPage}</span>
-                            <span className="text-gray-700 mx-1 text-[10px]">/</span>
-                            <span className="text-[12px] font-black text-gray-500 font-mono">{Math.max(1, Math.ceil(totalCount / itemsPerPage))}</span>
+                        <div className="flex items-center gap-2 bg-[var(--theme-bg-card)] px-3 py-1.5 rounded-full border border-[var(--theme-border)]">
+                            <span className="text-[10px] font-bold text-[var(--theme-text-secondary)] uppercase tracking-wider">Page</span>
+                            <span className="text-xs font-bold text-[var(--theme-text-primary)] font-mono">{currentPage}</span>
+                            <span className="text-[var(--theme-text-muted)] mx-1 text-[10px]">/</span>
+                            <span className="text-xs font-bold text-[var(--theme-text-secondary)] font-mono">{Math.max(1, Math.ceil(totalCount / itemsPerPage))}</span>
                         </div>
 
                         <button
                             onClick={() => setCurrentPage(prev => Math.min(prev + 1, Math.max(1, Math.ceil(totalCount / itemsPerPage))))}
                             disabled={currentPage >= Math.ceil(totalCount / itemsPerPage) || isLoading}
-                            className="px-4 py-2 bg-white/5 hover:bg-[#2C5E3B]/10 dark:hover:bg-[#A9CBA2]/10 disabled:opacity-30 disabled:hover:bg-white/5 rounded-xl text-[11px] font-black text-white transition-all border border-white/10 hover:border-[#2C5E3B]/40 dark:hover:border-[#A9CBA2]/40 flex items-center gap-2 group cursor-pointer"
+                            className="px-4 py-2 bg-[var(--theme-bg-card)] hover:bg-[var(--theme-bg-card-hover)] disabled:opacity-30 rounded-full text-xs font-bold text-[var(--theme-text-primary)] transition-all border border-[var(--theme-border)] flex items-center gap-2 group cursor-pointer"
                         >
                             Next
                             <ChevronRight size={14} className="group-hover:translate-x-0.5 transition-transform" />

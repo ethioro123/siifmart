@@ -1,6 +1,7 @@
 import React, { useMemo } from 'react';
-import { Calendar, Plus, Clock, CheckCircle2, XCircle, AlertCircle } from 'lucide-react';
+import { Calendar, Plus, Clock, CheckCircle2, XCircle, AlertCircle, ShieldCheck } from 'lucide-react';
 import { LeaveRequest } from '../../../utils/employeeProfileData';
+import { getStatutoryLeaveConfig } from '../../../services/leave-requests.service';
 
 interface TimeOffTabProps {
     isOwnProfile: boolean;
@@ -9,6 +10,7 @@ interface TimeOffTabProps {
     onRequestTimeOff: () => void;
     onApproveRequest?: (requestId: string) => void;
     onRejectRequest?: (requestId: string) => void;
+    countryCode?: string;
 }
 
 export default function TimeOffTab({
@@ -17,23 +19,33 @@ export default function TimeOffTab({
     leaveRequests,
     onRequestTimeOff,
     onApproveRequest,
-    onRejectRequest
+    onRejectRequest,
+    countryCode = 'ET'
 }: TimeOffTabProps) {
-    // Total allowances
-    const TOTAL_ANNUAL = 20;
-    const TOTAL_SICK = 10;
+    // Statutory Leave Allowances Config-Gated by Sovereign Country
+    const statutoryConfig = useMemo(() => getStatutoryLeaveConfig(countryCode), [countryCode]);
+    const TOTAL_ANNUAL = statutoryConfig.annualLeaveDays;
+    const TOTAL_SICK = statutoryConfig.sickLeaveDays;
 
-    // Calculate used days from approved leaves
+    // Calculate used days from approved leaves (supporting both camelCase & snake_case)
     const usedAnnual = useMemo(() => {
         return leaveRequests
-            .filter(r => r.type === 'Annual Leave' && r.status === 'Approved')
-            .reduce((sum, r) => sum + r.days, 0);
+            .filter(r => {
+                const type = (r as any).leave_type || r.type;
+                const status = (r as any).status;
+                return (type === 'Annual Leave' || type === 'annual') && status === 'Approved';
+            })
+            .reduce((sum, r) => sum + ((r as any).days_count ?? r.days ?? 0), 0);
     }, [leaveRequests]);
 
     const usedSick = useMemo(() => {
         return leaveRequests
-            .filter(r => r.type === 'Sick Leave' && r.status === 'Approved')
-            .reduce((sum, r) => sum + r.days, 0);
+            .filter(r => {
+                const type = (r as any).leave_type || r.type;
+                const status = (r as any).status;
+                return (type === 'Sick Leave' || type === 'medical' || type === 'sick') && status === 'Approved';
+            })
+            .reduce((sum, r) => sum + ((r as any).days_count ?? r.days ?? 0), 0);
     }, [leaveRequests]);
 
     const remainingAnnual = Math.max(0, TOTAL_ANNUAL - usedAnnual);
@@ -41,6 +53,19 @@ export default function TimeOffTab({
 
     return (
         <div className="space-y-6 animate-in fade-in">
+            {/* Statutory Compliance Indicator */}
+            <div className="flex items-center justify-between p-3.5 bg-[#FAF8F5] dark:bg-black/30 rounded-xl border border-[#E2DCCE] dark:border-white/10 text-xs">
+                <div className="flex items-center gap-2">
+                    <ShieldCheck size={16} className="text-[#2C5E3B] dark:text-[#A9CBA2]" />
+                    <span className="font-bold text-[#1E3F27] dark:text-[#EAE5D9]">
+                        Statutory Labor Policy ({statutoryConfig.countryCode})
+                    </span>
+                </div>
+                <span className="font-mono text-stone-500 font-medium text-[11px]">
+                    Statutory Baseline: {TOTAL_ANNUAL}d Annual • {TOTAL_SICK}d Medical • 4-Eyes Dual Control
+                </span>
+            </div>
+
             {/* Leave Balance Cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="p-6 bg-[#FAF8F5] dark:bg-black/30 rounded-2xl border border-[#E2DCCE] dark:border-white/10 shadow-xs">
@@ -120,11 +145,18 @@ export default function TimeOffTab({
             ) : (
                 <div className="space-y-3">
                     {leaveRequests.map(req => {
+                        const status = (req as any).status || 'Pending';
+                        const type = (req as any).leave_type || req.type;
+                        const startDate = (req as any).start_date || req.startDate;
+                        const endDate = (req as any).end_date || req.endDate;
+                        const days = (req as any).days_count ?? req.days ?? 1;
+                        const reason = (req as any).reason;
+
                         const statusColors = {
                             Approved: 'bg-emerald-50 text-emerald-800 dark:bg-emerald-950/20 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800/40',
                             Pending: 'bg-amber-50 text-amber-800 dark:bg-amber-950/20 dark:text-amber-300 border-amber-200 dark:border-amber-800/40',
                             Rejected: 'bg-red-50 text-red-800 dark:bg-red-950/20 dark:text-red-300 border-red-200 dark:border-red-800/40'
-                        }[req.status];
+                        }[status as 'Approved' | 'Pending' | 'Rejected'] || 'bg-stone-50 text-stone-700 border-stone-200';
 
                         return (
                             <div
@@ -138,25 +170,25 @@ export default function TimeOffTab({
                                     <div>
                                         <div className="flex items-center gap-2">
                                             <h5 className="font-bold text-sm text-[#1E3F27] dark:text-[#EAE5D9]">
-                                                {req.type}
+                                                {type}
                                             </h5>
                                             <span className={`text-[10px] font-black uppercase px-2 py-0.5 rounded-lg border ${statusColors}`}>
-                                                {req.status}
+                                                {status}
                                             </span>
                                         </div>
                                         <p className="text-xs text-stone-600 dark:text-stone-400 mt-0.5">
-                                            {req.startDate} to {req.endDate} ({req.days} {req.days === 1 ? 'day' : 'days'})
+                                            {startDate} to {endDate} ({days} {days === 1 ? 'day' : 'days'})
                                         </p>
-                                        {req.reason && (
+                                        {reason && (
                                             <p className="text-xs text-stone-500 italic mt-1">
-                                                "{req.reason}"
+                                                "{reason}"
                                             </p>
                                         )}
                                     </div>
                                 </div>
 
                                 {/* Manager Approval Controls */}
-                                {canManageEmployees && req.status === 'Pending' && onApproveRequest && onRejectRequest && (
+                                {canManageEmployees && status === 'Pending' && onApproveRequest && onRejectRequest && (
                                     <div className="flex items-center gap-2 shrink-0">
                                         <button
                                             onClick={() => onRejectRequest(req.id)}

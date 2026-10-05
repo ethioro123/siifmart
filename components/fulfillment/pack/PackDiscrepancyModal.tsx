@@ -1,13 +1,27 @@
 import React, { useState, useEffect } from 'react';
 import {
     X, AlertTriangle, CheckCircle, Loader2, ShieldAlert,
-    Package, Minus, Plus, ArrowRight, ClipboardList
+    Package, Minus, Plus, ArrowRight, ClipboardList, ShieldCheck, KeyRound, UserCheck
 } from 'lucide-react';
 import { WMSJob, User } from '../../../types';
 import { formatJobId } from '../../../utils/jobIdFormatter';
 import { useLanguage } from '../../../contexts/LanguageContext';
+import { useData } from '../../../contexts/DataContext';
+import { getCachedAuditLocation } from '../../../utils/geolocationHelper';
+import { matchStaffPin } from '../../../utils/employeeIdGenerator';
 
 type ReasonCode = 'underpack' | 'overpack' | 'wrong_item' | 'damaged' | 'short_picked';
+
+const SUPERVISORY_ROLES = [
+    'super_admin',
+    'ceo',
+    'operations_manager',
+    'warehouse_manager',
+    'inventory_manager',
+    'store_manager',
+    'shift_supervisor',
+    'inventory_specialist'
+];
 
 interface PackDiscrepLine {
     index: number;
@@ -28,6 +42,7 @@ export const PackDiscrepancyModal: React.FC<PackDiscrepancyModalProps> = ({
     onAcceptCount,
 }) => {
     const { t } = useLanguage();
+    const { employees, logSystemEvent } = useData();
     
     const reasonOptions = [
         { id: 'short_picked' as const, label: t('warehouse.packing.shortPicked'), desc: t('warehouse.packing.shortPickedDesc'), color: 'text-amber-500' },
@@ -40,6 +55,8 @@ export const PackDiscrepancyModal: React.FC<PackDiscrepancyModalProps> = ({
     const [lines, setLines] = useState<PackDiscrepLine[]>([]);
     const [reasonCode, setReasonCode] = useState<ReasonCode>('short_picked');
     const [notes, setNotes] = useState('');
+    const [supervisorPin, setSupervisorPin] = useState('');
+    const [authError, setAuthError] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [step, setStep] = useState<'COUNT' | 'REASON' | 'DONE'>('COUNT');
 
@@ -48,6 +65,8 @@ export const PackDiscrepancyModal: React.FC<PackDiscrepancyModalProps> = ({
         setStep('COUNT');
         setNotes('');
         setReasonCode('short_picked');
+        setSupervisorPin('');
+        setAuthError('');
         setLines(
             (job.lineItems as any[]).map((item: any, idx: number) => ({
                 index: idx,
@@ -79,9 +98,38 @@ export const PackDiscrepancyModal: React.FC<PackDiscrepancyModalProps> = ({
         setLines(prev => prev.map((l, i) => i === idx ? { ...l, actualCount: val } : l));
     };
 
+    const linkedPicker = employees.find(e => e.id === job.assignedTo || e.name === job.assignedTo || e.code === job.assignedTo);
+    const linkedPickerName = linkedPicker?.name || job.assignedTo || 'Unassigned Picker';
+
     const handleSubmit = async () => {
+        setAuthError('');
+
+        if (!supervisorPin.trim()) {
+            setAuthError('Supervisor PIN or Employee ID is required for pack discrepancy authorization.');
+            return;
+        }
+
+        const supervisor = employees.find(emp => {
+            const matchesPin = matchStaffPin(emp.code || emp.id, supervisorPin) || supervisorPin === emp.code || supervisorPin === emp.id;
+            const isDifferentUser = emp.id !== currentUser?.id && emp.name !== currentUser?.name;
+            const hasRole = SUPERVISORY_ROLES.includes((emp.role || '').toLowerCase());
+            return matchesPin && isDifferentUser && hasRole;
+        });
+
+        if (!supervisor) {
+            const isSelf = employees.find(emp => matchStaffPin(emp.code || emp.id, supervisorPin) && (emp.id === currentUser?.id || emp.name === currentUser?.name));
+            if (isSelf) {
+                setAuthError('Dual-control violation: Packer cannot self-authorize a pack discrepancy.');
+            } else {
+                setAuthError('Invalid credentials. Authorized supervisor PIN required.');
+            }
+            return;
+        }
+
         setIsSubmitting(true);
         try {
+            const gpsLocation = await getCachedAuditLocation();
+
             const updatedLineItems = (job.lineItems as any[]).map((item: any, idx: number) => {
                 const line = lines[idx];
                 const actualVal = parseInt(line.actualCount);
@@ -95,18 +143,65 @@ export const PackDiscrepancyModal: React.FC<PackDiscrepancyModalProps> = ({
                         variance: actual - line.expected,
                         reasonCode,
                         reportedBy: currentUser?.name || 'Packer',
+                        supervisorId: supervisor.id,
+                        supervisorName: supervisor.name,
+                        supervisorRole: supervisor.role,
+                        linkedPicker: job.assignedTo || 'Unassigned',
+                        gpsLocation,
                         reportedAt: new Date().toISOString(),
                     } : undefined,
                 };
             });
 
-            const auditNote = `[PACK DISCREPANCY by ${currentUser?.name || 'Packer'} at ${new Date().toLocaleString()}] Reason: ${reasonOptions.find((r: any) => r.id === reasonCode)?.label}. ${notes}`;
+            const auditNote = `[PACK DISCREPANCY by ${currentUser?.name || 'Packer'} | Co-Signed by ${supervisor.name} (${supervisor.role}) at ${new Date().toLocaleString()}] Reason: ${reasonOptions.find((r: any) => r.id === reasonCode)?.label}. Picker: ${linkedPickerName}. ${notes}`;
 
             await wmsJobsService.update(job.id, {
                 lineItems: updatedLineItems,
                 hasDiscrepancy: true,
                 notes: job.notes ? `${job.notes}\n${auditNote}` : auditNote,
             } as any);
+
+            await logSystemEvent(
+                'PACK_DISCREPANCY_ATTRIBUTED',
+                {
+                    jobId: job.id,
+                    orderRef: job.orderRef,
+                    reasonCode,
+                    notes,
+                    reportedBy: currentUser?.name || 'Packer',
+                    supervisorId: supervisor.id,
+                    supervisorName: supervisor.name,
+                    supervisorRole: supervisor.role,
+                    linkedPicker: linkedPickerName,
+                    discrepancies: lines
+                        .filter(l => {
+                            const val = parseInt(l.actualCount);
+                            return !isNaN(val) && val !== l.expected;
+                        })
+                        .map(l => ({
+                            sku: l.sku,
+                            name: l.name,
+                            expected: l.expected,
+                            actual: parseInt(l.actualCount),
+                            variance: parseInt(l.actualCount) - l.expected,
+                        })),
+                },
+                currentUser?.name || 'Packer',
+                'Warehouse',
+                {
+                    employeeId: currentUser?.id,
+                    siteId: job.siteId || job.site_id,
+                    gpsLocation,
+                    entityType: 'WMSJob',
+                    entityId: job.id,
+                    metadata: {
+                        supervisorId: supervisor.id,
+                        supervisorName: supervisor.name,
+                        supervisorRole: supervisor.role,
+                        linkedPicker: linkedPickerName,
+                    }
+                }
+            );
 
             onAcceptCount?.(updatedLineItems);
             await refreshData();
@@ -288,6 +383,58 @@ export const PackDiscrepancyModal: React.FC<PackDiscrepancyModalProps> = ({
                                     rows={2}
                                     className="w-full text-xs border border-zinc-200 dark:border-white/10 bg-zinc-50 dark:bg-black/40 rounded-xl px-4 py-3 text-zinc-800 dark:text-zinc-200 placeholder:text-zinc-450 dark:placeholder:text-zinc-700 focus:outline-none focus:border-orange-400 transition-all resize-none"
                                 />
+                            </div>
+
+                            {/* Linked Order Picker Card */}
+                            <div className="p-3 bg-zinc-50 dark:bg-white/5 border border-zinc-200 dark:border-white/10 rounded-xl flex items-center justify-between">
+                                <div className="flex items-center gap-2.5">
+                                    <div className="w-8 h-8 rounded-lg bg-blue-500/10 border border-blue-500/20 flex items-center justify-center">
+                                        <UserCheck size={15} className="text-blue-600 dark:text-blue-400" />
+                                    </div>
+                                    <div>
+                                        <p className="text-[9px] font-black text-zinc-400 uppercase tracking-widest">{t('warehouse.packing.linkedPicker') || 'Linked Order Picker'}</p>
+                                        <p className="text-xs font-black text-zinc-900 dark:text-zinc-100">{linkedPickerName}</p>
+                                    </div>
+                                </div>
+                                <span className="text-[10px] font-mono font-bold text-zinc-500 bg-zinc-100 dark:bg-white/10 px-2 py-0.5 rounded">
+                                    {job.assignedTo || 'Unassigned'}
+                                </span>
+                            </div>
+
+                            {/* Mandatory Supervisor Co-Attribution Card */}
+                            <div className="p-4 bg-orange-50/50 dark:bg-orange-950/20 border border-orange-500/30 rounded-2xl space-y-3">
+                                <div className="flex items-center gap-2">
+                                    <ShieldCheck size={16} className="text-orange-600 dark:text-orange-400 shrink-0" />
+                                    <div>
+                                        <p className="text-[10px] font-black text-orange-900 dark:text-orange-200 uppercase tracking-wider">
+                                            {t('warehouse.packing.supervisorSignOff') || 'Supervisor Co-Attribution (Dual Control)'}
+                                        </p>
+                                        <p className="text-[9px] text-zinc-500">
+                                            {t('warehouse.packing.supervisorPinDesc') || 'A supervisor PIN or Employee ID is required to authorize and attribute this variance.'}
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <div className="relative">
+                                        <KeyRound size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-400" />
+                                        <input
+                                            type="password"
+                                            value={supervisorPin}
+                                            onChange={e => {
+                                                setSupervisorPin(e.target.value);
+                                                if (authError) setAuthError('');
+                                            }}
+                                            placeholder="Enter Supervisor PIN / Employee ID..."
+                                            className="w-full text-xs font-mono pl-10 pr-4 py-2.5 bg-white dark:bg-black/50 border border-zinc-300 dark:border-white/10 rounded-xl focus:outline-none focus:border-orange-500 text-zinc-900 dark:text-white"
+                                        />
+                                    </div>
+                                    {authError && (
+                                        <p className="text-[10px] text-red-500 font-bold mt-1.5 flex items-center gap-1">
+                                            <AlertTriangle size={11} className="shrink-0" /> {authError}
+                                        </p>
+                                    )}
+                                </div>
                             </div>
                         </div>
                         <div className="p-5 border-t border-zinc-200 dark:border-white/10 bg-zinc-50/50 dark:bg-zinc-950/50 flex justify-between items-center shrink-0">

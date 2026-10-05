@@ -199,7 +199,7 @@ export const PickList: React.FC<PickListProps> = ({
                                                 } `}>
                                                 {job.status === 'In-Progress' ? `● ${t('warehouse.activeLabel')}` : job.priority}
                                             </span>
-                                            {['super_admin', 'warehouse_manager'].includes(user?.role as string) && (
+                                            {['super_admin', 'warehouse_manager', 'operations_manager', 'regional_manager'].includes(user?.role as string) && (
                                                 <button
                                                     onClick={(e) => handleDelete(e, job.id)}
                                                     className="w-9 h-9 ml-1 rounded-lg border bg-white/5 border-white/10 text-red-500 hover:text-white hover:bg-red-500 hover:border-red-500 transition-colors flex items-center justify-center shrink-0"

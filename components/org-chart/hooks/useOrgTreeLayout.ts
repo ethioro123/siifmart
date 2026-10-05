@@ -85,6 +85,8 @@ export const useOrgTreeLayout = ({ employees, sites = [], filters }: UseOrgTreeL
         const whMgrs = allNodes.filter(n => n.role === 'warehouse_manager');
         const shiftLeads = allNodes.filter(n => n.role === 'shift_lead' || n.role === 'assistant_manager');
         const dispatchMgrs = allNodes.filter(n => n.role === 'dispatch_manager');
+        const csMgr = allNodes.find(n => n.role === 'cs_manager');
+        const secMgr = allNodes.find(n => n.role === 'security_manager');
 
         // Helper to find best manager for a given node
         const findParent = (node: OrgTreeNode): OrgTreeNode | null => {
@@ -111,6 +113,10 @@ export const useOrgTreeLayout = ({ employees, sites = [], filters }: UseOrgTreeL
                     if (sameSiteWhMgr && sameSiteWhMgr.id !== node.id) return sameSiteWhMgr;
                     if (whMgrs.length > 0 && whMgrs[0].id !== node.id) return whMgrs[0];
                 }
+                // Central Ops Managers (Security Manager, CS Manager) report to Operations Manager
+                if (['security_manager', 'cs_manager'].includes(node.role)) {
+                    if (opsMgr && opsMgr.id !== node.id) return opsMgr;
+                }
                 // Store/Warehouse managers report to Operations Manager (or Regional Manager, or CEO)
                 if (opsMgr && opsMgr.id !== node.id) return opsMgr;
                 if (regionalMgr && regionalMgr.id !== node.id) return regionalMgr;
@@ -118,6 +124,19 @@ export const useOrgTreeLayout = ({ employees, sites = [], filters }: UseOrgTreeL
             }
 
             // Level 4 (Staff & Specialists)
+            // Central Operations Team members
+            if (['store_operations_auditor', 'data_analyst'].includes(node.role)) {
+                if (opsMgr && opsMgr.id !== node.id) return opsMgr;
+            }
+            if (node.role === 'customer_service') {
+                if (csMgr && csMgr.id !== node.id) return csMgr;
+                if (opsMgr && opsMgr.id !== node.id) return opsMgr;
+            }
+            if (node.role === 'loss_prevention') {
+                if (secMgr && secMgr.id !== node.id) return secMgr;
+                if (opsMgr && opsMgr.id !== node.id) return opsMgr;
+            }
+
             if (node.department === 'store') {
                 // Find Shift Lead or Store Manager at the same site
                 const sameSiteLead = shiftLeads.find(l => l.siteId && l.siteId === node.siteId);

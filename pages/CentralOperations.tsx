@@ -1,35 +1,30 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useData } from '../contexts/DataContext';
 import { useFulfillmentData } from '../components/fulfillment/FulfillmentDataProvider';
 import { useGamification } from '../contexts/GamificationContext';
 import { useStore } from '../contexts/CentralStore';
 import { useNavigate } from 'react-router-dom';
 import { generateQuarterlyReport } from '../utils/reportGenerator';
-import {
-    Activity, DollarSign, Box, Map as MapIcon, Download, Radio, Zap
-} from 'lucide-react';
 import { getCountryProfile, type Country } from '../utils/localization';
 import { calculateMetrics, DashboardMetrics } from '../utils/metrics';
 import { formatCompactNumber } from '../utils/formatting';
-import WidgetErrorBoundary from '../components/WidgetErrorBoundary';
 import DashboardSkeleton from '../components/DashboardSkeleton';
 import PointsPerformanceDashboard from '../components/PointsPerformanceDashboard';
 
 // --- Dashboard Widgets & Sections Imports ---
-import { CyberClock } from '../components/dashboard/widgets/CyberClock';
-import { EthiopianDateWidget } from '../components/dashboard/widgets/EthiopianDateWidget';
 import { SystemTicker } from '../components/dashboard/widgets/SystemTicker';
-import { SystemLoadWidget } from '../components/dashboard/widgets/SystemLoadWidget';
-import { ActivityLogWidget } from '../components/dashboard/widgets/ActivityLogWidget';
-import { DesktopDownloadButton } from '../components/dashboard/widgets/DesktopDownloadButton';
-import { DashboardSection } from '../components/dashboard/widgets/DashboardSection';
 import { FinancialSection } from '../components/dashboard/sections/FinancialSection';
 import { InventorySection } from '../components/dashboard/sections/InventorySection';
 import { NetworkSection } from '../components/dashboard/sections/NetworkSection';
-import { SitePerformance } from '../components/dashboard/types';
+import { TelemetrySection } from '../components/dashboard/sections/TelemetrySection';
+import { CentralOpsTeamSection } from '../components/dashboard/sections/CentralOpsTeamSection';
+import { CentralOperationsHeader } from '../components/dashboard/CentralOperationsHeader';
+import { CentralOpsExecutiveDeck } from '../components/dashboard/CentralOpsExecutiveDeck';
+import { SitePerformance, CentralOpsViewMode, FacilityScope } from '../components/dashboard/types';
 
+import { Download, Activity } from 'lucide-react';
+import { DesktopDownloadButton } from '../components/dashboard/widgets/DesktopDownloadButton';
 import { useDateFilter, DateRangeOption } from '../hooks/useDateFilter';
-import DateRangeSelector from '../components/DateRangeSelector';
 import FiscalYearDeck from '../components/FiscalYearDeck';
 import { logger } from '../utils/logger';
 
@@ -39,23 +34,64 @@ export default function CentralOperations() {
     const { workerPoints } = useGamification();
     const { loading, theme } = useStore();
     const navigate = useNavigate();
-    const accentColor = theme === 'dark' ? '#A9CBA2' : '#2C5E3B';
+
+    // Apple Minimalist Aesthetic Accents: Off-White (#F5F5F7) in Dark, Deep Black (#1D1D1F) in Light
+    const isDark = theme === 'dark';
+    const accentColor = isDark ? '#F5F5F7' : '#1D1D1F';
+
 
     const activeCountry = (effectiveCountry || settings?.country || 'ET') as Country;
     const countryProfile = useMemo(() => getCountryProfile(activeCountry), [activeCountry]);
     const currencySymbol = countryProfile.currencySymbol || 'ETB';
 
+    // Interactive View Modes & Facility Scoping
+    const [viewMode, setViewMode] = useState<CentralOpsViewMode>('executive');
+    const [facilityScope, setFacilityScope] = useState<FacilityScope>('all');
+
     // Default to 'This Quarter' as requested
     const defaultRange: DateRangeOption = 'This Quarter';
     const { dateRange, setDateRange, isWithinRange } = useDateFilter(defaultRange);
 
+    // --- FACILITY SCOPING LOGIC ---
+    const baseSites = useMemo(() => {
+        return (sites || []).filter(s => s.type !== 'Administration' && s.type !== 'HQ' && s.type !== 'Administrative');
+    }, [sites]);
+
+    const scopedSites = useMemo(() => {
+        if (facilityScope === 'store') {
+            return baseSites.filter(s => s.type === 'Store' || s.type === 'Dark Store' || s.type === 'Online Store');
+        }
+        if (facilityScope === 'warehouse') {
+            return baseSites.filter(s => s.type === 'Warehouse' || s.type === 'Distribution Center');
+        }
+        return baseSites;
+    }, [baseSites, facilityScope]);
+
+    const scopedSiteIds = useMemo(() => new Set(scopedSites.map(s => s.id)), [scopedSites]);
+
+    // --- FILTERED DATA (Date & Facility Scoped) ---
+    const filteredSales = useMemo(() => {
+        return (allSales || []).filter(s =>
+            isWithinRange(s.date) && (facilityScope === 'all' || scopedSiteIds.has(s.siteId))
+        );
+    }, [allSales, isWithinRange, facilityScope, scopedSiteIds]);
+
+    const filteredOrders = useMemo(() => {
+        return (allOrders || []).filter(o => isWithinRange(o.createdAt || new Date().toISOString()));
+    }, [allOrders, isWithinRange]);
+
+    const scopedProducts = useMemo(() => {
+        if (facilityScope === 'all') return allProducts || [];
+        return (allProducts || []).filter(p => !p.siteId || scopedSiteIds.has(p.siteId));
+    }, [allProducts, facilityScope, scopedSiteIds]);
+
     // --- REPORT GENERATION ---
     const handleGenerateReport = () => {
         const filteredMetrics = calculateMetrics(
-            allSales.filter(s => isWithinRange(s.date)),
-            allProducts,
+            filteredSales,
+            scopedProducts,
             jobs.filter(j => isWithinRange(j.createdAt || '')),
-            allOrders.filter(o => isWithinRange(o.date || o.createdAt || '')),
+            filteredOrders,
             employees,
             [],
             undefined
@@ -63,16 +99,12 @@ export default function CentralOperations() {
         generateQuarterlyReport(filteredMetrics, dateRange, 'Operations');
     };
 
-    // --- FILTERED DATA ---
-    const filteredSales = useMemo(() => (allSales || []).filter(s => isWithinRange(s.date)), [allSales, dateRange]);
-    const filteredOrders = useMemo(() => (allOrders || []).filter(o => isWithinRange(o.createdAt || new Date().toISOString())), [allOrders, dateRange]);
-
-    // --- AGGREGATED METRICS (Using Filtered Data) ---
+    // --- AGGREGATED METRICS ---
     const metrics: DashboardMetrics = useMemo(() => {
         try {
             return calculateMetrics(
                 filteredSales,
-                allProducts || [],
+                scopedProducts,
                 jobs || [],
                 filteredOrders,
                 employees || [],
@@ -98,36 +130,34 @@ export default function CentralOperations() {
                 totalReturnedValue: 0
             } as unknown as DashboardMetrics;
         }
-    }, [filteredSales, allProducts, jobs, filteredOrders, employees]);
+    }, [filteredSales, scopedProducts, jobs, filteredOrders, employees]);
 
-    const totalSites = sites?.length || 0;
     const activeAlerts = metrics?.activeAlerts || 0;
     const inventoryValue = metrics?.totalNetworkStockValue || 0;
 
-    // Stock Status Data (Scoped to Active Country Catalog)
+    // Stock Status Data (Scoped to Country & Facility Catalog)
     const stockStatusData = useMemo(() => {
-        const goodStock = (allProducts || []).filter(p => p.stock >= 10 && p.status !== 'out_of_stock').length;
-        const lowStock = (allProducts || []).filter(p => (p.stock < 10 && p.stock > 0) || p.status === 'low_stock').length;
-        const outStock = (allProducts || []).filter(p => p.stock === 0 || p.status === 'out_of_stock').length;
+        const goodStock = scopedProducts.filter(p => p.stock >= 10 && p.status !== 'out_of_stock').length;
+        const lowStock = scopedProducts.filter(p => (p.stock < 10 && p.stock > 0) || p.status === 'low_stock').length;
+        const outStock = scopedProducts.filter(p => p.stock === 0 || p.status === 'out_of_stock').length;
 
         return [
-            { name: 'Optimal', value: goodStock, color: '#10b981' },
-            { name: 'Low Stock', value: lowStock, color: '#f59e0b' },
-            { name: 'Out of Stock', value: outStock, color: '#ef4444' },
+            { name: 'Optimal', value: goodStock, color: isDark ? '#CFCFCF' : '#252525' },
+            { name: 'Low Stock', value: lowStock, color: '#7D7D7D' },
+            { name: 'Out of Stock', value: outStock, color: '#545454' },
         ].filter(d => d.value > 0);
-    }, [allProducts]);
 
-    // --- SITE PERFORMANCE (Filtered) ---
+    }, [scopedProducts]);
+
+    // --- SITE PERFORMANCE ---
     const sitePerformance: SitePerformance[] = useMemo(() => {
-        if (!sites || !filteredSales || !employees || !allProducts) return [];
+        if (!scopedSites || !filteredSales || !employees || !scopedProducts) return [];
 
-        const operationalSites = sites.filter(s => s.type !== 'Administration' && s.type !== 'HQ' && s.type !== 'Administrative');
-
-        return operationalSites.map(site => {
+        return scopedSites.map(site => {
             const siteSales = filteredSales.filter(s => s.siteId === site.id);
             const revenue = siteSales.reduce((sum, s) => sum + s.total, 0);
             const staffCount = employees.filter(e => e.siteId === site.id).length;
-            const lowStock = allProducts.filter(p => p.siteId === site.id && p.status === 'low_stock').length;
+            const lowStock = scopedProducts.filter(p => p.siteId === site.id && p.status === 'low_stock').length;
 
             return {
                 ...site,
@@ -137,7 +167,7 @@ export default function CentralOperations() {
                 transactionCount: siteSales.length
             };
         }).sort((a, b) => b.revenue - a.revenue);
-    }, [sites, filteredSales, employees, allProducts]);
+    }, [scopedSites, filteredSales, employees, scopedProducts]);
 
     const revenueBySiteData = useMemo(() => {
         if (!sitePerformance) return [];
@@ -164,7 +194,7 @@ export default function CentralOperations() {
             .slice(0, 6);
     }, [filteredSales]);
 
-    // --- TOP PRODUCTS (Filtered) ---
+    // --- TOP PRODUCTS ---
     const topProducts = useMemo(() => {
         if (!filteredSales) return [];
         const productStats = new Map<string, { name: string, sales: number, count: number }>();
@@ -186,13 +216,13 @@ export default function CentralOperations() {
             .slice(0, 5);
     }, [filteredSales]);
 
-    // --- COLORS & CHART STYLES ---
-    const isDark = theme === 'dark';
-    const chartAxisColor = isDark ? '#555' : '#9ca3af';
-    const chartGridColor = isDark ? '#222' : '#e5e7eb';
-    const tooltipBg = isDark ? 'rgba(0,0,0,0.8)' : 'rgba(255,255,255,0.95)';
-    const tooltipBorder = isDark ? '#333' : '#e5e7eb';
-    const tooltipText = isDark ? '#fff' : '#111827';
+    // --- COLORS & CHART STYLES (Apple Minimalist Aesthetic) ---
+    const chartAxisColor = '#86868B';
+    const chartGridColor = isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.08)';
+    const tooltipBg = isDark ? '#000000' : '#FFFFFF';
+    const tooltipBorder = isDark ? 'rgba(255, 255, 255, 0.12)' : 'rgba(0, 0, 0, 0.12)';
+    const tooltipText = isDark ? '#F5F5F7' : '#1D1D1F';
+
 
     // --- LOADING STATE ---
     if (loading) {
@@ -200,85 +230,61 @@ export default function CentralOperations() {
     }
 
     return (
-        <div className="min-h-screen p-6 pb-20 animate-in fade-in duration-700 bg-transparent">
+        <div className="min-h-screen p-4 sm:p-6 pb-24 animate-in fade-in duration-500 bg-transparent max-w-[1700px] mx-auto">
+            {/* Modern Executive Header */}
+            <CentralOperationsHeader
+                activeCountry={activeCountry}
+                viewMode={viewMode}
+                onViewModeChange={setViewMode}
+                facilityScope={facilityScope}
+                onFacilityScopeChange={setFacilityScope}
+                totalSitesCount={baseSites.length}
+                filteredSitesCount={scopedSites.length}
+                dateRange={dateRange}
+                onDateRangeChange={setDateRange}
+                onGenerateReport={handleGenerateReport}
+            />
 
-            {/* --- HEADER --- */}
-            <div className="flex flex-col md:flex-row justify-between items-end mb-6 relative z-10">
-                <div>
-                    <div className="flex items-center gap-3 mb-2">
-                        <div className="p-2 bg-cyber-primary/10 rounded-lg border border-cyber-primary/20">
-                            <Zap className="text-cyber-primary" size={20} />
-                        </div>
-                        <h1 className="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-gray-100 via-gray-300 to-gray-500 dark:from-white dark:via-gray-200 dark:to-gray-500">
-                            CENTRAL<span className="text-cyber-primary">OPS</span>
-                        </h1>
-                    </div>
-                    <p className="text-gray-400 font-medium flex items-center gap-2">
-                        <Radio size={14} className="text-[#A9CBA2] dark:text-[#2C5E3B] animate-pulse" />
-                        <span className="text-xs font-mono text-gray-400">LIVE FEED CONNECTED</span>
-                    </p>
-                </div>
-
-                <div className="flex items-center gap-6 mt-4 md:mt-0 h-full">
-                    <DateRangeSelector
-                         value={dateRange}
-                         onChange={setDateRange}
-                         className="hidden xl:block"
-                    />
-
-                    {activeCountry === 'ET' ? (
-                        <EthiopianDateWidget />
-                    ) : (
-                        <div className="hidden lg:flex px-5 py-2 bg-gradient-to-r from-emerald-500/10 to-teal-500/5 dark:bg-white/5 backdrop-blur-md rounded-2xl border border-emerald-500/20 dark:border-white/10 h-[46px] flex-col justify-center items-end text-right relative overflow-hidden group shadow-inner">
-                            <p className="text-[8px] text-emerald-600 dark:text-emerald-400 font-black uppercase tracking-[0.25em] leading-none mb-1 shadow-sm">{countryProfile.name}</p>
-                            <p className="text-[10px] sm:text-[11px] font-mono font-bold text-gray-900 dark:text-emerald-400 leading-none tracking-widest truncate max-w-[250px] drop-shadow-sm">
-                                {countryProfile.timezone === 'Africa/Nairobi' ? 'EAT (UTC+3) • Nairobi' : countryProfile.timezone}
-                            </p>
-                        </div>
-                    )}
-
-                    <CyberClock country={activeCountry} />
-
-                    <div className="text-right px-6 py-2 bg-white/50 dark:bg-white/5 backdrop-blur-sm rounded-2xl border border-gray-200 dark:border-white/10 h-[46px] flex flex-col justify-center">
-                        <p className="text-[10px] text-gray-500 font-bold uppercase leading-none mb-0.5">Active Sites</p>
-                        <p className="text-xl font-mono font-bold text-gray-900 dark:text-white leading-none">{totalSites}</p>
-                    </div>
-
-                    <DesktopDownloadButton />
-
-                    <button
-                        onClick={handleGenerateReport}
-                        className="hidden md:flex items-center gap-2 woody-btn-primary h-[46px]"
-                    >
-                        <Download size={18} />
-                        <span className="hidden lg:inline">Report</span>
-                    </button>
-                </div>
-            </div>
-
-            {/* --- SYSTEM TICKER --- */}
+            {/* System Telemetry Ticker */}
             <SystemTicker />
 
-            {/* --- FISCAL YEAR DECK (Condition: Year View) --- */}
-            {(dateRange === 'This Year' || dateRange === 'Last Year') && (
-                <div className="max-w-[1700px] mx-auto mb-6">
+            {/* Fiscal Year Deck (Condition: Year View & Financial/All Mode) */}
+            {(dateRange === 'This Year' || dateRange === 'Last Year') && (viewMode === 'financial' || viewMode === 'all') && (
+                <div className="mb-6">
                     <FiscalYearDeck
                         year={dateRange === 'Last Year' ? new Date().getFullYear() - 1 : new Date().getFullYear()}
                         currentQuarter={dateRange === 'Last Year' ? 4 : Math.floor(new Date().getMonth() / 3) + 1}
                         metrics={{
-                            q1: { value: formatCompactNumber(filteredSales.filter(s => { const d = new Date(s.date); return d.getMonth() < 3 }).reduce((a, b) => a + b.total, 0), { currency: currencySymbol }), label: 'Revenue', trend: '+10%' },
-                            q2: { value: formatCompactNumber(filteredSales.filter(s => { const d = new Date(s.date); return d.getMonth() >= 3 && d.getMonth() < 6 }).reduce((a, b) => a + b.total, 0), { currency: currencySymbol }), label: 'Revenue' },
-                            q3: { value: formatCompactNumber(filteredSales.filter(s => { const d = new Date(s.date); return d.getMonth() >= 6 && d.getMonth() < 9 }).reduce((a, b) => a + b.total, 0), { currency: currencySymbol }), label: 'Revenue' },
-                            q4: { value: formatCompactNumber(filteredSales.filter(s => { const d = new Date(s.date); return d.getMonth() >= 9 }).reduce((a, b) => a + b.total, 0), { currency: currencySymbol }), label: 'Revenue' }
+                            q1: { value: formatCompactNumber(filteredSales.filter(s => { const d = new Date(s.date); return d.getMonth() < 3; }).reduce((a, b) => a + b.total, 0), { currency: currencySymbol }), label: 'Revenue', trend: '+10%' },
+                            q2: { value: formatCompactNumber(filteredSales.filter(s => { const d = new Date(s.date); return d.getMonth() >= 3 && d.getMonth() < 6; }).reduce((a, b) => a + b.total, 0), { currency: currencySymbol }), label: 'Revenue' },
+                            q3: { value: formatCompactNumber(filteredSales.filter(s => { const d = new Date(s.date); return d.getMonth() >= 6 && d.getMonth() < 9; }).reduce((a, b) => a + b.total, 0), { currency: currencySymbol }), label: 'Revenue' },
+                            q4: { value: formatCompactNumber(filteredSales.filter(s => { const d = new Date(s.date); return d.getMonth() >= 9; }).reduce((a, b) => a + b.total, 0), { currency: currencySymbol }), label: 'Revenue' }
                         }}
                     />
                 </div>
             )}
 
-            {/* --- BENTO GRID LAYOUT --- */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-6 max-w-[1700px] mx-auto">
+            {/* --- DOMAIN ROUTING VIEWS --- */}
+            {viewMode === 'executive' && (
+                <CentralOpsExecutiveDeck
+                    metrics={metrics}
+                    currencySymbol={currencySymbol}
+                    sitePerformance={sitePerformance}
+                    revenueBySiteData={revenueBySiteData}
+                    topProducts={topProducts}
+                    allProducts={allProducts || []}
+                    accentColor={accentColor}
+                    chartGridColor={chartGridColor}
+                    chartAxisColor={chartAxisColor}
+                    tooltipBg={tooltipBg}
+                    tooltipBorder={tooltipBorder}
+                    tooltipText={tooltipText}
+                    dateRange={dateRange}
+                    inventoryValue={inventoryValue}
+                />
+            )}
 
-                {/* 1. FINANCIAL COMMAND CENTER */}
+            {viewMode === 'financial' && (
                 <FinancialSection
                     metrics={metrics}
                     revenueBySiteData={revenueBySiteData}
@@ -293,8 +299,9 @@ export default function CentralOperations() {
                     dateRange={dateRange}
                     inventoryValue={inventoryValue}
                 />
+            )}
 
-                {/* 2. INVENTORY & LOGISTICS HUB */}
+            {viewMode === 'inventory' && (
                 <InventorySection
                     metrics={metrics}
                     activeAlerts={activeAlerts}
@@ -306,34 +313,125 @@ export default function CentralOperations() {
                     currencySymbol={currencySymbol}
                     navigate={navigate}
                 />
+            )}
 
-                {/* 3. NETWORK & RESOURCE MANAGEMENT */}
-                <NetworkSection
-                    metrics={metrics}
-                    sitePerformance={sitePerformance}
-                    allSales={allSales}
+            {viewMode === 'network' && (
+                <div className="space-y-8">
+                    <NetworkSection
+                        metrics={metrics}
+                        sitePerformance={sitePerformance}
+                        allSales={allSales}
+                        currencySymbol={currencySymbol}
+                    />
+                    <PointsPerformanceDashboard
+                        workerPoints={workerPoints}
+                        storePoints={storePoints}
+                        currencySymbol={currencySymbol}
+                    />
+                </div>
+            )}
+
+            {viewMode === 'team' && (
+                <CentralOpsTeamSection
+                    employees={employees}
+                    sites={scopedSites}
+                    activeCountry={activeCountry}
                     currencySymbol={currencySymbol}
                 />
+            )}
 
-                {/* 4. OPERATIONAL PERFORMANCE & GAMIFICATION */}
-                <PointsPerformanceDashboard
-                    workerPoints={workerPoints}
-                    storePoints={storePoints}
+            {viewMode === 'telemetry' && (
+                <TelemetrySection
+                    systemLogs={systemLogs}
+                    activeCountry={activeCountry}
                 />
+            )}
 
-                {/* 5. SYSTEM MONITORING & AUDIT */}
-                <DashboardSection title="System Monitoring & Audit" icon={Activity} className="col-span-1 md:col-span-4">
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 h-[400px]">
-                        <WidgetErrorBoundary title="System Load">
-                            <SystemLoadWidget />
-                        </WidgetErrorBoundary>
-                        <WidgetErrorBoundary title="Live Activity Log">
-                            <ActivityLogWidget logs={systemLogs} />
-                        </WidgetErrorBoundary>
+            {viewMode === 'all' && (
+                <div className="space-y-12">
+                    <CentralOpsTeamSection
+                        employees={employees}
+                        sites={scopedSites}
+                        activeCountry={activeCountry}
+                        currencySymbol={currencySymbol}
+                    />
+
+                    <FinancialSection
+                        metrics={metrics}
+                        revenueBySiteData={revenueBySiteData}
+                        revenueByCategory={revenueByCategory}
+                        accentColor={accentColor}
+                        chartGridColor={chartGridColor}
+                        chartAxisColor={chartAxisColor}
+                        tooltipBg={tooltipBg}
+                        tooltipBorder={tooltipBorder}
+                        tooltipText={tooltipText}
+                        currencySymbol={currencySymbol}
+                        dateRange={dateRange}
+                        inventoryValue={inventoryValue}
+                    />
+
+                    <InventorySection
+                        metrics={metrics}
+                        activeAlerts={activeAlerts}
+                        stockStatusData={stockStatusData}
+                        topProducts={topProducts}
+                        tooltipBg={tooltipBg}
+                        tooltipBorder={tooltipBorder}
+                        tooltipText={tooltipText}
+                        currencySymbol={currencySymbol}
+                        navigate={navigate}
+                    />
+
+                    <NetworkSection
+                        metrics={metrics}
+                        sitePerformance={sitePerformance}
+                        allSales={allSales}
+                        currencySymbol={currencySymbol}
+                    />
+
+                    <PointsPerformanceDashboard
+                        workerPoints={workerPoints}
+                        storePoints={storePoints}
+                        currencySymbol={currencySymbol}
+                    />
+
+                    <TelemetrySection
+                        systemLogs={systemLogs}
+                        activeCountry={activeCountry}
+                    />
+                </div>
+            )}
+
+            {/* --- BOTTOM UTILITIES & ACTIONS (Get App & Executive Report) --- */}
+            <div className="mt-12 p-5 sm:p-6 bg-white dark:bg-[#1A1410] rounded-3xl border border-[#CCBEB1]/40 dark:border-[#CCBEB1]/20 backdrop-blur-md shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4">
+                <div className="flex items-center gap-3 w-full sm:w-auto">
+                    <div className="w-10 h-10 rounded-2xl bg-[#FFDBBB]/15 dark:bg-[#FFDBBB]/15 text-[#664930] dark:text-[#FFDBBB] border border-[#997E67]/40 flex items-center justify-center shrink-0">
+                        <Activity size={20} />
                     </div>
-                </DashboardSection>
-            </div>
+                    <div>
+                        <h4 className="text-sm font-bold text-[#24180E] dark:text-[#FAF7F2]">
+                            SIIFMART Central Operations Suite
+                        </h4>
+                        <p className="text-xs text-[#997E67] dark:text-[#CCBEB1]">
+                            Download native desktop workstation or generate periodic operational intelligence reports
+                        </p>
+                    </div>
+                </div>
 
+                <div className="flex items-center gap-3 w-full sm:w-auto justify-end">
+                    <DesktopDownloadButton />
+
+                    <button
+                        onClick={handleGenerateReport}
+                        className="flex items-center gap-2 px-5 py-2.5 h-[46px] rounded-2xl bg-[#664930] hover:bg-[#523a25] dark:bg-[#FFDBBB] dark:hover:bg-[#FFE6CE] text-[#FFDBBB] dark:text-[#664930] text-xs font-bold transition-all shadow-md active:scale-95 cursor-pointer"
+                        title="Generate Operational Performance Report"
+                    >
+                        <Download size={16} />
+                        <span>Executive Report</span>
+                    </button>
+                </div>
+            </div>
         </div>
     );
 }

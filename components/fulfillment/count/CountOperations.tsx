@@ -1,8 +1,11 @@
 import React, { useState } from 'react';
-import { RotateCcw, Search, AlertTriangle, Package, CheckCircle, ArrowRight, RefreshCw } from 'lucide-react';
+import { RotateCcw, Search, AlertTriangle, Package, CheckCircle, ArrowRight, RefreshCw, ShieldAlert } from 'lucide-react';
 import { Product, PendingInventoryChange, User } from '../../../types';
 import { useLanguage } from '../../../contexts/LanguageContext';
+import { useData } from '../../../contexts/DataContext';
 import { useCreateInventoryRequestMutation } from '../../../hooks/useInventoryRequestMutations';
+import { resolveCountAndPackPolicy, resolveReceivingPolicy } from '../../../utils/receivingPolicy';
+import { RecountAuthModal } from './components/RecountAuthModal';
 import { logger } from '../../../utils/logger';
 
 interface CountOperationsProps {
@@ -30,8 +33,23 @@ export const CountOperations: React.FC<CountOperationsProps> = ({
     addNotification,
 }) => {
     const { t } = useLanguage();
+    const { settings, effectiveCountry, employees, logSystemEvent } = useData();
+    const policy = resolveCountAndPackPolicy(settings, effectiveCountry);
+    const receivingPolicy = resolveReceivingPolicy(settings, effectiveCountry);
     const createRequestMutation = useCreateInventoryRequestMutation();
+
+    const isManagerOrHQ = [
+        'super_admin',
+        'ceo',
+        'operations_manager',
+        'warehouse_manager',
+        'inventory_manager',
+        'store_manager',
+        'shift_supervisor'
+    ].includes(user?.role?.toLowerCase() || '');
+
     const [approvingVariance, setApprovingVariance] = useState<number | null>(null);
+    const [authModalItem, setAuthModalItem] = useState<{ idx: number; product: Product } | null>(null);
 
     return (
         <>
@@ -223,35 +241,74 @@ export const CountOperations: React.FC<CountOperationsProps> = ({
                                         <div>
                                             <p className="font-bold text-stone-900 dark:text-stone-100">{product?.name}</p>
                                             <div className="flex gap-4 text-xs mt-1">
-                                                <span className="text-stone-500 dark:text-stone-400">{t('warehouse.expected')}: <strong className="text-stone-900 dark:text-stone-100">{item.systemQty}</strong></span>
-                                                <span className="text-[#2C5E3B] dark:text-[#A9CBA2]">{t('warehouse.picking')}: <strong className="text-stone-900 dark:text-stone-100">{item.countedQty}</strong></span>
+                                                <span className="text-stone-500 dark:text-stone-400">
+                                                    {t('warehouse.expected')}: <strong className="text-stone-900 dark:text-stone-100">
+                                                        {receivingPolicy.blind && !isManagerOrHQ ? '*** (Blind)' : item.systemQty}
+                                                    </strong>
+                                                </span>
+                                                <span className="text-[#2C5E3B] dark:text-[#A9CBA2]">
+                                                    {t('warehouse.picking')}: <strong className="text-stone-900 dark:text-stone-100">{item.countedQty}</strong>
+                                                </span>
                                                 <span className={hasVariance ? 'text-red-600 dark:text-red-400 font-bold' : 'text-[#2C5E3B] dark:text-[#A9CBA2] font-bold'}>
-                                                    {t('warehouse.variance').slice(0, 3)}: {item.variance && item.variance > 0 ? '+' : ''}{item.variance}
+                                                    {receivingPolicy.blind && !isManagerOrHQ
+                                                        ? (hasVariance ? 'Variance Detected' : 'Matched')
+                                                        : `${t('warehouse.variance').slice(0, 3)}: ${item.variance && item.variance > 0 ? '+' : ''}${item.variance}`}
                                                 </span>
                                             </div>
                                         </div>
                                     </div>
 
-                                    {hasVariance && item.status !== 'Approved' && (
-                                        <div className="flex gap-2">
-                                            <button
-                                                onClick={() => {
-                                                    // Recount logic
-                                                    const newItems = [...countSessionItems];
-                                                    newItems[idx].status = 'Pending';
-                                                    newItems[idx].countedQty = undefined;
-                                                    newItems[idx].variance = undefined;
-                                                    setCountSessionItems(newItems);
-                                                    setCountSessionStatus('Active');
-                                                    addNotification('info', t('warehouse.recountMarkedInfo').replace('{name}', product?.name || ''));
-                                                }}
-                                                className="woody-btn-secondary px-3 py-1.5 text-xs"
-                                            >
-                                                {t('warehouse.recount')}
-                                            </button>
-                                            <button
-                                                disabled={approvingVariance === idx}
-                                                onClick={async () => {
+                                    {hasVariance && item.status !== 'Approved' && (() => {
+                                        const recountsDone = item.recountsDone || 0;
+                                        const isRecountCapReached = recountsDone >= policy.maxCycleCountRecounts;
+
+                                        const triggerRecount = (supervisorName?: string, supervisorRole?: string) => {
+                                            const newItems = [...countSessionItems];
+                                            newItems[idx].status = 'Pending';
+                                            newItems[idx].countedQty = undefined;
+                                            newItems[idx].variance = undefined;
+                                            newItems[idx].recountsDone = recountsDone + 1;
+                                            if (supervisorName) {
+                                                newItems[idx].recountAuthorizedBy = supervisorName;
+                                            }
+                                            setCountSessionItems(newItems);
+                                            setCountSessionStatus('Active');
+                                            addNotification('info', t('warehouse.recountMarkedInfo').replace('{name}', product?.name || ''));
+
+                                            if (logSystemEvent) {
+                                                logSystemEvent(
+                                                    'CYCLE_COUNT_RECOUNT_INITIATED',
+                                                    `Recount #${recountsDone + 1} for SKU ${product?.sku || item.productId} initiated by ${user?.name || 'Counter'}${supervisorName ? ` (Authorized by ${supervisorName} - ${supervisorRole})` : ''}`,
+                                                    user?.name || 'Counter',
+                                                    'WMS_INVENTORY_COUNT'
+                                                );
+                                            }
+                                        };
+
+                                        return (
+                                            <div className="flex gap-2">
+                                                <button
+                                                    disabled={isRecountCapReached}
+                                                    onClick={() => {
+                                                        if (isRecountCapReached) return;
+                                                        if (policy.requireSecondCounterOnVariance && product) {
+                                                            setAuthModalItem({ idx, product });
+                                                        } else {
+                                                            triggerRecount();
+                                                        }
+                                                    }}
+                                                    className={`px-3 py-1.5 text-xs font-semibold rounded-xl border transition-colors ${
+                                                        isRecountCapReached
+                                                            ? 'opacity-40 cursor-not-allowed bg-stone-100 dark:bg-white/5 border-stone-200 dark:border-white/10 text-stone-400'
+                                                            : 'woody-btn-secondary'
+                                                    }`}
+                                                    title={isRecountCapReached ? `Recount limit (${policy.maxCycleCountRecounts}) reached.` : undefined}
+                                                >
+                                                    {isRecountCapReached ? `Recounts (${recountsDone}/${policy.maxCycleCountRecounts})` : t('warehouse.recount')}
+                                                </button>
+                                                <button
+                                                    disabled={approvingVariance === idx}
+                                                    onClick={async () => {
                                                     setApprovingVariance(idx);
                                                     try {
                                                         // Approve Variance - NOW CREATES REQUEST
@@ -263,6 +320,7 @@ export const CountOperations: React.FC<CountOperationsProps> = ({
                                                             productName: product?.name || 'Unknown',
                                                             productSku: product?.sku || 'Unknown',
                                                             siteId: product?.siteId || user?.siteId || '',
+                                                            countryCode: (product as any)?.countryCode || (product as any)?.country_code || (user as any)?.country || 'ET',
                                                             changeType: 'stock_adjustment',
                                                             requestedBy: user?.name || 'Manager',
                                                             requestedAt: new Date().toISOString(),
@@ -299,8 +357,9 @@ export const CountOperations: React.FC<CountOperationsProps> = ({
                                                     t('warehouse.approveVariance')
                                                 )}
                                             </button>
-                                        </div>
-                                    )}
+                                            </div>
+                                        );
+                                    })()}
 
                                     {(!hasVariance || item.status === 'Approved') && (
                                         <div className="flex items-center gap-2 text-[#2C5E3B] dark:text-[#A9CBA2] text-xs font-bold px-3 py-1.5 bg-[#2C5E3B]/10 dark:bg-[#A9CBA2]/10 rounded-lg">
@@ -329,6 +388,41 @@ export const CountOperations: React.FC<CountOperationsProps> = ({
                         </button>
                     </div>
                 </div>
+            )}
+
+            {authModalItem && (
+                <RecountAuthModal
+                    isOpen={!!authModalItem}
+                    onClose={() => setAuthModalItem(null)}
+                    productName={authModalItem.product.name}
+                    productSku={authModalItem.product.sku}
+                    employees={employees}
+                    currentUserId={user?.id || user?.name}
+                    onAuthorize={(supName, supRole) => {
+                        const targetIdx = authModalItem.idx;
+                        const targetItem = countSessionItems[targetIdx];
+                        const recounts = targetItem?.recountsDone || 0;
+                        const newItems = [...countSessionItems];
+                        newItems[targetIdx].status = 'Pending';
+                        newItems[targetIdx].countedQty = undefined;
+                        newItems[targetIdx].variance = undefined;
+                        newItems[targetIdx].recountsDone = recounts + 1;
+                        newItems[targetIdx].recountAuthorizedBy = supName;
+                        setCountSessionItems(newItems);
+                        setCountSessionStatus('Active');
+                        setAuthModalItem(null);
+                        addNotification('info', t('warehouse.recountMarkedInfo').replace('{name}', authModalItem.product.name));
+
+                        if (logSystemEvent) {
+                            logSystemEvent(
+                                'CYCLE_COUNT_RECOUNT_AUTHORIZED',
+                                `Dual-control recount #${recounts + 1} for SKU ${authModalItem.product.sku} authorized by ${supName} (${supRole}) for counter ${user?.name || 'Counter'}`,
+                                supName,
+                                'WMS_INVENTORY_COUNT'
+                            );
+                        }
+                    }}
+                />
             )}
         </>
     );

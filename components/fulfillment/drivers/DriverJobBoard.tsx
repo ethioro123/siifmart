@@ -4,6 +4,7 @@ import { WMSJob, Site, User } from '../../../types';
 import Pagination from '../../shared/Pagination';
 import { formatJobId } from '../../../utils/jobIdFormatter';
 import { useLanguage } from '../../../contexts/LanguageContext';
+import { canWorkerPerformJob } from '../../../utils/fulfillmentRoles';
 
 interface DriverJobBoardProps {
     t?: (key: string) => string;
@@ -85,6 +86,7 @@ export const DriverJobBoard: React.FC<DriverJobBoardProps> = ({
                                             <button onClick={async (e) => {
                                                 e.stopPropagation(); const currentEmployee = employees.find(emp => (user?.email && emp.email === user.email) || (user?.name && emp.name?.toLowerCase() === user.name.toLowerCase()) || ((user as any)?.employeeId && emp.id === (user as any).employeeId) || emp.id === user?.id);
                                                 if (!currentEmployee) { addNotification('alert', finalT('warehouse.driverHub.protocolFault')); return; }
+                                                if (!canWorkerPerformJob(currentEmployee.role, job.type)) { addNotification('alert', 'Floor workers cannot accept delivery missions. Only verified drivers can perform deliveries.'); return; }
                                                 const isInternal = !currentEmployee?.driverType || currentEmployee?.driverType === 'internal'; setProcessingJobIds(prev => new Set(prev).add(job.id));
                                                 try { await wmsJobsService.update(job.id, { assignedTo: currentEmployee.id, status: isInternal ? 'In-Progress' : 'Pending' }); await refreshData(); addNotification('success', finalT('warehouse.driverHub.jobAccepted')); } catch (err) { addNotification('alert', finalT('warehouse.driverHub.jobAcceptFailed')); } finally { setProcessingJobIds(prev => { const next = new Set(prev); next.delete(job.id); return next; }); }
                                             }} className={`flex-1 min-h-[44px] py-2.5 rounded-xl text-[10px] font-black uppercase tracking-[0.15em] flex items-center justify-center gap-2 disabled:opacity-50 transition-colors shadow-md active:scale-95 ${isCritical ? 'bg-red-600 text-white' : 'bg-[#224429] dark:bg-[#EAE5D9] hover:bg-[#1B3520] dark:hover:bg-[#DFD9CA] text-[#FAF8F5] dark:text-[#1E3B24]'}`}>{processingJobIds.has(job.id) ? <RefreshCw className="animate-spin" size={13} /> : <Zap size={13} />} {finalT('warehouse.driverHub.acceptJob')}</button>

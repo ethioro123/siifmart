@@ -58,11 +58,12 @@ export function useScanOnly(
         }
 
         charCount.current++;
-        const timeSinceLast = now - lastKeyTime.current;
         lastKeyTime.current = now;
 
-        // Any human-paced keystroke interval (> threshold) is blocked immediately
-        if (timeSinceLast > threshold) {
+        // Judge by AVERAGE speed of the stream (needs >= 4 chars) so a single
+        // jittery gap from a real scanner isn't mistaken for manual typing.
+        const avgInterval = (now - firstKeyTime.current) / (charCount.current - 1);
+        if (charCount.current >= 4 && avgInterval > threshold) {
             e.preventDefault();
             setInputVal('');
             charCount.current = 0;

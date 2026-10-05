@@ -19,6 +19,7 @@ import Pagination from '../../shared/Pagination';
 import { WMSJob, Product } from '../../../types';
 import { formatJobId } from '../../../utils/jobIdFormatter';
 import { formatDateTime } from '../../../utils/formatting';
+import { formatDisplayEmployeeId } from '../../../utils/employeeIdGenerator';
 
 import { ReturnToWarehouseModal } from '../returns/ReturnToWarehouseModal';
 
@@ -80,7 +81,7 @@ export const PickHistory: React.FC<PickHistoryProps> = ({
                     e.id === user.employeeId
                 );
             }
-            const displayId = userObj?.code || (userId ? (isUUID(userId) ? userId.slice(0, 8).toUpperCase() : userId) : '');
+            const displayId = (userObj?.code ? formatDisplayEmployeeId(userObj.code) : '') || (userId ? (isUUID(userId) ? userId.slice(0, 8).toUpperCase() : userId) : '');
             const resolvedUser = {
                 name: userObj?.name || (userId ? userId : t('warehouse.picking.systemUser')),
                 displayId: displayId || ''

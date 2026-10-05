@@ -1,4 +1,5 @@
 import { PurchaseOrder, Product } from '../../../../types';
+import { generateBatchNumber } from '../../../../utils/batchNumber';
 
 interface UseReceiveScanDeps {
     user: any;
@@ -180,10 +181,10 @@ export const useReceiveScan = (deps: UseReceiveScanDeps) => {
                 if (lineItem) {
                     setSplitReceivingItem(lineItem);
                     setSplitReceivingPO(relevantPO);
-                    const now = new Date();
-                    const dateStr = now.toISOString().split('T')[0].replace(/-/g, '');
-                    const randomStr = Math.random().toString(36).substring(2, 6).toUpperCase();
-                    const newBatch = `BN-${dateStr}-${randomStr}`;
+                    const newBatch = generateBatchNumber({
+                        sku: product.sku,
+                        sequence: 1
+                    });
 
                     setSplitVariants([{
                         id: `variant-${Date.now()}`,

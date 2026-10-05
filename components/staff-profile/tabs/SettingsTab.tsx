@@ -1,14 +1,20 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { Key, User, Shield, MapPin, Building, Briefcase, DollarSign, Save, Loader2, ChevronDown, Star, Phone, Home, PhoneCall } from 'lucide-react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import { Save, Loader2, Check } from 'lucide-react';
 import { Employee, UserRole } from '../../../types';
 import { SYSTEM_ROLES, canEmployRole } from '../../../utils/roles';
 import { autoSelectSiteForRole, getRecommendedDepartment, canRoleBeAtSiteType } from '../../../utils/roleSegregation';
-import { formatRole } from '../../../utils/formatting';
 import { logger } from '../../../utils/logger';
+import { isSovereignCEO, evaluateEmployeeProfileChanges } from '../../../utils/employeeGovernance';
+import { employeeChangesService } from '../../../services/employee-changes.service';
 
-const DEPARTMENTS = ['Retail Operations', 'Logistics & Warehouse', 'Management', 'Human Resources', 'Security', 'Transport', 'Procurement'];
+import { GovernanceApprovalBadge } from './settings/GovernanceApprovalBadge';
+import { ProfileIdentityCard } from './settings/ProfileIdentityCard';
+import { ProfileRoleDeptCard } from './settings/ProfileRoleDeptCard';
+import { ProfileContactCard } from './settings/ProfileContactCard';
+import { ProfileSecurityCard } from './settings/ProfileSecurityCard';
+import { SubmitChangeRequestModal } from '../modals/SubmitChangeRequestModal';
+
 type EmployeeStatus = 'Active' | 'On Leave' | 'Terminated' | 'Pending Approval';
-const STATUS_OPTIONS: EmployeeStatus[] = ['Active', 'On Leave', 'Terminated', 'Pending Approval'];
 
 interface SettingsTabProps {
     employee: Employee;
@@ -43,31 +49,46 @@ export default function SettingsTab({
     isChangingPassword,
     handleUpdatePassword
 }: SettingsTabProps) {
-    // ---------- Editable state ----------
+    // --- Editable State ---
+    const [editName, setEditName] = useState(employee.name || '');
+    const [editAge, setEditAge] = useState(employee.age?.toString() || '');
+    const [editDateOfBirth, setEditDateOfBirth] = useState(employee.dateOfBirth || '');
+    const [editNationalIdNumber, setEditNationalIdNumber] = useState(employee.nationalIdNumber || '');
+
     const [editRole, setEditRole] = useState<UserRole>(employee.role);
     const [editDepartment, setEditDepartment] = useState(employee.department || 'Retail Operations');
     const [editSiteId, setEditSiteId] = useState(employee.siteId || employee.site_id || '');
-    const [editSpecialization, setEditSpecialization] = useState(employee.specialization || '');
     const [editSalary, setEditSalary] = useState(employee.salary?.toString() || '0');
+    const [editSpecialization, setEditSpecialization] = useState(employee.specialization || '');
     const [editStatus, setEditStatus] = useState<EmployeeStatus>(employee.status || 'Active');
+
     const [editPhone, setEditPhone] = useState(employee.phone || '');
     const [editAddress, setEditAddress] = useState(employee.address || '');
     const [editEmergencyContact, setEditEmergencyContact] = useState(employee.emergencyContact || '');
+
     const [isSaving, setIsSaving] = useState(false);
     const [saveSuccess, setSaveSuccess] = useState(false);
+    const [isApprovalModalOpen, setIsApprovalModalOpen] = useState(false);
+    const [isSubmittingApproval, setIsSubmittingApproval] = useState(false);
 
-    // Reset form when employee changes
+    // Reset when employee changes
     useEffect(() => {
+        setEditName(employee.name || '');
+        setEditAge(employee.age?.toString() || '');
+        setEditDateOfBirth(employee.dateOfBirth || '');
+        setEditNationalIdNumber(employee.nationalIdNumber || '');
         setEditRole(employee.role);
         setEditDepartment(employee.department || 'Retail Operations');
         setEditSiteId(employee.siteId || employee.site_id || '');
-        setEditSpecialization(employee.specialization || '');
         setEditSalary(employee.salary?.toString() || '0');
+        setEditSpecialization(employee.specialization || '');
         setEditStatus((employee.status || 'Active') as EmployeeStatus);
         setEditPhone(employee.phone || '');
         setEditAddress(employee.address || '');
         setEditEmergencyContact(employee.emergencyContact || '');
     }, [employee.id]);
+
+    const isCEO = isSovereignCEO(currentUser?.role);
 
     const getAssignableRoles = useCallback((): UserRole[] => {
         if (!currentUser) return [];
@@ -75,8 +96,6 @@ export default function SettingsTab({
             .filter(r => canEmployRole(currentUser.role, r.id))
             .map(r => r.id);
     }, [currentUser]);
-
-    const canAdjustPayroll = ['super_admin', 'hr_manager', 'hr', 'admin'].includes(currentUser?.role || '');
 
     const handleRoleChange = (newRole: UserRole) => {
         setEditRole(newRole);
@@ -89,392 +108,238 @@ export default function SettingsTab({
         }
     };
 
-    const canEditContact = canEditStaff || isOwnProfile;
+    // Proposed employee changes payload
+    const proposedChanges = useMemo((): Partial<Employee> => ({
+        name: editName.trim(),
+        age: editAge ? parseInt(editAge, 10) : undefined,
+        dateOfBirth: editDateOfBirth,
+        nationalIdNumber: editNationalIdNumber.trim(),
+        role: editRole,
+        department: editDepartment,
+        siteId: editSiteId,
+        salary: parseFloat(editSalary) || 0,
+        specialization: editSpecialization.trim(),
+        status: editStatus,
+        phone: editPhone.trim(),
+        address: editAddress.trim(),
+        emergencyContact: editEmergencyContact.trim()
+    }), [
+        editName, editAge, editDateOfBirth, editNationalIdNumber,
+        editRole, editDepartment, editSiteId, editSalary, editSpecialization, editStatus,
+        editPhone, editAddress, editEmergencyContact
+    ]);
 
-    const hasChanges = editRole !== employee.role ||
+    const hasChanges = 
+        editName.trim() !== employee.name.trim() ||
+        editAge !== (employee.age?.toString() || '') ||
+        editDateOfBirth !== (employee.dateOfBirth || '') ||
+        editNationalIdNumber.trim() !== (employee.nationalIdNumber || '').trim() ||
+        editRole !== employee.role ||
         editDepartment !== (employee.department || 'Retail Operations') ||
         editSiteId !== (employee.siteId || employee.site_id || '') ||
-        editSpecialization !== (employee.specialization || '') ||
         editSalary !== (employee.salary?.toString() || '0') ||
+        editSpecialization !== (employee.specialization || '') ||
         editStatus !== (employee.status || 'Active') ||
         editPhone !== (employee.phone || '') ||
         editAddress !== (employee.address || '') ||
         editEmergencyContact !== (employee.emergencyContact || '');
 
-    const handleSave = async () => {
+    // Evaluate governance rules
+    const governanceResult = useMemo(() => {
+        return evaluateEmployeeProfileChanges(employee, proposedChanges, currentUser?.role);
+    }, [employee, proposedChanges, currentUser?.role]);
+
+    // Handle Direct Save (CEO or HR non-governed changes)
+    const handleDirectSave = async () => {
         if (!updateEmployee || !hasChanges) return;
-        if (editRole !== employee.role && !canEmployRole(currentUser?.role, editRole)) {
-            logger.warn('SettingsTab', 'Unauthorized role assignment attempt blocked', { targetRole: editRole });
-            return;
-        }
         setIsSaving(true);
         setSaveSuccess(false);
         try {
-            const updatedEmployee: Employee = {
+            const fullUpdatedEmployee: Employee = {
                 ...employee,
-                role: editRole,
-                department: editDepartment,
-                siteId: editSiteId,
-                specialization: editSpecialization,
-                salary: parseFloat(editSalary) || 0,
-                status: editStatus,
-                phone: editPhone,
-                address: editAddress,
-                emergencyContact: editEmergencyContact,
-            };
-            const result = updateEmployee(updatedEmployee, currentUser?.name || 'HR Admin');
+                ...proposedChanges
+            } as Employee;
+
+            const result = updateEmployee(
+                fullUpdatedEmployee, 
+                currentUser?.name || (isCEO ? 'CEO Sovereign Executive' : 'HR Officer')
+            );
             if (result instanceof Promise) await result;
             setSaveSuccess(true);
             setTimeout(() => setSaveSuccess(false), 3000);
         } catch (err) {
-            logger.error('SettingsTab', 'Failed to save employee changes', err as Error);
+            logger.error('SettingsTab', 'Failed to save employee changes:', err as Error);
         } finally {
             setIsSaving(false);
         }
     };
 
+    // Handle primary action click
+    const handleSaveClick = () => {
+        if (!hasChanges) return;
+        if (governanceResult.requiresApproval && !isCEO) {
+            setIsApprovalModalOpen(true);
+        } else {
+            handleDirectSave();
+        }
+    };
+
+    // Confirm and submit change request to other departments
+    const handleConfirmSubmitRequest = async (reason: string) => {
+        setIsSubmittingApproval(true);
+        try {
+            await employeeChangesService.create({
+                employeeId: employee.id,
+                employeeName: employee.name,
+                countryCode: employee.country || (employee as any).country_code || 'ET',
+                siteId: editSiteId || employee.siteId,
+                requestedBy: currentUser?.name || 'HR Officer',
+                requestedByRole: currentUser?.role || 'hr',
+                requestedAt: new Date().toISOString(),
+                status: 'pending',
+                governanceCategory: governanceResult.governanceCategories.length === 1 
+                    ? governanceResult.governanceCategories[0] 
+                    : 'composite',
+                requiredApprovers: governanceResult.requiredApprovers,
+                diffs: governanceResult.diffs,
+                fullProposedEmployee: proposedChanges,
+                reason
+            });
+
+            setIsApprovalModalOpen(false);
+            setSaveSuccess(true);
+            setTimeout(() => setSaveSuccess(false), 4000);
+        } catch (err) {
+            logger.error('SettingsTab', 'Failed to submit change request:', err as Error);
+        } finally {
+            setIsSubmittingApproval(false);
+        }
+    };
+
     const assignableRoles = getAssignableRoles();
-    const selectClasses = 'w-full bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-3 text-gray-900 dark:text-white outline-none focus:border-[#2C5E3B] dark:focus:border-emerald-500 transition-colors appearance-none cursor-pointer';
-    const inputClasses = 'w-full bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-3 text-gray-900 dark:text-white outline-none focus:border-[#2C5E3B] dark:focus:border-emerald-500 transition-colors';
-    const labelClasses = 'text-[10px] text-gray-500 font-black uppercase tracking-widest mb-1.5 block px-1';
-    const readOnlyClasses = 'flex items-center justify-between p-4 bg-white dark:bg-white/5 rounded-xl border border-gray-200 dark:border-white/5 shadow-sm dark:shadow-none';
 
     return (
-        <div className="space-y-8 animate-in fade-in">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                {/* Security Section */}
-                <div className="bg-gray-50 dark:bg-black/30 p-8 rounded-2xl border border-gray-200 dark:border-white/5">
-                    <h4 className="text-lg font-bold text-gray-900 dark:text-white mb-6 flex items-center gap-3">
-                        <div className="p-2 bg-yellow-400/20 rounded-lg text-yellow-600 dark:text-yellow-400">
-                            <Key size={18} />
-                        </div>
-                        Security & Access
-                    </h4>
+        <div className="space-y-6 animate-in fade-in duration-200">
+            {/* Real-time Governance Status Callout */}
+            <GovernanceApprovalBadge 
+                isCEO={isCEO} 
+                ruleResult={governanceResult} 
+                hasChanges={hasChanges} 
+            />
 
-                    <div className="space-y-4">
-                        <div>
-                            <label className={labelClasses}>Current Password</label>
-                            <input
-                                type="password"
-                                value={currentPasswordInput}
-                                onChange={(e) => setCurrentPasswordInput(e.target.value)}
-                                autoComplete="current-password"
-                                placeholder="••••••••"
-                                className={inputClasses}
-                            />
-                        </div>
-                        <div>
-                            <label className={labelClasses}>New Password</label>
-                            <input
-                                type="password"
-                                value={newPasswordInput}
-                                onChange={(e) => setNewPasswordInput(e.target.value)}
-                                autoComplete="new-password"
-                                placeholder="Minimum 6 characters"
-                                className={inputClasses}
-                            />
-                        </div>
-                        <div>
-                            <label className={labelClasses}>Confirm New Password</label>
-                            <input
-                                type="password"
-                                value={confirmPasswordInput}
-                                onChange={(e) => setConfirmPasswordInput(e.target.value)}
-                                autoComplete="new-password"
-                                placeholder="Confirm your new password"
-                                className={inputClasses}
-                            />
-                        </div>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {/* Column 1: Identity & Authentication */}
+                <div className="space-y-6">
+                    <ProfileIdentityCard
+                        employee={employee}
+                        sites={sites}
+                        canEdit={canEditStaff}
+                        isCEO={isCEO}
+                        name={editName}
+                        setName={setEditName}
+                        age={editAge}
+                        setAge={setEditAge}
+                        dateOfBirth={editDateOfBirth}
+                        setDateOfBirth={setEditDateOfBirth}
+                        nationalIdNumber={editNationalIdNumber}
+                        setNationalIdNumber={setEditNationalIdNumber}
+                    />
 
-                        <button
-                            onClick={handleUpdatePassword}
-                            disabled={isChangingPassword || !newPasswordInput || newPasswordInput !== confirmPasswordInput}
-                            className="w-full mt-4 flex items-center justify-center gap-2 bg-yellow-400 hover:bg-yellow-500 text-black font-black uppercase tracking-widest py-3 rounded-xl transition-all disabled:opacity-30 border border-yellow-500/20 shadow-lg shadow-yellow-400/20"
-                        >
-                            {isChangingPassword ? (
-                                <div className="w-5 h-5 border-2 border-black/20 border-t-black rounded-full animate-spin" />
-                            ) : (
-                                <>Update Password</>
-                            )}
-                        </button>
-                    </div>
+                    <ProfileSecurityCard
+                        currentPasswordInput={currentPasswordInput}
+                        setCurrentPasswordInput={setCurrentPasswordInput}
+                        newPasswordInput={newPasswordInput}
+                        setNewPasswordInput={setNewPasswordInput}
+                        confirmPasswordInput={confirmPasswordInput}
+                        setConfirmPasswordInput={setConfirmPasswordInput}
+                        isChangingPassword={isChangingPassword}
+                        handleUpdatePassword={handleUpdatePassword}
+                    />
                 </div>
 
-                {/* Account Info / Edit Section */}
-                <div className="bg-gray-50 dark:bg-black/30 p-8 rounded-2xl border border-gray-200 dark:border-white/5">
-                    <h4 className="text-lg font-bold text-gray-900 dark:text-white mb-6 flex items-center gap-3">
-                        <div className="p-2 bg-[#2C5E3B]/20 rounded-lg text-[#2C5E3B] dark:text-emerald-400">
-                            <User size={18} />
-                        </div>
-                        {canEditStaff ? 'Edit Employee Profile' : 'Account Information'}
-                    </h4>
+                {/* Column 2: Role, Department & Contact Details */}
+                <div className="space-y-6">
+                    <ProfileRoleDeptCard
+                        employee={employee}
+                        sites={sites}
+                        canEdit={canEditStaff}
+                        isCEO={isCEO}
+                        assignableRoles={assignableRoles}
+                        role={editRole}
+                        onRoleChange={handleRoleChange}
+                        department={editDepartment}
+                        setDepartment={setEditDepartment}
+                        siteId={editSiteId}
+                        setSiteId={setEditSiteId}
+                        salary={editSalary}
+                        setSalary={setEditSalary}
+                        specialization={editSpecialization}
+                        setSpecialization={setEditSpecialization}
+                        status={editStatus}
+                        setStatus={setEditStatus}
+                    />
 
-                    <div className="space-y-5">
-                        {/* Employee ID — always read-only */}
-                        <div className={readOnlyClasses}>
-                            <div>
-                                <p className="text-[10px] text-gray-500 uppercase font-bold tracking-widest">Employee ID</p>
-                                <p className="text-gray-900 dark:text-white font-mono text-sm">{employee.code || 'EMP-' + employee.id.substring(0, 5).toUpperCase()}</p>
-                            </div>
-                            <div className="px-3 py-1 bg-gray-100 dark:bg-white/10 rounded text-xs text-gray-500 dark:text-gray-400 font-bold uppercase tracking-tighter">Personnel Code</div>
-                        </div>
-
-                        {/* ROLE */}
-                        {canEditStaff && assignableRoles.length > 0 ? (
-                            <div>
-                                <label className={labelClasses}>
-                                    <Shield size={10} className="inline mr-1" />
-                                    Access Role
-                                </label>
-                                <div className="relative">
-                                    <select
-                                        value={editRole}
-                                        onChange={(e) => handleRoleChange(e.target.value as UserRole)}
-                                        className={selectClasses}
-                                    >
-                                        {assignableRoles.map(roleId => {
-                                            const roleMeta = SYSTEM_ROLES.find(r => r.id === roleId);
-                                            return (
-                                                <option key={roleId} value={roleId}>
-                                                    {roleMeta?.label || formatRole(roleId)} — {roleMeta?.desc || roleId}
-                                                </option>
-                                            );
-                                        })}
-                                    </select>
-                                    <ChevronDown size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
-                                </div>
-                            </div>
-                        ) : (
-                            <div className={readOnlyClasses}>
-                                <div>
-                                    <p className="text-[10px] text-gray-500 uppercase font-bold tracking-widest">Access Role</p>
-                                    <p className="text-gray-900 dark:text-white font-bold">{formatRole(employee.role)}</p>
-                                </div>
-                                <Shield size={16} className="text-[#2C5E3B] dark:text-emerald-400" />
-                            </div>
-                        )}
-
-                        {/* DEPARTMENT */}
-                        {canEditStaff ? (
-                            <div>
-                                <label className={labelClasses}>
-                                    <Briefcase size={10} className="inline mr-1" />
-                                    Department
-                                </label>
-                                <div className="relative">
-                                    <select
-                                        value={editDepartment}
-                                        onChange={(e) => setEditDepartment(e.target.value)}
-                                        className={selectClasses}
-                                    >
-                                        {DEPARTMENTS.map(dept => (
-                                            <option key={dept} value={dept}>{dept}</option>
-                                        ))}
-                                    </select>
-                                    <ChevronDown size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
-                                </div>
-                            </div>
-                        ) : (
-                            <div className={readOnlyClasses}>
-                                <div>
-                                    <p className="text-[10px] text-gray-500 uppercase font-bold tracking-widest">Department</p>
-                                    <p className="text-gray-900 dark:text-white font-bold">{employee.department || 'Retail Operations'}</p>
-                                </div>
-                                <Briefcase size={16} className="text-[#2C5E3B] dark:text-emerald-400" />
-                            </div>
-                        )}
-
-                        {/* PRIMARY SITE */}
-                        {canEditStaff ? (
-                            <div>
-                                <label className={labelClasses}>
-                                    <Building size={10} className="inline mr-1" />
-                                    Primary Site
-                                </label>
-                                <div className="relative">
-                                    <select
-                                        value={editSiteId}
-                                        onChange={(e) => setEditSiteId(e.target.value)}
-                                        className={selectClasses}
-                                    >
-                                        {sites.map(site => (
-                                            <option key={site.id} value={site.id}>
-                                                {site.name} ({site.type || 'site'})
-                                            </option>
-                                        ))}
-                                    </select>
-                                    <ChevronDown size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
-                                </div>
-                            </div>
-                        ) : (
-                            <div className={readOnlyClasses}>
-                                <div>
-                                    <p className="text-[10px] text-gray-500 uppercase font-bold tracking-widest">Primary Site</p>
-                                    <p className="text-gray-900 dark:text-white font-bold">{sites.find(s => s.id === employee.siteId || s.id === employee.site_id)?.name || 'HQ'}</p>
-                                </div>
-                                <MapPin size={16} className="text-[#2C5E3B] dark:text-emerald-400" />
-                            </div>
-                        )}
-
-                        {/* SPECIALIZATION — only in edit mode */}
-                        {canEditStaff && (
-                            <div>
-                                <label className={labelClasses}>
-                                    <Star size={10} className="inline mr-1" />
-                                    Specialization
-                                </label>
-                                <input
-                                    type="text"
-                                    value={editSpecialization}
-                                    onChange={(e) => setEditSpecialization(e.target.value)}
-                                    placeholder="e.g. Deli, Bakery, Produce"
-                                    className={inputClasses}
-                                />
-                            </div>
-                        )}
-
-                        {/* SALARY — only for payroll-eligible roles */}
-                        {canEditStaff && canAdjustPayroll && (
-                            <div>
-                                <label className={labelClasses}>
-                                    <DollarSign size={10} className="inline mr-1" />
-                                    Monthly Salary (ETB)
-                                </label>
-                                <input
-                                    type="number"
-                                    value={editSalary}
-                                    onChange={(e) => setEditSalary(e.target.value)}
-                                    min="0"
-                                    step="100"
-                                    className={inputClasses}
-                                />
-                            </div>
-                        )}
-
-                        {/* STATUS */}
-                        {canEditStaff ? (
-                            <div>
-                                <label className={labelClasses}>
-                                    <User size={10} className="inline mr-1" />
-                                    Employment Status
-                                </label>
-                                <div className="relative">
-                                    <select
-                                        value={editStatus}
-                                        onChange={(e) => setEditStatus(e.target.value as EmployeeStatus)}
-                                        className={selectClasses}
-                                    >
-                                        {STATUS_OPTIONS.map(s => (
-                                            <option key={s} value={s}>{s}</option>
-                                        ))}
-                                    </select>
-                                    <ChevronDown size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
-                                </div>
-                            </div>
-                        ) : null}
-
-                        {/* CONTACT DETAILS */}
-                        <div className="pt-3 border-t border-gray-200 dark:border-white/10 space-y-4">
-                            <p className="text-[10px] font-black uppercase tracking-widest text-[#1E3F27] dark:text-[#EAE5D9]">
-                                Contact & Residence Information
-                            </p>
-
-                            {/* Phone */}
-                            {canEditContact ? (
-                                <div>
-                                    <label className={labelClasses}>
-                                        <Phone size={10} className="inline mr-1" /> Phone Number
-                                    </label>
-                                    <input
-                                        type="tel"
-                                        value={editPhone}
-                                        onChange={(e) => setEditPhone(e.target.value)}
-                                        placeholder="+251 91 234 5678"
-                                        className={inputClasses}
-                                    />
-                                </div>
-                            ) : (
-                                <div className={readOnlyClasses}>
-                                    <div>
-                                        <p className="text-[10px] text-gray-500 uppercase font-bold tracking-widest">Phone Number</p>
-                                        <p className="text-gray-900 dark:text-white font-mono text-sm">{employee.phone || 'Not set'}</p>
-                                    </div>
-                                    <Phone size={16} className="text-[#2C5E3B] dark:text-emerald-400" />
-                                </div>
-                            )}
-
-                            {/* Residence Address */}
-                            {canEditContact ? (
-                                <div>
-                                    <label className={labelClasses}>
-                                        <Home size={10} className="inline mr-1" /> Residence Address
-                                    </label>
-                                    <input
-                                        type="text"
-                                        value={editAddress}
-                                        onChange={(e) => setEditAddress(e.target.value)}
-                                        placeholder="Subcity, Woreda, House No."
-                                        className={inputClasses}
-                                    />
-                                </div>
-                            ) : (
-                                <div className={readOnlyClasses}>
-                                    <div>
-                                        <p className="text-[10px] text-gray-500 uppercase font-bold tracking-widest">Residence Address</p>
-                                        <p className="text-gray-900 dark:text-white text-sm">{employee.address || 'Not set'}</p>
-                                    </div>
-                                    <Home size={16} className="text-[#2C5E3B] dark:text-emerald-400" />
-                                </div>
-                            )}
-
-                            {/* Emergency Contact */}
-                            {canEditContact ? (
-                                <div>
-                                    <label className={labelClasses}>
-                                        <PhoneCall size={10} className="inline mr-1" /> Emergency Contact
-                                    </label>
-                                    <input
-                                        type="text"
-                                        value={editEmergencyContact}
-                                        onChange={(e) => setEditEmergencyContact(e.target.value)}
-                                        placeholder="e.g. Spouse +251 91 122 3344"
-                                        className={inputClasses}
-                                    />
-                                </div>
-                            ) : (
-                                <div className={readOnlyClasses}>
-                                    <div>
-                                        <p className="text-[10px] text-gray-500 uppercase font-bold tracking-widest">Emergency Contact</p>
-                                        <p className="text-gray-900 dark:text-white text-sm">{employee.emergencyContact || 'Not set'}</p>
-                                    </div>
-                                    <PhoneCall size={16} className="text-[#2C5E3B] dark:text-emerald-400" />
-                                </div>
-                            )}
-                        </div>
-
-                        {/* SAVE BUTTON */}
-                        {(canEditStaff || isOwnProfile) && (
-                            <button
-                                onClick={handleSave}
-                                disabled={isSaving || !hasChanges}
-                                className={`w-full mt-2 flex items-center justify-center gap-2 font-black uppercase tracking-widest py-3 rounded-xl transition-all border shadow-lg ${
-                                    saveSuccess
-                                        ? 'bg-green-500 border-green-600/20 text-white shadow-green-500/20'
-                                        : 'bg-[#2C5E3B] hover:bg-[#224429] border-emerald-700/20 text-white shadow-emerald-500/20 disabled:opacity-30'
-                                }`}
-                            >
-                                {isSaving ? (
-                                    <Loader2 size={18} className="animate-spin" />
-                                ) : saveSuccess ? (
-                                    <>✓ Saved Successfully</>
-                                ) : (
-                                    <><Save size={16} /> Save Changes</>
-                                )}
-                            </button>
-                        )}
-                    </div>
+                    <ProfileContactCard
+                        employee={employee}
+                        canEdit={canEditStaff || isOwnProfile}
+                        phone={editPhone}
+                        setPhone={setEditPhone}
+                        address={editAddress}
+                        setAddress={setEditAddress}
+                        emergencyContact={editEmergencyContact}
+                        setEmergencyContact={setEditEmergencyContact}
+                    />
                 </div>
             </div>
+
+            {/* Bottom Action Suite */}
+            {(canEditStaff || isOwnProfile) && (
+                <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-4 rounded-2xl bg-[var(--theme-bg-card)] border border-[var(--theme-border)] shadow-sm">
+                    <div className="text-xs text-[var(--theme-text-muted)]">
+                        {isCEO ? (
+                            <span>CEO Sovereign Authority: Changes apply directly to personnel ledger.</span>
+                        ) : governanceResult.requiresApproval && hasChanges ? (
+                            <span>Governed fields detected: Request will route to {governanceResult.requiredApprovers.join(', ')}.</span>
+                        ) : (
+                            <span>No governed fields modified: Changes will apply immediately.</span>
+                        )}
+                    </div>
+
+                    <button
+                        onClick={handleSaveClick}
+                        disabled={isSaving || !hasChanges}
+                        className={`w-full sm:w-auto px-6 py-2.5 rounded-xl font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition-all cursor-pointer shadow-xs disabled:opacity-40 ${
+                            saveSuccess
+                                ? 'bg-emerald-600 text-white'
+                                : governanceResult.requiresApproval && !isCEO
+                                    ? 'bg-amber-500 hover:bg-amber-600 text-black'
+                                    : 'bg-[var(--theme-primary)] hover:opacity-95 text-white'
+                        }`}
+                    >
+                        {isSaving ? (
+                            <Loader2 size={16} className="animate-spin" />
+                        ) : saveSuccess ? (
+                            <><Check size={16} /> {governanceResult.requiresApproval && !isCEO ? 'Request Submitted' : 'Saved Successfully'}</>
+                        ) : governanceResult.requiresApproval && !isCEO ? (
+                            <><Save size={15} /> Submit for Department Sign-Off</>
+                        ) : (
+                            <><Save size={15} /> Save Changes (Direct Update)</>
+                        )}
+                    </button>
+                </div>
+            )}
+
+            {/* Submit Change Request Modal */}
+            {isApprovalModalOpen && (
+                <SubmitChangeRequestModal
+                    isOpen={isApprovalModalOpen}
+                    onClose={() => setIsApprovalModalOpen(false)}
+                    employeeName={employee.name}
+                    ruleResult={governanceResult}
+                    onConfirm={handleConfirmSubmitRequest}
+                    isSubmitting={isSubmittingApproval}
+                />
+            )}
         </div>
     );
 }

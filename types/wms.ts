@@ -40,6 +40,8 @@ export interface WMSJob {
   id: string;
   siteId: string;
   site_id?: string;
+  countryCode?: string;
+  country_code?: string;
   type: 'PICK' | 'PACK' | 'PUTAWAY' | 'TRANSFER' | 'DISPATCH' | 'REPLENISH' | 'COUNT' | 'WASTE' | 'RETURNS' | 'DRIVER' | 'RECEIVE';
   priority: 'Critical' | 'High' | 'Normal';
   status: 'Pending' | 'In-Progress' | 'Completed' | 'Cancelled' | 'Dispatched' | 'Deleted';

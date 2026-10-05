@@ -33,7 +33,7 @@ export const InventoryRejectionModal: React.FC<InventoryRejectionModalProps> = (
             title="Reject Request"
         >
             <div className="space-y-4">
-                <p className="text-secondary text-sm">
+                <p className="text-[var(--theme-text-secondary)] text-sm">
                     Please provide a reason for rejecting this request.
                     The requester will be notified.
                 </p>
@@ -41,7 +41,7 @@ export const InventoryRejectionModal: React.FC<InventoryRejectionModalProps> = (
                     value={rejectionReason}
                     onChange={(e) => setRejectionReason(e.target.value)}
                     placeholder="Reason for rejection..."
-                    className="w-full h-32 bg-white dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-xl p-4 text-gray-900 dark:text-white placeholder-stone-400 dark:placeholder-stone-500 focus:border-[#2C5E3B] dark:focus:border-[#A9CBA2] focus:ring-4 focus:ring-[#2C5E3B]/10 dark:focus:ring-[#A9CBA2]/10 focus:outline-none transition-all duration-300"
+                    className="w-full h-32 bg-[var(--theme-bg-panel)] border border-[var(--theme-border)] rounded-xl p-4 text-[var(--theme-text-primary)] placeholder-[var(--theme-text-muted)] focus:border-[var(--theme-border-strong)] focus:outline-none transition-all duration-150"
                     autoFocus
                 />
                 <div className="flex gap-4 justify-end">

@@ -3,6 +3,7 @@ import { Employee, Site } from '../../../types';
 import { ROLE_LABELS, DEPT_COLORS } from '../types';
 import { getRoleDept } from '../hooks/useOrgTreeLayout';
 import { X, Mail, Phone, MapPin, Award, Calendar, Shield, ExternalLink, Copy, Check, CreditCard, UserCheck, AlertCircle } from 'lucide-react';
+import { formatDisplayEmployeeId } from '../../../utils/employeeIdGenerator';
 
 interface EmployeeDetailDrawerProps {
     employee: Employee | null;
@@ -106,7 +107,7 @@ export const EmployeeDetailDrawer: React.FC<EmployeeDetailDrawerProps> = ({
                             </h3>
                             {employee.code && (
                                 <span className="text-[10px] font-mono px-1.5 py-0.5 rounded font-bold bg-[#EAE5D9] dark:bg-black/40 text-[#2C5E3B] dark:text-emerald-400">
-                                    {employee.code}
+                                    {formatDisplayEmployeeId(employee)}
                                 </span>
                             )}
                         </div>

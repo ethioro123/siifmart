@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import Modal from '../../components/Modal';
 import { Product, Supplier } from '../../types';
-import { Package, Search, Plus, Star } from 'lucide-react'; // Added Star if needed, checked usage
+import { Package, Search, Plus } from 'lucide-react';
 import { useData } from '../../contexts/DataContext';
 import { useStore } from '../../contexts/CentralStore';
 import { getCountryProfile } from '../../utils/localization';
@@ -23,12 +23,9 @@ export const ProductCatalogModal: React.FC<ProductCatalogModalProps> = ({ isOpen
     const [catalogStockFilter, setCatalogStockFilter] = useState<'all' | 'low' | 'out'>('all');
 
     const filteredCatalogProducts = useMemo(() => {
-        // Ensure products is available
         let filtered = products || [];
 
-        // 1. Filter by Supplier (currently just generic matching as per original code note)
-
-        // 2. Search
+        // Search
         if (catalogSearch.trim()) {
             const q = catalogSearch.toLowerCase();
             filtered = filtered.filter(p =>
@@ -37,20 +34,20 @@ export const ProductCatalogModal: React.FC<ProductCatalogModalProps> = ({ isOpen
             );
         }
 
-        // 3. Category
+        // Category
         if (catalogCategory !== 'All') {
             filtered = filtered.filter(p => p.category === catalogCategory);
         }
 
-        // 4. Stock Filter
+        // Stock Filter
         if (catalogStockFilter === 'low') {
             filtered = filtered.filter(p => (p.stock || 0) <= (p.minStock || 10) && (p.stock || 0) > 0);
         } else if (catalogStockFilter === 'out') {
             filtered = filtered.filter(p => (p.stock || 0) === 0);
         }
 
-        // 5. Sort
-        return [...filtered].sort((a, b) => { // Create copy to avoid mutating original if sort mutates (JS sort usually mutates)
+        // Sort
+        return [...filtered].sort((a, b) => {
             switch (catalogSort) {
                 case 'priceAsc': return a.price - b.price;
                 case 'priceDesc': return b.price - a.price;
@@ -72,43 +69,46 @@ export const ProductCatalogModal: React.FC<ProductCatalogModalProps> = ({ isOpen
         <Modal isOpen={isOpen} onClose={onClose} title={`Products from ${supplier.name || 'Supplier'}`} size="xl">
             <div className="space-y-4">
                 {/* Header Banner */}
-                <div className="bg-[#2C5E3B]/10 border border-[#2C5E3B]/20 rounded-xl p-4">
-                    <div className="flex items-center gap-3 mb-2">
-                        <Package className="text-[#2C5E3B] dark:text-[#A9CBA2]" size={20} />
-                        <h3 className="text-gray-900 dark:text-white font-bold">Supplier Product Catalog</h3>
+                <div className="bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-2xl p-4 flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-[var(--theme-bg-panel)] border border-[var(--theme-border)] flex items-center justify-center text-[var(--theme-text-primary)] shrink-0">
+                        <Package size={18} strokeWidth={1.5} />
                     </div>
-                    <p className="text-xs text-gray-500 dark:text-gray-400">
-                        Products available from {supplier.name}.
-                    </p>
+                    <div>
+                        <h3 className="text-sm font-bold text-[var(--theme-text-primary)]">Supplier Master Catalog</h3>
+                        <p className="text-xs text-[var(--theme-text-secondary)] font-medium mt-0.5">
+                            Active SKUs available from {supplier.name}. Select items to attach directly to your purchase order.
+                        </p>
+                    </div>
                 </div>
 
-                {/* 🔍 Search & Filter Bar */}
+                {/* Search & Filter Bar */}
                 <div className="space-y-3">
                     {/* Search */}
                     <div className="relative">
-                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={16} />
+                        <Search className="absolute left-3.5 top-1/2 transform -translate-y-1/2 text-[var(--theme-text-muted)] pointer-events-none" size={16} />
                         <input
                             type="text"
-                            placeholder="Search products by name or SKU..."
+                            placeholder="Search products by title, brand, or SKU..."
                             value={catalogSearch}
                             onChange={(e) => setCatalogSearch(e.target.value)}
-                            className="w-full bg-gray-50 dark:bg-black/40 border border-gray-200 dark:border-white/10 rounded-lg pl-10 pr-4 py-3 text-sm text-gray-900 dark:text-white focus:border-[#2C5E3B] dark:focus:border-[#A9CBA2] focus:ring-2 focus:ring-[#2C5E3B]/10 dark:focus:ring-[#A9CBA2]/10 outline-none transition-all placeholder-gray-400 dark:placeholder-gray-700 font-bold"
+                            className="w-full h-11 pl-10 pr-4 rounded-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-xs text-[var(--theme-text-primary)] placeholder-[var(--theme-text-muted)] focus:outline-none focus:border-[var(--theme-accent)] transition-all font-medium"
                         />
                     </div>
 
                     {/* Filters Row */}
-                    <div className="flex flex-col md:flex-row gap-3">
-                        {/* Category Chips (Horizontal Scroll) */}
-                        <div className="flex-1 overflow-x-auto pb-2 -mb-2 no-scrollbar">
-                            <div className="flex gap-2">
+                    <div className="flex flex-col md:flex-row gap-3 items-stretch md:items-center justify-between">
+                        {/* Category Chips */}
+                        <div className="flex-1 overflow-x-auto pb-1 no-scrollbar">
+                            <div className="flex gap-1.5">
                                 {catalogCategories.map(cat => (
                                     <button
                                         key={cat}
                                         onClick={() => setCatalogCategory(cat)}
-                                        className={`px-3 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap transition-colors ${catalogCategory === cat
-                                            ? 'bg-[#224429] dark:bg-[#EAE5D9] text-[#FAF8F5] dark:text-[#1E3B24]'
-                                            : 'glass-panel-pushed text-gray-500 dark:text-gray-400 hover:bg-stone-100 dark:hover:bg-white/10 hover:text-gray-900 dark:hover:text-white'
-                                            }`}
+                                        className={`h-8 px-3.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
+                                            catalogCategory === cat
+                                                ? 'bg-[var(--theme-primary)] text-[var(--theme-primary-text)] shadow-sm'
+                                                : 'bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] border border-[var(--theme-border)]'
+                                        }`}
                                     >
                                         {cat}
                                     </button>
@@ -117,22 +117,22 @@ export const ProductCatalogModal: React.FC<ProductCatalogModalProps> = ({ isOpen
                         </div>
 
                         {/* Controls Right */}
-                        <div className="flex gap-2 shrink-0">
+                        <div className="flex items-center gap-2 shrink-0">
                             {/* Sort */}
                             <select
                                 aria-label="Sort by"
                                 value={catalogSort}
                                 onChange={(e) => setCatalogSort(e.target.value as any)}
-                                className="bg-gray-50 dark:bg-black/40 border border-gray-200 dark:border-white/10 rounded-lg px-3 py-1.5 text-xs text-gray-900 dark:text-white focus:border-[#2C5E3B] dark:focus:border-[#A9CBA2] outline-none font-bold cursor-pointer"
+                                className="h-8 px-3 rounded-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-xs text-[var(--theme-text-primary)] font-semibold focus:outline-none focus:border-[var(--theme-accent)] cursor-pointer"
                             >
-                                <option value="name" className="bg-white dark:bg-[#18201B] text-gray-900 dark:text-white">Name (A-Z)</option>
-                                <option value="priceAsc" className="bg-white dark:bg-[#18201B] text-gray-900 dark:text-white">Price (Low-High)</option>
-                                <option value="priceDesc" className="bg-white dark:bg-[#18201B] text-gray-900 dark:text-white">Price (High-Low)</option>
-                                <option value="stockAsc" className="bg-white dark:bg-[#18201B] text-gray-900 dark:text-white">Stock (Low-High)</option>
+                                <option value="name">Name (A-Z)</option>
+                                <option value="priceAsc">Price (Low-High)</option>
+                                <option value="priceDesc">Price (High-Low)</option>
+                                <option value="stockAsc">Stock (Low-High)</option>
                             </select>
 
                             {/* Stock Filter */}
-                            <div className="flex glass-panel-pushed rounded-lg p-1 gap-1">
+                            <div className="flex bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-full p-0.5">
                                 {[
                                     { id: 'all', label: 'All' },
                                     { id: 'low', label: 'Low' },
@@ -141,10 +141,11 @@ export const ProductCatalogModal: React.FC<ProductCatalogModalProps> = ({ isOpen
                                     <button
                                         key={opt.id}
                                         onClick={() => setCatalogStockFilter(opt.id as any)}
-                                        className={`px-3 py-1 rounded-md text-xs font-bold transition-all ${catalogStockFilter === opt.id
-                                            ? 'bg-[#2C5E3B]/20 text-[#2C5E3B] dark:text-[#A9CBA2] shadow-sm'
-                                            : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 font-medium'
-                                            }`}
+                                        className={`px-3 py-1 rounded-full text-xs font-semibold transition-all cursor-pointer ${
+                                            catalogStockFilter === opt.id
+                                                ? 'bg-[var(--theme-primary)] text-[var(--theme-primary-text)] shadow-sm'
+                                                : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)]'
+                                        }`}
                                     >
                                         {opt.label}
                                     </button>
@@ -154,51 +155,50 @@ export const ProductCatalogModal: React.FC<ProductCatalogModalProps> = ({ isOpen
                     </div>
                 </div>
 
-                {/* Products List */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-[500px] overflow-y-auto pr-1 custom-scrollbar">
+                {/* Products Grid */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5 max-h-[480px] overflow-y-auto pr-1">
                     {filteredCatalogProducts.map(product => (
-                        <div key={product.id} className="glass-panel p-4 hover:border-[#2C5E3B]/50 dark:hover:border-[#A9CBA2]/50 transition-colors group">
+                        <div key={product.id} className="p-4 rounded-2xl bg-[var(--theme-bg-subtle)]/60 border border-[var(--theme-border)] hover:border-[var(--theme-accent)]/50 transition-all flex flex-col justify-between group">
                             <div className="flex items-start gap-3">
                                 {product.image && !product.image.includes('placeholder.com') ? (
                                     <img
                                         src={product.image}
                                         alt={product.name}
-                                        className="w-16 h-16 rounded-lg object-cover bg-black/20"
+                                        className="w-14 h-14 rounded-xl object-cover bg-black/20 shrink-0"
                                         onError={(e) => {
                                             e.currentTarget.style.display = 'none';
-                                            (e.currentTarget.parentElement as HTMLElement).innerHTML = '<div class="w-16 h-16 rounded-lg bg-black/30 flex items-center justify-center flex-shrink-0"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-package text-gray-600"><path d="m7.5 4.27 9 5.15"/><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg></div>';
                                         }}
                                     />
                                 ) : (
-                                    <div className="w-16 h-16 rounded-lg bg-black/30 flex items-center justify-center flex-shrink-0">
-                                        <Package size={24} className="text-gray-600" />
+                                    <div className="w-14 h-14 rounded-xl bg-[var(--theme-bg-panel)] border border-[var(--theme-border)] flex items-center justify-center shrink-0 text-[var(--theme-text-muted)]">
+                                        <Package size={22} strokeWidth={1.5} />
                                     </div>
                                 )}
                                 <div className="flex-1 min-w-0">
-                                    <div className="flex justify-between items-start">
-                                        <h4 className="text-gray-900 dark:text-white font-black text-sm truncate pr-2 group-hover:text-[#2C5E3B] dark:group-hover:text-[#A9CBA2] transition-colors">{product.name}</h4>
-                                        {/* Stock Badge */}
+                                    <div className="flex justify-between items-start gap-1">
+                                        <h4 className="text-[var(--theme-text-primary)] font-bold text-xs truncate pr-1 group-hover:text-[var(--theme-accent)] transition-colors">{product.name}</h4>
                                         {(product.stock || 0) <= (product.minStock || 10) && (
-                                            <span className={`text-[10px] px-1.5 py-0.5 rounded font-bold uppercase ${(product.stock || 0) === 0 ? 'bg-red-500/20 text-red-400' : 'bg-yellow-500/20 text-yellow-400'
-                                                }`}>
+                                            <span className={`text-[10px] px-2 py-0.5 rounded-full font-semibold uppercase tracking-wider shrink-0 ${
+                                                (product.stock || 0) === 0 ? 'bg-rose-500/10 text-rose-500 border border-rose-500/20' : 'bg-amber-500/10 text-amber-500 border border-amber-500/20'
+                                            }`}>
                                                 {(product.stock || 0) === 0 ? 'Out' : 'Low'}
                                             </span>
                                         )}
                                     </div>
-                                    <p className="text-xs text-gray-400 mt-1">SKU: {product.sku || product.id}</p>
-                                    <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-2">
-                                        <div className="flex items-center gap-1.5">
-                                            <span className="text-[10px] text-gray-500 uppercase font-bold">Retail</span>
-                                            <span className="text-gray-900 dark:text-white font-bold text-sm">{currencySymbol} {product.price.toLocaleString()}</span>
+                                    <p className="text-[11px] font-mono text-[var(--theme-text-muted)] mt-0.5">SKU: {product.sku || product.id}</p>
+                                    <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-2 text-xs">
+                                        <div className="flex items-center gap-1 font-mono">
+                                            <span className="text-[10px] text-[var(--theme-text-muted)] uppercase font-semibold">Retail</span>
+                                            <span className="text-[var(--theme-text-primary)] font-bold tabular-nums">{currencySymbol} {product.price.toLocaleString()}</span>
                                         </div>
-                                        <div className="flex items-center gap-1.5">
-                                            <span className="text-[10px] text-gray-500 uppercase font-bold border-l border-stone-200 dark:border-white/10 pl-4">Base Cost</span>
-                                            <span className="text-[#2C5E3B] dark:text-[#A9CBA2] font-bold text-sm">
+                                        <div className="flex items-center gap-1 font-mono border-l border-[var(--theme-border)] pl-3">
+                                            <span className="text-[10px] text-[var(--theme-text-muted)] uppercase font-semibold">Cost</span>
+                                            <span className="text-emerald-600 dark:text-emerald-400 font-bold tabular-nums">
                                                 {currencySymbol} {(product.costPrice || (product.price * 0.7)).toLocaleString()}
                                             </span>
                                         </div>
-                                        <div className="text-[10px] text-gray-500 border-l border-stone-200 dark:border-white/10 pl-4">
-                                            Stock: {product.stock || 0}
+                                        <div className="text-[10px] text-[var(--theme-text-muted)] font-mono border-l border-[var(--theme-border)] pl-3">
+                                            Stock: <span className="text-[var(--theme-text-primary)] font-bold tabular-nums">{product.stock || 0}</span>
                                         </div>
                                     </div>
                                 </div>
@@ -206,31 +206,30 @@ export const ProductCatalogModal: React.FC<ProductCatalogModalProps> = ({ isOpen
                             <button
                                 onClick={() => {
                                     onAddToPO(product);
-                                    showToast(`Add "${product.name}" to your purchase order`, 'info');
+                                    showToast(`Added "${product.name}" to PO`, 'info');
                                 }}
-                                className="w-full mt-3 py-2 bg-[#2C5E3B]/10 hover:bg-[#2C5E3B] dark:bg-[#A9CBA2]/10 dark:hover:bg-[#A9CBA2] text-[#2C5E3B] hover:text-white dark:text-[#A9CBA2] dark:hover:text-black text-xs font-bold rounded-lg transition-colors flex items-center justify-center gap-2"
+                                className="w-full mt-3 h-9 bg-[var(--theme-primary)] text-[var(--theme-primary-text)] font-semibold text-xs rounded-full transition-all active:scale-[0.98] shadow-sm flex items-center justify-center gap-1.5 cursor-pointer"
                             >
-                                <Plus size={14} />
-                                Add to PO
+                                <Plus size={14} strokeWidth={2} /> Add to Order
                             </button>
                         </div>
                     ))}
                 </div>
 
                 {filteredCatalogProducts.length === 0 && (
-                    <div className="text-center py-12 text-gray-500 glass-panel border-dashed">
-                        <Package size={48} className="mx-auto mb-4 opacity-50 text-gray-600" />
-                        <p className="text-sm font-bold text-gray-400">No products found</p>
-                        <p className="text-xs mt-1">Try adjusting your filters or search terms</p>
+                    <div className="text-center py-16 text-[var(--theme-text-muted)] rounded-2xl bg-[var(--theme-bg-subtle)] border border-dashed border-[var(--theme-border)]">
+                        <Package size={36} className="mx-auto mb-3 opacity-30 text-[var(--theme-text-secondary)]" strokeWidth={1.5} />
+                        <p className="text-xs font-semibold text-[var(--theme-text-primary)]">No products match your filter</p>
+                        <p className="text-[11px] text-[var(--theme-text-muted)] mt-1">Try adjusting your search query or reset filter selections</p>
                         <button
                             onClick={() => {
                                 setCatalogSearch('');
                                 setCatalogCategory('All');
                                 setCatalogStockFilter('all');
                             }}
-                            className="mt-4 px-4 py-2 glass-panel-pushed hover:bg-stone-100 dark:hover:bg-white/10 rounded-lg text-xs text-gray-900 dark:text-white transition-colors"
+                            className="mt-3.5 h-8 px-4 rounded-full bg-[var(--theme-bg-panel)] border border-[var(--theme-border)] text-xs font-semibold text-[var(--theme-text-primary)] hover:bg-[var(--theme-border)]/40 transition-colors cursor-pointer"
                         >
-                            Clear Filters
+                            Reset Filters
                         </button>
                     </div>
                 )}

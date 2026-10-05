@@ -56,6 +56,7 @@ export default function UnknownBarcodeModal({
         'store_manager',
         'warehouse_manager',
         'operations_manager',
+        'regional_manager',
         'ceo'
     ].includes(user?.role?.toLowerCase() || '');
 
@@ -237,7 +238,7 @@ export default function UnknownBarcodeModal({
 
         const lockThreshold = settings?.highValueBarcodeLockThreshold ?? 3000;
         const isHighValue = (selectedProduct.price || 0) >= lockThreshold ||
-            ['electronics', 'jewelry', 'spirits'].includes((selectedProduct.category || '').toLowerCase());
+            ['electronics', 'jewelry', 'cosmetics'].includes((selectedProduct.category || '').toLowerCase());
 
         // If high value and not already an admin/manager, require Manager PIN
         if (isHighValue && !isManagerOrAdmin) {

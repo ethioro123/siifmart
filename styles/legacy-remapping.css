@@ -1,0 +1,306 @@
+/* ==========================================================================
+   SIIFMART DESIGN SYSTEM: INK WASH ADAPTER LAYER
+   Harmonizes all legacy hex classes into the 4-color Ink Wash palette:
+     - #252525 : Obsidian Ink / Deep Charcoal
+     - #CFCFCF : Frosted Silver Silk / Sterling Platinum
+     - #7D7D7D : Mid Muted Slate / Monochromatic Stone Gray
+     - #545454 : Graphite / Deep Slate Anthracite
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   1. Typography Neutralization (Warm Alabaster & Cashmere)
+   -------------------------------------------------------------------------- */
+.text-\[\#1E3F27\],
+.text-\[\#1E3B24\],
+.text-\[\#FAF8F5\],
+.dark\:text-\[\#FAF8F5\]:where(.dark, .dark *),
+.text-\[\#E2C899\] {
+  color: var(--theme-text-primary) !important;
+}
+
+.text-\[\#EAE5D9\],
+.dark\:text-\[\#EAE5D9\]:where(.dark, .dark *),
+.text-\[\#2C4D35\],
+.text-\[\#4D6E56\],
+.text-\[\#DFD9CA\] {
+  color: var(--theme-text-secondary) !important;
+}
+
+.text-\[\#7A9E83\],
+.text-\[\#E2DCCE\],
+.text-\[\#8C6239\] {
+  color: var(--theme-text-muted) !important;
+}
+
+/* Base text-[#2C5E3B] and text-[#A9CBA2] mapped to elegant cashmere & dark espresso */
+.text-\[\#2C5E3B\] {
+  color: var(--theme-text-primary) !important;
+}
+
+.dark\:text-\[\#A9CBA2\]:where(.dark, .dark *),
+.text-\[\#A9CBA2\] {
+  color: var(--theme-text-secondary) !important;
+}
+
+/* Hover and active states glow with Champagne / Walnut luxury */
+.hover\:text-\[\#2C5E3B\]:hover,
+.hover\:text-\[\#A9CBA2\]:hover,
+.dark\:hover\:text-\[\#A9CBA2\]:where(.dark, .dark *):hover,
+.group:hover .group-hover\:text-\[\#2C5E3B\],
+.group:hover .group-hover\:text-\[\#A9CBA2\] {
+  color: var(--theme-primary) !important;
+}
+
+/* Active navigation items and badge text */
+[aria-selected="true"] .text-\[\#2C5E3B\],
+[aria-selected="true"] .text-\[\#A9CBA2\],
+[aria-selected="true"].text-\[\#2C5E3B\],
+[aria-selected="true"].text-\[\#A9CBA2\],
+.active .text-\[\#2C5E3B\],
+.active .text-\[\#A9CBA2\],
+.bg-\[\#2C5E3B\]\/10 .text-\[\#2C5E3B\],
+.bg-\[\#2C5E3B\]\/10 .text-\[\#A9CBA2\],
+.bg-\[\#A9CBA2\]\/10 .text-\[\#2C5E3B\],
+.bg-\[\#A9CBA2\]\/10 .text-\[\#A9CBA2\] {
+  color: var(--theme-pill-text) !important;
+}
+
+/* --------------------------------------------------------------------------
+   2. Hairline Cashmere Borders (#CCBEB1 & #E5DDD5)
+   -------------------------------------------------------------------------- */
+.border-\[\#E2DCCE\],
+.border-t-\[\#E2DCCE\],
+.border-b-\[\#E2DCCE\],
+.border-l-\[\#E2DCCE\],
+.border-r-\[\#E2DCCE\],
+.border-\[\#EAE5D9\],
+.border-\[\#CFC6B4\],
+.border-\[\#DFD9CA\],
+.border-\[\#18201B\],
+.border-\[\#1E2822\],
+.border-\[\#232E27\],
+.border-\[\#1C2620\] {
+  border-color: var(--theme-border) !important;
+}
+
+.border-\[\#E2DCCE\]\/20,
+.border-\[\#E2DCCE\]\/30,
+.border-\[\#E2DCCE\]\/40,
+.border-\[\#E2DCCE\]\/50,
+.border-\[\#E2DCCE\]\/60,
+.border-\[\#E2DCCE\]\/70,
+.border-\[\#E2DCCE\]\/80 {
+  border-color: var(--theme-border) !important;
+}
+
+/* Legacy card and modal borders neutralized to refined cashmere hairline */
+.border-\[\#2C5E3B\],
+.border-t-\[\#2C5E3B\],
+.border-b-\[\#2C5E3B\],
+.border-l-\[\#2C5E3B\],
+.border-\[\#A9CBA2\],
+.border-t-\[\#A9CBA2\],
+.border-b-\[\#A9CBA2\],
+.border-l-\[\#A9CBA2\],
+.border-\[\#2C4D35\],
+.dark\:border-\[\#2C5E3B\]:where(.dark, .dark *),
+.dark\:border-\[\#A9CBA2\]:where(.dark, .dark *) {
+  border-color: var(--theme-border) !important;
+}
+
+.border-\[\#2C5E3B\]\/10,
+.border-\[\#2C5E3B\]\/15,
+.border-\[\#2C5E3B\]\/20,
+.border-\[\#2C5E3B\]\/25,
+.border-\[\#2C5E3B\]\/30,
+.border-\[\#2C5E3B\]\/40,
+.border-\[\#2C5E3B\]\/50,
+.border-\[\#2C5E3B\]\/60,
+.border-\[\#A9CBA2\]\/10,
+.border-\[\#A9CBA2\]\/20,
+.border-\[\#A9CBA2\]\/25,
+.border-\[\#A9CBA2\]\/30,
+.border-\[\#A9CBA2\]\/40,
+.border-\[\#A9CBA2\]\/50,
+.border-\[\#A9CBA2\]\/\[0\.04\],
+.border-\[\#A9CBA2\]\/\[0\.06\],
+.border-\[\#A9CBA2\]\/\[0\.08\] {
+  border-color: var(--theme-border) !important;
+}
+
+.dark\:border-emerald-950\/20:where(.dark, .dark *),
+.dark\:border-emerald-950\/30:where(.dark, .dark *),
+.dark\:border-emerald-950\/40:where(.dark, .dark *),
+.dark\:border-emerald-900\/15:where(.dark, .dark *),
+.dark\:border-emerald-900\/20:where(.dark, .dark *),
+.dark\:border-emerald-900\/30:where(.dark, .dark *),
+.dark\:border-emerald-900\/40:where(.dark, .dark *),
+.border-emerald-100,
+.border-emerald-200,
+.border-emerald-300 {
+  border-color: var(--theme-border) !important;
+}
+
+/* Active and focus borders */
+.border-r-2.border-\[\#2C5E3B\],
+.border-r-2.border-\[\#A9CBA2\],
+.active.border-\[\#2C5E3B\],
+.active.border-\[\#A9CBA2\],
+.hover\:border-\[\#2C5E3B\]:hover,
+.hover\:border-\[\#A9CBA2\]:hover {
+  border-color: var(--theme-primary) !important;
+}
+
+.ring-\[\#2C5E3B\],
+.ring-\[\#A9CBA2\] {
+  --tw-ring-color: var(--theme-primary) !important;
+}
+
+/* --------------------------------------------------------------------------
+   3. Neutral Elegance Surfaces (Deep Espresso & Alabaster)
+   -------------------------------------------------------------------------- */
+.bg-\[\#18201B\],
+.dark\:bg-\[\#18201B\]:where(.dark, .dark *),
+.bg-\[\#FAF8F5\],
+.bg-\[\#F7F3ED\],
+.bg-\[\#0B0F0D\],
+.bg-\[\#F4F0E6\] {
+  background-color: var(--theme-bg-app) !important;
+}
+
+.bg-\[\#18201B\]\/60,
+.bg-\[\#18201B\]\/70,
+.bg-\[\#18201B\]\/80,
+.bg-\[\#18201B\]\/90,
+.bg-\[\#18201B\]\/95,
+.bg-\[\#FAF8F5\]\/80 {
+  background-color: var(--theme-bg-app) !important;
+}
+
+.bg-\[\#1E2822\],
+.dark\:bg-\[\#1E2822\]:where(.dark, .dark *),
+.bg-\[\#151D18\] {
+  background-color: var(--theme-bg-panel) !important;
+}
+
+.bg-\[\#232E27\],
+.dark\:bg-\[\#232E27\]:where(.dark, .dark *),
+.bg-\[\#1C2620\],
+.dark\:bg-\[\#1C2620\]:where(.dark, .dark *) {
+  background-color: var(--theme-bg-card) !important;
+}
+
+.bg-\[\#EAE5D9\],
+.bg-emerald-50 {
+  background-color: var(--theme-bg-subtle) !important;
+}
+
+.dark\:bg-emerald-950\/20:where(.dark, .dark *),
+.dark\:bg-emerald-950\/30:where(.dark, .dark *),
+.dark\:bg-emerald-900\/20:where(.dark, .dark *),
+.dark\:bg-black\/25:where(.dark, .dark *),
+.dark\:bg-black\/20:where(.dark, .dark *) {
+  background-color: var(--theme-bg-card) !important;
+}
+
+/* --------------------------------------------------------------------------
+   4. Primary Luxury CTAs & Active Indicator Accents
+   -------------------------------------------------------------------------- */
+.bg-\[\#2C5E3B\],
+.bg-\[\#224429\],
+.bg-\[\#1E3F27\],
+.bg-\[\#00A859\],
+.bg-\[\#00FF9D\],
+.bg-\[\#3a7a4d\] {
+  background-color: var(--theme-primary) !important;
+  color: var(--theme-primary-text) !important;
+}
+
+.hover\:bg-\[\#2C5E3B\]:hover,
+.hover\:bg-\[\#1E3F27\]:hover,
+.bg-\[\#1B3520\] {
+  background-color: var(--theme-primary-hover) !important;
+}
+
+/* Active pills and badge backgrounds in warm Champagne / Mocha */
+.bg-\[\#2C5E3B\]\/10,
+.dark\:bg-\[\#2C5E3B\]\/10:where(.dark, .dark *),
+.bg-\[\#A9CBA2\]\/10,
+.dark\:bg-\[\#A9CBA2\]\/10:where(.dark, .dark *),
+.bg-\[\#33FFFF\]\/10 {
+  background-color: var(--theme-pill-bg) !important;
+  border-color: var(--theme-pill-border) !important;
+}
+
+.bg-\[\#2C5E3B\]\/20,
+.dark\:bg-\[\#2C5E3B\]\/20:where(.dark, .dark *),
+.bg-\[\#A9CBA2\]\/20,
+.dark\:bg-\[\#A9CBA2\]\/20:where(.dark, .dark *) {
+  background-color: color-mix(in srgb, var(--theme-primary) 22%, transparent) !important;
+}
+
+.fill-\[\#2C5E3B\] { fill: var(--theme-primary) !important; }
+.stroke-\[\#2C5E3B\] { stroke: var(--theme-primary) !important; }
+
+/* --------------------------------------------------------------------------
+   5. Residual Emerald Neutralization to Neutral Elegance Swatches
+   -------------------------------------------------------------------------- */
+.text-emerald-400,
+.dark\:text-emerald-400:where(.dark, .dark *),
+.dark\:text-emerald-300:where(.dark, .dark *),
+.dark\:text-emerald-200:where(.dark, .dark *) {
+  color: var(--theme-primary) !important;
+}
+
+.text-emerald-600,
+.text-emerald-700,
+.text-emerald-800,
+.text-emerald-900 {
+  color: var(--theme-brand-walnut) !important;
+}
+
+.text-emerald-500 {
+  color: var(--theme-accent) !important;
+}
+
+.bg-emerald-500\/10,
+.dark\:bg-emerald-500\/10:where(.dark, .dark *),
+.bg-emerald-500\/20,
+.dark\:bg-emerald-500\/20:where(.dark, .dark *),
+.bg-emerald-500\/5,
+.dark\:bg-emerald-500\/5:where(.dark, .dark *) {
+  background-color: var(--theme-pill-bg) !important;
+}
+
+.border-emerald-500\/20,
+.border-emerald-500\/25,
+.border-emerald-500\/30,
+.dark\:border-emerald-500\/20:where(.dark, .dark *),
+.dark\:border-emerald-500\/25:where(.dark, .dark *) {
+  border-color: var(--theme-border-mocha) !important;
+}
+
+/* --------------------------------------------------------------------------
+   6. Universal Gradient Neutralization (RULE 20: No Gradients / Apple Simplicity)
+   -------------------------------------------------------------------------- */
+.bg-gradient-to-r,
+.bg-gradient-to-l,
+.bg-gradient-to-t,
+.bg-gradient-to-b,
+.bg-gradient-to-tr,
+.bg-gradient-to-tl,
+.bg-gradient-to-br,
+.bg-gradient-to-bl {
+  background-image: none !important;
+}
+
+/* Strip text gradient clipping to ensure solid Apple typography */
+.text-transparent.bg-clip-text {
+  color: var(--theme-text-primary) !important;
+  -webkit-text-fill-color: var(--theme-text-primary) !important;
+  background-clip: unset !important;
+  -webkit-background-clip: unset !important;
+  background-image: none !important;
+}
+
+

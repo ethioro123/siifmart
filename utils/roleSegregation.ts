@@ -59,6 +59,24 @@ export const ROLE_SEGREGATION_RULES: RoleSegregationRule[] = [
         description: 'Accountant - Financial tracking'
     },
     {
+        role: 'treasury_officer',
+        siteType: 'Administration',
+        department: 'Management',
+        description: 'Treasury Officer - Daily cash and mobile money tender reconciliation'
+    },
+    {
+        role: 'tax_compliance_officer',
+        siteType: 'Administration',
+        department: 'Management',
+        description: 'Tax Compliance Officer - Sovereign VAT and withholding tax filings'
+    },
+    {
+        role: 'credit_control_officer',
+        siteType: 'Administration',
+        department: 'Management',
+        description: 'Credit Control Officer - B2B credit terms and institutional accounts'
+    },
+    {
         role: 'procurement_manager',
         siteType: 'Administration',
         department: 'Management',
@@ -99,6 +117,18 @@ export const ROLE_SEGREGATION_RULES: RoleSegregationRule[] = [
         siteType: 'Administration',
         department: 'Human Resources',
         description: 'Training Coordinator - Staff onboarding'
+    },
+    {
+        role: 'payroll_specialist',
+        siteType: 'Administration',
+        department: 'Human Resources',
+        description: 'Payroll Specialist - Compensation & Payroll Runs'
+    },
+    {
+        role: 'talent_recruiter',
+        siteType: 'Administration',
+        department: 'Human Resources',
+        description: 'Talent Recruiter - Candidate Sourcing & Hiring'
     },
 
     // ========================================
@@ -279,6 +309,42 @@ export const ROLE_SEGREGATION_RULES: RoleSegregationRule[] = [
         siteType: 'Administration',
         department: 'Logistics & Warehouse',
         description: 'Demand Planner - Stock allocation forecasting'
+    },
+    {
+        role: 'vendor_relations_manager',
+        siteType: 'Administration',
+        department: 'Procurement',
+        description: 'Vendor Relations Manager - Supplier onboarding, scorecards & cooperatives'
+    },
+    {
+        role: 'customs_import_specialist',
+        siteType: 'Administration',
+        department: 'Procurement',
+        description: 'Customs & Import Specialist - Freight, LC & port clearances'
+    },
+    {
+        role: 'inbound_qc_inspector',
+        siteType: 'Warehouse',
+        department: 'Logistics & Warehouse',
+        description: 'Inbound QC Inspector - Food safety, cold-chain & dock QC compliance'
+    },
+    {
+        role: 'replenishment_planner',
+        siteType: 'Any',
+        department: 'Logistics & Warehouse',
+        description: 'Replenishment Planner - Store shelf velocity and automated RDC transfers'
+    },
+    {
+        role: 'fleet_maintenance_supervisor',
+        siteType: 'Warehouse',
+        department: 'Transport',
+        description: 'Fleet Maintenance Supervisor - Vehicle inspections, fuel cards, driver logs, transport maintenance'
+    },
+    {
+        role: 'store_operations_auditor',
+        siteType: 'Any',
+        department: 'Management',
+        description: 'Store Operations Auditor - Unannounced store walkthroughs, planogram/merchandising checks, and cash handling spot audits'
     }
 ];
 

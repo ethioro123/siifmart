@@ -190,6 +190,7 @@ export const WasteLog: React.FC<WasteLogProps> = ({
                                             productName: product?.name || 'Unknown',
                                             productSku: product?.sku || 'Unknown',
                                             siteId: product?.siteId || user?.siteId || '',
+                                            countryCode: (product as any)?.countryCode || (product as any)?.country_code || (user as any)?.country || 'ET',
                                             changeType: 'stock_adjustment',
                                             requestedBy: user?.name || 'WMS',
                                             requestedAt: new Date().toISOString(),

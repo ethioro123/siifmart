@@ -7,6 +7,7 @@ import { supabase } from '../lib/supabase';
 import type { User, Session } from '@supabase/supabase-js';
 import { employeesService } from './supabase.service';
 import { systemLogsService } from './local-logs.service';
+import { buildCodeFilterFromLoginEmail } from '../utils/employeeIdGenerator';
 import {
     hasPermission,
     hasAllPermissions,
@@ -18,26 +19,9 @@ import {
     type Permission
 } from './permissions.service';
 
-// 4-Level Role Hierarchy for Multi-Store/Warehouse Operations
-export type UserRole =
-    // Level 1 - Executive
-    | 'super_admin' | 'CEO' | 'ceo'
-    // Level 2 - Regional/Directors
-    | 'regional_manager' | 'operations_manager' | 'finance_manager'
-    | 'hr_manager' | 'procurement_manager' | 'supply_chain_manager'
-    // Level 3 - Site Managers
-    | 'store_manager' | 'warehouse_manager' | 'dispatch_manager'
-    | 'assistant_manager' | 'shift_lead'
-    // Level 4 - Staff
-    | 'cashier' | 'sales_associate' | 'stock_clerk' | 'picker' | 'packer'
-    | 'receiver' | 'driver' | 'forklift_operator' | 'inventory_specialist'
-    | 'customer_service' | 'auditor' | 'it_support'
-    // Legacy (backwards compatibility)
-    | 'admin' | 'hr' | 'pos' | 'dispatcher'
-    | 'cs_manager' | 'returns_clerk' | 'merchandiser' | 'loss_prevention'
-    | 'accountant' | 'data_analyst' | 'training_coordinator' | 'store_supervisor'
-    // New roles
-    | 'buyer' | 'demand_planner' | 'inventory_manager' | 'logistics_manager' | 'security_manager';
+// 4-Level Role Hierarchy for Multi-Store/Warehouse Operations (Source of truth: types/auth.ts)
+import type { UserRole } from '../types/auth';
+export type { UserRole };
 
 export interface UserProfile {
     id: string;
@@ -106,18 +90,40 @@ export const authService = {
             let { data: employee, error } = await supabase
                 .from('employees')
                 .select('email')
-                .ilike('name', identifier)
-                .single();
+                .or(`name.ilike.${identifier},code.ilike.${identifier}`)
+                .limit(1)
+                .maybeSingle();
 
             if (error || !employee) {
-                console.error('AuthService: Username lookup failed', error);
-                throw new Error('Username not found');
+                console.error('AuthService: Username or Worker ID lookup failed', error);
+                throw new Error('Username or Worker ID not found');
             }
 
             email = employee.email;
         }
 
-        const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+        const { data: firstData, error: firstError } = await supabase.auth.signInWithPassword({ email, password });
+        let data = firstData;
+        let error = firstError;
+
+        // Code-style emails (KE-SIIF0043@siifmart.com or legacy siif-0043@siifmart.com) resolve through the
+        // employee's worker code to their real auth email, so old and new formats both keep working.
+        if (error && isEmail) {
+            const codeFilter = buildCodeFilterFromLoginEmail(identifier);
+            if (codeFilter) {
+                const { data: emp } = await supabase
+                    .from('employees')
+                    .select('email')
+                    .or(codeFilter)
+                    .limit(1)
+                    .maybeSingle();
+                if (emp?.email && emp.email.toLowerCase() !== email.toLowerCase()) {
+                    const retry = await supabase.auth.signInWithPassword({ email: emp.email, password });
+                    data = retry.data;
+                    error = retry.error;
+                }
+            }
+        }
 
         if (error) {
             console.error('AuthService: Sign in error', error);

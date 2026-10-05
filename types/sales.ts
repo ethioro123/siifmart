@@ -36,6 +36,8 @@ export interface SaleRecord {
   amountTendered?: number;
   change?: number;
   cashierName?: string;
+  cashierId?: string;
+  cashier_id?: string;
   type?: 'In-Store' | 'Delivery' | 'Pickup';
   customerId?: string;
   customer_id?: string; // Supabase compatibility
@@ -97,6 +99,15 @@ export interface ShiftRecord {
   reconciledAt?: string;
   reconciliationStatus?: 'Pending' | 'Reconciled' | 'Discrepancy_Flagged';
   hqNotes?: string;
+  cashDrops?: number;
+  cash_drops?: number;
+  dropCount?: number;
+  countryCode?: string;
+  country_code?: string;
+  supervisorId?: string;
+  supervisorName?: string;
+  supervisorRole?: string;
+  supervisorSignedAt?: string;
   createdAt?: string;
   updatedAt?: string;
 }

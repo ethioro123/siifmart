@@ -47,6 +47,7 @@ interface UsePOSCheckoutActionsProps {
     setShowCart?: React.Dispatch<React.SetStateAction<boolean>>;
     addNotification: (type: 'alert' | 'success' | 'info', message: string, userId?: string, isGlobal?: boolean) => void;
     sales: SaleRecord[];
+    activeShift?: any;
     
     // Discount code props
     cartDiscount: number;
@@ -104,6 +105,7 @@ export const usePOSCheckoutActions = ({
     setShowCart,
     addNotification,
     sales,
+    activeShift,
     cartDiscount,
     setCartDiscount,
     setAppliedDiscountCode,
@@ -167,6 +169,11 @@ export const usePOSCheckoutActions = ({
     }, [cart, total, addNotification, setAmountTendered, setSelectedPaymentMethod, setIsPaymentModalOpen]);
 
     const handleProcessPayment = React.useCallback(async (mobileDetails?: { channel?: string; ref?: string; phone?: string }) => {
+        if (!activeShift) {
+            addNotification('alert', 'Zero-Trust Security: Cannot process sales without an active, verified shift. Please start your shift first.');
+            setIsPaymentModalOpen(false);
+            return;
+        }
         if (!isPaymentValid) return;
         setIsProcessing(true);
         try {
@@ -220,7 +227,7 @@ export const usePOSCheckoutActions = ({
                 setShowPointsPopup(true);
             }
 
-            // ⚡️ Electron Desktop: Auto-kick cash drawer on cash payments
+            // Electron Desktop: Auto-kick cash drawer on cash payments
             if (selectedPaymentMethod === 'Cash' && typeof window !== 'undefined' && window.electronAPI?.isElectron) {
                 window.electronAPI.openCashDrawer().catch(() => {});
             }
@@ -238,7 +245,7 @@ export const usePOSCheckoutActions = ({
     }, [
         isPaymentValid, selectedPaymentMethod, amountTendered, total, changeDue, activeSite, cart, user,
         taxBreakdown, processSale, clearCart, setShowCart, setSelectedCustomer, setLastSale, setEarnedPointsData,
-        setShowPointsPopup, setIsPaymentModalOpen, setIsReceiptModalOpen, addNotification, setIsProcessing
+        setShowPointsPopup, setIsPaymentModalOpen, setIsReceiptModalOpen, addNotification, setIsProcessing, activeShift
     ]);
 
     const handlePrintReceipt = React.useCallback(() => {
@@ -367,19 +374,31 @@ export const usePOSCheckoutActions = ({
         if (lastSale) {
             setIsReceiptModalOpen(true);
         } else if (sales.length > 0) {
-            const siteSales = activeSite?.id ? sales.filter(s => s.siteId === activeSite.id || (s as any).site_id === activeSite.id) : sales;
-            const targetSales = siteSales.length > 0 ? siteSales : sales;
-            const sorted = [...targetSales].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+            // Zero-Trust Rule: Cashiers can ONLY reprint their own active shift transactions
+            const currentCashierId = user?.id;
+            const currentCashierName = user?.name;
+            const shiftStartTime = activeShift?.startTime ? new Date(activeShift.startTime).getTime() : 0;
+
+            const myShiftSales = sales.filter(s => {
+                const matchesSite = !activeSite?.id || s.siteId === activeSite.id || (s as any).site_id === activeSite.id;
+                const sAny = s as any;
+                const matchesCashier = (currentCashierId && (sAny.cashierId === currentCashierId || sAny.cashier_id === currentCashierId)) ||
+                                       (currentCashierName && (sAny.cashierName === currentCashierName || sAny.cashier === currentCashierName));
+                const matchesShift = shiftStartTime > 0 ? new Date(s.date).getTime() >= shiftStartTime : true;
+                return matchesSite && matchesCashier && matchesShift;
+            });
+
+            const sorted = [...myShiftSales].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
             if (sorted[0]) {
                 setLastSale(sorted[0]);
                 setIsReceiptModalOpen(true);
             } else {
-                addNotification('info', "No recent transactions found in this session to reprint.");
+                addNotification('info', "No transactions found in your active shift to reprint.");
             }
         } else {
-            addNotification('info', "No recent transactions found in this session to reprint.");
+            addNotification('info', "No transactions found in your active shift to reprint.");
         }
-    }, [lastSale, sales, activeSite, setLastSale, setIsReceiptModalOpen, addNotification]);
+    }, [lastSale, sales, activeSite, user, activeShift, setLastSale, setIsReceiptModalOpen, addNotification]);
 
     return {
         handleInitiatePayment,

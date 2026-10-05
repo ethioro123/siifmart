@@ -34,11 +34,11 @@ export const InventoryHeader: React.FC<InventoryHeaderProps> = ({
         <div className="flex-none p-4 sm:p-6 md:p-8 space-y-6">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
-                    <h1 className="text-3xl font-black uppercase tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-[#2C5E3B] to-amber-600 dark:from-[#A9CBA2] dark:to-[#DFD5C6] drop-shadow-sm">
+                    <h1 className="text-3xl font-black uppercase tracking-tight text-[var(--theme-text-primary)]">
                         Inventory Command
                     </h1>
-                    <p className="text-gray-500 dark:text-gray-400 font-medium mt-1 flex items-center gap-2 text-sm">
-                        <Shield size={14} className={isReadOnly ? "text-amber-500" : "text-green-500"} />
+                    <p className="text-[var(--theme-text-secondary)] font-medium mt-1 flex items-center gap-2 text-sm">
+                        <Shield size={14} className={isReadOnly ? "text-amber-500" : "text-emerald-500"} />
                         {isReadOnly ? 'Read-Only Mode' : 'Live Management Mode'}
                     </p>
                 </div>
@@ -48,7 +48,7 @@ export const InventoryHeader: React.FC<InventoryHeaderProps> = ({
                         permission="ADD_PRODUCT"
                         onClick={handleOpenAddProduct}
                         disabled={isReadOnly}
-                        className="woody-btn-primary flex items-center gap-2"
+                        className="px-5 py-2.5 rounded-full bg-[var(--theme-primary)] text-[var(--theme-primary-text)] font-semibold text-sm hover:opacity-90 active:scale-[0.98] transition-all duration-150 flex items-center gap-2 shadow-sm cursor-pointer disabled:opacity-50"
                     >
                         <Plus size={18} />
                         Add Product
@@ -57,7 +57,7 @@ export const InventoryHeader: React.FC<InventoryHeaderProps> = ({
                         onClick={() => { setLabelsToPrint([]); setIsPrintHubOpen(true); }}
                         variant="secondary"
                         icon={<Printer size={18} />}
-                        className="woody-btn-secondary flex items-center gap-2"
+                        className="px-5 py-2.5 rounded-full bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)] border border-[var(--theme-border)] font-semibold text-sm hover:bg-[var(--theme-bg-card-hover)] active:scale-[0.98] transition-all duration-150 flex items-center gap-2 shadow-sm cursor-pointer"
                     >
                         Print Hub
                     </Button>
@@ -77,17 +77,17 @@ export const InventoryHeader: React.FC<InventoryHeaderProps> = ({
                     <button
                         key={tab.id}
                         onClick={() => setActiveTab(tab.id as InventoryTab)}
-                        className={`flex items-center gap-2 px-6 py-3 rounded-2xl text-xs font-black uppercase tracking-widest transition-all relative ${activeTab === tab.id
-                            ? 'bg-[#224429] dark:bg-[#EAE5D9] text-[#FAF8F5] dark:text-[#1E3B24] scale-105'
-                            : 'bg-white/90 dark:bg-black/25 text-stone-500 dark:text-[#7A9E83] hover:text-[#1E3F27] dark:hover:text-white border border-[#E2DCCE] dark:border-emerald-950/20'
+                        className={`flex items-center gap-2 px-5 py-2.5 rounded-full text-xs font-bold uppercase tracking-wider transition-all duration-150 relative cursor-pointer active:scale-[0.98] ${activeTab === tab.id
+                            ? 'bg-[var(--theme-primary)] text-[var(--theme-primary-text)] shadow-sm'
+                            : 'bg-[var(--theme-bg-card)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] border border-[var(--theme-border)] hover:bg-[var(--theme-bg-card-hover)]'
                             }`}
                     >
                         <tab.icon size={14} />
                         {tab.label}
                         {tab.count !== undefined && tab.count > 0 && (
-                            <span className={`absolute -top-1 -right-1 flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full text-[9px] font-bold border ${activeTab === tab.id
-                                ? (theme === 'dark' ? 'bg-black text-[#A9CBA2] border-black' : 'bg-white text-[#2C5E3B] border-white')
-                                : 'bg-red-500 text-white border-red-600'
+                            <span className={`absolute -top-1 -right-1 flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full text-[10px] font-bold ${activeTab === tab.id
+                                ? 'bg-[var(--theme-bg-app)] text-[var(--theme-text-primary)] border border-[var(--theme-border)]'
+                                : 'bg-rose-500 text-white'
                                 }`}>
                                 {tab.count}
                             </span>

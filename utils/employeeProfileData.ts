@@ -31,25 +31,89 @@ export interface PayslipRecord {
     status?: 'Disbursed' | 'Pending';
 }
 
-// Net Salary Calculation
-export function calculateNetSalary(gross: number) {
+// Net Salary Calculation with Sovereign Country Support
+export function calculateNetSalary(gross: number, countryCode?: string) {
     if (!gross || gross <= 0) {
         return {
             grossSalary: 0,
             taxDeduction: 0,
             pensionDeduction: 0,
+            incomeTax: 0,
+            pension: 0,
+            shif: 0,
             netSalary: 0
         };
     }
-    const taxDeduction = Math.round(gross * 0.15);
-    const pensionDeduction = Math.round(gross * 0.07);
-    const netSalary = Math.max(0, gross - taxDeduction - pensionDeduction);
-    return {
-        grossSalary: gross,
-        taxDeduction,
-        pensionDeduction,
-        netSalary
-    };
+    const country = countryCode?.toUpperCase();
+    let taxDeduction = 0;
+    let pensionDeduction = 0;
+    let shif = 0;
+
+    if (country === 'KE') {
+        // Kenya Statutory Deductions (KRA PAYE + NSSF + SHIF)
+        const nssf = 1080; // NSSF Tier I + II cap
+        const shif = Math.round(gross * 0.0275); // SHIF 2.75%
+        pensionDeduction = nssf + shif;
+        if (gross <= 24000) {
+            taxDeduction = Math.round(gross * 0.10);
+        } else if (gross <= 32333) {
+            taxDeduction = Math.round(2400 + (gross - 24000) * 0.25);
+        } else {
+            taxDeduction = Math.round(2400 + 2083 + (gross - 32333) * 0.30);
+        }
+        const netSalary = Math.max(0, gross - taxDeduction - pensionDeduction);
+        return {
+            grossSalary: gross,
+            taxDeduction,
+            pensionDeduction,
+            incomeTax: taxDeduction,
+            pension: nssf,
+            shif,
+            netSalary
+        };
+    } else if (country === 'ET') {
+        // Ethiopia Statutory Deductions (ERCA Progressive Income Tax + 7% Pension)
+        pensionDeduction = Math.round(gross * 0.07);
+        if (gross <= 600) {
+            taxDeduction = 0;
+        } else if (gross <= 1650) {
+            taxDeduction = Math.round((gross * 0.10) - 60);
+        } else if (gross <= 3200) {
+            taxDeduction = Math.round((gross * 0.15) - 142.5);
+        } else if (gross <= 5250) {
+            taxDeduction = Math.round((gross * 0.20) - 302.5);
+        } else if (gross <= 7800) {
+            taxDeduction = Math.round((gross * 0.25) - 565);
+        } else if (gross <= 10900) {
+            taxDeduction = Math.round((gross * 0.30) - 955);
+        } else {
+            taxDeduction = Math.round((gross * 0.35) - 1500);
+        }
+        const netSalary = Math.max(0, gross - taxDeduction - pensionDeduction);
+        return {
+            grossSalary: gross,
+            taxDeduction,
+            pensionDeduction,
+            incomeTax: taxDeduction,
+            pension: pensionDeduction,
+            shif: 0,
+            netSalary
+        };
+    } else {
+        // Standard Flat Calculation (15% Tax, 7% Pension)
+        taxDeduction = Math.round(gross * 0.15);
+        pensionDeduction = Math.round(gross * 0.07);
+        const netSalary = Math.max(0, gross - taxDeduction - pensionDeduction);
+        return {
+            grossSalary: gross,
+            taxDeduction,
+            pensionDeduction,
+            incomeTax: taxDeduction,
+            pension: pensionDeduction,
+            shif: 0,
+            netSalary
+        };
+    }
 }
 
 // Safe LocalStorage helpers
@@ -131,26 +195,11 @@ export function removeEmployeeDocument(employeeId: string, docId: string): void 
     deleteEmployeeDocument(employeeId, docId);
 }
 
-// Leave Requests Storage Bridge
+// Leave Requests Storage Bridge (Clean - No Fake Pre-Seeded Approved Data)
 export function getEmployeeLeaveRequests(employeeId: string): LeaveRequest[] {
     try {
         const stored = getStorageItem(`siifmart_emp_leave_${employeeId}`);
-        if (!stored) {
-            const defaults: LeaveRequest[] = [
-                {
-                    id: `leave_def_1_${employeeId}`,
-                    type: 'Annual Leave',
-                    startDate: '2026-01-12',
-                    endDate: '2026-01-16',
-                    days: 5,
-                    reason: 'Annual family holiday',
-                    status: 'Approved',
-                    createdAt: '2026-01-05'
-                }
-            ];
-            setStorageItem(`siifmart_emp_leave_${employeeId}`, JSON.stringify(defaults));
-            return defaults;
-        }
+        if (!stored) return [];
         return JSON.parse(stored);
     } catch {
         return [];

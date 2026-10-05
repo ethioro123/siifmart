@@ -7,7 +7,8 @@ import {
     wmsJobsService,
     purchaseOrdersService,
     salesService,
-    jobAssignmentsService
+    jobAssignmentsService,
+    systemLogsService
 } from '../../services/supabase.service';
 import { QueryClient } from '@tanstack/react-query';
 import { logger } from '../../utils/logger';
@@ -451,6 +452,29 @@ export const useJobCompletion = (deps: UseJobCompletionDeps) => {
             }
 
             stage('Final Logs');
+            try {
+                await systemLogsService.create({
+                    action: `${job.type}_JOB_COMPLETED`,
+                    module: 'Fulfillment',
+                    user_name: user?.name || employeeName || 'System',
+                    employee_id: user?.id,
+                    site_id: job.siteId || (job as any).site_id,
+                    country_code: job.countryCode || (job as any).country_code || 'ET',
+                    entity_type: 'wms_job',
+                    entity_id: jobId,
+                    details: {
+                        jobType: job.type,
+                        jobNumber: job.jobNumber,
+                        itemsCount: job.items,
+                        completedBy: completedByValue,
+                        hasDiscrepancy: job.hasDiscrepancy || false,
+                        orderRef: job.orderRef,
+                    },
+                });
+            } catch (auditErr) {
+                logger.warn('useJobCompletion', 'Non-blocking audit log failure:', { error: auditErr instanceof Error ? auditErr.message : String(auditErr) });
+            }
+
             queryClient.invalidateQueries({ queryKey: ['jobs'] });
             console.timeEnd(`completeJob-${jobId}`);
             return pointsResult;

@@ -73,13 +73,13 @@ export const ReceivingPendingList: React.FC = () => {
     return (
         <>
             {/* Order Ref Scanner */}
-            <div className="bg-[#FAF8F5] dark:bg-[#2C5E3B]/5 border border-[#E2DCCE] dark:border-[#2C5E3B]/30 rounded-2xl p-4 mb-2 shadow-sm">
+            <div className="bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-2xl p-4 mb-2">
                 <div className="flex items-center justify-between mb-3">
-                    <label className="text-xs font-bold text-[#2C5E3B] dark:text-[#A9CBA2] uppercase flex items-center gap-2">
+                    <label className="text-xs font-bold text-[var(--theme-text-primary)] uppercase flex items-center gap-2">
                         <Scan size={14} />
                         {t('posCommand.quickScanHandover')}
                     </label>
-                    <span className="text-[10px] text-stone-550 dark:text-gray-500 italic">{t('posCommand.scanPackingLabel')}</span>
+                    <span className="text-[10px] text-[var(--theme-text-secondary)] italic">{t('posCommand.scanPackingLabel')}</span>
                 </div>
                 <div className="relative">
                     <input
@@ -91,11 +91,11 @@ export const ReceivingPendingList: React.FC = () => {
                             if (e.key === 'Enter') handleScanOrderRef(orderRefScanInput);
                         }}
                         placeholder={t('posCommand.scanBarcodePlaceholder')}
-                        className="w-full bg-white dark:bg-black/45 border border-[#E2DCCE] dark:border-white/10 rounded-xl px-4 py-3 text-[#1E3F27] dark:text-white font-mono outline-none transition-all placeholder:text-[#4D6E56]/40 dark:placeholder:text-gray-600 focus:border-[#2C5E3B] dark:focus:border-[#A9CBA2] focus:ring-1 focus:ring-[#2C5E3B]"
+                        className="w-full bg-[var(--theme-input-bg)] border border-[var(--theme-border)] rounded-xl px-4 py-3 text-[var(--theme-text-primary)] font-mono outline-none transition-all placeholder:text-[var(--theme-text-muted)] focus:border-[var(--theme-border-focus)]"
                     />
                     <button
                         onClick={() => handleScanOrderRef(orderRefScanInput)}
-                        className="absolute right-2 top-2 px-4 py-1.5 bg-[#224429] dark:bg-[#2C5E3B] hover:bg-[#1B3520] text-white font-bold rounded-lg text-xs transition-colors shadow-sm cursor-pointer"
+                        className="absolute right-2 top-2 px-4 py-1.5 bg-[var(--theme-primary)] text-[var(--theme-primary-text)] hover:opacity-90 font-bold rounded-lg text-xs transition-all active:scale-95 cursor-pointer"
                     >
                         {t('common.verify') || 'Verify'}
                     </button>
@@ -104,13 +104,13 @@ export const ReceivingPendingList: React.FC = () => {
 
             {/* Inbound Shipment List */}
             <div className="space-y-3">
-                <h3 className="text-xs font-black text-[#4D6E56] dark:text-[#7A9E83] uppercase tracking-widest pl-1">{t('posCommand.inboundShipments')}</h3>
+                <h3 className="text-xs font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider pl-1">{t('posCommand.inboundShipments')}</h3>
                 
                 {pendingItems.length === 0 ? (
-                    <div className="text-center py-12 bg-white/40 dark:bg-black/10 border border-[#E2DCCE] dark:border-white/5 rounded-3xl">
-                        <Truck size={40} className="mx-auto mb-4 opacity-30 text-stone-400 dark:text-gray-600" />
-                        <p className="text-sm font-bold text-stone-500 dark:text-gray-400">{t('posCommand.noInboundTransfers')}</p>
-                        <p className="text-xs text-stone-400 dark:text-gray-500 mt-1">{t('posCommand.inboundAppear')}</p>
+                    <div className="text-center py-12 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-2xl">
+                        <Truck size={40} className="mx-auto mb-4 opacity-30 text-[var(--theme-text-secondary)]" />
+                        <p className="text-sm font-bold text-[var(--theme-text-primary)]">{t('posCommand.noInboundTransfers')}</p>
+                        <p className="text-xs text-[var(--theme-text-secondary)] mt-1">{t('posCommand.inboundAppear')}</p>
                     </div>
                 ) : (
                     <div className="space-y-3">
@@ -122,20 +122,20 @@ export const ReceivingPendingList: React.FC = () => {
                             return (
                                 <div
                                     key={item.id}
-                                    className={`bg-white dark:bg-white/5 border rounded-3xl overflow-hidden transition-all duration-300 ${
+                                    className={`bg-[var(--theme-bg-card)] border rounded-2xl overflow-hidden transition-all duration-150 ${
                                         isExpanded
-                                            ? 'border-[#2C5E3B]/40 dark:border-[#A9CBA2]/40 shadow-md ring-4 ring-[#2C5E3B]/5'
-                                            : 'border-[#E2DCCE] dark:border-white/10 hover:border-stone-300 dark:hover:border-white/20 shadow-sm'
+                                            ? 'border-[var(--theme-border-focus)] ring-2 ring-[var(--theme-primary)]/10'
+                                            : 'border-[var(--theme-border)] hover:border-[var(--theme-border-strong)]'
                                     }`}
                                 >
                                     {/* Main Header summary clickable row */}
                                     <div className="p-4 flex flex-wrap items-center justify-between gap-4">
                                         <div className="flex-1 min-w-0">
                                             <div className="flex items-center gap-2 mb-1">
-                                                <span className="font-mono font-black text-sm text-[#1E3F27] dark:text-white uppercase tracking-tight">
+                                                <span className="font-mono font-bold text-sm text-[var(--theme-text-primary)] uppercase tracking-tight">
                                                     {formatJobId({ ...item, type: 'TRANSFER' } as any)}
                                                 </span>
-                                                <span className="px-2 py-0.5 bg-amber-500/10 text-amber-500 border border-amber-500/20 rounded text-[9px] font-black uppercase tracking-wider">
+                                                <span className="px-2 py-0.5 bg-amber-500/10 text-amber-500 border border-amber-500/20 rounded text-[9px] font-bold uppercase tracking-wider">
                                                     {(() => {
                                                         const stat = ((item as any).transferStatus || item.status || '').toLowerCase();
                                                         return stat === 'in_transit' || stat === 'dispatched' ? t('posCommand.inTransit') : t('posCommand.pending');
@@ -154,26 +154,26 @@ export const ReceivingPendingList: React.FC = () => {
                                                     if (!isExt) {
                                                         if (!isDone) {
                                                             return (
-                                                                <span className="px-2 py-0.5 bg-amber-500/10 text-amber-500 border border-amber-500/20 rounded text-[9px] font-black uppercase tracking-wider">
+                                                                <span className="px-2 py-0.5 bg-amber-500/10 text-amber-500 border border-amber-500/20 rounded text-[9px] font-bold uppercase tracking-wider">
                                                                     Driver In-Transit (Awaiting Arrival)
                                                                 </span>
                                                             );
                                                         }
                                                         return (
-                                                            <span className="px-2 py-0.5 bg-[#2C5E3B]/10 text-[#2C5E3B] dark:text-[#A9CBA2] border border-[#2C5E3B]/20 rounded text-[9px] font-black uppercase tracking-wider">
+                                                            <span className="px-2 py-0.5 bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 rounded text-[9px] font-bold uppercase tracking-wider">
                                                                 Driver Delivered — Ready to Receive
                                                             </span>
                                                         );
                                                     } else {
                                                         if (!isDeparted) {
                                                             return (
-                                                                <span className="px-2 py-0.5 bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 rounded text-[9px] font-black uppercase tracking-wider">
+                                                                <span className="px-2 py-0.5 bg-amber-500/10 text-amber-500 border border-amber-500/20 rounded text-[9px] font-bold uppercase tracking-wider">
                                                                     EXT Carrier (Awaiting Departure)
                                                                 </span>
                                                             );
                                                         }
                                                         return (
-                                                            <span className="px-2 py-0.5 bg-[#2C5E3B]/10 text-[#2C5E3B] dark:text-[#A9CBA2] border border-[#2C5E3B]/20 rounded text-[9px] font-black uppercase tracking-wider">
+                                                            <span className="px-2 py-0.5 bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 rounded text-[9px] font-bold uppercase tracking-wider">
                                                                 EXT Carrier — Departure Confirmed
                                                             </span>
                                                         );
@@ -181,13 +181,13 @@ export const ReceivingPendingList: React.FC = () => {
                                                 })()}
                                             </div>
                                             
-                                            <div className="flex flex-wrap items-center gap-y-1 gap-x-4 text-xs font-bold text-stone-500 dark:text-gray-400">
+                                            <div className="flex flex-wrap items-center gap-y-1 gap-x-4 text-xs font-semibold text-[var(--theme-text-secondary)]">
                                                 <span className="flex items-center gap-1.5">
-                                                    <MapPin size={12} className="text-[#2C5E3B] dark:text-[#A9CBA2]" />
+                                                    <MapPin size={12} className="text-[var(--theme-text-secondary)]" />
                                                     {originName}
                                                 </span>
                                                 <span className="flex items-center gap-1.5">
-                                                    <Clock size={12} className="text-[#2C5E3B] dark:text-[#A9CBA2]" />
+                                                    <Clock size={12} className="text-[var(--theme-text-secondary)]" />
                                                     {formatDateTime(item.createdAt)}
                                                 </span>
                                             </div>
@@ -196,7 +196,7 @@ export const ReceivingPendingList: React.FC = () => {
                                         <div className="flex items-center gap-2">
                                             <button
                                                 onClick={() => setExpandedTransferId(isExpanded ? null : item.id)}
-                                                className="p-2 bg-stone-100 dark:bg-white/5 hover:bg-stone-200 dark:hover:bg-white/10 rounded-xl text-stone-600 dark:text-gray-400 transition-colors"
+                                                className="p-2 bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card-hover)] rounded-xl text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] border border-[var(--theme-border)] transition-colors cursor-pointer"
                                                 aria-label={isExpanded ? "Collapse details" : "Expand details"}
                                             >
                                                 {isExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
@@ -223,7 +223,7 @@ export const ReceivingPendingList: React.FC = () => {
                                                     return (
                                                         <button
                                                             onClick={() => handleSelectTransferForReceiving(item.id)}
-                                                            className="px-4 py-2.5 bg-amber-500/10 dark:bg-amber-500/20 border border-amber-500/30 text-amber-600 dark:text-amber-400 hover:bg-amber-500/20 font-bold rounded-xl text-xs flex items-center gap-1.5 transition-all shadow-sm cursor-pointer"
+                                                            className="px-4 py-2.5 bg-amber-500/10 dark:bg-amber-500/20 border border-amber-500/30 text-amber-500 hover:bg-amber-500/20 font-bold rounded-xl text-xs flex items-center gap-1.5 transition-all cursor-pointer"
                                                             title="Internal driver must mark delivery complete before POS can start receiving"
                                                         >
                                                             <Clock size={13} />
@@ -237,7 +237,7 @@ export const ReceivingPendingList: React.FC = () => {
                                                         return (
                                                             <button
                                                                 onClick={() => handleSelectTransferForReceiving(item.id)}
-                                                                className="px-4 py-2.5 bg-amber-600 hover:bg-amber-700 text-white font-bold rounded-xl text-xs flex items-center gap-1.5 transition-all active:scale-95 shadow-sm cursor-pointer"
+                                                                className="px-4 py-2.5 bg-amber-500 hover:bg-amber-600 text-black font-bold rounded-xl text-xs flex items-center gap-1.5 transition-all active:scale-95 cursor-pointer"
                                                                 title="Warehouse authority: Click to confirm external carrier departure & start receiving"
                                                             >
                                                                 <Truck size={14} />
@@ -248,7 +248,7 @@ export const ReceivingPendingList: React.FC = () => {
                                                     return (
                                                         <button
                                                             onClick={() => handleSelectTransferForReceiving(item.id)}
-                                                            className="px-4 py-2.5 bg-amber-500/10 dark:bg-amber-500/20 border border-amber-500/30 text-amber-600 dark:text-amber-400 hover:bg-amber-500/20 font-bold rounded-xl text-xs flex items-center gap-1.5 transition-all shadow-sm cursor-pointer"
+                                                            className="px-4 py-2.5 bg-amber-500/10 dark:bg-amber-500/20 border border-amber-500/30 text-amber-500 hover:bg-amber-500/20 font-bold rounded-xl text-xs flex items-center gap-1.5 transition-all cursor-pointer"
                                                             title="Warehouse authority must confirm departure before external receiving can begin"
                                                         >
                                                             <Clock size={13} />
@@ -260,7 +260,7 @@ export const ReceivingPendingList: React.FC = () => {
                                                 return (
                                                     <button
                                                         onClick={() => handleSelectTransferForReceiving(item.id)}
-                                                        className="px-4 py-2.5 bg-[#224429] dark:bg-[#2C5E3B] hover:bg-[#1B3520] dark:hover:bg-[#3a7a4d] text-white font-bold rounded-xl text-xs flex items-center gap-1.5 transition-all active:scale-95 shadow-sm"
+                                                        className="px-4 py-2.5 bg-[var(--theme-primary)] text-[var(--theme-primary-text)] hover:opacity-90 font-bold rounded-xl text-xs flex items-center gap-1.5 transition-all active:scale-95 cursor-pointer"
                                                     >
                                                         {t('posCommand.startReceiving')}
                                                         <ChevronRight size={14} />
@@ -272,16 +272,16 @@ export const ReceivingPendingList: React.FC = () => {
 
                                     {/* Expanded Line Items Detail */}
                                     {isExpanded && (
-                                        <div className="bg-[#FAF8F5] dark:bg-black/10 border-t border-[#E2DCCE]/60 dark:border-white/5 p-4 animate-in slide-in-from-top-2 duration-300">
-                                            <p className="text-[10px] font-black text-[#4D6E56] dark:text-[#7A9E83] uppercase tracking-widest mb-2 pl-0.5">{t('posCommand.manifestItems')} ({(item as any).items?.length || 0})</p>
-                                            <div className="max-h-[220px] overflow-y-auto custom-scrollbar border border-[#E2DCCE] dark:border-white/10 rounded-2xl bg-white dark:bg-transparent divide-y divide-[#E2DCCE]/60 dark:divide-white/5">
+                                        <div className="bg-[var(--theme-bg-subtle)] border-t border-[var(--theme-border)] p-4">
+                                            <p className="text-[10px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider mb-2 pl-0.5">{t('posCommand.manifestItems')} ({(item as any).items?.length || 0})</p>
+                                            <div className="max-h-[220px] overflow-y-auto custom-scrollbar border border-[var(--theme-border)] rounded-xl bg-[var(--theme-bg-card)] divide-y divide-[var(--theme-border)]">
                                                 {((item as any).items || []).map((lineItem: any, idx: number) => (
-                                                    <div key={idx} className="p-3 flex justify-between items-center text-xs font-bold hover:bg-stone-50 dark:hover:bg-white/5 transition-colors">
+                                                    <div key={idx} className="p-3 flex justify-between items-center text-xs font-medium hover:bg-[var(--theme-bg-card-hover)] transition-colors">
                                                         <div className="min-w-0 flex-1">
-                                                            <p className="text-stone-700 dark:text-gray-300 truncate">{lineItem.name}</p>
-                                                            <p className="text-[10px] text-stone-400 dark:text-gray-500 font-mono">SKU: {lineItem.sku}</p>
+                                                            <p className="text-[var(--theme-text-primary)] truncate font-semibold">{lineItem.name}</p>
+                                                            <p className="text-[10px] text-[var(--theme-text-secondary)] font-mono">SKU: {lineItem.sku}</p>
                                                         </div>
-                                                        <span className="text-stone-600 dark:text-gray-400 font-mono pl-3">
+                                                        <span className="text-[var(--theme-text-secondary)] font-mono pl-3">
                                                             {lineItem.expectedQty || lineItem.quantity || 0}
                                                             {lineItem.unit ? ` ${lineItem.unit}` : ''}
                                                         </span>

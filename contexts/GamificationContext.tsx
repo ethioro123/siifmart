@@ -14,7 +14,8 @@ import { calculateBonus, getLevelInfo } from '../components/settings/gamificatio
 import {
     calculateWarehousePoints,
     calculateStreakUpdate,
-    evaluateAchievements
+    evaluateAchievements,
+    calculateDiscrepancyPenalty
 } from '../utils/warehouseGamification';
 import { logger } from '../utils/logger';
 
@@ -147,6 +148,7 @@ export const GamificationProvider = ({ children }: { children: ReactNode }) => {
                     totalItemsPicked: newItemsPicked,
                     currentStreak: streakInfo.currentStreak,
                     longestStreak: streakInfo.longestStreak,
+                    averageAccuracy: accuracyVal,
                     level: newLevelInfo.currentLevel.level,
                     levelTitle: newLevelInfo.currentLevel.title,
                     currentBonusTier: bonusInfo.tier.tierName,
@@ -297,6 +299,34 @@ export const GamificationProvider = ({ children }: { children: ReactNode }) => {
         window.addEventListener('fulfillment:job-completed', handleJobCompletion as EventListener);
         return () => window.removeEventListener('fulfillment:job-completed', handleJobCompletion as EventListener);
     }, [activeSiteId, settings, sites, awardPoints]);
+
+    // Chain of Custody Discrepancy Listener: Penalizes accuracy and points for cargo discrepancies
+    useEffect(() => {
+        const handleDiscrepancy = (e: CustomEvent) => {
+            const { employeeId, employeeName, siteId, discrepancyCount, totalExpected, transferId } = e.detail || {};
+            if (!employeeId || !discrepancyCount) return;
+
+            const current = workerPoints.find(w => w.employeeId === employeeId);
+            const currentAccuracy = current?.averageAccuracy !== undefined ? current.averageAccuracy : 100;
+            const penalty = calculateDiscrepancyPenalty(currentAccuracy, discrepancyCount, totalExpected || 10);
+
+            awardPoints(
+                employeeId,
+                penalty.penaltyPoints,
+                'DISCREPANCY_PENALTY',
+                penalty.description,
+                transferId,
+                {
+                    employeeName: employeeName || current?.employeeName || 'Staff',
+                    siteId: siteId || activeSiteId,
+                    accuracy: penalty.newAccuracy
+                }
+            );
+        };
+
+        window.addEventListener('fulfillment:chain-of-custody-discrepancy', handleDiscrepancy as EventListener);
+        return () => window.removeEventListener('fulfillment:chain-of-custody-discrepancy', handleDiscrepancy as EventListener);
+    }, [workerPoints, activeSiteId, awardPoints]);
 
     const getLeaderboard = useCallback((siteId?: string, period: 'today' | 'week' | 'month' | 'all' = 'all') => {
         let filtered = [...workerPoints];

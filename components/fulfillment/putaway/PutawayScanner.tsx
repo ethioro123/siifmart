@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect, useMemo } from 'react';
-import { ArrowLeft, Box, CheckCircle, Map as MapIcon, X, Maximize2, RotateCcw, Info, AlertTriangle } from 'lucide-react';
+import { CheckCircle, X, RotateCcw } from 'lucide-react';
 import { WMSJob, Product } from '../../../types';
 import { playBeep } from '../../../utils/audioUtils';
 import { normalizeLocation } from '../../../utils/locationTracking';
@@ -10,6 +10,11 @@ import { useData } from '../../../contexts/DataContext';
 import { validateCrossBorderSku } from '../../../utils/skuValidation';
 import { logger } from '../../../utils/logger';
 import { PutawayScannerLocationCard } from './components/PutawayScannerLocationCard';
+import { PutawayScannerItemCard } from './components/PutawayScannerItemCard';
+import { PutawayScannerQuantityCard } from './components/PutawayScannerQuantityCard';
+import { PutawayScannerStatusOrb } from './components/PutawayScannerStatusOrb';
+import { PutawayScannerWarnings } from './components/PutawayScannerWarnings';
+import { resolveFulfillmentScanningPolicy } from '../../../utils/receivingPolicy';
 
 const normalizeSku = (s: string) => s.replace(/[-\/\s]/g, '').toUpperCase();
 
@@ -19,7 +24,7 @@ interface PutawayScannerProps {
     currentProduct?: Product;
     onClose: () => void;
     onScanLocation: (location: string) => void;
-    onScanItem: (barcode: string) => void;
+    onScanItem: (barcode: string, quantity?: number) => void | Promise<void>;
     isProcessing: boolean;
     recommendation?: { location: string; type: 'ASSIGNED' | 'SUGGESTED'; label: string } | null;
     occupants?: Product[];
@@ -44,8 +49,10 @@ export const PutawayScanner: React.FC<PutawayScannerProps> = ({
     expectedPrefix,
     t
 }) => {
-    const { effectiveCountry } = useData();
-    const [step, setStep] = useState<'LOCATION' | 'ITEM'>('LOCATION');
+    const { effectiveCountry, settings } = useData();
+    const scanningPolicy = resolveFulfillmentScanningPolicy(settings, effectiveCountry);
+    const [step, setStep] = useState<'LOCATION' | 'ITEM' | 'QUANTITY'>('LOCATION');
+    const [scannedSku, setScannedSku] = useState<string>('');
     const [inputVal, setInputVal] = useState('');
     const [showSuccess, setShowSuccess] = useState(false);
     const [showError, setShowError] = useState(false);
@@ -102,13 +109,10 @@ export const PutawayScanner: React.FC<PutawayScannerProps> = ({
 
     useEffect(() => {
         setInputVal('');
-    }, [currentItem?.id, step]);
-
-    useEffect(() => {
         setAwaitingOccupancyConfirmation(false);
         setAwaitingMismatchConfirmation(false);
         setLastCheckedLocation(null);
-    }, [step]);
+    }, [currentItem?.id, step]);
 
     useEffect(() => {
         const normalized = normalizeLocation(inputVal);
@@ -225,7 +229,7 @@ export const PutawayScanner: React.FC<PutawayScannerProps> = ({
                 setAwaitingMismatchConfirmation(false);
                 setLastCheckedLocation(null);
                 playBeep('success');
-            } else {
+            } else if (step === 'ITEM') {
                 const itemName = currentItem?.name || 'Item';
                 const decodedSku = extractSkuFromScan(val);
 
@@ -240,8 +244,18 @@ export const PutawayScanner: React.FC<PutawayScannerProps> = ({
                     return;
                 }
 
+                // Zero-Trust physical quantity verification config gate
+                if (scanningPolicy.requirePutawayQuantityEntry) {
+                    setScannedSku(decodedSku);
+                    setStep('QUANTITY');
+                    setInputVal(String(currentItem?.expectedQty || 1));
+                    playBeep('success');
+                    return;
+                }
+
+                // If quantity entry disabled, auto-credit full expected quantity
                 try {
-                    await onScanItem(decodedSku);
+                    await onScanItem(decodedSku, currentItem?.expectedQty);
                 } catch (err: any) {
                     playBeep('error');
                     setErrorMsg('Incorrect Item Scanned');
@@ -254,6 +268,45 @@ export const PutawayScanner: React.FC<PutawayScannerProps> = ({
                 setShowSuccess(true);
                 playBeep('success');
                 setInputVal('');
+                setTimeout(() => {
+                    setShowSuccess(false);
+                    setStep('LOCATION');
+                }, 2000);
+            } else if (step === 'QUANTITY') {
+                const itemName = currentItem?.name || 'Item';
+                const enteredQty = parseInt(rawVal, 10);
+                if (isNaN(enteredQty) || enteredQty <= 0) {
+                    playBeep('error');
+                    setErrorMsg('Enter valid count > 0');
+                    setShowError(true);
+                    setTimeout(() => setShowError(false), 2000);
+                    return;
+                }
+
+                const maxAllowed = currentItem?.expectedQty || 1;
+                if (enteredQty > maxAllowed) {
+                    playBeep('error');
+                    setErrorMsg(`Cannot exceed ${maxAllowed} units`);
+                    setShowError(true);
+                    setTimeout(() => setShowError(false), 2500);
+                    return;
+                }
+
+                try {
+                    await onScanItem(scannedSku || currentItem?.sku, enteredQty);
+                } catch (err: any) {
+                    playBeep('error');
+                    setErrorMsg('Error confirming putaway');
+                    setShowError(true);
+                    setTimeout(() => setShowError(false), 2500);
+                    return;
+                }
+
+                setSuccessMsg(`Shelved ${enteredQty}x ${itemName}`);
+                setShowSuccess(true);
+                playBeep('success');
+                setInputVal('');
+                setScannedSku('');
                 setTimeout(() => {
                     setShowSuccess(false);
                     setStep('LOCATION');
@@ -278,7 +331,7 @@ export const PutawayScanner: React.FC<PutawayScannerProps> = ({
                     </button>
                     <div className="min-w-0">
                         <h3 className="font-black text-stone-900 dark:text-white text-base sm:text-lg uppercase tracking-tight truncate">
-                            {step === 'LOCATION' ? t('warehouse.scanLocation') : t('warehouse.scanSkuToConfirm')}
+                            {step === 'LOCATION' ? t('warehouse.scanLocation') : step === 'ITEM' ? t('warehouse.scanSkuToConfirm') : 'Enter Shelved Quantity'}
                         </h3>
                         <p className="text-[10px] text-[#2C5E3B] dark:text-[#A9CBA2] font-black uppercase tracking-widest">
                             JOB: {formatJobId(job)}
@@ -287,7 +340,7 @@ export const PutawayScanner: React.FC<PutawayScannerProps> = ({
                 </div>
                 <div className="flex items-center gap-2">
                     <span className="text-[10px] font-black uppercase tracking-widest bg-stone-200/70 dark:bg-white/10 px-3 py-1.5 rounded-full text-stone-700 dark:text-stone-300 border border-stone-300/40 dark:border-white/10">
-                        STEP {step === 'LOCATION' ? '1' : '2'} OF 2
+                        STEP {step === 'LOCATION' ? '1' : step === 'ITEM' ? '2' : '3'} OF {scanningPolicy.requirePutawayQuantityEntry ? '3' : '2'}
                     </span>
                 </div>
             </div>
@@ -297,29 +350,15 @@ export const PutawayScanner: React.FC<PutawayScannerProps> = ({
                 <div className={`absolute inset-0 opacity-10 blur-[100px] transition-colors duration-1000 pointer-events-none ${step === 'LOCATION' ? 'bg-[#2C5E3B]' : 'bg-emerald-600'} `} />
 
                 <div className="relative min-h-full flex flex-col items-center justify-start p-4 sm:p-6 pb-32 max-w-lg mx-auto">
-                    {/* Status Orb - Responsive height */}
-                    <div className={`w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 rounded-3xl sm:rounded-[2rem] border-3 sm:border-4 flex items-center justify-center mb-3 sm:mb-4 shadow-lg transition-all duration-500 shrink-0 ${
-                        showSuccess 
-                            ? 'border-emerald-400 bg-emerald-400/20 shadow-emerald-500/30 scale-105' 
-                            : showError 
-                                ? 'border-rose-500 bg-rose-500/20 shadow-rose-500/30 scale-105 animate-shake' 
-                                : step === 'LOCATION' 
-                                    ? 'border-[#2C5E3B] bg-[#2C5E3B]/10 dark:border-[#A9CBA2] dark:bg-[#A9CBA2]/10 shadow-[#2C5E3B]/20' 
-                                    : 'border-emerald-500 bg-emerald-500/10 shadow-emerald-500/20'
-                    }`}>
-                        {showSuccess ? (
-                            <CheckCircle size={36} className="text-emerald-400 animate-bounce" />
-                        ) : showError ? (
-                            <AlertTriangle size={36} className="text-rose-500" />
-                        ) : step === 'LOCATION' ? (
-                            <MapIcon size={36} className="text-[#2C5E3B] dark:text-[#A9CBA2]" />
-                        ) : (
-                            <Box size={36} className="text-emerald-500" />
-                        )}
-                    </div>
+                    {/* Status Orb */}
+                    <PutawayScannerStatusOrb
+                        showSuccess={showSuccess}
+                        showError={showError}
+                        step={step}
+                    />
 
                     <h1 className={`text-xl sm:text-2xl md:text-3xl font-black text-stone-900 dark:text-white text-center uppercase tracking-tight mb-3 sm:mb-4 transition-all duration-300 ${isStrictlyValid ? 'text-[#2C5E3B] dark:text-[#A9CBA2]' : showError ? 'text-rose-500' : ''}`}>
-                        {showSuccess ? 'Success!' : showError ? 'Scan Error' : step === 'LOCATION' ? (isStrictlyValid ? t('warehouse.putaway.confirmLocation') : t('warehouse.scanLocation')) : t('warehouse.scanSkuToConfirm')}
+                        {showSuccess ? 'Success!' : showError ? 'Scan Error' : step === 'LOCATION' ? (isStrictlyValid ? t('warehouse.putaway.confirmLocation') : t('warehouse.scanLocation')) : step === 'ITEM' ? t('warehouse.scanSkuToConfirm') : 'Enter Shelved Quantity'}
                     </h1>
 
                     {showSuccess ? (
@@ -347,34 +386,17 @@ export const PutawayScanner: React.FC<PutawayScannerProps> = ({
                                 t={t}
                             />
                         </div>
+                    ) : step === 'ITEM' ? (
+                        <PutawayScannerItemCard
+                            currentItem={currentItem}
+                            currentOccupants={currentOccupants}
+                            t={t}
+                        />
                     ) : (
-                        <div className="text-center mb-6 w-full max-w-md">
-                            <p className="text-stone-400 dark:text-stone-500 text-[10px] font-black uppercase tracking-[0.2em] mb-3">{t('warehouse.putaway.itemVerification')}</p>
-                            <div className="bg-emerald-50/80 dark:bg-emerald-950/20 border-2 border-emerald-400/40 rounded-3xl p-6 shadow-lg">
-                                <p className="text-2xl text-stone-900 dark:text-white font-black uppercase tracking-tight leading-snug mb-3">
-                                    {currentItem?.name || currentItem?.productName}
-                                </p>
-                                <div className="inline-block px-4 py-2 bg-emerald-600 text-white font-black font-mono text-base rounded-xl shadow-md shadow-emerald-600/20 tracking-widest mb-3">
-                                    {currentItem?.sku}
-                                </div>
-                                
-                                {currentOccupants.length > 0 && (
-                                    <div className="mt-4 space-y-4 pt-6 border-t-2 border-emerald-400/20 text-left">
-                                        <span className="text-[10px] font-black uppercase text-emerald-600 dark:text-emerald-400/60 tracking-widest block mb-1">{t('warehouse.putaway.locationOccupants')} ({currentOccupants.length})</span>
-                                        {currentOccupants.slice(0, 3).map((occ: Product) => (
-                                            <div key={occ.id} className="flex items-center gap-3">
-                                                <div className="w-7 h-7 rounded-lg bg-emerald-100 dark:bg-white/5 border border-emerald-200 dark:border-white/10 flex items-center justify-center shrink-0">
-                                                    <Box size={14} className="text-emerald-600 dark:text-emerald-400" />
-                                                </div>
-                                                <div className="min-w-0">
-                                                    <p className="text-[11px] font-black text-gray-900 dark:text-white truncate uppercase tracking-tight">{occ.name}</p>
-                                                </div>
-                                            </div>
-                                        ))}
-                                    </div>
-                                )}
-                            </div>
-                        </div>
+                        <PutawayScannerQuantityCard
+                            currentItem={currentItem}
+                            scannedSku={scannedSku}
+                        />
                     )}
 
                     {/* Input Area */}
@@ -382,19 +404,27 @@ export const PutawayScanner: React.FC<PutawayScannerProps> = ({
                         <div className="relative">
                             <input
                                 ref={inputRef}
-                                type="text"
+                                type={step === 'QUANTITY' ? 'number' : 'text'}
+                                min={step === 'QUANTITY' ? '1' : undefined}
+                                max={step === 'QUANTITY' ? (currentItem?.expectedQty || 1) : undefined}
                                 aria-label="Scan location or SKU barcode"
                                 title="Scan location or SKU barcode"
                                 value={inputVal}
                                 onChange={(e) => setInputVal(e.target.value)}
-                                onKeyDown={scanOnlyHandlers.onKeyDown}
-                                onPaste={scanOnlyHandlers.onPaste}
+                                onKeyDown={step !== 'QUANTITY' ? scanOnlyHandlers.onKeyDown : undefined}
+                                onPaste={step !== 'QUANTITY' ? scanOnlyHandlers.onPaste : undefined}
                                 className={`w-full bg-white dark:bg-[#1C2620] border-2 sm:border-3 rounded-2xl py-4 sm:py-5 px-4 text-center text-2xl sm:text-3xl font-black font-mono text-stone-900 dark:text-white placeholder:text-stone-300 dark:placeholder:text-stone-700 focus:outline-none shadow-xl transition-all duration-300 ${
                                     awaitingOccupancyConfirmation || awaitingMismatchConfirmation 
                                         ? 'border-amber-400 shadow-amber-500/25 ring-2 ring-amber-400/30' 
                                         : 'border-[#E2DCCE] dark:border-white/10 focus:border-[#2C5E3B] dark:focus:border-[#A9CBA2]'
                                 }`}
-                                placeholder={step === 'LOCATION' ? t('warehouse.putaway.scanLocationPlaceholder') : t('warehouse.putaway.scanSkuPlaceholder')}
+                                placeholder={
+                                    step === 'LOCATION'
+                                        ? t('warehouse.putaway.scanLocationPlaceholder')
+                                        : step === 'ITEM'
+                                            ? t('warehouse.putaway.scanSkuPlaceholder')
+                                            : `Enter count (max ${currentItem?.expectedQty || 1})`
+                                }
                                 autoFocus
                                 disabled={isProcessing}
                             />
@@ -408,47 +438,13 @@ export const PutawayScanner: React.FC<PutawayScannerProps> = ({
                             </div>
                         )}
 
-                        {/* Occupancy Warning */}
-                        {awaitingOccupancyConfirmation && !isPlacementBlocked && (
-                            <div className="p-4 rounded-2xl bg-amber-50 dark:bg-amber-500/10 border border-amber-400/50 animate-in zoom-in-95 duration-300 shadow-sm text-left">
-                                <div className="flex items-center gap-2 text-amber-700 dark:text-amber-400 mb-1">
-                                    <AlertTriangle size={18} className="shrink-0 stroke-[2.5]" />
-                                    <span className="font-black uppercase tracking-wider text-xs">{t('warehouse.putaway.stockMergeRequired')}</span>
-                                </div>
-                                <p className="text-[11px] text-stone-700 dark:text-stone-300 leading-relaxed">
-                                    {t('warehouse.putaway.stockMergeInstruction')}
-                                </p>
-                            </div>
-                        )}
-
-                        {/* Mismatch Warning */}
-                        {awaitingMismatchConfirmation && (
-                            <div className="p-4 rounded-2xl bg-amber-50 dark:bg-amber-500/10 border border-amber-400/50 animate-in zoom-in-95 duration-300 shadow-sm text-left">
-                                <div className="flex items-center gap-2 text-amber-700 dark:text-amber-400 mb-1">
-                                    <AlertTriangle size={18} className="shrink-0 stroke-[2.5]" />
-                                    <span className="font-black uppercase tracking-wider text-xs">{t('warehouse.putaway.alternateLocationScanned')}</span>
-                                </div>
-                                <p className="text-[11px] text-stone-700 dark:text-stone-300 leading-relaxed">
-                                    {t('warehouse.putaway.alternateLocationInstruction')}
-                                </p>
-                            </div>
-                        )}
-
-                        {/* Strict Block Warning */}
-                        {isPlacementBlocked && (
-                            <div className="p-5 rounded-2xl bg-rose-50 dark:bg-rose-950/40 border-2 border-rose-500 animate-in zoom-in-95 duration-300 shadow-md text-left">
-                                <div className="flex items-center gap-2 text-rose-600 dark:text-rose-400 mb-2">
-                                    <X size={20} className="shrink-0 stroke-[3]" />
-                                    <span className="font-black uppercase tracking-wider text-sm">{t('warehouse.putaway.placementBlocked')}</span>
-                                </div>
-                                <p className="text-xs font-black text-rose-900 dark:text-rose-200 leading-relaxed mb-2">
-                                    Incompatible inventory detected: <span className="bg-rose-600 text-white px-2 py-0.5 rounded-lg font-mono">{conflictingOccupants[0]?.sku}</span>
-                                </p>
-                                <p className="text-[10px] text-rose-700 dark:text-rose-300 uppercase font-bold tracking-wider">
-                                    {t('warehouse.putaway.mixedSkuNotAllowed')}
-                                </p>
-                            </div>
-                        )}
+                        <PutawayScannerWarnings
+                            awaitingOccupancyConfirmation={awaitingOccupancyConfirmation}
+                            awaitingMismatchConfirmation={awaitingMismatchConfirmation}
+                            isPlacementBlocked={isPlacementBlocked}
+                            conflictingOccupants={conflictingOccupants}
+                            t={t}
+                        />
 
                         {/* Action Button */}
                         <button
@@ -478,7 +474,9 @@ export const PutawayScanner: React.FC<PutawayScannerProps> = ({
                                             ? 'CONFIRM MERGE' 
                                             : awaitingMismatchConfirmation 
                                                 ? 'CONFIRM LOCATION' 
-                                                : 'SUBMIT'}
+                                                : step === 'QUANTITY'
+                                                    ? 'CONFIRM QUANTITY'
+                                                    : 'SUBMIT'}
                             </span>
                         </button>
                     </form>

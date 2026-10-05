@@ -2,9 +2,11 @@ import React from 'react';
 import { Camera, Building, CreditCard, MessageSquare, Key, AlertTriangle, Trash2, User, UserCheck, ShieldCheck, Clock } from 'lucide-react';
 import { Employee } from '../../types';
 import { formatRole } from '../../utils/formatting';
+import { formatDisplayEmployeeId } from '../../utils/employeeIdGenerator';
 
 interface StaffProfileHeaderProps {
     employee: Employee;
+    sites?: any[];
     isOwnProfile: boolean;
     canManageEmployees: boolean;
     canResetPassword: boolean;
@@ -24,7 +26,7 @@ interface StaffProfileHeaderProps {
 }
 
 export default function StaffProfileHeader({
-    employee, isOwnProfile, canManageEmployees, canResetPassword, canTerminate, canDelete,
+    employee, sites, isOwnProfile, canManageEmployees, canResetPassword, canTerminate, canDelete,
     canApprove, isOnline,
     onPhotoRequest, onIdCard, onMessage, onResetPassword, onTerminate, onDelete, onApprove,
     photoInputRef, handleProfilePhotoSelect
@@ -94,7 +96,7 @@ export default function StaffProfileHeader({
                                     {employee.department || 'Retail Operations'}
                                 </span>
                                 <span className="inline-flex items-center font-mono text-xs font-semibold px-2.5 py-1 rounded-full bg-stone-100 dark:bg-white/5 text-stone-700 dark:text-stone-300 border border-stone-200 dark:border-white/10">
-                                    ID: {employee.code || 'EMP-' + employee.id.substring(0, 5).toUpperCase()}
+                                    ID: {formatDisplayEmployeeId(employee, sites)}
                                 </span>
                             </div>
                         </div>

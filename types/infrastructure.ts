@@ -175,17 +175,27 @@ export interface SystemConfig {
   defaultCreditLimit?: number;
   receivingLogic?: 'blind' | 'verified';
   qcSamplingRate?: number;
+  overReceiveTolerancePct?: number;
+  poPriceApplyAt?: 'receive' | 'putaway';
+  printPriceTagAt?: 'receive' | 'putaway' | 'store';
   managerSecurityPin?: string;
   blindCloseEnforced?: boolean;
   requireRefundManagerPin?: boolean;
   highValueBarcodeLockThreshold?: number;
   qcBlockOnFailure?: boolean;
   putawayLogic?: 'manual' | 'system';
+  requirePutawayQuantityEntry?: boolean;
   rotationPolicy?: 'fifo' | 'fefo' | 'lifo';
   requireExpiry?: boolean;
   cycleCountStrategy?: 'abc' | 'random';
+  maxCycleCountRecounts?: number;
+  requireSecondCounterOnVariance?: boolean;
   pickingMethod?: 'order' | 'wave' | 'zone';
   strictScanning?: boolean;
+  requirePickQuantityEntry?: boolean;
+  requirePackSecuritySeal?: boolean;
+  requirePackCartonWeight?: boolean;
+  packWeightTolerancePct?: number;
   reserveStockBuffer?: number;
   webhookOrderCreated?: string;
   webhookInventoryLow?: string;
@@ -214,17 +224,7 @@ export interface SystemConfig {
   rolePermissions?: RolePermissionCategory;
 }
 
-export interface ExpenseRecord {
-  id: string;
-  siteId: string;
-  site_id?: string; // Supabase compatibility
-  date: string;
-  category: 'Rent' | 'Utilities' | 'Marketing' | 'Maintenance' | 'Software' | 'Salaries' | 'Other';
-  description: string;
-  amount: number;
-  status: 'Paid' | 'Pending' | 'Overdue';
-  approvedBy: string;
-}
+export type { ExpenseRecord, ExpenseStatus } from './expense';
 
 export interface StatMetric {
   label: string;

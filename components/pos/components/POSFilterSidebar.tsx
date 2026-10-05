@@ -1,5 +1,5 @@
 import React from 'react';
-import { Filter, X, RotateCcw } from 'lucide-react';
+import { Filter, X, RotateCcw, Tag, Scale } from 'lucide-react';
 import { usePOS } from '../POSContext';
 import { CURRENCY_SYMBOL } from '../../../constants';
 
@@ -17,6 +17,11 @@ export const POSFilterSidebar: React.FC<POSFilterSidebarProps> = ({
     activeFiltersCount
 }) => {
     const {
+        categories,
+        selectedCategory,
+        setSelectedCategory,
+        selectedDepartment,
+        setSelectedDepartment,
         sortBy,
         setSortBy,
         minPriceFilter,
@@ -56,19 +61,19 @@ export const POSFilterSidebar: React.FC<POSFilterSidebarProps> = ({
         <div className="fixed inset-0 z-50 overflow-hidden flex justify-end">
             {/* Backdrop */}
             <div 
-                className="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity duration-300 animate-in fade-in"
+                className="absolute inset-0 bg-black/60 transition-opacity duration-200 animate-in fade-in"
                 onClick={onClose}
             />
             
             {/* Sidebar Container */}
-            <div className="relative w-full max-w-md bg-[#FAF6EE] dark:bg-[#121915] h-full shadow-2xl flex flex-col z-10 border-l border-[#E2DCCE]/50 dark:border-emerald-950/20 transform transition-transform duration-300 animate-in slide-in-from-right">
+            <div className="relative w-full max-w-md bg-[var(--theme-bg-panel)] h-full shadow-xl flex flex-col z-10 border-l border-[var(--theme-border)] transform transition-transform duration-200 animate-in slide-in-from-right">
                 {/* Header */}
-                <div className="p-4 border-b border-[#E2DCCE] dark:border-emerald-950/30 flex items-center justify-between bg-white/50 dark:bg-black/20">
+                <div className="p-4 border-b border-[var(--theme-border)] flex items-center justify-between bg-[var(--theme-bg-card)]">
                     <div className="flex items-center gap-2">
-                        <Filter className="w-5 h-5 text-[#2C5E3B] dark:text-[#A9CBA2]" />
-                        <h2 className="text-base font-extrabold text-[#1E3F27] dark:text-[#EAE5D9]">Advanced Filters</h2>
+                        <Filter className="w-4 h-4 text-[var(--theme-text-primary)]" />
+                        <h2 className="text-base font-bold text-[var(--theme-text-primary)]">Filters & Sort</h2>
                         {activeFiltersCount > 0 && (
-                            <span className="bg-[#2C5E3B] text-white text-[10px] font-black px-2 py-0.5 rounded-full">
+                            <span className="bg-[var(--theme-primary)] text-[var(--theme-primary-text)] text-[10px] font-bold px-2 py-0.5 rounded-full">
                                 {activeFiltersCount}
                             </span>
                         )}
@@ -77,7 +82,7 @@ export const POSFilterSidebar: React.FC<POSFilterSidebarProps> = ({
                         onClick={onClose}
                         title="Close filter panel"
                         aria-label="Close filter panel"
-                        className="w-8 h-8 rounded-full bg-stone-200/50 hover:bg-stone-200 dark:bg-emerald-950/40 dark:hover:bg-emerald-950/60 flex items-center justify-center text-stone-600 dark:text-[#A9CBA2] transition-colors"
+                        className="w-8 h-8 rounded-full bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card-hover)] flex items-center justify-center text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] transition-colors cursor-pointer"
                     >
                         <X size={16} />
                     </button>
@@ -85,9 +90,69 @@ export const POSFilterSidebar: React.FC<POSFilterSidebarProps> = ({
                 
                 {/* Body / Scrollable Content */}
                 <div className="flex-1 overflow-y-auto p-5 space-y-6 scrollbar-hide">
+                    {/* Department Selector */}
+                    <div className="space-y-2">
+                        <div className="flex items-center justify-between">
+                            <label className="text-xs font-bold uppercase tracking-wider text-[var(--theme-text-secondary)]">Department</label>
+                            {selectedDepartment !== 'All' && (
+                                <button
+                                    onClick={() => setSelectedDepartment('All')}
+                                    className="text-[10px] font-bold text-[var(--theme-primary)] hover:underline cursor-pointer"
+                                >
+                                    Reset to All
+                                </button>
+                            )}
+                        </div>
+                        <div className="grid grid-cols-2 gap-2">
+                            {['All', 'Fresh Food & Deli', 'Pantry & Groceries', 'Frozen Food', 'Household & Personal', 'General Merchandise', 'Other'].map(dept => (
+                                <button
+                                    key={dept}
+                                    onClick={() => setSelectedDepartment(dept)}
+                                    className={`px-3 py-2 rounded-xl border text-xs font-semibold text-center transition-colors cursor-pointer ${selectedDepartment === dept
+                                        ? 'bg-[var(--theme-primary)] text-[var(--theme-primary-text)] border-transparent shadow-xs'
+                                        : 'bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-card-hover)]'
+                                    }`}
+                                >
+                                    {dept}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+
+                    {/* Subcategories Selector (when available) */}
+                    {categories.length > 1 && (
+                        <div className="space-y-2">
+                            <div className="flex items-center justify-between">
+                                <label className="text-xs font-bold uppercase tracking-wider text-[var(--theme-text-secondary)]">Category</label>
+                                {selectedCategory !== 'All' && (
+                                    <button
+                                        onClick={() => setSelectedCategory('All')}
+                                        className="text-[10px] font-bold text-[var(--theme-primary)] hover:underline cursor-pointer"
+                                    >
+                                        Reset to All
+                                    </button>
+                                )}
+                            </div>
+                            <div className="flex flex-wrap gap-1.5 max-h-[140px] overflow-y-auto p-2 bg-[var(--theme-bg-subtle)] rounded-xl border border-[var(--theme-border)]">
+                                {categories.map(cat => (
+                                    <button
+                                        key={cat}
+                                        onClick={() => setSelectedCategory(cat)}
+                                        className={`px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors cursor-pointer ${selectedCategory === cat
+                                            ? 'bg-[var(--theme-pill-bg)] text-[var(--theme-pill-text)] border border-[var(--theme-border-focus)] shadow-xs font-bold'
+                                            : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-card-hover)]'
+                                        }`}
+                                    >
+                                        {cat}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+
                     {/* Sort Options */}
                     <div className="space-y-2">
-                        <label className="text-xs font-black uppercase tracking-wider text-[#4D6E56] dark:text-[#7A9E83]">Sort Products By</label>
+                        <label className="text-xs font-bold uppercase tracking-wider text-[var(--theme-text-secondary)]">Sort Products By</label>
                         <div className="grid grid-cols-2 gap-2">
                             {[
                                 { id: 'default', label: 'Default' },
@@ -102,9 +167,9 @@ export const POSFilterSidebar: React.FC<POSFilterSidebarProps> = ({
                                 <button
                                     key={opt.id}
                                     onClick={() => setSortBy(opt.id)}
-                                    className={`px-3 py-2.5 rounded-xl border text-xs font-bold text-center transition-all ${sortBy === opt.id
-                                        ? 'bg-[#2C5E3B] text-white border-transparent shadow-sm'
-                                        : 'bg-white dark:bg-white/5 border-[#E2DCCE] dark:border-emerald-950/15 text-stone-700 dark:text-stone-300 hover:bg-stone-50 dark:hover:bg-white/10'
+                                    className={`px-3 py-2 rounded-xl border text-xs font-bold text-center transition-colors cursor-pointer ${sortBy === opt.id
+                                        ? 'bg-[var(--theme-primary)] text-[var(--theme-primary-text)] border-transparent shadow-xs'
+                                        : 'bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-card-hover)]'
                                     }`}
                                 >
                                     {opt.label}
@@ -115,27 +180,27 @@ export const POSFilterSidebar: React.FC<POSFilterSidebarProps> = ({
 
                     {/* Price Range Filter */}
                     <div className="space-y-2">
-                        <label className="text-xs font-black uppercase tracking-wider text-[#4D6E56] dark:text-[#7A9E83]">Price Range</label>
+                        <label className="text-xs font-bold uppercase tracking-wider text-[var(--theme-text-secondary)]">Price Range</label>
                         <div className="flex items-center gap-3">
-                            <div className="flex-1 flex items-center bg-white dark:bg-black/35 border border-[#E2DCCE] dark:border-emerald-950/20 rounded-xl px-3 py-2">
-                                <span className="text-stone-400 dark:text-stone-600 text-xs font-bold mr-1.5">{CURRENCY_SYMBOL}</span>
+                            <div className="flex-1 flex items-center bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3 py-2">
+                                <span className="text-[var(--theme-text-muted)] text-xs font-bold mr-1.5">{CURRENCY_SYMBOL}</span>
                                 <input
                                     type="number"
                                     placeholder="Min"
                                     aria-label="Minimum Price"
-                                    className="bg-transparent border-none w-full text-xs font-bold text-[#1E3F27] dark:text-white outline-none"
+                                    className="bg-transparent border-none w-full text-xs font-bold text-[var(--theme-text-primary)] outline-none"
                                     value={minPriceFilter}
                                     onChange={(e) => setMinPriceFilter(e.target.value)}
                                 />
                             </div>
-                            <span className="text-[#4D6E56] text-xs font-bold">to</span>
-                            <div className="flex-1 flex items-center bg-white dark:bg-black/35 border border-[#E2DCCE] dark:border-emerald-950/20 rounded-xl px-3 py-2">
-                                <span className="text-stone-400 dark:text-stone-600 text-xs font-bold mr-1.5">{CURRENCY_SYMBOL}</span>
+                            <span className="text-[var(--theme-text-secondary)] text-xs font-bold">to</span>
+                            <div className="flex-1 flex items-center bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3 py-2">
+                                <span className="text-[var(--theme-text-muted)] text-xs font-bold mr-1.5">{CURRENCY_SYMBOL}</span>
                                 <input
                                     type="number"
                                     placeholder="Max"
                                     aria-label="Maximum Price"
-                                    className="bg-transparent border-none w-full text-xs font-bold text-[#1E3F27] dark:text-white outline-none"
+                                    className="bg-transparent border-none w-full text-xs font-bold text-[var(--theme-text-primary)] outline-none"
                                     value={maxPriceFilter}
                                     onChange={(e) => setMaxPriceFilter(e.target.value)}
                                 />
@@ -146,8 +211,8 @@ export const POSFilterSidebar: React.FC<POSFilterSidebarProps> = ({
                     {/* Brands Filter */}
                     {availableBrands.length > 0 && (
                         <div className="space-y-2">
-                            <label className="text-xs font-black uppercase tracking-wider text-[#4D6E56] dark:text-[#7A9E83]">Filter by Brand</label>
-                            <div className="bg-white dark:bg-black/25 border border-[#E2DCCE] dark:border-emerald-950/15 rounded-2xl p-4 max-h-[160px] overflow-y-auto custom-scrollbar space-y-2">
+                            <label className="text-xs font-bold uppercase tracking-wider text-[var(--theme-text-secondary)]">Filter by Brand</label>
+                            <div className="bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl p-3 max-h-[160px] overflow-y-auto space-y-1">
                                 {availableBrands.map(brand => {
                                     const isChecked = selectedBrands.includes(brand);
                                     return (
@@ -155,16 +220,16 @@ export const POSFilterSidebar: React.FC<POSFilterSidebarProps> = ({
                                             key={brand}
                                             onClick={() => toggleBrand(brand)}
                                             role="button"
-                                            className="w-full flex items-center gap-3 py-1.5 hover:bg-stone-50/50 dark:hover:bg-white/5 px-2 rounded-xl text-left cursor-pointer select-none"
+                                            className="w-full flex items-center gap-2.5 py-1.5 hover:bg-[var(--theme-bg-card-hover)] px-2 rounded-lg text-left cursor-pointer select-none"
                                         >
-                                            <div className={`w-4 h-4 border border-stone-350 dark:border-white/20 rounded flex items-center justify-center transition-all flex-shrink-0 ${isChecked ? 'bg-[#2C5E3B] dark:bg-[#A9CBA2] border-transparent' : 'bg-white/5'}`}>
+                                            <div className={`w-4 h-4 border rounded flex items-center justify-center transition-colors flex-shrink-0 ${isChecked ? 'bg-[var(--theme-primary)] text-[var(--theme-primary-text)] border-transparent' : 'bg-[var(--theme-bg-card)] border-[var(--theme-border)]'}`}>
                                                 {isChecked && (
-                                                    <svg className="w-2.5 h-2.5 text-white dark:text-stone-900" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3.5}>
+                                                    <svg className="w-2.5 h-2.5 text-[var(--theme-primary-text)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3.5}>
                                                         <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                                                     </svg>
                                                 )}
                                             </div>
-                                            <span className="text-xs font-bold text-stone-700 dark:text-stone-300">{brand}</span>
+                                            <span className="text-xs font-medium text-[var(--theme-text-primary)]">{brand}</span>
                                         </div>
                                     );
                                 })}
@@ -174,7 +239,7 @@ export const POSFilterSidebar: React.FC<POSFilterSidebarProps> = ({
 
                     {/* Velocity Options */}
                     <div className="space-y-2">
-                        <label className="text-xs font-black uppercase tracking-wider text-[#4D6E56] dark:text-[#7A9E83]">Sales Velocity</label>
+                        <label className="text-xs font-bold uppercase tracking-wider text-[var(--theme-text-secondary)]">Sales Velocity</label>
                         <div className="flex gap-2">
                             {['Fast', 'Medium', 'Slow'].map(vel => {
                                 const isActive = selectedVelocities.includes(vel);
@@ -182,9 +247,9 @@ export const POSFilterSidebar: React.FC<POSFilterSidebarProps> = ({
                                     <button
                                         key={vel}
                                         onClick={() => toggleVelocity(vel)}
-                                        className={`flex-1 py-2 rounded-xl border text-xs font-bold transition-all ${isActive
-                                            ? 'bg-[#2C5E3B] text-white border-transparent shadow-sm'
-                                            : 'bg-white dark:bg-white/5 border-[#E2DCCE] dark:border-emerald-950/15 text-stone-700 dark:text-stone-300 hover:bg-stone-50 dark:hover:bg-white/10'
+                                        className={`flex-1 py-2 rounded-xl border text-xs font-bold transition-colors cursor-pointer ${isActive
+                                            ? 'bg-[var(--theme-primary)] text-[var(--theme-primary-text)] border-transparent shadow-xs'
+                                            : 'bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-card-hover)]'
                                         }`}
                                     >
                                         {vel}
@@ -196,12 +261,12 @@ export const POSFilterSidebar: React.FC<POSFilterSidebarProps> = ({
 
                     {/* Stock Status Switch */}
                     <div className="space-y-2">
-                        <label className="text-xs font-black uppercase tracking-wider text-[#4D6E56] dark:text-[#7A9E83]">Stock Availability</label>
+                        <label className="text-xs font-bold uppercase tracking-wider text-[var(--theme-text-secondary)]">Stock Availability</label>
                         <select
                             value={stockStatusFilter}
                             onChange={(e) => setStockStatusFilter(e.target.value as any)}
                             aria-label="Stock Availability Selector"
-                            className="w-full bg-white dark:bg-white/5 border border-[#E2DCCE] dark:border-emerald-950/20 rounded-xl px-4 py-2.5 text-xs font-bold text-[#1E3F27] dark:text-white outline-none cursor-pointer"
+                            className="w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3 py-2 text-xs font-bold text-[var(--theme-text-primary)] outline-none cursor-pointer"
                         >
                             <option value="all">Show All Items</option>
                             <option value="in_stock">In Stock Only</option>
@@ -211,41 +276,47 @@ export const POSFilterSidebar: React.FC<POSFilterSidebarProps> = ({
                     </div>
 
                     {/* Checkbox Switches */}
-                    <div className="space-y-3 pt-2">
+                    <div className="space-y-2.5 pt-2">
                         <button
                             onClick={() => setOnSaleOnly(!onSaleOnly)}
-                            className="w-full flex items-center justify-between p-3.5 bg-white dark:bg-white/5 border border-[#E2DCCE] dark:border-emerald-950/15 rounded-2xl cursor-pointer"
+                            className="w-full flex items-center justify-between p-3 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl cursor-pointer"
                         >
-                            <span className="text-xs font-bold text-stone-700 dark:text-stone-300">🏷️ Only Show Promotional Items</span>
-                            <div className={`w-9 h-5 rounded-full p-0.5 transition-colors ${onSaleOnly ? 'bg-red-500' : 'bg-stone-300 dark:bg-stone-700'}`}>
-                                <div className={`w-4 h-4 rounded-full bg-white transition-transform ${onSaleOnly ? 'translate-x-4' : 'translate-x-0'}`} />
+                            <span className="inline-flex items-center gap-2 text-xs font-medium text-[var(--theme-text-primary)]">
+                                <Tag className="w-3.5 h-3.5 text-rose-500 shrink-0" />
+                                <span>Only Show Promotional Items</span>
+                            </span>
+                            <div className={`w-8 h-4.5 rounded-full p-0.5 transition-colors ${onSaleOnly ? 'bg-rose-500' : 'bg-[var(--theme-border)]'}`}>
+                                <div className={`w-3.5 h-3.5 rounded-full bg-white transition-transform ${onSaleOnly ? 'translate-x-3.5' : 'translate-x-0'}`} />
                             </div>
                         </button>
                         
                         <button
                             onClick={() => setCompetitorMatchedOnly(!competitorMatchedOnly)}
-                            className="w-full flex items-center justify-between p-3.5 bg-white dark:bg-white/5 border border-[#E2DCCE] dark:border-emerald-950/15 rounded-2xl cursor-pointer"
+                            className="w-full flex items-center justify-between p-3 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl cursor-pointer"
                         >
-                            <span className="text-xs font-bold text-stone-700 dark:text-stone-300">⚖️ Show Competitor Price-Matched</span>
-                            <div className={`w-9 h-5 rounded-full p-0.5 transition-colors ${competitorMatchedOnly ? 'bg-purple-600' : 'bg-stone-300 dark:bg-stone-700'}`}>
-                                <div className={`w-4 h-4 rounded-full bg-white transition-transform ${competitorMatchedOnly ? 'translate-x-4' : 'translate-x-0'}`} />
+                            <span className="inline-flex items-center gap-2 text-xs font-medium text-[var(--theme-text-primary)]">
+                                <Scale className="w-3.5 h-3.5 text-[var(--theme-text-secondary)] shrink-0" />
+                                <span>Show Competitor Price-Matched</span>
+                            </span>
+                            <div className={`w-8 h-4.5 rounded-full p-0.5 transition-colors ${competitorMatchedOnly ? 'bg-[var(--theme-primary)]' : 'bg-[var(--theme-border)]'}`}>
+                                <div className={`w-3.5 h-3.5 rounded-full bg-[var(--theme-primary-text)] transition-transform ${competitorMatchedOnly ? 'translate-x-3.5' : 'translate-x-0'}`} />
                             </div>
                         </button>
                     </div>
                 </div>
                 
                 {/* Footer Controls */}
-                <div className="p-4 border-t border-[#E2DCCE] dark:border-emerald-950/30 flex items-center gap-3 bg-white/50 dark:bg-black/25">
+                <div className="p-4 border-t border-[var(--theme-border)] flex items-center gap-3 bg-[var(--theme-bg-card)]">
                     <button
                         onClick={resetAllFilters}
-                        className="flex-1 py-3 bg-stone-100 hover:bg-stone-250 dark:bg-white/5 dark:hover:bg-white/10 text-stone-700 dark:text-white font-bold text-xs uppercase tracking-wider rounded-xl transition-all border border-stone-200 dark:border-emerald-950/15 flex items-center justify-center gap-2 active:scale-95"
+                        className="flex-1 py-3 bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card-hover)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] font-bold text-xs uppercase tracking-wider rounded-xl transition-colors border border-[var(--theme-border)] flex items-center justify-center gap-2 active:scale-95 cursor-pointer"
                     >
                         <RotateCcw size={14} />
                         Reset All
                     </button>
                     <button
                         onClick={onClose}
-                        className="flex-1 py-3 bg-[#2C5E3B] text-white hover:bg-[#1E3F27] font-bold text-xs uppercase tracking-wider rounded-xl transition-all shadow-md active:scale-95"
+                        className="flex-1 py-3 bg-[var(--theme-primary)] text-[var(--theme-primary-text)] hover:opacity-90 font-bold text-xs uppercase tracking-wider rounded-xl transition-all shadow-xs active:scale-95 cursor-pointer"
                     >
                         Apply Filters
                     </button>

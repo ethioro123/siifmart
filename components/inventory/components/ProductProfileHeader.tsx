@@ -50,50 +50,50 @@ export const ProductProfileHeader: React.FC<ProductProfileHeaderProps> = ({
     }
 
     return (
-        <div className="bg-gradient-to-br from-stone-50 via-white to-stone-50/80 dark:from-[#18201B] dark:via-[#1C2620] dark:to-[#141A16] p-5 sm:p-6 rounded-3xl border border-[#E2DCCE]/80 dark:border-[#2C5E3B]/20 shadow-sm space-y-5">
+        <div className="bg-[var(--theme-bg-panel)] p-5 sm:p-6 rounded-3xl border border-[var(--theme-border)] space-y-5">
             {/* Top Identity Row */}
             <div className="flex flex-col lg:flex-row gap-5 items-start lg:items-center justify-between">
                 <div className="flex items-start gap-4 min-w-0 flex-1">
                     {/* Thumbnail */}
-                    <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-white dark:bg-black/40 border border-[#E2DCCE] dark:border-white/10 flex items-center justify-center shrink-0 overflow-hidden shadow-inner relative group">
+                    <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] flex items-center justify-center shrink-0 overflow-hidden relative group">
                         {product.image && !product.image.includes('placeholder.com') ? (
                             <img src={product.image} alt={product.name} className="w-full h-full object-cover" />
                         ) : (
-                            <Package size={30} className="text-[#2C5E3B]/40 dark:text-[#A9CBA2]/40" />
+                            <Package size={30} className="text-[var(--theme-text-muted)]" />
                         )}
-                        <span className="absolute bottom-1 right-1 w-2.5 h-2.5 rounded-full border-2 border-white dark:border-black shadow-xs shrink-0" style={{ backgroundColor: product.stock > 0 ? '#10b981' : '#ef4444' }} />
+                        <span className="absolute bottom-1 right-1 w-2.5 h-2.5 rounded-full border-2 border-[var(--theme-bg-panel)] shadow-xs shrink-0" style={{ backgroundColor: product.stock > 0 ? '#10b981' : '#ef4444' }} />
                     </div>
 
                     {/* Titles and Badges */}
                     <div className="space-y-1.5 min-w-0 flex-1">
                         {/* Meta Tags Row */}
                         <div className="flex flex-wrap items-center gap-2">
-                            <span className="px-2.5 py-0.5 rounded-lg text-[9px] font-black uppercase tracking-wider bg-[#2C5E3B]/10 text-[#2C5E3B] dark:text-[#A9CBA2] border border-[#2C5E3B]/20">
+                            <span className="px-2.5 py-0.5 rounded-lg text-[9px] font-bold uppercase tracking-wider bg-[var(--theme-pill-bg)] text-[var(--theme-text-primary)] border border-[var(--theme-pill-border)]">
                                 {product.category || 'General Catalog'}
                             </span>
-                            <span className="px-2.5 py-0.5 rounded-lg text-[9px] font-mono font-black uppercase tracking-wider bg-stone-200/70 dark:bg-white/10 text-stone-700 dark:text-stone-300 border border-stone-300/50 dark:border-white/10">
+                            <span className="px-2.5 py-0.5 rounded-lg text-[9px] font-mono font-bold uppercase tracking-wider bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] border border-[var(--theme-border)]">
                                 SKU: {product.sku}
                             </span>
-                            <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg text-[9px] font-black uppercase tracking-wider border ${statusConfig.badgeClass}`}>
+                            <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg text-[9px] font-bold uppercase tracking-wider border ${statusConfig.badgeClass}`}>
                                 <span className={`w-1.5 h-1.5 rounded-full ${statusConfig.dotClass} animate-pulse`} />
                                 {statusConfig.label}
                             </span>
                         </div>
 
                         {/* Product Title */}
-                        <h2 className="text-xl sm:text-2xl font-black text-stone-900 dark:text-white uppercase tracking-tight leading-tight truncate">
+                        <h2 className="text-xl sm:text-2xl font-bold text-[var(--theme-text-primary)] uppercase tracking-tight leading-tight truncate">
                             {product.brand && !brandAlreadyInName && (
-                                <span className="text-[#2C5E3B] dark:text-[#A9CBA2] mr-2">{product.brand}</span>
+                                <span className="text-[var(--theme-accent)] mr-2">{product.brand}</span>
                             )}
                             {product.name}
                         </h2>
 
                         {/* Location Subtext */}
-                        <div className="flex items-center gap-2 text-[11px] font-bold text-stone-500 dark:text-stone-400">
-                            <MapPin size={13} className="text-[#2C5E3B] dark:text-[#A9CBA2] shrink-0" />
-                            <span>Primary Bay: <span className="font-mono text-stone-800 dark:text-stone-200 uppercase font-black">{product.location || 'Unassigned Bay'}</span></span>
+                        <div className="flex items-center gap-2 text-[11px] font-medium text-[var(--theme-text-muted)]">
+                            <MapPin size={13} className="text-[var(--theme-text-secondary)] shrink-0" />
+                            <span>Primary Bay: <span className="font-mono text-[var(--theme-text-primary)] uppercase font-semibold">{product.location || 'Unassigned Bay'}</span></span>
                             {product.shelfPosition && (
-                                <span className="text-stone-400 dark:text-stone-500">· Shelf {product.shelfPosition}</span>
+                                <span className="text-[var(--theme-text-muted)]">· Shelf {product.shelfPosition}</span>
                             )}
                         </div>
                     </div>
@@ -103,15 +103,15 @@ export const ProductProfileHeader: React.FC<ProductProfileHeaderProps> = ({
             {/* Executive KPI Grid */}
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 pt-1">
                 {/* 1. Retail Price */}
-                <div className="bg-white/90 dark:bg-black/30 p-3.5 sm:p-4 rounded-2xl border border-[#E2DCCE]/70 dark:border-white/5 shadow-xs">
-                    <span className="text-[9px] font-black uppercase tracking-widest text-stone-500 dark:text-stone-400 block mb-1">
+                <div className="bg-[var(--theme-bg-card)] p-3.5 sm:p-4 rounded-2xl border border-[var(--theme-border)]">
+                    <span className="text-[9px] font-bold uppercase tracking-wider text-[var(--theme-text-muted)] block mb-1">
                         Retail Selling Price
                     </span>
                     <div className="flex items-baseline gap-1.5">
-                        <span className="text-lg sm:text-xl font-mono font-black text-[#2C5E3B] dark:text-[#A9CBA2] tracking-tight">
+                        <span className="text-lg sm:text-xl font-mono font-bold text-[var(--theme-text-primary)] tracking-tight">
                             {currencySymbol} {formatPriceValue(product.price)}
                         </span>
-                        <span className="text-[10px] font-bold text-stone-400 uppercase font-mono">
+                        <span className="text-[10px] font-medium text-[var(--theme-text-muted)] uppercase font-mono">
                             /{sellUnit?.shortLabel || 'unit'}
                         </span>
                     </div>
@@ -123,61 +123,61 @@ export const ProductProfileHeader: React.FC<ProductProfileHeaderProps> = ({
                 </div>
 
                 {/* 2. Stock Level */}
-                <div className="bg-white/90 dark:bg-black/30 p-3.5 sm:p-4 rounded-2xl border border-[#E2DCCE]/70 dark:border-white/5 shadow-xs">
-                    <span className="text-[9px] font-black uppercase tracking-widest text-stone-500 dark:text-stone-400 block mb-1">
+                <div className="bg-[var(--theme-bg-card)] p-3.5 sm:p-4 rounded-2xl border border-[var(--theme-border)]">
+                    <span className="text-[9px] font-bold uppercase tracking-wider text-[var(--theme-text-muted)] block mb-1">
                         Available On-Hand
                     </span>
                     <div className="flex items-baseline gap-1.5">
-                        <span className={`text-lg sm:text-xl font-mono font-black tracking-tight ${statusConfig.stockTextClass}`}>
+                        <span className={`text-lg sm:text-xl font-mono font-bold tracking-tight ${statusConfig.stockTextClass}`}>
                             {formatStockDisplay(product.stock, product)}
                         </span>
                     </div>
-                    <span className="text-[9px] font-bold text-stone-400 uppercase block mt-1">
+                    <span className="text-[9px] font-medium text-[var(--theme-text-muted)] uppercase block mt-1">
                         {product.packQuantity && product.packQuantity > 1 ? `Pack of ${product.packQuantity}` : 'Single Unit'}
                     </span>
                 </div>
 
                 {/* 3. Total Asset Value */}
-                <div className="bg-white/90 dark:bg-black/30 p-3.5 sm:p-4 rounded-2xl border border-[#E2DCCE]/70 dark:border-white/5 shadow-xs">
-                    <span className="text-[9px] font-black uppercase tracking-widest text-stone-500 dark:text-stone-400 block mb-1">
+                <div className="bg-[var(--theme-bg-card)] p-3.5 sm:p-4 rounded-2xl border border-[var(--theme-border)]">
+                    <span className="text-[9px] font-bold uppercase tracking-wider text-[var(--theme-text-muted)] block mb-1">
                         Total Stock Value
                     </span>
                     <div className="flex items-baseline gap-1.5">
-                        <span className="text-lg sm:text-xl font-mono font-black text-stone-900 dark:text-white tracking-tight">
+                        <span className="text-lg sm:text-xl font-mono font-bold text-[var(--theme-text-primary)] tracking-tight">
                             {currencySymbol} {totalAssetValue.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
                         </span>
                     </div>
-                    <span className="text-[9px] font-bold text-stone-400 uppercase block mt-1 font-mono">
+                    <span className="text-[9px] font-medium text-[var(--theme-text-muted)] uppercase block mt-1 font-mono">
                         {product.stock} × {formatPriceValue(product.price)}
                     </span>
                 </div>
 
                 {/* 4. Margin & Profit (If privileged role) or Reorder Level */}
                 {showCostPrice ? (
-                    <div className="bg-white/90 dark:bg-black/30 p-3.5 sm:p-4 rounded-2xl border border-[#E2DCCE]/70 dark:border-white/5 shadow-xs">
-                        <span className="text-[9px] font-black uppercase tracking-widest text-stone-500 dark:text-stone-400 block mb-1">
+                    <div className="bg-[var(--theme-bg-card)] p-3.5 sm:p-4 rounded-2xl border border-[var(--theme-border)]">
+                        <span className="text-[9px] font-bold uppercase tracking-wider text-[var(--theme-text-muted)] block mb-1">
                             Gross Margin
                         </span>
                         <div className="flex items-baseline gap-1.5">
-                            <span className="text-lg sm:text-xl font-mono font-black text-emerald-700 dark:text-emerald-400 tracking-tight">
+                            <span className="text-lg sm:text-xl font-mono font-bold text-emerald-600 dark:text-emerald-400 tracking-tight">
                                 {marginPct > 0 ? `${marginPct.toFixed(1)}%` : '0%'}
                             </span>
                         </div>
-                        <span className="text-[9px] font-bold text-stone-400 uppercase block mt-1 font-mono">
+                        <span className="text-[9px] font-medium text-[var(--theme-text-muted)] uppercase block mt-1 font-mono">
                             Cost: {currencySymbol}{formatPriceValue(cost)}
                         </span>
                     </div>
                 ) : (
-                    <div className="bg-white/90 dark:bg-black/30 p-3.5 sm:p-4 rounded-2xl border border-[#E2DCCE]/70 dark:border-white/5 shadow-xs">
-                        <span className="text-[9px] font-black uppercase tracking-widest text-stone-500 dark:text-stone-400 block mb-1">
+                    <div className="bg-[var(--theme-bg-card)] p-3.5 sm:p-4 rounded-2xl border border-[var(--theme-border)]">
+                        <span className="text-[9px] font-bold uppercase tracking-wider text-[var(--theme-text-muted)] block mb-1">
                             Min Safety Threshold
                         </span>
                         <div className="flex items-baseline gap-1.5">
-                            <span className="text-lg sm:text-xl font-mono font-black text-amber-600 dark:text-amber-400 tracking-tight">
+                            <span className="text-lg sm:text-xl font-mono font-bold text-amber-600 dark:text-amber-400 tracking-tight">
                                 {product.minStock !== undefined && product.minStock !== null ? `${product.minStock} units` : 'Not Set'}
                             </span>
                         </div>
-                        <span className="text-[9px] font-bold text-stone-400 uppercase block mt-1">
+                        <span className="text-[9px] font-medium text-[var(--theme-text-muted)] uppercase block mt-1">
                             Safety Buffer
                         </span>
                     </div>

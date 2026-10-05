@@ -1,0 +1,207 @@
+import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { salaryRequestsService } from '../../services/salary-requests.service';
+import { authService } from '../../services/auth.service';
+import { hasPermission } from '../../utils/permissions';
+import { CONFLICTING_DUTIES } from '../../services/permissions.service';
+
+vi.mock('../../lib/supabase', () => ({
+    supabase: {
+        from: vi.fn().mockReturnValue({
+            select: vi.fn().mockReturnValue({
+                order: vi.fn().mockReturnValue({
+                    limit: vi.fn().mockResolvedValue({ data: null, error: { message: 'Mocked offline' } })
+                }),
+                eq: vi.fn().mockReturnValue({
+                    single: vi.fn().mockResolvedValue({ data: null, error: { message: 'Mocked offline' } })
+                })
+            }),
+            insert: vi.fn().mockReturnValue({
+                select: vi.fn().mockReturnValue({
+                    single: vi.fn().mockResolvedValue({ data: null, error: { message: 'Mocked offline' } })
+                })
+            }),
+            update: vi.fn().mockReturnValue({
+                eq: vi.fn().mockReturnValue({
+                    select: vi.fn().mockReturnValue({
+                        single: vi.fn().mockResolvedValue({ data: null, error: { message: 'Mocked offline' } })
+                    })
+                })
+            })
+        })
+    }
+}));
+
+describe('Dual-Control Salary Approval Queue (SOP-GOV-018 & Zero-Trust SoD)', () => {
+    beforeEach(() => {
+        // Clear local storage and in-memory cache
+        if (typeof localStorage !== 'undefined') {
+            localStorage.clear();
+        }
+        (salaryRequestsService as any)._clearCache();
+    });
+
+    describe('Permissions & Separation of Duties (SoD)', () => {
+        it('grants HR propose_salary permission while strictly withholding approve_salary', () => {
+            expect(authService.checkPermission('hr', 'employees.propose_salary')).toBe(true);
+            expect(authService.checkPermission('hr', 'employees.approve_salary')).toBe(false);
+            expect(hasPermission('hr', 'PROPOSE_SALARY')).toBe(true);
+            expect(hasPermission('hr', 'APPROVE_SALARY')).toBe(false);
+        });
+
+        it('grants HR Manager propose_salary while strictly withholding approve_salary', () => {
+            expect(authService.checkPermission('hr_manager', 'employees.propose_salary')).toBe(true);
+            expect(authService.checkPermission('hr_manager', 'employees.approve_salary')).toBe(false);
+            expect(hasPermission('hr_manager', 'PROPOSE_SALARY')).toBe(true);
+            expect(hasPermission('hr_manager', 'APPROVE_SALARY')).toBe(false);
+        });
+
+        it('grants Finance Manager approve_salary permission while withholding direct propose_salary', () => {
+            expect(authService.checkPermission('finance_manager', 'employees.approve_salary')).toBe(true);
+            expect(authService.checkPermission('finance_manager', 'employees.propose_salary')).toBe(false);
+            expect(hasPermission('finance_manager', 'APPROVE_SALARY')).toBe(true);
+            expect(hasPermission('finance_manager', 'PROPOSE_SALARY')).toBe(false);
+        });
+
+        it('grants CEO and Super Admin full dual-control permissions including executive override', () => {
+            expect(authService.checkPermission('super_admin', 'employees.propose_salary')).toBe(true);
+            expect(authService.checkPermission('super_admin', 'employees.approve_salary')).toBe(true);
+            expect(authService.checkPermission('CEO', 'employees.propose_salary')).toBe(true);
+            expect(authService.checkPermission('CEO', 'employees.approve_salary')).toBe(true);
+        });
+
+        it('enforces conflicting duty matrix between propose_salary and approve_salary', () => {
+            expect(CONFLICTING_DUTIES['employees.propose_salary']).toContain('employees.approve_salary');
+            expect(CONFLICTING_DUTIES['employees.approve_salary']).toContain('employees.propose_salary');
+        });
+    });
+
+    describe('Salary Requests Lifecycle (create, approve, reject)', () => {
+        it('creates a salary change request in pending status with country scoping', async () => {
+            const req = await salaryRequestsService.create({
+                employeeId: 'emp-001',
+                employeeName: 'Abebe Bikila',
+                currentSalary: 20000,
+                proposedSalary: 25000,
+                currency: 'ETB',
+                siteId: 'site-addis-01',
+                countryCode: 'ET',
+                reason: 'Annual merit increase and performance excellence',
+                status: 'pending',
+                requestedBy: 'Sara HR',
+                requestedByRole: 'hr',
+                requestedAt: new Date().toISOString()
+            });
+
+            expect(req.id).toBeDefined();
+            expect(req.status).toBe('pending');
+            expect(req.proposedSalary).toBe(25000);
+            expect(req.countryCode).toBe('ET');
+
+            const pending = await salaryRequestsService.getPending('site-addis-01', 'ET');
+            expect(pending.some(p => p.id === req.id)).toBe(true);
+        });
+
+        it('approves a pending request and updates approver metadata', async () => {
+            const req = await salaryRequestsService.create({
+                employeeId: 'emp-002',
+                employeeName: 'Kipchoge Keino',
+                currentSalary: 30000,
+                proposedSalary: 38000,
+                currency: 'KSh',
+                siteId: 'site-nairobi-01',
+                countryCode: 'KE',
+                reason: 'Promotion to Senior Dispatch Lead',
+                status: 'pending',
+                requestedBy: 'John HR',
+                requestedByRole: 'hr',
+                requestedAt: new Date().toISOString()
+            });
+
+            const approved = await salaryRequestsService.approve(req.id, {
+                id: 'fin-001',
+                name: 'David Finance',
+                role: 'finance_manager'
+            });
+
+            expect(approved.status).toBe('approved');
+            expect(approved.approvedBy).toBe('David Finance');
+            expect(approved.approvedByRole).toBe('finance_manager');
+            expect(approved.approvedAt).toBeDefined();
+
+            // Should no longer appear in pending list
+            const pendingAfter = await salaryRequestsService.getPending('site-nairobi-01', 'KE');
+            expect(pendingAfter.some(p => p.id === req.id)).toBe(false);
+        });
+
+        it('rejects a pending request with mandatory reason', async () => {
+            const req = await salaryRequestsService.create({
+                employeeId: 'emp-003',
+                employeeName: 'Almaz Ayana',
+                currentSalary: 18000,
+                proposedSalary: 28000,
+                currency: 'ETB',
+                siteId: 'site-addis-02',
+                countryCode: 'ET',
+                reason: 'Exceptional inventory count accuracy',
+                status: 'pending',
+                requestedBy: 'Sara HR',
+                requestedByRole: 'hr',
+                requestedAt: new Date().toISOString()
+            });
+
+            const rejected = await salaryRequestsService.reject(
+                req.id,
+                { id: 'fin-001', name: 'David Finance', role: 'finance_manager' },
+                'Exceeds departmental Q4 compensation budget ceiling'
+            );
+
+            expect(rejected.status).toBe('rejected');
+            expect(rejected.rejectedBy).toBe('David Finance');
+            expect(rejected.rejectionReason).toBe('Exceeds departmental Q4 compensation budget ceiling');
+            expect(rejected.rejectedAt).toBeDefined();
+
+            // Should no longer be pending
+            const pendingAfter = await salaryRequestsService.getPending('site-addis-02', 'ET');
+            expect(pendingAfter.some(p => p.id === req.id)).toBe(false);
+        });
+
+        it('isolates salary requests strictly by countryCode', async () => {
+            const etReq = await salaryRequestsService.create({
+                employeeId: 'emp-et-1',
+                employeeName: 'Ethiopian Worker',
+                currentSalary: 15000,
+                proposedSalary: 18000,
+                currency: 'ETB',
+                countryCode: 'ET',
+                reason: 'ET Branch Review',
+                status: 'pending',
+                requestedBy: 'HR ET',
+                requestedByRole: 'hr',
+                requestedAt: new Date().toISOString()
+            });
+
+            const keReq = await salaryRequestsService.create({
+                employeeId: 'emp-ke-1',
+                employeeName: 'Kenyan Worker',
+                currentSalary: 25000,
+                proposedSalary: 30000,
+                currency: 'KSh',
+                countryCode: 'KE',
+                reason: 'KE Branch Review',
+                status: 'pending',
+                requestedBy: 'HR KE',
+                requestedByRole: 'hr',
+                requestedAt: new Date().toISOString()
+            });
+
+            const etList = await salaryRequestsService.getAll(undefined, 'ET');
+            const keList = await salaryRequestsService.getAll(undefined, 'KE');
+
+            expect(etList.some(r => r.id === etReq.id)).toBe(true);
+            expect(etList.some(r => r.id === keReq.id)).toBe(false);
+
+            expect(keList.some(r => r.id === keReq.id)).toBe(true);
+            expect(keList.some(r => r.id === etReq.id)).toBe(false);
+        });
+    });
+});

@@ -10,6 +10,7 @@ interface AdjustStockParams {
     productName: string;
     productSku: string;
     siteId: string;
+    countryCode?: string;
     quantity: number;
     type: 'IN' | 'OUT';
     reason: string;
@@ -25,7 +26,7 @@ export function useAdjustStockMutation() {
 
     return useMutation({
         mutationFn: async (params: AdjustStockParams) => {
-            const { productId, productName, productSku, siteId, quantity, type, reason, canApprove, expiryDate, batchNumber } = params;
+            const { productId, productName, productSku, siteId, countryCode, quantity, type, reason, canApprove, expiryDate, batchNumber } = params;
 
             if (canApprove) {
                 // Direct adjustment
@@ -38,6 +39,7 @@ export function useAdjustStockMutation() {
                     productName,
                     productSku,
                     siteId,
+                    countryCode: countryCode || (user as any)?.country || 'ET',
                     changeType: 'stock_adjustment',
                     requestedBy: user?.name || 'Unknown',
                     requestedAt: new Date().toISOString(),

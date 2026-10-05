@@ -4,7 +4,6 @@ import {
   StockMovement, Employee, Customer, ShiftRecord, HeldOrder, SystemConfig, Site,
   Notification, SystemLog, EmployeeTask, StorePoints, Promotion, DiscountCode
 } from '../types';
-import { systemLogsService } from '../services/supabase.service';
 import { useStore } from './CentralStore';
 import { posDB } from '../services/db/pos.db';
 import { usePosSync } from '../hooks/usePosSync';
@@ -12,6 +11,7 @@ import { useDataQueries } from '../hooks/useDataQueries';
 import { DEFAULT_CONFIG } from './DataContextDefaults';
 import { DATA_CONTEXT_FALLBACK } from './DataContextFallback';
 import { DataContextType } from './DataContextTypes';
+import { useAuditLogger } from './hooks/useAuditLogger';
 
 // --- Custom Hooks ---
 import { useSiteActions } from './hooks/useSiteActions';
@@ -195,20 +195,7 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
   // 2. Hydrate Customer/Site details for Outbound Jobs (Pack/Dispatch)
 
 
-
-  const logSystemEvent = useCallback(async (action: string, details: string, user: string, module: SystemLog['module']) => {
-    try {
-      const newLog = await systemLogsService.create({
-        action,
-        details,
-        user_name: user,
-        module
-      });
-      setSystemLogs(prev => [newLog as SystemLog, ...prev]);
-    } catch (error) {
-      logger.error('DataContext', 'Failed to log system event:', error);
-    }
-  }, []);
+  const { logSystemEvent } = useAuditLogger({ user, activeSiteId, setSystemLogs });
 
   const { refreshData, loadSites } = useDataInitialization({
     user: user || undefined,

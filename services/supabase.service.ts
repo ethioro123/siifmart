@@ -17,6 +17,8 @@ export { suppliersService } from './suppliers.service';
 
 // Transaction Services
 export { purchaseOrdersService } from './purchase-orders.service';
+export { purchaseOrdersApprovalService } from './purchase-orders.approval';
+export { procurementGovernanceService } from './procurement-governance.service';
 export { salesService } from './sales.service';
 
 // Warehouse Services

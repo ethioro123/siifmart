@@ -33,12 +33,14 @@ export const CatalogSearch: React.FC<CatalogSearchProps> = ({
 
     return (
         <div className="space-y-1.5">
-            <label className="text-[10px] text-stone-500 dark:text-gray-400 uppercase tracking-wider font-bold ml-1 block">Search Product Catalog</label>
+            <label className="text-[10px] text-[var(--theme-text-muted)] uppercase tracking-wider font-semibold ml-1 block">
+                Search Product Catalog
+            </label>
             <div className="relative">
-                <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-stone-400" />
+                <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--theme-text-muted)] pointer-events-none" />
                 <input
                     type="text"
-                    className={`w-full bg-[#FAF8F5] dark:bg-black/30 border ${errors.search ? 'border-red-500/50' : 'border-[#E2DCCE] dark:border-white/10'} rounded-2xl pl-10 pr-4 py-2.5 text-xs text-[#1E3F27] dark:text-white focus:border-[#2C5E3B] outline-none placeholder:text-stone-400 font-bold transition-colors`}
+                    className={`w-full h-11 bg-[var(--theme-bg-subtle)] border ${errors.search ? 'border-rose-500/50' : 'border-[var(--theme-border)]'} rounded-full pl-10 pr-4 text-xs text-[var(--theme-text-primary)] focus:border-[var(--theme-accent)] outline-none placeholder:text-[var(--theme-text-muted)] font-semibold transition-all`}
                     placeholder="Type product name, brand, or SKU to search catalog..."
                     value={searchTerm}
                     onChange={(e) => {
@@ -50,9 +52,9 @@ export const CatalogSearch: React.FC<CatalogSearchProps> = ({
                     onFocus={() => setIsSearchOpen(true)}
                     onBlur={() => setIsSearchOpen(false)}
                 />
-                {errors.search && <span className="absolute right-3.5 top-2.5 text-[10px] text-red-500 font-bold">{errors.search}</span>}
+                {errors.search && <span className="absolute right-3.5 top-3 text-[10px] text-rose-500 font-bold">{errors.search}</span>}
                 {isSearchOpen && (
-                    <div className="absolute z-50 w-full mt-1.5 bg-white dark:bg-[#18201B] border border-[#E2DCCE] dark:border-emerald-950/20 rounded-2xl shadow-xl max-h-60 overflow-y-auto p-1">
+                    <div className="absolute z-50 w-full mt-1.5 bg-[var(--theme-bg-panel)] border border-[var(--theme-border)] rounded-2xl shadow-2xl max-h-60 overflow-y-auto p-1.5">
                         {filteredProducts.length > 0 ? (
                             filteredProducts.map(p => (
                                 <div
@@ -66,19 +68,19 @@ export const CatalogSearch: React.FC<CatalogSearchProps> = ({
                                         if (p.price) setCurrentRetailPrice(p.price);
                                         if (p.unit) setCustomItemUnit(p.unit);
                                     }}
-                                    className="px-3.5 py-2.5 hover:bg-[#FAF8F5] dark:hover:bg-white/5 rounded-xl cursor-pointer flex justify-between items-center group transition-colors"
+                                    className="px-3.5 py-2.5 hover:bg-[var(--theme-bg-subtle)] rounded-xl cursor-pointer flex justify-between items-center group transition-colors"
                                 >
                                     <div className="flex flex-col">
-                                        <span className="text-xs text-[#1E3F27] dark:text-white font-bold group-hover:text-[#2C5E3B] dark:group-hover:text-[#A9CBA2] transition-colors">{p.name}</span>
-                                        <span className="text-[10px] text-stone-400 font-mono uppercase">{p.sku || 'No SKU'}</span>
+                                        <span className="text-xs text-[var(--theme-text-primary)] font-semibold group-hover:text-[var(--theme-accent)] transition-colors">{p.name}</span>
+                                        <span className="text-[10px] text-[var(--theme-text-muted)] font-mono uppercase">{p.sku || 'No SKU'}</span>
                                     </div>
                                     <div className="flex items-center gap-2">
-                                        <span className="text-[10px] text-stone-500 dark:text-stone-400 bg-stone-100 dark:bg-white/5 px-2 py-0.5 rounded-md font-bold">Stock: {p.stock}</span>
+                                        <span className="text-[10px] text-[var(--theme-text-secondary)] bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] px-2 py-0.5 rounded-full font-mono font-semibold">Stock: {p.stock}</span>
                                     </div>
                                 </div>
                             ))
                         ) : (
-                            <div className="px-4 py-3 text-xs text-stone-400 text-center italic">No catalog products found matching "{searchTerm}"</div>
+                            <div className="px-4 py-3 text-xs text-[var(--theme-text-muted)] text-center italic">No catalog products found matching "{searchTerm}"</div>
                         )}
                     </div>
                 )}

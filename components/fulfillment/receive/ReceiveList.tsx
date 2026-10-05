@@ -8,6 +8,8 @@ import { getSellUnit } from '../../../utils/units';
 import { hasPermission } from '../../../utils/permissions';
 import { convertToSellableUnits } from '../useReceiving';
 import { useData } from '../../../contexts/DataContext';
+import { generateBatchNumber } from '../../../utils/batchNumber';
+import { resolveReceivingPolicy } from '../../../utils/receivingPolicy';
 
 interface ReceiveListProps {
     paginatedReceiveOrders: PurchaseOrder[];
@@ -59,7 +61,7 @@ export const ReceiveList: React.FC<ReceiveListProps> = ({
     employees
 }) => {
     const { settings, effectiveCountry } = useData();
-    const isBlindReceiving = settings?.receivingLogic === 'blind' || (!settings?.receivingLogic && effectiveCountry === 'ET');
+    const isBlindReceiving = resolveReceivingPolicy(settings, effectiveCountry).blind;
 
     if (filteredReceiveOrdersLength === 0) {
         return (
@@ -81,14 +83,15 @@ export const ReceiveList: React.FC<ReceiveListProps> = ({
                 {paginatedReceiveOrders.map(po => {
                     const poJobs = jobs.filter(j => (j.orderRef === po.id || (po.po_number && j.orderRef === po.po_number) || (po.poNumber && j.orderRef === po.poNumber)) && j.type === 'PUTAWAY');
                     const receivedMap: Record<string, number> = {};
+                    const cleanSku = (s?: string) => s ? s.replace(/[-\s]/g, '').toUpperCase() : '';
                     const jobSkuMap: Record<string, string> = {};
                     poJobs.forEach(job => {
                         job.lineItems.forEach((ji: any) => {
-                            if (ji.productId) {
-                                receivedMap[ji.productId] = (receivedMap[ji.productId] || 0) + (ji.expectedQty || 0);
-                            }
-                            if (ji.sku) {
-                                receivedMap[ji.sku] = (receivedMap[ji.sku] || 0) + (ji.expectedQty || 0);
+                            const expected = ji.expectedQty || (ji as any).quantity || 0;
+                            if (expected <= 0) return;
+                            const canonKey = cleanSku(ji.sku) || ji.productId;
+                            if (canonKey) {
+                                receivedMap[canonKey] = (receivedMap[canonKey] || 0) + expected;
                             }
                             if (ji.productId && ji.sku) {
                                 jobSkuMap[ji.productId] = ji.sku;
@@ -98,18 +101,10 @@ export const ReceiveList: React.FC<ReceiveListProps> = ({
                     });
                     const allItemsReceived = po.lineItems?.every(item => {
                         const dbReceived = item.receivedQty || 0;
-                        const product = allProducts.find(p => p.id === item.productId || (item.sku && p.sku === item.sku));
-                        const candidateKeys = [
-                            item.productId,
-                            item.sku,
-                            product?.id,
-                            product?.sku
-                        ].filter(Boolean) as string[];
-                        
+                        const product = allProducts.find(p => p.id === item.productId || (item.sku && cleanSku(p.sku) === cleanSku(item.sku)));
+                        const canonKey = cleanSku(item.sku) || cleanSku(product?.sku) || item.productId || product?.id || '';
                         const expectedSellable = convertToSellableUnits(item.quantity, item);
-                        const mapReceived = candidateKeys.length > 0 
-                            ? candidateKeys.reduce((max, k) => Math.max(max, receivedMap[k] || 0), 0)
-                            : 0;
+                        const mapReceived = canonKey ? (receivedMap[canonKey] || 0) : 0;
                         return Math.max(dbReceived, mapReceived) >= expectedSellable;
                     }) || false;
 
@@ -139,17 +134,9 @@ export const ReceiveList: React.FC<ReceiveListProps> = ({
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4 relative z-10">
                                 {(po.lineItems || []).map((item, idx) => {
                                     const dbReceivedQty = item.receivedQty || 0;
-                                    const product = allProducts.find(p => p.id === item.productId || (item.sku && p.sku === item.sku));
-                                    const candidateKeys = [
-                                        item.productId,
-                                        item.sku,
-                                        product?.id,
-                                        product?.sku
-                                    ].filter(Boolean) as string[];
-                                    
-                                    const mapReceivedQty = candidateKeys.length > 0 
-                                        ? candidateKeys.reduce((max, k) => Math.max(max, receivedMap[k] || 0), 0)
-                                        : 0;
+                                    const product = allProducts.find(p => p.id === item.productId || (item.sku && cleanSku(p.sku) === cleanSku(item.sku)));
+                                    const canonKey = cleanSku(item.sku) || cleanSku(product?.sku) || item.productId || product?.id || '';
+                                    const mapReceivedQty = canonKey ? (receivedMap[canonKey] || 0) : 0;
                                     const receivedQty = Math.max(dbReceivedQty, mapReceivedQty);
                                     const expectedSellable = convertToSellableUnits(item.quantity, item);
                                     const remainingQty = Math.max(0, expectedSellable - receivedQty);
@@ -220,10 +207,10 @@ export const ReceiveList: React.FC<ReceiveListProps> = ({
                                                     <div className="space-y-2">
                                                         <div className="flex justify-between items-center px-1">
                                                             <span className="text-[8px] font-black text-stone-400 uppercase tracking-widest">{t('warehouse.inboundVelocity')}</span>
-                                                            <span className={`text-[8px] font-black uppercase tracking-widest ${isComplete ? 'text-stone-400' : 'text-[#2C5E3B] dark:text-[#A9CBA2]'}`}>{isComplete ? t('warehouse.completePercent') : `${Math.round((receivedQty / item.quantity) * 100)}${t('warehouse.receivedPercent')}`}</span>
+                                                            <span className={`text-[8px] font-black uppercase tracking-widest ${isComplete ? 'text-stone-400' : 'text-[#2C5E3B] dark:text-[#A9CBA2]'}`}>{isComplete ? t('warehouse.completePercent') : `${expectedSellable > 0 ? Math.min(100, Math.round((receivedQty / expectedSellable) * 100)) : 0}${t('warehouse.receivedPercent')}`}</span>
                                                         </div>
                                                         <ProgressBar
-                                                            progress={(receivedQty / item.quantity) * 100}
+                                                            progress={expectedSellable > 0 ? Math.min(100, (receivedQty / expectedSellable) * 100) : 0}
                                                             containerClassName="h-1.5 bg-slate-100 dark:bg-white/5 rounded-full overflow-hidden"
                                                             fillClassName={`h-full transition-all duration-700 relative ${isComplete ? 'bg-[#224429] dark:bg-[#EAE5D9]' : 'bg-[#2C5E3B] dark:bg-[#A9CBA2] shadow-[0_0_8px_rgba(44,94,59,0.3)]'}`}
                                                         />
@@ -237,27 +224,32 @@ export const ReceiveList: React.FC<ReceiveListProps> = ({
                                                             qty: 1,
                                                             price: product?.retailPrice,
                                                             category: product?.category,
-                                                            expiry: ''
+                                                            expiry: product?.expiryDate || '',
+                                                            batchNumber: product?.batchNumber,
+                                                            packQuantity: item.packQuantity || product?.packQuantity || 1,
+                                                            poNumber: po.poNumber || po.po_number
                                                         })} className="w-full woody-btn-secondary h-10 text-[10px] font-black uppercase tracking-widest rounded-xl flex items-center justify-center gap-2 transition-all shadow-sm">
                                                             <Printer size={14} className="text-[#4D6E56] dark:text-zinc-500" /> {t('warehouse.reprintLabel')}
                                                         </button>
                                                     ) : (
                                                         isAllowedToReceive ? (
                                                             <button onClick={() => {
-                                                                const now = new Date();
-                                                                const dateStr = now.toISOString().split('T')[0].replace(/-/g, '');
-                                                                const randomStr = Math.random().toString(36).substring(2, 6).toUpperCase();
-                                                                const newBatch = `BN-${dateStr}-${randomStr}`;
-
                                                                 const resolvedSku = item.sku
                                                                     || (item.productId ? (allProducts.find(p => p.id === item.productId)?.sku || '') : '')
                                                                     || allProducts.find(p => p.name === item.productName)?.sku
                                                                     || '';
+                                                                const newBatch = generateBatchNumber({
+                                                                    sku: resolvedSku,
+                                                                    sequence: 1
+                                                                });
 
+                                                                const expectedSellable = convertToSellableUnits(item.quantity, item);
                                                                 let fullName = item.productName || '';
 
                                                                 setSplitReceivingItem({
                                                                     ...item,
+                                                                    quantity: expectedSellable,
+                                                                    orderedPackages: item.quantity,
                                                                     sku: resolvedSku,
                                                                     productName: fullName
                                                                 });

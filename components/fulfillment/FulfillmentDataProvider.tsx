@@ -162,7 +162,7 @@ export const FulfillmentDataProvider = ({ children }: { children: ReactNode }) =
                     'operations_manager', 'warehouse_manager', 'dispatcher',
                     'store_manager', 'logistics_manager', 'inventory_manager',
                     'assistant_manager', 'shift_lead', 'inventory_specialist',
-                    'dispatch_manager', 'supply_chain_manager'
+                    'dispatch_manager', 'supply_chain_manager', 'fleet_maintenance_supervisor', 'replenishment_planner'
                 ];
                 const isGlobalRole = GLOBAL_QUEUE_ROLES.includes((user?.role || '').toLowerCase());
 
@@ -187,7 +187,7 @@ export const FulfillmentDataProvider = ({ children }: { children: ReactNode }) =
                     loadedZones,
                     loadedApprovals
                 ] = await Promise.all([
-                    wmsJobsService.getAll(activeSiteId, 500, employeeId),
+                    wmsJobsService.getAll(activeSiteId, 500, employeeId, activeCountryCode),
                     transfersService.getAll(activeSiteId),
                     jobAssignmentsService.getAll(activeSiteId),
                     warehouseZonesService.getAll(activeSiteId),
@@ -407,7 +407,7 @@ export const FulfillmentDataProvider = ({ children }: { children: ReactNode }) =
     const { receivePO, receivePOSplit, finalizePO } = useReceiving({
         orders, allOrders, jobs, products, allProducts,
         activeSite, setJobs, setOrders, setAllOrders, addNotification,
-        setProducts, setAllProducts
+        setProducts, setAllProducts, settings
     });
 
     // Transfers: requestTransfer, shipTransfer, receiveTransfer, updateTransfer

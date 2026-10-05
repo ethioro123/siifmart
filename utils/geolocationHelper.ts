@@ -39,7 +39,7 @@ export const fetchLoginLocation = async (): Promise<string> => {
     });
     return `GPS: ${pos.coords.latitude.toFixed(4)}, ${pos.coords.longitude.toFixed(4)}`;
   } catch (highAccErr: any) {
-    logger.warn('CentralStore', 'High-accuracy GPS Geolocation failed/timed out, retrying with low-accuracy.', highAccErr);
+    logger.warn('CentralStore', 'High-accuracy GPS Geolocation failed/timed out, retrying with low-accuracy.', { error: highAccErr?.message || String(highAccErr) });
 
     // 2. Try Low Accuracy Geolocation (Wi-Fi / Cell tower positioning)
     try {
@@ -57,5 +57,28 @@ export const fetchLoginLocation = async (): Promise<string> => {
       // 3. Fall back to IP Geolocation lookup
       return await fetchIpLocation();
     }
+  }
+};
+
+let cachedAuditLocation: string | null = null;
+let lastAuditLocationFetch = 0;
+
+/**
+ * Returns a cached location string (max 2 minutes old) to prevent
+ * excessive network calls or permission prompts during frequent audit logging.
+ */
+export const getCachedAuditLocation = async (): Promise<string> => {
+  const now = Date.now();
+  if (cachedAuditLocation && now - lastAuditLocationFetch < 120000) {
+    return cachedAuditLocation;
+  }
+
+  try {
+    const loc = await fetchLoginLocation();
+    cachedAuditLocation = loc;
+    lastAuditLocationFetch = now;
+    return loc;
+  } catch {
+    return cachedAuditLocation || 'GPS: Unavailable';
   }
 };

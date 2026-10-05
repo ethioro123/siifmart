@@ -102,6 +102,7 @@ export function useEmployeeData({
                filtered = filtered.filter(e => 
                   e.name.toLowerCase().includes(term) || 
                   e.email.toLowerCase().includes(term) || 
+                  (e.code && e.code.toLowerCase().includes(term)) ||
                   (e.phone && e.phone.includes(term))
                );
             }

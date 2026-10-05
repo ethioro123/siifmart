@@ -67,7 +67,7 @@ export default function LocationSelect() {
                 {/* Header */}
                 <div className="flex flex-col md:flex-row justify-between items-center gap-4 border-b border-[#E2DCCE] dark:border-emerald-950/20 pb-6">
                     <div>
-                        <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-[#2C5E3B] to-amber-600 dark:from-[#A9CBA2] dark:to-[#DFD5C6] tracking-tight">
+                        <h1 className="text-3xl font-bold text-[var(--theme-text-primary)] tracking-tight">
                             Location Command
                         </h1>
                         <p className="text-stone-500 dark:text-stone-400 mt-1">Select a facility to switch operational context.</p>

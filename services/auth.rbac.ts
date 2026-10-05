@@ -19,10 +19,10 @@ export const ROLE_PERMISSIONS: Record<string, string[]> = {
 
     // ═══ LEVEL 2 - REGIONAL/DIRECTORS ═══
     regional_manager: [
-        'dashboard', 'pos', 'inventory', 'warehouse', 'sales', 'customers', 'employees', 'finance', 'procurement', 'settings', 'profile'
+        'dashboard', 'admin', 'pos', 'inventory', 'warehouse', 'sales', 'customers', 'employees', 'pricing', 'finance', 'procurement', 'settings', 'profile'
     ],
     operations_manager: [
-        'dashboard', 'pos', 'inventory', 'warehouse', 'sales', 'customers', 'employees', 'finance', 'procurement', 'settings', 'profile'
+        'dashboard', 'admin', 'pos', 'inventory', 'warehouse', 'sales', 'customers', 'employees', 'pricing', 'finance', 'procurement', 'settings', 'profile'
     ],
     finance_manager: [
         'dashboard', 'finance', 'sales', 'procurement', 'employees', 'profile'
@@ -35,6 +35,9 @@ export const ROLE_PERMISSIONS: Record<string, string[]> = {
     ],
     supply_chain_manager: [
         'dashboard', 'inventory', 'warehouse', 'procurement', 'finance', 'profile'
+    ],
+    merchandising_manager: [
+        'dashboard', 'admin', 'pricing', 'inventory', 'sales', 'procurement', 'profile'
     ],
 
     // ═══ LEVEL 3 - SITE MANAGERS ═══
@@ -65,13 +68,24 @@ export const ROLE_PERMISSIONS: Record<string, string[]> = {
     forklift_operator: ['dashboard', 'warehouse', 'inventory', 'profile'],
     inventory_specialist: ['dashboard', 'inventory', 'warehouse', 'profile'],
     customer_service: ['dashboard', 'customers', 'sales', 'profile'],
-    auditor: ['dashboard', 'sales', 'inventory', 'finance', 'profile'],
+    auditor: ['dashboard', 'sales', 'inventory', 'finance', 'settings', 'profile'],
     it_support: ['dashboard', 'settings', 'employees', 'profile'],
     buyer: ['dashboard', 'procurement', 'profile'],
     demand_planner: ['dashboard', 'inventory', 'procurement', 'sales', 'profile'],
     inventory_manager: ['dashboard', 'inventory', 'warehouse', 'profile'],
     logistics_manager: ['dashboard', 'warehouse', 'inventory', 'employees', 'profile'],
     security_manager: ['dashboard', 'settings', 'employees', 'profile'],
+    payroll_specialist: ['dashboard', 'employees', 'finance', 'profile'],
+    talent_recruiter: ['dashboard', 'employees', 'profile'],
+    treasury_officer: ['dashboard', 'finance', 'pos', 'sales', 'profile'],
+    tax_compliance_officer: ['dashboard', 'finance', 'sales', 'profile'],
+    credit_control_officer: ['dashboard', 'finance', 'sales', 'customers', 'procurement', 'profile'],
+    vendor_relations_manager: ['dashboard', 'procurement', 'pricing', 'inventory', 'profile'],
+    customs_import_specialist: ['dashboard', 'procurement', 'inventory', 'profile'],
+    inbound_qc_inspector: ['dashboard', 'procurement', 'warehouse', 'inventory', 'profile'],
+    store_operations_auditor: ['dashboard', 'pos', 'inventory', 'pricing', 'sales', 'profile'],
+    replenishment_planner: ['dashboard', 'inventory', 'warehouse', 'procurement', 'sales', 'profile'],
+    fleet_maintenance_supervisor: ['dashboard', 'warehouse', 'inventory', 'employees', 'profile'],
 
     // ═══ LEGACY ROLES (backwards compatibility) ═══
     // admin: stripped to read-only — no active users should have this role.
@@ -84,19 +98,24 @@ export const ROLE_PERMISSIONS: Record<string, string[]> = {
     cs_manager: ['dashboard', 'customers', 'sales', 'profile'],
     store_supervisor: ['dashboard', 'pos', 'inventory', 'sales', 'customers', 'profile'],
     returns_clerk: ['dashboard', 'warehouse', 'inventory', 'customers', 'profile'],
-    merchandiser: ['dashboard', 'inventory', 'pricing', 'profile'],
+    merchandiser: ['dashboard', 'inventory', 'profile'],
     loss_prevention: ['dashboard', 'inventory', 'sales', 'profile'],
-    accountant: ['dashboard', 'finance', 'sales', 'profile'],
+    accountant: ['dashboard', 'finance', 'sales', 'procurement', 'profile'],
     data_analyst: ['dashboard', 'sales', 'inventory', 'finance', 'profile'],
     training_coordinator: ['dashboard', 'employees', 'profile']
 };
 
 export function canAccessRoute(userRole: UserRole, route: string): boolean {
     const permissions = ROLE_PERMISSIONS[userRole];
+    if (!permissions) return false;
     if (permissions.includes('*')) return true;
-    return permissions.some(permission =>
-        route.toLowerCase().includes(permission.toLowerCase())
-    );
+    const lowerRoute = route.toLowerCase();
+    return permissions.some(permission => {
+        const lowerPerm = permission.toLowerCase();
+        if (lowerPerm === 'warehouse' && (lowerRoute.includes('warehouse') || lowerRoute.includes('wms'))) return true;
+        if (lowerPerm === 'pos' && lowerRoute.includes('pos')) return true;
+        return lowerRoute.includes(lowerPerm);
+    });
 }
 
 /**
@@ -104,8 +123,8 @@ export function canAccessRoute(userRole: UserRole, route: string): boolean {
  * Prevents warehouse workers at stores from seeing warehouse sections and vice versa.
  */
 export function getAvailableSections(userRole: UserRole, siteType?: string): string[] {
-    const basePermissions = ROLE_PERMISSIONS[userRole];
-    if (basePermissions.includes('*')) return basePermissions;
+    const basePermissions = ROLE_PERMISSIONS[userRole] || [];
+    if (basePermissions.includes('*') || ['regional_manager', 'operations_manager'].includes(userRole)) return basePermissions;
     if (!siteType) return basePermissions;
 
     if (siteType === 'Store' || siteType === 'Dark Store') {

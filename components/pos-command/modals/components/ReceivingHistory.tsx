@@ -67,13 +67,13 @@ export const ReceivingHistory: React.FC = () => {
 
     return (
         <div className="space-y-4">
-            <div className="bg-emerald-50 dark:bg-[#2C5E3B]/10 border border-emerald-150 dark:border-[#2C5E3B]/30 rounded-xl p-4">
+            <div className="bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-2xl p-4">
                 <div className="flex items-center gap-3">
-                    <Clock className="text-emerald-700 dark:text-[#A9CBA2]" size={20} />
-                    <h3 className="text-[#1E3F27] dark:text-white font-bold">{t('posCommand.recentTransactions')}</h3>
+                    <Clock className="text-[var(--theme-text-primary)]" size={20} />
+                    <h3 className="text-[var(--theme-text-primary)] font-bold">{t('posCommand.recentTransactions')}</h3>
                 </div>
-                <p className="text-xs text-stone-500 dark:text-gray-400 mt-1">
-                    {t('posCommand.showingHistory')} <span className="text-[#1E3F27] dark:text-white font-bold">{activeSite?.name}</span>.
+                <p className="text-xs text-[var(--theme-text-secondary)] mt-1">
+                    {t('posCommand.showingHistory')} <span className="text-[var(--theme-text-primary)] font-bold">{activeSite?.name}</span>.
                 </p>
             </div>
 
@@ -104,16 +104,16 @@ export const ReceivingHistory: React.FC = () => {
                                 isHistory: true
                             });
                         }}
-                        className="bg-[#FAF8F5]/80 dark:bg-white/5 border border-[#E2DCCE] dark:border-white/10 rounded-2xl p-4 flex items-center justify-between cursor-pointer hover:bg-[#2C5E3B]/5 dark:hover:bg-white/10 hover:border-[#2C5E3B]/20 transition-all shadow-sm"
+                        className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-4 flex items-center justify-between cursor-pointer hover:bg-[var(--theme-bg-card-hover)] transition-all shadow-xs"
                     >
                         <div>
-                            <p className="font-mono font-bold text-[#1E3F27] dark:text-[#EAE5D9]">{formatJobId({ ...item, type: 'TRANSFER' } as any)}</p>
-                            <p className="text-xs text-stone-500 dark:text-gray-400">
+                            <p className="font-mono font-bold text-[var(--theme-text-primary)]">{formatJobId({ ...item, type: 'TRANSFER' } as any)}</p>
+                            <p className="text-xs text-[var(--theme-text-secondary)]">
                                 {(item as any).items?.length || 0} {t('posCommand.productsLabel')} • {formatDateTime((item as any).receivedAt || (item as any).updatedAt)}
                             </p>
                         </div>
                         <div className="text-right">
-                            <span className="px-2.5 py-1 bg-emerald-50 dark:bg-green-500/20 text-emerald-700 dark:text-green-400 border border-emerald-100 dark:border-green-500/30 rounded text-[10px] font-bold uppercase">
+                            <span className="px-2.5 py-1 bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 rounded-full text-[10px] font-bold uppercase">
                                 {t('posCommand.received').toUpperCase()}
                             </span>
                         </div>

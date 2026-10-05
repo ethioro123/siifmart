@@ -3,11 +3,12 @@ import { useStore } from '../../../../contexts/CentralStore';
 import { useData } from '../../../../contexts/DataContext';
 import { logger } from '../../../../utils/logger';
 import { convertToSellableUnits } from '../../useReceiving';
+import { resolveReceivingPolicy } from '../../../../utils/receivingPolicy';
 import { Product } from '../../../../types';
 
 export function usePutawayStock() {
     const { user } = useStore();
-    const { orders, addNotification, refreshData } = useData();
+    const { orders, addNotification, refreshData, settings } = useData();
 
     const isUUID = (id: string) => /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id.trim());
 
@@ -35,6 +36,14 @@ export function usePutawayStock() {
         try {
             const ts = params.timestamp || new Date().toISOString();
             logger.debug('Fulfillment', '📦 putawayStock called:');
+
+            // Country policy: PO retail price goes live only when stock reaches the shelf (default)
+            if (params.type === 'IN' && params.retailPrice && params.retailPrice > 0
+                && resolveReceivingPolicy(settings).poPriceApplyAt === 'putaway') {
+                productsService.updatePriceBySku(params.sku, params.siteId, params.retailPrice).catch(e => {
+                    logger.warn('Fulfillment', `Failed to apply PO price at putaway for ${params.sku}`, e);
+                });
+            }
 
             // 1. Check if product exists at destination
             let destProduct = await productsService.getBySkuAndLocation(params.sku, params.location, params.siteId);

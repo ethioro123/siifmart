@@ -6,7 +6,8 @@ import { formatCompactNumber } from '../../utils/formatting';
 import { getCountryProfile, getEffectiveCountry, type Country } from '../../utils/localization';
 import { useData } from '../../contexts/DataContext';
 import { useStore } from '../../contexts/CentralStore';
-import { purchaseOrdersService, productsService, suppliersService } from '../../services/supabase.service';
+import { suppliersService } from '../../services/supabase.service';
+import { usePurchaseOrderMutations } from '../../hooks/usePurchaseOrderMutations';
 import { generateSequentialSKU } from '../../utils/skuGenerator';
 
 import { POItemForm } from './POItemForm';
@@ -27,8 +28,8 @@ interface CreatePOModalProps {
 export const CreatePOModal: React.FC<CreatePOModalProps> = ({
     isOpen, onClose, editingPO, initialSupplierId, onSuccess
 }) => {
-    const { user } = useStore();
-    const { showToast } = useStore();
+    const { user, showToast } = useStore();
+    const { createPOMutation, updatePOMutation } = usePurchaseOrderMutations();
     const {
         allProducts,
         suppliers: contextSuppliers,
@@ -46,9 +47,9 @@ export const CreatePOModal: React.FC<CreatePOModalProps> = ({
     const [localSuppliers, setLocalSuppliers] = useState<Supplier[]>([]);
     useEffect(() => {
         if (isOpen && contextSuppliers.length === 0 && localSuppliers.length === 0) {
-            logger.debug('CreatePOModal', '⚡ Suppliers empty from context, fetching directly...');
+            logger.debug('CreatePOModal', 'Suppliers empty from context, fetching directly...');
             suppliersService.getAll(1000).then(res => {
-                logger.debug('CreatePOModal', '⚡ Direct supplier fetch returned:');
+                logger.debug('CreatePOModal', 'Direct supplier fetch returned:');
                 setLocalSuppliers(res.data);
             }).catch(err => logger.error('CreatePOModal', 'Direct supplier fetch failed', err as Error));
         }
@@ -346,10 +347,10 @@ export const CreatePOModal: React.FC<CreatePOModalProps> = ({
                 };
 
                 if (isEditMode) {
-                    await purchaseOrdersService.update(newPO.id, newPO);
+                    await updatePOMutation.mutateAsync({ id: newPO.id, updates: newPO });
                     successCount++;
                 } else {
-                    await purchaseOrdersService.create(newPO, siteItems);
+                    await createPOMutation.mutateAsync({ po: newPO, items: siteItems });
                     successCount++;
                 }
             }
@@ -368,14 +369,15 @@ export const CreatePOModal: React.FC<CreatePOModalProps> = ({
     };
 
     const isEditMode = Boolean(editingPO && editingPO.id);
+    const isPendingAction = isSubmitting || createPOMutation.isPending || updatePOMutation.isPending;
 
     const createPOFooter = (
         <div className="flex justify-between items-center w-full px-2">
             <div className="flex items-center gap-4">
-                <div className="h-8 w-[1px] bg-gray-200 dark:bg-white/10 hidden md:block"></div>
+                <div className="h-8 w-[1px] bg-[var(--theme-border-subtle)] hidden md:block"></div>
                 <div className="flex flex-col">
-                    <span className="text-[10px] text-stone-500 dark:text-stone-400 uppercase font-bold tracking-wider leading-none">Total Value</span>
-                    <span className="text-lg font-mono text-[#2C5E3B] dark:text-[#A9CBA2] tracking-tight font-black">
+                    <span className="text-[10px] text-[var(--theme-text-muted)] uppercase font-bold tracking-wider leading-none">Total Value</span>
+                    <span className="text-lg font-mono text-[var(--theme-text-primary)] tracking-tight font-black tabular-nums">
                         {currencySymbol} {formatCompactNumber(poTotal)}
                     </span>
                 </div>
@@ -383,16 +385,16 @@ export const CreatePOModal: React.FC<CreatePOModalProps> = ({
             <div className="flex items-center gap-3">
                 <button
                     onClick={onClose}
-                    className="px-5 py-2.5 rounded-2xl text-xs font-bold transition-colors text-stone-600 hover:text-stone-900 dark:text-stone-300 dark:hover:text-white hover:bg-stone-100 dark:hover:bg-white/5 border border-stone-200 dark:border-white/10 cursor-pointer"
+                    className="px-5 py-2.5 rounded-full text-xs font-semibold transition-colors text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] cursor-pointer active:scale-[0.98]"
                 >
                     Cancel
                 </button>
                 <button
                     onClick={handleCreatePO}
-                    disabled={isSubmitting || newPOItems.length === 0}
-                    className="woody-btn-primary px-8 py-2.5 rounded-2xl text-xs font-black transition-all flex items-center gap-2.5 disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer"
+                    disabled={isPendingAction || newPOItems.length === 0}
+                    className="px-7 py-2.5 rounded-full text-xs font-semibold bg-[var(--theme-primary)] text-[var(--theme-primary-text)] hover:opacity-95 active:scale-[0.98] transition-all flex items-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer shadow-sm"
                 >
-                    {isSubmitting && <Loader2 size={15} className="animate-spin" />}
+                    {isPendingAction && <Loader2 size={14} className="animate-spin" />}
                     {isEditMode ? 'Save Changes' : 'Create Purchase Order'}
                 </button>
             </div>
@@ -408,10 +410,6 @@ export const CreatePOModal: React.FC<CreatePOModalProps> = ({
             footer={createPOFooter}
         >
             <div className="relative space-y-8 pb-4 overflow-x-hidden">
-                {/* Decorative background accent */}
-                <div className="absolute -top-20 -right-20 w-64 h-64 bg-[#2C5E3B]/5 dark:bg-[#1E3F27]/5 blur-[100px] rounded-full pointer-events-none animate-pulse-slow"></div>
-                <div className="absolute -bottom-20 -left-20 w-64 h-64 bg-amber-600/5 dark:bg-amber-700/3 blur-[100px] rounded-full pointer-events-none animate-pulse-slow"></div>
-
                 {/* 1. Supplier & Logistics */}
                 <POSupplierLogistics
                     isManualVendor={isManualVendor}
@@ -434,7 +432,7 @@ export const CreatePOModal: React.FC<CreatePOModalProps> = ({
                     setPoPriority={setPoPriority}
                 />
 
-                <div className="h-[1px] w-full bg-gradient-to-r from-transparent via-[#E2DCCE] dark:via-emerald-950/20 to-transparent"></div>
+                <div className="h-[1px] w-full bg-[var(--theme-border-subtle)]" />
 
                 {/* 2. Add Item Form */}
                 <POItemForm
@@ -456,7 +454,7 @@ export const CreatePOModal: React.FC<CreatePOModalProps> = ({
                     onFullEdit={handleFullEdit}
                 />
 
-                <div className="h-[1px] w-full bg-gradient-to-r from-transparent via-[#E2DCCE] dark:via-emerald-950/20 to-transparent"></div>
+                <div className="h-[1px] w-full bg-[var(--theme-border-subtle)]" />
 
                 {/* 4. Totals & Notes */}
                 <POTotalsSummary
@@ -478,7 +476,6 @@ export const CreatePOModal: React.FC<CreatePOModalProps> = ({
                     poTotal={poTotal}
                     currencySymbol={currencySymbol}
                 />
-
             </div>
         </Modal>
     );

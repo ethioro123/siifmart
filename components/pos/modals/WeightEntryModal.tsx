@@ -19,32 +19,32 @@ export const WeightEntryModal: React.FC<WeightEntryModalProps> = ({ product, onC
     const lineTotal = effectivePrice * numericValue;
 
     return (
-        <div className="fixed inset-0 z-[999] bg-black/80 backdrop-blur-md flex items-center justify-center p-4" onClick={onCancel}>
+        <div className="fixed inset-0 z-[999] bg-black/60 flex items-center justify-center p-4" onClick={onCancel}>
             <div
-                className="bg-white/95 dark:bg-[#18201B] border border-[#E2DCCE] dark:border-emerald-950/20 rounded-[32px] w-full max-w-sm shadow-2xl animate-in zoom-in-95 fade-in duration-200"
+                className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl w-full max-w-sm shadow-xl animate-in zoom-in-95 fade-in duration-200"
                 onClick={e => e.stopPropagation()}
             >
                 {/* Header */}
-                <div className="flex items-center justify-between p-4 border-b border-[#E2DCCE]/50 dark:border-white/5">
+                <div className="flex items-center justify-between p-4 border-b border-[var(--theme-border)]">
                     <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-lg bg-[#2C5E3B]/10 border border-[#2C5E3B]/20 flex items-center justify-center">
-                            <Scale size={16} className="text-[#2C5E3B] dark:text-[#A9CBA2]" />
+                        <div className="w-8 h-8 rounded-lg bg-[var(--theme-pill-bg)] border border-[var(--theme-border)] flex items-center justify-center text-[var(--theme-primary)]">
+                            <Scale size={16} />
                         </div>
                         <div className="min-w-0">
-                            <h3 className="text-[#1E3F27] dark:text-[#EAE5D9] text-sm font-bold leading-tight truncate">{product.name}</h3>
-                            <p className="text-[10px] text-[#4D6E56] dark:text-[#7A9E83] truncate">
+                            <h3 className="text-[var(--theme-text-primary)] text-sm font-bold leading-tight truncate">{product.name}</h3>
+                            <p className="text-[10px] text-[var(--theme-text-secondary)] truncate">
                                 {CURRENCY_SYMBOL} {formatPriceValue(effectivePrice)} per {unit.shortLabel}
                             </p>
                         </div>
                     </div>
-                    <button onClick={onCancel} className="p-1.5 hover:bg-white/10 rounded-lg text-[#4D6E56] dark:text-gray-400 hover:text-[#1E3F27] dark:hover:text-white transition-colors" title="Close">
+                    <button onClick={onCancel} className="p-1.5 hover:bg-[var(--theme-bg-subtle)] rounded-lg text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] transition-colors cursor-pointer" title="Close">
                         <X size={16} />
                     </button>
                 </div>
 
                 {/* Input */}
-                <div className="p-6">
-                    <label className="text-[10px] text-[#4D6E56] dark:text-[#7A9E83] font-bold uppercase tracking-widest block mb-2">
+                <div className="p-5">
+                    <label className="text-[10px] text-[var(--theme-text-secondary)] font-bold uppercase tracking-wider block mb-2">
                         Enter {unit.label}
                     </label>
                     <div className="flex items-center gap-2">
@@ -60,9 +60,9 @@ export const WeightEntryModal: React.FC<WeightEntryModalProps> = ({ product, onC
                                 if (e.key === 'Escape') onCancel();
                             }}
                             placeholder="0.00"
-                            className="flex-1 min-w-0 bg-white dark:bg-black/60 border border-[#E2DCCE] dark:border-white/10 rounded-xl px-2 py-3 lg:px-4 text-xl lg:text-2xl text-[#1E3F27] dark:text-white font-mono text-center focus:border-[#2C5E3B] dark:focus:border-[#A9CBA2] outline-none transition-all [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+                            className="flex-1 min-w-0 bg-[var(--theme-input-bg)] border border-[var(--theme-input-border)] rounded-xl px-2 py-3 lg:px-4 text-xl lg:text-2xl text-[var(--theme-input-text)] font-mono text-center focus:border-[var(--theme-border-focus)] outline-none transition-all [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
                         />
-                        <span className="text-sm lg:text-lg text-[#4D6E56] dark:text-gray-400 font-bold uppercase shrink-0 w-8 lg:w-10 text-right">{unit.shortLabel}</span>
+                        <span className="text-sm lg:text-base text-[var(--theme-text-secondary)] font-bold uppercase shrink-0 w-8 lg:w-10 text-right">{unit.shortLabel}</span>
                     </div>
 
                     {unit.category === 'weight' && (
@@ -72,7 +72,7 @@ export const WeightEntryModal: React.FC<WeightEntryModalProps> = ({ product, onC
                                     key={preset}
                                     type="button"
                                     onClick={() => setValue(preset.toString())}
-                                    className="py-1.5 lg:py-2 bg-white/90 dark:bg-black/30 border border-[#E2DCCE] dark:border-white/10 rounded-xl text-[9px] lg:text-[10px] text-[#2C4D35] dark:text-gray-300 font-bold transition-all active:scale-95 shadow-sm truncate whitespace-nowrap px-1"
+                                    className="py-1.5 lg:py-2 bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card-hover)] border border-[var(--theme-border)] rounded-xl text-[9px] lg:text-[10px] text-[var(--theme-text-primary)] font-bold transition-all active:scale-95 shadow-xs truncate whitespace-nowrap px-1 cursor-pointer"
                                 >
                                     {preset} {unit.shortLabel}
                                 </button>
@@ -86,7 +86,7 @@ export const WeightEntryModal: React.FC<WeightEntryModalProps> = ({ product, onC
                                     key={preset}
                                     type="button"
                                     onClick={() => setValue(preset.toString())}
-                                    className="py-1.5 lg:py-2 bg-white/90 dark:bg-black/30 border border-[#E2DCCE] dark:border-white/10 rounded-xl text-[9px] lg:text-[10px] text-[#2C4D35] dark:text-gray-300 font-bold transition-all active:scale-95 shadow-sm truncate whitespace-nowrap px-1"
+                                    className="py-1.5 lg:py-2 bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card-hover)] border border-[var(--theme-border)] rounded-xl text-[9px] lg:text-[10px] text-[var(--theme-text-primary)] font-bold transition-all active:scale-95 shadow-xs truncate whitespace-nowrap px-1 cursor-pointer"
                                 >
                                     {preset} {unit.shortLabel}
                                 </button>
@@ -96,9 +96,9 @@ export const WeightEntryModal: React.FC<WeightEntryModalProps> = ({ product, onC
 
                     {/* Line total preview */}
                     {numericValue > 0 && (
-                        <div className="mt-4 p-3 bg-[#2C5E3B]/5 border border-[#2C5E3B]/10 rounded-xl flex justify-between items-center">
-                            <span className="text-[10px] text-[#4D6E56] dark:text-gray-400 font-bold uppercase">Line Total</span>
-                            <span className="text-lg text-[#2C5E3B] dark:text-[#A9CBA2] font-black tabular-nums">
+                        <div className="mt-4 p-3 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl flex justify-between items-center shadow-xs">
+                            <span className="text-[10px] text-[var(--theme-text-secondary)] font-bold uppercase tracking-wider">Line Total</span>
+                            <span className="text-lg text-[var(--theme-primary)] font-bold tabular-nums font-mono">
                                 {CURRENCY_SYMBOL} {lineTotal.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                             </span>
                         </div>
@@ -106,17 +106,17 @@ export const WeightEntryModal: React.FC<WeightEntryModalProps> = ({ product, onC
                 </div>
 
                 {/* Footer */}
-                <div className="p-4 border-t border-[#E2DCCE]/50 dark:border-white/5 flex gap-2">
+                <div className="p-4 border-t border-[var(--theme-border)] flex gap-2">
                     <button
                         onClick={onCancel}
-                        className="flex-1 py-3 bg-white/90 dark:bg-black/30 text-stone-700 dark:text-gray-300 hover:bg-stone-100 dark:hover:bg-black/50 rounded-xl font-bold text-sm transition-all border border-[#E2DCCE] dark:border-white/10"
+                        className="flex-1 py-3 bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-card-hover)] rounded-xl font-bold text-xs transition-colors border border-[var(--theme-border)] cursor-pointer shadow-xs"
                     >
                         Cancel
                     </button>
                     <button
                         onClick={() => numericValue > 0 && onConfirm(numericValue)}
                         disabled={numericValue <= 0}
-                        className="flex-1 py-3 bg-gradient-to-r from-[#224429] to-[#2C5E3B] disabled:bg-stone-200 dark:disabled:bg-white/5 text-white disabled:text-stone-400 dark:disabled:text-stone-600 border border-transparent disabled:border-stone-300 dark:disabled:border-white/5 disabled:cursor-not-allowed rounded-xl font-black text-sm transition-all uppercase tracking-wider"
+                        className="flex-1 py-3 bg-[var(--theme-primary)] disabled:opacity-30 text-[var(--theme-primary-text)] border border-transparent disabled:cursor-not-allowed rounded-xl font-bold text-xs transition-colors uppercase tracking-wider cursor-pointer shadow-xs"
                     >
                         Add to Cart
                     </button>

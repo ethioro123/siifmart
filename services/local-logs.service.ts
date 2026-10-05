@@ -51,11 +51,15 @@ class SystemLogsService {
 
     private saveLogs() {
         try {
-            // IMPORTANT: Rotate logs to prevent localStorage overflow
-            // Keep only last 1000 entries (approximately 500KB)
-            if (this.logs.length > 1000) {
-                console.warn(`Log rotation: Trimming ${this.logs.length - 1000} old entries`);
+            // IMPORTANT: Rotate logs in batches to prevent localStorage overflow
+            // without spamming the console on every single entry.
+            // When threshold of 1100 is reached, trim back to 1000 entries (approximately 500KB).
+            if (this.logs.length > 1100) {
+                const trimmedCount = this.logs.length - 1000;
                 this.logs = this.logs.slice(0, 1000);
+                if (import.meta.env.DEV) {
+                    console.debug(`[SystemLogsService] Batch log rotation: Trimmed ${trimmedCount} entries`);
+                }
             }
 
             localStorage.setItem(this.STORAGE_KEY, JSON.stringify(this.logs));

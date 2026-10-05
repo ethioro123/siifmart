@@ -1,9 +1,10 @@
-import React, { useMemo } from 'react';
-import { DollarSign, Download, FileText, CheckCircle2, ChevronRight } from 'lucide-react';
+import React, { useMemo, useState, useEffect, useCallback } from 'react';
+import { DollarSign, Download, FileText, CheckCircle2, ChevronRight, Clock, ShieldCheck } from 'lucide-react';
 import { CURRENCY_SYMBOL } from '../../../constants';
 import { useData } from '../../../contexts/DataContext';
-import { Employee } from '../../../types';
+import { Employee, SalaryChangeRequest } from '../../../types';
 import { PayslipRecord, generateEmployeePayslips } from '../../../utils/employeeProfileData';
+import { salaryRequestsService } from '../../../services/salary-requests.service';
 
 interface PayrollTabProps {
     employee: Employee;
@@ -22,6 +23,35 @@ export default function PayrollTab({
 }: PayrollTabProps) {
     const { settings, activeSite } = useData();
     const currencySymbol = (employee as any).salaryCurrency || (activeSite as any)?.currency || settings?.currency || CURRENCY_SYMBOL;
+
+    const [pendingRequest, setPendingRequest] = useState<SalaryChangeRequest | null>(null);
+
+    const loadPendingForEmployee = useCallback(async () => {
+        try {
+            const pendingList = await salaryRequestsService.getPending();
+            const match = pendingList.find(r => r.employeeId === employee.id);
+            setPendingRequest(match || null);
+        } catch {
+            // Handled
+        }
+    }, [employee.id]);
+
+    useEffect(() => {
+        loadPendingForEmployee();
+        const handleCreated = () => loadPendingForEmployee();
+        const handleApproved = () => loadPendingForEmployee();
+        const handleRejected = () => loadPendingForEmployee();
+
+        window.addEventListener('salary:request-created', handleCreated);
+        window.addEventListener('salary:request-approved', handleApproved);
+        window.addEventListener('salary:request-rejected', handleRejected);
+
+        return () => {
+            window.removeEventListener('salary:request-created', handleCreated);
+            window.removeEventListener('salary:request-approved', handleApproved);
+            window.removeEventListener('salary:request-rejected', handleRejected);
+        };
+    }, [loadPendingForEmployee]);
 
     const payslips = useMemo(() => {
         return generateEmployeePayslips(employee, currencySymbol);
@@ -62,6 +92,28 @@ export default function PayrollTab({
                     )}
                 </div>
             </div>
+
+            {/* Pending Salary Request Alert */}
+            {pendingRequest && (
+                <div className="p-4 rounded-2xl bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800/30 flex items-start sm:items-center justify-between gap-4">
+                    <div className="flex items-center gap-3">
+                        <div className="p-2 rounded-xl bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-400">
+                            <Clock size={18} />
+                        </div>
+                        <div>
+                            <p className="text-xs font-bold text-amber-900 dark:text-amber-300">
+                                Pending Salary Adjustment: {currencySymbol} {Number(pendingRequest.currentSalary).toLocaleString()} → {currencySymbol} {Number(pendingRequest.proposedSalary).toLocaleString()}
+                            </p>
+                            <p className="text-[11px] text-amber-700 dark:text-amber-400/80 mt-0.5">
+                                Proposed by {pendingRequest.requestedBy} ({pendingRequest.requestedByRole}) • Awaiting Finance Manager / CEO Authorization
+                            </p>
+                        </div>
+                    </div>
+                    <span className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full bg-amber-200/80 dark:bg-amber-900/60 text-amber-800 dark:text-amber-300 shrink-0">
+                        In Queue
+                    </span>
+                </div>
+            )}
 
             {/* Recent Payslips */}
             <div className="space-y-4">

@@ -42,50 +42,72 @@ export const ViewPOModal: React.FC<ViewPOModalProps> = ({ isOpen, onClose, po, o
 
     const isCEO = user?.role === 'super_admin';
     const isProcurementManager = user?.role === 'procurement_manager';
-    const isWarehouseManager = user?.role === 'warehouse_manager';
-    const canApprove = isProcurementManager || user?.role === 'finance_manager' || user?.role === 'admin' || isCEO || isWarehouseManager;
-    const canFullDelete = isCEO || isProcurementManager || isWarehouseManager;
+    const isOperationalDirector = user?.role === 'regional_manager' || user?.role === 'operations_manager';
+    const isAuthorizedApprover = isProcurementManager || user?.role === 'finance_manager' || user?.role === 'admin' || isCEO || isOperationalDirector;
+
+    // Zero-Trust 4-Eyes Check: Creator cannot approve their own PO (Captain Owns the Ship Doctrine)
+    const isCreator = Boolean(
+        user?.name && po.createdBy && user.name.toLowerCase().trim() === po.createdBy.toLowerCase().trim()
+    );
+    const canApprove = isAuthorizedApprover && (!isCreator || isCEO);
+    const canFullDelete = isCEO || isOperationalDirector;
 
     const handleApprovePO = async () => {
-        if (!window.confirm(`Are you sure you want to approve PO ${formatPONumber(po)}?`)) return;
+        if (isCreator && !isCEO) {
+            showToast('Zero-Trust Violation: You cannot approve a PO you created yourself.', 'error');
+            return;
+        }
+
+        const reason = window.prompt(
+            "Enter structured approval reason code:\n1: STANDARD_REPLENISHMENT\n2: EMERGENCY_STOCK_OUT\n3: DIRECT_FARMER_PURCHASE\n4: PROMOTIONAL_STOCKING",
+            "STANDARD_REPLENISHMENT"
+        );
+        if (!reason) return;
+
         setIsSubmitting(true);
         try {
-            const updatedPO: PurchaseOrder = {
-                ...po,
-                status: 'Ordered', // Or 'Approved' based on logic, original code set to 'Ordered' in some places, but 'Approved' is standard workflow. Let's stick to what original code did if unclear, but 'Ordered' usually implies sent. Original code line 2661 sets to 'Ordered'.
-                approvedBy: user?.name || 'Unknown',
-                approvedAt: new Date().toISOString()
-            };
-            await purchaseOrdersService.update(updatedPO.id, updatedPO);
+            await purchaseOrdersService.approve({
+                poId: po.id,
+                approverId: user?.id || (user as any)?.employeeId || 'USR',
+                approverName: user?.name || 'Authorized Manager',
+                approverRole: user?.role || 'procurement_manager',
+                reasonCode: reason.trim() as any,
+                notes: 'Approved via PO Inspector modal'
+            });
             showToast(`PO ${formatPONumber(po)} approved successfully`, 'success');
             onSuccess();
             onClose();
-        } catch (error) {
+        } catch (error: any) {
             logger.error('ViewPOModal', 'Error approving PO:', error);
-            showToast('Failed to approve PO', 'error');
+            showToast(error.message || 'Failed to approve PO', 'error');
         } finally {
             setIsSubmitting(false);
         }
     };
 
     const handleRejectPO = async () => {
-        const reason = window.prompt("Reason for rejection:");
+        const reason = window.prompt(
+            "Enter rejection reason:\n(PRICE_UNFAVORABLE / BUDGET_OVERRUN / EXCESSIVE_STOCK_ON_HAND / SPECIFICATION_MISMATCH)",
+            "SPECIFICATION_MISMATCH"
+        );
         if (!reason) return;
 
         setIsSubmitting(true);
         try {
-            const updatedPO: PurchaseOrder = {
-                ...po,
-                status: 'Rejected',
-                notes: po.notes ? `${po.notes}\n[REJECTED: ${reason}]` : `[REJECTED: ${reason}]`
-            };
-            await purchaseOrdersService.update(updatedPO.id, updatedPO);
+            await purchaseOrdersService.reject({
+                poId: po.id,
+                rejectorId: user?.id || (user as any)?.employeeId || 'USR',
+                rejectorName: user?.name || 'Authorized Manager',
+                rejectorRole: user?.role || 'procurement_manager',
+                reasonCode: (reason.trim().toUpperCase().replace(/\s+/g, '_')) as any,
+                notes: reason
+            });
             showToast(`PO ${formatPONumber(po)} rejected`, 'info');
             onSuccess();
             onClose();
-        } catch (error) {
+        } catch (error: any) {
             logger.error('ViewPOModal', 'Error rejecting PO:', error);
-            showToast('Failed to reject PO', 'error');
+            showToast(error.message || 'Failed to reject PO', 'error');
         } finally {
             setIsSubmitting(false);
         }
@@ -120,59 +142,60 @@ export const ViewPOModal: React.FC<ViewPOModalProps> = ({ isOpen, onClose, po, o
                         <h2 className="text-2xl font-bold text-gray-900 dark:text-white tracking-tight">
                             {formatPONumber(po)}
                         </h2>
-                        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                        <p className="text-sm text-[var(--theme-text-secondary)] mt-1">
                             {po.supplierName}
                             {po.supplierId?.startsWith('MANUAL') && (
-                                <span className="ml-2 text-[10px] bg-[#2C5E3B]/15 text-[#2C5E3B] dark:text-[#A9CBA2] border border-[#2C5E3B]/20 dark:border-[#A9CBA2]/20 px-1.5 py-0.5 rounded">MANUAL</span>
+                                <span className="ml-2 text-[10px] bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] border border-[var(--theme-border)] px-2 py-0.5 rounded-full font-semibold uppercase">MANUAL</span>
                             )}
                         </p>
                     </div>
                     <div className="flex flex-col items-end gap-2">
-                        <div className={`px-4 py-2 rounded-full text-sm font-bold ${po.status === 'Received' ? 'bg-green-500/20 text-green-400' :
-                            po.status === 'Approved' ? 'bg-[#2C5E3B]/20 text-[#2C5E3B] dark:text-[#A9CBA2]' :
-                                po.status === 'Pending' ? 'bg-[#8C6239]/20 text-[#8C6239] dark:text-[#E2C899]' :
-                                    po.status === 'Draft' ? 'bg-yellow-500/20 text-yellow-400' :
-                                        'bg-red-500/20 text-red-400'
-                            }`}>
+                        <div className={`px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider border ${
+                            po.status === 'Received' ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' :
+                            po.status === 'Approved' ? 'bg-blue-500/10 text-blue-500 border-blue-500/20' :
+                            po.status === 'Pending' ? 'bg-amber-500/10 text-amber-500 border-amber-500/20' :
+                            po.status === 'Draft' ? 'bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] border-[var(--theme-border)]' :
+                            'bg-red-500/10 text-red-500 border-red-500/20'
+                        }`}>
                             {po.status}
                         </div>
-                        <div className={`px-3 py-1 rounded-full text-[10px] font-bold border uppercase ${po.priority === 'High' || po.priority === 'Urgent' ? 'text-red-400 border-red-500/20 bg-red-500/10' :
-                            po.priority === 'Low' ? 'text-[#8C6239] border-[#8C6239]/20 bg-[#8C6239]/10' :
-                                'text-gray-400 border-gray-500/20 bg-gray-500/10'
-                            }`}>
+                        <div className={`px-2.5 py-0.5 rounded-full text-[10px] font-semibold border uppercase tracking-wide ${
+                            po.priority === 'High' || po.priority === 'Urgent' ? 'text-red-500 border-red-500/20 bg-red-500/10' :
+                            'text-[var(--theme-text-secondary)] border-[var(--theme-border)] bg-[var(--theme-bg-subtle)]'
+                        }`}>
                             Priority: {po.priority || 'Normal'}
                         </div>
                     </div>
                 </div>
 
-                {/* Key Info - Dark Dashboard Grid */}
+                {/* Key Info - Apple Card Grid */}
                 <div className={`grid grid-cols-2 ${po.approvedBy ? 'md:grid-cols-5' : 'md:grid-cols-4'} gap-3`}>
-                    <div className="glass-panel rounded-xl p-4 border border-gray-100 dark:border-white/5 shadow-sm dark:shadow-none">
-                        <p className="text-[10px] text-gray-500 dark:text-secondary uppercase tracking-widest font-bold mb-1">Date</p>
-                        <p className="text-gray-900 dark:text-white font-bold">{po.date || (po.created_at ? formatDateTime(po.created_at, { showTime: true }) : 'N/A')}</p>
+                    <div className="rounded-2xl p-4 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] shadow-sm">
+                        <p className="text-[10px] text-[var(--theme-text-muted)] uppercase tracking-wider font-semibold mb-1">Date</p>
+                        <p className="text-[var(--theme-text-primary)] font-semibold font-mono text-sm tabular-nums">{po.date || (po.created_at ? formatDateTime(po.created_at, { showTime: true }) : 'N/A')}</p>
                     </div>
-                    <div className="glass-panel rounded-xl p-4 border border-gray-100 dark:border-white/5 shadow-sm dark:shadow-none">
-                        <p className="text-[10px] text-gray-500 dark:text-secondary uppercase tracking-widest font-bold mb-1">Requested By</p>
-                        <p className="text-gray-900 dark:text-white font-bold text-[clamp(11px,1.5vw,14px)] break-words leading-tight">{po.requestedBy || po.createdBy || 'Unknown'}</p>
+                    <div className="rounded-2xl p-4 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] shadow-sm">
+                        <p className="text-[10px] text-[var(--theme-text-muted)] uppercase tracking-wider font-semibold mb-1">Requested By</p>
+                        <p className="text-[var(--theme-text-primary)] font-semibold text-sm truncate">{po.requestedBy || po.createdBy || 'Unknown'}</p>
                     </div>
                     {po.approvedBy && (
-                        <div className="glass-panel rounded-xl p-4 border border-[#2C5E3B]/20 dark:border-[#A9CBA2]/20 bg-[#2C5E3B]/5 dark:bg-[#A9CBA2]/5 shadow-sm dark:shadow-none">
-                            <p className="text-[10px] text-[#2C5E3B] dark:text-[#A9CBA2] uppercase tracking-widest font-bold mb-1">Approved By</p>
-                            <p className="text-gray-900 dark:text-white font-bold text-[clamp(11px,1.5vw,14px)] break-words leading-tight">{po.approvedBy}</p>
+                        <div className="rounded-2xl p-4 border border-emerald-500/20 bg-emerald-500/5 shadow-sm">
+                            <p className="text-[10px] text-emerald-500 uppercase tracking-wider font-semibold mb-1">Approved By</p>
+                            <p className="text-[var(--theme-text-primary)] font-semibold text-sm truncate">{po.approvedBy}</p>
                         </div>
                     )}
-                    <div className="glass-panel rounded-xl p-4 border border-gray-100 dark:border-white/5 shadow-sm dark:shadow-none">
-                        <p className="text-[10px] text-gray-500 dark:text-secondary uppercase tracking-widest font-bold mb-1">Destination</p>
-                        <div className="flex items-center gap-1">
-                            <MapPin size={12} className="text-gray-400 dark:text-gray-500 shrink-0" />
-                            <p className="text-gray-900 dark:text-white font-bold text-[clamp(11px,1.5vw,14px)] break-words leading-tight">
+                    <div className="rounded-2xl p-4 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] shadow-sm">
+                        <p className="text-[10px] text-[var(--theme-text-muted)] uppercase tracking-wider font-semibold mb-1">Destination</p>
+                        <div className="flex items-center gap-1.5">
+                            <MapPin size={13} className="text-[var(--theme-text-muted)] shrink-0" />
+                            <p className="text-[var(--theme-text-primary)] font-semibold text-sm truncate">
                                 {sites?.find(s => s.id === po.siteId)?.name || po.destination || 'N/A'}
                             </p>
                         </div>
                     </div>
-                    <div className="glass-panel rounded-xl p-4 border border-gray-100 dark:border-white/5 shadow-sm dark:shadow-none">
-                        <p className="text-[10px] text-gray-500 dark:text-secondary uppercase tracking-widest font-bold mb-1">Expected</p>
-                        <p className="text-gray-900 dark:text-white font-bold">{po.expectedDelivery || 'N/A'}</p>
+                    <div className="rounded-2xl p-4 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] shadow-sm">
+                        <p className="text-[10px] text-[var(--theme-text-muted)] uppercase tracking-wider font-semibold mb-1">Expected</p>
+                        <p className="text-[var(--theme-text-primary)] font-semibold font-mono text-sm tabular-nums">{po.expectedDelivery || 'N/A'}</p>
                     </div>
                 </div>
 
@@ -186,11 +209,11 @@ export const ViewPOModal: React.FC<ViewPOModalProps> = ({ isOpen, onClose, po, o
                             </div>
                         )}
                         {po.approvedBy && (
-                            <div className="flex items-center gap-1 text-gray-400">
-                                <span className="text-gray-500 dark:text-gray-400 uppercase font-bold tracking-widest text-[9px]">Approved By:</span>
-                                <span className="text-[#2C5E3B] dark:text-[#A9CBA2] font-black">{po.approvedBy}</span>
+                            <div className="flex items-center gap-1.5 text-xs">
+                                <span className="text-[var(--theme-text-muted)] uppercase font-semibold tracking-wider text-[10px]">Approved By:</span>
+                                <span className="text-[var(--theme-text-primary)] font-semibold">{po.approvedBy}</span>
                                 {po.approvedAt && (
-                                    <span className="text-gray-500 dark:text-gray-400 font-mono text-xs">({formatDateTime(po.approvedAt, { showTime: true })})</span>
+                                    <span className="text-[var(--theme-text-muted)] font-mono text-xs">({formatDateTime(po.approvedAt, { showTime: true })})</span>
                                 )}
                             </div>
                         )}
@@ -200,17 +223,17 @@ export const ViewPOModal: React.FC<ViewPOModalProps> = ({ isOpen, onClose, po, o
                 {/* Order Items Table */}
                 <div>
                     <div className="flex items-center justify-between mb-3 px-1">
-                        <h3 className="text-[10px] font-black text-gray-500 dark:text-gray-400 uppercase tracking-widest">
+                        <h3 className="text-xs font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider">
                             Order Payload
                         </h3>
                         {(() => {
                             const totalSellable = po.lineItems?.reduce((sum, item) => sum + getPOItemPackagingSummary(item, allProducts).sellableQty, 0) || 0;
                             const totalManifest = po.lineItems?.reduce((sum, item) => sum + item.quantity, 0) || 0;
                             return (
-                                <span className="text-[10px] font-black text-[#8C6239] dark:text-[#E2C899] uppercase tracking-widest flex items-center gap-1.5">
+                                <span className="text-xs font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider flex items-center gap-1.5 font-mono">
                                     <span>{totalSellable.toLocaleString()} Total Sellable Units</span>
                                     {totalManifest !== totalSellable && (
-                                        <span className="text-gray-400 dark:text-gray-500 font-bold lowercase">
+                                        <span className="text-[var(--theme-text-muted)] lowercase font-normal">
                                             ({totalManifest.toLocaleString()} manifest {totalManifest === 1 ? 'unit' : 'units'})
                                         </span>
                                     )}
@@ -218,7 +241,7 @@ export const ViewPOModal: React.FC<ViewPOModalProps> = ({ isOpen, onClose, po, o
                             );
                         })()}
                     </div>
-                    <div className="glass-panel rounded-2xl overflow-hidden shadow-sm dark:shadow-none">
+                    <div className="rounded-2xl border border-[var(--theme-border)] bg-[var(--theme-bg-panel)] overflow-hidden shadow-sm">
                         <table className="w-full">
                             <thead>
                                 <tr className="bg-gray-100/50 dark:bg-black/20 border-b border-gray-200 dark:border-white/5">
@@ -250,16 +273,16 @@ export const ViewPOModal: React.FC<ViewPOModalProps> = ({ isOpen, onClose, po, o
                                                             <span className="inline-block text-[10px] bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 px-1.5 py-0.5 rounded font-black tracking-widest uppercase italic">Custom Resource</span>
                                                         )}
                                                         {pkg.packBadge && (
-                                                            <span className="inline-block text-[9px] bg-amber-500/10 border border-amber-500/20 text-amber-700 dark:text-amber-400 px-1.5 py-0.5 rounded font-black tracking-wider uppercase">
-                                                                📦 {pkg.packBadge}
+                                                            <span className="inline-flex items-center gap-1 text-[9px] bg-amber-500/10 border border-amber-500/20 text-amber-700 dark:text-amber-400 px-1.5 py-0.5 rounded font-black tracking-wider uppercase">
+                                                                <Package size={11} className="shrink-0" /> {pkg.packBadge}
                                                             </span>
                                                         )}
                                                     </div>
                                                 </td>
                                                 <td className="p-4">
                                                     <div className="text-xs font-bold text-gray-900 dark:text-white flex items-center gap-1">
-                                                        <span className="inline-block px-2 py-0.5 rounded-md bg-amber-500/10 border border-amber-500/20 text-amber-700 dark:text-amber-400 text-[10px] font-black uppercase">
-                                                            📦 {pkg.packBadge || pkg.manifestUnitName}
+                                                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-amber-500/10 border border-amber-500/20 text-amber-700 dark:text-amber-400 text-[10px] font-black uppercase">
+                                                            <Package size={11} className="shrink-0" /> {pkg.packBadge || pkg.manifestUnitName}
                                                         </span>
                                                     </div>
                                                     <div className="text-[10px] text-gray-500 dark:text-gray-400 font-bold mt-1">
@@ -271,43 +294,43 @@ export const ViewPOModal: React.FC<ViewPOModalProps> = ({ isOpen, onClose, po, o
                                                         {pkg.sellableQty.toLocaleString()} <span className="text-[11px] font-bold text-gray-500 dark:text-gray-400">{pkg.sellUnitLabel}</span>
                                                     </div>
                                                     {pkg.hasMultiplier ? (
-                                                        <div className="text-[10px] text-[#2C5E3B] dark:text-[#A9CBA2] font-black whitespace-nowrap mt-0.5">
+                                                        <div className="text-[10px] text-[var(--theme-text-secondary)] font-medium whitespace-nowrap mt-0.5">
                                                             {item.quantity} {pkg.manifestUnitName.toLowerCase()} ({pkg.unitsPerOrderUnit} {pkg.sellUnitLabel}/{pkg.manifestUnitName.replace(/s$/, '').toLowerCase()})
                                                         </div>
                                                     ) : (
-                                                        <div className="text-[10px] text-gray-400 font-medium">
+                                                        <div className="text-[10px] text-[var(--theme-text-muted)] font-medium">
                                                             (individual units)
                                                         </div>
                                                     )}
                                                 </td>
                                                 <td className="p-4 text-right">
-                                                    <div className="text-gray-900 dark:text-white font-black font-mono tabular-nums text-xs">
+                                                    <div className="text-[var(--theme-text-primary)] font-bold font-mono tabular-nums text-xs">
                                                         {formatCompactNumber(item.unitCost, { currency: currencySymbol })}{pkg.hasMultiplier ? ` /${pkg.manifestUnitName.replace(/s$/, '').toLowerCase()}` : ''}
                                                     </div>
                                                     {pkg.hasMultiplier && (
-                                                        <div className="text-[10px] text-gray-400 font-mono">
+                                                        <div className="text-[10px] text-[var(--theme-text-muted)] font-mono">
                                                             ~{formatCompactNumber(pkg.costPerSellableUnit, { currency: currencySymbol })}/{pkg.sellUnitLabel}
                                                         </div>
                                                     )}
                                                 </td>
-                                                <td className="p-4 text-[#2C5E3B] dark:text-[#A9CBA2] text-right font-black font-mono tabular-nums">{formatCompactNumber(item.totalCost, { currency: currencySymbol })}</td>
-                                                <td className="p-4 text-gray-400 dark:text-gray-500">
+                                                <td className="p-4 text-[var(--theme-text-primary)] text-right font-bold font-mono tabular-nums">{formatCompactNumber(item.totalCost, { currency: currencySymbol })}</td>
+                                                <td className="p-4 text-[var(--theme-text-muted)]">
                                                     {expandedItems[i] ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
                                                 </td>
                                             </tr>
                                             {expandedItems[i] && item.customAttributes && (
-                                                <tr className="bg-black/20">
+                                                <tr className="bg-[var(--theme-bg-subtle)]/40">
                                                     <td colSpan={8} className="p-4 pl-12">
-                                                        <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-xs text-gray-400">
+                                                        <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-xs text-[var(--theme-text-secondary)]">
                                                             {Object.entries(item.customAttributes).map(([category, attrs]) => (
                                                                 <div key={category} className="space-y-1">
-                                                                    <h4 className="font-bold text-gray-500 uppercase text-[10px] mb-1">{category}</h4>
+                                                                    <h4 className="font-semibold text-[var(--theme-text-muted)] uppercase text-[10px] mb-1">{category}</h4>
                                                                     {Object.entries(attrs).map(([key, value]) => {
                                                                         if (!value) return null;
                                                                         return (
-                                                                            <div key={key} className="flex justify-between border-b border-white/5 pb-0.5">
+                                                                            <div key={key} className="flex justify-between border-b border-[var(--theme-border-subtle)] pb-0.5">
                                                                                 <span className="capitalize">{key.replace(/([A-Z])/g, ' $1').trim()}:</span>
-                                                                                <span className="text-gray-300 ml-2 text-right">
+                                                                                <span className="text-[var(--theme-text-primary)] ml-2 text-right font-medium">
                                                                                     {value === true ? 'Yes' : String(value)}
                                                                                 </span>
                                                                             </div>
@@ -324,7 +347,7 @@ export const ViewPOModal: React.FC<ViewPOModalProps> = ({ isOpen, onClose, po, o
                                 })}
                                 {(!po.lineItems || po.lineItems.length === 0) && (
                                     <tr>
-                                        <td colSpan={8} className="p-8 text-center text-gray-500 italic">No items in this order</td>
+                                        <td colSpan={8} className="p-8 text-center text-[var(--theme-text-muted)] italic">No items in this order</td>
                                     </tr>
                                 )}
                             </tbody>
@@ -334,26 +357,26 @@ export const ViewPOModal: React.FC<ViewPOModalProps> = ({ isOpen, onClose, po, o
 
                 {/* Minimalist Summary */}
                 <div className="flex justify-end pt-8">
-                    <div className="w-full md:w-80 space-y-6 text-sm">
-                        <div className="flex justify-between items-end border-b border-gray-100 dark:border-white/5 pb-2">
-                            <span className="uppercase tracking-widest text-[10px] font-bold text-gray-500">Base Payload</span>
-                            <span className="font-mono text-gray-900 dark:text-white font-black tabular-nums">{currencySymbol} {(po.totalAmount - ((po.taxAmount || 0) + (po.shippingCost || 0))).toLocaleString()}</span>
+                    <div className="w-full md:w-80 space-y-4 text-sm">
+                        <div className="flex justify-between items-end border-b border-[var(--theme-border-subtle)] pb-2">
+                            <span className="uppercase tracking-wider text-[10px] font-semibold text-[var(--theme-text-muted)]">Base Payload</span>
+                            <span className="font-mono text-[var(--theme-text-primary)] font-bold tabular-nums">{currencySymbol} {(po.totalAmount - ((po.taxAmount || 0) + (po.shippingCost || 0))).toLocaleString()}</span>
                         </div>
                         {po.shippingCost && po.shippingCost > 0 ? (
-                            <div className="flex justify-between items-end border-b border-gray-100 dark:border-white/5 pb-2">
-                                <span className="uppercase tracking-widest text-[10px] font-bold text-gray-400">Logistics</span>
-                                <span className="font-mono text-gray-600 dark:text-gray-300 font-bold tabular-nums">{currencySymbol} {po.shippingCost.toLocaleString()}</span>
+                            <div className="flex justify-between items-end border-b border-[var(--theme-border-subtle)] pb-2">
+                                <span className="uppercase tracking-wider text-[10px] font-semibold text-[var(--theme-text-muted)]">Logistics</span>
+                                <span className="font-mono text-[var(--theme-text-secondary)] font-semibold tabular-nums">{currencySymbol} {po.shippingCost.toLocaleString()}</span>
                             </div>
                         ) : null}
                         {po.taxAmount && po.taxAmount > 0 ? (
-                            <div className="flex justify-between items-end border-b border-gray-100 dark:border-white/5 pb-2">
-                                <span className="uppercase tracking-widest text-[10px] font-bold text-gray-400">Tax</span>
-                                <span className="font-mono text-gray-600 dark:text-gray-300 font-bold tabular-nums">{currencySymbol} {po.taxAmount.toLocaleString()}</span>
+                            <div className="flex justify-between items-end border-b border-[var(--theme-border-subtle)] pb-2">
+                                <span className="uppercase tracking-wider text-[10px] font-semibold text-[var(--theme-text-muted)]">Tax</span>
+                                <span className="font-mono text-[var(--theme-text-secondary)] font-semibold tabular-nums">{currencySymbol} {po.taxAmount.toLocaleString()}</span>
                             </div>
                         ) : null}
                         <div className="flex justify-between items-end pt-2">
-                            <span className="uppercase tracking-widest text-xs font-black text-gray-900 dark:text-white">Total Authority</span>
-                            <span className="font-mono text-3xl font-black text-gray-900 dark:text-[#A9CBA2] tabular-nums tracking-tighter leading-none">{currencySymbol} {po.totalAmount.toLocaleString()}</span>
+                            <span className="uppercase tracking-wider text-xs font-bold text-[var(--theme-text-primary)]">Total Authority</span>
+                            <span className="font-mono text-2xl font-bold text-[var(--theme-text-primary)] tabular-nums tracking-tight leading-none">{currencySymbol} {po.totalAmount.toLocaleString()}</span>
                         </div>
                     </div>
                 </div>
@@ -369,24 +392,24 @@ export const ViewPOModal: React.FC<ViewPOModalProps> = ({ isOpen, onClose, po, o
                 )}
 
                 {/* Actions */}
-                <div className="pt-4 border-t border-white/10 space-y-3">
+                <div className="pt-4 border-t border-[var(--theme-border)] space-y-3">
                     {/* Primary Actions for Draft POs */}
                     {po.status === 'Draft' && canApprove && (
                         <div className="grid grid-cols-2 gap-3">
                             <button
                                 onClick={handleApprovePO}
                                 disabled={isSubmitting}
-                                className={`py-3 bg-[#2C5E3B] hover:bg-[#224429] dark:bg-[#A9CBA2] dark:hover:bg-[#8dae86] text-[#FAF8F5] dark:text-[#1E3B24] font-bold rounded-xl transition-colors flex items-center justify-center gap-2 ${isSubmitting ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                className={`h-11 px-5 bg-[var(--theme-primary)] hover:opacity-90 active:scale-[0.98] text-[var(--theme-primary-text)] font-semibold text-sm rounded-full transition-all flex items-center justify-center gap-2 shadow-sm ${isSubmitting ? 'opacity-50 cursor-not-allowed' : ''}`}
                             >
-                                {isSubmitting ? <Loader2 size={18} className="animate-spin" /> : <CheckCircle size={18} />}
+                                {isSubmitting ? <Loader2 size={16} className="animate-spin" /> : <CheckCircle size={16} />}
                                 {isSubmitting ? 'Approving...' : 'Approve'}
                             </button>
                             {user?.role === 'super_admin' && (
                                 <button
                                     onClick={handleRejectPO}
-                                    className="py-3 bg-red-500/20 hover:bg-red-500/30 text-red-400 font-bold rounded-xl border border-red-500/30 transition-colors flex items-center justify-center gap-2"
+                                    className="h-11 px-5 bg-red-500/10 hover:bg-red-500/20 text-red-500 font-semibold text-sm rounded-full border border-red-500/30 transition-all flex items-center justify-center gap-2 active:scale-[0.98]"
                                 >
-                                    <XCircle size={18} /> Reject
+                                    <XCircle size={16} /> Reject
                                 </button>
                             )}
                         </div>
@@ -394,26 +417,26 @@ export const ViewPOModal: React.FC<ViewPOModalProps> = ({ isOpen, onClose, po, o
 
                     {/* Status Messages */}
                     {po.status === 'Received' && (
-                        <div className="py-3 px-4 bg-green-500/10 border border-green-500/20 rounded-xl flex items-center gap-3 text-green-400">
-                            <CheckCircle size={18} />
-                            <span className="text-sm font-medium">Order received and processed</span>
+                        <div className="p-3.5 px-4 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl flex items-center gap-2.5 text-emerald-500 text-xs font-medium">
+                            <CheckCircle size={16} />
+                            <span>Order received and processed</span>
                         </div>
                     )}
 
                     {(po.status === 'Approved' || po.status === 'Pending') && (
-                        <div className="py-3 px-4 bg-[#8C6239]/10 border border-[#8C6239]/20 rounded-xl flex items-center gap-3 text-[#8C6239] dark:text-[#E2C899]">
-                            <Package size={18} />
-                            <span className="text-sm">Receive in WMS → Operations → Receiving</span>
+                        <div className="p-3.5 px-4 bg-amber-500/10 border border-amber-500/20 rounded-2xl flex items-center gap-2.5 text-amber-500 text-xs font-medium">
+                            <Package size={16} />
+                            <span>Receive in WMS → Operations → Receiving</span>
                         </div>
                     )}
 
                     {/* Secondary Actions */}
-                    <div className="grid grid-cols-3 gap-3">
+                    <div className="flex flex-wrap items-center justify-end gap-2.5 pt-1">
                         <button
                             onClick={handlePrintPO}
-                            className="py-3 bg-white/5 hover:bg-white/10 text-gray-300 rounded-xl transition-colors flex items-center justify-center gap-2 font-medium"
+                            className="h-10 px-4 bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card-hover)] text-[var(--theme-text-primary)] rounded-full border border-[var(--theme-border)] transition-all flex items-center justify-center gap-2 font-medium text-xs active:scale-[0.98]"
                         >
-                            <Printer size={16} /> Print
+                            <Printer size={15} /> Print
                         </button>
 
                         {/* Edit & Delete Action Logic:
@@ -428,22 +451,22 @@ export const ViewPOModal: React.FC<ViewPOModalProps> = ({ isOpen, onClose, po, o
                                         onEdit(po);
                                         onClose();
                                     }}
-                                    className="py-3 bg-white/5 hover:bg-[#2C5E3B]/10 text-gray-300 hover:text-[#2C5E3B] dark:hover:text-[#A9CBA2] rounded-xl transition-colors flex items-center justify-center gap-2 font-medium border border-transparent hover:border-[#2C5E3B]/20 dark:hover:border-[#A9CBA2]/20"
+                                    className="h-10 px-4 bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card-hover)] text-[var(--theme-text-primary)] rounded-full border border-[var(--theme-border)] transition-all flex items-center justify-center gap-1.5 font-medium text-xs active:scale-[0.98]"
                                 >
-                                    <Edit3 size={16} /> Edit
+                                    <Edit3 size={14} /> Edit
                                 </button>
                                 <button
                                     onClick={handleDeletePO}
-                                    className="py-3 bg-white/5 hover:bg-red-500/10 text-gray-300 hover:text-red-400 rounded-xl transition-colors flex items-center justify-center gap-2 font-medium border border-transparent hover:border-red-500/20"
+                                    className="h-10 px-4 bg-[var(--theme-bg-subtle)] hover:bg-red-500/10 text-[var(--theme-text-secondary)] hover:text-red-400 rounded-full border border-[var(--theme-border)] hover:border-red-500/30 transition-all flex items-center justify-center gap-1.5 font-medium text-xs active:scale-[0.98]"
                                 >
-                                    <Trash2 size={16} /> Delete
+                                    <Trash2 size={14} /> Delete
                                 </button>
                             </>
                         )}
 
                         <button
                             onClick={onClose}
-                            className="py-3 bg-white/10 hover:bg-white/20 text-white rounded-xl transition-colors font-medium"
+                            className="h-10 px-5 bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card-hover)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] border border-[var(--theme-border)] rounded-full transition-all font-medium text-xs active:scale-[0.98]"
                         >
                             Close
                         </button>

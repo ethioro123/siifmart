@@ -28,17 +28,42 @@ export const SupplierManagement: React.FC<SupplierManagementProps> = ({
 }) => {
     const ITEMS_PER_PAGE = 20;
 
+    // Filter & Search state
+    const [searchQuery, setSearchQuery] = useState('');
+    const [selectedCategory, setSelectedCategory] = useState<string>('ALL');
+
     // Modal States
     const [isAddSupplierOpen, setIsAddSupplierOpen] = useState(false);
     const [isContactModalOpen, setIsContactModalOpen] = useState(false);
     const [isProductCatalogOpen, setIsProductCatalogOpen] = useState(false);
     const [selectedSupplier, setSelectedSupplier] = useState<Supplier | null>(null);
 
-    // Use passed suppliers directly (server-side paginated)
-    const paginatedSuppliers = suppliers;
+    // Filter suppliers
+    const filteredSuppliers = useMemo(() => {
+        return suppliers.filter(sup => {
+            const matchesSearch = !searchQuery.trim() ||
+                sup.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                sup.category?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                sup.email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                sup.phone?.includes(searchQuery);
 
-    // Pagination Logic
-    const totalPages = Math.ceil(totalCount / ITEMS_PER_PAGE);
+            const matchesCategory = selectedCategory === 'ALL' ||
+                sup.category === selectedCategory ||
+                (selectedCategory === 'Farmer' && sup.type === 'Farmer');
+
+            return matchesSearch && matchesCategory;
+        });
+    }, [suppliers, searchQuery, selectedCategory]);
+
+    const categories = useMemo(() => {
+        const set = new Set<string>();
+        suppliers.forEach(s => {
+            if (s.category) set.add(s.category);
+        });
+        return Array.from(set);
+    }, [suppliers]);
+
+    const totalPages = Math.max(1, Math.ceil(totalCount / ITEMS_PER_PAGE));
 
     const handleSupplierClick = (sup: Supplier) => {
         setSelectedSupplier(sup);
@@ -54,108 +79,156 @@ export const SupplierManagement: React.FC<SupplierManagementProps> = ({
     return (
         <div className="space-y-6">
             {/* Header Actions */}
-            <div className="flex justify-between items-center glass-panel p-4">
-                <div className="flex items-center gap-3">
-                    <div className="p-2 bg-[#2C5E3B]/10 dark:bg-[#A9CBA2]/10 rounded-lg">
-                        <Building size={24} className="text-[#2C5E3B] dark:text-[#A9CBA2]" />
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-6 rounded-3xl bg-[var(--theme-bg-panel)] border border-[var(--theme-border)] shadow-sm">
+                <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 rounded-2xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] flex items-center justify-center text-[var(--theme-text-primary)] shrink-0">
+                        <Building size={22} strokeWidth={1.5} />
                     </div>
                     <div>
-                        <h2 className="text-xl font-bold text-gray-900 dark:text-white">Supplier Directory</h2>
-                        <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">{suppliers.length} Active Partners</p>
+                        <h2 className="text-xl font-bold tracking-tight text-[var(--theme-text-primary)]">Supplier Directory</h2>
+                        <p className="text-xs text-[var(--theme-text-secondary)] font-medium mt-0.5">
+                            <span className="font-mono tabular-nums font-semibold">{totalCount}</span> verified sourcing partners across East Africa
+                        </p>
                     </div>
                 </div>
                 <Protected permission="MANAGE_SUPPLIERS">
                     <button
                         onClick={() => setIsAddSupplierOpen(true)}
-                        className="woody-btn-primary flex items-center gap-2"
+                        className="h-11 px-5 rounded-full bg-[var(--theme-primary)] text-[var(--theme-primary-text)] font-semibold text-xs active:scale-[0.98] transition-all flex items-center justify-center gap-2 shadow-sm cursor-pointer shrink-0"
                     >
-                        <Plus size={18} /> Add New Supplier
+                        <Plus size={16} strokeWidth={2} /> Add New Supplier
                     </button>
                 </Protected>
             </div>
 
-            {/* Suppliers Table */}
-            <div className="glass-panel overflow-x-auto">
+            {/* Filter and Search Bar */}
+            <div className="p-4 rounded-3xl bg-[var(--theme-bg-panel)] border border-[var(--theme-border)] shadow-sm flex flex-col md:flex-row gap-3 items-stretch md:items-center justify-between">
+                <div className="relative flex-1 max-w-md">
+                    <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--theme-text-muted)] pointer-events-none" />
+                    <input
+                        type="text"
+                        placeholder="Search by supplier name, contact, category..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className="w-full h-11 pl-10 pr-4 rounded-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-xs text-[var(--theme-text-primary)] placeholder-[var(--theme-text-muted)] focus:outline-none focus:border-[var(--theme-accent)] transition-all font-medium"
+                    />
+                </div>
+
+                <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-0.5">
+                    <button
+                        onClick={() => setSelectedCategory('ALL')}
+                        className={`h-9 px-4 rounded-full text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
+                            selectedCategory === 'ALL'
+                                ? 'bg-[var(--theme-primary)] text-[var(--theme-primary-text)] shadow-sm'
+                                : 'bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] border border-[var(--theme-border)]'
+                        }`}
+                    >
+                        All Categories
+                    </button>
+                    {categories.slice(0, 5).map(cat => (
+                        <button
+                            key={cat}
+                            onClick={() => setSelectedCategory(cat)}
+                            className={`h-9 px-4 rounded-full text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
+                                selectedCategory === cat
+                                    ? 'bg-[var(--theme-primary)] text-[var(--theme-primary-text)] shadow-sm'
+                                    : 'bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] border border-[var(--theme-border)]'
+                            }`}
+                        >
+                            {cat}
+                        </button>
+                    ))}
+                </div>
+            </div>
+
+            {/* Suppliers Table Container */}
+            <div className="rounded-3xl bg-[var(--theme-bg-panel)] border border-[var(--theme-border)] shadow-sm overflow-hidden">
                 <table className="w-full text-left border-collapse hidden md:table">
                     <thead>
-                        <tr className="glass-panel-pushed border-b border-[#E2DCCE]/50 dark:border-emerald-950/20 text-[10px] text-gray-500 dark:text-gray-400 uppercase tracking-widest font-black">
-                            <th className="p-4 font-bold pl-6">Supplier Name</th>
-                            <th className="p-4 font-bold">Category</th>
-                            <th className="p-4 font-bold">Status</th>
-                            <th className="p-4 font-bold">Performance</th>
-                            <th className="p-4 font-bold">Contact Info</th>
-                            <th className="p-4 font-bold text-right pr-6">Quick Actions</th>
+                        <tr className="border-b border-[var(--theme-border)] bg-[var(--theme-bg-subtle)]/40 text-[11px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider">
+                            <th className="py-3.5 px-6 font-semibold">Supplier Name</th>
+                            <th className="py-3.5 px-4 font-semibold">Category</th>
+                            <th className="py-3.5 px-4 font-semibold">Status</th>
+                            <th className="py-3.5 px-4 font-semibold">Performance</th>
+                            <th className="py-3.5 px-4 font-semibold">Contact Info</th>
+                            <th className="py-3.5 px-6 font-semibold text-right">Quick Actions</th>
                         </tr>
                     </thead>
-                    <tbody>
-                        {paginatedSuppliers.map((sup) => {
+                    <tbody className="divide-y divide-[var(--theme-border)]">
+                        {filteredSuppliers.map((sup) => {
                             const Icon = getSupplierIcon(sup.type);
                             return (
                                 <tr
                                     key={sup.id}
                                     onClick={() => handleSupplierClick(sup)}
-                                    className="border-b border-[#E2DCCE]/30 dark:border-emerald-950/10 hover:bg-stone-50 dark:hover:bg-white/5 transition-colors cursor-pointer group last:border-0"
+                                    className="hover:bg-[var(--theme-bg-subtle)]/60 transition-colors cursor-pointer group"
                                 >
-                                    <td className="p-4 pl-6">
+                                    <td className="py-4 px-6">
                                         <div className="flex items-center gap-3">
-                                            <div className="w-10 h-10 rounded-xl bg-stone-100 dark:bg-white/5 flex items-center justify-center text-gray-400 group-hover:text-[#2C5E3B] dark:group-hover:text-[#A9CBA2] group-hover:bg-[#2C5E3B]/10 dark:group-hover:bg-[#A9CBA2]/10 transition-colors border border-[#E2DCCE]/30 dark:border-[#A9CBA2]/[0.06]">
-                                                <Icon size={20} />
+                                            <div className="w-10 h-10 rounded-2xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] flex items-center justify-center text-[var(--theme-text-secondary)] group-hover:text-[var(--theme-text-primary)] transition-colors shrink-0">
+                                                <Icon size={18} strokeWidth={1.5} />
                                             </div>
                                             <div>
-                                                <h3 className="text-sm font-black text-gray-900 dark:text-white group-hover:text-[#2C5E3B] dark:group-hover:text-[#A9CBA2] transition-colors">{sup.name}</h3>
-                                                <p className="text-[10px] text-gray-500 dark:text-gray-500 font-mono font-bold uppercase">Terms: {sup.paymentTerms || 'Net 30'}</p>
+                                                <h3 className="text-sm font-semibold tracking-tight text-[var(--theme-text-primary)]">{sup.name}</h3>
+                                                <p className="text-[11px] text-[var(--theme-text-muted)] font-mono font-medium uppercase mt-0.5">
+                                                    Terms: {sup.paymentTerms || 'Net 30'}
+                                                </p>
                                             </div>
                                         </div>
                                     </td>
-                                    <td className="p-4">
+                                    <td className="py-4 px-4">
                                         <div className="flex flex-col">
-                                            <span className="text-xs text-gray-700 dark:text-gray-300 font-black uppercase tracking-wide">{sup.category}</span>
-                                            <span className="text-[10px] text-gray-400 dark:text-gray-500 font-bold italic">{sup.type}</span>
+                                            <span className="text-xs font-semibold text-[var(--theme-text-primary)]">{sup.category || 'General'}</span>
+                                            <span className="text-[11px] text-[var(--theme-text-muted)] font-medium">{sup.type}</span>
                                         </div>
                                     </td>
-                                    <td className="p-4">
-                                        <div className={`inline-flex px-2.5 py-1 rounded-full text-[10px] font-bold border uppercase tracking-wide ${sup.status === 'Active' ? 'text-green-400 border-green-500/20 bg-green-500/10' : 'text-red-400 border-red-500/20 bg-red-500/10'
-                                            }`}>
-                                            <div className={`w-1.5 h-1.5 rounded-full mr-1.5 ${sup.status === 'Active' ? 'bg-green-400' : 'bg-red-400'}`}></div>
+                                    <td className="py-4 px-4">
+                                        <div className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold border ${
+                                            sup.status === 'Active'
+                                                ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20'
+                                                : 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/20'
+                                        }`}>
+                                            <span className={`w-1.5 h-1.5 rounded-full ${sup.status === 'Active' ? 'bg-emerald-500' : 'bg-rose-500'}`} />
                                             {sup.status}
                                         </div>
                                     </td>
-                                    <td className="p-4">
-                                        <div className="flex flex-col gap-1">
+                                    <td className="py-4 px-4">
+                                        <div className="flex flex-col gap-1.5">
                                             <div className="flex items-center gap-1.5">
-                                                <Star size={12} className="text-yellow-500 fill-yellow-500" />
-                                                <span className="text-sm text-gray-900 dark:text-white font-black">{sup.rating}</span>
-                                                <span className="text-xs text-gray-400 dark:text-gray-600 font-bold">/ 5.0</span>
+                                                <Star size={12} className="text-amber-500 fill-amber-500" />
+                                                <span className="text-xs font-bold font-mono tabular-nums text-[var(--theme-text-primary)]">{sup.rating}</span>
+                                                <span className="text-[11px] text-[var(--theme-text-muted)]">/ 5.0</span>
                                             </div>
-                                            <div className="w-24 h-1.5 bg-stone-100 dark:bg-white/10 rounded-full overflow-hidden">
-                                                <div className="h-full bg-[#2C5E3B] dark:bg-[#A9CBA2] w-[98%]"></div>
-                                            </div>
-                                            <span className="text-[9px] text-emerald-600 dark:text-green-400 font-black uppercase tracking-wider">98% OTIF Score</span>
+                                            <span className="text-[10px] font-mono font-semibold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">
+                                                98% OTIF Score
+                                            </span>
                                         </div>
                                     </td>
-                                    <td className="p-4">
-                                        <div className="flex flex-col gap-1.5">
-                                            {sup.email ? (
-                                                <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-gray-300 transition-colors font-bold">
-                                                    <Mail size={12} />
-                                                    <span className="truncate max-w-[150px]">{sup.email}</span>
+                                    <td className="py-4 px-4">
+                                        <div className="flex flex-col gap-1">
+                                            {sup.email && (
+                                                <div className="flex items-center gap-2 text-xs text-[var(--theme-text-secondary)] font-medium">
+                                                    <Mail size={12} className="shrink-0 text-[var(--theme-text-muted)]" />
+                                                    <span className="truncate max-w-[160px]">{sup.email}</span>
                                                 </div>
-                                            ) : null}
-                                            {sup.phone ? (
-                                                <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-gray-300 transition-colors font-bold">
-                                                    <Phone size={12} />
+                                            )}
+                                            {sup.phone && (
+                                                <div className="flex items-center gap-2 text-xs text-[var(--theme-text-secondary)] font-mono">
+                                                    <Phone size={12} className="shrink-0 text-[var(--theme-text-muted)]" />
                                                     <span>{sup.phone}</span>
                                                 </div>
-                                            ) : null}
-                                            {!sup.email && !sup.phone && <span className="text-xs text-gray-600 italic">No contact info</span>}
+                                            )}
+                                            {!sup.email && !sup.phone && (
+                                                <span className="text-xs text-[var(--theme-text-muted)] italic">No direct contact</span>
+                                            )}
                                         </div>
                                     </td>
-                                    <td className="p-4 pr-6 text-right">
+                                    <td className="py-4 px-6 text-right">
                                         <button
                                             onClick={(e) => handleCatalogClick(e, sup)}
-                                            className="px-3 py-1.5 glass-panel-pushed hover:bg-[#224429] dark:hover:bg-[#EAE5D9] hover:text-white dark:hover:text-[#1E3B24] text-[10px] font-black uppercase tracking-widest rounded-xl transition-all hover:border-[#224429] dark:hover:border-[#EAE5D9] text-gray-500 dark:text-gray-300 flex items-center gap-2 ml-auto"
+                                            className="h-8 px-3.5 rounded-full text-xs font-semibold bg-[var(--theme-bg-subtle)] text-[var(--theme-text-primary)] hover:bg-[var(--theme-border)]/50 border border-[var(--theme-border)] active:scale-[0.98] transition-all inline-flex items-center gap-1.5 cursor-pointer ml-auto"
                                         >
-                                            <Package size={14} /> Catalog
+                                            <Package size={13} strokeWidth={1.5} /> Catalog
                                         </button>
                                     </td>
                                 </tr>
@@ -165,106 +238,108 @@ export const SupplierManagement: React.FC<SupplierManagementProps> = ({
                 </table>
 
                 {/* Mobile Card List View */}
-                <div className="block md:hidden divide-y divide-[#E2DCCE]/30 dark:divide-emerald-950/10">
-                    {paginatedSuppliers.map((sup) => {
+                <div className="block md:hidden divide-y divide-[var(--theme-border)]">
+                    {filteredSuppliers.map((sup) => {
                         const Icon = getSupplierIcon(sup.type);
                         return (
                             <div
                                 key={sup.id}
                                 onClick={() => handleSupplierClick(sup)}
-                                className="p-4 space-y-4 hover:bg-stone-50 dark:hover:bg-white/5 transition-colors cursor-pointer group"
+                                className="p-4 space-y-3.5 hover:bg-[var(--theme-bg-subtle)]/40 transition-colors cursor-pointer group"
                             >
-                                {/* Name, Status, rating */}
                                 <div className="flex items-start justify-between gap-3">
                                     <div className="flex items-center gap-3">
-                                        <div className="w-10 h-10 rounded-xl bg-stone-100 dark:bg-white/5 flex items-center justify-center text-gray-400 group-hover:text-[#2C5E3B] dark:group-hover:text-[#A9CBA2] group-hover:bg-[#2C5E3B]/10 dark:group-hover:bg-[#A9CBA2]/10 transition-colors border border-[#E2DCCE]/30 dark:border-[#A9CBA2]/[0.06]">
-                                            <Icon size={20} />
+                                        <div className="w-10 h-10 rounded-2xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] flex items-center justify-center text-[var(--theme-text-secondary)] shrink-0">
+                                            <Icon size={18} strokeWidth={1.5} />
                                         </div>
                                         <div className="text-left">
-                                            <h3 className="text-sm font-black text-gray-900 dark:text-white group-hover:text-[#2C5E3B] dark:group-hover:text-[#A9CBA2] transition-colors">{sup.name}</h3>
-                                            <p className="text-[10px] text-gray-500 font-mono font-bold uppercase mt-0.5">Terms: {sup.paymentTerms || 'Net 30'}</p>
+                                            <h3 className="text-sm font-semibold tracking-tight text-[var(--theme-text-primary)]">{sup.name}</h3>
+                                            <p className="text-[11px] text-[var(--theme-text-muted)] font-mono mt-0.5">Terms: {sup.paymentTerms || 'Net 30'}</p>
                                         </div>
                                     </div>
-                                    <div className={`inline-flex px-2.5 py-1 rounded-full text-[9px] font-bold border uppercase tracking-wide ${sup.status === 'Active' ? 'text-green-400 border-green-500/20 bg-green-500/10' : 'text-red-400 border-red-500/20 bg-red-500/10'}`}>
+                                    <div className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold border ${
+                                        sup.status === 'Active'
+                                            ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20'
+                                            : 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/20'
+                                    }`}>
                                         {sup.status}
                                     </div>
                                 </div>
 
-                                {/* Category, Rating, Performance */}
-                                <div className="grid grid-cols-2 gap-2 text-left bg-gray-50/50 dark:bg-black/10 p-3 rounded-xl border border-gray-100 dark:border-white/5">
+                                <div className="grid grid-cols-2 gap-2 text-left bg-[var(--theme-bg-subtle)]/60 p-3 rounded-2xl border border-[var(--theme-border)]">
                                     <div>
-                                        <span className="text-[8px] text-gray-500 font-bold uppercase tracking-widest">Category</span>
-                                        <p className="text-xs text-gray-700 dark:text-gray-300 font-black uppercase mt-0.5">{sup.category}</p>
-                                        <p className="text-[9px] text-gray-400 dark:text-gray-500 font-bold italic mt-0.5">{sup.type}</p>
+                                        <span className="text-[10px] text-[var(--theme-text-muted)] font-semibold uppercase tracking-wider">Category</span>
+                                        <p className="text-xs text-[var(--theme-text-primary)] font-semibold mt-0.5">{sup.category || 'General'}</p>
+                                        <p className="text-[10px] text-[var(--theme-text-secondary)] font-medium mt-0.5">{sup.type}</p>
                                     </div>
                                     <div>
-                                        <span className="text-[8px] text-gray-500 font-bold uppercase tracking-widest">Performance</span>
+                                        <span className="text-[10px] text-[var(--theme-text-muted)] font-semibold uppercase tracking-wider">Rating</span>
                                         <div className="flex items-center gap-1 mt-0.5">
-                                            <Star size={10} className="text-yellow-500 fill-yellow-500" />
-                                            <span className="text-xs text-gray-900 dark:text-white font-black">{sup.rating}</span>
-                                            <span className="text-[10px] text-gray-400">/ 5.0</span>
+                                            <Star size={11} className="text-amber-500 fill-amber-500" />
+                                            <span className="text-xs text-[var(--theme-text-primary)] font-bold font-mono tabular-nums">{sup.rating}</span>
+                                            <span className="text-[10px] text-[var(--theme-text-muted)]">/ 5.0</span>
                                         </div>
-                                        <span className="text-[8px] text-[#2C5E3B] dark:text-[#A9CBA2] font-black uppercase tracking-wider block mt-0.5">98% OTIF</span>
+                                        <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-mono font-semibold block mt-0.5">98% OTIF</span>
                                     </div>
                                 </div>
 
-                                {/* Contacts & Quick Action */}
                                 <div className="flex items-center justify-between pt-1">
-                                    <div className="flex flex-col gap-0.5 text-left">
+                                    <div className="flex flex-col text-left">
                                         {sup.email && (
-                                            <span className="text-[10px] text-gray-500 truncate max-w-[150px]">{sup.email}</span>
+                                            <span className="text-[11px] text-[var(--theme-text-secondary)] truncate max-w-[170px]">{sup.email}</span>
                                         )}
                                         {sup.phone && (
-                                            <span className="text-[10px] text-gray-500">{sup.phone}</span>
+                                            <span className="text-[11px] text-[var(--theme-text-muted)] font-mono">{sup.phone}</span>
                                         )}
                                     </div>
                                     <button
                                         onClick={(e) => handleCatalogClick(e, sup)}
-                                        className="px-3 py-1.5 glass-panel-pushed hover:bg-[#224429] dark:hover:bg-[#EAE5D9] hover:text-white dark:hover:text-[#1E3B24] text-[9px] font-black uppercase tracking-widest rounded-xl transition-all text-gray-500 dark:text-gray-300 flex items-center gap-1.5"
+                                        className="h-8 px-3 rounded-full text-xs font-semibold bg-[var(--theme-bg-subtle)] text-[var(--theme-text-primary)] border border-[var(--theme-border)] inline-flex items-center gap-1.5"
                                     >
-                                        <Package size={12} /> Catalog
+                                        <Package size={12} strokeWidth={1.5} /> Catalog
                                     </button>
                                 </div>
                             </div>
                         );
                     })}
                 </div>
-                {paginatedSuppliers.length === 0 && (
-                    <div className="p-12 text-center text-gray-500 flex flex-col items-center justify-center">
-                        <div className="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center mb-4">
-                            <Search size={32} className="opacity-50" />
+
+                {filteredSuppliers.length === 0 && (
+                    <div className="py-16 text-center text-[var(--theme-text-muted)] flex flex-col items-center justify-center">
+                        <div className="w-14 h-14 rounded-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] flex items-center justify-center mb-3">
+                            <Search size={22} className="opacity-40 text-[var(--theme-text-secondary)]" />
                         </div>
-                        <p className="text-lg font-bold text-gray-400">No suppliers found</p>
-                        <p className="text-sm mt-1">Add a new supplier to get started.</p>
+                        <p className="text-sm font-semibold text-[var(--theme-text-primary)]">No suppliers found</p>
+                        <p className="text-xs text-[var(--theme-text-secondary)] mt-1">Try adjusting your search criteria or register a new supplier.</p>
                     </div>
                 )}
             </div>
 
             {/* Pagination Controls */}
-            <div className="flex items-center justify-between p-4 glass-panel-pushed rounded-2xl">
-                <p className="text-xs text-gray-500 dark:text-gray-500 font-mono">
-                    Showing <span className="text-gray-900 dark:text-gray-300 font-black">{paginatedSuppliers.length}</span> of <span className="text-gray-900 dark:text-gray-300 font-black">{totalCount}</span> Partners
+            <div className="flex items-center justify-between p-4 rounded-3xl bg-[var(--theme-bg-panel)] border border-[var(--theme-border)] shadow-sm">
+                <p className="text-xs text-[var(--theme-text-secondary)] font-medium">
+                    Showing <span className="text-[var(--theme-text-primary)] font-semibold font-mono tabular-nums">{filteredSuppliers.length}</span> of <span className="text-[var(--theme-text-primary)] font-semibold font-mono tabular-nums">{totalCount}</span> Partners
                 </p>
-                <div className="flex gap-2">
+                <div className="flex items-center gap-2">
                     <button
                         onClick={() => onPageChange(Math.max(1, currentPage - 1))}
                         disabled={currentPage === 1 || loading}
-                        className="px-3 py-1.5 glass-panel-pushed rounded-lg text-xs font-black text-gray-500 dark:text-gray-400 hover:bg-stone-100 dark:hover:bg-white/5 disabled:opacity-30 transition-colors"
+                        className="h-9 px-3.5 rounded-full text-xs font-semibold text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] disabled:opacity-30 disabled:cursor-not-allowed transition-all flex items-center gap-1 cursor-pointer"
                     >
-                        Previous
+                        <ChevronLeft size={14} /> Previous
                     </button>
-                    <div className="flex items-center px-4 glass-panel-pushed rounded-lg">
-                        <span className="text-[10px] text-gray-400 dark:text-gray-500 uppercase font-black tracking-widest mr-2">Page</span>
-                        <span className="text-sm font-mono font-black text-[#2C5E3B] dark:text-[#A9CBA2]">{currentPage}</span>
-                        <span className="text-[10px] text-gray-400 dark:text-gray-500 mx-2">of</span>
-                        <span className="text-sm font-mono text-gray-900 dark:text-white font-black">{totalPages || 1}</span>
+                    <div className="flex items-center px-3.5 h-9 rounded-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-xs font-mono">
+                        <span className="text-[var(--theme-text-muted)] mr-1.5">Page</span>
+                        <span className="font-bold text-[var(--theme-text-primary)] tabular-nums">{currentPage}</span>
+                        <span className="text-[var(--theme-text-muted)] mx-1.5">of</span>
+                        <span className="font-bold text-[var(--theme-text-primary)] tabular-nums">{totalPages}</span>
                     </div>
                     <button
                         onClick={() => onPageChange(Math.min(totalPages, currentPage + 1))}
                         disabled={currentPage >= totalPages || loading}
-                        className="px-3 py-1.5 glass-panel-pushed rounded-lg text-xs font-black text-gray-500 dark:text-gray-400 hover:bg-stone-100 dark:hover:bg-white/5 disabled:opacity-30 transition-colors"
+                        className="h-9 px-3.5 rounded-full text-xs font-semibold text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] disabled:opacity-30 disabled:cursor-not-allowed transition-all flex items-center gap-1 cursor-pointer"
                     >
-                        Next
+                        Next <ChevronRight size={14} />
                     </button>
                 </div>
             </div>

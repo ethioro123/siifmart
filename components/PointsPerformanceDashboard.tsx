@@ -15,9 +15,10 @@ import { formatCompactNumber } from '../utils/formatting';
 interface PointsPerformanceDashboardProps {
     workerPoints: WorkerPoints[];
     storePoints: StorePoints[];
+    currencySymbol?: string;
 }
 
-const PointsPerformanceDashboard: React.FC<PointsPerformanceDashboardProps> = ({ workerPoints, storePoints }) => {
+const PointsPerformanceDashboard: React.FC<PointsPerformanceDashboardProps> = ({ workerPoints, storePoints, currencySymbol = 'ETB' }) => {
     // 1. CALCULATE TOP METRICS
     const globalStats = useMemo(() => {
         const totalIndividualPoints = workerPoints.reduce((sum, w) => sum + w.totalPoints, 0);
@@ -77,7 +78,7 @@ const PointsPerformanceDashboard: React.FC<PointsPerformanceDashboardProps> = ({
                 </div>
                 <div className="flex gap-2">
                     <div className="px-4 py-2 bg-white/5 border border-white/10 rounded-xl backdrop-blur-md flex items-center gap-2">
-                        <Activity size={14} className="text-cyber-primary animate-pulse" />
+                        <Activity size={14} className="text-emerald-500 dark:text-emerald-400 animate-pulse" />
                         <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Global Status: OPTIMAL</span>
                     </div>
                 </div>
@@ -101,7 +102,7 @@ const PointsPerformanceDashboard: React.FC<PointsPerformanceDashboardProps> = ({
                 />
                 <PerformanceCard
                     title="Projected Bonuses"
-                    value={`ETB ${formatCompactNumber(globalStats.totalBonuses)}`}
+                    value={`${currencySymbol} ${formatCompactNumber(globalStats.totalBonuses)}`}
                     sub="Monthly Reward Pool"
                     icon={Award}
                     color="purple"
@@ -120,9 +121,9 @@ const PointsPerformanceDashboard: React.FC<PointsPerformanceDashboardProps> = ({
 
                 {/* 1. NETWORK RADAR (Balanced Scorecard) */}
                 <div className="lg:col-span-4 bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-6 flex flex-col items-center justify-center relative overflow-hidden group">
-                    <div className="absolute inset-0 bg-gradient-to-br from-cyber-primary/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
+                    <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/10 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
                     <h3 className="text-sm font-bold text-gray-400 uppercase tracking-widest mb-4 flex items-center gap-2">
-                        <BarChart3 size={16} className="text-cyber-primary" />
+                        <BarChart3 size={16} className="text-emerald-500 dark:text-emerald-400" />
                         Network Synergy Score
                     </h3>
                     <div className="w-full h-[250px]">
@@ -134,9 +135,9 @@ const PointsPerformanceDashboard: React.FC<PointsPerformanceDashboardProps> = ({
                                 <Radar
                                     name="Performance"
                                     dataKey="A"
-                                    stroke="#00ff9d"
-                                    fill="#00ff9d"
-                                    fillOpacity={0.6}
+                                    stroke="#10b981"
+                                    fill="#10b981"
+                                    fillOpacity={0.5}
                                 />
                             </RadarChart>
                         </ResponsiveContainer>
@@ -177,13 +178,13 @@ const PointsPerformanceDashboard: React.FC<PointsPerformanceDashboardProps> = ({
                                     <p className="text-[10px] text-gray-500 font-mono uppercase truncate">{w.levelTitle} • LVL {w.level}</p>
                                 </div>
                                 <div className="text-right">
-                                    <p className="font-mono font-bold text-cyber-primary">{formatCompactNumber(w.totalPoints)}</p>
+                                    <p className="font-mono font-bold text-emerald-500 dark:text-emerald-400">{formatCompactNumber(w.totalPoints)}</p>
                                     <p className="text-[8px] text-gray-500 uppercase font-bold">Total Pts</p>
-                                </div>
+                                 </div>
                             </div>
                         ))}
                     </div>
-                    <button className="mt-auto pt-6 text-xs text-cyber-primary font-bold uppercase tracking-widest flex items-center gap-2 hover:gap-3 transition-all">
+                    <button className="mt-auto pt-6 text-xs text-emerald-500 dark:text-emerald-400 font-bold uppercase tracking-widest flex items-center gap-2 hover:gap-3 transition-all">
                         View Full Global Ranks <TrendingUp size={14} />
                     </button>
                 </div>
@@ -197,9 +198,9 @@ const PointsPerformanceDashboard: React.FC<PointsPerformanceDashboardProps> = ({
                     <div className="space-y-4">
                         {topTeams.map((s, i) => (
                             <div key={s.id} className="flex items-center gap-3 p-3 bg-white/5 hover:bg-white/10 rounded-2xl border border-white/5 transition-all duration-300 group/item hover:-translate-x-1">
-                                <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm ${i === 0 ? 'bg-cyber-primary text-black' : 'bg-white/10 text-gray-400'
+                                <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm ${i === 0 ? 'bg-emerald-500 text-stone-900' : 'bg-white/10 text-gray-400'
                                     }`}>
-                                    <Shield size={14} className={i === 0 ? 'text-black' : 'text-gray-400'} />
+                                    <Shield size={14} className={i === 0 ? 'text-stone-900' : 'text-gray-400'} />
                                 </div>
                                 <div className="flex-1 min-w-0">
                                     <p className="font-bold text-white text-sm truncate">{s.siteName}</p>
@@ -214,7 +215,7 @@ const PointsPerformanceDashboard: React.FC<PointsPerformanceDashboardProps> = ({
                     </div>
                     <div className="mt-auto pt-6 flex items-center justify-between">
                         <p className="text-[10px] text-gray-500 font-bold uppercase">Performance Pool</p>
-                        <p className="text-sm font-bold text-white">ETB 145,000 Dist.</p>
+                        <p className="text-sm font-bold text-white">{currencySymbol} 145,000 Dist.</p>
                     </div>
                 </div>
 
@@ -248,7 +249,7 @@ const PerformanceCard = ({ title, value, sub, icon: Icon, color }: any) => {
                 <p className="text-[10px] text-gray-500 font-black uppercase tracking-[0.2em]">{title}</p>
                 <h3 className="text-2xl font-mono font-black text-white mt-1 break-all">{value}</h3>
                 <p className="text-[10px] text-gray-400 font-medium mt-2 flex items-center gap-1">
-                    <span className="w-1 h-1 rounded-full bg-cyber-primary" />
+                    <span className="w-1 h-1 rounded-full bg-emerald-500" />
                     {sub}
                 </p>
             </div>

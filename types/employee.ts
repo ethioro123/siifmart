@@ -39,7 +39,11 @@ export interface Employee {
   code: string; // Simplified Display ID
   siteId: string;
   site_id?: string; // Supabase compatibility
+  country?: string;
+  country_code?: string;
   name: string;
+  age?: number;
+  dateOfBirth?: string;
   role: UserRole;
   email: string;
   phone: string;

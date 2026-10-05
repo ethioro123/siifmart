@@ -3,7 +3,7 @@ import type { ExpenseRecord, Employee, Site } from '../../types';
 import type { Country, CountryProfile } from '../../utils/localization';
 import type { CountryTaxConfig, ApAgingSummary } from '../../hooks/financialsHelpers';
 
-export type FinanceTab = 'overview' | 'expenses' | 'payroll' | 'tax' | 'budget';
+export type FinanceTab = 'overview' | 'expenses' | 'drawer' | 'ap' | 'ar' | 'gl' | 'petty_cash' | 'budget' | 'margin' | 'workbenches' | 'payroll' | 'tax';
 
 export interface FinanceContextType {
     user: any;
@@ -14,7 +14,7 @@ export interface FinanceContextType {
     expenses: ExpenseRecord[];
     allProducts: any[];
     addExpense: (expense: ExpenseRecord) => Promise<void>;
-    deleteExpense: (id: string) => Promise<void>;
+    deleteExpense: (id: string) => Promise<void> | void;
     processPayroll: (siteId: string, processedBy: string) => Promise<void>;
     activeSite: Site | null | undefined;
     addNotification: (type: any, message: string) => void;
@@ -33,6 +33,13 @@ export interface FinanceContextType {
     setIsAddExpenseOpen: (open: boolean) => void;
     isSubmitting: boolean;
     setIsSubmitting: (sub: boolean) => void;
+
+    // Zero-Trust Void Modal State
+    isVoidExpenseModalOpen: boolean;
+    setIsVoidExpenseModalOpen: (open: boolean) => void;
+    expenseToVoid: ExpenseRecord | null;
+    setExpenseToVoid: (exp: ExpenseRecord | null) => void;
+
     isDeleteExpenseModalOpen: boolean;
     setIsDeleteExpenseModalOpen: (open: boolean) => void;
     expenseToDelete: string | null;
@@ -107,8 +114,12 @@ export interface FinanceContextType {
     getDateRangeLabels: () => string;
     getQuarterInfo: (d?: Date) => { q: number; year: number; start: Date; end: Date };
     handleAddExpense: () => Promise<void>;
+    handleApproveExpense: (id: string) => Promise<void>;
+    handleRejectExpense: (id: string) => Promise<void>;
     handleDeleteExpense: (id: string) => void;
     handleConfirmDeleteExpense: () => Promise<void>;
+    handleTriggerVoidExpense: (exp: ExpenseRecord | string) => void;
+    handleConfirmVoidExpense: (reason: string) => Promise<void>;
     handleExportPnL: () => void;
     handleProcessPayroll: () => void;
     handleConfirmPayroll: () => Promise<void>;

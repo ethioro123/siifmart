@@ -70,7 +70,7 @@ export const DocksOutboundDepartures: React.FC<DocksOutboundDeparturesProps> = (
                                             <span className="text-[9px] glass-panel-pushed text-stone-500 dark:text-stone-400 px-2 py-0.5 rounded border border-[#E2DCCE]/30 dark:border-[#A9CBA2]/[0.04] font-mono tracking-wider">
                                                 #{formatJobId(job)}
                                             </span>
-                                            {['super_admin', 'warehouse_manager'].includes(user?.role as string) && (
+                                            {['super_admin', 'warehouse_manager', 'operations_manager', 'regional_manager'].includes(user?.role as string) && (
                                                 <button
                                                     onClick={(e) => handleDelete(e, job.id)}
                                                     className="w-6 h-6 rounded border bg-slate-100 dark:bg-white/5 border-slate-200 dark:border-white/10 text-red-500 hover:text-white hover:bg-red-500 hover:border-red-500 transition-all flex items-center justify-center shrink-0"

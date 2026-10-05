@@ -335,8 +335,8 @@ export const PutawayTab: React.FC<PutawayTabProps> = ({
         await handleScanLocation(loc);
     };
 
-    const onScanItemWrapper = async (barcode: string) => {
-        await handleScanItem(barcode);
+    const onScanItemWrapper = async (barcode: string, quantity?: number) => {
+        await handleScanItem(barcode, quantity);
         // Clean up
         setScannedLocation(''); // Reset for next item
         setLocationOccupants([]);

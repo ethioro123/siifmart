@@ -1,5 +1,5 @@
 import React, { useRef, useEffect } from 'react';
-import { Clock, Scan, CheckCircle } from 'lucide-react';
+import { Clock, Scan, CheckCircle, Lock } from 'lucide-react';
 import { usePOSCommand } from '../../POSCommandContext';
 import { useFulfillmentData } from '../../../fulfillment/FulfillmentDataProvider';
 import { useStore } from '../../../../contexts/CentralStore';
@@ -12,15 +12,14 @@ export const ReceivingForm: React.FC = () => {
     const { user } = useStore();
     const { jobs } = useFulfillmentData();
 
-    const isManagerOrHQ = [
+    // Zero-Trust Rule 4: Branch store managers and supervisors must receive blindly to prevent rubber-stamping
+    const isCentralHQOnly = [
         'super_admin',
-        'admin',
         'ceo',
-        'store_manager',
         'operations_manager',
-        'inventory_manager',
-        'supervisor'
+        'regional_manager'
     ].includes(user?.role?.toLowerCase() || '');
+    const isManagerOrHQ = isCentralHQOnly;
 
     const {
         selectedTransferForReceiving,
@@ -75,18 +74,18 @@ export const ReceivingForm: React.FC = () => {
     return (
         <div className="space-y-4 animate-in fade-in duration-300">
             {/* Back button and title */}
-            <div className="flex items-center gap-3 border-b border-[#E2DCCE]/60 dark:border-white/10 pb-4">
+            <div className="flex items-center gap-3 border-b border-[var(--theme-border)] pb-4">
                 <button
                     onClick={() => handleCloseReceivingModal()}
                     title={t('common.back') || 'Back'}
                     aria-label={t('common.back') || 'Back'}
-                    className="p-2 bg-[#F4F0E6]/60 dark:bg-white/5 hover:bg-[#2C5E3B]/10 dark:hover:bg-white/10 rounded-lg text-stone-600 dark:text-gray-400 hover:text-[#2C5E3B] dark:hover:text-white transition-all active:scale-95 border border-[#E2DCCE]/50 dark:border-white/5"
+                    className="p-2 bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card-hover)] rounded-xl text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] transition-all active:scale-95 border border-[var(--theme-border)] cursor-pointer"
                 >
                     <Clock size={16} />
                 </button>
                 <div>
-                    <h3 className="text-lg font-bold text-[#1E3F27] dark:text-white tracking-wide">{t('posCommand.receivingShipment')}</h3>
-                    <p className="text-[10px] text-stone-400 dark:text-gray-500 uppercase tracking-widest font-bold">
+                    <h3 className="text-lg font-bold text-[var(--theme-text-primary)] tracking-tight">{t('posCommand.receivingShipment')}</h3>
+                    <p className="text-[10px] text-[var(--theme-text-secondary)] uppercase tracking-widest font-bold">
                         {t('posCommand.ref')}: {(() => {
                             const matchedJob = jobs.find(j => j.id === selectedTransferForReceiving || j.orderRef === selectedTransferForReceiving);
                             return matchedJob ? formatJobId(matchedJob) : selectedTransferForReceiving.substring(0, 8);
@@ -94,21 +93,21 @@ export const ReceivingForm: React.FC = () => {
                     </p>
                 </div>
                 <div className="ml-auto">
-                    <span className="px-3 py-1 bg-emerald-50 dark:bg-[#2C5E3B]/10 text-emerald-700 dark:text-[#A9CBA2] border border-emerald-250 dark:border-[#2C5E3B]/30 rounded-full text-xs font-bold flex items-center gap-2">
-                        <div className="w-2 h-2 rounded-full bg-emerald-500 dark:bg-[#A9CBA2] animate-pulse" />
+                    <span className="px-3 py-1 bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 rounded-full text-xs font-bold flex items-center gap-2">
+                        <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
                         {t('posCommand.inProgress')}
                     </span>
                 </div>
             </div>
 
             {/* Quick Hardware Scanner Only Input */}
-            <div className="bg-[#FAF8F5] dark:bg-black/30 border border-[#E2DCCE] dark:border-white/10 rounded-2xl p-4">
+            <div className="bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-2xl p-4">
                 <div className="flex items-center justify-between mb-2">
-                    <label className="text-xs font-black text-[#4D6E56] dark:text-[#7A9E83] uppercase tracking-wider flex items-center gap-2">
-                        <Scan size={14} className="text-[#2C5E3B] dark:text-[#A9CBA2]" />
+                    <label className="text-xs font-bold text-[var(--theme-text-secondary)] uppercase tracking-wider flex items-center gap-2">
+                        <Scan size={14} className="text-[var(--theme-text-primary)]" />
                         {t('posCommand.scanNextItem')}
                     </label>
-                    <span className="px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-700 dark:text-[#A9CBA2] border border-emerald-500/20 text-[9px] font-bold uppercase tracking-wider">
+                    <span className="px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 text-[9px] font-bold uppercase tracking-wider">
                         Hardware Scanner Active
                     </span>
                 </div>
@@ -122,26 +121,26 @@ export const ReceivingForm: React.FC = () => {
                         onChange={(e) => setTransferScanBarcode(e.target.value)}
                         onBlur={() => setTimeout(() => inputRef.current?.focus(), 150)}
                         placeholder="Scan barcode with hardware scanner (Manual typing & paste disabled)..."
-                        className="w-full bg-white dark:bg-black/40 border border-[#E2DCCE] dark:border-white/10 rounded-xl px-4 py-3 text-[#1E3F27] dark:text-white font-mono outline-none transition-all placeholder:text-[#4D6E56]/40 dark:placeholder:text-gray-600 focus:border-[#2C5E3B] dark:focus:border-[#A9CBA2] focus:ring-1 focus:ring-[#2C5E3B] dark:focus:ring-[#A9CBA2]"
+                        className="w-full bg-[var(--theme-input-bg)] border border-[var(--theme-border)] rounded-xl px-4 py-3 text-[var(--theme-text-primary)] font-mono outline-none transition-all placeholder:text-[var(--theme-text-muted)] focus:border-[var(--theme-border-focus)]"
                     />
                 </div>
             </div>
 
             {/* Items Table Grid */}
-            <div className="bg-[#FAF8F5] dark:bg-black/20 border border-[#E2DCCE] dark:border-white/10 rounded-2xl overflow-hidden">
+            <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl overflow-hidden">
                 <div className="max-h-[400px] overflow-y-auto custom-scrollbar">
                     <table className="w-full text-left">
-                        <thead className="bg-[#F4F0E6] dark:bg-white/5 sticky top-0 backdrop-blur-md z-10 border-b border-[#E2DCCE] dark:border-white/10">
+                        <thead className="bg-[var(--theme-thead-bg)] sticky top-0 z-10 border-b border-[var(--theme-border)]">
                             <tr>
-                                <th className="p-3 text-[10px] text-stone-500 dark:text-gray-400 uppercase font-black tracking-widest">{t('posCommand.itemDetails')}</th>
-                                <th className="p-3 text-[10px] text-stone-500 dark:text-gray-400 uppercase font-black tracking-widest text-center">
+                                <th className="p-3 text-[10px] text-[var(--theme-thead-text)] uppercase font-bold tracking-wider">{t('posCommand.itemDetails')}</th>
+                                <th className="p-3 text-[10px] text-[var(--theme-thead-text)] uppercase font-bold tracking-wider text-center">
                                     {isManagerOrHQ ? t('posCommand.expected') : 'Expected (Blind)'}
                                 </th>
-                                <th className="p-3 text-[10px] text-stone-500 dark:text-gray-400 uppercase font-black tracking-widest text-center">{t('posCommand.received')}</th>
-                                <th className="p-3 text-[10px] text-stone-500 dark:text-gray-400 uppercase font-black tracking-widest">{t('posCommand.condition')}</th>
+                                <th className="p-3 text-[10px] text-[var(--theme-thead-text)] uppercase font-bold tracking-wider text-center">{t('posCommand.received')}</th>
+                                <th className="p-3 text-[10px] text-[var(--theme-thead-text)] uppercase font-bold tracking-wider">{t('posCommand.condition')}</th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-[#E2DCCE]/60 dark:divide-white/5 bg-transparent">
+                        <tbody className="divide-y divide-[var(--theme-border)] bg-transparent">
                             {transferReceivingItems.map((item, index) => {
                                 const unit = item.unit || '';
                                 const sizeNum = item.productSize || 0;
@@ -153,25 +152,26 @@ export const ReceivingForm: React.FC = () => {
                                 const isOverReceived = item.receivedQty > rawExpected;
 
                                 return (
-                                    <tr key={index} className={`transition-colors ${isFullyReceived ? 'bg-emerald-500/[0.02]' : 'hover:bg-stone-50 dark:hover:bg-white/[0.02]'}`}>
+                                    <tr key={index} className={`transition-colors ${isFullyReceived ? 'bg-emerald-500/[0.04]' : 'hover:bg-[var(--theme-bg-card-hover)]'}`}>
                                         <td className="p-3">
-                                            <p className="text-sm font-bold text-[#1E3F27] dark:text-white mb-0.5">{item.name}</p>
-                                            <p className="text-xs font-mono text-stone-600 dark:text-gray-455 bg-[#FAF8F5] dark:bg-black/40 px-1.5 py-0.5 rounded border border-[#E2DCCE] dark:border-white/5">SKU: {item.sku}</p>
+                                            <p className="text-sm font-bold text-[var(--theme-text-primary)] mb-0.5">{item.name}</p>
+                                            <p className="text-xs font-mono text-[var(--theme-text-secondary)] bg-[var(--theme-bg-subtle)] px-2 py-0.5 rounded-md border border-[var(--theme-border)] inline-block">SKU: {item.sku}</p>
                                         </td>
                                         <td className="p-3 text-center">
-                                            {isManagerOrHQ ? (
-                                                <span className="text-sm font-mono text-stone-700 dark:text-gray-300">
+                                            {isCentralHQOnly ? (
+                                                <span className="text-sm font-mono text-[var(--theme-text-primary)]">
                                                     {isWeightVol ? (
                                                         `${casesExpected % 1 === 0 ? casesExpected : casesExpected.toFixed(2)} x ${sizeNum}`
                                                     ) : (
                                                         casesExpected
                                                     )}
                                                     {' '}
-                                                    {unit ? <span className="text-[10px] text-stone-500 dark:text-gray-555 uppercase">{unit}</span> : ''}
+                                                    {unit ? <span className="text-[10px] text-[var(--theme-text-secondary)] uppercase">{unit}</span> : ''}
                                                 </span>
                                             ) : (
-                                                <span className="px-2 py-0.5 rounded-full bg-stone-100 dark:bg-white/5 border border-stone-200 dark:border-white/10 text-[10px] font-bold text-stone-500 dark:text-stone-400 font-mono" title="Blind audit: Count units accurately">
-                                                    🔒 Blind Count
+                                                <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-[10px] font-bold text-[var(--theme-text-secondary)] font-mono" title="Blind audit: Count units accurately">
+                                                    <Lock size={10} className="shrink-0" />
+                                                    <span>Blind Count</span>
                                                 </span>
                                             )}
                                         </td>
@@ -179,7 +179,7 @@ export const ReceivingForm: React.FC = () => {
                                             <div className="flex items-center justify-center gap-2">
                                                 <button
                                                     onClick={() => handleUpdateTransferItem(index, 'receivedQty', Math.max(0, item.receivedQty - (isWeightVol ? sizeNum : 1)))}
-                                                    className="w-7 h-7 bg-stone-100 dark:bg-white/5 hover:bg-rose-500/20 text-stone-600 dark:text-gray-400 hover:text-rose-600 dark:hover:text-red-400 rounded flex items-center justify-center transition-all active:scale-90 border border-[#E2DCCE] dark:border-transparent hover:border-rose-500/30"
+                                                    className="w-7 h-7 bg-[var(--theme-bg-subtle)] hover:bg-rose-500/10 text-[var(--theme-text-primary)] hover:text-rose-500 rounded-lg flex items-center justify-center transition-all active:scale-95 border border-[var(--theme-border)] hover:border-rose-500/30 cursor-pointer"
                                                 >-</button>
                                                 <input
                                                     title={t('posCommand.receivedQty') || "Received Quantity"}
@@ -192,26 +192,26 @@ export const ReceivingForm: React.FC = () => {
                                                         const val = parseFloat(e.target.value) || 0;
                                                         handleUpdateTransferItem(index, 'receivedQty', isWeightVol ? val * sizeNum : Math.round(val));
                                                     }}
-                                                    className={`w-14 bg-white dark:bg-black/50 border rounded text-center font-mono py-1 focus:outline-none transition-all ${
-                                                        isOverReceived && isManagerOrHQ
-                                                            ? 'border-amber-500/50 text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-500/10'
-                                                            : isFullyReceived && isManagerOrHQ
-                                                                ? 'border-emerald-500/50 text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-500/10'
-                                                                : 'border-[#E2DCCE] dark:border-white/10 text-[#1E3F27] dark:text-white focus:border-[#2C5E3B] dark:focus:border-[#A9CBA2]'
+                                                    className={`w-14 bg-[var(--theme-input-bg)] border rounded-lg text-center font-mono py-1 focus:outline-none transition-all ${
+                                                        isOverReceived && isCentralHQOnly
+                                                            ? 'border-amber-500/50 text-amber-500 bg-amber-500/10'
+                                                            : isFullyReceived && isCentralHQOnly
+                                                                ? 'border-emerald-500/50 text-emerald-500 bg-emerald-500/10'
+                                                                : 'border-[var(--theme-border)] text-[var(--theme-text-primary)] focus:border-[var(--theme-border-focus)]'
                                                     }`}
                                                 />
                                                 <button
                                                     onClick={() => handleUpdateTransferItem(index, 'receivedQty', item.receivedQty + (isWeightVol ? sizeNum : 1))}
-                                                    className="w-7 h-7 bg-stone-100 dark:bg-white/5 hover:bg-emerald-500/20 text-stone-600 dark:text-gray-400 hover:text-emerald-700 dark:hover:text-emerald-450 rounded flex items-center justify-center transition-all active:scale-90 border border-[#E2DCCE] dark:border-transparent hover:border-emerald-500/30"
+                                                    className="w-7 h-7 bg-[var(--theme-bg-subtle)] hover:bg-emerald-500/10 text-[var(--theme-text-primary)] hover:text-emerald-500 rounded-lg flex items-center justify-center transition-all active:scale-95 border border-[var(--theme-border)] hover:border-emerald-500/30 cursor-pointer"
                                                 >+</button>
                                                 {isWeightVol ? (
-                                                    <span className="text-[10px] text-stone-500 dark:text-gray-555 uppercase font-bold ml-1">x {sizeNum} {unit}</span>
+                                                    <span className="text-[10px] text-[var(--theme-text-secondary)] uppercase font-bold ml-1">x {sizeNum} {unit}</span>
                                                 ) : (
-                                                    unit && <span className="text-[10px] text-stone-500 dark:text-gray-555 uppercase font-bold ml-1">{unit}</span>
+                                                    unit && <span className="text-[10px] text-[var(--theme-text-secondary)] uppercase font-bold ml-1">{unit}</span>
                                                 )}
                                             </div>
-                                            {isOverReceived && isManagerOrHQ && (
-                                                <p className="text-[9px] text-amber-600 dark:text-amber-400 text-center mt-1 font-bold uppercase tracking-wider">{t('posCommand.overageDetected')}</p>
+                                            {isOverReceived && isCentralHQOnly && (
+                                                <p className="text-[9px] text-amber-500 text-center mt-1 font-bold uppercase tracking-wider">{t('posCommand.overageDetected')}</p>
                                             )}
                                         </td>
                                         <td className="p-3">
@@ -220,17 +220,17 @@ export const ReceivingForm: React.FC = () => {
                                                 aria-label={t('posCommand.condition') || "Condition"}
                                                 value={item.condition}
                                                 onChange={(e) => handleUpdateTransferItem(index, 'condition', e.target.value)}
-                                                className={`bg-white dark:bg-black/50 border rounded-lg text-xs p-2 outline-none w-full cursor-pointer transition-all ${
+                                                className={`bg-[var(--theme-input-bg)] border rounded-lg text-xs p-2 outline-none w-full cursor-pointer transition-all ${
                                                     item.condition === 'Good'
-                                                        ? 'text-emerald-700 dark:text-emerald-400 border-emerald-500/30 font-bold'
+                                                        ? 'text-emerald-500 border-emerald-500/30 font-bold'
                                                         : item.condition === 'Damaged'
-                                                            ? 'text-rose-700 dark:text-red-400 border-rose-500/30 font-bold bg-rose-50 dark:bg-rose-500/5'
-                                                            : 'text-amber-700 dark:text-amber-400 border-amber-500/30 font-bold bg-amber-50 dark:bg-amber-500/5'
+                                                            ? 'text-rose-500 border-rose-500/30 font-bold bg-rose-500/5'
+                                                            : 'text-amber-500 border-amber-500/30 font-bold bg-amber-500/5'
                                                 }`}
                                             >
-                                                <option value="Good" className="bg-[#FAF8F5] dark:bg-[#18201B] text-[#1E3F27] dark:text-white">{t('posCommand.conditionGood')}</option>
-                                                <option value="Damaged" className="bg-[#FAF8F5] dark:bg-[#18201B] text-[#1E3F27] dark:text-white">{t('posCommand.conditionDamaged')}</option>
-                                                <option value="Expired" className="bg-[#FAF8F5] dark:bg-[#18201B] text-[#1E3F27] dark:text-white">{t('posCommand.conditionExpired')}</option>
+                                                <option value="Good" className="bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)]">{t('posCommand.conditionGood')}</option>
+                                                <option value="Damaged" className="bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)]">{t('posCommand.conditionDamaged')}</option>
+                                                <option value="Expired" className="bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)]">{t('posCommand.conditionExpired')}</option>
                                             </select>
                                         </td>
                                     </tr>
@@ -241,12 +241,12 @@ export const ReceivingForm: React.FC = () => {
                 </div>
 
                 {/* Summary Footer */}
-                <div className="bg-[#FAF8F5] dark:bg-black/30 p-4 border-t border-[#E2DCCE] dark:border-white/10 flex items-center justify-between">
+                <div className="bg-[var(--theme-bg-subtle)] p-4 border-t border-[var(--theme-border)] flex items-center justify-between">
                     <div className="flex gap-6 flex-wrap font-mono">
                         {isManagerOrHQ ? (
                             <div>
-                                <p className="text-[10px] text-stone-500 dark:text-gray-455 uppercase font-black tracking-widest">{t('posCommand.totalExpected')}</p>
-                                <div className="text-lg text-[#1E3F27] dark:text-white font-bold">
+                                <p className="text-[10px] text-[var(--theme-text-secondary)] uppercase font-semibold tracking-wider">{t('posCommand.totalExpected')}</p>
+                                <div className="text-lg text-[var(--theme-text-primary)] font-bold">
                                     {transferReceivingItems.map((item, idx) => {
                                         const unit = item.unit || '';
                                         const sizeNum = item.productSize || 0;
@@ -259,9 +259,9 @@ export const ReceivingForm: React.FC = () => {
 
                                         return (
                                             <span key={idx}>
-                                                {idx > 0 && <span className="text-stone-400 dark:text-gray-650 mx-1">·</span>}
+                                                {idx > 0 && <span className="text-[var(--theme-text-secondary)] mx-1">·</span>}
                                                 {formatted}
-                                                {unit && <span className="text-[10px] text-stone-500 dark:text-gray-555 uppercase ml-0.5">{unit}</span>}
+                                                {unit && <span className="text-[10px] text-[var(--theme-text-secondary)] uppercase ml-0.5">{unit}</span>}
                                             </span>
                                         );
                                     })}
@@ -269,20 +269,21 @@ export const ReceivingForm: React.FC = () => {
                             </div>
                         ) : (
                             <div className="flex items-center gap-2">
-                                <span className="px-2.5 py-1 bg-amber-500/10 text-amber-800 dark:text-amber-300 border border-amber-500/20 rounded-xl text-xs font-bold font-sans">
-                                    🔒 Zero-Trust Blind Audit Protocol Active (Expected counts hidden)
+                                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-amber-500/10 text-amber-500 border border-amber-500/20 rounded-xl text-xs font-bold font-sans">
+                                    <Lock size={12} className="shrink-0 text-amber-500" />
+                                    <span>Zero-Trust Blind Audit Protocol Active (Expected counts hidden)</span>
                                 </span>
                             </div>
                         )}
                         <div>
-                            <p className="text-[10px] text-stone-500 dark:text-gray-455 uppercase font-black tracking-widest">{t('posCommand.totalScanned')}</p>
+                            <p className="text-[10px] text-[var(--theme-text-secondary)] uppercase font-semibold tracking-wider">{t('posCommand.totalScanned')}</p>
                             <div className={`text-lg font-bold ${
                                 transferReceivingItems.every(item => {
                                     const sizeNum = item.productSize || 0;
                                     const isWV = (isWeightBased(item.unit || '') || isVolumeBased(item.unit || '')) && sizeNum > 0;
                                     const rawExpected = isWV ? (item.displayExpectedQty || item.expectedQty) * sizeNum : (item.displayExpectedQty || item.expectedQty);
                                     return item.receivedQty >= rawExpected;
-                                }) ? 'text-emerald-700 dark:text-green-400' : 'text-[#2C5E3B] dark:text-[#A9CBA2]'
+                                }) ? 'text-emerald-500' : 'text-[var(--theme-text-primary)]'
                             }`}>
                                 {transferReceivingItems.map((item, idx) => {
                                     const unit = item.unit || '';
@@ -296,9 +297,9 @@ export const ReceivingForm: React.FC = () => {
 
                                     return (
                                         <span key={idx}>
-                                            {idx > 0 && <span className="text-stone-400 dark:text-gray-650 mx-1">·</span>}
+                                            {idx > 0 && <span className="text-[var(--theme-text-secondary)] mx-1">·</span>}
                                             {formatted}
-                                            {unit && <span className="text-[10px] text-stone-500 dark:text-gray-555 uppercase ml-0.5">{unit}</span>}
+                                            {unit && <span className="text-[10px] text-[var(--theme-text-secondary)] uppercase ml-0.5">{unit}</span>}
                                         </span>
                                     );
                                 })}
@@ -308,12 +309,12 @@ export const ReceivingForm: React.FC = () => {
                     <button
                         onClick={handleConfirmTransferReceiving}
                         disabled={isConfirmingReceive || transferReceivingItems.reduce((sum, item) => sum + item.receivedQty, 0) === 0}
-                        className="px-8 py-3 disabled:bg-stone-200 dark:disabled:bg-white/5 disabled:text-stone-400 dark:disabled:text-stone-600 border border-transparent disabled:border-stone-300 dark:disabled:border-white/10 disabled:cursor-not-allowed text-white font-bold flex items-center gap-2 rounded-2xl transition-all active:scale-95 hover:opacity-90 bg-gradient-to-br from-[#224429] to-[#2C5E3B] shadow-[0_4px_16px_rgba(44,94,59,0.25)] disabled:shadow-none"
+                        className="px-6 py-2.5 disabled:opacity-40 disabled:cursor-not-allowed text-[var(--theme-primary-text)] font-bold flex items-center gap-2 rounded-xl transition-all active:scale-95 hover:opacity-90 bg-[var(--theme-primary)] shadow-xs cursor-pointer text-xs uppercase tracking-wider"
                     >
                         {isConfirmingReceive ? (
                             <span className="flex items-center gap-2"><div className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin" /> {t('common.processing')}...</span>
                         ) : (
-                            <span className="flex items-center gap-2"><CheckCircle size={18} /> {t('posCommand.finalizeReceipt')}</span>
+                            <span className="flex items-center gap-2"><CheckCircle size={16} /> {t('posCommand.finalizeReceipt')}</span>
                         )}
                     </button>
                 </div>

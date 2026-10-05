@@ -1,5 +1,5 @@
 import React from 'react';
-import { X, Printer, Minus, Plus, RefreshCw, Box, Tags, Eye, EyeOff, LayoutTemplate, ScanLine, QrCode } from 'lucide-react';
+import { X, Printer, Minus, Plus, RefreshCw, Box, Tags, Eye, EyeOff, LayoutTemplate, ScanLine, QrCode, Info } from 'lucide-react';
 
 interface ReceiveReprintModalProps {
     reprintItem: {
@@ -8,6 +8,11 @@ interface ReceiveReprintModalProps {
         qty: number;
         price?: string | number;
         category?: string;
+        expiry?: string;
+        batchNumber?: string;
+        targetLocation?: string;
+        poNumber?: string;
+        packQuantity?: number;
     };
     setReprintItem: (val: any) => void;
     isSubmitting: boolean;
@@ -22,6 +27,9 @@ interface ReceiveReprintModalProps {
         showName: boolean;
     };
     setReprintOptions: (val: any) => void;
+    labelType?: 'LPN' | 'ITEM';
+    setLabelType?: (val: 'LPN' | 'ITEM') => void;
+    printPriceTagAt?: 'receive' | 'putaway' | 'store';
     t: (key: string) => string;
 }
 
@@ -36,6 +44,9 @@ export const ReceiveReprintModal: React.FC<ReceiveReprintModalProps> = ({
     setReprintFormat,
     reprintOptions,
     setReprintOptions,
+    labelType = 'LPN',
+    setLabelType,
+    printPriceTagAt,
     t
 }) => {
     const sizes: Array<'TINY' | 'SMALL' | 'MEDIUM' | 'LARGE' | 'XL'> = ['TINY', 'SMALL', 'MEDIUM', 'LARGE', 'XL'];
@@ -72,7 +83,32 @@ export const ReceiveReprintModal: React.FC<ReceiveReprintModalProps> = ({
                     </button>
                 </div>
 
-                <div className="p-8 space-y-8 overflow-y-auto flex-1 custom-scrollbar">
+                <div className="p-8 space-y-6 overflow-y-auto flex-1 custom-scrollbar">
+                    {/* Label Purpose Selector */}
+                    <div className="flex items-center gap-2 p-1.5 bg-[#FAF8F5] dark:bg-black/40 rounded-2xl border border-[#E2DCCE] dark:border-white/10">
+                        <button
+                            type="button"
+                            onClick={() => setLabelType?.('LPN')}
+                            className={`flex-1 py-2.5 px-3 rounded-xl text-xs font-black uppercase tracking-wider flex items-center justify-center gap-2 transition-all ${labelType === 'LPN'
+                                ? 'bg-[#2C5E3B] text-white shadow-md'
+                                : 'text-stone-500 hover:text-stone-800 dark:hover:text-white'
+                            }`}
+                        >
+                            <Box size={14} />
+                            Putaway & Carton LPN (Recommended)
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => setLabelType?.('ITEM')}
+                            className={`flex-1 py-2.5 px-3 rounded-xl text-xs font-black uppercase tracking-wider flex items-center justify-center gap-2 transition-all ${labelType === 'ITEM'
+                                ? 'bg-[#2C5E3B] text-white shadow-md'
+                                : 'text-stone-500 hover:text-stone-800 dark:hover:text-white'
+                            }`}
+                        >
+                            <Tags size={14} />
+                            Unit Barcode Sticker
+                        </button>
+                    </div>
 
                     {/* Product Summary HUD */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -185,6 +221,14 @@ export const ReceiveReprintModal: React.FC<ReceiveReprintModalProps> = ({
                                 </button>
                             ))}
                         </div>
+                        {printPriceTagAt !== 'receive' && (
+                            <div className="p-3 bg-emerald-500/10 border border-emerald-500/20 rounded-xl flex items-start gap-2.5 text-[11px] text-emerald-800 dark:text-emerald-300">
+                                <Info size={14} className="shrink-0 mt-0.5 text-emerald-600 dark:text-emerald-400" />
+                                <span>
+                                    <strong>Inventory Label Mode:</strong> Inbound receiving labels identify SKU, batch & barcode. Retail shelf price tags are printed in POS Command / Store Shelf Hub to maintain scanner price parity.
+                                </span>
+                            </div>
+                        )}
                     </div>
                 </div>
 

@@ -13,7 +13,7 @@ function mapShiftRow(row: any): ShiftRecord {
         cashierId: row.cashier_id,
         cashierName: row.cashier_name || 'Staff Member',
         startTime: row.start_time || row.created_at,
-        endTime: row.end_time,
+        endTime: row.status === 'Open' ? undefined : (row.end_time || undefined),
         openingFloat: Number(row.opening_float) || 0,
         cashSales: Number(row.cash_sales) || 0,
         cardSales: Number(row.card_sales) || 0,
@@ -31,6 +31,15 @@ function mapShiftRow(row: any): ShiftRecord {
         reconciledAt: row.reconciled_at,
         reconciliationStatus: row.reconciliation_status || 'Pending',
         hqNotes: row.hq_notes,
+        cashDrops: Number(row.cash_drops) || 0,
+        cash_drops: Number(row.cash_drops) || 0,
+        dropCount: Number(row.drop_count) || 0,
+        countryCode: row.country_code || 'ET',
+        country_code: row.country_code || 'ET',
+        supervisorId: row.supervisor_id,
+        supervisorName: row.supervisor_name,
+        supervisorRole: row.supervisor_role,
+        supervisorSignedAt: row.supervisor_signed_at,
         createdAt: row.created_at,
         updatedAt: row.updated_at
     };
@@ -129,6 +138,9 @@ export const shiftsService = {
             card_sales: Number(shift.cardSales) || 0,
             mobile_sales: Number(shift.mobileSales) || 0,
             expenses: Number(shift.expenses) || 0,
+            cash_drops: Number(shift.cashDrops ?? shift.cash_drops) || 0,
+            drop_count: Number(shift.dropCount) || 0,
+            country_code: shift.countryCode || shift.country_code || 'ET',
             expected_cash: Number(shift.expectedCash ?? shift.openingFloat) || 0,
             actual_cash: Number(shift.actualCash) || 0,
             variance: Number(shift.variance) || 0,
@@ -141,9 +153,21 @@ export const shiftsService = {
 
         try {
             // RLS-Aware: insert without select('*') chaining
-            const { error } = await supabase
+            let { error } = await supabase
                 .from('shifts')
                 .insert(dbShift);
+
+            // Resilient fallback for databases with a legacy NOT NULL constraint on end_time
+            if (error && (error.code === '23502' || error.message?.includes('end_time'))) {
+                logger.warn('shiftsService', 'Legacy shifts table enforces NOT NULL on end_time. Retrying with opening timestamp fallback.');
+                const retryResult = await supabase
+                    .from('shifts')
+                    .insert({
+                        ...dbShift,
+                        end_time: startTime
+                    });
+                error = retryResult.error;
+            }
 
             if (error) throw error;
 
@@ -158,6 +182,11 @@ export const shiftsService = {
                 cardSales: dbShift.card_sales,
                 mobileSales: dbShift.mobile_sales,
                 expenses: dbShift.expenses,
+                cashDrops: dbShift.cash_drops,
+                cash_drops: dbShift.cash_drops,
+                dropCount: dbShift.drop_count,
+                countryCode: dbShift.country_code,
+                country_code: dbShift.country_code,
                 expectedCash: dbShift.expected_cash,
                 actualCash: dbShift.actual_cash,
                 variance: dbShift.variance,
@@ -187,6 +216,14 @@ export const shiftsService = {
         if (updates.cardSales !== undefined) dbUpdates.card_sales = updates.cardSales;
         if (updates.mobileSales !== undefined) dbUpdates.mobile_sales = updates.mobileSales;
         if (updates.expenses !== undefined) dbUpdates.expenses = updates.expenses;
+        if (updates.cashDrops !== undefined || updates.cash_drops !== undefined) {
+            dbUpdates.cash_drops = Number(updates.cashDrops ?? updates.cash_drops);
+        }
+        if (updates.dropCount !== undefined) dbUpdates.drop_count = updates.dropCount;
+        if (updates.supervisorId !== undefined) dbUpdates.supervisor_id = updates.supervisorId;
+        if (updates.supervisorName !== undefined) dbUpdates.supervisor_name = updates.supervisorName;
+        if (updates.supervisorRole !== undefined) dbUpdates.supervisor_role = updates.supervisorRole;
+        if (updates.supervisorSignedAt !== undefined) dbUpdates.supervisor_signed_at = updates.supervisorSignedAt;
         if (updates.expectedCash !== undefined) dbUpdates.expected_cash = updates.expectedCash;
         if (updates.actualCash !== undefined) dbUpdates.actual_cash = updates.actualCash;
         if (updates.variance !== undefined) dbUpdates.variance = updates.variance;

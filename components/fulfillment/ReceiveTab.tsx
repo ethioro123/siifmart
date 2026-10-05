@@ -1,8 +1,11 @@
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { PurchaseOrder, Product } from '../../types';
 import { generateUnifiedBatchLabelsHTML } from '../../utils/labels/ProductLabelGenerator';
+import { generateInboundPutawayLabelHTML, InboundPutawayLabelItem } from '../../utils/labels/InboundPutawayLabelGenerator';
 import { LabelSize, LabelFormat } from '../../utils/labels/types';
 import { useFulfillment } from './FulfillmentContext';
+import { useData } from '../../contexts/DataContext';
+import { resolveReceivingPolicy } from '../../utils/receivingPolicy';
 import { ReceiveHistory } from './receive/ReceiveHistory';
 import { ReceiveHeader } from './receive/ReceiveHeader';
 import { ReceiveList } from './receive/ReceiveList';
@@ -23,6 +26,8 @@ export const ReceiveTab: React.FC = () => {
         refreshData, historicalJobs, selectedJob, setSelectedJob, isDetailsOpen, setIsDetailsOpen,
         resolveOrderRef, activeTab, finalizePO, user, wmsJobsService, sites
     } = useFulfillment();
+    const { settings, effectiveCountry } = useData();
+    const receivingPolicy = useMemo(() => resolveReceivingPolicy(settings, effectiveCountry), [settings, effectiveCountry]);
 
     // --- STATE ---
     const [receiveSearch, setReceiveSearch] = useState('');
@@ -68,11 +73,19 @@ export const ReceiveTab: React.FC = () => {
     const [reprintSize, setReprintSize] = useState<'TINY' | 'SMALL' | 'MEDIUM' | 'LARGE' | 'XL'>('MEDIUM');
     const [reprintFormat, setReprintFormat] = useState<'QR' | 'Barcode' | 'Both'>('Both');
     const [reprintOptions, setReprintOptions] = useState({
-        showPrice: true,
+        showPrice: receivingPolicy.printPriceTagAt === 'receive',
         showCategory: true,
         showName: true
     });
 
+    useEffect(() => {
+        setReprintOptions(prev => ({
+            ...prev,
+            showPrice: receivingPolicy.printPriceTagAt === 'receive'
+        }));
+    }, [receivingPolicy.printPriceTagAt]);
+
+    const [reprintLabelType, setReprintLabelType] = useState<'LPN' | 'ITEM'>('LPN');
     const [finalizedSkus, setFinalizedSkus] = useState<Record<string, string>>({});
 
     const scanInputRef = useRef<HTMLInputElement>(null);
@@ -102,7 +115,7 @@ export const ReceiveTab: React.FC = () => {
         const isStaffWithLimitedAccess = !['admin', 'warehouse_manager', 'super_admin', 'dispatcher', 'inventory_specialist'].includes(user?.role || '');
 
         return orders.filter(o => {
-            const isApproved = o.status === 'Approved';
+            const isPendingManifest = o.status === 'Approved' || o.status === 'Partially Received';
             const q = receiveSearch.toLowerCase();
             const items = o.lineItems || [];
             const matchesItems = items.some((item: any) => 
@@ -116,12 +129,7 @@ export const ReceiveTab: React.FC = () => {
                 (o.supplierName || '').toLowerCase().includes(q) ||
                 matchesItems;
 
-            const hasItemsToReceive = (o.lineItems || []).some(item => {
-                const remaining = item.quantity - (item.receivedQty || 0);
-                return remaining > 0;
-            });
-            
-            if (!isApproved || !matchesSearch || !hasItemsToReceive) return false;
+            if (!isPendingManifest || !matchesSearch) return false;
 
             if (isStaffWithLimitedAccess) {
                 const hasAssignedReceiveJob = jobs.some(j => 
@@ -163,28 +171,66 @@ export const ReceiveTab: React.FC = () => {
         splitVariants,
         splitReceivingPO
     });
-    const handlePrintBatch = async (printItems: Array<{ sku: string; name: string; qty: number; price?: string | number; category?: string; expiry?: string; }>) => {
+    const handlePrintBatch = async (
+        printItems: Array<{
+            sku: string;
+            name: string;
+            qty: number;
+            price?: string | number;
+            category?: string;
+            expiry?: string;
+            batchNumber?: string;
+            targetLocation?: string;
+            targetZone?: string;
+            poNumber?: string;
+            packQuantity?: number;
+        }>,
+        targetType: 'LPN' | 'ITEM' = reprintLabelType
+    ) => {
         setIsSubmitting(true);
         try {
-            const labelsToPrint = printItems.map(item => ({
-                value: item.sku,
-                label: item.name,
-                quantity: item.qty,
-                price: (item.price || '0.00').toString(),
-                category: item.category || 'General',
-                date: ''
-            }));
-            const printOptions = {
-                size: reprintSize as LabelSize,
-                format: reprintFormat as LabelFormat,
-                showPrice: reprintOptions.showPrice,
-                showCategory: reprintOptions.showCategory,
-                showName: reprintOptions.showName
-            };
+            if (targetType === 'LPN') {
+                const lpnItems: InboundPutawayLabelItem[] = printItems.map(item => ({
+                    sku: item.sku,
+                    productName: item.name,
+                    barcode: item.sku,
+                    poNumber: item.poNumber || receivingPO?.poNumber || (receivingPO as any)?.po_number,
+                    quantity: item.qty,
+                    packQuantity: item.packQuantity || 1,
+                    batchNumber: item.batchNumber,
+                    expiryDate: item.expiry,
+                    targetLocation: item.targetLocation,
+                    targetZone: item.targetZone || item.category || 'General',
+                    receivedBy: user?.name,
+                    receiverCode: (user as any)?.employeeCode || (user as any)?.employee_code,
+                    receivedDate: new Date().toISOString().slice(0, 10),
+                    condition: 'QC-PASSED'
+                }));
+                const html = await generateInboundPutawayLabelHTML(lpnItems, {
+                    size: reprintSize as LabelSize,
+                    format: reprintFormat as LabelFormat
+                });
+                printHtmlContent(html);
+            } else {
+                const labelsToPrint = printItems.map(item => ({
+                    value: item.sku,
+                    label: item.name,
+                    quantity: item.qty,
+                    price: (item.price || '0.00').toString(),
+                    category: item.category || 'General',
+                    date: item.expiry || ''
+                }));
+                const printOptions = {
+                    size: reprintSize as LabelSize,
+                    format: reprintFormat as LabelFormat,
+                    showPrice: reprintOptions.showPrice,
+                    showCategory: reprintOptions.showCategory,
+                    showName: reprintOptions.showName
+                };
 
-            const html = await generateUnifiedBatchLabelsHTML(labelsToPrint, printOptions);
-
-            printHtmlContent(html);
+                const html = await generateUnifiedBatchLabelsHTML(labelsToPrint, printOptions);
+                printHtmlContent(html);
+            }
         } catch (e) {
             logger.error('ReceiveTab', 'caught error', e as Error);
             addNotification('alert', 'Failed to generate labels');
@@ -196,7 +242,7 @@ export const ReceiveTab: React.FC = () => {
     const handleReprintLabels = async () => {
         if (!reprintItem || isSubmitting) return;
         logger.debug('ReceiveTab', '🔍 REPRINT_ITEM');
-        await handlePrintBatch([reprintItem]);
+        await handlePrintBatch([reprintItem], reprintLabelType);
         setReprintItem(null);
     };
 
@@ -319,6 +365,9 @@ export const ReceiveTab: React.FC = () => {
                     setReprintFormat={setReprintFormat}
                     reprintOptions={reprintOptions}
                     setReprintOptions={setReprintOptions}
+                    labelType={reprintLabelType}
+                    setLabelType={setReprintLabelType}
+                    printPriceTagAt={receivingPolicy.printPriceTagAt}
                     t={t}
                 />
             )}

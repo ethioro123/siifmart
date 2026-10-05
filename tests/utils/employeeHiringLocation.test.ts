@@ -98,6 +98,8 @@ describe('Employee Mandatory Workplace Location & Segregation Rules', () => {
         it('requires executive and director roles to be deployed to Administration facilities', () => {
             expect(getRequiredSiteType('super_admin')).toBe('Administration');
             expect(getRequiredSiteType('hr_manager')).toBe('Administration');
+            expect(getRequiredSiteType('payroll_specialist')).toBe('Administration');
+            expect(getRequiredSiteType('talent_recruiter')).toBe('Administration');
             expect(getRequiredSiteType('finance_manager')).toBe('Administration');
             expect(getRequiredSiteType('procurement_manager')).toBe('Administration');
 

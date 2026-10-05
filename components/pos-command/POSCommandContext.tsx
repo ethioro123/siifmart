@@ -117,7 +117,7 @@ export const POSCommandProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     const { jobs, transfers, refreshJobs } = useFulfillmentData();
     const { workerPoints } = useGamification();
 
-    const isCentralHQ = ['super_admin', 'ceo', 'admin'].includes(user?.role?.toLowerCase() || '');
+    const isCentralHQ = ['super_admin', 'ceo', 'admin', 'regional_manager', 'operations_manager'].includes(user?.role?.toLowerCase() || '');
 
     // --- DATE FILTER & SITE SCOPING ---
     const { dateRange, setDateRange, isWithinRange } = useDateFilter('This Quarter');

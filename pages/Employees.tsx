@@ -1,6 +1,7 @@
-import React, { useState, useRef } from 'react';
-import { Briefcase, User, Network, Calendar, UserPlus, Lock, Shield, AlertTriangle } from 'lucide-react';
-import { Employee } from '../types';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Briefcase, User, Network, Calendar, UserPlus, Lock, Shield, AlertTriangle, ShieldCheck, DollarSign } from 'lucide-react';
+import { Employee, PayrollRun } from '../types';
 import { useStore } from '../contexts/CentralStore';
 import { useData } from '../contexts/DataContext';
 import { useEmployeeData } from '../hooks/useEmployeeData';
@@ -19,10 +20,19 @@ import DirectoryGrid from '../components/employees/DirectoryGrid';
 import DirectoryList from '../components/employees/DirectoryList';
 import EmployeePagination from '../components/employees/EmployeePagination';
 import EmployeeModals from '../components/employees/EmployeeModals';
+import SalaryApprovalQueueModal from '../components/employees/SalaryApprovalQueueModal';
+import { EmployeeChangeApprovalModal } from '../components/employees/modals/EmployeeChangeApprovalModal';
+import RecruitmentPipelineTab from '../components/employees/recruitment/RecruitmentPipelineTab';
+import DisciplinaryRegisterTab from '../components/employees/disciplinary/DisciplinaryRegisterTab';
+import AccessReviewTab from '../components/employees/compliance/AccessReviewTab';
+import { salaryRequestsService } from '../services/salary-requests.service';
+import { employeeChangesService } from '../services/employee-changes.service';
+import { payrollRunsService } from '../services/payroll-runs.service';
 
-type ViewMode = 'directory' | 'org' | 'shifts';
+type ViewMode = 'directory' | 'recruitment' | 'disciplinary' | 'access-audit' | 'org' | 'shifts';
 
 export default function Employees() {
+   const navigate = useNavigate();
    const { user, updateUserAvatar, onlineIds } = useStore();
    const { employees, addEmployee, updateEmployee, deleteEmployee, activeSite, sites, addNotification, tasks, shifts, effectiveCountry } = useData();
 
@@ -44,6 +54,80 @@ export default function Employees() {
 
    const [pendingOnboardingImageSrc, setPendingOnboardingImageSrc] = useState<string | null>(null);
    const [isOnboardingEditorOpen, setIsOnboardingEditorOpen] = useState(false);
+   const [isSalaryQueueOpen, setIsSalaryQueueOpen] = useState(false);
+   const [pendingSalaryCount, setPendingSalaryCount] = useState(0);
+   const [isChangeApprovalModalOpen, setIsChangeApprovalModalOpen] = useState(false);
+   const [pendingChangeCount, setPendingChangeCount] = useState(0);
+   const [pendingPayrollRun, setPendingPayrollRun] = useState<PayrollRun | null>(null);
+
+   const refreshPendingSalary = useCallback(async () => {
+      try {
+         const pending = await salaryRequestsService.getPending(activeSite?.id, effectiveCountry);
+         setPendingSalaryCount(pending.length);
+      } catch {
+         // Fallback
+      }
+   }, [activeSite?.id, effectiveCountry]);
+
+   const refreshPendingChanges = useCallback(async () => {
+      try {
+         const pending = await employeeChangesService.getPending(undefined, effectiveCountry);
+         setPendingChangeCount(pending.length);
+      } catch {
+         // Fallback
+      }
+   }, [effectiveCountry]);
+
+   const refreshPayrollRun = useCallback(async () => {
+      try {
+         const run = await payrollRunsService.getLatestRun(activeSite?.id, effectiveCountry);
+         setPendingPayrollRun(run);
+      } catch {
+         // Fallback
+      }
+   }, [activeSite?.id, effectiveCountry]);
+
+   useEffect(() => {
+      refreshPendingSalary();
+      refreshPendingChanges();
+      refreshPayrollRun();
+      const handleCreated = () => { refreshPendingSalary(); refreshPendingChanges(); };
+      const handleApproved = () => { refreshPendingSalary(); refreshPendingChanges(); };
+      const handleRejected = () => { refreshPendingSalary(); refreshPendingChanges(); };
+      const handlePayrollUpdated = () => refreshPayrollRun();
+
+      window.addEventListener('salary:request-created', handleCreated);
+      window.addEventListener('salary:request-approved', handleApproved);
+      window.addEventListener('salary:request-rejected', handleRejected);
+      window.addEventListener('employee-change:updated', refreshPendingChanges);
+      window.addEventListener('payroll:updated', handlePayrollUpdated);
+      window.addEventListener('payroll:disbursed', handlePayrollUpdated);
+
+      return () => {
+         window.removeEventListener('salary:request-created', handleCreated);
+         window.removeEventListener('salary:request-approved', handleApproved);
+         window.removeEventListener('salary:request-rejected', handleRejected);
+         window.removeEventListener('employee-change:updated', refreshPendingChanges);
+         window.removeEventListener('payroll:updated', handlePayrollUpdated);
+         window.removeEventListener('payroll:disbursed', handlePayrollUpdated);
+      };
+   }, [refreshPendingSalary, refreshPendingChanges, refreshPayrollRun]);
+
+   const handleCertifyPayrollAsHR = async () => {
+      if (!pendingPayrollRun) return;
+      try {
+         await payrollRunsService.signAsHR(
+            pendingPayrollRun.id,
+            user?.name || 'HR Officer',
+            user?.role || 'hr',
+            'HR verified active staff roster, leaves, and attendance telemetry.'
+         );
+         addNotification('success', `Roster certified for ${pendingPayrollRun.period}. Handed off to Finance.`);
+         refreshPayrollRun();
+      } catch (err: any) {
+         addNotification('alert', err.message || 'Certification failed');
+      }
+   };
 
    // --- HOOKS ---
    const { displayedEmployees, totalCount, totalPages, isLoadingEmployees, canViewAll, restricted } = useEmployeeData({
@@ -87,9 +171,9 @@ export default function Employees() {
       addNotification('success', 'Profile photo adjusted for new recruit');
    };
 
-   const handleTerminate = async () => {
+   const handleTerminate = async (details?: any) => {
       if (!selectedEmployee) return;
-      const success = await actions.handleTerminateEmployee(selectedEmployee, terminateInput);
+      const success = await actions.handleTerminateEmployee(selectedEmployee, terminateInput, details);
       if (success) {
          setIsTerminateModalOpen(false);
          setTerminateInput('');
@@ -100,7 +184,7 @@ export default function Employees() {
    const canAccessDirectory = canViewAllEmployees(user?.role) || [
       'super_admin', 'admin', 'hr', 'hr_manager', 'regional_manager', 'operations_manager',
       'supply_chain_manager', 'store_manager', 'warehouse_manager', 'assistant_manager',
-      'shift_lead', 'store_supervisor', 'logistics_manager', 'inventory_manager', 'security_manager'
+      'shift_lead', 'store_supervisor', 'logistics_manager', 'inventory_manager', 'security_manager', 'fleet_maintenance_supervisor'
    ].includes(user?.role || '');
 
    if (!canAccessDirectory) {
@@ -129,9 +213,18 @@ export default function Employees() {
                <p className="text-[#4D6E56] dark:text-gray-400 text-sm font-medium">Orchestrate your workforce, track performance, and manage shifts.</p>
             </div>
              <div className="flex items-center gap-3">
-                <div className="flex bg-white/90 dark:bg-black/25 border border-[#E2DCCE] dark:border-emerald-950/20 rounded-xl p-1 mr-4">
-                   {[ { id: 'directory', icon: User, label: 'Directory' }, { id: 'org', icon: Network, label: 'Org Chart' }, { id: 'shifts', icon: Calendar, label: 'Shift Planner' } ].map(v => (
-                      <button key={v.id} onClick={() => setViewMode(v.id as ViewMode)} className={`px-4 py-2 rounded-lg transition-all flex items-center gap-2 text-sm font-bold cursor-pointer ${viewMode === v.id ? 'bg-[#224429] dark:bg-[#EAE5D9] text-[#FAF8F5] dark:text-[#1E3B24]' : 'text-stone-500 dark:text-[#7A9E83] hover:text-[#1E3F27] dark:hover:text-white hover:bg-stone-200/20 dark:hover:bg-white/5'}`}><v.icon size={16} />{v.label}</button>
+                <div className="flex bg-white/90 dark:bg-black/25 border border-[#E2DCCE] dark:border-emerald-950/20 rounded-xl p-1 mr-4 overflow-x-auto max-w-[55vw]">
+                   {[ 
+                      { id: 'directory', icon: User, label: 'Directory' }, 
+                      ...(canViewAll ? [
+                         { id: 'recruitment', icon: Briefcase, label: 'Recruitment' },
+                         { id: 'disciplinary', icon: AlertTriangle, label: 'Disciplinary' },
+                         { id: 'access-audit', icon: Shield, label: 'Access Review' }
+                      ] : []),
+                      { id: 'org', icon: Network, label: 'Org Chart' }, 
+                      { id: 'shifts', icon: Calendar, label: 'Shift Planner' } 
+                   ].map(v => (
+                      <button key={v.id} onClick={() => setViewMode(v.id as ViewMode)} className={`px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5 text-xs font-bold shrink-0 cursor-pointer ${viewMode === v.id ? 'bg-[#224429] dark:bg-[#EAE5D9] text-[#FAF8F5] dark:text-[#1E3B24]' : 'text-stone-500 dark:text-[#7A9E83] hover:text-[#1E3F27] dark:hover:text-white hover:bg-stone-200/20 dark:hover:bg-white/5'}`}><v.icon size={14} />{v.label}</button>
                    ))}
                 </div>
                 {wizard.getCreatableRoles().length > 0 ? (
@@ -141,6 +234,93 @@ export default function Employees() {
          </div>
 
          <PhotoApprovalList photoRequests={actions.photoRequests} onApprove={actions.handleApprovePhoto} onReject={actions.handleRejectPhoto} />
+         
+         {pendingSalaryCount > 0 && (
+            <div className="p-4 rounded-2xl bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-800/30 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+               <div className="flex items-center gap-3">
+                  <div className="p-2.5 rounded-xl bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 flex-shrink-0">
+                     <ShieldCheck size={20} />
+                  </div>
+                  <div>
+                     <h4 className="text-sm font-bold text-emerald-950 dark:text-emerald-300">
+                        {pendingSalaryCount} Compensation Adjustment {pendingSalaryCount === 1 ? 'Proposal' : 'Proposals'} Awaiting Authorization
+                     </h4>
+                     <p className="text-xs text-emerald-800 dark:text-emerald-400/80">
+                        Dual-Control 4-Eyes Governance: Compensation changes proposed by HR require Finance Manager or CEO co-signature.
+                     </p>
+                  </div>
+               </div>
+               <button
+                  type="button"
+                  onClick={() => setIsSalaryQueueOpen(true)}
+                  className="px-4 py-2 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs uppercase tracking-wider transition-colors cursor-pointer shrink-0 shadow-xs"
+               >
+                  Review Salary Queue
+               </button>
+            </div>
+         )}
+
+         {pendingChangeCount > 0 && (
+            <div className="p-4 rounded-2xl bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800/30 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+               <div className="flex items-center gap-3">
+                  <div className="p-2.5 rounded-xl bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 flex-shrink-0">
+                     <ShieldCheck size={20} />
+                  </div>
+                  <div>
+                     <h4 className="text-sm font-bold text-amber-950 dark:text-amber-300">
+                        {pendingChangeCount} Cross-Department Profile {pendingChangeCount === 1 ? 'Change' : 'Changes'} Awaiting Sign-Off
+                     </h4>
+                     <p className="text-xs text-amber-800 dark:text-amber-400/80">
+                        Segregation of Duties: HR modifications to legal identity, age, departments, or roles require managerial authorization.
+                     </p>
+                  </div>
+               </div>
+               <button
+                  type="button"
+                  onClick={() => setIsChangeApprovalModalOpen(true)}
+                  className="px-4 py-2 rounded-xl bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs uppercase tracking-wider transition-colors cursor-pointer shrink-0 shadow-xs"
+               >
+                  Review Approvals Queue
+               </button>
+            </div>
+         )}
+
+         {pendingPayrollRun && !pendingPayrollRun.hrApprovedBy && pendingPayrollRun.status !== 'disbursed' && pendingPayrollRun.status !== 'rejected' && (
+            <div className="p-4 rounded-2xl bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800/30 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+               <div className="flex items-center gap-3">
+                  <div className="p-2.5 rounded-xl bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 flex-shrink-0">
+                     <DollarSign size={20} />
+                  </div>
+                  <div>
+                     <h4 className="text-sm font-bold text-blue-950 dark:text-blue-300">
+                        Monthly Payroll Cycle ({pendingPayrollRun.period}) Awaiting HR Certification
+                     </h4>
+                     <p className="text-xs text-blue-800 dark:text-blue-400/80">
+                        Zero-Trust Multi-Department Governance: Staff roster, active attendance, and leave deductions must be certified by HR before Finance can release funds.
+                     </p>
+                  </div>
+               </div>
+               <div className="flex items-center gap-2 shrink-0">
+                  <button
+                     type="button"
+                     onClick={() => navigate('/finance')}
+                     className="px-4 py-2 rounded-xl bg-blue-100 hover:bg-blue-200 dark:bg-white/10 dark:hover:bg-white/15 text-blue-900 dark:text-blue-200 font-bold text-xs uppercase tracking-wider transition-colors cursor-pointer shrink-0 shadow-xs"
+                  >
+                     Details in Financials
+                  </button>
+                  {canViewAll && (user?.role === 'hr' || user?.role === 'hr_manager' || user?.role === 'super_admin') && (
+                     <button
+                        type="button"
+                        onClick={handleCertifyPayrollAsHR}
+                        className="px-4 py-2 rounded-xl bg-blue-700 hover:bg-blue-800 text-white font-bold text-xs uppercase tracking-wider transition-colors cursor-pointer shrink-0 shadow-xs flex items-center gap-1.5"
+                     >
+                        <ShieldCheck size={14} />
+                        <span>Certify Roster & Attendance</span>
+                     </button>
+                  )}
+               </div>
+            </div>
+         )}
          {canViewAll && viewMode === 'directory' && (
             <EmployeeStats
                employees={employees}
@@ -195,7 +375,7 @@ export default function Employees() {
                      </div>
                   </div>
                )}
-               <DirectoryHeader searchTerm={searchTerm} setSearchTerm={setSearchTerm} filterRole={filterRole} setFilterRole={setFilterRole} filterStatus={filterStatus} setFilterStatus={setFilterStatus} filterDepartment={filterDepartment} setFilterDepartment={setFilterDepartment} filterSite={filterSite} setFilterSite={setFilterSite} sites={sites} layoutMode={layoutMode} setLayoutMode={setLayoutMode} isTaskQueueOpen={isTaskQueueOpen} setIsTaskQueueOpen={setIsTaskQueueOpen} totalCount={totalCount} tasksCount={tasks.length} canViewAll={canViewAll} restricted={restricted} setCurrentPage={setCurrentPage} visibleEmployees={employees} />
+               <DirectoryHeader searchTerm={searchTerm} setSearchTerm={setSearchTerm} filterRole={filterRole} setFilterRole={setFilterRole} filterStatus={filterStatus} setFilterStatus={setFilterStatus} filterDepartment={filterDepartment} setFilterDepartment={setFilterDepartment} filterSite={filterSite} setFilterSite={setFilterSite} sites={sites} layoutMode={layoutMode} setLayoutMode={setLayoutMode} isTaskQueueOpen={isTaskQueueOpen} setIsTaskQueueOpen={setIsTaskQueueOpen} totalCount={totalCount} tasksCount={tasks.length} canViewAll={canViewAll} restricted={restricted} setCurrentPage={setCurrentPage} visibleEmployees={employees} pendingSalaryCount={pendingSalaryCount} onOpenSalaryQueue={() => setIsSalaryQueueOpen(true)} />
                {layoutMode === 'grid' ? <DirectoryGrid displayedEmployees={displayedEmployees} isLoadingEmployees={isLoadingEmployees} sites={sites} setSelectedEmployee={setSelectedEmployee} currentUser={user} onlineIds={onlineIds} /> : <DirectoryList displayedEmployees={displayedEmployees} isLoadingEmployees={isLoadingEmployees} sites={sites} setSelectedEmployee={setSelectedEmployee} canViewAll={canViewAll} currentUser={user} />}
                <EmployeePagination currentPage={currentPage} totalPages={totalPages} totalCount={totalCount} ITEMS_PER_PAGE={20} setCurrentPage={setCurrentPage} />
             </div>
@@ -218,6 +398,9 @@ export default function Employees() {
                initialSiteFilter={filterSite !== 'All' ? filterSite : (activeSite?.id || 'All')}
             />
          )}
+         {viewMode === 'recruitment' && <RecruitmentPipelineTab />}
+         {viewMode === 'disciplinary' && <DisciplinaryRegisterTab />}
+         {viewMode === 'access-audit' && <AccessReviewTab />}
 
          <EmployeeModals 
             selectedEmployee={selectedEmployee} 
@@ -271,6 +454,22 @@ export default function Employees() {
             setPendingOnboardingImageSrc={setPendingOnboardingImageSrc}
             handleSaveOnboardingPhoto={handleSaveOnboardingPhoto}
          />
+
+         {isSalaryQueueOpen && (
+            <SalaryApprovalQueueModal
+               isOpen={isSalaryQueueOpen}
+               onClose={() => setIsSalaryQueueOpen(false)}
+               onRequestsUpdated={refreshPendingSalary}
+            />
+         )}
+
+         {isChangeApprovalModalOpen && (
+            <EmployeeChangeApprovalModal
+               isOpen={isChangeApprovalModalOpen}
+               onClose={() => setIsChangeApprovalModalOpen(false)}
+               onRequestsUpdated={refreshPendingChanges}
+            />
+         )}
       </div>
    );
 }

@@ -21,6 +21,14 @@ export function useApproveInventoryRequestMutation(createPutawayJob?: Function) 
 
     return useMutation({
         mutationFn: async (change: PendingInventoryChange) => {
+            // Zero-Trust 4-Eyes Principle: Requester cannot approve their own inventory request
+            if (change.requestedBy && (
+                change.requestedBy.toLowerCase() === (user?.name || '').toLowerCase() ||
+                change.requestedBy.toLowerCase() === (user?.email || '').toLowerCase()
+            )) {
+                throw new Error('4-Eyes Principle Violation: Requesters cannot approve their own inventory adjustments.');
+            }
+
             let success = false;
             let resultProduct: Product | null = null;
 

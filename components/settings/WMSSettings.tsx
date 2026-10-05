@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import {
     Shield, Package, RotateCw, AlertTriangle, Scan, Search,
-    ClipboardCheck, ArrowRight, Save, MapPin, Lock, Globe
+    ClipboardCheck, ArrowRight, Save, MapPin, Lock, Globe,
+    Tag, DollarSign, Percent
 } from 'lucide-react';
 import { useData } from '../../contexts/DataContext';
 import { useStore } from '../../contexts/CentralStore';
@@ -24,8 +25,8 @@ export default function WMSSettings() {
     // Only L1–L2 central operations and warehouse managers may configure WMS engine policies.
     // Store-level staff (store_manager, cashier, picker) are unconditionally blocked.
     const WMS_ALLOWED_ROLES = [
-        'super_admin', 'CEO',
-        'operations_manager', 'warehouse_manager',
+        'super_admin', 'CEO', 'ceo',
+        'operations_manager', 'regional_manager', 'warehouse_manager',
     ];
     const canConfigureWMS = WMS_ALLOWED_ROLES.includes(user?.role || '');
     const isHQAdmin = isAdmin(user?.role as Parameters<typeof isAdmin>[0]);
@@ -43,19 +44,29 @@ export default function WMSSettings() {
         receivingLogic: 'verified' as 'blind' | 'verified',
         qcSamplingRate: 10,
         qcBlockOnFailure: true,
-        putawayLogic: 'system' as 'manual' | 'system'
+        putawayLogic: 'system' as 'manual' | 'system',
+        requirePutawayQuantityEntry: true,
+        overReceiveTolerancePct: 0,
+        poPriceApplyAt: 'putaway' as 'putaway' | 'receive',
+        printPriceTagAt: 'store' as 'store' | 'putaway' | 'receive'
     });
 
     const [health, setHealth] = useState({
         rotationPolicy: 'fefo' as 'fefo' | 'fifo',
         requireExpiry: true,
-        cycleCountStrategy: 'abc' as 'abc' | 'random'
+        cycleCountStrategy: 'abc' as 'abc' | 'random',
+        maxCycleCountRecounts: 1,
+        requireSecondCounterOnVariance: true
     });
 
     const [outbound, setOutbound] = useState({
         pickingMethod: 'order' as 'order' | 'wave' | 'zone',
         strictScanning: true,
-        bayScan: true
+        bayScan: true,
+        requirePickQuantityEntry: true,
+        requirePackSecuritySeal: true,
+        requirePackCartonWeight: false,
+        packWeightTolerancePct: 5
     });
 
     // ── MUTATION HOOK ──
@@ -72,19 +83,29 @@ export default function WMSSettings() {
                 receivingLogic: countryPartition?.receivingLogic || (isCountryActive ? settings.receivingLogic : undefined) || 'verified',
                 qcSamplingRate: countryPartition?.qcSamplingRate ?? (isCountryActive ? settings.qcSamplingRate : undefined) ?? 10,
                 qcBlockOnFailure: countryPartition?.qcBlockOnFailure ?? (isCountryActive ? settings.qcBlockOnFailure : undefined) ?? true,
-                putawayLogic: countryPartition?.putawayLogic || (isCountryActive ? settings.putawayLogic : undefined) || 'system'
+                putawayLogic: countryPartition?.putawayLogic || (isCountryActive ? settings.putawayLogic : undefined) || 'system',
+                requirePutawayQuantityEntry: countryPartition?.requirePutawayQuantityEntry ?? (isCountryActive ? settings.requirePutawayQuantityEntry : undefined) ?? true,
+                overReceiveTolerancePct: countryPartition?.overReceiveTolerancePct ?? (isCountryActive ? settings.overReceiveTolerancePct : undefined) ?? 0,
+                poPriceApplyAt: countryPartition?.poPriceApplyAt || (isCountryActive ? settings.poPriceApplyAt : undefined) || 'putaway',
+                printPriceTagAt: countryPartition?.printPriceTagAt || (isCountryActive ? settings.printPriceTagAt : undefined) || 'store'
             });
 
             setHealth({
                 rotationPolicy: countryPartition?.rotationPolicy === 'fifo' ? 'fifo' : 'fefo',
                 requireExpiry: countryPartition?.requireExpiry ?? (isCountryActive ? settings.requireExpiry : undefined) ?? true,
-                cycleCountStrategy: countryPartition?.cycleCountStrategy || (isCountryActive ? settings.cycleCountStrategy : undefined) || 'abc'
+                cycleCountStrategy: countryPartition?.cycleCountStrategy || (isCountryActive ? settings.cycleCountStrategy : undefined) || 'abc',
+                maxCycleCountRecounts: countryPartition?.maxCycleCountRecounts ?? (isCountryActive ? settings.maxCycleCountRecounts : undefined) ?? 1,
+                requireSecondCounterOnVariance: countryPartition?.requireSecondCounterOnVariance ?? (isCountryActive ? settings.requireSecondCounterOnVariance : undefined) ?? true
             });
 
             setOutbound({
                 pickingMethod: countryPartition?.pickingMethod || (isCountryActive ? settings.pickingMethod : undefined) || 'order',
                 strictScanning: countryPartition?.strictScanning ?? (isCountryActive ? settings.strictScanning : undefined) ?? true,
-                bayScan: countryPartition?.bayScan ?? (isCountryActive ? settings.bayScan : undefined) ?? true
+                bayScan: countryPartition?.bayScan ?? (isCountryActive ? settings.bayScan : undefined) ?? true,
+                requirePickQuantityEntry: countryPartition?.requirePickQuantityEntry ?? (isCountryActive ? settings.requirePickQuantityEntry : undefined) ?? true,
+                requirePackSecuritySeal: countryPartition?.requirePackSecuritySeal ?? (isCountryActive ? settings.requirePackSecuritySeal : undefined) ?? true,
+                requirePackCartonWeight: countryPartition?.requirePackCartonWeight ?? (isCountryActive ? settings.requirePackCartonWeight : undefined) ?? false,
+                packWeightTolerancePct: countryPartition?.packWeightTolerancePct ?? (isCountryActive ? settings.packWeightTolerancePct : undefined) ?? 5
             });
         }
     }, [activeCountry, settings]);
@@ -200,6 +221,13 @@ export default function WMSSettings() {
                                         value={inbound.qcSamplingRate}
                                         onChange={(val: number) => setInbound(prev => ({ ...prev, qcSamplingRate: val }))}
                                     />
+                                    <SliderGroup
+                                        label="Over-Receive Tolerance"
+                                        icon={Percent}
+                                        min={0} max={20} step={1} unit="%"
+                                        value={inbound.overReceiveTolerancePct}
+                                        onChange={(val: number) => setInbound(prev => ({ ...prev, overReceiveTolerancePct: val }))}
+                                    />
                                     <ToggleRow
                                         label="Block on QC Failure"
                                         sub="Quarantines lot and raises HQ approval request — branch cannot unilaterally reject"
@@ -207,6 +235,27 @@ export default function WMSSettings() {
                                         onChange={() => setInbound(prev => ({ ...prev, qcBlockOnFailure: !prev.qcBlockOnFailure }))}
                                     />
                                 </div>
+                                <RadioGroup<'putaway' | 'receive'>
+                                    label="PO Retail Price Activation"
+                                    icon={DollarSign}
+                                    options={[
+                                        { value: 'putaway', label: 'At Putaway (Recommended)', desc: 'Live price updates only when goods are shelved' },
+                                        { value: 'receive', label: 'At Receive Dock', desc: 'Overrides live shelf price immediately upon unloading' },
+                                    ]}
+                                    value={inbound.poPriceApplyAt}
+                                    onChange={(val) => setInbound(prev => ({ ...prev, poPriceApplyAt: val }))}
+                                />
+                                <RadioGroup<'store' | 'putaway' | 'receive'>
+                                    label="Price Tag Printing Location"
+                                    icon={Tag}
+                                    options={[
+                                        { value: 'store', label: 'POS Command / Store Floor (Recommended)', desc: 'Print shelf price tags at retail display to guarantee scanner parity' },
+                                        { value: 'putaway', label: 'At Putaway', desc: 'Print tags when moving goods into storage bays' },
+                                        { value: 'receive', label: 'At Receive Dock', desc: 'Print price tags at receiving dock (caution: risks price divergence)' },
+                                    ]}
+                                    value={inbound.printPriceTagAt}
+                                    onChange={(val) => setInbound(prev => ({ ...prev, printPriceTagAt: val }))}
+                                />
                                 <RadioGroup<'manual' | 'system'>
                                     label="Putaway Logic"
                                     icon={ArrowRight}
@@ -216,6 +265,12 @@ export default function WMSSettings() {
                                     ]}
                                     value={inbound.putawayLogic}
                                     onChange={(val) => setInbound(prev => ({ ...prev, putawayLogic: val }))}
+                                />
+                                <ToggleRow
+                                    label="Require Explicit Putaway Quantity Entry"
+                                    sub="Forces operator to verify and enter physical quantity shelved into bay (blocks single-scan full crediting)"
+                                    checked={inbound.requirePutawayQuantityEntry}
+                                    onChange={() => setInbound(prev => ({ ...prev, requirePutawayQuantityEntry: !prev.requirePutawayQuantityEntry }))}
                                 />
                                 <div className="pt-4 border-t border-[#E2DCCE]/60 dark:border-white/10 flex justify-end">
                                     <button
@@ -261,6 +316,12 @@ export default function WMSSettings() {
                                         ]}
                                         value={health.cycleCountStrategy}
                                         onChange={(val) => setHealth(prev => ({ ...prev, cycleCountStrategy: val }))}
+                                    />
+                                    <ToggleRow
+                                        label="Require Second Counter on Variance"
+                                        sub="Recounts on count discrepancy items require dual sign-off (4-Eyes principle)"
+                                        checked={health.requireSecondCounterOnVariance}
+                                        onChange={() => setHealth(prev => ({ ...prev, requireSecondCounterOnVariance: !prev.requireSecondCounterOnVariance }))}
                                     />
                                     <div className="pt-4 border-t border-[#E2DCCE]/60 dark:border-white/10 flex justify-end">
                                         <button
@@ -323,6 +384,24 @@ export default function WMSSettings() {
                                                 setOutbound(prev => ({ ...prev, bayScan: !prev.bayScan }));
                                             }}
                                             warning={!isHQAdmin ? 'HQ Admin required to disable' : 'Disabling increases pick errors and audit exposure'}
+                                        />
+                                        <ToggleRow
+                                            label="Require Explicit Pick Quantity Entry"
+                                            sub="Forces picker to count and enter verified physical units picked (prevents auto-crediting entire order on single scan)"
+                                            checked={outbound.requirePickQuantityEntry}
+                                            onChange={() => setOutbound(prev => ({ ...prev, requirePickQuantityEntry: !prev.requirePickQuantityEntry }))}
+                                        />
+                                        <ToggleRow
+                                            label="Require Tamper Security Seal"
+                                            sub="Requires serial number scan/entry for tamper-evident security seal before box closure"
+                                            checked={outbound.requirePackSecuritySeal}
+                                            onChange={() => setOutbound(prev => ({ ...prev, requirePackSecuritySeal: !prev.requirePackSecuritySeal }))}
+                                        />
+                                        <ToggleRow
+                                            label="Require Scale Carton Weight Check"
+                                            sub="Enforces physical scale weighing against computed SKU weights prior to shipping"
+                                            checked={outbound.requirePackCartonWeight}
+                                            onChange={() => setOutbound(prev => ({ ...prev, requirePackCartonWeight: !prev.requirePackCartonWeight }))}
                                         />
                                     </div>
                                     <div className="pt-4 border-t border-[#E2DCCE]/60 dark:border-white/10 flex justify-end">

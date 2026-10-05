@@ -72,53 +72,53 @@ export const PriceUpdatesModal: React.FC = () => {
                 </div>
 
                 {priceUpdatedProducts.length === 0 ? (
-                    <div className="text-center py-10 text-stone-600 dark:text-gray-400 font-medium">
-                        <CheckCircle size={48} className="mx-auto mb-2 opacity-30 text-[#2C5E3B] dark:text-[#A9CBA2]" />
-                        <p>No price changes in the last 7 days.</p>
+                    <div className="text-center py-10 text-[var(--theme-text-muted)] font-medium">
+                        <CheckCircle size={44} className="mx-auto mb-2 opacity-30 text-[var(--theme-primary)]" />
+                        <p className="text-xs">No price changes in the last 7 days.</p>
                     </div>
                 ) : (
-                    <div className="max-h-[60vh] overflow-y-auto border border-[#E2DCCE] dark:border-white/10 rounded-xl">
-                        <table className="w-full text-left bg-white/50 dark:bg-black/20">
-                            <thead className="bg-stone-200/70 dark:bg-white/5 text-xs uppercase text-stone-700 dark:text-gray-300 sticky top-0 backdrop-blur-md font-bold">
+                    <div className="max-h-[60vh] overflow-y-auto border border-[var(--theme-border)] rounded-xl">
+                        <table className="w-full text-left bg-transparent">
+                            <thead className="bg-[var(--theme-thead-bg)] text-xs uppercase text-[var(--theme-thead-text)] sticky top-0 font-bold border-b border-[var(--theme-border)]">
                                 <tr>
-                                    <th className="p-3">Product</th>
-                                    <th className="p-3 text-center">Unit</th>
-                                    <th className="p-3 text-right">Old Price</th>
-                                    <th className="p-3 text-right">New Price</th>
-                                    <th className="p-3 text-right">Update Time</th>
-                                    <th className="p-3 text-center">Action</th>
+                                    <th className="p-3 text-[10px] uppercase font-bold tracking-wider">Product</th>
+                                    <th className="p-3 text-[10px] uppercase font-bold tracking-wider text-center">Unit</th>
+                                    <th className="p-3 text-[10px] uppercase font-bold tracking-wider text-right">Old Price</th>
+                                    <th className="p-3 text-[10px] uppercase font-bold tracking-wider text-right">New Price</th>
+                                    <th className="p-3 text-[10px] uppercase font-bold tracking-wider text-right">Update Time</th>
+                                    <th className="p-3 text-[10px] uppercase font-bold tracking-wider text-center">Action</th>
                                 </tr>
                             </thead>
-                            <tbody className="divide-y divide-[#E2DCCE] dark:divide-white/5">
+                            <tbody className="divide-y divide-[var(--theme-border)]">
                                 {priceUpdatedProducts.map((p: any) => {
                                     const priceTime = p.priceUpdatedAt || p.price_updated_at || p.updatedAt || p.updated_at;
                                     const isUnseen = priceTime && new Date(priceTime).getTime() > (lastSeenPriceUpdate || 0);
                                     return (
-                                        <tr key={p.id} className="hover:bg-stone-50 dark:hover:bg-white/5 transition-colors">
+                                        <tr key={p.id} className="hover:bg-[var(--theme-table-row-hover)] transition-colors">
                                             <td className="p-3">
                                                 <div className="flex items-center gap-2">
-                                                    <div className="font-bold text-[#1E3F27] dark:text-[#EAE5D9]">{p.name}</div>
+                                                    <div className="font-bold text-[var(--theme-text-primary)] text-xs">{p.name}</div>
                                                     {isUnseen && (
-                                                        <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-black bg-blue-500/10 text-blue-700 dark:text-blue-300 border border-blue-400/30 uppercase">
+                                                        <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-bold bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-400/30 uppercase">
                                                             <span className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" />
                                                             New Price
                                                         </span>
                                                     )}
                                                 </div>
-                                                <div className="text-xs text-[#4D6E56] dark:text-gray-400 font-medium">{p.sku}</div>
+                                                <div className="text-[10px] text-[var(--theme-text-secondary)] font-mono">{p.sku}</div>
                                             </td>
                                             <td className="p-3 text-center">
-                                                <span className="text-[10px] font-bold text-stone-700 dark:text-gray-300 bg-stone-200/80 dark:bg-white/10 px-1.5 py-0.5 rounded uppercase">
+                                                <span className="text-[10px] font-bold text-[var(--theme-text-secondary)] bg-[var(--theme-pill-bg)] border border-[var(--theme-border)] px-1.5 py-0.5 rounded uppercase">
                                                     {getSellUnit(p.unit).shortLabel}
                                                 </span>
                                             </td>
-                                            <td className="p-3 text-right text-stone-600 dark:text-gray-400 font-mono text-sm">
+                                            <td className="p-3 text-right text-[var(--theme-text-muted)] font-mono text-xs">
                                                 {p.oldPrice !== undefined && p.oldPrice !== null ? `${Number(p.oldPrice).toLocaleString()} ${CURRENCY_SYMBOL}` : '-'}
                                             </td>
-                                            <td className="p-3 text-right text-amber-600 dark:text-amber-400 font-bold font-mono text-sm">
+                                            <td className="p-3 text-right text-amber-600 dark:text-amber-400 font-bold font-mono text-xs">
                                                 {p.price.toLocaleString()} {CURRENCY_SYMBOL}{getSellUnit(p.unit).code !== 'UNIT' ? `/${getSellUnit(p.unit).shortLabel}` : ''}
                                             </td>
-                                            <td className="p-3 text-right text-xs text-[#2C5E3B] dark:text-[#A9CBA2] font-semibold">
+                                            <td className="p-3 text-right text-[10px] text-[var(--theme-text-secondary)] font-medium">
                                                 {priceTime ? new Date(priceTime).toLocaleDateString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : '—'}
                                             </td>
                                             <td className="p-3 text-center">
@@ -129,7 +129,7 @@ export const PriceUpdatesModal: React.FC = () => {
                                                         native.haptic();
                                                         addNotification('info', `Added ${p.name} at updated price ${CURRENCY_SYMBOL} ${p.price}`);
                                                     }}
-                                                    className="px-2.5 py-1 bg-[#2C5E3B]/10 hover:bg-[#2C5E3B] text-[#2C5E3B] hover:text-white dark:bg-white/5 dark:hover:bg-[#2C5E3B] dark:text-[#A9CBA2] dark:hover:text-white rounded-lg text-xs font-bold transition-colors inline-flex items-center gap-1 cursor-pointer"
+                                                    className="px-2.5 py-1 bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-primary)] text-[var(--theme-text-primary)] hover:text-[var(--theme-primary-text)] border border-[var(--theme-border)] rounded-lg text-xs font-bold transition-colors inline-flex items-center gap-1 cursor-pointer shadow-xs"
                                                     title="Add to cart at new price"
                                                 >
                                                     <Plus size={12} />
@@ -144,7 +144,7 @@ export const PriceUpdatesModal: React.FC = () => {
                     </div>
                 )}
 
-                <div className="flex justify-end gap-3 pt-4 border-t border-[#E2DCCE] dark:border-white/10">
+                <div className="flex justify-end gap-3 pt-4 border-t border-[var(--theme-border)]">
                     <Button
                         variant="secondary"
                         onClick={() => {

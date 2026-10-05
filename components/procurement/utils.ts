@@ -185,7 +185,7 @@ export const inferBulkPackaging = (item: any): { unitsPerOrderUnit: number; pack
     // the ordered unit is a bulk bundle/bale/case (e.g., Ugali flour cost KSh 4,200 vs retail KSh 400).
     if (unitCost > 0 && retailPrice > 0 && unitCost >= retailPrice * 1.5) {
         const isGrainOrFlour = text.includes('flour') || text.includes('ugali') || text.includes('grain') || text.includes('sugar') || text.includes('maize');
-        const isBeverage = text.includes('drink') || text.includes('soda') || text.includes('beer') || text.includes('water') || text.includes('can') || text.includes('bottle');
+        const isBeverage = text.includes('drink') || text.includes('soda') || text.includes('juice') || text.includes('water') || text.includes('can') || text.includes('bottle');
         const marginFactor = isBeverage ? 0.80 : 0.85;
         const estimatedPacks = Math.round(unitCost / (retailPrice * marginFactor));
         const standardMultiples = isBeverage ? [6, 12, 24, 48] : isGrainOrFlour ? [10, 12, 20, 24] : [6, 10, 12, 20, 24, 48];

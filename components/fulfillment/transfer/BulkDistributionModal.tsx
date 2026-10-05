@@ -110,7 +110,8 @@ export const BulkDistributionModal: React.FC<BulkDistributionModalProps> = ({
     const handleCreateDistribution = async () => {
         const actualSourceSite = bulkDistributionSourceSite || activeSite?.id;
 
-        if (settings?.enforceRegionalZoning && user?.role !== 'super_admin') {
+        const canOverrideZoning = ['super_admin', 'CEO', 'ceo', 'regional_manager', 'operations_manager'].includes(user?.role || '');
+        if (settings?.enforceRegionalZoning && !canOverrideZoning) {
             if (isCrossZone) {
                 addNotification('alert', 'Cross-zone distribution is restricted. Stores can only receive stock from warehouses in the same Logistics Zone.');
                 return;
@@ -349,13 +350,13 @@ export const BulkDistributionModal: React.FC<BulkDistributionModalProps> = ({
                             </select>
                         </div>
 
-                        {isCrossZone && settings?.enforceRegionalZoning && user?.role === 'super_admin' && (
+                        {isCrossZone && settings?.enforceRegionalZoning && ['super_admin', 'CEO', 'ceo', 'regional_manager', 'operations_manager'].includes(user?.role || '') && (
                              <div className="bg-yellow-500/10 border border-yellow-500/30 text-yellow-400 p-4 rounded-xl flex items-start gap-3 animate-pulse">
                                  <AlertTriangle className="shrink-0 mt-0.5 text-yellow-400" size={18} />
                                  <div>
                                      <h4 className="font-bold text-sm text-yellow-400">⚠️ Cross-Zone Allocation Override</h4>
                                      <p className="text-xs mt-1 text-yellow-500/90 leading-relaxed">
-                                         You are distributing stock from <span className="font-bold text-white">{getZoneName(sourceSiteObj?.logisticsZoneId)}</span> to stores in different Logistics Zones: {crossZoneStores.map(s => `${s.name} (${getZoneName(s.logisticsZoneId)})`).join(', ')}. As CEO, you are authorized to override this restriction.
+                                         You are distributing stock from <span className="font-bold text-white">{getZoneName(sourceSiteObj?.logisticsZoneId)}</span> to stores in different Logistics Zones: {crossZoneStores.map(s => `${s.name} (${getZoneName(s.logisticsZoneId)})`).join(', ')}. As Operations/Regional Leadership, you are authorized to override this restriction for emergency reallocations.
                                      </p>
                                  </div>
                              </div>

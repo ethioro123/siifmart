@@ -192,7 +192,7 @@ export default function Customers() {
                {selectedCustomer ? (
                   <div className="space-y-6 animate-in fade-in">
                      <div className="text-center">
-                        <div className="w-24 h-24 rounded-full bg-gradient-to-br from-cyber-primary/20 to-blue-500/20 mx-auto flex items-center justify-center border-2 border-white/10 mb-4">
+                        <div className="w-24 h-24 rounded-full bg-[var(--theme-bg-subtle)] mx-auto flex items-center justify-center border border-[var(--theme-border)] mb-4">
                            <Crown size={40} className={
                               selectedCustomer.tier === 'Platinum' ? 'text-purple-400' :
                                  selectedCustomer.tier === 'Gold' ? 'text-yellow-400' :

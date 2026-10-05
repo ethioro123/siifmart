@@ -186,8 +186,8 @@ export function generateZReportReceiptHtml(
             <span>Date: ____________</span>
           </div>
           ${auditorName || shift.reconciledBy ? `
-            <p style="margin: 8px 0 0 0; font-size: 9px; color: #2C5E3B; font-weight: bold;">
-              ✓ HQ Audit Signed-Off By: ${auditorName || shift.reconciledBy}
+            <p style="margin: 8px 0 0 0; font-size: 9px; color: #000; font-weight: bold;">
+              HQ Audit Verified By: ${auditorName || shift.reconciledBy}
             </p>
           ` : ''}
         </div>

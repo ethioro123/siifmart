@@ -12,6 +12,8 @@ import {
     addEmployeeLeaveRequest,
     updateEmployeeLeaveRequestStatus
 } from '../utils/employeeProfileData';
+import { leaveRequestsService } from '../services/leave-requests.service';
+import { employeeDocumentsService } from '../services/employee-documents.service';
 
 interface UseStaffProfileProps {
     employee: Employee;
@@ -109,10 +111,30 @@ export function useStaffProfile({
             : `${Math.round(file.size / 1024)} KB`;
 
         const reader = new FileReader();
-        reader.onload = () => {
+        reader.onload = async () => {
             const dataUrl = reader.result as string;
             const newDoc = addEmployeeDocument(employee.id, file.name, sizeFormatted, dataUrl);
             setDocuments(prev => [newDoc, ...prev]);
+
+            try {
+                const docType = file.name.toLowerCase().includes('id') || file.name.toLowerCase().includes('passport')
+                    ? 'national_id'
+                    : (file.name.toLowerCase().includes('contract') ? 'contract' : 'other');
+
+                await employeeDocumentsService.addDocument({
+                    country_code: employee.country || (employee as any).country_code || 'ET',
+                    employee_id: employee.id,
+                    name: file.name,
+                    doc_type: docType as any,
+                    file_url: dataUrl,
+                    file_size: file.size,
+                    mime_type: file.type || 'application/octet-stream',
+                    uploaded_by: user?.name || 'Authorized Staff'
+                });
+            } catch {
+                // Service fallback handled
+            }
+
             addNotification('success', `Uploaded document: ${file.name}`);
             if (documentInputRef.current) {
                 documentInputRef.current.value = '';
@@ -121,26 +143,81 @@ export function useStaffProfile({
         reader.readAsDataURL(file);
     };
 
-    const handleDeleteDocument = (docId: string) => {
+    const handleDeleteDocument = async (docId: string) => {
         removeEmployeeDocument(employee.id, docId);
         setDocuments(prev => prev.filter(d => d.id !== docId));
+        try {
+            await employeeDocumentsService.deleteDocument(docId, employee.id, user?.name || 'Authorized Staff');
+        } catch {
+            // Handled
+        }
         addNotification('info', 'Document removed');
     };
 
-    const handleRequestTimeOff = (request: { type: string; startDate: string; endDate: string; reason?: string }) => {
+    const handleRequestTimeOff = async (request: { type: string; startDate: string; endDate: string; reason?: string }) => {
         const newReq = addEmployeeLeaveRequest(employee.id, request);
         setLeaveRequests(prev => [newReq, ...prev]);
         setIsTimeOffModalOpen(false);
+
+        try {
+            const start = new Date(request.startDate);
+            const end = new Date(request.endDate);
+            const diffDays = Math.max(1, Math.round((end.getTime() - start.getTime()) / 86400000) + 1);
+
+            let lType: any = 'annual';
+            const reqTypeLower = request.type.toLowerCase();
+            if (reqTypeLower.includes('sick') || reqTypeLower.includes('med')) lType = 'sick';
+            else if (reqTypeLower.includes('emergency')) lType = 'emergency';
+            else if (reqTypeLower.includes('unpaid')) lType = 'unpaid';
+
+            await leaveRequestsService.createLeave({
+                country_code: employee.country || (employee as any).country_code || 'ET',
+                site_id: employee.siteId || employee.site_id,
+                employee_id: employee.id,
+                employee_name: employee.name,
+                leave_type: lType,
+                start_date: request.startDate,
+                end_date: request.endDate,
+                days: diffDays,
+                reason: request.reason || 'Formal time-off request',
+                requested_by: user?.name || employee.name
+            });
+        } catch {
+            // Service fallback handled
+        }
+
         addNotification('success', `Time off request submitted (${request.type})`);
     };
 
-    const handleApproveLeave = (requestId: string) => {
+    const handleApproveLeave = async (requestId: string) => {
+        try {
+            await leaveRequestsService.reviewLeave(
+                requestId,
+                { id: user?.id || 'mgr', name: user?.name || 'Supervisory Manager', role: user?.role || 'hr' },
+                'Approved'
+            );
+        } catch (err: any) {
+            addNotification('alert', err.message || 'Maker-checker validation rejected leave approval.');
+            return;
+        }
+
         updateEmployeeLeaveRequestStatus(employee.id, requestId, 'Approved');
         setLeaveRequests(prev => prev.map(r => r.id === requestId ? { ...r, status: 'Approved' } : r));
         addNotification('success', 'Leave request approved');
     };
 
-    const handleRejectLeave = (requestId: string) => {
+    const handleRejectLeave = async (requestId: string) => {
+        try {
+            await leaveRequestsService.reviewLeave(
+                requestId,
+                { id: user?.id || 'mgr', name: user?.name || 'Supervisory Manager', role: user?.role || 'hr' },
+                'Rejected'
+            );
+        } catch (err: any) {
+            addNotification('alert', err.message || 'Action rejected');
+            return;
+        }
+
         updateEmployeeLeaveRequestStatus(employee.id, requestId, 'Rejected');
         setLeaveRequests(prev => prev.map(r => r.id === requestId ? { ...r, status: 'Rejected' } : r));
         addNotification('info', 'Leave request rejected');

@@ -20,7 +20,7 @@ export const OverviewTab: React.FC = () => {
 
     const getColorClass = (index: number) => {
         const classes = [
-            'bg-[#2C5E3B] dark:bg-[#A9CBA2]',
+            'bg-emerald-600 dark:bg-emerald-400',
             'bg-blue-500',
             'bg-amber-500',
             'bg-rose-500',
@@ -30,64 +30,66 @@ export const OverviewTab: React.FC = () => {
         return classes[index % classes.length];
     };
 
+    const cardBase = "bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-5 flex flex-col justify-between min-h-[120px]";
+
     return (
         <div className="space-y-6 animate-in fade-in">
             {/* Top Metrics */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-                <div className="bg-stone-900/60 dark:bg-stone-900/60 border border-stone-200/10 dark:border-white/5 rounded-2xl p-5 flex flex-col justify-between min-h-[120px]">
+                <div className={cardBase}>
                     <div>
-                        <p className="text-gray-400 text-[10px] uppercase font-bold tracking-wider">Total Revenue</p>
-                        <h3 className="text-2xl font-mono font-bold text-white mt-1">{formatCompactNumber(totalRevenue, { currency: currencySymbol })}</h3>
+                        <p className="text-[var(--theme-text-secondary)] text-[10px] uppercase font-bold tracking-wider">Total Revenue</p>
+                        <h3 className="text-2xl font-mono font-bold text-[var(--theme-text-primary)] mt-1">{formatCompactNumber(totalRevenue, { currency: currencySymbol })}</h3>
                     </div>
                     <div className="mt-2 flex items-center gap-1.5">
-                        <Activity size={12} className="text-[#2C5E3B] dark:text-[#A9CBA2]" />
-                        <span className="text-[10px] text-gray-500 font-bold">Base metric</span>
+                        <Activity size={12} className="text-emerald-500" />
+                        <span className="text-[10px] text-[var(--theme-text-muted)] font-bold">Base metric</span>
                     </div>
                 </div>
 
-                <div className="bg-stone-900/60 dark:bg-stone-900/60 border border-stone-200/10 dark:border-white/5 rounded-2xl p-5 flex flex-col justify-between min-h-[120px]">
+                <div className={cardBase}>
                     <div>
-                        <p className="text-gray-400 text-[10px] uppercase font-bold tracking-wider">Total Expenses</p>
-                        <h3 className="text-2xl font-mono font-bold text-white mt-1">{formatCompactNumber(totalExpenses, { currency: currencySymbol })}</h3>
+                        <p className="text-[var(--theme-text-secondary)] text-[10px] uppercase font-bold tracking-wider">Total Expenses</p>
+                        <h3 className="text-2xl font-mono font-bold text-rose-500 mt-1">{formatCompactNumber(totalExpenses, { currency: currencySymbol })}</h3>
                     </div>
                     <div className="mt-2 flex items-center gap-1.5">
                         <Activity size={12} className="text-rose-500" />
-                        <span className="text-[10px] text-gray-500 font-bold">Operational costs</span>
+                        <span className="text-[10px] text-[var(--theme-text-muted)] font-bold">Operational costs</span>
                     </div>
                 </div>
 
-                <div className="bg-stone-900/60 dark:bg-stone-900/60 border border-stone-200/10 dark:border-white/5 rounded-2xl p-5 flex flex-col justify-between min-h-[120px]">
+                <div className={cardBase}>
                     <div>
-                        <p className="text-gray-400 text-[10px] uppercase font-bold tracking-wider">Total Refunds</p>
-                        <h3 className="text-2xl font-mono font-bold text-white mt-1">{formatCompactNumber(totalRefunds, { currency: currencySymbol })}</h3>
+                        <p className="text-[var(--theme-text-secondary)] text-[10px] uppercase font-bold tracking-wider">Total Refunds</p>
+                        <h3 className="text-2xl font-mono font-bold text-amber-500 mt-1">{formatCompactNumber(totalRefunds, { currency: currencySymbol })}</h3>
                     </div>
                     <div className="mt-2 flex items-center gap-1.5">
                         <Activity size={12} className="text-amber-500" />
-                        <span className="text-[10px] text-gray-500 font-bold">Returns value</span>
+                        <span className="text-[10px] text-[var(--theme-text-muted)] font-bold">Returns value</span>
                     </div>
                 </div>
 
-                <div className="bg-stone-900/60 dark:bg-stone-900/60 border border-stone-200/10 dark:border-white/5 rounded-2xl p-5 flex flex-col justify-between min-h-[120px]">
+                <div className={cardBase}>
                     <div>
-                        <p className="text-gray-400 text-[10px] uppercase font-bold tracking-wider">Inventory Asset Value</p>
-                        <h3 className="text-2xl font-mono font-bold text-white mt-1">{formatCompactNumber(totalInventoryValue, { currency: currencySymbol })}</h3>
+                        <p className="text-[var(--theme-text-secondary)] text-[10px] uppercase font-bold tracking-wider">Inventory Asset Value</p>
+                        <h3 className="text-2xl font-mono font-bold text-[var(--theme-text-primary)] mt-1">{formatCompactNumber(totalInventoryValue, { currency: currencySymbol })}</h3>
                     </div>
                     <div className="mt-2 flex items-center gap-1.5">
                         <Activity size={12} className="text-blue-500" />
-                        <span className="text-[10px] text-gray-500 font-bold">Stock valuation</span>
+                        <span className="text-[10px] text-[var(--theme-text-muted)] font-bold">Stock valuation</span>
                     </div>
                 </div>
 
-                <div className="bg-stone-900/60 dark:bg-stone-900/60 border border-stone-200/10 dark:border-white/5 rounded-2xl p-5 flex flex-col justify-between min-h-[120px]">
+                <div className={cardBase}>
                     <div>
-                        <p className="text-gray-400 text-[10px] uppercase font-bold tracking-wider">Net Profit</p>
-                        <h3 className={`text-2xl font-mono font-bold mt-1 ${netProfit >= 0 ? 'text-[#2C5E3B] dark:text-[#A9CBA2]' : 'text-rose-500'}`}>
+                        <p className="text-[var(--theme-text-secondary)] text-[10px] uppercase font-bold tracking-wider">Net Profit</p>
+                        <h3 className={`text-2xl font-mono font-bold mt-1 ${netProfit >= 0 ? 'text-emerald-500' : 'text-rose-500'}`}>
                             {formatCompactNumber(netProfit, { currency: currencySymbol })}
                         </h3>
                     </div>
                     <div className="mt-2 flex items-center gap-1.5">
-                        <Activity size={12} className={netProfit >= 0 ? 'text-[#2C5E3B] dark:text-[#A9CBA2]' : 'text-rose-500'} />
-                        <span className="text-[10px] text-gray-500 font-bold">Bottom-line earnings</span>
+                        <Activity size={12} className={netProfit >= 0 ? 'text-emerald-500' : 'text-rose-500'} />
+                        <span className="text-[10px] text-[var(--theme-text-muted)] font-bold">Bottom-line earnings</span>
                     </div>
                 </div>
             </div>
@@ -95,42 +97,32 @@ export const OverviewTab: React.FC = () => {
             {/* Charts Row */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 {/* Cashflow Trend */}
-                <div className="bg-stone-900/60 dark:bg-stone-900/60 border border-stone-200/10 dark:border-white/5 rounded-3xl p-6 lg:col-span-2">
-                    <h4 className="text-white font-bold text-sm uppercase tracking-wider mb-6">Cashflow Trend</h4>
-                    <div className="h-[300px]">
-                        <ResponsiveContainer width="100%" height="100%">
+                <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-6 lg:col-span-2">
+                    <h4 className="text-[var(--theme-text-primary)] font-bold text-sm uppercase tracking-wider mb-6">Cashflow Trend</h4>
+                    <div className="h-[300px] w-full min-w-0 relative">
+                        <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
                             <AreaChart data={cashflowData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                                <defs>
-                                    <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
-                                        <stop offset="5%" stopColor={accentColor} stopOpacity={0.2} />
-                                        <stop offset="95%" stopColor={accentColor} stopOpacity={0} />
-                                    </linearGradient>
-                                    <linearGradient id="colorExpenses" x1="0" y1="0" x2="0" y2="1">
-                                        <stop offset="5%" stopColor="#ef4444" stopOpacity={0.2} />
-                                        <stop offset="95%" stopColor="#ef4444" stopOpacity={0} />
-                                    </linearGradient>
-                                </defs>
-                                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
-                                <XAxis dataKey="name" stroke="#666" fontSize={10} tickLine={false} />
-                                <YAxis stroke="#666" fontSize={10} tickLine={false} />
+                                <CartesianGrid strokeDasharray="3 3" stroke="var(--theme-border)" opacity={0.6} />
+                                <XAxis dataKey="name" stroke="var(--theme-text-secondary)" fontSize={10} tickLine={false} />
+                                <YAxis stroke="var(--theme-text-secondary)" fontSize={10} tickLine={false} />
                                 <Tooltip
-                                    contentStyle={{ backgroundColor: '#1a1a1a', border: '1px solid #333', borderRadius: '8px' }}
-                                    itemStyle={{ color: '#fff', fontSize: '12px' }}
+                                    contentStyle={{ backgroundColor: 'var(--theme-bg-panel)', border: '1px solid var(--theme-border)', borderRadius: '12px' }}
+                                    itemStyle={{ color: 'var(--theme-text-primary)', fontSize: '12px' }}
                                 />
-                                <Area type="monotone" dataKey="revenue" stroke={accentColor} fillOpacity={1} fill="url(#colorRevenue)" name="Revenue" strokeWidth={2} />
-                                <Area type="monotone" dataKey="expenses" stroke="#ef4444" fillOpacity={1} fill="url(#colorExpenses)" name="Expenses" strokeWidth={2} />
+                                <Area type="monotone" dataKey="revenue" stroke={accentColor} fillOpacity={0.08} fill={accentColor} name="Revenue" strokeWidth={2} />
+                                <Area type="monotone" dataKey="expenses" stroke="#ef4444" fillOpacity={0.08} fill="#ef4444" name="Expenses" strokeWidth={2} />
                             </AreaChart>
                         </ResponsiveContainer>
                     </div>
                 </div>
 
                 {/* Expense Breakdown */}
-                <div className="bg-stone-900/60 dark:bg-stone-900/60 border border-stone-200/10 dark:border-white/5 rounded-3xl p-6 flex flex-col justify-between">
-                    <h4 className="text-white font-bold text-sm uppercase tracking-wider mb-4">Expense Breakdown</h4>
+                <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-6 flex flex-col justify-between">
+                    <h4 className="text-[var(--theme-text-primary)] font-bold text-sm uppercase tracking-wider mb-4">Expense Breakdown</h4>
                     {expenseBreakdownData.length > 0 ? (
                         <>
-                            <div className="h-[200px] flex items-center justify-center">
-                                <ResponsiveContainer width="100%" height="100%">
+                            <div className="h-[200px] w-full min-w-0 relative flex items-center justify-center">
+                                <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
                                     <PieChart>
                                         <Pie
                                             data={expenseBreakdownData}
@@ -146,28 +138,28 @@ export const OverviewTab: React.FC = () => {
                                             ))}
                                         </Pie>
                                         <Tooltip
-                                            contentStyle={{ backgroundColor: '#1a1a1a', border: '1px solid #333', borderRadius: '8px' }}
-                                            itemStyle={{ color: '#fff', fontSize: '12px' }}
+                                            contentStyle={{ backgroundColor: 'var(--theme-bg-panel)', border: '1px solid var(--theme-border)', borderRadius: '12px' }}
+                                            itemStyle={{ color: 'var(--theme-text-primary)', fontSize: '12px' }}
                                         />
                                     </PieChart>
                                 </ResponsiveContainer>
                             </div>
                             <div className="space-y-2 mt-4 max-h-[140px] overflow-y-auto pr-2 custom-scrollbar">
                                 {expenseBreakdownData.map((item: any, i: number) => (
-                                    <div key={i} className="flex justify-between items-center text-sm border-b border-white/5 pb-2 last:border-0 last:pb-0">
+                                    <div key={i} className="flex justify-between items-center text-sm border-b border-[var(--theme-border)] pb-2 last:border-0 last:pb-0">
                                         <div className="flex items-center gap-2">
                                             <div className={`w-2 h-2 rounded-full ${getColorClass(i)}`}></div>
-                                            <span className="text-gray-300 text-xs">{item.name}</span>
+                                            <span className="text-[var(--theme-text-secondary)] text-xs">{item.name}</span>
                                         </div>
-                                        <span className="font-mono text-white text-xs">{item.value}%</span>
+                                        <span className="font-mono text-[var(--theme-text-primary)] font-semibold text-xs">{item.value}%</span>
                                     </div>
                                 ))}
                             </div>
                         </>
                     ) : (
                         <div className="flex-1 flex flex-col items-center justify-center py-10 opacity-50">
-                            <PieIcon size={48} className="text-gray-600 mb-2" />
-                            <p className="text-xs text-gray-500 italic">No breakdown available</p>
+                            <PieIcon size={48} className="text-[var(--theme-text-muted)] mb-2" />
+                            <p className="text-xs text-[var(--theme-text-muted)] italic">No breakdown available</p>
                         </div>
                     )}
                 </div>

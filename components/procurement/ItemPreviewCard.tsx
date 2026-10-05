@@ -34,7 +34,7 @@ export const ItemPreviewCard: React.FC<ItemPreviewCardProps> = ({
 }) => {
     const effectiveCost = cost !== undefined ? cost : price;
     const effectiveRetail = retailPrice !== undefined ? retailPrice : 0;
-    // Helper to render attribute badge (Ultra Compact)
+
     const AttrBadge = ({ label, value, color, icon: Icon }: { label: string, value?: string | number | boolean | null, color?: string, icon?: any }) => {
         if (value === null || value === undefined || value === '') return null;
         if (typeof value === 'boolean' && !value) return null;
@@ -43,24 +43,24 @@ export const ItemPreviewCard: React.FC<ItemPreviewCardProps> = ({
         const displayLabel = typeof value === 'boolean' ? '' : label;
 
         return (
-            <div className={`flex items-center gap-1.5 ${color ? `bg-${color}-500/10 border-${color}-500/30` : 'bg-gray-100 dark:bg-white/5 border-gray-200 dark:border-white/5'} border rounded px-1.5 py-1 min-w-0`}>
-                {Icon && <Icon size={10} className={color ? `text-${color}-600 dark:text-${color}-400` : 'text-gray-400 dark:text-gray-500'} />}
-                {displayLabel && <span className={`text-[9px] ${color ? `text-${color}-600 dark:text-${color}-400` : 'text-gray-500'} uppercase tracking-tighter font-bold`}>{displayLabel}</span>}
-                <span className={`text-[10px] ${color ? `text-${color}-900 dark:text-${color}-200` : 'text-gray-900 dark:text-gray-200'} font-black leading-none truncate`}>{displayValue}</span>
+            <div className="flex items-center gap-1.5 bg-[var(--theme-bg-panel)] border border-[var(--theme-border)] rounded-lg px-2 py-1 min-w-0">
+                {Icon && <Icon size={10} className="text-[var(--theme-text-muted)]" />}
+                {displayLabel && <span className="text-[9px] text-[var(--theme-text-muted)] uppercase tracking-wider font-semibold">{displayLabel}</span>}
+                <span className="text-[10px] text-[var(--theme-text-primary)] font-bold font-mono leading-none truncate">{displayValue}</span>
             </div>
         );
     };
 
     return (
-        <div className="glass-panel p-3 h-auto flex flex-col gap-3 shadow-sm dark:shadow-none">
+        <div className="p-4 rounded-2xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] flex flex-col gap-3 shadow-sm">
             {/* Header */}
-            <div className="flex justify-between items-start gap-2 border-b border-gray-100 dark:border-white/5 pb-2">
+            <div className="flex justify-between items-start gap-2 border-b border-[var(--theme-border-subtle)] pb-2.5">
                 <div>
-                    <h3 className="text-sm font-black text-gray-900 dark:text-white leading-tight">
-                        {brand && <span className="text-[#2C5E3B] dark:text-[#A9CBA2] font-black">{brand} </span>}
+                    <h3 className="text-sm font-bold text-[var(--theme-text-primary)] leading-tight">
+                        {brand && <span className="text-[var(--theme-accent)] font-semibold">{brand} </span>}
                         {name || "Item Name"}
                     </h3>
-                    <p className="text-[10px] text-gray-500 dark:text-gray-500 mt-0.5 font-mono font-bold uppercase">
+                    <p className="text-[10px] text-[var(--theme-text-muted)] mt-0.5 font-mono uppercase font-medium">
                         {customAttributes?.identity?.variant ? `${customAttributes.identity.variant} • ` : ''}
                         {(() => {
                             const physicalWeight = customAttributes?.physical?.netWeight || size;
@@ -72,24 +72,24 @@ export const ItemPreviewCard: React.FC<ItemPreviewCardProps> = ({
                     </p>
                 </div>
                 {(effectiveCost > 0 || effectiveRetail > 0) && (
-                    <div className="text-right whitespace-nowrap flex flex-col items-end gap-0.5">
+                    <div className="text-right whitespace-nowrap flex flex-col items-end gap-0.5 font-mono">
                         {effectiveRetail > 0 && (
                             <div className="flex items-center gap-1">
-                                <span className="text-[8px] uppercase font-bold text-stone-400">Retail:</span>
-                                <span className="text-xs font-black text-[#2C5E3B] dark:text-[#A9CBA2] font-mono">{currencySymbol} {formatPriceValue(effectiveRetail)}</span>
+                                <span className="text-[9px] uppercase font-semibold text-[var(--theme-text-muted)]">Retail:</span>
+                                <span className="text-xs font-bold text-[var(--theme-text-primary)] tabular-nums">{currencySymbol} {formatPriceValue(effectiveRetail)}</span>
                             </div>
                         )}
                         {effectiveCost > 0 && (
                             <div className="flex items-center gap-1">
-                                <span className="text-[8px] uppercase font-bold text-stone-400">Cost:</span>
-                                <span className="text-[11px] font-bold text-stone-600 dark:text-stone-300 font-mono">{currencySymbol} {formatPriceValue(effectiveCost)}</span>
+                                <span className="text-[9px] uppercase font-semibold text-[var(--theme-text-muted)]">Cost:</span>
+                                <span className="text-[11px] font-semibold text-[var(--theme-text-secondary)] tabular-nums">{currencySymbol} {formatPriceValue(effectiveCost)}</span>
                             </div>
                         )}
                     </div>
                 )}
             </div>
 
-            {/* Dense Attribute Grid - Auto-fits available space */}
+            {/* Dense Attribute Grid */}
             <div className="flex flex-wrap gap-1.5">
                 {/* Physical */}
                 <AttrBadge label="Net" value={customAttributes?.physical?.netWeight ? `${customAttributes.physical.netWeight}${customAttributes?.physical?.sizeType || unit || 'kg'}` : null} />
@@ -106,34 +106,34 @@ export const ItemPreviewCard: React.FC<ItemPreviewCardProps> = ({
                 <AttrBadge label="Breakable" value={customAttributes?.packaging?.isBreakable} color="red" />
 
                 {/* Storage */}
-                <AttrBadge label="Storage" value={customAttributes?.storage?.type} color={customAttributes?.storage?.type === 'Frozen' ? 'blue' : customAttributes?.storage?.type === 'Chilled' ? 'cyan' : undefined} />
+                <AttrBadge label="Storage" value={customAttributes?.storage?.type} />
                 <AttrBadge label="Hazard" value={customAttributes?.storage?.isHazardous} color="red" />
                 <AttrBadge label="Stack" value={customAttributes?.storage?.stackLimit ? `Max ${customAttributes.storage.stackLimit}` : null} />
-                <AttrBadge label="Light Sensitive" value={customAttributes?.storage?.isLightSensitive} color="yellow" />
-                <AttrBadge label="Fragile" value={customAttributes?.storage?.isFragile} color="orange" />
+                <AttrBadge label="Light Sensitive" value={customAttributes?.storage?.isLightSensitive} />
+                <AttrBadge label="Fragile" value={customAttributes?.storage?.isFragile} />
 
                 {/* Commercial */}
                 <AttrBadge label="Sell By" value={customAttributes?.commercial?.sellBy} />
                 <AttrBadge label="Price" value={customAttributes?.commercial?.priceType} />
-                <AttrBadge label="Weighted" value={customAttributes?.commercial?.isWeighted} color="purple" />
-                <AttrBadge label="Returnable" value={customAttributes?.commercial?.isReturnable} color="green" />
-                <AttrBadge label="Bundle" value={customAttributes?.commercial?.isBundleEligible} color="blue" />
+                <AttrBadge label="Weighted" value={customAttributes?.commercial?.isWeighted} />
+                <AttrBadge label="Returnable" value={customAttributes?.commercial?.isReturnable} />
+                <AttrBadge label="Bundle" value={customAttributes?.commercial?.isBundleEligible} />
 
                 {/* Descriptive */}
                 <AttrBadge label="Use" value={customAttributes?.descriptive?.usage} />
                 <AttrBadge label="Target" value={customAttributes?.descriptive?.audience} />
-                <AttrBadge label="Scent" value={customAttributes?.descriptive?.scent} color="pink" />
-                <AttrBadge label="Flavor" value={customAttributes?.descriptive?.flavor} color="orange" />
+                <AttrBadge label="Scent" value={customAttributes?.descriptive?.scent} />
+                <AttrBadge label="Flavor" value={customAttributes?.descriptive?.flavor} />
                 <AttrBadge label="Strength" value={customAttributes?.descriptive?.strength} />
             </div>
 
             {/* Generated Description Preview */}
-            <div className="glass-panel-pushed px-2 py-2 mt-1 shadow-inner">
+            <div className="p-3 rounded-xl bg-[var(--theme-bg-panel)] border border-[var(--theme-border)]">
                 <div className="flex items-center gap-1.5 mb-1.5">
-                    <Info size={12} className="text-[#2C5E3B] dark:text-[#A9CBA2]" />
-                    <span className="text-[10px] text-[#2C5E3B] dark:text-[#A9CBA2] uppercase font-black tracking-widest leading-none">System Description</span>
+                    <Info size={12} className="text-[var(--theme-accent)]" />
+                    <span className="text-[10px] text-[var(--theme-text-muted)] uppercase font-semibold tracking-wider leading-none">System Description</span>
                 </div>
-                <p className="text-[11px] text-gray-900 dark:text-gray-300 font-mono leading-relaxed font-bold">
+                <p className="text-xs text-[var(--theme-text-primary)] font-mono leading-relaxed font-semibold">
                     {[
                         brand,
                         name,
@@ -149,26 +149,17 @@ export const ItemPreviewCard: React.FC<ItemPreviewCardProps> = ({
                 {(() => {
                     const badge = formatPackBadge({ customAttributes });
                     return badge ? (
-                        <span className="inline-block mt-1 px-1.5 py-0.5 rounded bg-amber-500/10 border border-amber-500/20 text-amber-700 dark:text-amber-400 text-[9px] font-black uppercase tracking-widest">
+                        <span className="inline-block mt-2 px-2 py-0.5 rounded-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-[var(--theme-text-secondary)] text-[10px] font-mono font-semibold uppercase tracking-wider">
                             {badge}
                         </span>
                     ) : null;
                 })()}
                 {customAttributes?.descriptive?.keyFeatures && (
-                    <p className="text-[10px] text-gray-500 mt-1 italic border-t border-white/5 pt-1">
+                    <p className="text-[10px] text-[var(--theme-text-muted)] mt-1.5 italic border-t border-[var(--theme-border-subtle)] pt-1.5">
                         Features: {customAttributes.descriptive.keyFeatures}
                     </p>
                 )}
             </div>
-
-            {/* Fallback description if provided manually */}
-            {description && !customAttributes?.physical?.netWeight && (
-                <div className="bg-white/5 rounded px-2 py-1 mt-1">
-                    <p className="text-[10px] text-gray-400 font-mono leading-relaxed line-clamp-2">
-                        {description}
-                    </p>
-                </div>
-            )}
         </div>
     );
 };

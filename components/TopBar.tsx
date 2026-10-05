@@ -8,7 +8,7 @@ import { useLanguage } from '../contexts/LanguageContext';
 import { tasksService } from '../services/supabase.service';
 import { authService } from '../services/auth.service';
 import { supabase } from '../lib/supabase';
-import { canAccessModule } from '../utils/permissions';
+import { canAccessModule, canViewAllEmployees } from '../utils/permissions';
 
 // Sub-components
 import { LocationBadge } from './topbar/LocationBadge';
@@ -150,7 +150,7 @@ export default function TopBar() {
 
    const visibleEmployees = useMemo(() => {
       if (!user) return [];
-      if (user.role === 'super_admin') return employees;
+      if (canViewAllEmployees(user.role)) return employees;
       const userSiteId = currentEmployee?.siteId || currentEmployee?.site_id || user.siteId;
       if (!userSiteId) return employees;
       return employees.filter(emp => emp.siteId === userSiteId || emp.site_id === userSiteId);
@@ -170,7 +170,7 @@ export default function TopBar() {
    // Notifications & Tasks
    const filteredNotifications = useMemo(() => {
       if (!user) return [];
-      const isPrivileged = user.role === 'super_admin' || user.role === 'admin' || user.role === 'hr';
+      const isPrivileged = user.role === 'super_admin' || user.role === 'admin' || user.role === 'hr' || user.role === 'hr_manager' || user.role === 'regional_manager' || user.role === 'operations_manager';
       const userId = user.id;
       const employeeId = currentEmployee?.id;
 
@@ -206,20 +206,31 @@ export default function TopBar() {
       const siteType = activeSite?.type || '';
       const isStore = ['Store', 'Dark Store', 'Retail', 'POS'].includes(siteType);
       const isWarehouse = ['Warehouse', 'Distribution Center', 'WMS', 'Fulfillment Center'].includes(siteType);
-      const isCeo = userRole === 'super_admin' || (userRole as string) === 'CEO';
+      const isHQ = !isStore && !isWarehouse;
+      const isCeo = userRole === 'super_admin' || (userRole as string)?.toLowerCase() === 'ceo' || userRole === 'regional_manager' || userRole === 'operations_manager';
 
       const navigation = NAVIGATION_TARGETS.filter(nav => {
          if (!canAccessModule(userRole, nav.module)) return false;
-         if (!isCeo) {
-            if (isWarehouse && ['admin', 'pricing', 'finance', 'settings', 'pos', 'customers'].includes(nav.module)) return false;
-            if (isStore && ['admin', 'warehouse', 'pricing', 'finance', 'settings', 'procurement'].includes(nav.module)) return false;
+         
+         if (isWarehouse) {
+            if (['pos', 'customers', 'sales', 'pricing', 'finance', 'settings'].includes(nav.module)) return false;
+            if (nav.path === '/network-inventory' || nav.path === '/roadmap') return false;
+            if (nav.module === 'admin' && nav.path === '/admin' && !isCeo) return false;
+         } else if (isStore) {
+            if (['warehouse', 'procurement', 'pricing', 'finance', 'settings'].includes(nav.module)) return false;
+            if (nav.path === '/network-inventory' || nav.path === '/roadmap') return false;
+            if (nav.module === 'admin' && nav.path === '/admin' && !isCeo) return false;
+         } else if (isHQ) {
+            if (['pos', 'warehouse', 'procurement', 'sales'].includes(nav.module)) return false;
+            if (nav.path === '/inventory') return false; // In HQ, local inventory is replaced by Network Inventory
          }
+
          return nav.title.toLowerCase().includes(query) || nav.keywords.some(k => k.toLowerCase().includes(query));
       }).slice(0, 4); // Max 4 nav results
 
       // 2. Deep Linking (Job/Order ID matching)
       const deepLinks: { title: string, path: string, type: string, id: string }[] = [];
-      if (isJobIdPattern && canAccessModule(userRole, 'warehouse')) {
+      if (isJobIdPattern && canAccessModule(userRole, 'warehouse') && !isStore) {
          deepLinks.push({ title: `Open Job: ${query.toUpperCase()}`, path: `/wms-ops?search=${query.toUpperCase()}`, type: 'job', id: query });
       }
 
@@ -228,15 +239,15 @@ export default function TopBar() {
          ? allProducts.filter(p => p.name.toLowerCase().includes(query) || p.sku.toLowerCase().includes(query)).slice(0, 5) 
          : [];
       
-      const customersResults = canAccessModule(userRole, 'customers')
+      const customersResults = canAccessModule(userRole, 'customers') && !isWarehouse
          ? customers.filter(c => c.name.toLowerCase().includes(query) || (c.email && c.email.toLowerCase().includes(query))).slice(0, 5)
          : [];
       
-      const orders = canAccessModule(userRole, 'procurement')
+      const orders = canAccessModule(userRole, 'procurement') && !isStore
          ? allOrders.filter(o => (o.poNumber && o.poNumber.toLowerCase().includes(query)) || (o.po_number && o.po_number.toLowerCase().includes(query))).slice(0, 5)
          : [];
       
-      const sales = canAccessModule(userRole, 'sales')
+      const sales = canAccessModule(userRole, 'sales') && !isWarehouse
          ? allSales.filter(s => (s.receiptNumber && s.receiptNumber.toLowerCase().includes(query)) || (s.id && s.id.toLowerCase().includes(query))).slice(0, 5)
          : [];
       
@@ -339,13 +350,13 @@ export default function TopBar() {
 
    return (
       <header
-         className="sticky top-0 z-[100] px-2 sm:px-4 md:px-6 flex items-center justify-between transition-colors duration-300 min-h-[56px] h-14 sm:h-16 bg-[#FDFBF7] dark:bg-[#151D18] border-b border-[#E2DCCE] dark:border-[#223326] shadow-xs"
-         style={{ paddingTop: 'env(safe-area-inset-top, 0px)' }}
+         className="sticky top-0 z-[100] px-2 sm:px-4 md:px-6 flex items-center justify-between transition-colors duration-300 min-h-[56px] h-14 sm:h-16 border-0 border-transparent shadow-none"
+         style={{ backgroundColor: 'var(--bg-app)', paddingTop: 'env(safe-area-inset-top, 0px)' }}
       >
          <div className="flex items-center space-x-2 sm:space-x-3 min-w-0 flex-1 sm:flex-initial">
             <button
                onClick={toggleSidebar}
-               className="text-[#4D6E56] dark:text-[#A9CBA2] hover:text-[#1E3F27] dark:hover:text-white p-2 min-w-[40px] min-h-[40px] flex items-center justify-center cursor-pointer transition-colors rounded-lg active:bg-black/10 dark:active:bg-white/10 flex-shrink-0"
+               className="text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] p-2 min-w-[40px] min-h-[40px] flex items-center justify-center cursor-pointer transition-colors rounded-xl active:bg-[var(--theme-bg-subtle)] flex-shrink-0"
                aria-label="Toggle sidebar"
             >
                <Menu size={22} className="md:w-6 md:h-6" />
@@ -375,7 +386,7 @@ export default function TopBar() {
             {/* Mobile Search Trigger */}
             <button
                onClick={() => setIsMobileSearchVisible(true)}
-               className="lg:hidden p-2 text-[#4D6E56] dark:text-[#A9CBA2] hover:text-[#1E3F27] dark:hover:text-white transition-colors cursor-pointer min-w-[36px] min-h-[36px] flex items-center justify-center"
+               className="lg:hidden p-2 text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] transition-colors cursor-pointer min-w-[36px] min-h-[36px] flex items-center justify-center"
                aria-label="Search"
             >
                <Search size={18} />
@@ -384,7 +395,7 @@ export default function TopBar() {
             {/* Refresh Button */}
             <button 
                onClick={handleRefresh}
-               className={`hidden sm:flex p-2 rounded-xl border border-[#E2DCCE] dark:border-emerald-950/20 bg-white/50 dark:bg-black/10 text-[#4D6E56] dark:text-[#A9CBA2] hover:text-[#2C5E3B] dark:hover:text-white hover:border-[#2C5E3B]/30 dark:hover:border-emerald-800/30 transition-all cursor-pointer ${isRefreshing ? 'animate-spin text-[#2C5E3B] dark:text-[#A9CBA2]' : ''}`}
+               className={`hidden sm:flex p-2 rounded-xl border border-[var(--theme-border)] bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:border-[var(--theme-border-focus)] transition-all cursor-pointer ${isRefreshing ? 'animate-spin text-[var(--theme-text-primary)]' : ''}`}
                title="Reload Page"
                aria-label="Reload Page"
             >
@@ -394,7 +405,7 @@ export default function TopBar() {
             {/* Dark/Light Toggle */}
             <button
                onClick={toggleTheme}
-               className="hidden sm:flex p-2 rounded-xl border border-[#E2DCCE] dark:border-emerald-950/20 bg-white/50 dark:bg-black/10 text-[#4D6E56] dark:text-[#A9CBA2] hover:text-amber-600 dark:hover:text-amber-500 hover:border-amber-600/30 dark:hover:border-amber-500/20 transition-all cursor-pointer"
+               className="hidden sm:flex p-2 rounded-xl border border-[var(--theme-border)] bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:border-[var(--theme-border-focus)] transition-all cursor-pointer"
                aria-label="Toggle Theme"
             >
                {theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}

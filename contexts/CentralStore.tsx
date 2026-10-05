@@ -8,7 +8,7 @@ import { useNetworkStatus } from '../hooks/useNetworkStatus';
 import { systemLogsService } from '../services/local-logs.service';
 import { systemLogsService as dbSystemLogsService } from '../services/supabase.service';
 import { APP_CONFIG } from '../config/app.config';
-import Toast from '../components/Toast';
+import { NotificationContainer } from '../components/notifications/NotificationContainer';
 import { usePresence } from '../hooks/useRealtime';
 import { logger } from '../utils/logger';
 import { fetchLoginLocation } from '../utils/geolocationHelper';
@@ -30,6 +30,7 @@ interface ToastMessage {
   message: string;
   type: 'info' | 'warning' | 'error' | 'success';
   duration?: number;
+  title?: string;
 }
 interface StoreContextType {
   user: User | null;
@@ -45,7 +46,7 @@ interface StoreContextType {
   loading: boolean;
   isOnline: boolean;
   isServerDown: boolean;
-  showToast: (message: string, type?: 'info' | 'warning' | 'error' | 'success', duration?: number) => void;
+  showToast: (message: string, type?: 'info' | 'warning' | 'error' | 'success', duration?: number, title?: string) => void;
   updateUserAvatar: (newAvatar: string) => void; // Update current user's avatar
   onlineIds: Set<string>;
 }
@@ -107,7 +108,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         if (rawNormalized === 'ceo') mappedRole = 'super_admin';
         else if (rawNormalized === 'procurement') mappedRole = 'procurement_manager';
 
-        // Resolve location: use preset, then check sessionStorage, then fetch precisely.
+        // Resolve location: use preset on explicit login, check sessionStorage, or fallback to active session
         let location = presetLocation;
         if (!location) {
           try {
@@ -118,23 +119,24 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         }
 
         if (!location) {
+          location = 'Local-Session';
+          // Non-blocking background location resolution for active session
+          fetchLoginLocation()
+            .then(resolvedLoc => {
+              try {
+                sessionStorage.setItem('siifmart_login_location', resolvedLoc);
+              } catch (_) {}
+              setUser(prev => prev ? { ...prev, loginLocation: resolvedLoc } : null);
+            })
+            .catch(() => {});
+        } else {
           try {
-            location = await fetchLoginLocation();
-          } catch (e) {
-            logger.warn('CentralStore', 'Could not fetch login location on session sync, using fallback');
-            location = 'Local-Session';
-          }
+            sessionStorage.setItem('siifmart_login_location', location);
+          } catch (_) {}
         }
 
-        // Cache the verified login location for this browser session
-        try {
-          sessionStorage.setItem('siifmart_login_location', location);
-        } catch (e) {
-          logger.warn('CentralStore', 'Could not cache session location');
-        }
-
-        // Save last login GPS, timestamp, device, and login history to Supabase
-        if (location) {
+        // Save last login GPS, timestamp, device, and login history ONLY on explicit login
+        if (presetLocation && location) {
           try {
             const employeeData = await employeesService.getById(profile.id);
             const currentHistory = Array.isArray(employeeData.loginHistory) ? employeeData.loginHistory : [];
@@ -388,9 +390,9 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     setIsSidebarOpen(prev => !prev);
   };
 
-  const showToast = (message: string, type: 'info' | 'warning' | 'error' | 'success' = 'info', duration?: number) => {
-    const id = crypto.randomUUID();
-    setToasts(prev => [...prev, { id, message, type, duration }]);
+  const showToast = (message: string, type: 'info' | 'warning' | 'error' | 'success' = 'info', duration?: number, title?: string) => {
+    const id = typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random()}`;
+    setToasts(prev => [...prev, { id, message, type, duration, title }]);
   };
 
   const removeToast = (id: string) => {
@@ -456,16 +458,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   return (
     <StoreContext.Provider value={value}>
       {children}
-      {/* Toast Notifications */}
-      {toasts.map(toast => (
-        <Toast
-          key={toast.id}
-          message={toast.message}
-          type={toast.type}
-          duration={toast.duration}
-          onClose={() => removeToast(toast.id)}
-        />
-      ))}
+      {/* Real-time On-Screen Explanatory Notification Cards */}
+      <NotificationContainer toasts={toasts} onRemoveToast={removeToast} />
     </StoreContext.Provider>
   );
 }

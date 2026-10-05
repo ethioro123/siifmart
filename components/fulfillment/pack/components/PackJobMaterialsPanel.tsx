@@ -1,5 +1,5 @@
 import React from 'react';
-import { Box, Snowflake, Layers, Tag, Check, ShieldAlert, ArrowUp, Lock, Mail, ThermometerSnowflake } from 'lucide-react';
+import { Box, Snowflake, Layers, Tag, Check, ShieldAlert, ArrowUp, Lock, Mail, ThermometerSnowflake, Scale, AlertTriangle } from 'lucide-react';
 import { WMSJob, Site } from '../../../../types';
 
 interface PackJobMaterialsPanelProps {
@@ -16,6 +16,14 @@ interface PackJobMaterialsPanelProps {
     hasIcePack: boolean;
     setHasIcePack: (hasIce: boolean) => void;
     t: (key: string) => string;
+    sealSerialNumber?: string;
+    setSealSerialNumber?: (serial: string) => void;
+    scaleWeight?: string;
+    setScaleWeight?: (weight: string) => void;
+    requireSeal?: boolean;
+    requireWeight?: boolean;
+    expectedWeightKg?: number;
+    weightTolerancePct?: number;
 }
 
 export const PackJobMaterialsPanel: React.FC<PackJobMaterialsPanelProps> = ({
@@ -32,6 +40,14 @@ export const PackJobMaterialsPanel: React.FC<PackJobMaterialsPanelProps> = ({
     hasIcePack,
     setHasIcePack,
     t,
+    sealSerialNumber,
+    setSealSerialNumber,
+    scaleWeight,
+    setScaleWeight,
+    requireSeal,
+    requireWeight,
+    expectedWeightKg,
+    weightTolerancePct,
 }) => {
     const boxOptions: Array<{ size: 'Small' | 'Medium' | 'Large' | 'Extra Large' | 'Poly Mailer' | 'Thermal Cool Box'; label: string; code: string; desc: string; icon?: any }> = [
         { size: 'Small', label: 'Small Box', code: 'SM', desc: 'Up to 2kg' },
@@ -209,6 +225,23 @@ export const PackJobMaterialsPanel: React.FC<PackJobMaterialsPanelProps> = ({
                         </div>
                     </button>
 
+                    {/* Security Seal Serial Input */}
+                    {packingMaterials.securitySeal && (
+                        <div className="p-2.5 bg-purple-500/10 border border-purple-500/20 rounded-xl space-y-1">
+                            <label className="text-[10px] font-bold text-purple-900 dark:text-purple-300 flex items-center justify-between uppercase">
+                                <span className="flex items-center gap-1.5"><Lock size={12} /> Seal Serial Number</span>
+                                {requireSeal && <span className="text-[9px] text-red-500 font-mono font-bold">Required</span>}
+                            </label>
+                            <input
+                                type="text"
+                                placeholder="Scan or type seal serial (e.g. SEAL-8921)..."
+                                value={sealSerialNumber || ''}
+                                onChange={(e) => setSealSerialNumber?.(e.target.value)}
+                                className="w-full bg-white dark:bg-black/40 border border-purple-300 dark:border-purple-500/30 rounded-lg px-2.5 py-1.5 text-xs font-mono font-bold text-purple-900 dark:text-purple-200 outline-none uppercase"
+                            />
+                        </div>
+                    )}
+
                     {/* 5. Ice Packs / Cold Chain Toggle */}
                     <button
                         type="button"
@@ -238,6 +271,61 @@ export const PackJobMaterialsPanel: React.FC<PackJobMaterialsPanelProps> = ({
                     </button>
                 </div>
             </div>
+
+            {/* Carton Scale Weight Verification Card */}
+            {(requireWeight || (expectedWeightKg !== undefined && expectedWeightKg > 0)) && (
+                <div className="bg-white dark:bg-[#1C2620] border border-[#E2DCCE] dark:border-[#2C5E3B]/25 rounded-2xl p-4 shadow-xs space-y-2.5">
+                    <div className="flex items-center justify-between pb-1 border-b border-stone-100 dark:border-white/5">
+                        <span className="text-[10px] text-stone-500 dark:text-stone-400 font-black uppercase tracking-wider flex items-center gap-1.5">
+                            <Scale size={13} className="text-[#2C5E3B] dark:text-[#A9CBA2]" />
+                            Scale Weight Verification {requireWeight && <span className="text-red-500">*</span>}
+                        </span>
+                        {expectedWeightKg !== undefined && expectedWeightKg > 0 && (
+                            <span className="text-[9px] font-mono text-stone-400 font-bold">
+                                Exp: {expectedWeightKg.toFixed(2)} kg
+                            </span>
+                        )}
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                        <input
+                            type="number"
+                            step="0.05"
+                            min="0"
+                            placeholder="0.00"
+                            value={scaleWeight || ''}
+                            onChange={(e) => setScaleWeight?.(e.target.value)}
+                            className="woody-input flex-1 font-mono text-sm py-1.5 text-center font-bold"
+                        />
+                        <span className="text-xs font-bold font-mono text-stone-500">KG</span>
+                    </div>
+
+                    {/* Weight Tolerance Calculation */}
+                    {(() => {
+                        const actual = parseFloat(scaleWeight || '0');
+                        if (!actual || !expectedWeightKg) return null;
+                        const diff = Math.abs(actual - expectedWeightKg);
+                        const diffPct = (diff / expectedWeightKg) * 100;
+                        const tol = weightTolerancePct || 5;
+                        const isExceeded = diffPct > tol;
+
+                        if (isExceeded) {
+                            return (
+                                <div className="p-2 rounded-lg bg-red-500/10 border border-red-500/20 text-[10px] text-red-600 dark:text-red-400 flex items-center gap-1.5">
+                                    <AlertTriangle size={12} className="shrink-0" />
+                                    <span>Weight variance {diffPct.toFixed(1)}% exceeds ±{tol}% tolerance</span>
+                                </div>
+                            );
+                        }
+                        return (
+                            <div className="p-1.5 rounded-lg bg-green-500/10 border border-green-500/20 text-[10px] text-green-700 dark:text-green-400 flex items-center gap-1.5 font-bold">
+                                <Check size={12} className="shrink-0" />
+                                <span>Weight verified within ±{tol}% (±{diffPct.toFixed(1)}%)</span>
+                            </div>
+                        );
+                    })()}
+                </div>
+            )}
         </div>
     );
 };

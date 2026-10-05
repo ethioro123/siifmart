@@ -51,16 +51,21 @@ export const usePOSShiftActions = ({
         setCountedCash('');
         setShiftNotes('');
         setClosingStep(1);
-        setCashDenominations({ '200': 0, '100': 0, '50': 0, '10': 0, '5': 0, '1': 0 });
+        const isKenya = activeSite?.country === 'KE' || activeSite?.currency === 'KES' || activeSite?.currency === 'KSh';
+        if (isKenya) {
+            setCashDenominations({ '1000': 0, '500': 0, '200': 0, '100': 0, '50': 0, '20': 0, '10': 0, '5': 0, '1': 0 });
+        } else {
+            setCashDenominations({ '200': 0, '100': 0, '50': 0, '10': 0, '5': 0, '1': 0 });
+        }
         setDiscrepancyReason('');
         setIsShiftModalOpen(true);
-    }, [setCountedCash, setShiftNotes, setClosingStep, setCashDenominations, setDiscrepancyReason, setIsShiftModalOpen]);
+    }, [activeSite, setCountedCash, setShiftNotes, setClosingStep, setCashDenominations, setDiscrepancyReason, setIsShiftModalOpen]);
 
     const getShiftSummary = React.useCallback(() => {
-        if (!activeShift) return { cash: 0, card: 0, mobile: 0, total: 0, expected: 0 };
+        if (!activeShift) return { cash: 0, card: 0, mobile: 0, drops: 0, total: 0, expected: 0 };
         const startTime = new Date(activeShift.startTime).getTime();
         const siteId = activeShift?.siteId || activeSite?.id;
-        const isCentralHQ = user?.role === 'super_admin' || user?.role === 'inventory_manager' || user?.role === 'store_manager';
+        const isCentralHQ = ['super_admin', 'regional_manager', 'operations_manager', 'inventory_manager', 'store_manager'].includes(user?.role || '');
 
         const currentShiftSales = sales.filter(s => {
             const saleTime = new Date(s.date).getTime();
@@ -78,7 +83,9 @@ export const usePOSShiftActions = ({
         const cash = currentShiftSales.filter(s => s.method === 'Cash').reduce((sum, s) => sum + s.total, 0);
         const card = currentShiftSales.filter(s => s.method === 'Card').reduce((sum, s) => sum + s.total, 0);
         const mobile = currentShiftSales.filter(s => s.method === 'Mobile Money' || (s.method as any) === 'Telebirr' || (s.method as any) === 'CBE Birr').reduce((sum, s) => sum + s.total, 0);
-        return { cash, card, mobile, total: cash + card + mobile, expected: (activeShift.openingFloat || 0) + cash };
+        const drops = Number(activeShift.cashDrops || (activeShift as any).cash_drops || 0);
+        const expected = Math.max(0, (activeShift.openingFloat || 0) + cash - drops);
+        return { cash, card, mobile, drops, total: cash + card + mobile, expected };
     }, [activeShift, sales, activeSite, user]);
 
     const handleSubmitShift = React.useCallback(async () => {
@@ -93,6 +100,8 @@ export const usePOSShiftActions = ({
                 cashSales: summary.cash,
                 cardSales: summary.card,
                 mobileSales: summary.mobile,
+                cashDrops: summary.drops,
+                cash_drops: summary.drops,
                 expectedCash: summary.expected,
                 actualCash,
                 variance: actualCash - summary.expected,

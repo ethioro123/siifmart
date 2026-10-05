@@ -4,6 +4,7 @@ import { Printer, Download, Building, ShieldCheck, CheckCircle2 } from 'lucide-r
 import { Employee } from '../../../types';
 import { PayslipRecord } from '../../../utils/employeeProfileData';
 import { formatRole } from '../../../utils/formatting';
+import { formatDisplayEmployeeId } from '../../../utils/employeeIdGenerator';
 
 interface PayslipModalProps {
     isOpen: boolean;
@@ -64,7 +65,7 @@ export const PayslipModal: React.FC<PayslipModalProps> = ({
                     </div>
                     <div>
                         <span className="text-stone-400 text-[10px] uppercase font-bold block">Employee Code</span>
-                        <span className="font-mono font-bold text-[#1E3F27] dark:text-[#EAE5D9]">{employee.code || 'EMP-' + employee.id.substring(0, 5).toUpperCase()}</span>
+                        <span className="font-mono font-bold text-[#1E3F27] dark:text-[#EAE5D9]">{formatDisplayEmployeeId(employee)}</span>
                     </div>
                     <div>
                         <span className="text-stone-400 text-[10px] uppercase font-bold block">Role</span>

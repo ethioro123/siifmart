@@ -78,39 +78,39 @@ export const InventoryPending: React.FC<InventoryPendingProps> = ({
     return (
         <div className="space-y-6 animate-in fade-in">
             {/* Pending Products Section */}
-            <div className="glass-panel rounded-2xl overflow-hidden">
-                <div className="p-6 border-b border-[#E2DCCE]/60 dark:border-[#A9CBA2]/10 flex items-center justify-between">
+            <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl overflow-hidden shadow-xs">
+                <div className="p-6 border-b border-[var(--theme-border)] flex items-center justify-between">
                     <div>
                         <h3 className="font-bold text-amber-600 dark:text-amber-500 flex items-center gap-2">
                             <Package size={18} /> New Products Awaiting Approval
                         </h3>
-                        <p className="text-xs text-secondary mt-1">{pendingProducts.length} products pending review</p>
+                        <p className="text-xs text-[var(--theme-text-secondary)] mt-1">{pendingProducts.length} products pending review</p>
                     </div>
                 </div>
 
                 {pendingProducts.length === 0 ? (
-                    <div className="p-12 text-center text-secondary">
+                    <div className="p-12 text-center text-[var(--theme-text-muted)]">
                         <CheckCircle size={48} className="mx-auto opacity-30 mb-4" />
                         <p>No pending products awaiting approval.</p>
                     </div>
                 ) : (
                     <div className="overflow-x-auto">
                         <table className="w-full text-left">
-                            <thead><tr className="bg-gray-50 dark:bg-black/20 border-b border-gray-200 dark:border-white/10">
-                                <th className="p-4 text-xs text-secondary uppercase font-bold">Product</th>
-                                <th className="p-4 text-xs text-secondary uppercase font-bold">SKU</th>
-                                <th className="p-4 text-xs text-secondary uppercase font-bold">Category</th>
-                                <th className="p-4 text-xs text-secondary uppercase font-bold text-right">Price</th>
-                                <th className="p-4 text-xs text-secondary uppercase font-bold">Created By</th>
-                                <th className="p-4 text-xs text-secondary uppercase font-bold">Created At</th>
-                                <th className="p-4 text-xs text-secondary uppercase font-bold text-center">Actions</th>
+                            <thead><tr className="bg-[var(--theme-bg-panel)] border-b border-[var(--theme-border)]">
+                                <th className="p-4 text-xs text-[var(--theme-text-secondary)] uppercase font-bold">Product</th>
+                                <th className="p-4 text-xs text-[var(--theme-text-secondary)] uppercase font-bold">SKU</th>
+                                <th className="p-4 text-xs text-[var(--theme-text-secondary)] uppercase font-bold">Category</th>
+                                <th className="p-4 text-xs text-[var(--theme-text-secondary)] uppercase font-bold text-right">Price</th>
+                                <th className="p-4 text-xs text-[var(--theme-text-secondary)] uppercase font-bold">Created By</th>
+                                <th className="p-4 text-xs text-[var(--theme-text-secondary)] uppercase font-bold">Created At</th>
+                                <th className="p-4 text-xs text-[var(--theme-text-secondary)] uppercase font-bold text-center">Actions</th>
                             </tr></thead>
-                            <tbody className="divide-y divide-gray-100 dark:divide-white/5">
+                            <tbody className="divide-y divide-[var(--theme-border)]">
                                 {pendingProducts.map((prod) => (
-                                    <tr key={prod.id} className="hover:bg-gray-50 dark:hover:bg-white/5">
+                                    <tr key={prod.id} className="hover:bg-[var(--theme-bg-panel-hover)]">
                                         <td className="p-4">
                                             <div className="flex items-center gap-3">
-                                                <div className="w-10 h-10 rounded-lg bg-gray-200 dark:bg-black/30 border border-gray-200 dark:border-white/10 flex items-center justify-center flex-shrink-0 overflow-hidden">
+                                                <div className="w-10 h-10 rounded-lg bg-[var(--theme-bg-panel)] border border-[var(--theme-border)] flex items-center justify-center flex-shrink-0 overflow-hidden">
                                                     {prod.image && !prod.image.includes('placeholder.com') ? (
                                                         <img
                                                             src={prod.image}
@@ -118,26 +118,26 @@ export const InventoryPending: React.FC<InventoryPendingProps> = ({
                                                             className="w-full h-full object-cover"
                                                             onError={(e) => {
                                                                 e.currentTarget.style.display = 'none';
-                                                                (e.currentTarget.parentElement as HTMLElement).innerHTML = '<div class="text-gray-600"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-package"><path d="m7.5 4.27 9 5.15"/><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg></div>';
+                                                                (e.currentTarget.parentElement as HTMLElement).innerHTML = '<div class="text-[var(--theme-text-muted)]"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-package"><path d="m7.5 4.27 9 5.15"/><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg></div>';
                                                             }}
                                                         />
                                                     ) : (
-                                                        <Package size={16} className="text-gray-600 animate-pulse" />
+                                                        <Package size={16} className="text-[var(--theme-text-muted)] animate-pulse" />
                                                     )}
                                                 </div>
                                                 <div>
-                                                    <p className="font-semibold text-gray-900 dark:text-white text-sm">{prod.name}</p>
-                                                    <p className="text-[10px] text-secondary">{prod.brand}</p>
+                                                    <p className="font-semibold text-[var(--theme-text-primary)] text-sm">{prod.name}</p>
+                                                    <p className="text-[10px] text-[var(--theme-text-secondary)]">{prod.brand}</p>
                                                 </div>
                                             </div>
                                         </td>
-                                        <td className="p-4 font-mono text-xs text-secondary">{prod.sku}</td>
-                                        <td className="p-4 text-xs text-secondary">{prod.category}</td>
-                                        <td className="p-4 text-sm font-bold text-gray-900 dark:text-white text-right">{currencySymbol} {prod.price?.toLocaleString()}</td>
-                                        <td className="p-4 text-xs text-[#2C5E3B] dark:text-[#A9CBA2] flex items-center gap-1 font-bold">
-                                            <User size={12} /> {prod.createdBy || prod.created_by || 'Unknown'}
+                                        <td className="p-4 font-mono text-xs text-[var(--theme-text-secondary)]">{prod.sku}</td>
+                                        <td className="p-4 text-xs text-[var(--theme-text-secondary)]">{prod.category}</td>
+                                        <td className="p-4 text-sm font-bold text-[var(--theme-text-primary)] text-right">{currencySymbol} {prod.price?.toLocaleString()}</td>
+                                        <td className="p-4 text-xs text-[var(--theme-text-primary)] flex items-center gap-1 font-bold">
+                                            <User size={12} className="text-[var(--theme-text-secondary)]" /> {prod.createdBy || prod.created_by || 'Unknown'}
                                         </td>
-                                        <td className="p-4 text-xs text-secondary">
+                                        <td className="p-4 text-xs text-[var(--theme-text-secondary)]">
                                             {prod.createdAt || prod.created_at ? formatDateTime(prod.createdAt || prod.created_at || '') : '-'}
                                         </td>
                                         <td className="p-4">
@@ -168,14 +168,14 @@ export const InventoryPending: React.FC<InventoryPendingProps> = ({
                                                                     requestedAt: (prod as any).createdAt || (prod as any).created_at || '',
                                                                     status: 'pending',
                                                                     siteId: prod.siteId || (prod as any).site_id || ''
-                                                                 };
+                                                                };
                                                                 setRequestForDetails(pseudoRequest);
                                                                 setIsRequestDetailsModalOpen(true);
                                                             }}
                                                             variant="ghost"
                                                             size="sm"
                                                             icon={<Search size={14} />}
-                                                            className="px-3 py-1.5 bg-[#2C5E3B]/10 dark:bg-[#A9CBA2]/10 text-[#2C5E3B] dark:text-[#A9CBA2] font-bold hover:bg-[#2C5E3B]/20 dark:hover:bg-[#A9CBA2]/20"
+                                                            className="px-3 py-1.5 bg-[var(--theme-bg-panel)] text-[var(--theme-text-primary)] border border-[var(--theme-border)] font-bold hover:bg-[var(--theme-bg-panel-hover)]"
                                                         >
                                                             Details
                                                         </Button>
@@ -191,7 +191,7 @@ export const InventoryPending: React.FC<InventoryPendingProps> = ({
                                                     </>
                                                 ) : (
                                                     <div className="flex items-center justify-center">
-                                                        <span className="text-xs text-amber-600 dark:text-amber-500/80 italic border border-[#E2DCCE] dark:border-amber-500/10 px-3 py-1 bg-amber-500/5 rounded-lg flex items-center gap-1">
+                                                        <span className="text-xs text-amber-600 dark:text-amber-500/80 italic border border-amber-500/20 px-3 py-1 bg-amber-500/10 rounded-lg flex items-center gap-1">
                                                             <Clock size={12} /> Awaiting CEO
                                                         </span>
                                                     </div>
@@ -207,13 +207,13 @@ export const InventoryPending: React.FC<InventoryPendingProps> = ({
             </div>
 
             {/* Pending Changes Section */}
-            <div className="glass-panel rounded-2xl overflow-hidden">
-                <div className="p-6 border-b border-[#E2DCCE]/60 dark:border-[#A9CBA2]/10 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl overflow-hidden shadow-xs">
+                <div className="p-6 border-b border-[var(--theme-border)] flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                     <div>
                         <h3 className="font-bold text-orange-600 dark:text-orange-500 flex items-center gap-2">
                             <Edit size={18} /> Change Requests Awaiting Approval
                         </h3>
-                        <p className="text-xs text-secondary mt-1">{pendingChanges.length} change requests pending review</p>
+                        <p className="text-xs text-[var(--theme-text-secondary)] mt-1">{pendingChanges.length} change requests pending review</p>
                     </div>
                     {canApprove && pendingChanges.length > 0 && (
                         <Button
@@ -221,45 +221,45 @@ export const InventoryPending: React.FC<InventoryPendingProps> = ({
                             variant="danger"
                             size="sm"
                             icon={<Trash2 size={14} />}
-                            className="px-4 py-2 bg-red-500/10 text-red-500 border border-red-500/20"
+                            className="px-4 py-2 bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20 font-bold active:scale-[0.98]"
                         >
                             Clear Ghost Requests
                         </Button>
                     )}
                 </div>
                 {pendingChanges.length === 0 ? (
-                    <div className="p-12 text-center text-secondary">
+                    <div className="p-12 text-center text-[var(--theme-text-muted)]">
                         <CheckCircle size={48} className="mx-auto opacity-30 mb-4" />
                         <p>No pending change requests.</p>
                     </div>
                 ) : (
                     <div className="overflow-x-auto">
                         <table className="w-full text-left">
-                            <thead><tr className="bg-gray-50 dark:bg-black/20 border-b border-gray-200 dark:border-white/10">
-                                <th className="p-4 text-xs text-secondary uppercase font-bold">Request Type</th>
-                                <th className="p-4 text-xs text-secondary uppercase font-bold">Product</th>
-                                <th className="p-4 text-xs text-secondary uppercase font-bold">SKU</th>
-                                <th className="p-4 text-xs text-secondary uppercase font-bold">Details</th>
-                                <th className="p-4 text-xs text-secondary uppercase font-bold">Requested By</th>
-                                <th className="p-4 text-xs text-secondary uppercase font-bold">Requested At</th>
-                                <th className="p-4 text-xs text-secondary uppercase font-bold text-center">Actions</th>
+                            <thead><tr className="bg-[var(--theme-bg-panel)] border-b border-[var(--theme-border)]">
+                                <th className="p-4 text-xs text-[var(--theme-text-secondary)] uppercase font-bold">Request Type</th>
+                                <th className="p-4 text-xs text-[var(--theme-text-secondary)] uppercase font-bold">Product</th>
+                                <th className="p-4 text-xs text-[var(--theme-text-secondary)] uppercase font-bold">SKU</th>
+                                <th className="p-4 text-xs text-[var(--theme-text-secondary)] uppercase font-bold">Details</th>
+                                <th className="p-4 text-xs text-[var(--theme-text-secondary)] uppercase font-bold">Requested By</th>
+                                <th className="p-4 text-xs text-[var(--theme-text-secondary)] uppercase font-bold">Requested At</th>
+                                <th className="p-4 text-xs text-[var(--theme-text-secondary)] uppercase font-bold text-center">Actions</th>
                             </tr></thead>
-                            <tbody className="divide-y divide-gray-100 dark:divide-white/5">
+                            <tbody className="divide-y divide-[var(--theme-border)]">
                                 {pendingChanges.map((change) => (
-                                    <tr key={change.id} className="hover:bg-gray-50 dark:hover:bg-white/5">
+                                    <tr key={change.id} className="hover:bg-[var(--theme-bg-panel-hover)]">
                                         <td className="p-4">
                                             <span className={`text-[10px] font-bold px-2 py-1 rounded uppercase border ${change.changeType === 'edit' ? 'text-blue-500 border-blue-500/20 bg-blue-500/10' :
-                                                change.changeType === 'delete' ? 'text-red-500 border-red-500/20 bg-red-500/10' :
-                                                    'text-yellow-600 dark:text-yellow-400 border-yellow-500/20 bg-yellow-500/10'
+                                                change.changeType === 'delete' ? 'text-rose-500 border-rose-500/20 bg-rose-500/10' :
+                                                    'text-amber-600 dark:text-amber-400 border-amber-500/20 bg-amber-500/10'
                                                 }`}>
                                                 {change.changeType === 'stock_adjustment' ? 'Stock Adj.' : change.changeType}
                                             </span>
                                         </td>
-                                        <td className="p-4 font-semibold text-gray-900 dark:text-white text-sm">{change.productName}</td>
-                                        <td className="p-4 font-mono text-xs text-secondary">{change.productSku}</td>
-                                        <td className="p-4 text-xs text-secondary">
+                                        <td className="p-4 font-semibold text-[var(--theme-text-primary)] text-sm">{change.productName}</td>
+                                        <td className="p-4 font-mono text-xs text-[var(--theme-text-secondary)]">{change.productSku}</td>
+                                        <td className="p-4 text-xs text-[var(--theme-text-secondary)]">
                                             {change.changeType === 'delete' && (
-                                                <span className="flex items-center gap-2 text-red-500 font-medium">
+                                                <span className="flex items-center gap-2 text-rose-500 font-medium">
                                                     <Trash2 size={12} /> Permanently delete this product
                                                 </span>
                                             )}
@@ -273,20 +273,20 @@ export const InventoryPending: React.FC<InventoryPendingProps> = ({
                                             )}
                                             {change.changeType === 'stock_adjustment' && (
                                                 <div className="space-y-1">
-                                                    <span className="text-yellow-600 dark:text-yellow-400 font-medium flex items-center gap-1">
+                                                    <span className="text-amber-600 dark:text-amber-400 font-medium flex items-center gap-1">
                                                         <RefreshCw size={12} /> Stock Adjustment:
                                                     </span>
-                                                    <span className={change.adjustmentType === 'IN' ? 'text-green-500 font-bold' : 'text-red-500 font-bold'}>
+                                                    <span className={change.adjustmentType === 'IN' ? 'text-emerald-500 font-bold' : 'text-rose-500 font-bold'}>
                                                         {change.adjustmentType === 'IN' ? '+' : '-'}{change.adjustmentQty} units
                                                     </span>
-                                                    <p className="text-[10px] text-secondary italic mt-0.5">Reason: {change.adjustmentReason}</p>
+                                                    <p className="text-[10px] text-[var(--theme-text-secondary)] italic mt-0.5">Reason: {change.adjustmentReason}</p>
                                                 </div>
                                             )}
                                         </td>
-                                        <td className="p-4 text-xs text-[#2C5E3B] dark:text-[#A9CBA2] flex items-center gap-1 font-bold">
-                                            <User size={12} /> {change.requestedBy}
+                                        <td className="p-4 text-xs text-[var(--theme-text-primary)] flex items-center gap-1 font-bold">
+                                            <User size={12} className="text-[var(--theme-text-secondary)]" /> {change.requestedBy}
                                         </td>
-                                        <td className="p-4 text-xs text-secondary">
+                                        <td className="p-4 text-xs text-[var(--theme-text-secondary)]">
                                             {formatDateTime(change.requestedAt || (change as any).requested_at || '', { showTime: true })}
                                         </td>
                                         <td className="p-4 text-center">
@@ -311,7 +311,7 @@ export const InventoryPending: React.FC<InventoryPendingProps> = ({
                                                         variant="ghost"
                                                         size="sm"
                                                         icon={<Search size={14} />}
-                                                        className="px-3 py-1.5 bg-[#2C5E3B]/10 dark:bg-[#A9CBA2]/10 text-[#2C5E3B] dark:text-[#A9CBA2] font-bold hover:bg-[#2C5E3B]/20 dark:hover:bg-[#A9CBA2]/20"
+                                                        className="px-3 py-1.5 bg-[var(--theme-bg-panel)] text-[var(--theme-text-primary)] border border-[var(--theme-border)] font-bold hover:bg-[var(--theme-bg-panel-hover)]"
                                                     >
                                                         Details
                                                     </Button>

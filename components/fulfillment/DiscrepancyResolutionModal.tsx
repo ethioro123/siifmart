@@ -106,10 +106,8 @@ export function DiscrepancyResolutionModal({
 
     // Helper to check permissions (placeholder)
     const canDoAction = (action: ResolutionType) => {
-        // Example logic
         if (action === 'claim' || action === 'reject') {
-            // Require manager role?
-            return ['store_manager', 'warehouse_manager', 'super_admin'].includes(currentUser?.role || '');
+            return ['store_manager', 'warehouse_manager', 'super_admin', 'regional_manager', 'operations_manager'].includes(currentUser?.role || '');
         }
         return true;
     };
@@ -120,6 +118,7 @@ export function DiscrepancyResolutionModal({
         try {
             const qty = resolveQty ? parseInt(resolveQty) : 0;
             let replacementJobId: string | undefined = undefined;
+            const isHqApprover = ['super_admin', 'ceo', 'admin', 'regional_manager', 'operations_manager'].includes((currentUser?.role || '').toLowerCase());
 
             // --- PHASE 1: SIDE EFFECTS & REPLACEMENTS ---
             const reasons = {
@@ -141,7 +140,7 @@ export function DiscrepancyResolutionModal({
                         quantity: qty,
                         type: 'OUT',
                         reason: reasons.overage,
-                        canApprove: true
+                        canApprove: isHqApprover
                     });
                 }
                 // Dispose (Waste) - Reduces Stock
@@ -155,7 +154,7 @@ export function DiscrepancyResolutionModal({
                         quantity: qty,
                         type: 'OUT',
                         reason: reasons.waste,
-                        canApprove: true
+                        canApprove: isHqApprover
                     });
                 }
                 // Adjust (Shortage Found) - Adds Stock
@@ -169,7 +168,7 @@ export function DiscrepancyResolutionModal({
                         quantity: qty,
                         type: 'IN',
                         reason: reasons.shortage,
-                        canApprove: true
+                        canApprove: isHqApprover
                     });
                 }
                 // Resend Missing Items - Creates new replacement job

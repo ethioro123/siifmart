@@ -20,8 +20,9 @@ import RoleSettings from '../components/settings/RoleSettings';
 import GamificationSettings from '../components/settings/GamificationSettings';
 import DiscountCodesSettings from '../components/settings/DiscountCodesSettings';
 import LocationSettings from '../components/settings/LocationSettings';
+import HRSettings from '../components/settings/HRSettings';
 
-type SettingsTab = 'general' | 'inventory' | 'pos' | 'discounts' | 'finance' | 'roles' | 'locations' | 'infrastructure' | 'integrations' | 'security' | 'notifications' | 'data' | 'audit' | 'gamification';
+type SettingsTab = 'general' | 'inventory' | 'pos' | 'discounts' | 'finance' | 'hr' | 'roles' | 'locations' | 'infrastructure' | 'integrations' | 'security' | 'notifications' | 'data' | 'audit' | 'gamification';
 
 export default function SettingsPage() {
     const { user } = useStore();
@@ -89,11 +90,14 @@ export default function SettingsPage() {
                     <Protected permission="ACCESS_FINANCE">
                         <TabButton id="finance" icon={DollarSign} label="Financial & Tax Policy" />
                     </Protected>
+                    <Protected permission="EDIT_EMPLOYEE">
+                        <TabButton id="hr" icon={Users} label="HR & Workforce Policy" />
+                    </Protected>
                     <Protected permission="EDIT_SYSTEM_SETTINGS">
                         <TabButton id="infrastructure" icon={Printer} label="Infrastructure & Devices" />
                     </Protected>
 
-                    {(user?.role === 'super_admin' || user?.role === 'admin') && (
+                    {(user?.role === 'super_admin' || user?.role === 'admin' || user?.role === 'auditor') && (
                         <>
                             <p className="text-[10px] font-black text-stone-400 dark:text-gray-500 uppercase tracking-wider mt-5 mb-3 px-2">Enterprise Security</p>
                             <Protected permission="MANAGE_ROLES">
@@ -160,6 +164,11 @@ export default function SettingsPage() {
                     {activeTab === 'finance' && (
                         <Protected permission="ACCESS_FINANCE">
                             <FinanceSettings />
+                        </Protected>
+                    )}
+                    {activeTab === 'hr' && (
+                        <Protected permission="EDIT_EMPLOYEE">
+                            <HRSettings />
                         </Protected>
                     )}
                     {activeTab === 'roles' && (

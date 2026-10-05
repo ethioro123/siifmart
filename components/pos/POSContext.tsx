@@ -19,11 +19,11 @@ import { usePOSReturnActions } from './hooks/usePOSReturnActions';
 import { usePOSTransferActions } from './hooks/usePOSTransferActions';
 import { usePOSHoldRecallActions } from './hooks/usePOSHoldRecallActions';
 import { usePOSProductFilters } from './hooks/usePOSProductFilters';
+import { usePOSScanActions } from './hooks/usePOSScanActions';
 import { POSContextType } from './types';
 import { getParentCategory } from './utils/posUtils';
 
 import { logger } from '../../utils/logger';
-import { audioFeedback } from '../../utils/audioFeedback';
 
 const POSContext = createContext<POSContextType | undefined>(undefined);
 
@@ -81,7 +81,7 @@ export const POSProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     const isKenyaPOS = activeSite ? (activeSite.country === 'KE' || activeSite.currency === 'KES' || activeSite.currency === 'KSh') : (settings?.country === 'KE');
     const [cashDenominations, setCashDenominations] = useState<Record<string, number>>(() => (isKenyaPOS ? ({ '1000': 0, '500': 0, '200': 0, '100': 0, '50': 0 } as Record<string, number>) : ({ '200': 0, '100': 0, '50': 0, '10': 0, '5': 0, '1': 0 } as Record<string, number>)));
     const [discrepancyReason, setDiscrepancyReason] = useState(''), [countedCash, setCountedCash] = useState(''), [shiftNotes, setShiftNotes] = useState('');
-    const isCentralHQ = user?.role === 'super_admin' || user?.role === 'inventory_manager' || user?.role === 'store_manager';
+    const isCentralHQ = ['super_admin', 'regional_manager', 'operations_manager', 'inventory_manager', 'store_manager'].includes(user?.role || '');
     const activeShift = shifts.find((s: ShiftRecord) =>
         (s.cashierId === user?.id || (user?.code && s.cashierId === user?.code) || ((user as any)?.employeeId && s.cashierId === (user as any)?.employeeId)) && s.status === 'Open'
     ) || (isCentralHQ ? shifts.find(s => s.siteId === activeSite?.id && s.status === 'Open') : undefined);
@@ -236,7 +236,7 @@ export const POSProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     const [isPriceUpdatesModalOpen, setIsPriceUpdatesModalOpen] = useState(false);
 
     const activeSiteType = activeSite?.type || 'Administrative';
-    const isMultiSiteRole = user?.role === 'super_admin' || user?.role === 'admin' || user?.role === 'auditor';
+    const isMultiSiteRole = user?.role === 'super_admin' || user?.role === 'admin' || user?.role === 'auditor' || user?.role === 'regional_manager' || user?.role === 'operations_manager';
     const needsStoreSelection = isMultiSiteRole && (activeSiteType === 'Administrative' || activeSiteType === 'Headquarters' || activeSiteType === 'HQ' || activeSiteType === 'Administration');
 
     // --- Hook Initializations ---
@@ -263,7 +263,7 @@ export const POSProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         isEmailReceiptModalOpen, setIsEmailReceiptModalOpen, emailReceiptAddress, setEmailReceiptAddress,
         isReceiptPreviewOpen, setIsReceiptPreviewOpen, receiptPreviewHTML, setReceiptPreviewHTML,
         activeSite, user, settings, subtotal, tax, taxBreakdown, total, changeDue, isPaymentValid,
-        processSale, clearCart, setShowCart, addNotification, sales,
+        processSale, clearCart, setShowCart, addNotification, sales, activeShift,
         cartDiscount, setCartDiscount, setAppliedDiscountCode, setAppliedDiscountCodeDetails,
         setIsDiscountModalOpen, discountCodeInput, setDiscountCodeInput, setDiscountCodeError,
         setIsValidatingCode, validateDiscountCode, useDiscountCode
@@ -284,7 +284,7 @@ export const POSProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     } = usePOSReturnActions({
         returnSearchId, setReturnSearchId, foundSaleForReturn, setFoundSaleForReturn,
         returnConfig, setReturnConfig, setIsReturnModalOpen, setIsProcessing,
-        sales, user, processReturn, addNotification
+        sales, user, processReturn, addNotification, activeSite
     });
 
     const {
@@ -306,118 +306,24 @@ export const POSProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         clearCart, addNotification
     });
 
-    // Global scan listener setup
-    const handleScanProduct = React.useCallback(async (barcode: string): Promise<boolean> => {
-        if (!barcode) return false;
-        const product = products.find((p: Product) => {
-            const matchSku = p.sku.toLowerCase() === barcode.toLowerCase();
-            const matchBarcode = p.barcode?.toLowerCase() === barcode.toLowerCase();
-            const matchBarcodes = p.barcodes?.some((b: string) => b.toLowerCase() === barcode.toLowerCase());
-            const matchId = p.id === barcode;
-            return matchSku || matchBarcode || matchBarcodes || matchId;
-        });
-
-        if (!product) {
-            try {
-                const serverResults = await productsService.getByBarcode(barcode, activeSite?.id);
-                if (serverResults.length > 0) {
-                    const sp = serverResults[0];
-                    addToCart(sp);
-                    audioFeedback.playScanSuccess();
-                    addNotification('success', `Added ${sp.name} (Found via server)`);
-                    return true;
-                }
-            } catch (err) { logger.error('POSContext', 'caught error', err as Error); }
-
-            if (barcode.trim().length > 0) {
-                setUnknownBarcode(barcode);
-                setSearchTerm('');
-                audioFeedback.playScanError();
-                addNotification('alert', `Unknown Barcode: ${barcode}. Click 'Link Item' to map it.`);
-            }
-            return false;
-        }
-
-        if (unknownBarcode) setUnknownBarcode('');
-        addToCart(product);
-        audioFeedback.playScanSuccess();
-        addNotification('success', `Added ${product.name}`);
-        return true;
-    }, [products, activeSite, addNotification, unknownBarcode, setCart, addToCart]);
-
-    // Effect for Keyboard shortcuts and scanners
-    useEffect(() => {
-        let buffer = '';
-        let lastKeyTime = Date.now();
-        let scanTimeout: NodeJS.Timeout;
-
-        const handleGlobalKeyDown = (e: KeyboardEvent) => {
-            const char = e.key;
-            const now = Date.now();
-
-            if (document.activeElement === searchInputRef.current) return;
-
-            // Global Input Guard: Never intercept typing if the user is actively focused on a form field.
-            // This prevents rapid manual typing (like decimals "1.5") from triggering the barcode scanner
-            // in ANY modal (Misc Item, Shift Close, Receiving, etc).
-            const activeTag = document.activeElement?.tagName;
-            if (activeTag === 'INPUT' || activeTag === 'TEXTAREA') return;
-
-            if (isUnknownBarcodeModalOpen) return;
-            if (weightPromptProduct) return; // Prevent scanner from intercepting typing in WeightEntryModal
-            if (char === 'Shift' || char === 'Control' || char === 'Alt' || char === 'Meta' || char === 'Tab' || char === 'CapsLock') return;
-
-            if (now - lastKeyTime > 100) { buffer = ''; }
-            lastKeyTime = now;
-            clearTimeout(scanTimeout);
-
-            if (char === 'Enter') {
-                if (document.activeElement === searchInputRef.current) { buffer = ''; return; }
-                if (buffer.length > 0) {
-                    handleScanProduct(buffer);
-                    if (document.activeElement !== searchInputRef.current) setSearchTerm('');
-                    buffer = '';
-                    if (e.target instanceof HTMLInputElement) {
-                        e.preventDefault(); e.stopPropagation();
-                    }
-                }
-            } else if (char.length === 1) {
-                const isValidBarcodeChar = /^[a-zA-Z0-9\-_\/\.\+\*\$\%\@\!\#\^\&\(\)\[\]\{\}\|\:\;\'\"\,\<\>\?\=\~\`\\ ]$/.test(char);
-                if (isValidBarcodeChar) {
-                    buffer += char;
-                    scanTimeout = setTimeout(() => {
-                        if (buffer.length > 0) {
-                            handleScanProduct(buffer);
-                            if (document.activeElement !== searchInputRef.current) setSearchTerm('');
-                            buffer = '';
-                        }
-                    }, 300);
-                }
-            }
-        };
-        window.addEventListener('keydown', handleGlobalKeyDown, true);
-        return () => {
-            window.removeEventListener('keydown', handleGlobalKeyDown, true);
-            clearTimeout(scanTimeout);
-        };
-    }, [handleScanProduct, isUnknownBarcodeModalOpen, weightPromptProduct]);
-
-    // --- Functions ---
-
-    const handleSearchKeyDown = async (e: React.KeyboardEvent<HTMLInputElement>) => {
-        if (e.key === 'Enter') {
-            e.preventDefault();
-            const inputValue = searchInputRef.current?.value?.trim() || searchTerm.trim();
-            if (!inputValue) return;
-            if (inputValue.length < 3) { addNotification('alert', `Input too short.`); setSearchTerm(''); if (searchInputRef.current) searchInputRef.current.value = ''; return; }
-            await handleScanProduct(inputValue);
-            setSearchTerm(''); if (searchInputRef.current) searchInputRef.current.value = '';
-            setTimeout(() => { if (searchInputRef.current) searchInputRef.current.focus(); }, 100);
-        }
-    };
+    // Barcode Scanner & Search Actions (Cross-Border SKU validation enforced)
+    const { handleScanProduct, handleSearchKeyDown } = usePOSScanActions({
+        products,
+        activeSite,
+        unknownBarcode,
+        setUnknownBarcode,
+        setSearchTerm,
+        addToCart,
+        addNotification,
+        isUnknownBarcodeModalOpen,
+        weightPromptProduct,
+        searchInputRef
+    });
 
     const handleSelectCustomer = (customer: Customer) => { setSelectedCustomer(customer); setIsCustomerModalOpen(false); addNotification('success', `Customer set to: ${customer.name}`); };
-    const getCustomerHistory = (customerId: string) => sales.filter((sale: SaleRecord) => sale.customerId === customerId);
+    const getCustomerHistory = (customerId: string) => sales.filter((sale: SaleRecord) => 
+        sale.customerId === customerId && (!activeSite?.id || sale.siteId === activeSite.id || (sale as any).site_id === activeSite.id)
+    );
     const getCustomerStats = (customerId: string) => { const customerSales = getCustomerHistory(customerId); return { totalSpent: customerSales.reduce((sum: number, sale: SaleRecord) => sum + sale.total, 0), totalVisits: customerSales.length }; };
 
     const value = useMemo(() => ({

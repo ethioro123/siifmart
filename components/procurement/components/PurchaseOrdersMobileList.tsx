@@ -33,8 +33,85 @@ export const PurchaseOrdersMobileList: React.FC<PurchaseOrdersMobileListProps> =
     formatPONumber,
     currencySymbol = 'ETB'
 }) => {
+    const renderPriorityBadge = (priority?: string) => {
+        const p = (priority || 'Normal').toLowerCase();
+        if (p === 'urgent' || p === 'high') {
+            return (
+                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[9px] font-semibold tracking-wide uppercase bg-red-500/10 text-red-500 border border-red-500/20">
+                    {priority || 'Normal'}
+                </span>
+            );
+        }
+        if (p === 'low') {
+            return (
+                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[9px] font-semibold tracking-wide uppercase bg-[var(--theme-bg-subtle)] text-[var(--theme-text-muted)] border border-[var(--theme-border)]">
+                    {priority || 'Normal'}
+                </span>
+            );
+        }
+        return (
+            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[9px] font-semibold tracking-wide uppercase bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] border border-[var(--theme-border)]">
+                {priority || 'Normal'}
+            </span>
+        );
+    };
+
+    const renderStatusBadge = (status: string) => {
+        switch (status) {
+            case 'Received':
+                return (
+                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[9px] font-semibold uppercase tracking-wider bg-emerald-500/10 text-emerald-500 border border-emerald-500/20">
+                        Received
+                    </span>
+                );
+            case 'Partially Received':
+                return (
+                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[9px] font-semibold uppercase tracking-wider bg-amber-500/10 text-amber-500 border border-amber-500/20">
+                        Partially Received
+                    </span>
+                );
+            case 'Approved':
+                return (
+                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[9px] font-semibold uppercase tracking-wider bg-blue-500/10 text-blue-500 border border-blue-500/20">
+                        Approved
+                    </span>
+                );
+            case 'Ordered':
+                return (
+                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[9px] font-semibold uppercase tracking-wider bg-indigo-500/10 text-indigo-500 border border-indigo-500/20">
+                        Ordered
+                    </span>
+                );
+            case 'Draft':
+                return (
+                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[9px] font-semibold uppercase tracking-wider bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] border border-[var(--theme-border)]">
+                        Draft
+                    </span>
+                );
+            case 'Pending':
+                return (
+                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[9px] font-semibold uppercase tracking-wider bg-amber-500/10 text-amber-500 border border-amber-500/20">
+                        Pending
+                    </span>
+                );
+            case 'Cancelled':
+            case 'Rejected':
+                return (
+                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[9px] font-semibold uppercase tracking-wider bg-red-500/10 text-red-500 border border-red-500/20">
+                        {status}
+                    </span>
+                );
+            default:
+                return (
+                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[9px] font-semibold uppercase tracking-wider bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] border border-[var(--theme-border)]">
+                        {status}
+                    </span>
+                );
+        }
+    };
+
     return (
-        <div className="md:hidden space-y-4">
+        <div className="md:hidden space-y-3 p-4">
             {orders.map((po) => {
                 const isDraft = po.status === 'Draft';
                 const isSelected = selectedPOIds.includes(po.id);
@@ -42,14 +119,14 @@ export const PurchaseOrdersMobileList: React.FC<PurchaseOrdersMobileListProps> =
                     <div
                         key={po.id}
                         onClick={() => setSelectedPO(po)}
-                        className={`glass-panel p-4 rounded-xl space-y-3 cursor-pointer border transition-all ${
+                        className={`p-4 rounded-2xl space-y-3 cursor-pointer border transition-all duration-150 bg-[var(--theme-bg-panel)] shadow-sm active:scale-[0.99] ${
                             isSelected
-                                ? 'bg-[#2C5E3B]/5 dark:bg-[#A9CBA2]/5 border-[#2C5E3B] dark:border-[#A9CBA2]'
-                                : 'border-[#E2DCCE]/50 dark:border-emerald-950/20'
+                                ? 'border-[var(--theme-accent)] ring-1 ring-[var(--theme-accent)]/30'
+                                : 'border-[var(--theme-border)] hover:border-[var(--theme-border-focus)]'
                         }`}
                     >
                         {/* Header: PO Num & status */}
-                        <div className="flex justify-between items-center">
+                        <div className="flex justify-between items-center gap-2">
                             <div className="flex items-center gap-2">
                                 {user?.role === 'super_admin' && (
                                     <div onClick={(e) => e.stopPropagation()}>
@@ -62,42 +139,28 @@ export const PurchaseOrdersMobileList: React.FC<PurchaseOrdersMobileListProps> =
                                                     if (e.target.checked) setSelectedPOIds(prev => [...prev, po.id]);
                                                     else setSelectedPOIds(prev => prev.filter(id => id !== po.id));
                                                 }}
-                                                className="w-4 h-4 rounded border-gray-300 dark:border-gray-600 text-[#2C5E3B] dark:text-[#A9CBA2] bg-white dark:bg-black/50"
+                                                className="w-4 h-4 rounded border-[var(--theme-border)] text-[var(--theme-accent)] bg-transparent focus:ring-0 cursor-pointer"
                                             />
                                         ) : <div className="w-4 h-4" />}
                                     </div>
                                 )}
-                                <div className="text-left">
-                                    <span className="text-sm font-mono text-gray-900 dark:text-white font-bold">{formatPONumber(po)}</span>
-                                    <span className={`ml-2 inline-block px-1.5 py-0.5 rounded text-[8px] font-bold border uppercase text-center ${po.priority === 'High' || po.priority === 'Urgent' ? 'text-red-400 border-red-500/20 bg-red-500/10' :
-                                        po.priority === 'Low' ? 'text-[#8C6239] dark:text-[#E2C899] border-[#8C6239]/20 dark:border-[#E2C899]/20 bg-[#8C6239]/10 dark:bg-[#E2C899]/5' :
-                                            'text-gray-400 border-gray-500/20 bg-gray-500/10'
-                                        }`}>
-                                        {po.priority || 'Normal'}
-                                    </span>
+                                <div className="flex items-center gap-2">
+                                    <span className="text-sm font-mono font-semibold text-[var(--theme-text-primary)] tabular-nums">{formatPONumber(po)}</span>
+                                    {renderPriorityBadge(po.priority)}
                                 </div>
                             </div>
-                            <span className={`inline-flex items-center px-2 py-0.5 rounded text-[9px] font-bold uppercase border ${po.status === 'Received' ? 'text-green-400 border-green-500/20 bg-green-500/10' :
-                                po.status === 'Partially Received' ? 'text-amber-500 dark:text-amber-400 border-amber-500/20 bg-amber-500/10' :
-                                    po.status === 'Approved' ? 'text-[#2C5E3B] dark:text-[#A9CBA2] border-[#2C5E3B]/20 dark:border-[#A9CBA2]/20 bg-[#2C5E3B]/10 dark:bg-[#A9CBA2]/10' :
-                                        po.status === 'Ordered' ? 'text-amber-600 dark:text-[#E2C899] border-amber-500/20 dark:border-[#E2C899]/20 bg-amber-500/10 dark:bg-amber-500/5' :
-                                            po.status === 'Draft' ? 'text-yellow-400 border-yellow-500/20 bg-yellow-500/10' :
-                                                po.status === 'Pending' ? 'text-[#8C6239] dark:text-[#E2C899] border-[#8C6239]/20 dark:border-[#E2C899]/20 bg-[#8C6239]/10 dark:bg-[#E2C899]/10' :
-                                                    'text-red-400 border-red-500/20 bg-red-500/10'
-                                }`}>
-                                {po.status}
-                            </span>
+                            {renderStatusBadge(po.status)}
                         </div>
 
                         {/* Middle detail: Supplier & Destination */}
-                        <div className="grid grid-cols-2 gap-2 text-left bg-gray-50/50 dark:bg-black/10 p-3 rounded-xl border border-gray-100 dark:border-white/5">
+                        <div className="grid grid-cols-2 gap-2 text-left bg-[var(--theme-bg-subtle)] p-3 rounded-xl border border-[var(--theme-border-subtle)]">
                             <div>
-                                <span className="text-[8px] text-gray-500 font-bold uppercase tracking-widest">Supplier</span>
-                                <p className="text-xs text-gray-900 dark:text-white font-medium mt-0.5 truncate">{po.supplierName}</p>
+                                <span className="text-[9px] text-[var(--theme-text-muted)] font-semibold uppercase tracking-wider block">Supplier</span>
+                                <p className="text-xs text-[var(--theme-text-primary)] font-medium mt-0.5 truncate">{po.supplierName}</p>
                             </div>
                             <div>
-                                <span className="text-[8px] text-gray-500 font-bold uppercase tracking-widest">Destination</span>
-                                <p className="text-xs text-gray-900 dark:text-white font-medium mt-0.5 truncate">
+                                <span className="text-[9px] text-[var(--theme-text-muted)] font-semibold uppercase tracking-wider block">Destination</span>
+                                <p className="text-xs text-[var(--theme-text-secondary)] font-medium mt-0.5 truncate">
                                     {po.destination || sites.find((s: any) => s.id === po.siteId)?.name || 'Central Operations'}
                                 </p>
                             </div>
@@ -106,35 +169,35 @@ export const PurchaseOrdersMobileList: React.FC<PurchaseOrdersMobileListProps> =
                         {/* Expected and items/amount */}
                         <div className="flex items-center justify-between text-xs font-mono">
                             <div className="flex flex-col text-left">
-                                <span className="text-[8px] text-gray-500 font-sans font-bold uppercase tracking-widest">Expected Delivery</span>
-                                <span className="text-[10px] text-[#8C6239] dark:text-[#E2C899] font-bold mt-0.5">{po.expectedDelivery || 'N/A'}</span>
+                                <span className="text-[9px] text-[var(--theme-text-muted)] font-sans font-semibold uppercase tracking-wider">Expected</span>
+                                <span className="text-xs text-[var(--theme-text-secondary)] tabular-nums mt-0.5">{po.expectedDelivery || 'N/A'}</span>
                             </div>
                             <div className="flex gap-4">
                                 <div className="flex flex-col items-end">
-                                    <span className="text-[8px] text-gray-500 font-sans font-bold uppercase tracking-widest">Items</span>
-                                    <span className="text-[10px] text-gray-600 dark:text-gray-300 font-bold mt-0.5">{po.itemsCount}</span>
+                                    <span className="text-[9px] text-[var(--theme-text-muted)] font-sans font-semibold uppercase tracking-wider">Items</span>
+                                    <span className="text-xs text-[var(--theme-text-secondary)] tabular-nums mt-0.5">{po.itemsCount}</span>
                                 </div>
                                 <div className="flex flex-col items-end">
-                                    <span className="text-[8px] text-gray-500 font-sans font-bold uppercase tracking-widest">Amount</span>
-                                    <span className="text-[10px] text-[#2C5E3B] dark:text-[#A9CBA2] font-bold mt-0.5">{po.currency || currencySymbol} {po.totalAmount.toLocaleString()}</span>
+                                    <span className="text-[9px] text-[var(--theme-text-muted)] font-sans font-semibold uppercase tracking-wider">Amount</span>
+                                    <span className="text-xs text-[var(--theme-text-primary)] font-semibold tabular-nums mt-0.5">{po.currency || currencySymbol} {po.totalAmount.toLocaleString()}</span>
                                 </div>
                             </div>
                         </div>
 
                         {/* Actions & request info */}
-                        <div className="flex items-center justify-between pt-1">
-                            <span className="text-[9px] text-gray-500 italic">By: {po.requestedBy || po.createdBy || 'Unknown'}</span>
-                            <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
+                        <div className="flex items-center justify-between pt-1 border-t border-[var(--theme-border-subtle)]">
+                            <span className="text-[10px] text-[var(--theme-text-muted)]">By: {po.requestedBy || po.createdBy || 'Unknown'}</span>
+                            <div className="flex items-center gap-1.5" onClick={(e) => e.stopPropagation()}>
                                 <button
                                     onClick={() => setSelectedPO(po)}
-                                    className="px-2.5 py-1 text-[10px] font-bold bg-white/10 dark:bg-white/5 border border-gray-200 dark:border-white/10 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-white dark:hover:bg-white/10 transition-colors"
+                                    className="h-7 px-3 text-[11px] font-medium rounded-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-card-hover)] transition-all active:scale-[0.98]"
                                 >
                                     Details
                                 </button>
                                 {isDraft && canApprove && (
                                     <button
                                         onClick={(e) => handleSingleApprove(e, po)}
-                                        className="px-2.5 py-1 text-[10px] font-bold bg-green-500/10 hover:bg-green-500/20 text-green-400 rounded-lg border border-green-500/20 transition-colors"
+                                        className="h-7 px-3 text-[11px] font-medium rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-500 hover:bg-emerald-500/20 transition-all active:scale-[0.98]"
                                     >
                                         Approve
                                     </button>
@@ -144,11 +207,11 @@ export const PurchaseOrdersMobileList: React.FC<PurchaseOrdersMobileListProps> =
                                     (po.status === 'Draft' && (po.createdBy === user?.name || po.requestedBy === user?.name))) && (
                                     <button
                                         onClick={() => onEdit(po)}
-                                        className="p-1 bg-[#2C5E3B]/10 dark:bg-[#A9CBA2]/10 hover:bg-[#2C5E3B]/20 dark:hover:bg-[#A9CBA2]/20 text-[#2C5E3B] dark:text-[#A9CBA2] rounded-lg"
+                                        className="w-7 h-7 rounded-full flex items-center justify-center border border-transparent hover:border-[var(--theme-border)] hover:bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] transition-all active:scale-[0.95]"
                                         title="Edit PO"
                                         aria-label="Edit Purchase Order"
                                     >
-                                        <Edit3 size={12} />
+                                        <Edit3 size={13} />
                                     </button>
                                 )}
                                 {((isCEO && po.status !== 'Received' && po.status !== 'Cancelled') ||
@@ -156,11 +219,11 @@ export const PurchaseOrdersMobileList: React.FC<PurchaseOrdersMobileListProps> =
                                     (po.status === 'Draft' && (po.createdBy === user?.name || po.requestedBy === user?.name))) && (
                                     <button
                                         onClick={(e) => handleDeletePO(e, po)}
-                                        className="p-1 bg-red-500/10 hover:bg-red-500/20 text-red-500 rounded-lg"
+                                        className="w-7 h-7 rounded-full flex items-center justify-center border border-transparent hover:border-red-500/30 hover:bg-red-500/10 text-[var(--theme-text-secondary)] hover:text-red-400 transition-all active:scale-[0.95]"
                                         title="Cancel PO"
                                         aria-label="Cancel Purchase Order"
                                     >
-                                        <Trash2 size={12} />
+                                        <Trash2 size={13} />
                                     </button>
                                 )}
                             </div>
@@ -169,7 +232,7 @@ export const PurchaseOrdersMobileList: React.FC<PurchaseOrdersMobileListProps> =
                 );
             })}
             {orders.length === 0 && (
-                <div className="p-8 text-center text-gray-500 italic">No active purchase orders found.</div>
+                <div className="p-8 text-center text-xs text-[var(--theme-text-secondary)]">No active purchase orders found.</div>
             )}
         </div>
     );

@@ -1,6 +1,7 @@
 import React from 'react';
 import { OrgLayoutNode, ROLE_LABELS, DEPT_COLORS } from '../types';
 import { ChevronDown, ChevronRight, MapPin, ShieldCheck, User } from 'lucide-react';
+import { formatDisplayEmployeeId } from '../../../utils/employeeIdGenerator';
 
 interface OrgTreeNodeCardProps {
     layoutNode: OrgLayoutNode;
@@ -82,7 +83,7 @@ export const OrgTreeNodeCard: React.FC<OrgTreeNodeCardProps> = ({
                                     <span className={`text-[9px] font-mono px-1 py-0.5 rounded font-semibold ${
                                         isDark ? 'bg-black/30 text-emerald-400' : 'bg-[#EAE5D9]/70 text-[#2C5E3B]'
                                     }`}>
-                                        {emp.code}
+                                        {formatDisplayEmployeeId(emp)}
                                     </span>
                                 )}
                             </div>

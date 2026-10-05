@@ -212,8 +212,8 @@ export default function App() {
                     return <Navigate to="/pos" replace />;
                   }
 
-                  // 1. CEO Default Landing -> Administration Access (/admin) unless scoped to a WMS or POS site
-                  if (user?.role === 'super_admin' || (user?.role as string) === 'CEO') {
+                  // 1. Executive Leadership Default Landing -> Administration Access (/admin) unless scoped to a WMS or POS site
+                  if (user?.role === 'super_admin' || (user?.role as string) === 'CEO' || user?.role === 'regional_manager' || user?.role === 'operations_manager') {
                     if (isWarehouse) return <Navigate to="/wms-ops" replace />;
                     if (isStore) return <Navigate to={native.isCleanMobileMode() ? "/pos" : "/pos-dashboard"} replace />;
                     return <Navigate to="/admin" replace />;

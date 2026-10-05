@@ -1,5 +1,5 @@
 import React from 'react';
-import { Search, XCircle, LayoutGrid, List, ClipboardList, ChevronDown } from 'lucide-react';
+import { Search, XCircle, LayoutGrid, List, ClipboardList, ChevronDown, ShieldCheck } from 'lucide-react';
 import { Employee, Site } from '../../types';
 import { SYSTEM_ROLES } from '../../utils/roles';
 
@@ -25,13 +25,16 @@ interface DirectoryHeaderProps {
    restricted: boolean;
    setCurrentPage: (page: number) => void;
    visibleEmployees: Employee[];
+   pendingSalaryCount?: number;
+   onOpenSalaryQueue?: () => void;
 }
 
 export default function DirectoryHeader({
    searchTerm, setSearchTerm, filterRole, setFilterRole, filterStatus, setFilterStatus,
    filterDepartment, setFilterDepartment, filterSite, setFilterSite, sites,
    layoutMode, setLayoutMode, isTaskQueueOpen, setIsTaskQueueOpen,
-   totalCount, tasksCount, canViewAll, restricted, setCurrentPage, visibleEmployees
+   totalCount, tasksCount, canViewAll, restricted, setCurrentPage, visibleEmployees,
+   pendingSalaryCount = 0, onOpenSalaryQueue
 }: DirectoryHeaderProps) {
    
    const filterOptions = [
@@ -66,6 +69,21 @@ export default function DirectoryHeader({
                      </span>
                   )}
                </button>
+
+               {onOpenSalaryQueue && (
+                  <button
+                     onClick={onOpenSalaryQueue}
+                     className="px-4 py-2 rounded-xl flex items-center gap-2 font-bold transition-all border cursor-pointer bg-white dark:bg-black/45 text-stone-600 dark:text-gray-400 border-[#E2DCCE] dark:border-white/10 hover:text-[#2C5E3B] dark:hover:text-white hover:border-[#2C5E3B]/40 dark:hover:border-white/30"
+                  >
+                     <ShieldCheck size={18} />
+                     <span>Salary Queue</span>
+                     {pendingSalaryCount > 0 && (
+                        <span className="text-[10px] px-1.5 py-0.5 rounded-full font-black bg-emerald-600 text-white">
+                           {pendingSalaryCount}
+                        </span>
+                     )}
+                  </button>
+               )}
 
                <div className="bg-white/80 dark:bg-black/40 p-1 rounded-xl border border-[#E2DCCE] dark:border-white/10 flex shadow-sm">
                   <button onClick={() => setLayoutMode('grid')} className={`p-2 rounded-lg transition-all cursor-pointer ${layoutMode === 'grid' ? 'bg-[#2C5E3B]/10 text-[#2C5E3B] dark:bg-[#A9CBA2]/20 dark:text-[#A9CBA2] font-bold' : 'text-stone-400 dark:text-gray-500 hover:text-[#2C5E3B] dark:hover:text-white'}`} title="Grid View"><LayoutGrid size={18} /></button>

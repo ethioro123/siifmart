@@ -48,7 +48,7 @@ export const FinancialSection = ({
                         value={formatCompactNumber(metrics.totalNetworkRevenue, { currency: currencySymbol })}
                         sub="vs. Last Month"
                         icon={DollarSign}
-                        color="text-green-400"
+                        swatch="silk"
                     />
                 </WidgetErrorBoundary>
                 <WidgetErrorBoundary title="Net Profit">
@@ -57,7 +57,7 @@ export const FinancialSection = ({
                         value={formatCompactNumber(metrics.netProfit, { currency: currencySymbol })}
                         sub="Net Earnings"
                         icon={Award}
-                        color="text-emerald-400"
+                        swatch="slate"
                     />
                 </WidgetErrorBoundary>
                 <WidgetErrorBoundary title="Profit Margin">
@@ -66,7 +66,7 @@ export const FinancialSection = ({
                         value={`${metrics.profitMargin.toFixed(1)}%`}
                         sub="Efficiency Rate"
                         icon={TrendingUp}
-                        color="text-teal-400"
+                        swatch="graphite"
                     />
                 </WidgetErrorBoundary>
                 <WidgetErrorBoundary title="Inventory Value">
@@ -75,45 +75,39 @@ export const FinancialSection = ({
                         value={formatCompactNumber(inventoryValue, { currency: currencySymbol })}
                         sub={`Valued at Base Cost (Retail: ${formatCompactNumber(metrics.totalNetworkStockValueRetail || 0, { currency: currencySymbol })})`}
                         icon={Package}
-                        color="text-blue-400"
+                        swatch="obsidian"
                     />
                 </WidgetErrorBoundary>
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 h-[400px]">
                 {/* Revenue Velocity Chart */}
-                <div className="lg:col-span-3 glass-panel rounded-3xl p-8 relative overflow-hidden group shadow-2xl">
+                <div className="lg:col-span-3 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-3xl p-8 relative overflow-hidden group shadow-sm">
                     <WidgetErrorBoundary title="Revenue Chart">
                         {revenueBySiteData.length === 0 && <EmptyState message="No revenue data available" />}
                         <div className="flex justify-between items-center mb-6">
-                            <h3 className="font-bold text-gray-900 dark:text-white flex items-center gap-2">
-                                <Activity className="text-cyber-primary" size={20} />
-                                Revenue Velocity <span className="text-xs font-normal text-gray-500 ml-2">(Top 10 Sites)</span>
+                            <h3 className="font-bold text-[var(--theme-text-primary)] flex items-center gap-2">
+                                <Activity className="text-[var(--theme-text-primary)]" size={20} />
+                                Revenue Velocity <span className="text-xs font-normal text-[var(--theme-text-muted)] ml-2">(Top 10 Sites)</span>
                             </h3>
                         </div>
                         <ResponsiveContainer width="100%" height={280}>
                             <AreaChart data={revenueBySiteData}>
-                                <defs>
-                                    <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
-                                        <stop offset="5%" stopColor={accentColor} stopOpacity={0.4} />
-                                        <stop offset="95%" stopColor={accentColor} stopOpacity={0} />
-                                    </linearGradient>
-                                </defs>
                                 <CartesianGrid strokeDasharray="3 3" stroke={chartGridColor} vertical={false} />
                                 <XAxis dataKey="name" stroke={chartAxisColor} fontSize={11} tickLine={false} axisLine={false} />
                                 <YAxis stroke={chartAxisColor} fontSize={11} tickLine={false} axisLine={false} allowDecimals={false} domain={[0, (dataMax: number) => Math.max(dataMax, 1000)]} tickFormatter={(val) => val === 0 ? '0' : `${val >= 1000 ? (val / 1000).toLocaleString() : val}k`} />
-                                <Tooltip contentStyle={{ backgroundColor: tooltipBg, backdropFilter: 'blur(10px)', border: `1px solid ${tooltipBorder}`, borderRadius: '12px' }} itemStyle={{ color: tooltipText, fontSize: '12px' }} />
-                                <Area type="monotone" dataKey="revenue" stroke={accentColor} strokeWidth={3} fillOpacity={1} fill="url(#colorRevenue)" />
+                                <Tooltip contentStyle={{ backgroundColor: tooltipBg, border: `1px solid ${tooltipBorder}`, borderRadius: '14px', boxShadow: '0 8px 24px rgba(0,0,0,0.2)' }} itemStyle={{ color: tooltipText, fontSize: '12px' }} />
+                                <Area type="monotone" dataKey="revenue" stroke={accentColor} strokeWidth={2.5} fillOpacity={0.08} fill={accentColor} />
                             </AreaChart>
                         </ResponsiveContainer>
                     </WidgetErrorBoundary>
                 </div>
 
                 {/* Category Sales Bar Chart */}
-                <div className="lg:col-span-1 glass-panel rounded-3xl p-6 flex flex-col overflow-hidden relative">
+                <div className="lg:col-span-1 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-3xl p-6 flex flex-col overflow-hidden relative shadow-sm">
                     <WidgetErrorBoundary title="Category Performance">
-                        <h3 className="font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2 text-sm">
-                            <Layers className="text-yellow-500 dark:text-yellow-400" size={18} />
+                        <h3 className="font-bold text-[var(--theme-text-primary)] mb-4 flex items-center gap-2 text-sm">
+                            <Layers className="text-[var(--theme-text-primary)]" size={18} />
                             Category Sales
                         </h3>
                         <div className="flex-1 w-full min-h-0">
@@ -121,8 +115,8 @@ export const FinancialSection = ({
                                 <BarChart data={revenueByCategory} layout="vertical">
                                     <XAxis type="number" hide />
                                     <YAxis dataKey="name" type="category" width={80} tick={{ fill: chartAxisColor, fontSize: 10 }} axisLine={false} tickLine={false} />
-                                    <Tooltip cursor={{ fill: 'transparent' }} contentStyle={{ backgroundColor: tooltipBg, border: `1px solid ${tooltipBorder}` }} itemStyle={{ color: tooltipText }} />
-                                    <Bar dataKey="value" fill="#f59e0b" barSize={12} radius={[0, 4, 4, 0]} />
+                                    <Tooltip cursor={{ fill: 'transparent' }} contentStyle={{ backgroundColor: tooltipBg, border: `1px solid ${tooltipBorder}`, borderRadius: '12px' }} itemStyle={{ color: tooltipText }} />
+                                    <Bar dataKey="value" fill={accentColor} barSize={12} radius={[0, 4, 4, 0]} />
                                 </BarChart>
                             </ResponsiveContainer>
                         </div>

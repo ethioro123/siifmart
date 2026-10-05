@@ -52,26 +52,15 @@ export function usePurchaseOrderMutations() {
   const approvePOMutation = useMutation({
     mutationFn: async (po: PurchaseOrder) => {
       const approvedBy = user?.name || user?.email || 'Authorized Executive';
-      const approvedAt = new Date().toISOString();
 
-      const updated = await purchaseOrdersService.update(po.id, {
-        ...po,
-        status: 'Approved',
-        approvedBy,
-        approvedAt
+      const updated = await purchaseOrdersService.approve({
+        poId: po.id,
+        approverId: user?.id || (user as any)?.employeeId || 'USR',
+        approverName: approvedBy,
+        approverRole: user?.role || 'procurement_manager',
+        reasonCode: 'STANDARD_REPLENISHMENT',
+        notes: 'Quick list approval'
       });
-
-      // Immutable audit log
-      try {
-        await systemLogsService.create({
-          action: 'PO_APPROVED',
-          details: `PO ${formatPONumber(po)} approved for ${po.currency || 'ETB'} ${po.totalAmount.toLocaleString()}`,
-          user_name: approvedBy,
-          module: 'Procurement'
-        });
-      } catch (logErr) {
-        logger.warn('usePurchaseOrderMutations', 'Failed to write audit log to system_logs', { error: String(logErr) });
-      }
 
       logSystemEvent('PO_APPROVED', `Approved PO ${formatPONumber(po)}`, approvedBy, 'Procurement');
       return updated;
@@ -89,14 +78,15 @@ export function usePurchaseOrderMutations() {
   const bulkApproveMutation = useMutation({
     mutationFn: async (ordersToApprove: PurchaseOrder[]) => {
       const approvedBy = user?.name || user?.email || 'HQ Bulk Action';
-      const approvedAt = new Date().toISOString();
 
       const promises = ordersToApprove.map(po =>
-        purchaseOrdersService.update(po.id, {
-          ...po,
-          status: 'Approved',
-          approvedBy,
-          approvedAt
+        purchaseOrdersService.approve({
+          poId: po.id,
+          approverId: user?.id || (user as any)?.employeeId || 'USR',
+          approverName: approvedBy,
+          approverRole: user?.role || 'procurement_manager',
+          reasonCode: 'STANDARD_REPLENISHMENT',
+          notes: 'HQ Bulk Action Approval'
         })
       );
 
@@ -192,10 +182,46 @@ export function usePurchaseOrderMutations() {
     }
   });
 
+  const updatePOMutation = useMutation({
+    mutationFn: async ({ id, updates }: { id: string; updates: Partial<PurchaseOrder> }) => {
+      if (updates.siteId) {
+        const targetSite = sites.find(s => s.id === updates.siteId);
+        if (targetSite && targetSite.type !== 'Warehouse' && targetSite.type !== 'Distribution Center') {
+          throw new Error(`Procurement policy violation: Purchase orders can only be sent to a Warehouse or Distribution Center. Selected site "${targetSite.name}" is a ${targetSite.type}.`);
+        }
+      }
+
+      const updated = await purchaseOrdersService.update(id, updates);
+
+      try {
+        await systemLogsService.create({
+          action: 'PO_UPDATED',
+          details: `PO ${formatPONumber(updated)} updated`,
+          user_name: user?.name || user?.email || 'User',
+          module: 'Procurement'
+        });
+      } catch (logErr) {
+        logger.warn('usePurchaseOrderMutations', 'Failed to write audit log to system_logs', { error: String(logErr) });
+      }
+
+      logSystemEvent('PO_UPDATED', `Updated PO ${formatPONumber(updated)}`, user?.name || 'User', 'Procurement');
+      return updated;
+    },
+    onSuccess: (po) => {
+      queryClient.invalidateQueries({ queryKey: ['purchase_orders'] });
+      showToast(`PO ${formatPONumber(po)} Updated Successfully`, 'success');
+    },
+    onError: (error: any) => {
+      logger.error('usePurchaseOrderMutations', 'PO update failed', error);
+      showToast(error.message || 'Failed to update PO', 'error');
+    }
+  });
+
   return {
     approvePOMutation,
     bulkApproveMutation,
     cancelPOMutation,
-    createPOMutation
+    createPOMutation,
+    updatePOMutation
   };
 }

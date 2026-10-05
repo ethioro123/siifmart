@@ -6,6 +6,7 @@ import { getAll, getMetrics, getById } from './purchase-orders.read';
 import { logger } from '../utils/logger';
 import { systemLogsService } from './system-logs.service';
 import { getEffectiveCountry } from '../utils/localization';
+import { purchaseOrdersApprovalService } from './purchase-orders.approval';
 
 async function validateWarehouseDestination(siteId?: string): Promise<void> {
     if (!siteId) return;
@@ -24,6 +25,8 @@ export const purchaseOrdersService = {
     getAll,
     getMetrics,
     getById,
+    approve: purchaseOrdersApprovalService.approve,
+    reject: purchaseOrdersApprovalService.reject,
 
     async create(po: Omit<PurchaseOrder, 'created_at' | 'updated_at'>, items: any[]) {
         const poId = po.id || crypto.randomUUID();
@@ -176,22 +179,25 @@ export const purchaseOrdersService = {
         const currentNotes = currentPO?.notes || '';
         const effectiveStatus = updates.status || currentPO.status;
 
-        // Handle Approval Specific Logic (Tagging)
-        if (updates.status === 'Approved' || (currentPO.status !== 'Approved' && updates.approvedBy)) {
+        // Handle Approval Specific Logic (Tagging & DB Columns)
+        if (updates.status === 'Approved' || (currentPO && currentPO.status !== 'Approved' && updates.approvedBy)) {
             const alreadyApproved = currentNotes?.includes('[APPROVED_BY:');
             if (!alreadyApproved) {
                 const approvalTag = `\n[APPROVED_BY:${updates.approvedBy || 'System'}:${updates.approvedAt || new Date().toISOString()}]`;
                 dbUpdates.notes = currentNotes + approvalTag;
             }
             dbUpdates.status = 'Approved';
+            if (updates.approvedBy) dbUpdates.approved_by = updates.approvedBy;
+            if (updates.approvedAt) dbUpdates.approved_at = updates.approvedAt;
         } else if (updates.status === 'Cancelled') {
             dbUpdates.status = 'Cancelled';
         } else if (updates.status) {
             dbUpdates.status = String(updates.status);
         }
 
-        // Handle Line Item Updates (delete + re-insert)
-        if (updates.lineItems && updates.lineItems.length > 0) {
+        // Handle Line Item Updates (Only allowed for Draft/Pending to prevent post-approval price tampering)
+        const isSettled = currentPO && ['Approved', 'Ordered', 'Received', 'Partially Received'].includes(currentPO.status);
+        if (updates.lineItems && updates.lineItems.length > 0 && !isSettled) {
             const { error: deleteError } = await supabase.from('po_items').delete().eq('po_id', id);
             if (deleteError) {
                 logger.error('PurchaseOrdersService', 'Failed to delete existing PO items during update', deleteError);
@@ -271,6 +277,7 @@ export const purchaseOrdersService = {
                     if (wmsJobsService) {
                         await wmsJobsService.create({
                             siteId: updates.siteId || currentPO.siteId,
+                            countryCode: (currentPO as any).country_code || (currentPO as any).countryCode || 'ET',
                             type: 'RECEIVE',
                             priority,
                             status: 'Pending',
@@ -344,7 +351,7 @@ export const purchaseOrdersService = {
             throw error;
         }
 
-        if (updates.status === 'Approved') {
+        if (updates.status === 'Approved' || effectiveStatus === 'Approved') {
             await systemLogsService.create({
                 user_name: updates.approvedBy || 'System',
                 action: 'PURCHASE_ORDER_APPROVED',
@@ -398,6 +405,7 @@ export const purchaseOrdersService = {
 
             await wmsJobsService.create({
                 siteId: po.siteId,
+                countryCode: (po as any).country_code || (po as any).countryCode || 'ET',
                 type: 'PUTAWAY',
                 priority: (po as any).priority || 'Normal',
                 status: 'Pending',

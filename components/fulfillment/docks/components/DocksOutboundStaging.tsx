@@ -123,7 +123,7 @@ export const DocksOutboundStaging: React.FC<DocksOutboundStagingProps> = ({
                                     <div className="flex sm:flex-col items-center sm:items-end justify-between w-full sm:w-auto gap-2 shrink-0" onClick={e => e.stopPropagation()}>
                                         <div className="flex items-center gap-2">
                                             <span className="text-[10px] text-gray-400 font-mono font-bold">{job.items || job.lineItems?.length || 0} Units</span>
-                                            {['super_admin', 'warehouse_manager'].includes(user?.role as string) && (
+                                            {['super_admin', 'warehouse_manager', 'operations_manager', 'regional_manager'].includes(user?.role as string) && (
                                                 <button
                                                     onClick={(e) => handleDelete(e, job.id)}
                                                     className="w-5 h-5 rounded border bg-slate-100 dark:bg-white/5 border-slate-200 dark:border-white/10 text-red-500 hover:text-white hover:bg-red-500 hover:border-red-500 transition-all flex items-center justify-center shrink-0"

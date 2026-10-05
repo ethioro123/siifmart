@@ -43,28 +43,33 @@ export function ProtectedRoute({
     }
   }
 
-  // 2. Check site-type content isolation (NOT for CEO/super_admin — they see all modules)
-  const isCeo = user.role === 'super_admin' || (user.role as string) === 'CEO';
-
-  if (activeSite && !isCeo) {
+  // 2. Check site-type content isolation (Strict isolation: WMS blocked at stores, POS blocked at warehouses)
+  if (activeSite) {
     const siteType = activeSite.type || '';
     const isWarehouse = ['Warehouse', 'Distribution Center', 'WMS', 'Fulfillment Center'].includes(siteType);
     const isStore = ['Store', 'Dark Store', 'Retail', 'POS'].includes(siteType);
+    const isExecutive = ['super_admin', 'CEO', 'ceo', 'regional_manager', 'operations_manager'].includes(user.role);
 
     if (isWarehouse) {
-      // In WMS site: NO administration content (admin, pricing, finance, settings) and NO POS content!
-      const blockedInWms = ['admin', 'pricing', 'finance', 'settings', 'pos', 'customers'];
+      // In WMS site: strictly warehouse operations. POS is blocked.
+      const blockedInWms = ['pos', 'sales', 'customers'];
+      if (!isExecutive) {
+        blockedInWms.push('admin', 'pricing', 'finance', 'settings');
+      }
       if (module && blockedInWms.includes(module)) {
-        logger.warn('ProtectedRoute', `Blocked administration/pos module "${module}" while active site is WMS (${activeSite.name})`);
+        logger.warn('ProtectedRoute', `Blocked POS module "${module}" while active site is WMS (${activeSite.name})`);
         return <Navigate to={redirectTo || "/wms-ops"} replace />;
       }
     }
 
     if (isStore) {
-      // In POS store site: NO administration content, NO WMS, and NO central inventory (stores use POS stocklist)
-      const blockedInStore = ['admin', 'warehouse', 'inventory', 'pricing', 'finance', 'settings', 'procurement'];
+      // In POS store site: strictly store operations. WMS and procurement are blocked.
+      const blockedInStore = ['warehouse', 'procurement'];
+      if (!isExecutive) {
+        blockedInStore.push('admin', 'pricing', 'finance', 'settings');
+      }
       if (module && blockedInStore.includes(module)) {
-        logger.warn('ProtectedRoute', `Blocked administration/wms/inventory module "${module}" while active site is POS Store (${activeSite.name})`);
+        logger.warn('ProtectedRoute', `Blocked warehouse module "${module}" while active site is POS Store (${activeSite.name})`);
         return <Navigate to={redirectTo || (native.isCleanMobileMode() ? "/pos" : "/pos-dashboard")} replace />;
       }
     }
@@ -92,12 +97,14 @@ export function ProtectedRoute({
  * Helper to determine the correct dashboard route based on role and active site type
  */
 function getDashboardRoute(role: string, siteType?: string): string {
+  const isExecutive = ['super_admin', 'CEO', 'ceo', 'regional_manager', 'operations_manager'].includes(role);
+  if (isExecutive) return '/admin';
+
   const isWarehouse = siteType && ['Warehouse', 'Distribution Center', 'WMS', 'Fulfillment Center'].includes(siteType);
   const isStore = siteType && ['Store', 'Dark Store', 'Retail', 'POS'].includes(siteType);
 
   if (isWarehouse) return '/wms-ops';
   if (isStore) return native.isCleanMobileMode() ? '/pos' : '/pos-dashboard';
-  if (role === 'super_admin' || role === 'CEO') return '/admin';
 
   switch (role) {
     case 'wms':

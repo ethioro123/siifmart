@@ -234,22 +234,22 @@ export default function SalesHistory() {
          {/* Header */}
          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>
-               <h2 className="text-2xl font-bold text-[#1E3F27] dark:text-[#EAE5D9] flex items-center gap-2.5">
-                  <FileText className="text-[#2C5E3B] dark:text-[#A9CBA2]" />
+               <h2 className="text-2xl font-bold text-[var(--theme-text-primary)] flex items-center gap-2.5">
+                  <FileText className="text-[var(--theme-text-primary)]" />
                   Audit Console
                </h2>
-               <p className="text-[#4D6E56] dark:text-gray-400 text-sm font-medium">Search, audit, and report on full transaction history.</p>
+               <p className="text-[var(--theme-text-secondary)] text-sm font-medium">Search, audit, and report on store transaction history.</p>
             </div>
             <div className="flex items-center gap-3">
                {/* Sync Status Badge */}
                <div className={`flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-bold border transition-colors duration-300 ${
                   posSyncStatus === 'offline' 
-                     ? 'bg-rose-50 dark:bg-rose-950/20 text-rose-700 dark:text-rose-455 border-rose-200/50 dark:border-rose-900/20' 
+                     ? 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/20' 
                      : posSyncStatus === 'syncing' 
-                        ? 'bg-sky-50 dark:bg-sky-950/20 text-sky-700 dark:text-sky-400 border-sky-200/50 dark:border-sky-900/20' 
+                        ? 'bg-sky-500/10 text-sky-600 dark:text-sky-400 border-sky-500/20' 
                         : (posPendingSyncCount || 0) > 0 
-                           ? 'bg-amber-50 dark:bg-amber-950/20 text-amber-700 dark:text-amber-400 border-amber-200/50 dark:border-amber-900/20' 
-                           : 'bg-emerald-50 dark:bg-[#2C5E3B]/10 text-emerald-700 dark:text-[#A9CBA2] border border-emerald-250/50 dark:border-[#2C5E3B]/25'
+                           ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20' 
+                           : 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20'
                   }`}>
                   {posSyncStatus === 'syncing' ? (
                      <RefreshCw size={14} className="animate-spin" />
@@ -271,8 +271,9 @@ export default function SalesHistory() {
 
                <Protected permission="EXPORT_SALES_DATA">
                   <button
+                     type="button"
                      onClick={handleExportCSV}
-                     className="bg-[#2C5E3B]/10 dark:bg-[#2C5E3B]/20 text-[#2C5E3B] dark:text-[#A9CBA2] border border-[#2C5E3B]/20 dark:border-[#A9CBA2]/25 px-4 py-2 rounded-xl text-sm hover:bg-[#2C5E3B]/20 dark:hover:bg-[#2C5E3B]/30 flex items-center transition-all font-bold active:scale-98 shadow-sm"
+                     className="bg-[var(--theme-bg-panel)] text-[var(--theme-text-primary)] border border-[var(--theme-border)] px-4 py-2 rounded-xl text-sm hover:bg-[var(--theme-bg-panel-hover)] flex items-center transition-all font-bold active:scale-[0.98] shadow-xs cursor-pointer"
                   >
                      <Download className="w-4 h-4 mr-2" />
                      Export Page Data
@@ -302,16 +303,16 @@ export default function SalesHistory() {
          />
 
          {/* --- DATA GRID --- */}
-         <div className="bg-white/80 dark:bg-[#18201B]/40 border border-[#E2DCCE] dark:border-emerald-950/20 backdrop-blur-md rounded-2xl overflow-hidden flex flex-col min-h-[500px] shadow-sm">
+         <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl overflow-hidden flex flex-col min-h-[500px] shadow-xs">
             <div className="overflow-x-auto flex-1 relative">
                {loading && (
-                  <div className="absolute inset-0 bg-[#FAF8F5]/40 dark:bg-black/40 backdrop-blur-sm z-10 flex items-center justify-center">
-                     <Loader className="w-8 h-8 text-[#2C5E3B] dark:text-[#A9CBA2] animate-spin" />
+                  <div className="absolute inset-0 bg-[var(--theme-bg-card)]/50 backdrop-blur-xs z-10 flex items-center justify-center">
+                     <Loader className="w-8 h-8 text-[var(--theme-text-primary)] animate-spin" />
                   </div>
                )}
                <table className="w-full text-left">
                   <thead>
-                     <tr className="bg-[#F4F0E6] dark:bg-black/20 border-b border-[#E2DCCE] dark:border-white/10 text-[10px] uppercase tracking-widest font-black text-stone-500 dark:text-gray-400">
+                     <tr className="bg-[var(--theme-bg-panel)] border-b border-[var(--theme-border)] text-[10px] uppercase tracking-wider font-bold text-[var(--theme-text-secondary)]">
                         <th className="p-4">Receipt ID</th>
                         <th className="p-4">Date & Time</th>
                         <th className="p-4">Store</th>
@@ -323,85 +324,87 @@ export default function SalesHistory() {
                         <th className="p-4"></th>
                      </tr>
                   </thead>
-                  <tbody className="divide-y divide-[#E2DCCE]/60 dark:divide-white/5">
+                  <tbody className="divide-y divide-[var(--theme-border)]">
                      {sales.map((sale) => (
                         <tr
                            key={sale.id}
                            onClick={() => { setSelectedSale(sale); setDetailTab('receipt'); }}
-                           className="hover:bg-[#2C5E3B]/5 dark:hover:bg-white/5 transition-colors cursor-pointer group text-[#1E3F27] dark:text-white"
+                           className="hover:bg-[var(--theme-bg-panel-hover)] transition-colors cursor-pointer group text-[var(--theme-text-primary)]"
                         >
                            <td className="p-4">
                               <div className="flex items-center gap-2">
-                                 <FileText size={14} className="text-stone-400 dark:text-gray-550" />
-                                 <span className="text-sm font-mono text-[#1E3F27] dark:text-[#EAE5D9] font-bold group-hover:text-[#2C5E3B] dark:group-hover:text-[#A9CBA2] transition-colors">{sale.receiptNumber || `S${sale.id.substring(0, 8).replace(/-/g, '').toUpperCase()}`}</span>
+                                 <FileText size={14} className="text-[var(--theme-text-secondary)]" />
+                                 <span className="text-sm font-mono text-[var(--theme-text-primary)] font-bold group-hover:underline transition-colors">{sale.receiptNumber || `S${sale.id.substring(0, 8).replace(/-/g, '').toUpperCase()}`}</span>
                               </div>
                            </td>
                            <td className="p-4">
-                              <div className="text-xs text-stone-600 dark:text-gray-300 font-semibold">{formatDateTime(sale.date, { useRelative: true })}</div>
+                              <div className="text-xs text-[var(--theme-text-secondary)] font-medium">{formatDateTime(sale.date, { useRelative: true })}</div>
                            </td>
                            <td className="p-4">
-                              <span className="text-xs text-stone-600 dark:text-gray-300 font-medium">
+                              <span className="text-xs text-[var(--theme-text-secondary)] font-medium">
                                  {sites.find(s => s.id === sale.siteId)?.name || 'Unknown'}
                               </span>
                            </td>
                            <td className="p-4">
                               <div className="flex items-center gap-2">
-                                 <div className="w-6 h-6 rounded-full bg-[#FAF8F5] dark:bg-white/10 border border-[#E2DCCE] dark:border-white/10 flex items-center justify-center text-[10px] font-black text-[#2C5E3B] dark:text-[#A9CBA2]">
+                                 <div className="w-6 h-6 rounded-full bg-[var(--theme-bg-panel)] border border-[var(--theme-border)] flex items-center justify-center text-[10px] font-bold text-[var(--theme-text-primary)]">
                                     {sale.cashierName?.charAt(0) || '?'}
                                  </div>
-                                 <span className="text-xs text-stone-650 dark:text-gray-300 font-medium">{sale.cashierName || 'Unknown'}</span>
+                                 <span className="text-xs text-[var(--theme-text-primary)] font-medium">{sale.cashierName || 'Unknown'}</span>
                               </div>
                            </td>
                            <td className="p-4">
-                              <span className="text-xs text-stone-500 dark:text-gray-400 flex items-center gap-1.5 font-medium">
-                                 <CreditCard size={12} className="text-stone-400 dark:text-gray-550" /> {sale.method}
+                              <span className="text-xs text-[var(--theme-text-secondary)] flex items-center gap-1.5 font-medium">
+                                 <CreditCard size={12} className="text-[var(--theme-text-secondary)]" /> {sale.method}
                               </span>
                            </td>
-                           <td className="p-4 text-xs text-stone-650 dark:text-gray-400 text-right font-mono font-bold">{sale.items.length}</td>
-                           <td className="p-4 text-sm font-mono text-[#1E3F27] dark:text-white font-bold text-right">
+                           <td className="p-4 text-xs text-[var(--theme-text-secondary)] text-right font-mono font-bold">{sale.items.length}</td>
+                           <td className="p-4 text-sm font-mono text-[var(--theme-text-primary)] font-bold text-right">
                               {currencySymbol} {sale.total.toLocaleString()}
                            </td>
                            <td className="p-4 text-center">
-                              <span className={`inline-flex items-center px-2.5 py-1 rounded-[4px] text-[10px] font-black uppercase border ${
+                              <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold uppercase border ${
                                  sale.status === 'Completed' 
-                                    ? 'text-emerald-700 dark:text-emerald-450 bg-emerald-50 dark:bg-emerald-500/10 border-emerald-200 dark:border-emerald-500/20' 
+                                    ? 'text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 border-emerald-500/20' 
                                     : sale.status === 'Pending' 
-                                       ? 'text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-500/10 border-amber-200 dark:border-amber-500/20' 
-                                       : 'text-rose-700 dark:text-red-400 bg-rose-50 dark:bg-red-500/10 border-rose-200 dark:border-red-500/20'
-                                 }`}>
+                                       ? 'text-amber-600 dark:text-amber-400 bg-amber-500/10 border-amber-500/20' 
+                                       : 'text-rose-600 dark:text-rose-400 bg-rose-500/10 border-rose-500/20'
+                              }`}>
                                  {sale.status}
                               </span>
                            </td>
                            <td className="p-4 text-right">
-                              <ChevronRight size={16} className="text-stone-455 dark:text-gray-600 group-hover:text-[#2C5E3B] dark:group-hover:text-[#A9CBA2] transition-colors" />
+                              <ChevronRight size={16} className="text-[var(--theme-text-muted)] group-hover:text-[var(--theme-text-primary)] transition-colors" />
                            </td>
                         </tr>
                      ))}
                      {!loading && sales.length === 0 && (
-                        <tr><td colSpan={9} className="p-12 text-center text-stone-400 dark:text-gray-500 font-medium bg-transparent">No transactions found matching criteria.</td></tr>
+                        <tr><td colSpan={9} className="p-12 text-center text-[var(--theme-text-muted)] font-medium bg-transparent">No transactions found matching criteria.</td></tr>
                      )}
                   </tbody>
                </table>
             </div>
 
             {/* Pagination Footer */}
-            <div className="p-4 border-t border-[#E2DCCE] dark:border-white/10 flex justify-between items-center bg-[#FAF8F5]/80 dark:bg-black/25">
-               <p className="text-xs text-stone-500 dark:text-gray-555">
-                  Showing <span className="text-[#1E3F27] dark:text-white font-bold">{totalCount > 0 ? (currentPage - 1) * ITEMS_PER_PAGE + 1 : 0}</span> to <span className="text-[#1E3F27] dark:text-white font-bold">{Math.min(currentPage * ITEMS_PER_PAGE, totalCount)}</span> of {totalCount} entries
+            <div className="p-4 border-t border-[var(--theme-border)] flex justify-between items-center bg-[var(--theme-bg-panel)]">
+               <p className="text-xs text-[var(--theme-text-secondary)]">
+                  Showing <span className="text-[var(--theme-text-primary)] font-bold">{totalCount > 0 ? (currentPage - 1) * ITEMS_PER_PAGE + 1 : 0}</span> to <span className="text-[var(--theme-text-primary)] font-bold">{Math.min(currentPage * ITEMS_PER_PAGE, totalCount)}</span> of {totalCount} entries
                </p>
                <div className="flex gap-2">
                   <button
+                     type="button"
                      onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
                      disabled={currentPage === 1 || loading}
-                     className="p-2 rounded-xl bg-white dark:bg-white/5 border border-[#E2DCCE] dark:border-white/10 hover:bg-stone-50 dark:hover:bg-white/10 disabled:opacity-30 text-stone-700 dark:text-white transition-all active:scale-95 cursor-pointer"
+                     className="p-2 rounded-xl bg-[var(--theme-bg-card)] border border-[var(--theme-border)] hover:bg-[var(--theme-bg-panel-hover)] disabled:opacity-30 text-[var(--theme-text-primary)] transition-all active:scale-95 cursor-pointer"
                      aria-label="Previous Page"
                   >
                      <ChevronLeft size={16} />
                   </button>
                   <button
+                     type="button"
                      onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
                      disabled={currentPage >= totalPages || totalPages === 0 || loading}
-                     className="p-2 rounded-xl bg-white dark:bg-white/5 border border-[#E2DCCE] dark:border-white/10 hover:bg-stone-50 dark:hover:bg-white/10 disabled:opacity-30 text-stone-700 dark:text-white transition-all active:scale-95 cursor-pointer"
+                     className="p-2 rounded-xl bg-[var(--theme-bg-card)] border border-[var(--theme-border)] hover:bg-[var(--theme-bg-panel-hover)] disabled:opacity-30 text-[var(--theme-text-primary)] transition-all active:scale-95 cursor-pointer"
                      aria-label="Next Page"
                   >
                      <ChevronRight size={16} />

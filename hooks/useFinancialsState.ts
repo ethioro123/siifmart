@@ -1,9 +1,8 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import { ExpenseRecord, Employee } from '../types';
-import { expensesService } from '../services/supabase.service';
+import { expensesService } from '../services/expenses.service';
 import { useStore } from '../contexts/CentralStore';
 import { useData } from '../contexts/DataContext';
-import { generateQuarterlyReport } from '../utils/reportGenerator';
 import { DateRangeOption } from '../hooks/useDateFilter';
 import { logger } from '../utils/logger';
 import { getCountryProfile, Country } from '../utils/localization';
@@ -12,13 +11,19 @@ import {
    getCountryTaxConfig,
    getQuarterInfo,
    getDateRangeLabels,
-   getDateRangeBounds,
    isWithinRange,
    calculateEmployeeBonus,
    calculateApAging,
    computeWeeklyCashflow
 } from './financialsHelpers';
+import {
+   exportPnLReportJson,
+   exportTaxDeclarationFile,
+   exportBankDisbursementFile,
+   generateQuarterlyPdf
+} from './financialsExportHelpers';
 import { useFinancialPayrollState } from './useFinancialPayrollState';
+import { useFinancialsDataFetch } from './useFinancialsDataFetch';
 
 const EXPENSES_PER_PAGE = 20;
 
@@ -33,7 +38,6 @@ export function useFinancialsState() {
       allProducts,
       allOrders,
       addExpense,
-      deleteExpense,
       processPayroll,
       activeSite,
       effectiveCountry,
@@ -52,13 +56,18 @@ export function useFinancialsState() {
    const [isAddExpenseOpen, setIsAddExpenseOpen] = useState(false);
    const [isSubmitting, setIsSubmitting] = useState(false);
 
+   // Zero-Trust Void Modal State (Soft-void replacing hard delete)
+   const [isVoidExpenseModalOpen, setIsVoidExpenseModalOpen] = useState(false);
+   const [expenseToVoid, setExpenseToVoid] = useState<ExpenseRecord | null>(null);
+
+   // Legacy compatibility modal hooks
    const [isDeleteExpenseModalOpen, setIsDeleteExpenseModalOpen] = useState(false);
    const [expenseToDelete, setExpenseToDelete] = useState<string | null>(null);
    const [deleteInput, setDeleteInput] = useState('');
 
    const [isPayrollModalOpen, setIsPayrollModalOpen] = useState(false);
 
-   // Sovereign Country Tax Configuration (100% isolated per country, config-gated by settings.taxRate)
+   // Sovereign Country Tax Configuration
    const currentTaxConfig = useMemo(() => {
       return getCountryTaxConfig(activeCountry, settings?.taxRate);
    }, [activeCountry, settings?.taxRate]);
@@ -81,53 +90,20 @@ export function useFinancialsState() {
    // Payroll Sub-State Hook
    const payroll = useFinancialPayrollState(employees);
 
-   // 1. Fetch Paginated Expenses (Country & Site Scoped)
-   useEffect(() => {
-      if (activeTab === 'expenses') {
-         const fetchExpenses = async () => {
-            setExpensesLoading(true);
-            try {
-               const offset = (currentExpensesPage - 1) * EXPENSES_PER_PAGE;
-               const { startDate, endDate } = getDateRangeBounds(dateRange);
-               const querySiteId = isCountryAdmin ? undefined : activeSite?.id;
-
-               const { data, count } = await expensesService.getAll(querySiteId, EXPENSES_PER_PAGE, offset, {
-                  startDate,
-                  endDate
-               });
-
-               setLocalExpenses(data);
-               setTotalExpensesCount(count);
-            } catch (error) {
-               logger.error('useFinancialsState', 'Failed to fetch expenses', error as Error);
-            } finally {
-               setExpensesLoading(false);
-            }
-         };
-         fetchExpenses();
-      }
-   }, [activeTab, currentExpensesPage, activeSite?.id, isCountryAdmin, dateRange]);
-
-   // 2. Fetch Server Financial Metrics with Country Isolation
-   useEffect(() => {
-      const fetchFinancials = async () => {
-         try {
-            const { startDate, endDate } = getDateRangeBounds(dateRange);
-            const querySiteId = isCountryAdmin ? undefined : activeSite?.id;
-            const data = await expensesService.getFinancialMetrics(
-               querySiteId,
-               startDate ? `${startDate}T00:00:00.000Z` : undefined,
-               endDate ? `${endDate}T23:59:59.999Z` : undefined,
-               activeCountry
-            );
-            setServerFinancials(data);
-         } catch (err) {
-            logger.error('useFinancialsState', "Error fetching financial metrics:", err);
-         }
-      };
-
-      fetchFinancials();
-   }, [dateRange, activeSite?.id, isCountryAdmin, activeCountry]);
+   // Data fetching effects extracted to sub-hook
+   useFinancialsDataFetch({
+      activeTab,
+      currentExpensesPage,
+      expensesPerPage: EXPENSES_PER_PAGE,
+      dateRange,
+      isCountryAdmin,
+      activeSiteId: activeSite?.id,
+      activeCountry,
+      setLocalExpenses,
+      setTotalExpensesCount,
+      setExpensesLoading,
+      setServerFinancials
+   });
 
    const localGetDateRangeLabels = () => getDateRangeLabels(dateRange);
    const localIsWithinRange = (dateString: string) => isWithinRange(dateString, dateRange);
@@ -140,7 +116,7 @@ export function useFinancialsState() {
       return Math.min(100, Math.max(0, (daysPassed / totalDays) * 100));
    };
 
-   // 3. Resolve active datasets: Admin HQ consolidates all country sales/expenses; Branch scopes to site
+   // Resolve active datasets
    const targetSales = useMemo(() => {
       const baseSales = isCountryAdmin ? (allSales || []) : (sales || []);
       return baseSales.filter(s => {
@@ -162,7 +138,7 @@ export function useFinancialsState() {
       return targetSales.filter(s => localIsWithinRange(s.created_at || s.date || new Date().toISOString()));
    }, [targetSales, dateRange]);
 
-   // 4. Expense Breakdown
+   // Expense Breakdown
    const expenseBreakdownData = useMemo(() => {
       if (serverFinancials?.expense_breakdown && serverFinancials.expense_breakdown.length > 0) {
          return serverFinancials.expense_breakdown.map((item: any, _: number, arr: any[]) => {
@@ -186,7 +162,7 @@ export function useFinancialsState() {
       }));
    }, [filteredExpenses, serverFinancials]);
 
-   // 5. Cashflow Trend (Standardized keys: name, income, expense, revenue, expenses)
+   // Cashflow Trend
    const cashflowData = useMemo(() => {
       if (serverFinancials?.cashflow_data && serverFinancials.cashflow_data.length > 0) {
          return serverFinancials.cashflow_data.map((d: any) => {
@@ -204,151 +180,204 @@ export function useFinancialsState() {
       return computeWeeklyCashflow(filteredSales, filteredExpenses);
    }, [filteredSales, filteredExpenses, serverFinancials]);
 
-   // 6. Core Financial Totals with Admin HQ Rollup & Fallback
-   const calculatedSalesTotal = filteredSales.reduce((sum, s) => sum + (Number(s.total) || 0), 0);
-   const calculatedRefundsTotal = filteredSales.filter(s => s.status === 'Refunded').reduce((sum, s) => sum + (Number(s.total) || 0), 0);
-   const calculatedOpEx = filteredExpenses.reduce((sum, e) => sum + (Number(e.amount) || 0), 0);
+   // Bonus and Salary Calculations
+   const localCalculateEmployeeBonus = (emp: Employee) => calculateEmployeeBonus(emp, sites, getStorePoints, settings);
 
-   const totalRevenue = (serverFinancials?.total_revenue && Number(serverFinancials.total_revenue) > 0)
-      ? Number(serverFinancials.total_revenue)
-      : calculatedSalesTotal;
+   const totalRevenue = useMemo(() => {
+      if (serverFinancials?.total_revenue !== undefined) return serverFinancials.total_revenue;
+      return filteredSales.reduce((sum, s) => sum + (s.total || (s as any).total_amount || 0), 0);
+   }, [filteredSales, serverFinancials]);
 
-   const totalRefunds = (serverFinancials?.total_refunds !== undefined && serverFinancials.total_refunds !== null)
-      ? Number(serverFinancials.total_refunds)
-      : calculatedRefundsTotal;
+   const totalSalaries = useMemo(() => {
+      return employees.reduce((sum, emp) => {
+         if ((emp.status || 'Active') === 'Terminated') return sum;
+         return sum + (Number(emp.salary) || 0);
+      }, 0);
+   }, [employees]);
 
-   const totalOpEx = (serverFinancials?.total_expenses && Number(serverFinancials.total_expenses) > 0)
-      ? Number(serverFinancials.total_expenses)
-      : calculatedOpEx;
+   const totalOpEx = useMemo(() => {
+      if (serverFinancials?.total_expenses !== undefined) return serverFinancials.total_expenses;
+      return filteredExpenses.reduce((sum, e) => sum + (Number(e.amount) || 0), 0);
+   }, [filteredExpenses, serverFinancials]);
 
-   const totalSalaries = employees.reduce((sum, e) => sum + (Number(e.salary) || 0), 0);
+   const totalBonuses = useMemo(() => {
+      return employees.reduce((sum, emp) => sum + localCalculateEmployeeBonus(emp), 0);
+   }, [employees, filteredSales]);
 
-   const localCalculateEmployeeBonus = (emp: Employee): number => {
-      return calculateEmployeeBonus(emp, sites, getStorePoints, settings);
-   };
+   const totalInventoryValue = useMemo(() => {
+      return (allProducts || []).reduce((sum, p) => {
+         const pAny = p as any;
+         const qty = isCountryAdmin
+            ? (pAny.inventory ? Object.values(pAny.inventory).reduce((a: any, b: any) => a + b, 0) : (p.stock || 0))
+            : (pAny.inventory?.[activeSite?.id || ''] ?? (p.stock || 0));
+         return sum + ((qty as number) * (pAny.cost_price || p.costPrice || 0));
+      }, 0);
+   }, [allProducts, isCountryAdmin, activeSite?.id]);
 
-   const totalBonuses = employees.reduce((sum, emp) => sum + localCalculateEmployeeBonus(emp), 0);
+   const totalExpenses = totalOpEx + totalSalaries + totalBonuses;
+   const totalRefunds = serverFinancials?.total_refunds ?? 0;
 
-   const totalInventoryValue = allProducts
-      .filter(p => (p.status || (p as any).status) !== 'archived')
-      .reduce((sum, p) => sum + ((p.stock || 0) * (p.costPrice || p.price * 0.7)), 0);
+   // Sovereign Tax Compliance Engine
+   const estimatedTaxLiability = useMemo(() => {
+      const rate = (currentTaxConfig.rate || 15) / 100;
+      return (totalRevenue - totalRefunds) * rate;
+   }, [totalRevenue, totalRefunds, currentTaxConfig.rate]);
 
-   const totalExpenses = totalSalaries + totalOpEx;
+   const inputTaxCredit = useMemo(() => {
+      const rate = (currentTaxConfig.rate || 15) / 100;
+      return totalOpEx * (rate / (1 + rate));
+   }, [totalOpEx, currentTaxConfig.rate]);
 
-   // 7. Sovereign Tax Calculation
-   const taxRateDecimal = currentTaxConfig.rate / 100;
-   const estimatedTaxLiability = Math.max(0, (totalRevenue - totalRefunds) * taxRateDecimal);
-   const inputTaxCredit = Math.max(0, totalOpEx * taxRateDecimal);
    const netTaxPayable = Math.max(0, estimatedTaxLiability - inputTaxCredit);
-
-   const netProfit = totalRevenue - totalExpenses - netTaxPayable - totalRefunds;
+   const netProfit = totalRevenue - totalRefunds - totalExpenses - netTaxPayable;
    const profitMargin = totalRevenue > 0 ? (netProfit / totalRevenue) * 100 : 0;
 
-   // 8. Accounts Payable Aging from real country-scoped purchase orders
-   const apAging = useMemo(() => calculateApAging(allOrders || []), [allOrders]);
+   // Accounts Payable Aging & Forecasting
+   const apAging = useMemo(() => calculateApAging(allOrders), [allOrders]);
 
-   // 9. Forecast
-   const avgRevenue = totalRevenue / Math.max(1, cashflowData.length);
-   const forecastData = [
-      { month: 'Next M1', low: avgRevenue * 0.9, high: avgRevenue * 1.1, projection: avgRevenue * 1.05 },
-      { month: 'Next M2', low: avgRevenue * 0.92, high: avgRevenue * 1.15, projection: avgRevenue * 1.08 },
-      { month: 'Next M3', low: avgRevenue * 0.95, high: avgRevenue * 1.2, projection: avgRevenue * 1.12 },
-   ];
+   const forecastData = useMemo(() => {
+      const historicalPoints = cashflowData.slice(-6);
+      const avgRevenue = historicalPoints.length > 0
+         ? historicalPoints.reduce((acc: number, p: any) => acc + (p.revenue || p.income || 0), 0) / historicalPoints.length
+         : 10000;
+
+      const growthRate = 1.05;
+      return [
+         { name: 'Month +1', projectedRevenue: Math.round(avgRevenue * Math.pow(growthRate, 1)), confidenceLow: Math.round(avgRevenue * 0.95), confidenceHigh: Math.round(avgRevenue * 1.1) },
+         { name: 'Month +2', projectedRevenue: Math.round(avgRevenue * Math.pow(growthRate, 2)), confidenceLow: Math.round(avgRevenue * 0.92), confidenceHigh: Math.round(avgRevenue * 1.15) },
+         { name: 'Month +3', projectedRevenue: Math.round(avgRevenue * Math.pow(growthRate, 3)), confidenceLow: Math.round(avgRevenue * 0.88), confidenceHigh: Math.round(avgRevenue * 1.22) }
+      ];
+   }, [cashflowData]);
 
    const COLORS = [accentColor, '#3b82f6', '#f59e0b', '#ef4444', '#a855f7', '#ec4899'];
 
-   // 10. Zero-Trust Expense Creation
+   // Zero-Trust Expense Creation (Strictly Pending, Captures Creator)
    const handleAddExpense = async () => {
       if (!newExpData.description || !newExpData.amount) return;
       setIsSubmitting(true);
       try {
-         const userRole = (user?.role || '').toLowerCase();
-         const isPrivileged = ['admin', 'super_admin', 'ceo'].includes(userRole);
-         const expense: ExpenseRecord = {
-            id: `EXP-${Date.now()}`,
+         const expensePayload: any = {
             siteId: activeSite?.id || 'SITE-0001',
+            countryCode: activeCountry,
             date: newExpData.date || new Date().toISOString().split('T')[0],
             category: (newExpData.category as any) || 'Other',
             description: newExpData.description,
             amount: Number(newExpData.amount),
-            status: isPrivileged ? ((newExpData.status as any) || 'Pending') : 'Pending',
-            approvedBy: isPrivileged ? (user?.name || 'Admin') : 'Pending HQ Approval'
+            status: 'Pending',
+            createdById: user?.id || user?.employeeId,
+            createdByName: user?.name || 'Staff Member',
+            creatorUser: {
+               id: user?.id || user?.employeeId || 'STAFF-001',
+               name: user?.name || 'Staff Member',
+               role: user?.role || 'staff'
+            },
+            thresholdLimit: settings?.expenseApprovalLimit || 50000
          };
-         await addExpense(expense);
+
+         const saved = await expensesService.create(expensePayload);
+         setLocalExpenses(prev => [saved, ...prev]);
          setIsAddExpenseOpen(false);
          setNewExpData({ category: 'Other', status: 'Pending', date: new Date().toISOString().split('T')[0] });
-         addNotification('success', 'Expense record submitted.');
-      } catch (error) {
+         addNotification('success', `Expense submitted (${saved.escalatedToCeo ? 'Escalated to CEO' : 'Pending Approval'}).`);
+      } catch (error: any) {
          logger.error('useFinancialsState', 'caught error', error as Error);
-         addNotification('alert', 'Failed to log expense');
+         addNotification('alert', error?.message || 'Failed to log expense');
       } finally {
          setIsSubmitting(false);
       }
    };
 
-   const handleDeleteExpense = (id: string) => {
-      setExpenseToDelete(id);
-      setDeleteInput('');
-      setIsDeleteExpenseModalOpen(true);
-   };
-
-   const handleConfirmDeleteExpense = async () => {
-      if (!expenseToDelete) return;
-      if (deleteInput !== "DELETE") {
-         addNotification('alert', 'Please type "DELETE" to confirm.');
-         return;
-      }
+   // Maker/Checker Expense Approval
+   const handleApproveExpense = async (id: string) => {
       setIsSubmitting(true);
       try {
-         await deleteExpense(expenseToDelete);
-         addNotification('success', 'Expense record deleted.');
-         setIsDeleteExpenseModalOpen(false);
-         setExpenseToDelete(null);
-         setDeleteInput('');
-      } catch (error) {
-         logger.error('useFinancialsState', 'caught error', error as Error);
+         const approverUser = {
+            id: user?.id || user?.employeeId || 'FIN-MGR-001',
+            name: user?.name || 'Finance Manager',
+            role: user?.role || 'finance_manager'
+         };
+         const updated = await expensesService.approve(id, approverUser);
+         setLocalExpenses(prev => prev.map(e => e.id === id ? updated : e));
+         addNotification('success', `Expense approved by ${approverUser.name}`);
+      } catch (error: any) {
+         logger.error('useFinancialsState', 'Failed to approve expense', error as Error);
+         addNotification('alert', error?.message || 'Failed to approve expense');
       } finally {
          setIsSubmitting(false);
       }
    };
 
+   // Expense Rejection
+   const handleRejectExpense = async (id: string, reason?: string) => {
+      setIsSubmitting(true);
+      try {
+         const rejectorUser = {
+            id: user?.id || user?.employeeId || 'FIN-MGR-001',
+            name: user?.name || 'Finance Manager',
+            role: user?.role || 'finance_manager',
+            reason
+         };
+         const updated = await expensesService.reject(id, rejectorUser);
+         setLocalExpenses(prev => prev.map(e => e.id === id ? updated : e));
+         addNotification('info', `Expense marked as rejected by ${rejectorUser.name}`);
+      } catch (error: any) {
+         logger.error('useFinancialsState', 'Failed to reject expense', error as Error);
+         addNotification('alert', error?.message || 'Failed to reject expense');
+      } finally {
+         setIsSubmitting(false);
+      }
+   };
+
+   // Zero-Trust Soft-Void Action (Replaces Delete)
+   const handleTriggerVoidExpense = (exp: ExpenseRecord | string) => {
+      const record = typeof exp === 'string'
+         ? localExpenses.find(e => e.id === exp) || ({ id: exp, amount: 0, category: 'Other', description: '' } as ExpenseRecord)
+         : exp;
+      setExpenseToVoid(record);
+      setIsVoidExpenseModalOpen(true);
+   };
+
+   const handleConfirmVoidExpense = async (reason: string) => {
+      if (!expenseToVoid) return;
+      setIsSubmitting(true);
+      try {
+         const voided = await expensesService.voidExpense(expenseToVoid.id, {
+            reason,
+            voidedById: user?.id || user?.employeeId || 'FIN-MGR-001',
+            voidedByName: user?.name || 'Finance Manager'
+         });
+         setLocalExpenses(prev => prev.map(e => e.id === expenseToVoid.id ? voided : e));
+         setIsVoidExpenseModalOpen(false);
+         setExpenseToVoid(null);
+         addNotification('success', `Expense #${expenseToVoid.id.slice(0, 8)} voided successfully.`);
+      } catch (error: any) {
+         logger.error('useFinancialsState', 'Failed to void expense', error as Error);
+         addNotification('alert', error?.message || 'Failed to void expense');
+      } finally {
+         setIsSubmitting(false);
+      }
+   };
+
+   const handleDeleteExpense = (id: string) => handleTriggerVoidExpense(id);
+   const handleConfirmDeleteExpense = () => handleConfirmVoidExpense('Administrative Correction');
+
+   // Reporting & Disbursements
    const handleExportPnL = () => {
-      const data = {
-         country: activeCountry,
-         currency: currencySymbol,
-         reportDate: new Date().toISOString(),
-         metrics: {
-            totalRevenue,
-            totalRefunds,
-            totalExpenses: {
-               operating: totalOpEx,
-               payroll: totalSalaries
-            },
-            tax: {
-               authority: currentTaxConfig.authority,
-               taxName: currentTaxConfig.taxName,
-               rate: currentTaxConfig.rate,
-               estimatedLiability: netTaxPayable
-            },
-            netProfit,
-            profitMargin: `${profitMargin.toFixed(1)}%`
-         }
-      };
-
-      const jsonString = JSON.stringify(data, null, 2);
-      const blob = new Blob([jsonString], { type: "application/json" });
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = url;
-      link.download = `siifmart_${activeCountry.toLowerCase()}_pnl_report_${new Date().toISOString().split('T')[0]}.json`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+      exportPnLReportJson({
+         activeCountry,
+         currencySymbol,
+         totalRevenue,
+         totalRefunds,
+         totalOpEx,
+         totalSalaries,
+         currentTaxConfig,
+         netTaxPayable,
+         netProfit,
+         profitMargin
+      });
    };
 
-   const handleProcessPayroll = () => {
-      setIsPayrollModalOpen(true);
-   };
+   const handleProcessPayroll = () => setIsPayrollModalOpen(true);
 
    const handleConfirmPayroll = async () => {
       setIsSubmitting(true);
@@ -364,42 +393,66 @@ export function useFinancialsState() {
 
    const handleGenerateFiling = () => {
       setIsSubmitting(true);
-      addNotification('info', `Generating ${currentTaxConfig.taxName} Filing for ${currentTaxConfig.authority}...`);
-      setTimeout(() => {
-         addNotification('success', `Tax Report Generated! Net Payable: ${currencySymbol} ${netTaxPayable.toLocaleString()}`);
+      try {
+         const filename = exportTaxDeclarationFile({
+            activeCountry,
+            currencySymbol,
+            currentTaxConfig,
+            totalRevenue,
+            totalRefunds,
+            totalOpEx,
+            estimatedTaxLiability,
+            inputTaxCredit,
+            netTaxPayable
+         });
+         addNotification('success', `Exported sovereign tax declaration: ${filename}`);
+      } catch (error) {
+         logger.error('useFinancialsState', 'Failed to export tax filing', error as Error);
+         addNotification('alert', 'Failed to generate tax filing');
+      } finally {
          setIsSubmitting(false);
-      }, 1200);
+      }
    };
 
    const handleDownloadBankFile = () => {
       setIsSubmitting(true);
-      addNotification('info', 'Generating Bank Payment File (ABA/NACHA)...');
-      setTimeout(() => {
-         addNotification('success', 'Bank File Downloaded Successfully');
+      try {
+         const filename = exportBankDisbursementFile({
+            activeCountry,
+            currencySymbol,
+            employees,
+            calculateEmployeeBonus: localCalculateEmployeeBonus
+         });
+         addNotification('success', `Generated bulk bank disbursement file: ${filename}`);
+      } catch (error) {
+         logger.error('useFinancialsState', 'Failed to export bank file', error as Error);
+         addNotification('alert', 'Failed to export bank disbursement file');
+      } finally {
          setIsSubmitting(false);
-      }, 1200);
+      }
    };
 
    const localGetQuarterInfo = (d = new Date()) => getQuarterInfo(d);
 
    const handleGenerateReport = () => {
-      const reportMetrics = {
+      generateQuarterlyPdf({
          totalRevenue,
          totalExpenses,
          totalRefunds,
          netProfit,
-         profitMargin: profitMargin.toFixed(1) + '%',
+         profitMargin,
          totalSalaries,
-         totalOpEx
-      };
-      generateQuarterlyReport(reportMetrics, localGetDateRangeLabels(), 'Financials');
+         totalOpEx,
+         dateRangeLabel: localGetDateRangeLabels()
+      });
    };
 
    return {
-      user, theme, accentColor, employees, sales, expenses, allProducts, addExpense, deleteExpense, processPayroll,
+      user, theme, accentColor, employees, sales, expenses, allProducts, addExpense, deleteExpense: handleDeleteExpense, processPayroll,
       activeSite, addNotification, settings, sites, getStorePoints, activeTab, setActiveTab, isAddExpenseOpen,
       setIsAddExpenseOpen, isSubmitting, setIsSubmitting, isDeleteExpenseModalOpen, setIsDeleteExpenseModalOpen,
-      expenseToDelete, setExpenseToDelete, deleteInput, setDeleteInput, isPayrollModalOpen, setIsPayrollModalOpen,
+      expenseToDelete, setExpenseToDelete, deleteInput, setDeleteInput, isVoidExpenseModalOpen, setIsVoidExpenseModalOpen,
+      expenseToVoid, setExpenseToVoid, isPayrollModalOpen, setIsPayrollModalOpen,
       effectiveCountry: activeCountry, countryProfile, currencySymbol, currentTaxConfig, newExpData, setNewExpData,
       dateRange, setDateRange, localExpenses, setLocalExpenses, expensesLoading, setExpensesLoading, totalExpensesCount,
       setTotalExpensesCount, currentExpensesPage, setCurrentExpensesPage, serverFinancials, setServerFinancials,
@@ -408,7 +461,8 @@ export function useFinancialsState() {
       totalRefunds, estimatedTaxLiability, inputTaxCredit, netTaxPayable, netProfit, profitMargin, forecastData, COLORS,
       EXPENSES_PER_PAGE, apAging, getQuarterProgress, getDateRangeLabels: localGetDateRangeLabels,
       getQuarterInfo: localGetQuarterInfo, handleAddExpense, handleDeleteExpense, handleConfirmDeleteExpense,
-      handleExportPnL, handleProcessPayroll, handleConfirmPayroll, handleGenerateFiling, handleDownloadBankFile,
-      handleGenerateReport
+      handleTriggerVoidExpense, handleConfirmVoidExpense,
+      handleApproveExpense, handleRejectExpense, handleExportPnL, handleProcessPayroll, handleConfirmPayroll,
+      handleGenerateFiling, handleDownloadBankFile, handleGenerateReport
    };
 }

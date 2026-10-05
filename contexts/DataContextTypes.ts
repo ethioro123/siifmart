@@ -107,7 +107,7 @@ export interface DataContextType {
   clearNotification: (id: string) => void;
   clearAllNotifications: () => void;
   markNotificationsRead: () => void;
-  logSystemEvent: (action: string, details: string, user: string, module: SystemLog['module']) => void;
+  logSystemEvent: (action: string, details: string | Record<string, any>, user?: string, module?: SystemLog['module'], options?: any) => Promise<any> | void;
   exportSystemData: () => string;
   resetData: () => void;
   refreshData: () => Promise<void>;

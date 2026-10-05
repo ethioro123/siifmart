@@ -67,6 +67,7 @@ export function LocationBadge({ user, sites, employees, activeSite, setActiveSit
          const isSt = ['Store', 'Dark Store', 'Retail', 'POS'].includes(selected.type || '');
          if (isWh) navigate('/wms-ops');
          else if (isSt) navigate('/pos');
+         else navigate('/admin');
       }
    };
 

@@ -8,6 +8,7 @@ import { useData } from '../../contexts/DataContext';
 import { getSellUnit } from '../../utils/units';
 import { Site, StockMovement } from '../../types';
 import { logger } from '../../utils/logger';
+import { canViewAllSites } from '../../utils/permissions';
 
 interface InventoryMovementsProps {
     sites: Site[];
@@ -29,7 +30,7 @@ export const InventoryMovements: React.FC<InventoryMovementsProps> = ({
     // Filter State
     const { user } = useStore();
     const { allProducts, products } = useData();
-    const isSuperAdmin = user?.role === 'super_admin';
+    const isSuperAdmin = canViewAllSites(user?.role);
     const isHQView = !activeSite;
 
     const [movementsSearch, setMovementsSearch] = useState('');
@@ -94,15 +95,15 @@ export const InventoryMovements: React.FC<InventoryMovementsProps> = ({
     return (
         <div className="space-y-4 animate-in fade-in">
             {/* Controls */}
-            <div className="p-4 glass-panel rounded-2xl flex flex-wrap items-center gap-4">
+            <div className="p-4 bg-[var(--theme-bg-panel)] rounded-2xl border border-[var(--theme-border)] flex flex-wrap items-center gap-4">
                 <div className="flex-1 min-w-[300px] relative group">
-                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-[#2C5E3B] dark:group-focus-within:text-[#A9CBA2] transition-colors" size={16} />
+                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--theme-text-muted)] group-focus-within:text-[var(--theme-accent)] transition-colors" size={16} />
                     <input
                         type="text"
                         value={movementsSearch}
                         onChange={(e) => setMovementsSearch(e.target.value)}
                         placeholder="Search by Product name or Reference ID..."
-                        className="w-full bg-white dark:bg-black/40 border border-gray-200 dark:border-white/10 rounded-xl py-3 pl-12 pr-4 text-sm text-gray-900 dark:text-white focus:outline-none focus:border-[#2C5E3B]/50 dark:focus:border-[#A9CBA2]/50 focus:ring-4 focus:ring-[#2C5E3B]/10 dark:focus:ring-[#A9CBA2]/10 transition-all"
+                        className="w-full bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl py-3 pl-12 pr-4 text-sm text-[var(--theme-text-primary)] focus:outline-none focus:border-[var(--theme-accent)] transition-all"
                     />
                 </div>
 
@@ -113,7 +114,7 @@ export const InventoryMovements: React.FC<InventoryMovementsProps> = ({
                             aria-label="Filter Movement Site"
                             value={movementsSiteFilter}
                             onChange={(e) => setMovementsSiteFilter(e.target.value)}
-                            className="bg-white dark:bg-black/40 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-3 text-sm text-gray-700 dark:text-white focus:outline-none focus:border-[#2C5E3B]/50 dark:focus:border-[#A9CBA2]/50 focus:ring-4 focus:ring-[#2C5E3B]/10 dark:focus:ring-[#A9CBA2]/10"
+                            className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl px-4 py-3 text-sm text-[var(--theme-text-primary)] focus:outline-none focus:border-[var(--theme-accent)]"
                         >
                             <option value="All">All Sites</option>
                             {sites.filter(s => s.type !== 'Store' && s.type !== 'Administration').map(s => (
@@ -123,7 +124,7 @@ export const InventoryMovements: React.FC<InventoryMovementsProps> = ({
                     ) : (
                         // Show current site as read-only badge if in warehouse view
                         !isHQView && (
-                            <div className="bg-[#2C5E3B]/10 dark:bg-[#A9CBA2]/10 border border-[#2C5E3B]/20 dark:border-[#A9CBA2]/20 rounded-xl px-4 py-3 text-sm text-[#2C5E3B] dark:text-[#A9CBA2] font-bold">
+                            <div className="bg-[var(--theme-pill-bg)] border border-[var(--theme-pill-border)] rounded-xl px-4 py-3 text-sm text-[var(--theme-text-primary)] font-bold">
                                 {activeSite?.name || 'Current Site'}
                             </div>
                         )
@@ -134,7 +135,7 @@ export const InventoryMovements: React.FC<InventoryMovementsProps> = ({
                         aria-label="Filter Movement Type"
                         value={movementsTypeFilter}
                         onChange={(e) => setMovementsTypeFilter(e.target.value)}
-                        className="bg-white dark:bg-black/40 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-3 text-sm text-gray-700 dark:text-white focus:outline-none focus:border-[#2C5E3B]/50 dark:focus:border-[#A9CBA2]/50 focus:ring-4 focus:ring-[#2C5E3B]/10 dark:focus:ring-[#A9CBA2]/10"
+                        className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl px-4 py-3 text-sm text-[var(--theme-text-primary)] focus:outline-none focus:border-[var(--theme-accent)]"
                     >
                         <option value="All">All Types</option>
                         <option value="IN">Inbound (Stock In)</option>
@@ -151,7 +152,7 @@ export const InventoryMovements: React.FC<InventoryMovementsProps> = ({
                             const [key, direction] = e.target.value.split('-');
                             setMovementsSort({ key, direction: direction as 'asc' | 'desc' });
                         }}
-                        className="bg-white dark:bg-black/40 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-3 text-sm text-gray-700 dark:text-white focus:outline-none focus:border-[#2C5E3B]/50 dark:focus:border-[#A9CBA2]/50 focus:ring-4 focus:ring-[#2C5E3B]/10 dark:focus:ring-[#A9CBA2]/10"
+                        className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl px-4 py-3 text-sm text-[var(--theme-text-primary)] focus:outline-none focus:border-[var(--theme-accent)]"
                     >
                         <option value="date-desc">Newest First</option>
                         <option value="date-asc">Oldest First</option>
@@ -175,24 +176,24 @@ export const InventoryMovements: React.FC<InventoryMovementsProps> = ({
                 </div>
             </div>
 
-            <div className="glass-panel rounded-2xl overflow-hidden">
-                <div className="p-6 border-b border-gray-100 dark:border-white/5"><h3 className="font-bold text-gray-900 dark:text-white">Stock Movements</h3><p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Immutable history of inventory changes.</p></div>
+            <div className="bg-[var(--theme-bg-panel)] rounded-2xl border border-[var(--theme-border)] overflow-hidden">
+                <div className="p-6 border-b border-[var(--theme-border)]"><h3 className="font-bold text-[var(--theme-text-primary)]">Stock Movements</h3><p className="text-xs text-[var(--theme-text-muted)] mt-1">Immutable history of inventory changes.</p></div>
                 <div className="overflow-x-auto relative min-h-[400px]">
                     {movementsLoading && (
-                        <div className="absolute inset-0 bg-black/20 backdrop-blur-[1px] flex items-center justify-center z-10 transition-all">
-                            <div className="w-10 h-10 border-4 border-[#2C5E3B]/20 dark:border-[#A9CBA2]/20 border-t-[#2C5E3B] dark:border-t-[#A9CBA2] rounded-full animate-spin" />
+                        <div className="absolute inset-0 bg-black/20 flex items-center justify-center z-10 transition-all">
+                            <div className="w-10 h-10 border-4 border-[var(--theme-border)] border-t-[var(--theme-accent)] rounded-full animate-spin" />
                         </div>
                     )}
                     <table className="w-full text-left">
-                        <thead><tr className="bg-gray-50 dark:bg-black/20 border-b border-gray-200 dark:border-white/5"><th className="p-4 text-xs text-gray-500 uppercase">Ref ID</th><th className="p-4 text-xs text-gray-500 uppercase">Time</th><th className="p-4 text-xs text-gray-500 uppercase">Type</th><th className="p-4 text-xs text-gray-500 uppercase">Product</th><th className="p-4 text-xs text-gray-500 uppercase text-right">Qty</th><th className="p-4 text-xs text-gray-500 uppercase">User</th><th className="p-4 text-xs text-gray-500 uppercase">Reason</th></tr></thead>
-                        <tbody className="divide-y divide-gray-100 dark:divide-white/5">
+                        <thead><tr className="bg-[var(--theme-bg-subtle)] border-b border-[var(--theme-border)]"><th className="p-4 text-[11px] text-[var(--theme-text-muted)] uppercase tracking-wider font-semibold">Ref ID</th><th className="p-4 text-[11px] text-[var(--theme-text-muted)] uppercase tracking-wider font-semibold">Time</th><th className="p-4 text-[11px] text-[var(--theme-text-muted)] uppercase tracking-wider font-semibold">Type</th><th className="p-4 text-[11px] text-[var(--theme-text-muted)] uppercase tracking-wider font-semibold">Product</th><th className="p-4 text-[11px] text-[var(--theme-text-muted)] uppercase tracking-wider font-semibold text-right">Qty</th><th className="p-4 text-[11px] text-[var(--theme-text-muted)] uppercase tracking-wider font-semibold">User</th><th className="p-4 text-[11px] text-[var(--theme-text-muted)] uppercase tracking-wider font-semibold">Reason</th></tr></thead>
+                        <tbody className="divide-y divide-[var(--theme-border)]">
                             {localMovements.map((move) => (
-                                <tr key={move.id} className="hover:bg-gray-50 dark:hover:bg-white/5">
-                                    <td className="p-4 text-xs font-mono text-gray-500 dark:text-gray-400">{move.id?.slice(0, 8).toUpperCase()}</td>
-                                    <td className="p-4 text-xs text-gray-900 dark:text-white">{formatDateTime(move.date, { showTime: true })}</td>
-                                    <td className="p-4"><span className={`text-[10px] font-bold px-2 py-1 rounded uppercase border ${move.type === 'IN' ? 'text-green-600 dark:text-green-400 border-green-500/20 bg-green-500/10' : move.type === 'OUT' ? 'text-blue-600 dark:text-blue-400 border-blue-500/20 bg-blue-500/10' : 'text-yellow-600 dark:text-yellow-400 border-yellow-500/20 bg-yellow-500/10'} `}>{move.type}</span></td>
-                                    <td className="p-4 text-sm text-gray-900 dark:text-white">{move.productName}</td>
-                                    <td className={`p-4 text-sm font-mono text-right font-bold ${move.type === 'IN' ? 'text-green-600 dark:text-green-400' : move.type === 'OUT' ? 'text-red-500' : 'text-gray-900 dark:text-white'} `}>
+                                <tr key={move.id} className="hover:bg-[var(--theme-bg-subtle)] transition-colors">
+                                    <td className="p-4 text-xs font-mono text-[var(--theme-text-muted)]">{move.id?.slice(0, 8).toUpperCase()}</td>
+                                    <td className="p-4 text-xs text-[var(--theme-text-primary)]">{formatDateTime(move.date, { showTime: true })}</td>
+                                    <td className="p-4"><span className={`text-[10px] font-bold px-2 py-1 rounded uppercase border ${move.type === 'IN' ? 'text-emerald-600 dark:text-emerald-400 border-emerald-500/20 bg-emerald-500/10' : move.type === 'OUT' ? 'text-blue-600 dark:text-blue-400 border-blue-500/20 bg-blue-500/10' : 'text-amber-600 dark:text-amber-400 border-amber-500/20 bg-amber-500/10'} `}>{move.type}</span></td>
+                                    <td className="p-4 text-sm text-[var(--theme-text-primary)]">{move.productName}</td>
+                                    <td className={`p-4 text-sm font-mono text-right font-bold ${move.type === 'IN' ? 'text-emerald-600 dark:text-emerald-400' : move.type === 'OUT' ? 'text-red-500' : 'text-[var(--theme-text-primary)]'} `}>
                                         {(() => {
                                             const prod = allProducts.find(p => p.id === move.productId) || products.find(p => p.id === move.productId);
                                             const unitCode = prod?.unit;
@@ -220,13 +221,13 @@ export const InventoryMovements: React.FC<InventoryMovementsProps> = ({
                                             );
                                         })()}
                                     </td>
-                                    <td className="p-4 text-xs text-gray-600 dark:text-gray-300">{move.performedBy}</td>
-                                    <td className="p-4 text-xs text-gray-500 italic">{move.reason}</td>
+                                    <td className="p-4 text-xs text-[var(--theme-text-secondary)]">{move.performedBy}</td>
+                                    <td className="p-4 text-xs text-[var(--theme-text-muted)] italic">{move.reason}</td>
                                 </tr>
                             ))}
                             {!movementsLoading && localMovements.length === 0 && (
                                 <tr>
-                                    <td colSpan={7} className="p-10 text-center text-gray-500 italic text-sm">
+                                    <td colSpan={7} className="p-10 text-center text-[var(--theme-text-muted)] italic text-sm">
                                         No stock movements found matching your criteria.
                                     </td>
                                 </tr>
@@ -235,25 +236,25 @@ export const InventoryMovements: React.FC<InventoryMovementsProps> = ({
                     </table>
                 </div>
                 {/* Pagination Controls */}
-                <div className="flex justify-between items-center p-4 border-t border-gray-100 dark:border-white/5 bg-gray-50 dark:bg-black/20">
-                    <div className="text-xs text-gray-400">
+                <div className="flex justify-between items-center p-4 border-t border-[var(--theme-border)] bg-[var(--theme-bg-subtle)]">
+                    <div className="text-xs text-[var(--theme-text-muted)]">
                         Showing {localMovements.length} of {formatCompactNumber(totalMovementsCount)} records
                     </div>
                     <div className="flex gap-2">
                         <button
                             onClick={() => setCurrentMovementsPage(prev => Math.max(1, prev - 1))}
                             disabled={currentMovementsPage === 1 || movementsLoading}
-                            className="px-3 py-1 bg-white hover:bg-gray-100 dark:bg-white/5 dark:hover:bg-white/10 disabled:opacity-50 disabled:cursor-not-allowed rounded text-xs text-gray-700 dark:text-white transition-colors border border-gray-200 dark:border-white/10"
+                            className="px-3 py-1 bg-[var(--theme-bg-card)] hover:bg-[var(--theme-bg-card-hover)] disabled:opacity-40 disabled:cursor-not-allowed rounded-lg text-xs text-[var(--theme-text-primary)] transition-colors border border-[var(--theme-border)]"
                         >
                             Previous
                         </button>
-                        <span className="flex items-center px-2 text-xs text-gray-400 font-mono">
+                        <span className="flex items-center px-2 text-xs text-[var(--theme-text-muted)] font-mono">
                             Page {currentMovementsPage}
                         </span>
                         <button
                             onClick={() => setCurrentMovementsPage(prev => (localMovements.length === MOVEMENTS_PER_PAGE ? prev + 1 : prev))}
                             disabled={localMovements.length < MOVEMENTS_PER_PAGE || movementsLoading}
-                            className="px-3 py-1 bg-white hover:bg-gray-100 dark:bg-white/5 dark:hover:bg-white/10 disabled:opacity-50 disabled:cursor-not-allowed rounded text-xs text-gray-700 dark:text-white transition-colors border border-gray-200 dark:border-white/10"
+                            className="px-3 py-1 bg-[var(--theme-bg-card)] hover:bg-[var(--theme-bg-card-hover)] disabled:opacity-40 disabled:cursor-not-allowed rounded-lg text-xs text-[var(--theme-text-primary)] transition-colors border border-[var(--theme-border)]"
                         >
                             Next
                         </button>

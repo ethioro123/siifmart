@@ -90,10 +90,9 @@ describe('employeeProfileData utils', () => {
     });
 
     describe('Leave Requests Storage & Actions', () => {
-        it('should return initial sample leaves when empty', () => {
+        it('should return empty leaves when no records exist', () => {
             const leaves = getEmployeeLeaveRequests('emp-test-01');
-            expect(leaves.length).toBeGreaterThan(0);
-            expect(leaves[0].type).toBeDefined();
+            expect(leaves).toEqual([]);
         });
 
         it('should add a leave request and compute number of days', () => {

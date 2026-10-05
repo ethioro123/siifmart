@@ -61,6 +61,10 @@ await productsService.update(id, { stock: newStock });
 - **Every database change MUST have a migration file** in `/migrations/` named `YYYYMMDD_description.sql`.
 - **Mandatory In-Chat SQL Delivery**: Whenever ANY SQL migration, table, column, index, RPC function, or RLS policy is created or modified while coding, the AI MUST bring the complete, runnable, copy-pasteable SQL directly into the chat response every single time so the user can easily copy and execute it in Supabase SQL Editor. Never silently create or modify migration files without delivering the full runnable SQL in the chat.
 
+### Synaptic Neural Mesh Pattern (Zero Dead-End Mutations)
+- **Every mutation MUST stimulate downstream operational synapses**: An update to one entity cannot stop at a single row write. It must propagate state changes, cache invalidations, and audit signals across the interconnected event mesh (POS → Inventory → WMS → Financials → Gamification → CentralOps).
+- **Zero Dead-End Silos**: If a business action occurs, all adjacent modules affected by that operational reality must immediately reflect the update without requiring page reloads or manual synchronization.
+
 ---
 
 ## Role Hierarchy
@@ -156,7 +160,219 @@ const canApprove = ['super_admin', 'CEO'].includes(user?.role || '');
 - **Zero Per-Screen Country Selectors**: We do NOT create country selection chips, dropdowns, or partition switcher banners inside individual settings pages or tabs (POS settings, WMS settings, Inventory settings, General settings).
 - **Single Global Switch (CEO / Super Admin Only)**: Choosing between countries is performed exclusively by the CEO/Super Admin via **ONE central toggle/selection** in the global application header. When selected (e.g. Kenya `KE`), the entire system cleanly re-hydrates globally — all settings, facilities, dashboards, and inventories immediately reflect that country's tenant.
 - **Invisible Tenancy for Branch Staff & Clean Native Experience**: Non-CEO users (cashiers, store managers, pickers, drivers, branch accountants) must NEVER see country pickers, partition banners, or multi-tenant switches anywhere. To each user, the application is presented 100% as a native, single-nation system (e.g., fully Kenyan website for Kenyan branches). A user should not see or be aware of whether they are using a Kenyan or Ethiopian tenant.
-- **Automatic 100% Background Separation**: All settings panels, hooks, and services MUST enforce 100% data and setting separation automatically in the background. Settings pages automatically read from and write to the active country's partition (`countryConfigs[targetCountry]`) without requiring the user to manually target a country or choose between tenants in the form UI.
+### 7. Linguistic Purity & Anti-Dialect Mixing Architecture
+- **Zero Inter-Dialect Mixing**: In multi-lingual national environments (e.g. Ethiopia with Amharic and Afaan Oromoo, or Kenya with Swahili and English), strings must NEVER be concatenated into mixed bilingual monstrosities (e.g., NEVER write `Jimaata (ዓርብ), Fuulbana (መስከረም)`).
+- **Strict Language Isolation**: UI presentation must strictly follow the user's active locale/language (`useLanguage()`):
+  - When language is Amharic (`am`): 100% pure Amharic script (e.g. `ዓርብ፣ መስከረም 22፣ 2019 ዓ.ም` and `ጠዋት/ቀን/ማታ/ሌሊት`). Zero Oromo or mixed terms.
+  - When language is Afaan Oromoo (`or`): 100% pure Afaan Oromoo (e.g. `Jimaata, Fulbaana 22, 2019` and `Ganama/Guyyaa/Galgala/Halkan`). Zero Amharic script or mixed terms. Note: Oromo language code in SIIFMART is strictly `'or'`.
+  - When language is Swahili (`sw`): 100% pure Swahili (e.g. `Ijumaa, 2 Oktoba 2026`).
+  - When language is English (`en`): 100% pure English (e.g. `Friday, Meskerem 22, 2019`).
+
+### 8. Sovereign National Calendar & Live Clock Sovereignty Model
+- **National Sovereignty of Time**: Enterprisewide operations must be anchored to the sovereign country's national time standard and calendar system.
+- **Ethiopian Instance (`ET`)**: Uses the Ethiopic Solar Calendar (Ge'ez months, Ethiopic year, 13 months) + East Africa Time (`Africa/Addis_Ababa`, UTC+3) + traditional 12-hour cycle with day/night offset starting at dawn (06:00). Confusing Latin era markers (`ERA1`, `AM`) must be stripped.
+- **Kenyan Instance (`KE`)**: Uses Kenyan National Calendar (Swahili / English) + East Africa Time (`Africa/Nairobi`, UTC+3).
+- **Live Monospace Clock Digit Protection**: All live digital clock elements (`00:00:00`) MUST be protected against vertical character wrapping with `flex-nowrap whitespace-nowrap shrink-0`. Live time digits must NEVER be allowed to break or wrap vertically into a column under constrained container widths.
+- **Anti-Duplication UI Law**: A page or header MUST NEVER render duplicate instances of sovereign calendar dates (e.g. mounting a standalone date pill right next to a clock that already displays the date). A unified, single Sovereign Clock & Calendar card must be used.
+
+### 9. Dual Tax / VAT Controllability & Exempt Purchasing Framework
+- **National Tax Gating**: In emerging East African markets, enterprises purchase both from formal VAT-registered corporate vendors and informal smallholders/farmers (exempt from VAT or non-registered). Similarly, specific retail goods, basic foodstuffs, or promotional channels may be tax-exempt.
+- **Mandatory Independent Toggles**: Tax calculation on purchases (`taxOnPurchasing`) and sales (`taxOnSelling`) MUST be individually configurable per country in `SystemConfig`.
+- **Zero Hardcoded Taxing**: PO creation, vendor receiving, and POS checkout MUST check these country toggles before applying or calculating VAT/tax.
+
+### 10. Header Ergonomics & Heavy Action Hierarchy
+- **Lean Operational Control Rooms**: Central Operations, POS Command, and WMS dashboard headers represent live operational control rooms.
+- **Dedicated Telemetry Bar**: Top operational bars must remain lean and dedicated to live telemetry, search/filters, active shift indicators, and sovereign time.
+- **Bottom Suite Placement**: Heavy action buttons (e.g., "Get App (macOS)", "Executive Quarterly Export", "Mass CSV Import") MUST NOT clutter top navigation bars; they must be positioned in dedicated bottom operational suites, footers, or action drawers.
+
+### 11. Floor Worker Interchangeability & Delivery Lockdown Law
+- **Floor Worker Interchangeability**: Internal warehouse/store floor jobs (`PICK`, `PACK`, `RECEIVE`, `PUTAWAY`, `COUNT`, `TRANSFER`, `REPLENISH`, `WASTE`, `RETURNS`, `LABELS`) are 100% cross-functional across all floor staff (`picker`, `packer`, `receiver`, `inventory_specialist`, `forklift_operator`, `stock_clerk`). Any floor worker can perform any floor job regardless of their primary role title.
+- **Driver Floor Capabilities**: Verified drivers (`driver`) can ALSO perform all internal floor jobs in addition to their transit duties.
+- **Strict Delivery Lockdown**: Floor workers (`picker`, `packer`, `receiver`, etc.) CANNOT perform, accept, or be assigned to external delivery missions (`DRIVER`, `DELIVERY`, `DISPATCH`). Only verified drivers (and authorized dispatch leadership) may be assigned or accept delivery jobs.
+- **Automated Guardrails**: Auto-assignment algorithms, manual assignment selectors, and mission boards must strictly enforce this boundary with clear rejection alerts.
+
+### 12. Chain of Custody & Acceptance Responsibility Law ("You Inspect Before You Accept. The Moment You Accept, You Own It")
+- **Custody Transfer Principle**: When transferring goods between nodes (DC to branch, branch to branch, supplier to DC), custody is strictly transferred only upon explicit physical inspection and dual digital sign-off.
+- **The Golden Custody Rule**: *"You inspect before you accept. The moment you accept, you own it."* Once a receiving worker accepts a transfer or load without noting discrepancies on the manifest, any subsequent shortage, damage, or discrepancy discovered later becomes the direct liability and accountability of the accepting party.
+- **Digital Dual-Handshake**:
+  - For clean shipments (zero discrepancy): The receiver signs certifying receipt of all items in good condition.
+  - For shipments with variances (shortage, damage, surplus): Both the delivering driver and the receiving custodian MUST co-sign the discrepancy log. The driver co-signs acknowledging the items were damaged or missing upon handover.
+- **Gamification Accuracy & Discrepancy Penalties**: Any discrepancy (shortage, damage) verified during receiving triggers an automated accuracy penalty event (`CHAIN_OF_CUSTODY_DISCREPANCY`). The system calculates the discrepancy severity percentage and applies a proportional penalty to the responsible party's warehouse accuracy score and national leaderboard points.
+- **Immutable Audit Trail**: All custody handshakes, whether clean or contested, log immutable records (`CHAIN_OF_CUSTODY_HANDSHAKE` / `CHAIN_OF_CUSTODY_DISCREPANCY`) to `system_logs` including transfer ID, driver ID, receiver ID, site ID, items verified, conditions, and timestamps.
+
+### 13. Non-Alcoholic / Halal Catalog Compliance Law
+- **Strict Prohibition of Alcohol & Liquor**: SIIFMART operates strictly as an alcohol-free, halal-compliant enterprise. We do NOT sell liquor, beer, wine, spirits, or alcoholic beverages under any circumstances.
+- **Zero Liquor in Category Taxonomy**: The product catalog and category taxonomy must NEVER contain liquor, beer, wine, or spirits categories. Any legacy data must be automatically sanitized and remapped to non-alcoholic categories (e.g. `Beverages`).
+- **Zero Liquor in Examples, Mock Data & SOPs**: Developers, agents, and administrators must NEVER use liquor, beer, wine, or spirits as examples in documentation, SOPs, cycle count risk tiers, test cases, or mock databases. High-value / high-shrink examples must strictly use commodities like cooking oil, infant milk formula, premium coffee/tea, honey, electronics, cosmetics, or fresh meat.
+
+### 14. Manager & Supervisory Accountability Law ("The Captain Owns the Ship")
+- **Supervisory Co-Liability Doctrine**: Frontline workers do not operate in a vacuum. Under the "Captain Owns the Ship" doctrine, managers and shift supervisors bear joint accountability for all variances, overrides, and shrinkage occurring on their shift or under their supervisory stamp.
+- **Immutable Supervisory Footprint**: Every supervisory action (price override, line void, drawer kick, refund approval, job reassignment, PO approval) must capture:
+  - `managerId` / `managerEmployeeId`
+  - `managerName` & `managerRole`
+  - Mandatory structured `reasonCode` (free-text or blank overrides are computationally prohibited)
+  - `terminalId`, `deviceFingerprint`, `gpsCoordinates`, and server timestamp
+- **Shift Variance Co-Sign Mandate**: When a cashier closes a drawer with an unverified cash variance (> 20 ETB / 50 KSh), the on-duty shift supervisor MUST co-sign the discrepancy log. Unexplained shift variances directly penalize the supervisor's leadership integrity score.
+- **Override Velocity Gating**: Excessive supervisory override frequency (> 3% of store shift transactions) automatically triggers a Central HQ Loss Prevention audit flag to detect potential cashier-supervisor collusion or sweethearting.
+- **Anti-Collusion Separation of Duties (4-Eyes Check)**: Managers cannot approve POs, expenses, or stock adjustments that they personally originated or counted. All store-level stock adjustments remain strictly gated to Central HQ Audit review via `inventory_requests`.
+
+### 15. Universal English UI & Neutral Sovereignty Law
+- **Zero Local Dialect Bleed in English**: Under no circumstances may Ethiopian-specific administrative or cultural terms (such as `Kebele`, `Woreda`, etc.) be hardcoded into universal English UI labels, placeholders, tooltips, or form fields.
+- **Universal International Terminology**: Universal English UI elements must strictly use international, neutral terms (e.g. `National ID / Passport Number`, `Residential Address`, `Street, Building, Apt / House No.`).
+- **Strict Translation Gating**: Ethiopian administrative and cultural terms must ONLY appear when the active language is an Ethiopian national language (`am` for Amharic, `or` for Afaan Oromoo via `useLanguage()`) or when data is explicitly partitioned and displayed under the Ethiopian national instance (`ET`).
+
+### 16. Mandatory Apple Minimalist & Liquid Glass Design Standard (Total Omnipresence Across Every Single Element)
+- **The October 2026 Apple Formula (macOS 27 / iOS 27 baseline)**: Every interface in the system must strictly embody Apple's latest cross-platform design standard: **SF typography + generous whitespace + edge-to-edge content + Liquid Glass controls + restrained semantic colour + layered SF-style icons + rounded geometry + subtle depth + responsive motion**. Interfaces must feel calm, purposeful, uncluttered, and museum-grade.
+- **Content-First Architectural Hierarchy**: The interface follows a strict structural priority: `CONTENT → STRUCTURE → NAVIGATION → CONTROLS → DECORATION` (never `Cards → Borders → Shadows → Gradients → Content`). The interface must NEVER look like a cluttered "collection of boxes" or card traps. Contrast is established through typography, generous negative space, and edge-to-edge content, not by boxing every paragraph, metric, or row into a card container.
+- **The 70 / 20 / 8 / 2 Golden Ratio Colour Philosophy**:
+  - **70% Neutral Foundation**: Background canvas (OLED `#000000` in dark mode, Apple `#F5F5F7` in light mode).
+  - **20% Surfaces & Structure**: Content surfaces, panels, and structural tones (pure OLED `#000000` or deep onyx `#1D1D1F` in dark; pure white `#FFFFFF` in light). Strictly zero muddy gray cards (`#1C1C1E` / `#2C2C2E`).
+  - **8% Text & Structural Contrast**: High-contrast typography (`#F5F5F7` primary in dark, `#1D1D1F` in light) and 1px crisp hairlines (`rgba(255,255,255,0.08)` in dark, `rgba(0,0,0,0.08)` in light).
+  - **2% Restrained Accent Colour**: Accent color (`#0071E3` in light / `#2997FF` in dark) is used sparingly for primary actions, selected navigation items, active indicators, and status badges. Never flood the interface with accent colors.
+- **Restrained Semantic Colour Mapping**:
+  - Primary / Interactive: Accent Blue (`#0071E3` / `#2997FF`)
+  - Success: Green (`#34C759`)
+  - Warning: Orange/Amber (`#FF9500`)
+  - Destructive: Red (`#FF3B30`)
+  - Attention / Caution: Yellow (`#FFCC00`)
+  - Special Category: Purple (`#AF52DE`)
+  - Secondary / Utility: System Gray (`#86868B` / `#8E8E93`)
+- **Liquid Glass Materials & Three-Tiered Hierarchy ("Glass Isn't Everywhere")**:
+  - Liquid Glass is a dynamic material combining optical glass properties, fluidity, translucency, blur, refraction, specular lighting, and dynamic tinting.
+  - **Tier 1: Glass Clear** (Opacity ~0.25–0.35, `blur(16px)`): Used for floating toolbars, subtle topbars, and minimal floating navigation.
+  - **Tier 2: Glass Standard** (Opacity ~0.45–0.60, `blur(24px) saturate(180%)`, hairline border `rgba(255,255,255,0.12)`, specular highlight pseudo-element `linear-gradient(180deg, rgba(255,255,255,0.12), rgba(255,255,255,0))`): Used for sidebars, floating control clusters, and search pills.
+  - **Tier 3: Glass Strong** (Opacity ~0.65–0.80, `blur(32px) saturate(180%)`, soft elevation shadow): Used for modal sheets, popovers, and critical action overlays.
+  - **Judicious Glass Rule**: Glass belongs strictly to functional floating layers (navigation, toolbars, search pills, floating controls, sidebars, modal sheets). Do NOT make every card, table, or section into glass.
+- **Tonal Depth Hierarchy**: Level 0 (Canvas) → Level 1 (Content Surface) → Level 2 (Elevated / Glass Controls) → Level 3 (Modal / Floating Sheet).
+- **Subtle Elevation Shadows**: Low opacity, large blur, low spread ("subtle floating elevation", never harsh drop-shadows): Small (`0 2px 8px`), Medium (`0 8px 30px`), Floating (`0 16px 50px`), Modal (`0 24px 80px`).
+- **Standardized Corner Radii System**: `--radius-xs: 6px` (indicators/tags); `--radius-sm: 10px` (inputs/small chips); `--radius-md: 14px` (buttons/small cards); `--radius-lg: 18px` (content cards); `--radius-xl: 22px` (glass panels/containers); `--radius-2xl: 28px` (modals/floating sheets); `--radius-pill: 999px` (pills, badges, search pills).
+- **Typography Scale & Negative Letter-Tracking Physics**:
+  - Font Stack: `system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", sans-serif`.
+  - Hierarchy & Tracking: Display (56px, line-height 1.05, weight 700, tracking `-0.035em`), Large Title (40px, line-height 1.1, weight 700, tracking `-0.025em`), H1 (32px, line-height 1.15, weight 700, tracking `-0.02em`), H2 (26px, line-height 1.2, weight 650, tracking `-0.015em`), H3 (21px, line-height 1.25, weight 600), Body Large (17px, line-height 1.45, weight 400), Body (15–16px, line-height 1.45, weight 400, tracking `0`), Small (13px, line-height 1.35, weight 400), Caption/Micro (11–12px, line-height 1.3, weight 500/600, tracking `+0.01em`).
+  - Monospace & Tabular Numerals: Monospace SF Mono and `font-variant-numeric: tabular-nums` (`tabular-nums`) for currency, prices, stock counts, quantities, KPIs, timestamps, and sovereign clocks.
+- **Spacing Scale & Generous Whitespace Standard**: 4px base grid (`--space-1: 4px` to `--space-16: 64px`). Enforce generous negative space (1.5x–2x typical SaaS density). Give content room to breathe; avoid crowding elements.
+- **Natural Apple Spring Motion Physics**: `--ease-apple: cubic-bezier(0.2, 0.8, 0.2, 1)`, Fast (120ms), Normal (200ms), Slow (320ms), tactile compression on click (`active:scale-[0.98]`). Motion communicates physical location without loud distraction; strictly respects `prefers-reduced-motion`.
+- **Component Ergonomics & Hierarchy**:
+  - **44px Control Baseline**: Inputs and primary buttons enforce 44px standard height (SM: 36px, MD: 44px, LG: 52px). Inputs use 16px font to prevent mobile zoom and focus ring `outline: 2px solid var(--theme-accent); outline-offset: 1px;`.
+  - **Button Hierarchy**: Exactly ONE primary action per screen (solid high-contrast pill: `#FFFFFF` in dark, `#1D1D1F` in light), neutral secondary surfaces, and tertiary ghost text ("Cancel").
+  - **KPI Cards**: Strictly ZERO rainbow gradient backgrounds behind KPI cards. Standard structure: 13px uppercase label, 32–40px bold tabular numeral, 13–14px semantic delta badge, 12–13px supporting context.
+  - **Spacious Tables**: Clean and spacious with 48–56px row height, generous padding, hairline separators, tabular numbers for currency and stock counts, zero rainbow badges.
+  - **macOS 27 Navigation Sidebar**: 240px width, 12px padding, 40–44px item height, 10–12px radius. Selected item uses subtle surface + accent text/icon (never a solid blue block). Icons adopt distinctive domain-specific semantic tinting (blue for dashboard, emerald for orders, amber for products, purple for settings).
+- **The 10-Point "Apple Test" Audit Checklist**: Before approving ANY UI component, screen, or workflow, verify:
+  1. Is the content the visual priority?
+  2. Could I remove a border?
+  3. Could I remove a card? (Eliminate "collection of boxes")
+  4. Could I reduce the colour? (Enforce 70/20/8/2 ratio)
+  5. Could I simplify the icon?
+  6. Does the spacing feel generous? (1.5x–2x standard SaaS spacing)
+  7. Does the hierarchy work without decoration?
+  8. Is the glass actually serving a functional purpose? (Judicious glass rule)
+  9. Does dark mode feel intentionally designed? (Independent tonal hierarchy, not simple inversion)
+  10. Does it still work without animation?
+- **Enterprise Retail & WMS Synthesis Doctrine**: We do not create an ornamental consumer marketing page; we synthesize Apple 2026 visual language with serious enterprise retail & WMS information architecture (dense operational tables, bin locations, SKU tracking, FEFO batch expiry, operational badges, hardware barcode scanners, and fast filters). Low-end mobile constraints (stripping GPU blurs) remain strictly quarantined to frontline warehouse workers in Fulfillment.
+- **The 12 Aesthetic Anti-Patterns (Strictly Prohibited)**:
+  1. ❌ Excessive gradients (purple → pink → orange, glow blobs)
+  2. ❌ Excessive glass (glass card inside glass card inside glass card)
+  3. ❌ Heavy / thick borders (> 1px)
+  4. ❌ Harsh dark drop-shadows
+  5. ❌ Tiny unreadable text (< 11px)
+  6. ❌ Rainbow palettes (20 different colours on one screen)
+  7. ❌ Every element being rounded arbitrarily
+  8. ❌ Excessive pills everywhere
+  9. ❌ Every item trapped inside a card container ("collection of boxes")
+  10. ❌ Generic dashboard gradients behind KPI cards
+  11. ❌ Muddy gray cards (`#1C1C1E` / `#2C2C2E`)
+  12. ❌ Neumorphism or 2020 glassmorphism
+
+### 17. Mandatory Low-End Mobile Performance & Warehouse Ergonomics Standard (Strictly Confined to Fulfillment)
+- **Strict Domain Scoping (Fulfillment Only)**: Low-end mobile performance constraints, RAM optimizations, animation restrictions, and GPU blur stripping are STRICTLY CONFINED to the Fulfillment domain (`pages/Fulfillment.tsx` and `components/fulfillment/`). Frontline warehouse workers (pickers, packers, receivers) operate on low-cost entry-level Android devices ($50–$100, 2GB–3GB RAM, budget Mali/PowerVR GPUs e.g. Tecno Pop/Spark, Infinix Smart/Hot, Itel, Samsung Galaxy A03/A04). In ALL other domains — POS, POS Command, Administration, Central Operations, Financials, Procurement, Inventory, HR, and Settings — our full October 2026 Apple Liquid Glass & aesthetic applies without restriction.
+- **Zero GPU Blur Penalties in Fulfillment Mobile Viewports**: `backdrop-filter: blur()` and heavy RAM-intensive animations are strictly stripped in Fulfillment mobile viewports (`@media (max-width: 768px)`) and replaced with fast, solid opaque surfaces (`#161617` or `#FFFFFF`) to maintain silky smooth 60 FPS scrolling and instantaneous scanning response.
+- **Warehouse Floor Ergonomics**:
+  - Minimum 48×48px tap targets for all buttons, inputs, and list rows.
+  - `touch-action: manipulation` across all interactive elements to eliminate the 300ms mobile tap delay.
+  - High-contrast monospace typography for critical barcodes, bin locations, and quantities to ensure legibility under harsh direct warehouse lighting.
+
+### 18. Mandatory Zero-Hardcoded Aesthetic & Semantic Tokenization Standard
+- **Zero Raw Aesthetic Hardcoding**: Whenever possible, developers and AI assistants must strictly avoid hardcoding any visual or aesthetic values directly into UI components.
+  - No hardcoded raw color hex codes (e.g. `#000000`, `#1D1D1F`, `#FAF7F2`, `#252525`).
+  - No hardcoded font family strings or ad-hoc typography scales.
+  - No hardcoded card surface backgrounds, static panel colors, or fixed border strokes.
+  - No scattered box shadows or ad-hoc border radii.
+- **Centralized Semantic Token Dictum**: ALL visual aesthetics MUST be driven exclusively by the semantic design token architecture in `styles/theme.css`:
+  - Canvas & Wallpaper: `var(--theme-bg-app)`
+  - Window Chrome & Panels: `var(--theme-bg-panel)`
+  - Content Cards & Tables: `var(--theme-bg-card)`, `var(--theme-bg-card-hover)`
+  - Subtles & Wells: `var(--theme-bg-subtle)`
+  - High-Contrast CTAs: `var(--theme-primary)`, `var(--theme-primary-hover)`, `var(--theme-primary-text)`
+  - Typography: `var(--theme-text-primary)` (primary title/body), `var(--theme-text-secondary)` (subtitles/labels), `var(--theme-text-muted)` (captions/metadata)
+  - Hairlines: `var(--theme-border)`, `var(--theme-border-subtle)`, `var(--theme-border-focus)`
+  - System Accents: `var(--theme-accent)`, `var(--theme-accent-hover)`, `var(--theme-accent-muted)`
+- **Effortless Enterprise Rebranding**: Strict adherence to this rule guarantees that any future brand evolution, aesthetic redesign (e.g. switching between design themes or adjusting contrast for sunlight readability), or font update is completed instantly from `styles/theme.css` without touching hundreds of individual TSX files.
+
+### 19. Mandatory Zero-Emoji & Professional Vector Iconography Standard (SF Symbols Philosophy)
+- **Zero Raw Unicode Emojis**: Under no circumstances may raw Unicode emojis (e.g. `⚠️`, `🔒`, `•`, `✅`, `❌`, `🎉`, `📦`, `🏷️`, `⚖️`, `⚡️`) be used in UI text strings, labels, badges, buttons, alerts, toasts, modals, or tables.
+- **Cross-Platform Visual Integrity**: Unicode emojis render inconsistently across operating systems (iOS vs Android vs Linux vs Windows) and impart an amateurish, toy-like appearance to enterprise retail software.
+- **Standardized Vector Iconography**: All iconography MUST be implemented using crisp, standardized Lucide React SVG vector icons matching SF Symbols optical weight and geometry:
+  - Sizing Tokens: `w-3.5 h-3.5` (14px) for inline text and compact status pills; `w-4 h-4` (16px) for standard interactive buttons and inputs; `w-5 h-5` (20px) for page headers and primary nav tabs; `w-6 h-6` (24px+) for modals and hero sections.
+  - Stroke Weight Harmonization: `strokeWidth={1.5}` or `strokeWidth={2}` consistently across all icons.
+  - Semantic Color Restraint & Sidebar Tinting: Utility icons inherit text color or use restrained semantic tinting (`text-emerald-500`, `text-amber-500`, `text-rose-500`, `text-[var(--theme-text-secondary)]`). In navigation sidebars, icons adopt distinctive domain-specific semantic tinting (macOS 27 pattern: blue for dashboard, emerald for orders, amber for products, purple for settings). Always include `shrink-0` to avoid SVG distortion in flex containers.
+
+### 20. Mandatory Universal Theme & Aesthetic Application Across All Domains
+- **No Domain Silos for Aesthetics**: Whenever ANY file, component, workflow, hook, service, or modal is created, edited, reviewed, or audited — regardless of domain (Procurement, Financials, WMS, POS, HR, Central Ops, Settings, etc.) — you MUST actively verify whether our themes and October 2026 Apple minimalist & Liquid Glass aesthetic are properly, fully, and strictly applied there.
+- **Simultaneous Functional & Visual Audit**: For example, when checking how procurement purchase orders, receiving splits, or vendor relations operate, the AI must NOT stop at functional logic; it MUST simultaneously audit whether procurement's tables, cards, inputs, status pills, action buttons, and modals consume semantic theme tokens (`var(--theme-*)`), enforce zero gradients, eliminate unapproved blurs (blurs allowed only for judicious Liquid Glass navigation/modals, strictly zero blurs in mobile fulfillment), contain zero raw Unicode emojis, and use professional vector icons. No functional task or review is complete without verifying total theme compliance in that touched domain.
+
+### 21. Mandatory 6-Month Autonomous Apple Aesthetic Re-Alignment Cycle
+- **Synchronized Bi-Annual Modernization**: The design system, semantic design tokens (`styles/theme.css`), component motion physics, and typography hierarchy MUST be reviewed, audited, and modernized every 6 months to re-align with Apple's absolute latest design language (synchronized with Apple's bi-annual design updates, e.g. June WWDC and September/October OS releases like iOS/iPadOS 27 and macOS 27).
+- **Self-Updating Aesthetic Standard**: The rules automatically enforce that every 6 months, all components are re-evaluated against the latest Apple macOS/iOS aesthetic standard — ensuring that corner radiuses, spring animations, surface layers, system gray palettes, and typography tracking never degrade or lag behind Apple's newest design standards.
+- **Zero Aesthetic Drift**: Any visual patterns that fall behind Apple's current design standard must be refactored into the updated tokens.
+
+---
+
+## Synaptic Neural Mesh Architecture: Deep Interconnection & Reactive Propagation Model
+
+> **Operating Philosophy**: A distributed retail enterprise and supply chain is a single living organism, not a disjointed archipelago of software silos.
+> **Core Principle**: **"Everything is Connected to Everything"**. Just like a biological neural network where an action potential in one neuron stimulates and depolarizes connected synapses to fire and adapt, EVERY business event, transaction, mutation, and operational threshold in SIIFMART must propagate ripple effects across all interconnected operational domains to extract the maximum intelligence and performance out of the system.
+
+### 1. The 5 Foundational Laws of the Synaptic Neural Mesh
+1. **Zero Isolated Operational Silos (The Synaptic Law)**:
+   - No module (POS, Inventory, WMS, Procurement, Financials, Employees, Central Operations) may execute a mutation in isolation as a dead-end database write.
+   - Every mutation MUST stimulate its downstream connected neural synapses (updating inventory, triggering replenishment, posting to financial ledgers, awarding gamification scores, and pulsing executive telemetry).
+2. **The Synaptic Signal Cascade Map**:
+   - **Synapse Alpha: Point of Sale (POS) → Downstream Cascade**:
+     - *Neuron Event: Sale / Checkout Completed* →
+       - → **Inventory**: Immediate depletion of discrete sellable units + automated FEFO (First-Expired, First-Out) lot/batch deduction. If stock breaches the safety threshold, immediately fires a replenishment reorder trigger.
+       - → **Fulfillment & WMS**: Automatically enqueues internal branch transfer or warehouse replenishment pick job.
+       - → **Financials & Accounting**: Real-time gross profit margin accrual, tax ledger posting, digital tender breakdown (Telebirr/CBE Birr/M-Pesa), and immediate update to the cashier's expected shift drawer balance.
+       - → **Workforce & Gamification**: Credits cashier accuracy and volume points; boosts branch team score on the national leaderboard.
+       - → **Central Operations**: Pulses real-time revenue velocity charts, updates active daily KPIs, and decrements stock health counters.
+   - **Synapse Beta: Procurement & DC Receiving → Downstream Cascade**:
+     - *Neuron Event: Purchase Order Delivered & Blind QC Verified at DC* →
+       - → **Inventory**: Batch ingestion with manufacturing/expiry dates; recalculates Moving Average Landed Cost (Base Cost).
+       - → **Pricing & Merchandising**: Evaluates margin protection (Landed Cost + Target Margin % vs Base Retail Shelf Price); initializes perishable markdown countdown ladders.
+       - → **Cross-Docking & Logistics**: Immediately releases pending branch transfer backorders (cross-docking freight directly from receiving to outbound staging).
+       - → **Financials**: Creates Accounts Payable accrual, verifies 3-way match (PO vs Receiving Slip vs Vendor Invoice).
+       - → **Central Operations**: Clears inbound shipment alerts, updates Network Asset Value at Cost and Retail.
+   - **Synapse Gamma: Stock Discrepancies & Audits → Downstream Cascade**:
+     - *Neuron Event: Cycle Count Variance or Shrinkage Logged* →
+       - → **Zero-Trust Oversight**: Freezes autonomous write-offs; routes adjustment to `inventory_requests` for HQ approval.
+       - → **Financials**: Provisions pending shrinkage write-off reserve.
+       - → **Audit & Security**: Captures GPS coordinates, device ID, and employee ID to `system_logs`; recalculates picker/store accuracy rating.
+       - → **Central Operations**: Triggers Critical Alert digest in the Executive Command Deck.
+   - **Synapse Delta: Shift Closing & Cash Drops → Downstream Cascade**:
+     - *Neuron Event: Cashier Shift End / EOD Z-Report* →
+       - → **Financial Reconciliation**: Real-time variance comparison between counted physical tender and calculated system balance.
+       - → **HQ Audit Desk**: Pushes directly to the Daily HQ Cash Reconciliation table for Finance sign-off.
+       - → **Gamification & HR**: Evaluates shift targets and grants shift completion rewards.
+3. **Cybernetic Backpropagation & Adaptive Feedback Loops**:
+   - Downstream operational outcomes must feed back into upstream decision-making:
+     - Customer returns or perishable spoilage in Retail Stores feed back into Vendor Quality Scorecards in Procurement and Putaway climate/zone assignments in WMS.
+     - Cashier scan velocity and void anomalies feed back into dynamic fraud scoring and dual-control approval requirements.
+     - Out-of-stock velocities and cycle count variances feed back into AI demand forecasting models and dynamic safety stock buffer adjustments.
+4. **The Sovereign Myelin Sheath (National Blood-Brain Barrier)**:
+   - While the neural network is ultra-dense, reactive, and interconnected *within* each sovereign country (`ET` or `KE`), it is strictly insulated at national borders.
+   - Synapses and signals MUST NEVER bleed across countries. Under no circumstances does a Kenyan POS sale adjust Ethiopian inventory or trigger an Ethiopian reorder signal. The neural mesh is 100% intra-country; international transfers require formal customs clearance.
+5. **Circuit Breakers & Anti-Storm Cascade Protection**:
+   - To prevent feedback storms and infinite event recursion (Neuron A triggering B triggering A), all synaptic handlers must be idempotent, debounced, and protected by correlation cycle-detection guards.
 
 ---
 
@@ -266,13 +482,24 @@ import { ROLES } from '../constants';
 <div style={{ width: `${percentage}%` }} />
 ```
 
-### Design Tokens (Sand / Emerald / Amber)
-- Primary Green: `#2C5E3B` (dark), `#A9CBA2` (light accent)
-- Sand/Warm: `#EAE5D9` (light bg), `#1E3F27` (dark text), `#E2DCCE` (light border)
-- Accent Amber: `amber-600` (light mode), `amber-500` (dark mode)
-- Dark Mode BG: `#18201B`, borders: `emerald-950/20`
-- Glassmorphism: `backdrop-blur-xl` with semi-transparent backgrounds
-- Light cards: `bg-white/85`, Dark cards: `bg-[#18201B]/65`
+### Design Tokens (Apple Liquid Glass & Pure Contrast Architecture)
+- Centralized semantic tokens defined in `styles/theme.css`:
+  - Canvas & Wallpaper: `var(--theme-bg-app)`
+  - Window Chrome & Panels: `var(--theme-bg-panel)`
+  - Content Cards & Tables: `var(--theme-bg-card)`, `var(--theme-bg-card-hover)`
+  - High-Contrast CTAs: `var(--theme-primary)`, `var(--theme-primary-hover)`, `var(--theme-primary-text)`
+  - Typography: `var(--theme-text-primary)`, `var(--theme-text-secondary)`, `var(--theme-text-muted)`
+  - Hairlines: `var(--theme-border)`, `var(--theme-border-subtle)`, `var(--theme-border-focus)`
+  - Corner Radii: `--radius-xs` (6px), `--radius-sm` (10px), `--radius-md` (14px), `--radius-lg` (18px), `--radius-xl` (22px), `--radius-2xl` (28px), `--radius-pill` (999px)
+  - Spacing Scale: `--space-1` (4px) through `--space-16` (64px) on a 4px base grid
+  - Control Sizing: `--control-height-sm` (36px), `--control-height-md` (44px), `--control-height-lg` (52px)
+  - Motion & Easing: `--ease-apple` (`cubic-bezier(0.2, 0.8, 0.2, 1)`), `--duration-fast` (120ms), `--duration-normal` (200ms), `--duration-slow` (320ms)
+  - Soft Shadows: `--shadow-sm`, `--shadow-md`, `--shadow-lg`, `--shadow-modal`
+  - Liquid Glass 3 Tiers: Clear (`.glass-clear`), Standard (`.glass-standard`), Strong (`.glass-strong`)
+- Dark Mode Canvas: Level 0 Canvas — OLED `#000000` dark / Apple `#F5F5F7` light
+- Pure Contrast Surfaces: Dark mode uses pure OLED black surfaces (`#000000`) or deep onyx (`#1D1D1F`) with crisp 1px hairline borders (`rgba(255,255,255,0.08)`); Light mode uses pure white cards (`#FFFFFF`) with subtle hairline borders (`rgba(0,0,0,0.08)`). Strictly zero muddy gray cards (`#1C1C1E` / `#2C2C2E`).
+- Judicious Liquid Glass: Used selectively for navigation bars, toolbars, search pills, sidebars, segmented controls, and modal sheets (not everywhere).
+- Scope of Hardware Overrides: Low-end mobile performance constraints (stripping GPU blurs, restricting RAM/animations, solid opaque surfaces) are STRICTLY CONFINED to the Fulfillment domain (`pages/Fulfillment.tsx` and `components/fulfillment/`). In POS, POS Command, Administration, and all other domains, our full Apple Liquid Glass aesthetic applies completely.
 
 ---
 
@@ -669,7 +896,7 @@ When editing or creating any file, the AI MUST:
 - ❌ Don't silently swallow errors with empty catch blocks
 - ❌ Don't spread full objects into Supabase `update()` — use explicit allowlists
 - ❌ Don't add a TypeScript field without updating the service mapper (read) and allowlist (write)
-- ❌ Don't use the old `cyber-*` design tokens — use the sand/emerald/amber palette
+- ❌ Don't use legacy palettes (cyber-*, sand/emerald/amber) — enforce our authentic October 2026 Apple aesthetic across POS, Administration, and all non-fulfillment domains
 - ❌ Don't mix data or KPIs across countries (e.g. never display Ethiopian metrics on a Kenyan dashboard)
 - ❌ Don't auto-convert retail shelf prices between countries using live exchange rates
 - ❌ Don't allow non-CEO staff to view or switch to another country (enforce branch lockdown)
@@ -683,5 +910,20 @@ When editing or creating any file, the AI MUST:
 - ❌ Don't expose tenancy selection or multi-tenant mechanics to non-CEO branch users (the application must render seamlessly as a native national platform)
 - ❌ Don't require users to manually target a country when configuring settings — the system must automatically bind and isolate settings per active country in the background
 - ❌ Don't create or modify SQL migrations without bringing the complete, runnable SQL to the chat for the user to run in Supabase
+- ❌ Don't build isolated operational silos or dead-end mutations — every state change must stimulate its connected neural synapses (inventory, fulfillment, financials, gamification, telemetry) through the event mesh
+- ❌ Don't assign or allow floor workers (pickers, packers, receivers, inventory specialists) to perform delivery missions — deliveries are strictly locked to verified drivers
+- ❌ Don't allow transfer receiving or cargo handovers to bypass the Digital Dual-Handshake, or transfer acceptance without recording discrepancies (unrecorded variances become the accepting custodian's sole liability)
+- ❌ Don't include liquor, alcohol, beer, wine, or spirits as a category, product, mock item, or example anywhere in the system — SIIFMART does NOT sell alcohol
+- ❌ Don't permit anonymous supervisory overrides or untracked managerial approvals — every managerial action must capture authenticated ID, role, and mandatory reason code
+- ❌ Don't use decorative gradients, glow blobs, or multi-color progress bars — enforce Apple minimalist monochrome and solid single-tint accents
+- ❌ Don't use expensive `backdrop-filter: blur()` or heavy animations in Fulfillment mobile viewports — Fulfillment is the only domain where performance overrides apply for low-end hardware
+- ❌ Don't render borders, dividers, or box shadows on top navigation bars that disrupt the seamless single-canvas aesthetic
+- ❌ Don't hardcode aesthetic styling (raw hex colors, font families, static card fills, fixed borders, or shadows) directly in components — always consume centralized semantic theme tokens from `styles/theme.css`
+- ❌ Don't use raw Unicode emojis (e.g. ⚠️, 🔒, •, ✅, ❌, 🎉, 📦, 🏷️, ⚖️, ⚡️) anywhere in the UI — use crisp, standardized Lucide React vector icons with semantic styling
+- ❌ Don't review, create, or edit code in any domain (e.g. Procurement, Financials, WMS, POS, HR) without simultaneously verifying that our October 2026 Apple minimalist & Liquid Glass themes, semantic design tokens, pure contrast architecture, zero gradients, zero unapproved blurs, and zero emojis are fully and properly applied
+- ❌ Don't allow the design system or UI components to drift or lag behind Apple's latest aesthetic standard — re-align and modernize every 6 months without exception
+- ❌ Don't use muddy gray cards (#1C1C1E / #2C2C2E) — enforce Apple's authentic pure contrast architecture (#000000 / #1D1D1F in dark mode, #FFFFFF in light mode)
+- ❌ Don't treat interfaces as a "collection of boxes" or card traps — establish contrast through typography, negative space, and edge-to-edge content
+- ❌ Don't place Liquid Glass materials everywhere — use glass judiciously for navigation bars, toolbars, search pills, sidebars, segmented controls, and modal sheets
 
 

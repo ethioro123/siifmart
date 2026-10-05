@@ -25,13 +25,13 @@ export const ProductLocationBreakdown: React.FC<Props> = ({ product, locationBre
     const formattedTotal = formatStockDisplay(totalStockSum, product);
 
     return (
-        <div className="bg-white dark:bg-black/15 p-5 rounded-2xl border border-stone-200 dark:border-white/5 space-y-4 shadow-sm">
-            <div className="flex items-center justify-between border-b border-stone-100 dark:border-white/5 pb-2">
+        <div className="bg-[var(--theme-bg-card)] p-5 rounded-2xl border border-[var(--theme-border)] space-y-4 shadow-sm">
+            <div className="flex items-center justify-between border-b border-[var(--theme-border)] pb-2">
                 <div className="flex items-center gap-2">
-                    <Building2 size={14} className="text-[#2C5E3B] dark:text-[#A9CBA2]" />
-                    <h3 className="text-[10px] font-black uppercase tracking-wider">Multi-Site & Store Stock Breakdown</h3>
+                    <Building2 size={14} className="text-[var(--theme-text-secondary)]" />
+                    <h3 className="text-[10px] font-bold uppercase tracking-wider">Multi-Site & Store Stock Breakdown</h3>
                 </div>
-                <span className="text-[9px] font-mono font-bold px-2 py-0.5 rounded-full bg-[#2C5E3B]/10 text-[#2C5E3B] dark:text-[#A9CBA2]">
+                <span className="text-[9px] font-mono font-bold px-2 py-0.5 rounded-full bg-[var(--theme-pill-bg)] text-[var(--theme-text-primary)] border border-[var(--theme-pill-border)]">
                     {formattedTotal} Across {locationBreakdown.length} {locationBreakdown.length === 1 ? 'Location' : 'Locations'}
                 </span>
             </div>
@@ -41,21 +41,21 @@ export const ProductLocationBreakdown: React.FC<Props> = ({ product, locationBre
                         key={i}
                         className={`p-3 rounded-xl border flex items-center justify-between ${
                             loc.isCurrentSite
-                                ? 'bg-[#2C5E3B]/5 border-[#2C5E3B]/20 dark:bg-[#A9CBA2]/10 dark:border-[#A9CBA2]/20'
-                                : 'bg-stone-50/50 dark:bg-black/10 border-stone-200/50 dark:border-white/5'
+                                ? 'bg-[var(--theme-pill-bg)] border-[var(--theme-pill-border)]'
+                                : 'bg-[var(--theme-bg-subtle)] border-[var(--theme-border)]'
                         }`}
                     >
                         <div className="min-w-0 pr-2">
                             <div className="flex items-center gap-1.5">
-                                <span className="text-xs font-black text-gray-900 dark:text-white truncate">{loc.siteName}</span>
+                                <span className="text-xs font-semibold text-[var(--theme-text-primary)] truncate">{loc.siteName}</span>
                                 {loc.isCurrentSite && (
-                                    <span className="text-[8px] font-extrabold uppercase px-1.5 py-0.2 rounded bg-[#2C5E3B] text-white">This Store</span>
+                                    <span className="text-[8px] font-bold uppercase px-1.5 py-0.5 rounded bg-[var(--theme-primary)] text-[var(--theme-primary-text)]">This Store</span>
                                 )}
                             </div>
-                            <p className="text-[10px] font-mono text-gray-500 mt-0.5 truncate">Shelf / Bin: {loc.location}</p>
+                            <p className="text-[10px] font-mono text-[var(--theme-text-muted)] mt-0.5 truncate">Shelf / Bin: {loc.location}</p>
                         </div>
                         <div className="text-right shrink-0">
-                            <p className={`text-xs font-black font-mono ${loc.stock > 0 ? 'text-green-600 dark:text-green-400' : 'text-red-500'}`}>
+                            <p className={`text-xs font-bold font-mono ${loc.stock > 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-500'}`}>
                                 {formatStockDisplay(loc.stock, product)}
                             </p>
                         </div>

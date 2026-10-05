@@ -2,6 +2,7 @@ import { supabase } from '../lib/supabase';
 import type { Employee } from '../types';
 import type { Country } from '../utils/localization';
 import { getRoleHierarchy } from '../utils/roles';
+import { formatEmployeeCode, parseEmployeeCode, normalizeCountryCode } from '../utils/employeeIdGenerator';
 
 export interface EmployeeFilters {
     role?: string;
@@ -36,6 +37,9 @@ interface RawDbEmployee {
     login_history?: unknown[];
     address?: string;
     emergency_contact?: string;
+    age?: number;
+    date_of_birth?: string;
+    national_id_number?: string;
     [key: string]: unknown;
 }
 
@@ -56,6 +60,9 @@ function mapDbEmployeeToEmployee(e: RawDbEmployee): Employee {
         joinDate: e.join_date || (e.created_at ? e.created_at.split('T')[0] : e.created_at) || 'N/A',
         performanceScore: e.performance_score ?? 0,
         attendanceRate: e.attendance_rate ?? 0,
+        age: e.age !== undefined && e.age !== null ? Number(e.age) : undefined,
+        dateOfBirth: (e.date_of_birth || e.dateOfBirth) as string,
+        nationalIdNumber: (e.national_id_number || e.nationalIdNumber) as string,
         lastLoginGps: e.last_login_gps,
         last_login_gps: e.last_login_gps,
         lastLoginAt: e.last_login_at,
@@ -123,7 +130,7 @@ export const employeesService = {
 
         // Search
         if (searchTerm) {
-            query = query.or(`name.ilike.%${searchTerm}%,email.ilike.%${searchTerm}%,phone.ilike.%${searchTerm}%`);
+            query = query.or(`name.ilike.%${searchTerm}%,email.ilike.%${searchTerm}%,phone.ilike.%${searchTerm}%,code.ilike.%${searchTerm}%`);
         }
 
         const { data: allIds, error: idError, count } = await query;
@@ -187,30 +194,28 @@ export const employeesService = {
         return mapDbEmployeeToEmployee(data as RawDbEmployee);
     },
 
-    async getNextCode(): Promise<string> {
-        let maxCodeNumber = 39; // Baseline known employee codes in database
+    async getNextCode(countryCode?: string): Promise<string> {
+        const country = normalizeCountryCode(countryCode || 'ET');
+        let maxCodeNumber = country === 'ET' ? 39 : 0; // Baseline known employee codes in database
         try {
             const { data } = await supabase
                 .from('employees')
                 .select('code')
                 .order('code', { ascending: false })
-                .limit(20);
+                .limit(100);
 
             if (data && Array.isArray(data)) {
                 data.forEach((emp: { code?: string }) => {
-                    if (emp.code) {
-                        const match = emp.code.match(/SIIF-(\d+)/i);
-                        if (match) {
-                            const num = parseInt(match[1], 10);
-                            if (num > maxCodeNumber) maxCodeNumber = num;
-                        }
+                    const parsed = parseEmployeeCode(emp.code);
+                    if (parsed && parsed.country === country) {
+                        if (parsed.seq > maxCodeNumber) maxCodeNumber = parsed.seq;
                     }
                 });
             }
         } catch {
             // fallback gracefully
         }
-        return `SIIF-${(maxCodeNumber + 1).toString().padStart(4, '0')}`;
+        return formatEmployeeCode(country, maxCodeNumber + 1);
     },
 
     async create(employee: Omit<Employee, 'created_at' | 'updated_at'>) {
@@ -251,11 +256,14 @@ export const employeesService = {
 
             // If unique constraint violation on code, generate fresh next code and retry
             if (error.code === '23505' && (error.message?.includes('code') || error.details?.includes('code'))) {
-                const currentNum = parseInt(currentCode.match(/SIIF-(\d+)/i)?.[1] || '0', 10);
-                const freshCode = await this.getNextCode();
-                const freshNum = parseInt(freshCode.match(/SIIF-(\d+)/i)?.[1] || '0', 10);
+                const parsed = parseEmployeeCode(currentCode);
+                const country = parsed?.country || 'ET';
+                const currentNum = parsed?.seq || 0;
+                const freshCode = await this.getNextCode(country);
+                const freshParsed = parseEmployeeCode(freshCode);
+                const freshNum = freshParsed?.seq || 0;
                 const nextNum = Math.max(currentNum + 1, freshNum);
-                currentCode = `SIIF-${nextNum.toString().padStart(4, '0')}`;
+                currentCode = formatEmployeeCode(country, nextNum);
                 continue;
             }
 
@@ -290,6 +298,9 @@ export const employeesService = {
             loginHistory: 'login_history',
             emergencyContact: 'emergency_contact',
             address: 'address',
+            age: 'age',
+            dateOfBirth: 'date_of_birth',
+            nationalIdNumber: 'national_id_number',
         };
 
         const dbUpdates: Record<string, unknown> = {};
@@ -299,15 +310,38 @@ export const employeesService = {
             }
         }
 
-        const { data, error } = await supabase
-            .from('employees')
-            .update(dbUpdates)
-            .eq('id', id)
-            .select()
-            .single();
+        try {
+            const { data, error } = await supabase
+                .from('employees')
+                .update(dbUpdates)
+                .eq('id', id)
+                .select()
+                .single();
 
-        if (error) throw error;
-        return mapDbEmployeeToEmployee(data as RawDbEmployee);
+            if (error) throw error;
+            return mapDbEmployeeToEmployee(data as RawDbEmployee);
+        } catch (err: any) {
+            // Resilient fallback if optional new columns (age, date_of_birth) do not exist yet in DB
+            if (err?.code === 'PGRST204' || err?.message?.includes('column') || err?.message?.includes('schema')) {
+                delete dbUpdates.age;
+                delete dbUpdates.date_of_birth;
+                delete dbUpdates.national_id_number;
+                const { data, error: retryError } = await supabase
+                    .from('employees')
+                    .update(dbUpdates)
+                    .eq('id', id)
+                    .select()
+                    .single();
+                if (retryError) throw retryError;
+                return {
+                    ...mapDbEmployeeToEmployee(data as RawDbEmployee),
+                    age: updates.age,
+                    dateOfBirth: updates.dateOfBirth,
+                    nationalIdNumber: updates.nationalIdNumber
+                } as Employee;
+            }
+            throw err;
+        }
     },
 
     async delete(id: string) {

@@ -8,6 +8,7 @@ import {
 } from '../../services/supabase.service';
 import { QueryClient } from '@tanstack/react-query';
 import { logger } from '../../utils/logger';
+import { canWorkerPerformJob, getJobAssignmentEligibility } from '../../utils/fulfillmentRoles';
 
 // Helper for translations (mirrors the one in FulfillmentDataProvider)
 const getTranslation = (path: string): string => {
@@ -56,6 +57,13 @@ export const useJobActions = (deps: UseJobActionsDeps) => {
 
             if (!employee) {
                 addNotification('alert', 'Employee not found');
+                return;
+            }
+
+            // Enforce Floor Worker Interchangeability & Delivery Lockdown Law
+            const eligibility = getJobAssignmentEligibility(employee.role, job.type);
+            if (!eligibility.eligible) {
+                addNotification('alert', eligibility.reason || 'Worker is not eligible for this job type');
                 return;
             }
 
@@ -241,20 +249,10 @@ export const useJobActions = (deps: UseJobActionsDeps) => {
                 currentWorkloads.set(e.id, count);
             });
 
-            const getRoleMatch = (employee: any, job: WMSJob) => {
-                const role = (employee.role || '').toLowerCase();
-                const warehouseRoles = [
-                    'super_admin', 'admin', 'manager', 'regional_manager', 'operations_manager',
-                    'warehouse_manager', 'dispatcher', 'picker', 'packer', 'receiver',
-                    'driver', 'inventory_specialist', 'forklift_operator'
-                ];
-                return warehouseRoles.includes(role);
-            };
-
             let assignedCount = 0;
             for (const job of pendingJobs) {
                 const candidates = eligibleEmployees
-                    .filter(e => getRoleMatch(e, job))
+                    .filter(e => canWorkerPerformJob(e.role, job.type))
                     .sort((a, b) => (currentWorkloads.get(a.id) || 0) - (currentWorkloads.get(b.id) || 0));
 
                 if (candidates.length > 0) {

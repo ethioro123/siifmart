@@ -3,9 +3,11 @@ import { History as HistoryIcon, Search, ChevronRight, User, Calendar, Clock, Pa
 import Pagination from '../../shared/Pagination';
 import { WMSJob, PurchaseOrder, Product } from '../../../types';
 import { formatDateTime } from '../../../utils/formatting';
+import { formatDisplayEmployeeId } from '../../../utils/employeeIdGenerator';
 
 import { ReturnToWarehouseModal } from '../returns/ReturnToWarehouseModal';
 import { getSellUnit } from '../../../utils/units';
+import { convertToSellableUnits } from '../useReceiving';
 
 interface ReceiveHistoryProps {
     orders: PurchaseOrder[];
@@ -65,7 +67,7 @@ export const ReceiveHistory: React.FC<ReceiveHistoryProps> = ({
 
         const receivedOrders = orders.filter(o => {
             const isFullyReceived = (o.lineItems || []).length > 0 &&
-                (o.lineItems || []).every(li => (li.receivedQty || 0) >= li.quantity);
+                (o.lineItems || []).every(li => (li.receivedQty || 0) >= convertToSellableUnits(li.quantity, li));
             const isMarkedReceived = o.status === 'Received' || (o.status as any) === 'Closed';
             
             if (!isFullyReceived && !isMarkedReceived) return false;
@@ -102,7 +104,7 @@ export const ReceiveHistory: React.FC<ReceiveHistoryProps> = ({
                     e.id === user.employeeId
                 );
             }
-            const displayId = userObj?.code || (userId ? (isUUID(userId) ? userId.slice(0, 8).toUpperCase() : userId) : '');
+            const displayId = (userObj?.code ? formatDisplayEmployeeId(userObj.code) : '') || (userId ? (isUUID(userId) ? userId.slice(0, 8).toUpperCase() : userId) : '');
             const resolvedUser = {
                 name: userObj?.name || (userId ? userId : 'System'),
                 displayId: displayId || ''

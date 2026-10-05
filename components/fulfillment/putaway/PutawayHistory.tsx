@@ -3,6 +3,7 @@ import { History as HistoryIcon, Search, ChevronRight, User, Calendar, Clock, Pa
 import Pagination from '../../shared/Pagination';
 import { WMSJob } from '../../../types';
 import { formatJobId } from '../../../utils/jobIdFormatter';
+import { formatDisplayEmployeeId } from '../../../utils/employeeIdGenerator';
 
 import { getSellUnit } from '../../../utils/units';
 
@@ -68,7 +69,7 @@ export const PutawayHistory: React.FC<PutawayHistoryProps> = ({
                         e.id === user.employeeId
                     );
                 }
-                const displayId = userObj?.code || (userId ? (isUUID(userId) ? userId.slice(0, 8).toUpperCase() : userId) : '');
+                const displayId = (userObj?.code ? formatDisplayEmployeeId(userObj.code) : '') || (userId ? (isUUID(userId) ? userId.slice(0, 8).toUpperCase() : userId) : '');
 
                 const resolvedUser = {
                     name: userObj?.name || (userId ? userId : 'System'),

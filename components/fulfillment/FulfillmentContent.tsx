@@ -41,20 +41,22 @@ import { inventoryRequestsService } from '../../services/supabase.service'; // N
 import { generatePackLabelHTML } from '../../utils/labels/PackLabelGenerator'; // Needed for DocksTab
 import { logger } from '../../utils/logger';
 
+const FLOOR_OPS_ROLES = ['picker', 'packer', 'receiver', 'inventory_specialist', 'forklift_operator', 'driver', 'inbound_qc_inspector'];
+
 const TAB_PERMISSIONS: Record<OpTab, string[]> = {
-    RECEIVE: ['super_admin', 'admin', 'manager', 'regional_manager', 'operations_manager', 'warehouse_manager', 'dispatcher', 'inventory_specialist', 'picker', 'packer', 'driver', 'receiver', 'logistics_manager', 'inventory_manager'],
-    PUTAWAY: ['super_admin', 'admin', 'manager', 'regional_manager', 'operations_manager', 'warehouse_manager', 'dispatcher', 'inventory_specialist', 'picker', 'packer', 'driver', 'receiver', 'logistics_manager', 'inventory_manager'],
-    TRANSFER: ['super_admin', 'admin', 'manager', 'regional_manager', 'operations_manager', 'warehouse_manager', 'dispatcher', 'retail_manager', 'logistics_manager', 'inventory_manager', 'demand_planner'],
-    PICK: ['super_admin', 'admin', 'manager', 'regional_manager', 'operations_manager', 'warehouse_manager', 'dispatcher', 'picker', 'packer', 'driver', 'receiver', 'logistics_manager'],
-    PACK: ['super_admin', 'admin', 'manager', 'regional_manager', 'operations_manager', 'warehouse_manager', 'dispatcher', 'picker', 'packer', 'driver', 'receiver', 'logistics_manager'],
-    DOCKS: ['super_admin', 'warehouse_manager', 'dispatcher', 'logistics_manager'],
-    DRIVER: ['super_admin', 'admin', 'manager', 'regional_manager', 'operations_manager', 'warehouse_manager', 'dispatcher', 'driver', 'logistics_manager'],
-    REPLENISH: ['super_admin', 'admin', 'manager', 'regional_manager', 'operations_manager', 'warehouse_manager', 'dispatcher', 'inventory_specialist', 'logistics_manager', 'inventory_manager'],
-    COUNT: ['super_admin', 'admin', 'manager', 'regional_manager', 'operations_manager', 'warehouse_manager', 'inventory_specialist', 'inventory_manager'],
-    WASTE: ['super_admin', 'admin', 'manager', 'regional_manager', 'operations_manager', 'warehouse_manager', 'inventory_specialist', 'inventory_manager'],
-    RETURNS: ['super_admin', 'admin', 'manager', 'regional_manager', 'operations_manager', 'warehouse_manager', 'dispatcher', 'logistics_manager', 'inventory_manager'],
-    ASSIGN: ['super_admin', 'admin', 'manager', 'regional_manager', 'operations_manager', 'warehouse_manager', 'dispatcher', 'logistics_manager', 'inventory_manager'], // Job assignment center
-    LABELS: ['super_admin', 'admin', 'manager', 'regional_manager', 'operations_manager', 'warehouse_manager', 'dispatcher', 'inventory_specialist', 'picker', 'packer', 'driver', 'receiver', 'logistics_manager', 'inventory_manager'], // Label printing hub
+    RECEIVE: ['super_admin', 'admin', 'manager', 'regional_manager', 'operations_manager', 'warehouse_manager', 'dispatcher', 'logistics_manager', 'inventory_manager', ...FLOOR_OPS_ROLES],
+    PUTAWAY: ['super_admin', 'admin', 'manager', 'regional_manager', 'operations_manager', 'warehouse_manager', 'dispatcher', 'logistics_manager', 'inventory_manager', ...FLOOR_OPS_ROLES],
+    TRANSFER: ['super_admin', 'admin', 'manager', 'regional_manager', 'operations_manager', 'warehouse_manager', 'dispatcher', 'retail_manager', 'logistics_manager', 'inventory_manager', 'demand_planner', 'replenishment_planner', ...FLOOR_OPS_ROLES],
+    PICK: ['super_admin', 'admin', 'manager', 'regional_manager', 'operations_manager', 'warehouse_manager', 'dispatcher', 'logistics_manager', ...FLOOR_OPS_ROLES],
+    PACK: ['super_admin', 'admin', 'manager', 'regional_manager', 'operations_manager', 'warehouse_manager', 'dispatcher', 'logistics_manager', ...FLOOR_OPS_ROLES],
+    DOCKS: ['super_admin', 'admin', 'operations_manager', 'regional_manager', 'warehouse_manager', 'dispatcher', 'logistics_manager', 'fleet_maintenance_supervisor'],
+    DRIVER: ['super_admin', 'admin', 'manager', 'regional_manager', 'operations_manager', 'warehouse_manager', 'dispatcher', 'driver', 'logistics_manager', 'fleet_maintenance_supervisor'], // Strict Delivery Lockdown: only drivers and dispatch leadership
+    REPLENISH: ['super_admin', 'admin', 'manager', 'regional_manager', 'operations_manager', 'warehouse_manager', 'dispatcher', 'logistics_manager', 'inventory_manager', 'replenishment_planner', ...FLOOR_OPS_ROLES],
+    COUNT: ['super_admin', 'admin', 'manager', 'regional_manager', 'operations_manager', 'warehouse_manager', 'logistics_manager', 'inventory_manager', ...FLOOR_OPS_ROLES],
+    WASTE: ['super_admin', 'admin', 'manager', 'regional_manager', 'operations_manager', 'warehouse_manager', 'logistics_manager', 'inventory_manager', ...FLOOR_OPS_ROLES],
+    RETURNS: ['super_admin', 'admin', 'manager', 'regional_manager', 'operations_manager', 'warehouse_manager', 'dispatcher', 'logistics_manager', 'inventory_manager', ...FLOOR_OPS_ROLES],
+    ASSIGN: ['super_admin', 'admin', 'manager', 'regional_manager', 'operations_manager', 'warehouse_manager', 'dispatcher', 'logistics_manager', 'inventory_manager', 'fleet_maintenance_supervisor'], // Job assignment center
+    LABELS: ['super_admin', 'admin', 'manager', 'regional_manager', 'operations_manager', 'warehouse_manager', 'dispatcher', 'logistics_manager', 'inventory_manager', 'fleet_maintenance_supervisor', 'replenishment_planner', ...FLOOR_OPS_ROLES], // Label printing hub
 };
 
 export const FulfillmentContent: React.FC = () => {

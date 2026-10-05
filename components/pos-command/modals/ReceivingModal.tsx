@@ -41,23 +41,23 @@ export const ReceivingModal: React.FC = () => {
             <div className="space-y-4 p-1 bg-transparent">
                 {/* Tabs */}
                 {!receivingSummary && !selectedTransferForReceiving && (
-                    <div className="flex p-1 bg-[#F4F0E6] dark:bg-black/30 rounded-2xl mb-4 border border-[#E2DCCE] dark:border-white/5">
+                    <div className="flex p-1 bg-[var(--theme-bg-subtle)] rounded-2xl mb-4 border border-[var(--theme-border)]">
                         <button
                             onClick={() => setActiveTab2('pending')}
-                            className={`flex-1 py-2.5 text-sm font-bold rounded-xl transition-all cursor-pointer ${
+                            className={`flex-1 py-2.5 text-xs font-bold uppercase tracking-wider rounded-xl transition-all cursor-pointer ${
                                 activeTab === 'pending'
-                                    ? 'bg-[#224429] dark:bg-[#2C5E3B] text-white shadow-sm'
-                                    : 'text-[#4D6E56] dark:text-gray-400 hover:text-[#2C5E3B] dark:hover:text-white'
+                                    ? 'bg-[var(--theme-primary)] text-[var(--theme-primary-text)] shadow-xs'
+                                    : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-card-hover)]'
                             }`}
                         >
                             {t('posCommand.pendingTab')} ({activeSite?.name})
                         </button>
                         <button
                             onClick={() => setActiveTab2('history')}
-                            className={`flex-1 py-2.5 text-sm font-bold rounded-xl transition-all cursor-pointer ${
+                            className={`flex-1 py-2.5 text-xs font-bold uppercase tracking-wider rounded-xl transition-all cursor-pointer ${
                                 activeTab === 'history'
-                                    ? 'bg-[#224429] dark:bg-[#2C5E3B] text-white shadow-sm'
-                                    : 'text-[#4D6E56] dark:text-gray-400 hover:text-[#2C5E3B] dark:hover:text-white'
+                                    ? 'bg-[var(--theme-primary)] text-[var(--theme-primary-text)] shadow-xs'
+                                    : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-card-hover)]'
                             }`}
                         >
                             {t('posCommand.historyTab')}

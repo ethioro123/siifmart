@@ -54,100 +54,100 @@ export const InventoryDesktopTable: React.FC<InventoryDesktopTableProps> = ({
 
     return (
         <table className="w-full text-left border-collapse hidden md:table">
-            <thead className="sticky top-0 bg-gray-50/95 dark:bg-black/80 backdrop-blur-md z-10 border-b border-gray-200 dark:border-white/10 shadow-sm">
-                <tr className="bg-gray-50 dark:bg-white/[0.02]">
+            <thead className="sticky top-0 bg-[var(--theme-bg-subtle)] z-10 border-b border-[var(--theme-border)] shadow-sm">
+                <tr className="bg-[var(--theme-bg-subtle)]">
                     <th className="p-5 w-10">
                         <div className="relative flex items-center justify-center">
                             <input
                                 type="checkbox"
                                 aria-label="Select All"
-                                className="peer appearance-none w-4 h-4 border border-white/20 dark:border-white/20 rounded bg-white/5 checked:bg-[#2C5E3B] checked:border-[#2C5E3B] dark:checked:bg-[#A9CBA2] dark:checked:border-[#A9CBA2] transition-all cursor-pointer"
+                                className="peer appearance-none w-4 h-4 border border-[var(--theme-border)] rounded bg-[var(--theme-bg-card)] checked:bg-[var(--theme-primary)] checked:border-[var(--theme-primary)] transition-all cursor-pointer"
                                 onChange={() => {
                                     if (selectedIds.size === products.length) setSelectedIds(new Set());
                                     else setSelectedIds(new Set(products.map(i => i.id)));
                                 }}
                                 checked={selectedIds.size === products.length && products.length > 0}
                             />
-                            <CheckCircle size={10} className="absolute text-black opacity-0 peer-checked:opacity-100 transition-opacity pointer-events-none" />
+                            <CheckCircle size={10} className="absolute text-[var(--theme-primary-text)] opacity-0 peer-checked:opacity-100 transition-opacity pointer-events-none" />
                         </div>
                     </th>
 
-                    <th className="p-5 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] cursor-pointer hover:text-white transition-colors group select-none" onClick={() => handleSort('name')}>
+                    <th className="p-5 text-[10px] font-bold text-[var(--theme-text-secondary)] uppercase tracking-wider cursor-pointer hover:text-[var(--theme-text-primary)] transition-colors group select-none" onClick={() => handleSort('name')}>
                         <div className="flex items-center gap-2">
                             Product
-                            <div className={`p-1 rounded transition-colors ${sortConfig?.key === 'name' ? 'bg-[#2C5E3B]/20 text-[#2C5E3B] dark:bg-[#A9CBA2]/20 dark:text-[#A9CBA2]' : 'text-gray-600 group-hover:text-gray-400'}`}>
+                            <div className={`p-1 rounded transition-colors ${sortConfig?.key === 'name' ? 'bg-[var(--theme-primary)] text-[var(--theme-primary-text)]' : 'text-[var(--theme-text-muted)] group-hover:text-[var(--theme-text-secondary)]'}`}>
                                 <ArrowUpDown size={10} className={sortConfig?.key === 'name' && sortConfig.direction === 'asc' ? 'rotate-180' : ''} />
                             </div>
                         </div>
                     </th>
-                    <th className="p-5 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] cursor-pointer hover:text-white transition-colors group select-none" onClick={() => handleSort('location')}>
+                    <th className="p-5 text-[10px] font-bold text-[var(--theme-text-secondary)] uppercase tracking-wider cursor-pointer hover:text-[var(--theme-text-primary)] transition-colors group select-none" onClick={() => handleSort('location')}>
                         <div className="flex items-center gap-2">
                             Location
-                            <div className={`p-1 rounded transition-colors ${sortConfig?.key === 'location' ? 'bg-[#2C5E3B]/20 text-[#2C5E3B] dark:bg-[#A9CBA2]/20 dark:text-[#A9CBA2]' : 'text-gray-600 group-hover:text-gray-400'}`}>
+                            <div className={`p-1 rounded transition-colors ${sortConfig?.key === 'location' ? 'bg-[var(--theme-primary)] text-[var(--theme-primary-text)]' : 'text-[var(--theme-text-muted)] group-hover:text-[var(--theme-text-secondary)]'}`}>
                                 <ArrowUpDown size={10} className={sortConfig?.key === 'location' && sortConfig.direction === 'asc' ? 'rotate-180' : ''} />
                             </div>
                         </div>
                     </th>
-                    <th className="p-5 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] text-center cursor-pointer hover:text-white transition-colors group select-none" onClick={() => handleSort('stock')}>
+                    <th className="p-5 text-[10px] font-bold text-[var(--theme-text-secondary)] uppercase tracking-wider text-center cursor-pointer hover:text-[var(--theme-text-primary)] transition-colors group select-none" onClick={() => handleSort('stock')}>
                         <div className="flex items-center justify-center gap-2">
                             Stock Level
-                            <div className={`p-1 rounded transition-colors ${sortConfig?.key === 'stock' ? 'bg-[#2C5E3B]/20 text-[#2C5E3B] dark:bg-[#A9CBA2]/20 dark:text-[#A9CBA2]' : 'text-gray-600 group-hover:text-gray-400'}`}>
+                            <div className={`p-1 rounded transition-colors ${sortConfig?.key === 'stock' ? 'bg-[var(--theme-primary)] text-[var(--theme-primary-text)]' : 'text-[var(--theme-text-muted)] group-hover:text-[var(--theme-text-secondary)]'}`}>
                                 <ArrowUpDown size={10} className={sortConfig?.key === 'stock' && sortConfig.direction === 'asc' ? 'rotate-180' : ''} />
                             </div>
                         </div>
                     </th>
-                    <th className="p-5 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] text-center cursor-pointer hover:text-white transition-colors group select-none" onClick={() => handleSort('unit')}>
+                    <th className="p-5 text-[10px] font-bold text-[var(--theme-text-secondary)] uppercase tracking-wider text-center cursor-pointer hover:text-[var(--theme-text-primary)] transition-colors group select-none" onClick={() => handleSort('unit')}>
                         <div className="flex items-center justify-center gap-2">
                             Unit
-                            <div className={`p-1 rounded transition-colors ${sortConfig?.key === 'unit' ? 'bg-[#2C5E3B]/20 text-[#2C5E3B] dark:bg-[#A9CBA2]/20 dark:text-[#A9CBA2]' : 'text-gray-600 group-hover:text-gray-400'}`}>
+                            <div className={`p-1 rounded transition-colors ${sortConfig?.key === 'unit' ? 'bg-[var(--theme-primary)] text-[var(--theme-primary-text)]' : 'text-[var(--theme-text-muted)] group-hover:text-[var(--theme-text-secondary)]'}`}>
                                 <ArrowUpDown size={10} className={sortConfig?.key === 'unit' && sortConfig.direction === 'asc' ? 'rotate-180' : ''} />
                             </div>
                         </div>
                     </th>
 
-                    <th className="p-5 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] text-right cursor-pointer hover:text-white transition-colors group select-none" onClick={() => handleSort('price')}>
+                    <th className="p-5 text-[10px] font-bold text-[var(--theme-text-secondary)] uppercase tracking-wider text-right cursor-pointer hover:text-[var(--theme-text-primary)] transition-colors group select-none" onClick={() => handleSort('price')}>
                         <div className="flex items-center justify-end gap-2">
                             Price
-                            <div className={`p-1 rounded transition-colors ${sortConfig?.key === 'price' ? 'bg-[#2C5E3B]/20 text-[#2C5E3B] dark:bg-[#A9CBA2]/20 dark:text-[#A9CBA2]' : 'text-gray-600 group-hover:text-gray-400'}`}>
+                            <div className={`p-1 rounded transition-colors ${sortConfig?.key === 'price' ? 'bg-[var(--theme-primary)] text-[var(--theme-primary-text)]' : 'text-[var(--theme-text-muted)] group-hover:text-[var(--theme-text-secondary)]'}`}>
                                 <ArrowUpDown size={10} className={sortConfig?.key === 'price' && sortConfig.direction === 'asc' ? 'rotate-180' : ''} />
                             </div>
                         </div>
                     </th>
                     {showCostPrice && (
-                        <th className="p-5 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] text-right cursor-pointer hover:text-white transition-colors group select-none" onClick={() => handleSort('costPrice')}>
+                        <th className="p-5 text-[10px] font-bold text-[var(--theme-text-secondary)] uppercase tracking-wider text-right cursor-pointer hover:text-[var(--theme-text-primary)] transition-colors group select-none" onClick={() => handleSort('costPrice')}>
                             <div className="flex items-center justify-end gap-2">
                                 Cost Price
-                                <div className={`p-1 rounded transition-colors ${sortConfig?.key === 'costPrice' ? 'bg-[#2C5E3B]/20 text-[#2C5E3B] dark:bg-[#A9CBA2]/20 dark:text-[#A9CBA2]' : 'text-gray-600 group-hover:text-gray-400'}`}>
+                                <div className={`p-1 rounded transition-colors ${sortConfig?.key === 'costPrice' ? 'bg-[var(--theme-primary)] text-[var(--theme-primary-text)]' : 'text-[var(--theme-text-muted)] group-hover:text-[var(--theme-text-secondary)]'}`}>
                                     <ArrowUpDown size={10} className={sortConfig?.key === 'costPrice' && sortConfig.direction === 'asc' ? 'rotate-180' : ''} />
                                 </div>
                             </div>
                         </th>
                     )}
-                    <th className="p-5 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] text-right cursor-pointer hover:text-white transition-colors group select-none" onClick={() => handleSort('assetValue')}>
+                    <th className="p-5 text-[10px] font-bold text-[var(--theme-text-secondary)] uppercase tracking-wider text-right cursor-pointer hover:text-[var(--theme-text-primary)] transition-colors group select-none" onClick={() => handleSort('assetValue')}>
                         <div className="flex items-center justify-end gap-2">
                             Value
-                            <div className={`p-1 rounded transition-colors ${sortConfig?.key === 'assetValue' ? 'bg-[#2C5E3B]/20 text-[#2C5E3B] dark:bg-[#A9CBA2]/20 dark:text-[#A9CBA2]' : 'text-gray-600 group-hover:text-gray-400'}`}>
+                            <div className={`p-1 rounded transition-colors ${sortConfig?.key === 'assetValue' ? 'bg-[var(--theme-primary)] text-[var(--theme-primary-text)]' : 'text-[var(--theme-text-muted)] group-hover:text-[var(--theme-text-secondary)]'}`}>
                                 <ArrowUpDown size={10} className={sortConfig?.key === 'assetValue' && sortConfig.direction === 'asc' ? 'rotate-180' : ''} />
                             </div>
                         </div>
                     </th>
-                    <th className="p-5 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] text-center cursor-pointer hover:text-white transition-colors group select-none" onClick={() => handleSort('abc')}>
+                    <th className="p-5 text-[10px] font-bold text-[var(--theme-text-secondary)] uppercase tracking-wider text-center cursor-pointer hover:text-[var(--theme-text-primary)] transition-colors group select-none" onClick={() => handleSort('abc')}>
                         <div className="flex items-center justify-center gap-2">
                             Class
-                            <div className={`p-1 rounded transition-colors ${sortConfig?.key === 'abc' ? 'bg-[#2C5E3B]/20 text-[#2C5E3B] dark:bg-[#A9CBA2]/20 dark:text-[#A9CBA2]' : 'text-gray-600 group-hover:text-gray-400'}`}>
+                            <div className={`p-1 rounded transition-colors ${sortConfig?.key === 'abc' ? 'bg-[var(--theme-primary)] text-[var(--theme-primary-text)]' : 'text-[var(--theme-text-muted)] group-hover:text-[var(--theme-text-secondary)]'}`}>
                                 <ArrowUpDown size={10} className={sortConfig?.key === 'abc' && sortConfig.direction === 'asc' ? 'rotate-180' : ''} />
                             </div>
                         </div>
                     </th>
-                    <th className="p-5 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] text-right cursor-pointer hover:text-white transition-colors group select-none" onClick={() => handleSort('createdAt')}>
+                    <th className="p-5 text-[10px] font-bold text-[var(--theme-text-secondary)] uppercase tracking-wider text-right cursor-pointer hover:text-[var(--theme-text-primary)] transition-colors group select-none" onClick={() => handleSort('createdAt')}>
                         <div className="flex items-center justify-end gap-2">
                             Date
-                            <div className={`p-1 rounded transition-colors ${sortConfig?.key === 'createdAt' ? 'bg-[#2C5E3B]/20 text-[#2C5E3B] dark:bg-[#A9CBA2]/20 dark:text-[#A9CBA2]' : 'text-gray-600 group-hover:text-gray-400'}`}>
+                            <div className={`p-1 rounded transition-colors ${sortConfig?.key === 'createdAt' ? 'bg-[var(--theme-primary)] text-[var(--theme-primary-text)]' : 'text-[var(--theme-text-muted)] group-hover:text-[var(--theme-text-secondary)]'}`}>
                                 <ArrowUpDown size={10} className={sortConfig?.key === 'createdAt' && sortConfig.direction === 'asc' ? 'rotate-180' : ''} />
                             </div>
                         </div>
                     </th>
-                    <th className="p-5 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] text-right">Actions</th>
+                    <th className="p-5 text-[10px] font-bold text-[var(--theme-text-secondary)] uppercase tracking-wider text-right">Actions</th>
                 </tr>
             </thead>
             <tbody className="divide-y divide-gray-100 dark:divide-white/5">
@@ -159,23 +159,23 @@ export const InventoryDesktopTable: React.FC<InventoryDesktopTableProps> = ({
                         <tr
                             key={product.id}
                             onClick={() => setSelectedViewProduct(product)}
-                            className={`group hover:bg-gray-50 dark:hover:bg-white/[0.03] transition-all duration-300 cursor-pointer ${isSelected ? 'bg-[#2C5E3B]/[0.08] dark:bg-[#A9CBA2]/[0.08]' : ''}`}
+                            className={`group hover:bg-[var(--theme-bg-card-hover)] transition-all duration-150 cursor-pointer ${isSelected ? 'bg-[var(--theme-bg-subtle)]' : ''}`}
                         >
                             <td className="p-5" onClick={(e) => e.stopPropagation()}>
                                 <div className="relative flex items-center justify-center">
                                     <input
                                         type="checkbox"
                                         aria-label="Select row"
-                                        className="peer appearance-none w-4 h-4 border border-white/10 rounded bg-white/5 checked:bg-[#2C5E3B] checked:border-[#2C5E3B] dark:checked:bg-[#A9CBA2] dark:checked:border-[#A9CBA2] transition-all cursor-pointer"
+                                        className="peer appearance-none w-4 h-4 border border-[var(--theme-border)] rounded bg-[var(--theme-bg-card)] checked:bg-[var(--theme-primary)] checked:border-[var(--theme-primary)] transition-all cursor-pointer"
                                         checked={isSelected}
                                         onChange={() => toggleSelection(product.id)}
                                     />
-                                    <CheckCircle size={10} className="absolute text-black dark:text-[#18201B] opacity-0 peer-checked:opacity-100 transition-opacity pointer-events-none" />
+                                    <CheckCircle size={10} className="absolute text-[var(--theme-primary-text)] opacity-0 peer-checked:opacity-100 transition-opacity pointer-events-none" />
                                 </div>
                             </td>
                             <td className="p-5">
                                 <div className="flex items-center space-x-4">
-                                    <div className="w-14 h-14 rounded-2xl bg-gray-200 dark:bg-black/40 border border-gray-200 dark:border-white/10 flex items-center justify-center flex-shrink-0 overflow-hidden shadow-inner group-hover:border-[#2C5E3B]/30 dark:group-hover:border-[#A9CBA2]/30 transition-colors">
+                                    <div className="w-14 h-14 rounded-2xl bg-[var(--theme-bg-card)] border border-[var(--theme-border)] flex items-center justify-center flex-shrink-0 overflow-hidden shadow-inner group-hover:border-[var(--theme-border-focus)] transition-colors">
                                         {product.image && !product.image.includes('placeholder.com') ? (
                                             <img
                                                 src={product.image}
@@ -183,24 +183,24 @@ export const InventoryDesktopTable: React.FC<InventoryDesktopTableProps> = ({
                                                 className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                                                 onError={(e) => {
                                                     e.currentTarget.style.display = 'none';
-                                                    (e.currentTarget.parentElement as HTMLElement).innerHTML = '<div class="text-gray-700"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="m7.5 4.27 9 5.15"/><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg></div>';
+                                                    (e.currentTarget.parentElement as HTMLElement).innerHTML = '<div class="text-[var(--theme-text-muted)]"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="m7.5 4.27 9 5.15"/><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg></div>';
                                                 }}
                                             />
                                         ) : (
-                                            <Package size={24} className="text-gray-700 group-hover:text-[#2C5E3B]/40 dark:group-hover:text-[#A9CBA2]/40 transition-colors" />
+                                            <Package size={24} className="text-[var(--theme-text-muted)] group-hover:text-[var(--theme-primary)] transition-colors" />
                                         )}
                                     </div>
                                     <div>
-                                        <p className="text-[14px] font-black text-[#1E3F27] dark:text-[#EAE5D9] tracking-tight group-hover:text-[#2C5E3B] dark:group-hover:text-[#A9CBA2] transition-colors duration-200 uppercase">
+                                        <p className="text-sm font-bold text-[var(--theme-text-primary)] tracking-tight group-hover:text-[var(--theme-primary)] transition-colors duration-150 uppercase">
                                             {product.name}
                                         </p>
                                         <div className="flex flex-wrap items-center gap-1.5 mt-1.5 max-w-md">
                                             {product.brand && !product.name.toLowerCase().startsWith(product.brand.toLowerCase()) && (
-                                                <span className="text-[9px] font-bold text-amber-600 bg-amber-500/5 dark:text-amber-400 dark:bg-amber-500/5 px-2 py-0.5 rounded border border-amber-500/10 dark:border-amber-500/10 uppercase tracking-wider">
+                                                <span className="text-[9px] font-bold text-amber-500 bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20 uppercase tracking-wider">
                                                     {product.brand}
                                                 </span>
                                             )}
-                                            <span className="text-[9px] font-extrabold font-mono text-[#2C5E3B] bg-[#2C5E3B]/10 dark:text-[#A9CBA2] dark:bg-[#A9CBA2]/10 px-2 py-0.5 rounded border border-[#2C5E3B]/25 dark:border-[#A9CBA2]/25 uppercase tracking-tighter shadow-sm">
+                                            <span className="text-[9px] font-bold font-mono text-emerald-600 bg-emerald-500/10 dark:text-emerald-400 px-2 py-0.5 rounded border border-emerald-500/20 uppercase tracking-tighter shadow-sm">
                                                 {product.sku}
                                             </span>
                                             <span className="text-[9px] font-extrabold text-stone-600 bg-stone-100 dark:text-stone-300 dark:bg-white/5 px-2 py-0.5 rounded border border-stone-200 dark:border-white/5 uppercase tracking-wider">
@@ -308,44 +308,44 @@ export const InventoryDesktopTable: React.FC<InventoryDesktopTableProps> = ({
 
                             <td className="p-5 text-right">
                                 <div className="flex flex-col items-end">
-                                    <span className="text-[13px] font-black text-gray-900 dark:text-white font-mono tracking-tighter group-hover:text-[#2C5E3B] dark:group-hover:text-[#A9CBA2] transition-colors">
+                                    <span className="text-[13px] font-bold text-[var(--theme-text-primary)] font-mono tracking-tight group-hover:text-[var(--theme-primary)] transition-colors">
                                         {product.price && product.price > 0 ? formatCompactNumber(product.price, { currency: currencySymbol }) : '—'}
                                         {product.unit && product.price > 0 && getSellUnit(product.unit).code !== 'UNIT' && (
-                                             <span className="text-[9px] text-gray-500 font-bold">/{getSellUnit(product.unit).shortLabel}</span>
+                                             <span className="text-[9px] text-[var(--theme-text-muted)] font-bold">/{getSellUnit(product.unit).shortLabel}</span>
                                         )}
                                     </span>
-                                    <span className="text-[9px] text-gray-500 font-bold uppercase tracking-widest mt-0.5">Retail Price</span>
+                                    <span className="text-[9px] text-[var(--theme-text-muted)] font-bold uppercase tracking-wider mt-0.5">Retail Price</span>
                                 </div>
                             </td>
                             {showCostPrice && (
                                 <td className="p-5 text-right">
                                     <div className="flex flex-col items-end">
-                                        <span className="text-[13px] font-black text-gray-900 dark:text-white font-mono tracking-tighter group-hover:text-[#2C5E3B] dark:group-hover:text-[#A9CBA2] transition-colors">
+                                        <span className="text-[13px] font-bold text-[var(--theme-text-primary)] font-mono tracking-tight group-hover:text-[var(--theme-primary)] transition-colors">
                                             {product.costPrice && product.costPrice > 0 ? formatCompactNumber(product.costPrice, { currency: currencySymbol }) : '—'}
                                             {product.costPrice !== undefined && product.costPrice !== null && product.costPrice > 0 && getSellUnit(product.unit || '').code !== 'UNIT' && (
-                                                <span className="text-[9px] text-gray-500 font-bold">/{getSellUnit(product.unit || '').shortLabel}</span>
+                                                <span className="text-[9px] text-[var(--theme-text-muted)] font-bold">/{getSellUnit(product.unit || '').shortLabel}</span>
                                             )}
                                         </span>
-                                        <span className="text-[9px] text-gray-500 font-bold uppercase tracking-widest mt-0.5">Cost Price</span>
+                                        <span className="text-[9px] text-[var(--theme-text-muted)] font-bold uppercase tracking-wider mt-0.5">Cost Price</span>
                                     </div>
                                 </td>
                             )}
                             <td className="p-5 text-right">
-                                <div className="inline-flex flex-col items-end bg-gray-100 dark:bg-black/20 p-2 rounded-xl border border-gray-100 dark:border-white/[0.03]">
-                                    <span className="text-[12px] font-black text-[#2C5E3B] dark:text-[#A9CBA2] font-mono tracking-tighter">
+                                <div className="inline-flex flex-col items-end bg-[var(--theme-bg-subtle)] p-2 rounded-xl border border-[var(--theme-border)]">
+                                    <span className="text-[12px] font-bold text-emerald-600 dark:text-emerald-400 font-mono tracking-tight">
                                         {product.price && product.price > 0 ? formatCompactNumber(getInventoryValue(product), { currency: currencySymbol }) : '—'}
                                     </span>
-                                    <span className="text-[9px] text-gray-600 font-bold uppercase tracking-widest font-sans">Inventory Value</span>
+                                    <span className="text-[9px] text-[var(--theme-text-secondary)] font-bold uppercase tracking-wider font-sans">Inventory Value</span>
                                 </div>
                             </td>
                             <td className="p-5 text-center">
-                                <div className={`inline-flex items-center justify-center w-8 h-8 rounded-full text-[11px] font-black border transition-all ${abc === 'A' ? 'bg-green-500/10 text-green-500 border-green-500/30 shadow-lg shadow-green-500/5' : abc === 'B' ? 'bg-blue-500/10 text-blue-500 border-blue-500/30' : 'bg-gray-500/10 text-gray-500 border-gray-500/30'}`}>
+                                <div className={`inline-flex items-center justify-center w-8 h-8 rounded-full text-[11px] font-bold border transition-all ${abc === 'A' ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/30' : abc === 'B' ? 'bg-blue-500/10 text-blue-500 border-blue-500/30' : 'bg-gray-500/10 text-gray-500 border-gray-500/30'}`}>
                                     {abc}
                                 </div>
                             </td>
                             <td className="p-5 text-right">
                                 <div className="flex flex-col items-end">
-                                    <span className="text-[10px] font-black text-gray-500 font-mono">
+                                    <span className="text-[10px] font-bold text-[var(--theme-text-muted)] font-mono">
                                         {(() => {
                                             const dateVal = product.createdAt || (product as any).created_at;
                                             if (!dateVal) return '--';
@@ -355,7 +355,7 @@ export const InventoryDesktopTable: React.FC<InventoryDesktopTableProps> = ({
                                             }).replace(',', ' •');
                                         })()}
                                     </span>
-                                    <span className="text-[9px] text-gray-700 font-bold uppercase tracking-widest mt-0.5">Date Added</span>
+                                    <span className="text-[9px] text-[var(--theme-text-muted)] font-bold uppercase tracking-wider mt-0.5">Date Added</span>
                                 </div>
                             </td>
                             <td className="p-5 text-right">
@@ -366,7 +366,7 @@ export const InventoryDesktopTable: React.FC<InventoryDesktopTableProps> = ({
                                                 <Protected permission="ADJUST_STOCK">
                                                     <button
                                                         onClick={() => handleOpenAdjust(product)}
-                                                        className="p-2 hover:bg-[#2C5E3B]/10 dark:hover:bg-[#A9CBA2]/10 hover:text-[#2C5E3B] dark:hover:text-[#A9CBA2] text-gray-500 rounded-xl transition-all"
+                                                        className="p-2 hover:bg-[var(--theme-bg-card-hover)] hover:text-[var(--theme-text-primary)] text-[var(--theme-text-muted)] rounded-xl transition-all cursor-pointer"
                                                         title="Adjust Stock"
                                                     >
                                                         <RefreshCw size={14} />

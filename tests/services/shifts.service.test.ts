@@ -111,6 +111,6 @@ describe('shiftsService', () => {
         expect(html).toContain('Merkato Retail Store');
         expect(html).toContain('BALANCED');
         expect(html).toContain('200 ETB note x 87');
-        expect(html).toContain('HQ Audit Signed-Off By: HQ Auditor Selam');
+        expect(html).toContain('HQ Audit Verified By: HQ Auditor Selam');
     });
 });

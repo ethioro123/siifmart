@@ -27,15 +27,16 @@ export const ReceiveReviewModal: React.FC<ReceiveReviewModalProps> = ({
     // Calculate stats
     const stats = useMemo(() => {
         const poJobs = jobs.filter(j => (j.orderRef === po.id || (po.po_number && j.orderRef === po.po_number) || (po.poNumber && j.orderRef === po.poNumber)) && j.type === 'PUTAWAY');
+        const cleanSku = (s?: string) => s ? s.replace(/[-\s]/g, '').toUpperCase() : '';
         const receivedMap: Record<string, number> = {};
 
         poJobs.forEach(job => {
             job.lineItems.forEach(item => {
-                if (item.productId) {
-                    receivedMap[item.productId] = (receivedMap[item.productId] || 0) + (item.expectedQty || item.receivedQty || 0);
-                }
-                if (item.sku) {
-                    receivedMap[item.sku] = (receivedMap[item.sku] || 0) + (item.expectedQty || item.receivedQty || 0);
+                const qty = item.expectedQty || item.receivedQty || (item as any).quantity || 0;
+                if (qty <= 0) return;
+                const canonKey = cleanSku(item.sku) || item.productId;
+                if (canonKey) {
+                    receivedMap[canonKey] = (receivedMap[canonKey] || 0) + qty;
                 }
             });
         });
@@ -45,19 +46,12 @@ export const ReceiveReviewModal: React.FC<ReceiveReviewModalProps> = ({
         let totalOrderedCases = 0;
 
         const details = (po.lineItems || []).map(item => {
-            const product = allProducts.find(p => p.id === item.productId || (item.sku && p.sku === item.sku));
-            const candidateKeys = [
-                item.productId,
-                item.sku,
-                product?.id,
-                product?.sku
-            ].filter(Boolean) as string[];
-            
-            const received = candidateKeys.length > 0 
-                ? candidateKeys.reduce((max, k) => Math.max(max, receivedMap[k] || 0), 0)
-                : 0;
-
+            const product = allProducts.find(p => p.id === item.productId || (item.sku && cleanSku(p.sku) === cleanSku(item.sku)));
+            const canonKey = cleanSku(item.sku) || cleanSku(product?.sku) || item.productId || product?.id || '';
+            const receivedFromJobs = canonKey ? (receivedMap[canonKey] || 0) : 0;
             const expectedSellable = convertToSellableUnits(item.quantity, item);
+            const received = Math.max(item.receivedQty || 0, receivedFromJobs);
+            const unitsPerOrderUnit = convertToSellableUnits(1, item);
 
             totalOrderedCases += item.quantity;
             totalExpectedSellable += expectedSellable;
@@ -67,6 +61,7 @@ export const ReceiveReviewModal: React.FC<ReceiveReviewModalProps> = ({
                 ...item,
                 expectedSellable,
                 received,
+                unitsPerOrderUnit,
                 status: received >= expectedSellable ? 'Complete' : received > 0 ? 'Partial' : 'Pending'
             };
         });
@@ -167,7 +162,14 @@ export const ReceiveReviewModal: React.FC<ReceiveReviewModalProps> = ({
                                                 <div className="text-[9px] text-stone-400 dark:text-stone-500 font-normal">({item.quantity} pkgs)</div>
                                             )}
                                         </td>
-                                        <td className="p-2.5 md:p-4 text-center font-black text-[#2C5E3B] dark:text-[#A9CBA2] tabular-nums text-xs">{item.received}</td>
+                                        <td className="p-2.5 md:p-4 text-center font-black text-[#2C5E3B] dark:text-[#A9CBA2] tabular-nums text-xs">
+                                            {item.received}
+                                            {(item.unitsPerOrderUnit || 1) > 1 && (
+                                                <div className="text-[9px] text-stone-400 dark:text-stone-500 font-normal">
+                                                    ({Math.round((item.received / item.unitsPerOrderUnit) * 10) / 10} pkgs)
+                                                </div>
+                                            )}
+                                        </td>
                                         <td className="p-2.5 md:p-4 text-right">
                                             <span className={`px-2.5 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest border transition-all ${item.status === 'Complete' ? 'bg-[#2C5E3B] dark:bg-[#EAE5D9] text-[#FAF8F5] dark:text-[#1E3B24] border-[#2C5E3B] dark:border-[#EAE5D9] shadow-sm' :
                                                 item.status === 'Partial' ? 'bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-200 dark:border-amber-500/20' :

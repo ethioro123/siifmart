@@ -4,9 +4,11 @@ import {
 } from 'lucide-react';
 import Modal from '../../../components/Modal';
 import { Protected } from '../../../components/Protected';
-import { formatDateTime, formatPriceValue } from '../../../utils/formatting';
+import { formatDateTime, formatPriceValue, maskPhoneNumber } from '../../../utils/formatting';
 import { CURRENCY_SYMBOL } from '../../../constants';
 import { SaleRecord, Site } from '../../../types';
+import { useStore } from '../../../contexts/CentralStore';
+import { isAdmin } from '../../../utils/permissions';
 
 interface SalesDetailModalProps {
     selectedSale: SaleRecord | null;
@@ -33,6 +35,9 @@ export const SalesDetailModal: React.FC<SalesDetailModalProps> = ({
     addNotification,
     currencySymbol = CURRENCY_SYMBOL
 }) => {
+    const { user } = useStore();
+    const canViewFullCustomerPII = isAdmin(user?.role) || user?.role === 'finance_manager';
+
     return (
         <Modal
             isOpen={!!selectedSale}
@@ -41,37 +46,39 @@ export const SalesDetailModal: React.FC<SalesDetailModalProps> = ({
             size="lg"
         >
             {selectedSale && (
-                <div className="flex flex-col h-[600px] text-[#1E3F27] dark:text-white">
+                <div className="flex flex-col h-[600px] text-[var(--theme-text-primary)]">
                     {/* Modal Header Info */}
-                    <div className="flex items-center justify-between mb-6 bg-[#FAF8F5] dark:bg-[#18201B]/50 p-4 rounded-2xl border border-[#E2DCCE]/60 dark:border-white/10">
+                    <div className="flex items-center justify-between mb-6 bg-[var(--theme-bg-panel)] p-4 rounded-2xl border border-[var(--theme-border)]">
                         <div>
-                            <h3 className="text-xl font-bold text-[#1E3F27] dark:text-white font-mono">{selectedSale.receiptNumber || `S${selectedSale.id.substring(0, 8).replace(/-/g, '').toUpperCase()}`}</h3>
-                            <p className="text-xs text-stone-400 dark:text-gray-550 mt-1">{formatDateTime(selectedSale.date, { showTime: true })}</p>
+                            <h3 className="text-xl font-bold text-[var(--theme-text-primary)] font-mono">{selectedSale.receiptNumber || `S${selectedSale.id.substring(0, 8).replace(/-/g, '').toUpperCase()}`}</h3>
+                            <p className="text-xs text-[var(--theme-text-secondary)] mt-1">{formatDateTime(selectedSale.date, { showTime: true })}</p>
                         </div>
                         <div className="text-right">
-                            <p className="text-xs text-stone-500 dark:text-gray-555 uppercase font-black tracking-widest">Total Amount</p>
-                            <p className="text-2xl font-mono text-[#2C5E3B] dark:text-[#A9CBA2] font-black">{currencySymbol} {selectedSale.total.toLocaleString()}</p>
+                            <p className="text-xs text-[var(--theme-text-secondary)] uppercase font-bold tracking-wider">Total Amount</p>
+                            <p className="text-2xl font-mono text-[var(--theme-text-primary)] font-bold">{currencySymbol} {selectedSale.total.toLocaleString()}</p>
                         </div>
                     </div>
 
                     {/* Tabs */}
-                    <div className="flex border-b border-[#E2DCCE]/60 dark:border-white/10 mb-4 select-none">
+                    <div className="flex border-b border-[var(--theme-border)] mb-4 select-none">
                         <button
+                            type="button"
                             onClick={() => setDetailTab('receipt')}
-                            className={`px-4 py-2 text-sm font-bold border-b-2 transition-colors ${detailTab === 'receipt' ? 'border-[#2C5E3B] dark:border-[#A9CBA2] text-[#1E3F27] dark:text-white' : 'border-transparent text-stone-500 dark:text-gray-400 hover:text-[#2C5E3B] dark:hover:text-white'}`}
+                            className={`px-4 py-2 text-sm font-bold border-b-2 transition-all cursor-pointer ${detailTab === 'receipt' ? 'border-[var(--theme-text-primary)] text-[var(--theme-text-primary)]' : 'border-transparent text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)]'}`}
                         >
                             Digital Receipt
                         </button>
                         <button
+                            type="button"
                             onClick={() => setDetailTab('audit')}
-                            className={`px-4 py-2 text-sm font-bold border-b-2 transition-colors ${detailTab === 'audit' ? 'border-[#2C5E3B] dark:border-[#A9CBA2] text-[#1E3F27] dark:text-white' : 'border-transparent text-stone-500 dark:text-gray-400 hover:text-[#2C5E3B] dark:hover:text-white'}`}
+                            className={`px-4 py-2 text-sm font-bold border-b-2 transition-all cursor-pointer ${detailTab === 'audit' ? 'border-[var(--theme-text-primary)] text-[var(--theme-text-primary)]' : 'border-transparent text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)]'}`}
                         >
                             Audit Log
                         </button>
                     </div>
 
                     {/* Content Area */}
-                    <div className="flex-1 overflow-y-auto custom-scrollbar bg-[#FAF8F5]/80 dark:bg-black/20 rounded-2xl border border-[#E2DCCE]/60 dark:border-white/10 p-6">
+                    <div className="flex-1 overflow-y-auto custom-scrollbar bg-[var(--theme-bg-panel)] rounded-2xl border border-[var(--theme-border)] p-6">
 
                         {/* TAB 1: RECEIPT VIEW */}
                         {detailTab === 'receipt' && (
@@ -150,7 +157,7 @@ export const SalesDetailModal: React.FC<SalesDetailModalProps> = ({
                                     {selectedSale.customerPhone && (
                                         <div className="flex justify-between text-[9px] opacity-60 font-mono">
                                             <span>PHONE:</span>
-                                            <span>{selectedSale.customerPhone}</span>
+                                            <span>{canViewFullCustomerPII ? selectedSale.customerPhone : maskPhoneNumber(selectedSale.customerPhone)}</span>
                                         </div>
                                     )}
                                 </div>
@@ -163,16 +170,16 @@ export const SalesDetailModal: React.FC<SalesDetailModalProps> = ({
 
                         {/* TAB 2: REAL AUDIT LOG */}
                         {detailTab === 'audit' && (
-                            <div className="space-y-6 relative text-[#1E3F27] dark:text-white">
-                                <div className="absolute left-3 top-2 bottom-2 w-px bg-[#E2DCCE] dark:bg-white/10"></div>
+                            <div className="space-y-6 relative text-[var(--theme-text-primary)]">
+                                <div className="absolute left-3 top-2 bottom-2 w-px bg-[var(--theme-border)]"></div>
 
                                 {/* Header Event */}
                                 <div className="flex gap-4 relative">
-                                    <div className="w-6 h-6 rounded-full bg-emerald-50 dark:bg-[#2C5E3B]/20 text-emerald-700 dark:text-[#A9CBA2] border border-emerald-250/50 dark:border-[#2C5E3B]/30 flex items-center justify-center z-10 shrink-0"><CheckCircle size={14} /></div>
+                                    <div className="w-6 h-6 rounded-full bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 flex items-center justify-center z-10 shrink-0"><CheckCircle size={14} /></div>
                                     <div>
-                                        <p className="text-sm font-bold text-[#1E3F27] dark:text-[#EAE5D9]">Transaction Completed</p>
-                                        <p className="text-xs text-stone-400 dark:text-gray-550">{formatDateTime(selectedSale.date, { showTime: true })}</p>
-                                        <p className="text-xs text-stone-500 dark:text-gray-450 mt-1">Payment verified via {selectedSale.mobilePaymentChannel || selectedSale.method}{selectedSale.mobileTransactionRef ? ` (Ref: ${selectedSale.mobileTransactionRef})` : ''} gateway.</p>
+                                        <p className="text-sm font-bold text-[var(--theme-text-primary)]">Transaction Completed</p>
+                                        <p className="text-xs text-[var(--theme-text-secondary)]">{formatDateTime(selectedSale.date, { showTime: true })}</p>
+                                        <p className="text-xs text-[var(--theme-text-secondary)] mt-1">Payment verified via {selectedSale.mobilePaymentChannel || selectedSale.method}{selectedSale.mobileTransactionRef ? ` (Ref: ${selectedSale.mobileTransactionRef})` : ''} gateway.</p>
                                     </div>
                                 </div>
 
@@ -180,11 +187,11 @@ export const SalesDetailModal: React.FC<SalesDetailModalProps> = ({
                                 {auditLogs.length > 0 ? (
                                     auditLogs.map(log => (
                                         <div key={log.id} className="flex gap-4 relative">
-                                            <div className="w-6 h-6 rounded-full bg-sky-55 dark:bg-sky-500/10 text-sky-700 dark:text-sky-400 border border-sky-200/50 dark:border-sky-500/20 flex items-center justify-center z-10 shrink-0"><Shield size={14} /></div>
+                                            <div className="w-6 h-6 rounded-full bg-sky-500/10 text-sky-500 border border-sky-500/20 flex items-center justify-center z-10 shrink-0"><Shield size={14} /></div>
                                             <div>
-                                                <p className="text-sm font-bold text-[#1E3F27] dark:text-[#EAE5D9]">{log.type === 'OUT' ? 'Stock Deducted' : 'Stock Return'}</p>
-                                                <p className="text-xs text-stone-400 dark:text-gray-550">{formatDateTime(log.date, { showTime: true })}</p>
-                                                <div className="mt-2 bg-[#FAF8F5] dark:bg-black/35 border border-[#E2DCCE]/60 dark:border-white/5 p-2.5 rounded-xl text-[10px] font-mono text-stone-750 dark:text-gray-300">
+                                                <p className="text-sm font-bold text-[var(--theme-text-primary)]">{log.type === 'OUT' ? 'Stock Deducted' : 'Stock Return'}</p>
+                                                <p className="text-xs text-[var(--theme-text-secondary)]">{formatDateTime(log.date, { showTime: true })}</p>
+                                                <div className="mt-2 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] p-2.5 rounded-xl text-[10px] font-mono text-[var(--theme-text-secondary)]">
                                                     {log.type === 'OUT' ? '-' : '+'} {log.quantity} {log.productName} (ID: {log.productId})
                                                 </div>
                                             </div>
@@ -192,21 +199,21 @@ export const SalesDetailModal: React.FC<SalesDetailModalProps> = ({
                                     ))
                                 ) : (
                                     <div className="flex gap-4 relative">
-                                        <div className="w-6 h-6 rounded-full bg-stone-100 dark:bg-white/5 text-stone-600 dark:text-gray-400 border border-stone-250 dark:border-white/10 flex items-center justify-center z-10 shrink-0"><User size={14} /></div>
+                                        <div className="w-6 h-6 rounded-full bg-[var(--theme-bg-card)] text-[var(--theme-text-secondary)] border border-[var(--theme-border)] flex items-center justify-center z-10 shrink-0"><User size={14} /></div>
                                         <div>
-                                            <p className="text-sm font-bold text-[#1E3F27] dark:text-[#EAE5D9]">System Log</p>
-                                            <p className="text-xs text-stone-400 dark:text-gray-550">No detailed movement logs found for this legacy transaction.</p>
+                                            <p className="text-sm font-bold text-[var(--theme-text-primary)]">System Log</p>
+                                            <p className="text-xs text-[var(--theme-text-secondary)]">No detailed movement logs found for this transaction.</p>
                                         </div>
                                     </div>
                                 )}
 
                                 {/* Footer Event */}
                                 <div className="flex gap-4 relative">
-                                    <div className="w-6 h-6 rounded-full bg-stone-100 dark:bg-white/5 text-stone-600 dark:text-gray-400 border border-stone-250 dark:border-white/10 flex items-center justify-center z-10 shrink-0"><User size={14} /></div>
+                                    <div className="w-6 h-6 rounded-full bg-[var(--theme-bg-card)] text-[var(--theme-text-secondary)] border border-[var(--theme-border)] flex items-center justify-center z-10 shrink-0"><User size={14} /></div>
                                     <div>
-                                        <p className="text-sm font-bold text-[#1E3F27] dark:text-[#EAE5D9]">Session Active</p>
-                                        <p className="text-xs text-stone-400 dark:text-gray-550">Cashier: {selectedSale.cashierName}</p>
-                                        <p className="text-xs text-stone-500 dark:text-gray-450 mt-1">Terminal ID: POS-01</p>
+                                        <p className="text-sm font-bold text-[var(--theme-text-primary)]">Session Active</p>
+                                        <p className="text-xs text-[var(--theme-text-secondary)]">Cashier: {selectedSale.cashierName}</p>
+                                        <p className="text-xs text-[var(--theme-text-secondary)] mt-1">Terminal ID: POS-01</p>
                                     </div>
                                 </div>
                             </div>
@@ -214,20 +221,22 @@ export const SalesDetailModal: React.FC<SalesDetailModalProps> = ({
                     </div>
 
                     {/* Footer Actions */}
-                    <div className="flex gap-3 mt-6 pt-4 border-t border-[#E2DCCE]/60 dark:border-white/10 border-dashed">
+                    <div className="flex gap-3 mt-6 pt-4 border-t border-[var(--theme-border)]">
                         <button
+                            type="button"
                             onClick={handleReprint}
-                            className="flex-1 py-3 bg-stone-100 dark:bg-white/5 hover:bg-[#2C5E3B]/10 dark:hover:bg-white/10 border border-[#E2DCCE] dark:border-white/10 rounded-2xl text-[#1E3F27] dark:text-white font-bold flex items-center justify-center gap-2 transition-all active:scale-[0.98]"
+                            className="flex-1 py-3 bg-[var(--theme-bg-panel)] hover:bg-[var(--theme-bg-panel-hover)] border border-[var(--theme-border)] rounded-xl text-[var(--theme-text-primary)] font-bold flex items-center justify-center gap-2 transition-all active:scale-[0.98] cursor-pointer"
                         >
                             <Printer size={18} /> Reprint
                         </button>
                         <Protected permission="REFUND_SALE">
                             <button
+                                type="button"
                                 onClick={() => {
                                     addNotification('info', `Initiating Return Workflow for ${selectedSale.receiptNumber || selectedSale.id.substring(0, 12)}...`);
                                     onClose();
                                 }}
-                                className="flex-1 py-3 bg-rose-50 dark:bg-rose-500/10 hover:bg-rose-100 dark:hover:bg-rose-500/20 border border-rose-200 dark:border-rose-500/30 rounded-2xl text-rose-700 dark:text-rose-455 font-bold flex items-center justify-center gap-2 transition-all active:scale-[0.98]"
+                                className="flex-1 py-3 bg-rose-500/10 text-rose-600 dark:text-rose-400 hover:bg-rose-500/20 border border-rose-500/20 rounded-xl font-bold flex items-center justify-center gap-2 transition-all active:scale-[0.98] cursor-pointer"
                             >
                                 <RotateCcw size={18} /> Issue Return
                             </button>

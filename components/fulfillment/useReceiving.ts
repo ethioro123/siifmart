@@ -1,17 +1,19 @@
 import { useCallback } from 'react';
 import {
-    WMSJob, Product, PurchaseOrder, POReceivingInput
+    WMSJob, Product, PurchaseOrder, POReceivingInput, SystemConfig
 } from '../../types';
 import {
     wmsJobsService,
     purchaseOrdersService,
-    productsService
+    productsService,
+    systemLogsService
 } from '../../services/supabase.service';
 import { logger } from '../../utils/logger';
 import { useReceivingSplit } from './useReceivingSplit';
 
 
 import { convertToSellableUnits } from '../procurement/utils';
+import { resolveReceivingPolicy } from '../../utils/receivingPolicy';
 export { convertToSellableUnits };
 
 // ─── Hook Dependencies ──────────────────────────────────────────────────────
@@ -29,6 +31,7 @@ interface UseReceivingDeps {
     addNotification: (type: 'alert' | 'success' | 'info', message: string) => void;
     setProducts?: React.Dispatch<React.SetStateAction<Product[]>>;
     setAllProducts?: React.Dispatch<React.SetStateAction<Product[]>>;
+    settings?: SystemConfig;
 }
 
 // ─── Hook ───────────────────────────────────────────────────────────────────
@@ -37,7 +40,7 @@ export const useReceiving = (deps: UseReceivingDeps) => {
     const {
         orders, allOrders, jobs, products, allProducts,
         activeSite, setJobs, setOrders, setAllOrders, addNotification,
-        setProducts, setAllProducts
+        setProducts, setAllProducts, settings
     } = deps;
 
     const { receivePOSplit } = useReceivingSplit(deps);
@@ -58,6 +61,7 @@ export const useReceiving = (deps: UseReceivingDeps) => {
             if (!po.lineItems) return;
 
             const targetSiteId = po.siteId || po.site_id;
+            const policy = resolveReceivingPolicy(settings, activeSite?.country);
 
             // Filter for items that have received quantity > 0
             const itemsToProcess = receivedItems
@@ -81,14 +85,15 @@ export const useReceiving = (deps: UseReceivingDeps) => {
                 const decision = skuDecisions ? skuDecisions[lineItem.sku || ''] : 'keep';
                 const scannedSku = scannedSkus ? scannedSkus[lineItem.sku || ''] : null;
 
+                const cleanSku = (s?: string) => s ? s.replace(/[-\s]/g, '').toUpperCase() : '';
                 // 2. Check if the product already exists in the TARGET SITE
                 let localProduct = allProducts.find(p => 
-                    (p.id === targetProductId || p.sku === productSku) && 
+                    (p.id === targetProductId || (productSku && cleanSku(p.sku) === cleanSku(productSku))) && 
                     (p.siteId === targetSiteId || (p as any).site_id === targetSiteId)
                 );
                 if (!localProduct) {
                     localProduct = products.find(p => 
-                        (p.id === targetProductId || p.sku === productSku) && 
+                        (p.id === targetProductId || (productSku && cleanSku(p.sku) === cleanSku(productSku))) && 
                         (p.siteId === targetSiteId || (p as any).site_id === targetSiteId)
                     );
                 }
@@ -106,7 +111,7 @@ export const useReceiving = (deps: UseReceivingDeps) => {
                     if (!localProduct.brand && lineItem.brand) updates.brand = lineItem.brand;
                     if (!localProduct.unit && lineItem.unit) updates.unit = lineItem.unit;
                     if (!localProduct.category && lineItem.category) updates.category = lineItem.category;
-                    if (lineItem.retailPrice && lineItem.retailPrice > 0 && lineItem.retailPrice !== localProduct.price) {
+                    if (policy.poPriceApplyAt === 'receive' && lineItem.retailPrice && lineItem.retailPrice > 0 && lineItem.retailPrice !== localProduct.price) {
                         updates.price = lineItem.retailPrice;
                         updates.priceUpdatedAt = new Date().toISOString();
                         if (targetSiteId && lineItem.sku) {
@@ -237,13 +242,33 @@ export const useReceiving = (deps: UseReceivingDeps) => {
 
             addNotification('success', `Created ${newJobs.length} putaway jobs for PO ${po.poNumber}`);
 
+            try {
+                await systemLogsService.create({
+                    action: 'PO_GOODS_RECEIVED',
+                    module: 'Fulfillment',
+                    user_name: actionUser?.name || 'Receiver',
+                    site_id: targetSiteId,
+                    country_code: activeSite?.country || 'ET',
+                    entity_type: 'purchase_order',
+                    entity_id: poId,
+                    details: {
+                        poNumber: po.poNumber,
+                        itemsCount: newJobs.length,
+                        itemsProcessed: itemsToProcess.length,
+                        receivedBy: actionUser?.name,
+                    },
+                });
+            } catch (logErr) {
+                logger.warn('useReceiving', 'Non-blocking audit log failure:', { error: logErr instanceof Error ? logErr.message : String(logErr) });
+            }
+
             return newJobs;
         } catch (error: any) {
             logger.error('useReceiving', 'Error receiving PO', error as Error);
             addNotification('alert', error.message || 'Failed to receive PO');
             throw error;
         }
-    }, [orders, allOrders, products, allProducts, activeSite, setJobs, setOrders, setAllOrders, addNotification, setProducts, setAllProducts]);
+    }, [orders, allOrders, products, allProducts, activeSite, setJobs, setOrders, setAllOrders, addNotification, setProducts, setAllProducts, settings]);
 
 
 
@@ -251,44 +276,81 @@ export const useReceiving = (deps: UseReceivingDeps) => {
 
     const finalizePO = useCallback(async (poId: string) => {
         try {
-            const po = orders.find(o => o.id === poId);
+            const po = orders.find(o => o.id === poId) || allOrders.find(o => o.id === poId);
             if (!po) throw new Error('PO not found');
+
+            const cleanSku = (s?: string) => s ? s.replace(/[-\s]/g, '').toUpperCase() : '';
 
             // Calculate if full or partial
             const poJobs = jobs.filter(j => (j.orderRef === poId || (po.po_number && j.orderRef === po.po_number) || (po.poNumber && j.orderRef === po.poNumber)) && j.type === 'PUTAWAY');
             const receivedMap: Record<string, number> = {};
             poJobs.forEach(job => {
                 job.lineItems.forEach(item => {
-                    if (item.productId) {
-                        receivedMap[item.productId] = (receivedMap[item.productId] || 0) + item.expectedQty;
-                    }
-                    if (item.sku) {
-                        receivedMap[item.sku] = (receivedMap[item.sku] || 0) + item.expectedQty;
+                    const expected = item.expectedQty || (item as any).quantity || 0;
+                    if (expected <= 0) return;
+                    const canonKey = cleanSku(item.sku) || item.productId;
+                    if (canonKey) {
+                        receivedMap[canonKey] = (receivedMap[canonKey] || 0) + expected;
                     }
                 });
             });
 
-            const allReceived = po.lineItems?.every(item => {
-                const product = allProducts.find(p => p.id === item.productId || (item.sku && p.sku === item.sku));
-                const candidateKeys = [
-                    item.productId,
-                    item.sku,
-                    product?.id,
-                    product?.sku
-                ].filter(Boolean) as string[];
-                
-                const received = candidateKeys.length > 0 
-                    ? candidateKeys.reduce((max, k) => Math.max(max, receivedMap[k] || 0), 0)
-                    : 0;
+            const updatedLineItems = (po.lineItems || []).map((item: any) => {
+                const product = allProducts.find(p => p.id === item.productId || (item.sku && cleanSku(p.sku) === cleanSku(item.sku)));
+                const canonKey = cleanSku(item.sku) || cleanSku(product?.sku) || item.productId || product?.id || '';
+                const receivedFromJobs = canonKey ? (receivedMap[canonKey] || 0) : 0;
+                const received = Math.max(item.receivedQty || 0, receivedFromJobs);
+
+                return {
+                    ...item,
+                    receivedQty: received
+                };
+            });
+
+            const allReceived = updatedLineItems.every((item: any) => {
                 const expectedSellable = convertToSellableUnits(item.quantity, item);
-                return received >= expectedSellable;
+                return (item.receivedQty || 0) >= expectedSellable;
             });
 
             const status = allReceived ? 'Received' : 'Partially Received';
 
-            const updated = await purchaseOrdersService.update(poId, { status: status as any });
+            // 1. Update PO status and lineItems in DB
+            const updated = await purchaseOrdersService.update(poId, { 
+                status: status as any,
+                lineItems: updatedLineItems
+            });
             setOrders(prev => prev.map(o => o.id === poId ? updated : o));
             setAllOrders(prev => prev.map(o => o.id === poId ? updated : o));
+
+            // 2. Mark any matching WMS RECEIVE jobs as Completed
+            const receiveJobs = jobs.filter(j => 
+                j.type === 'RECEIVE' && 
+                (j.orderRef === poId || (po.poNumber && j.jobNumber === po.poNumber) || (po.po_number && j.jobNumber === po.po_number))
+            );
+            for (const rj of receiveJobs) {
+                try {
+                    await wmsJobsService.update(rj.id, {
+                        status: 'Completed',
+                        completedBy: po.receivedBy || 'System',
+                        completedAt: new Date().toISOString()
+                    });
+                } catch (e) {
+                    logger.error('useReceiving', 'finalizePO_updateReceiveJobs', e);
+                }
+            }
+
+            // 3. Update local jobs state so the RECEIVE job is shown as Completed
+            setJobs(prev => prev.map(j => {
+                if (j.type === 'RECEIVE' && (j.orderRef === poId || (po.poNumber && j.jobNumber === po.poNumber) || (po.po_number && j.jobNumber === po.po_number))) {
+                    return {
+                        ...j,
+                        status: 'Completed' as const,
+                        completedBy: po.receivedBy || 'System',
+                        completedAt: new Date().toISOString()
+                    };
+                }
+                return j;
+            }));
 
             addNotification('success', `PO #${po.poNumber || po.po_number} finalized as ${status}`);
         } catch (error) {
@@ -296,7 +358,7 @@ export const useReceiving = (deps: UseReceivingDeps) => {
             addNotification('alert', 'Failed to finalize PO');
             throw error;
         }
-    }, [orders, jobs, allProducts, setOrders, setAllOrders, addNotification]);
+    }, [orders, allOrders, jobs, allProducts, setOrders, setAllOrders, setJobs, addNotification]);
 
     return { receivePO, receivePOSplit, finalizePO };
 };

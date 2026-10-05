@@ -3,7 +3,7 @@ import { usePOS } from '../POSContext';
 import { useData } from '../../../contexts/DataContext';
 import Modal from '../../Modal';
 import { CURRENCY_SYMBOL } from '../../../constants';
-import { formatCompactNumber, formatDateTime } from '../../../utils/formatting';
+import { formatCompactNumber, formatDateTime, maskPhoneNumber } from '../../../utils/formatting';
 import { Search, User, CheckCircle } from 'lucide-react';
 
 export const CustomerSelectionModal: React.FC = () => {
@@ -25,12 +25,12 @@ export const CustomerSelectionModal: React.FC = () => {
     return (
         <Modal isOpen={isCustomerModalOpen} onClose={() => setIsCustomerModalOpen(false)} title="Select Customer" size="lg">
             <div className="space-y-4">
-                <div className="flex items-center bg-white dark:bg-black/30 border border-[#E2DCCE] dark:border-white/10 rounded-xl px-4 py-3 focus-within:border-[#2C5E3B] dark:focus-within:border-[#A9CBA2] transition-colors">
-                    <Search className="w-5 h-5 text-[#4D6E56] dark:text-[#7A9E83]" />
+                <div className="flex items-center bg-[var(--theme-bg-panel)] border border-[var(--theme-border)] rounded-xl px-4 py-3 focus-within:border-[var(--theme-border-strong)] transition-colors">
+                    <Search className="w-5 h-5 text-[var(--theme-text-secondary)]" />
                     <input
                         type="text"
                         placeholder="Search by name, phone, or email..."
-                        className="bg-transparent border-none ml-3 flex-1 text-[#1E3F27] dark:text-white outline-none placeholder-stone-400 dark:placeholder-stone-500"
+                        className="bg-transparent border-none ml-3 flex-1 text-[var(--theme-text-primary)] outline-none placeholder-[var(--theme-text-muted)] text-sm"
                         value={customerSearchTerm}
                         onChange={(e) => setCustomerSearchTerm(e.target.value)}
                         autoFocus
@@ -41,51 +41,54 @@ export const CustomerSelectionModal: React.FC = () => {
                     {/* Customer List */}
                     <div className="max-h-96 overflow-y-auto custom-scrollbar space-y-2">
                         <button
+                            type="button"
                             onClick={() => {
                                 setSelectedCustomer(null);
                                 setIsCustomerModalOpen(false);
                                 addNotification('info', 'Customer set to Walk-in');
                             }}
-                            className={`w-full text-left p-3 rounded-xl border transition-colors flex items-center justify-between ${!selectedCustomer
-                                ? 'bg-[#2C5E3B]/10 border-[#2C5E3B] dark:border-[#A9CBA2] text-[#2C5E3B] dark:text-[#A9CBA2]'
-                                : 'bg-white/90 dark:bg-black/25 border-[#E2DCCE] dark:border-white/5 text-stone-700 dark:text-gray-300 hover:bg-white dark:hover:bg-[#18201B]/40 hover:border-[#2C5E3B]/30'
-                                 }`}
+                            className={`w-full text-left p-3 rounded-xl border transition-all flex items-center justify-between cursor-pointer active:scale-[0.98] ${!selectedCustomer
+                                ? 'bg-[var(--theme-bg-card)] border-[var(--theme-border-strong)] text-[var(--theme-text-primary)] ring-1 ring-[var(--theme-border-strong)]'
+                                : 'bg-[var(--theme-bg-panel)] border-[var(--theme-border)] text-[var(--theme-text-secondary)] hover:bg-[var(--theme-bg-panel-hover)]'
+                            }`}
                         >
                             <div>
-                                <p className="font-bold">Walk-in Customer</p>
-                                <p className="text-xs opacity-70">Default guest account</p>
+                                <p className="font-bold text-[var(--theme-text-primary)]">Walk-in Customer</p>
+                                <p className="text-xs text-[var(--theme-text-muted)]">Default guest account</p>
                             </div>
-                            {!selectedCustomer && <CheckCircle size={16} className="text-[#2C5E3B] dark:text-[#A9CBA2]" />}
+                            {!selectedCustomer && <CheckCircle size={16} className="text-emerald-500" />}
                         </button>
 
                         {filteredCustomers.map(customer => {
                             const stats = getCustomerStats(customer.id);
+                            const isSelected = selectedCustomer?.id === customer.id;
                             return (
                                 <button
                                     key={customer.id}
+                                    type="button"
                                     onClick={() => handleSelectCustomer(customer)}
-                                    className={`w-full text-left p-3 rounded-xl border transition-colors ${selectedCustomer?.id === customer.id
-                                        ? 'bg-[#2C5E3B]/10 border-[#2C5E3B] dark:border-[#A9CBA2] text-[#2C5E3B] dark:text-[#A9CBA2]'
-                                        : 'bg-white/90 dark:bg-black/25 border-[#E2DCCE] dark:border-white/5 text-stone-700 dark:text-gray-300 hover:bg-white dark:hover:bg-[#18201B]/40 hover:border-[#2C5E3B]/30'
-                                         }`}
+                                    className={`w-full text-left p-3 rounded-xl border transition-all cursor-pointer active:scale-[0.98] ${isSelected
+                                        ? 'bg-[var(--theme-bg-card)] border-[var(--theme-border-strong)] text-[var(--theme-text-primary)] ring-1 ring-[var(--theme-border-strong)]'
+                                        : 'bg-[var(--theme-bg-panel)] border-[var(--theme-border)] text-[var(--theme-text-secondary)] hover:bg-[var(--theme-bg-panel-hover)]'
+                                    }`}
                                 >
                                     <div className="flex items-start justify-between">
                                         <div className="flex-1">
-                                            <p className="font-bold">{customer.name}</p>
-                                            <p className="text-xs opacity-70">{customer.phone} • {customer.email}</p>
+                                            <p className="font-bold text-[var(--theme-text-primary)]">{customer.name}</p>
+                                            <p className="text-xs text-[var(--theme-text-secondary)] font-mono">{maskPhoneNumber(customer.phone)} • {customer.email}</p>
                                             <div className="flex gap-3 mt-1 text-[10px]">
-                                                <span className="text-[#2C5E3B] dark:text-[#A9CBA2] font-semibold">{stats.totalVisits} visits</span>
-                                                <span className="text-[#4D6E56] dark:text-gray-400">{formatCompactNumber(stats.totalSpent, { currency: CURRENCY_SYMBOL })} spent</span>
+                                                <span className="text-emerald-600 dark:text-emerald-400 font-semibold">{stats.totalVisits} visits</span>
+                                                <span className="text-[var(--theme-text-muted)]">{formatCompactNumber(stats.totalSpent, { currency: CURRENCY_SYMBOL })} spent</span>
                                             </div>
                                         </div>
-                                        {selectedCustomer?.id === customer.id && <CheckCircle size={16} className="text-[#2C5E3B] dark:text-[#A9CBA2]" />}
+                                        {isSelected && <CheckCircle size={16} className="text-emerald-500" />}
                                     </div>
                                 </button>
                             );
                         })}
 
                         {filteredCustomers.length === 0 && (
-                            <div className="text-center py-8 text-[#4D6E56] dark:text-gray-400 font-medium">
+                            <div className="text-center py-8 text-[var(--theme-text-muted)] font-medium">
                                 <User size={32} className="mx-auto mb-2 opacity-50" />
                                 <p>No customers found</p>
                             </div>
@@ -94,38 +97,38 @@ export const CustomerSelectionModal: React.FC = () => {
 
                     {/* Customer History Panel */}
                     {selectedCustomer && (
-                        <div className="bg-white/50 dark:bg-black/25 border border-[#E2DCCE] dark:border-white/5 rounded-xl p-4">
-                            <h3 className="font-bold text-[#1E3F27] dark:text-[#EAE5D9] mb-3 flex items-center gap-2">
-                                <User size={16} className="text-[#2C5E3B] dark:text-[#A9CBA2]" />
+                        <div className="bg-[var(--theme-bg-panel)] border border-[var(--theme-border)] rounded-xl p-4">
+                            <h3 className="font-bold text-[var(--theme-text-primary)] mb-3 flex items-center gap-2">
+                                <User size={16} className="text-[var(--theme-text-secondary)]" />
                                 Customer Details
                             </h3>
 
                             <div className="space-y-3">
                                 <div className="grid grid-cols-2 gap-3">
-                                    <div className="bg-white/90 dark:bg-black/35 border border-[#E2DCCE] dark:border-white/10 p-3 rounded-lg">
-                                        <p className="text-xs text-[#4D6E56] dark:text-gray-400 font-medium">Total Visits</p>
-                                        <p className="text-xl font-bold text-[#1E3F27] dark:text-[#EAE5D9]">{getCustomerStats(selectedCustomer.id).totalVisits}</p>
+                                    <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] p-3 rounded-lg">
+                                        <p className="text-xs text-[var(--theme-text-secondary)] font-medium">Store Visits</p>
+                                        <p className="text-xl font-bold text-[var(--theme-text-primary)]">{getCustomerStats(selectedCustomer.id).totalVisits}</p>
                                     </div>
-                                    <div className="bg-white/90 dark:bg-black/35 border border-[#E2DCCE] dark:border-white/10 p-3 rounded-lg">
-                                        <p className="text-xs text-[#4D6E56] dark:text-gray-400 font-medium">Total Spent</p>
-                                        <p className="text-xl font-bold text-[#2C5E3B] dark:text-[#A9CBA2]">{formatCompactNumber(getCustomerStats(selectedCustomer.id).totalSpent, { currency: CURRENCY_SYMBOL })}</p>
+                                    <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] p-3 rounded-lg">
+                                        <p className="text-xs text-[var(--theme-text-secondary)] font-medium">Store Spent</p>
+                                        <p className="text-xl font-bold text-emerald-600 dark:text-emerald-400">{formatCompactNumber(getCustomerStats(selectedCustomer.id).totalSpent, { currency: CURRENCY_SYMBOL })}</p>
                                     </div>
                                 </div>
 
                                 <div>
-                                    <p className="text-xs text-[#4D6E56] dark:text-gray-400 font-medium mb-2">Recent Purchases</p>
+                                    <p className="text-xs text-[var(--theme-text-secondary)] font-medium mb-2">Recent Store Purchases</p>
                                     <div className="space-y-2 max-h-48 overflow-y-auto custom-scrollbar">
                                         {getCustomerHistory(selectedCustomer.id).slice(0, 5).map((sale, idx) => (
-                                            <div key={idx} className="bg-white/90 dark:bg-black/35 border border-[#E2DCCE] dark:border-white/5 p-2 rounded text-xs">
-                                                <div className="flex justify-between">
-                                                    <span className="text-stone-700 dark:text-gray-300 font-medium">{formatDateTime(sale.date, { useRelative: true })}</span>
-                                                    <span className="text-[#2C5E3B] dark:text-[#A9CBA2] font-bold">{formatCompactNumber(sale.total, { currency: CURRENCY_SYMBOL })}</span>
+                                            <div key={idx} className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] p-2.5 rounded-lg text-xs">
+                                                <div className="flex justify-between items-center">
+                                                    <span className="text-[var(--theme-text-secondary)] font-medium">{formatDateTime(sale.date, { useRelative: true })}</span>
+                                                    <span className="text-[var(--theme-text-primary)] font-bold">{formatCompactNumber(sale.total, { currency: CURRENCY_SYMBOL })}</span>
                                                 </div>
-                                                <p className="text-[#4D6E56] dark:text-gray-400 text-[10px] mt-1">{sale.items.length} items</p>
+                                                <p className="text-[var(--theme-text-muted)] text-[10px] mt-1">{sale.items.length} items</p>
                                             </div>
                                         ))}
                                         {getCustomerHistory(selectedCustomer.id).length === 0 && (
-                                            <p className="text-[#4D6E56] dark:text-gray-400 text-xs italic">No purchase history</p>
+                                            <p className="text-[var(--theme-text-muted)] text-xs italic">No purchase history at this store</p>
                                         )}
                                     </div>
                                 </div>
@@ -134,10 +137,11 @@ export const CustomerSelectionModal: React.FC = () => {
                     )}
                 </div>
 
-                <div className="pt-4 border-t border-[#E2DCCE] dark:border-white/10 flex justify-end">
+                <div className="pt-4 border-t border-[var(--theme-border)] flex justify-end">
                     <button
+                        type="button"
                         onClick={() => setIsCustomerModalOpen(false)}
-                        className="px-6 py-2 bg-white/90 dark:bg-black/35 border border-[#E2DCCE] dark:border-white/10 hover:bg-[#2C5E3B]/10 hover:text-[#2C5E3B] dark:hover:text-white text-stone-700 dark:text-stone-300 rounded-lg transition-colors font-bold text-sm"
+                        className="px-6 py-2 bg-[var(--theme-bg-panel)] border border-[var(--theme-border)] hover:bg-[var(--theme-bg-panel-hover)] text-[var(--theme-text-primary)] rounded-xl transition-all font-bold text-sm cursor-pointer active:scale-[0.98]"
                     >
                         Cancel
                     </button>

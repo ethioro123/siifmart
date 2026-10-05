@@ -31,10 +31,10 @@ export interface WMSSettingsPayload {
 }
 
 // ── EXPLICIT ALLOWLISTS PER SECTION ──
-const ALLOWED_FIELDS: Record<WMSSection, (keyof SystemConfig)[]> = {
-  inbound: ['receivingLogic', 'qcSamplingRate', 'qcBlockOnFailure', 'putawayLogic'],
-  health: ['rotationPolicy', 'requireExpiry', 'cycleCountStrategy'],
-  outbound: ['pickingMethod', 'strictScanning', 'bayScan'],
+export const ALLOWED_FIELDS: Record<WMSSection, (keyof SystemConfig)[]> = {
+  inbound: ['receivingLogic', 'qcSamplingRate', 'qcBlockOnFailure', 'putawayLogic', 'overReceiveTolerancePct', 'poPriceApplyAt', 'printPriceTagAt', 'requirePutawayQuantityEntry'],
+  health: ['rotationPolicy', 'requireExpiry', 'cycleCountStrategy', 'maxCycleCountRecounts', 'requireSecondCounterOnVariance'],
+  outbound: ['pickingMethod', 'strictScanning', 'bayScan', 'requirePickQuantityEntry', 'requirePackSecuritySeal', 'requirePackCartonWeight', 'packWeightTolerancePct'],
 };
 
 export function useWMSSettingsMutation() {

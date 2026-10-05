@@ -1,5 +1,5 @@
 import React from 'react';
-import { SaleRecord, ReturnItem, ReturnCondition, ReturnReason, User } from '../../../types';
+import { SaleRecord, ReturnItem, ReturnCondition, ReturnReason, User, Site } from '../../../types';
 import { CURRENCY_SYMBOL } from '../../../constants';
 
 interface UsePOSReturnActionsProps {
@@ -15,6 +15,7 @@ interface UsePOSReturnActionsProps {
     user: User | null;
     processReturn: any;
     addNotification: (type: 'alert' | 'success' | 'info', message: string, userId?: string, isGlobal?: boolean) => void;
+    activeSite?: Site | undefined;
 }
 
 export const usePOSReturnActions = ({
@@ -29,7 +30,8 @@ export const usePOSReturnActions = ({
     sales,
     user,
     processReturn,
-    addNotification
+    addNotification,
+    activeSite
 }: UsePOSReturnActionsProps) => {
 
     const handleSearchForReturn = React.useCallback(() => {
@@ -44,6 +46,14 @@ export const usePOSReturnActions = ({
             return sId === query || rNum === query || `tx-${sId}` === query || sId.replace(/[^a-z0-9]/g, '') === query.replace(/[^a-z0-9]/g, '');
         });
         if (sale) {
+            // Zero-Trust & National Sovereignty: Verify store boundary
+            const saleSiteId = sale.siteId || (sale as any).site_id;
+            if (activeSite?.id && saleSiteId && saleSiteId !== activeSite.id) {
+                setFoundSaleForReturn(null);
+                addNotification('alert', 'Zero-Trust Notice: This receipt belongs to a different store. Cross-store returns require Central HQ Manager transfer.');
+                return;
+            }
+
             setFoundSaleForReturn(sale);
             const initialConfig: Record<string, any> = {};
             sale.items.forEach(item => {
@@ -54,7 +64,7 @@ export const usePOSReturnActions = ({
             setFoundSaleForReturn(null);
             addNotification('alert', 'Transaction not found.');
         }
-    }, [sales, returnSearchId, setFoundSaleForReturn, setReturnConfig, addNotification]);
+    }, [sales, returnSearchId, activeSite, setFoundSaleForReturn, setReturnConfig, addNotification]);
 
     const updateReturnConfig = React.useCallback((itemId: string, field: string, value: any) => {
         setReturnConfig(prev => ({

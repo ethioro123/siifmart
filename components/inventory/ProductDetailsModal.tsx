@@ -15,6 +15,7 @@ import { productsService, inventoryRequestsService } from '../../services/supaba
 import { ProductAttributesPanel } from './components/ProductAttributesPanel';
 import { ProductLocationBreakdown } from './components/ProductLocationBreakdown';
 import { ProductProfileHeader } from './components/ProductProfileHeader';
+import { parseBatchNumber } from '../../utils/batchNumber';
 
 interface ProductDetailsModalProps {
     product: Product | null;
@@ -28,13 +29,13 @@ const DetailField = ({ label, value, icon: Icon, colorClass, highlight }: { labe
         <div className={`p-3 rounded-xl flex items-start gap-3 border ${
             highlight 
                 ? 'bg-amber-500/5 border-amber-500/20 dark:bg-amber-400/5 dark:border-amber-400/10' 
-                : 'bg-stone-50/50 dark:bg-black/10 border-stone-200/50 dark:border-white/5'
+                : 'bg-[var(--theme-bg-subtle)] border-[var(--theme-border)]'
         }`}>
-            {Icon && <Icon size={14} className={`mt-0.5 flex-shrink-0 ${colorClass || 'text-[#2C5E3B] dark:text-[#A9CBA2]'}`} />}
+            {Icon && <Icon size={14} className={`mt-0.5 flex-shrink-0 ${colorClass || 'text-[var(--theme-text-primary)]'}`} />}
             <div className="space-y-0.5 min-w-0 flex-1">
-                <span className="text-[9px] text-gray-500 font-bold uppercase tracking-wider block">{label}</span>
-                <div className="text-xs font-black text-gray-950 dark:text-stone-100 leading-tight">
-                    {value !== undefined && value !== null && value !== '' ? value : <span className="text-gray-300 dark:text-gray-650 font-bold">—</span>}
+                <span className="text-[9px] text-[var(--theme-text-muted)] font-medium uppercase tracking-wider block">{label}</span>
+                <div className="text-xs font-semibold text-[var(--theme-text-primary)] leading-tight">
+                    {value !== undefined && value !== null && value !== '' ? value : <span className="text-[var(--theme-text-muted)] font-medium">—</span>}
                 </div>
             </div>
         </div>
@@ -94,13 +95,14 @@ export const ProductDetailsModal: React.FC<ProductDetailsModalProps> = ({ produc
     const isCEO = user?.role === 'super_admin' || (user?.role as string)?.toLowerCase() === 'ceo';
     const isWarehouseManager = user?.role === 'warehouse_manager';
     const isStoreManager = user?.role === 'store_manager';
-    const showDeleteButton = isCEO || isStoreManager || isWarehouseManager;
-    const isDeleteDisabled = (isStoreManager || isWarehouseManager) && product.stock > 0;
+    const isSeniorOperations = ['regional_manager', 'operations_manager'].includes(user?.role || '');
+    const showDeleteButton = isCEO || isStoreManager || isWarehouseManager || isSeniorOperations;
+    const isDeleteDisabled = (isStoreManager || isWarehouseManager || isSeniorOperations) && product.stock > 0;
     // Only CEO can directly edit. Everyone else submits for CEO approval.
     const canDirectEdit = isCEO;
 
     const handleDelete = async () => {
-        if (!isCEO && !isStoreManager) return;
+        if (!isCEO && !isStoreManager && !isSeniorOperations && !isWarehouseManager) return;
         if (isCEO) {
             const confirmation = window.prompt(
                 `WARNING: You are about to permanently delete "${product.name}" (${product.sku}).\n` +
@@ -110,9 +112,9 @@ export const ProductDetailsModal: React.FC<ProductDetailsModalProps> = ({ produc
                 showToast('Deletion cancelled.', 'info');
                 return;
             }
-        } else if (isStoreManager) {
+        } else {
             if (product.stock > 0) {
-                showToast('Store Managers can only delete products that are out of stock.', 'error');
+                showToast('Managers can only delete products that are out of stock.', 'error');
                 return;
             }
             if (!window.confirm(`Are you sure you want to permanently delete "${product.name}"?`)) return;
@@ -198,23 +200,23 @@ export const ProductDetailsModal: React.FC<ProductDetailsModalProps> = ({ produc
 
     return (
         <Modal isOpen={isOpen} onClose={onClose} title="Product Profile & Inventory Console" size="xl" footer={modalFooter}>
-            <div className="flex flex-col gap-6 text-[#1E3F27] dark:text-[#EAE5D9]">
+            <div className="flex flex-col gap-6 text-[var(--theme-text-primary)]">
                 {/* Executive Hero Product Profile Header */}
                 <ProductProfileHeader product={product} showCostPrice={showCostPrice} currencySymbol={activeCurrency} />
 
                 {/* Multi-Site & Store Stock Locations */}
                 <ProductLocationBreakdown product={product} locationBreakdown={locationBreakdown} />
 
-                <div className="bg-white dark:bg-black/15 p-5 rounded-2xl border border-stone-200 dark:border-white/5 space-y-4 shadow-sm">
-                    <div className="flex items-center justify-between border-b border-stone-100 dark:border-white/5 pb-2">
+                <div className="bg-[var(--theme-bg-card)] p-5 rounded-2xl border border-[var(--theme-border)] space-y-4 shadow-sm">
+                    <div className="flex items-center justify-between border-b border-[var(--theme-border)] pb-2">
                         <div className="flex items-center gap-2">
-                            <Info size={14} className="text-[#2C5E3B]" />
-                            <h3 className="text-[10px] font-black uppercase tracking-wider">Product Specifications</h3>
+                            <Info size={14} className="text-[var(--theme-text-secondary)]" />
+                            <h3 className="text-[10px] font-bold uppercase tracking-wider">Product Specifications</h3>
                         </div>
                         <button
                             type="button"
                             onClick={() => setIsSmartUnitModalOpen(true)}
-                            className="px-2.5 py-1 text-[10px] font-black uppercase bg-[#2C5E3B]/10 hover:bg-[#2C5E3B]/20 text-[#2C5E3B] dark:text-[#A9CBA2] rounded-lg border border-[#2C5E3B]/25 flex items-center gap-1 transition-all cursor-pointer"
+                            className="px-2.5 py-1 text-[10px] font-bold uppercase bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card-hover)] text-[var(--theme-text-primary)] rounded-lg border border-[var(--theme-border)] flex items-center gap-1 transition-all cursor-pointer"
                         >
                             <Sparkles size={12} className="text-amber-500" />
                             <span>Smart Unit Spec</span>
@@ -228,7 +230,22 @@ export const ProductDetailsModal: React.FC<ProductDetailsModalProps> = ({ produc
                         <DetailField label="Sell Unit" value={unitObj ? `${unitObj.label} (${unitObj.shortLabel})` : product.unit} icon={Package} />
                         <DetailField label="Size / Weight" value={formatProductSize(product)} icon={Box} />
                         <DetailField label="Variant" value={customAttrs?.identity?.variant} icon={Tag} />
-                        <DetailField label="Batch / Lot No" value={product.batchNumber} icon={Layers} />
+                        <DetailField
+                            label="Batch / Lot No"
+                            value={product.batchNumber ? (
+                                <span className="flex flex-col">
+                                    <span className="font-mono">{product.batchNumber}</span>
+                                    {(() => {
+                                        const parsed = parseBatchNumber(product.batchNumber);
+                                        if (parsed.isStandard && parsed.formattedDate) {
+                                            return <span className="text-[9px] text-[var(--theme-text-primary)] font-semibold">Rcvd {parsed.formattedDate}</span>;
+                                        }
+                                        return null;
+                                    })()}
+                                </span>
+                            ) : null}
+                            icon={Layers}
+                        />
                         <DetailField label="Expiry Date" value={product.expiryDate ? `${new Date(product.expiryDate).toLocaleDateString()}${expiryAlert ? ` (${expiryAlert})` : ''}` : null} icon={Calendar} colorClass={expiryColor || undefined} />
                         <DetailField label="Shelf Position" value={product.shelfPosition} icon={Layers} />
                         <DetailField label="Storage Location" value={product.location} icon={Building2} />
@@ -237,10 +254,10 @@ export const ProductDetailsModal: React.FC<ProductDetailsModalProps> = ({ produc
                     </div>
                 </div>
 
-                <div className="bg-white dark:bg-black/15 p-5 rounded-2xl border border-stone-200 dark:border-white/5 space-y-4 shadow-sm">
-                    <div className="flex items-center gap-2 border-b border-stone-100 dark:border-white/5 pb-2">
-                        <DollarSign size={14} className="text-[#2C5E3B]" />
-                        <h3 className="text-[10px] font-black uppercase tracking-wider">Financial & Pricing Details</h3>
+                <div className="bg-[var(--theme-bg-card)] p-5 rounded-2xl border border-[var(--theme-border)] space-y-4 shadow-sm">
+                    <div className="flex items-center gap-2 border-b border-[var(--theme-border)] pb-2">
+                        <DollarSign size={14} className="text-[var(--theme-text-secondary)]" />
+                        <h3 className="text-[10px] font-bold uppercase tracking-wider">Financial & Pricing Details</h3>
                     </div>
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                         <DetailField label="Retail Price" value={`${activeCurrency} ${formatPriceValue(product.price)}`} icon={DollarSign} />
@@ -249,7 +266,7 @@ export const ProductDetailsModal: React.FC<ProductDetailsModalProps> = ({ produc
                         {compPrice > 0 && <DetailField label="Competitor Price" value={`${activeCurrency} ${formatPriceValue(compPrice)}`} icon={compDiff > 0 ? TrendingDown : TrendingUp} colorClass={compDiff > 0 ? 'text-red-500' : 'text-green-500'} />}
                         {showCostPrice && (
                             <>
-                                <DetailField label="Cost Price (COGS)" value={cost > 0 ? `${activeCurrency} ${formatPriceValue(cost)}` : null} icon={Lock} colorClass="text-stone-400" />
+                                <DetailField label="Cost Price (COGS)" value={cost > 0 ? `${activeCurrency} ${formatPriceValue(cost)}` : null} icon={Lock} colorClass="text-[var(--theme-text-muted)]" />
                                 <DetailField label="Gross Profit" value={grossProfit > 0 ? `${activeCurrency} ${grossProfit.toFixed(2)}` : null} icon={TrendingUp} />
                                 <DetailField label="Gross Margin" value={marginPct > 0 ? `${marginPct.toFixed(1)}%` : null} icon={Percent} />
                                 <DetailField label="Markup Rate" value={markupPct > 0 ? `${markupPct.toFixed(1)}%` : null} icon={Percent} />
@@ -261,36 +278,36 @@ export const ProductDetailsModal: React.FC<ProductDetailsModalProps> = ({ produc
                 <ProductAttributesPanel product={product} />
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="bg-white dark:bg-black/15 p-5 rounded-2xl border border-stone-200 dark:border-white/5 space-y-4 shadow-sm">
-                        <div className="flex items-center justify-between border-b border-stone-100 dark:border-white/5 pb-2">
-                            <div className="flex items-center gap-2"><Layers size={14} className="text-[#2C5E3B]"/><h3 className="text-[10px] font-black uppercase tracking-wider">Stock Policies</h3></div>
-                            {canEditThresholds && !isEditingThresholds && <button onClick={() => setIsEditingThresholds(true)} className="px-2 py-0.5 text-[9px] font-black uppercase bg-[#2C5E3B]/10 hover:bg-[#2C5E3B]/20 text-[#2C5E3B] dark:text-[#A9CBA2] rounded-lg border border-[#2C5E3B]/25">Edit</button>}
+                    <div className="bg-[var(--theme-bg-card)] p-5 rounded-2xl border border-[var(--theme-border)] space-y-4 shadow-sm">
+                        <div className="flex items-center justify-between border-b border-[var(--theme-border)] pb-2">
+                            <div className="flex items-center gap-2"><Layers size={14} className="text-[var(--theme-text-secondary)]"/><h3 className="text-[10px] font-bold uppercase tracking-wider">Stock Policies</h3></div>
+                            {canEditThresholds && !isEditingThresholds && <button onClick={() => setIsEditingThresholds(true)} className="px-2 py-0.5 text-[9px] font-bold uppercase bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card-hover)] text-[var(--theme-text-primary)] rounded-lg border border-[var(--theme-border)]">Edit</button>}
                         </div>
                         {!isEditingThresholds ? (
                             <div className="grid grid-cols-2 gap-3">
-                                <div className="p-3 bg-stone-50 dark:bg-white/[0.02] rounded-xl border border-stone-200/50 dark:border-white/5 text-center">
-                                    <span className="text-[9px] text-gray-500 font-bold uppercase block">Min Stock</span>
+                                <div className="p-3 bg-[var(--theme-bg-subtle)] rounded-xl border border-[var(--theme-border)] text-center">
+                                    <span className="text-[9px] text-[var(--theme-text-muted)] font-medium uppercase block">Min Stock</span>
                                     <span className="text-sm font-mono font-bold text-amber-600 dark:text-amber-400 block mt-1">{product.minStock !== undefined && product.minStock !== null ? `${product.minStock} units` : '—'}</span>
                                 </div>
-                                <div className="p-3 bg-stone-50 dark:bg-white/[0.02] rounded-xl border border-stone-200/50 dark:border-white/5 text-center">
-                                    <span className="text-[9px] text-gray-500 font-bold uppercase block">Max Stock</span>
-                                    <span className="text-sm font-mono font-bold text-green-600 dark:text-green-400 block mt-1">{product.maxStock !== undefined && product.maxStock !== null ? `${product.maxStock} units` : '—'}</span>
+                                <div className="p-3 bg-[var(--theme-bg-subtle)] rounded-xl border border-[var(--theme-border)] text-center">
+                                    <span className="text-[9px] text-[var(--theme-text-muted)] font-medium uppercase block">Max Stock</span>
+                                    <span className="text-sm font-mono font-bold text-emerald-600 dark:text-emerald-400 block mt-1">{product.maxStock !== undefined && product.maxStock !== null ? `${product.maxStock} units` : '—'}</span>
                                 </div>
                             </div>
                         ) : (
                             <div className="space-y-3">
                                 <div className="grid grid-cols-2 gap-2">
                                     <div>
-                                        <label htmlFor="min-stock-input" className="text-[8px] text-gray-500 font-bold uppercase block mb-1">Min Stock</label>
-                                        <input id="min-stock-input" type="number" min="0" value={minVal} onChange={(e) => setMinVal(e.target.value === '' ? '' : Math.max(0, parseInt(e.target.value) || 0))} placeholder="e.g. 10" className="w-full bg-gray-100 dark:bg-black/40 border border-stone-200 rounded-lg px-2.5 py-1.5 text-xs font-mono focus:outline-none" />
+                                        <label htmlFor="min-stock-input" className="text-[8px] text-[var(--theme-text-muted)] font-medium uppercase block mb-1">Min Stock</label>
+                                        <input id="min-stock-input" type="number" min="0" value={minVal} onChange={(e) => setMinVal(e.target.value === '' ? '' : Math.max(0, parseInt(e.target.value) || 0))} placeholder="e.g. 10" className="w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-lg px-2.5 py-1.5 text-xs font-mono focus:border-[var(--theme-accent)] focus:outline-none" />
                                     </div>
                                     <div>
-                                        <label htmlFor="max-stock-input" className="text-[8px] text-gray-500 font-bold uppercase block mb-1">Max Stock</label>
-                                        <input id="max-stock-input" type="number" min="0" value={maxVal} onChange={(e) => setMaxVal(e.target.value === '' ? '' : Math.max(0, parseInt(e.target.value) || 0))} placeholder="e.g. 100" className="w-full bg-gray-100 dark:bg-black/40 border border-stone-200 rounded-lg px-2.5 py-1.5 text-xs font-mono focus:outline-none" />
+                                        <label htmlFor="max-stock-input" className="text-[8px] text-[var(--theme-text-muted)] font-medium uppercase block mb-1">Max Stock</label>
+                                        <input id="max-stock-input" type="number" min="0" value={maxVal} onChange={(e) => setMaxVal(e.target.value === '' ? '' : Math.max(0, parseInt(e.target.value) || 0))} placeholder="e.g. 100" className="w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-lg px-2.5 py-1.5 text-xs font-mono focus:border-[var(--theme-accent)] focus:outline-none" />
                                     </div>
                                 </div>
                                 <div className="flex gap-1.5 justify-end pt-1">
-                                    <button onClick={() => setIsEditingThresholds(false)} className="px-2 py-1 text-[9px] font-black uppercase bg-stone-100 dark:bg-white/5 text-stone-500 rounded-lg">Cancel</button>
+                                    <button onClick={() => setIsEditingThresholds(false)} className="px-2 py-1 text-[9px] font-bold uppercase bg-[var(--theme-bg-subtle)] text-[var(--theme-text-muted)] rounded-lg">Cancel</button>
                                     <button onClick={async () => {
                                         setIsSaving(true);
                                         try {
@@ -320,31 +337,31 @@ export const ProductDetailsModal: React.FC<ProductDetailsModalProps> = ({ produc
                                         } finally {
                                             setIsSaving(false);
                                         }
-                                    }} disabled={isSaving} className="px-2 py-1 text-[9px] font-black uppercase bg-[#2C5E3B] text-white rounded-lg disabled:opacity-50">
+                                    }} disabled={isSaving} className="px-2 py-1 text-[9px] font-bold uppercase bg-[var(--theme-primary)] text-[var(--theme-primary-text)] rounded-lg disabled:opacity-50 hover:opacity-90 active:scale-[0.98]">
                                         {isSaving ? 'Saving…' : canDirectEdit ? 'Save' : 'Submit for Approval'}
                                     </button>
                                 </div>
                             </div>
                         )}
                     </div>
-                    <div className="bg-white dark:bg-black/15 p-5 rounded-2xl border border-stone-200 dark:border-white/5 space-y-4 shadow-sm">
-                        <div className="flex items-center gap-2 border-b border-stone-100 dark:border-white/5 pb-2">
-                            <TrendingUp size={14} className="text-[#2C5E3B]" />
-                            <h3 className="text-[10px] font-black uppercase tracking-wider">Restock Log & Audits</h3>
+                    <div className="bg-[var(--theme-bg-card)] p-5 rounded-2xl border border-[var(--theme-border)] space-y-4 shadow-sm">
+                        <div className="flex items-center gap-2 border-b border-[var(--theme-border)] pb-2">
+                            <TrendingUp size={14} className="text-[var(--theme-text-secondary)]" />
+                            <h3 className="text-[10px] font-bold uppercase tracking-wider">Restock Log & Audits</h3>
                         </div>
                         {recentReceives.length > 0 ? (
-                            <div className="space-y-3 pl-2 border-l border-stone-200 dark:border-white/5 ml-2 max-h-[140px] overflow-y-auto">
+                            <div className="space-y-3 pl-2 border-l border-[var(--theme-border)] ml-2 max-h-[140px] overflow-y-auto">
                                 {recentReceives.map(m => (
                                     <div key={m.id} className="relative flex flex-col gap-0.5">
-                                        <div className="absolute -left-[14px] top-1.5 w-1.5 h-1.5 rounded-full bg-green-500 border border-white dark:border-black" />
-                                        <div className="flex items-center justify-between text-[11px]"><span className="font-bold text-gray-900 dark:text-white uppercase">{employees?.find(e => e.id === m.performedBy)?.name || m.performedBy || 'System'}</span><span className="font-mono text-green-600 font-bold">+{m.quantity}</span></div>
-                                        <span className="text-[9px] text-gray-400 font-mono">{new Date(m.date).toLocaleDateString([], { month: 'short', day: 'numeric' })}</span>
+                                        <div className="absolute -left-[14px] top-1.5 w-1.5 h-1.5 rounded-full bg-emerald-500 border border-[var(--theme-bg-card)]" />
+                                        <div className="flex items-center justify-between text-[11px]"><span className="font-semibold text-[var(--theme-text-primary)] uppercase">{employees?.find(e => e.id === m.performedBy)?.name || m.performedBy || 'System'}</span><span className="font-mono text-emerald-600 dark:text-emerald-400 font-bold">+{m.quantity}</span></div>
+                                        <span className="text-[9px] text-[var(--theme-text-muted)] font-mono">{new Date(m.date).toLocaleDateString([], { month: 'short', day: 'numeric' })}</span>
                                     </div>
                                 ))}
                             </div>
-                        ) : <p className="text-xs font-bold text-gray-400 text-center py-2">No recent restocks</p>}
-                        <div className="pt-3 border-t border-stone-200 dark:border-white/5 text-[10px] space-y-1.5">
-                            <div className="flex justify-between"><span className="text-gray-500 font-bold uppercase">Created:</span><span className="font-semibold">{product.createdBy || 'System'}</span></div>
+                        ) : <p className="text-xs font-medium text-[var(--theme-text-muted)] text-center py-2">No recent restocks</p>}
+                        <div className="pt-3 border-t border-[var(--theme-border)] text-[10px] space-y-1.5">
+                            <div className="flex justify-between"><span className="text-[var(--theme-text-muted)] font-medium uppercase">Created:</span><span className="font-semibold text-[var(--theme-text-primary)]">{product.createdBy || 'System'}</span></div>
                         </div>
                     </div>
                 </div>

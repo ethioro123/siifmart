@@ -244,7 +244,7 @@ export interface PointsTransaction {
   employeeId: string;
   jobId?: string;
   points: number;
-  type: 'JOB_COMPLETE' | 'BONUS' | 'ACHIEVEMENT' | 'SPEED_BONUS' | 'ACCURACY_BONUS' | 'STREAK_BONUS';
+  type: 'JOB_COMPLETE' | 'BONUS' | 'ACHIEVEMENT' | 'SPEED_BONUS' | 'ACCURACY_BONUS' | 'STREAK_BONUS' | 'DISCREPANCY_PENALTY';
   description: string;
   timestamp: string;
 }

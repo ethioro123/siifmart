@@ -224,3 +224,15 @@ export const getExpiryStatus = (dateString?: string): { color: string; label: st
 
     return { color: 'bg-green-500/20 text-green-400 border-green-500/30', label: 'Good' };
 };
+
+/**
+ * Mask a phone number for customer privacy (e.g. 0911223344 -> 09••••3344, +254712345678 -> +254••••5678)
+ */
+export const maskPhoneNumber = (phone: string | undefined | null): string => {
+    if (!phone) return '';
+    const clean = phone.trim();
+    if (clean.length <= 6) return '••••••';
+    const start = clean.startsWith('+') ? clean.slice(0, 4) : clean.slice(0, 2);
+    const end = clean.slice(-4);
+    return `${start}••••${end}`;
+};

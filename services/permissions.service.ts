@@ -27,6 +27,8 @@ export type Permission =
     // Finance
     | 'finance.view' | 'finance.view_reports' | 'finance.create_expense'
     | 'finance.approve_expense' | 'finance.edit_expense' | 'finance.delete_expense'
+    | 'finance.void_expense' | 'finance.reconcile_drawer' | 'finance.manage_ap'
+    | 'finance.manage_gl' | 'finance.manage_budget'
     | 'finance.manage_payroll' | 'finance.view_payroll'
     // Sales
     | 'sales.view' | 'sales.view_reports' | 'sales.create' | 'sales.refund'
@@ -36,6 +38,7 @@ export type Permission =
     // Employees
     | 'employees.view' | 'employees.create' | 'employees.edit' | 'employees.delete'
     | 'employees.approve' | 'employees.view_salary' | 'employees.edit_salary'
+    | 'employees.propose_salary' | 'employees.approve_salary'
     | 'employees.manage_attendance'
     // Pricing
     | 'pricing.view' | 'pricing.edit' | 'pricing.create_promo' | 'pricing.approve_promo'
@@ -66,9 +69,11 @@ export const CONFLICTING_DUTIES: Record<Permission, Permission[]> = {
     // Warehouse Controls
     'warehouse.pick': ['warehouse.pack'],
     'warehouse.pack': ['warehouse.pick'],
-    // HR Controls
+    // HR & Salary Controls (Dual-Control 4-Eyes Governance)
     'employees.create': ['employees.approve'],
     'employees.approve': ['employees.create'],
+    'employees.propose_salary': ['employees.approve_salary'],
+    'employees.approve_salary': ['employees.propose_salary'],
     // Payroll Controls
     'employees.edit_salary': ['finance.approve_expense'],
     'finance.manage_payroll': ['finance.approve_expense'],
@@ -86,6 +91,8 @@ export const CONFLICTING_DUTIES: Record<Permission, Permission[]> = {
     'procurement.delete_po': [], 'procurement.receive': [],
     'finance.view': [], 'finance.view_reports': [],
     'finance.edit_expense': [], 'finance.delete_expense': [], 'finance.view_payroll': [],
+    'finance.void_expense': [], 'finance.reconcile_drawer': [], 'finance.manage_ap': [],
+    'finance.manage_gl': [], 'finance.manage_budget': [],
     'sales.view': [], 'sales.view_reports': [], 'sales.create': [], 'sales.refund': [],
     'customers.view': [], 'customers.create': [], 'customers.edit': [],
     'customers.delete': [], 'customers.view_history': [], 'customers.manage_loyalty': [],
@@ -117,7 +124,7 @@ export const APPROVAL_WORKFLOWS: Record<string, ApprovalWorkflow> = {
         levels: [
             { roles: ['procurement_manager'], threshold: 10000 },
             { roles: ['procurement_manager', 'finance_manager'], threshold: 50000 },
-            { roles: ['procurement_manager', 'finance_manager', 'super_admin'], threshold: Infinity }
+            { roles: ['procurement_manager', 'finance_manager', 'regional_manager', 'operations_manager', 'super_admin'], threshold: Infinity }
         ]
     },
     expense: {
@@ -130,13 +137,13 @@ export const APPROVAL_WORKFLOWS: Record<string, ApprovalWorkflow> = {
     },
     employee_hire: {
         name: 'Employee Hiring Approval',
-        levels: [{ roles: ['hr', 'hr_manager', 'super_admin'] }]
+        levels: [{ roles: ['hr', 'hr_manager', 'regional_manager', 'operations_manager', 'super_admin'] }]
     },
     inventory_adjustment: {
         name: 'Inventory Adjustment Approval',
         levels: [
             { roles: ['warehouse_manager'], threshold: 100 },
-            { roles: ['warehouse_manager', 'super_admin'], threshold: Infinity }
+            { roles: ['warehouse_manager', 'regional_manager', 'operations_manager', 'super_admin'], threshold: Infinity }
         ]
     },
     price_change: {
@@ -150,7 +157,7 @@ export const APPROVAL_WORKFLOWS: Record<string, ApprovalWorkflow> = {
         name: 'Refund Approval',
         levels: [
             { roles: ['store_manager', 'cs_manager'], threshold: 500 },
-            { roles: ['store_manager', 'cs_manager', 'super_admin'], threshold: Infinity }
+            { roles: ['store_manager', 'cs_manager', 'regional_manager', 'operations_manager', 'super_admin'], threshold: Infinity }
         ]
     }
 };
@@ -225,6 +232,11 @@ export function getPermissionDescription(permission: Permission): string {
         'finance.view': 'View finance', 'finance.view_reports': 'View financial reports',
         'finance.create_expense': 'Create expenses', 'finance.approve_expense': 'Approve expenses',
         'finance.edit_expense': 'Edit expenses', 'finance.delete_expense': 'Delete expenses',
+        'finance.void_expense': 'Void expenses with mandatory reason',
+        'finance.reconcile_drawer': 'Reconcile drawer shifts with supervisor co-attribution',
+        'finance.manage_ap': 'Manage Accounts Payable & 3-way match',
+        'finance.manage_gl': 'Manage General Ledger & Period Close',
+        'finance.manage_budget': 'Manage departmental budgets & reconciliation',
         'finance.manage_payroll': 'Manage payroll', 'finance.view_payroll': 'View payroll',
         'sales.view': 'View sales', 'sales.view_reports': 'View sales reports',
         'sales.create': 'Create sales', 'sales.refund': 'Process refunds',
@@ -234,7 +246,8 @@ export function getPermissionDescription(permission: Permission): string {
         'employees.view': 'View employees', 'employees.create': 'Create employees',
         'employees.edit': 'Edit employees', 'employees.delete': 'Delete employees',
         'employees.approve': 'Approve employee changes', 'employees.view_salary': 'View salaries',
-        'employees.edit_salary': 'Edit salaries', 'employees.manage_attendance': 'Manage attendance',
+        'employees.edit_salary': 'Edit salaries', 'employees.propose_salary': 'Propose salary adjustment',
+        'employees.approve_salary': 'Approve salary adjustment', 'employees.manage_attendance': 'Manage attendance',
         'pricing.view': 'View pricing', 'pricing.edit': 'Edit prices',
         'pricing.create_promo': 'Create promotions', 'pricing.approve_promo': 'Approve promotions',
         'settings.view': 'View settings', 'settings.edit': 'Edit settings',

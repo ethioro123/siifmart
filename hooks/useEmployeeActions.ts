@@ -4,6 +4,8 @@ import { systemLogsService, LogEntry } from '../services/local-logs.service';
 import { imageStorageService } from '../services/imageStorage.service';
 import { logger } from '../utils/logger';
 import { canEmployRole } from '../utils/roles';
+import { terminationsService } from '../services/terminations.service';
+import type { TerminationReasonCode } from '../types/hr-zero-trust';
 
 export interface PhotoRequest {
    id: string;
@@ -197,32 +199,71 @@ export function useEmployeeActions({
       }
    };
 
-   const handleTerminateEmployee = async (employee: Employee, input: string) => {
+   const handleTerminateEmployee = async (
+      employee: Employee, 
+      input: string,
+      terminationDetails?: {
+         reasonCode?: TerminationReasonCode;
+         reasonDetails?: string;
+         effectiveDate?: string;
+         assetsReturned?: boolean;
+         posAccessRevoked?: boolean;
+         wmsBadgeDeactivated?: boolean;
+         keysSurrendered?: boolean;
+         cashDrawerReconciled?: boolean;
+         reconciliationNotes?: string;
+      }
+   ) => {
       if (!employee) return false;
       if (input !== "TERMINATE") {
          addNotification('alert', 'Please type "TERMINATE" to confirm.');
          return false;
       }
 
+      const reasonCode: TerminationReasonCode = terminationDetails?.reasonCode || 'gross_misconduct';
+      const reasonDetails = terminationDetails?.reasonDetails || 'Structured offboarding under Zero-Trust dual control.';
+      const effectiveDate = terminationDetails?.effectiveDate || new Date().toISOString().split('T')[0];
+
       try {
-         // Explicit column update without mass-assignment
-         const result = updateEmployee({ ...employee, status: 'Terminated' }, user?.name || 'System');
-         if (result instanceof Promise) await result;
+         // 1. Propose termination via Zero-Trust terminationsService (Rule 18 Audit & 4-Eyes Governance)
+         const proposed = await terminationsService.proposeTermination({
+            country_code: employee.country || (employee as any).country_code || 'ET',
+            site_id: employee.siteId || employee.site_id,
+            employee_id: employee.id,
+            employee_name: employee.name,
+            employee_role: employee.role,
+            reason_code: reasonCode,
+            reason_details: reasonDetails,
+            effective_date: effectiveDate,
+            assets_returned: Boolean(terminationDetails?.assetsReturned),
+            pos_access_revoked: Boolean(terminationDetails?.posAccessRevoked),
+            wms_badge_deactivated: Boolean(terminationDetails?.wmsBadgeDeactivated),
+            keys_surrendered: Boolean(terminationDetails?.keysSurrendered),
+            cash_drawer_reconciled: Boolean(terminationDetails?.cashDrawerReconciled),
+            proposed_by: user?.id || 'unknown_manager',
+            proposed_by_name: user?.name || 'Authorized Manager',
+            proposed_by_role: user?.role || 'hr',
+            reconciliation_notes: terminationDetails?.reconciliationNotes
+         });
 
-         // Tamper-proof Zero-Trust audit log
-         systemLogsService.logHR(
-            'EMPLOYEE_TERMINATED',
-            `Terminated employment for ${employee.name} (${employee.code || employee.id})`,
-            { id: user?.id, role: user?.role, name: user?.name },
-            'WARNING',
-            { employeeId: employee.id, employeeName: employee.name, role: employee.role }
-         );
+         // 2. If Super Admin, execute immediate sign-off under supervisory executive authority
+         if (user?.role === 'super_admin') {
+            await terminationsService.approveTermination(proposed.id, {
+               id: user.id || 'super_admin',
+               name: user.name || 'Super Admin',
+               role: 'super_admin'
+            });
+            const result = updateEmployee({ ...employee, status: 'Terminated' }, user?.name || 'System');
+            if (result instanceof Promise) await result;
+            addNotification('success', `Employee ${employee.name} offboarded and terminated.`);
+         } else {
+            addNotification('info', `Termination proposal for ${employee.name} submitted for 4-Eyes dual approval.`);
+         }
 
-         addNotification('success', `Employee ${employee.name} terminated.`);
          return true;
-      } catch (error) {
+      } catch (error: any) {
          logger.error('useEmployeeActions', 'Error terminating employee:', error);
-         addNotification('alert', 'Failed to terminate employee');
+         addNotification('alert', error.message || 'Failed to terminate employee');
          return false;
       }
    };

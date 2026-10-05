@@ -21,18 +21,18 @@ export const ReceiptPreviewModal: React.FC = () => {
                         className="w-full h-full border-none bg-white"
                     />
                 </div>
-                <div className="flex justify-end gap-3 pt-4 border-t border-[#E2DCCE] dark:border-white/10">
+                <div className="flex justify-end gap-3 pt-4 border-t border-[var(--theme-border)]">
                     <button
                         onClick={() => setIsReceiptPreviewOpen(false)}
-                        className="px-4 py-2 bg-white/90 dark:bg-black/35 border border-[#E2DCCE] dark:border-white/10 hover:bg-[#2C5E3B]/10 hover:text-[#2C5E3B] dark:hover:text-white text-stone-700 dark:text-stone-300 rounded-lg transition-colors font-bold text-sm"
+                        className="px-4 py-2 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] hover:bg-[var(--theme-bg-card-hover)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] rounded-xl transition-colors font-bold text-xs cursor-pointer shadow-xs"
                     >
                         Cancel
                     </button>
                     <button
                         onClick={handleConfirmPrint}
-                        className="px-6 py-2 bg-gradient-to-br from-[#224429] to-[#2C5E3B] text-white hover:opacity-90 font-bold rounded-lg transition-all flex items-center gap-2 shadow-sm"
+                        className="px-5 py-2 bg-[var(--theme-primary)] text-[var(--theme-primary-text)] hover:opacity-90 font-bold rounded-xl transition-colors flex items-center gap-2 shadow-xs text-xs cursor-pointer"
                     >
-                        <Printer size={18} />
+                        <Printer size={16} />
                         Print Receipt
                     </button>
                 </div>

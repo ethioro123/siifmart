@@ -32,10 +32,11 @@ export async function checkBarcodeConflicts(sku: string | undefined, barcodes: s
     }
 
     if (data && data.length > 0) {
-        const normalizedTargetSku = sku.trim().toUpperCase();
+        const cleanSku = (s: string) => s.replace(/[-\s]/g, '').toUpperCase();
+        const normalizedTargetSku = cleanSku(sku);
         for (const item of data) {
-            const itemSku = (item.sku || '').trim().toUpperCase();
-            if (itemSku !== normalizedTargetSku) {
+            const itemSku = cleanSku(item.sku || '');
+            if (itemSku && normalizedTargetSku && itemSku !== normalizedTargetSku) {
                 throw new Error(`This barcode is flagged because it is already registered under SKU ${item.sku} (${item.name})`);
             }
         }

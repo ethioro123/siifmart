@@ -17,6 +17,7 @@ export const SYSTEM_ROLES: {
    { id: 'hr_manager', label: 'HR Manager', desc: 'Staff & Payroll Management', level: 2, styles: { text: 'text-pink-600 dark:text-pink-400', bg: 'bg-pink-100 dark:bg-pink-400/10', border: 'border-pink-200 dark:border-pink-400/20', badge: 'bg-pink-100 dark:bg-pink-400/20 text-pink-700 dark:text-pink-400' } },
    { id: 'procurement_manager', label: 'Procurement Manager', desc: 'Supply Chain & Purchasing', level: 2, styles: { text: 'text-indigo-600 dark:text-indigo-400', bg: 'bg-indigo-100 dark:bg-indigo-400/10', border: 'border-indigo-200 dark:border-indigo-400/20', badge: 'bg-indigo-100 dark:bg-indigo-400/20 text-indigo-700 dark:text-indigo-400' } },
    { id: 'supply_chain_manager', label: 'Supply Chain Manager', desc: 'End-to-End Logistics', level: 2, styles: { text: 'text-violet-600 dark:text-violet-400', bg: 'bg-violet-100 dark:bg-violet-400/10', border: 'border-violet-200 dark:border-violet-400/20', badge: 'bg-violet-100 dark:bg-violet-400/20 text-violet-700 dark:text-violet-400' } },
+   { id: 'merchandising_manager', label: 'Merchandising Manager', desc: 'Corporate Pricing, Margins & Planograms', level: 2, styles: { text: 'text-amber-600 dark:text-amber-400', bg: 'bg-amber-100 dark:bg-amber-400/10', border: 'border-amber-200 dark:border-amber-400/20', badge: 'bg-amber-100 dark:bg-amber-400/20 text-amber-700 dark:text-amber-400' } },
 
    // ═══ LEVEL 3 - SITE MANAGERS ═══
    { id: 'store_manager', label: 'Store Manager', desc: 'Single Store Operations', level: 3, styles: { text: 'text-teal-600 dark:text-teal-400', bg: 'bg-teal-100 dark:bg-teal-400/10', border: 'border-teal-200 dark:border-teal-400/20', badge: 'bg-teal-100 dark:bg-teal-400/20 text-teal-700 dark:text-teal-400' } },
@@ -26,6 +27,8 @@ export const SYSTEM_ROLES: {
    { id: 'security_manager', label: 'Security & LP Manager', desc: 'Loss Prevention & Security', level: 3, styles: { text: 'text-rose-600 dark:text-rose-400', bg: 'bg-rose-50 dark:bg-rose-400/10', border: 'border-rose-200 dark:border-rose-400/20', badge: 'bg-rose-50 dark:bg-rose-400/20 text-rose-700 dark:text-rose-400' } },
    { id: 'dispatch_manager', label: 'Dispatch Manager', desc: 'Fleet & Delivery Management', level: 3, styles: { text: 'text-lime-600 dark:text-lime-400', bg: 'bg-lime-100 dark:bg-lime-400/10', border: 'border-lime-200 dark:border-lime-400/20', badge: 'bg-lime-100 dark:bg-lime-400/20 text-lime-700 dark:text-lime-400' } },
    { id: 'assistant_manager', label: 'Assistant Manager', desc: 'Deputy Management', level: 3, styles: { text: 'text-cyan-600 dark:text-cyan-400', bg: 'bg-cyan-100 dark:bg-cyan-400/10', border: 'border-cyan-200 dark:border-cyan-400/20', badge: 'bg-cyan-100 dark:bg-cyan-400/20 text-cyan-700 dark:text-cyan-400' } },
+   { id: 'vendor_relations_manager', label: 'Vendor Relations Manager', desc: 'Supplier Onboarding, Scorecards & Cooperatives', level: 3, styles: { text: 'text-indigo-600 dark:text-indigo-400', bg: 'bg-indigo-100 dark:bg-indigo-400/10', border: 'border-indigo-200 dark:border-indigo-400/20', badge: 'bg-indigo-100 dark:bg-indigo-400/20 text-indigo-700 dark:text-indigo-400' } },
+   { id: 'fleet_maintenance_supervisor', label: 'Fleet Maintenance Supervisor', desc: 'Vehicle Inspections & Transport Maintenance', level: 3, styles: { text: 'text-indigo-600 dark:text-indigo-400', bg: 'bg-indigo-50 dark:bg-indigo-400/10', border: 'border-indigo-200 dark:border-indigo-400/20', badge: 'bg-indigo-50 dark:bg-indigo-400/20 text-indigo-700 dark:text-indigo-400' } },
    { id: 'shift_lead', label: 'Shift Lead', desc: 'Team Lead', level: 3, styles: { text: 'text-blue-600 dark:text-blue-200', bg: 'bg-blue-50 dark:bg-blue-200/10', border: 'border-blue-200 dark:border-blue-200/20', badge: 'bg-blue-50 dark:bg-blue-200/20 text-blue-700 dark:text-blue-200' } },
 
    // ═══ LEVEL 4 - STAFF ═══
@@ -43,6 +46,10 @@ export const SYSTEM_ROLES: {
    { id: 'it_support', label: 'IT Support', desc: 'Technical Assistance', level: 4, styles: { text: 'text-purple-600 dark:text-purple-300', bg: 'bg-purple-100 dark:bg-purple-300/10', border: 'border-purple-200 dark:border-purple-300/20', badge: 'bg-purple-100 dark:bg-purple-300/20 text-purple-700 dark:text-purple-300' } },
    { id: 'buyer', label: 'Sourcing Buyer', desc: 'Supplier & Purchase Orders', level: 4, styles: { text: 'text-amber-600 dark:text-amber-400', bg: 'bg-amber-100 dark:bg-amber-400/10', border: 'border-amber-200 dark:border-amber-400/20', badge: 'bg-amber-100 dark:bg-amber-400/20 text-amber-700 dark:text-amber-400' } },
    { id: 'demand_planner', label: 'Demand Planner', desc: 'Stock Allocation & Forecasting', level: 4, styles: { text: 'text-violet-600 dark:text-violet-400', bg: 'bg-violet-100 dark:bg-violet-400/10', border: 'border-violet-200 dark:border-violet-400/20', badge: 'bg-violet-100 dark:bg-violet-400/20 text-violet-700 dark:text-violet-400' } },
+   { id: 'replenishment_planner', label: 'Replenishment Planner', desc: 'Store Velocity & RDC Transfers', level: 4, styles: { text: 'text-violet-600 dark:text-violet-400', bg: 'bg-violet-100 dark:bg-violet-400/10', border: 'border-violet-200 dark:border-violet-400/20', badge: 'bg-violet-100 dark:bg-violet-400/20 text-violet-700 dark:text-violet-400' } },
+   { id: 'customs_import_specialist', label: 'Customs & Import Specialist', desc: 'Cross-Border Freight, LC & Port Clearances', level: 4, styles: { text: 'text-sky-600 dark:text-sky-400', bg: 'bg-sky-100 dark:bg-sky-400/10', border: 'border-sky-200 dark:border-sky-400/20', badge: 'bg-sky-100 dark:bg-sky-400/20 text-sky-700 dark:text-sky-400' } },
+   { id: 'inbound_qc_inspector', label: 'Inbound QC Inspector', desc: 'Food Safety, Cold-Chain & Dock QC Compliance', level: 4, styles: { text: 'text-emerald-600 dark:text-emerald-400', bg: 'bg-emerald-100 dark:bg-emerald-400/10', border: 'border-emerald-200 dark:border-emerald-400/20', badge: 'bg-emerald-100 dark:bg-emerald-400/20 text-emerald-700 dark:text-emerald-400' } },
+   { id: 'store_operations_auditor', label: 'Store Operations Auditor', desc: 'Unannounced Store Walkthroughs & Spot Audits', level: 4, styles: { text: 'text-purple-600 dark:text-purple-400', bg: 'bg-purple-100 dark:bg-purple-400/10', border: 'border-purple-200 dark:border-purple-400/20', badge: 'bg-purple-100 dark:bg-purple-400/20 text-purple-700 dark:text-purple-400' } },
 
    // ═══ LEGACY ROLES (backwards compatibility) ═══
    { id: 'admin', label: 'Assistant CEO', desc: 'System Admin', level: 2, styles: { text: 'text-purple-600 dark:text-purple-400', bg: 'bg-purple-100 dark:bg-purple-400/10', border: 'border-purple-200 dark:border-purple-400/20', badge: 'bg-purple-100 dark:bg-purple-400/20 text-purple-700 dark:text-purple-400' } },
@@ -57,12 +64,19 @@ export const SYSTEM_ROLES: {
    { id: 'accountant', label: 'Accountant', desc: 'Financial Records', level: 4, styles: { text: 'text-emerald-600 dark:text-emerald-300', bg: 'bg-emerald-100 dark:bg-emerald-300/10', border: 'border-emerald-200 dark:border-emerald-300/20', badge: 'bg-emerald-100 dark:bg-emerald-300/20 text-emerald-700 dark:text-emerald-300' } },
    { id: 'data_analyst', label: 'Data Analyst', desc: 'Reports & Analytics', level: 4, styles: { text: 'text-purple-600 dark:text-purple-300', bg: 'bg-purple-100 dark:bg-purple-300/10', border: 'border-purple-200 dark:border-purple-300/20', badge: 'bg-purple-100 dark:bg-purple-300/20 text-purple-700 dark:text-purple-300' } },
    { id: 'training_coordinator', label: 'Training Coordinator', desc: 'Employee Training', level: 4, styles: { text: 'text-yellow-600 dark:text-yellow-300', bg: 'bg-yellow-100 dark:bg-yellow-300/10', border: 'border-yellow-200 dark:border-yellow-300/20', badge: 'bg-yellow-100 dark:bg-yellow-300/20 text-yellow-700 dark:text-yellow-300' } },
+   { id: 'payroll_specialist', label: 'Payroll Specialist', desc: 'Compensation & Payroll Runs', level: 4, styles: { text: 'text-pink-600 dark:text-pink-400', bg: 'bg-pink-100 dark:bg-pink-400/10', border: 'border-pink-200 dark:border-pink-400/20', badge: 'bg-pink-100 dark:bg-pink-400/20 text-pink-700 dark:text-pink-400' } },
+   { id: 'talent_recruiter', label: 'Talent Recruiter', desc: 'Candidate Sourcing & Hiring', level: 4, styles: { text: 'text-pink-600 dark:text-pink-300', bg: 'bg-pink-50 dark:bg-pink-300/10', border: 'border-pink-200 dark:border-pink-300/20', badge: 'bg-pink-50 dark:bg-pink-300/20 text-pink-700 dark:text-pink-300' } },
+   { id: 'treasury_officer', label: 'Treasury Officer', desc: 'Cash & Tender Reconciliation', level: 4, styles: { text: 'text-emerald-600 dark:text-emerald-400', bg: 'bg-emerald-100 dark:bg-emerald-400/10', border: 'border-emerald-200 dark:border-emerald-400/20', badge: 'bg-emerald-100 dark:bg-emerald-400/20 text-emerald-700 dark:text-emerald-400' } },
+   { id: 'tax_compliance_officer', label: 'Tax Compliance Officer', desc: 'Sovereign VAT & Withholding', level: 4, styles: { text: 'text-teal-600 dark:text-teal-400', bg: 'bg-teal-100 dark:bg-teal-400/10', border: 'border-teal-200 dark:border-teal-400/20', badge: 'bg-teal-100 dark:bg-teal-400/20 text-teal-700 dark:text-teal-400' } },
+   { id: 'credit_control_officer', label: 'Credit Control Officer', desc: 'B2B Accounts & Supplier Credit', level: 4, styles: { text: 'text-teal-700 dark:text-teal-500', bg: 'bg-teal-50 dark:bg-teal-500/10', border: 'border-teal-200 dark:border-teal-500/20', badge: 'bg-teal-50 dark:bg-teal-500/20 text-teal-800 dark:text-teal-500' } },
 ];
 
 export const getRoleHierarchy = (role: UserRole | string): number => {
     const hierarchy: Partial<Record<UserRole | string, number>> = {
         // Level 1: Executive
         'super_admin': 100,
+        'CEO': 100,
+        'ceo': 100,
 
         // Level 2: Directors & Regional
         'regional_manager': 95,
@@ -72,7 +86,8 @@ export const getRoleHierarchy = (role: UserRole | string): number => {
         'hr_manager': 85,
         'hr': 85, // Legacy HR
         'procurement_manager': 82,
-        'supply_chain_manager': 80,
+        'supply_chain_manager': 82,
+        'merchandising_manager': 82,
 
         // Level 3: Site Managers & Department Heads
         'logistics_manager': 80,
@@ -83,20 +98,31 @@ export const getRoleHierarchy = (role: UserRole | string): number => {
         'dispatch_manager': 75,
         'cs_manager': 60,
         'assistant_manager': 60,
+        'vendor_relations_manager': 60,
+        'fleet_maintenance_supervisor': 58,
         'store_supervisor': 55,
         'shift_lead': 55,
 
         // Support & Supervisors
+        'store_operations_auditor': 45,
         'auditor': 40,
+        'payroll_specialist': 40,
+        'treasury_officer': 38,
+        'tax_compliance_officer': 38,
+        'credit_control_officer': 36,
         'accountant': 35,
         'data_analyst': 35,
         'training_coordinator': 35,
+        'talent_recruiter': 35,
+        'customs_import_specialist': 35,
         'it_support': 35,
         'dispatcher': 35,
 
         // Level 4: Staff
         'buyer': 30,
         'demand_planner': 30,
+        'replenishment_planner': 30,
+        'inbound_qc_inspector': 30,
         'loss_prevention': 30,
         'cashier': 30,
         'sales_associate': 28,
@@ -141,12 +167,14 @@ export const canViewLocation = (
 export const canViewCostPrice = (role: string | undefined): boolean => {
     if (!role) return false;
 
-    // Explicitly allow merchandising manager, merchandiser, finance manager, and procurement manager
+    // Explicitly allow regional/operations directors, finance, procurement, and merchandising leadership
     if (
+        role === 'regional_manager' ||
+        role === 'operations_manager' ||
         role === 'finance_manager' ||
         role === 'procurement_manager' ||
-        role === 'merchandising_manager' ||
-        role === 'merchandiser'
+        role === 'vendor_relations_manager' ||
+        role === 'merchandising_manager'
     ) {
         return true;
     }

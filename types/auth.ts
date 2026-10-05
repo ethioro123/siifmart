@@ -4,9 +4,11 @@ export type UserRole =
   // Level 2 - Regional/Directors
   | 'regional_manager' | 'operations_manager' | 'finance_manager'
   | 'hr_manager' | 'procurement_manager' | 'supply_chain_manager'
-  // Level 3 - Site Managers
+  | 'merchandising_manager'
+  // Level 3 - Site Managers & Supervisors
   | 'store_manager' | 'warehouse_manager' | 'dispatch_manager'
   | 'assistant_manager' | 'shift_lead' | 'store_supervisor'
+  | 'fleet_maintenance_supervisor'
   // Level 4 - Staff
   | 'cashier' | 'sales_associate' | 'stock_clerk' | 'picker' | 'packer'
   | 'receiver' | 'driver' | 'forklift_operator' | 'inventory_specialist'
@@ -16,7 +18,11 @@ export type UserRole =
   | 'cs_manager' | 'returns_clerk' | 'merchandiser' | 'loss_prevention'
   | 'accountant' | 'data_analyst' | 'training_coordinator'
   // New roles
-  | 'buyer' | 'demand_planner' | 'inventory_manager' | 'logistics_manager' | 'security_manager';
+  | 'buyer' | 'demand_planner' | 'inventory_manager' | 'logistics_manager' | 'security_manager'
+  | 'payroll_specialist' | 'talent_recruiter' | 'replenishment_planner'
+  | 'vendor_relations_manager' | 'customs_import_specialist' | 'inbound_qc_inspector'
+  | 'treasury_officer' | 'tax_compliance_officer' | 'credit_control_officer'
+  | 'store_operations_auditor';
 
 export type PaymentMethod = 'Cash' | 'Card' | 'Mobile Money';
 

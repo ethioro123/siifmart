@@ -55,9 +55,9 @@ export default function StaffProfileView(props: StaffProfileViewProps) {
     const targetRoleLevel = getRoleHierarchy(employee.role);
     const canManage = hasPermission(user?.role, 'EDIT_EMPLOYEE');
     const canViewPayroll = hasPermission(user?.role, 'VIEW_PAYROLL') || isOwnProfile;
-    const canTerminate = (user?.role === 'super_admin' || user?.role === 'hr' || user?.role === 'hr_manager') && userRoleLevel > targetRoleLevel && !isOwnProfile;
+    const canTerminate = (user?.role === 'super_admin' || user?.role === 'hr' || user?.role === 'hr_manager' || user?.role === 'regional_manager' || user?.role === 'operations_manager') && userRoleLevel > targetRoleLevel && !isOwnProfile;
     const canDelete = user?.role === 'super_admin' && userRoleLevel > targetRoleLevel && !isOwnProfile;
-    const canApprove = (user?.role === 'super_admin' || user?.role === 'hr' || user?.role === 'hr_manager' || user?.role === 'admin') &&
+    const canApprove = (user?.role === 'super_admin' || user?.role === 'hr' || user?.role === 'hr_manager' || user?.role === 'admin' || user?.role === 'regional_manager' || user?.role === 'operations_manager') &&
         canEmployRole(user?.role, employee.role) &&
         employee.status === 'Pending Approval' &&
         !isOwnProfile;
@@ -85,7 +85,7 @@ export default function StaffProfileView(props: StaffProfileViewProps) {
     return (
         <div className="space-y-6 animate-in fade-in duration-300">
             <StaffProfileHeader 
-                employee={employee} isOwnProfile={isOwnProfile} canManageEmployees={canManage} 
+                employee={employee} sites={sites} isOwnProfile={isOwnProfile} canManageEmployees={canManage} 
                 canResetPassword={userRoleLevel > targetRoleLevel} canTerminate={canTerminate} canDelete={canDelete}
                 canApprove={canApprove} onApprove={handleApprove}
                 isOnline={isOnline}
@@ -166,6 +166,7 @@ export default function StaffProfileView(props: StaffProfileViewProps) {
                         onRequestTimeOff={() => profile.setIsTimeOffModalOpen(true)}
                         onApproveRequest={profile.handleApproveLeave}
                         onRejectRequest={profile.handleRejectLeave}
+                        countryCode={employee.country || (employee as any).country_code || 'ET'}
                     />
                 )}
                 {profile.activeProfileTab === 'docs' && (
@@ -189,7 +190,7 @@ export default function StaffProfileView(props: StaffProfileViewProps) {
                     <SettingsTab
                         employee={employee}
                         sites={sites}
-                        canEditStaff={canManage && !isOwnProfile && userRoleLevel > targetRoleLevel}
+                        canEditStaff={(user?.role === 'super_admin' || user?.role === 'admin' || canManage) && !isOwnProfile}
                         isOwnProfile={isOwnProfile}
                         currentUser={user}
                         updateEmployee={updateEmployee}
@@ -236,12 +237,11 @@ export default function StaffProfileView(props: StaffProfileViewProps) {
                 <AdjustSalaryModal
                     isOpen={profile.isSalaryModalOpen}
                     onClose={() => profile.setIsSalaryModalOpen(false)}
+                    employee={employee}
                     salaryInput={profile.salaryInput}
                     setSalaryInput={profile.setSalaryInput}
-                    handleConfirmSalary={() => {
-                        updateEmployee({ ...employee, salary: parseFloat(profile.salaryInput) }, user?.name || 'Admin');
+                    onSuccess={() => {
                         profile.setIsSalaryModalOpen(false);
-                        addNotification('success', 'Salary updated.');
                     }}
                 />
             )}

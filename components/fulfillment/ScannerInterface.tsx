@@ -16,9 +16,11 @@ import { playBeep } from '../../utils/audioUtils';
 import { useScanOnly } from '../../hooks/useScanOnly';
 import { getExpiryStatus } from '../../utils/formatting';
 import { logger } from '../../utils/logger';
+import { canViewAllSites } from '../../utils/permissions';
 import { ScannerJobList } from './components/ScannerJobList';
 import { ScannerNavStep } from './components/ScannerNavStep';
 import { ScannerScanStep } from './components/ScannerScanStep';
+import { resolveFulfillmentScanningPolicy } from '../../utils/receivingPolicy';
 
 // Helper component for metrics
 const MetricBadge = ({ label, value, color }: { label: string; value: string | number; color: string }) => (
@@ -38,9 +40,11 @@ export const ScannerInterface: React.FC = () => {
         settings,
         logSystemEvent,
         refreshData,
-        activeSite
+        activeSite,
+        effectiveCountry
     } = useData();
     const { user } = useStore();
+    const scanningPolicy = resolveFulfillmentScanningPolicy(settings, effectiveCountry);
 
     const {
         updateJobItem,
@@ -100,7 +104,7 @@ export const ScannerInterface: React.FC = () => {
     const scanOnlyItemHandlers = useScanOnly(setScannedItem);
 
     // --- DERIVED DATA ---
-    const isMultiSiteRole = ['CEO', 'Super Admin', 'Admin', 'Auditor', 'super_admin'].includes(user?.role || '');
+    const isMultiSiteRole = canViewAllSites(user?.role);
 
     const filteredJobs = useMemo(() => {
         let baseFiltered = jobs || [];
@@ -230,7 +234,7 @@ export const ScannerInterface: React.FC = () => {
         return { points, message: 'Great job!', breakdown: bonuses };
     };
 
-    const handleItemScan = async (val?: string) => {
+    const handleItemScan = async (val?: string, quantity?: number) => {
         // Use val if passed, otherwise state
         const inputVal = val || scannedItem;
 
@@ -281,10 +285,14 @@ export const ScannerInterface: React.FC = () => {
             playBeep('success');
             setIsProcessingScan(true);
 
+            const pickedQty = quantity !== undefined && quantity !== null ? quantity : currentItem.expectedQty;
+            const isShort = pickedQty < currentItem.expectedQty;
+            const itemFinalStatus = isShort ? 'Short' : 'Picked';
+
             try {
                 // 1. Update Job Item Status
                 const itemIndex = selectedJob.lineItems.indexOf(currentItem);
-                await updateJobItem(selectedJob.id, itemIndex, 'Picked', currentItem.expectedQty); // Assuming full pick
+                await updateJobItem(selectedJob.id, itemIndex, itemFinalStatus, pickedQty);
 
                 // 2. Adjust Stock (if PICK) — deduct from source site
                 if (selectedJob.type === 'PICK' && adjustStockMutation) {
@@ -294,32 +302,26 @@ export const ScannerInterface: React.FC = () => {
                         productName: currentItem.name,
                         productSku: currentItem.sku,
                         siteId: sourceSiteId,
-                        quantity: currentItem.expectedQty, // positive — type:'OUT' handles the deduction
-                        reason: `Picked for Job #${selectedJob.jobNumber}`,
+                        quantity: pickedQty, // positive — type:'OUT' handles the deduction
+                        reason: isShort
+                            ? `Short Picked for Job #${selectedJob.jobNumber} (${pickedQty}/${currentItem.expectedQty})`
+                            : `Picked for Job #${selectedJob.jobNumber}`,
                         type: 'OUT',
                         canApprove: true
                     });
                 }
 
-                // 3. Putaway Logic (Moved to PutawayScanner)
-                // This line seems to be a malformed snippet from the instruction.
-                // Assuming the intent was to remove the old PUTAWAY check and not introduce new invalid syntax.
-                // The original block was:
-                // if (selectedJob.type === 'PUTAWAY') {
-                //     // Should not be reached
-                // }
-
-                // 4. Update Local State UI
-                setLastCompletedItem({ name: currentItem.name, qty: currentItem.expectedQty });
-                setLastCompletedStatus('success');
-                setEarnedPoints({ points: 10, message: 'Item Picked', bonuses: [] }); // Simple points
+                // 3. Update Local State UI
+                setLastCompletedItem({ name: currentItem.name, qty: pickedQty });
+                setLastCompletedStatus(isShort ? 'warning' : 'success');
+                setEarnedPoints({ points: isShort ? 5 : 10, message: isShort ? 'Short Pick Recorded' : 'Item Picked', bonuses: [] });
                 setShowPointsPopup(true);
                 setTimeout(() => setShowPointsPopup(false), 2000);
 
-                // 5. Check for Job Completion or Next Item
+                // 4. Check for Job Completion or Next Item
                 // We use a fresh copy of items to check completion
                 const nextItems = [...selectedJob.lineItems];
-                nextItems[itemIndex] = { ...currentItem, status: 'Picked', pickedQty: currentItem.expectedQty };
+                nextItems[itemIndex] = { ...currentItem, status: itemFinalStatus, pickedQty };
 
                 const nextPending = nextItems.find(i => i.status === 'Pending');
 
@@ -456,6 +458,7 @@ export const ScannerInterface: React.FC = () => {
                         scanOnlyItemHandlers={scanOnlyItemHandlers}
                         handleItemScan={handleItemScan}
                         isProcessingScan={isProcessingScan}
+                        requireQuantityEntry={scanningPolicy.requirePickQuantityEntry}
                     />
                 )}
             </div>

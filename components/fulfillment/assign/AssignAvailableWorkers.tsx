@@ -4,6 +4,7 @@ import { Employee, WMSJob } from '../../../types';
 import { Protected } from '../../Protected';
 import { useFulfillment } from '../FulfillmentContext';
 import { logger } from '../../../utils/logger';
+import { canWorkerPerformJob, getJobAssignmentEligibility, isDeliveryJob, isFloorWorkerRole } from '../../../utils/fulfillmentRoles';
 
 interface AssignAvailableWorkersProps {
     filteredEmployees: Employee[];
@@ -61,7 +62,7 @@ export const AssignAvailableWorkers: React.FC<AssignAvailableWorkersProps> = ({
                                 e.status?.toLowerCase() === 'active'
                             );
                             if (dispatchEmployeeFilter !== 'ALL') filtered = filtered.filter(e => e.role?.toLowerCase() === dispatchEmployeeFilter.toLowerCase());
-                            if (dispatchEmployeeSearch) filtered = filtered.filter(e => e.name?.toLowerCase().includes(dispatchEmployeeSearch.toLowerCase()));
+                            if (dispatchEmployeeSearch) filtered = filtered.filter(e => e.name?.toLowerCase().includes(dispatchEmployeeSearch.toLowerCase()) || e.code?.toLowerCase().includes(dispatchEmployeeSearch.toLowerCase()));
                             return filtered.length;
                         })()}
                     </span>
@@ -123,20 +124,12 @@ export const AssignAvailableWorkers: React.FC<AssignAvailableWorkersProps> = ({
                         e.status?.toLowerCase() === 'active'
                     );
                     if (dispatchEmployeeFilter !== 'ALL') filtered = filtered.filter(e => e.role?.toLowerCase() === dispatchEmployeeFilter.toLowerCase());
-                    if (dispatchEmployeeSearch) filtered = filtered.filter(e => e.name?.toLowerCase().includes(dispatchEmployeeSearch.toLowerCase()));
+                    if (dispatchEmployeeSearch) filtered = filtered.filter(e => e.name?.toLowerCase().includes(dispatchEmployeeSearch.toLowerCase()) || e.code?.toLowerCase().includes(dispatchEmployeeSearch.toLowerCase()));
 
-                    // Check if selected job matches employee role
+                    // Check if selected job matches employee role using fulfillment role rules
                     const getRoleMatch = (employee: any, job: WMSJob | null) => {
                         if (!job) return false;
-                        const role = employee.role?.toLowerCase();
-
-                        // All warehouse/operations roles can do any job (cross-functional)
-                        const warehouseRoles = [
-                            'super_admin', 'admin', 'manager', 'regional_manager', 'operations_manager',
-                            'warehouse_manager', 'dispatcher', 'picker', 'packer', 'receiver',
-                            'driver', 'inventory_specialist', 'forklift_operator'
-                        ];
-                        return warehouseRoles.includes(role);
+                        return canWorkerPerformJob(employee.role, job.type);
                     };
 
                     // Sort by:role match first, then by workload
@@ -168,11 +161,15 @@ export const AssignAvailableWorkers: React.FC<AssignAvailableWorkersProps> = ({
                                   );
                                   const workloadCount = activeAssignments.length;
                                   const roleMatch = getRoleMatch(employee, selectedJob);
+                                  const eligibility = selectedJob ? getJobAssignmentEligibility(employee.role, selectedJob.type) : { eligible: true };
+                                  const isDeliveryLockout = selectedJob ? (isDeliveryJob(selectedJob.type) && isFloorWorkerRole(employee.role)) : false;
   
                                   return (
                                       <div key={employee.id} className={`p-4 rounded-2xl border transition-all duration-300 ${roleMatch && selectedJob
                                           ? 'bg-[#2C5E3B]/5 dark:bg-[#A9CBA2]/10 border-[#2C5E3B]/30'
-                                          : 'bg-stone-50/50 dark:bg-[#1C2620]/30 border-[#E2DCCE]/30 dark:border-[#A9CBA2]/[0.04] hover:border-[#CFC6B4]/60 dark:hover:border-[#A9CBA2]/10 hover:bg-stone-100/50 dark:hover:bg-[#EAE5D9]/10'
+                                          : isDeliveryLockout && selectedJob
+                                              ? 'bg-amber-500/[0.03] dark:bg-amber-500/[0.06] border-amber-500/20 opacity-80'
+                                              : 'bg-stone-50/50 dark:bg-[#1C2620]/30 border-[#E2DCCE]/30 dark:border-[#A9CBA2]/[0.04] hover:border-[#CFC6B4]/60 dark:hover:border-[#A9CBA2]/10 hover:bg-stone-100/50 dark:hover:bg-[#EAE5D9]/10'
                                           } `}>
                                           <div className="flex items-center gap-4">
                                               <div className="relative">
@@ -186,8 +183,13 @@ export const AssignAvailableWorkers: React.FC<AssignAvailableWorkersProps> = ({
                                                   <div className="flex items-center gap-2 mb-1">
                                                       <div className="text-sm text-stone-850 dark:text-[#EAE5D9] font-black truncate">{employee.name}</div>
                                                       {roleMatch && selectedJob && (
-                                                          <span className="bg-[#2C5E3B]/10 dark:bg-[#A9CBA2]/20 text-[#2C5E3B] dark:text-[#A9CBA2] px-1.5 py-0.5 rounded-full border border-[#2C5E3B]/20 dark:border-[#A9CBA2]/30 font-black uppercase tracking-tighter shadow-sm">
+                                                          <span className="bg-[#2C5E3B]/10 dark:bg-[#A9CBA2]/20 text-[#2C5E3B] dark:text-[#A9CBA2] px-1.5 py-0.5 rounded-full border border-[#2C5E3B]/20 dark:border-[#A9CBA2]/30 font-black uppercase tracking-tighter text-[9px] shadow-sm">
                                                               Match
+                                                          </span>
+                                                      )}
+                                                      {isDeliveryLockout && selectedJob && (
+                                                          <span className="bg-amber-500/10 text-amber-700 dark:text-amber-400 px-1.5 py-0.5 rounded-full border border-amber-500/20 font-black uppercase tracking-tighter text-[9px]">
+                                                              Driver Only
                                                           </span>
                                                       )}
                                                   </div>
@@ -211,25 +213,28 @@ export const AssignAvailableWorkers: React.FC<AssignAvailableWorkersProps> = ({
   
                                               <Protected permission="ASSIGN_TASKS">
                                                   <button
-                                                      disabled={!selectedJob}
+                                                      disabled={!selectedJob || !eligibility.eligible}
                                                       onClick={async () => {
-                                                          if (selectedJob) {
-                                                              try {
-                                                                  setIsSubmitting(true);
-                                                                  await assignJob(selectedJob.id, employee.id);
-                                                                  addNotification('success', `Job assigned to ${employee.name}`);
-                                                                  setSelectedJob(null);
-                                                                  await refreshData();
-                                                              } catch (error) {
-                                                                  logger.error('AssignAvailableWorkers', 'Failed to assign job:', error);
-                                                                  addNotification('alert', 'Failed to assign job');
-                                                              } finally {
-                                                                  setIsSubmitting(false);
-                                                              }
+                                                          if (!selectedJob) return;
+                                                          if (!eligibility.eligible) {
+                                                              addNotification('alert', eligibility.reason || 'Worker is not eligible for this job type');
+                                                              return;
+                                                          }
+                                                          try {
+                                                              setIsSubmitting(true);
+                                                              await assignJob(selectedJob.id, employee.id);
+                                                              addNotification('success', `Job assigned to ${employee.name}`);
+                                                              setSelectedJob(null);
+                                                              await refreshData();
+                                                          } catch (error) {
+                                                              logger.error('AssignAvailableWorkers', 'Failed to assign job:', error);
+                                                              addNotification('alert', 'Failed to assign job');
+                                                          } finally {
+                                                              setIsSubmitting(false);
                                                           }
                                                       }}
-                                                      className={`p-2.5 rounded-xl border transition-all duration-300 flex items-center justify-center ${!selectedJob
-                                                          ? 'bg-stone-50/50 dark:bg-[#18201B]/50 text-stone-400 dark:text-stone-600 border-[#E2DCCE]/30 dark:border-emerald-950/20 cursor-not-allowed'
+                                                      className={`p-2.5 rounded-xl border transition-all duration-300 flex items-center justify-center ${!selectedJob || !eligibility.eligible
+                                                          ? 'bg-stone-50/50 dark:bg-[#18201B]/50 text-stone-400 dark:text-stone-600 border-[#E2DCCE]/30 dark:border-emerald-950/20 cursor-not-allowed opacity-50'
                                                           : roleMatch
                                                               ? 'woody-btn-primary py-2 px-3 hover:scale-105 active:scale-95'
                                                               : 'woody-btn-secondary py-2 px-3 hover:scale-105 active:scale-95 shadow-sm'
@@ -237,7 +242,9 @@ export const AssignAvailableWorkers: React.FC<AssignAvailableWorkersProps> = ({
                                                       title={
                                                           !selectedJob
                                                               ? t('warehouse.selectJobFirst')
-                                                              : 'Assign Task'
+                                                              : !eligibility.eligible
+                                                                  ? (eligibility.reason || 'Ineligible for this job')
+                                                                  : 'Assign Task'
                                                       }
                                                   >
                                                       <Plus size={16} />

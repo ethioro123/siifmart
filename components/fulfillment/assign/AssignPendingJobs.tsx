@@ -3,6 +3,7 @@ import { ArrowRight, SlidersHorizontal, RotateCcw, ArrowUpDown, Building2, Searc
 import { WMSJob, Site, Employee } from '../../../types';
 import { AssignJobCard } from './AssignJobCard';
 import { useStore } from '../../../contexts/CentralStore';
+import { canWorkerPerformJob } from '../../../utils/fulfillmentRoles';
 
 interface AssignPendingJobsProps {
     filteredJobs: WMSJob[];
@@ -445,21 +446,9 @@ export const AssignPendingJobs: React.FC<AssignPendingJobsProps> = ({
             <div className="flex-1 overflow-y-auto p-3 space-y-3 custom-scrollbar">
                 {filteredActiveJobs.length > 0 ? (
                     filteredActiveJobs.map(job => {
-                        // Find best match employee
+                        // Find best match employee based on fulfillment role eligibility
                         const bestMatchEmployee = employees
-                            .filter(e => {
-                                const role = e.role?.toLowerCase();
-                                if (role === 'super_admin') return false;
-                                // All warehouse/operations roles are cross-functional
-                                const warehouseRoles = [
-                                    'admin', 'manager', 'regional_manager', 'operations_manager',
-                                    'warehouse_manager', 'dispatcher', 'picker', 'packer', 'receiver',
-                                    'driver', 'inventory_specialist', 'forklift_operator'
-                                ];
-                                if (!warehouseRoles.includes(role)) return false;
-                                if (e.status !== 'Active') return false;
-                                return true;
-                            })
+                            .filter(e => e.status === 'Active' && e.role?.toLowerCase() !== 'super_admin' && canWorkerPerformJob(e.role, job.type))
                             .map(e => {
                                 const activeAssignments = jobAssignments.filter(
                                     a => a.employeeId === e.id && ['Assigned', 'Accepted', 'In-Progress'].includes(a.status)

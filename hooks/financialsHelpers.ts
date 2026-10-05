@@ -231,3 +231,112 @@ export function computeWeeklyCashflow(filteredSales: any[], filteredExpenses: an
         };
     });
 }
+
+/**
+ * Triggers download of country-specific banking / mobile payment file for active payroll.
+ * ET: Commercial Bank of Ethiopia (CBE) / Telebirr bulk disbursement format
+ * KE: KEPSS / M-Pesa B2C bulk payment format
+ */
+export function exportSovereignBankFile(
+    country: string,
+    currencySymbol: string,
+    employees: any[],
+    calculateBonus: (emp: any) => number
+) {
+    const isKenya = (country || '').toUpperCase() === 'KE';
+    const timestamp = new Date().toISOString().split('T')[0];
+    const activeStaff = (employees || []).filter(e => e.status === 'Active');
+
+    let csvContent = '';
+    let filename = '';
+
+    if (isKenya) {
+        filename = `siifmart_ke_mpesa_b2c_payroll_${timestamp}.csv`;
+        const headers = ['Phone Number', 'Full Name', 'Worker Code', 'Department', 'Net Amount (KSh)', 'Reference'];
+        const rows = activeStaff.map(emp => {
+            const bonus = calculateBonus(emp);
+            const total = (Number(emp.salary) || 0) + bonus;
+            const phone = (emp.phone || '').replace(/[\s-]/g, '') || '254700000000';
+            const name = `"${(emp.name || '').replace(/"/g, '""')}"`;
+            const code = emp.code || 'KE-STAFF';
+            const dept = `"${(emp.department || 'Retail').replace(/"/g, '""')}"`;
+            const ref = `SALARY-${timestamp}-${code}`;
+            return [phone, name, code, dept, total.toFixed(2), ref].join(',');
+        });
+        csvContent = [headers.join(','), ...rows].join('\n');
+    } else {
+        filename = `siifmart_et_cbe_telebirr_payroll_${timestamp}.csv`;
+        const headers = ['Beneficiary Account / Telebirr', 'Employee Name', 'Worker Code', 'Department', 'Amount (ETB)', 'Currency', 'Payment Details'];
+        const rows = activeStaff.map(emp => {
+            const bonus = calculateBonus(emp);
+            const total = (Number(emp.salary) || 0) + bonus;
+            const account = (emp.phone || '').replace(/[\s-]/g, '') || '0911000000';
+            const name = `"${(emp.name || '').replace(/"/g, '""')}"`;
+            const code = emp.code || 'ET-STAFF';
+            const dept = `"${(emp.department || 'Retail').replace(/"/g, '""')}"`;
+            const ref = `SALARY-${timestamp}-${code}`;
+            return [account, name, code, dept, total.toFixed(2), 'ETB', ref].join(',');
+        });
+        csvContent = [headers.join(','), ...rows].join('\n');
+    }
+
+    if (typeof window !== 'undefined' && typeof document !== 'undefined' && typeof URL !== 'undefined') {
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = filename;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+    }
+    return filename;
+}
+
+/**
+ * Triggers download of country-specific official tax return filing summary (ERCA Form 21 / KRA VAT 3).
+ */
+export function exportSovereignTaxFiling(
+    country: string,
+    currencySymbol: string,
+    taxConfig: { authority: string; taxName: string; rate: number },
+    metrics: {
+        totalRevenue: number;
+        totalRefunds: number;
+        totalOpEx: number;
+        estimatedTaxLiability: number;
+        inputTaxCredit: number;
+        netTaxPayable: number;
+    }
+) {
+    const isKenya = (country || '').toUpperCase() === 'KE';
+    const timestamp = new Date().toISOString().split('T')[0];
+    const authority = taxConfig.authority || (isKenya ? 'Kenya Revenue Authority (KRA)' : 'Ministry of Revenues (ERCA)');
+    const taxName = taxConfig.taxName || (isKenya ? 'KRA VAT 3' : 'ERCA Form 21');
+    const filename = `siifmart_${(country || 'et').toLowerCase()}_${taxName.toLowerCase().replace(/[^a-z0-9]/g, '_')}_filing_${timestamp}.csv`;
+
+    const headers = ['Line Item', 'Description', `Amount (${currencySymbol})`, 'Tax Treatment', 'Statutory Authority'];
+    const rows = [
+        ['Section 1', 'Gross Standard Rated Supplies', metrics.totalRevenue.toFixed(2), `${taxConfig.rate}% VAT Output`, authority],
+        ['Section 2', 'Returns / Credit Notes Allowed', (-metrics.totalRefunds).toFixed(2), 'Deductible from Output', authority],
+        ['Section 3', 'Net Taxable Turnover', (metrics.totalRevenue - metrics.totalRefunds).toFixed(2), 'Net Output Base', authority],
+        ['Section 4', 'Total Output VAT Collected', metrics.estimatedTaxLiability.toFixed(2), 'Payable to Authority', authority],
+        ['Section 5', 'Allowable Input Tax Credit (Purchases & OpEx)', (-metrics.inputTaxCredit).toFixed(2), 'Claimable Deduction', authority],
+        ['Section 6', 'NET VAT PAYABLE / (REFUNDABLE)', metrics.netTaxPayable.toFixed(2), 'Final Settlement Due', authority],
+    ];
+
+    const csvContent = [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
+    if (typeof window !== 'undefined' && typeof document !== 'undefined' && typeof URL !== 'undefined') {
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = filename;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+    }
+    return filename;
+}

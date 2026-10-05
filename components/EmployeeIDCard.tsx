@@ -7,6 +7,7 @@ import Logo from './Logo';
 import { formatRole } from '../utils/formatting';
 import { logger } from '../utils/logger';
 import { printHtmlContent } from '../utils/printHelper';
+import { formatDisplayEmployeeId } from '../utils/employeeIdGenerator';
 
 interface EmployeeIDCardProps {
     employee: Employee;
@@ -57,6 +58,7 @@ export default function EmployeeIDCard({ employee, siteCode, onClose }: Employee
             try {
                 const url = await QRCode.toDataURL(JSON.stringify({
                     id: employee.id,
+                    code: formatDisplayEmployeeId(employee),
                     name: employee.name,
                     role: employee.role,
                     site: employee.siteId
@@ -143,7 +145,7 @@ export default function EmployeeIDCard({ employee, siteCode, onClose }: Employee
                         </div>
                         <div className="flex justify-between text-sm">
                             <span className="text-gray-500 dark:text-gray-400">Employee ID:</span>
-                            <span className="text-cyan-600 dark:text-cyan-400 font-mono text-xs font-bold">{employee.code || 'NOT ASSIGNED'}</span>
+                            <span className="text-cyan-600 dark:text-cyan-400 font-mono text-xs font-bold">{formatDisplayEmployeeId(employee)}</span>
                         </div>
                         <div className="flex justify-between text-sm">
                             <span className="text-gray-500 dark:text-gray-400">Site ID:</span>
@@ -231,7 +233,7 @@ export default function EmployeeIDCard({ employee, siteCode, onClose }: Employee
                                 <div className="space-y-1">
                                     <div className="flex items-center gap-1.5 text-white">
                                         <Shield size={10} />
-                                        <span className="text-[11px] font-mono leading-tight break-all font-bold">{employee.code || 'NO-CODE'}</span>
+                                        <span className="text-[11px] font-mono leading-tight break-all font-bold">{formatDisplayEmployeeId(employee)}</span>
                                     </div>
                                     <div className="flex items-center gap-1.5 text-gray-400">
                                         <Building size={10} />

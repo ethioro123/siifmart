@@ -54,17 +54,17 @@ export const BarcodeAuditDetailsModal: React.FC<BarcodeAuditDetailsModalProps> =
                         )}
                     </div>
                     <div>
-                        <h3 className="text-lg font-bold text-[#1E3F27] dark:text-white font-sans">{record.product?.name || 'Catalog Product'}</h3>
+                        <h3 className="text-lg font-bold text-[var(--theme-text-primary)] font-sans">{record.product?.name || 'Catalog Product'}</h3>
                         <div className="flex gap-2 mt-2 flex-wrap">
-                            <span className="px-2 py-1 rounded-xl bg-stone-100 dark:bg-white/10 border border-[#E2DCCE]/50 dark:border-white/5 text-stone-700 dark:text-white text-xs font-mono">
+                            <span className="px-2 py-1 rounded-xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-[var(--theme-text-secondary)] text-xs font-mono">
                                 {record.product?.sku || 'NO SKU'}
                             </span>
-                            <span className="px-2 py-1 rounded-xl bg-[#2C5E3B]/10 text-[#2C5E3B] dark:bg-[#A9CBA2]/10 dark:text-[#A9CBA2] border border-[#2C5E3B]/20 dark:border-[#A9CBA2]/20 text-xs font-mono font-bold flex items-center gap-1">
+                            <span className="px-2 py-1 rounded-xl bg-[var(--theme-pill-bg)] text-[var(--theme-text-primary)] border border-[var(--theme-pill-border)] text-xs font-mono font-bold flex items-center gap-1">
                                 <Barcode size={12} /> {record.barcode}
                             </span>
                         </div>
-                        <div className="mt-4 flex items-center gap-4 text-xs text-stone-500">
-                            <div className="flex items-center gap-1 font-bold text-stone-700 dark:text-stone-300">
+                        <div className="mt-4 flex items-center gap-4 text-xs text-[var(--theme-text-muted)]">
+                            <div className="flex items-center gap-1 font-medium text-[var(--theme-text-secondary)]">
                                 <User size={12} /> {employeeName}
                             </div>
                             <div className="flex items-center gap-1">
@@ -74,32 +74,32 @@ export const BarcodeAuditDetailsModal: React.FC<BarcodeAuditDetailsModalProps> =
                     </div>
                 </div>
 
-                <div className="p-4 rounded-2xl bg-[#FAF8F5] dark:bg-white/5 border border-[#E2DCCE] dark:border-white/10 text-sm space-y-2">
-                    <h4 className="font-bold text-[#1E3F27] dark:text-white uppercase text-[10px] tracking-widest mb-1">Audit Summary</h4>
-                    <p className="text-stone-600 dark:text-gray-300">
-                        Barcode <b className="font-mono">{record.barcode}</b> was registered by <b>{employeeName}</b> and mapped to <b>"{record.product?.name || 'Product'}"</b>.
+                <div className="p-4 rounded-2xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-sm space-y-2">
+                    <h4 className="font-bold text-[var(--theme-text-primary)] uppercase text-[10px] tracking-wider mb-1">Audit Summary</h4>
+                    <p className="text-[var(--theme-text-secondary)]">
+                        Barcode <b className="font-mono text-[var(--theme-text-primary)]">{record.barcode}</b> was registered by <b>{employeeName}</b> and mapped to <b>"{record.product?.name || 'Product'}"</b>.
                     </p>
-                    <p className="text-stone-400 text-xs">
+                    <p className="text-[var(--theme-text-muted)] text-xs">
                         Automatically synced across all store POS checkout registers and WMS pick/pack scanners.
                     </p>
                 </div>
 
-                <div className="flex justify-end gap-3 pt-4 border-t border-[#E2DCCE]/60 dark:border-white/10">
+                <div className="flex justify-end gap-3 pt-4 border-t border-[var(--theme-border)]">
                     <button
                         type="button"
                         onClick={onClose}
-                        className="px-4 py-2 rounded-xl text-stone-500 hover:text-stone-800 dark:hover:text-white transition-colors text-sm font-bold cursor-pointer"
+                        className="px-4 py-2 rounded-xl text-[var(--theme-text-muted)] hover:text-[var(--theme-text-primary)] transition-colors text-sm font-medium cursor-pointer"
                     >
                         Close
                     </button>
-                    {['super_admin', 'admin', 'warehouse_manager'].includes(userRole || '') && (
+                    {['super_admin', 'admin', 'warehouse_manager', 'operations_manager', 'regional_manager'].includes(userRole || '') && (
                         <button
                             type="button"
                             onClick={() => {
                                 onDelete(record);
                                 onClose();
                             }}
-                            className="px-4 py-2 rounded-xl bg-red-500/10 text-red-600 dark:text-red-400 hover:bg-red-500 hover:text-white transition-all text-sm font-bold flex items-center gap-2 cursor-pointer"
+                            className="px-4 py-2 rounded-xl bg-red-500/10 text-red-600 dark:text-red-400 hover:bg-red-500 hover:text-white transition-all text-sm font-bold flex items-center gap-2 cursor-pointer active:scale-95"
                         >
                             <Trash2 size={14} /> Remove Mapping
                         </button>

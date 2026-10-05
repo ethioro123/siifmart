@@ -13,6 +13,9 @@ import { Protected } from '../components/Protected';
 import { formatDateTime } from '../utils/formatting';
 import { logger } from '../utils/logger';
 import { getCountryProfile, type Country } from '../utils/localization';
+import { VendorRelationsTab } from '../components/procurement/VendorRelationsTab';
+import { CustomsImportTab } from '../components/procurement/CustomsImportTab';
+import { InboundQCTab } from '../components/procurement/InboundQCTab';
 
 export default function Procurement() {
     const { user } = useStore();
@@ -29,7 +32,7 @@ export default function Procurement() {
     const countrySiteIdsKey = countrySiteIds.join(',');
 
     // UI State
-    const [activeTab, setActiveTab] = useState<'overview' | 'orders' | 'suppliers'>('overview');
+    const [activeTab, setActiveTab] = useState<'overview' | 'orders' | 'suppliers' | 'vendor_relations' | 'customs_import' | 'inbound_qc'>('overview');
     const [loading, setLoading] = useState(false);
 
     // Data State
@@ -97,16 +100,16 @@ export default function Procurement() {
                     .filter(po => ['Pending', 'Ordered', 'Approved'].includes(po.status))
                     .reduce((sum, po) => sum + (po.totalAmount || 0), 0);
 
-                // Potential Revenue (From line items retail prices, fallback 1.5x cost)
+                // Potential Revenue (Calculated from line items retail prices where available)
                 const potentialRevenue = filteredPOs.reduce((sum, po) =>
-                    sum + (po.lineItems?.reduce((isum, item) => isum + (item.retailPrice ? item.quantity * item.retailPrice : item.totalCost * 1.5), 0) || 0), 0);
+                    sum + (po.lineItems?.reduce((isum, item) => isum + (item.retailPrice ? item.quantity * item.retailPrice : (item.totalCost || 0)), 0) || 0), 0);
 
                 // Category Data
                 const categorySpend: Record<string, number> = {};
                 filteredPOs.forEach(po => {
                     po.lineItems?.forEach(item => {
                         const cat = item.category || 'General';
-                        categorySpend[cat] = (categorySpend[cat] || 0) + item.totalCost;
+                        categorySpend[cat] = (categorySpend[cat] || 0) + (item.totalCost || 0);
                     });
                 });
                 const categoryData = Object.entries(categorySpend)
@@ -114,16 +117,19 @@ export default function Procurement() {
                     .sort((a, b) => b.value - a.value)
                     .slice(0, 5);
 
-                // Trend Data (Last 6 months)
-                // Simplified trend data
-                const trendData = [
-                    { name: 'Jan', spend: totalSpend * 0.1 },
-                    { name: 'Feb', spend: totalSpend * 0.12 },
-                    { name: 'Mar', spend: totalSpend * 0.15 },
-                    { name: 'Apr', spend: totalSpend * 0.2 },
-                    { name: 'May', spend: totalSpend * 0.18 },
-                    { name: filteredPOs.length > 0 ? formatDateTime(new Date()).split(' ')[1] : 'Jun', spend: totalSpend * 0.25 }
-                ];
+                // Trend Data (Grouped from actual PO order dates)
+                const monthlySpend: Record<string, number> = {};
+                const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+                filteredPOs.forEach(po => {
+                    if (po.date || po.created_at) {
+                        const d = new Date(po.date || po.created_at || Date.now());
+                        const m = monthNames[d.getMonth()] || 'Month';
+                        monthlySpend[m] = (monthlySpend[m] || 0) + (po.totalAmount || 0);
+                    }
+                });
+                const trendData = Object.keys(monthlySpend).length > 0
+                    ? Object.entries(monthlySpend).map(([name, spend]) => ({ name, spend }))
+                    : [{ name: 'Current', spend: totalSpend }];
 
                 setProcurementMetrics({
                     totalSpend,
@@ -150,7 +156,7 @@ export default function Procurement() {
                 setTotalCount(res.count);
             } else if (activeTab === 'suppliers') {
                 const offset = (supplierPage - 1) * ITEMS_PER_PAGE;
-                const res = await suppliersService.getAll(ITEMS_PER_PAGE, offset);
+                const res = await suppliersService.getAll(ITEMS_PER_PAGE, offset, activeCountry);
                 setLocalSuppliers(res.data);
                 setTotalSuppliersCount(res.count);
             }
@@ -183,24 +189,23 @@ export default function Procurement() {
             {/* Header */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
                 <div>
-                    <div className="flex items-center gap-3 mb-2">
-                        <div className="p-3 bg-[#2C5E3B]/15 dark:bg-[#A9CBA2]/10 text-[#2C5E3B] dark:text-[#A9CBA2] rounded-2xl">
-                            <Truck size={28} />
+                    <div className="flex items-center gap-3.5 mb-1.5">
+                        <div className="w-12 h-12 rounded-2xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-[var(--theme-text-primary)] flex items-center justify-center shadow-sm">
+                            <Truck size={24} strokeWidth={2} />
                         </div>
-                        <h1 className="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-[#2C5E3B] to-amber-600 dark:from-[#A9CBA2] dark:to-[#DFD5C6] tracking-tight flex-1">Procurement</h1>
+                        <h1 className="text-2xl sm:text-3xl font-semibold text-[var(--theme-text-primary)] tracking-tight">Procurement</h1>
                     </div>
-                    <p className="text-stone-500 dark:text-stone-400 font-mono text-sm max-w-xl">
+                    <p className="text-[var(--theme-text-secondary)] text-xs sm:text-sm font-normal max-w-xl">
                         Manage supply chain, purchase orders, and vendor relationships.
                     </p>
                 </div>
                 <div className="flex gap-3">
-
                     <Protected permission="CREATE_PO">
                         <button
                             onClick={() => handleCreatePOOpen()}
-                            className="woody-btn-primary flex items-center gap-2"
+                            className="h-11 px-5 rounded-full bg-[var(--theme-primary)] text-[var(--theme-primary-text)] font-semibold text-sm hover:opacity-90 active:scale-[0.98] transition-all flex items-center gap-2 shadow-sm shrink-0"
                         >
-                            <Plus size={20} strokeWidth={3} />
+                            <Plus size={18} strokeWidth={2.5} />
                             Create Order
                         </button>
                     </Protected>
@@ -208,24 +213,31 @@ export default function Procurement() {
             </div>
 
             {/* Navigation Tabs */}
-            <div className="flex gap-2 p-1.5 glass-panel-pushed rounded-full w-fit">
-                {(['overview', 'orders', 'suppliers'] as const).map(tab => (
-                    <button
-                        key={tab}
-                        onClick={() => setActiveTab(tab)}
-                        className={`px-6 py-2.5 rounded-full text-sm font-bold transition-all duration-300 ${activeTab === tab
-                            ? 'bg-[#224429] dark:bg-[#EAE5D9] text-[#FAF8F5] dark:text-[#1E3B24] shadow-sm'
-                            : 'text-stone-500 dark:text-[#7A9E83] hover:text-[#1E3F27] dark:hover:text-white hover:bg-stone-200/20 dark:hover:bg-white/5'
+            <div className="inline-flex p-1 rounded-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border-subtle)] gap-1 flex-wrap w-fit">
+                {(['overview', 'orders', 'suppliers', 'vendor_relations', 'customs_import', 'inbound_qc'] as const).map(tab => {
+                    const isActive = activeTab === tab;
+                    return (
+                        <button
+                            key={tab}
+                            onClick={() => setActiveTab(tab)}
+                            className={`px-4 py-2 rounded-full text-xs sm:text-sm transition-all duration-200 ${
+                                isActive
+                                    ? 'bg-[var(--theme-bg-panel)] text-[var(--theme-text-primary)] font-semibold shadow-sm border border-[var(--theme-border)]'
+                                    : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-card-hover)] font-medium border border-transparent'
                             }`}
-                    >
-                        {tab.charAt(0).toUpperCase() + tab.slice(1)}
-                    </button>
-                ))}
+                        >
+                            {tab === 'vendor_relations' ? 'Vendor Relations' :
+                             tab === 'customs_import' ? 'Customs & Port' :
+                             tab === 'inbound_qc' ? 'Inbound QC Dock' :
+                             tab.charAt(0).toUpperCase() + tab.slice(1)}
+                        </button>
+                    );
+                })}
             </div>
 
             {/* Content Area */}
             <div className="min-h-[600px]">
-                {loading && <div className="flex justify-center p-12"><RefreshCw className="animate-spin text-[#2C5E3B] dark:text-[#A9CBA2]" /></div>}
+                {loading && <div className="flex justify-center p-12"><RefreshCw className="animate-spin text-[var(--theme-accent)]" /></div>}
 
                 {!loading && activeTab === 'overview' && (
                     <ProcurementDashboard
@@ -266,8 +278,27 @@ export default function Procurement() {
                         totalCount={totalSuppliersCount}
                         currentPage={supplierPage}
                         onPageChange={setSupplierPage}
-                        onAddSupplier={() => fetchData()} // Mock callback, actual functionality inside modal
+                        onAddSupplier={() => fetchData()}
                         onOpenCreatePO={handleCreatePOOpen}
+                    />
+                )}
+
+                {!loading && activeTab === 'vendor_relations' && (
+                    <VendorRelationsTab
+                        countryCode={activeCountry}
+                        suppliers={allSuppliers}
+                    />
+                )}
+
+                {!loading && activeTab === 'customs_import' && (
+                    <CustomsImportTab
+                        countryCode={activeCountry}
+                    />
+                )}
+
+                {!loading && activeTab === 'inbound_qc' && (
+                    <InboundQCTab
+                        countryCode={activeCountry}
                     />
                 )}
             </div>

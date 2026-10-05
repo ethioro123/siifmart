@@ -69,7 +69,7 @@ export default function Inventory() {
     }, [activeTab]);
 
     // --- READ-ONLY & PERMISSIONS ---
-    const canApprove = user?.role === 'super_admin' || (user?.role as string)?.toLowerCase() === 'ceo';
+    const canApprove = user?.role === 'super_admin' || (user?.role as string)?.toLowerCase() === 'ceo' || user?.role === 'regional_manager' || user?.role === 'operations_manager';
     const isReadOnly = useMemo(() => {
         if (!activeSite) return true; // HQ View is Read-Only
         const type = activeSite.type;

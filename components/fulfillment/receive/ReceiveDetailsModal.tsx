@@ -5,6 +5,9 @@ import { useFulfillment } from '../FulfillmentContext';
 import Badge from '../../shared/Badge';
 import { formatDateTime } from '../../../utils/formatting';
 import { getSellUnit } from '../../../utils/units';
+import { parseBatchNumber, getBatchExpiryStatus } from '../../../utils/batchNumber';
+import { useData } from '../../../contexts/DataContext';
+import { resolveReceivingPolicy } from '../../../utils/receivingPolicy';
 
 interface ReceiveDetailsModalProps {
     selectedItem: WMSJob | PurchaseOrder;
@@ -24,7 +27,9 @@ export const ReceiveDetailsModal: React.FC<ReceiveDetailsModalProps> = ({
     t
 }) => {
     const { addNotification, isSubmitting, setIsSubmitting, employees, user, jobs, historicalJobs } = useFulfillment();
+    const { settings, effectiveCountry } = useData();
     const [printingId, setPrintingId] = useState<string | null>(null);
+    const isBlindReceiving = resolveReceivingPolicy(settings, effectiveCountry).blind;
 
     const isPO = (item: any): item is PurchaseOrder => {
         return (item as PurchaseOrder).poNumber !== undefined || (item as PurchaseOrder).supplierName !== undefined;
@@ -83,9 +88,14 @@ export const ReceiveDetailsModal: React.FC<ReceiveDetailsModalProps> = ({
         setReprintItem({
             sku: item.sku,
             name: item.name || item.productName || 'Unknown Item',
-            qty: 1,
+            qty: item.quantity || item.expectedQty || 1,
             price: item.retailPrice || item.price || 0,
-            category: item.category || 'General'
+            category: item.category || 'General',
+            batchNumber: item.batchNumber || item.batch_number,
+            expiry: item.expiryDate || item.expiry_date,
+            targetLocation: item.location || item.suggestedLocation || (selectedItem as any)?.location,
+            poNumber: isPO(selectedItem) ? (selectedItem.poNumber || (selectedItem as any).po_number) : undefined,
+            packQuantity: item.packQuantity || 1
         });
     };
 
@@ -189,14 +199,30 @@ export const ReceiveDetailsModal: React.FC<ReceiveDetailsModalProps> = ({
                                         </div>
 
                                         {/* Granular Metadata (Batch / Expiry) */}
-                                        <div className="flex items-center gap-3 mt-2">
-                                            {item.batchNumber && (
-                                                <div className="flex items-center gap-1.5">
-                                                    <Box size={10} className="text-slate-400 dark:text-zinc-600" />
-                                                    <span className="text-[9px] font-black text-slate-400 dark:text-zinc-500 uppercase tracking-widest">Batch:</span>
-                                                    <span className="text-[9px] font-black text-slate-900 dark:text-zinc-300 font-mono">{item.batchNumber}</span>
-                                                </div>
-                                            )}
+                                        <div className="flex flex-wrap items-center gap-2 mt-2">
+                                            {item.batchNumber && (() => {
+                                                const parsed = parseBatchNumber(item.batchNumber);
+                                                return (
+                                                    <div className="inline-flex items-center gap-1.5 px-2 py-0.5 bg-stone-100 dark:bg-white/5 border border-stone-200 dark:border-white/10 rounded-md">
+                                                        <Box size={10} className="text-[#2C5E3B] dark:text-[#A9CBA2]" />
+                                                        <span className="text-[9px] font-black text-stone-500 uppercase tracking-wider">Lot:</span>
+                                                        <span className="text-[9px] font-black text-slate-900 dark:text-zinc-200 font-mono">{item.batchNumber}</span>
+                                                        {parsed.isStandard && parsed.formattedDate && (
+                                                            <span className="text-[8px] text-stone-400 font-mono ml-1 border-l border-stone-300 dark:border-stone-700 pl-1">
+                                                                Rcvd {parsed.formattedDate}
+                                                            </span>
+                                                        )}
+                                                    </div>
+                                                );
+                                            })()}
+                                            {item.expiryDate && (() => {
+                                                const exp = getBatchExpiryStatus(item.expiryDate);
+                                                return (
+                                                    <span className={`text-[8px] font-black uppercase px-2 py-0.5 rounded-full border ${exp.badgeColor}`}>
+                                                        {exp.label}
+                                                    </span>
+                                                );
+                                            })()}
                                         </div>
 
                                         {/* Extra Barcodes */}
@@ -214,32 +240,40 @@ export const ReceiveDetailsModal: React.FC<ReceiveDetailsModalProps> = ({
 
                                 <div className="flex items-center gap-3 md:gap-6 flex-shrink-0 ml-2">
                                     <div className="text-right">
-                                        <p className="text-[9px] text-slate-400 dark:text-zinc-600 uppercase font-black tracking-widest mb-1.5">{t('warehouse.quantityToReceive')}</p>
-                                        <p className="text-lg font-black text-[#2C5E3B] dark:text-[#A9CBA2] tabular-nums font-mono leading-none">
-                                            {(() => {
-                                                const baseQty = item.receivedQty || item.quantity || item.expectedQty || 0;
-                                                const itemUnit = getSellUnit(item.unit);
-                                                const sizeNum = parseFloat(item.size || '') || 0;
-                                                const isWeightOrVolume = itemUnit.category === 'weight' || itemUnit.category === 'volume';
+                                        <p className={`text-[9px] uppercase font-black tracking-widest mb-1.5 ${isBlindReceiving && data.status !== 'Completed' && data.status !== 'Received' ? 'text-amber-600 dark:text-amber-400' : 'text-slate-400 dark:text-zinc-600'}`}>
+                                            {t('warehouse.quantityToReceive')}{isBlindReceiving && data.status !== 'Completed' && data.status !== 'Received' ? ' (Blind)' : ''}
+                                        </p>
+                                        {isBlindReceiving && data.status !== 'Completed' && data.status !== 'Received' ? (
+                                            <p className="text-lg font-black text-amber-600 dark:text-amber-400 tabular-nums font-mono leading-none tracking-widest">
+                                                ***
+                                            </p>
+                                        ) : (
+                                            <p className="text-lg font-black text-[#2C5E3B] dark:text-[#A9CBA2] tabular-nums font-mono leading-none">
+                                                {(() => {
+                                                    const baseQty = item.receivedQty || item.quantity || item.expectedQty || 0;
+                                                    const itemUnit = getSellUnit(item.unit);
+                                                    const sizeNum = parseFloat(item.size || '') || 0;
+                                                    const isWeightOrVolume = itemUnit.category === 'weight' || itemUnit.category === 'volume';
 
-                                                if (isWeightOrVolume && sizeNum > 0) {
+                                                    if (isWeightOrVolume && sizeNum > 0) {
+                                                        return (
+                                                            <>
+                                                                {baseQty}
+                                                                <span className="text-[10px] text-[#2C5E3B]/70 dark:text-[#A9CBA2]/70 font-bold ml-1 uppercase">× {sizeNum}{itemUnit.shortLabel.toLowerCase()}</span>
+                                                            </>
+                                                        );
+                                                    }
                                                     return (
                                                         <>
                                                             {baseQty}
-                                                            <span className="text-[10px] text-[#2C5E3B]/70 dark:text-[#A9CBA2]/70 font-bold ml-1 uppercase">× {sizeNum}{itemUnit.shortLabel.toLowerCase()}</span>
+                                                            {itemUnit.code !== 'UNIT' && (
+                                                                <span className="text-[10px] text-[#2C5E3B]/70 dark:text-[#A9CBA2]/70 font-bold ml-1 uppercase">{itemUnit.shortLabel}</span>
+                                                            )}
                                                         </>
                                                     );
-                                                }
-                                                return (
-                                                    <>
-                                                        {baseQty}
-                                                        {itemUnit.code !== 'UNIT' && (
-                                                            <span className="text-[10px] text-[#2C5E3B]/70 dark:text-[#A9CBA2]/70 font-bold ml-1 uppercase">{itemUnit.shortLabel}</span>
-                                                        )}
-                                                    </>
-                                                );
-                                            })()}
-                                        </p>
+                                                })()}
+                                            </p>
+                                        )}
                                     </div>
 
                                     <div className="hidden md:block w-px h-8 bg-slate-200 dark:bg-white/10" />

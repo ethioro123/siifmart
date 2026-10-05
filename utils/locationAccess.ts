@@ -34,6 +34,7 @@ const SINGLE_SITE_ROLES: UserRole[] = [
     'hr_manager',
     'procurement_manager',
     'supply_chain_manager',
+    'merchandising_manager',
     'admin',
     'hr',
     'cs_manager',

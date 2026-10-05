@@ -4,6 +4,8 @@ import { Product } from '../../types';
 import { useData } from '../../contexts/DataContext';
 import PinPad from '../pos/PinPad';
 
+import { matchStaffPin } from '../../utils/employeeIdGenerator';
+
 interface UnknownBarcodeManagerPinStepProps {
     selectedProduct: Product;
     scannedBarcode: string;
@@ -29,9 +31,9 @@ export const UnknownBarcodeManagerPinStep: React.FC<UnknownBarcodeManagerPinStep
 
         // 4-Eyes Principle: Any authorized store supervisor/manager staff PIN
         const managerStaff = (employees || []).filter(e =>
-            ['super_admin', 'admin', 'store_manager', 'shift_lead', 'operations_manager', 'ceo'].includes(e.role?.toLowerCase() || '')
+            ['super_admin', 'admin', 'store_manager', 'shift_lead', 'operations_manager', 'regional_manager', 'ceo'].includes(e.role?.toLowerCase() || '')
         );
-        const matchesStaffPin = managerStaff.some(m => m.code?.trim() === entered);
+        const matchesStaffPin = managerStaff.some(m => matchStaffPin(m.code, entered));
 
         if (matchesConfigured || matchesStaffPin) {
             setErrorMsg('');

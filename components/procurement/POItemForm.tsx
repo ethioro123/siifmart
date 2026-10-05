@@ -289,27 +289,27 @@ export const POItemForm: React.FC<POItemFormProps> = ({
        ═══════════════════════════════════════════════════ */
 
     return (
-        <div id="po-item-form-container" className="bg-white/85 dark:bg-[#18201B]/60 border border-[#E2DCCE] dark:border-emerald-950/20 rounded-3xl p-6 shadow-sm relative overflow-hidden group">
-            <h3 className="text-xs font-black text-[#1E3F27] dark:text-[#EAE5D9] uppercase tracking-wider mb-4 flex items-center gap-2 relative z-10">
-                <div className="p-1.5 bg-emerald-50 text-[#2C5E3B] dark:bg-[#2C5E3B]/20 dark:text-[#A9CBA2] rounded-xl border border-emerald-200 dark:border-emerald-950/30">
+        <div id="po-item-form-container" className="bg-[var(--theme-bg-panel)] border border-[var(--theme-border)] rounded-2xl p-6 shadow-sm relative overflow-hidden group">
+            <h3 className="text-xs font-black text-[var(--theme-text-primary)] uppercase tracking-wider mb-4 flex items-center gap-2 relative z-10">
+                <div className="p-1.5 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 rounded-xl border border-emerald-500/20">
                     <Plus size={15} />
                 </div>
                 {editingItem ? 'Edit Product Item' : 'Add Products'}
             </h3>
 
             {/* ─── Type Toggle ───────────────────────────── */}
-            <div className="flex gap-4 mb-5 border-b border-[#E2DCCE]/60 dark:border-white/5 pb-3.5 relative z-10">
+            <div className="flex gap-3 mb-5 border-b border-[var(--theme-border-subtle)] pb-3.5 relative z-10">
                 <button
                     type="button"
                     onClick={() => setProductType('catalog')}
-                    className={`px-4 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${productType === 'catalog' ? 'bg-[#2C5E3B] text-white shadow-sm' : 'text-stone-500 hover:text-stone-900 dark:hover:text-white bg-[#FAF8F5] dark:bg-black/30 border border-[#E2DCCE] dark:border-white/10'}`}
+                    className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${productType === 'catalog' ? 'bg-[var(--theme-primary)] text-[var(--theme-primary-text)] shadow-sm' : 'text-[var(--theme-text-muted)] hover:text-[var(--theme-text-primary)] bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)]'}`}
                 >
                     CATALOG SEARCH
                 </button>
                 <button
                     type="button"
                     onClick={() => setProductType('new')}
-                    className={`px-4 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${productType === 'new' ? 'bg-[#2C5E3B] text-white shadow-sm' : 'text-stone-500 hover:text-stone-900 dark:hover:text-white bg-[#FAF8F5] dark:bg-black/30 border border-[#E2DCCE] dark:border-white/10'}`}
+                    className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${productType === 'new' ? 'bg-[var(--theme-primary)] text-[var(--theme-primary-text)] shadow-sm' : 'text-[var(--theme-text-muted)] hover:text-[var(--theme-text-primary)] bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)]'}`}
                 >
                     CUSTOM ITEM
                 </button>
@@ -429,20 +429,20 @@ export const POItemForm: React.FC<POItemFormProps> = ({
                 )}
 
                 {/* ─── ACTION BUTTON ─── */}
-                <div className="pt-2 border-t border-[#E2DCCE]/60 dark:border-white/5">
+                <div className="pt-2 border-t border-[var(--theme-border-subtle)]">
                     {editingItem ? (
                         <div className="flex w-full gap-2 font-black">
                             <button
                                 type="button"
                                 onClick={onCancelEdit}
-                                className="w-1/3 py-3 bg-stone-100 dark:bg-white/10 hover:bg-stone-200 dark:hover:bg-white/20 text-stone-700 dark:text-white rounded-2xl transition-colors cursor-pointer text-xs font-bold"
+                                className="w-1/3 py-2.5 bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-border-subtle)] text-[var(--theme-text-secondary)] rounded-xl transition-colors cursor-pointer text-xs font-semibold border border-[var(--theme-border)] active:scale-[0.98]"
                             >
                                 Cancel
                             </button>
                             <button
                                 type="button"
                                 onClick={handleAddItem}
-                                className="w-2/3 py-3 woody-btn-primary rounded-2xl transition-all flex items-center justify-center gap-2 cursor-pointer text-xs font-black"
+                                className="w-2/3 py-2.5 bg-[var(--theme-primary)] text-[var(--theme-primary-text)] hover:opacity-95 active:scale-[0.98] rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer text-xs font-semibold shadow-sm"
                             >
                                 <Save size={15} /> Update Item
                             </button>
@@ -451,7 +451,7 @@ export const POItemForm: React.FC<POItemFormProps> = ({
                         <button
                             type="button"
                             onClick={handleAddItem}
-                            className="w-full py-3 woody-btn-primary rounded-2xl transition-all flex items-center justify-center gap-2 cursor-pointer text-xs font-black"
+                            className="w-full py-2.5 bg-[var(--theme-primary)] text-[var(--theme-primary-text)] hover:opacity-95 active:scale-[0.98] rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer text-xs font-semibold shadow-sm"
                         >
                             <Plus size={15} /> Add Item to Order
                         </button>

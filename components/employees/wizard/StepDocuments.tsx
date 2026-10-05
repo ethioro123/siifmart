@@ -265,7 +265,7 @@ export default function StepDocuments({
                     <div className="sm:col-span-2 space-y-3">
                         <div>
                             <label className="text-[11px] text-stone-600 dark:text-stone-300 uppercase font-bold mb-1 block">
-                                National ID / Kebele / Passport Number
+                                National ID / Passport Number
                             </label>
                             <input
                                 className="w-full bg-white dark:bg-black/30 border border-[#E2DCCE] dark:border-white/10 rounded-xl px-3 py-2 text-stone-900 dark:text-white focus:border-[#2C5E3B] dark:focus:border-emerald-500 outline-none text-sm font-mono"

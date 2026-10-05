@@ -64,7 +64,7 @@ export default function WarehouseOperations() {
     const adjustStockMutation = useAdjustStockMutation();
     const relocateProductMutation = useRelocateProductMutation();
 
-    const canApprove = ['super_admin', 'CEO', 'Admin'].includes(user?.role || '');
+    const canApprove = ['super_admin', 'CEO', 'ceo', 'admin', 'Admin', 'regional_manager', 'operations_manager'].includes(user?.role || '');
 
 
     const [isMobileTabMenuOpen, setIsMobileTabMenuOpen] = useState(false); // Mobile Tab Selector Toggle

@@ -24,27 +24,27 @@ export const NetworkSection = ({
         <DashboardSection title="Network & Resource Management" icon={MapIcon} className="col-span-1 md:col-span-4">
             <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
                 {/* Site Matrix */}
-                <div className="lg:col-span-2 glass-panel rounded-3xl p-6 overflow-hidden flex flex-col relative h-[400px]">
+                <div className="lg:col-span-2 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-3xl p-6 overflow-hidden flex flex-col relative h-[400px] shadow-sm">
                     <WidgetErrorBoundary title="Network Performance">
-                        <h3 className="font-bold text-gray-900 dark:text-white mb-6 flex items-center gap-2">
-                            <MapIcon className="text-blue-500 dark:text-blue-400" size={20} />
+                        <h3 className="font-bold text-[var(--theme-text-primary)] mb-6 flex items-center gap-2">
+                            <MapIcon className="text-[var(--theme-text-primary)]" size={20} />
                             Network Performance
                         </h3>
                         <div className="overflow-y-auto custom-scrollbar pr-2">
                             <div className="space-y-3">
                                 {sitePerformance.map((site) => (
-                                    <div key={site.id} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-white/5 hover:bg-gray-100 dark:hover:bg-white/10 rounded-2xl transition-all duration-300 border border-gray-200 dark:border-white/5 group hover:border-gray-300 dark:hover:border-white/20 hover:shadow-lg hover:shadow-black/5 dark:hover:shadow-black/20 hover:-translate-x-1 cursor-pointer">
+                                    <div key={site.id} className="flex items-center justify-between p-4 bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card-hover)] rounded-2xl transition-all duration-200 border border-[var(--theme-border)] group hover:border-[var(--theme-border-focus)] cursor-pointer">
                                         <div className="flex items-center gap-4">
-                                            <div className={`p-2 rounded-lg ${site.type === 'Warehouse' ? 'bg-purple-500/10 dark:bg-purple-500/20 text-purple-600 dark:text-purple-400' : 'bg-blue-500/10 dark:bg-blue-500/20 text-blue-600 dark:text-blue-400'}`}>
+                                            <div className="p-2 rounded-xl bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)] border border-[var(--theme-border)]">
                                                 <Package size={16} />
                                             </div>
                                             <div>
-                                                <p className="font-bold text-gray-900 dark:text-white text-sm">{site.name}</p>
-                                                <p className="text-xs text-gray-500 font-mono">{site.type} • {site.staffCount} Staff</p>
+                                                <p className="font-bold text-[var(--theme-text-primary)] text-sm">{site.name}</p>
+                                                <p className="text-xs text-[var(--theme-text-secondary)] font-mono">{site.type} • {site.staffCount} Staff</p>
                                             </div>
                                         </div>
                                         <div className="text-right">
-                                            <p className="font-mono font-bold text-green-400 text-sm">{formatCompactNumber(site.revenue, { currency: currencySymbol })}</p>
+                                            <p className="font-mono font-bold text-[var(--theme-text-primary)] text-sm">{formatCompactNumber(site.revenue, { currency: currencySymbol })}</p>
                                         </div>
                                     </div>
                                 ))}
@@ -61,7 +61,7 @@ export const NetworkSection = ({
                             value={formatCompactNumber(metrics.totalEmployees > 0 ? metrics.totalNetworkRevenue / metrics.totalEmployees : 0, { currency: currencySymbol })}
                             sub="Rev. Per Employee"
                             icon={Users}
-                            color="text-pink-400"
+                            swatch="silk"
                         />
                     </WidgetErrorBoundary>
                     <WidgetErrorBoundary title="Active Staff">
@@ -70,7 +70,7 @@ export const NetworkSection = ({
                             value={metrics.activeEmployees || 0}
                             sub="Currently On-Site"
                             icon={Users}
-                            color="text-purple-400"
+                            swatch="slate"
                         />
                     </WidgetErrorBoundary>
                     <WidgetErrorBoundary title="Basket Size">
@@ -79,7 +79,7 @@ export const NetworkSection = ({
                             value={(allSales?.reduce((acc, sale) => acc + (sale.items?.reduce((iAcc: number, i: any) => iAcc + i.quantity, 0) || 0), 0) / (allSales?.length || 1)).toFixed(1) || "0"}
                             sub="Items Per Order"
                             icon={ShoppingBag}
-                            color="text-orange-400"
+                            swatch="graphite"
                         />
                     </WidgetErrorBoundary>
                     <WidgetErrorBoundary title="Inbound Velocity">
@@ -88,7 +88,7 @@ export const NetworkSection = ({
                             value="8.2"
                             sub="Shipments / Day"
                             icon={Truck}
-                            color="text-cyan-400"
+                            swatch="obsidian"
                         />
                     </WidgetErrorBoundary>
                 </div>

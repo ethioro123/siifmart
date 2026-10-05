@@ -8,14 +8,15 @@ interface DashboardSectionProps {
 }
 
 export const DashboardSection = ({ title, icon: Icon, children, className = "" }: DashboardSectionProps) => (
-    <div className={`space-y-4 mb-12 ${className}`}>
+    <div className={`space-y-4 mb-10 ${className}`}>
         <div className="flex items-center gap-3 px-2">
-            <div className="p-1.5 bg-white/50 dark:bg-white/5 rounded-lg border border-gray-200 dark:border-white/10">
-                <Icon size={16} className="text-gray-500 dark:text-gray-400" />
+            <div className="p-1.5 bg-[#FFDBBB]/15 dark:bg-[#FFDBBB]/15 rounded-lg border border-[#997E67]/30">
+                <Icon size={16} className="text-[#664930] dark:text-[#FFDBBB]" />
             </div>
-            <h2 className="text-xs font-black text-gray-500 dark:text-gray-400 uppercase tracking-[0.3em]">{title}</h2>
-            <div className="flex-1 h-[1px] bg-gradient-to-r from-gray-200 to-transparent dark:from-white/10 dark:to-transparent ml-4"></div>
+            <h2 className="text-xs font-black text-[#664930] dark:text-[#CCBEB1] uppercase tracking-[0.25em]">{title}</h2>
+            <div className="flex-1 h-[1px] bg-gradient-to-r from-[#CCBEB1]/40 to-transparent dark:from-[#CCBEB1]/20 dark:to-transparent ml-4"></div>
         </div>
         {children}
     </div>
 );
+

@@ -40,7 +40,7 @@ export const InventorySection = ({
                         value={metrics.pendingPicks + metrics.inProgressPacks}
                         sub="Pending Fulfillment"
                         icon={ShoppingCart}
-                        color="text-purple-400"
+                        swatch="silk"
                     />
                 </WidgetErrorBoundary>
                 <WidgetErrorBoundary title="Return Rate">
@@ -49,7 +49,7 @@ export const InventorySection = ({
                         value={`${metrics.returnRate.toFixed(1)}%`}
                         sub={`${formatCompactNumber(metrics.totalReturnedValue, { currency: currencySymbol })} Refunded`}
                         icon={Undo}
-                        color="text-rose-400"
+                        swatch="slate"
                     />
                 </WidgetErrorBoundary>
                 <WidgetErrorBoundary title="Cycle Time">
@@ -58,7 +58,7 @@ export const InventorySection = ({
                         value={metrics.avgCycleTime || '0m'}
                         sub="Processing Speed"
                         icon={Clock}
-                        color="text-blue-400"
+                        swatch="graphite"
                     />
                 </WidgetErrorBoundary>
                 <WidgetErrorBoundary title="Inbound POs">
@@ -67,17 +67,17 @@ export const InventorySection = ({
                         value={metrics.pendingPOs}
                         sub="Pending Shipments"
                         icon={Truck}
-                        color="text-orange-400"
+                        swatch="obsidian"
                     />
                 </WidgetErrorBoundary>
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 h-[400px]">
                 {/* Stock Health */}
-                <div className="lg:col-span-1 glass-panel rounded-3xl p-6 relative flex flex-col">
+                <div className="lg:col-span-1 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-3xl p-6 relative flex flex-col shadow-sm">
                     <WidgetErrorBoundary title="Stock Health">
-                        <h3 className="font-bold text-gray-900 dark:text-white mb-2 flex items-center gap-2 text-sm">
-                            <PieChartIcon className="text-purple-500 dark:text-purple-400" size={16} />
+                        <h3 className="font-bold text-[var(--theme-text-primary)] mb-2 flex items-center gap-2 text-sm">
+                            <PieChartIcon className="text-[var(--theme-text-secondary)]" size={16} />
                             Stock Health
                         </h3>
                         <div className="flex-1 w-full min-h-0 relative">
@@ -86,28 +86,28 @@ export const InventorySection = ({
                                     <Pie data={stockStatusData} innerRadius={40} outerRadius={60} paddingAngle={5} dataKey="value">
                                         {stockStatusData.map((entry, index) => <Cell key={`cell-${index}`} fill={entry.color} stroke="none" />)}
                                     </Pie>
-                                    <Tooltip contentStyle={{ backgroundColor: tooltipBg, border: `1px solid ${tooltipBorder}`, fontSize: '12px' }} itemStyle={{ color: tooltipText }} />
+                                    <Tooltip contentStyle={{ backgroundColor: tooltipBg, border: `1px solid ${tooltipBorder}`, borderRadius: '12px', fontSize: '12px' }} itemStyle={{ color: tooltipText }} />
                                 </PieChart>
                             </ResponsiveContainer>
                             <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                                <span className="text-lg font-bold text-gray-900 dark:text-white">{metrics.stockCount > 0 ? '100%' : '0%'}</span>
+                                <span className="text-lg font-bold text-[var(--theme-text-primary)]">{metrics.stockCount > 0 ? '100%' : '0%'}</span>
                             </div>
                         </div>
                     </WidgetErrorBoundary>
                 </div>
 
                 {/* Critical Alerts */}
-                <div className="lg:col-span-1 glass-panel rounded-3xl p-6 relative flex flex-col justify-between group">
-                    <h3 className="font-bold text-gray-900 dark:text-white flex items-center gap-2 text-sm">
-                        <AlertTriangle className="text-red-500 dark:text-red-400" size={16} />
+                <div className="lg:col-span-1 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-3xl p-6 relative flex flex-col justify-between group shadow-sm">
+                    <h3 className="font-bold text-[var(--theme-text-primary)] flex items-center gap-2 text-sm">
+                        <AlertTriangle className="text-[var(--theme-text-secondary)]" size={16} />
                         Critical Alerts
                     </h3>
                     <div>
-                        <p className="text-4xl font-mono font-bold text-gray-900 dark:text-white">{activeAlerts}</p>
-                        <p className="text-xs text-red-500 dark:text-red-400 mt-1">{metrics.lowStockCount} Low Stock Items</p>
-                        <p className="text-xs text-red-500 dark:text-red-400">{metrics.outOfStockCount} Out of Stock</p>
+                        <p className="text-4xl font-mono font-bold text-[var(--theme-text-primary)]">{activeAlerts}</p>
+                        <p className="text-xs text-[var(--theme-text-secondary)] mt-1">{metrics.lowStockCount} Low Stock Items</p>
+                        <p className="text-xs text-rose-500 dark:text-rose-400">{metrics.outOfStockCount} Out of Stock</p>
                     </div>
-                    <button onClick={() => navigate(METRIC_ROUTES.lowStock)} className="w-full py-2 bg-red-500/10 hover:bg-red-500/20 text-red-400 text-xs font-bold rounded-lg border border-red-500/20 transition-colors">
+                    <button onClick={() => navigate(METRIC_ROUTES.lowStock)} className="w-full py-2 bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-primary)] hover:text-[var(--theme-primary-text)] text-[var(--theme-text-primary)] text-xs font-bold rounded-xl border border-[var(--theme-border)] transition-colors cursor-pointer">
                         View Alerts
                     </button>
                 </div>

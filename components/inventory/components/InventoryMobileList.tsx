@@ -45,7 +45,7 @@ export const InventoryMobileList: React.FC<InventoryMobileListProps> = ({
 
     return (
 
-        <div className="block md:hidden divide-y divide-gray-100 dark:divide-white/5">
+        <div className="block md:hidden divide-y divide-[var(--theme-border)]">
             {products.map((product) => {
                 const abc = getABCClass(product, totalInventoryValue);
                 const isSelected = selectedIds.has(product.id);
@@ -56,14 +56,14 @@ export const InventoryMobileList: React.FC<InventoryMobileListProps> = ({
                 const colorClasses = isOutOfStock
                     ? 'bg-red-500/10 text-red-500 border border-red-500/30'
                     : isLowStock
-                    ? 'bg-yellow-500/10 text-yellow-500 border border-yellow-500/30'
-                    : 'bg-green-500/10 text-green-500 border border-green-500/30';
+                    ? 'bg-amber-500/10 text-amber-500 border border-amber-500/30'
+                    : 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/30';
 
                 return (
                     <div
                         key={product.id}
                         onClick={() => setSelectedViewProduct(product)}
-                        className={`p-4 space-y-4 hover:bg-gray-50 dark:hover:bg-white/[0.03] transition-all cursor-pointer ${isSelected ? 'bg-[#2C5E3B]/[0.08] dark:bg-[#A9CBA2]/[0.08]' : ''}`}
+                        className={`p-4 space-y-4 hover:bg-[var(--theme-bg-subtle)] transition-all cursor-pointer ${isSelected ? 'bg-[var(--theme-pill-bg)]' : ''}`}
                     >
                         {/* Top Row: Select, Name, SKU, Image */}
                         <div className="flex items-start gap-3">
@@ -72,43 +72,43 @@ export const InventoryMobileList: React.FC<InventoryMobileListProps> = ({
                                     <input
                                         type="checkbox"
                                         aria-label="Select row"
-                                        className="peer appearance-none w-4 h-4 border border-white/10 rounded bg-white/5 checked:bg-[#2C5E3B] checked:border-[#2C5E3B] dark:checked:bg-[#A9CBA2] dark:checked:border-[#A9CBA2] transition-all cursor-pointer"
+                                        className="peer appearance-none w-4 h-4 border border-[var(--theme-border)] rounded bg-[var(--theme-bg-subtle)] checked:bg-[var(--theme-primary)] checked:border-[var(--theme-primary)] transition-all cursor-pointer"
                                         checked={isSelected}
                                         onChange={() => toggleSelection(product.id)}
                                     />
-                                    <CheckCircle size={10} className="absolute text-black dark:text-[#18201B] opacity-0 peer-checked:opacity-100 transition-opacity pointer-events-none" />
+                                    <CheckCircle size={10} className="absolute text-[var(--theme-primary-text)] opacity-0 peer-checked:opacity-100 transition-opacity pointer-events-none" />
                                 </div>
                             </div>
-                            <div className="w-12 h-12 rounded-xl bg-gray-200 dark:bg-black/40 border border-gray-200 dark:border-white/10 flex items-center justify-center flex-shrink-0 overflow-hidden">
+                            <div className="w-12 h-12 rounded-xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] flex items-center justify-center flex-shrink-0 overflow-hidden">
                                 {product.image && !product.image.includes('placeholder.com') ? (
                                     <img src={product.image} alt="" className="w-full h-full object-cover" />
                                 ) : (
-                                    <Package size={20} className="text-gray-700" />
+                                    <Package size={20} className="text-[var(--theme-text-secondary)]" />
                                 )}
                             </div>
                             <div className="flex-1 min-w-0">
-                                <p className="text-xs font-black text-[#1E3F27] dark:text-[#EAE5D9] truncate uppercase">
+                                <p className="text-xs font-semibold text-[var(--theme-text-primary)] truncate uppercase">
                                     {product.name}
                                 </p>
                                 <div className="flex flex-wrap items-center gap-1 mt-1">
-                                    <span className="text-[8px] font-extrabold font-mono text-[#2C5E3B] bg-[#2C5E3B]/10 dark:text-[#A9CBA2] dark:bg-[#A9CBA2]/10 px-1.5 py-0.5 rounded">
+                                    <span className="text-[8px] font-bold font-mono text-[var(--theme-text-primary)] bg-[var(--theme-pill-bg)] border border-[var(--theme-pill-border)] px-1.5 py-0.5 rounded">
                                         {product.sku}
                                     </span>
-                                    <span className="text-[8px] font-extrabold text-stone-600 bg-stone-100 dark:text-[#7A9E83] dark:bg-white/5 px-1.5 py-0.5 rounded">
+                                    <span className="text-[8px] font-medium text-[var(--theme-text-secondary)] bg-[var(--theme-bg-subtle)] px-1.5 py-0.5 rounded">
                                         {product.category}
                                     </span>
                                     {formatProductSize(product) && (
-                                        <span className="text-[8px] font-extrabold font-mono text-emerald-700 bg-emerald-500/10 dark:text-emerald-300 dark:bg-emerald-500/20 px-1.5 py-0.5 rounded border border-emerald-500/20">
+                                        <span className="text-[8px] font-bold font-mono text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-1.5 py-0.5 rounded border border-emerald-500/20">
                                             {formatProductSize(product)}
                                         </span>
                                     )}
                                 </div>
                             </div>
                             {/* Status Badge */}
-                            <div className={`flex flex-col items-end text-[10px] font-black font-mono px-2 py-1 rounded-lg ${colorClasses}`}>
+                            <div className={`flex flex-col items-end text-[10px] font-bold font-mono px-2 py-1 rounded-lg ${colorClasses}`}>
                                 <span>{formatStockDisplay(stockVal, product)}</span>
                                 {formatPackagingDescription(product, stockVal) && (
-                                    <span className="text-[8px] font-sans font-medium text-stone-600 dark:text-stone-300">
+                                    <span className="text-[8px] font-sans font-medium text-[var(--theme-text-secondary)]">
                                         {formatPackagingDescription(product, stockVal)}
                                     </span>
                                 )}
@@ -116,35 +116,35 @@ export const InventoryMobileList: React.FC<InventoryMobileListProps> = ({
                         </div>
 
                         {/* Middle details: Location, Price, Total Value */}
-                        <div className={`grid ${showCostPrice ? 'grid-cols-4' : 'grid-cols-3'} gap-2 text-left bg-[#FAF8F5] dark:bg-black/10 p-3 rounded-xl border border-gray-100 dark:border-white/5`}>
+                        <div className={`grid ${showCostPrice ? 'grid-cols-4' : 'grid-cols-3'} gap-2 text-left bg-[var(--theme-bg-subtle)] p-3 rounded-xl border border-[var(--theme-border)]`}>
                             <div className="flex flex-col min-w-0">
-                                <span className="text-[8px] text-gray-500 font-bold uppercase tracking-widest">Location</span>
+                                <span className="text-[8px] text-[var(--theme-text-muted)] font-medium uppercase tracking-wider">Location</span>
                                 {(() => {
                                     const site = sites.find(s => s.id === product.siteId || s.id === (product as any).site_id);
                                     return (
-                                        <span className="text-[10px] text-gray-700 dark:text-gray-300 font-bold truncate mt-0.5">
+                                        <span className="text-[10px] text-[var(--theme-text-secondary)] font-medium truncate mt-0.5">
                                             {site ? site.name : product.location || 'No Loc'}
                                         </span>
                                     );
                                 })()}
                             </div>
                             <div className="flex flex-col items-center">
-                                <span className="text-[8px] text-gray-500 font-bold uppercase tracking-widest">Price</span>
-                                <span className="text-[10px] text-gray-900 dark:text-white font-mono font-bold mt-0.5">
+                                <span className="text-[8px] text-[var(--theme-text-muted)] font-medium uppercase tracking-wider">Price</span>
+                                <span className="text-[10px] text-[var(--theme-text-primary)] font-mono font-semibold mt-0.5">
                                     {product.price && product.price > 0 ? formatCompactNumber(product.price, { currency: currencySymbol }) : '—'}
                                 </span>
                             </div>
                             {showCostPrice && (
                                 <div className="flex flex-col items-center">
-                                    <span className="text-[8px] text-gray-500 font-bold uppercase tracking-widest">Cost</span>
-                                    <span className="text-[10px] text-gray-900 dark:text-white font-mono font-bold mt-0.5">
+                                    <span className="text-[8px] text-[var(--theme-text-muted)] font-medium uppercase tracking-wider">Cost</span>
+                                    <span className="text-[10px] text-[var(--theme-text-primary)] font-mono font-semibold mt-0.5">
                                         {product.costPrice && product.costPrice > 0 ? formatCompactNumber(product.costPrice, { currency: currencySymbol }) : '—'}
                                     </span>
                                 </div>
                             )}
                             <div className="flex flex-col items-end">
-                                <span className="text-[8px] text-gray-500 font-bold uppercase tracking-widest">Value</span>
-                                <span className="text-[10px] text-[#2C5E3B] dark:text-[#A9CBA2] font-mono font-bold mt-0.5">
+                                <span className="text-[8px] text-[var(--theme-text-muted)] font-medium uppercase tracking-wider">Value</span>
+                                <span className="text-[10px] text-[var(--theme-text-primary)] font-mono font-semibold mt-0.5">
                                     {product.price && product.price > 0 ? formatCompactNumber(getInventoryValue(product), { currency: currencySymbol }) : '—'}
                                 </span>
                             </div>
@@ -152,7 +152,7 @@ export const InventoryMobileList: React.FC<InventoryMobileListProps> = ({
 
                         {/* Bottom row: Actions & date */}
                         <div className="flex items-center justify-between pt-1">
-                            <span className="text-[9px] text-gray-500 font-mono">
+                            <span className="text-[9px] text-[var(--theme-text-muted)] font-mono">
                                 {(() => {
                                     const dateVal = product.createdAt || (product as any).created_at;
                                     if (!dateVal) return '--';
@@ -166,7 +166,7 @@ export const InventoryMobileList: React.FC<InventoryMobileListProps> = ({
                                     <Protected permission="ADJUST_STOCK">
                                         <button
                                             onClick={() => handleOpenAdjust(product)}
-                                            className="px-2.5 py-1 text-[10px] font-bold bg-[#2C5E3B]/10 hover:bg-[#2C5E3B]/20 text-[#2C5E3B] dark:bg-[#A9CBA2]/10 dark:hover:bg-[#A9CBA2]/20 dark:text-[#A9CBA2] rounded-lg transition-all"
+                                            className="px-2.5 py-1 text-[10px] font-medium bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card-hover)] text-[var(--theme-text-primary)] border border-[var(--theme-border)] rounded-lg transition-all"
                                         >
                                             Adjust
                                         </button>
@@ -174,13 +174,13 @@ export const InventoryMobileList: React.FC<InventoryMobileListProps> = ({
                                     <Protected permission="EDIT_PRODUCT">
                                         <button
                                             onClick={() => handleOpenEditProduct(product)}
-                                            className="px-2.5 py-1 text-[10px] font-bold bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 rounded-lg transition-all"
+                                            className="px-2.5 py-1 text-[10px] font-medium bg-[var(--theme-accent-muted)] hover:opacity-80 text-[var(--theme-accent)] rounded-lg transition-all"
                                         >
                                             Edit
                                         </button>
                                         <button
                                             onClick={() => handleDeleteProduct(product.id)}
-                                            className="px-2.5 py-1 text-[10px] font-bold bg-red-500/10 hover:bg-red-500/20 text-red-500 rounded-lg transition-all"
+                                            className="px-2.5 py-1 text-[10px] font-medium bg-red-500/10 hover:bg-red-500/20 text-red-500 rounded-lg transition-all"
                                         >
                                             Delete
                                         </button>

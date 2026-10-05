@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import type { Notification, User } from '../../types';
 import { logger } from '../../utils/logger';
+import { notificationBus } from '../../services/notification-bus';
 
 interface UseNotificationStateProps {
   user: User | undefined;
@@ -50,10 +51,10 @@ export function useNotificationState({ user }: UseNotificationStateProps) {
     return () => clearInterval(interval);
   }, []);
 
-  const addNotification = useCallback((type: 'alert' | 'success' | 'info', message: string, userId?: string, isGlobal?: boolean) => {
+  const addNotification = useCallback((type: 'alert' | 'success' | 'info' | 'warning', message: string, userId?: string, isGlobal?: boolean, title?: string) => {
     const newNotif: Notification = {
       id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-      type,
+      type: type as any,
       message,
       timestamp: new Date().toISOString(),
       read: false,
@@ -61,6 +62,17 @@ export function useNotificationState({ user }: UseNotificationStateProps) {
       isGlobal: isGlobal || false
     };
     setNotifications(prev => [newNotif, ...prev].slice(0, 500));
+
+    // Immediately trigger on-screen explanatory popup card
+    try {
+      notificationBus.notify({
+        type: type === 'alert' ? 'error' : (type as any),
+        message,
+        title
+      });
+    } catch (e) {
+      logger.error('useNotificationState', 'Failed to dispatch notification popup', e);
+    }
   }, [user]);
 
   const clearNotification = useCallback((id: string) => {

@@ -165,26 +165,20 @@ export default function WMSDashboard() {
   };
 
   return (
-    <div className="space-y-6 md:space-y-8 bg-transparent relative transition-colors duration-500 w-full max-w-full overflow-hidden">
-      {/* Background Depth & Organic Flows */}
-      <div className="absolute inset-0 pointer-events-none hidden lg:block">
-        <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-[#2C5E3B]/10 dark:bg-[#1E3F27]/5 rounded-full blur-[150px] -mr-96 -mt-96 opacity-40 animate-pulse-slow" />
-        <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-amber-600/10 dark:bg-amber-700/3 rounded-full blur-[120px] -ml-72 -mb-72 opacity-30 animate-pulse-slow" />
-      </div>
-
+    <div className="space-y-6 md:space-y-8 bg-transparent relative transition-colors duration-300 w-full max-w-full overflow-hidden">
       <div className="relative z-10 space-y-8">
 
         {/* Header with Date Filter & Alerts */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-[#E2DCCE]/40 dark:border-white/[0.04]">
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-[var(--theme-border)]">
           <div>
             <div className="flex items-center gap-4 mb-2">
-              <div className="p-3 bg-gradient-to-tr from-[#1E3F27] via-[#2C5E3B] to-amber-700 rounded-2xl shadow-[0_8px_20px_rgba(44,94,59,0.2)]">
-                <Box className="text-white animate-pulse-slow" size={24} />
+              <div className="p-3 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-[var(--theme-text-primary)] rounded-2xl shadow-xs">
+                <Box size={24} />
               </div>
               <div>
-                <h1 className="text-xl sm:text-2xl md:text-3xl font-extrabold dark:text-[#EAE5D9] text-[#1E3F27] tracking-tight uppercase">Warehouse Operations Center</h1>
-                <div className="flex items-center gap-2 text-[#4D6E56] dark:text-[#7A9E83] text-[10px] font-bold uppercase tracking-[0.3em] mt-2">
-                  <span className={`w-1.5 h-1.5 rounded-full ${refreshing ? 'bg-amber-600 animate-ping' : 'bg-[#2C5E3B] opacity-60'}`}></span>
+                <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-[var(--theme-text-primary)] tracking-tight uppercase">Warehouse Operations Center</h1>
+                <div className="flex items-center gap-2 text-[var(--theme-text-secondary)] text-[10px] font-bold uppercase tracking-[0.3em] mt-2">
+                  <span className={`w-1.5 h-1.5 rounded-full ${refreshing ? 'bg-amber-500 animate-ping' : 'bg-emerald-500'}`}></span>
                   {refreshing ? 'Synchronizing Operational Data...' : 'Operational Command Node'}
                 </div>
               </div>
@@ -192,13 +186,13 @@ export default function WMSDashboard() {
           </div>
 
           <div className="flex flex-wrap items-center gap-4">
-            <div className="flex items-center gap-3 p-1.5 bg-white/80 dark:bg-[#18201B]/70 border border-[#E2DCCE] dark:border-emerald-950/20 rounded-2xl shadow-sm backdrop-blur-md">
-              <div className="px-5 py-2.5 bg-red-500/[0.03] dark:bg-red-500/[0.02] border border-red-500/10 text-red-600 dark:text-red-400 text-[10px] font-bold uppercase tracking-widest rounded-xl flex items-center">
-                <AlertTriangle size={14} className="mr-2.5 opacity-60" />
+            <div className="flex items-center gap-3 p-1.5 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-2xl shadow-xs">
+              <div className="px-4 py-2 bg-red-500/10 border border-red-500/20 text-red-600 dark:text-red-400 text-[10px] font-bold uppercase tracking-widest rounded-xl flex items-center">
+                <AlertTriangle size={14} className="mr-2" />
                 {metrics.active_alerts} Alerts Active
               </div>
-              <div className="px-5 py-2.5 bg-amber-600/[0.03] dark:bg-amber-600/[0.02] border border-amber-600/10 text-amber-700 dark:text-amber-500 text-[10px] font-bold uppercase tracking-widest rounded-xl flex items-center">
-                <Thermometer size={14} className="mr-2.5 opacity-60" />
+              <div className="px-4 py-2 bg-amber-500/10 border border-amber-500/20 text-amber-700 dark:text-amber-400 text-[10px] font-bold uppercase tracking-widest rounded-xl flex items-center">
+                <Thermometer size={14} className="mr-2" />
                 Zone C: -4°C
               </div>
             </div>
@@ -213,24 +207,23 @@ export default function WMSDashboard() {
         {/* KPI Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {[
-            { title: 'Pending Picks', value: metrics.pendingPicks, sub: `${metrics.criticalPicks} Priority`, icon: ClipboardList, color: 'text-amber-600 dark:text-amber-500', bg: 'bg-amber-500/10 dark:bg-amber-500/5', route: METRIC_ROUTES.picks },
-            { title: 'Inbound POs', value: metrics.inboundPOs, sub: 'Dock Schedule', icon: Truck, color: 'text-emerald-700 dark:text-[#A9CBA2]', bg: 'bg-emerald-500/10 dark:bg-emerald-500/5', route: METRIC_ROUTES.procurement },
-            { title: 'Cycle Time', value: metrics.avgCycleTime, sub: 'Efficiency', icon: Clock, color: 'text-[#2C5E3B] dark:text-[#A9CBA2]', bg: 'bg-[#2C5E3B]/10 dark:bg-[#A9CBA2]/10', route: METRIC_ROUTES.wms },
-            { title: 'Pick Accuracy', value: metrics.pickAccuracy, sub: 'Quality Score', icon: CheckCircle, color: 'text-yellow-600 dark:text-[#E2C899]', bg: 'bg-yellow-500/10 dark:bg-yellow-500/5', route: METRIC_ROUTES.picks },
+            { title: 'Pending Picks', value: metrics.pendingPicks, sub: `${metrics.criticalPicks} Priority`, icon: ClipboardList, color: 'text-amber-500', bg: 'bg-amber-500/10', route: METRIC_ROUTES.picks },
+            { title: 'Inbound POs', value: metrics.inboundPOs, sub: 'Dock Schedule', icon: Truck, color: 'text-emerald-500', bg: 'bg-emerald-500/10', route: METRIC_ROUTES.procurement },
+            { title: 'Cycle Time', value: metrics.avgCycleTime, sub: 'Efficiency', icon: Clock, color: 'text-blue-500', bg: 'bg-blue-500/10', route: METRIC_ROUTES.wms },
+            { title: 'Pick Accuracy', value: metrics.pickAccuracy, sub: 'Quality Score', icon: CheckCircle, color: 'text-purple-500', bg: 'bg-purple-500/10', route: METRIC_ROUTES.picks },
           ].map((kpi, idx) => (
             <div key={idx} onClick={() => navigate(kpi.route)} className="group relative cursor-pointer">
-              <div className="absolute inset-0 bg-gradient-to-br from-[#2C5E3B]/5 to-transparent rounded-3xl -z-10 transition-opacity opacity-0 group-hover:opacity-100 duration-500" />
-              <div className="h-full bg-white/80 dark:bg-[#18201B]/70 border border-[#E2DCCE] dark:border-emerald-950/20 lg:backdrop-blur-2xl rounded-3xl p-5 sm:p-6 md:p-7 transition-all duration-500 hover:translate-y-[-4px] hover:border-[#CFC6B4] dark:hover:border-emerald-800/30 hover:bg-white dark:hover:bg-[#1C2620] shadow-sm dark:shadow-[0_24px_80px_rgba(5,8,6,0.65)] hover:shadow-xl">
+              <div className="h-full bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-5 sm:p-6 transition-all duration-300 hover:translate-y-[-2px] shadow-xs hover:shadow-sm">
                 <div className="flex items-start justify-between mb-5">
-                  <div className={`p-4 rounded-2xl ${kpi.bg} border border-[#E2DCCE]/50 dark:border-emerald-950/10 shadow-inner transition-transform duration-500 group-hover:scale-110`}>
-                    <kpi.icon size={22} className={kpi.color} />
+                  <div className={`p-3.5 rounded-xl ${kpi.bg} border border-[var(--theme-border)] shadow-xs transition-transform duration-300 group-hover:scale-105`}>
+                    <kpi.icon size={20} className={kpi.color} />
                   </div>
                 </div>
                 <div>
-                  <h3 className="text-[#4D6E56] dark:text-[#7A9E83] text-[10px] font-bold uppercase tracking-[0.25em] mb-2">{kpi.title}</h3>
+                  <h3 className="text-[var(--theme-text-secondary)] text-[10px] font-bold uppercase tracking-[0.2em] mb-2">{kpi.title}</h3>
                   <div className="flex items-baseline gap-2">
-                    <span className="text-3xl font-extrabold text-[#1E3F27] dark:text-[#EAE5D9] tracking-tight leading-none">{kpi.value}</span>
-                    <span className={`text-[11px] font-bold ${kpi.color} opacity-80`}>{kpi.sub}</span>
+                    <span className="text-3xl font-bold text-[var(--theme-text-primary)] tracking-tight leading-none">{kpi.value}</span>
+                    <span className={`text-[11px] font-bold ${kpi.color}`}>{kpi.sub}</span>
                   </div>
                 </div>
                 <div className="mt-4 pt-4 border-t border-[#E2DCCE]/40 dark:border-white/[0.04] flex items-center justify-between opacity-0 group-hover:opacity-100 transition-opacity">
@@ -262,24 +255,20 @@ export default function WMSDashboard() {
         </div>
 
         {/* Operational Pipeline */}
-        <div className="bg-white/80 dark:bg-[#18201B]/70 border border-[#E2DCCE] dark:border-emerald-950/20 lg:backdrop-blur-2xl rounded-3xl p-5 sm:p-8 lg:p-10 relative overflow-hidden shadow-sm transition-colors duration-500">
-          <div className="absolute top-0 left-0 w-full h-full pointer-events-none">
-            <div className="hidden lg:block absolute top-0 right-0 w-[500px] h-full bg-[#2C5E3B]/5 blur-[120px] rounded-full translate-x-1/2" />
-          </div>
-
-          <div className="flex flex-col md:flex-row md:items-center justify-between mb-10 gap-6 relative">
+        <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-6 sm:p-8 relative overflow-hidden shadow-xs">
+          <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-6 relative">
             <div>
-              <h3 className="text-xl font-extrabold text-[#1E3F27] dark:text-[#EAE5D9] flex items-center gap-4 uppercase tracking-tight">
-                <div className="p-3 bg-white dark:bg-black/25 border border-[#E2DCCE] dark:border-emerald-950/20 rounded-2xl shadow-sm">
-                  <Activity className="text-[#2C5E3B] dark:text-[#A9CBA2]" size={24} />
+              <h3 className="text-lg font-bold text-[var(--theme-text-primary)] flex items-center gap-3 uppercase tracking-tight">
+                <div className="p-2.5 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-[var(--theme-text-primary)] rounded-xl shadow-xs">
+                  <Activity size={20} />
                 </div>
                 Operational Throughput
               </h3>
-              <p className="text-[#4D6E56] dark:text-[#7A9E83] text-xs mt-2 font-bold uppercase tracking-widest opacity-60">Real-time throughput analysis</p>
+              <p className="text-[var(--theme-text-secondary)] text-xs mt-1 font-bold uppercase tracking-widest">Real-time throughput analysis</p>
             </div>
-            <div className="flex items-center gap-3 px-6 py-3 bg-[#FAF8F5]/80 dark:bg-black/25 border border-[#E2DCCE] dark:border-emerald-950/20 rounded-2xl shrink-0 shadow-sm">
-              <span className="w-2 h-2 rounded-full bg-[#2C5E3B] dark:bg-[#A9CBA2] opacity-80" />
-              <span className="text-[10px] font-bold text-[#4D6E56] dark:text-[#7A9E83] uppercase tracking-widest">System Online</span>
+            <div className="flex items-center gap-2 px-4 py-2 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl shrink-0 shadow-xs">
+              <span className="w-2 h-2 rounded-full bg-emerald-500" />
+              <span className="text-[10px] font-bold text-[var(--theme-text-secondary)] uppercase tracking-widest">System Online</span>
             </div>
           </div>
 
@@ -328,14 +317,13 @@ export default function WMSDashboard() {
 
         {/* Site Personnel & Scheduling Section */}
         <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 mt-6">
-          <div className="bg-[#FAF8F5] dark:bg-white/[0.02] border border-[#E2DCCE] dark:border-white/5 rounded-2xl md:rounded-[3rem] p-5 sm:p-8 lg:p-10 relative overflow-hidden group">
-            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-[#2C5E3B]/20 to-transparent" />
+          <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-6 sm:p-8 relative overflow-hidden shadow-xs">
             <SiteRoster layout="grid" limit={8} className="relative z-10" />
 
-            <div className="mt-10 flex justify-center">
+            <div className="mt-8 flex justify-center">
               <button
                 onClick={() => navigate('/employees')}
-                className="px-8 py-3 bg-white dark:bg-white/5 border border-[#E2DCCE] dark:border-white/10 rounded-2xl text-[10px] font-black text-[#4D6E56] dark:text-gray-400 uppercase tracking-[0.3em] hover:text-[#2C5E3B] hover:dark:border-white/20 hover:border-black/20 transition-all flex items-center gap-3 cursor-pointer"
+                className="px-6 py-2.5 bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-muted)] border border-[var(--theme-border)] rounded-xl text-xs font-bold text-[var(--theme-text-primary)] transition-all flex items-center gap-2 cursor-pointer shadow-xs"
               >
                 Access Personnel Database
                 <ChevronRight size={14} />
@@ -343,8 +331,7 @@ export default function WMSDashboard() {
             </div>
           </div>
 
-          <div className="bg-[#FAF8F5] dark:bg-white/[0.02] border border-[#E2DCCE] dark:border-white/5 rounded-2xl md:rounded-[3rem] p-5 sm:p-8 lg:p-10 relative overflow-visible group">
-            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-[#2C5E3B]/20 to-transparent" />
+          <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-6 sm:p-8 relative overflow-visible shadow-xs">
             <RosterManager className="relative z-10" />
           </div>
         </div>

@@ -6,6 +6,8 @@ import { SYSTEM_ROLES, canEmployRole, getRoleHierarchy } from '../utils/roles';
 import { logger } from '../utils/logger';
 import { employeesService } from '../services/employees.service';
 import { saveEmployeeDocument } from '../utils/employeeProfileData';
+import { formatEmployeeCode, parseEmployeeCode, normalizeCountryCode, generateEmployeeEmail } from '../utils/employeeIdGenerator';
+import { getSiteCountryId } from '../utils/siteIdGenerator';
 
 export interface NewEmployeeFormData {
    firstName: string;
@@ -98,12 +100,12 @@ export function useEmployeeWizard({
       }
 
       if (user.role === 'logistics_manager') {
-         const logisticsPool: UserRole[] = ['assistant_manager', 'shift_lead', 'driver', 'dispatcher'];
+         const logisticsPool: UserRole[] = ['assistant_manager', 'shift_lead', 'fleet_maintenance_supervisor', 'driver', 'dispatcher'];
          return logisticsPool.filter(roleId => canEmployRole(user.role, roleId));
       }
 
       if (user.role === 'inventory_manager') {
-         const inventoryPool: UserRole[] = ['assistant_manager', 'shift_lead', 'inventory_specialist', 'stock_clerk', 'receiver'];
+         const inventoryPool: UserRole[] = ['assistant_manager', 'shift_lead', 'replenishment_planner', 'inventory_specialist', 'stock_clerk', 'receiver'];
          return inventoryPool.filter(roleId => canEmployRole(user.role, roleId));
       }
 
@@ -287,39 +289,35 @@ export function useEmployeeWizard({
             throw new Error("Workplace location is mandatory. Every employee must be assigned to an operating location.");
          }
          const validatedSiteId = newEmpData.siteId.trim();
+         const assignedSite = sites.find(s => s.id === validatedSiteId);
+         const targetCountry = normalizeCountryCode(getSiteCountryId(assignedSite) || activeSite?.country || 'ET');
 
-         let maxCodeNumber = 39; // Baseline known employee count in database
+         let maxCodeNumber = targetCountry === 'ET' ? 39 : 0; // ET baseline 39, other countries start from 0
          if (Array.isArray(employees)) {
             employees.forEach(emp => {
-               if (emp.code) {
-                  const match = emp.code.match(/SIIF-(\d+)/i);
-                  if (match) {
-                     const num = parseInt(match[1], 10);
-                     if (num > maxCodeNumber) {
-                        maxCodeNumber = num;
-                     }
+               const parsed = parseEmployeeCode(emp.code);
+               if (parsed && parsed.country === targetCountry) {
+                  if (parsed.seq > maxCodeNumber) {
+                     maxCodeNumber = parsed.seq;
                   }
                }
             });
          }
          try {
-            const nextDbCode = await employeesService.getNextCode();
-            const match = nextDbCode.match(/SIIF-(\d+)/i);
-            if (match) {
-               const num = parseInt(match[1], 10);
-               if (num > maxCodeNumber) {
-                  maxCodeNumber = num - 1;
-               }
+            const nextDbCode = await employeesService.getNextCode(targetCountry);
+            const parsed = parseEmployeeCode(nextDbCode);
+            if (parsed && parsed.country === targetCountry && parsed.seq > maxCodeNumber) {
+               maxCodeNumber = parsed.seq - 1;
             }
          } catch (e) {
             logger.warn('useEmployeeWizard', 'Failed to fetch next DB employee code, using local max', { error: String(e) });
          }
 
          let nextCodeNumber = maxCodeNumber + 1;
-         let employeeCode = `SIIF-${nextCodeNumber.toString().padStart(4, '0')}`;
-         while (employees.some(emp => emp.code === employeeCode)) {
+         let employeeCode = formatEmployeeCode(targetCountry, nextCodeNumber);
+         while (employees.some(emp => emp.code?.toUpperCase() === employeeCode.toUpperCase())) {
             nextCodeNumber++;
-            employeeCode = `SIIF-${nextCodeNumber.toString().padStart(4, '0')}`;
+            employeeCode = formatEmployeeCode(targetCountry, nextCodeNumber);
          }
 
          const adminClient = createClient(
@@ -341,7 +339,7 @@ export function useEmployeeWizard({
          );
 
          // Email is always auto-generated from employee code
-         let signupEmail = `${employeeCode.toLowerCase()}@siifmart.com`;
+         let signupEmail = generateEmployeeEmail(employeeCode);
 
          const buildPayload = () => ({
             email: signupEmail,

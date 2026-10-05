@@ -1,0 +1,352 @@
+/* ==========================================================================
+   SIIFMART DESIGN SYSTEM: SEMANTIC THEME TOKENS
+   Standard: RULE 20 (Mandatory Apple Minimalist Design Standard)
+   Aesthetic: Apple 2026 Web Architecture (apple.com live CSS standard)
+   Dark Mode:
+     - Pure OLED Black Canvas (#000000)
+     - Pure Pitch Black Studio Tiles & Cards (#000000)
+     - Elevated Deep Onyx Hover (#1D1D1F)
+     - Signature Apple Off-White Text (#F5F5F7)
+     - Apple Mid-Gray Subtitles (#86868B)
+     - Apple Developer Blue Accent (#2997FF)
+     - High-Contrast Pure White CTA Pill (#FFFFFF) with Deep Black Text
+   Light Mode:
+     - Clean Apple Canvas (#F5F5F7)
+     - Pure White Studio Panels & Cards (#FFFFFF)
+     - Apple Deep Black Primary Text (#1D1D1F)
+     - Apple Mid-Gray Subtitles (#86868B)
+     - Apple System Blue Accent (#0071E3)
+     - High-Contrast Deep Black CTA Pill (#1D1D1F) with Pure White Text
+   Hairline Precision: Crisp 0.5px / 1px hairlines without decorative gradients
+   Zero Gray Cards: Strictly NO System Gray (#1C1C1E) cards — pure contrast architecture
+   ========================================================================== */
+
+:root {
+  /* ------------------------------------------------------------------------
+     Dark Mode: Apple macOS Pro Dark (Default)
+     ------------------------------------------------------------------------ */
+  /* Swatch Expose (Apple Monochromatic Palette) */
+  --color-swatch-obsidian: #000000;
+  --color-swatch-silk: #F5F5F7;
+  --color-swatch-slate: #86868B;
+  --color-swatch-graphite: #1D1D1F;
+
+  /* Backward Compatibility Swatch Aliases */
+  --color-swatch-champagne: #F5F5F7;
+  --color-swatch-cashmere: #86868B;
+  --color-swatch-mocha: #1D1D1F;
+  --color-swatch-walnut: #000000;
+
+  /* Seamless App Canvas (Apple Pure OLED Black) */
+  --theme-bg-app: #000000;
+  --theme-bg-panel: #000000;
+  --theme-bg-card: #000000;
+  --theme-bg-card-hover: #1D1D1F;
+  --theme-bg-subtle: rgba(255, 255, 255, 0.05);
+
+  /* Primary Brand: High-Contrast Pure White Pill (#FFFFFF) */
+  --theme-primary: #FFFFFF;
+  --theme-primary-hover: #E5E5E7;
+  --theme-primary-active: #D2D2D7;
+  --theme-primary-text: #000000;
+  --theme-primary-muted: rgba(255, 255, 255, 0.12);
+  --theme-btn-primary-bg: var(--theme-primary);
+  --theme-btn-primary-text: var(--theme-primary-text);
+
+  /* Secondary Brand / Deep System Onyx */
+  --theme-brand-walnut: #000000;
+  --theme-brand-walnut-hover: #1D1D1F;
+  --theme-brand-graphite: #1D1D1F;
+
+  /* Accent Highlight: Apple System Blue (#2997FF) */
+  --theme-accent: #2997FF;
+  --theme-accent-hover: #52AAFF;
+  --theme-accent-light: #70B8FF;
+  --theme-accent-muted: rgba(41, 151, 255, 0.15);
+
+  /* Active Navigation & Status Pills */
+  --theme-pill-bg: rgba(255, 255, 255, 0.08);
+  --theme-pill-border: rgba(255, 255, 255, 0.14);
+  --theme-pill-text: #F5F5F7;
+
+  /* Crisp 0.5px / 1px Hairline Borders */
+  --theme-border: rgba(255, 255, 255, 0.08);
+  --theme-border-subtle: rgba(255, 255, 255, 0.04);
+  --theme-border-focus: #0071E3;
+  --theme-border-mocha: rgba(255, 255, 255, 0.12);
+
+  /* Apple Signature High-Contrast Typography */
+  --theme-text-primary: #F5F5F7;
+  --theme-text-secondary: #86868B;
+  --theme-text-muted: #6E6E73;
+
+  /* Glass Panels & Subtle Elevation */
+  --theme-glass-bg: rgba(22, 22, 23, 0.85);
+  --theme-glass-border: rgba(255, 255, 255, 0.08);
+  --theme-glass-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+
+  /* Liquid Glass 3 Tiers (October 2026 Apple Standard) */
+  --theme-glass-clear-bg: rgba(30, 30, 32, 0.30);
+  --theme-glass-clear-blur: 16px;
+  --theme-glass-standard-bg: rgba(30, 30, 32, 0.55);
+  --theme-glass-standard-blur: 24px;
+  --theme-glass-strong-bg: rgba(22, 22, 23, 0.75);
+  --theme-glass-strong-blur: 32px;
+
+  /* Standardized Corner Radii System */
+  --radius-xs: 6px;
+  --radius-sm: 10px;
+  --radius-md: 14px;
+  --radius-lg: 18px;
+  --radius-xl: 22px;
+  --radius-2xl: 28px;
+  --radius-pill: 999px;
+
+  /* 4px Base Grid Spacing Scale */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-7: 28px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-16: 64px;
+
+  /* Standardized Control Sizing (44px Touch Baseline) */
+  --control-height-sm: 36px;
+  --control-height-md: 44px;
+  --control-height-lg: 52px;
+
+  /* Natural Apple Spring Motion Physics */
+  --ease-apple: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --duration-fast: 120ms;
+  --duration-normal: 200ms;
+  --duration-slow: 320ms;
+
+  /* Soft Elevation Shadows (Dark Mode) */
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.20);
+  --shadow-md: 0 8px 30px rgba(0, 0, 0, 0.30);
+  --shadow-lg: 0 16px 50px rgba(0, 0, 0, 0.40);
+  --shadow-modal: 0 24px 80px rgba(0, 0, 0, 0.45);
+
+  /* Legacy Variable Aliases */
+  --bg-app: var(--theme-bg-app);
+  --bg-panel: var(--theme-bg-panel);
+  --bg-card: var(--theme-bg-card);
+  --color-primary: var(--theme-primary);
+  --color-accent: var(--theme-accent);
+  --text-base: var(--theme-text-primary);
+  --border-color: var(--theme-border);
+}
+
+[data-theme="light"] {
+  /* ------------------------------------------------------------------------
+     Light Mode: Apple macOS Light
+     ------------------------------------------------------------------------ */
+  --color-swatch-obsidian: #1D1D1F;
+  --color-swatch-silk: #F5F5F7;
+  --color-swatch-slate: #86868B;
+  --color-swatch-graphite: #E5E5E7;
+
+  --color-swatch-champagne: #F5F5F7;
+  --color-swatch-cashmere: #86868B;
+  --color-swatch-mocha: #E5E5E7;
+  --color-swatch-walnut: #1D1D1F;
+
+  /* Seamless App Canvas (Clean Apple Web Page Canvas) */
+  --theme-bg-app: #F5F5F7;
+  --theme-bg-panel: #FFFFFF;
+  --theme-bg-card: #FFFFFF;
+  --theme-bg-card-hover: #F0F0F2;
+  --theme-bg-subtle: rgba(0, 0, 0, 0.04);
+
+  /* Primary Brand: Apple Deep Black (#1D1D1F) with Pure White Text */
+  --theme-primary: #1D1D1F;
+  --theme-primary-hover: #000000;
+  --theme-primary-active: #333336;
+  --theme-primary-text: #FFFFFF;
+  --theme-primary-muted: rgba(29, 29, 31, 0.06);
+  --theme-btn-primary-bg: var(--theme-primary);
+  --theme-btn-primary-text: var(--theme-primary-text);
+
+  /* Secondary Brand: System Gray 5 */
+  --theme-brand-walnut: #1D1D1F;
+  --theme-brand-walnut-hover: #000000;
+  --theme-brand-graphite: #E5E5E7;
+
+  /* Accent Highlight: Apple System Blue (#0071E3) */
+  --theme-accent: #0071E3;
+  --theme-accent-hover: #0077ED;
+  --theme-accent-light: #2997FF;
+  --theme-accent-muted: rgba(0, 113, 227, 0.1);
+
+  /* Active Navigation & Status Pills */
+  --theme-pill-bg: rgba(0, 0, 0, 0.05);
+  --theme-pill-border: rgba(0, 0, 0, 0.08);
+  --theme-pill-text: #1D1D1F;
+
+  /* Refined Hairline Borders */
+  --theme-border: rgba(0, 0, 0, 0.08);
+  --theme-border-subtle: rgba(0, 0, 0, 0.04);
+  --theme-border-focus: #0071E3;
+  --theme-border-mocha: rgba(0, 0, 0, 0.12);
+
+  /* Apple Signature Deep Charcoal & Slate Typography */
+  --theme-text-primary: #1D1D1F;
+  --theme-text-secondary: #86868B;
+  --theme-text-muted: #A1A1A6;
+
+  /* Glass Panels & Subtle Elevation */
+  --theme-glass-bg: rgba(255, 255, 255, 0.9);
+  --theme-glass-border: rgba(0, 0, 0, 0.08);
+  /* Liquid Glass 3 Tiers (Light Mode) */
+  --theme-glass-clear-bg: rgba(255, 255, 255, 0.30);
+  --theme-glass-clear-blur: 16px;
+  --theme-glass-standard-bg: rgba(255, 255, 255, 0.55);
+  --theme-glass-standard-blur: 24px;
+  --theme-glass-strong-bg: rgba(255, 255, 255, 0.80);
+  --theme-glass-strong-blur: 32px;
+
+  /* Soft Elevation Shadows (Light Mode) */
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.06);
+  --shadow-md: 0 8px 30px rgba(0, 0, 0, 0.08);
+  --shadow-lg: 0 16px 50px rgba(0, 0, 0, 0.14);
+  --shadow-modal: 0 24px 80px rgba(0, 0, 0, 0.20);
+
+  /* Legacy Variable Aliases */
+  --bg-app: var(--theme-bg-app);
+  --bg-panel: var(--theme-bg-panel);
+  --bg-card: var(--theme-bg-card);
+  --color-primary: var(--theme-primary);
+  --color-accent: var(--theme-accent);
+  --text-base: var(--theme-text-primary);
+  --border-color: var(--theme-border);
+}
+
+/* --------------------------------------------------------------------------
+   Semantic Tone Normalization (Apple Typography & Form Controls)
+   -------------------------------------------------------------------------- */
+[data-theme="light"] input,
+[data-theme="light"] select,
+[data-theme="light"] textarea {
+  color: var(--theme-text-primary);
+  background-color: var(--theme-bg-card);
+  border-color: var(--theme-border);
+}
+
+[data-theme="dark"] input,
+[data-theme="dark"] select,
+[data-theme="dark"] textarea {
+  color: var(--theme-text-primary);
+  background-color: var(--theme-bg-panel);
+  border-color: var(--theme-border);
+}
+
+/* Normalizing standard Tailwind gray & stone tone classes to Apple theme tokens */
+[data-theme="light"] .text-gray-400,
+[data-theme="light"] .text-stone-400,
+[data-theme="light"] .text-gray-500,
+[data-theme="light"] .text-stone-500 {
+  color: var(--theme-text-muted);
+}
+
+[data-theme="light"] .text-gray-300,
+[data-theme="light"] .text-stone-600,
+[data-theme="light"] .text-stone-700 {
+  color: var(--theme-text-secondary);
+}
+
+[data-theme="light"] .text-stone-800,
+[data-theme="light"] .text-stone-900,
+[data-theme="light"] .text-gray-800,
+[data-theme="light"] .text-gray-900 {
+  color: var(--theme-text-primary);
+}
+
+[data-theme="dark"] .text-gray-400,
+[data-theme="dark"] .text-stone-400,
+[data-theme="dark"] .text-gray-500,
+[data-theme="dark"] .text-stone-500 {
+  color: var(--theme-text-muted);
+}
+
+[data-theme="dark"] .text-gray-300,
+[data-theme="dark"] .text-stone-300 {
+  color: var(--theme-text-secondary);
+}
+
+[data-theme="dark"] .text-white,
+[data-theme="dark"] .text-stone-100 {
+  color: var(--theme-text-primary);
+}
+
+[data-theme="light"] .border-white\/5,
+[data-theme="light"] .border-white\/10,
+[data-theme="light"] .border-white\/20,
+[data-theme="light"] .border-white\/30,
+[data-theme="light"] .border-stone-200,
+[data-theme="light"] .border-stone-300 {
+  border-color: var(--theme-border);
+}
+
+[data-theme="light"] .bg-white\/5,
+[data-theme="light"] .bg-white\/10,
+[data-theme="light"] .bg-white\/20,
+[data-theme="light"] .bg-white\/30 {
+  background-color: rgba(0, 0, 0, 0.03);
+}
+
+/* Modal Backdrops with Neutral Dark Overlays */
+[data-theme="light"] .bg-black\/20 {
+  background-color: rgba(0, 0, 0, 0.15);
+}
+
+[data-theme="light"] .bg-black\/30,
+[data-theme="light"] .bg-black\/40 {
+  background-color: rgba(0, 0, 0, 0.25);
+}
+
+[data-theme="light"] .bg-black\/50,
+[data-theme="light"] .bg-black\/60 {
+  background-color: rgba(0, 0, 0, 0.45);
+}
+
+/* --------------------------------------------------------------------------
+   Liquid Glass Tiered Utility Classes (October 2026 Apple Standard)
+   -------------------------------------------------------------------------- */
+.glass-clear {
+  background: var(--theme-glass-clear-bg);
+  -webkit-backdrop-filter: blur(var(--theme-glass-clear-blur));
+  backdrop-filter: blur(var(--theme-glass-clear-blur));
+  border: 1px solid var(--theme-border-subtle);
+}
+
+.glass-standard {
+  position: relative;
+  background: var(--theme-glass-standard-bg);
+  -webkit-backdrop-filter: blur(var(--theme-glass-standard-blur)) saturate(180%);
+  backdrop-filter: blur(var(--theme-glass-standard-blur)) saturate(180%);
+  border: 1px solid var(--theme-border);
+  box-shadow: var(--shadow-sm);
+}
+
+.glass-standard::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0));
+}
+
+.glass-strong {
+  position: relative;
+  background: var(--theme-glass-strong-bg);
+  -webkit-backdrop-filter: blur(var(--theme-glass-strong-blur)) saturate(180%);
+  backdrop-filter: blur(var(--theme-glass-strong-blur)) saturate(180%);
+  border: 1px solid var(--theme-border);
+  box-shadow: var(--shadow-modal);
+}

@@ -35,7 +35,7 @@ export function generatePOHTML(po: PurchaseOrder, sites: any[], user: any, allPr
                 </td>
                 <td style="padding: 8px 6px; text-align: center; font-weight: 700; color: #111827; font-size: 11px;">
                     <div>${pkg.sellableQty.toLocaleString()} <span style="font-size: 9px; color: #6b7280; font-weight: normal;">${pkg.sellUnitLabel}</span></div>
-                    ${pkg.hasMultiplier ? `<div style="font-size: 9px; color: #8c6239; font-weight: normal;">(${item.quantity} ${pkg.manifestUnitName.toLowerCase()})</div>` : ''}
+                    ${pkg.hasMultiplier ? `<div style="font-size: 9px; color: #6b7280; font-weight: normal;">(${item.quantity} ${pkg.manifestUnitName.toLowerCase()})</div>` : ''}
                 </td>
                 <td style="padding: 8px 6px; text-align: right; color: #374151; font-size: 11px;">
                     <div>${formatCompactNumber(item.unitCost, { currency: currencySymbol })}</div>
@@ -251,7 +251,7 @@ export const POPrintView: React.FC<POPrintViewProps> = ({ po, sites, user, allPr
                                 <td className="py-2 px-1 text-center font-bold text-black">
                                     <div>{pkg.sellableQty.toLocaleString()} <span className="text-[10px] font-normal text-gray-600">{pkg.sellUnitLabel}</span></div>
                                     {pkg.hasMultiplier && (
-                                        <div className="text-[9px] font-normal text-[#8C6239]">({item.quantity} {pkg.manifestUnitName.toLowerCase()})</div>
+                                        <div className="text-[9px] font-normal text-gray-500">({item.quantity} {pkg.manifestUnitName.toLowerCase()})</div>
                                     )}
                                 </td>
                                 <td className="py-2 px-1 text-right text-gray-800">

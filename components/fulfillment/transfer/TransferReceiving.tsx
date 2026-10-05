@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { ArrowDown, Box } from 'lucide-react';
 import { WMSJob, Site, ReceivingItem, Product } from '../../../types';
 import { formatJobId } from '../../../utils/jobIdFormatter';
@@ -6,6 +6,8 @@ import { getSellUnit } from '../../../utils/units';
 import { supabase } from '../../../lib/supabase';
 import { useLanguage } from '../../../contexts/LanguageContext';
 import { logger } from '../../../utils/logger';
+import { useFulfillment } from '../FulfillmentContext';
+import { CustodyHandshakeModal } from './CustodyHandshakeModal';
 
 interface TransferReceivingProps {
     activeTransferJob: WMSJob;
@@ -35,15 +37,32 @@ export const TransferReceiving: React.FC<TransferReceivingProps> = ({
     activeSite
 }) => {
     const { t } = useLanguage();
+    const { user, employees, logSystemEvent } = useFulfillment();
+    const [isHandshakeModalOpen, setIsHandshakeModalOpen] = useState(false);
+    const [isSubmittingReceipt, setIsSubmittingReceipt] = useState(false);
 
-    const handleConfirmReceipt = async () => {
+    // Delivering driver lookup
+    const assignedDriver = employees.find(e => e.id === activeTransferJob.assignedTo);
+    const driverName = assignedDriver?.name || 'Assigned Driver / Courier';
+
+    const handleConfirmReceipt = async (discrepancyDetails?: { hasDiscrepancy: boolean; discrepancyCount: number; driverAcknowledged: boolean }) => {
         if (!activeTransferJob) return;
         try {
-            // Update job status to Received
+            setIsSubmittingReceipt(true);
+            const hasDiscrepancy = !!discrepancyDetails?.hasDiscrepancy;
+            const discrepancyCount = discrepancyDetails?.discrepancyCount || 0;
+
+            // Update job status to Received with Chain of Custody audit details
             await wmsJobsService.update(activeTransferJob.id, {
                 transferStatus: 'Received',
                 status: 'Completed',
-            });
+                hasDiscrepancy,
+                discrepancyDetails: hasDiscrepancy
+                    ? `Chain of Custody Discrepancy: ${discrepancyCount} units variance. Certified by ${user?.name || 'Receiver'}`
+                    : undefined,
+                receivedAt: new Date().toISOString(),
+                receivedBy: user?.name || 'Receiver'
+            } as any);
 
             // Also complete the child DISPATCH job if exists
             try {
@@ -122,14 +141,58 @@ export const TransferReceiving: React.FC<TransferReceivingProps> = ({
                 }
             }
 
-            addNotification('success', 'Transfer received successfully');
+            // If discrepancy occurred, dispatch event to penalize gamification accuracy & log audit
+            if (hasDiscrepancy) {
+                const responsibleEmployeeId = activeTransferJob.assignedTo || assignedDriver?.id;
+                if (responsibleEmployeeId) {
+                    window.dispatchEvent(new CustomEvent('fulfillment:chain-of-custody-discrepancy', {
+                        detail: {
+                            employeeId: responsibleEmployeeId,
+                            employeeName: driverName,
+                            siteId: activeTransferJob.sourceSiteId || activeSite?.id,
+                            discrepancyCount,
+                            totalExpected: activeTransferJob.items || 10,
+                            transferId: activeTransferJob.id
+                        }
+                    }));
+                }
+
+                if (logSystemEvent) {
+                    try {
+                        await logSystemEvent(
+                            'CHAIN_OF_CUSTODY_DISCREPANCY',
+                            `Transfer ${formatJobId(activeTransferJob)} received with ${discrepancyCount} unit variance. Relinquished by ${driverName}, accepted by ${user?.name || 'Receiver'}. Driver co-sign: ${discrepancyDetails?.driverAcknowledged ? 'Acknowledged' : 'Unacknowledged'}`,
+                            user?.name || 'Receiver',
+                            'WMS_TRANSFERS'
+                        );
+                    } catch (auditErr) {
+                        logger.warn('TransferReceiving', `Failed to log custody discrepancy: ${String(auditErr)}`);
+                    }
+                }
+            } else if (logSystemEvent) {
+                try {
+                    await logSystemEvent(
+                        'CHAIN_OF_CUSTODY_CLEAN_HANDSHAKE',
+                        `Transfer ${formatJobId(activeTransferJob)} clean custody transfer sealed. 100% count match. Relinquished by ${driverName}, accepted by ${user?.name || 'Receiver'}`,
+                        user?.name || 'Receiver',
+                        'WMS_TRANSFERS'
+                    );
+                } catch (auditErr) {
+                    logger.warn('TransferReceiving', `Failed to log clean custody handshake: ${String(auditErr)}`);
+                }
+            }
+
+            addNotification(hasDiscrepancy ? 'warning' : 'success', hasDiscrepancy ? `Custody transfer sealed with ${discrepancyCount} unit discrepancy noted` : 'Clean custody handshake sealed successfully');
+            setIsHandshakeModalOpen(false);
             setTransferReceiveMode(false);
             setActiveTransferJob(null);
             setTransferReceiveItems([]);
-            refreshData();
+            await refreshData();
         } catch (err) {
             logger.error('TransferReceiving', 'Failed to receive transfer:', err);
             addNotification('alert', 'Failed to receive items');
+        } finally {
+            setIsSubmittingReceipt(false);
         }
     };
 
@@ -229,7 +292,7 @@ export const TransferReceiving: React.FC<TransferReceivingProps> = ({
                                             >
                                                 <option value="Good">{t('warehouse.good')}</option>
                                                 <option value="Damaged">Damaged</option>
-                                                <option value="Missing">Missing</option>
+                                                <option value="Short">Short / Missing</option>
                                             </select>
                                         </div>
                                     </div>
@@ -240,13 +303,26 @@ export const TransferReceiving: React.FC<TransferReceivingProps> = ({
                 </div>
                 <div className="pt-4 border-t border-white/10 mt-2">
                     <button
-                        onClick={handleConfirmReceipt}
-                        className="w-full py-3 bg-green-500 text-black font-bold rounded-xl hover:bg-green-400 transition-all shadow-lg shadow-green-500/20"
+                        onClick={() => setIsHandshakeModalOpen(true)}
+                        className="woody-btn-primary w-full py-3.5 text-xs font-black uppercase tracking-wider flex items-center justify-center gap-2 shadow-lg"
                     >
-                        {t('warehouse.confirm')}
+                        Review & Sign Digital Handshake (Chain of Custody)
                     </button>
                 </div>
             </div>
+
+            {/* Custody Handshake Modal */}
+            <CustodyHandshakeModal
+                isOpen={isHandshakeModalOpen}
+                onClose={() => setIsHandshakeModalOpen(false)}
+                onConfirm={handleConfirmReceipt}
+                activeTransferJob={activeTransferJob}
+                transferReceiveItems={transferReceiveItems}
+                allProducts={allProducts}
+                currentUser={user}
+                driverName={driverName}
+                isSubmitting={isSubmittingReceipt}
+            />
         </div>
     );
 };

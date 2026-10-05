@@ -4,6 +4,7 @@ import { Pagination } from '../../shared';
 import { WMSJob, Site, Product } from '../../../types';
 import { formatJobId } from '../../../utils/jobIdFormatter';
 import { formatDateTime } from '../../../utils/formatting';
+import { formatDisplayEmployeeId } from '../../../utils/employeeIdGenerator';
 
 
 interface PackHistoryProps {
@@ -77,7 +78,7 @@ export const PackHistory: React.FC<PackHistoryProps> = ({
                     e.id === user.employeeId
                 );
             }
-            const displayId = userObj?.code || (userId ? (isUUID(userId) ? userId.slice(0, 8).toUpperCase() : userId) : '');
+            const displayId = (userObj?.code ? formatDisplayEmployeeId(userObj.code) : '') || (userId ? (isUUID(userId) ? userId.slice(0, 8).toUpperCase() : userId) : '');
             const resolvedUser = {
                 name: userObj?.name || (userId ? userId : 'System'),
                 displayId: displayId || ''

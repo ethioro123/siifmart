@@ -44,14 +44,14 @@ export const AdjustStockModal: React.FC<AdjustStockModalProps> = ({
                         <span>Central HQ Approval Required. Your adjustment request will route to HQ before inventory is modified.</span>
                     </div>
                 )}
-                <div className="p-4 bg-gray-50 dark:bg-white/5 rounded-xl border border-gray-100 dark:border-white/10 flex items-center gap-4">
-                    <div className="w-16 h-16 rounded-lg bg-gray-200 dark:bg-black/20 overflow-hidden">
+                <div className="p-4 bg-[var(--theme-bg-subtle)] rounded-xl border border-[var(--theme-border)] flex items-center gap-4">
+                    <div className="w-16 h-16 rounded-lg bg-[var(--theme-bg-card)] border border-[var(--theme-border)] overflow-hidden">
                         {product.image && <img src={product.image} alt="" className="w-full h-full object-cover" />}
                     </div>
                     <div>
-                        <h4 className="font-bold text-gray-900 dark:text-white">{product.name}</h4>
-                        <p className="text-xs text-secondary font-mono mt-1">{product.sku}</p>
-                        <div className="mt-2 text-xs font-bold text-[#2C5E3B] dark:text-[#A9CBA2] bg-[#2C5E3B]/10 dark:bg-[#A9CBA2]/10 px-2 py-0.5 rounded inline-block">
+                        <h4 className="font-bold text-[var(--theme-text-primary)]">{product.name}</h4>
+                        <p className="text-xs text-[var(--theme-text-secondary)] font-mono mt-1">{product.sku}</p>
+                        <div className="mt-2 text-xs font-bold text-[var(--theme-text-primary)] bg-[var(--theme-pill-bg)] border border-[var(--theme-pill-border)] px-2 py-0.5 rounded inline-block">
                             Current Stock: {product.stock}
                         </div>
                     </div>
@@ -59,26 +59,26 @@ export const AdjustStockModal: React.FC<AdjustStockModalProps> = ({
                 <div className="grid grid-cols-2 gap-4">
                     <button 
                         onClick={() => setAdjustType('IN')} 
-                        className={`p-4 rounded-xl border flex flex-col items-center gap-2 transition-all ${adjustType === 'IN' ? 'bg-[#2C5E3B]/10 border-[#2C5E3B] text-[#2C5E3B] dark:bg-[#A9CBA2]/10 dark:border-[#A9CBA2] dark:text-[#A9CBA2]' : 'border-gray-200 dark:border-white/10 text-stone-500'}`}
+                        className={`p-4 rounded-xl border flex flex-col items-center gap-2 transition-all ${adjustType === 'IN' ? 'bg-emerald-500/10 border-emerald-500 text-emerald-600 dark:text-emerald-400' : 'border-[var(--theme-border)] bg-[var(--theme-bg-subtle)] text-[var(--theme-text-muted)] hover:bg-[var(--theme-bg-card-hover)]'}`}
                     >
                         <div className="p-2 rounded-full bg-current bg-opacity-10"><Plus size={20} /></div>
                         <span className="font-bold text-sm">Stock In (+)</span>
                     </button>
                     <button 
                         onClick={() => setAdjustType('OUT')} 
-                        className={`p-4 rounded-xl border flex flex-col items-center gap-2 transition-all ${adjustType === 'OUT' ? 'bg-amber-500/10 border-amber-500 text-amber-600 dark:text-amber-400' : 'border-gray-200 dark:border-white/10 text-stone-500'}`}
+                        className={`p-4 rounded-xl border flex flex-col items-center gap-2 transition-all ${adjustType === 'OUT' ? 'bg-amber-500/10 border-amber-500 text-amber-600 dark:text-amber-400' : 'border-[var(--theme-border)] bg-[var(--theme-bg-subtle)] text-[var(--theme-text-muted)] hover:bg-[var(--theme-bg-card-hover)]'}`}
                     >
                         <div className="p-2 rounded-full bg-current bg-opacity-10"><Minus size={20} /></div>
                         <span className="font-bold text-sm">Stock Out (-)</span>
                     </button>
                 </div>
                 <div>
-                    <label className="block text-xs font-bold uppercase text-stone-500 mb-1">Quantity</label>
+                    <label className="block text-xs font-bold uppercase text-[var(--theme-text-muted)] mb-1">Quantity</label>
                     <input 
                         type="number" 
                         value={adjustQty} 
                         onChange={(e) => setAdjustQty(e.target.value)} 
-                        className="w-full bg-white dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-3 text-lg font-bold outline-none focus:border-[#2C5E3B] dark:focus:border-[#A9CBA2] focus:ring-4 focus:ring-[#2C5E3B]/10 dark:focus:ring-[#A9CBA2]/10 transition-all" 
+                        className="w-full bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl px-4 py-3 text-lg font-bold text-[var(--theme-text-primary)] outline-none focus:border-[var(--theme-accent)] transition-all" 
                         placeholder="0" 
                         min="0.01"
                         step="any" 
@@ -86,12 +86,12 @@ export const AdjustStockModal: React.FC<AdjustStockModalProps> = ({
                     />
                 </div>
                 <div>
-                    <label className="block text-xs font-bold uppercase text-stone-500 mb-1">Reason</label>
+                    <label className="block text-xs font-bold uppercase text-[var(--theme-text-muted)] mb-1">Reason</label>
                     <select 
                         aria-label="Adjustment Reason" 
                         value={adjustReason} 
                         onChange={(e) => setAdjustReason(e.target.value)} 
-                        className="w-full bg-white dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-3 text-sm font-medium outline-none focus:border-[#2C5E3B] dark:focus:border-[#A9CBA2] focus:ring-4 focus:ring-[#2C5E3B]/10 dark:focus:ring-[#A9CBA2]/10 transition-all"
+                        className="w-full bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl px-4 py-3 text-sm font-medium text-[var(--theme-text-primary)] outline-none focus:border-[var(--theme-accent)] transition-all"
                     >
                         <option>Stock Correction</option>
                         <option>Damaged Goods</option>

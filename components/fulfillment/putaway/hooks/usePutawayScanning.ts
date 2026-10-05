@@ -56,7 +56,7 @@ export const usePutawayScanning = (deps: UsePutawayScanningDeps) => {
         addNotification('success', `Location ${normalized} ready`);
     };
 
-    const handleScanItem = async (barcode: string) => {
+    const handleScanItem = async (barcode: string, quantityToPutaway?: number) => {
         if (!selectedJob || !currentItem) return;
         if (isSubmitting || isSubmittingRef.current) {
             logger.warn('PutawayTab', "⚠️ Already submitting putaway. Ignoring duplicate scan.");
@@ -122,11 +122,15 @@ export const usePutawayScanning = (deps: UsePutawayScanningDeps) => {
             // Capture a single timestamp for consistency across inventory and putaway history
             const putawayTimestamp = new Date().toISOString();
 
+            const qty = (quantityToPutaway !== undefined && quantityToPutaway > 0)
+                ? quantityToPutaway
+                : currentItem.expectedQty;
+
             // 2. Putaway Stock Logic (Replaces adjustStock + relocate)
             await putawayStock({
                 sku: currentItem.sku || '',
                 location: scannedLocation,
-                quantity: currentItem.expectedQty,
+                quantity: qty,
                 siteId: activeSite?.id,
                 type: 'IN',
                 expiryDate: currentItem.expiryDate,
@@ -159,13 +163,14 @@ export const usePutawayScanning = (deps: UsePutawayScanningDeps) => {
                 return;
             }
 
-            await updateJobItem(selectedJob.id, itemIndex, 'Picked', currentItem.expectedQty, scannedLocation);
+            const itemStatus = qty < currentItem.expectedQty ? 'Short' : 'Picked';
+            await updateJobItem(selectedJob.id, itemIndex, itemStatus, qty, scannedLocation);
 
             addNotification('success', 'Item put away successfully');
 
             // 3. Update Local Job State
             const nextItems = [...selectedJob.lineItems];
-            nextItems[itemIndex] = { ...currentItem, status: 'Picked', pickedQty: currentItem.expectedQty, location: scannedLocation };
+            nextItems[itemIndex] = { ...currentItem, status: itemStatus, pickedQty: qty, location: scannedLocation };
 
             // 4. Auto-Complete: If all items are done, complete the job automatically
             const allDone = nextItems.every(i => !i || i.status === 'Picked' || i.status === 'Short' || i.status === 'Completed');

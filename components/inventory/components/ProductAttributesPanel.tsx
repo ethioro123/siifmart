@@ -20,7 +20,7 @@ const AttrBadge = ({ label, value, color }: { label: string; value?: string | nu
         purple: 'bg-purple-500/10 border-purple-500/30 text-purple-700 dark:text-purple-400',
         pink: 'bg-pink-500/10 border-pink-500/30 text-pink-700 dark:text-pink-400',
     };
-    const colorClasses = color && colorMap[color] ? colorMap[color] : 'bg-gray-100 dark:bg-white/5 border-gray-200 dark:border-white/10 text-gray-700 dark:text-gray-300';
+    const colorClasses = color && colorMap[color] ? colorMap[color] : 'bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] text-[var(--theme-text-secondary)]';
 
     return (
         <div className={`flex items-center gap-1.5 ${colorClasses} border rounded px-2 py-1 min-w-0`}>
@@ -48,10 +48,10 @@ export const ProductAttributesPanel: React.FC<ProductAttributesPanelProps> = ({ 
     if (!hasAnyAttributes) return null;
 
     return (
-        <div className="p-5 bg-white dark:bg-black/20 rounded-2xl border border-gray-200 dark:border-white/10 shadow-sm">
+        <div className="p-5 bg-[var(--theme-bg-card)] rounded-2xl border border-[var(--theme-border)] shadow-sm">
             <div className="flex items-center gap-2 mb-4">
-                <Box size={14} className="text-[#2C5E3B] dark:text-[#A9CBA2]" />
-                <h3 className="text-[11px] font-black text-gray-900 dark:text-white uppercase tracking-[0.15em]">Product Attributes</h3>
+                <Box size={14} className="text-[var(--theme-text-secondary)]" />
+                <h3 className="text-[11px] font-bold text-[var(--theme-text-primary)] uppercase tracking-wider">Product Attributes</h3>
             </div>
             <div className="flex flex-wrap gap-1.5">
                 {/* Physical */}

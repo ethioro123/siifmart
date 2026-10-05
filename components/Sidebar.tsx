@@ -66,49 +66,49 @@ export default function Sidebar() {
   const getNavItems = (userRole: UserRole) => {
     const allItems = [
       // WMS DASHBOARD - Overview (Managers Only)
-      { to: "/wms-dashboard", icon: LayoutDashboard, label: "WMS Dashboard", section: "warehouse", roles: ['super_admin', 'warehouse_manager', 'dispatcher', 'inventory_specialist', 'operations_manager', 'regional_manager', 'supply_chain_manager'] },
+      { to: "/wms-dashboard", icon: LayoutDashboard, label: "WMS Dashboard", section: "warehouse", roles: ['super_admin', 'warehouse_manager', 'dispatcher', 'inventory_specialist', 'operations_manager', 'regional_manager', 'supply_chain_manager', 'inventory_manager', 'logistics_manager', 'fleet_maintenance_supervisor'] },
 
       // NETWORK INVENTORY - Executive & Supply Chain Leadership
-      { to: "/network-inventory", icon: Globe, label: "Network View", section: "inventory", roles: ['super_admin', 'admin', 'supply_chain_manager', 'operations_manager', 'finance_manager', 'procurement_manager', 'auditor', 'regional_manager'] },
+      { to: "/network-inventory", icon: Globe, label: "Network View", section: "inventory", roles: ['super_admin', 'admin', 'supply_chain_manager', 'operations_manager', 'finance_manager', 'procurement_manager', 'auditor', 'regional_manager', 'replenishment_planner'] },
 
       // INVENTORY
-      { to: "/inventory", icon: Package, label: "Inventory", section: "inventory", roles: ['super_admin', 'store_manager', 'assistant_manager', 'shift_lead', 'warehouse_manager', 'dispatcher', 'dispatch_manager', 'auditor', 'procurement_manager', 'inventory_specialist', 'store_supervisor', 'pos', 'operations_manager', 'regional_manager', 'supply_chain_manager'] },
+      { to: "/inventory", icon: Package, label: "Inventory", section: "inventory", roles: ['super_admin', 'store_manager', 'assistant_manager', 'shift_lead', 'warehouse_manager', 'dispatcher', 'dispatch_manager', 'auditor', 'procurement_manager', 'inventory_specialist', 'store_supervisor', 'pos', 'operations_manager', 'regional_manager', 'supply_chain_manager', 'inventory_manager', 'logistics_manager', 'security_manager', 'vendor_relations_manager', 'customs_import_specialist', 'inbound_qc_inspector', 'replenishment_planner', 'fleet_maintenance_supervisor', 'store_operations_auditor'] },
 
       // FULFILLMENT (WMS) - Warehouse staff & operations leadership
-      { to: "/wms-ops", icon: ClipboardList, label: "Fulfillment", section: "warehouse", roles: ['super_admin', 'admin', 'warehouse_manager', 'operations_manager', 'dispatch_manager', 'dispatcher', 'picker', 'packer', 'receiver', 'driver', 'inventory_specialist', 'regional_manager', 'supply_chain_manager'] },
+      { to: "/wms-ops", icon: ClipboardList, label: "Fulfillment", section: "warehouse", roles: ['super_admin', 'admin', 'warehouse_manager', 'operations_manager', 'dispatch_manager', 'dispatcher', 'picker', 'packer', 'receiver', 'driver', 'inventory_specialist', 'regional_manager', 'supply_chain_manager', 'inventory_manager', 'logistics_manager', 'inbound_qc_inspector', 'replenishment_planner', 'fleet_maintenance_supervisor'] },
 
-      // PROCUREMENT - Warehouse, procurement & operational leadership
-      { to: "/procurement", icon: Truck, label: "Procurement", section: "procurement", roles: ['super_admin', 'warehouse_manager', 'dispatcher', 'procurement_manager', 'finance_manager', 'operations_manager', 'regional_manager', 'supply_chain_manager'] },
+      // PROCUREMENT - Corporate administration, procurement & operational leadership
+      { to: "/procurement", icon: Truck, label: "Procurement", section: "procurement", roles: ['super_admin', 'admin', 'procurement_manager', 'buyer', 'demand_planner', 'vendor_relations_manager', 'customs_import_specialist', 'supply_chain_manager', 'finance_manager', 'operations_manager', 'regional_manager', 'replenishment_planner', 'credit_control_officer', 'accountant'] },
 
       // ROADMAP - CEO Only (Confidential Strategic Canvas)
       { to: "/roadmap", icon: Map, label: "Roadmap", section: "dashboard", roles: ['super_admin'] },
 
       // CENTRAL OPERATIONS - CEO & Operations Leadership
-      { to: "/admin", icon: Activity, label: "Central Operations", section: "dashboard", roles: ['super_admin', 'admin', 'operations_manager', 'regional_manager'] },
+      { to: "/admin", icon: Activity, label: "Central Operations", section: "dashboard", roles: ['super_admin', 'admin', 'operations_manager', 'regional_manager', 'store_operations_auditor'] },
 
       // POS
       { to: "/pos", icon: ShoppingCart, label: "POS Terminal", section: "pos", roles: ['super_admin', 'store_manager', 'assistant_manager', 'shift_lead', 'pos', 'store_supervisor'] },
 
-      // POS COMMAND CENTER - Store management
-      { to: "/pos-dashboard", icon: Eye, label: "POS Command", section: "pos", roles: ['super_admin', 'store_manager', 'assistant_manager', 'shift_lead', 'pos', 'store_supervisor'] },
+      // POS COMMAND CENTER - Store management & regional operations
+      { to: "/pos-dashboard", icon: Eye, label: "POS Command", section: "pos", roles: ['super_admin', 'store_manager', 'assistant_manager', 'shift_lead', 'pos', 'store_supervisor', 'operations_manager', 'regional_manager', 'finance_manager', 'auditor', 'treasury_officer', 'store_operations_auditor'] },
 
       // SALES - Management & Auditing (Cashiers blocked from historical revenue)
-      { to: "/sales", icon: FileText, label: "Sales History", section: "sales", roles: ['super_admin', 'store_manager', 'assistant_manager', 'shift_lead', 'auditor', 'finance_manager', 'cs_manager', 'store_supervisor', 'operations_manager', 'regional_manager'] },
+      { to: "/sales", icon: FileText, label: "Sales History", section: "sales", roles: ['super_admin', 'store_manager', 'assistant_manager', 'shift_lead', 'auditor', 'finance_manager', 'cs_manager', 'store_supervisor', 'operations_manager', 'regional_manager', 'accountant', 'treasury_officer', 'tax_compliance_officer', 'credit_control_officer', 'demand_planner', 'replenishment_planner', 'store_operations_auditor'] },
 
       // MERCHANDISING
-      { to: "/pricing", icon: Tags, label: "Merchandising", section: "pricing", roles: ['super_admin', 'finance_manager', 'procurement_manager'] },
+      { to: "/pricing", icon: Tags, label: "Merchandising", section: "pricing", roles: ['super_admin', 'merchandising_manager', 'finance_manager', 'procurement_manager', 'regional_manager', 'operations_manager', 'vendor_relations_manager', 'store_operations_auditor'] },
 
       // FINANCE
-      { to: "/finance", icon: DollarSign, label: "Financials", section: "finance", roles: ['super_admin', 'auditor', 'finance_manager'] },
+      { to: "/finance", icon: DollarSign, label: "Financials", section: "finance", roles: ['super_admin', 'auditor', 'finance_manager', 'regional_manager', 'operations_manager', 'hr_manager', 'hr', 'accountant', 'payroll_specialist', 'treasury_officer', 'tax_compliance_officer', 'credit_control_officer'] },
 
       // CUSTOMERS
-      { to: "/customers", icon: Users, label: "Customers", section: "customers", roles: ['super_admin', 'store_manager', 'assistant_manager', 'shift_lead', 'pos', 'cs_manager', 'store_supervisor', 'operations_manager', 'regional_manager'] },
+      { to: "/customers", icon: Users, label: "Customers", section: "customers", roles: ['super_admin', 'store_manager', 'assistant_manager', 'shift_lead', 'pos', 'cs_manager', 'store_supervisor', 'operations_manager', 'regional_manager', 'credit_control_officer'] },
 
       // EMPLOYEES
-      { to: "/employees", icon: Briefcase, label: "Employees", section: "employees", roles: ['super_admin', 'admin', 'hr', 'hr_manager', 'store_manager', 'assistant_manager', 'shift_lead', 'store_supervisor', 'operations_manager', 'regional_manager'] },
+      { to: "/employees", icon: Briefcase, label: "Employees", section: "employees", roles: ['super_admin', 'admin', 'hr', 'hr_manager', 'store_manager', 'assistant_manager', 'shift_lead', 'store_supervisor', 'operations_manager', 'regional_manager', 'training_coordinator', 'payroll_specialist', 'talent_recruiter', 'logistics_manager', 'inventory_manager', 'fleet_maintenance_supervisor'] },
 
       // SETTINGS
-      { to: "/settings", icon: Settings, label: "Settings", section: "settings", roles: ['super_admin', 'admin', 'hr', 'it_support'] },
+      { to: "/settings", icon: Settings, label: "Settings", section: "settings", roles: ['super_admin', 'admin', 'hr', 'hr_manager', 'it_support', 'security_manager', 'regional_manager', 'operations_manager', 'auditor'] },
     ];
 
     // Filter by role AND site-type context
@@ -133,30 +133,48 @@ export default function Sidebar() {
       let isAllowedForSite = true;
 
       if (isWarehouse) {
-        // In WMS site: strictly WMS & Inventory menu options ONLY. Hide Administration HQ & POS.
-        if (item.to === '/admin' || ['pos', 'pricing', 'finance', 'settings', 'customers'].includes(item.section)) {
+        // ═══ WAREHOUSE / FULFILLMENT SITE CONTEXT ═══
+        // Warehouse Manager view: WMS Dashboard, Fulfillment, Inventory, Procurement, Staff.
+        // POS, Sales, Customers, Merchandising, Financials, and Settings are strictly hidden.
+        if (['pos', 'sales', 'customers', 'pricing', 'finance', 'settings'].includes(item.section)) {
+          isAllowedForSite = false;
+        }
+        if (item.to === '/network-inventory' || item.to === '/roadmap') {
+          isAllowedForSite = false;
+        }
+        // Central Operations button is kept for CEO & operational leadership to return to HQ
+        if (item.to === '/admin' && !isSuperAdminOrCeo && !['regional_manager', 'operations_manager'].includes(userRole)) {
           isAllowedForSite = false;
         }
       } else if (isStore) {
-        // In POS store site: strictly POS, Sales & Customers menu options ONLY. Hide Administration HQ, WMS, and Central Inventory.
-        if (item.to === '/admin' || ['warehouse', 'inventory', 'procurement', 'finance', 'pricing', 'settings'].includes(item.section)) {
+        // ═══ STORE / POS SITE CONTEXT ═══
+        // Store Manager view: POS Terminal, POS Command, Inventory, Sales, Customers, Staff.
+        // WMS Dashboard, Fulfillment, Procurement, Merchandising, Financials, and Settings are strictly hidden.
+        if (['warehouse', 'procurement', 'pricing', 'finance', 'settings'].includes(item.section)) {
+          isAllowedForSite = false;
+        }
+        if (item.to === '/network-inventory' || item.to === '/roadmap') {
+          isAllowedForSite = false;
+        }
+        // Central Operations button is kept for CEO & operational leadership to return to HQ
+        if (item.to === '/admin' && !isSuperAdminOrCeo && !['regional_manager', 'operations_manager'].includes(userRole)) {
           isAllowedForSite = false;
         }
       } else if (isHQ) {
-        // In Administration HQ site (e.g. SITE-0001): SHOW Central Operations & HQ tools; HIDE WMS-only & POS-only site ops.
-        if (['warehouse', 'pos'].includes(item.section)) {
-          // Operations, supply chain, and regional leaders at HQ must have access to fulfillment & warehouse supervision
-          const isOpsLeader = ['operations_manager', 'regional_manager', 'supply_chain_manager'].includes(userRole);
-          if (item.section === 'warehouse' && isOpsLeader) {
-            // Keep warehouse allowed for operational directors
-          } else {
-            isAllowedForSite = false;
-          }
+        // ═══ ADMINISTRATION / HQ SITE CONTEXT ═══
+        // Executive leadership & central administration deck.
+        // HIDE local physical site floor terminals: POS Terminal, POS Command, WMS Dashboard, WMS Ops.
+        // Central Procurement, Network Inventory, Merchandising, Financials, and HR are fully active at Administration.
+        if (['warehouse', 'pos'].includes(item.section) || item.to === '/sales') {
+          isAllowedForSite = false;
+        }
+        if (item.to === '/inventory') {
+          // In HQ, local inventory is replaced by Network View
+          isAllowedForSite = false;
         }
       }
 
-      const isSectionAllowed = availableSections.includes(item.section) || availableSections.includes('*');
-      return hasRole && isAllowedForSite && isSectionAllowed;
+      return hasRole && isAllowedForSite;
     });
 
     return filteredItems;
@@ -190,8 +208,8 @@ export default function Sidebar() {
           <p className="px-4 text-xs font-bold text-stone-400 dark:text-gray-500 uppercase tracking-wider mb-3">Menu</p>
           {navItems.map(item => {
             const Icon = item.icon;
-            // "Central Operations" for CEO: clear activeSite before navigating
-            if (item.to === '/admin' && user.role === 'super_admin') {
+            // "Central Operations" for multi-site leadership: switch to Admin site before navigating
+            if (item.to === '/admin' && ['super_admin', 'admin', 'regional_manager', 'operations_manager'].includes(user.role)) {
               return (
                 <button
                   key={item.to}

@@ -3,6 +3,7 @@ import { History as HistoryIcon, Search, Clock, User as UserIcon, Upload, ArrowR
 import Pagination from '../../shared/Pagination';
 import { WMSJob, Site, User } from '../../../types';
 import { useLanguage } from '../../../contexts/LanguageContext';
+import { formatDisplayEmployeeId } from '../../../utils/employeeIdGenerator';
 
 interface DocksOutboundHistoryProps {
     jobs: WMSJob[];
@@ -44,7 +45,7 @@ export const DocksOutboundHistory: React.FC<DocksOutboundHistoryProps> = ({
                 (e.email && userId && e.email.toLowerCase() === userId.toLowerCase()) ||
                 (e.code && userId && e.code.toLowerCase() === userId.toLowerCase())
             );
-            const displayId = userObj?.code || (userId ? (isUUID(userId) ? userId.slice(0, 8).toUpperCase() : userId) : '');
+            const displayId = (userObj?.code ? formatDisplayEmployeeId(userObj.code) : '') || (userId ? (isUUID(userId) ? userId.slice(0, 8).toUpperCase() : userId) : '');
             const resolvedUser = {
                 name: userObj?.name || (userId ? userId : 'System'),
                 displayId: displayId || ''

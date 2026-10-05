@@ -41,45 +41,45 @@ export const StartShiftModal: React.FC = () => {
         >
             <form onSubmit={handleSubmit} className="p-4 sm:p-6 space-y-6">
                 {/* Cashier & Station Header */}
-                <div className="p-4 bg-[#F8F6F0] dark:bg-black/30 border border-[#E2DCCE] dark:border-white/5 rounded-2xl space-y-2.5">
+                <div className="p-4 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-2xl space-y-2.5">
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2.5">
-                            <div className="w-9 h-9 rounded-xl bg-[#2C5E3B]/10 dark:bg-[#A9CBA2]/10 flex items-center justify-center text-[#2C5E3B] dark:text-[#A9CBA2] border border-[#2C5E3B]/20">
+                            <div className="w-9 h-9 rounded-xl bg-[var(--theme-pill-bg)] text-[var(--theme-text-primary)] flex items-center justify-center border border-[var(--theme-border)]">
                                 <User size={18} />
                             </div>
                             <div>
-                                <p className="text-xs font-bold text-[#1E3F27] dark:text-white leading-tight">{user?.name || 'Staff Cashier'}</p>
-                                <p className="text-[10px] text-stone-500 dark:text-gray-400 font-mono uppercase tracking-wider">{user?.role || 'Cashier'}</p>
+                                <p className="text-xs font-bold text-[var(--theme-text-primary)] leading-tight">{user?.name || 'Staff Cashier'}</p>
+                                <p className="text-[10px] text-[var(--theme-text-secondary)] font-mono uppercase tracking-wider">{user?.role || 'Cashier'}</p>
                             </div>
                         </div>
 
-                        <div className="flex items-center gap-1.5 text-xs font-bold text-[#2C5E3B] dark:text-[#A9CBA2] bg-white dark:bg-white/5 px-3 py-1.5 rounded-xl border border-[#E2DCCE] dark:border-white/5 shadow-xs">
+                        <div className="flex items-center gap-1.5 text-xs font-bold text-[var(--theme-text-primary)] bg-[var(--theme-bg-card)] px-3 py-1.5 rounded-xl border border-[var(--theme-border)] shadow-xs">
                             <Store size={14} />
                             <span>{activeSite?.name || 'Store Register'}</span>
                         </div>
                     </div>
 
-                    <div className="flex items-center justify-between text-[11px] font-semibold text-stone-500 dark:text-gray-400 pt-2 border-t border-[#E2DCCE]/60 dark:border-white/5">
+                    <div className="flex items-center justify-between text-[11px] font-semibold text-[var(--theme-text-secondary)] pt-2 border-t border-[var(--theme-border)]">
                         <div className="flex items-center gap-1.5">
                             <Clock size={12} />
                             <span>Shift starting {new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
                         </div>
-                        <span className="text-[10px] uppercase font-bold text-amber-600 dark:text-amber-400">Zero-Trust Audit Logged</span>
+                        <span className="text-[10px] uppercase font-bold text-amber-500">Zero-Trust Audit Logged</span>
                     </div>
                 </div>
 
                 {/* Float Input */}
                 <div className="space-y-3">
                     <div className="flex justify-between items-baseline">
-                        <label className="text-xs font-black text-[#1E3F27] dark:text-white uppercase tracking-wider flex items-center gap-1.5">
-                            <DollarSign size={14} className="text-[#2C5E3B] dark:text-[#A9CBA2]" />
+                        <label className="text-xs font-bold text-[var(--theme-text-primary)] uppercase tracking-wider flex items-center gap-1.5">
+                            <DollarSign size={14} className="text-[var(--theme-text-primary)]" />
                             Opening Cash Float
                         </label>
-                        <span className="text-[11px] text-stone-500 dark:text-gray-400 font-medium">Count physical cash in drawer</span>
+                        <span className="text-[11px] text-[var(--theme-text-secondary)] font-medium">Count physical cash in drawer</span>
                     </div>
 
                     <div className="relative">
-                        <span className="absolute left-4 top-1/2 -translate-y-1/2 text-sm font-bold text-stone-400 font-mono">
+                        <span className="absolute left-4 top-1/2 -translate-y-1/2 text-sm font-bold text-[var(--theme-text-secondary)] font-mono">
                             {CURRENCY_SYMBOL}
                         </span>
                         <input
@@ -89,7 +89,7 @@ export const StartShiftModal: React.FC = () => {
                             value={openingFloat}
                             onChange={(e) => setOpeningFloat(e.target.value)}
                             placeholder="0.00"
-                            className="w-full pl-16 pr-4 py-3.5 bg-white dark:bg-black/40 border-2 border-[#E2DCCE] dark:border-white/10 rounded-2xl text-xl font-mono font-black text-[#1E3F27] dark:text-white focus:border-[#2C5E3B] dark:focus:border-[#A9CBA2] outline-hidden shadow-xs transition-colors"
+                            className="w-full pl-16 pr-4 py-3.5 bg-[var(--theme-input-bg)] border border-[var(--theme-border)] rounded-2xl text-xl font-mono font-bold text-[var(--theme-text-primary)] focus:border-[var(--theme-border-focus)] outline-hidden shadow-xs transition-colors"
                             autoFocus
                         />
                     </div>
@@ -103,8 +103,8 @@ export const StartShiftModal: React.FC = () => {
                                 onClick={() => setOpeningFloat(String(val))}
                                 className={`py-2 px-1 text-xs font-mono font-bold rounded-xl border transition-all cursor-pointer ${
                                     floatNum === val
-                                        ? 'bg-[#2C5E3B] text-white border-[#2C5E3B] shadow-xs scale-102'
-                                        : 'bg-[#F8F6F0] dark:bg-white/5 text-stone-700 dark:text-stone-300 border-[#E2DCCE] dark:border-white/10 hover:border-[#2C5E3B]/40'
+                                        ? 'bg-[var(--theme-primary)] text-[var(--theme-primary-text)] border-[var(--theme-primary)] shadow-xs'
+                                        : 'bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] border-[var(--theme-border)] hover:bg-[var(--theme-bg-card-hover)] hover:text-[var(--theme-text-primary)]'
                                 }`}
                             >
                                 {val.toLocaleString()}
@@ -115,8 +115,8 @@ export const StartShiftModal: React.FC = () => {
 
                 {/* Audit Notice */}
                 <div className="p-3 bg-amber-500/10 border border-amber-500/20 rounded-xl flex items-start gap-2.5">
-                    <ShieldCheck size={16} className="text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
-                    <p className="text-[11px] text-amber-800 dark:text-amber-300 leading-relaxed font-medium">
+                    <ShieldCheck size={16} className="text-amber-500 shrink-0 mt-0.5" />
+                    <p className="text-[11px] text-amber-500 leading-relaxed font-medium">
                         Opening float syncs in real-time to Supabase for central HQ reconciliation. End-of-day drawer count will be reconciled against this amount.
                     </p>
                 </div>
@@ -126,14 +126,14 @@ export const StartShiftModal: React.FC = () => {
                     <button
                         type="button"
                         onClick={() => setIsStartShiftModalOpen(false)}
-                        className="flex-1 py-3 bg-stone-100 dark:bg-white/5 hover:bg-stone-200 dark:hover:bg-white/10 text-stone-700 dark:text-stone-300 text-xs font-bold uppercase tracking-wider rounded-xl transition-colors cursor-pointer"
+                        className="flex-1 py-3 bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card-hover)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] text-xs font-bold uppercase tracking-wider rounded-xl transition-colors cursor-pointer border border-[var(--theme-border)] shadow-xs"
                     >
                         Cancel
                     </button>
                     <button
                         type="submit"
                         disabled={isSubmitting || floatNum < 0}
-                        className="flex-2 py-3 bg-[#2C5E3B] hover:bg-[#1E3F27] disabled:opacity-50 text-white text-xs font-bold uppercase tracking-wider rounded-xl shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-98"
+                        className="flex-2 py-3 bg-[var(--theme-primary)] hover:opacity-90 disabled:opacity-50 text-[var(--theme-primary-text)] text-xs font-bold uppercase tracking-wider rounded-xl shadow-xs transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-95"
                     >
                         <Play size={14} className="fill-current" />
                         <span>{isSubmitting ? 'Starting...' : 'Open Drawer & Start Shift'}</span>

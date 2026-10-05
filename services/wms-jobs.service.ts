@@ -42,6 +42,8 @@ export const wmsJobsService = {
         // Map line items to match frontend structure
         const job = {
             ...data,
+            countryCode: data.country_code || 'ET',
+            country_code: data.country_code || 'ET',
             siteId: data.site_id,
             trackingNumber: data.tracking_number,
             destSiteId: data.dest_site_id,
@@ -76,7 +78,7 @@ export const wmsJobsService = {
         return job;
     },
 
-    async getAll(siteId?: string, limit: number = 500, employeeId?: string) {
+    async getAll(siteId?: string, limit: number = 500, employeeId?: string, countryCode?: string) {
         // 1. Fetch ALL Active Jobs (Pending/In-Progress) for the site
         // We don't limit these because they represent the operational backlog that MUST be visible
         let activeQuery = supabase
@@ -84,6 +86,10 @@ export const wmsJobsService = {
             .select('*')
             .not('status', 'in', '("Completed","Cancelled")')
             .order('created_at', { ascending: true }); // Oldest first for FIFO
+
+        if (countryCode) {
+            activeQuery = activeQuery.eq('country_code', countryCode);
+        }
 
         if (siteId && employeeId) {
             activeQuery = activeQuery.or(`site_id.eq.${siteId},dest_site_id.eq.${siteId},assigned_to.eq.${employeeId}`);
@@ -102,6 +108,10 @@ export const wmsJobsService = {
             .in('status', ['Completed', 'Cancelled'])
             .order('updated_at', { ascending: false })
             .limit(limit);
+
+        if (countryCode) {
+            historyQuery = historyQuery.eq('country_code', countryCode);
+        }
 
         if (siteId && employeeId) {
             historyQuery = historyQuery.or(`site_id.eq.${siteId},dest_site_id.eq.${siteId},assigned_to.eq.${employeeId}`);
@@ -123,6 +133,8 @@ export const wmsJobsService = {
         // Map to domain model
         return combinedData.map((j: any) => ({
             ...j,
+            countryCode: j.country_code || 'ET',
+            country_code: j.country_code || 'ET',
             siteId: j.site_id,
             items: j.items_count,
             assignedTo: j.assigned_to,
@@ -151,11 +163,15 @@ export const wmsJobsService = {
             notes: j.notes
         }));
     },
-    async getDiscrepancies(siteId: string): Promise<WMSJob[]> {
+    async getDiscrepancies(siteId: string, countryCode?: string): Promise<WMSJob[]> {
         let query = supabase
             .from('wms_jobs')
             .select('*')
             .contains('line_items', JSON.stringify([{ status: 'Discrepancy' }]));
+
+        if (countryCode) {
+            query = query.eq('country_code', countryCode);
+        }
 
         if (siteId) {
             query = query.or(`site_id.eq.${siteId},dest_site_id.eq.${siteId}`);
@@ -166,6 +182,8 @@ export const wmsJobsService = {
 
         return (data || []).map((j: any) => ({
             ...j,
+            countryCode: j.country_code || 'ET',
+            country_code: j.country_code || 'ET',
             siteId: j.site_id,
             items: j.items_count,
             assignedTo: j.assigned_to,
@@ -195,6 +213,7 @@ export const wmsJobsService = {
 
     async create(job: Omit<WMSJob, 'id' | 'created_at' | 'updated_at'>) {
         const dbJob = {
+            country_code: job.countryCode || job.country_code || (job as any).country || 'ET',
             site_id: job.siteId,
             type: job.type,
             priority: job.priority,
@@ -261,6 +280,8 @@ export const wmsJobsService = {
             if (!error) {
                 return {
                     ...data,
+                    countryCode: data.country_code || 'ET',
+                    country_code: data.country_code || 'ET',
                     siteId: data.site_id,
                     items: data.items_count,
                     assignedTo: data.assigned_to,
@@ -322,6 +343,8 @@ export const wmsJobsService = {
 
     async update(id: string, updates: Partial<WMSJob>) {
         const dbUpdates: any = { ...updates };
+        if (updates.countryCode !== undefined) { dbUpdates.country_code = updates.countryCode; delete dbUpdates.countryCode; }
+        if (updates.country_code !== undefined) { dbUpdates.country_code = updates.country_code; }
         if (updates.siteId !== undefined) { dbUpdates.site_id = updates.siteId; delete dbUpdates.siteId; }
         if (updates.items !== undefined) { dbUpdates.items_count = Math.round(updates.items || 0); delete dbUpdates.items; }
         if (updates.assignedTo !== undefined) { dbUpdates.assigned_to = updates.assignedTo; delete dbUpdates.assignedTo; }
@@ -352,6 +375,8 @@ export const wmsJobsService = {
         if (error) throw error;
         return {
             ...data,
+            countryCode: data.country_code || 'ET',
+            country_code: data.country_code || 'ET',
             siteId: data.site_id,
             items: data.items_count,
             assignedTo: data.assigned_to,
