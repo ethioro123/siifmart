@@ -104,13 +104,13 @@ export const SupplierManagement: React.FC<SupplierManagementProps> = ({
             {/* Filter and Search Bar */}
             <div className="p-4 rounded-3xl bg-[var(--theme-bg-panel)] border border-[var(--theme-border)] shadow-sm flex flex-col md:flex-row gap-3 items-stretch md:items-center justify-between">
                 <div className="relative flex-1 max-w-md">
-                    <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--theme-text-muted)] pointer-events-none" />
+                    <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--theme-text-secondary)] pointer-events-none" />
                     <input
                         type="text"
                         placeholder="Search by supplier name, contact, category..."
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
-                        className="w-full h-11 pl-10 pr-4 rounded-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-xs text-[var(--theme-text-primary)] placeholder-[var(--theme-text-muted)] focus:outline-none focus:border-[var(--theme-accent)] transition-all font-medium"
+                        className="w-full h-11 pl-10 pr-4 rounded-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-xs text-[var(--theme-text-primary)] placeholder-[var(--theme-text-secondary)]/70 focus:outline-none focus:border-[var(--theme-accent)] transition-all font-medium"
                     />
                 </div>
 
@@ -170,7 +170,7 @@ export const SupplierManagement: React.FC<SupplierManagementProps> = ({
                                             </div>
                                             <div>
                                                 <h3 className="text-sm font-semibold tracking-tight text-[var(--theme-text-primary)]">{sup.name}</h3>
-                                                <p className="text-[11px] text-[var(--theme-text-muted)] font-mono font-medium uppercase mt-0.5">
+                                                <p className="text-[11px] text-[var(--theme-text-secondary)] font-mono font-medium uppercase mt-0.5">
                                                     Terms: {sup.paymentTerms || 'Net 30'}
                                                 </p>
                                             </div>
@@ -179,7 +179,7 @@ export const SupplierManagement: React.FC<SupplierManagementProps> = ({
                                     <td className="py-4 px-4">
                                         <div className="flex flex-col">
                                             <span className="text-xs font-semibold text-[var(--theme-text-primary)]">{sup.category || 'General'}</span>
-                                            <span className="text-[11px] text-[var(--theme-text-muted)] font-medium">{sup.type}</span>
+                                            <span className="text-[11px] text-[var(--theme-text-secondary)] font-medium">{sup.type}</span>
                                         </div>
                                     </td>
                                     <td className="py-4 px-4">
@@ -197,7 +197,7 @@ export const SupplierManagement: React.FC<SupplierManagementProps> = ({
                                             <div className="flex items-center gap-1.5">
                                                 <Star size={12} className="text-amber-500 fill-amber-500" />
                                                 <span className="text-xs font-bold font-mono tabular-nums text-[var(--theme-text-primary)]">{sup.rating}</span>
-                                                <span className="text-[11px] text-[var(--theme-text-muted)]">/ 5.0</span>
+                                                <span className="text-[11px] text-[var(--theme-text-secondary)]">/ 5.0</span>
                                             </div>
                                             <span className="text-[10px] font-mono font-semibold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">
                                                 98% OTIF Score
@@ -208,18 +208,18 @@ export const SupplierManagement: React.FC<SupplierManagementProps> = ({
                                         <div className="flex flex-col gap-1">
                                             {sup.email && (
                                                 <div className="flex items-center gap-2 text-xs text-[var(--theme-text-secondary)] font-medium">
-                                                    <Mail size={12} className="shrink-0 text-[var(--theme-text-muted)]" />
+                                                    <Mail size={12} className="shrink-0 text-[var(--theme-text-secondary)]" />
                                                     <span className="truncate max-w-[160px]">{sup.email}</span>
                                                 </div>
                                             )}
                                             {sup.phone && (
                                                 <div className="flex items-center gap-2 text-xs text-[var(--theme-text-secondary)] font-mono">
-                                                    <Phone size={12} className="shrink-0 text-[var(--theme-text-muted)]" />
+                                                    <Phone size={12} className="shrink-0 text-[var(--theme-text-secondary)]" />
                                                     <span>{sup.phone}</span>
                                                 </div>
                                             )}
                                             {!sup.email && !sup.phone && (
-                                                <span className="text-xs text-[var(--theme-text-muted)] italic">No direct contact</span>
+                                                <span className="text-xs text-[var(--theme-text-secondary)] italic">No direct contact</span>
                                             )}
                                         </div>
                                     </td>
@@ -254,7 +254,7 @@ export const SupplierManagement: React.FC<SupplierManagementProps> = ({
                                         </div>
                                         <div className="text-left">
                                             <h3 className="text-sm font-semibold tracking-tight text-[var(--theme-text-primary)]">{sup.name}</h3>
-                                            <p className="text-[11px] text-[var(--theme-text-muted)] font-mono mt-0.5">Terms: {sup.paymentTerms || 'Net 30'}</p>
+                                            <p className="text-[11px] text-[var(--theme-text-secondary)] font-mono mt-0.5">Terms: {sup.paymentTerms || 'Net 30'}</p>
                                         </div>
                                     </div>
                                     <div className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold border ${
@@ -268,16 +268,16 @@ export const SupplierManagement: React.FC<SupplierManagementProps> = ({
 
                                 <div className="grid grid-cols-2 gap-2 text-left bg-[var(--theme-bg-subtle)]/60 p-3 rounded-2xl border border-[var(--theme-border)]">
                                     <div>
-                                        <span className="text-[10px] text-[var(--theme-text-muted)] font-semibold uppercase tracking-wider">Category</span>
+                                        <span className="text-[10px] text-[var(--theme-text-secondary)] font-semibold uppercase tracking-wider">Category</span>
                                         <p className="text-xs text-[var(--theme-text-primary)] font-semibold mt-0.5">{sup.category || 'General'}</p>
                                         <p className="text-[10px] text-[var(--theme-text-secondary)] font-medium mt-0.5">{sup.type}</p>
                                     </div>
                                     <div>
-                                        <span className="text-[10px] text-[var(--theme-text-muted)] font-semibold uppercase tracking-wider">Rating</span>
+                                        <span className="text-[10px] text-[var(--theme-text-secondary)] font-semibold uppercase tracking-wider">Rating</span>
                                         <div className="flex items-center gap-1 mt-0.5">
                                             <Star size={11} className="text-amber-500 fill-amber-500" />
                                             <span className="text-xs text-[var(--theme-text-primary)] font-bold font-mono tabular-nums">{sup.rating}</span>
-                                            <span className="text-[10px] text-[var(--theme-text-muted)]">/ 5.0</span>
+                                            <span className="text-[10px] text-[var(--theme-text-secondary)]">/ 5.0</span>
                                         </div>
                                         <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-mono font-semibold block mt-0.5">98% OTIF</span>
                                     </div>
@@ -289,7 +289,7 @@ export const SupplierManagement: React.FC<SupplierManagementProps> = ({
                                             <span className="text-[11px] text-[var(--theme-text-secondary)] truncate max-w-[170px]">{sup.email}</span>
                                         )}
                                         {sup.phone && (
-                                            <span className="text-[11px] text-[var(--theme-text-muted)] font-mono">{sup.phone}</span>
+                                            <span className="text-[11px] text-[var(--theme-text-secondary)] font-mono">{sup.phone}</span>
                                         )}
                                     </div>
                                     <button
@@ -305,7 +305,7 @@ export const SupplierManagement: React.FC<SupplierManagementProps> = ({
                 </div>
 
                 {filteredSuppliers.length === 0 && (
-                    <div className="py-16 text-center text-[var(--theme-text-muted)] flex flex-col items-center justify-center">
+                    <div className="py-16 text-center text-[var(--theme-text-secondary)] flex flex-col items-center justify-center">
                         <div className="w-14 h-14 rounded-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] flex items-center justify-center mb-3">
                             <Search size={22} className="opacity-40 text-[var(--theme-text-secondary)]" />
                         </div>
@@ -329,9 +329,9 @@ export const SupplierManagement: React.FC<SupplierManagementProps> = ({
                         <ChevronLeft size={14} /> Previous
                     </button>
                     <div className="flex items-center px-3.5 h-9 rounded-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-xs font-mono">
-                        <span className="text-[var(--theme-text-muted)] mr-1.5">Page</span>
+                        <span className="text-[var(--theme-text-secondary)] mr-1.5">Page</span>
                         <span className="font-bold text-[var(--theme-text-primary)] tabular-nums">{currentPage}</span>
-                        <span className="text-[var(--theme-text-muted)] mx-1.5">of</span>
+                        <span className="text-[var(--theme-text-secondary)] mx-1.5">of</span>
                         <span className="font-bold text-[var(--theme-text-primary)] tabular-nums">{totalPages}</span>
                     </div>
                     <button

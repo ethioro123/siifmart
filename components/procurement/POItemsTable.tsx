@@ -59,11 +59,11 @@ export const POItemsTable: React.FC<POItemsTableProps> = ({
             <div className="relative bg-[var(--theme-bg-panel)] rounded-2xl overflow-x-auto border border-[var(--theme-border)] shadow-sm">
                 <table className="w-full text-left border-collapse min-w-[700px]">
                     <thead>
-                        <tr className="bg-[var(--theme-bg-subtle)] border-b border-[var(--theme-border-subtle)] text-[10px] text-[var(--theme-text-muted)] uppercase tracking-widest font-black">
+                        <tr className="bg-[var(--theme-bg-subtle)] border-b border-[var(--theme-border)] text-[10px] text-[var(--theme-text-secondary)] uppercase tracking-wider font-bold">
                             <th className="p-4 pl-6">Product Details</th>
                             <th className="p-4 text-left w-36">Packaging</th>
                             <th className="p-4 text-right w-28">Sellable Qty</th>
-                            <th className="p-4 text-right w-32">Unit Cost</th>
+                            <th className="p-4 text-right w-36">Order Cost</th>
                             <th className="p-4 text-right w-32">Total</th>
                             <th className="p-4 text-right pr-6 w-32">Actions</th>
                         </tr>
@@ -82,17 +82,11 @@ export const POItemsTable: React.FC<POItemsTableProps> = ({
                                                 <div className="text-[var(--theme-text-primary)] text-sm font-black tracking-tight">
                                                     {formatPOItemDescription(item)}
                                                 </div>
-                                                <div className="text-xs text-[var(--theme-text-muted)] font-mono mt-0.5 flex items-center gap-2 flex-wrap">
+                                                <div className="text-xs text-[var(--theme-text-secondary)] font-mono mt-0.5 flex items-center gap-2 flex-wrap">
                                                     <span className="bg-[var(--theme-bg-subtle)] px-2 py-0.5 rounded-md text-[10px] border border-[var(--theme-border)] font-bold">{item.sku}</span>
                                                     {item.identityType === 'new' && (
                                                         <span className="text-[9px] px-2 py-0.5 border border-amber-500/30 rounded-md bg-amber-500/10 text-amber-700 dark:text-amber-400 font-black tracking-widest">
                                                             CUSTOM
-                                                        </span>
-                                                    )}
-                                                    {pkg.packBadge && (
-                                                        <span className="text-[9px] bg-amber-500/10 border border-amber-500/20 text-amber-700 dark:text-amber-400 px-1.5 py-0.5 rounded font-black tracking-wider uppercase inline-flex items-center gap-1">
-                                                            <Package size={10} className="shrink-0" />
-                                                            <span>{pkg.packBadge}</span>
                                                         </span>
                                                     )}
                                                 </div>
@@ -103,8 +97,8 @@ export const POItemsTable: React.FC<POItemsTableProps> = ({
                                         <div className="text-xs font-bold text-[var(--theme-text-primary)]">
                                             {pkg.packBadge || pkg.manifestUnitName}
                                         </div>
-                                        <div className="text-[10px] text-[var(--theme-text-muted)] font-medium mt-0.5">
-                                            {pkg.packDetail}
+                                        <div className="text-[10px] text-[var(--theme-text-secondary)] font-medium mt-0.5">
+                                            Ordered: {item.quantity} {pkg.manifestUnitName.toLowerCase()}
                                         </div>
                                     </td>
                                     <td className="p-4 text-right font-mono">
@@ -122,7 +116,7 @@ export const POItemsTable: React.FC<POItemsTableProps> = ({
                                         ) : (
                                             <div>
                                                 <div className="text-[var(--theme-text-primary)] font-bold text-sm tabular-nums">
-                                                    {pkg.sellableQty.toLocaleString()} <span className="text-xs text-[var(--theme-text-muted)] font-normal">{pkg.sellUnitLabel}</span>
+                                                    {pkg.sellableQty.toLocaleString()} <span className="text-xs text-[var(--theme-text-secondary)] font-medium">{pkg.sellUnitLabel}</span>
                                                 </div>
                                                 {pkg.hasMultiplier && (
                                                     <div className="text-[10px] text-[var(--theme-text-secondary)] font-medium">
@@ -147,9 +141,12 @@ export const POItemsTable: React.FC<POItemsTableProps> = ({
                                             <div>
                                                 <div className="text-[var(--theme-text-primary)] font-semibold tabular-nums">
                                                     {formatCompactNumber(item.unitCost, { currency: currencySymbol })}
+                                                    <span className="text-[10px] text-[var(--theme-text-secondary)] font-medium ml-1">
+                                                        /{pkg.manifestUnitName.replace(/s$/, '').toLowerCase()}
+                                                    </span>
                                                 </div>
                                                 {pkg.hasMultiplier && (
-                                                    <div className="text-[10px] text-stone-400 font-mono">
+                                                    <div className="text-[10px] text-[var(--theme-text-secondary)] font-mono">
                                                         ~{formatCompactNumber(pkg.costPerSellableUnit, { currency: currencySymbol })}/{pkg.sellUnitLabel}
                                                     </div>
                                                 )}
@@ -181,9 +178,9 @@ export const POItemsTable: React.FC<POItemsTableProps> = ({
                                         </div>
                                     ) : (
                                         <div className="flex justify-end gap-1.5">
-                                            <button onClick={() => onFullEdit(i)} className="p-1.5 hover:bg-[var(--theme-bg-subtle)] rounded-xl text-[var(--theme-text-muted)] hover:text-[var(--theme-text-primary)] transition-colors cursor-pointer" title="Full Edit"><Edit3 size={14} /></button>
-                                            <button onClick={() => startInlineEdit(i)} className="p-1.5 hover:bg-[var(--theme-bg-subtle)] rounded-xl text-[var(--theme-text-muted)] hover:text-[var(--theme-accent)] transition-colors cursor-pointer" title="Quick Adjust"><FileText size={14} /></button>
-                                            <button onClick={() => onRemoveItem(i)} className="p-1.5 hover:bg-red-500/10 rounded-xl text-[var(--theme-text-muted)] hover:text-red-500 transition-colors cursor-pointer" title="Remove Item"><Trash2 size={14} /></button>
+                                            <button onClick={() => onFullEdit(i)} className="p-1.5 hover:bg-[var(--theme-bg-subtle)] rounded-xl text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] transition-colors cursor-pointer" title="Full Edit"><Edit3 size={14} /></button>
+                                            <button onClick={() => startInlineEdit(i)} className="p-1.5 hover:bg-[var(--theme-bg-subtle)] rounded-xl text-[var(--theme-text-secondary)] hover:text-[var(--theme-accent)] transition-colors cursor-pointer" title="Quick Adjust"><FileText size={14} /></button>
+                                            <button onClick={() => onRemoveItem(i)} className="p-1.5 hover:bg-red-500/10 rounded-xl text-[var(--theme-text-secondary)] hover:text-red-500 transition-colors cursor-pointer" title="Remove Item"><Trash2 size={14} /></button>
                                         </div>
                                     )}
                                 </td>
@@ -198,7 +195,7 @@ export const POItemsTable: React.FC<POItemsTableProps> = ({
                                             <Package size={26} />
                                         </div>
                                         <h3 className="text-sm font-black text-[var(--theme-text-primary)]">No Products Added Yet</h3>
-                                        <p className="text-xs text-[var(--theme-text-muted)] mt-1 max-w-sm mx-auto">Select a product from the catalog or generate custom line items above to build this purchase order.</p>
+                                        <p className="text-xs text-[var(--theme-text-secondary)] font-medium mt-1 max-w-sm mx-auto">Select a product from the catalog or generate custom line items above to build this purchase order.</p>
                                     </div>
                                 </td>
                             </tr>

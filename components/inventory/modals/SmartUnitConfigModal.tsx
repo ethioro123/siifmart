@@ -6,13 +6,13 @@ import { useStore } from '../../../contexts/CentralStore';
 import { useLanguage } from '../../../contexts/LanguageContext';
 import { CURRENCY_SYMBOL } from '../../../constants';
 import { formatPriceValue } from '../../../utils/formatting';
-import { getSellUnit, SELL_UNITS, SellUnit } from '../../../utils/units';
-import { productsService } from '../../../services/supabase.service';
+import { getSellUnit, SELL_UNITS } from '../../../utils/units';
+import { inventoryRequestsService } from '../../../services/supabase.service';
+import { systemLogsService } from '../../../services/system-logs.service';
 import { logger } from '../../../utils/logger';
-import {
-    Sparkles, Scale, Box, Check, Info, Layers, Building2,
-    DollarSign, CheckCircle2, ShieldAlert, ArrowRight, Eye, RefreshCw
-} from 'lucide-react';
+import { SmartUnitIntelligencePanel } from './smart-unit/SmartUnitIntelligencePanel';
+import { SmartUnitSelector } from './smart-unit/SmartUnitSelector';
+import { Check, Info, CheckCircle2, AlertTriangle, RefreshCw } from 'lucide-react';
 
 interface SmartUnitConfigModalProps {
     product: Product | null;
@@ -31,7 +31,7 @@ export const SmartUnitConfigModal: React.FC<SmartUnitConfigModalProps> = ({
     onSaveSuccess
 }) => {
     const { t } = useLanguage();
-    const { sites, activeSite, updateProduct, refreshData } = useData();
+    const { sites, activeSite, updateProduct, refreshData, effectiveCountry } = useData();
     const { user, showToast } = useStore();
 
     // Form States
@@ -41,7 +41,8 @@ export const SmartUnitConfigModal: React.FC<SmartUnitConfigModalProps> = ({
     const [selectedUnitCode, setSelectedUnitCode] = useState<string>('UNIT');
     const [isSaving, setIsSaving] = useState(false);
 
-    // Initializer
+    const isCEO = user?.role === 'super_admin' || (user?.role as string)?.toLowerCase() === 'ceo';
+
     useEffect(() => {
         if (product) {
             const sellUnit = getSellUnit(product.unit);
@@ -53,12 +54,10 @@ export const SmartUnitConfigModal: React.FC<SmartUnitConfigModalProps> = ({
         }
     }, [product, activeSite]);
 
-    // Available Units filtered by category
     const availableUnits = useMemo(() => {
         return SELL_UNITS.filter(u => u.category === category);
     }, [category]);
 
-    // Auto-detected conversion intelligence math
     const smartIntelligence = useMemo(() => {
         if (!product) return null;
         const sellUnit = getSellUnit(selectedUnitCode);
@@ -97,7 +96,6 @@ export const SmartUnitConfigModal: React.FC<SmartUnitConfigModalProps> = ({
 
     if (!product) return null;
 
-    // Supplier spec payload details (captured from PO or custom attributes)
     const customAttrs = product.customAttributes || (product as any).custom_attributes;
     const supplierSpec = {
         packSize: customAttrs?.physical?.netWeight || product.size || '1 unit',
@@ -127,15 +125,66 @@ export const SmartUnitConfigModal: React.FC<SmartUnitConfigModalProps> = ({
                 targetSiteIds.push(...selectedSiteIds);
             }
 
-            // Update product sell unit
-            await productsService.update(product.id, {
-                unit: selectedUnitCode
-            });
+            const countryCode = effectiveCountry || (activeSite as any)?.country || (user as any)?.country || 'ET';
 
-            showToast(
-                `Smart Unit updated to ${selectedUnitCode} for ${targetSiteIds.length || 1} location(s)`,
-                'success'
-            );
+            if (isCEO) {
+                // CEO: Direct Edit (propagates to posDB cache & audit logs)
+                await updateProduct({
+                    ...product,
+                    unit: selectedUnitCode
+                });
+
+                showToast(
+                    `Smart Unit updated to ${selectedUnitCode} for ${targetSiteIds.length || 1} location(s)`,
+                    'success'
+                );
+            } else {
+                // Non-CEO staff: Zero Autonomous Authority - submits request for CEO approval
+                await inventoryRequestsService.create({
+                    productId: product.id,
+                    productName: product.name,
+                    productSku: product.sku,
+                    siteId: product.siteId || (product as any).site_id || activeSite?.id || '',
+                    countryCode,
+                    changeType: 'edit',
+                    requestedBy: user?.name || 'Unknown',
+                    requestedAt: new Date().toISOString(),
+                    status: 'pending',
+                    proposedChanges: { ...product, unit: selectedUnitCode },
+                    adjustmentReason: `Smart unit change to ${selectedUnitCode}`,
+                });
+
+                // Tamper-proof audit trail
+                try {
+                    await systemLogsService.create({
+                        action: 'PRODUCT_UNIT_CHANGE_REQUESTED',
+                        details: {
+                            productId: product.id,
+                            sku: product.sku,
+                            name: product.name,
+                            previousUnit: product.unit,
+                            requestedUnit: selectedUnitCode,
+                            scope,
+                            targetSiteIds,
+                        },
+                        module: 'Inventory',
+                        user_name: user?.name || 'Unknown',
+                        employee_id: user?.id,
+                        site_id: product.siteId || (product as any).site_id || activeSite?.id,
+                        country_code: countryCode,
+                        entity_type: 'inventory_request',
+                        entity_id: product.id,
+                    });
+                } catch (logErr) {
+                    logger.warn('SmartUnitConfigModal', 'Failed to log unit request', { error: String(logErr) });
+                }
+
+                showToast(
+                    `Unit change to ${selectedUnitCode} submitted for CEO approval`,
+                    'info'
+                );
+            }
+
             if (onSaveSuccess) onSaveSuccess();
             await refreshData();
             onClose();
@@ -155,107 +204,31 @@ export const SmartUnitConfigModal: React.FC<SmartUnitConfigModalProps> = ({
             size="xl"
         >
             <div className="space-y-6 text-[var(--theme-text-primary)]">
-
-                {/* Main 2-Column Split: Left = Auto & Supplier Spec | Right = How You Sell It */}
+                {/* Main 2-Column Split */}
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    {/* Left Column: Smart Intelligence & Supplier Spec */}
-                    <div className="space-y-4">
-                        {/* Smart Intelligence Auto-Detected Box */}
-                        <div className="bg-[var(--theme-bg-subtle)] p-5 rounded-2xl border border-[var(--theme-border)] space-y-3 relative overflow-hidden">
-                            <div className="flex items-center justify-between">
-                                <div className="flex items-center gap-2">
-                                    <Sparkles size={18} className="text-amber-600 dark:text-amber-400 animate-pulse" />
-                                    <h4 className="text-xs font-bold uppercase tracking-wider text-[var(--theme-text-primary)]">Smart Intelligence</h4>
-                                </div>
-                                <span className="px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-500/30">
-                                    Auto-Detected
-                                </span>
-                            </div>
-
-                            <div className="bg-[var(--theme-bg-card)] p-3.5 rounded-xl border border-[var(--theme-border)] space-y-1">
-                                <p className="text-base font-bold font-mono text-[var(--theme-text-primary)]">
-                                    {smartIntelligence?.autoConversionText}
-                                </p>
-                                {smartIntelligence?.subUnitRateText && (
-                                    <p className="text-xs text-amber-700 dark:text-amber-400 font-bold font-mono">
-                                        = {smartIntelligence.subUnitRateText}
-                                    </p>
-                                )}
-                            </div>
-
-                            <p className="text-[11px] text-[var(--theme-text-secondary)] font-medium flex items-center gap-1.5">
-                                <Check size={14} className="text-[var(--theme-accent)]" />
-                                Sell mode auto-matched from product unit: <span className="font-bold uppercase text-[var(--theme-text-primary)]">{smartIntelligence?.sellUnit.shortLabel}</span>
-                            </p>
-                        </div>
-
-                        {/* Supplier Specification (Read-Only) */}
-                        <div className="bg-[var(--theme-bg-subtle)] p-4 rounded-2xl border border-[var(--theme-border)] space-y-3">
-                            <div className="flex items-center justify-between">
-                                <div className="flex items-center gap-2">
-                                    <Box size={16} className="text-[var(--theme-text-secondary)]" />
-                                    <h4 className="text-xs font-bold uppercase tracking-wider">Supplier Specification</h4>
-                                </div>
-                                <span className="px-2 py-0.5 rounded-full text-[9px] font-medium uppercase bg-[var(--theme-bg-subtle)] text-[var(--theme-text-muted)] border border-[var(--theme-border)]">
-                                    Read-Only
-                                </span>
-                            </div>
-
-                            <p className="text-[11px] text-[var(--theme-text-muted)] leading-snug font-medium">
-                                Physical content is supplier-defined. Configure how you sell it on the right.
-                            </p>
-
-                            <div className="grid grid-cols-2 gap-2 text-xs font-mono pt-1">
-                                <div className="p-2.5 bg-[var(--theme-bg-card)] rounded-xl border border-[var(--theme-border)]">
-                                    <span className="text-[9px] text-[var(--theme-text-muted)] block font-sans font-medium uppercase">Pack / Case Size</span>
-                                    <span className="font-bold text-[var(--theme-text-primary)]">{supplierSpec.packSize}</span>
-                                </div>
-                                <div className="p-2.5 bg-[var(--theme-bg-card)] rounded-xl border border-[var(--theme-border)]">
-                                    <span className="text-[9px] text-[var(--theme-text-muted)] block font-sans font-medium uppercase">Base Unit Type</span>
-                                    <span className="font-bold text-[var(--theme-text-primary)]">{supplierSpec.sizeType}</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Live POS Label Preview */}
-                        <div className="bg-[var(--theme-bg-card)] p-4 rounded-2xl border border-[var(--theme-border)] space-y-2 shadow-sm">
-                            <div className="flex items-center gap-2">
-                                <Eye size={16} className="text-[var(--theme-text-secondary)]" />
-                                <h4 className="text-xs font-bold uppercase tracking-wider">POS Label & Card Preview</h4>
-                            </div>
-                            <div className="p-3 rounded-xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] flex items-center justify-between">
-                                <div>
-                                    <p className="text-xs font-bold text-[var(--theme-text-primary)]">{product.name}</p>
-                                    <p className="text-[10px] text-[var(--theme-text-secondary)] font-medium">
-                                        Sold per <span className="uppercase text-[var(--theme-accent)] font-bold">{smartIntelligence?.sellUnit.shortLabel}</span>
-                                    </p>
-                                </div>
-                                <div className="text-right">
-                                    <p className="text-sm font-bold font-mono text-[var(--theme-text-primary)]">
-                                        {smartIntelligence?.priceFormatted}{smartIntelligence?.sellUnit.code !== 'UNIT' ? `/${smartIntelligence?.sellUnit.shortLabel}` : ''}
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                    {/* Left Column: Intelligence Panel */}
+                    <SmartUnitIntelligencePanel
+                        product={product}
+                        smartIntelligence={smartIntelligence}
+                        supplierSpec={supplierSpec}
+                    />
 
                     {/* Right Column: How You Sell It Form */}
                     <div className="bg-[var(--theme-bg-card)] p-5 rounded-2xl border border-[var(--theme-border)] space-y-5 shadow-sm">
                         <div className="flex items-center justify-between border-b border-[var(--theme-border)] pb-3">
                             <h4 className="text-xs font-bold uppercase tracking-wider text-[var(--theme-text-primary)]">How You Sell It</h4>
                             <span className="px-2 py-0.5 rounded-full text-[9px] font-bold uppercase bg-[var(--theme-pill-bg)] text-[var(--theme-text-primary)] border border-[var(--theme-pill-border)]">
-                                Editable
+                                {isCEO ? 'Direct Edit' : 'Requires Approval'}
                             </span>
                         </div>
 
-                        {/* Step 0: Where to apply — Location Scope */}
+                        {/* Step 0: Location Scope */}
                         <div className="space-y-2">
                             <label className="text-[11px] font-bold uppercase tracking-wider text-[var(--theme-text-muted)] flex items-center gap-1.5">
                                 <span className="w-4 h-4 rounded-full bg-[var(--theme-primary)] text-[var(--theme-primary-text)] text-[10px] flex items-center justify-center font-bold">0</span>
                                 Apply to which location(s)?
                             </label>
                             <div className="grid grid-cols-1 gap-2">
-                                {/* Row of 3 scope pills */}
                                 <div className="grid grid-cols-3 gap-2">
                                     <button
                                         type="button"
@@ -278,7 +251,7 @@ export const SmartUnitConfigModal: React.FC<SmartUnitConfigModalProps> = ({
                                         onClick={() => setScope('SELECTED_SITES')}
                                         className={`p-2.5 rounded-xl border text-left transition-all cursor-pointer flex items-center justify-between ${
                                             scope === 'SELECTED_SITES'
-                                                ? 'bg-amber-500/10 border-amber-500 dark:border-amber-400 text-amber-700 dark:text-amber-300'
+                                                ? 'bg-amber-500/10 border-amber-500 text-amber-700 dark:text-amber-300'
                                                 : 'bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] hover:bg-[var(--theme-bg-card-hover)]'
                                         }`}
                                     >
@@ -294,7 +267,7 @@ export const SmartUnitConfigModal: React.FC<SmartUnitConfigModalProps> = ({
                                         onClick={() => setScope('ALL_SITES')}
                                         className={`p-2.5 rounded-xl border text-left transition-all cursor-pointer flex items-center justify-between ${
                                             scope === 'ALL_SITES'
-                                                ? 'bg-blue-500/10 border-blue-500 dark:border-blue-400 text-blue-700 dark:text-blue-300'
+                                                ? 'bg-blue-500/10 border-blue-500 text-blue-700 dark:text-blue-300'
                                                 : 'bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] hover:bg-[var(--theme-bg-card-hover)]'
                                         }`}
                                     >
@@ -306,7 +279,6 @@ export const SmartUnitConfigModal: React.FC<SmartUnitConfigModalProps> = ({
                                     </button>
                                 </div>
 
-                                {/* Site checklist expands when Several Places is selected */}
                                 {scope === 'SELECTED_SITES' && (
                                     <div className="bg-[var(--theme-bg-subtle)] rounded-xl border border-[var(--theme-border)] p-3 grid grid-cols-2 gap-1.5 max-h-[130px] overflow-y-auto">
                                         {sites.map(site => (
@@ -331,104 +303,14 @@ export const SmartUnitConfigModal: React.FC<SmartUnitConfigModalProps> = ({
                             </div>
                         </div>
 
-                        {/* Step 1: Charged at POS by */}
-                        <div className="space-y-2">
-                            <label className="text-[11px] font-bold uppercase tracking-wider text-[var(--theme-text-muted)] flex items-center gap-1.5">
-                                <span className="w-4 h-4 rounded-full bg-[var(--theme-primary)] text-[var(--theme-primary-text)] text-[10px] flex items-center justify-center font-bold">1</span>
-                                Charged at POS by…
-                            </label>
-
-                            <div className="grid grid-cols-3 gap-2">
-                                <button
-                                    type="button"
-                                    onClick={() => handleCategoryChange('count')}
-                                    className={`p-3 rounded-xl border text-left transition-all cursor-pointer flex flex-col justify-between ${
-                                        category === 'count'
-                                            ? 'bg-[var(--theme-primary)] text-[var(--theme-primary-text)] border-[var(--theme-primary)] shadow-sm'
-                                            : 'bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] hover:bg-[var(--theme-bg-card-hover)]'
-                                    }`}
-                                >
-                                    <div className="flex items-center justify-between w-full mb-1">
-                                        <Box size={16} />
-                                        {category === 'count' && <Check size={14} />}
-                                    </div>
-                                    <div>
-                                        <p className="text-xs font-bold">By Count</p>
-                                        <p className="text-[9px] opacity-80 leading-tight mt-0.5">Units, packs, bottles</p>
-                                    </div>
-                                </button>
-
-                                <button
-                                    type="button"
-                                    onClick={() => handleCategoryChange('weight')}
-                                    className={`p-3 rounded-xl border text-left transition-all cursor-pointer flex flex-col justify-between ${
-                                        category === 'weight'
-                                            ? 'bg-amber-600 text-white border-amber-600 shadow-sm'
-                                            : 'bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] hover:bg-[var(--theme-bg-card-hover)]'
-                                    }`}
-                                >
-                                    <div className="flex items-center justify-between w-full mb-1">
-                                        <Scale size={16} />
-                                        {category === 'weight' && <Check size={14} />}
-                                    </div>
-                                    <div>
-                                        <p className="text-xs font-bold">By Weight</p>
-                                        <p className="text-[9px] opacity-80 leading-tight mt-0.5">Kg, grams — weighed</p>
-                                    </div>
-                                </button>
-
-                                <button
-                                    type="button"
-                                    onClick={() => handleCategoryChange('volume')}
-                                    className={`p-3 rounded-xl border text-left transition-all cursor-pointer flex flex-col justify-between ${
-                                        category === 'volume'
-                                            ? 'bg-blue-600 text-white border-blue-600 shadow-sm'
-                                            : 'bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] hover:bg-[var(--theme-bg-card-hover)]'
-                                    }`}
-                                >
-                                    <div className="flex items-center justify-between w-full mb-1">
-                                        <Sparkles size={16} />
-                                        {category === 'volume' && <Check size={14} />}
-                                    </div>
-                                    <div>
-                                        <p className="text-xs font-bold">By Volume</p>
-                                        <p className="text-[9px] opacity-80 leading-tight mt-0.5">Litres, ml — measured</p>
-                                    </div>
-                                </button>
-                            </div>
-                        </div>
-
-                        {/* Step 2: Selling Unit — what is "1" at checkout? */}
-                        <div className="space-y-2">
-                            <label className="text-[11px] font-bold uppercase tracking-wider text-[var(--theme-text-muted)] flex items-center gap-1.5">
-                                <span className="w-4 h-4 rounded-full bg-[var(--theme-primary)] text-[var(--theme-primary-text)] text-[10px] flex items-center justify-center font-bold">2</span>
-                                Selling unit — what is "1" at checkout?
-                            </label>
-
-                            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                                {availableUnits.map(unit => {
-                                    const isSelected = selectedUnitCode === unit.code;
-                                    return (
-                                        <button
-                                            key={unit.code}
-                                            type="button"
-                                            onClick={() => setSelectedUnitCode(unit.code)}
-                                            className={`p-2.5 rounded-xl border text-left transition-all cursor-pointer flex items-center justify-between ${
-                                                isSelected
-                                                    ? 'bg-[var(--theme-pill-bg)] border-[var(--theme-primary)] text-[var(--theme-text-primary)] font-bold shadow-sm'
-                                                    : 'bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] hover:bg-[var(--theme-bg-card-hover)]'
-                                            }`}
-                                        >
-                                            <div>
-                                                <p className="text-xs font-bold">{unit.label}</p>
-                                                <p className="text-[10px] font-mono opacity-75">{unit.shortLabel}</p>
-                                            </div>
-                                            {isSelected && <Check size={14} className="text-[var(--theme-text-primary)]" />}
-                                        </button>
-                                    );
-                                })}
-                            </div>
-                        </div>
+                        {/* Step 1 & 2: Unit Category and Selling Unit Selection */}
+                        <SmartUnitSelector
+                            category={category}
+                            onCategoryChange={handleCategoryChange}
+                            availableUnits={availableUnits}
+                            selectedUnitCode={selectedUnitCode}
+                            onSelectUnit={(code) => setSelectedUnitCode(code)}
+                        />
 
                         {/* Smart Conversion Summary Box */}
                         <div className="p-3.5 rounded-xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] space-y-1.5 text-xs">
@@ -445,6 +327,13 @@ export const SmartUnitConfigModal: React.FC<SmartUnitConfigModalProps> = ({
                                 </p>
                             )}
                         </div>
+
+                        {!isCEO && (
+                            <div className="flex items-start gap-2.5 p-3.5 bg-amber-500/10 border border-amber-500/20 rounded-xl text-amber-800 dark:text-amber-300">
+                                <AlertTriangle size={15} className="text-amber-500 flex-shrink-0 mt-0.5" />
+                                <p className="text-xs font-bold">Selling unit changes require CEO approval. Your save will submit an inventory change request.</p>
+                            </div>
+                        )}
                     </div>
                 </div>
 
@@ -471,7 +360,7 @@ export const SmartUnitConfigModal: React.FC<SmartUnitConfigModalProps> = ({
                         ) : (
                             <>
                                 <Check size={14} />
-                                <span>Apply Smart Spec</span>
+                                <span>{isCEO ? 'Apply Smart Spec' : 'Submit for Approval'}</span>
                             </>
                         )}
                     </button>

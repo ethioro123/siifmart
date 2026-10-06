@@ -302,14 +302,14 @@ export const POItemForm: React.FC<POItemFormProps> = ({
                 <button
                     type="button"
                     onClick={() => setProductType('catalog')}
-                    className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${productType === 'catalog' ? 'bg-[var(--theme-primary)] text-[var(--theme-primary-text)] shadow-sm' : 'text-[var(--theme-text-muted)] hover:text-[var(--theme-text-primary)] bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)]'}`}
+                    className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${productType === 'catalog' ? 'bg-[var(--theme-primary)] text-[var(--theme-primary-text)] shadow-sm' : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)]'}`}
                 >
                     CATALOG SEARCH
                 </button>
                 <button
                     type="button"
                     onClick={() => setProductType('new')}
-                    className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${productType === 'new' ? 'bg-[var(--theme-primary)] text-[var(--theme-primary-text)] shadow-sm' : 'text-[var(--theme-text-muted)] hover:text-[var(--theme-text-primary)] bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)]'}`}
+                    className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${productType === 'new' ? 'bg-[var(--theme-primary)] text-[var(--theme-primary-text)] shadow-sm' : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)]'}`}
                 >
                     CUSTOM ITEM
                 </button>
@@ -330,6 +330,8 @@ export const POItemForm: React.FC<POItemFormProps> = ({
                         image={customItemImage}
                         currencySymbol={currencySymbol}
                         customAttributes={customAttributes}
+                        orderUnitName={orderUnitName}
+                        unitsPerOrderUnit={unitsPerOrderUnit}
                     />
                 </div>
             )}

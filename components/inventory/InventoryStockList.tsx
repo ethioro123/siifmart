@@ -219,6 +219,7 @@ export const InventoryStockList: React.FC<InventoryStockListProps> = ({
                 isOpen={!!selectedViewProduct}
                 onClose={() => setSelectedViewProduct(null)}
                 currencySymbol={currencySymbol}
+                onEdit={handleOpenEditProduct}
             />
         </div>
     );

@@ -2,8 +2,9 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import {
     productsService,
     inventoryRequestsService,
-    // Note: createPutawayJob might need to be imported if it's a utility or from another hook
 } from '../services/supabase.service';
+import { systemLogsService } from '../services/system-logs.service';
+import { posDB } from '../services/db/pos.db';
 import { useData } from '../contexts/DataContext';
 import { useStore } from '../contexts/CentralStore';
 import { PendingInventoryChange, Product } from '../types';
@@ -57,6 +58,43 @@ export function useApproveInventoryRequestMutation(createPutawayJob?: Function) 
                     approvedAt: new Date().toISOString()
                 } as Product);
                 success = !!updateResult;
+
+                if (success && change.siteId) {
+                    // Synaptic Neural Mesh: Sync POS IndexedDB Cache
+                    try {
+                        const existing = await posDB.getCachedProducts(change.siteId);
+                        if (existing && Array.isArray(existing)) {
+                            const updatedList = existing.map(p => p.id === change.productId ? { ...p, ...change.proposedChanges, approvalStatus: 'approved' } : p);
+                            await posDB.cacheProducts(change.siteId, updatedList);
+                        }
+                    } catch (posErr) {
+                        logger.warn('useInventoryRequestMutations', 'POS IndexedDB sync skipped', { error: String(posErr) });
+                    }
+                }
+
+                // Zero-Trust Rule 5 Audit Logging
+                try {
+                    await systemLogsService.create({
+                        action: 'PRODUCT_EDIT_APPROVED',
+                        details: {
+                            requestId: change.id,
+                            productId: change.productId,
+                            productName: change.productName,
+                            productSku: change.productSku,
+                            siteId: change.siteId,
+                            proposedChanges: change.proposedChanges,
+                        },
+                        module: 'Inventory',
+                        user_name: user?.name || 'System',
+                        employee_id: user?.id,
+                        site_id: change.siteId,
+                        country_code: change.countryCode || 'ET',
+                        entity_type: 'product',
+                        entity_id: change.productId,
+                    });
+                } catch (logErr) {
+                    logger.warn('useInventoryRequestMutations', 'Failed to write approval audit log', { error: String(logErr) });
+                }
             }
             else if (change.changeType === 'delete') {
                 await productsService.cascadeDelete(change.productId);

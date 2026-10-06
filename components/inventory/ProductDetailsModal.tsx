@@ -12,16 +12,19 @@ import { getSellUnit, formatProductSize, getEffectivePackageSize, formatStockDis
 import { getRoleHierarchy, canViewCostPrice } from '../../utils/roles';
 import { useStore } from '../../contexts/CentralStore';
 import { productsService, inventoryRequestsService } from '../../services/supabase.service';
+import { systemLogsService } from '../../services/system-logs.service';
 import { ProductAttributesPanel } from './components/ProductAttributesPanel';
 import { ProductLocationBreakdown } from './components/ProductLocationBreakdown';
 import { ProductProfileHeader } from './components/ProductProfileHeader';
 import { parseBatchNumber } from '../../utils/batchNumber';
+import { SmartUnitConfigModal } from './modals/SmartUnitConfigModal';
 
 interface ProductDetailsModalProps {
     product: Product | null;
     isOpen: boolean;
     onClose: () => void;
     currencySymbol?: string;
+    onEdit?: (product: Product) => void;
 }
 
 const DetailField = ({ label, value, icon: Icon, colorClass, highlight }: { label: string; value: React.ReactNode; icon?: any; colorClass?: string; highlight?: boolean }) => {
@@ -42,8 +45,8 @@ const DetailField = ({ label, value, icon: Icon, colorClass, highlight }: { labe
     );
 };
 
-export const ProductDetailsModal: React.FC<ProductDetailsModalProps> = ({ product, isOpen, onClose, currencySymbol }) => {
-    const { movements, employees, refreshData, deleteProduct, allProducts, sites, activeSite, effectiveCountry, settings } = useData();
+export const ProductDetailsModal: React.FC<ProductDetailsModalProps> = ({ product, isOpen, onClose, currencySymbol, onEdit }) => {
+    const { movements, employees, refreshData, deleteProduct, updateProduct, allProducts, sites, activeSite, effectiveCountry, settings } = useData();
     const { user, showToast } = useStore();
     const showCostPrice = canViewCostPrice(user?.role);
     const activeCurrency = currencySymbol || (activeSite as any)?.currency || (effectiveCountry === 'KE' || settings?.country === 'KE' ? 'KSh' : CURRENCY_SYMBOL);
@@ -189,12 +192,27 @@ export const ProductDetailsModal: React.FC<ProductDetailsModalProps> = ({ produc
                 <button
                     onClick={handleDelete}
                     disabled={isDeleteDisabled}
-                    className={`px-4 py-2 text-xs font-black uppercase rounded-xl border ${isDeleteDisabled ? 'bg-stone-100 text-stone-400 cursor-not-allowed' : 'bg-red-500/10 text-red-600 hover:bg-red-500/20'}`}
+                    className={`px-4 py-2 text-xs font-black uppercase rounded-xl border ${isDeleteDisabled ? 'bg-[var(--theme-bg-subtle)] text-[var(--theme-text-muted)] cursor-not-allowed opacity-50' : 'bg-red-500/10 text-red-600 border-red-500/20 hover:bg-red-500/20'}`}
                 >
                     Delete Product
                 </button>
             )}
-            <button onClick={onClose} className="px-4 py-2 bg-stone-100 dark:bg-white/10 text-stone-700 dark:text-stone-300 font-bold text-xs rounded-xl">Close</button>
+            <div className="flex items-center gap-2">
+                <button onClick={onClose} className="px-4 py-2 bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card-hover)] text-[var(--theme-text-primary)] border border-[var(--theme-border)] font-bold text-xs rounded-xl transition-all cursor-pointer">Close</button>
+                {onEdit && (
+                    <button
+                        type="button"
+                        onClick={() => {
+                            onClose();
+                            onEdit(product);
+                        }}
+                        className="px-4 py-2 bg-[var(--theme-primary)] hover:opacity-90 text-[var(--theme-primary-text)] font-black uppercase text-xs rounded-xl flex items-center gap-1.5 transition-all active:scale-[0.98] cursor-pointer"
+                    >
+                        <Edit2 size={13} />
+                        <span>Edit Product</span>
+                    </button>
+                )}
+            </div>
         </div>
     );
 
@@ -312,22 +330,53 @@ export const ProductDetailsModal: React.FC<ProductDetailsModalProps> = ({ produc
                                         setIsSaving(true);
                                         try {
                                             if (canDirectEdit) {
-                                                // CEO: apply immediately
-                                                await productsService.update(product.id, { minStock: minVal === '' ? undefined : minVal, maxStock: maxVal === '' ? undefined : maxVal });
+                                                // CEO: apply immediately via updateProduct (syncs posDB & audit logs)
+                                                await updateProduct({
+                                                    id: product.id,
+                                                    minStock: minVal === '' ? undefined : minVal,
+                                                    maxStock: maxVal === '' ? undefined : maxVal
+                                                });
                                                 showToast('Stock thresholds updated', 'success');
                                             } else {
                                                 // Non-CEO managers: submit for CEO approval
+                                                const country = effectiveCountry || (activeSite as any)?.country || 'ET';
                                                 await inventoryRequestsService.create({
                                                     productId: product.id,
                                                     productName: product.name,
                                                     productSku: product.sku,
-                                                    siteId: product.siteId || '',
+                                                    siteId: product.siteId || (product as any).site_id || '',
+                                                    countryCode: country,
                                                     changeType: 'edit',
                                                     requestedBy: user?.name || 'Unknown',
                                                     requestedAt: new Date().toISOString(),
                                                     status: 'pending',
                                                     proposedChanges: { ...product, minStock: minVal === '' ? product.minStock : minVal, maxStock: maxVal === '' ? product.maxStock : maxVal },
+                                                    adjustmentReason: `Stock thresholds: Min ${minVal}, Max ${maxVal}`,
                                                 });
+
+                                                try {
+                                                    await systemLogsService.create({
+                                                        action: 'PRODUCT_THRESHOLD_CHANGE_REQUESTED',
+                                                        details: {
+                                                            productId: product.id,
+                                                            sku: product.sku,
+                                                            name: product.name,
+                                                            minStock: minVal,
+                                                            maxStock: maxVal,
+                                                            siteId: product.siteId || (product as any).site_id,
+                                                        },
+                                                        module: 'Inventory',
+                                                        user_name: user?.name || 'Unknown',
+                                                        employee_id: user?.id,
+                                                        site_id: product.siteId || (product as any).site_id,
+                                                        country_code: country,
+                                                        entity_type: 'inventory_request',
+                                                        entity_id: product.id,
+                                                    });
+                                                } catch (logErr) {
+                                                    // Silent fallback for audit trail
+                                                }
+
                                                 showToast('Threshold change submitted for CEO approval', 'info');
                                             }
                                             setIsEditingThresholds(false);
@@ -337,7 +386,7 @@ export const ProductDetailsModal: React.FC<ProductDetailsModalProps> = ({ produc
                                         } finally {
                                             setIsSaving(false);
                                         }
-                                    }} disabled={isSaving} className="px-2 py-1 text-[9px] font-bold uppercase bg-[var(--theme-primary)] text-[var(--theme-primary-text)] rounded-lg disabled:opacity-50 hover:opacity-90 active:scale-[0.98]">
+                                    }} disabled={isSaving} className="px-2 py-1 text-[9px] font-bold uppercase bg-[var(--theme-primary)] text-[var(--theme-primary-text)] rounded-lg disabled:opacity-50 hover:opacity-90 active:scale-[0.98] transition-all cursor-pointer">
                                         {isSaving ? 'Saving…' : canDirectEdit ? 'Save' : 'Submit for Approval'}
                                     </button>
                                 </div>
@@ -366,12 +415,19 @@ export const ProductDetailsModal: React.FC<ProductDetailsModalProps> = ({ produc
                     </div>
                 </div>
 
-                <div className="p-4 bg-stone-50/50 dark:bg-black/10 rounded-xl border border-stone-200 dark:border-white/5 text-[11px] leading-relaxed font-mono">
-                    <span className="text-gray-400 font-bold uppercase block mb-1">Catalog Description Spec:</span>
-                    <span className="text-gray-800 dark:text-stone-200 font-bold">{systemDesc || '—'}</span>
-                    {customAttrs?.descriptive?.keyFeatures && <p className="mt-2 text-stone-600 dark:text-stone-400 italic">Features: {customAttrs.descriptive.keyFeatures}</p>}
+                <div className="p-4 bg-[var(--theme-bg-subtle)] rounded-xl border border-[var(--theme-border)] text-[11px] leading-relaxed font-mono">
+                    <span className="text-[var(--theme-text-muted)] font-bold uppercase block mb-1">Catalog Description Spec:</span>
+                    <span className="text-[var(--theme-text-primary)] font-bold">{systemDesc || '—'}</span>
+                    {customAttrs?.descriptive?.keyFeatures && <p className="mt-2 text-[var(--theme-text-secondary)] italic">Features: {customAttrs.descriptive.keyFeatures}</p>}
                 </div>
             </div>
+            {product && (
+                <SmartUnitConfigModal
+                    product={product}
+                    isOpen={isSmartUnitModalOpen}
+                    onClose={() => setIsSmartUnitModalOpen(false)}
+                />
+            )}
         </Modal>
     );
 };

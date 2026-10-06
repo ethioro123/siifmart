@@ -95,11 +95,11 @@ export const CustomsImportTab: React.FC<CustomsImportTabProps> = ({ countryCode 
       </div>
 
       {loading ? (
-        <div className="p-16 text-center text-xs font-medium text-[var(--theme-text-muted)] rounded-3xl bg-[var(--theme-bg-panel)] border border-[var(--theme-border)]">
+        <div className="p-16 text-center text-xs font-medium text-[var(--theme-text-secondary)] rounded-3xl bg-[var(--theme-bg-panel)] border border-[var(--theme-border)]">
           Loading customs entries...
         </div>
       ) : declarations.length === 0 ? (
-        <div className="p-12 text-center text-[var(--theme-text-muted)] text-sm rounded-3xl bg-[var(--theme-bg-panel)] border border-[var(--theme-border)] shadow-sm">
+        <div className="p-12 text-center text-[var(--theme-text-secondary)] text-sm font-medium rounded-3xl bg-[var(--theme-bg-panel)] border border-[var(--theme-border)] shadow-sm">
           No import clearance declarations on file for {countryCode}. Register freight shipments to track customs releases.
         </div>
       ) : (
@@ -123,31 +123,31 @@ export const CustomsImportTab: React.FC<CustomsImportTabProps> = ({ countryCode 
                   </p>
                 </div>
                 <div className="text-right shrink-0">
-                  <p className="text-[10px] font-semibold text-[var(--theme-text-muted)] uppercase tracking-wider">Assessed Duty</p>
+                  <p className="text-[10px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider">Assessed Duty</p>
                   <p className="text-sm font-bold font-mono tabular-nums text-[var(--theme-text-primary)]">{d.currency} {d.dutyAmount.toLocaleString()}</p>
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-2.5 text-xs bg-[var(--theme-bg-subtle)]/60 border border-[var(--theme-border)] p-3.5 rounded-2xl font-mono">
                 <div>
-                  <span className="text-[10px] text-[var(--theme-text-muted)] font-semibold uppercase block">Bill of Lading:</span>
+                  <span className="text-[10px] text-[var(--theme-text-secondary)] font-semibold uppercase block">Bill of Lading:</span>
                   <span className="font-semibold text-[var(--theme-text-primary)] truncate block">{d.billOfLading || 'N/A'}</span>
                 </div>
                 <div>
-                  <span className="text-[10px] text-[var(--theme-text-muted)] font-semibold uppercase block">Letter of Credit (LC):</span>
+                  <span className="text-[10px] text-[var(--theme-text-secondary)] font-semibold uppercase block">Letter of Credit (LC):</span>
                   <span className="font-semibold text-[var(--theme-text-primary)] truncate block">{d.letterOfCreditRef || 'Direct Transfer'}</span>
                 </div>
                 <div>
-                  <span className="text-[10px] text-[var(--theme-text-muted)] font-semibold uppercase block">Clearing Agent:</span>
+                  <span className="text-[10px] text-[var(--theme-text-secondary)] font-semibold uppercase block">Clearing Agent:</span>
                   <span className="font-semibold text-[var(--theme-text-primary)] truncate block">{d.clearingAgent || 'In-House'}</span>
                 </div>
                 <div>
-                  <span className="text-[10px] text-[var(--theme-text-muted)] font-semibold uppercase block">Carrier / Line:</span>
+                  <span className="text-[10px] text-[var(--theme-text-secondary)] font-semibold uppercase block">Carrier / Line:</span>
                   <span className="font-semibold text-[var(--theme-text-primary)] truncate block">{d.carrierName || 'Maersk'}</span>
                 </div>
               </div>
 
-              <p className="text-[10px] text-[var(--theme-text-muted)] font-mono">
+              <p className="text-[10px] text-[var(--theme-text-secondary)] font-mono font-medium">
                 Filed by {d.specialistName || 'Customs Specialist'} on {formatDateTime(d.createdAt)}
               </p>
             </div>
@@ -167,7 +167,7 @@ export const CustomsImportTab: React.FC<CustomsImportTabProps> = ({ countryCode 
                   placeholder="e.g. CD-2026-DJ0941"
                   value={declNum}
                   onChange={e => setDeclNum(e.target.value)}
-                  className="w-full h-11 px-3.5 rounded-2xl border border-[var(--theme-border)] bg-[var(--theme-bg-subtle)] text-xs text-[var(--theme-text-primary)] font-semibold focus:outline-none focus:border-[var(--theme-accent)]"
+                  className="w-full h-11 px-3.5 rounded-2xl border border-[var(--theme-border)] bg-[var(--theme-bg-subtle)] text-xs text-[var(--theme-text-primary)] font-semibold placeholder:text-[var(--theme-text-secondary)]/70 focus:outline-none focus:border-[var(--theme-accent)]"
                 />
               </div>
               <div className="grid grid-cols-2 gap-2.5">
@@ -178,11 +178,11 @@ export const CustomsImportTab: React.FC<CustomsImportTabProps> = ({ countryCode 
                     onChange={e => setPort(e.target.value)}
                     className="w-full h-11 px-3 rounded-2xl border border-[var(--theme-border)] bg-[var(--theme-bg-subtle)] text-xs text-[var(--theme-text-primary)] font-semibold focus:outline-none focus:border-[var(--theme-accent)] cursor-pointer"
                   >
-                    <option value="Port of Djibouti">Port of Djibouti</option>
-                    <option value="Port of Mombasa">Port of Mombasa</option>
-                    <option value="Bole Cargo Terminal">Bole Cargo Terminal (Air)</option>
-                    <option value="JKIA Cargo Hub">JKIA Cargo Hub (Air)</option>
-                    <option value="Moyale Border Crossing">Moyale Border Crossing (Road)</option>
+                    <option className="bg-[var(--theme-bg-panel)] text-[var(--theme-text-primary)]" value="Port of Djibouti">Port of Djibouti</option>
+                    <option className="bg-[var(--theme-bg-panel)] text-[var(--theme-text-primary)]" value="Port of Mombasa">Port of Mombasa</option>
+                    <option className="bg-[var(--theme-bg-panel)] text-[var(--theme-text-primary)]" value="Bole Cargo Terminal">Bole Cargo Terminal (Air)</option>
+                    <option className="bg-[var(--theme-bg-panel)] text-[var(--theme-text-primary)]" value="JKIA Cargo Hub">JKIA Cargo Hub (Air)</option>
+                    <option className="bg-[var(--theme-bg-panel)] text-[var(--theme-text-primary)]" value="Moyale Border Crossing">Moyale Border Crossing (Road)</option>
                   </select>
                 </div>
                 <div>
@@ -203,7 +203,7 @@ export const CustomsImportTab: React.FC<CustomsImportTabProps> = ({ countryCode 
                     placeholder="BL-99482"
                     value={bl}
                     onChange={e => setBl(e.target.value)}
-                    className="w-full h-11 px-3.5 rounded-2xl border border-[var(--theme-border)] bg-[var(--theme-bg-subtle)] text-xs text-[var(--theme-text-primary)] font-mono font-semibold focus:outline-none focus:border-[var(--theme-accent)]"
+                    className="w-full h-11 px-3.5 rounded-2xl border border-[var(--theme-border)] bg-[var(--theme-bg-subtle)] text-xs text-[var(--theme-text-primary)] font-mono font-semibold placeholder:text-[var(--theme-text-secondary)]/70 focus:outline-none focus:border-[var(--theme-accent)]"
                   />
                 </div>
                 <div>
@@ -213,7 +213,7 @@ export const CustomsImportTab: React.FC<CustomsImportTabProps> = ({ countryCode 
                     placeholder="LC-CBE-2026"
                     value={lc}
                     onChange={e => setLc(e.target.value)}
-                    className="w-full h-11 px-3.5 rounded-2xl border border-[var(--theme-border)] bg-[var(--theme-bg-subtle)] text-xs text-[var(--theme-text-primary)] font-mono font-semibold focus:outline-none focus:border-[var(--theme-accent)]"
+                    className="w-full h-11 px-3.5 rounded-2xl border border-[var(--theme-border)] bg-[var(--theme-bg-subtle)] text-xs text-[var(--theme-text-primary)] font-mono font-semibold placeholder:text-[var(--theme-text-secondary)]/70 focus:outline-none focus:border-[var(--theme-accent)]"
                   />
                 </div>
               </div>
@@ -224,7 +224,7 @@ export const CustomsImportTab: React.FC<CustomsImportTabProps> = ({ countryCode 
                   placeholder="e.g. Bollore Logistics / DHL Global Forwarding"
                   value={agent}
                   onChange={e => setAgent(e.target.value)}
-                  className="w-full h-11 px-3.5 rounded-2xl border border-[var(--theme-border)] bg-[var(--theme-bg-subtle)] text-xs text-[var(--theme-text-primary)] font-semibold focus:outline-none focus:border-[var(--theme-accent)]"
+                  className="w-full h-11 px-3.5 rounded-2xl border border-[var(--theme-border)] bg-[var(--theme-bg-subtle)] text-xs text-[var(--theme-text-primary)] font-semibold placeholder:text-[var(--theme-text-secondary)]/70 focus:outline-none focus:border-[var(--theme-accent)]"
                 />
               </div>
             </div>

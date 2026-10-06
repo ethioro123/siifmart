@@ -53,7 +53,7 @@ export const POItemOrderDetails: React.FC<POItemOrderDetailsProps> = ({
                 <div className="grid grid-cols-12 gap-4">
                     {/* Order Qty */}
                     <div className={`${showRetailInput ? 'col-span-4' : 'col-span-6'} space-y-1`}>
-                        <label className="text-[10px] text-[var(--theme-text-muted)] uppercase tracking-wider font-semibold ml-1 block">
+                        <label className="text-[10px] text-[var(--theme-text-secondary)] uppercase tracking-wider font-semibold ml-1 block">
                             Order Qty{' '}
                             {unitSuffix && (
                                 <span className="text-[var(--theme-text-secondary)] normal-case font-medium text-[9px]">
@@ -85,7 +85,7 @@ export const POItemOrderDetails: React.FC<POItemOrderDetailsProps> = ({
 
                     {/* Manifest Unit Cost */}
                     <div className={`${showRetailInput ? 'col-span-4' : 'col-span-6'} space-y-1`}>
-                        <label className="text-[10px] text-[var(--theme-text-muted)] uppercase tracking-wider font-semibold ml-1 block">
+                        <label className="text-[10px] text-[var(--theme-text-secondary)] uppercase tracking-wider font-semibold ml-1 block">
                             Cost / {orderUnitName} <span className="text-rose-500">*</span>
                         </label>
                         <input
@@ -111,7 +111,7 @@ export const POItemOrderDetails: React.FC<POItemOrderDetailsProps> = ({
                     {/* Retail Input (Shown for Catalog items) */}
                     {showRetailInput && (
                         <div className="col-span-4 space-y-1 relative">
-                            <label className="text-[10px] text-[var(--theme-text-muted)] uppercase tracking-wider font-semibold ml-1 block">
+                            <label className="text-[10px] text-[var(--theme-text-secondary)] uppercase tracking-wider font-semibold ml-1 block">
                                 Retail / {sellUnit} <span className="text-rose-500">*</span>
                             </label>
                             <div className="relative">

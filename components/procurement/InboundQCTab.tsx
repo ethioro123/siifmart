@@ -103,11 +103,11 @@ export const InboundQCTab: React.FC<InboundQCTabProps> = ({ countryCode }) => {
       </div>
 
       {loading ? (
-        <div className="p-16 text-center text-xs font-medium text-[var(--theme-text-muted)] rounded-3xl bg-[var(--theme-bg-panel)] border border-[var(--theme-border)]">
+        <div className="p-16 text-center text-xs font-medium text-[var(--theme-text-secondary)] rounded-3xl bg-[var(--theme-bg-panel)] border border-[var(--theme-border)]">
           Loading dock inspections...
         </div>
       ) : inspections.length === 0 ? (
-        <div className="p-12 text-center text-[var(--theme-text-muted)] text-sm rounded-3xl bg-[var(--theme-bg-panel)] border border-[var(--theme-border)] shadow-sm">
+        <div className="p-12 text-center text-[var(--theme-text-secondary)] text-sm font-medium rounded-3xl bg-[var(--theme-bg-panel)] border border-[var(--theme-border)] shadow-sm">
           No inbound QC inspections on file for {countryCode}. Perform dock checklists when receiving trucks arrive.
         </div>
       ) : (
@@ -117,7 +117,7 @@ export const InboundQCTab: React.FC<InboundQCTabProps> = ({ countryCode }) => {
               <div className="flex items-start justify-between gap-2">
                 <div>
                   <h3 className="font-bold text-sm tracking-tight text-[var(--theme-text-primary)]">PO {qc.poNumber || 'Inbound Dock'}</h3>
-                  <p className="text-[11px] font-mono text-[var(--theme-text-muted)] mt-0.5">{formatDateTime(qc.inspectionDate)}</p>
+                  <p className="text-[11px] font-mono text-[var(--theme-text-secondary)] mt-0.5">{formatDateTime(qc.inspectionDate)}</p>
                 </div>
                 <span className={`px-2.5 py-0.5 rounded-full text-xs font-semibold border ${
                   qc.disposition === 'Accepted'
@@ -134,14 +134,14 @@ export const InboundQCTab: React.FC<InboundQCTabProps> = ({ countryCode }) => {
                 <div className="p-3 rounded-2xl bg-[var(--theme-bg-subtle)]/60 border border-[var(--theme-border)] flex items-center gap-2.5">
                   <Thermometer size={16} className={qc.tempComplianceStatus === 'Breach' ? 'text-rose-500 shrink-0' : 'text-emerald-500 shrink-0'} />
                   <div>
-                    <p className="text-[10px] text-[var(--theme-text-muted)] font-semibold uppercase tracking-wider">Temp</p>
+                    <p className="text-[10px] text-[var(--theme-text-secondary)] font-semibold uppercase tracking-wider">Temp</p>
                     <p className="font-bold font-mono text-[var(--theme-text-primary)]">{qc.coldChainTempCelsius !== undefined ? `${qc.coldChainTempCelsius}°C` : 'Dry'}</p>
                   </div>
                 </div>
                 <div className="p-3 rounded-2xl bg-[var(--theme-bg-subtle)]/60 border border-[var(--theme-border)] flex items-center gap-2.5">
-                  <Box size={16} className="text-[var(--theme-text-muted)] shrink-0" />
+                  <Box size={16} className="text-[var(--theme-text-secondary)] shrink-0" />
                   <div>
-                    <p className="text-[10px] text-[var(--theme-text-muted)] font-semibold uppercase tracking-wider">Packaging</p>
+                    <p className="text-[10px] text-[var(--theme-text-secondary)] font-semibold uppercase tracking-wider">Packaging</p>
                     <p className="font-bold text-[var(--theme-text-primary)]">{qc.packagingIntegrity}</p>
                   </div>
                 </div>
@@ -153,7 +153,7 @@ export const InboundQCTab: React.FC<InboundQCTabProps> = ({ countryCode }) => {
                 </div>
               )}
 
-              <p className="text-[10px] text-[var(--theme-text-muted)] font-mono pt-1">
+              <p className="text-[10px] text-[var(--theme-text-secondary)] font-mono font-medium pt-1">
                 Inspector: {qc.inspectorName}
               </p>
             </div>
@@ -173,7 +173,7 @@ export const InboundQCTab: React.FC<InboundQCTabProps> = ({ countryCode }) => {
                   placeholder="e.g. PO-2026-0042"
                   value={poNumber}
                   onChange={e => setPoNumber(e.target.value)}
-                  className="w-full h-11 px-3.5 rounded-2xl border border-[var(--theme-border)] bg-[var(--theme-bg-subtle)] text-xs text-[var(--theme-text-primary)] font-semibold focus:outline-none focus:border-[var(--theme-accent)]"
+                  className="w-full h-11 px-3.5 rounded-2xl border border-[var(--theme-border)] bg-[var(--theme-bg-subtle)] text-xs text-[var(--theme-text-primary)] font-semibold placeholder:text-[var(--theme-text-secondary)]/70 focus:outline-none focus:border-[var(--theme-accent)]"
                 />
               </div>
               <div className="grid grid-cols-2 gap-2.5">
@@ -194,7 +194,7 @@ export const InboundQCTab: React.FC<InboundQCTabProps> = ({ countryCode }) => {
                     placeholder="e.g. 3.5"
                     value={tempCelsius ?? ''}
                     onChange={e => setTempCelsius(e.target.value ? Number(e.target.value) : undefined)}
-                    className="w-full h-11 px-3.5 rounded-2xl border border-[var(--theme-border)] bg-[var(--theme-bg-subtle)] text-xs font-mono font-bold text-[var(--theme-text-primary)] focus:outline-none focus:border-[var(--theme-accent)]"
+                    className="w-full h-11 px-3.5 rounded-2xl border border-[var(--theme-border)] bg-[var(--theme-bg-subtle)] text-xs font-mono font-bold text-[var(--theme-text-primary)] placeholder:text-[var(--theme-text-secondary)]/70 focus:outline-none focus:border-[var(--theme-accent)]"
                   />
                 </div>
               </div>
@@ -206,9 +206,9 @@ export const InboundQCTab: React.FC<InboundQCTabProps> = ({ countryCode }) => {
                     onChange={e => setPackaging(e.target.value as any)}
                     className="w-full h-11 px-3 rounded-2xl border border-[var(--theme-border)] bg-[var(--theme-bg-subtle)] text-xs text-[var(--theme-text-primary)] font-semibold focus:outline-none focus:border-[var(--theme-accent)] cursor-pointer"
                   >
-                    <option value="Passed">Passed (Intact)</option>
-                    <option value="Damaged">Damaged (Minor)</option>
-                    <option value="Compromised">Compromised (Breach)</option>
+                    <option className="bg-[var(--theme-bg-panel)] text-[var(--theme-text-primary)]" value="Passed">Passed (Intact)</option>
+                    <option className="bg-[var(--theme-bg-panel)] text-[var(--theme-text-primary)]" value="Damaged">Damaged (Minor)</option>
+                    <option className="bg-[var(--theme-bg-panel)] text-[var(--theme-text-primary)]" value="Compromised">Compromised (Breach)</option>
                   </select>
                 </div>
                 <div>
@@ -218,9 +218,9 @@ export const InboundQCTab: React.FC<InboundQCTabProps> = ({ countryCode }) => {
                     onChange={e => setExpiry(e.target.value as any)}
                     className="w-full h-11 px-3 rounded-2xl border border-[var(--theme-border)] bg-[var(--theme-bg-subtle)] text-xs text-[var(--theme-text-primary)] font-semibold focus:outline-none focus:border-[var(--theme-accent)] cursor-pointer"
                   >
-                    <option value="Passed">Passed (Valid)</option>
-                    <option value="Near Expiry">Near Expiry (&lt;30d)</option>
-                    <option value="Expired">Expired</option>
+                    <option className="bg-[var(--theme-bg-panel)] text-[var(--theme-text-primary)]" value="Passed">Passed (Valid)</option>
+                    <option className="bg-[var(--theme-bg-panel)] text-[var(--theme-text-primary)]" value="Near Expiry">Near Expiry (&lt;30d)</option>
+                    <option className="bg-[var(--theme-bg-panel)] text-[var(--theme-text-primary)]" value="Expired">Expired</option>
                   </select>
                 </div>
               </div>
@@ -231,10 +231,10 @@ export const InboundQCTab: React.FC<InboundQCTabProps> = ({ countryCode }) => {
                   onChange={e => setDisposition(e.target.value as any)}
                   className="w-full h-11 px-3.5 rounded-2xl border border-[var(--theme-border)] bg-[var(--theme-bg-subtle)] text-xs text-[var(--theme-text-primary)] font-semibold focus:outline-none focus:border-[var(--theme-accent)] cursor-pointer"
                 >
-                  <option value="Accepted">Accepted (Dock Clearance)</option>
-                  <option value="Conditionally Accepted">Conditionally Accepted</option>
-                  <option value="Quarantined">Quarantined for Audit</option>
-                  <option value="Rejected">Rejected at Dock</option>
+                  <option className="bg-[var(--theme-bg-panel)] text-[var(--theme-text-primary)]" value="Accepted">Accepted (Dock Clearance)</option>
+                  <option className="bg-[var(--theme-bg-panel)] text-[var(--theme-text-primary)]" value="Conditionally Accepted">Conditionally Accepted</option>
+                  <option className="bg-[var(--theme-bg-panel)] text-[var(--theme-text-primary)]" value="Quarantined">Quarantined for Audit</option>
+                  <option className="bg-[var(--theme-bg-panel)] text-[var(--theme-text-primary)]" value="Rejected">Rejected at Dock</option>
                 </select>
               </div>
             </div>

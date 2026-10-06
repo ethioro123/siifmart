@@ -1,7 +1,8 @@
 import React from 'react';
 import { formatPriceValue } from '../../utils/formatting';
-import { Info } from 'lucide-react';
-import { formatPackBadge } from './utils';
+import { Info, Package, Scale, Thermometer, Tag, AlertTriangle } from 'lucide-react';
+import { formatPackBadge, formatPOItemDescription } from './utils';
+import { getSellUnit } from '../../utils/units';
 
 interface ItemPreviewCardProps {
     name: string;
@@ -9,13 +10,15 @@ interface ItemPreviewCardProps {
     size: string;
     unit: string;
     category: string;
-    description: string;
+    description?: string;
     price?: number;
     cost?: number;
     retailPrice?: number;
-    image: string;
+    image?: string;
     currencySymbol?: string;
     customAttributes?: any;
+    orderUnitName?: string;
+    unitsPerOrderUnit?: number;
 }
 
 export const ItemPreviewCard: React.FC<ItemPreviewCardProps> = ({
@@ -30,12 +33,37 @@ export const ItemPreviewCard: React.FC<ItemPreviewCardProps> = ({
     retailPrice,
     image,
     currencySymbol = 'ETB',
-    customAttributes
+    customAttributes,
+    orderUnitName = 'Case',
+    unitsPerOrderUnit = 1
 }) => {
     const effectiveCost = cost !== undefined ? cost : price;
     const effectiveRetail = retailPrice !== undefined ? retailPrice : 0;
+    const unitsPerOrder = unitsPerOrderUnit > 1 ? unitsPerOrderUnit : 1;
+    const isBulkOrder = unitsPerOrder > 1;
+    const costPerSellUnit = effectiveCost > 0 ? effectiveCost / unitsPerOrder : 0;
+    const sellUnitDef = getSellUnit(unit);
+    const sellUnitLabel = sellUnitDef.shortLabel || 'ea';
 
-    const AttrBadge = ({ label, value, color, icon: Icon }: { label: string, value?: string | number | boolean | null, color?: string, icon?: any }) => {
+    // Margin calculations
+    let marginPct: number | null = null;
+    let grossProfit: number | null = null;
+    if (effectiveRetail > 0 && costPerSellUnit > 0) {
+        marginPct = ((effectiveRetail - costPerSellUnit) / effectiveRetail) * 100;
+        grossProfit = effectiveRetail - costPerSellUnit;
+    }
+
+    const AttrBadge = ({
+        label,
+        value,
+        isAlert,
+        icon: Icon
+    }: {
+        label: string;
+        value?: string | number | boolean | null;
+        isAlert?: boolean;
+        icon?: React.ComponentType<{ size: number; className?: string }>;
+    }) => {
         if (value === null || value === undefined || value === '') return null;
         if (typeof value === 'boolean' && !value) return null;
 
@@ -43,119 +71,222 @@ export const ItemPreviewCard: React.FC<ItemPreviewCardProps> = ({
         const displayLabel = typeof value === 'boolean' ? '' : label;
 
         return (
-            <div className="flex items-center gap-1.5 bg-[var(--theme-bg-panel)] border border-[var(--theme-border)] rounded-lg px-2 py-1 min-w-0">
-                {Icon && <Icon size={10} className="text-[var(--theme-text-muted)]" />}
-                {displayLabel && <span className="text-[9px] text-[var(--theme-text-muted)] uppercase tracking-wider font-semibold">{displayLabel}</span>}
-                <span className="text-[10px] text-[var(--theme-text-primary)] font-bold font-mono leading-none truncate">{displayValue}</span>
+            <div
+                className={`inline-flex items-center gap-1.5 px-2 py-1 rounded-lg border text-xs font-medium transition-all ${
+                    isAlert
+                        ? 'bg-rose-500/10 border-rose-500/20 text-rose-700 dark:text-rose-400'
+                        : 'bg-[var(--theme-bg-panel)] border-[var(--theme-border)] text-[var(--theme-text-primary)]'
+                }`}
+            >
+                {Icon && <Icon size={11} className={isAlert ? 'text-rose-600 dark:text-rose-400 shrink-0' : 'text-[var(--theme-text-secondary)] shrink-0'} />}
+                {displayLabel && (
+                    <span className="text-[9px] uppercase tracking-wider font-semibold text-[var(--theme-text-secondary)]">
+                        {displayLabel}
+                    </span>
+                )}
+                <span className="text-[11px] font-bold font-mono tabular-nums leading-none truncate text-[var(--theme-text-primary)]">
+                    {displayValue}
+                </span>
             </div>
         );
     };
 
+    // Filter active items per group
+    const packagingAttrs = [
+        { label: 'Pack Qty', value: customAttributes?.packaging?.packQty ? `${customAttributes.packaging.packQty} ${sellUnitLabel}/${customAttributes?.packaging?.packageType || 'pack'}` : null },
+        { label: 'Type', value: customAttributes?.packaging?.packageType },
+        { label: 'Material', value: customAttributes?.packaging?.material },
+        { label: 'Breakable', value: customAttributes?.packaging?.isBreakable, isAlert: true, icon: AlertTriangle },
+        { label: 'Level', value: customAttributes?.packaging?.packagingLevel }
+    ].filter(a => a.value !== null && a.value !== undefined && a.value !== '' && a.value !== false);
+
+    const physicalAttrs = [
+        { label: 'Net', value: customAttributes?.physical?.netWeight ? `${customAttributes.physical.netWeight}${customAttributes?.physical?.sizeType || unit || 'kg'}` : null },
+        { label: 'Gross', value: customAttributes?.physical?.grossWeight ? `${customAttributes.physical.grossWeight}kg` : null },
+        { label: 'Form', value: customAttributes?.physical?.form },
+        { label: 'Color', value: customAttributes?.physical?.color },
+        { label: 'Dims', value: customAttributes?.physical?.dims }
+    ].filter(a => a.value !== null && a.value !== undefined && a.value !== '' && a.value !== false);
+
+    const storageAttrs = [
+        { label: 'Condition', value: customAttributes?.storage?.type },
+        { label: 'Hazard', value: customAttributes?.storage?.isHazardous ? 'Hazardous Material' : null, isAlert: true, icon: AlertTriangle },
+        { label: 'Fragile', value: customAttributes?.storage?.isFragile ? 'Fragile' : null, isAlert: true, icon: AlertTriangle },
+        { label: 'Light Sensitive', value: customAttributes?.storage?.isLightSensitive ? 'Light Sensitive' : null },
+        { label: 'Stack Limit', value: customAttributes?.storage?.stackLimit ? `Max ${customAttributes.storage.stackLimit} high` : null }
+    ].filter(a => a.value !== null && a.value !== undefined && a.value !== '' && a.value !== false);
+
+    const commercialAttrs = [
+        { label: 'Sell By', value: customAttributes?.commercial?.sellBy },
+        { label: 'Price Type', value: customAttributes?.commercial?.priceType },
+        { label: 'Returnable', value: customAttributes?.commercial?.isReturnable !== undefined ? (customAttributes.commercial.isReturnable ? 'Returnable' : 'Non-Returnable') : null },
+        { label: 'Bundle', value: customAttributes?.commercial?.isBundleEligible ? 'Bundle Eligible' : null },
+        { label: 'Weighted', value: customAttributes?.commercial?.isWeighted ? 'Scale Weighted' : null }
+    ].filter(a => a.value !== null && a.value !== undefined && a.value !== '' && a.value !== false);
+
     return (
-        <div className="p-4 rounded-2xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] flex flex-col gap-3 shadow-sm">
-            {/* Header */}
-            <div className="flex justify-between items-start gap-2 border-b border-[var(--theme-border-subtle)] pb-2.5">
+        <div className="p-4 rounded-2xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] flex flex-col gap-4 shadow-sm">
+            {/* ─── Header: Brand, Name & Normalized Pricing ─── */}
+            <div className="flex flex-col sm:flex-row justify-between items-start gap-3 border-b border-[var(--theme-border-subtle)] pb-3.5">
                 <div>
-                    <h3 className="text-sm font-bold text-[var(--theme-text-primary)] leading-tight">
+                    <h3 className="text-base font-black text-[var(--theme-text-primary)] leading-tight tracking-tight">
                         {brand && <span className="text-[var(--theme-accent)] font-semibold">{brand} </span>}
-                        {name || "Item Name"}
+                        {name || 'Item Name'}
                     </h3>
-                    <p className="text-[10px] text-[var(--theme-text-muted)] mt-0.5 font-mono uppercase font-medium">
-                        {customAttributes?.identity?.variant ? `${customAttributes.identity.variant} • ` : ''}
-                        {(() => {
-                            const physicalWeight = customAttributes?.physical?.netWeight || size;
-                            const physicalType = customAttributes?.physical?.sizeType || customAttributes?.physical?.unit || 
-                                                 (unit && !['UNIT', 'PACK', 'DOZEN'].includes(unit.toUpperCase().trim()) ? unit : '');
-                            return physicalWeight ? `${physicalWeight}${physicalType}` : "Size";
-                        })()} • {category || "Category"}
-                        {customAttributes?.identity?.subcategory ? ` • ${customAttributes.identity.subcategory}` : ''}
+                    <p className="text-[11px] text-[var(--theme-text-secondary)] mt-1 font-mono uppercase font-semibold flex items-center gap-1.5 flex-wrap">
+                        {customAttributes?.identity?.variant && (
+                            <span className="bg-[var(--theme-bg-panel)] px-2 py-0.5 rounded border border-[var(--theme-border)] text-[var(--theme-text-primary)]">
+                                {customAttributes.identity.variant}
+                            </span>
+                        )}
+                        <span>{category || 'Category'}</span>
+                        {customAttributes?.identity?.subcategory && (
+                            <span>• {customAttributes.identity.subcategory}</span>
+                        )}
                     </p>
                 </div>
+
+                {/* Normalized Pricing / Margin Block */}
                 {(effectiveCost > 0 || effectiveRetail > 0) && (
-                    <div className="text-right whitespace-nowrap flex flex-col items-end gap-0.5 font-mono">
+                    <div className="text-left sm:text-right whitespace-nowrap flex flex-col items-start sm:items-end gap-1 font-mono">
                         {effectiveRetail > 0 && (
-                            <div className="flex items-center gap-1">
-                                <span className="text-[9px] uppercase font-semibold text-[var(--theme-text-muted)]">Retail:</span>
-                                <span className="text-xs font-bold text-[var(--theme-text-primary)] tabular-nums">{currencySymbol} {formatPriceValue(effectiveRetail)}</span>
+                            <div className="flex items-center gap-1.5">
+                                <span className="text-[10px] uppercase font-bold text-[var(--theme-text-secondary)]">Retail:</span>
+                                <span className="text-sm font-black text-[var(--theme-text-primary)] tabular-nums">
+                                    {currencySymbol} {formatPriceValue(effectiveRetail)}{' '}
+                                    <span className="text-[10px] font-semibold text-[var(--theme-text-secondary)] font-sans">
+                                        /{sellUnitLabel}
+                                    </span>
+                                </span>
                             </div>
                         )}
                         {effectiveCost > 0 && (
-                            <div className="flex items-center gap-1">
-                                <span className="text-[9px] uppercase font-semibold text-[var(--theme-text-muted)]">Cost:</span>
-                                <span className="text-[11px] font-semibold text-[var(--theme-text-secondary)] tabular-nums">{currencySymbol} {formatPriceValue(effectiveCost)}</span>
+                            <div className="flex items-center gap-1.5">
+                                <span className="text-[10px] uppercase font-bold text-[var(--theme-text-secondary)]">Unit Cost:</span>
+                                <span className="text-xs font-bold text-[var(--theme-text-primary)] tabular-nums">
+                                    {currencySymbol} {formatPriceValue(costPerSellUnit)}{' '}
+                                    <span className="text-[10px] font-semibold text-[var(--theme-text-secondary)] font-sans">
+                                        /{sellUnitLabel}
+                                    </span>
+                                </span>
+                            </div>
+                        )}
+                        {isBulkOrder && effectiveCost > 0 && (
+                            <div className="text-[10px] text-[var(--theme-text-secondary)] font-mono">
+                                Order: {currencySymbol} {formatPriceValue(effectiveCost)}/{orderUnitName.toLowerCase()} ({unitsPerOrder} {sellUnitLabel})
+                            </div>
+                        )}
+                        {marginPct !== null && grossProfit !== null && (
+                            <div
+                                className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold font-mono mt-0.5 border ${
+                                    marginPct >= 30
+                                        ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-600 dark:text-emerald-400'
+                                        : marginPct >= 15
+                                        ? 'bg-amber-500/10 border-amber-500/20 text-amber-600 dark:text-amber-400'
+                                        : 'bg-rose-500/10 border-rose-500/20 text-rose-600 dark:text-rose-400'
+                                }`}
+                            >
+                                <span>+{marginPct.toFixed(1)}% margin</span>
+                                <span className="text-[9px] opacity-80">
+                                    (+{currencySymbol} {formatPriceValue(grossProfit)}/{sellUnitLabel})
+                                </span>
                             </div>
                         )}
                     </div>
                 )}
             </div>
 
-            {/* Dense Attribute Grid */}
-            <div className="flex flex-wrap gap-1.5">
-                {/* Physical */}
-                <AttrBadge label="Net" value={customAttributes?.physical?.netWeight ? `${customAttributes.physical.netWeight}${customAttributes?.physical?.sizeType || unit || 'kg'}` : null} />
-                <AttrBadge label="Gross" value={customAttributes?.physical?.grossWeight ? `${customAttributes.physical.grossWeight}kg` : null} />
-                <AttrBadge label="Form" value={customAttributes?.physical?.form} />
-                <AttrBadge label="Color" value={customAttributes?.physical?.color} />
-                <AttrBadge label="Dims" value={customAttributes?.physical?.dims} />
+            {/* ─── Structured Attributes Grouped by Domain ─── */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                {/* 1. Packaging & Case */}
+                {packagingAttrs.length > 0 && (
+                    <div className="p-2.5 rounded-xl bg-[var(--theme-bg-panel)] border border-[var(--theme-border)] space-y-2">
+                        <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-[var(--theme-text-secondary)]">
+                            <Package size={12} className="text-amber-500 shrink-0" />
+                            <span>Packaging</span>
+                        </div>
+                        <div className="flex flex-wrap gap-1.5">
+                            {packagingAttrs.map((attr, idx) => (
+                                <AttrBadge key={idx} label={attr.label} value={attr.value} isAlert={attr.isAlert} icon={attr.icon} />
+                            ))}
+                        </div>
+                    </div>
+                )}
 
-                {/* Packaging */}
-                <AttrBadge label="Pack" value={customAttributes?.packaging?.packQty ? `x${customAttributes.packaging.packQty}` : null} />
-                <AttrBadge label="Level" value={customAttributes?.packaging?.packagingLevel} />
-                <AttrBadge label="Type" value={customAttributes?.packaging?.packageType} />
-                <AttrBadge label="Mat" value={customAttributes?.packaging?.material} />
-                <AttrBadge label="Breakable" value={customAttributes?.packaging?.isBreakable} color="red" />
+                {/* 2. Physical & Specs */}
+                {physicalAttrs.length > 0 && (
+                    <div className="p-2.5 rounded-xl bg-[var(--theme-bg-panel)] border border-[var(--theme-border)] space-y-2">
+                        <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-[var(--theme-text-secondary)]">
+                            <Scale size={12} className="text-blue-500 shrink-0" />
+                            <span>Physical Specs</span>
+                        </div>
+                        <div className="flex flex-wrap gap-1.5">
+                            {physicalAttrs.map((attr, idx) => (
+                                <AttrBadge key={idx} label={attr.label} value={attr.value} />
+                            ))}
+                        </div>
+                    </div>
+                )}
 
-                {/* Storage */}
-                <AttrBadge label="Storage" value={customAttributes?.storage?.type} />
-                <AttrBadge label="Hazard" value={customAttributes?.storage?.isHazardous} color="red" />
-                <AttrBadge label="Stack" value={customAttributes?.storage?.stackLimit ? `Max ${customAttributes.storage.stackLimit}` : null} />
-                <AttrBadge label="Light Sensitive" value={customAttributes?.storage?.isLightSensitive} />
-                <AttrBadge label="Fragile" value={customAttributes?.storage?.isFragile} />
+                {/* 3. Storage & Care */}
+                {storageAttrs.length > 0 && (
+                    <div className="p-2.5 rounded-xl bg-[var(--theme-bg-panel)] border border-[var(--theme-border)] space-y-2">
+                        <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-[var(--theme-text-secondary)]">
+                            <Thermometer size={12} className="text-emerald-500 shrink-0" />
+                            <span>Storage & Care</span>
+                        </div>
+                        <div className="flex flex-wrap gap-1.5">
+                            {storageAttrs.map((attr, idx) => (
+                                <AttrBadge key={idx} label={attr.label} value={attr.value} isAlert={attr.isAlert} icon={attr.icon} />
+                            ))}
+                        </div>
+                    </div>
+                )}
 
-                {/* Commercial */}
-                <AttrBadge label="Sell By" value={customAttributes?.commercial?.sellBy} />
-                <AttrBadge label="Price" value={customAttributes?.commercial?.priceType} />
-                <AttrBadge label="Weighted" value={customAttributes?.commercial?.isWeighted} />
-                <AttrBadge label="Returnable" value={customAttributes?.commercial?.isReturnable} />
-                <AttrBadge label="Bundle" value={customAttributes?.commercial?.isBundleEligible} />
-
-                {/* Descriptive */}
-                <AttrBadge label="Use" value={customAttributes?.descriptive?.usage} />
-                <AttrBadge label="Target" value={customAttributes?.descriptive?.audience} />
-                <AttrBadge label="Scent" value={customAttributes?.descriptive?.scent} />
-                <AttrBadge label="Flavor" value={customAttributes?.descriptive?.flavor} />
-                <AttrBadge label="Strength" value={customAttributes?.descriptive?.strength} />
+                {/* 4. Commercial & POS */}
+                {commercialAttrs.length > 0 && (
+                    <div className="p-2.5 rounded-xl bg-[var(--theme-bg-panel)] border border-[var(--theme-border)] space-y-2">
+                        <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-[var(--theme-text-secondary)]">
+                            <Tag size={12} className="text-purple-500 shrink-0" />
+                            <span>Commercial & POS</span>
+                        </div>
+                        <div className="flex flex-wrap gap-1.5">
+                            {commercialAttrs.map((attr, idx) => (
+                                <AttrBadge key={idx} label={attr.label} value={attr.value} />
+                            ))}
+                        </div>
+                    </div>
+                )}
             </div>
 
-            {/* Generated Description Preview */}
+            {/* ─── Generated System Description ─── */}
             <div className="p-3 rounded-xl bg-[var(--theme-bg-panel)] border border-[var(--theme-border)]">
                 <div className="flex items-center gap-1.5 mb-1.5">
                     <Info size={12} className="text-[var(--theme-accent)]" />
-                    <span className="text-[10px] text-[var(--theme-text-muted)] uppercase font-semibold tracking-wider leading-none">System Description</span>
+                    <span className="text-[10px] text-[var(--theme-text-secondary)] uppercase font-semibold tracking-wider leading-none">
+                        System Description
+                    </span>
                 </div>
                 <p className="text-xs text-[var(--theme-text-primary)] font-mono leading-relaxed font-semibold">
-                    {[
+                    {formatPOItemDescription({
                         brand,
-                        name,
-                        customAttributes?.identity?.variant,
-                        (() => {
-                            const physicalWeight = customAttributes?.physical?.netWeight || size;
-                            const physicalType = customAttributes?.physical?.sizeType || customAttributes?.physical?.unit ||
-                                                 (unit && !['UNIT', 'PACK', 'DOZEN'].includes(unit.toUpperCase().trim()) ? unit : '');
-                            return physicalWeight ? `${physicalWeight}${physicalType}` : '';
-                        })(),
-                    ].filter(Boolean).join(' ')}
+                        productName: name,
+                        category,
+                        size,
+                        unit,
+                        customAttributes
+                    }) || 'Item Name'}
                 </p>
                 {(() => {
                     const badge = formatPackBadge({ customAttributes });
                     return badge ? (
-                        <span className="inline-block mt-2 px-2 py-0.5 rounded-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-[var(--theme-text-secondary)] text-[10px] font-mono font-semibold uppercase tracking-wider">
+                        <span className="inline-block mt-2 px-2.5 py-0.5 rounded-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-[var(--theme-text-secondary)] text-[10px] font-mono font-semibold uppercase tracking-wider">
                             {badge}
                         </span>
                     ) : null;
                 })()}
                 {customAttributes?.descriptive?.keyFeatures && (
-                    <p className="text-[10px] text-[var(--theme-text-muted)] mt-1.5 italic border-t border-[var(--theme-border-subtle)] pt-1.5">
+                    <p className="text-[10px] text-[var(--theme-text-secondary)] font-medium mt-1.5 italic border-t border-[var(--theme-border-subtle)] pt-1.5">
                         Features: {customAttributes.descriptive.keyFeatures}
                     </p>
                 )}

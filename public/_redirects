@@ -1,1 +1,2 @@
-# SPA Routing - Handled via 404.html fallback to avoid infinite loop warning
+# Cloudflare Pages SPA Routing
+/*    /index.html   200

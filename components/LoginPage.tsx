@@ -4,6 +4,7 @@ import { useStore } from '../contexts/CentralStore';
 import { useData } from '../contexts/DataContext';
 import { authService } from '../services/auth.service';
 import { logger } from '../utils/logger';
+import { KenyanQuickLogin } from './login/KenyanQuickLogin';
 
 type Mode = 'login' | 'forgot';
 
@@ -27,7 +28,9 @@ export default function LoginPage() {
     try {
       if (mode === 'login') {
         const success = await login(email, password);
-        if (!success) {
+        if (success) {
+          window.location.hash = '#/';
+        } else {
           setError('Invalid credentials. Please check your email/username and password.');
         }
       } else if (mode === 'forgot') {
@@ -46,6 +49,28 @@ export default function LoginPage() {
     setError('');
     setSuccess('');
     setPassword('');
+  };
+
+  const handleQuickLogin = async (quickEmail: string, quickPass: string) => {
+    setEmail(quickEmail);
+    setPassword(quickPass);
+    setError('');
+    setSuccess('');
+    setLoading(true);
+
+    try {
+      const success = await login(quickEmail, quickPass);
+      if (success) {
+        window.location.hash = '#/';
+      } else {
+        setError('Invalid credentials. Please check your email and password.');
+      }
+    } catch (err: any) {
+      logger.error('LoginPage', 'Quick login error:', err);
+      setError(err.message || 'Authentication failed. Please try again.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -201,6 +226,13 @@ export default function LoginPage() {
             )}
           </div>
         </form>
+
+        {mode === 'login' && (
+          <KenyanQuickLogin
+            onSelectAccount={handleQuickLogin}
+            disabled={loading}
+          />
+        )}
 
         <div className="mt-8 pt-6 border-t border-[#E2DCCE]/40 dark:border-white/[0.04] text-center select-none">
           <p className="text-[10px] text-[#4D6E56] dark:text-[#7A9E83] font-semibold tracking-wider uppercase">SiifMart Operations v3.5.6</p>

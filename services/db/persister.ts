@@ -34,8 +34,18 @@ export const createIDBPersister = (key: string = 'REACT_QUERY_OFFLINE_CACHE'): P
             }
         },
         restoreClient: async () => {
-            const client = await posDB.getQueryCache(key);
-            return client as PersistedClient | undefined;
+            try {
+                // Fail-safe 800ms race timeout to prevent IndexedDB stalls from blocking app initialization on mobile
+                const timeoutPromise = new Promise<undefined>((resolve) =>
+                    setTimeout(() => resolve(undefined), 800)
+                );
+                const fetchPromise = posDB.getQueryCache(key).catch(() => undefined);
+                const client = await Promise.race([fetchPromise, timeoutPromise]);
+                return client as PersistedClient | undefined;
+            } catch (err) {
+                console.warn('POSDB: Non-blocking error restoring query cache, mounting fresh:', err);
+                return undefined;
+            }
         },
         removeClient: async () => {
             if (timeout) {

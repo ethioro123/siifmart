@@ -55,7 +55,7 @@ export interface DataContextType {
 
   addProduct: (product: Product) => Promise<Product | undefined>;
   updateProduct: (product: Partial<Product> & { id: string }, updatedBy?: string) => Promise<Product | undefined>;
-  updatePricesBySKU: (sku: string, updates: { price: number; costPrice?: number; salePrice?: number; isOnSale?: boolean }) => Promise<void>;
+  updatePricesBySKU: (sku: string, updates: { price: number; costPrice?: number; salePrice?: number; isOnSale?: boolean }, targetSiteIds?: string[]) => Promise<void>;
   deleteProduct: (id: string) => Promise<void>;
   relocateProduct: (productId: string, newLocation: string, user: string) => Promise<void>;
   cleanupAdminProducts: () => Promise<void>;

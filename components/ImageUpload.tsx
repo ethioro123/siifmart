@@ -40,15 +40,43 @@ export default function ImageUpload({ value, onChange, onError, placeholder = 'U
             const reader = new FileReader();
             reader.onload = (e) => {
                 const img = new Image();
-                img.onload = () => {
+                img.onload = async () => {
                     const canvas = document.createElement('canvas');
                     const ctx = canvas.getContext('2d');
                     if (!ctx) return reject('No context');
-                    const MAX = 800; let { width, height } = img;
-                    if (width > height) { if (width > MAX) { height = (height * MAX) / width; width = MAX; } }
-                    else { if (height > MAX) { width = (width * MAX) / height; height = MAX; } }
-                    canvas.width = width; canvas.height = height; ctx.drawImage(img, 0, 0, width, height);
-                    resolve(canvas.toDataURL('image/jpeg', 0.8));
+                    const MAX = 400;
+                    let { width, height } = img;
+                    if (width > height) {
+                        if (width > MAX) { height = (height * MAX) / width; width = MAX; }
+                    } else {
+                        if (height > MAX) { width = (width * MAX) / height; height = MAX; }
+                    }
+                    canvas.width = width;
+                    canvas.height = height;
+                    ctx.drawImage(img, 0, 0, width, height);
+
+                    // 1. Attempt uploading to Supabase Storage CDN (cached egress) to avoid DB egress
+                    try {
+                        const { supabase } = await import('../lib/supabase');
+                        const blob = await new Promise<Blob | null>(r => canvas.toBlob(r, 'image/jpeg', 0.7));
+                        if (blob) {
+                            const fileName = `item_${Date.now()}_${Math.random().toString(36).substring(2, 7)}.jpg`;
+                            const { data: uploadData, error: uploadErr } = await supabase.storage
+                                .from('system-assets')
+                                .upload(`products/${fileName}`, blob, { contentType: 'image/jpeg', cacheControl: '31536000' });
+                            if (!uploadErr && uploadData) {
+                                const { data: urlData } = supabase.storage.from('system-assets').getPublicUrl(uploadData.path);
+                                if (urlData?.publicUrl) {
+                                    return resolve(urlData.publicUrl);
+                                }
+                            }
+                        }
+                    } catch (_) {
+                        // Fallback to lightweight compressed data URL
+                    }
+
+                    // 2. Fallback: lightweight 400px JPEG string (~20KB vs 400KB previously)
+                    resolve(canvas.toDataURL('image/jpeg', 0.65));
                 };
                 img.src = e.target?.result as string;
             };

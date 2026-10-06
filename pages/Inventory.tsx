@@ -433,6 +433,7 @@ export default function Inventory() {
                 canApprove={canApprove}
                 isReadOnly={isReadOnly}
                 isSubmitting={saveProductMutation.isPending}
+                currencySymbol={currencySymbol}
                 onSave={async (data) => {
                     try {
                         const isNew = !editingProduct;

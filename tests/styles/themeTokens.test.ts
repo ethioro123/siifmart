@@ -394,16 +394,16 @@ describe('Modern CSS Token Layer & Aesthetic Architecture', () => {
     expect(themeContent).toContain('--shadow-lg:');
     expect(themeContent).toContain('--shadow-modal:');
 
-    // 10-Point "Apple Test" Checklist
-    expect(agentsContent).toContain('The 10-Point "Apple Test" Audit');
-    expect(rulesContent).toContain('The 10-Point "Apple Test" Audit Checklist');
+    // 11-Point "Apple Test" Checklist
+    expect(agentsContent).toContain('11-Point "Apple Test" Audit');
+    expect(rulesContent).toContain('11-Point "Apple Test" Audit Checklist');
 
     // Enterprise Retail & WMS Synthesis Doctrine
     expect(agentsContent).toContain('Enterprise Retail & WMS Synthesis Doctrine');
     expect(rulesContent).toContain('Enterprise Retail & WMS Synthesis Doctrine');
 
     // Anti-patterns codified
-    expect(rulesContent).toContain('The 12 Aesthetic Anti-Patterns (Strictly Prohibited)');
+    expect(rulesContent).toContain('Aesthetic Anti-Patterns (Strictly Prohibited)');
   });
 });
 

@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { X, Package, Scale, DollarSign, Layers, Info } from 'lucide-react';
 import { Product } from '../../types';
-import { productsService } from '../../services/supabase.service';
+import { productsService, inventoryRequestsService } from '../../services/supabase.service';
+import { systemLogsService } from '../../services/system-logs.service';
 import { useStore } from '../../contexts/CentralStore';
 import { useData } from '../../contexts/DataContext';
 import { canViewCostPrice } from '../../utils/roles';
@@ -37,7 +38,8 @@ export const ProductControlModal: React.FC<Props> = ({ product, isOpen, onClose,
     const activeCountry = (effectiveCountry || settings?.country || 'ET') as any;
     const dynamicCurrency = currencySymbol || getCountryProfile(activeCountry).currencySymbol || 'ETB';
     const showCost = canViewCostPrice(user?.role);
-    const canDirectEdit = user?.role === 'super_admin';
+    const isCEO = user?.role === 'super_admin' || (user?.role as string)?.toLowerCase() === 'ceo';
+    const canDirectEdit = isCEO;
 
     const [activeTab, setActiveTab] = useState<ModalTab>('unit');
     const [isSaving, setIsSaving] = useState(false);
@@ -114,29 +116,73 @@ export const ProductControlModal: React.FC<Props> = ({ product, isOpen, onClose,
                 },
             };
 
-            const scope = unitCfg.scope || 'single';
-            if (scope === 'all' && product.sku) {
-                const matchingProducts = (allProducts || []).filter(p => p.sku === product.sku);
-                if (matchingProducts.length > 0) {
-                    await Promise.all(matchingProducts.map(p => productsService.update(p.id, updatePayload)));
-                } else {
-                    await productsService.update(product.id, updatePayload);
+            if (!canDirectEdit) {
+                // Zero Autonomous Authority: Non-CEO staff submit for CEO approval
+                await inventoryRequestsService.create({
+                    productId: product.id,
+                    productName: product.name,
+                    productSku: product.sku,
+                    siteId: product.siteId || (product as any).site_id || '',
+                    countryCode: activeCountry,
+                    changeType: 'edit',
+                    requestedBy: user?.name || 'Unknown',
+                    requestedAt: new Date().toISOString(),
+                    status: 'pending',
+                    proposedChanges: { ...product, ...updatePayload },
+                    adjustmentReason: `Unit & Packaging config update to ${unitCfg.sellUnit}`,
+                });
+
+                try {
+                    await systemLogsService.create({
+                        action: 'PRODUCT_UNIT_CHANGE_REQUESTED',
+                        details: {
+                            productId: product.id,
+                            sku: product.sku,
+                            requestedUnit: unitCfg.sellUnit,
+                            siteId: product.siteId,
+                        },
+                        module: 'Inventory',
+                        user_name: user?.name || 'Unknown',
+                        employee_id: user?.id,
+                        site_id: product.siteId,
+                        country_code: activeCountry,
+                        entity_type: 'inventory_request',
+                        entity_id: product.id,
+                    });
+                } catch (logErr) {
+                    logger.warn('ProductControlModal', 'Failed to log unit request', { error: String(logErr) });
                 }
-                showToast(`Selling configuration updated across all network locations for SKU ${product.sku}`, 'success');
-            } else if (scope === 'custom' && (unitCfg.selectedSiteIds || []).length > 0) {
-                const targetSiteIds = new Set(unitCfg.selectedSiteIds);
-                const matchingProducts = (allProducts || []).filter(
-                    p => (p.sku === product.sku || p.id === product.id) && targetSiteIds.has(p.siteId || (p as any).site_id || '')
-                );
-                if (matchingProducts.length > 0) {
-                    await Promise.all(matchingProducts.map(p => productsService.update(p.id, updatePayload)));
-                } else {
-                    await productsService.update(product.id, updatePayload);
-                }
-                showToast(`Selling configuration updated across ${targetSiteIds.size} selected location(s)`, 'success');
+
+                showToast('Selling configuration submitted for CEO approval', 'info');
             } else {
-                await productsService.update(product.id, updatePayload);
-                showToast('Selling & Packaging Configuration saved for this location', 'success');
+                // CEO direct edit - strictly respects country boundaries
+                const scope = unitCfg.scope || 'single';
+                if (scope === 'all' && product.sku) {
+                    const countrySiteIds = new Set((sites || []).map(s => s.id));
+                    const matchingProducts = (allProducts || []).filter(
+                        p => p.sku === product.sku && countrySiteIds.has(p.siteId || (p as any).site_id || '')
+                    );
+                    if (matchingProducts.length > 0) {
+                        await Promise.all(matchingProducts.map(p => updateProduct({ ...p, ...updatePayload })));
+                    } else {
+                        await updateProduct({ ...product, ...updatePayload });
+                    }
+                    showToast(`Selling configuration updated across national network for SKU ${product.sku}`, 'success');
+                } else if (scope === 'custom' && (unitCfg.selectedSiteIds || []).length > 0) {
+                    const targetSiteIds = new Set(unitCfg.selectedSiteIds);
+                    const matchingProducts = (allProducts || []).filter(
+                        p => (p.sku === product.sku || p.id === product.id) && targetSiteIds.has(p.siteId || (p as any).site_id || '')
+                    );
+                    if (matchingProducts.length > 0) {
+                        await Promise.all(matchingProducts.map(p => updateProduct({ ...p, ...updatePayload })));
+                    } else {
+                        await updateProduct({ ...product, ...updatePayload });
+                    }
+                    showToast(`Selling configuration updated across ${targetSiteIds.size} selected location(s)`, 'success');
+                } else {
+                    await updateProduct({ ...product, ...updatePayload });
+                    showToast('Selling & Packaging Configuration saved for this location', 'success');
+                }
             }
 
             await refreshData();
@@ -150,6 +196,7 @@ export const ProductControlModal: React.FC<Props> = ({ product, isOpen, onClose,
     };
 
     const handleSavePricing = async () => {
+        if (!product) return;
         setIsSaving(true);
         try {
             const updates = {
@@ -160,47 +207,79 @@ export const ProductControlModal: React.FC<Props> = ({ product, isOpen, onClose,
                 competitorPrice: pricingCfg.competitorPrice,
             };
 
-            if (pricingCfg.scope === 'single') {
-                await updateProduct({ ...product, ...updates });
-                showToast(`Pricing saved for ${product.location || 'this location'}`, 'success');
-            } else if (pricingCfg.scope === 'all') {
-                await updateProduct({ ...product, ...updates });
-                if (product.sku) {
-                    await updatePricesBySKU(product.sku, {
-                        price: pricingCfg.price,
-                        costPrice: pricingCfg.costPrice,
-                        salePrice: pricingCfg.salePrice,
-                        isOnSale: pricingCfg.isOnSale,
+            if (!canDirectEdit) {
+                // Zero Autonomous Price Changes: Branch staff submit for CEO approval
+                await inventoryRequestsService.create({
+                    productId: product.id,
+                    productName: product.name,
+                    productSku: product.sku,
+                    siteId: product.siteId || (product as any).site_id || '',
+                    countryCode: activeCountry,
+                    changeType: 'edit',
+                    requestedBy: user?.name || 'Unknown',
+                    requestedAt: new Date().toISOString(),
+                    status: 'pending',
+                    proposedChanges: { ...product, ...updates },
+                    adjustmentReason: `Pricing update: Price ${pricingCfg.price}, Cost ${pricingCfg.costPrice}`,
+                });
+
+                try {
+                    await systemLogsService.create({
+                        action: 'PRODUCT_PRICE_CHANGE_REQUESTED',
+                        details: {
+                            productId: product.id,
+                            sku: product.sku,
+                            price: pricingCfg.price,
+                            costPrice: pricingCfg.costPrice,
+                            salePrice: pricingCfg.salePrice,
+                        },
+                        module: 'Inventory',
+                        user_name: user?.name || 'Unknown',
+                        employee_id: user?.id,
+                        site_id: product.siteId,
+                        country_code: activeCountry,
+                        entity_type: 'inventory_request',
+                        entity_id: product.id,
                     });
-                }
-                showToast(`Pricing saved & synced across all network sites for SKU ${product.sku}`, 'success');
-            } else if (pricingCfg.scope === 'custom') {
-                const targetSiteIds = new Set(pricingCfg.selectedSiteIds);
-                if (targetSiteIds.size === 0) {
-                    showToast('Please select at least one store location to apply pricing', 'error');
-                    setIsSaving(false);
-                    return;
+                } catch (logErr) {
+                    logger.warn('ProductControlModal', 'Failed to log pricing request', { error: String(logErr) });
                 }
 
-                const matchingProducts = (allProducts || []).filter(
-                    p => (p.sku === product.sku || p.id === product.id) && targetSiteIds.has(p.siteId || (p as any).site_id || '')
-                );
-
-                if (matchingProducts.length === 0) {
+                showToast('Pricing changes submitted for CEO approval', 'info');
+            } else {
+                // CEO direct edit: strictly partitioned by country
+                if (pricingCfg.scope === 'single') {
                     await updateProduct({ ...product, ...updates });
-                } else {
-                    await Promise.all(
-                        matchingProducts.map(p => updateProduct({ ...p, ...updates }))
+                    showToast(`Pricing saved for ${product.location || 'this location'}`, 'success');
+                } else if (pricingCfg.scope === 'all') {
+                    await updateProduct({ ...product, ...updates });
+                    if (product.sku) {
+                        const nationalSiteIds = (sites || []).map(s => s.id);
+                        await updatePricesBySKU(product.sku, updates, nationalSiteIds);
+                    }
+                    showToast(`Pricing synchronized across all national locations for SKU ${product.sku}`, 'success');
+                } else if (pricingCfg.scope === 'custom') {
+                    const targetSiteIds = new Set(pricingCfg.selectedSiteIds);
+                    if (targetSiteIds.size === 0) {
+                        showToast('Please select at least one store location to apply pricing', 'error');
+                        setIsSaving(false);
+                        return;
+                    }
+
+                    const matchingProducts = (allProducts || []).filter(
+                        p => (p.sku === product.sku || p.id === product.id) && targetSiteIds.has(p.siteId || (p as any).site_id || '')
                     );
+
+                    if (matchingProducts.length === 0) {
+                        await updateProduct({ ...product, ...updates });
+                    } else {
+                        await Promise.all(
+                            matchingProducts.map(p => updateProduct({ ...p, ...updates }))
+                        );
+                    }
+
+                    showToast(`Pricing updated across ${targetSiteIds.size} selected location(s)`, 'success');
                 }
-
-                const totalSitesCount = (sites || []).length || targetSiteIds.size;
-                const unselectedCount = Math.max(0, totalSitesCount - targetSiteIds.size);
-
-                showToast(
-                    `Pricing updated across ${targetSiteIds.size} selected location(s)${unselectedCount > 0 ? ` (${unselectedCount} left unchanged)` : ''}`,
-                    'success'
-                );
             }
 
             await refreshData();
@@ -214,13 +293,60 @@ export const ProductControlModal: React.FC<Props> = ({ product, isOpen, onClose,
     };
 
     const handleSaveStock = async () => {
+        if (!product) return;
         setIsSaving(true);
         try {
-            await productsService.update(product.id, {
+            const stockUpdates = {
                 minStock: stockCfg.minStock === '' ? undefined : parseInt(stockCfg.minStock),
                 maxStock: stockCfg.maxStock === '' ? undefined : parseInt(stockCfg.maxStock),
-            });
-            showToast('Stock policies saved', 'success');
+            };
+
+            if (!canDirectEdit) {
+                // Zero Autonomous Authority: Submit stock policy update for CEO approval
+                await inventoryRequestsService.create({
+                    productId: product.id,
+                    productName: product.name,
+                    productSku: product.sku,
+                    siteId: product.siteId || (product as any).site_id || '',
+                    countryCode: activeCountry,
+                    changeType: 'edit',
+                    requestedBy: user?.name || 'Unknown',
+                    requestedAt: new Date().toISOString(),
+                    status: 'pending',
+                    proposedChanges: { ...product, ...stockUpdates },
+                    adjustmentReason: `Stock policy update: Min ${stockCfg.minStock}, Max ${stockCfg.maxStock}`,
+                });
+
+                try {
+                    await systemLogsService.create({
+                        action: 'PRODUCT_STOCK_POLICY_REQUESTED',
+                        details: {
+                            productId: product.id,
+                            sku: product.sku,
+                            minStock: stockCfg.minStock,
+                            maxStock: stockCfg.maxStock,
+                        },
+                        module: 'Inventory',
+                        user_name: user?.name || 'Unknown',
+                        employee_id: user?.id,
+                        site_id: product.siteId,
+                        country_code: activeCountry,
+                        entity_type: 'inventory_request',
+                        entity_id: product.id,
+                    });
+                } catch (logErr) {
+                    logger.warn('ProductControlModal', 'Failed to log stock policy request', { error: String(logErr) });
+                }
+
+                showToast('Stock policy changes submitted for CEO approval', 'info');
+            } else {
+                await updateProduct({
+                    ...product,
+                    ...stockUpdates,
+                });
+                showToast('Stock policies saved', 'success');
+            }
+
             await refreshData();
             onSaved?.();
         } catch (err: any) {

@@ -6,7 +6,7 @@ export const optionalNumber = z.number().optional().nullable();
 
 export const ProductSchema = z.object({
     id: z.string().optional(),
-    siteId: z.string().uuid(),
+    siteId: z.string().optional(),
     name: z.string().min(1, 'Name is required'),
     sku: z.string().min(2, 'SKU is required'),
     barcode: optionalString,

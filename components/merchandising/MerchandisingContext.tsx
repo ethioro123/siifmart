@@ -23,7 +23,7 @@ export interface MerchandisingContextType {
    refreshData: () => Promise<void>;
    addNotification: (type: any, message: string) => void;
    updateProduct: (p: Product) => Promise<any>;
-   updatePricesBySKU: (sku: string, updates: any) => Promise<any>;
+   updatePricesBySKU: (sku: string, updates: any, targetSiteIds?: string[]) => Promise<any>;
    addPromotion: (promo: any) => Promise<any>;
    currencySymbol: string;
    activeCountry: string;

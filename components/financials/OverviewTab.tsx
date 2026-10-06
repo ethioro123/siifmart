@@ -100,7 +100,7 @@ export const OverviewTab: React.FC = () => {
                 <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-6 lg:col-span-2">
                     <h4 className="text-[var(--theme-text-primary)] font-bold text-sm uppercase tracking-wider mb-6">Cashflow Trend</h4>
                     <div className="h-[300px] w-full min-w-0 relative">
-                        <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
+                        <ResponsiveContainer width="100%" height={300} minWidth={0} minHeight={300}>
                             <AreaChart data={cashflowData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                                 <CartesianGrid strokeDasharray="3 3" stroke="var(--theme-border)" opacity={0.6} />
                                 <XAxis dataKey="name" stroke="var(--theme-text-secondary)" fontSize={10} tickLine={false} />
@@ -122,7 +122,7 @@ export const OverviewTab: React.FC = () => {
                     {expenseBreakdownData.length > 0 ? (
                         <>
                             <div className="h-[200px] w-full min-w-0 relative flex items-center justify-center">
-                                <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
+                                <ResponsiveContainer width="100%" height={200} minWidth={0} minHeight={200}>
                                     <PieChart>
                                         <Pie
                                             data={expenseBreakdownData}

@@ -28,13 +28,28 @@ const queryClient = new QueryClient({
 
 const persister = createIDBPersister();
 
-// Automatically purge stale Service Worker registrations when running on native Android/Capacitor
-if (typeof navigator !== 'undefined' && 'serviceWorker' in navigator) {
+// 1. Auto-recover from chunk 404s when a new version is pushed to live web
+if (typeof window !== 'undefined') {
+  window.addEventListener('vite:preloadError', (event) => {
+    console.warn('Vite chunk preload error detected (new live deployment), reloading...', event);
+    window.location.reload();
+  });
+}
+
+// 2. Automatically activate updated Service Worker on live web and purge on Capacitor
+if (typeof window !== 'undefined' && 'serviceWorker' in navigator) {
   const isCapacitor = (window as any).Capacitor?.isNativePlatform?.() || (window as any).Capacitor?.getPlatform?.() === 'android';
   if (isCapacitor) {
     navigator.serviceWorker.getRegistrations().then(registrations => {
       for (const reg of registrations) {
         reg.unregister();
+      }
+    });
+  } else {
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+      if (!(window as any).__swReloading) {
+        (window as any).__swReloading = true;
+        window.location.reload();
       }
     });
   }
@@ -76,7 +91,7 @@ root.render(
           </FulfillmentDataProvider>
         </DataProvider>
       </StoreProvider>
-      <ReactQueryDevtools initialIsOpen={false} />
+      {import.meta.env.DEV && <ReactQueryDevtools initialIsOpen={false} />}
     </PersistQueryClientProvider>
   </GlobalErrorBoundary>
 );

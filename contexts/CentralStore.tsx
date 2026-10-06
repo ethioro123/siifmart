@@ -319,27 +319,41 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       }
     };
 
-    // Check every 5 seconds
-    const interval = setInterval(checkServerHealth, 5000);
-    checkServerHealth(); // Immediate check
+    // Check every 60 seconds (throttled to reduce unnecessary egress)
+    // Only query when document is visible; trigger immediately on network reconnect
+    const runHealthCheckIfVisible = () => {
+      if (typeof document !== 'undefined' && document.hidden) return;
+      checkServerHealth();
+    };
 
-    return () => clearInterval(interval);
+    const interval = setInterval(runHealthCheckIfVisible, 60000);
+    checkServerHealth(); // Immediate check on mount
+
+    window.addEventListener('online', checkServerHealth);
+
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('online', checkServerHealth);
+    };
   }, []);
 
   const checkSession = async () => {
-    // FAIL-SAFE: Ensure loading is ALWAYS set to false within 15 seconds
+    // FAIL-SAFE: Ensure loading is ALWAYS set to false within 6 seconds on slow mobile
     const failSafeTimeout = setTimeout(() => {
-      logger.warn('CentralStore', '⚠️ CentralStore: Session check fail-safe triggered after 15s');
+      logger.warn('CentralStore', 'Session check fail-safe triggered');
       setLoading(false);
-    }, 15000);
+    }, 6000);
 
     try {
       const session = await authService.getSession();
       if (session?.user) {
         await syncUserProfile();
+      } else {
+        setUser(null);
       }
-    } catch (error) {
-      logger.error('CentralStore', 'Session check failed:', error);
+    } catch (error: any) {
+      logger.warn('CentralStore', 'Session check failed:', error?.message);
+      setUser(null);
     } finally {
       clearTimeout(failSafeTimeout);
       setLoading(false);

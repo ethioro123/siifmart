@@ -142,4 +142,40 @@ describe('Procurement Packaging & Sellable Units', () => {
             expect(formatPackBadge({ packQuantity: 6, caseSize: 4, packageType: 'Carton' })).toBe('6 units × 4 packs (Carton)');
         });
     });
+
+    describe('formatPOItemDescription', () => {
+        it('does NOT append physical net weight to discrete general merchandise (e.g. Amazon Kindle 217g -> Amazon Kindle)', () => {
+            const kindle = {
+                brand: 'Amazon',
+                productName: 'Kindle',
+                category: 'Electronics & Batteries',
+                size: '217',
+                unit: 'g',
+                customAttributes: {
+                    physical: {
+                        netWeight: '217',
+                        sizeType: 'g'
+                    }
+                }
+            };
+            expect(formatPOItemDescription(kindle)).toBe('Amazon Kindle');
+        });
+
+        it('appends pack size for consumable groceries where size differentiates the SKU', () => {
+            const flour = {
+                brand: 'Juma',
+                productName: 'Ugali Flour',
+                category: 'Pantry & Groceries',
+                size: '1',
+                unit: 'kg',
+                customAttributes: {
+                    physical: {
+                        netWeight: '1',
+                        sizeType: 'kg'
+                    }
+                }
+            };
+            expect(formatPOItemDescription(flour)).toBe('Juma Ugali Flour 1kg');
+        });
+    });
 });

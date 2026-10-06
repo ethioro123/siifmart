@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ChevronDown, Trophy, TrendingUp, Zap, Crown, ClipboardList, Archive, PackageCheck, Truck, BoxIcon, User, MapPin, Globe, LogOut, Sun, Moon, RefreshCw, ShieldCheck, Lock } from 'lucide-react';
+import { ChevronDown, Trophy, TrendingUp, Zap, Crown, ClipboardList, Archive, PackageCheck, Truck, BoxIcon, User, MapPin, Globe, LogOut, Sun, Moon, RefreshCw, ShieldCheck, Lock, AlertTriangle } from 'lucide-react';
 import { formatRole } from '../../utils/formatting';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { useData } from '../../contexts/DataContext';
@@ -81,15 +81,19 @@ export function UserMenu({
 
    return (
       <div className="relative flex-shrink-0" ref={dropdownRef}>
-         <div
+         <button
+            type="button"
             onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
-            className={`flex items-center gap-1.5 sm:gap-2 md:gap-3 px-1 sm:px-2 md:px-4 py-1 sm:py-1.5 md:py-2 rounded-full border transition-all duration-300 cursor-pointer flex-shrink-0 ${isUserMenuOpen
-               ? 'bg-[#2C5E3B]/10 dark:bg-white/10 border-[#2C5E3B]/40 dark:border-[#A9CBA2]/30'
-               : 'bg-white/60 dark:bg-white/5 border-[#E2DCCE] dark:border-white/10 hover:border-[#2C5E3B]/40 dark:hover:border-[#A9CBA2]/30'
+            aria-label="User Profile and Menu"
+            aria-expanded={isUserMenuOpen}
+            aria-haspopup="true"
+            className={`flex items-center gap-1.5 sm:gap-2 md:gap-3 px-1.5 sm:px-2 md:px-4 py-1 sm:py-1.5 md:py-2 rounded-full border transition-all duration-300 cursor-pointer flex-shrink-0 touch-manipulation min-h-[44px] ${isUserMenuOpen
+               ? 'bg-[var(--theme-bg-subtle)] border-[var(--theme-border-focus)]'
+               : 'bg-[var(--theme-bg-card)] border-[var(--theme-border)] hover:border-[var(--theme-border-focus)]'
             }`}
          >
             <div className="relative">
-               <div className="w-7 h-7 md:w-9 md:h-9 rounded-full bg-gradient-to-br from-[#2C5E3B] to-[#4A855A] dark:from-[#A9CBA2] dark:to-[#4A855A] flex items-center justify-center text-white dark:text-[#1E3B24] font-black text-xs md:text-sm shadow-lg transition-transform overflow-hidden border border-white/20">
+               <div className="w-7 h-7 md:w-9 md:h-9 rounded-full bg-[var(--theme-primary)] text-[var(--theme-primary-text)] flex items-center justify-center font-black text-xs md:text-sm shadow-md transition-transform overflow-hidden border border-white/20">
                   {user.avatar ? (
                      <img
                         src={user.avatar}
@@ -104,27 +108,27 @@ export function UserMenu({
                      user.name.charAt(0).toUpperCase()
                   )}
                </div>
-               <div className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 md:w-3 md:h-3 bg-green-500 border-2 border-white dark:border-[#1E2822] rounded-full animate-pulse"></div>
+               <div className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 md:w-3 md:h-3 bg-emerald-500 border-2 border-[var(--theme-bg-panel)] rounded-full animate-pulse"></div>
             </div>
 
-            <div className="hidden md:flex flex-col">
-               <span className="text-sm font-bold text-[#1E3F27] dark:text-white leading-none">{user.name}</span>
-               <span className="text-[10px] font-mono text-stone-500 dark:text-gray-400 uppercase tracking-wider mt-0.5 leading-none">{formatRole(user.role)}</span>
+            <div className="hidden md:flex flex-col text-left">
+               <span className="text-sm font-bold text-[var(--theme-text-primary)] leading-none">{user.name}</span>
+               <span className="text-[10px] font-mono text-[var(--theme-text-secondary)] uppercase tracking-wider mt-0.5 leading-none">{formatRole(user.role)}</span>
             </div>
 
-            <ChevronDown size={14} className={`hidden md:block text-stone-400 dark:text-gray-500 transition-transform duration-300 ${isUserMenuOpen ? 'rotate-180' : ''}`} />
-         </div>
+            <ChevronDown size={14} className={`hidden md:block text-[var(--theme-text-secondary)] transition-transform duration-300 ${isUserMenuOpen ? 'rotate-180' : ''}`} />
+         </button>
 
          {/* Dropdown Menu */}
          {isUserMenuOpen && (
             <div
-               className="absolute right-0 mt-2 w-64 bg-white dark:bg-[#1E2822] border border-[#E2DCCE] dark:border-white/10 rounded-xl shadow-[0_20px_50px_rgba(0,0,0,0.15)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.5)] z-[150] animate-in fade-in slide-in-from-top-2 overflow-hidden backdrop-blur-xl"
+               className="fixed sm:absolute right-2 sm:right-0 top-[3.75rem] sm:top-full mt-0 sm:mt-2 w-[calc(100vw-1rem)] sm:w-72 max-w-[320px] bg-[var(--theme-bg-panel)] border border-[var(--theme-border)] rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.25)] z-[150] animate-in fade-in slide-in-from-top-2 overflow-y-auto max-h-[calc(100vh-4.5rem)] custom-scrollbar backdrop-blur-xl"
                onClick={() => setIsUserMenuOpen(false)}
             >
-                  <div className="p-4 border-b border-[#E2DCCE] dark:border-white/5 bg-stone-50/60 dark:bg-black/20" onClick={(e) => e.stopPropagation()}>
-                     <p className="text-xs font-bold text-stone-400 dark:text-gray-400 uppercase tracking-wider mb-1">Signed in as</p>
-                     <p className="text-sm font-bold text-[#1E3F27] dark:text-white truncate">{user.name}</p>
-                     <p className="text-[10px] font-mono text-[#2C5E3B] dark:text-[#A9CBA2] uppercase mb-1">{formatRole(user.role)}</p>
+                  <div className="p-4 border-b border-[var(--theme-border)] bg-[var(--theme-bg-subtle)]" onClick={(e) => e.stopPropagation()}>
+                     <p className="text-xs font-bold text-[var(--theme-text-secondary)] uppercase tracking-wider mb-1">Signed in as</p>
+                     <p className="text-sm font-bold text-[var(--theme-text-primary)] truncate">{user.name}</p>
+                     <p className="text-[10px] font-mono text-[var(--theme-primary)] uppercase mb-1">{formatRole(user.role)}</p>
                      
                      {user.loginLocation && (() => {
                         const geofence = evaluateGeofence(user.loginLocation, currentMarket);
@@ -134,11 +138,15 @@ export function UserMenu({
                                  ? 'bg-red-500/10 text-red-600 dark:text-red-400 border-red-500/20'
                                  : geofence.isOffPremise
                                     ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20'
-                                    : 'text-stone-500 dark:text-gray-400/80 bg-stone-100/50 dark:bg-white/5 border-[#E2DCCE]/50 dark:border-white/5'
+                                    : 'text-[var(--theme-text-secondary)] bg-[var(--theme-bg-card)] border-[var(--theme-border)]'
                            }`}>
-                              <MapPin size={9} className={geofence.isForeignAnomaly ? 'text-red-500 shrink-0' : 'text-[#2C5E3B] dark:text-[#A9CBA2] shrink-0'} />
+                              {geofence.isForeignAnomaly ? (
+                                 <AlertTriangle size={9} className="text-red-500 shrink-0" />
+                              ) : (
+                                 <MapPin size={9} className="text-[var(--theme-primary)] shrink-0" />
+                              )}
                               <span className="truncate max-w-[200px]" title={geofence.anomalyReason || user.loginLocation}>
-                                 {geofence.isForeignAnomaly ? `⚠️ Foreign: ${geofence.displayLocation}` : user.loginLocation}
+                                 {geofence.isForeignAnomaly ? `Foreign: ${geofence.displayLocation}` : user.loginLocation}
                               </span>
                            </div>
                         );
@@ -147,44 +155,44 @@ export function UserMenu({
                      {/* Performance Highlights */}
                      {currentUserPoints && (
                         <div className="grid grid-cols-2 gap-2 mt-2">
-                           <div className="bg-stone-100/60 dark:bg-white/5 rounded-lg p-2 border border-[#E2DCCE] dark:border-white/5">
+                           <div className="bg-[var(--theme-bg-subtle)] rounded-lg p-2 border border-[var(--theme-border)]">
                               <div className="flex items-center gap-1.5 mb-1">
-                                 <Trophy size={10} className="text-yellow-500 dark:text-yellow-400" />
-                                 <span className="text-[9px] font-bold text-stone-500 dark:text-gray-400 uppercase">Points</span>
+                                 <Trophy size={10} className="text-amber-500" />
+                                 <span className="text-[9px] font-bold text-[var(--theme-text-secondary)] uppercase">Points</span>
                               </div>
-                              <p className="text-sm font-black text-[#1E3F27] dark:text-white">{currentUserPoints.totalPoints?.toLocaleString() || 0}</p>
+                              <p className="text-sm font-black text-[var(--theme-text-primary)]">{currentUserPoints.totalPoints?.toLocaleString() || 0}</p>
                            </div>
-                           <div className="bg-stone-100/60 dark:bg-white/5 rounded-lg p-2 border border-[#E2DCCE] dark:border-white/5">
+                           <div className="bg-[var(--theme-bg-subtle)] rounded-lg p-2 border border-[var(--theme-border)]">
                               <div className="flex items-center gap-1.5 mb-1">
-                                 <TrendingUp size={10} className="text-[#2C5E3B] dark:text-[#A9CBA2]" />
-                                 <span className="text-[9px] font-bold text-stone-500 dark:text-gray-400 uppercase">Rank</span>
+                                 <TrendingUp size={10} className="text-blue-500" />
+                                 <span className="text-[9px] font-bold text-[var(--theme-text-secondary)] uppercase">Rank</span>
                               </div>
-                              <p className="text-sm font-black text-[#1E3F27] dark:text-white">#{currentUserPoints.rank || '-'}</p>
+                              <p className="text-sm font-black text-[var(--theme-text-primary)]">#{currentUserPoints.rank || '-'}</p>
                            </div>
-                           <div className="col-span-2 bg-[#2C5E3B]/10 dark:bg-[#A9CBA2]/5 rounded-lg p-2 border border-[#2C5E3B]/20 dark:border-[#A9CBA2]/20 flex items-center justify-between">
+                           <div className="col-span-2 bg-[var(--theme-bg-subtle)] rounded-lg p-2 border border-[var(--theme-border)] flex items-center justify-between">
                               <div className="flex items-center gap-2">
-                                 <div className="w-6 h-6 rounded-full bg-[#2C5E3B]/20 dark:bg-[#A9CBA2]/10 flex items-center justify-center text-[#2C5E3B] dark:text-[#A9CBA2]">
+                                 <div className="w-6 h-6 rounded-full bg-[var(--theme-primary)] text-[var(--theme-primary-text)] flex items-center justify-center">
                                     <Zap size={12} fill="currentColor" />
                                  </div>
                                  <div>
-                                    <p className="text-[9px] font-bold text-[#2C5E3B] dark:text-[#A9CBA2] uppercase leading-none">Level {currentUserPoints.level || 1}</p>
-                                    <p className="text-[10px] font-black text-[#1E3F27] dark:text-white leading-tight">{currentUserPoints.levelTitle || 'Rookie'}</p>
+                                    <p className="text-[9px] font-bold text-[var(--theme-text-secondary)] uppercase leading-none">Level {currentUserPoints.level || 1}</p>
+                                    <p className="text-[10px] font-black text-[var(--theme-text-primary)] leading-tight">{currentUserPoints.levelTitle || 'Rookie'}</p>
                                  </div>
                               </div>
-                              <Crown size={14} className="text-yellow-500 dark:text-yellow-400 opacity-50" />
+                              <Crown size={14} className="text-amber-500 opacity-60" />
                            </div>
                         </div>
                      )}
 
                      {/* Today's Completed Jobs Card */}
                      {todayJobsTotal > 0 && (
-                        <div className="mt-3 bg-gradient-to-br from-blue-500/10 via-cyan-500/5 to-transparent rounded-xl p-3 border border-blue-500/15">
+                        <div className="mt-3 bg-blue-500/10 rounded-xl p-3 border border-blue-500/20">
                            <div className="flex items-center justify-between mb-2">
                               <div className="flex items-center gap-1.5">
                                  <ClipboardList size={11} className="text-blue-400" />
                                  <span className="text-[9px] font-black text-blue-400 uppercase tracking-widest">Today's Missions</span>
                               </div>
-                              <span className="text-[10px] font-mono font-black text-blue-900 dark:text-white bg-blue-500/20 px-1.5 py-0.5 rounded border border-blue-500/20">
+                              <span className="text-[10px] font-mono font-black text-blue-500 bg-blue-500/20 px-1.5 py-0.5 rounded border border-blue-500/20">
                                  {todayJobsTotal}
                               </span>
                            </div>
@@ -194,10 +202,10 @@ export function UserMenu({
                                     j.type === 'PICK' ? <PackageCheck size={10} /> :
                                        j.type === 'RECEIVE' ? <Truck size={10} /> :
                                           <BoxIcon size={10} />;
-                                 const color = j.type === 'PUTAWAY' ? 'text-blue-700 dark:text-blue-300 bg-blue-500/15 border-blue-500/20' :
-                                    j.type === 'PICK' ? 'text-purple-700 dark:text-purple-300 bg-purple-500/15 border-purple-500/20' :
-                                       j.type === 'RECEIVE' ? 'text-green-700 dark:text-green-300 bg-green-500/15 border-green-500/20' :
-                                          'text-stone-600 dark:text-gray-300 bg-white/5 border-white/10';
+                                 const color = j.type === 'PUTAWAY' ? 'text-blue-500 bg-blue-500/15 border-blue-500/20' :
+                                    j.type === 'PICK' ? 'text-purple-500 bg-purple-500/15 border-purple-500/20' :
+                                       j.type === 'RECEIVE' ? 'text-emerald-500 bg-emerald-500/15 border-emerald-500/20' :
+                                          'text-[var(--theme-text-secondary)] bg-[var(--theme-bg-card)] border-[var(--theme-border)]';
                                  return (
                                     <div key={j.type} className={`flex items-center gap-1.5 px-2 py-1 rounded-lg border text-[10px] font-bold ${color}`}>
                                        {icon}
@@ -215,7 +223,7 @@ export function UserMenu({
                   <div className="p-2">
                      <button
                         onClick={() => { navigate('/profile'); setIsUserMenuOpen(false); }}
-                        className="w-full flex items-center gap-3 px-3 py-2 text-sm text-stone-600 dark:text-gray-300 hover:text-[#2C5E3B] dark:hover:text-white hover:bg-stone-100 dark:hover:bg-white/5 rounded-lg transition-colors"
+                        className="w-full flex items-center gap-3 px-3 py-2 text-sm text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-subtle)] rounded-lg transition-colors cursor-pointer"
                      >
                         <User size={16} />
                         <span>My Profile</span>
@@ -224,7 +232,7 @@ export function UserMenu({
                      {(user.role === 'super_admin' || (user.role as string) === 'CEO') && (
                         <button
                            onClick={() => { navigate('/location-select'); setIsUserMenuOpen(false); }}
-                           className="w-full flex items-center gap-3 px-3 py-2 text-sm text-stone-600 dark:text-gray-300 hover:text-[#2C5E3B] dark:hover:text-white hover:bg-stone-100 dark:hover:bg-white/5 rounded-lg transition-colors"
+                           className="w-full flex items-center gap-3 px-3 py-2 text-sm text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-subtle)] rounded-lg transition-colors cursor-pointer"
                         >
                            <MapPin size={16} />
                            <span>Switch Location</span>
@@ -233,11 +241,11 @@ export function UserMenu({
 
                      {/* Market Instance Switcher (CEO Dual Market vs Staff Locked) */}
                      <div
-                        className="mt-2 px-3 py-2 border-t border-[#E2DCCE] dark:border-white/5"
+                        className="mt-2 px-3 py-2 border-t border-[var(--theme-border)]"
                         onClick={(e) => e.stopPropagation()}
                      >
                         <div className="flex items-center justify-between mb-1.5">
-                           <p className="text-[10px] font-bold text-stone-400 dark:text-gray-500 uppercase tracking-widest">
+                           <p className="text-[10px] font-bold text-[var(--theme-text-muted)] uppercase tracking-widest">
                               Market Instance
                            </p>
                            {isCeoUser ? (
@@ -251,14 +259,14 @@ export function UserMenu({
                                  </span>
                               )
                            ) : (
-                              <span className="text-[9px] font-bold uppercase tracking-wider text-stone-500 dark:text-stone-400 bg-stone-500/10 px-1.5 py-0.5 rounded border border-stone-500/20 flex items-center gap-1">
+                              <span className="text-[9px] font-bold uppercase tracking-wider text-[var(--theme-text-muted)] bg-[var(--theme-bg-card)] px-1.5 py-0.5 rounded border border-[var(--theme-border)] flex items-center gap-1">
                                  <Lock size={8} /> Branch Locked
                               </span>
                            )}
                         </div>
 
                         {isCeoUser ? (
-                           <div className="grid grid-cols-2 gap-1.5 p-1 bg-stone-100/80 dark:bg-white/5 rounded-xl border border-[#E2DCCE] dark:border-white/10 max-h-40 overflow-y-auto custom-scrollbar">
+                           <div className="grid grid-cols-2 gap-1.5 p-1 bg-[var(--theme-bg-subtle)] rounded-xl border border-[var(--theme-border)] max-h-40 overflow-y-auto custom-scrollbar">
                               {getRegisteredCountries().map((prof) => (
                                  <button
                                     key={prof.code}
@@ -267,8 +275,8 @@ export function UserMenu({
                                     onClick={() => handleSwitchMarket(prof.code)}
                                     className={`flex items-center justify-center gap-1.5 py-1.5 px-2 rounded-lg text-xs font-bold transition-all cursor-pointer ${
                                        currentMarket === prof.code
-                                          ? 'bg-white dark:bg-[#2C5E3B] text-[#1E3F27] dark:text-white shadow-xs border border-[#E2DCCE] dark:border-transparent'
-                                          : 'text-stone-500 dark:text-stone-400 hover:text-stone-800 dark:hover:text-white'
+                                          ? 'bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)] shadow-xs border border-[var(--theme-border)]'
+                                          : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)]'
                                     } ${isSwitchingMarket ? 'opacity-50 cursor-wait' : ''}`}
                                     title={prof.name}
                                  >
@@ -278,12 +286,12 @@ export function UserMenu({
                               ))}
                            </div>
                         ) : (
-                           <div className="flex items-center justify-between bg-stone-100/60 dark:bg-white/5 rounded-lg px-2.5 py-1.5 border border-[#E2DCCE] dark:border-white/5">
-                              <span className="text-xs font-bold text-[#1E3F27] dark:text-white flex items-center gap-1.5">
+                           <div className="flex items-center justify-between bg-[var(--theme-bg-subtle)] rounded-lg px-2.5 py-1.5 border border-[var(--theme-border)]">
+                              <span className="text-xs font-bold text-[var(--theme-text-primary)] flex items-center gap-1.5">
                                  <span>{currentMarketProfile.flag}</span>
                                  <span className="truncate max-w-[150px]">{currentMarketProfile.name}</span>
                               </span>
-                              <span className="text-[10px] font-mono text-stone-400 font-semibold">
+                              <span className="text-[10px] font-mono text-[var(--theme-text-secondary)] font-semibold">
                                  {currentMarketProfile.currencySymbol}
                               </span>
                            </div>
@@ -292,35 +300,35 @@ export function UserMenu({
 
                      {/* Language Switcher */}
                      <div
-                        className="mt-2 px-3 py-2 border-t border-[#E2DCCE] dark:border-white/5"
+                        className="mt-2 px-3 py-2 border-t border-[var(--theme-border)]"
                         onClick={(e) => e.stopPropagation()}
                      >
                         <div className="flex items-center justify-between mb-2">
-                           <p className="text-[10px] font-bold text-stone-400 dark:text-gray-500 uppercase tracking-widest">Display Language</p>
-                           <span className="text-[10px] font-mono font-bold text-[#2C5E3B] dark:text-[#A9CBA2] flex items-center gap-1">
+                           <p className="text-[10px] font-bold text-[var(--theme-text-muted)] uppercase tracking-widest">Display Language</p>
+                           <span className="text-[10px] font-mono font-bold text-[var(--theme-primary)] flex items-center gap-1">
                               {currentMarketProfile.flag} {currentMarketProfile.code}
                            </span>
                         </div>
                         {availableLanguages.length <= 1 ? (
-                           <div className="flex items-center justify-between bg-stone-100/60 dark:bg-white/5 rounded-lg px-2.5 py-2 border border-[#E2DCCE] dark:border-white/5">
-                              <span className="text-xs font-bold text-[#1E3F27] dark:text-white flex items-center gap-1.5">
-                                 <Globe size={13} className="text-stone-400" /> {currentMarketProfile.supportedLanguages[0]?.label || 'English'}
+                           <div className="flex items-center justify-between bg-[var(--theme-bg-subtle)] rounded-lg px-2.5 py-2 border border-[var(--theme-border)]">
+                              <span className="text-xs font-bold text-[var(--theme-text-primary)] flex items-center gap-1.5">
+                                 <Globe size={13} className="text-[var(--theme-text-muted)]" /> {currentMarketProfile.supportedLanguages[0]?.label || 'English'}
                               </span>
                               <span className="text-[9px] font-bold uppercase tracking-wider text-amber-600 bg-amber-500/10 px-1.5 py-0.5 rounded border border-amber-500/20">
                                  Locked
                               </span>
                            </div>
                         ) : (
-                           <div className="flex items-center gap-2 bg-stone-100/60 dark:bg-white/5 rounded-lg p-1.5 border border-[#E2DCCE] dark:border-white/5 hover:border-[#2C5E3B]/30 dark:hover:border-[#A9CBA2]/30 transition-all">
-                              <Globe size={14} className="text-stone-400 dark:text-gray-400" />
+                           <div className="flex items-center gap-2 bg-[var(--theme-bg-subtle)] rounded-lg p-1.5 border border-[var(--theme-border)] hover:border-[var(--theme-border-focus)] transition-all">
+                              <Globe size={14} className="text-[var(--theme-text-muted)]" />
                               <select
                                  value={language}
                                  onChange={(e) => setLanguage(e.target.value as any)}
-                                 className="bg-transparent text-[#1E3F27] dark:text-white text-xs outline-none border-none flex-1 cursor-pointer font-bold"
+                                 className="bg-transparent text-[var(--theme-text-primary)] text-xs outline-none border-none flex-1 cursor-pointer font-bold"
                                  title="Select Language"
                               >
                                  {availableLanguages.map(lang => (
-                                    <option key={lang.code} value={lang.code} className="bg-white dark:bg-gray-800">
+                                    <option key={lang.code} value={lang.code} className="bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)]">
                                        {lang.label} ({lang.nativeLabel})
                                     </option>
                                  ))}
@@ -329,18 +337,18 @@ export function UserMenu({
                         )}
                      </div>
                       {/* Theme and Refresh shortcuts */}
-                      <div className="mt-2 pt-2 border-t border-[#E2DCCE] dark:border-white/5 space-y-1">
+                      <div className="mt-2 pt-2 border-t border-[var(--theme-border)] space-y-1">
                          {toggleTheme && (
                             <button
                                type="button"
                                onClick={toggleTheme}
-                               className="w-full flex items-center justify-between px-3 py-2 text-sm text-stone-600 dark:text-gray-300 hover:text-[#2C5E3B] dark:hover:text-white hover:bg-stone-100 dark:hover:bg-white/5 rounded-lg transition-colors cursor-pointer"
+                               className="w-full flex items-center justify-between px-3 py-2 text-sm text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-subtle)] rounded-lg transition-colors cursor-pointer"
                             >
                                <div className="flex items-center gap-3">
                                   {theme === 'dark' ? <Sun size={16} className="text-amber-500" /> : <Moon size={16} className="text-stone-500" />}
                                   <span>{theme === 'dark' ? 'Light Mode' : 'Dark Mode'}</span>
                                </div>
-                               <span className="text-[10px] font-mono text-stone-400 dark:text-gray-500 uppercase">{theme}</span>
+                               <span className="text-[10px] font-mono text-[var(--theme-text-muted)] uppercase">{theme}</span>
                             </button>
                          )}
 
@@ -348,7 +356,7 @@ export function UserMenu({
                             <button
                                type="button"
                                onClick={onRefresh}
-                               className="w-full flex items-center gap-3 px-3 py-2 text-sm text-stone-600 dark:text-gray-300 hover:text-[#2C5E3B] dark:hover:text-white hover:bg-stone-100 dark:hover:bg-white/5 rounded-lg transition-colors cursor-pointer"
+                               className="w-full flex items-center gap-3 px-3 py-2 text-sm text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-subtle)] rounded-lg transition-colors cursor-pointer"
                             >
                                <RefreshCw size={16} />
                                <span>Reload Data</span>
@@ -357,10 +365,10 @@ export function UserMenu({
                       </div>
                    </div>
 
-                  <div className="p-2 border-t border-[#E2DCCE] dark:border-white/5">
+                  <div className="p-2 border-t border-[var(--theme-border)]">
                      <button
                         onClick={() => { logout(); setIsUserMenuOpen(false); }}
-                        className="w-full flex items-center gap-3 px-3 py-2 text-sm text-red-500 dark:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"
+                        className="w-full flex items-center gap-3 px-3 py-2 text-sm text-red-500 dark:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors cursor-pointer"
                      >
                         <LogOut size={16} />
                         <span>Sign Out</span>

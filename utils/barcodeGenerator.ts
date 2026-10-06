@@ -29,7 +29,7 @@ export const generateBarcodeCanvas = (
 
     // Use CODE128B for alphanumeric values with special chars (hyphens, etc.)
     const safeFormat = format === 'CODE128' ? 'CODE128B' : format;
-    const safeWidth = Math.max(width, 2);
+    const safeWidth = width && width > 0 ? Math.max(width, 1) : 2;
 
     try {
         JsBarcode(canvas, value, {
@@ -39,7 +39,7 @@ export const generateBarcodeCanvas = (
             displayValue,
             fontSize,
             textMargin,
-            margin: Math.max(margin, 4),
+            margin: typeof margin === 'number' ? Math.max(margin, 0) : 4,
             background: '#ffffff',
             lineColor: '#000000'
         });
@@ -425,8 +425,9 @@ export const generateBarcodeSVG = (
     // CODE128 auto-mode can switch charsets mid-barcode causing scan misreads
     // e.g. "GN-019" scanned as "N/019" due to charset switching artifacts
     const safeFormat = format === 'CODE128' ? 'CODE128B' : format;
-    // Ensure minimum bar width for reliable scanning (too thin = scanner misread)
-    const safeWidth = Math.max(width, 2);
+    // Allow widths down to 1 for high-density labels; default to 2
+    const safeWidth = width && width > 0 ? Math.max(width, 1) : 2;
+    const safeMargin = typeof margin === 'number' ? Math.max(margin, 0) : 4;
 
     const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
 
@@ -446,7 +447,7 @@ export const generateBarcodeSVG = (
             displayValue,
             fontSize,
             textMargin,
-            margin: Math.max(margin, 4),
+            margin: safeMargin,
             background: '#ffffff',
             lineColor: '#000000',
             valid: function (valid) {
@@ -472,7 +473,7 @@ export const generateBarcodeSVG = (
                 width: safeWidth,
                 height,
                 displayValue: false, // <-- Disable text on retry
-                margin: Math.max(margin, 4),
+                margin: safeMargin,
                 background: '#ffffff',
                 lineColor: '#000000'
             });

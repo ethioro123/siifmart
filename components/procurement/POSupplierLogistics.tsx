@@ -79,14 +79,14 @@ export const POSupplierLogistics: React.FC<POSupplierLogisticsProps> = ({
                         <button
                             type="button"
                             onClick={() => setIsManualVendor(false)}
-                            className={`flex-1 py-2 text-xs font-black rounded-lg transition-all cursor-pointer ${!isManualVendor ? 'bg-[var(--theme-primary)] text-[var(--theme-primary-text)] shadow-sm' : 'text-[var(--theme-text-muted)] hover:text-[var(--theme-text-primary)]'}`}
+                            className={`flex-1 py-2 text-xs font-black rounded-lg transition-all cursor-pointer ${!isManualVendor ? 'bg-[var(--theme-primary)] text-[var(--theme-primary-text)] shadow-sm' : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)]'}`}
                         >
                             REGISTERED VENDOR
                         </button>
                         <button
                             type="button"
                             onClick={() => setIsManualVendor(true)}
-                            className={`flex-1 py-2 text-xs font-black rounded-lg transition-all cursor-pointer ${isManualVendor ? 'bg-[var(--theme-primary)] text-[var(--theme-primary-text)] shadow-sm' : 'text-[var(--theme-text-muted)] hover:text-[var(--theme-text-primary)]'}`}
+                            className={`flex-1 py-2 text-xs font-black rounded-lg transition-all cursor-pointer ${isManualVendor ? 'bg-[var(--theme-primary)] text-[var(--theme-primary-text)] shadow-sm' : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)]'}`}
                         >
                             ONE-OFF / EXTERNAL
                         </button>
@@ -94,7 +94,7 @@ export const POSupplierLogistics: React.FC<POSupplierLogisticsProps> = ({
 
                     {!isManualVendor ? (
                         <div className="space-y-1.5">
-                            <label className="text-[10px] text-[var(--theme-text-muted)] uppercase font-bold tracking-wider block">Select Supplier</label>
+                            <label className="text-[10px] text-[var(--theme-text-secondary)] uppercase font-bold tracking-wider block">Select Supplier</label>
                             <div className="relative">
                                 <select
                                     className="w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-4 py-2.5 text-xs text-[var(--theme-text-primary)] focus:border-[var(--theme-accent)] outline-none transition-all appearance-none cursor-pointer font-bold"
@@ -102,19 +102,19 @@ export const POSupplierLogistics: React.FC<POSupplierLogisticsProps> = ({
                                     onChange={(e) => setNewPOSupplier(e.target.value)}
                                     title="Select Supplier"
                                 >
-                                    <option value="" className="text-[var(--theme-text-muted)]">Choose from vendor directory...</option>
+                                    <option value="" className="text-[var(--theme-text-secondary)] bg-[var(--theme-bg-panel)]">Choose from vendor directory...</option>
                                     {allSuppliers.map(s => <option key={s.id} value={s.id} className="text-[var(--theme-text-primary)] bg-[var(--theme-bg-panel)]">{s.name}</option>)}
                                 </select>
-                                <ChevronDown size={14} className="absolute right-4 top-1/2 -translate-y-1/2 text-[var(--theme-text-muted)] pointer-events-none" />
+                                <ChevronDown size={14} className="absolute right-4 top-1/2 -translate-y-1/2 text-[var(--theme-text-secondary)] pointer-events-none" />
                             </div>
                         </div>
                     ) : (
                         <div className="space-y-1.5">
-                            <label className="text-[10px] text-[var(--theme-text-muted)] uppercase font-bold tracking-wider block">Vendor Name</label>
+                            <label className="text-[10px] text-[var(--theme-text-secondary)] uppercase font-bold tracking-wider block">Vendor Name</label>
                             <input
                                 type="text"
                                 placeholder="Enter external vendor name..."
-                                className="w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-4 py-2.5 text-xs text-[var(--theme-text-primary)] focus:border-[var(--theme-accent)] outline-none transition-all placeholder:text-[var(--theme-text-muted)] font-bold"
+                                className="w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-4 py-2.5 text-xs text-[var(--theme-text-primary)] focus:border-[var(--theme-accent)] outline-none transition-all placeholder:text-[var(--theme-text-secondary)]/70 font-bold"
                                 value={manualVendorName}
                                 onChange={(e) => setManualVendorName(e.target.value)}
                             />
@@ -147,29 +147,29 @@ export const POSupplierLogistics: React.FC<POSupplierLogisticsProps> = ({
                     {/* Destination Dropdown */}
                     <div className="space-y-1.5 relative" ref={siteDropdownRef}>
                         <div className="flex items-center justify-between">
-                            <label className="text-[10px] text-[var(--theme-text-muted)] uppercase font-bold tracking-wider block">
+                            <label className="text-[10px] text-[var(--theme-text-secondary)] uppercase font-bold tracking-wider block">
                                 Receiving Facility <span className="text-amber-600 dark:text-amber-400 font-bold">(Warehouse / DC Only)</span>
                             </label>
-                            <span className="text-[9px] text-[var(--theme-text-muted)] italic">No direct store delivery</span>
+                            <span className="text-[9px] text-[var(--theme-text-secondary)] italic">No direct store delivery</span>
                         </div>
 
                         <div
                             className={`w-full bg-[var(--theme-bg-subtle)] border rounded-xl px-4 py-2.5 text-xs text-[var(--theme-text-primary)] cursor-pointer flex justify-between items-center transition-all ${isSiteDropdownOpen ? 'border-[var(--theme-accent)]' : 'border-[var(--theme-border)]'}`}
                             onClick={() => setIsSiteDropdownOpen(!isSiteDropdownOpen)}
                         >
-                            <span className={destinationSiteIds.length === 0 ? 'text-[var(--theme-text-muted)] text-xs' : 'font-black text-[var(--theme-text-primary)]'}>
+                            <span className={destinationSiteIds.length === 0 ? 'text-[var(--theme-text-secondary)] text-xs' : 'font-black text-[var(--theme-text-primary)]'}>
                                 {destinationSiteIds.length === 0
                                     ? 'Select receiving Warehouse or DC...'
                                     : `${destinationSiteIds.length} storage hub(s) assigned`}
                             </span>
-                            {isSiteDropdownOpen ? <ChevronUp size={14} className="text-[var(--theme-accent)]" /> : <ChevronDown size={14} className="text-[var(--theme-text-muted)]" />}
+                            {isSiteDropdownOpen ? <ChevronUp size={14} className="text-[var(--theme-accent)]" /> : <ChevronDown size={14} className="text-[var(--theme-text-secondary)]" />}
                         </div>
 
                         {/* Dropdown Menu */}
                         {isSiteDropdownOpen && (
                             <div className="absolute z-50 w-full mt-2 bg-[var(--theme-bg-panel)] border border-[var(--theme-border)] rounded-2xl shadow-xl p-2 max-h-56 overflow-y-auto">
                                 <div className="flex justify-between items-center px-2 py-1 border-b border-[var(--theme-border-subtle)] mb-1.5">
-                                    <span className="text-[10px] text-[var(--theme-text-muted)] font-bold uppercase">
+                                    <span className="text-[10px] text-[var(--theme-text-secondary)] font-bold uppercase">
                                         Storage Hubs & DCs {sites.length > 0 && `(${sites[0]?.country === 'KE' ? 'Kenya Hub' : 'Ethiopia HQ'})`}
                                     </span>
                                     <div className="flex gap-2">
@@ -185,7 +185,7 @@ export const POSupplierLogistics: React.FC<POSupplierLogisticsProps> = ({
                                         >
                                             Select All Hubs
                                         </button>
-                                        <span className="text-[var(--theme-text-muted)]">|</span>
+                                        <span className="text-[var(--theme-text-secondary)]">|</span>
                                         <button
                                             type="button"
                                             onClick={() => setDestinationSiteIds([])}
@@ -223,7 +223,7 @@ export const POSupplierLogistics: React.FC<POSupplierLogisticsProps> = ({
                                                     {s.type === 'Distribution Center' ? 'DC' : 'Warehouse'}
                                                 </span>
                                             </div>
-                                            <p className="text-[10px] text-[var(--theme-text-muted)] font-mono mt-0.5">
+                                            <p className="text-[10px] text-[var(--theme-text-secondary)] font-mono mt-0.5">
                                                 {formatDisplaySiteId(s)} • {s.address || 'Central Storage'}
                                             </p>
                                         </div>
@@ -263,7 +263,7 @@ export const POSupplierLogistics: React.FC<POSupplierLogisticsProps> = ({
                     {/* Date & Priority */}
                     <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-1.5">
-                            <label className="text-[10px] text-[var(--theme-text-muted)] uppercase font-bold tracking-wider block">Expected Delivery</label>
+                            <label className="text-[10px] text-[var(--theme-text-secondary)] uppercase font-bold tracking-wider block">Expected Delivery</label>
                             <input
                                 type="date"
                                 className="w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 py-2 text-xs text-[var(--theme-text-primary)] focus:border-[var(--theme-accent)] outline-none font-bold"
@@ -273,7 +273,7 @@ export const POSupplierLogistics: React.FC<POSupplierLogisticsProps> = ({
                             />
                         </div>
                         <div className="space-y-1.5">
-                            <label className="text-[10px] text-[var(--theme-text-muted)] uppercase font-bold tracking-wider block">Order Priority</label>
+                            <label className="text-[10px] text-[var(--theme-text-secondary)] uppercase font-bold tracking-wider block">Order Priority</label>
                             <div className="relative">
                                 <select
                                     className="w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 py-2 text-xs text-[var(--theme-text-primary)] focus:border-[var(--theme-accent)] outline-none appearance-none font-bold cursor-pointer"
@@ -281,12 +281,12 @@ export const POSupplierLogistics: React.FC<POSupplierLogisticsProps> = ({
                                     onChange={(e) => setPoPriority(e.target.value as any)}
                                     title="Priority"
                                 >
-                                    <option value="Low">Low</option>
-                                    <option value="Normal">Normal</option>
-                                    <option value="High">High Priority</option>
-                                    <option value="Urgent">Urgent (Critical)</option>
+                                    <option value="Low" className="bg-[var(--theme-bg-panel)] text-[var(--theme-text-primary)]">Low</option>
+                                    <option value="Normal" className="bg-[var(--theme-bg-panel)] text-[var(--theme-text-primary)]">Normal</option>
+                                    <option value="High" className="bg-[var(--theme-bg-panel)] text-[var(--theme-text-primary)]">High Priority</option>
+                                    <option value="Urgent" className="bg-[var(--theme-bg-panel)] text-[var(--theme-text-primary)]">Urgent (Critical)</option>
                                 </select>
-                                <ChevronDown size={14} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[var(--theme-text-muted)] pointer-events-none" />
+                                <ChevronDown size={14} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[var(--theme-text-secondary)] pointer-events-none" />
                             </div>
                         </div>
                     </div>

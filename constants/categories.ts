@@ -58,7 +58,7 @@ export const GROCERY_CATEGORIES: Record<string, string[]> = {
 };
 
 export const COMMON_UNITS = [
-  'piece', 'kg', 'g', 'liter', 'ml', 'box', 'pack', 'carton',
+  'piece', 'unit', 'kg', 'g', 'liter', 'ml', 'box', 'pack', 'carton',
   'bag', 'bottle', 'can', 'jar', 'dozen', 'bundle', 'tray'
 ];
 

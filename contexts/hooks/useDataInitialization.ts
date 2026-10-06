@@ -197,14 +197,17 @@ export function useDataInitialization({
     }
   }, [setSettings]);
 
+  const hasLoadedGlobalRef = React.useRef(false);
+
   const loadGlobalData = useCallback(async () => {
     try {
+      // Egress optimization: fetch reasonable working batches rather than dumping 5000 full records
       const [allProds, allSls, allOrds, allEmps, allSupps] = await Promise.all([
-        productsService.getAll(undefined, 5000).then(res => res.data),
-        salesService.getAll(undefined, 5000).then(res => res.data),
-        purchaseOrdersService.getAll(undefined, 5000).then(res => res.data),
+        productsService.getAll(undefined, 250).then(res => res.data),
+        salesService.getAll(undefined, 100).then(res => res.data),
+        purchaseOrdersService.getAll(undefined, 100).then(res => res.data),
         employeesService.getAll(),
-        suppliersService.getAll(1000).then(res => res.data)
+        suppliersService.getAll(100).then(res => res.data)
       ]);
 
       setAllProducts(allProds);
@@ -217,7 +220,7 @@ export function useDataInitialization({
         setIsDataInitialLoading(false);
       }
     } catch (error) {
-      logger.error('useDataInitialization', '❌ Failed to load global data:', error);
+      logger.error('useDataInitialization', 'Failed to load global data:', error);
       if (!activeSiteId) {
         setLoadError('Failed to load global data. Check connection.');
         setIsDataInitialLoading(false);
@@ -238,12 +241,14 @@ export function useDataInitialization({
   // Load Global Data once on mount (background)
   useEffect(() => {
     if (!user) return;
+    if (hasLoadedGlobalRef.current) return;
+    hasLoadedGlobalRef.current = true;
 
     loadGlobalData();
 
     const quickTimeout = setTimeout(() => {
       if (isDataInitialLoading) {
-        logger.warn('useDataInitialization', '⚡ 5s fail-safe triggered - Unblocking UI for authenticated user');
+        logger.warn('useDataInitialization', '5s fail-safe triggered - Unblocking UI for authenticated user');
         setIsDataInitialLoading(false);
       }
     }, 5000);

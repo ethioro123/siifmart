@@ -81,16 +81,18 @@ export function ActivityCenter({
    return (
       <div className="relative" ref={notifRef}>
          <button
+            type="button"
             onClick={() => setIsNotifOpen(!isNotifOpen)}
-            className={`p-2 rounded-full border transition-all duration-300 relative group ${isNotifOpen
-               ? 'bg-[#2C5E3B]/20 dark:bg-[#A9CBA2]/20 border-[#2C5E3B]/50 dark:border-[#A9CBA2]/50 text-[#2C5E3B] dark:text-[#A9CBA2]'
-               : 'bg-white/60 dark:bg-white/5 border-[#E2DCCE] dark:border-white/10 text-stone-500 dark:text-gray-400 hover:text-[#2C5E3B] dark:hover:text-white hover:border-[#2C5E3B]/30 dark:hover:border-white/20'
+            aria-label="Activity Center and Notifications"
+            aria-expanded={isNotifOpen}
+            className={`min-w-[44px] min-h-[44px] p-2 rounded-full border transition-all duration-300 relative group flex items-center justify-center touch-manipulation cursor-pointer ${isNotifOpen
+               ? 'bg-[var(--theme-bg-subtle)] border-[var(--theme-border-focus)] text-[var(--theme-text-primary)]'
+               : 'bg-[var(--theme-bg-card)] border-[var(--theme-border)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:border-[var(--theme-border-focus)]'
             }`}
-            aria-label="Notifications"
          >
             <Bell size={18} className={isNotifOpen ? 'animate-bounce' : 'group-hover:rotate-12 transition-transform'} />
             {totalAlerts > 0 && (
-               <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white text-[10px] font-black flex items-center justify-center rounded-full border-2 border-white dark:border-[#1E2822] shadow-lg animate-pulse">
+               <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white text-[10px] font-black flex items-center justify-center rounded-full border-2 border-[var(--theme-bg-panel)] shadow-sm animate-pulse">
                   {totalAlerts}
                </span>
             )}
@@ -98,29 +100,29 @@ export function ActivityCenter({
 
          {isNotifOpen && (
             <div
-               className="fixed sm:absolute left-2 right-2 sm:left-auto sm:right-0 top-[3.75rem] sm:top-full mt-0 sm:mt-2 w-auto sm:w-96 max-w-[400px] bg-white dark:bg-[#1E2822] border border-[#E2DCCE] dark:border-white/10 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.12)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.5)] z-[150] animate-in fade-in slide-in-from-top-4 overflow-hidden backdrop-blur-xl"
+               className="fixed sm:absolute left-2 right-2 sm:left-auto sm:right-0 top-[3.75rem] sm:top-full mt-0 sm:mt-2 w-auto sm:w-96 max-w-[400px] bg-[var(--theme-bg-panel)] border border-[var(--theme-border)] rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.25)] z-[150] animate-in fade-in slide-in-from-top-4 overflow-hidden backdrop-blur-xl"
                onClick={(e) => e.stopPropagation()}
             >
                   {/* Header */}
-                  <div className="p-4 border-b border-[#E2DCCE] dark:border-white/5 bg-stone-50/60 dark:bg-black/20">
+                  <div className="p-4 border-b border-[var(--theme-border)] bg-[var(--theme-bg-subtle)]">
                      <div className="flex items-center justify-between mb-4">
                         <div className="flex items-center gap-2">
-                           <Layout size={16} className="text-[#2C5E3B] dark:text-[#A9CBA2]" />
-                           <h4 className="text-sm font-black text-[#1E3F27] dark:text-white uppercase tracking-widest">Activity Center</h4>
+                           <Layout size={16} className="text-[var(--theme-primary)]" />
+                           <h4 className="text-sm font-black text-[var(--theme-text-primary)] uppercase tracking-widest">Activity Center</h4>
                         </div>
                         <div className="flex items-center gap-3">
                            {notifTab === 'all' && filteredNotifications.length > 0 && (
                               <>
                                  <button
                                     onClick={handleMarkAllRead}
-                                    className="text-[10px] font-bold text-[#2C5E3B] dark:text-[#A9CBA2] hover:text-[#1E3F27] dark:hover:text-white uppercase transition-colors"
+                                    className="text-[10px] font-bold text-[var(--theme-primary)] hover:opacity-80 uppercase transition-opacity cursor-pointer"
                                  >
                                     Mark all read
                                  </button>
-                                 <div className="w-px h-3 bg-white/10" />
+                                 <div className="w-px h-3 bg-[var(--theme-border)]" />
                                  <button
                                     onClick={handleClearAll}
-                                    className="text-[10px] font-bold text-red-500 hover:text-red-400 uppercase transition-colors"
+                                    className="text-[10px] font-bold text-red-500 hover:text-red-400 uppercase transition-colors cursor-pointer"
                                  >
                                     Clear all
                                  </button>
@@ -128,7 +130,7 @@ export function ActivityCenter({
                            )}
                            <button 
                               onClick={() => setIsNotifOpen(false)} 
-                              className="text-gray-500 hover:text-white"
+                              className="text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] cursor-pointer"
                               title="Close Activity Center"
                               aria-label="Close"
                            >
@@ -138,10 +140,10 @@ export function ActivityCenter({
                      </div>
 
                      {/* Tabs */}
-                     <div className="flex p-1 bg-stone-100/60 dark:bg-black/40 rounded-lg border border-[#E2DCCE] dark:border-white/5">
+                     <div className="flex p-1 bg-[var(--theme-bg-panel)] rounded-xl border border-[var(--theme-border)]">
                         <button
                            onClick={() => setNotifTab('all')}
-                           className={`flex-1 flex items-center justify-center gap-2 py-1.5 text-[10px] font-black uppercase tracking-wider rounded-md transition-all ${notifTab === 'all' ? 'bg-[#2C5E3B] dark:bg-[#A9CBA2] text-white dark:text-[#1E3B24]' : 'text-stone-500 dark:text-gray-400 hover:text-[#1E3F27] dark:hover:text-white'}`}
+                           className={`flex-1 flex items-center justify-center gap-2 py-1.5 text-[10px] font-black uppercase tracking-wider rounded-lg transition-all cursor-pointer ${notifTab === 'all' ? 'bg-[var(--theme-primary)] text-[var(--theme-primary-text)]' : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)]'}`}
                         >
                            <Bell size={12} />
                            Alerts
@@ -153,7 +155,7 @@ export function ActivityCenter({
                         </button>
                         <button
                            onClick={() => setNotifTab('tasks')}
-                           className={`flex-1 flex items-center justify-center gap-2 py-1.5 text-[10px] font-black uppercase tracking-wider rounded-md transition-all ${notifTab === 'tasks' ? 'bg-[#2C5E3B] dark:bg-[#A9CBA2] text-white dark:text-[#1E3B24]' : 'text-stone-500 dark:text-gray-400 hover:text-[#1E3F27] dark:hover:text-white'}`}
+                           className={`flex-1 flex items-center justify-center gap-2 py-1.5 text-[10px] font-black uppercase tracking-wider rounded-lg transition-all cursor-pointer ${notifTab === 'tasks' ? 'bg-[var(--theme-primary)] text-[var(--theme-primary-text)]' : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)]'}`}
                         >
                            <CheckSquare size={12} />
                            Tasks

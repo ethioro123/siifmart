@@ -46,7 +46,7 @@ export const ProcurementDashboard: React.FC<ProcurementDashboardProps> = ({
             </div>
             <h3 className="text-[11px] text-[var(--theme-text-secondary)] uppercase font-semibold tracking-wider mb-1.5">{title}</h3>
             <div className="text-2xl sm:text-3xl font-semibold text-[var(--theme-text-primary)] font-mono tabular-nums tracking-tight mb-1">{value}</div>
-            <p className="text-xs text-[var(--theme-text-muted)] font-normal">{sub}</p>
+            <p className="text-xs text-[var(--theme-text-secondary)] font-normal">{sub}</p>
         </div>
     );
 
@@ -168,7 +168,11 @@ export const ProcurementDashboard: React.FC<ProcurementDashboardProps> = ({
                                         <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} stroke="none" />
                                     ))}
                                 </Pie>
-                                <Tooltip contentStyle={{ backgroundColor: 'var(--theme-bg-panel)', border: '1px solid var(--theme-border)', borderRadius: '14px', color: 'var(--theme-text-primary)' }} />
+                                <Tooltip
+                                    contentStyle={{ backgroundColor: 'var(--theme-bg-panel)', border: '1px solid var(--theme-border)', borderRadius: '14px', color: 'var(--theme-text-primary)' }}
+                                    itemStyle={{ color: 'var(--theme-text-primary)', fontWeight: 600 }}
+                                    labelStyle={{ color: 'var(--theme-text-secondary)', fontWeight: 600 }}
+                                />
                             </PieChart>
                         </ResponsiveContainer>
                     </div>
@@ -191,9 +195,13 @@ export const ProcurementDashboard: React.FC<ProcurementDashboardProps> = ({
                         <ResponsiveContainer width="100%" height={300} minWidth={0} minHeight={300}>
                             <AreaChart data={metrics.trendData}>
                                 <CartesianGrid strokeDasharray="3 3" stroke="var(--theme-border)" opacity={0.4} vertical={false} />
-                                <XAxis dataKey="name" stroke="var(--theme-text-secondary)" fontSize={12} tickLine={false} axisLine={false} opacity={0.7} />
-                                <YAxis stroke="var(--theme-text-secondary)" fontSize={12} tickLine={false} axisLine={false} opacity={0.7} />
-                                <Tooltip contentStyle={{ backgroundColor: 'var(--theme-bg-panel)', border: '1px solid var(--theme-border)', borderRadius: '14px', color: 'var(--theme-text-primary)' }} />
+                                <XAxis dataKey="name" stroke="var(--theme-text-secondary)" fontSize={12} tickLine={false} axisLine={false} />
+                                <YAxis stroke="var(--theme-text-secondary)" fontSize={12} tickLine={false} axisLine={false} />
+                                <Tooltip
+                                    contentStyle={{ backgroundColor: 'var(--theme-bg-panel)', border: '1px solid var(--theme-border)', borderRadius: '14px', color: 'var(--theme-text-primary)' }}
+                                    itemStyle={{ color: 'var(--theme-text-primary)', fontWeight: 600 }}
+                                    labelStyle={{ color: 'var(--theme-text-secondary)', fontWeight: 600 }}
+                                />
                                 <Area type="monotone" dataKey="spend" stroke={accentColor} fillOpacity={0.12} fill={accentColor} strokeWidth={2} />
                             </AreaChart>
                         </ResponsiveContainer>

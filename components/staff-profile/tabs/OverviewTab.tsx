@@ -315,7 +315,7 @@ export default function OverviewTab({ employee, employeeTasks, sites, isOwnProfi
                     </span>
                 </div>
                 <div className="h-64 w-full min-h-[256px] min-w-0 relative overflow-hidden" role="img" aria-label="Bar chart showing weekly work hours">
-                    <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
+                    <ResponsiveContainer width="100%" height={256} minWidth={0} minHeight={256}>
                         <BarChart data={weeklyActivity}>
                             <CartesianGrid strokeDasharray="3 3" stroke="var(--theme-border)" vertical={false} />
                             <XAxis dataKey="day" stroke="var(--theme-text-secondary)" fontSize={11} tickLine={false} axisLine={false} />

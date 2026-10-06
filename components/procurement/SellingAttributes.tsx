@@ -196,7 +196,7 @@ export const SellingAttributes: React.FC<SellingAttributesProps> = ({
                 <div className="grid grid-cols-6 gap-4">
                     {/* Sell Unit */}
                     <div className="col-span-2 space-y-1.5">
-                        <label className="text-[10px] text-[var(--theme-text-muted)] uppercase font-semibold ml-1 block">
+                        <label className="text-[10px] text-[var(--theme-text-secondary)] uppercase font-semibold ml-1 block">
                             Sell Unit <span className="text-rose-500">*</span>
                         </label>
                         <div className="relative">
@@ -226,25 +226,25 @@ export const SellingAttributes: React.FC<SellingAttributesProps> = ({
                                     }));
                                 }}
                             >
-                                <option value="" className="text-[var(--theme-text-muted)]">Select unit...</option>
+                                <option value="" className="text-[var(--theme-text-secondary)] bg-[var(--theme-bg-panel)]">Select unit...</option>
                                 {(() => {
                                     const groups = getGroupedUnits();
                                     return (
                                         <>
-                                            <optgroup label="Count">
-                                                {groups.count.map(u => <option key={u.code} value={u.code}>{u.label}</option>)}
+                                            <optgroup label="Count" className="bg-[var(--theme-bg-panel)] text-[var(--theme-text-primary)]">
+                                                {groups.count.map(u => <option key={u.code} value={u.code} className="bg-[var(--theme-bg-panel)] text-[var(--theme-text-primary)]">{u.label}</option>)}
                                             </optgroup>
-                                            <optgroup label="Weight">
-                                                {groups.weight.map(u => <option key={u.code} value={u.code}>{u.label}</option>)}
+                                            <optgroup label="Weight" className="bg-[var(--theme-bg-panel)] text-[var(--theme-text-primary)]">
+                                                {groups.weight.map(u => <option key={u.code} value={u.code} className="bg-[var(--theme-bg-panel)] text-[var(--theme-text-primary)]">{u.label}</option>)}
                                             </optgroup>
-                                            <optgroup label="Volume">
-                                                {groups.volume.map(u => <option key={u.code} value={u.code}>{u.label}</option>)}
+                                            <optgroup label="Volume" className="bg-[var(--theme-bg-panel)] text-[var(--theme-text-primary)]">
+                                                {groups.volume.map(u => <option key={u.code} value={u.code} className="bg-[var(--theme-bg-panel)] text-[var(--theme-text-primary)]">{u.label}</option>)}
                                             </optgroup>
                                         </>
                                     );
                                 })()}
                             </select>
-                            <ChevronDown size={14} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[var(--theme-text-muted)] pointer-events-none" />
+                            <ChevronDown size={14} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[var(--theme-text-secondary)] pointer-events-none" />
                         </div>
                         {customItemUnit && (
                             <span className="text-[10px] text-[var(--theme-text-secondary)] ml-1 font-medium">
@@ -256,14 +256,14 @@ export const SellingAttributes: React.FC<SellingAttributesProps> = ({
 
                     {/* Retail Price + Margin */}
                     <div className="col-span-4 space-y-1.5">
-                        <label className="text-[10px] text-[var(--theme-text-muted)] uppercase font-semibold ml-1 block">
+                        <label className="text-[10px] text-[var(--theme-text-secondary)] uppercase font-semibold ml-1 block">
                             Retail Price{showPerUnit ? ` /${unitDef.shortLabel}` : ''} <span className="text-rose-500">*</span>
                         </label>
 
                         {/* Cost per sell unit hint */}
                         {costPerSellUnit !== null && (
                             <div className="rounded-xl px-3 py-1 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)]">
-                                <span className="text-[10px] text-[var(--theme-text-muted)] uppercase font-semibold tracking-tight">Cost/{unitDef.shortLabel}: </span>
+                                <span className="text-[10px] text-[var(--theme-text-secondary)] uppercase font-semibold tracking-tight">Cost/{unitDef.shortLabel}: </span>
                                 <span className="text-[11px] text-[var(--theme-text-primary)] font-mono font-bold tabular-nums">{costPerSellUnit.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                             </div>
                         )}
@@ -271,7 +271,7 @@ export const SellingAttributes: React.FC<SellingAttributesProps> = ({
                         <div className="grid grid-cols-2 gap-3">
                             {/* Margin Input */}
                             <div className="relative">
-                                <label className="text-[9px] text-[var(--theme-text-muted)] uppercase font-semibold ml-1 block mb-0.5">Margin %</label>
+                                <label className="text-[9px] text-[var(--theme-text-secondary)] uppercase font-semibold ml-1 block mb-0.5">Margin %</label>
                                 <input
                                     type="number"
                                     min="0.1"
@@ -282,11 +282,11 @@ export const SellingAttributes: React.FC<SellingAttributesProps> = ({
                                     onChange={e => handleMarginChange(e.target.value)}
                                     placeholder="e.g. 33.5"
                                 />
-                                <Percent size={12} className="absolute right-3.5 bottom-3.5 text-[var(--theme-text-muted)]" />
+                                <Percent size={12} className="absolute right-3.5 bottom-3.5 text-[var(--theme-text-secondary)]" />
                             </div>
                             {/* Retail Price */}
                             <div>
-                                <label className="text-[9px] text-[var(--theme-text-muted)] uppercase font-semibold ml-1 block mb-0.5">Shelf Price</label>
+                                <label className="text-[9px] text-[var(--theme-text-secondary)] uppercase font-semibold ml-1 block mb-0.5">Shelf Price</label>
                                 <input
                                     type="number"
                                     className={`w-full h-11 bg-[var(--theme-bg-subtle)] border ${errors.retail ? 'border-rose-500/50' : 'border-[var(--theme-border)]'} rounded-2xl text-xs text-[var(--theme-text-primary)] font-mono focus:border-[var(--theme-accent)] outline-none transition-all text-center font-bold tabular-nums`}
@@ -308,28 +308,28 @@ export const SellingAttributes: React.FC<SellingAttributesProps> = ({
                 {/* Sell By, Price Type, Flags */}
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 pt-3 border-t border-[var(--theme-border-subtle)]">
                     <div className="col-span-1 space-y-1">
-                        <label className="text-[10px] text-[var(--theme-text-muted)] uppercase font-semibold ml-1 block">Sell By</label>
+                        <label className="text-[10px] text-[var(--theme-text-secondary)] uppercase font-semibold ml-1 block">Sell By</label>
                         <select
                             title="Sell By"
                             className="w-full h-9 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-2.5 text-xs text-[var(--theme-text-primary)] outline-none font-semibold cursor-pointer"
                             value={customAttributes.commercial.sellBy}
                             onChange={e => setCustomAttributes((prev: any) => ({ ...prev, commercial: { ...prev.commercial, sellBy: e.target.value } }))}
                         >
-                            <option value="Unit">Unit</option>
-                            <option value="Weight">Weight</option>
-                            <option value="Volume">Volume</option>
+                            <option value="Unit" className="bg-[var(--theme-bg-panel)] text-[var(--theme-text-primary)]">Unit</option>
+                            <option value="Weight" className="bg-[var(--theme-bg-panel)] text-[var(--theme-text-primary)]">Weight</option>
+                            <option value="Volume" className="bg-[var(--theme-bg-panel)] text-[var(--theme-text-primary)]">Volume</option>
                         </select>
                     </div>
                     <div className="col-span-1 space-y-1">
-                        <label className="text-[10px] text-[var(--theme-text-muted)] uppercase font-semibold ml-1 block">Price Type</label>
+                        <label className="text-[10px] text-[var(--theme-text-secondary)] uppercase font-semibold ml-1 block">Price Type</label>
                         <select
                             title="Price Type"
                             className="w-full h-9 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-2.5 text-xs text-[var(--theme-text-primary)] outline-none font-semibold cursor-pointer"
                             value={customAttributes.commercial.priceType}
                             onChange={e => setCustomAttributes((prev: any) => ({ ...prev, commercial: { ...prev.commercial, priceType: e.target.value } }))}
                         >
-                            <option value="Fixed">Fixed</option>
-                            <option value="Variable">Variable</option>
+                            <option value="Fixed" className="bg-[var(--theme-bg-panel)] text-[var(--theme-text-primary)]">Fixed</option>
+                            <option value="Variable" className="bg-[var(--theme-bg-panel)] text-[var(--theme-text-primary)]">Variable</option>
                         </select>
                     </div>
                     <div className="col-span-2 flex flex-wrap items-center gap-5 pt-3">

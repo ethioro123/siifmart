@@ -65,7 +65,7 @@ export const AddSupplierModal: React.FC<AddSupplierModalProps> = ({ isOpen, onCl
                     <label className="text-[11px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider mb-1.5 block">Supplier Name *</label>
                     <input
                         type="text"
-                        className="w-full h-11 px-3.5 rounded-2xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-xs text-[var(--theme-text-primary)] font-semibold placeholder:text-[var(--theme-text-muted)] focus:outline-none focus:border-[var(--theme-accent)] transition-all"
+                        className="w-full h-11 px-3.5 rounded-2xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-xs text-[var(--theme-text-primary)] font-semibold placeholder:text-[var(--theme-text-secondary)]/70 focus:outline-none focus:border-[var(--theme-accent)] transition-all"
                         placeholder="Enter supplier legal business name"
                         value={newSupName}
                         onChange={e => setNewSupName(e.target.value)}
@@ -80,10 +80,10 @@ export const AddSupplierModal: React.FC<AddSupplierModalProps> = ({ isOpen, onCl
                         title="Select Supplier Type"
                         aria-label="Select Supplier Type"
                     >
-                        <option value="Business">Business / Registered Entity</option>
-                        <option value="Individual">Individual Merchant</option>
-                        <option value="Farmer">Farmer / Cooperative</option>
-                        <option value="One-Time">One-Time / Spot Vendor</option>
+                        <option value="Business" className="bg-[var(--theme-bg-panel)] text-[var(--theme-text-primary)]">Business / Registered Entity</option>
+                        <option value="Individual" className="bg-[var(--theme-bg-panel)] text-[var(--theme-text-primary)]">Individual Merchant</option>
+                        <option value="Farmer" className="bg-[var(--theme-bg-panel)] text-[var(--theme-text-primary)]">Farmer / Cooperative</option>
+                        <option value="One-Time" className="bg-[var(--theme-bg-panel)] text-[var(--theme-text-primary)]">One-Time / Spot Vendor</option>
                     </select>
                 </div>
                 <div className="grid grid-cols-2 gap-3">
@@ -91,7 +91,7 @@ export const AddSupplierModal: React.FC<AddSupplierModalProps> = ({ isOpen, onCl
                         <label className="text-[11px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider mb-1.5 block">Email</label>
                         <input
                             type="email"
-                            className="w-full h-11 px-3.5 rounded-2xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-xs text-[var(--theme-text-primary)] font-semibold placeholder:text-[var(--theme-text-muted)] focus:outline-none focus:border-[var(--theme-accent)] transition-all"
+                            className="w-full h-11 px-3.5 rounded-2xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-xs text-[var(--theme-text-primary)] font-semibold placeholder:text-[var(--theme-text-secondary)]/70 focus:outline-none focus:border-[var(--theme-accent)] transition-all"
                             placeholder="vendor@example.com"
                             value={newSupEmail}
                             onChange={e => setNewSupEmail(e.target.value)}
@@ -101,7 +101,7 @@ export const AddSupplierModal: React.FC<AddSupplierModalProps> = ({ isOpen, onCl
                         <label className="text-[11px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider mb-1.5 block">Phone</label>
                         <input
                             type="tel"
-                            className="w-full h-11 px-3.5 rounded-2xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-xs font-mono text-[var(--theme-text-primary)] font-semibold placeholder:text-[var(--theme-text-muted)] focus:outline-none focus:border-[var(--theme-accent)] transition-all"
+                            className="w-full h-11 px-3.5 rounded-2xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-xs font-mono text-[var(--theme-text-primary)] font-semibold placeholder:text-[var(--theme-text-secondary)]/70 focus:outline-none focus:border-[var(--theme-accent)] transition-all"
                             placeholder="+251 / +254..."
                             value={newSupPhone}
                             onChange={e => setNewSupPhone(e.target.value)}
@@ -112,7 +112,7 @@ export const AddSupplierModal: React.FC<AddSupplierModalProps> = ({ isOpen, onCl
                     <label className="text-[11px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider mb-1.5 block">Category</label>
                     <input
                         type="text"
-                        className="w-full h-11 px-3.5 rounded-2xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-xs text-[var(--theme-text-primary)] font-semibold placeholder:text-[var(--theme-text-muted)] focus:outline-none focus:border-[var(--theme-accent)] transition-all"
+                        className="w-full h-11 px-3.5 rounded-2xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-xs text-[var(--theme-text-primary)] font-semibold placeholder:text-[var(--theme-text-secondary)]/70 focus:outline-none focus:border-[var(--theme-accent)] transition-all"
                         placeholder="e.g. Produce, Grains, Dairy, Packaging"
                         value={newSupCategory}
                         onChange={e => setNewSupCategory(e.target.value)}
@@ -122,7 +122,7 @@ export const AddSupplierModal: React.FC<AddSupplierModalProps> = ({ isOpen, onCl
                     <label className="text-[11px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider mb-1.5 block">Tax ID / TIN / National ID</label>
                     <input
                         type="text"
-                        className="w-full h-11 px-3.5 rounded-2xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-xs font-mono text-[var(--theme-text-primary)] font-semibold placeholder:text-[var(--theme-text-muted)] focus:outline-none focus:border-[var(--theme-accent)] transition-all"
+                        className="w-full h-11 px-3.5 rounded-2xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-xs font-mono text-[var(--theme-text-primary)] font-semibold placeholder:text-[var(--theme-text-secondary)]/70 focus:outline-none focus:border-[var(--theme-accent)] transition-all"
                         placeholder="TIN / National ID (Checked for uniqueness)"
                         value={newSupID}
                         onChange={e => setNewSupID(e.target.value)}
@@ -132,7 +132,7 @@ export const AddSupplierModal: React.FC<AddSupplierModalProps> = ({ isOpen, onCl
                     <p className="text-[11px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider mb-2">Banking & Settlement (Dual-Control)</p>
                     <div className="grid grid-cols-2 gap-3 mb-3">
                         <div>
-                            <label className="text-[10px] font-semibold text-[var(--theme-text-muted)] uppercase mb-1 block">Bank Name</label>
+                            <label className="text-[10px] font-semibold text-[var(--theme-text-secondary)] uppercase mb-1 block">Bank Name</label>
                             <input
                                 type="text"
                                 className="w-full h-10 px-3 rounded-xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-xs text-[var(--theme-text-primary)] font-semibold focus:outline-none focus:border-[var(--theme-accent)]"
@@ -142,7 +142,7 @@ export const AddSupplierModal: React.FC<AddSupplierModalProps> = ({ isOpen, onCl
                             />
                         </div>
                         <div>
-                            <label className="text-[10px] font-semibold text-[var(--theme-text-muted)] uppercase mb-1 block">Account Number</label>
+                            <label className="text-[10px] font-semibold text-[var(--theme-text-secondary)] uppercase mb-1 block">Account Number</label>
                             <input
                                 type="text"
                                 className="w-full h-10 px-3 rounded-xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-xs font-mono text-[var(--theme-text-primary)] font-semibold focus:outline-none focus:border-[var(--theme-accent)]"
@@ -157,7 +157,7 @@ export const AddSupplierModal: React.FC<AddSupplierModalProps> = ({ isOpen, onCl
                     <label className="text-[11px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider mb-1.5 block">Location</label>
                     <input
                         type="text"
-                        className="w-full h-11 px-3.5 rounded-2xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-xs text-[var(--theme-text-primary)] font-semibold placeholder:text-[var(--theme-text-muted)] focus:outline-none focus:border-[var(--theme-accent)] transition-all"
+                        className="w-full h-11 px-3.5 rounded-2xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-xs text-[var(--theme-text-primary)] font-semibold placeholder:text-[var(--theme-text-secondary)]/70 focus:outline-none focus:border-[var(--theme-accent)] transition-all"
                         placeholder="City, District, Commercial Region"
                         value={newSupLocation}
                         onChange={e => setNewSupLocation(e.target.value)}

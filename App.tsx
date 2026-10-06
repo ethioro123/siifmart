@@ -50,6 +50,7 @@ function ModuleLoader() {
 import { native } from './utils/native';
 import { runAutoMigration } from './utils/autoMigrate';
 import { useCapacitor } from './hooks/useCapacitor';
+import { getRoleDashboardRoute } from './utils/roleDashboard';
 
 import { useData } from './contexts/DataContext';
 import { systemConfigService } from './services/supabase.service';
@@ -201,40 +202,7 @@ export default function App() {
             {/* Dashboard - Accessible by all authenticated users, content strictly scoped by role & active site */}
             <Route path="/" element={
               <ProtectedRoute module="dashboard">
-                {(() => {
-                  const activeSiteType = activeSite?.type || '';
-                  const isWarehouse = ['Warehouse', 'Distribution Center', 'WMS', 'Fulfillment Center'].includes(activeSiteType);
-                  const isStore = ['Store', 'Dark Store', 'Retail', 'POS'].includes(activeSiteType);
-
-                  // 0. Clean Mobile / Android Mode: strictly route to WMS Fulfillment or POS Terminal
-                  if (native.isCleanMobileMode()) {
-                    if (isWarehouse) return <Navigate to="/wms-ops" replace />;
-                    return <Navigate to="/pos" replace />;
-                  }
-
-                  // 1. Executive Leadership Default Landing -> Administration Access (/admin) unless scoped to a WMS or POS site
-                  if (user?.role === 'super_admin' || (user?.role as string) === 'CEO' || user?.role === 'regional_manager' || user?.role === 'operations_manager') {
-                    if (isWarehouse) return <Navigate to="/wms-ops" replace />;
-                    if (isStore) return <Navigate to={native.isCleanMobileMode() ? "/pos" : "/pos-dashboard"} replace />;
-                    return <Navigate to="/admin" replace />;
-                  }
-
-                  // 2. Strict Site-Type Redirection for all staff
-                  if (isWarehouse) {
-                    return <Navigate to="/wms-ops" replace />;
-                  }
-                  if (isStore) {
-                    return <Navigate to={native.isCleanMobileMode() ? "/pos" : "/pos-dashboard"} replace />;
-                  }
-
-                  // L2 Specialized Directors
-                  if (user?.role === 'hr_manager' || user?.role === 'hr') return <Navigate to="/employees" replace />;
-                  if (user?.role === 'finance_manager' || user?.role === 'auditor') return <Navigate to="/finance" replace />;
-                  if (user?.role === 'procurement_manager') return <Navigate to="/procurement" replace />;
-                  if (user?.role === 'it_support') return <Navigate to="/settings" replace />;
-
-                  return <Navigate to="/admin" replace />;
-                })()}
+                <Navigate to={getRoleDashboardRoute(user?.role, activeSite?.type)} replace />
               </ProtectedRoute>
             } />
             {/* Dashboard removed - merged into Admin */}

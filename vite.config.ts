@@ -97,11 +97,24 @@ export default defineConfig(() => {
             ]
           },
           workbox: {
-            maximumFileSizeToCacheInBytes: 6000000
+            maximumFileSizeToCacheInBytes: 6000000,
+            cleanupOutdatedCaches: true,
+            clientsClaim: true,
+            skipWaiting: true,
+            navigateFallback: '/index.html',
+            runtimeCaching: [
+              {
+                urlPattern: ({ request }) => request.mode === 'navigate',
+                handler: 'NetworkFirst',
+                options: {
+                  cacheName: 'html-cache',
+                  networkTimeoutSeconds: 3,
+                }
+              }
+            ]
           },
           devOptions: {
-            enabled: true,
-            type: 'module'
+            enabled: false
           }
         })
       ])

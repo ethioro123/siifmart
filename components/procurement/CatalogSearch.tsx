@@ -33,14 +33,14 @@ export const CatalogSearch: React.FC<CatalogSearchProps> = ({
 
     return (
         <div className="space-y-1.5">
-            <label className="text-[10px] text-[var(--theme-text-muted)] uppercase tracking-wider font-semibold ml-1 block">
+            <label className="text-[10px] text-[var(--theme-text-secondary)] uppercase tracking-wider font-semibold ml-1 block">
                 Search Product Catalog
             </label>
             <div className="relative">
-                <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--theme-text-muted)] pointer-events-none" />
+                <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--theme-text-secondary)] pointer-events-none" />
                 <input
                     type="text"
-                    className={`w-full h-11 bg-[var(--theme-bg-subtle)] border ${errors.search ? 'border-rose-500/50' : 'border-[var(--theme-border)]'} rounded-full pl-10 pr-4 text-xs text-[var(--theme-text-primary)] focus:border-[var(--theme-accent)] outline-none placeholder:text-[var(--theme-text-muted)] font-semibold transition-all`}
+                    className={`w-full h-11 bg-[var(--theme-bg-subtle)] border ${errors.search ? 'border-rose-500/50' : 'border-[var(--theme-border)]'} rounded-full pl-10 pr-4 text-xs text-[var(--theme-text-primary)] focus:border-[var(--theme-accent)] outline-none placeholder:text-[var(--theme-text-secondary)]/70 font-semibold transition-all`}
                     placeholder="Type product name, brand, or SKU to search catalog..."
                     value={searchTerm}
                     onChange={(e) => {
@@ -72,7 +72,7 @@ export const CatalogSearch: React.FC<CatalogSearchProps> = ({
                                 >
                                     <div className="flex flex-col">
                                         <span className="text-xs text-[var(--theme-text-primary)] font-semibold group-hover:text-[var(--theme-accent)] transition-colors">{p.name}</span>
-                                        <span className="text-[10px] text-[var(--theme-text-muted)] font-mono uppercase">{p.sku || 'No SKU'}</span>
+                                        <span className="text-[10px] text-[var(--theme-text-secondary)] font-mono font-semibold uppercase">{p.sku || 'No SKU'}</span>
                                     </div>
                                     <div className="flex items-center gap-2">
                                         <span className="text-[10px] text-[var(--theme-text-secondary)] bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] px-2 py-0.5 rounded-full font-mono font-semibold">Stock: {p.stock}</span>
@@ -80,7 +80,7 @@ export const CatalogSearch: React.FC<CatalogSearchProps> = ({
                                 </div>
                             ))
                         ) : (
-                            <div className="px-4 py-3 text-xs text-[var(--theme-text-muted)] text-center italic">No catalog products found matching "{searchTerm}"</div>
+                            <div className="px-4 py-3 text-xs text-[var(--theme-text-secondary)] font-medium text-center italic">No catalog products found matching "{searchTerm}"</div>
                         )}
                     </div>
                 )}

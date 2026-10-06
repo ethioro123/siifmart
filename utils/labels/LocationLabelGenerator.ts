@@ -25,7 +25,8 @@ export const generateLocationLabelHTML = async (
         const lower = s.toLowerCase();
         if (lower === 'small') return 'Small';
         if (lower === 'medium') return 'Medium';
-        if (lower === 'large' || lower === 'xl') return 'Large';
+        if (lower === 'large') return 'Large';
+        if (lower === 'xl') return 'XL';
         return 'Medium';
     };
 
@@ -39,7 +40,7 @@ export const generateLocationLabelHTML = async (
 
     const validSize = normalizedSize(size);
     const validFormat = normalizedFormat(format);
-    const css = SIZE_CSS[validSize];
+    const css = SIZE_CSS[validSize] || SIZE_CSS.Medium;
 
     const isSmall = validSize === 'Small';
     const isMedium = validSize === 'Medium';
@@ -55,12 +56,16 @@ export const generateLocationLabelHTML = async (
         const showBarcode = validFormat === 'Barcode' || validFormat === 'Both';
         const showQR = validFormat === 'QR' || validFormat === 'Both';
 
+        // Tuned for bay/location rack scanning: taller vertically (generous aperture) and narrower horizontally
+        const barcodeWidth = isSmall ? 1.05 : isMedium ? (showQR ? 1.10 : 1.20) : isLarge ? 1.35 : 1.50;
+        const barcodeHeight = isSmall ? 48 : isMedium ? (showQR ? 58 : 64) : isLarge ? 84 : 110;
+
         const barcodeObj = showBarcode ? generateBarcodeSVG(item.barcode, {
             format: 'CODE128',
-            width: isSmall ? 1.3 : isMedium ? 1.35 : 1.8,
-            height: isSmall ? 24 : isMedium ? 24 : 36,
+            width: barcodeWidth,
+            height: barcodeHeight,
             displayValue: false,
-            margin: 0
+            margin: 2
         }) : '';
 
         const qrData = JSON.stringify({
@@ -139,7 +144,7 @@ export const generateLocationLabelHTML = async (
                     <div style="display:flex;align-items:center;justify-content:center;gap:12px;margin-bottom:4px;width:100%;">
                         ${showQR && showBarcode ? `
                             <div class="qr-container" style="width:0.8in;height:0.8in;border:1px solid #000;padding:3px;background:#fff;display:flex;align-items:center;justify-content:center;">${qrObj}</div>
-                            <div style="flex:1;max-width:2.0in;display:flex;flex-direction:column;align-items:center;justify-content:center;">
+                            <div style="flex:1;max-width:2.2in;display:flex;flex-direction:column;align-items:center;justify-content:center;">
                                 <div class="barcode-container" style="display:flex;justify-content:center;width:100%;">${barcodeObj}</div>
                                 <div style="font-family:'SF Mono', 'Fira Code', monospace;font-size:8px;font-weight:900;letter-spacing:1px;color:#000;margin-top:3px;text-align:center;">${item.barcode}</div>
                             </div>
@@ -151,7 +156,7 @@ export const generateLocationLabelHTML = async (
                             </div>
                         ` : ''}
                         ${showBarcode && !showQR ? `
-                            <div style="flex:1;max-width:2.4in;display:flex;flex-direction:column;align-items:center;justify-content:center;">
+                            <div style="flex:1;max-width:2.8in;display:flex;flex-direction:column;align-items:center;justify-content:center;">
                                 <div class="barcode-container" style="display:flex;justify-content:center;width:100%;">${barcodeObj}</div>
                                 <div style="font-family:'SF Mono', 'Fira Code', monospace;font-size:9px;font-weight:900;letter-spacing:1px;color:#000;margin-top:4px;text-align:center;">${item.barcode}</div>
                             </div>

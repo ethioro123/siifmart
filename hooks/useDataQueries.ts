@@ -65,9 +65,9 @@ export const useDataQueries = ({ siteId, enabled, onProgress }: UseDataQueriesPr
         queries: [
             {
                 queryKey: DATA_KEYS.products(siteId),
-                queryFn: trackProgress('products', () => productsService.getAll(siteId, 5000).then(res => res.data)),
+                queryFn: trackProgress('products', () => productsService.getAll(siteId, 500).then(res => res.data)),
                 enabled: enabled && !!siteId,
-                staleTime: 1000 * 60 * 5, // 5 mins
+                staleTime: 1000 * 60 * 10, // 10 mins
             },
             {
                 queryKey: DATA_KEYS.employees(siteId),
@@ -83,23 +83,27 @@ export const useDataQueries = ({ siteId, enabled, onProgress }: UseDataQueriesPr
         queries: [
             {
                 queryKey: DATA_KEYS.orders(siteId),
-                queryFn: trackProgress('orders', () => purchaseOrdersService.getAll(siteId, 5000).then(res => res.data)),
+                queryFn: trackProgress('orders', () => purchaseOrdersService.getAll(siteId, 100).then(res => res.data)),
                 enabled: enabled && !!siteId,
+                staleTime: 1000 * 60 * 10, // 10 mins
             },
             {
                 queryKey: DATA_KEYS.sales(siteId),
-                queryFn: trackProgress('sales', () => salesService.getAll(siteId, 2000).then(res => res.data)),
+                queryFn: trackProgress('sales', () => salesService.getAll(siteId, 100).then(res => res.data)),
                 enabled: enabled && !!siteId,
+                staleTime: 1000 * 60 * 5, // 5 mins
             },
             {
                 queryKey: DATA_KEYS.customers(),
-                queryFn: trackProgress('customers', () => customersService.getAll(2000)),
+                queryFn: trackProgress('customers', () => customersService.getAll(200)),
                 enabled: enabled,
+                staleTime: 1000 * 60 * 15, // 15 mins
             },
             {
                 queryKey: DATA_KEYS.suppliers(),
-                queryFn: trackProgress('suppliers', () => suppliersService.getAll(1000).then(res => res.data)),
+                queryFn: trackProgress('suppliers', () => suppliersService.getAll(100).then(res => res.data)),
                 enabled: enabled,
+                staleTime: 1000 * 60 * 30, // 30 mins
             }
         ]
     });
@@ -109,68 +113,81 @@ export const useDataQueries = ({ siteId, enabled, onProgress }: UseDataQueriesPr
         queries: [
             {
                 queryKey: DATA_KEYS.jobs(siteId),
-                queryFn: trackProgress('jobs', () => wmsJobsService.getAll(siteId, 2000)),
-                enabled: enabled && !!siteId
+                queryFn: trackProgress('jobs', () => wmsJobsService.getAll(siteId, 100)),
+                enabled: enabled && !!siteId,
+                staleTime: 1000 * 60 * 5,
             },
             {
                 queryKey: DATA_KEYS.movements(siteId),
-                queryFn: trackProgress('movements', () => stockMovementsService.getAll(siteId, undefined, 2000).then(res => res.data)),
-                enabled: enabled && !!siteId
+                queryFn: trackProgress('movements', () => stockMovementsService.getAll(siteId, undefined, 100).then(res => res.data)),
+                enabled: enabled && !!siteId,
+                staleTime: 1000 * 60 * 5,
             },
             {
                 queryKey: DATA_KEYS.transfers(siteId),
-                queryFn: trackProgress('transfers', () => transfersService.getAll(siteId, 500)),
-                enabled: enabled && !!siteId
+                queryFn: trackProgress('transfers', () => transfersService.getAll(siteId, 50)),
+                enabled: enabled && !!siteId,
+                staleTime: 1000 * 60 * 5,
             },
             {
                 queryKey: DATA_KEYS.assignments(siteId),
-                queryFn: trackProgress('assignments', () => jobAssignmentsService.getAll(siteId, undefined, 500)),
-                enabled: enabled && !!siteId
+                queryFn: trackProgress('assignments', () => jobAssignmentsService.getAll(siteId, undefined, 50)),
+                enabled: enabled && !!siteId,
+                staleTime: 1000 * 60 * 5,
             },
             {
                 queryKey: DATA_KEYS.workerPoints(siteId),
                 queryFn: trackProgress('workerPoints', () => workerPointsService.getAll(siteId)),
-                enabled: enabled && !!siteId
+                enabled: enabled && !!siteId,
+                staleTime: 1000 * 60 * 10,
             },
             {
                 queryKey: DATA_KEYS.storePoints(),
                 queryFn: trackProgress('storePoints', () => storePointsService.getAll()),
-                enabled: enabled
+                enabled: enabled,
+                staleTime: 1000 * 60 * 10,
             },
             {
                 queryKey: DATA_KEYS.tasks(siteId),
-                queryFn: trackProgress('tasks', () => tasksService.getAll(siteId, 500)),
-                enabled: enabled && !!siteId
+                queryFn: trackProgress('tasks', () => tasksService.getAll(siteId, 50)),
+                enabled: enabled && !!siteId,
+                staleTime: 1000 * 60 * 10,
             },
             {
                 queryKey: DATA_KEYS.schedules(siteId),
                 queryFn: trackProgress('schedules', () => schedulesService.getAll(siteId)),
-                enabled: enabled && !!siteId
+                enabled: enabled && !!siteId,
+                staleTime: 1000 * 60 * 10,
             },
             {
                 queryKey: DATA_KEYS.barcodeApprovals(siteId),
                 queryFn: trackProgress('barcodeApprovals', () => barcodeApprovalsService.getAuditLog(siteId).catch(() => [])),
-                enabled: enabled && !!siteId
+                enabled: enabled && !!siteId,
+                staleTime: 1000 * 60 * 10,
             },
             {
                 queryKey: DATA_KEYS.zones(siteId),
                 queryFn: trackProgress('zones', () => warehouseZonesService.getAll(siteId).catch(() => [])),
-                enabled: enabled && !!siteId
+                enabled: enabled && !!siteId,
+                staleTime: 1000 * 60 * 30,
             },
             {
                 queryKey: DATA_KEYS.expenses(siteId),
-                queryFn: trackProgress('expenses', () => expensesService.getAll(siteId, 500).then(res => res.data)),
-                enabled: enabled && !!siteId
+                queryFn: trackProgress('expenses', () => expensesService.getAll(siteId, 100).then(res => res.data)),
+                enabled: enabled && !!siteId,
+                staleTime: 1000 * 60 * 10,
             },
             {
                 queryKey: DATA_KEYS.systemLogs(),
                 queryFn: trackProgress('systemLogs', () => systemLogsService.getAll().catch(() => [])),
-                enabled: enabled
+                enabled: enabled,
+                staleTime: 1000 * 60 * 10,
             },
             {
                 queryKey: DATA_KEYS.shifts(siteId),
-                queryFn: trackProgress('shifts', () => shiftsService.getAll(siteId, 200).catch(() => [])),
-                enabled: enabled
+                queryFn: trackProgress('shifts', () => shiftsService.getAll(siteId, 50).catch(() => [])),
+                enabled: enabled,
+                staleTime: 1000 * 60 * 5,
             }
         ]
     });

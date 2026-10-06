@@ -85,13 +85,13 @@ export const ProductCatalogModal: React.FC<ProductCatalogModalProps> = ({ isOpen
                 <div className="space-y-3">
                     {/* Search */}
                     <div className="relative">
-                        <Search className="absolute left-3.5 top-1/2 transform -translate-y-1/2 text-[var(--theme-text-muted)] pointer-events-none" size={16} />
+                        <Search className="absolute left-3.5 top-1/2 transform -translate-y-1/2 text-[var(--theme-text-secondary)] pointer-events-none" size={16} />
                         <input
                             type="text"
                             placeholder="Search products by title, brand, or SKU..."
                             value={catalogSearch}
                             onChange={(e) => setCatalogSearch(e.target.value)}
-                            className="w-full h-11 pl-10 pr-4 rounded-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-xs text-[var(--theme-text-primary)] placeholder-[var(--theme-text-muted)] focus:outline-none focus:border-[var(--theme-accent)] transition-all font-medium"
+                            className="w-full h-11 pl-10 pr-4 rounded-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-xs text-[var(--theme-text-primary)] placeholder-[var(--theme-text-secondary)]/70 focus:outline-none focus:border-[var(--theme-accent)] transition-all font-medium"
                         />
                     </div>
 
@@ -125,10 +125,10 @@ export const ProductCatalogModal: React.FC<ProductCatalogModalProps> = ({ isOpen
                                 onChange={(e) => setCatalogSort(e.target.value as any)}
                                 className="h-8 px-3 rounded-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-xs text-[var(--theme-text-primary)] font-semibold focus:outline-none focus:border-[var(--theme-accent)] cursor-pointer"
                             >
-                                <option value="name">Name (A-Z)</option>
-                                <option value="priceAsc">Price (Low-High)</option>
-                                <option value="priceDesc">Price (High-Low)</option>
-                                <option value="stockAsc">Stock (Low-High)</option>
+                                <option value="name" className="bg-[var(--theme-bg-panel)] text-[var(--theme-text-primary)]">Name (A-Z)</option>
+                                <option value="priceAsc" className="bg-[var(--theme-bg-panel)] text-[var(--theme-text-primary)]">Price (Low-High)</option>
+                                <option value="priceDesc" className="bg-[var(--theme-bg-panel)] text-[var(--theme-text-primary)]">Price (High-Low)</option>
+                                <option value="stockAsc" className="bg-[var(--theme-bg-panel)] text-[var(--theme-text-primary)]">Stock (Low-High)</option>
                             </select>
 
                             {/* Stock Filter */}
@@ -170,7 +170,7 @@ export const ProductCatalogModal: React.FC<ProductCatalogModalProps> = ({ isOpen
                                         }}
                                     />
                                 ) : (
-                                    <div className="w-14 h-14 rounded-xl bg-[var(--theme-bg-panel)] border border-[var(--theme-border)] flex items-center justify-center shrink-0 text-[var(--theme-text-muted)]">
+                                    <div className="w-14 h-14 rounded-xl bg-[var(--theme-bg-panel)] border border-[var(--theme-border)] flex items-center justify-center shrink-0 text-[var(--theme-text-secondary)]">
                                         <Package size={22} strokeWidth={1.5} />
                                     </div>
                                 )}
@@ -185,21 +185,21 @@ export const ProductCatalogModal: React.FC<ProductCatalogModalProps> = ({ isOpen
                                             </span>
                                         )}
                                     </div>
-                                    <p className="text-[11px] font-mono text-[var(--theme-text-muted)] mt-0.5">SKU: {product.sku || product.id}</p>
+                                    <p className="text-[11px] font-mono text-[var(--theme-text-secondary)] mt-0.5">SKU: {product.sku || product.id}</p>
                                     <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-2 text-xs">
-                                        <div className="flex items-center gap-1 font-mono">
-                                            <span className="text-[10px] text-[var(--theme-text-muted)] uppercase font-semibold">Retail</span>
-                                            <span className="text-[var(--theme-text-primary)] font-bold tabular-nums">{currencySymbol} {product.price.toLocaleString()}</span>
-                                        </div>
-                                        <div className="flex items-center gap-1 font-mono border-l border-[var(--theme-border)] pl-3">
-                                            <span className="text-[10px] text-[var(--theme-text-muted)] uppercase font-semibold">Cost</span>
-                                            <span className="text-emerald-600 dark:text-emerald-400 font-bold tabular-nums">
-                                                {currencySymbol} {(product.costPrice || (product.price * 0.7)).toLocaleString()}
-                                            </span>
-                                        </div>
-                                        <div className="text-[10px] text-[var(--theme-text-muted)] font-mono border-l border-[var(--theme-border)] pl-3">
-                                            Stock: <span className="text-[var(--theme-text-primary)] font-bold tabular-nums">{product.stock || 0}</span>
-                                        </div>
+                                         <div className="flex items-center gap-1 font-mono">
+                                             <span className="text-[10px] text-[var(--theme-text-secondary)] uppercase font-semibold">Retail</span>
+                                             <span className="text-[var(--theme-text-primary)] font-bold tabular-nums">{currencySymbol} {product.price.toLocaleString()}</span>
+                                         </div>
+                                         <div className="flex items-center gap-1 font-mono border-l border-[var(--theme-border)] pl-3">
+                                             <span className="text-[10px] text-[var(--theme-text-secondary)] uppercase font-semibold">Cost</span>
+                                             <span className="text-emerald-600 dark:text-emerald-400 font-bold tabular-nums">
+                                                 {currencySymbol} {(product.costPrice || (product.price * 0.7)).toLocaleString()}
+                                             </span>
+                                         </div>
+                                         <div className="text-[10px] text-[var(--theme-text-secondary)] font-mono border-l border-[var(--theme-border)] pl-3">
+                                             Stock: <span className="text-[var(--theme-text-primary)] font-bold tabular-nums">{product.stock || 0}</span>
+                                         </div>
                                     </div>
                                 </div>
                             </div>
@@ -217,10 +217,10 @@ export const ProductCatalogModal: React.FC<ProductCatalogModalProps> = ({ isOpen
                 </div>
 
                 {filteredCatalogProducts.length === 0 && (
-                    <div className="text-center py-16 text-[var(--theme-text-muted)] rounded-2xl bg-[var(--theme-bg-subtle)] border border-dashed border-[var(--theme-border)]">
+                    <div className="text-center py-16 text-[var(--theme-text-secondary)] rounded-2xl bg-[var(--theme-bg-subtle)] border border-dashed border-[var(--theme-border)]">
                         <Package size={36} className="mx-auto mb-3 opacity-30 text-[var(--theme-text-secondary)]" strokeWidth={1.5} />
                         <p className="text-xs font-semibold text-[var(--theme-text-primary)]">No products match your filter</p>
-                        <p className="text-[11px] text-[var(--theme-text-muted)] mt-1">Try adjusting your search query or reset filter selections</p>
+                        <p className="text-[11px] text-[var(--theme-text-secondary)] mt-1">Try adjusting your search query or reset filter selections</p>
                         <button
                             onClick={() => {
                                 setCatalogSearch('');

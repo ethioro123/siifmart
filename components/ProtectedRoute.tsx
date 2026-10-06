@@ -5,6 +5,7 @@ import { useData } from '../contexts/DataContext';
 import { canAccessModule, hasPermission, PERMISSIONS } from '../utils/permissions';
 import { native } from '../utils/native';
 import { logger } from '../utils/logger';
+import { getRoleDashboardRoute } from '../utils/roleDashboard';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -77,45 +78,20 @@ export function ProtectedRoute({
 
   // 3. Check module access
   if (module && !canAccessModule(user.role, module)) {
-    const dashboardRoute = getDashboardRoute(user.role, activeSite?.type);
+    const dashboardRoute = getRoleDashboardRoute(user.role, activeSite?.type);
     logger.warn('ProtectedRoute', `User ${user.name} (${user.role}) attempted to access module: ${module}`);
     return <Navigate to={redirectTo || dashboardRoute} replace />;
   }
 
   // 4. Check specific permission
   if (permission && !hasPermission(user.role, permission)) {
-    const dashboardRoute = getDashboardRoute(user.role, activeSite?.type);
+    const dashboardRoute = getRoleDashboardRoute(user.role, activeSite?.type);
     logger.warn('ProtectedRoute', `User ${user.name} (${user.role}) lacks permission: ${permission}`);
     return <Navigate to={redirectTo || dashboardRoute} replace />;
   }
 
   // Access granted
   return <>{children}</>;
-}
-
-/**
- * Helper to determine the correct dashboard route based on role and active site type
- */
-function getDashboardRoute(role: string, siteType?: string): string {
-  const isExecutive = ['super_admin', 'CEO', 'ceo', 'regional_manager', 'operations_manager'].includes(role);
-  if (isExecutive) return '/admin';
-
-  const isWarehouse = siteType && ['Warehouse', 'Distribution Center', 'WMS', 'Fulfillment Center'].includes(siteType);
-  const isStore = siteType && ['Store', 'Dark Store', 'Retail', 'POS'].includes(siteType);
-
-  if (isWarehouse) return '/wms-ops';
-  if (isStore) return native.isCleanMobileMode() ? '/pos' : '/pos-dashboard';
-
-  switch (role) {
-    case 'wms':
-    case 'picker':
-    case 'driver':
-      return '/wms-ops';
-    case 'pos':
-      return '/pos';
-    default:
-      return '/admin';
-  }
 }
 
 export default ProtectedRoute;

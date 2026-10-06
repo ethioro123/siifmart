@@ -330,39 +330,23 @@ input {
    RULE 21: LOW-END MOBILE PERFORMANCE & WAREHOUSE ERGONOMICS (60 FPS)
    Optimized for budget $50-$100 Android smartphones (Tecno, Infinix, Itel, Galaxy A0x)
    ========================================================================== */
-@media (max-width: 1024px) {
-  .backdrop-blur-sm,
-  .backdrop-blur-md,
-  .backdrop-blur-lg,
-  .backdrop-blur-xl,
-  .backdrop-blur-2xl,
-  [class*="backdrop-blur"] {
-    -webkit-backdrop-filter: none !important;
-    backdrop-filter: none !important;
-  }
+/* Confined to low-end Fulfillment mobile warehouse view per Rule 21 */
+.fulfillment-view [class*="backdrop-blur"] {
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
 }
 
 @media (max-width: 768px) {
-  /* Strip expensive GPU rasterization: blur filters drop frame rates on Mali/PowerVR */
-  *,
-  *::before,
-  *::after {
-    backdrop-filter: none !important;
-    -webkit-backdrop-filter: none !important;
-    filter: none !important;
-  }
-
-  /* Completely suppress decorative blur or glowing elements on mobile */
-  [class*="blur-"] {
+  /* Suppress standalone decorative glow blobs on mobile without hiding backdrop-blur surfaces */
+  .decorative-glow,
+  .ambient-glow,
+  [class~="blur-2xl"],
+  [class~="blur-3xl"] {
     display: none !important;
   }
 
-  /* Replace translucent glass surfaces with fast solid opaque fills */
-  .backdrop-blur-md,
-  .backdrop-blur-sm,
-  .backdrop-blur-lg,
-  .backdrop-blur-xl,
-  [class*="backdrop-blur"] {
+  /* Low-end mobile performance fallback: solid background support */
+  .fulfillment-view [class*="backdrop-blur"] {
     backdrop-filter: none !important;
     -webkit-backdrop-filter: none !important;
     background-color: var(--theme-bg-panel) !important;

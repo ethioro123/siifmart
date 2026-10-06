@@ -21,15 +21,15 @@ export const SupplierDetailsModal: React.FC<SupplierDetailsModalProps> = ({ isOp
                 {/* Status & Overview */}
                 <div className="flex items-center gap-4 p-4 rounded-2xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)]">
                     <div className="flex-1">
-                        <p className="text-[10px] text-[var(--theme-text-muted)] uppercase font-semibold tracking-wider">Category</p>
+                        <p className="text-[10px] text-[var(--theme-text-secondary)] uppercase font-semibold tracking-wider">Category</p>
                         <p className="text-[var(--theme-text-primary)] font-bold text-sm mt-0.5">{supplier.category || 'General'}</p>
                     </div>
                     <div className="flex-1">
-                        <p className="text-[10px] text-[var(--theme-text-muted)] uppercase font-semibold tracking-wider">Type</p>
+                        <p className="text-[10px] text-[var(--theme-text-secondary)] uppercase font-semibold tracking-wider">Type</p>
                         <p className="text-[var(--theme-text-primary)] font-bold text-sm mt-0.5">{supplier.type}</p>
                     </div>
                     <div className="flex-1">
-                        <p className="text-[10px] text-[var(--theme-text-muted)] uppercase font-semibold tracking-wider">Status</p>
+                        <p className="text-[10px] text-[var(--theme-text-secondary)] uppercase font-semibold tracking-wider">Status</p>
                         <div className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold border mt-0.5 ${
                             supplier.status === 'Active'
                                 ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20'
@@ -44,17 +44,17 @@ export const SupplierDetailsModal: React.FC<SupplierDetailsModalProps> = ({ isOp
                 {/* Performance Stats */}
                 <div className="grid grid-cols-3 gap-3">
                     <div className="p-3.5 rounded-2xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-center">
-                        <p className="text-[10px] text-[var(--theme-text-muted)] uppercase font-semibold tracking-wider mb-1">Performance</p>
+                        <p className="text-[10px] text-[var(--theme-text-secondary)] uppercase font-semibold tracking-wider mb-1">Performance</p>
                         <div className="flex items-center justify-center gap-1 text-amber-500 font-bold font-mono tabular-nums text-sm">
                             <Star size={13} fill="currentColor" /> {supplier.rating}
                         </div>
                     </div>
                     <div className="p-3.5 rounded-2xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-center">
-                        <p className="text-[10px] text-[var(--theme-text-muted)] uppercase font-semibold tracking-wider mb-1">Lead Time</p>
+                        <p className="text-[10px] text-[var(--theme-text-secondary)] uppercase font-semibold tracking-wider mb-1">Lead Time</p>
                         <p className="text-[var(--theme-text-primary)] font-bold font-mono tabular-nums text-sm">{supplier.leadTime} Days</p>
                     </div>
                     <div className="p-3.5 rounded-2xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-center">
-                        <p className="text-[10px] text-[var(--theme-text-muted)] uppercase font-semibold tracking-wider mb-1">Payment Terms</p>
+                        <p className="text-[10px] text-[var(--theme-text-secondary)] uppercase font-semibold tracking-wider mb-1">Payment Terms</p>
                         <p className="text-[var(--theme-text-primary)] font-bold font-mono text-sm">{supplier.paymentTerms || 'Net 30'}</p>
                     </div>
                 </div>
@@ -78,7 +78,7 @@ export const SupplierDetailsModal: React.FC<SupplierDetailsModalProps> = ({ isOp
                                 <p className="text-[var(--theme-text-primary)] font-semibold text-xs">Call Phone</p>
                                 <p className="text-xs text-[var(--theme-text-secondary)] font-mono">{supplier.phone}</p>
                             </div>
-                            <ExternalLink size={14} className="text-[var(--theme-text-muted)] group-hover:text-[var(--theme-text-primary)] transition-colors" />
+                            <ExternalLink size={14} className="text-[var(--theme-text-secondary)] group-hover:text-[var(--theme-text-primary)] transition-colors" />
                         </button>
                     )}
 
@@ -97,7 +97,7 @@ export const SupplierDetailsModal: React.FC<SupplierDetailsModalProps> = ({ isOp
                                 <p className="text-[var(--theme-text-primary)] font-semibold text-xs">Send Email</p>
                                 <p className="text-xs text-[var(--theme-text-secondary)] truncate">{supplier.email}</p>
                             </div>
-                            <ExternalLink size={14} className="text-[var(--theme-text-muted)] group-hover:text-[var(--theme-text-primary)] transition-colors" />
+                            <ExternalLink size={14} className="text-[var(--theme-text-secondary)] group-hover:text-[var(--theme-text-primary)] transition-colors" />
                         </button>
                     )}
 
@@ -114,9 +114,9 @@ export const SupplierDetailsModal: React.FC<SupplierDetailsModalProps> = ({ isOp
                     )}
 
                     {!supplier.phone && !supplier.email && !supplier.location && (
-                        <div className="text-center py-8 text-[var(--theme-text-muted)]">
+                        <div className="text-center py-8 text-[var(--theme-text-secondary)]">
                             <AlertCircle size={28} className="mx-auto mb-2 opacity-40 text-[var(--theme-text-secondary)]" />
-                            <p className="text-xs font-medium">No contact details on record</p>
+                            <p className="text-xs font-semibold">No contact details on record</p>
                         </div>
                     )}
                 </div>

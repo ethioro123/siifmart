@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { X, Search, ChevronRight, Loader2 } from 'lucide-react';
 import { Product } from '../../../types';
 import { productsService } from '../../../services/supabase.service';
+import { posDB } from '../../../services/db/pos.db';
+import { systemLogsService } from '../../../services/system-logs.service';
 
 interface ReceiveResolutionModalProps {
     resolvingBarcode: { barcode: string; qty: number };
@@ -91,6 +93,33 @@ export const ReceiveResolutionModal: React.FC<ReceiveResolutionModalProps> = ({
                                         }
 
                                         await productsService.update(product.id, { barcodes: updatedBarcodes });
+
+                                        const targetSiteId = product.siteId || (product as any).site_id;
+                                        if (targetSiteId) {
+                                            posDB.getCachedProducts(targetSiteId).then(cached => {
+                                                if (cached && Array.isArray(cached) && cached.length > 0) {
+                                                    const updatedCache = cached.map(p => p.id === product.id ? { ...p, barcodes: updatedBarcodes } : p);
+                                                    posDB.cacheProducts(targetSiteId, updatedCache);
+                                                }
+                                            }).catch(() => {});
+                                        }
+
+                                        systemLogsService.create({
+                                            action: 'PRODUCT_BARCODE_MAPPED',
+                                            details: {
+                                                productId: product.id,
+                                                sku: product.sku,
+                                                name: product.name,
+                                                newBarcode,
+                                                barcodes: updatedBarcodes,
+                                            },
+                                            module: 'Inventory',
+                                            user_name: 'Receiving Staff',
+                                            site_id: targetSiteId,
+                                            entity_type: 'product',
+                                            entity_id: product.id,
+                                        }).catch(() => {});
+
                                         setUnresolvedScans(prev => prev.filter(s => s.barcode !== resolvingBarcode.barcode));
                                         setResolvingBarcode(null);
                                         addNotification('success', `Mapped to ${product.name}`);

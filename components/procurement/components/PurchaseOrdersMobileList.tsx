@@ -44,7 +44,7 @@ export const PurchaseOrdersMobileList: React.FC<PurchaseOrdersMobileListProps> =
         }
         if (p === 'low') {
             return (
-                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[9px] font-semibold tracking-wide uppercase bg-[var(--theme-bg-subtle)] text-[var(--theme-text-muted)] border border-[var(--theme-border)]">
+                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[9px] font-semibold tracking-wide uppercase bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] border border-[var(--theme-border)]">
                     {priority || 'Normal'}
                 </span>
             );
@@ -155,11 +155,11 @@ export const PurchaseOrdersMobileList: React.FC<PurchaseOrdersMobileListProps> =
                         {/* Middle detail: Supplier & Destination */}
                         <div className="grid grid-cols-2 gap-2 text-left bg-[var(--theme-bg-subtle)] p-3 rounded-xl border border-[var(--theme-border-subtle)]">
                             <div>
-                                <span className="text-[9px] text-[var(--theme-text-muted)] font-semibold uppercase tracking-wider block">Supplier</span>
+                                <span className="text-[9px] text-[var(--theme-text-secondary)] font-semibold uppercase tracking-wider block">Supplier</span>
                                 <p className="text-xs text-[var(--theme-text-primary)] font-medium mt-0.5 truncate">{po.supplierName}</p>
                             </div>
                             <div>
-                                <span className="text-[9px] text-[var(--theme-text-muted)] font-semibold uppercase tracking-wider block">Destination</span>
+                                <span className="text-[9px] text-[var(--theme-text-secondary)] font-semibold uppercase tracking-wider block">Destination</span>
                                 <p className="text-xs text-[var(--theme-text-secondary)] font-medium mt-0.5 truncate">
                                     {po.destination || sites.find((s: any) => s.id === po.siteId)?.name || 'Central Operations'}
                                 </p>
@@ -169,16 +169,16 @@ export const PurchaseOrdersMobileList: React.FC<PurchaseOrdersMobileListProps> =
                         {/* Expected and items/amount */}
                         <div className="flex items-center justify-between text-xs font-mono">
                             <div className="flex flex-col text-left">
-                                <span className="text-[9px] text-[var(--theme-text-muted)] font-sans font-semibold uppercase tracking-wider">Expected</span>
+                                <span className="text-[9px] text-[var(--theme-text-secondary)] font-sans font-semibold uppercase tracking-wider">Expected</span>
                                 <span className="text-xs text-[var(--theme-text-secondary)] tabular-nums mt-0.5">{po.expectedDelivery || 'N/A'}</span>
                             </div>
                             <div className="flex gap-4">
                                 <div className="flex flex-col items-end">
-                                    <span className="text-[9px] text-[var(--theme-text-muted)] font-sans font-semibold uppercase tracking-wider">Items</span>
+                                    <span className="text-[9px] text-[var(--theme-text-secondary)] font-sans font-semibold uppercase tracking-wider">Items</span>
                                     <span className="text-xs text-[var(--theme-text-secondary)] tabular-nums mt-0.5">{po.itemsCount}</span>
                                 </div>
                                 <div className="flex flex-col items-end">
-                                    <span className="text-[9px] text-[var(--theme-text-muted)] font-sans font-semibold uppercase tracking-wider">Amount</span>
+                                    <span className="text-[9px] text-[var(--theme-text-secondary)] font-sans font-semibold uppercase tracking-wider">Amount</span>
                                     <span className="text-xs text-[var(--theme-text-primary)] font-semibold tabular-nums mt-0.5">{po.currency || currencySymbol} {po.totalAmount.toLocaleString()}</span>
                                 </div>
                             </div>
@@ -186,7 +186,7 @@ export const PurchaseOrdersMobileList: React.FC<PurchaseOrdersMobileListProps> =
 
                         {/* Actions & request info */}
                         <div className="flex items-center justify-between pt-1 border-t border-[var(--theme-border-subtle)]">
-                            <span className="text-[10px] text-[var(--theme-text-muted)]">By: {po.requestedBy || po.createdBy || 'Unknown'}</span>
+                            <span className="text-[10px] text-[var(--theme-text-secondary)]">By: {po.requestedBy || po.createdBy || 'Unknown'}</span>
                             <div className="flex items-center gap-1.5" onClick={(e) => e.stopPropagation()}>
                                 <button
                                     onClick={() => setSelectedPO(po)}

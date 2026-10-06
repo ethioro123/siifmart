@@ -96,7 +96,7 @@ export const PurchaseOrdersList: React.FC<PurchaseOrdersListProps> = ({
         }
         if (p === 'low') {
             return (
-                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold tracking-wide uppercase bg-[var(--theme-bg-subtle)] text-[var(--theme-text-muted)] border border-[var(--theme-border)]">
+                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold tracking-wide uppercase bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] border border-[var(--theme-border)]">
                     {priority || 'Normal'}
                 </span>
             );
@@ -170,11 +170,11 @@ export const PurchaseOrdersList: React.FC<PurchaseOrdersListProps> = ({
                 <div className="flex flex-col md:flex-row gap-3">
                     {/* Search */}
                     <div className="flex items-center rounded-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] px-4 h-11 flex-1 focus-within:border-[var(--theme-accent)] transition-all">
-                        <Search className="w-4 h-4 text-[var(--theme-text-muted)] shrink-0" />
+                        <Search className="w-4 h-4 text-[var(--theme-text-secondary)] shrink-0" />
                         <input
                             type="text"
                             placeholder="Search PO # or Supplier..."
-                            className="bg-transparent border-none ml-2.5 flex-1 text-[var(--theme-text-primary)] text-sm outline-none placeholder:text-[var(--theme-text-muted)]"
+                            className="bg-transparent border-none ml-2.5 flex-1 text-[var(--theme-text-primary)] text-sm outline-none placeholder:text-[var(--theme-text-secondary)]/70"
                             value={searchTerm}
                             onChange={(e) => onSearchChange(e.target.value)}
                         />
@@ -187,9 +187,9 @@ export const PurchaseOrdersList: React.FC<PurchaseOrdersListProps> = ({
                         onChange={(e) => onSupplierFilterChange(e.target.value)}
                         className="rounded-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] px-4 h-11 text-xs sm:text-sm font-medium text-[var(--theme-text-primary)] focus:outline-none focus:border-[var(--theme-accent)] min-w-[160px] transition-all cursor-pointer"
                     >
-                        <option value="All">All Suppliers</option>
+                        <option value="All" className="bg-[var(--theme-bg-panel)] text-[var(--theme-text-primary)]">All Suppliers</option>
                         {suppliers.map(s => (
-                            <option key={s.id} value={s.id}>{s.name}</option>
+                            <option key={s.id} value={s.id} className="bg-[var(--theme-bg-panel)] text-[var(--theme-text-primary)]">{s.name}</option>
                         ))}
                     </select>
 
@@ -200,11 +200,11 @@ export const PurchaseOrdersList: React.FC<PurchaseOrdersListProps> = ({
                         onChange={(e) => onSortChange(e.target.value as any)}
                         className="rounded-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] px-4 h-11 text-xs sm:text-sm font-medium text-[var(--theme-text-primary)] focus:outline-none focus:border-[var(--theme-accent)] min-w-[160px] transition-all cursor-pointer"
                     >
-                        <option value="dateDesc">Date: Newest</option>
-                        <option value="dateAsc">Date: Oldest</option>
-                        <option value="amountDesc">Amount: High-Low</option>
-                        <option value="amountAsc">Amount: Low-High</option>
-                        <option value="priority">Priority</option>
+                        <option value="dateDesc" className="bg-[var(--theme-bg-panel)] text-[var(--theme-text-primary)]">Date: Newest</option>
+                        <option value="dateAsc" className="bg-[var(--theme-bg-panel)] text-[var(--theme-text-primary)]">Date: Oldest</option>
+                        <option value="amountDesc" className="bg-[var(--theme-bg-panel)] text-[var(--theme-text-primary)]">Amount: High-Low</option>
+                        <option value="amountAsc" className="bg-[var(--theme-bg-panel)] text-[var(--theme-text-primary)]">Amount: Low-High</option>
+                        <option value="priority" className="bg-[var(--theme-bg-panel)] text-[var(--theme-text-primary)]">Priority</option>
                     </select>
                 </div>
 
@@ -238,7 +238,7 @@ export const PurchaseOrdersList: React.FC<PurchaseOrdersListProps> = ({
                         </span>
                         <button
                             onClick={() => setSelectedPOIds([])}
-                            className="text-xs text-[var(--theme-text-muted)] hover:text-[var(--theme-text-primary)] transition-colors"
+                            className="text-xs font-semibold text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] transition-colors cursor-pointer"
                         >
                             Clear Selection
                         </button>
@@ -322,14 +322,14 @@ export const PurchaseOrdersList: React.FC<PurchaseOrdersListProps> = ({
                                     </td>
                                     <td className="px-5 py-4 align-middle text-xs text-[var(--theme-text-secondary)]">
                                         <div className="flex items-center gap-1.5 max-w-[180px]">
-                                            <MapPin size={12} className="text-[var(--theme-text-muted)] shrink-0" />
+                                            <MapPin size={12} className="text-[var(--theme-text-secondary)] shrink-0" />
                                             <span className="truncate">{po.destination || sites.find(s => s.id === po.siteId)?.name || 'Central Operations'}</span>
                                         </div>
                                     </td>
                                     <td className="px-5 py-4 align-middle text-xs font-mono tabular-nums text-[var(--theme-text-secondary)] whitespace-nowrap">
                                         {po.date}
                                     </td>
-                                    <td className="px-5 py-4 align-middle text-xs font-mono tabular-nums text-[var(--theme-text-muted)] whitespace-nowrap">
+                                    <td className="px-5 py-4 align-middle text-xs font-mono tabular-nums text-[var(--theme-text-secondary)] whitespace-nowrap">
                                         {po.expectedDelivery || 'N/A'}
                                     </td>
                                     <td className="px-5 py-4 align-middle text-sm font-mono tabular-nums text-right text-[var(--theme-text-secondary)] whitespace-nowrap">
@@ -434,9 +434,9 @@ export const PurchaseOrdersList: React.FC<PurchaseOrdersListProps> = ({
                         Previous
                     </button>
                     <div className="h-9 px-4 rounded-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border-subtle)] flex items-center gap-2 text-xs font-mono text-[var(--theme-text-secondary)]">
-                        <span className="text-[10px] text-[var(--theme-text-muted)] uppercase tracking-wider font-semibold">Page</span>
+                        <span className="text-[10px] text-[var(--theme-text-secondary)] uppercase tracking-wider font-semibold">Page</span>
                         <span className="font-bold text-[var(--theme-text-primary)] tabular-nums">{currentPage}</span>
-                        <span className="text-[10px] text-[var(--theme-text-muted)]">of</span>
+                        <span className="text-[10px] text-[var(--theme-text-secondary)]">of</span>
                         <span className="font-semibold text-[var(--theme-text-secondary)] tabular-nums">{Math.max(1, Math.ceil(totalCount / ITEMS_PER_PAGE))}</span>
                     </div>
                     <button

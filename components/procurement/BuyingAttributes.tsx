@@ -84,10 +84,10 @@ export const BuyingAttributes: React.FC<BuyingAttributesProps> = ({
                 {/* ── Identity ──────────────────────────────── */}
                 <div className="grid grid-cols-6 gap-3.5">
                     <div className="col-span-2 space-y-1">
-                        <label className="text-[10px] text-[var(--theme-text-muted)] uppercase font-semibold ml-1 block">Brand <span className="text-rose-500">*</span></label>
+                        <label className="text-[10px] text-[var(--theme-text-secondary)] uppercase font-semibold ml-1 block">Brand <span className="text-rose-500">*</span></label>
                         <input
                             type="text"
-                            className={`w-full h-10 bg-[var(--theme-bg-subtle)] border ${errors.brand ? 'border-rose-500/50' : 'border-[var(--theme-border)]'} rounded-xl px-3 text-xs text-[var(--theme-text-primary)] focus:border-[var(--theme-accent)] outline-none transition-all placeholder:text-[var(--theme-text-muted)] font-semibold`}
+                            className={`w-full h-10 bg-[var(--theme-bg-subtle)] border ${errors.brand ? 'border-rose-500/50' : 'border-[var(--theme-border)]'} rounded-xl px-3 text-xs text-[var(--theme-text-primary)] focus:border-[var(--theme-accent)] outline-none transition-all placeholder:text-[var(--theme-text-secondary)]/70 font-semibold`}
                             placeholder="Brand Name"
                             value={customItemBrand}
                             onChange={e => { setCustomItemBrand(e.target.value); if (errors.brand) setErrors(p => ({ ...p, brand: '' })); }}
@@ -95,10 +95,10 @@ export const BuyingAttributes: React.FC<BuyingAttributesProps> = ({
                         {errors.brand && <span className="text-[9px] text-rose-500 ml-1 font-semibold">{errors.brand}</span>}
                     </div>
                     <div className="col-span-4 space-y-1">
-                        <label className="text-[10px] text-[var(--theme-text-muted)] uppercase font-semibold ml-1 block">Product Name <span className="text-rose-500">*</span></label>
+                        <label className="text-[10px] text-[var(--theme-text-secondary)] uppercase font-semibold ml-1 block">Product Name <span className="text-rose-500">*</span></label>
                         <input
                             type="text"
-                            className={`w-full h-10 bg-[var(--theme-bg-subtle)] border ${errors.name ? 'border-rose-500/50' : 'border-[var(--theme-border)]'} rounded-xl px-3 text-xs text-[var(--theme-text-primary)] font-semibold focus:border-[var(--theme-accent)] outline-none transition-all placeholder:text-[var(--theme-text-muted)]`}
+                            className={`w-full h-10 bg-[var(--theme-bg-subtle)] border ${errors.name ? 'border-rose-500/50' : 'border-[var(--theme-border)]'} rounded-xl px-3 text-xs text-[var(--theme-text-primary)] font-semibold focus:border-[var(--theme-accent)] outline-none transition-all placeholder:text-[var(--theme-text-secondary)]/70`}
                             placeholder="Full Product Description"
                             value={customItemName}
                             onChange={e => { setCustomItemName(e.target.value); if (errors.name) setErrors(p => ({ ...p, name: '' })); }}
@@ -109,7 +109,7 @@ export const BuyingAttributes: React.FC<BuyingAttributesProps> = ({
 
                 <div className="grid grid-cols-6 gap-3.5">
                     <div className="col-span-2 space-y-1">
-                        <label className="text-[10px] text-[var(--theme-text-muted)] uppercase font-semibold ml-1 block">Category <span className="text-rose-500">*</span></label>
+                        <label className="text-[10px] text-[var(--theme-text-secondary)] uppercase font-semibold ml-1 block">Category <span className="text-rose-500">*</span></label>
                         <div className="relative">
                             <select
                                 title="Category"
@@ -117,32 +117,32 @@ export const BuyingAttributes: React.FC<BuyingAttributesProps> = ({
                                 value={selectedMainCategory}
                                 onChange={e => { setSelectedMainCategory(e.target.value); if (errors.category) setErrors(p => ({ ...p, category: '' })); }}
                             >
-                                <option value="" className="text-[var(--theme-text-muted)]">Select Category...</option>
+                                <option value="" className="text-[var(--theme-text-secondary)] bg-[var(--theme-bg-panel)]">Select Category...</option>
                                 {Object.entries(PRODUCT_CATEGORIES).map(([group, items]) => (
-                                    <optgroup key={group} label={group}>
-                                        {(items as string[]).map(c => <option key={c} value={c}>{c}</option>)}
+                                    <optgroup key={group} label={group} className="bg-[var(--theme-bg-panel)] text-[var(--theme-text-primary)]">
+                                        {(items as string[]).map(c => <option key={c} value={c} className="bg-[var(--theme-bg-panel)] text-[var(--theme-text-primary)]">{c}</option>)}
                                     </optgroup>
                                 ))}
                             </select>
-                            <ChevronDown size={12} className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--theme-text-muted)] pointer-events-none" />
+                            <ChevronDown size={12} className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--theme-text-secondary)] pointer-events-none" />
                         </div>
                         {errors.category && <span className="text-[9px] text-rose-500 ml-1 font-semibold">{errors.category}</span>}
                     </div>
                     <div className="col-span-2 space-y-1">
-                        <label className="text-[10px] text-[var(--theme-text-muted)] uppercase font-semibold ml-1 block">Subcategory</label>
+                        <label className="text-[10px] text-[var(--theme-text-secondary)] uppercase font-semibold ml-1 block">Subcategory</label>
                         <input
                             type="text"
-                            className="w-full h-10 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3 text-xs text-[var(--theme-text-primary)] focus:border-[var(--theme-accent)] outline-none transition-all placeholder:text-[var(--theme-text-muted)] font-semibold"
+                            className="w-full h-10 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3 text-xs text-[var(--theme-text-primary)] focus:border-[var(--theme-accent)] outline-none transition-all placeholder:text-[var(--theme-text-secondary)]/70 font-semibold"
                             placeholder="e.g. Organic, Premium"
                             value={customAttributes.identity.subcategory}
                             onChange={e => setCustomAttributes((p: any) => ({ ...p, identity: { ...p.identity, subcategory: e.target.value } }))}
                         />
                     </div>
                     <div className="col-span-2 space-y-1">
-                        <label className="text-[10px] text-[var(--theme-text-muted)] uppercase font-semibold ml-1 block">Variant</label>
+                        <label className="text-[10px] text-[var(--theme-text-secondary)] uppercase font-semibold ml-1 block">Variant</label>
                         <input
                             type="text"
-                            className="w-full h-10 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3 text-xs text-[var(--theme-text-primary)] focus:border-[var(--theme-accent)] outline-none transition-all placeholder:text-[var(--theme-text-muted)] font-semibold"
+                            className="w-full h-10 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3 text-xs text-[var(--theme-text-primary)] focus:border-[var(--theme-accent)] outline-none transition-all placeholder:text-[var(--theme-text-secondary)]/70 font-semibold"
                             placeholder="e.g. Lemon, Original"
                             value={customAttributes.identity.variant}
                             onChange={e => setCustomAttributes((p: any) => ({ ...p, identity: { ...p.identity, variant: e.target.value } }))}
@@ -153,7 +153,7 @@ export const BuyingAttributes: React.FC<BuyingAttributesProps> = ({
                 {/* ── Size & Packaging ──────────────────────── */}
                 <div className="grid grid-cols-6 gap-3.5 pt-3 border-t border-[var(--theme-border-subtle)]">
                     <div className="col-span-2 space-y-1">
-                        <label className="text-[10px] text-[var(--theme-text-muted)] uppercase font-semibold ml-1 block">Size <span className="text-rose-500">*</span></label>
+                        <label className="text-[10px] text-[var(--theme-text-secondary)] uppercase font-semibold ml-1 block">Size <span className="text-rose-500">*</span></label>
                         <div className="flex gap-1">
                             <input
                                 type="number"
@@ -161,7 +161,7 @@ export const BuyingAttributes: React.FC<BuyingAttributesProps> = ({
                                 step="any"
                                 title="Size value"
                                 placeholder="e.g. 500"
-                                className={`w-full h-10 bg-[var(--theme-bg-subtle)] border ${errors.size ? 'border-rose-500/50' : 'border-[var(--theme-border)]'} rounded-l-xl px-3 text-xs text-[var(--theme-text-primary)] focus:border-[var(--theme-accent)] outline-none transition-all placeholder:text-[var(--theme-text-muted)] font-semibold`}
+                                className={`w-full h-10 bg-[var(--theme-bg-subtle)] border ${errors.size ? 'border-rose-500/50' : 'border-[var(--theme-border)]'} rounded-l-xl px-3 text-xs text-[var(--theme-text-primary)] focus:border-[var(--theme-accent)] outline-none transition-all placeholder:text-[var(--theme-text-secondary)]/70 font-semibold`}
                                 value={customItemSize}
                                 onChange={e => handleSizeChange(e.target.value)}
                             />
@@ -175,16 +175,16 @@ export const BuyingAttributes: React.FC<BuyingAttributesProps> = ({
                                         if (errors.size) setErrors(p => ({ ...p, size: '' }));
                                     }}
                                 >
-                                    <option value="">--</option>
-                                    {SIZE_TYPES.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
+                                    <option value="" className="bg-[var(--theme-bg-panel)] text-[var(--theme-text-primary)]">--</option>
+                                    {SIZE_TYPES.map(t => <option key={t.value} value={t.value} className="bg-[var(--theme-bg-panel)] text-[var(--theme-text-primary)]">{t.label}</option>)}
                                 </select>
-                                <ChevronDown size={10} className="absolute right-2 top-1/2 -translate-y-1/2 text-[var(--theme-text-muted)] pointer-events-none" />
+                                <ChevronDown size={10} className="absolute right-2 top-1/2 -translate-y-1/2 text-[var(--theme-text-secondary)] pointer-events-none" />
                             </div>
                         </div>
                         {errors.size && <span className="text-[9px] text-rose-500 ml-1 font-semibold">{errors.size}</span>}
                     </div>
                     <div className="col-span-2 space-y-1">
-                        <label className="text-[10px] text-[var(--theme-text-muted)] uppercase font-semibold ml-1 block">Pack Type</label>
+                        <label className="text-[10px] text-[var(--theme-text-secondary)] uppercase font-semibold ml-1 block">Pack Type</label>
                         <div className="relative">
                             <select 
                                 title="Package Type" 
@@ -203,10 +203,10 @@ export const BuyingAttributes: React.FC<BuyingAttributesProps> = ({
                                     }));
                                 }}
                             >
-                                <option value="">Select Type...</option>
-                                {PACKAGE_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
+                                <option value="" className="bg-[var(--theme-bg-panel)] text-[var(--theme-text-primary)]">Select Type...</option>
+                                {PACKAGE_TYPES.map(t => <option key={t} value={t} className="bg-[var(--theme-bg-panel)] text-[var(--theme-text-primary)]">{t}</option>)}
                             </select>
-                            <ChevronDown size={12} className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--theme-text-muted)] pointer-events-none" />
+                            <ChevronDown size={12} className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--theme-text-secondary)] pointer-events-none" />
                         </div>
                     </div>
                     <div className="col-span-2 flex items-end pb-2">
@@ -232,26 +232,26 @@ export const BuyingAttributes: React.FC<BuyingAttributesProps> = ({
                 {((parseInt(customAttributes.packaging.packQty) > 1) || (parseInt(customAttributes.packaging.caseSize) > 0) || ['Bale', 'Carton', 'Case', 'Box', 'Bundle', 'Crate', 'Sack', 'Tray', 'Multipack'].includes(customAttributes.packaging?.packageType)) && (
                     <div className="grid grid-cols-6 gap-3.5 pl-4 border-l-2 border-[var(--theme-accent)]/30">
                         <div className="col-span-3 space-y-1">
-                            <label className="text-[10px] text-[var(--theme-text-muted)] uppercase font-semibold ml-1 block">
+                            <label className="text-[10px] text-[var(--theme-text-secondary)] uppercase font-semibold ml-1 block">
                                 Pack Qty <span className="text-[9px] text-[var(--theme-text-secondary)] normal-case font-medium">(units per {customAttributes.packaging?.packageType?.toLowerCase() || 'pack'})</span>
                             </label>
                             <input
                                 type="number"
                                 min="2"
-                                className="w-full h-10 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3 text-xs text-[var(--theme-text-primary)] font-mono font-bold focus:border-[var(--theme-accent)] outline-none transition-all placeholder:text-[var(--theme-text-muted)]"
+                                className="w-full h-10 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3 text-xs text-[var(--theme-text-primary)] font-mono font-bold focus:border-[var(--theme-accent)] outline-none transition-all placeholder:text-[var(--theme-text-secondary)]/70"
                                 placeholder="e.g. 12"
                                 value={customAttributes.packaging.packQty}
                                 onChange={e => setCustomAttributes((p: any) => ({ ...p, packaging: { ...p.packaging, packQty: e.target.value } }))}
                             />
                         </div>
                         <div className="col-span-3 space-y-1">
-                            <label className="text-[10px] text-[var(--theme-text-muted)] uppercase font-semibold ml-1 block">
+                            <label className="text-[10px] text-[var(--theme-text-secondary)] uppercase font-semibold ml-1 block">
                                 Case Size <span className="text-[9px] text-[var(--theme-text-secondary)] normal-case font-medium">(packs per case)</span>
                             </label>
                             <input
                                 type="number"
                                 min="1"
-                                className="w-full h-10 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3 text-xs text-[var(--theme-text-primary)] font-mono font-bold focus:border-[var(--theme-accent)] outline-none transition-all placeholder:text-[var(--theme-text-muted)]"
+                                className="w-full h-10 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3 text-xs text-[var(--theme-text-primary)] font-mono font-bold focus:border-[var(--theme-accent)] outline-none transition-all placeholder:text-[var(--theme-text-secondary)]/70"
                                 placeholder="e.g. 24"
                                 value={customAttributes.packaging.caseSize || ''}
                                 onChange={e => setCustomAttributes((p: any) => ({ ...p, packaging: { ...p.packaging, caseSize: e.target.value } }))}
@@ -263,7 +263,7 @@ export const BuyingAttributes: React.FC<BuyingAttributesProps> = ({
                 {/* ── Storage & Handling ────────────────────── */}
                 <div className="grid grid-cols-6 gap-3.5 pt-3 border-t border-[var(--theme-border-subtle)]">
                     <div className="col-span-2 space-y-1">
-                        <label className="text-[10px] text-[var(--theme-text-muted)] uppercase font-semibold ml-1 block">Storage</label>
+                        <label className="text-[10px] text-[var(--theme-text-secondary)] uppercase font-semibold ml-1 block">Storage</label>
                         <div className="relative">
                             <select
                                 title="Storage"
@@ -271,13 +271,13 @@ export const BuyingAttributes: React.FC<BuyingAttributesProps> = ({
                                 value={customAttributes.storage.type}
                                 onChange={e => setCustomAttributes((p: any) => ({ ...p, storage: { ...p.storage, type: e.target.value } }))}
                             >
-                                {STORAGE_CONDITIONS.map(s => <option key={s} value={s}>{s}</option>)}
+                                {STORAGE_CONDITIONS.map(s => <option key={s} value={s} className="bg-[var(--theme-bg-panel)] text-[var(--theme-text-primary)]">{s}</option>)}
                             </select>
-                            <ChevronDown size={12} className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--theme-text-muted)] pointer-events-none" />
+                            <ChevronDown size={12} className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--theme-text-secondary)] pointer-events-none" />
                         </div>
                     </div>
                     <div className="col-span-1 space-y-1">
-                        <label className="text-[10px] text-[var(--theme-text-muted)] uppercase font-semibold ml-1 block">Shelf Life</label>
+                        <label className="text-[10px] text-[var(--theme-text-secondary)] uppercase font-semibold ml-1 block">Shelf Life</label>
                         <div className="flex gap-1 items-center">
                             <input
                                 type="number"
@@ -287,11 +287,11 @@ export const BuyingAttributes: React.FC<BuyingAttributesProps> = ({
                                 value={customAttributes.storage.shelfLifeDays || ''}
                                 onChange={e => setCustomAttributes((p: any) => ({ ...p, storage: { ...p.storage, shelfLifeDays: e.target.value } }))}
                             />
-                            <span className="text-[10px] text-[var(--theme-text-muted)] font-medium">d</span>
+                            <span className="text-[10px] text-[var(--theme-text-secondary)] font-medium">d</span>
                         </div>
                     </div>
                     <div className="col-span-1 space-y-1">
-                        <label className="text-[10px] text-[var(--theme-text-muted)] uppercase font-semibold ml-1 block">Form</label>
+                        <label className="text-[10px] text-[var(--theme-text-secondary)] uppercase font-semibold ml-1 block">Form</label>
                         <div className="relative">
                             <select
                                 title="Form"
@@ -299,14 +299,14 @@ export const BuyingAttributes: React.FC<BuyingAttributesProps> = ({
                                 value={customAttributes.physical.form}
                                 onChange={e => setCustomAttributes((p: any) => ({ ...p, physical: { ...p.physical, form: e.target.value } }))}
                             >
-                                <option value="">--</option>
-                                {['Solid', 'Liquid', 'Powder', 'Gel', 'Paste', 'Granule'].map(f => <option key={f} value={f}>{f}</option>)}
+                                <option value="" className="bg-[var(--theme-bg-panel)] text-[var(--theme-text-primary)]">--</option>
+                                {['Solid', 'Liquid', 'Powder', 'Gel', 'Paste', 'Granule'].map(f => <option key={f} value={f} className="bg-[var(--theme-bg-panel)] text-[var(--theme-text-primary)]">{f}</option>)}
                             </select>
-                            <ChevronDown size={10} className="absolute right-2 top-1/2 -translate-y-1/2 text-[var(--theme-text-muted)] pointer-events-none" />
+                            <ChevronDown size={10} className="absolute right-2 top-1/2 -translate-y-1/2 text-[var(--theme-text-secondary)] pointer-events-none" />
                         </div>
                     </div>
                     <div className="col-span-1 space-y-1">
-                        <label className="text-[10px] text-[var(--theme-text-muted)] uppercase font-semibold ml-1 block">Material</label>
+                        <label className="text-[10px] text-[var(--theme-text-secondary)] uppercase font-semibold ml-1 block">Material</label>
                         <div className="relative">
                             <select
                                 title="Material"
@@ -314,10 +314,10 @@ export const BuyingAttributes: React.FC<BuyingAttributesProps> = ({
                                 value={customAttributes.packaging.material}
                                 onChange={e => setCustomAttributes((p: any) => ({ ...p, packaging: { ...p.packaging, material: e.target.value } }))}
                             >
-                                <option value="">--</option>
-                                {['Plastic', 'Glass', 'Paper', 'Cardboard', 'Metal', 'Aluminium', 'Fabric'].map(m => <option key={m} value={m}>{m}</option>)}
+                                <option value="" className="bg-[var(--theme-bg-panel)] text-[var(--theme-text-primary)]">--</option>
+                                {['Plastic', 'Glass', 'Paper', 'Cardboard', 'Metal', 'Aluminium', 'Fabric'].map(m => <option key={m} value={m} className="bg-[var(--theme-bg-panel)] text-[var(--theme-text-primary)]">{m}</option>)}
                             </select>
-                            <ChevronDown size={10} className="absolute right-2 top-1/2 -translate-y-1/2 text-[var(--theme-text-muted)] pointer-events-none" />
+                            <ChevronDown size={10} className="absolute right-2 top-1/2 -translate-y-1/2 text-[var(--theme-text-secondary)] pointer-events-none" />
                         </div>
                     </div>
                     <div className="col-span-1 flex flex-col justify-end pb-2">

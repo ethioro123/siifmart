@@ -165,8 +165,21 @@ export const authService = {
     },
 
     async getSession(): Promise<Session | null> {
-        const { data: { session } } = await supabase.auth.getSession();
-        return session;
+        try {
+            const { data: { session }, error } = await supabase.auth.getSession();
+            if (error) {
+                console.warn('AuthService: getSession error, resetting session:', error.message);
+                if (error.message?.includes('Refresh Token') || (error as any).status === 400) {
+                    await supabase.auth.signOut().catch(() => {});
+                }
+                return null;
+            }
+            return session;
+        } catch (e: any) {
+            console.warn('AuthService: getSession exception, resetting session:', e?.message);
+            await supabase.auth.signOut().catch(() => {});
+            return null;
+        }
     },
 
     async getCurrentUser(): Promise<User | null> {

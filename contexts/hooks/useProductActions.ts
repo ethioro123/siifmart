@@ -2,6 +2,8 @@ import { useCallback } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import type { Product, Site, SystemLog } from '../../types';
 import { productsService } from '../../services/supabase.service';
+import { systemLogsService } from '../../services/system-logs.service';
+import { posDB } from '../../services/db/pos.db';
 import { logger } from '../../utils/logger';
 
 interface UseProductActionsDeps {
@@ -144,41 +146,117 @@ export function useProductActions(deps: UseProductActionsDeps) {
                 queryClient.setQueryData(['products', updatedSiteId], (old: Product[] | undefined) =>
                     old ? old.map(p => p.id === product.id ? { ...p, ...updated } : p) : old
                 );
+
+                // Synaptic Neural Mesh: Sync POS IndexedDB Cache
+                try {
+                    const cached = await posDB.getCachedProducts(updatedSiteId);
+                    if (cached && Array.isArray(cached) && cached.length > 0) {
+                        const updatedCache = cached.map(p => p.id === product.id ? { ...p, ...updated } : p);
+                        await posDB.cacheProducts(updatedSiteId, updatedCache);
+                    }
+                } catch (posErr) {
+                    logger.warn('useProductActions', 'POS IndexedDB sync skipped', { error: String(posErr) });
+                }
             }
 
             addNotification('success', `Product ${product.name || updated.name} updated`);
             logSystemEvent('Product Updated', `Product "${product.name || updated.name}" updated`, updatedBy || user?.name || 'System', 'Inventory');
+
+            // Zero-Trust Rule 5 Audit Logging
+            const countryCode = (updated as any).country || (updated as any).country_code || (user as any)?.country || 'ET';
+            try {
+                await systemLogsService.create({
+                    action: 'PRODUCT_UPDATED',
+                    details: {
+                        productId: updated.id,
+                        sku: updated.sku,
+                        name: updated.name,
+                        price: updated.price,
+                        stock: updated.stock,
+                        siteId: updatedSiteId,
+                    },
+                    module: 'Inventory',
+                    user_name: user?.name || 'System',
+                    employee_id: user?.id,
+                    site_id: updatedSiteId,
+                    country_code: countryCode,
+                    entity_type: 'product',
+                    entity_id: updated.id,
+                });
+            } catch (logErr) {
+                logger.warn('useProductActions', 'Failed to write product update log', { error: String(logErr) });
+            }
+
             return updated;
         } catch (error: any) {
-            logger.error('useProductActions', 'caught error', error as Error);;
+            logger.error('useProductActions', 'caught error', error as Error);
             addNotification('alert', error.message || 'Failed to update product');
             throw error;
         }
-    }, [addNotification, logSystemEvent, user, sites]);
+    }, [addNotification, logSystemEvent, user, sites, queryClient]);
 
-    const updatePricesBySKU = useCallback(async (sku: string, updates: { price: number; costPrice?: number; salePrice?: number; isOnSale?: boolean }) => {
+    const updatePricesBySKU = useCallback(async (
+        sku: string,
+        updates: { price: number; costPrice?: number; salePrice?: number; isOnSale?: boolean },
+        targetSiteIds?: string[]
+    ) => {
         try {
-            const updatedProducts = await productsService.updatePricesBySKU(sku, updates);
+            // Strict Country Boundary Partitioning: Scope to current country's sites unless explicitly targeted
+            const activeCountrySiteIds = targetSiteIds && targetSiteIds.length > 0
+                ? targetSiteIds
+                : (sites || []).map(s => s.id);
+
+            const updatedProducts = await productsService.updatePricesBySKU(sku, updates, activeCountrySiteIds);
             const updatedIds = new Set(updatedProducts.map(p => p.id));
 
             setProducts(prev => prev.map(p => updatedIds.has(p.id) ? { ...p, ...updates } : p));
             setAllProducts(prev => prev.map(p => updatedIds.has(p.id) ? { ...p, ...updates } : p));
 
-            const affectedSiteIds = new Set(updatedProducts.map(p => p.siteId || p.site_id).filter(Boolean));
+            const affectedSiteIds = new Set(updatedProducts.map(p => p.siteId || p.site_id).filter(Boolean) as string[]);
             affectedSiteIds.forEach(siteId => {
+                if (!siteId) return;
                 queryClient.setQueryData(['products', siteId], (old: Product[] | undefined) =>
                     old ? old.map(p => updatedIds.has(p.id) ? { ...p, ...updates } : p) : old
                 );
+
+                // Synaptic Neural Mesh: Sync POS IndexedDB Cache for affected site
+                posDB.getCachedProducts(siteId).then(cached => {
+                    if (cached && Array.isArray(cached) && cached.length > 0) {
+                        const updatedCache = cached.map(p => updatedIds.has(p.id) ? { ...p, ...updates } : p);
+                        posDB.cacheProducts(siteId, updatedCache);
+                    }
+                }).catch(() => {});
             });
 
             addNotification('success', `Synchronized prices for SKU ${sku} across ${updatedProducts.length} locations`);
-            logSystemEvent('Global Price Sync', `SKU ${sku} prices updated network-wide`, user?.name || 'System', 'Inventory');
+            logSystemEvent('Global Price Sync', `SKU ${sku} prices updated network-wide (${updatedProducts.length} locations)`, user?.name || 'System', 'Inventory');
+
+            // Zero-Trust Rule 5 Audit Logging
+            try {
+                await systemLogsService.create({
+                    action: 'GLOBAL_PRICE_SYNC',
+                    details: {
+                        sku,
+                        updates,
+                        affectedSitesCount: affectedSiteIds.size,
+                        updatedProductsCount: updatedProducts.length,
+                    },
+                    module: 'Inventory',
+                    user_name: user?.name || 'System',
+                    employee_id: user?.id,
+                    country_code: (user as any)?.country || 'ET',
+                    entity_type: 'product',
+                    entity_id: sku,
+                });
+            } catch (logErr) {
+                logger.warn('useProductActions', 'Failed to write price sync log', { error: String(logErr) });
+            }
         } catch (error: any) {
             logger.error('useProductActions', 'Global Price Sync Error:', error as Error);
             addNotification('alert', error.message || 'Failed to synchronize prices globally');
             throw error;
         }
-    }, [addNotification, logSystemEvent, user]);
+    }, [addNotification, logSystemEvent, user, sites, queryClient, setProducts, setAllProducts]);
 
     const deleteProduct = useCallback(async (id: string) => {
         try {

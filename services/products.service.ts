@@ -196,20 +196,26 @@ export const productsService = {
         return data ? this._mapProduct(data) : null;
     },
 
-    async findAllBySKU(sku: string) {
+    async findAllBySKU(sku: string, siteIds?: string[]) {
         if (!sku || sku === 'N/A' || sku === 'TEMP') return [];
-        const { data, error } = await supabase
+        let query = supabase
             .from('products')
             .select('*')
             .ilike('sku', sku.trim());
+
+        if (siteIds && siteIds.length > 0) {
+            query = query.in('site_id', siteIds);
+        }
+
+        const { data, error } = await query;
 
         if (error) throw error;
         return data.map(p => this._mapProduct(p));
     },
 
-    async updatePricesBySKU(sku: string, updates: { price: number; costPrice?: number; salePrice?: number; isOnSale?: boolean }) {
+    async updatePricesBySKU(sku: string, updates: { price: number; costPrice?: number; salePrice?: number; isOnSale?: boolean }, siteIds?: string[]) {
         if (!sku || sku === 'N/A') throw new Error('Cannot sync prices for products without a valid SKU');
-        const targets = await this.findAllBySKU(sku);
+        const targets = await this.findAllBySKU(sku, siteIds);
         if (targets.length === 0) {
             console.warn(`⚠️ Global Sync: No products found for SKU "${sku}".`);
             return [];

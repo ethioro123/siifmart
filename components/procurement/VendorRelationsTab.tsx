@@ -127,13 +127,13 @@ export const VendorRelationsTab: React.FC<VendorRelationsTabProps> = ({ countryC
       </div>
 
       {loading ? (
-        <div className="p-16 text-center text-xs font-medium text-[var(--theme-text-muted)] rounded-3xl bg-[var(--theme-bg-panel)] border border-[var(--theme-border)]">
+        <div className="p-16 text-center text-xs font-medium text-[var(--theme-text-secondary)] rounded-3xl bg-[var(--theme-bg-panel)] border border-[var(--theme-border)]">
           Loading vendor data...
         </div>
       ) : subTab === 'scorecards' ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
           {scorecards.length === 0 ? (
-            <div className="col-span-full p-12 text-center text-[var(--theme-text-muted)] text-sm rounded-3xl bg-[var(--theme-bg-panel)] border border-[var(--theme-border)] shadow-sm">
+            <div className="col-span-full p-12 text-center text-[var(--theme-text-secondary)] text-sm font-medium rounded-3xl bg-[var(--theme-bg-panel)] border border-[var(--theme-border)] shadow-sm">
               No vendor scorecards recorded for {countryCode}. Click "New Scorecard" to evaluate a vendor.
             </div>
           ) : (
@@ -144,7 +144,7 @@ export const VendorRelationsTab: React.FC<VendorRelationsTabProps> = ({ countryC
                   <div className="flex items-start justify-between gap-2">
                     <div>
                       <h3 className="font-bold text-[var(--theme-text-primary)] text-base tracking-tight">{sup?.name || 'Verified Vendor'}</h3>
-                      <p className="text-[11px] font-mono text-[var(--theme-text-muted)] mt-0.5">Period: {sc.evaluationPeriod}</p>
+                      <p className="text-[11px] font-mono text-[var(--theme-text-secondary)] mt-0.5">Period: {sc.evaluationPeriod}</p>
                     </div>
                     <div className="flex items-center gap-1 px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 text-xs font-bold font-mono tabular-nums">
                       <Star size={11} fill="currentColor" /> {sc.overallScore}%
@@ -153,15 +153,15 @@ export const VendorRelationsTab: React.FC<VendorRelationsTabProps> = ({ countryC
 
                   <div className="grid grid-cols-3 gap-2 text-center">
                     <div className="p-2.5 rounded-2xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)]">
-                      <p className="text-[10px] text-[var(--theme-text-muted)] font-semibold uppercase tracking-wider">Quality</p>
+                      <p className="text-[10px] text-[var(--theme-text-secondary)] font-semibold uppercase tracking-wider">Quality</p>
                       <p className="font-bold text-xs text-[var(--theme-text-primary)] font-mono tabular-nums mt-0.5">{sc.qualityScore}%</p>
                     </div>
                     <div className="p-2.5 rounded-2xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)]">
-                      <p className="text-[10px] text-[var(--theme-text-muted)] font-semibold uppercase tracking-wider">Delivery</p>
+                      <p className="text-[10px] text-[var(--theme-text-secondary)] font-semibold uppercase tracking-wider">Delivery</p>
                       <p className="font-bold text-xs text-[var(--theme-text-primary)] font-mono tabular-nums mt-0.5">{sc.deliveryScore}%</p>
                     </div>
                     <div className="p-2.5 rounded-2xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)]">
-                      <p className="text-[10px] text-[var(--theme-text-muted)] font-semibold uppercase tracking-wider">Pricing</p>
+                      <p className="text-[10px] text-[var(--theme-text-secondary)] font-semibold uppercase tracking-wider">Pricing</p>
                       <p className="font-bold text-xs text-[var(--theme-text-primary)] font-mono tabular-nums mt-0.5">{sc.pricingScore}%</p>
                     </div>
                   </div>
@@ -171,7 +171,7 @@ export const VendorRelationsTab: React.FC<VendorRelationsTabProps> = ({ countryC
                       "{sc.notes}"
                     </p>
                   )}
-                  <p className="text-[10px] text-[var(--theme-text-muted)] font-mono pt-1">
+                  <p className="text-[10px] text-[var(--theme-text-secondary)] font-mono font-medium pt-1">
                     Evaluated by {sc.evaluatorName} on {formatDateTime(sc.createdAt)}
                   </p>
                 </div>
@@ -186,7 +186,7 @@ export const VendorRelationsTab: React.FC<VendorRelationsTabProps> = ({ countryC
           </div>
           <div className="divide-y divide-[var(--theme-border)]">
             {contracts.length === 0 ? (
-              <div className="p-12 text-center text-[var(--theme-text-muted)] text-sm">
+              <div className="p-12 text-center text-[var(--theme-text-secondary)] text-sm font-medium">
                 No active master contracts registered for {countryCode}.
               </div>
             ) : (
@@ -202,7 +202,7 @@ export const VendorRelationsTab: React.FC<VendorRelationsTabProps> = ({ countryC
                       <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
                         {c.status}
                       </span>
-                      <p className="text-[11px] text-[var(--theme-text-muted)] font-mono mt-1">Expires: {c.endDate}</p>
+                      <p className="text-[11px] text-[var(--theme-text-secondary)] font-mono font-medium mt-1">Expires: {c.endDate}</p>
                     </div>
                   </div>
                 );
@@ -223,7 +223,7 @@ export const VendorRelationsTab: React.FC<VendorRelationsTabProps> = ({ countryC
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
             {farmers.length === 0 ? (
-              <div className="col-span-full p-12 text-center text-[var(--theme-text-muted)] text-sm rounded-2xl bg-[var(--theme-bg-subtle)]/40 border border-[var(--theme-border)]">
+              <div className="col-span-full p-12 text-center text-[var(--theme-text-secondary)] text-sm font-medium rounded-2xl bg-[var(--theme-bg-subtle)]/40 border border-[var(--theme-border)]">
                 No farmer cooperative programs registered for {countryCode}.
               </div>
             ) : (
@@ -257,9 +257,9 @@ export const VendorRelationsTab: React.FC<VendorRelationsTabProps> = ({ countryC
                   onChange={e => setSelectedSupplierId(e.target.value)}
                   className="w-full h-11 px-3.5 rounded-2xl border border-[var(--theme-border)] bg-[var(--theme-bg-subtle)] text-xs text-[var(--theme-text-primary)] font-semibold focus:outline-none focus:border-[var(--theme-accent)] cursor-pointer"
                 >
-                  <option value="">Select Supplier</option>
+                  <option className="bg-[var(--theme-bg-panel)] text-[var(--theme-text-primary)]" value="">Select Supplier</option>
                   {suppliers.map(s => (
-                    <option key={s.id} value={s.id}>{s.name}</option>
+                    <option className="bg-[var(--theme-bg-panel)] text-[var(--theme-text-primary)]" key={s.id} value={s.id}>{s.name}</option>
                   ))}
                 </select>
               </div>
@@ -307,7 +307,7 @@ export const VendorRelationsTab: React.FC<VendorRelationsTabProps> = ({ countryC
                   value={notes}
                   onChange={e => setNotes(e.target.value)}
                   placeholder="Audit summary..."
-                  className="w-full p-3 rounded-2xl border border-[var(--theme-border)] bg-[var(--theme-bg-subtle)] text-xs text-[var(--theme-text-primary)] focus:outline-none focus:border-[var(--theme-accent)] resize-none"
+                  className="w-full p-3 rounded-2xl border border-[var(--theme-border)] bg-[var(--theme-bg-subtle)] text-xs text-[var(--theme-text-primary)] placeholder:text-[var(--theme-text-secondary)]/70 focus:outline-none focus:border-[var(--theme-accent)] resize-none"
                   rows={2}
                 />
               </div>

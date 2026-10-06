@@ -139,7 +139,7 @@ export const ViewPOModal: React.FC<ViewPOModalProps> = ({ isOpen, onClose, po, o
             <div className="space-y-6 print:hidden">
                 <div className="flex items-start justify-between">
                     <div>
-                        <h2 className="text-2xl font-bold text-gray-900 dark:text-white tracking-tight">
+                        <h2 className="text-2xl font-bold text-[var(--theme-text-primary)] tracking-tight">
                             {formatPONumber(po)}
                         </h2>
                         <p className="text-sm text-[var(--theme-text-secondary)] mt-1">
@@ -171,11 +171,11 @@ export const ViewPOModal: React.FC<ViewPOModalProps> = ({ isOpen, onClose, po, o
                 {/* Key Info - Apple Card Grid */}
                 <div className={`grid grid-cols-2 ${po.approvedBy ? 'md:grid-cols-5' : 'md:grid-cols-4'} gap-3`}>
                     <div className="rounded-2xl p-4 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] shadow-sm">
-                        <p className="text-[10px] text-[var(--theme-text-muted)] uppercase tracking-wider font-semibold mb-1">Date</p>
+                        <p className="text-[10px] text-[var(--theme-text-secondary)] uppercase tracking-wider font-semibold mb-1">Date</p>
                         <p className="text-[var(--theme-text-primary)] font-semibold font-mono text-sm tabular-nums">{po.date || (po.created_at ? formatDateTime(po.created_at, { showTime: true }) : 'N/A')}</p>
                     </div>
                     <div className="rounded-2xl p-4 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] shadow-sm">
-                        <p className="text-[10px] text-[var(--theme-text-muted)] uppercase tracking-wider font-semibold mb-1">Requested By</p>
+                        <p className="text-[10px] text-[var(--theme-text-secondary)] uppercase tracking-wider font-semibold mb-1">Requested By</p>
                         <p className="text-[var(--theme-text-primary)] font-semibold text-sm truncate">{po.requestedBy || po.createdBy || 'Unknown'}</p>
                     </div>
                     {po.approvedBy && (
@@ -185,16 +185,16 @@ export const ViewPOModal: React.FC<ViewPOModalProps> = ({ isOpen, onClose, po, o
                         </div>
                     )}
                     <div className="rounded-2xl p-4 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] shadow-sm">
-                        <p className="text-[10px] text-[var(--theme-text-muted)] uppercase tracking-wider font-semibold mb-1">Destination</p>
+                        <p className="text-[10px] text-[var(--theme-text-secondary)] uppercase tracking-wider font-semibold mb-1">Destination</p>
                         <div className="flex items-center gap-1.5">
-                            <MapPin size={13} className="text-[var(--theme-text-muted)] shrink-0" />
+                            <MapPin size={13} className="text-[var(--theme-text-secondary)] shrink-0" />
                             <p className="text-[var(--theme-text-primary)] font-semibold text-sm truncate">
                                 {sites?.find(s => s.id === po.siteId)?.name || po.destination || 'N/A'}
                             </p>
                         </div>
                     </div>
                     <div className="rounded-2xl p-4 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] shadow-sm">
-                        <p className="text-[10px] text-[var(--theme-text-muted)] uppercase tracking-wider font-semibold mb-1">Expected</p>
+                        <p className="text-[10px] text-[var(--theme-text-secondary)] uppercase tracking-wider font-semibold mb-1">Expected</p>
                         <p className="text-[var(--theme-text-primary)] font-semibold font-mono text-sm tabular-nums">{po.expectedDelivery || 'N/A'}</p>
                     </div>
                 </div>
@@ -203,17 +203,17 @@ export const ViewPOModal: React.FC<ViewPOModalProps> = ({ isOpen, onClose, po, o
                 {(po.paymentTerms || po.approvedBy) && (
                     <div className="flex flex-wrap gap-4 text-sm">
                         {po.paymentTerms && (
-                            <div className="flex items-center gap-1 text-gray-500 dark:text-gray-400 text-xs">
-                                <span className="uppercase font-bold tracking-widest text-[9px]">Terms:</span>
-                                <span className="text-gray-900 dark:text-white font-black italic">{po.paymentTerms}</span>
+                            <div className="flex items-center gap-1.5 text-xs text-[var(--theme-text-secondary)]">
+                                <span className="uppercase font-semibold tracking-wider text-[10px]">Terms:</span>
+                                <span className="text-[var(--theme-text-primary)] font-semibold">{po.paymentTerms}</span>
                             </div>
                         )}
                         {po.approvedBy && (
                             <div className="flex items-center gap-1.5 text-xs">
-                                <span className="text-[var(--theme-text-muted)] uppercase font-semibold tracking-wider text-[10px]">Approved By:</span>
+                                <span className="text-[var(--theme-text-secondary)] uppercase font-semibold tracking-wider text-[10px]">Approved By:</span>
                                 <span className="text-[var(--theme-text-primary)] font-semibold">{po.approvedBy}</span>
                                 {po.approvedAt && (
-                                    <span className="text-[var(--theme-text-muted)] font-mono text-xs">({formatDateTime(po.approvedAt, { showTime: true })})</span>
+                                    <span className="text-[var(--theme-text-secondary)] font-mono text-xs">({formatDateTime(po.approvedAt, { showTime: true })})</span>
                                 )}
                             </div>
                         )}
@@ -233,7 +233,7 @@ export const ViewPOModal: React.FC<ViewPOModalProps> = ({ isOpen, onClose, po, o
                                 <span className="text-xs font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider flex items-center gap-1.5 font-mono">
                                     <span>{totalSellable.toLocaleString()} Total Sellable Units</span>
                                     {totalManifest !== totalSellable && (
-                                        <span className="text-[var(--theme-text-muted)] lowercase font-normal">
+                                        <span className="text-[var(--theme-text-secondary)] lowercase font-normal">
                                             ({totalManifest.toLocaleString()} manifest {totalManifest === 1 ? 'unit' : 'units'})
                                         </span>
                                     )}
@@ -244,30 +244,30 @@ export const ViewPOModal: React.FC<ViewPOModalProps> = ({ isOpen, onClose, po, o
                     <div className="rounded-2xl border border-[var(--theme-border)] bg-[var(--theme-bg-panel)] overflow-hidden shadow-sm">
                         <table className="w-full">
                             <thead>
-                                <tr className="bg-gray-100/50 dark:bg-black/20 border-b border-gray-200 dark:border-white/5">
-                                    <th className="text-left p-4 text-[10px] text-gray-500 dark:text-gray-500 font-black uppercase tracking-widest w-8">#</th>
-                                    <th className="text-left p-4 text-[10px] text-gray-500 dark:text-gray-500 font-black uppercase tracking-widest w-24">SKU</th>
-                                    <th className="text-left p-4 text-[10px] text-gray-500 dark:text-gray-500 font-black uppercase tracking-widest min-w-[220px]">Manifest Description</th>
-                                    <th className="text-left p-4 text-[10px] text-gray-500 dark:text-gray-500 font-black uppercase tracking-widest w-36">Packaging</th>
-                                    <th className="text-right p-4 text-[10px] text-gray-500 dark:text-gray-500 font-black uppercase tracking-widest w-36">Qty (Sellable)</th>
-                                    <th className="text-right p-4 text-[10px] text-gray-500 dark:text-gray-500 font-black uppercase tracking-widest w-28">Cost</th>
-                                    <th className="text-right p-4 text-[10px] text-gray-500 dark:text-gray-500 font-black uppercase tracking-widest w-24">Total</th>
+                                <tr className="bg-[var(--theme-bg-subtle)] border-b border-[var(--theme-border)]">
+                                    <th className="text-left p-4 text-[10px] text-[var(--theme-text-secondary)] font-bold uppercase tracking-wider w-8">#</th>
+                                    <th className="text-left p-4 text-[10px] text-[var(--theme-text-secondary)] font-bold uppercase tracking-wider w-24">SKU</th>
+                                    <th className="text-left p-4 text-[10px] text-[var(--theme-text-secondary)] font-bold uppercase tracking-wider min-w-[220px]">Manifest Description</th>
+                                    <th className="text-left p-4 text-[10px] text-[var(--theme-text-secondary)] font-bold uppercase tracking-wider w-36">Packaging</th>
+                                    <th className="text-right p-4 text-[10px] text-[var(--theme-text-secondary)] font-bold uppercase tracking-wider w-36">Qty (Sellable)</th>
+                                    <th className="text-right p-4 text-[10px] text-[var(--theme-text-secondary)] font-bold uppercase tracking-wider w-28">Cost</th>
+                                    <th className="text-right p-4 text-[10px] text-[var(--theme-text-secondary)] font-bold uppercase tracking-wider w-24">Total</th>
                                     <th className="w-10 px-4"></th>
                                 </tr>
                             </thead>
-                            <tbody className="divide-y divide-gray-200 dark:divide-white/5">
+                            <tbody className="divide-y divide-[var(--theme-border)]">
                                 {po.lineItems?.map((item, i) => {
                                     const pkg = getPOItemPackagingSummary(item, allProducts);
                                     return (
                                         <React.Fragment key={i}>
                                             <tr
-                                                className={`hover:bg-stone-100/50 dark:hover:bg-white/5 transition-colors cursor-pointer ${expandedItems[i] ? 'bg-stone-200/50 dark:bg-black/20' : ''}`}
+                                                className={`hover:bg-[var(--theme-bg-subtle)] transition-colors cursor-pointer ${expandedItems[i] ? 'bg-[var(--theme-bg-subtle)]' : ''}`}
                                                 onClick={() => toggleItem(i)}
                                             >
-                                                <td className="p-4 text-gray-400 dark:text-gray-500 text-[10px] font-black">{(i + 1).toString().padStart(2, '0')}</td>
-                                                <td className="p-4 text-gray-600 dark:text-gray-400 text-xs font-mono font-bold">{item.sku || allProducts?.find(p => p.id === item.productId)?.sku || allProducts?.find(p => p.name === item.productName)?.sku || '—'}</td>
+                                                <td className="p-4 text-[var(--theme-text-secondary)] text-[10px] font-bold">{(i + 1).toString().padStart(2, '0')}</td>
+                                                <td className="p-4 text-[var(--theme-text-secondary)] text-xs font-mono font-semibold">{item.sku || allProducts?.find(p => p.id === item.productId)?.sku || allProducts?.find(p => p.name === item.productName)?.sku || '—'}</td>
                                                 <td className="p-4">
-                                                    <div className="text-gray-900 dark:text-white font-black tracking-tight text-[clamp(11px,1.5vw,14px)] break-words leading-tight max-w-[360px]">{formatPOItemDescription(item)}</div>
+                                                    <div className="text-[var(--theme-text-primary)] font-bold tracking-tight text-sm break-words leading-tight max-w-[360px]">{formatPOItemDescription(item)}</div>
                                                     <div className="flex items-center gap-1.5 mt-1 flex-wrap">
                                                         {item.productId?.startsWith('CUSTOM') && (
                                                             <span className="inline-block text-[10px] bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 px-1.5 py-0.5 rounded font-black tracking-widest uppercase italic">Custom Resource</span>
@@ -280,25 +280,25 @@ export const ViewPOModal: React.FC<ViewPOModalProps> = ({ isOpen, onClose, po, o
                                                     </div>
                                                 </td>
                                                 <td className="p-4">
-                                                    <div className="text-xs font-bold text-gray-900 dark:text-white flex items-center gap-1">
+                                                    <div className="text-xs font-bold text-[var(--theme-text-primary)] flex items-center gap-1">
                                                         <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-amber-500/10 border border-amber-500/20 text-amber-700 dark:text-amber-400 text-[10px] font-black uppercase">
                                                             <Package size={11} className="shrink-0" /> {pkg.packBadge || pkg.manifestUnitName}
                                                         </span>
                                                     </div>
-                                                    <div className="text-[10px] text-gray-500 dark:text-gray-400 font-bold mt-1">
+                                                    <div className="text-[10px] text-[var(--theme-text-secondary)] font-medium mt-1">
                                                         {pkg.packDetail}
                                                     </div>
                                                 </td>
                                                 <td className="p-4 text-right">
-                                                    <div className="text-gray-900 dark:text-white font-black tabular-nums text-sm">
-                                                        {pkg.sellableQty.toLocaleString()} <span className="text-[11px] font-bold text-gray-500 dark:text-gray-400">{pkg.sellUnitLabel}</span>
+                                                    <div className="text-[var(--theme-text-primary)] font-bold tabular-nums text-sm">
+                                                        {pkg.sellableQty.toLocaleString()} <span className="text-[11px] font-medium text-[var(--theme-text-secondary)]">{pkg.sellUnitLabel}</span>
                                                     </div>
                                                     {pkg.hasMultiplier ? (
                                                         <div className="text-[10px] text-[var(--theme-text-secondary)] font-medium whitespace-nowrap mt-0.5">
                                                             {item.quantity} {pkg.manifestUnitName.toLowerCase()} ({pkg.unitsPerOrderUnit} {pkg.sellUnitLabel}/{pkg.manifestUnitName.replace(/s$/, '').toLowerCase()})
                                                         </div>
                                                     ) : (
-                                                        <div className="text-[10px] text-[var(--theme-text-muted)] font-medium">
+                                                        <div className="text-[10px] text-[var(--theme-text-secondary)] font-medium">
                                                             (individual units)
                                                         </div>
                                                     )}
@@ -308,13 +308,13 @@ export const ViewPOModal: React.FC<ViewPOModalProps> = ({ isOpen, onClose, po, o
                                                         {formatCompactNumber(item.unitCost, { currency: currencySymbol })}{pkg.hasMultiplier ? ` /${pkg.manifestUnitName.replace(/s$/, '').toLowerCase()}` : ''}
                                                     </div>
                                                     {pkg.hasMultiplier && (
-                                                        <div className="text-[10px] text-[var(--theme-text-muted)] font-mono">
+                                                        <div className="text-[10px] text-[var(--theme-text-secondary)] font-mono">
                                                             ~{formatCompactNumber(pkg.costPerSellableUnit, { currency: currencySymbol })}/{pkg.sellUnitLabel}
                                                         </div>
                                                     )}
                                                 </td>
                                                 <td className="p-4 text-[var(--theme-text-primary)] text-right font-bold font-mono tabular-nums">{formatCompactNumber(item.totalCost, { currency: currencySymbol })}</td>
-                                                <td className="p-4 text-[var(--theme-text-muted)]">
+                                                <td className="p-4 text-[var(--theme-text-secondary)]">
                                                     {expandedItems[i] ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
                                                 </td>
                                             </tr>
@@ -324,7 +324,7 @@ export const ViewPOModal: React.FC<ViewPOModalProps> = ({ isOpen, onClose, po, o
                                                         <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-xs text-[var(--theme-text-secondary)]">
                                                             {Object.entries(item.customAttributes).map(([category, attrs]) => (
                                                                 <div key={category} className="space-y-1">
-                                                                    <h4 className="font-semibold text-[var(--theme-text-muted)] uppercase text-[10px] mb-1">{category}</h4>
+                                                                    <h4 className="font-semibold text-[var(--theme-text-secondary)] uppercase text-[10px] mb-1">{category}</h4>
                                                                     {Object.entries(attrs).map(([key, value]) => {
                                                                         if (!value) return null;
                                                                         return (
@@ -347,7 +347,7 @@ export const ViewPOModal: React.FC<ViewPOModalProps> = ({ isOpen, onClose, po, o
                                 })}
                                 {(!po.lineItems || po.lineItems.length === 0) && (
                                     <tr>
-                                        <td colSpan={8} className="p-8 text-center text-[var(--theme-text-muted)] italic">No items in this order</td>
+                                        <td colSpan={8} className="p-8 text-center text-[var(--theme-text-secondary)] italic">No items in this order</td>
                                     </tr>
                                 )}
                             </tbody>
@@ -359,18 +359,18 @@ export const ViewPOModal: React.FC<ViewPOModalProps> = ({ isOpen, onClose, po, o
                 <div className="flex justify-end pt-8">
                     <div className="w-full md:w-80 space-y-4 text-sm">
                         <div className="flex justify-between items-end border-b border-[var(--theme-border-subtle)] pb-2">
-                            <span className="uppercase tracking-wider text-[10px] font-semibold text-[var(--theme-text-muted)]">Base Payload</span>
+                            <span className="uppercase tracking-wider text-[10px] font-semibold text-[var(--theme-text-secondary)]">Base Payload</span>
                             <span className="font-mono text-[var(--theme-text-primary)] font-bold tabular-nums">{currencySymbol} {(po.totalAmount - ((po.taxAmount || 0) + (po.shippingCost || 0))).toLocaleString()}</span>
                         </div>
                         {po.shippingCost && po.shippingCost > 0 ? (
                             <div className="flex justify-between items-end border-b border-[var(--theme-border-subtle)] pb-2">
-                                <span className="uppercase tracking-wider text-[10px] font-semibold text-[var(--theme-text-muted)]">Logistics</span>
+                                <span className="uppercase tracking-wider text-[10px] font-semibold text-[var(--theme-text-secondary)]">Logistics</span>
                                 <span className="font-mono text-[var(--theme-text-secondary)] font-semibold tabular-nums">{currencySymbol} {po.shippingCost.toLocaleString()}</span>
                             </div>
                         ) : null}
                         {po.taxAmount && po.taxAmount > 0 ? (
                             <div className="flex justify-between items-end border-b border-[var(--theme-border-subtle)] pb-2">
-                                <span className="uppercase tracking-wider text-[10px] font-semibold text-[var(--theme-text-muted)]">Tax</span>
+                                <span className="uppercase tracking-wider text-[10px] font-semibold text-[var(--theme-text-secondary)]">Tax</span>
                                 <span className="font-mono text-[var(--theme-text-secondary)] font-semibold tabular-nums">{currencySymbol} {po.taxAmount.toLocaleString()}</span>
                             </div>
                         ) : null}
@@ -383,9 +383,9 @@ export const ViewPOModal: React.FC<ViewPOModalProps> = ({ isOpen, onClose, po, o
 
                 {/* Notes */}
                 {po.notes && !po.notes.includes('Order received and processed') && (
-                    <div className="bg-gray-50 dark:bg-white/5 rounded-2xl p-6 border border-gray-100 dark:border-white/5 mt-8">
-                        <p className="text-[10px] text-gray-500 dark:text-gray-500 uppercase tracking-widest font-black mb-4">Protocol Notes & Instructions</p>
-                        <p className="text-sm text-gray-700 dark:text-gray-400 whitespace-pre-wrap leading-relaxed italic">
+                    <div className="bg-[var(--theme-bg-subtle)] rounded-2xl p-6 border border-[var(--theme-border)] mt-8">
+                        <p className="text-[10px] text-[var(--theme-text-secondary)] uppercase tracking-wider font-bold mb-3">Protocol Notes & Instructions</p>
+                        <p className="text-sm text-[var(--theme-text-primary)] whitespace-pre-wrap leading-relaxed">
                             {po.notes.replace(/\[APPROVED_BY:.*?\]/g, '').replace(/\[SITES:.*?\]/g, '').replace(/\[Multi-Site Order.*?\]/g, '').trim()}
                         </p>
                     </div>

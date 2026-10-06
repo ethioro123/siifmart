@@ -66,7 +66,7 @@ export default function TopBar() {
 
    // Auto-close dropdowns on click outside
    useEffect(() => {
-      const handleClickOutside = (event: MouseEvent) => {
+      const handleClickOutside = (event: MouseEvent | TouchEvent) => {
          const target = event.target as Node;
          
          // Search
@@ -87,9 +87,11 @@ export default function TopBar() {
 
       if (isSearchOpen || isNotifOpen || isUserMenuOpen) {
          document.addEventListener('mousedown', handleClickOutside);
+         document.addEventListener('touchstart', handleClickOutside, { passive: true });
       }
       return () => {
          document.removeEventListener('mousedown', handleClickOutside);
+         document.removeEventListener('touchstart', handleClickOutside);
       };
    }, [isSearchOpen, isNotifOpen, isUserMenuOpen]);
    const [showQuickAssign, setShowQuickAssign] = useState(false);
@@ -386,7 +388,7 @@ export default function TopBar() {
             {/* Mobile Search Trigger */}
             <button
                onClick={() => setIsMobileSearchVisible(true)}
-               className="lg:hidden p-2 text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] transition-colors cursor-pointer min-w-[36px] min-h-[36px] flex items-center justify-center"
+               className="lg:hidden p-2 text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] transition-colors cursor-pointer min-w-[40px] min-h-[40px] flex items-center justify-center touch-manipulation"
                aria-label="Search"
             >
                <Search size={18} />

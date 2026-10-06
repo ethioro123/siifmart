@@ -41,11 +41,11 @@ export const POTotalsSummary: React.FC<POTotalsSummaryProps> = ({
             {/* Left: Notes & Commercial Terms */}
             <div className="bg-[var(--theme-bg-panel)] border border-[var(--theme-border)] rounded-2xl p-6 shadow-sm space-y-4">
                 <div className="space-y-1.5">
-                    <label className="text-[10px] text-[var(--theme-text-muted)] uppercase font-bold tracking-wider flex items-center gap-2">
+                    <label className="text-[10px] text-[var(--theme-text-secondary)] uppercase font-bold tracking-wider flex items-center gap-2">
                         <FileText size={13} className="text-[var(--theme-accent)]" /> Transaction Notes & Instructions
                     </label>
                     <textarea
-                        className="w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl p-3.5 text-xs text-[var(--theme-text-primary)] focus:border-[var(--theme-accent)] outline-none transition-all resize-none h-28 placeholder:text-[var(--theme-text-muted)] font-medium"
+                        className="w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl p-3.5 text-xs text-[var(--theme-text-primary)] focus:border-[var(--theme-accent)] outline-none transition-all resize-none h-28 placeholder:text-[var(--theme-text-secondary)]/70 font-medium"
                         placeholder="Specify internal warehouse receiving directives or supplier delivery instructions..."
                         value={poNotes}
                         onChange={(e) => setPoNotes(e.target.value)}
@@ -54,21 +54,21 @@ export const POTotalsSummary: React.FC<POTotalsSummaryProps> = ({
 
                 <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-1.5">
-                        <label className="text-[10px] text-[var(--theme-text-muted)] uppercase font-bold tracking-wider block">Payment Terms</label>
+                        <label className="text-[10px] text-[var(--theme-text-secondary)] uppercase font-bold tracking-wider block">Payment Terms</label>
                         <input
                             type="text"
                             placeholder="e.g. Net 30, COD"
-                            className="w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 py-2.5 text-xs text-[var(--theme-text-primary)] focus:border-[var(--theme-accent)] outline-none font-bold placeholder:text-[var(--theme-text-muted)]"
+                            className="w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 py-2.5 text-xs text-[var(--theme-text-primary)] focus:border-[var(--theme-accent)] outline-none font-bold placeholder:text-[var(--theme-text-secondary)]/70"
                             value={paymentTerms}
                             onChange={(e) => setPaymentTerms(e.target.value)}
                         />
                     </div>
                     <div className="space-y-1.5">
-                        <label className="text-[10px] text-[var(--theme-text-muted)] uppercase font-bold tracking-wider block">Incoterms</label>
+                        <label className="text-[10px] text-[var(--theme-text-secondary)] uppercase font-bold tracking-wider block">Incoterms</label>
                         <input
                             type="text"
                             placeholder="e.g. EXW, FOB, CIF"
-                            className="w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 py-2.5 text-xs text-[var(--theme-text-primary)] focus:border-[var(--theme-accent)] outline-none font-bold placeholder:text-[var(--theme-text-muted)]"
+                            className="w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 py-2.5 text-xs text-[var(--theme-text-primary)] focus:border-[var(--theme-accent)] outline-none font-bold placeholder:text-[var(--theme-text-secondary)]/70"
                             value={incoterms}
                             onChange={(e) => setIncoterms(e.target.value)}
                         />
@@ -85,13 +85,13 @@ export const POTotalsSummary: React.FC<POTotalsSummaryProps> = ({
 
                 {/* Subtotal */}
                 <div className="flex justify-between items-center">
-                    <span className="text-xs font-bold text-[var(--theme-text-muted)] uppercase tracking-wide">Net Subtotal</span>
+                    <span className="text-xs font-bold text-[var(--theme-text-secondary)] uppercase tracking-wide">Net Subtotal</span>
                     <span className="text-base font-black text-[var(--theme-text-primary)] font-mono tabular-nums">{formatCompactNumber(poSubtotal, { currency: currencySymbol })}</span>
                 </div>
 
                 {/* Discount */}
                 <div className="flex justify-between items-center">
-                    <span className="text-xs font-bold text-[var(--theme-text-muted)] flex items-center gap-1.5">
+                    <span className="text-xs font-bold text-[var(--theme-text-secondary)] flex items-center gap-1.5">
                         <Percent size={13} className="text-emerald-600 dark:text-emerald-400" /> Applied Discount
                     </span>
                     <div className="flex items-center gap-2">
@@ -109,14 +109,14 @@ export const POTotalsSummary: React.FC<POTotalsSummaryProps> = ({
                                 onChange={(e) => setDiscountRate(parseFloat(e.target.value) || 0)}
                                 placeholder="0"
                             />
-                            <span className="text-[var(--theme-text-muted)] text-xs ml-1 font-bold">%</span>
+                            <span className="text-[var(--theme-text-secondary)] text-xs ml-1 font-bold">%</span>
                         </div>
                     </div>
                 </div>
 
                 {/* Tax */}
                 <div className="flex justify-between items-center">
-                    <span className="text-xs font-bold text-[var(--theme-text-muted)] flex items-center gap-1.5">
+                    <span className="text-xs font-bold text-[var(--theme-text-secondary)] flex items-center gap-1.5">
                         <Percent size={13} className="text-amber-600 dark:text-amber-400" /> Regulatory Tax
                         <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-700 dark:text-amber-400 font-black">
                             {currencySymbol === 'KSh' ? 'KRA 16%' : 'ERCA 15%'}
@@ -128,7 +128,7 @@ export const POTotalsSummary: React.FC<POTotalsSummaryProps> = ({
                                 + {formatCompactNumber(poTax, { currency: currencySymbol })}
                             </span>
                         ) : (
-                            <span className="text-[9px] text-[var(--theme-text-muted)] font-bold uppercase tracking-tight">
+                            <span className="text-[9px] text-[var(--theme-text-secondary)] font-bold uppercase tracking-tight">
                                 Exempt
                             </span>
                         )}
@@ -141,18 +141,18 @@ export const POTotalsSummary: React.FC<POTotalsSummaryProps> = ({
                                 onChange={(e) => setTaxRate(parseFloat(e.target.value) || 0)}
                                 placeholder="0"
                             />
-                            <span className="text-[var(--theme-text-muted)] text-xs ml-1 font-bold">%</span>
+                            <span className="text-[var(--theme-text-secondary)] text-xs ml-1 font-bold">%</span>
                         </div>
                     </div>
                 </div>
 
                 {/* Shipping */}
                 <div className="flex justify-between items-center">
-                    <span className="text-xs font-bold text-[var(--theme-text-muted)] flex items-center gap-1.5">
+                    <span className="text-xs font-bold text-[var(--theme-text-secondary)] flex items-center gap-1.5">
                         <DollarSign size={13} className="text-[var(--theme-accent)]" /> Freight / Shipping
                     </span>
                     <div className="flex items-center bg-[var(--theme-bg-subtle)] rounded-xl border border-[var(--theme-border)] px-2.5 py-1 focus-within:border-[var(--theme-accent)]">
-                        <span className="text-[var(--theme-text-muted)] text-[10px] mr-1 font-bold">{currencySymbol}</span>
+                        <span className="text-[var(--theme-text-secondary)] text-[10px] mr-1 font-bold">{currencySymbol}</span>
                         <input
                             type="number"
                             min="0"
@@ -167,8 +167,8 @@ export const POTotalsSummary: React.FC<POTotalsSummaryProps> = ({
                 {/* Total Section */}
                 <div className="pt-3 border-t border-[var(--theme-border-subtle)] flex justify-between items-end">
                     <div>
-                        <span className="text-[10px] text-[var(--theme-text-muted)] font-bold uppercase tracking-wider block">Grand Total</span>
-                        <span className="text-[10px] text-[var(--theme-text-muted)] font-medium mt-0.5 block">
+                        <span className="text-[10px] text-[var(--theme-text-secondary)] font-bold uppercase tracking-wider block">Grand Total</span>
+                        <span className="text-[10px] text-[var(--theme-text-secondary)] font-medium mt-0.5 block">
                             {incoterms ? `Terms: ${incoterms}` : 'Ready for authorization'}
                         </span>
                     </div>

@@ -127,8 +127,8 @@ export const InventoryOverview: React.FC<InventoryOverviewProps> = ({
                         </h3>
                     </div>
                     {categoryData.length > 0 ? (
-                        <div className="h-[280px]">
-                            <ResponsiveContainer width="100%" height="100%" minWidth={0}>
+                        <div className="h-[280px] w-full min-w-0">
+                            <ResponsiveContainer width="100%" height={280} minWidth={0} minHeight={280}>
                                 <BarChart data={categoryData} margin={{ top: 10, right: 10, left: 0, bottom: 20 }}>
                                     <CartesianGrid strokeDasharray="3 3" stroke="var(--theme-border)" opacity={0.6} vertical={false} />
                                     <XAxis
@@ -177,8 +177,8 @@ export const InventoryOverview: React.FC<InventoryOverviewProps> = ({
                             </h3>
                         </div>
                         {hasInventory ? (
-                            <div className="h-[180px]">
-                                <ResponsiveContainer width="100%" height="100%" minWidth={0}>
+                            <div className="h-[180px] w-full min-w-0">
+                                <ResponsiveContainer width="100%" height={180} minWidth={0} minHeight={180}>
                                     <PieChart>
                                         <Pie
                                             data={abcData}

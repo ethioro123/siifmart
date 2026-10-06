@@ -258,7 +258,13 @@ const canApprove = ['super_admin', 'CEO'].includes(user?.role || '');
   - **KPI Cards**: Strictly ZERO rainbow gradient backgrounds behind KPI cards. Standard structure: 13px uppercase label, 32–40px bold tabular numeral, 13–14px semantic delta badge, 12–13px supporting context.
   - **Spacious Tables**: Clean and spacious with 48–56px row height, generous padding, hairline separators, tabular numbers for currency and stock counts, zero rainbow badges.
   - **macOS 27 Navigation Sidebar**: 240px width, 12px padding, 40–44px item height, 10–12px radius. Selected item uses subtle surface + accent text/icon (never a solid blue block). Icons adopt distinctive domain-specific semantic tinting (blue for dashboard, emerald for orders, amber for products, purple for settings).
-- **The 10-Point "Apple Test" Audit Checklist**: Before approving ANY UI component, screen, or workflow, verify:
+- **Mandatory Text Visibility & Supreme Legibility Doctrine (Readability Is Paramount)**:
+  - While applying Apple SF typography, minimalist styling, refined palettes, and Liquid Glass materials, **text visibility and readability are strictly non-negotiable and paramount**. Visual aesthetics, minimalist restraint, dark mode surfaces, or glass translucency must NEVER compromise legibility or reading ergonomics.
+  - **High-Contrast Typography Standard**: Primary text must enforce maximum contrast (`#F5F5F7` / `#FFFFFF` on dark surfaces; `#1D1D1F` on light surfaces). Secondary and supporting text (`#A1A1A6` / `#86868B`) must strictly preserve WCAG AA minimum 4.5:1 contrast ratio against their immediate background surface (WCAG AAA 7:1 preferred for dense tabular data and captions).
+  - **Zero Washed-Out or Dim Gray Text**: Strictly prohibit low-contrast, washed-out, or dim gray text (e.g. text opacities `< 0.70` or muted grays like `#4B5563` on dark surfaces) that strains eyes or washes out under store fluorescent lights or dim warehouse floors.
+  - **High-Legibility Glass Scrims & Backings**: Whenever text is rendered over Liquid Glass or translucent controls, the glass material MUST provide sufficient optical opacity, contrast tinting, or a readable scrim so underlying content, refractions, and specular highlights never cause visual vibration, bleed-through, or illegibility.
+  - **Tabular & Operational Contrast Guarantee**: Tabular numbers, monetary figures, barcodes, SKU labels, inventory bin tags, and system clock digits must maintain maximum visual punch and razor-sharp contrast for instant glanceability.
+- **The 11-Point "Apple Test" Audit Checklist**: Before approving ANY UI component, screen, or workflow, verify:
   1. Is the content the visual priority?
   2. Could I remove a border?
   3. Could I remove a card? (Eliminate "collection of boxes")
@@ -269,8 +275,9 @@ const canApprove = ['super_admin', 'CEO'].includes(user?.role || '');
   8. Is the glass actually serving a functional purpose? (Judicious glass rule)
   9. Does dark mode feel intentionally designed? (Independent tonal hierarchy, not simple inversion)
   10. Does it still work without animation?
+  11. Is text visibility and contrast crystal-clear across all lighting conditions with zero washed-out or low-contrast typography?
 - **Enterprise Retail & WMS Synthesis Doctrine**: We do not create an ornamental consumer marketing page; we synthesize Apple 2026 visual language with serious enterprise retail & WMS information architecture (dense operational tables, bin locations, SKU tracking, FEFO batch expiry, operational badges, hardware barcode scanners, and fast filters). Low-end mobile constraints (stripping GPU blurs) remain strictly quarantined to frontline warehouse workers in Fulfillment.
-- **The 12 Aesthetic Anti-Patterns (Strictly Prohibited)**:
+- **The 13 Aesthetic Anti-Patterns (Strictly Prohibited)**:
   1. ❌ Excessive gradients (purple → pink → orange, glow blobs)
   2. ❌ Excessive glass (glass card inside glass card inside glass card)
   3. ❌ Heavy / thick borders (> 1px)
@@ -283,6 +290,7 @@ const canApprove = ['super_admin', 'CEO'].includes(user?.role || '');
   10. ❌ Generic dashboard gradients behind KPI cards
   11. ❌ Muddy gray cards (`#1C1C1E` / `#2C2C2E`)
   12. ❌ Neumorphism or 2020 glassmorphism
+  13. ❌ Low-contrast, washed-out, or dim gray text that sacrifices visibility and legibility for aesthetic minimalism or dark mode styling
 
 ### 17. Mandatory Low-End Mobile Performance & Warehouse Ergonomics Standard (Strictly Confined to Fulfillment)
 - **Strict Domain Scoping (Fulfillment Only)**: Low-end mobile performance constraints, RAM optimizations, animation restrictions, and GPU blur stripping are STRICTLY CONFINED to the Fulfillment domain (`pages/Fulfillment.tsx` and `components/fulfillment/`). Frontline warehouse workers (pickers, packers, receivers) operate on low-cost entry-level Android devices ($50–$100, 2GB–3GB RAM, budget Mali/PowerVR GPUs e.g. Tecno Pop/Spark, Infinix Smart/Hot, Itel, Samsung Galaxy A03/A04). In ALL other domains — POS, POS Command, Administration, Central Operations, Financials, Procurement, Inventory, HR, and Settings — our full October 2026 Apple Liquid Glass & aesthetic applies without restriction.
@@ -500,6 +508,7 @@ import { ROLES } from '../constants';
 - Pure Contrast Surfaces: Dark mode uses pure OLED black surfaces (`#000000`) or deep onyx (`#1D1D1F`) with crisp 1px hairline borders (`rgba(255,255,255,0.08)`); Light mode uses pure white cards (`#FFFFFF`) with subtle hairline borders (`rgba(0,0,0,0.08)`). Strictly zero muddy gray cards (`#1C1C1E` / `#2C2C2E`).
 - Judicious Liquid Glass: Used selectively for navigation bars, toolbars, search pills, sidebars, segmented controls, and modal sheets (not everywhere).
 - Scope of Hardware Overrides: Low-end mobile performance constraints (stripping GPU blurs, restricting RAM/animations, solid opaque surfaces) are STRICTLY CONFINED to the Fulfillment domain (`pages/Fulfillment.tsx` and `components/fulfillment/`). In POS, POS Command, Administration, and all other domains, our full Apple Liquid Glass aesthetic applies completely.
+- Supreme Text Visibility & Contrast: Text readability is paramount. All typography tokens enforce high contrast (minimum WCAG AA 4.5:1, AAA 7:1 for data tables). Never use washed-out or dim text on dark or light backgrounds, and ensure text over Liquid Glass materials maintains a high-contrast backing.
 
 ---
 
@@ -925,5 +934,6 @@ When editing or creating any file, the AI MUST:
 - ❌ Don't use muddy gray cards (#1C1C1E / #2C2C2E) — enforce Apple's authentic pure contrast architecture (#000000 / #1D1D1F in dark mode, #FFFFFF in light mode)
 - ❌ Don't treat interfaces as a "collection of boxes" or card traps — establish contrast through typography, negative space, and edge-to-edge content
 - ❌ Don't place Liquid Glass materials everywhere — use glass judiciously for navigation bars, toolbars, search pills, sidebars, segmented controls, and modal sheets
+- ❌ Don't compromise text visibility, contrast, or legibility for aesthetic minimalism, dark mode styling, or Liquid Glass effects — never use low-contrast, washed-out, or unreadable dim gray typography
 
 
