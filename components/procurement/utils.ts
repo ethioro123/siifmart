@@ -16,9 +16,15 @@ export {
     getCategoryAttributes,
     PRODUCT_CATEGORIES,
     isConsumableCategory,
-    isDiscreteGeneralMerch
+    isDiscreteGeneralMerch,
+    NET_CONTENT_UNITS,
+    getCategorySpecGroup,
+    getPOItemCategorySpecsSummary,
+    type CategorySpecGroup,
+    type CategoryAttributeField,
+    type POItemCategorySpecsSummary
 } from './categoryAttributes';
-import { isDiscreteGeneralMerch } from './categoryAttributes';
+import { isDiscreteGeneralMerch, isConsumableCategory } from './categoryAttributes';
 
 // Re-export the new structured unit system
 export { SELL_UNITS, getSellUnit, isDecimalAllowed, needsQuantityPrompt, getGroupedUnits, formatQuantityWithUnit, formatPricePerUnit, validateQuantity, normalizeQuantity } from '../../utils/units';

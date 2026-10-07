@@ -143,6 +143,9 @@ export const TransferRequestModal: React.FC<TransferRequestModalProps> = ({
                 };
             });
 
+            const sourceSiteObj = sites.find(s => s.id === actualSourceSite);
+            const siteCountry = sourceSiteObj?.country || (sourceSiteObj as any)?.country_code || activeSite?.country || (activeSite as any)?.country_code || settings?.country || 'ET';
+
             // Target transfer id for wms_jobs
             const transferJob = {
                 type: 'TRANSFER',
@@ -154,7 +157,10 @@ export const TransferRequestModal: React.FC<TransferRequestModalProps> = ({
                 items: Math.ceil(lineItems.reduce((acc, curr) => acc + (curr.expectedQty || 0), 0)),
                 priority: transferPriority,
                 notes: transferNote,
-                siteId: actualSourceSite
+                siteId: actualSourceSite,
+                countryCode: siteCountry,
+                country_code: siteCountry,
+                requestedBy: user?.name || 'System'
             };
 
             const createdJob = await wmsJobsService.create(transferJob);

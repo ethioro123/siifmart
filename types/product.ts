@@ -297,12 +297,13 @@ export interface POItem {
   expiryDate?: string;
   batchNumber?: string;
   customAttributes?: {
-    identity?: { variant?: string; type?: string; subcategory?: string };
+    identity?: { variant?: string; type?: string; subcategory?: string; modelNumber?: string; brand?: string };
     physical?: { netWeight?: string; grossWeight?: string; volume?: string; unit?: string; sizeType?: string; dims?: string; color?: string; form?: string; texture?: string };
     packaging?: { unitSize?: string; packQty?: string; caseSize?: string; packagingLevel?: string; material?: string; isBreakable?: boolean; packageType?: string };
     storage?: { type?: string; isPerishable?: boolean; stackLimit?: string; isHazardous?: boolean; isFragile?: boolean; isLightSensitive?: boolean };
     commercial?: { isWeighted?: boolean; sellBy?: string; priceType?: string; isBundleEligible?: boolean; isReturnable?: boolean };
     descriptive?: { usage?: string; audience?: string; ingredients?: string; keyFeatures?: string; scent?: string; flavor?: string; strength?: string };
+    categorySpecific?: Record<string, any>;
   };
   po_id?: string;
   product_id?: string;

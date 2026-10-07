@@ -9,8 +9,18 @@ import { BuyingAttributes } from './BuyingAttributes';
 import { SellingAttributes } from './SellingAttributes';
 import { CatalogSearch } from './CatalogSearch';
 import { POItemOrderDetails } from './POItemOrderDetails';
-import { isConsumableCategory } from './utils';
+import { isConsumableCategory, getPOItemCategorySpecsSummary } from './utils';
 import type { Country } from '../../utils/localization';
+
+const createDefaultCustomAttributes = () => ({
+    identity: { variant: '', type: '', subcategory: '', modelNumber: '' },
+    physical: { netWeight: '', grossWeight: '', volume: '', unit: '', sizeType: '', dims: '', color: '', form: '', texture: '' },
+    packaging: { unitSize: '', packQty: '', caseSize: '', packagingLevel: '', material: '', isBreakable: false, packageType: '' },
+    storage: { type: 'Ambient', isPerishable: false, stackLimit: '', isHazardous: false, isFragile: false, isLightSensitive: false },
+    commercial: { isWeighted: false, sellBy: 'Unit', priceType: 'Fixed', isBundleEligible: false, isReturnable: true },
+    descriptive: { usage: '', audience: '', ingredients: '', keyFeatures: '', scent: '', flavor: '', strength: '' },
+    categorySpecific: {} as Record<string, any>
+});
 
 interface POItemFormProps {
     products: Product[];
@@ -52,14 +62,7 @@ export const POItemForm: React.FC<POItemFormProps> = ({
     const [customItemImage, setCustomItemImage] = useState('');
 
     // Enterprise Attributes State (6-Layer Model)
-    const [customAttributes, setCustomAttributes] = useState({
-        identity: { variant: '', type: '', subcategory: '' },
-        physical: { netWeight: '', grossWeight: '', volume: '', unit: '', sizeType: '', dims: '', color: '', form: '', texture: '' },
-        packaging: { unitSize: '', packQty: '', caseSize: '', packagingLevel: '', material: '', isBreakable: false, packageType: '' },
-        storage: { type: 'Ambient', isPerishable: false, stackLimit: '', isHazardous: false, isFragile: false, isLightSensitive: false },
-        commercial: { isWeighted: false, sellBy: 'Unit', priceType: 'Fixed', isBundleEligible: false, isReturnable: true },
-        descriptive: { usage: '', audience: '', ingredients: '', keyFeatures: '', scent: '', flavor: '', strength: '' }
-    });
+    const [customAttributes, setCustomAttributes] = useState(createDefaultCustomAttributes);
 
     // Buying: Order Qty + Unit Cost
     const [currentQty, setCurrentQty] = useState(0);
@@ -72,8 +75,9 @@ export const POItemForm: React.FC<POItemFormProps> = ({
 
     const selectedCatalogProduct = productType === 'catalog' ? products.find(p => p.id === currentProductToAdd) : null;
     const activePackaging = selectedCatalogProduct?.customAttributes?.packaging || (selectedCatalogProduct as any)?.custom_attributes?.packaging || customAttributes.packaging;
-    const caseSize = parseInt(activePackaging?.caseSize) || 0;
-    const packQty = parseInt(activePackaging?.packQty) || selectedCatalogProduct?.packQuantity || (selectedCatalogProduct as any)?.pack_quantity || 1;
+    const packagingLevel = activePackaging?.packagingLevel || (parseInt(activePackaging?.caseSize) > 0 ? 'two_tier' : parseInt(activePackaging?.packQty) > 1 ? 'case' : 'single');
+    const caseSize = packagingLevel === 'single' ? 0 : (parseInt(activePackaging?.caseSize) || 0);
+    const packQty = packagingLevel === 'single' ? 1 : (parseInt(activePackaging?.packQty) || selectedCatalogProduct?.packQuantity || (selectedCatalogProduct as any)?.pack_quantity || 1);
     const pkgType = activePackaging?.packageType || '';
     const hasCases = caseSize >= 1 && caseSize > 0;
     const hasPacks = packQty > 1 && !hasCases;
@@ -127,16 +131,10 @@ export const POItemForm: React.FC<POItemFormProps> = ({
                     storage: { ...prev.storage, ...ca.storage },
                     commercial: { ...prev.commercial, ...ca.commercial },
                     descriptive: { ...prev.descriptive, ...ca.descriptive },
+                    categorySpecific: { ...prev.categorySpecific, ...((ca as any)?.categorySpecific || {}) },
                 }));
             } else {
-                setCustomAttributes({
-                    identity: { variant: '', type: '', subcategory: '' },
-                    physical: { netWeight: '', grossWeight: '', volume: '', unit: '', sizeType: '', dims: '', color: '', form: '', texture: '' },
-                    packaging: { unitSize: '', packQty: '', caseSize: '', packagingLevel: '', material: '', isBreakable: false, packageType: '' },
-                    storage: { type: 'Ambient', isPerishable: false, stackLimit: '', isHazardous: false, isFragile: false, isLightSensitive: false },
-                    commercial: { isWeighted: false, sellBy: 'Unit', priceType: 'Fixed', isBundleEligible: false, isReturnable: true },
-                    descriptive: { usage: '', audience: '', ingredients: '', keyFeatures: '', scent: '', flavor: '', strength: '' }
-                });
+                setCustomAttributes(createDefaultCustomAttributes());
             }
         } else {
             resetForm();
@@ -156,14 +154,7 @@ export const POItemForm: React.FC<POItemFormProps> = ({
         setCurrentQty(0);
         setCurrentCost(0);
         setCurrentRetailPrice(0);
-        setCustomAttributes({
-            identity: { variant: '', type: '', subcategory: '' },
-            physical: { netWeight: '', grossWeight: '', volume: '', unit: '', sizeType: '', dims: '', color: '', form: '', texture: '' },
-            packaging: { unitSize: '', packQty: '', caseSize: '', packagingLevel: '', material: '', isBreakable: false, packageType: '' },
-            storage: { type: 'Ambient', isPerishable: false, stackLimit: '', isHazardous: false, isFragile: false, isLightSensitive: false },
-            commercial: { isWeighted: false, sellBy: 'Unit', priceType: 'Fixed', isBundleEligible: false, isReturnable: true },
-            descriptive: { usage: '', audience: '', ingredients: '', keyFeatures: '', scent: '', flavor: '', strength: '' }
-        });
+        setCustomAttributes(createDefaultCustomAttributes());
     };
 
     const handleAddItem = async () => {
@@ -219,8 +210,14 @@ export const POItemForm: React.FC<POItemFormProps> = ({
             productId = editingItem?.productId || `CUSTOM-${Date.now()}`;
             itemSku = editingItem?.sku || await generateSequentialSKU(selectedMainCategory || 'General', products, country);
 
+            const catSpecs = getPOItemCategorySpecsSummary({
+                category: selectedMainCategory,
+                customAttributes
+            });
+
             const descParts = [
                 customAttributes.identity.variant ? `Variant: ${customAttributes.identity.variant}` : '',
+                catSpecs.summaryText || '',
                 customAttributes.physical.form ? `Form: ${customAttributes.physical.form}` : '',
                 customAttributes.packaging.material ? `Pkg: ${customAttributes.packaging.material}` : '',
                 customAttributes.storage.type !== 'Ambient' ? `Storage: ${customAttributes.storage.type}` : '',
@@ -258,6 +255,9 @@ export const POItemForm: React.FC<POItemFormProps> = ({
             finalDescription = product.description || undefined;
         }
 
+        const isSingleLevel = (finalCustomAttributes?.packaging?.packagingLevel === 'single') || (finalPackQty <= 1 && (!caseSize || caseSize <= 0));
+        const resolvedPackageType = finalCustomAttributes?.packaging?.packageType || pkgType || (isSingleLevel ? 'Retail Box' : undefined);
+
         const newItem: POItem = {
             productId,
             productName,
@@ -272,11 +272,19 @@ export const POItemForm: React.FC<POItemFormProps> = ({
             unit: finalUnit,
             category: finalCategory,
             identityType: productType === 'catalog' ? 'known' : 'new',
-            packQuantity: finalPackQty,
-            packageType: pkgType || finalCustomAttributes?.packaging?.packageType || undefined,
-            caseSize: caseSize || parseInt(finalCustomAttributes?.packaging?.caseSize) || undefined,
+            packQuantity: isSingleLevel ? 1 : finalPackQty,
+            packageType: resolvedPackageType,
+            caseSize: isSingleLevel ? undefined : (caseSize || parseInt(finalCustomAttributes?.packaging?.caseSize) || undefined),
             description: finalDescription,
-            customAttributes: finalCustomAttributes
+            customAttributes: {
+                ...finalCustomAttributes,
+                packaging: {
+                    ...finalCustomAttributes?.packaging,
+                    packageType: resolvedPackageType,
+                    packagingLevel: isSingleLevel ? 'single' : (caseSize > 0 ? 'two_tier' : finalPackQty > 1 ? 'case' : 'single'),
+                    packQty: isSingleLevel ? '1' : String(finalPackQty)
+                }
+            }
         };
 
         if (editingItem) {

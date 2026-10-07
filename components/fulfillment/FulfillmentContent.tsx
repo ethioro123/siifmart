@@ -98,6 +98,7 @@ export const FulfillmentContent: React.FC = () => {
         resolveOrderRef,
         addProduct,
         products,
+        allProducts,
         filteredProducts,
         sales,
         filteredMovements,
@@ -323,7 +324,7 @@ export const FulfillmentContent: React.FC = () => {
                         user={user ?? null}
                         sites={sites}
                         products={products}
-                        allProducts={products}
+                        allProducts={allProducts}
                         jobs={jobs}
                         filteredJobs={filteredJobs}
                         transfers={transfers}

@@ -1,19 +1,8 @@
 import React from 'react';
-import { Tag, ChevronDown, Lock, Package, Scale, Layers, Thermometer, ShieldAlert, Globe } from 'lucide-react';
-import { PRODUCT_CATEGORIES, PACKAGE_TYPES, STORAGE_CONDITIONS, isConsumableCategory } from './utils';
-
-/* ─────────────── NET CONTENT / PHYSICAL UoM (GS1 Standard) ──────────── */
-
-const NET_CONTENT_UNITS = [
-    { value: 'g', label: 'g (Gram)', group: 'Weight' },
-    { value: 'kg', label: 'kg (Kilogram)', group: 'Weight' },
-    { value: 'ml', label: 'ml (Millilitre)', group: 'Volume' },
-    { value: 'L', label: 'L (Litre)', group: 'Volume' },
-    { value: 'oz', label: 'oz (Ounce)', group: 'Weight' },
-    { value: 'lb', label: 'lb (Pound)', group: 'Weight' },
-    { value: 'fl oz', label: 'fl oz (Fluid Ounce)', group: 'Volume' },
-    { value: 'pcs', label: 'pcs (Pieces / Count)', group: 'Count' },
-] as const;
+import { Tag, ChevronDown, Lock, Package, Scale, Thermometer } from 'lucide-react';
+import { PRODUCT_CATEGORIES, STORAGE_CONDITIONS, isConsumableCategory, NET_CONTENT_UNITS } from './utils';
+import { CategorySpecificAttributes } from './CategorySpecificAttributes';
+import { PackagingHierarchySection } from './PackagingHierarchySection';
 
 export interface BuyingAttributesProps {
     customItemBrand: string;
@@ -178,17 +167,7 @@ export const BuyingAttributes: React.FC<BuyingAttributesProps> = ({
                                 onChange={e => setCustomAttributes((p: any) => ({ ...p, identity: { ...p.identity, subcategory: e.target.value } }))}
                             />
                         </div>
-                        <div className="col-span-1 space-y-1">
-                            <label className="text-[10px] text-[var(--theme-text-secondary)] uppercase font-semibold ml-1 block">Model / MPN</label>
-                            <input
-                                type="text"
-                                className="w-full h-10 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3 text-xs text-[var(--theme-text-primary)] font-mono focus:border-[var(--theme-accent)] outline-none transition-all placeholder:text-[var(--theme-text-secondary)]/70 font-semibold"
-                                placeholder="e.g. B08KTZ8249"
-                                value={customAttributes.identity?.modelNumber || ''}
-                                onChange={e => setCustomAttributes((p: any) => ({ ...p, identity: { ...p.identity, modelNumber: e.target.value } }))}
-                            />
-                        </div>
-                        <div className="col-span-1 space-y-1">
+                        <div className="col-span-2 space-y-1">
                             <label className="text-[10px] text-[var(--theme-text-secondary)] uppercase font-semibold ml-1 block">Variant / Style</label>
                             <input
                                 type="text"
@@ -201,12 +180,21 @@ export const BuyingAttributes: React.FC<BuyingAttributesProps> = ({
                     </div>
                 </div>
 
-                {/* ── 2. PHYSICAL PRODUCT SPECIFICATIONS (CONSUMER ITEM) ── */}
+                {/* ── 2. CATEGORY-SPECIFIC PRODUCT ATTRIBUTES ── */}
+                <CategorySpecificAttributes
+                    category={selectedMainCategory}
+                    subcategory={customAttributes.identity?.subcategory}
+                    customAttributes={customAttributes}
+                    setCustomAttributes={setCustomAttributes}
+                    errors={errors}
+                />
+
+                {/* ── 3. PHYSICAL PRODUCT SPECIFICATIONS (CONSUMER ITEM) ── */}
                 <div className="space-y-3 pt-3 border-t border-[var(--theme-border-subtle)]">
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-[var(--theme-text-secondary)]">
                             <Scale size={12} className="text-emerald-500" />
-                            <span>2. Physical Specifications (Consumer Unit / Each)</span>
+                            <span>3. Physical Specifications (Consumer Unit / Each)</span>
                         </div>
                         <span className="text-[9px] text-[var(--theme-text-secondary)] font-medium">
                             Pure content specs strictly separated from logistics packaging
@@ -236,7 +224,7 @@ export const BuyingAttributes: React.FC<BuyingAttributesProps> = ({
                                         className={`w-full h-10 bg-[var(--theme-bg-subtle)] border ${errors.size && !sizeType ? 'border-rose-500/50' : 'border-[var(--theme-border)]'} rounded-r-xl px-2 text-xs text-[var(--theme-text-primary)] focus:border-[var(--theme-accent)] outline-none appearance-none font-bold text-center cursor-pointer`}
                                         value={sizeType}
                                         onChange={e => {
-                                            setSizeType(e.target.value);
+                                             setSizeType(e.target.value);
                                             if (errors.size) setErrors(p => ({ ...p, size: '' }));
                                         }}
                                     >
@@ -297,119 +285,20 @@ export const BuyingAttributes: React.FC<BuyingAttributesProps> = ({
                     </div>
                 </div>
 
-                {/* ── 3. SUPPLY CHAIN PACKAGING HIERARCHY (GS1 STANDARD) ── */}
-                <div className="space-y-3 pt-3 border-t border-[var(--theme-border-subtle)]">
-                    <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-[var(--theme-text-secondary)]">
-                            <Layers size={12} className="text-amber-500" />
-                            <span>3. Supply Chain Packaging Hierarchy (GS1 Logistics Standard)</span>
-                        </div>
-                        <div className="px-2.5 py-0.5 rounded-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-[9px] font-mono font-bold text-[var(--theme-accent)]">
-                            {packagingLevel === 'single' ? '1 Order Unit = 1 Consumer Each (1:1)' : `1 Order Unit = ${multiplier} Consumer Eaches (×${multiplier})`}
-                        </div>
-                    </div>
+                {/* ── 4. SUPPLY CHAIN PACKAGING HIERARCHY (GS1 STANDARD) ── */}
+                <PackagingHierarchySection
+                    packagingLevel={packagingLevel}
+                    setPackagingLevel={setPackagingLevel}
+                    customAttributes={customAttributes}
+                    setCustomAttributes={setCustomAttributes}
+                    multiplier={multiplier}
+                />
 
-                    {/* Packaging Level Selector Pills */}
-                    <div className="grid grid-cols-4 gap-2">
-                        {[
-                            { id: 'single', label: 'Single Consumer Unit', sub: '1:1 Individual Each' },
-                            { id: 'case', label: 'Master Case / Carton', sub: 'Wholesale shipping case' },
-                            { id: 'bale', label: 'Bulk Bale / Bundle', sub: 'Commodity bale (e.g. 12 pk)' },
-                            { id: 'two_tier', label: '2-Tier Master Case', sub: 'Inner packs in master case' },
-                        ].map(tier => (
-                            <button
-                                key={tier.id}
-                                type="button"
-                                onClick={() => setPackagingLevel(tier.id as any)}
-                                className={`p-2.5 rounded-xl border text-left transition-all cursor-pointer ${
-                                    packagingLevel === tier.id
-                                        ? 'bg-[var(--theme-bg-subtle)] border-[var(--theme-accent)] shadow-sm'
-                                        : 'bg-[var(--theme-bg-panel)] border-[var(--theme-border)] hover:border-[var(--theme-border-subtle)]'
-                                }`}
-                            >
-                                <div className={`text-xs font-bold ${packagingLevel === tier.id ? 'text-[var(--theme-accent)]' : 'text-[var(--theme-text-primary)]'}`}>
-                                    {tier.label}
-                                </div>
-                                <div className="text-[9px] text-[var(--theme-text-secondary)] font-medium mt-0.5">
-                                    {tier.sub}
-                                </div>
-                            </button>
-                        ))}
-                    </div>
-
-                    {/* Container Type + Multipliers */}
-                    <div className="grid grid-cols-6 gap-3.5 pt-1">
-                        <div className="col-span-2 space-y-1">
-                            <label className="text-[10px] text-[var(--theme-text-secondary)] uppercase font-semibold ml-1 block">Package Container Type</label>
-                            <div className="relative">
-                                <select 
-                                    title="Package Container Type" 
-                                    className="w-full h-10 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3 text-xs text-[var(--theme-text-primary)] focus:border-[var(--theme-accent)] outline-none appearance-none font-semibold cursor-pointer" 
-                                    value={customAttributes.packaging?.packageType || ''} 
-                                    onChange={e => setCustomAttributes((p: any) => ({ ...p, packaging: { ...p.packaging, packageType: e.target.value } }))}
-                                >
-                                    <option value="" className="bg-[var(--theme-bg-panel)] text-[var(--theme-text-primary)]">Select Container...</option>
-                                    {PACKAGE_TYPES.map(t => <option key={t} value={t} className="bg-[var(--theme-bg-panel)] text-[var(--theme-text-primary)]">{t}</option>)}
-                                </select>
-                                <ChevronDown size={12} className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--theme-text-secondary)] pointer-events-none" />
-                            </div>
-                        </div>
-
-                        {packagingLevel !== 'single' && (
-                            <div className="col-span-2 space-y-1">
-                                <label className="text-[10px] text-[var(--theme-text-secondary)] uppercase font-semibold ml-1 block">
-                                    Pack Qty <span className="text-[9px] text-[var(--theme-text-secondary)] normal-case font-medium">(units per package)</span>
-                                </label>
-                                <input
-                                    type="number"
-                                    min="2"
-                                    className="w-full h-10 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3 text-xs text-[var(--theme-text-primary)] font-mono font-bold focus:border-[var(--theme-accent)] outline-none transition-all placeholder:text-[var(--theme-text-secondary)]/70"
-                                    placeholder="e.g. 12 or 24"
-                                    value={customAttributes.packaging?.packQty || ''}
-                                    onChange={e => setCustomAttributes((p: any) => ({ ...p, packaging: { ...p.packaging, packQty: e.target.value } }))}
-                                />
-                            </div>
-                        )}
-
-                        {packagingLevel === 'two_tier' && (
-                            <div className="col-span-2 space-y-1">
-                                <label className="text-[10px] text-[var(--theme-text-secondary)] uppercase font-semibold ml-1 block">
-                                    Case Size <span className="text-[9px] text-[var(--theme-text-secondary)] normal-case font-medium">(inner packs per case)</span>
-                                </label>
-                                <input
-                                    type="number"
-                                    min="1"
-                                    className="w-full h-10 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3 text-xs text-[var(--theme-text-primary)] font-mono font-bold focus:border-[var(--theme-accent)] outline-none transition-all placeholder:text-[var(--theme-text-secondary)]/70"
-                                    placeholder="e.g. 4"
-                                    value={customAttributes.packaging?.caseSize || ''}
-                                    onChange={e => setCustomAttributes((p: any) => ({ ...p, packaging: { ...p.packaging, caseSize: e.target.value } }))}
-                                />
-                            </div>
-                        )}
-
-                        <div className="col-span-2 space-y-1">
-                            <label className="text-[10px] text-[var(--theme-text-secondary)] uppercase font-semibold ml-1 block">Packaging Material</label>
-                            <div className="relative">
-                                <select
-                                    title="Packaging Material"
-                                    className="w-full h-10 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3 text-xs text-[var(--theme-text-primary)] outline-none font-semibold cursor-pointer appearance-none"
-                                    value={customAttributes.packaging?.material || ''}
-                                    onChange={e => setCustomAttributes((p: any) => ({ ...p, packaging: { ...p.packaging, material: e.target.value } }))}
-                                >
-                                    <option value="" className="bg-[var(--theme-bg-panel)] text-[var(--theme-text-primary)]">Select Material...</option>
-                                    {['Paper / Cardboard', 'Plastic', 'Glass', 'Metal', 'Aluminium', 'Fabric', 'Wood'].map(m => <option key={m} value={m} className="bg-[var(--theme-bg-panel)] text-[var(--theme-text-primary)]">{m}</option>)}
-                                </select>
-                                <ChevronDown size={10} className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--theme-text-secondary)] pointer-events-none" />
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                {/* ── 4. STORAGE, INBOUND QC & HANDLING COMPLIANCE ── */}
+                {/* ── 5. STORAGE, INBOUND QC & HANDLING COMPLIANCE ── */}
                 <div className="space-y-3 pt-3 border-t border-[var(--theme-border-subtle)]">
                     <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-[var(--theme-text-secondary)]">
                         <Thermometer size={12} className="text-purple-500" />
-                        <span>4. Storage, Inbound QC & Handling Directives</span>
+                        <span>5. Storage, Inbound QC & Handling Directives</span>
                     </div>
 
                     <div className="grid grid-cols-6 gap-3.5">

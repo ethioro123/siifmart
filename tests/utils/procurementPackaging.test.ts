@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import {
     convertToSellableUnits,
     getPOItemPackagingSummary,
+    getPOItemPhysicalSummary,
     inferBulkPackaging,
     formatPackBadge,
     formatPOItemDescription,
@@ -143,6 +144,70 @@ describe('Procurement Packaging & Sellable Units', () => {
             expect(formatPackBadge({ packQuantity: 12, packageType: 'Bale' })).toBe('12 pk/Bale');
             expect(formatPackBadge({ caseSize: 4, packageType: 'Case' })).toBe('4 packs/case (Case)');
             expect(formatPackBadge({ packQuantity: 6, caseSize: 4, packageType: 'Carton' })).toBe('6 units × 4 packs (Carton)');
+        });
+
+        it('correctly labels discrete merchandise (Amazon Kindle 217g) as Single Unit (1 ea) and never 217 Unit', () => {
+            const kindle = {
+                sku: 'KE-EL001',
+                brand: 'Amazon',
+                productName: 'Kindle Paperwhite',
+                category: 'Electronics & Batteries',
+                quantity: 100,
+                unitCost: 35000,
+                retailPrice: 42000,
+                size: '217',
+                unit: 'UNIT',
+                customAttributes: {
+                    physical: {
+                        netWeight: '217',
+                        sizeType: 'g',
+                        grossWeight: '0.28',
+                        dims: '16.0 × 11.5 × 0.8'
+                    },
+                    packaging: {
+                        packageType: 'Retail Box'
+                    }
+                }
+            };
+
+            const summary = getPOItemPackagingSummary(kindle);
+            expect(summary.sellableQty).toBe(100);
+            expect(summary.manifestQty).toBe(100);
+            expect(summary.hasMultiplier).toBe(false);
+            expect(summary.unitsPerOrderUnit).toBe(1);
+            expect(summary.packBadge).toBe('Retail Box (1 ea)');
+            expect(summary.packBadge).not.toContain('217 Unit');
+            expect(summary.costPerSellableUnit).toBe(35000);
+
+            const phys = getPOItemPhysicalSummary(kindle);
+            expect(phys.netWeightFormatted).toBe('217 g');
+            expect(phys.grossWeightFormatted).toBe('0.28 kg');
+            expect(phys.specBadge).toBe('Net: 217 g • Gross: 0.28 kg • Dims: 16.0 × 11.5 × 0.8 cm');
+        });
+
+        it('handles single unit with no packageType as Single Unit (1 ea)', () => {
+            const genericKindle = {
+                sku: 'KE-EL001',
+                brand: 'Amazon',
+                productName: 'Kindle',
+                category: 'Electronics & Batteries',
+                quantity: 50,
+                unitCost: 35000,
+                retailPrice: 42000,
+                size: '217',
+                unit: 'UNIT',
+                customAttributes: {
+                    physical: {
+                        netWeight: '217',
+                        sizeType: 'g'
+                    }
+                }
+            };
+
+            const summary = getPOItemPackagingSummary(genericKindle);
+            expect(summary.packBadge).toBe('Single Unit (1 ea)');
+            expect(summary.packBadge).not.toContain('217 Unit');
+            expect(summary.hasMultiplier).toBe(false);
         });
     });
 

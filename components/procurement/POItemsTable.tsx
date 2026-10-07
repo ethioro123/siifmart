@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { POItem } from '../../types';
 import { formatCompactNumber } from '../../utils/formatting';
 import { Package, Trash2, Edit3, FileText, Check, X } from 'lucide-react';
-import { formatPOItemDescription, getPOItemPackagingSummary, getPOItemPhysicalSummary } from './utils';
+import { formatPOItemDescription, getPOItemPackagingSummary, getPOItemPhysicalSummary, getPOItemCategorySpecsSummary } from './utils';
 
 interface POItemsTableProps {
     items: POItem[];
@@ -72,6 +72,7 @@ export const POItemsTable: React.FC<POItemsTableProps> = ({
                         {items.map((item, i) => {
                             const pkg = getPOItemPackagingSummary(item);
                             const phys = getPOItemPhysicalSummary(item);
+                            const catSpecs = getPOItemCategorySpecsSummary(item);
                             return (
                                 <tr key={i} className="hover:bg-[var(--theme-bg-subtle)] transition-colors group/row">
                                     <td className="p-4 pl-6">
@@ -93,6 +94,11 @@ export const POItemsTable: React.FC<POItemsTableProps> = ({
                                                     {phys.specBadge && (
                                                         <span className="bg-[var(--theme-bg-subtle)] px-2 py-0.5 rounded-md text-[10px] border border-[var(--theme-border)] text-[var(--theme-text-secondary)] font-medium">
                                                             {phys.specBadge}
+                                                        </span>
+                                                    )}
+                                                    {catSpecs.summaryText && (
+                                                        <span className="bg-[var(--theme-bg-subtle)] px-2 py-0.5 rounded-md text-[10px] border border-[var(--theme-border)] text-[var(--theme-text-primary)] font-medium">
+                                                            {catSpecs.summaryText}
                                                         </span>
                                                     )}
                                                 </div>

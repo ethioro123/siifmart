@@ -3,7 +3,7 @@ import { PurchaseOrder, SystemConfig } from '../../types';
 import { getCountryProfile } from '../../utils/localization';
 import { formatCompactNumber, formatDateTime } from '../../utils/formatting';
 import { formatPONumber } from '../../utils/jobIdFormatter';
-import { formatPOItemDescription, getPOItemPackagingSummary } from './utils';
+import { formatPOItemDescription, getPOItemPackagingSummary, getPOItemPhysicalSummary, getPOItemCategorySpecsSummary } from './utils';
 
 interface POPrintViewProps {
     po: PurchaseOrder;
@@ -24,18 +24,24 @@ export function generatePOHTML(po: PurchaseOrder, sites: any[], user: any, allPr
         const sku = item.sku || allProducts?.find(p => p.id === item.productId)?.sku || allProducts?.find(p => p.name === item.productName)?.sku || '—';
         const desc = formatPOItemDescription(item);
         const pkg = getPOItemPackagingSummary(item, allProducts);
+        const phys = getPOItemPhysicalSummary(item, allProducts);
+        const catSpecs = getPOItemCategorySpecsSummary(item, allProducts);
         return `
             <tr style="border-bottom: 1px solid #e5e7eb; page-break-inside: avoid;">
                 <td style="padding: 8px 6px; color: #4b5563; font-size: 11px;">${i + 1}</td>
                 <td style="padding: 8px 6px; font-family: monospace; color: #374151; font-size: 11px; font-weight: bold;">${sku}</td>
-                <td style="padding: 8px 6px; font-weight: 600; color: #111827; font-size: 11px;">${desc}</td>
+                <td style="padding: 8px 6px; font-weight: 600; color: #111827; font-size: 11px;">
+                    <div>${desc}</div>
+                    ${phys.specBadge ? `<div style="font-size: 9px; color: #6b7280; font-weight: 500; margin-top: 1px;">${phys.specBadge}</div>` : ''}
+                    ${catSpecs.summaryText ? `<div style="font-size: 9px; color: #374151; font-weight: 500; margin-top: 1px;">${catSpecs.summaryText}</div>` : ''}
+                </td>
                 <td style="padding: 8px 6px; font-size: 10px; color: #4b5563;">
-                    <div style="font-weight: 600; color: #111827;">${pkg.packBadge || pkg.manifestUnitName}</div>
-                    <div style="font-size: 9px; color: #6b7280;">${pkg.packDetail}</div>
+                    <div style="font-weight: 600; color: #111827;">${pkg.packBadge || (pkg.hasMultiplier ? pkg.manifestUnitName : 'Single Unit (1 ea)')}</div>
+                    <div style="font-size: 9px; color: #6b7280;">Ordered: ${item.quantity} ${pkg.hasMultiplier ? pkg.manifestUnitName.toLowerCase() : 'units'}</div>
                 </td>
                 <td style="padding: 8px 6px; text-align: center; font-weight: 700; color: #111827; font-size: 11px;">
                     <div>${pkg.sellableQty.toLocaleString()} <span style="font-size: 9px; color: #6b7280; font-weight: normal;">${pkg.sellUnitLabel}</span></div>
-                    ${pkg.hasMultiplier ? `<div style="font-size: 9px; color: #6b7280; font-weight: normal;">(${item.quantity} ${pkg.manifestUnitName.toLowerCase()})</div>` : ''}
+                    ${pkg.hasMultiplier ? `<div style="font-size: 9px; color: #6b7280; font-weight: normal;">(${item.quantity} ${pkg.manifestUnitName.toLowerCase()})</div>` : `<div style="font-size: 9px; color: #6b7280; font-weight: normal;">(1:1 Each)</div>`}
                 </td>
                 <td style="padding: 8px 6px; text-align: right; color: #374151; font-size: 11px;">
                     <div>${formatCompactNumber(item.unitCost, { currency: currencySymbol })}</div>

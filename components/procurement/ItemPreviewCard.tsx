@@ -1,8 +1,9 @@
 import React from 'react';
 import { formatPriceValue } from '../../utils/formatting';
-import { Info, Package, Scale, Thermometer, Tag, AlertTriangle } from 'lucide-react';
+import { Info, Package, Scale, Thermometer, Tag, AlertTriangle, SlidersHorizontal } from 'lucide-react';
 import { formatPackBadge, formatPOItemDescription } from './utils';
 import { getSellUnit } from '../../utils/units';
+import { getCategorySpecGroup } from './categoryAttributes';
 
 interface ItemPreviewCardProps {
     name: string;
@@ -91,22 +92,47 @@ export const ItemPreviewCard: React.FC<ItemPreviewCardProps> = ({
         );
     };
 
-    // Filter active items per group
+    // Packaging level calculation
+    const packagingLevel = customAttributes?.packaging?.packagingLevel ||
+        ((parseInt(customAttributes?.packaging?.caseSize) > 0) ? 'two_tier' :
+        (customAttributes?.packaging?.packageType === 'Bale') ? 'bale' :
+        (parseInt(customAttributes?.packaging?.packQty) > 1) ? 'case' : 'single');
+
+    // Filter active items per group (GS1 / Walmart Item 360 Architecture)
     const packagingAttrs = [
-        { label: 'Pack Qty', value: customAttributes?.packaging?.packQty ? `${customAttributes.packaging.packQty} ${sellUnitLabel}/${customAttributes?.packaging?.packageType || 'pack'}` : null },
-        { label: 'Type', value: customAttributes?.packaging?.packageType },
+        { label: 'Level', value: packagingLevel === 'single' ? 'Single Unit (1:1)' : packagingLevel === 'two_tier' ? '2-Tier Master Case' : packagingLevel === 'bale' ? 'Bulk Bale' : 'Master Case' },
+        { label: 'Container', value: customAttributes?.packaging?.packageType || (packagingLevel === 'single' ? 'Retail Box' : 'Case') },
+        { label: 'Multiplier', value: isBulkOrder ? `×${unitsPerOrder} ${sellUnitLabel}` : '1:1 Each' },
         { label: 'Material', value: customAttributes?.packaging?.material },
-        { label: 'Breakable', value: customAttributes?.packaging?.isBreakable, isAlert: true, icon: AlertTriangle },
-        { label: 'Level', value: customAttributes?.packaging?.packagingLevel }
+        { label: 'Breakable', value: customAttributes?.packaging?.isBreakable, isAlert: true, icon: AlertTriangle }
     ].filter(a => a.value !== null && a.value !== undefined && a.value !== '' && a.value !== false);
 
     const physicalAttrs = [
-        { label: 'Net', value: customAttributes?.physical?.netWeight ? `${customAttributes.physical.netWeight}${customAttributes?.physical?.sizeType || unit || 'kg'}` : null },
-        { label: 'Gross', value: customAttributes?.physical?.grossWeight ? `${customAttributes.physical.grossWeight}kg` : null },
+        { label: 'Net Content', value: customAttributes?.physical?.netWeight ? `${customAttributes.physical.netWeight} ${customAttributes?.physical?.sizeType || unit || ''}`.trim() : null },
+        { label: 'Gross Wt', value: customAttributes?.physical?.grossWeight ? (/[a-zA-Z]/.test(customAttributes.physical.grossWeight) ? customAttributes.physical.grossWeight : `${customAttributes.physical.grossWeight} kg`) : null },
         { label: 'Form', value: customAttributes?.physical?.form },
-        { label: 'Color', value: customAttributes?.physical?.color },
-        { label: 'Dims', value: customAttributes?.physical?.dims }
+        { label: 'Dimensions', value: customAttributes?.physical?.dims },
+        { label: 'Color', value: customAttributes?.physical?.color }
     ].filter(a => a.value !== null && a.value !== undefined && a.value !== '' && a.value !== false);
+
+    // Dynamic category-specific specifications
+    const specGroup = getCategorySpecGroup(category, customAttributes?.identity?.subcategory);
+    const categorySpecific = customAttributes?.categorySpecific || {};
+    const categoryAttrs = specGroup.fields
+        .map(f => {
+            let val = categorySpecific[f.key];
+            if (val === undefined || val === null || val === '') {
+                if (f.key === 'modelNumber') val = customAttributes?.identity?.modelNumber;
+                if (f.key === 'variantStyle') val = customAttributes?.identity?.variant;
+                if (f.key === 'shelfLifeDays') val = customAttributes?.storage?.shelfLifeDays;
+                if (f.key === 'scentFragrance') val = customAttributes?.descriptive?.scent;
+            }
+            return {
+                label: f.label.replace(/\s*\(.*\)/, '').replace(/\s*\/.*$/, '').trim(),
+                value: val
+            };
+        })
+        .filter(a => a.value !== null && a.value !== undefined && a.value !== '' && a.value !== false);
 
     const storageAttrs = [
         { label: 'Condition', value: customAttributes?.storage?.type },
@@ -197,8 +223,23 @@ export const ItemPreviewCard: React.FC<ItemPreviewCardProps> = ({
             </div>
 
             {/* ─── Structured Attributes Grouped by Domain ─── */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-                {/* 1. Packaging & Case */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+                {/* 1. Category Specs */}
+                {categoryAttrs.length > 0 && (
+                    <div className="p-2.5 rounded-xl bg-[var(--theme-bg-panel)] border border-[var(--theme-border)] space-y-2">
+                        <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-[var(--theme-text-secondary)]">
+                            <SlidersHorizontal size={12} className="text-[var(--theme-accent)] shrink-0" />
+                            <span>{specGroup.badgeLabel}</span>
+                        </div>
+                        <div className="flex flex-wrap gap-1.5">
+                            {categoryAttrs.map((attr, idx) => (
+                                <AttrBadge key={idx} label={attr.label} value={attr.value} />
+                            ))}
+                        </div>
+                    </div>
+                )}
+
+                {/* 2. Packaging & Case */}
                 {packagingAttrs.length > 0 && (
                     <div className="p-2.5 rounded-xl bg-[var(--theme-bg-panel)] border border-[var(--theme-border)] space-y-2">
                         <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-[var(--theme-text-secondary)]">
@@ -213,7 +254,7 @@ export const ItemPreviewCard: React.FC<ItemPreviewCardProps> = ({
                     </div>
                 )}
 
-                {/* 2. Physical & Specs */}
+                {/* 3. Physical & Specs */}
                 {physicalAttrs.length > 0 && (
                     <div className="p-2.5 rounded-xl bg-[var(--theme-bg-panel)] border border-[var(--theme-border)] space-y-2">
                         <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-[var(--theme-text-secondary)]">
@@ -228,7 +269,7 @@ export const ItemPreviewCard: React.FC<ItemPreviewCardProps> = ({
                     </div>
                 )}
 
-                {/* 3. Storage & Care */}
+                {/* 4. Storage & Care */}
                 {storageAttrs.length > 0 && (
                     <div className="p-2.5 rounded-xl bg-[var(--theme-bg-panel)] border border-[var(--theme-border)] space-y-2">
                         <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-[var(--theme-text-secondary)]">
@@ -243,7 +284,7 @@ export const ItemPreviewCard: React.FC<ItemPreviewCardProps> = ({
                     </div>
                 )}
 
-                {/* 4. Commercial & POS */}
+                {/* 5. Commercial & POS */}
                 {commercialAttrs.length > 0 && (
                     <div className="p-2.5 rounded-xl bg-[var(--theme-bg-panel)] border border-[var(--theme-border)] space-y-2">
                         <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-[var(--theme-text-secondary)]">

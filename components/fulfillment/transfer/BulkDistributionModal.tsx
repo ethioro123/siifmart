@@ -190,6 +190,9 @@ export const BulkDistributionModal: React.FC<BulkDistributionModalProps> = ({
                     }
                 }
 
+                const sourceSiteObj = sites.find(s => s.id === actualSourceSite);
+                const siteCountry = sourceSiteObj?.country || (sourceSiteObj as any)?.country_code || activeSite?.country || (activeSite as any)?.country_code || 'ET';
+
                 for (const [storeId, items] of Object.entries(storeAllocations)) {
                     const transferJob: any = {
                         id: `WAVE-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`,
@@ -204,6 +207,8 @@ export const BulkDistributionModal: React.FC<BulkDistributionModalProps> = ({
                         priority: 'Normal',
                         location: 'Wave Distribution',
                         assignedTo: '',
+                        countryCode: siteCountry,
+                        country_code: siteCountry,
                         items: items.length,
                         lineItems: items.map(item => {
                             const product = allProducts.find(p => p.id === item.productId);
@@ -232,6 +237,8 @@ export const BulkDistributionModal: React.FC<BulkDistributionModalProps> = ({
                         destSiteId: storeId,
                         priority: 'Normal',
                         status: 'Pending',
+                        countryCode: siteCountry,
+                        country_code: siteCountry,
                         orderRef: createdWaveJob.id,
                         items: items.length,
                         lineItems: items.map(item => {
@@ -245,7 +252,7 @@ export const BulkDistributionModal: React.FC<BulkDistributionModalProps> = ({
                                 status: 'Pending'
                             };
                         }),
-                        jobNumber: createdWaveJob.job_number
+                        jobNumber: createdWaveJob.jobNumber || createdWaveJob.job_number
                     };
                     await wmsJobsService.create(pickJob);
                     createdJobs++;

@@ -162,13 +162,14 @@ export const PartialDeliveryModal: React.FC<PartialDeliveryModalProps> = ({
                 hasDiscrepancy: hasUndelivered,
             } as any);
 
-            // 2. Update parent Transfer job if linked
+            // 2. Update parent Transfer job if linked (keep active until store receives)
             if (job.orderRef) {
                 const parentJob = jobs.find(j => j.id === job.orderRef);
                 if (parentJob) {
                     await wmsJobsService.update(parentJob.id, {
-                        status: 'Completed',
+                        status: 'Pending',
                         transferStatus: finalTransferStatus,
+                        deliveredAt: new Date().toISOString(),
                     } as any);
                 }
             }
@@ -178,7 +179,7 @@ export const PartialDeliveryModal: React.FC<PartialDeliveryModalProps> = ({
                 refreshJobs();
             }
             setStep('DONE');
-            addNotification('info', `${hasUndelivered ? 'Partial delivery' : 'Delivery'} logged for ${formatJobId(job)}. ${totalDelivered}/${totalDispatched} units credited to ${destSite?.name || 'store'}.`);
+            addNotification('info', `${hasUndelivered ? 'Partial delivery' : 'Delivery'} logged for ${formatJobId(job)}. ${totalDelivered}/${totalDispatched} units arrived at dock. Awaiting store receiving inspection.`);
         } catch (err: any) {
             addNotification('alert', 'Delivery failed: ' + (err?.message || 'Unknown error'));
         } finally {
@@ -224,7 +225,7 @@ export const PartialDeliveryModal: React.FC<PartialDeliveryModalProps> = ({
                         <p className="text-xs text-gray-500 max-w-xs leading-relaxed">
                             <strong className="text-emerald-400">{totalDelivered}</strong> {t('warehouse.driverHub.to')} <strong className="text-white">{totalDispatched}</strong> {t('warehouse.driverHub.units').toLowerCase()} {t('warehouse.driverHub.delivered').toLowerCase()} {t('warehouse.driverHub.to').toLowerCase()} {destSite?.name || t('warehouse.driverHub.localHub')}.
                         </p>
-                        <p className="text-[9px] sm:text-[10px] text-gray-650 mt-2">All inventory levels have been adjusted.</p>
+                        <p className="text-[9px] sm:text-[10px] text-gray-400 mt-2">Delivered to receiving dock. Awaiting store digital handshake certification.</p>
                         <button
                             onClick={onClose}
                             className="mt-6 sm:mt-8 px-6 sm:px-8 py-2.5 sm:py-3 bg-[#2C5E3B] hover:bg-[#224429] dark:bg-[#A9CBA2] dark:hover:bg-[#8eb886] dark:text-[#1C2620] text-white font-black text-xs uppercase tracking-widest rounded-xl transition-all"

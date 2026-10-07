@@ -274,6 +274,8 @@ export const useSmartReplenishState = ({
                 });
             } else {
                 // Create a new draft manifest
+                const sourceSite = sites.find((s: Site) => s.id === sourceSiteId);
+                const siteCountry = sourceSite?.country || (sourceSite as any)?.country_code || settings?.country || 'ET';
                 const orderRef = `AUTO-REPL-${sourceProd.sku}-${Date.now().toString().slice(-4)}`;
                 const newDraft = {
                     siteId: sourceSiteId,
@@ -282,6 +284,9 @@ export const useSmartReplenishState = ({
                     status: 'Pending' as const,
                     transferStatus: 'Draft' as const,
                     orderRef,
+                    countryCode: siteCountry,
+                    country_code: siteCountry,
+                    requestedBy: user?.name || 'System',
                     items: 1,
                     lineItems: [{
                         productId: sourceProd.id,
