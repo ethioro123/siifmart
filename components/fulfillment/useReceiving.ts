@@ -98,6 +98,18 @@ export const useReceiving = (deps: UseReceivingDeps) => {
                     );
                 }
 
+                // Check database to prevent creating duplicate placeholder if not yet loaded in local state
+                if (!localProduct && (targetProductId || productSku) && targetSiteId) {
+                    try {
+                        if (targetProductId) {
+                            localProduct = (await productsService.getById(targetProductId)) || undefined;
+                        }
+                        if (!localProduct && productSku) {
+                            localProduct = (await productsService.getBySKU(productSku, targetSiteId)) || undefined;
+                        }
+                    } catch (e) { }
+                }
+
                 // Also find a global product to act as a template if we need to create one
                 let globalProduct = allProducts.find(p => p.id === targetProductId || p.sku === productSku);
 

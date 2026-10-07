@@ -65,9 +65,17 @@ export const ProductDetailsModal: React.FC<ProductDetailsModalProps> = ({ produc
         const siteMap = new Map<string, typeof matches[0]>();
         matches.forEach(p => {
             const sId = p.siteId || (p as any).site_id || 'unknown';
-            // Keep the record that matches the current product ID, or the one with highest stock / latest
-            if (!siteMap.has(sId) || p.id === product.id) {
+            const existing = siteMap.get(sId);
+            if (!existing) {
                 siteMap.set(sId, p);
+            } else {
+                const pIsGhost = (p.location === 'On Order' || !p.location) && (!p.stock || p.stock === 0);
+                const existingIsGhost = (existing.location === 'On Order' || !existing.location) && (!existing.stock || existing.stock === 0);
+                if (existingIsGhost && !pIsGhost) {
+                    siteMap.set(sId, p);
+                } else if (!pIsGhost && (p.stock || 0) > (existing.stock || 0)) {
+                    siteMap.set(sId, p);
+                }
             }
         });
 

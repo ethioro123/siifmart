@@ -102,6 +102,22 @@ export async function createProduct(product: Omit<Product, 'id' | 'created_at' |
         if (dbProduct[key] === undefined) delete dbProduct[key];
     });
 
+    // Prevent duplicate 0-stock / 'On Order' ghost placeholders if a record already exists at site
+    if ((!dbProduct.stock || dbProduct.stock === 0) && (dbProduct.location === 'On Order' || !dbProduct.location)) {
+        const { data: existingGhostOrReal } = await supabase
+            .from('products')
+            .select('id, site_id, name, sku, category, price, cost_price, stock, status, location, barcode, barcodes, brand, size, unit, custom_attributes, description, min_stock, max_stock, created_at')
+            .eq('sku', dbProduct.sku)
+            .eq('site_id', dbProduct.site_id)
+            .order('stock', { ascending: false })
+            .limit(1)
+            .maybeSingle();
+        if (existingGhostOrReal) {
+            logger.info('products-mutations', `Product ${dbProduct.sku} already exists at site ${dbProduct.site_id}. Reusing existing record instead of creating duplicate.`);
+            return _mapProduct(existingGhostOrReal);
+        }
+    }
+
     const { data, error } = await supabase
         .from('products')
         .insert(dbProduct)
@@ -319,77 +335,11 @@ export async function deleteProduct(id: string) {
     if (error) throw error;
 }
 
-export async function cascadeDeleteProduct(id: string) {
-    const { error: movementsError } = await supabase
-        .from('stock_movements')
-        .update({ product_id: null })
-        .eq('product_id', id);
-
-    if (movementsError) {
-        console.warn('⚠️ Failed to update stock movements:', movementsError);
-    }
-
-    try {
-        const { error: saleItemsError } = await supabase
-            .from('sale_items')
-            .update({ product_id: null })
-            .eq('product_id', id);
-
-        if (saleItemsError) {
-            console.warn('⚠️ Failed to update sale_items:', saleItemsError);
-        }
-    } catch (e) {
-        console.warn('⚠️ sale_items table may not exist:', e);
-    }
-
-    const { error: requestsError } = await supabase
-        .from('inventory_requests')
-        .delete()
-        .eq('product_id', id);
-
-    if (requestsError) {
-        console.warn('⚠️ Failed to delete inventory_requests:', requestsError);
-    }
-
-    const { error: poItemsError } = await supabase
-        .from('po_items')
-        .update({ product_id: null })
-        .eq('product_id', id);
-
-    if (poItemsError) {
-        console.warn('⚠️ Failed to update po_items:', poItemsError);
-    }
-
-    const { error: productError } = await supabase
-        .from('products')
-        .delete()
-        .eq('id', id);
-
-    if (productError) {
-        console.error('❌ Failed to delete product:', productError);
-        throw productError;
-    }
-}
-
-export async function clearLocationForEmptyProducts(location?: string, siteId?: string, sku?: string) {
-    try {
-        let query = supabase
-            .from('products')
-            .update({ location: null })
-            .eq('stock', 0);
-
-        if (location) query = query.eq('location', location);
-        if (siteId) query = query.eq('site_id', siteId);
-        if (sku) query = query.eq('sku', sku);
-
-        const { error } = await query;
-        if (error) throw error;
-        return true;
-    } catch (error) {
-        console.error('Error clearing empty product locations:', error);
-        return false;
-    }
-}
+export {
+    cascadeDeleteProduct,
+    clearLocationForEmptyProducts,
+    deleteGhostPlaceholders
+} from './products-cleanup';
 
 export async function adjustStock(
     productId: string,

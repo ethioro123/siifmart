@@ -105,7 +105,25 @@ export const TransferJobDetails: React.FC<TransferJobDetailsProps> = ({
         }
     };
 
-    const totalItems = selectedJob.lineItems?.length || selectedJob.items || 0;
+    const resolvedLineItems = (selectedJob.lineItems && selectedJob.lineItems.length > 0)
+        ? selectedJob.lineItems
+        : Array.isArray((selectedJob as any).items)
+            ? (selectedJob as any).items.map((it: any) => ({
+                productId: it.productId || it.product_id || it.id,
+                sku: it.sku || it.barcode || '',
+                name: it.name || it.productName || it.product_name || 'Item',
+                expectedQty: it.quantity ?? it.qty ?? it.expectedQty ?? 0,
+                deliveredQty: it.deliveredQty ?? it.quantity ?? 0,
+                receivedQty: it.receivedQty,
+                unit: it.unit,
+                size: it.size,
+                status: it.status || 'Pending'
+            }))
+            : Array.isArray((selectedJob as any).line_items)
+                ? (selectedJob as any).line_items
+                : [];
+
+    const totalItems = resolvedLineItems.length || selectedJob.items || 0;
 
     const getLocalizedStatus = (status: string) => {
         switch (status) {
@@ -114,7 +132,7 @@ export const TransferJobDetails: React.FC<TransferJobDetailsProps> = ({
             case 'Picking': return t('warehouse.picking');
             case 'Picked': return t('warehouse.picking') + ' (OK)';
             case 'Packed': return t('warehouse.packed');
-            case 'Shipped': return t('warehouse.inTransitLabel').split(' ')[0] + ' ⚓';
+            case 'Shipped': return t('warehouse.inTransitLabel').split(' ')[0];
             case 'In-Transit': return t('warehouse.inTransitLabel');
             case 'Delivered': return t('warehouse.delivered');
             case 'Received': return t('warehouse.received');
@@ -177,7 +195,7 @@ export const TransferJobDetails: React.FC<TransferJobDetailsProps> = ({
                     </div>
 
                     <div className="space-y-2">
-                        {selectedJob.lineItems?.map((item: any, idx: number) => {
+                        {resolvedLineItems.map((item: any, idx: number) => {
                             const product = products.find(p => p.id === item.productId || p.sku === item.sku);
                             const itemQty = item.expectedQty || item.quantity || item.pickedQty || 0;
                             const itemSku = item.sku || product?.sku || 'N/A';
@@ -265,8 +283,24 @@ export const TransferJobDetails: React.FC<TransferJobDetailsProps> = ({
                                 {loading === 'delete' ? <Loader2 size={12} className="animate-spin" /> : <Trash2 size={12} />} Delete Manifest
                             </button>
                         )}
-                        {(transferStatus === 'In-Transit' || transferStatus === 'Shipped') && (selectedJob.destSiteId === activeSite?.id || ['super_admin', 'admin', 'warehouse_manager'].includes(user?.role || '')) && (
-                            <button onClick={() => { setActiveTransferJob(selectedJob); setTransferReceiveItems(selectedJob.lineItems || []); setTransferReceiveMode(true); setSelectedJob(null); }} className="px-3.5 py-1.5 rounded-lg font-bold text-[11px] uppercase tracking-wider bg-[#2C5E3B] hover:bg-[#20452B] dark:bg-[#EAE5D9] dark:hover:bg-[#D8D2C4] text-white dark:text-[#1C2620] shadow-sm transition-all flex items-center gap-1.5 active:scale-95 disabled:opacity-50">
+                        {['In-Transit', 'Shipped', 'Delivered', 'Partially Delivered'].includes(transferStatus) && (selectedJob.destSiteId === activeSite?.id || ['super_admin', 'admin', 'warehouse_manager', 'inventory_specialist', 'stock_clerk', 'receiver', 'store_manager'].includes(user?.role || '')) && (
+                            <button
+                                onClick={() => {
+                                    const itemsToReceive: ReceivingItem[] = resolvedLineItems.map((item: any) => ({
+                                        id: item.id,
+                                        productId: item.productId || item.product_id || item.id,
+                                        productName: item.name || item.productName || item.product_name,
+                                        expectedQty: item.expectedQty ?? item.quantity ?? 0,
+                                        receivedQty: item.deliveredQty !== undefined ? item.deliveredQty : (item.receivedQty !== undefined ? item.receivedQty : (item.expectedQty ?? item.quantity ?? 0)),
+                                        condition: (item.condition as any) || 'Good'
+                                    }));
+                                    setActiveTransferJob(selectedJob);
+                                    setTransferReceiveItems(itemsToReceive);
+                                    setTransferReceiveMode(true);
+                                    setSelectedJob(null);
+                                }}
+                                className="px-3.5 py-1.5 rounded-lg font-bold text-[11px] uppercase tracking-wider bg-[#2C5E3B] hover:bg-[#20452B] dark:bg-[#EAE5D9] dark:hover:bg-[#D8D2C4] text-white dark:text-[#1C2620] shadow-sm transition-all flex items-center gap-1.5 active:scale-95 disabled:opacity-50"
+                            >
                                 <Package size={12} /> {t('warehouse.received')}
                             </button>
                         )}

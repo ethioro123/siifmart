@@ -73,11 +73,14 @@ export const InventoryStockList: React.FC<InventoryStockListProps> = ({
     const getOtherLocationsForSku = useCallback((sku: string, currentProductId: string, currentProductSiteId?: string) => {
         if (!sku) return { count: 0, locations: [], details: [] };
 
+        const cleanSku = sku.replace(/[-\s]/g, '').toUpperCase();
         const sameSkuProducts = allProducts.filter(p =>
-            p.sku === sku &&
+            (p.sku ? p.sku.replace(/[-\s]/g, '').toUpperCase() : '') === cleanSku &&
             p.id !== currentProductId &&
             p.location &&
             p.location.trim() !== '' &&
+            p.location !== 'On Order' &&
+            (p.stock !== undefined && p.stock > 0) &&
             (currentProductSiteId ? (p.siteId === currentProductSiteId || (p as any).site_id === currentProductSiteId) : true)
         );
 
@@ -103,6 +106,31 @@ export const InventoryStockList: React.FC<InventoryStockListProps> = ({
         };
     }, [allProducts]);
 
+    // Hide 0-stock 'On Order' ghost placeholders if a real record with stock or physical location exists for that SKU
+    const visibleProducts = useMemo(() => {
+        return products.filter(product => {
+            const isGhostOnOrder = (product.location === 'On Order' || !product.location) && (!product.stock || product.stock === 0);
+            if (!isGhostOnOrder) return true;
+
+            const cleanSku = product.sku ? product.sku.replace(/[-\s]/g, '').toUpperCase() : '';
+            const siteId = product.siteId || (product as any).site_id;
+
+            const hasRealProduct = allProducts.some(p =>
+                p.id !== product.id &&
+                (p.sku ? p.sku.replace(/[-\s]/g, '').toUpperCase() : '') === cleanSku &&
+                (p.siteId === siteId || (p as any).site_id === siteId) &&
+                ((p.stock !== undefined && p.stock > 0) || (p.location && p.location !== 'On Order'))
+            ) || products.some(p =>
+                p.id !== product.id &&
+                (p.sku ? p.sku.replace(/[-\s]/g, '').toUpperCase() : '') === cleanSku &&
+                (p.siteId === siteId || (p as any).site_id === siteId) &&
+                ((p.stock !== undefined && p.stock > 0) || (p.location && p.location !== 'On Order'))
+            );
+
+            return !hasRealProduct;
+        });
+    }, [products, allProducts]);
+
     const toggleSelection = useCallback((id: string) => {
         setSelectedIds(prev => {
             const next = new Set(prev);
@@ -117,7 +145,7 @@ export const InventoryStockList: React.FC<InventoryStockListProps> = ({
             <div className="flex-1 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] flex flex-col rounded-2xl overflow-hidden shadow-sm">
                 {/* Search, Filter Toolbar & Bulk Indicators */}
                 <InventoryToolbar
-                    products={products}
+                    products={visibleProducts}
                     searchTerm={searchTerm}
                     setSearchTerm={setSearchTerm}
                     filters={filters}
@@ -135,7 +163,7 @@ export const InventoryStockList: React.FC<InventoryStockListProps> = ({
                 {/* Grid & List View */}
                 <div className="flex-1 overflow-x-auto">
                     <InventoryDesktopTable
-                        products={products}
+                        products={visibleProducts}
                         selectedIds={selectedIds}
                         setSelectedIds={setSelectedIds}
                         sortConfig={sortConfig}
@@ -154,7 +182,7 @@ export const InventoryStockList: React.FC<InventoryStockListProps> = ({
                     />
 
                     <InventoryMobileList
-                        products={products}
+                        products={visibleProducts}
                         selectedIds={selectedIds}
                         setSelectedIds={setSelectedIds}
                         sites={sites}
@@ -169,7 +197,7 @@ export const InventoryStockList: React.FC<InventoryStockListProps> = ({
                         currencySymbol={currencySymbol}
                     />
 
-                    {products.length === 0 && (
+                    {visibleProducts.length === 0 && (
                         <div className="text-center py-12 text-[var(--theme-text-muted)]">
                             <Box size={48} className="mx-auto mb-4 opacity-50" />
                             <p className="font-bold text-[var(--theme-text-secondary)]">No products found</p>

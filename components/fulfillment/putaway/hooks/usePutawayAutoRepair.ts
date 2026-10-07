@@ -40,6 +40,17 @@ export function usePutawayAutoRepair(
 
                     if (!existsLocally) {
                         attemptedSkusRef.current.add(cleanSkuKey);
+
+                        // Check DB directly before creating placeholder to prevent duplicates
+                        let dbProduct = null;
+                        try {
+                            dbProduct = await productsService.getBySKU(sku, targetSiteId);
+                        } catch (e) { }
+
+                        if (dbProduct) {
+                            continue;
+                        }
+
                         const globalTemplate = allProducts.find(p => p.sku?.replace(/[- ]/g, '').toLowerCase() === sku.replace(/[- ]/g, '').toLowerCase());
 
                         try {

@@ -8,6 +8,7 @@ import {
     deleteProduct,
     cascadeDeleteProduct,
     clearLocationForEmptyProducts,
+    deleteGhostPlaceholders,
     adjustStock,
     updatePriceBySku
 } from './products/products-mutations';
@@ -296,5 +297,6 @@ export const productsService = {
     delete: deleteProduct,
     cascadeDelete: cascadeDeleteProduct,
     clearLocationForEmptyProducts,
+    deleteGhostPlaceholders,
     adjustStock
 };

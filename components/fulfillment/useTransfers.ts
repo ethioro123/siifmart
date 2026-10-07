@@ -69,26 +69,29 @@ export const useTransfers = (deps: UseTransfersDeps) => {
             const transfer = transfers.find(t => t.id === id);
             if (!transfer) return;
 
-            logger.debug('useTransfers', `📦 Receiving transfer ${id} with quantities`);
+            logger.debug('useTransfers', `Receiving transfer ${id} with quantities`);
 
             if (transfer.items && transfer.items.length > 0) {
                 const receivedItemsMap = receivedQuantities || {};
 
                 const itemsToPutaway = transfer.items.filter(item => {
-                    const qty = receivedItemsMap[item.productId] ?? item.quantity;
+                    const qty = receivedItemsMap[item.productId] ?? (item.sku ? receivedItemsMap[item.sku] : undefined) ?? item.quantity;
                     return qty > 0;
                 });
 
                 if (itemsToPutaway.length > 0) {
-                    const jobLineItems = itemsToPutaway.map(item => ({
-                        productId: item.productId,
-                        name: item.productName || 'Unknown Product',
-                        sku: item.productId,
-                        image: '',
-                        expectedQty: receivedItemsMap[item.productId] ?? item.quantity,
-                        pickedQty: 0,
-                        status: 'Pending' as JobItem['status']
-                    }));
+                    const jobLineItems = itemsToPutaway.map(item => {
+                        const actualQty = receivedItemsMap[item.productId] ?? (item.sku ? receivedItemsMap[item.sku] : undefined) ?? item.quantity;
+                        return {
+                            productId: item.productId,
+                            name: item.productName || 'Unknown Product',
+                            sku: item.sku || item.productId,
+                            image: '',
+                            expectedQty: actualQty,
+                            pickedQty: 0,
+                            status: 'Pending' as JobItem['status']
+                        };
+                    });
 
                     const putawayJob = {
                         type: 'PUTAWAY',
@@ -107,7 +110,7 @@ export const useTransfers = (deps: UseTransfersDeps) => {
                     try {
                         const createdJob = await wmsJobsService.create(putawayJob as any);
                         setJobs(prev => [createdJob, ...prev]);
-                        logger.debug('useTransfers', `✅ Auto-created Putaway Job for Transfer ${id}: ${createdJob.id}`);
+                        logger.debug('useTransfers', `Auto-created Putaway Job for Transfer ${id}: ${createdJob.id}`);
                         addNotification('success', 'Putaway job created for received transfer');
                     } catch (e) {
                         logger.error('useTransfers', 'Failed to create Putaway Job for transfer', e as Error);
@@ -149,7 +152,7 @@ export const useTransfers = (deps: UseTransfersDeps) => {
                     }));
                 }
             } catch (jobErr) {
-                logger.warn('useTransfers', '⚠️ Failed to complete associated WMS jobs during POS receive');
+                logger.warn('useTransfers', 'Failed to complete associated WMS jobs during POS receive');
             }
 
             await transfersService.update(id, { status: 'Completed', receivedAt: timestampStr });

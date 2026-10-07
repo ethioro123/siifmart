@@ -8,6 +8,8 @@ import { useLanguage } from '../../../contexts/LanguageContext';
 import { logger } from '../../../utils/logger';
 import { useFulfillment } from '../FulfillmentContext';
 import { CustodyHandshakeModal } from './CustodyHandshakeModal';
+import { useData } from '../../../contexts/DataContext';
+import { resolveReceivingPolicy } from '../../../utils/receivingPolicy';
 
 interface TransferReceivingProps {
     activeTransferJob: WMSJob;
@@ -18,6 +20,7 @@ interface TransferReceivingProps {
     allProducts: Product[];
     wmsJobsService: any;
     adjustStockMutation: any;
+    addProduct?: any;
     addNotification: (type: string, message: string) => void;
     refreshData: () => Promise<void>;
     activeSite: Site | null;
@@ -32,12 +35,15 @@ export const TransferReceiving: React.FC<TransferReceivingProps> = ({
     allProducts,
     wmsJobsService,
     adjustStockMutation,
+    addProduct,
     addNotification,
     refreshData,
     activeSite
 }) => {
     const { t } = useLanguage();
     const { user, employees, logSystemEvent } = useFulfillment();
+    const { settings, effectiveCountry } = useData();
+    const isBlindReceiving = resolveReceivingPolicy(settings, effectiveCountry).blind;
     const [isHandshakeModalOpen, setIsHandshakeModalOpen] = useState(false);
     const [isSubmittingReceipt, setIsSubmittingReceipt] = useState(false);
 
@@ -81,7 +87,7 @@ export const TransferReceiving: React.FC<TransferReceivingProps> = ({
                     }
                 }
             } catch (err) {
-                logger.warn('TransferReceiving', '⚠️ Failed to complete child DISPATCH job:');
+                logger.warn('TransferReceiving', `Failed to complete child DISPATCH job: ${String(err)}`);
             }
 
             // Also complete the transfers table record if exists
@@ -112,32 +118,59 @@ export const TransferReceiving: React.FC<TransferReceivingProps> = ({
                     }
                 }
             } catch (err) {
-                logger.warn('TransferReceiving', '⚠️ Failed to complete transfers table record:');
+                logger.warn('TransferReceiving', `Failed to complete transfers table record: ${String(err)}`);
             }
 
             // Process stock adjustments at destination site
-            const destSiteId = activeTransferJob.destSiteId || activeTransferJob.dest_site_id;
+            const destSiteId = activeTransferJob.destSiteId || activeTransferJob.dest_site_id || activeSite?.id;
             for (const item of transferReceiveItems) {
                 if ((item.receivedQty || 0) > 0) {
                     // Find the source product first to get the SKU
-                    const sourceProduct = allProducts.find(p => p.id === item.productId);
+                    const sourceProduct = allProducts.find(p => p.id === item.productId || (item.barcode && p.barcode === item.barcode));
                     // Try to find the product record at the destination site by SKU
                     const destProduct = sourceProduct ? allProducts.find(p => 
                         p.sku === sourceProduct.sku && 
                         (p.siteId === destSiteId || (p as any).site_id === destSiteId)
                     ) : undefined;
-                    const product = destProduct || sourceProduct;
                     
-                    await adjustStockMutation.mutateAsync({
-                        productId: product?.id || item.productId,
-                        productName: product?.name || item.productName || 'Unknown',
-                        productSku: product?.sku || 'N/A',
-                        siteId: destSiteId || activeSite?.id || '',
-                        quantity: item.receivedQty,
-                        type: 'IN',
-                        reason: `Transfer Receipt ${activeTransferJob.orderRef}`,
-                        canApprove: true
-                    });
+                    let targetProductId = destProduct?.id;
+                    
+                    // If product doesn't exist at destination site, auto-create/clone it for destination site
+                    if (!destProduct && sourceProduct && addProduct) {
+                        try {
+                            const newProd = await addProduct({
+                                name: sourceProduct.name,
+                                sku: sourceProduct.sku,
+                                barcode: sourceProduct.barcode,
+                                price: sourceProduct.price,
+                                costPrice: (sourceProduct as any).costPrice || (sourceProduct as any).cost || 0,
+                                stock: 0,
+                                unit: sourceProduct.unit || 'pcs',
+                                siteId: destSiteId,
+                                site_id: destSiteId,
+                                category: sourceProduct.category || 'General',
+                                productId: sourceProduct.productId || sourceProduct.id,
+                                countryCode: (sourceProduct as any).countryCode || (sourceProduct as any).country_code,
+                                country_code: (sourceProduct as any).countryCode || (sourceProduct as any).country_code,
+                            } as any);
+                            targetProductId = newProd?.id;
+                        } catch (err) {
+                            logger.warn('TransferReceiving', `Failed to auto-create destination product via addProduct: ${String(err)}`);
+                        }
+                    }
+
+                    if (targetProductId) {
+                        await adjustStockMutation.mutateAsync({
+                            productId: targetProductId,
+                            productName: destProduct?.name || sourceProduct?.name || item.productName || 'Unknown',
+                            productSku: destProduct?.sku || sourceProduct?.sku || 'N/A',
+                            siteId: destSiteId || activeSite?.id || '',
+                            quantity: item.receivedQty,
+                            type: 'IN',
+                            reason: `Transfer Receipt ${activeTransferJob.orderRef || activeTransferJob.jobNumber || activeTransferJob.id}`,
+                            canApprove: true
+                        });
+                    }
                 }
             }
 
@@ -248,11 +281,19 @@ export const TransferReceiving: React.FC<TransferReceivingProps> = ({
                                             <p className="text-[10px] text-stone-500 font-mono">{product?.sku}</p>
                                         </div>
                                         <div className="text-right">
-                                            <span className="text-[10px] text-stone-400 dark:text-stone-500 uppercase font-black tracking-widest">{t('warehouse.expected')}</span>
+                                            <span className="text-[10px] text-stone-400 dark:text-stone-500 uppercase font-black tracking-widest">
+                                                {t('warehouse.expected')}{isBlindReceiving ? ' (Blind)' : ''}
+                                            </span>
                                             <p className="font-mono text-stone-900 dark:text-white font-bold">
-                                                {item.expectedQty}
-                                                {product?.unit && getSellUnit(product.unit).code !== 'UNIT' && (
-                                                    <span className="text-[10px] text-stone-500 font-bold ml-1 uppercase">{getSellUnit(product.unit).shortLabel}</span>
+                                                {isBlindReceiving ? (
+                                                    <span className="text-amber-600 dark:text-amber-400 font-mono tracking-widest font-black">***</span>
+                                                ) : (
+                                                    <>
+                                                        {item.expectedQty}
+                                                        {product?.unit && getSellUnit(product.unit).code !== 'UNIT' && (
+                                                            <span className="text-[10px] text-stone-500 font-bold ml-1 uppercase">{getSellUnit(product.unit).shortLabel}</span>
+                                                        )}
+                                                    </>
                                                 )}
                                             </p>
                                         </div>

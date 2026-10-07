@@ -32,7 +32,7 @@ export const TransferActiveList: React.FC<TransferActiveListProps> = ({
     // Filter Logic
     const filteredOngoingTransfers = useMemo(() => {
         return filteredJobs
-            .filter(j => j.type === 'TRANSFER' && j.status !== 'Completed' && j.status !== 'Cancelled' && j.transferStatus !== 'Received')
+            .filter(j => j.type === 'TRANSFER' && j.status !== 'Cancelled' && j.transferStatus !== 'Received' && (j.status !== 'Completed' || j.transferStatus === 'Delivered' || j.transferStatus === 'Partially Delivered'))
             .filter(j => {
                 // Derive effective status from child DISPATCH if it has progressed further
                 let effStatus = j.transferStatus || 'Requested';
@@ -118,7 +118,7 @@ export const TransferActiveList: React.FC<TransferActiveListProps> = ({
                 case 'Picking': return t('warehouse.picking');
                 case 'Picked': return t('warehouse.picking') + ' (OK)';
                 case 'Packed': return t('warehouse.packed');
-                case 'Shipped': return t('warehouse.inTransitLabel').split(' ')[0] + ' ⚓';
+                case 'Shipped': return t('warehouse.inTransitLabel').split(' ')[0];
                 case 'In-Transit': return t('warehouse.inTransitLabel');
                 case 'Delivered': return t('warehouse.delivered');
                 case 'Received': return t('warehouse.received');
@@ -133,20 +133,20 @@ export const TransferActiveList: React.FC<TransferActiveListProps> = ({
                     setSelectedJob(transfer);
                     setIsDetailsOpen(true);
                 }}
-                className={`flex items-center justify-between p-3 rounded-lg border cursor-pointer transition-all hover:bg-white/5 ${hasDisc ? 'border-red-500/40 bg-red-500/5' : 'border-white/5 hover:border-white/10'
+                className={`flex items-center justify-between p-3 rounded-lg border cursor-pointer transition-all hover:bg-stone-50 dark:hover:bg-white/5 ${hasDisc ? 'border-red-500/40 bg-red-500/5' : 'border-stone-200 dark:border-white/5 hover:border-stone-300 dark:hover:border-white/10'
                     }`}
             >
                 {/* Left: ID only */}
                 <div className="flex items-center gap-2">
                     {hasDisc && <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />}
-                    <span className="font-mono font-bold text-white text-sm">{formatJobId(transfer)}</span>
+                    <span className="font-mono font-bold text-stone-900 dark:text-white text-sm">{formatJobId(transfer)}</span>
                 </div>
                 {/* Right: Status + Chevron */}
                 <div className="flex items-center gap-3">
                     <span className={`text-[10px] px-2 py-0.5 rounded font-bold uppercase ${statusColors[effectiveStatus]}`}>
                         {getLocalizedStatus(effectiveStatus)}
                     </span>
-                    <ChevronRight size={16} className="text-gray-555" />
+                    <ChevronRight size={16} className="text-stone-400 dark:text-gray-555" />
                 </div>
             </div>
         );
@@ -163,13 +163,13 @@ export const TransferActiveList: React.FC<TransferActiveListProps> = ({
                         className="bg-white dark:bg-black/60 border border-[#E2DCCE] dark:border-white/10 rounded-xl px-3 py-2 text-xs font-bold text-stone-900 dark:text-white focus:border-[#2C5E3B] dark:focus:border-[#A9CBA2] focus:outline-none shadow-xs"
                     >
                         <option value="ALL">{t('warehouse.allTransfers')}</option>
-                        <option value="Requested">📋 {t('warehouse.requested')}</option>
-                        <option value="Picking">📦 {t('warehouse.picking')}</option>
-                        <option value="Packed">📤 {t('warehouse.packed')}</option>
-                        <option value="Shipped">⚓ {t('warehouse.inTransitLabel').split(' ')[0]}</option>
-                        <option value="In-Transit">🚚 {t('warehouse.inTransitLabel')}</option>
-                        <option value="Delivered">📍 {t('warehouse.delivered')}</option>
-                        <option value="Received">✅ {t('warehouse.received')}</option>
+                        <option value="Requested">{t('warehouse.requested')}</option>
+                        <option value="Picking">{t('warehouse.picking')}</option>
+                        <option value="Packed">{t('warehouse.packed')}</option>
+                        <option value="Shipped">{t('warehouse.inTransitLabel').split(' ')[0]}</option>
+                        <option value="In-Transit">{t('warehouse.inTransitLabel')}</option>
+                        <option value="Delivered">{t('warehouse.delivered')}</option>
+                        <option value="Received">{t('warehouse.received')}</option>
                     </select>
                     <SortDropdown
                         label={t('warehouse.sort')}
@@ -187,7 +187,7 @@ export const TransferActiveList: React.FC<TransferActiveListProps> = ({
                 </div>
                 <button
                     onClick={() => setShowTransferArchive && setShowTransferArchive(true)}
-                    className="px-3 py-2 bg-white/5 text-gray-400 rounded-lg text-xs font-bold hover:bg-white/10 border border-white/10 flex items-center gap-1.5"
+                    className="px-3 py-2 bg-stone-100 dark:bg-white/5 text-stone-600 dark:text-gray-400 hover:text-stone-900 dark:hover:text-white rounded-lg text-xs font-bold hover:bg-stone-200 dark:hover:bg-white/10 border border-stone-200 dark:border-white/10 flex items-center gap-1.5 transition-colors"
                 >
                     <FileText size={14} /> {t('warehouse.archive')}
                 </button>
@@ -198,8 +198,8 @@ export const TransferActiveList: React.FC<TransferActiveListProps> = ({
                 <div>
                     <div className="flex items-center gap-2 mb-3">
                         <div className="w-2 h-2 rounded-full bg-yellow-400 animate-pulse" />
-                        <h4 className="text-sm font-bold text-white uppercase tracking-wide">{t('warehouse.ongoing')}</h4>
-                        <span className="text-xs text-gray-500">({filteredOngoingTransfers.length})</span>
+                        <h4 className="text-sm font-bold text-stone-900 dark:text-white uppercase tracking-wide">{t('warehouse.ongoing')}</h4>
+                        <span className="text-xs text-stone-500 dark:text-gray-500">({filteredOngoingTransfers.length})</span>
                     </div>
                     {filteredOngoingTransfers.length > 0 ? (
                         <>
@@ -219,7 +219,7 @@ export const TransferActiveList: React.FC<TransferActiveListProps> = ({
                             </div>
                         </>
                     ) : (
-                        <div className="text-center py-8 text-gray-500 bg-white/[0.02] rounded-lg border border-white/5">
+                        <div className="text-center py-8 text-stone-500 dark:text-gray-500 bg-stone-50 dark:bg-white/[0.02] rounded-lg border border-stone-200 dark:border-white/5">
                             <Truck size={32} className="mx-auto mb-2 opacity-30" />
                             <p className="text-sm">{t('warehouse.noOngoingTransfers')}</p>
                         </div>

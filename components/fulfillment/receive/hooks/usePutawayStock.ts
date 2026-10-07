@@ -249,6 +249,14 @@ export function usePutawayStock() {
                 logger.warn('Fulfillment', '⚠️ Manual cleanup of old location tenants failed (non-critical)');
             }
 
+            // [CLEANUP] Purge any orphaned 0-stock 'On Order' ghost placeholders for this SKU at target site
+            try {
+                await productsService.deleteGhostPlaceholders(params.sku, params.siteId);
+                logger.debug('Fulfillment', `🧹 Purged any 0-stock On Order ghost placeholders for SKU ${params.sku}`);
+            } catch (ghostErr) {
+                logger.warn('Fulfillment', '⚠️ Ghost placeholder cleanup failed (non-critical)');
+            }
+
             addNotification('success', `Stock putaway to ${params.location}`);
             refreshData(); // Refresh to show new location
         } catch (e) {

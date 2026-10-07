@@ -358,6 +358,7 @@ export const TransferTab: React.FC<TransferTabProps> = ({
                     allProducts={allProducts}
                     wmsJobsService={wmsJobsService}
                     adjustStockMutation={adjustStockMutation}
+                    addProduct={addProduct}
                     addNotification={addNotification}
                     refreshData={refreshData}
                     activeSite={activeSite}

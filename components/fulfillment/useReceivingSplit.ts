@@ -92,7 +92,12 @@ export const useReceivingSplit = (deps: UseReceivingSplitDeps) => {
                 // 1. Handle New Product Creation
                 if (variant.skuType === 'new') {
                     try {
-                        const newProductCheck = allProducts.find(p => p.sku === variant.sku);
+                        let newProductCheck = allProducts.find(p => p.sku === variant.sku);
+                        if (!newProductCheck && (po.siteId || activeSite?.id)) {
+                            try {
+                                newProductCheck = (await productsService.getBySKU(variant.sku, po.siteId || activeSite?.id)) || undefined;
+                            } catch { }
+                        }
                         if (newProductCheck) {
                             targetProductId = newProductCheck.id;
                         } else {

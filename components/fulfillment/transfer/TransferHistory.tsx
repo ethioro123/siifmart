@@ -127,19 +127,19 @@ export const TransferHistory: React.FC<TransferHistoryProps> = ({
 
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-8">
                 <div>
-                    <h4 className="text-xl font-black text-white flex items-center gap-3 uppercase tracking-tight">
+                    <h4 className="text-xl font-black text-stone-900 dark:text-white flex items-center gap-3 uppercase tracking-tight">
                         <div className="p-2 bg-[#2C5E3B]/10 rounded-xl border border-[#2C5E3B]/20 group-hover/history:bg-[#2C5E3B]/20 transition-colors">
-                            <HistoryIcon size={20} className="text-[#A9CBA2]" />
+                            <HistoryIcon size={20} className="text-[#2C5E3B] dark:text-[#A9CBA2]" />
                         </div>
                         {t('warehouse.putaway.history')}
                     </h4>
-                    <p className="text-gray-555 text-[10px] mt-1 uppercase tracking-widest font-black">{t('warehouse.completedAndFinalizedShipments')}</p>
+                    <p className="text-stone-500 dark:text-gray-555 text-[10px] mt-1 uppercase tracking-widest font-black">{t('warehouse.completedAndFinalizedShipments')}</p>
                 </div>
 
                 <div className="relative w-full md:w-80 group">
                     <div className="absolute -inset-0.5 bg-[#2C5E3B]/20 rounded-xl blur opacity-0 group-hover:opacity-100 transition duration-500"></div>
-                    <div className="relative flex items-center bg-black/40 border border-white/10 rounded-xl focus-within:border-[#2C5E3B] transition-all shadow-sm">
-                        <Search className="absolute left-3 text-gray-600 group-focus-within:text-[#A9CBA2]" size={16} />
+                    <div className="relative flex items-center bg-stone-50 dark:bg-black/40 border border-[#E2DCCE] dark:border-white/10 rounded-xl focus-within:border-[#2C5E3B] transition-all shadow-xs">
+                        <Search className="absolute left-3 text-stone-400 dark:text-gray-600 group-focus-within:text-[#2C5E3B] dark:group-focus-within:text-[#A9CBA2]" size={16} />
                         <input
                             type="text"
                             placeholder={`${t('warehouse.searchHistoryPlaceholder')}`}
@@ -147,7 +147,7 @@ export const TransferHistory: React.FC<TransferHistoryProps> = ({
                             title={t('warehouse.searchHistoryPlaceholder')}
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
-                            className="w-full bg-transparent border-none rounded-xl pl-10 pr-4 py-3 text-xs text-white focus:outline-none placeholder:text-gray-600 font-bold uppercase tracking-wider"
+                            className="w-full bg-transparent border-none rounded-xl pl-10 pr-4 py-3 text-xs text-stone-900 dark:text-white focus:outline-none placeholder:text-stone-400 dark:placeholder:text-gray-600 font-bold uppercase tracking-wider"
                         />
                     </div>
                 </div>
@@ -174,47 +174,47 @@ export const TransferHistory: React.FC<TransferHistoryProps> = ({
                                             setSelectedJob(transfer);
                                             setIsDetailsOpen(true);
                                         }}
-                                        className="group relative bg-black/40 hover:bg-black/60 border border-white/5 hover:border-[#2C5E3B]/50 rounded-2xl p-5 transition-colors cursor-pointer overflow-hidden shadow-sm"
+                                        className="group relative bg-white/85 dark:bg-black/40 hover:bg-stone-50 dark:hover:bg-black/60 border border-[#E2DCCE] dark:border-white/5 hover:border-[#2C5E3B]/50 rounded-2xl p-5 transition-colors cursor-pointer overflow-hidden shadow-xs"
                                     >
                                         <div className="absolute inset-0 bg-gradient-to-br from-[#2C5E3B]/[0.02] to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
 
                                         <div className="relative flex justify-between items-start mb-4">
                                             <div className="flex items-center gap-2">
-                                                <div className="p-1.5 rounded-lg bg-[#2C5E3B]/10 text-[#A9CBA2]">
+                                                <div className="p-1.5 rounded-lg bg-[#2C5E3B]/10 text-[#2C5E3B] dark:text-[#A9CBA2]">
                                                     <Package size={14} />
                                                 </div>
-                                                <span className="text-[10px] uppercase font-black tracking-widest text-gray-500">
+                                                <span className="text-[10px] uppercase font-black tracking-widest text-stone-500">
                                                     {t('warehouse.interSiteTransfers').split(' ')[0]}
                                                 </span>
                                             </div>
                                             <span className={`text-[9px] px-2 py-0.5 rounded-full uppercase font-black tracking-widest border transition-all ${
                                                 transfer.status === 'Cancelled' 
-                                                ? 'bg-red-500/10 text-red-400 border-red-500/20' 
+                                                ? 'bg-red-500/10 text-red-500 dark:text-red-400 border-red-500/20' 
                                                 : transfer.status === 'Completed' || transfer.transferStatus === 'Received'
-                                                ? 'bg-green-500/10 text-green-400 border-green-500/20'
-                                                : 'bg-[#2C5E3B]/10 text-[#A9CBA2] border-[#2C5E3B]/20'
+                                                ? 'bg-green-500/10 text-green-600 dark:text-green-400 border-green-500/20'
+                                                : 'bg-[#2C5E3B]/10 text-[#2C5E3B] dark:text-[#A9CBA2] border-[#2C5E3B]/20'
                                             }`}>
                                                 {transfer.transferStatus === 'Received' ? t('warehouse.received') : transfer.status === 'Cancelled' ? 'Cancelled' : (transfer.transferStatus || transfer.status)}
                                             </span>
                                         </div>
 
                                         <div className="relative mb-4">
-                                            <h5 className="text-white font-black text-sm truncate group-hover:text-[#A9CBA2] transition-colors uppercase tracking-tight">
+                                            <h5 className="text-stone-900 dark:text-white font-black text-sm truncate group-hover:text-[#2C5E3B] dark:group-hover:text-[#A9CBA2] transition-colors uppercase tracking-tight">
                                                 {formattedId}
                                             </h5>
                                             <div className="flex flex-col gap-1.5 mt-2">
                                                 <div className="flex items-center gap-1.5">
-                                                    <span className="text-[10px] font-black text-gray-500 uppercase tracking-widest">REF:</span>
-                                                    <span className="text-[10px] font-black text-gray-300 uppercase tracking-tight">
+                                                    <span className="text-[10px] font-black text-stone-400 uppercase tracking-widest">REF:</span>
+                                                    <span className="text-[10px] font-black text-stone-700 dark:text-gray-300 uppercase tracking-tight">
                                                         {formattedId}
                                                         {transfer.jobNumber && transfer.jobNumber !== formattedId && (
-                                                            <> <span className="text-[#A9CBA2]/50 mr-1">•</span> {transfer.jobNumber}</>
+                                                             <> <span className="text-[#2C5E3B]/50 dark:text-[#A9CBA2]/50 mr-1">•</span> {transfer.jobNumber}</>
                                                         )}
                                                     </span>
                                                 </div>
                                                 <div className="flex items-center gap-1.5">
-                                                    <Calendar size={10} className="text-gray-600" />
-                                                    <span className="text-[10px] font-bold text-gray-500">
+                                                    <Calendar size={10} className="text-stone-400 dark:text-gray-600" />
+                                                    <span className="text-[10px] font-bold text-stone-500">
                                                         {formatDateTime((transfer as any).date || (transfer as any).createdAt)}
                                                     </span>
                                                 </div>
@@ -224,20 +224,20 @@ export const TransferHistory: React.FC<TransferHistoryProps> = ({
                                         {/* Preview items */}
                                         {productNames.length > 0 && (
                                             <div className="relative mb-4">
-                                                <p className="text-[10px] text-gray-600 truncate">
+                                                <p className="text-[10px] text-stone-500 dark:text-gray-400 truncate">
                                                     {productNames.slice(0, 2).join(', ')}
-                                                    {productNames.length > 2 && <span className="text-[#A9CBA2]/60 ml-1">+{productNames.length - 2} {t('warehouse.remaining')}</span>}
+                                                    {productNames.length > 2 && <span className="text-[#2C5E3B] dark:text-[#A9CBA2] font-bold ml-1">+{productNames.length - 2} {t('warehouse.remaining')}</span>}
                                                 </p>
                                             </div>
                                         )}
 
-                                        <div className="relative flex items-center justify-between border-t border-white/5 pt-3 mt-auto">
-                                            <div className="flex items-center gap-2 bg-white/[0.03] px-2 py-1 rounded-lg border border-white/5">
-                                                <Box size={12} className="text-gray-500" />
-                                                <span className="text-[10px] font-black text-gray-400">{totalItems} {totalItems === 1 ? t('warehouse.itemSingular') : t('warehouse.itemPlural')}</span>
+                                        <div className="relative flex items-center justify-between border-t border-stone-200/60 dark:border-white/5 pt-3 mt-auto">
+                                            <div className="flex items-center gap-2 bg-stone-100 dark:bg-white/[0.03] px-2 py-1 rounded-lg border border-stone-200 dark:border-white/5">
+                                                <Box size={12} className="text-stone-400 dark:text-gray-500" />
+                                                <span className="text-[10px] font-black text-stone-700 dark:text-gray-400">{totalItems} {totalItems === 1 ? t('warehouse.itemSingular') : t('warehouse.itemPlural')}</span>
                                             </div>
-                                            <div className="w-6 h-6 rounded-full bg-white/5 flex items-center justify-center group-hover:bg-[#2C5E3B]/20 transition-colors border border-white/10 group-hover:border-[#2C5E3B]/30">
-                                                <ChevronRight size={14} className="text-gray-600 group-hover:text-[#A9CBA2] transition-colors" />
+                                            <div className="w-6 h-6 rounded-full bg-stone-100 dark:bg-white/5 flex items-center justify-center group-hover:bg-[#2C5E3B]/20 transition-colors border border-stone-200 dark:border-white/10 group-hover:border-[#2C5E3B]/30">
+                                                <ChevronRight size={14} className="text-stone-500 group-hover:text-[#2C5E3B] dark:group-hover:text-[#A9CBA2] transition-colors" />
                                             </div>
                                         </div>
                                     </div>
@@ -255,9 +255,9 @@ export const TransferHistory: React.FC<TransferHistoryProps> = ({
                     />
                 </>
             ) : (
-                <div className="flex flex-col items-center justify-center py-20 bg-black/20 rounded-3xl border border-dashed border-white/5">
-                    <HistoryIcon size={32} className="text-gray-700 mb-4" />
-                    <p className="text-gray-600 font-bold uppercase tracking-widest text-xs">{t('warehouse.noHistoryFound')}</p>
+                <div className="flex flex-col items-center justify-center py-20 bg-stone-50/50 dark:bg-black/20 rounded-3xl border border-dashed border-stone-200 dark:border-white/5">
+                    <HistoryIcon size={32} className="text-stone-300 dark:text-gray-700 mb-4" />
+                    <p className="text-stone-500 dark:text-gray-600 font-bold uppercase tracking-widest text-xs">{t('warehouse.noHistoryFound')}</p>
                 </div>
             )}
         </div>

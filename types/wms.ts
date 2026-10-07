@@ -60,7 +60,7 @@ export interface WMSJob {
   dest_site_id?: string;
   jobNumber?: string;
   poNumber?: string;
-  transferStatus?: 'Draft' | 'Requested' | 'Approved' | 'Picking' | 'Picked' | 'Packed' | 'Shipped' | 'In-Transit' | 'Delivered' | 'Received' | 'Completed' | 'Cancelled' | 'Rejected';
+  transferStatus?: 'Draft' | 'Requested' | 'Approved' | 'Picking' | 'Picked' | 'Packed' | 'Shipped' | 'In-Transit' | 'Delivered' | 'Partially Delivered' | 'Received' | 'Completed' | 'Cancelled' | 'Rejected';
   requestedBy?: string;
   approvedBy?: string;
   shippedAt?: string;
