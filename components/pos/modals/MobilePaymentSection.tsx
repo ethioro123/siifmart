@@ -72,7 +72,7 @@ export const MobilePaymentSection: React.FC<MobilePaymentSectionProps> = ({
                         <button
                             type="button"
                             onClick={() => setChannel('MPESA_TILL')}
-                            className={`flex-1 py-2 px-1 text-[11px] font-black rounded-xl transition-all cursor-pointer text-center leading-tight ${
+                            className={`flex-1 py-2 px-1 text-xs font-bold rounded-xl transition-all cursor-pointer text-center leading-tight ${
                                 channel === 'MPESA_TILL'
                                     ? 'bg-emerald-600 text-white shadow-xs'
                                     : 'text-[var(--theme-text-secondary)] hover:text-emerald-500'
@@ -85,7 +85,7 @@ export const MobilePaymentSection: React.FC<MobilePaymentSectionProps> = ({
                         <button
                             type="button"
                             onClick={() => setChannel('MPESA_STK')}
-                            className={`flex-1 py-2 px-1 text-[11px] font-black rounded-xl transition-all cursor-pointer text-center leading-tight ${
+                            className={`flex-1 py-2 px-1 text-xs font-bold rounded-xl transition-all cursor-pointer text-center leading-tight ${
                                 channel === 'MPESA_STK'
                                     ? 'bg-emerald-600 text-white shadow-xs'
                                     : 'text-[var(--theme-text-secondary)] hover:text-emerald-500'
@@ -98,7 +98,7 @@ export const MobilePaymentSection: React.FC<MobilePaymentSectionProps> = ({
                         <button
                             type="button"
                             onClick={() => setChannel('AIRTEL_MONEY')}
-                            className={`flex-1 py-2 px-1 text-[11px] font-black rounded-xl transition-all cursor-pointer text-center leading-tight ${
+                            className={`flex-1 py-2 px-1 text-xs font-bold rounded-xl transition-all cursor-pointer text-center leading-tight ${
                                 channel === 'AIRTEL_MONEY'
                                     ? 'bg-rose-600 text-white shadow-xs'
                                     : 'text-[var(--theme-text-secondary)] hover:text-rose-500'
@@ -111,7 +111,7 @@ export const MobilePaymentSection: React.FC<MobilePaymentSectionProps> = ({
                         <button
                             type="button"
                             onClick={() => setChannel('MPESA_PAYBILL')}
-                            className={`flex-1 py-2 px-1 text-[11px] font-black rounded-xl transition-all cursor-pointer text-center leading-tight ${
+                            className={`flex-1 py-2 px-1 text-xs font-bold rounded-xl transition-all cursor-pointer text-center leading-tight ${
                                 channel === 'MPESA_PAYBILL'
                                     ? 'bg-amber-600 text-white shadow-xs'
                                     : 'text-[var(--theme-text-secondary)] hover:text-amber-500'
@@ -168,7 +168,7 @@ export const MobilePaymentSection: React.FC<MobilePaymentSectionProps> = ({
                         <button
                             type="button"
                             onClick={() => handleCopy(mpesaTillNumber)}
-                            className="text-[10px] font-bold flex items-center gap-1 text-emerald-500 hover:underline cursor-pointer"
+                            className="text-xs font-semibold flex items-center gap-1 text-emerald-500 hover:underline cursor-pointer"
                         >
                             {copiedTill ? <Check size={12} /> : <Copy size={12} />}
                             {copiedTill ? 'Copied' : 'Copy Till'}
@@ -178,20 +178,20 @@ export const MobilePaymentSection: React.FC<MobilePaymentSectionProps> = ({
                     {/* Big Till Number Display Box */}
                     <div className="p-3 bg-[var(--theme-bg-card)] rounded-xl border border-emerald-500/30 flex items-center justify-between">
                         <div>
-                            <p className="text-[10px] uppercase font-bold text-[var(--theme-text-secondary)]">Till Number</p>
+                            <p className="text-xs uppercase font-bold tracking-wider text-[var(--theme-text-secondary)]">Till Number</p>
                             <p className="text-2xl font-black font-mono tracking-widest text-[var(--theme-text-primary)]">
                                 {mpesaTillNumber}
                             </p>
                         </div>
                         <div className="text-right">
-                            <p className="text-[10px] uppercase font-bold text-[var(--theme-text-secondary)]">Amount to Pay</p>
+                            <p className="text-xs uppercase font-bold tracking-wider text-[var(--theme-text-secondary)]">Amount to Pay</p>
                             <p className="text-base font-black font-mono text-emerald-500 tabular-nums">
                                 {CURRENCY_SYMBOL} {total.toLocaleString()}
                             </p>
                         </div>
                     </div>
 
-                    <p className="text-[10px] text-[var(--theme-text-secondary)] leading-relaxed">
+                    <p className="text-xs text-[var(--theme-text-secondary)] font-medium leading-relaxed">
                         Direct customer to: <strong>M-Pesa &gt; Lipa na M-PESA &gt; Buy Goods &gt; Till {mpesaTillNumber}</strong>. No transaction fees for customer.
                     </p>
 
@@ -202,8 +202,8 @@ export const MobilePaymentSection: React.FC<MobilePaymentSectionProps> = ({
                                 M-Pesa Transaction Code
                             </label>
                             {transactionRef.length >= 8 && (
-                                <span className="text-[10px] font-bold text-emerald-500 flex items-center gap-1">
-                                    <CheckCircle2 size={12} /> Code Ready
+                                <span className="text-xs font-bold text-emerald-500 flex items-center gap-1">
+                                    <CheckCircle2 size={13} /> Code Ready
                                 </span>
                             )}
                         </div>
@@ -220,7 +220,7 @@ export const MobilePaymentSection: React.FC<MobilePaymentSectionProps> = ({
                                 type="button"
                                 onClick={() => setTransactionRef(generateSafaricomRef())}
                                 title="Auto-fill simulated reference"
-                                className="px-3 py-2 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] hover:border-emerald-500 text-[10px] font-mono font-bold text-[var(--theme-text-secondary)] rounded-xl cursor-pointer"
+                                className="px-3 py-2 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] hover:border-emerald-500 text-xs font-mono font-bold text-[var(--theme-text-secondary)] rounded-xl cursor-pointer"
                             >
                                 Quick Sim
                             </button>
@@ -239,12 +239,12 @@ export const MobilePaymentSection: React.FC<MobilePaymentSectionProps> = ({
                                 M-Pesa Express (STK Push)
                             </span>
                         </div>
-                        <span className="text-[10px] font-mono font-bold bg-emerald-600 text-white px-2 py-0.5 rounded-full">
+                        <span className="text-xs font-mono font-bold bg-emerald-600 text-white px-2.5 py-0.5 rounded-full">
                             Daraja API
                         </span>
                     </div>
 
-                    <p className="text-[10px] text-[var(--theme-text-secondary)]">
+                    <p className="text-xs text-[var(--theme-text-secondary)] font-medium">
                         Prompt will appear automatically on customer phone asking for M-Pesa PIN for {CURRENCY_SYMBOL} {total.toLocaleString()}.
                     </p>
 
@@ -294,7 +294,7 @@ export const MobilePaymentSection: React.FC<MobilePaymentSectionProps> = ({
                                 <p className="text-xs font-black text-amber-700 dark:text-amber-400">
                                     Prompt sent to customer! ({stkCountdown}s)
                                 </p>
-                                <p className="text-[10px] text-stone-500 dark:text-gray-400">
+                                <p className="text-xs text-[var(--theme-text-secondary)] font-medium">
                                     Customer is entering M-Pesa PIN on their handset...
                                 </p>
                             </div>
@@ -308,8 +308,8 @@ export const MobilePaymentSection: React.FC<MobilePaymentSectionProps> = ({
                                 <p className="text-xs font-black text-emerald-700 dark:text-emerald-400">
                                     M-Pesa PIN Confirmed!
                                 </p>
-                                <p className="text-[10px] text-stone-500 dark:text-gray-400 font-mono">
-                                    Ref: <strong>{transactionRef}</strong> • KES {total.toLocaleString()} Received
+                                <p className="text-xs text-[var(--theme-text-secondary)] font-mono font-medium">
+                                    Ref: <strong className="text-[var(--theme-text-primary)]">{transactionRef}</strong> • KES {total.toLocaleString()} Received
                                 </p>
                             </div>
                         </div>
@@ -330,7 +330,7 @@ export const MobilePaymentSection: React.FC<MobilePaymentSectionProps> = ({
                         <button
                             type="button"
                             onClick={() => handleCopy(airtelTillNumber)}
-                            className="text-[10px] font-bold flex items-center gap-1 text-rose-500 hover:underline cursor-pointer"
+                            className="text-xs font-semibold flex items-center gap-1 text-rose-500 hover:underline cursor-pointer"
                         >
                             {copiedTill ? <Check size={12} /> : <Copy size={12} />}
                             {copiedTill ? 'Copied' : 'Copy Till'}
@@ -339,20 +339,20 @@ export const MobilePaymentSection: React.FC<MobilePaymentSectionProps> = ({
 
                     <div className="p-3 bg-[var(--theme-bg-card)] rounded-xl border border-rose-500/30 flex items-center justify-between">
                         <div>
-                            <p className="text-[10px] uppercase font-bold text-[var(--theme-text-secondary)]">Airtel Till</p>
+                            <p className="text-xs uppercase font-bold tracking-wider text-[var(--theme-text-secondary)]">Airtel Till</p>
                             <p className="text-2xl font-black font-mono tracking-widest text-[var(--theme-text-primary)]">
                                 {airtelTillNumber}
                             </p>
                         </div>
                         <div className="text-right">
-                            <p className="text-[10px] uppercase font-bold text-[var(--theme-text-secondary)]">Amount</p>
+                            <p className="text-xs uppercase font-bold tracking-wider text-[var(--theme-text-secondary)]">Amount</p>
                             <p className="text-base font-black font-mono text-rose-500 tabular-nums">
                                 {CURRENCY_SYMBOL} {total.toLocaleString()}
                             </p>
                         </div>
                     </div>
 
-                    <p className="text-[10px] text-[var(--theme-text-secondary)]">
+                    <p className="text-xs text-[var(--theme-text-secondary)] font-medium">
                         Airtel Money customers can also dial <strong>*334# &gt; Lipa na Airtel &gt; Enter Till {airtelTillNumber}</strong>, or pay to Safaricom Till {mpesaTillNumber} via national interoperability.
                     </p>
 
@@ -372,7 +372,7 @@ export const MobilePaymentSection: React.FC<MobilePaymentSectionProps> = ({
                             <button
                                 type="button"
                                 onClick={() => setTransactionRef(generateAirtelRef())}
-                                className="px-3 py-2 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] hover:border-rose-500 text-[10px] font-mono font-bold text-[var(--theme-text-secondary)] rounded-xl cursor-pointer"
+                                className="px-3 py-2 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] hover:border-rose-500 text-xs font-mono font-bold text-[var(--theme-text-secondary)] rounded-xl cursor-pointer"
                             >
                                 Quick Sim
                             </button>
@@ -388,16 +388,16 @@ export const MobilePaymentSection: React.FC<MobilePaymentSectionProps> = ({
                         <span className="text-xs font-black uppercase text-amber-500 tracking-wider">
                             Lipa Na M-Pesa • Paybill
                         </span>
-                        <span className="text-[10px] font-mono font-bold text-[var(--theme-text-muted)]">Business / Invoicing</span>
+                        <span className="text-xs font-mono font-bold text-[var(--theme-text-secondary)]">Business / Invoicing</span>
                     </div>
 
                     <div className="grid grid-cols-2 gap-3 p-3 bg-[var(--theme-bg-card)] rounded-xl border border-amber-500/20">
                         <div>
-                            <p className="text-[10px] uppercase font-bold text-[var(--theme-text-secondary)]">Business No (Paybill)</p>
+                            <p className="text-xs uppercase font-bold tracking-wider text-[var(--theme-text-secondary)]">Business No (Paybill)</p>
                             <p className="text-xl font-black font-mono text-[var(--theme-text-primary)]">{mpesaPaybillNumber}</p>
                         </div>
                         <div>
-                            <p className="text-[10px] uppercase font-bold text-[var(--theme-text-secondary)]">Account No</p>
+                            <p className="text-xs uppercase font-bold tracking-wider text-[var(--theme-text-secondary)]">Account No</p>
                             <p className="text-xl font-black font-mono text-[var(--theme-text-primary)]">SIIFMART</p>
                         </div>
                     </div>
@@ -425,7 +425,7 @@ export const MobilePaymentSection: React.FC<MobilePaymentSectionProps> = ({
                         <p className="text-xs font-black uppercase text-sky-500">
                             {channel === 'TELEBIRR' ? 'Telebirr SuperApp / USSD (*127#)' : 'CBE Birr (*847#)'}
                         </p>
-                        <span className="text-[10px] font-mono font-bold text-sky-500 bg-[var(--theme-bg-card)] px-2 py-0.5 rounded border border-[var(--theme-border)]">
+                        <span className="text-xs font-mono font-bold text-sky-500 bg-[var(--theme-bg-card)] px-2.5 py-0.5 rounded-lg border border-[var(--theme-border)]">
                             Shortcode: 778899
                         </span>
                     </div>

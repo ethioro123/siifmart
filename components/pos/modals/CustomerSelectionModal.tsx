@@ -76,9 +76,9 @@ export const CustomerSelectionModal: React.FC = () => {
                                         <div className="flex-1">
                                             <p className="font-bold text-[var(--theme-text-primary)]">{customer.name}</p>
                                             <p className="text-xs text-[var(--theme-text-secondary)] font-mono">{maskPhoneNumber(customer.phone)} • {customer.email}</p>
-                                            <div className="flex gap-3 mt-1 text-[10px]">
+                                            <div className="flex gap-3 mt-1 text-xs font-medium">
                                                 <span className="text-emerald-600 dark:text-emerald-400 font-semibold">{stats.totalVisits} visits</span>
-                                                <span className="text-[var(--theme-text-muted)]">{formatCompactNumber(stats.totalSpent, { currency: CURRENCY_SYMBOL })} spent</span>
+                                                <span className="text-[var(--theme-text-secondary)]">{formatCompactNumber(stats.totalSpent, { currency: CURRENCY_SYMBOL })} spent</span>
                                             </div>
                                         </div>
                                         {isSelected && <CheckCircle size={16} className="text-emerald-500" />}
@@ -124,7 +124,7 @@ export const CustomerSelectionModal: React.FC = () => {
                                                     <span className="text-[var(--theme-text-secondary)] font-medium">{formatDateTime(sale.date, { useRelative: true })}</span>
                                                     <span className="text-[var(--theme-text-primary)] font-bold">{formatCompactNumber(sale.total, { currency: CURRENCY_SYMBOL })}</span>
                                                 </div>
-                                                <p className="text-[var(--theme-text-muted)] text-[10px] mt-1">{sale.items.length} items</p>
+                                                <p className="text-[var(--theme-text-secondary)] text-xs mt-1 font-medium">{sale.items.length} items</p>
                                             </div>
                                         ))}
                                         {getCustomerHistory(selectedCustomer.id).length === 0 && (

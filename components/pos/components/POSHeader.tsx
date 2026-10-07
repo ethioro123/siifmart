@@ -105,14 +105,14 @@ export const POSHeader: React.FC<POSHeaderProps> = ({ setIsFilterPanelOpen, acti
                                 title="Review and confirm product price updates"
                             >
                                 <span className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" />
-                                <span className="text-[10px] font-bold uppercase tracking-wider">
+                                <span className="text-xs font-bold uppercase tracking-wider">
                                     {unseenPriceChanges.length} Price {unseenPriceChanges.length === 1 ? 'Change' : 'Changes'}
                                 </span>
                             </button>
                             <button
                                 type="button"
                                 onClick={markPriceUpdatesAsRead}
-                                className="ml-1 text-[9px] font-bold uppercase px-1.5 py-0.5 rounded bg-blue-500 text-white hover:bg-blue-600 transition-colors cursor-pointer"
+                                className="ml-1 text-xs font-bold uppercase px-2 py-0.5 rounded-lg bg-blue-500 text-white hover:bg-blue-600 transition-colors cursor-pointer"
                                 title="Dismiss price notifications"
                             >
                                 Dismiss
@@ -169,7 +169,7 @@ export const POSHeader: React.FC<POSHeaderProps> = ({ setIsFilterPanelOpen, acti
                 <SlidersHorizontal size={14} className="text-[var(--theme-text-secondary)]" />
                 <span className="hidden sm:inline">Filter & Sort</span>
                 {activeFiltersCount > 0 && (
-                    <span className="w-4 h-4 bg-rose-500 text-white rounded-full flex items-center justify-center text-[9px] font-bold">
+                    <span className="w-5 h-5 bg-rose-500 text-white rounded-full flex items-center justify-center text-xs font-bold">
                         {activeFiltersCount}
                     </span>
                 )}
@@ -222,17 +222,17 @@ export const POSHeader: React.FC<POSHeaderProps> = ({ setIsFilterPanelOpen, acti
                     <div className="absolute right-0 top-full mt-2 hidden group-hover:block z-50 w-56 p-3 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl shadow-xl animate-in fade-in duration-200">
                         <div className="flex items-center justify-between mb-1">
                             <span className="text-xs font-bold text-[var(--theme-text-primary)]">{t('pos.teamBonus')}</span>
-                            <span className="px-1.5 py-0.5 rounded text-[8px] font-bold uppercase bg-[var(--theme-pill-bg)] text-[var(--theme-text-primary)] border border-[var(--theme-border)]">
+                            <span className="px-2 py-0.5 rounded-md text-xs font-bold uppercase bg-[var(--theme-pill-bg)] text-[var(--theme-text-primary)] border border-[var(--theme-border)]">
                                 {storeBonus.tier.tierName}
                             </span>
                         </div>
-                        <p className="text-[11px] text-[var(--theme-text-secondary)]">
+                        <p className="text-xs text-[var(--theme-text-secondary)] font-mono tabular-nums">
                             {currentStorePoints.monthlyPoints.toLocaleString()} {t('pos.pts')}
                         </p>
                         {userBonusShare && (
                             <div className="mt-2 pt-2 border-t border-[var(--theme-border)] flex items-center justify-between">
-                                <span className="text-[10px] text-[var(--theme-text-secondary)]">{t('pos.yourShare')}</span>
-                                <span className="text-xs font-mono font-bold text-[var(--theme-text-primary)]">
+                                <span className="text-xs text-[var(--theme-text-secondary)]">{t('pos.yourShare')}</span>
+                                <span className="text-xs font-mono font-bold text-[var(--theme-text-primary)] tabular-nums">
                                     {formatCompactNumber(userBonusShare.amount, { currency: CURRENCY_SYMBOL, maxFractionDigits: 0 })}
                                 </span>
                             </div>

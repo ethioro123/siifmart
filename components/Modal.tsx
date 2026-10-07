@@ -63,33 +63,36 @@ export default function Modal({
       />
 
       {/* Modal Content */}
-      <div className={`relative w-full max-w-full overflow-hidden ${isSide ? 'h-full max-w-md rounded-l-3xl rounded-r-none animate-in slide-in-from-right duration-300' : `${sizeClasses[size]} rounded-2xl animate-in fade-in zoom-in duration-200`} bg-[#F7F3ED]/95 dark:bg-[#1E2822]/95 backdrop-blur-2xl border border-[#E2DCCE] dark:border-emerald-950/20 shadow-2xl dark:shadow-[0_32px_96px_-12px_rgba(5,8,6,0.65)] transform transition-all flex flex-col ${isSide ? 'max-h-full' : 'max-h-[90vh]'} print:max-w-none print:w-full print:max-h-none print:shadow-none print:border-none print:rounded-none print:bg-white`}>
-
-        {/* Glow Effect */}
-        <div className={`absolute -inset-[1px] bg-gradient-to-r from-transparent via-[#2C5E3B]/20 to-transparent dark:via-[#A9CBA2]/10 ${isSide ? 'rounded-l-3xl' : 'rounded-2xl'} blur-sm -z-10 pointer-events-none print:hidden`} />
+      <div
+        style={{ backgroundColor: 'var(--theme-bg-panel)' }}
+        className={`relative w-full max-w-full overflow-hidden ${isSide ? 'h-full max-w-md rounded-l-3xl rounded-r-none animate-in slide-in-from-right duration-300' : `${sizeClasses[size]} rounded-3xl animate-in fade-in zoom-in duration-200`} bg-[var(--theme-bg-panel)] border border-[var(--theme-border)] shadow-[var(--shadow-modal)] transform transition-all flex flex-col ${isSide ? 'max-h-full' : 'max-h-[90vh]'} print:max-w-none print:w-full print:max-h-none print:shadow-none print:border-none print:rounded-none print:bg-white`}
+      >
 
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-[#E2DCCE] dark:border-emerald-950/20 shrink-0 print:hidden">
-          <h3 className="text-lg font-extrabold text-[#1E3F27] dark:text-[#EAE5D9] flex items-center gap-2 uppercase tracking-tight">
+        <div className="flex items-center justify-between px-6 py-5 border-b border-[var(--theme-border-subtle)] bg-[var(--theme-bg-panel)] shrink-0 print:hidden">
+          <h3 className="text-lg font-bold text-[var(--theme-text-primary)] flex items-center gap-2 tracking-tight">
             {title}
           </h3>
           <button
             onClick={onClose}
             aria-label="Close"
-            className="p-2 rounded-xl bg-[#E2DCCE]/40 dark:bg-white/5 text-[#2C5E3B] dark:text-[#A9CBA2] hover:text-[#1E3F27] dark:hover:text-white hover:bg-[#E2DCCE]/60 dark:hover:bg-white/10 transition-colors"
+            className="p-2 rounded-xl bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-border)] transition-colors cursor-pointer"
           >
             <X size={18} />
           </button>
         </div>
 
         {/* Body - Scrollable */}
-        <div className="p-6 overflow-y-auto overflow-x-hidden custom-scrollbar flex-1 print:overflow-visible print:px-0 print:py-0">
+        <div className="p-6 overflow-y-auto overflow-x-hidden custom-scrollbar flex-1 print:overflow-visible print:px-0 print:py-0 bg-[var(--theme-bg-panel)]">
           {children}
         </div>
 
         {/* Footer */}
         {footer && (
-          <div className="p-6 border-t border-[#E2DCCE] dark:border-emerald-950/20 shrink-0">
+          <div
+            style={{ backgroundColor: 'var(--theme-bg-panel)' }}
+            className="px-6 py-4 border-t border-[var(--theme-border-subtle)] bg-[var(--theme-bg-panel)] shrink-0"
+          >
             {footer}
           </div>
         )}

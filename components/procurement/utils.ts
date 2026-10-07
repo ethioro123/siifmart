@@ -14,8 +14,11 @@ export const getSupplierIcon = (type: SupplierType) => {
 export {
     CATEGORY_ATTRIBUTES,
     getCategoryAttributes,
-    PRODUCT_CATEGORIES
+    PRODUCT_CATEGORIES,
+    isConsumableCategory,
+    isDiscreteGeneralMerch
 } from './categoryAttributes';
+import { isDiscreteGeneralMerch } from './categoryAttributes';
 
 // Re-export the new structured unit system
 export { SELL_UNITS, getSellUnit, isDecimalAllowed, needsQuantityPrompt, getGroupedUnits, formatQuantityWithUnit, formatPricePerUnit, validateQuantity, normalizeQuantity } from '../../utils/units';
@@ -275,19 +278,7 @@ export const formatPOItemDescription = (item: any) => {
     const category = (item.category || item.customAttributes?.identity?.category || '').trim();
 
     // Check if category is non-consumable / discrete merchandise where net weight is a physical spec, not product title
-    const isDiscreteGeneralMerch = [
-        'Electronics & Batteries',
-        'Electronics',
-        'Industrial',
-        'Automotive',
-        'Hardware',
-        'Appliances',
-        'Apparel & Accessories',
-        'Clothing',
-        'Toys & Games',
-        'Stationery & Office',
-        'Books & Media'
-    ].some(c => category.toLowerCase().includes(c.toLowerCase()));
+    const isDiscrete = isDiscreteGeneralMerch(category);
 
     const physicalWeight = item.customAttributes?.physical?.netWeight || item.custom_attributes?.physical?.netWeight || item.size;
     const physicalType = item.customAttributes?.physical?.sizeType || item.custom_attributes?.physical?.sizeType ||
@@ -306,7 +297,7 @@ export const formatPOItemDescription = (item: any) => {
 
     // Only append physical weight for food/beverages/consumables where size distinguishes SKU,
     // and ONLY if not already in the name and not discrete general merchandise (like Kindle, Phones, Electronics)
-    if (physicalWeight && !isDiscreteGeneralMerch) {
+    if (physicalWeight && !isDiscrete) {
         const sizeUnit = `${physicalWeight}${physicalType}`;
         const normalizedName = rawName.replace(/\s+/g, '').toLowerCase();
         const normalizedSizeUnit = sizeUnit.replace(/\s+/g, '').toLowerCase();
@@ -365,14 +356,16 @@ export const formatProductDisplayName = (product: { name: string; brand?: string
     if (product.brand && !product.name.toLowerCase().startsWith(product.brand.toLowerCase())) {
         parts.push(product.brand);
     }
-
     parts.push(product.name);
+
+    const category = (product as any).category || product.customAttributes?.identity?.category || '';
+    const isDiscrete = isDiscreteGeneralMerch(category);
 
     const physicalWeight = product.customAttributes?.physical?.netWeight || product.size;
     const physicalType = product.customAttributes?.physical?.sizeType || product.customAttributes?.physical?.unit ||
                          (product.unit && !['UNIT', 'PACK', 'DOZEN'].includes(product.unit.toUpperCase().trim()) ? product.unit : '');
 
-    if (physicalWeight) {
+    if (physicalWeight && !isDiscrete) {
         const sizeUnit = `${physicalWeight}${physicalType}`;
         const normalizedName = product.name.replace(/\s+/g, '').toLowerCase();
         const normalizedSizeUnit = sizeUnit.replace(/\s+/g, '').toLowerCase();

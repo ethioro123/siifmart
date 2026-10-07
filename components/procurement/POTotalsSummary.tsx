@@ -39,13 +39,13 @@ export const POTotalsSummary: React.FC<POTotalsSummaryProps> = ({
     return (
         <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Left: Notes & Commercial Terms */}
-            <div className="bg-[var(--theme-bg-panel)] border border-[var(--theme-border)] rounded-2xl p-6 shadow-sm space-y-4">
+            <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-3xl p-6 shadow-sm space-y-4">
                 <div className="space-y-1.5">
-                    <label className="text-[10px] text-[var(--theme-text-secondary)] uppercase font-bold tracking-wider flex items-center gap-2">
-                        <FileText size={13} className="text-[var(--theme-accent)]" /> Transaction Notes & Instructions
+                    <label className="text-[10px] text-[var(--theme-text-secondary)] uppercase font-semibold tracking-wider flex items-center gap-2 block ml-1">
+                        <FileText size={14} className="text-[var(--theme-accent)]" /> Transaction Notes & Instructions
                     </label>
                     <textarea
-                        className="w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl p-3.5 text-xs text-[var(--theme-text-primary)] focus:border-[var(--theme-accent)] outline-none transition-all resize-none h-28 placeholder:text-[var(--theme-text-secondary)]/70 font-medium"
+                        className="w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-2xl p-3.5 text-xs text-[var(--theme-text-primary)] focus:border-[var(--theme-accent)] outline-none transition-all resize-none h-28 placeholder:text-[var(--theme-text-muted)] font-medium"
                         placeholder="Specify internal warehouse receiving directives or supplier delivery instructions..."
                         value={poNotes}
                         onChange={(e) => setPoNotes(e.target.value)}
@@ -54,21 +54,21 @@ export const POTotalsSummary: React.FC<POTotalsSummaryProps> = ({
 
                 <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-1.5">
-                        <label className="text-[10px] text-[var(--theme-text-secondary)] uppercase font-bold tracking-wider block">Payment Terms</label>
+                        <label className="text-[10px] text-[var(--theme-text-secondary)] uppercase font-semibold tracking-wider block ml-1">Payment Terms</label>
                         <input
                             type="text"
                             placeholder="e.g. Net 30, COD"
-                            className="w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 py-2.5 text-xs text-[var(--theme-text-primary)] focus:border-[var(--theme-accent)] outline-none font-bold placeholder:text-[var(--theme-text-secondary)]/70"
+                            className="w-full h-11 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-2xl px-3.5 text-xs text-[var(--theme-text-primary)] focus:border-[var(--theme-accent)] outline-none font-semibold placeholder:text-[var(--theme-text-muted)]"
                             value={paymentTerms}
                             onChange={(e) => setPaymentTerms(e.target.value)}
                         />
                     </div>
                     <div className="space-y-1.5">
-                        <label className="text-[10px] text-[var(--theme-text-secondary)] uppercase font-bold tracking-wider block">Incoterms</label>
+                        <label className="text-[10px] text-[var(--theme-text-secondary)] uppercase font-semibold tracking-wider block ml-1">Incoterms</label>
                         <input
                             type="text"
                             placeholder="e.g. EXW, FOB, CIF"
-                            className="w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 py-2.5 text-xs text-[var(--theme-text-primary)] focus:border-[var(--theme-accent)] outline-none font-bold placeholder:text-[var(--theme-text-secondary)]/70"
+                            className="w-full h-11 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-2xl px-3.5 text-xs text-[var(--theme-text-primary)] focus:border-[var(--theme-accent)] outline-none font-semibold placeholder:text-[var(--theme-text-muted)]"
                             value={incoterms}
                             onChange={(e) => setIncoterms(e.target.value)}
                         />
@@ -77,10 +77,12 @@ export const POTotalsSummary: React.FC<POTotalsSummaryProps> = ({
             </div>
 
             {/* Right: Financial Totals */}
-            <div className="bg-[var(--theme-bg-panel)] border border-[var(--theme-border)] rounded-2xl p-6 lg:p-7 shadow-sm space-y-4">
+            <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-3xl p-6 lg:p-7 shadow-sm space-y-4">
                 <div className="flex items-center gap-2 pb-3 border-b border-[var(--theme-border-subtle)]">
-                    <Calculator size={16} className="text-[var(--theme-accent)]" />
-                    <h3 className="text-xs font-black text-[var(--theme-text-primary)] uppercase tracking-wider">Financial Overview</h3>
+                    <div className="w-8 h-8 rounded-xl bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] border border-[var(--theme-accent)]/20 flex items-center justify-center shrink-0">
+                        <Calculator size={16} />
+                    </div>
+                    <h3 className="text-xs font-bold text-[var(--theme-text-primary)] uppercase tracking-wider">Financial Overview</h3>
                 </div>
 
                 {/* Subtotal */}

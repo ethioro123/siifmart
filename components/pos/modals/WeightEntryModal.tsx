@@ -32,7 +32,7 @@ export const WeightEntryModal: React.FC<WeightEntryModalProps> = ({ product, onC
                         </div>
                         <div className="min-w-0">
                             <h3 className="text-[var(--theme-text-primary)] text-sm font-bold leading-tight truncate">{product.name}</h3>
-                            <p className="text-[10px] text-[var(--theme-text-secondary)] truncate">
+                            <p className="text-xs text-[var(--theme-text-secondary)] font-medium truncate">
                                 {CURRENCY_SYMBOL} {formatPriceValue(effectivePrice)} per {unit.shortLabel}
                             </p>
                         </div>
@@ -44,7 +44,7 @@ export const WeightEntryModal: React.FC<WeightEntryModalProps> = ({ product, onC
 
                 {/* Input */}
                 <div className="p-5">
-                    <label className="text-[10px] text-[var(--theme-text-secondary)] font-bold uppercase tracking-wider block mb-2">
+                    <label className="text-xs text-[var(--theme-text-secondary)] font-bold uppercase tracking-wider block mb-2">
                         Enter {unit.label}
                     </label>
                     <div className="flex items-center gap-2">
@@ -72,7 +72,7 @@ export const WeightEntryModal: React.FC<WeightEntryModalProps> = ({ product, onC
                                     key={preset}
                                     type="button"
                                     onClick={() => setValue(preset.toString())}
-                                    className="py-1.5 lg:py-2 bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card-hover)] border border-[var(--theme-border)] rounded-xl text-[9px] lg:text-[10px] text-[var(--theme-text-primary)] font-bold transition-all active:scale-95 shadow-xs truncate whitespace-nowrap px-1 cursor-pointer"
+                                    className="py-1.5 lg:py-2 bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card-hover)] border border-[var(--theme-border)] rounded-xl text-xs text-[var(--theme-text-primary)] font-bold transition-all active:scale-95 shadow-xs truncate whitespace-nowrap px-1 cursor-pointer"
                                 >
                                     {preset} {unit.shortLabel}
                                 </button>
@@ -86,7 +86,7 @@ export const WeightEntryModal: React.FC<WeightEntryModalProps> = ({ product, onC
                                     key={preset}
                                     type="button"
                                     onClick={() => setValue(preset.toString())}
-                                    className="py-1.5 lg:py-2 bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card-hover)] border border-[var(--theme-border)] rounded-xl text-[9px] lg:text-[10px] text-[var(--theme-text-primary)] font-bold transition-all active:scale-95 shadow-xs truncate whitespace-nowrap px-1 cursor-pointer"
+                                    className="py-1.5 lg:py-2 bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card-hover)] border border-[var(--theme-border)] rounded-xl text-xs text-[var(--theme-text-primary)] font-bold transition-all active:scale-95 shadow-xs truncate whitespace-nowrap px-1 cursor-pointer"
                                 >
                                     {preset} {unit.shortLabel}
                                 </button>
@@ -97,7 +97,7 @@ export const WeightEntryModal: React.FC<WeightEntryModalProps> = ({ product, onC
                     {/* Line total preview */}
                     {numericValue > 0 && (
                         <div className="mt-4 p-3 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl flex justify-between items-center shadow-xs">
-                            <span className="text-[10px] text-[var(--theme-text-secondary)] font-bold uppercase tracking-wider">Line Total</span>
+                            <span className="text-xs text-[var(--theme-text-secondary)] font-bold uppercase tracking-wider">Line Total</span>
                             <span className="text-lg text-[var(--theme-primary)] font-bold tabular-nums font-mono">
                                 {CURRENCY_SYMBOL} {lineTotal.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                             </span>

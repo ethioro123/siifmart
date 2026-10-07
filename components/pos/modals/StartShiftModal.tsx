@@ -64,17 +64,17 @@ export const StartShiftModal: React.FC = () => {
                             </div>
                             <div>
                                 <p className="text-xs font-bold text-[var(--theme-text-primary)] leading-tight">{user?.name || 'Cashier'}</p>
-                                <p className="text-[10px] text-[var(--theme-text-secondary)] font-mono uppercase">{user?.role || 'Staff'}</p>
+                                <p className="text-xs text-[var(--theme-text-secondary)] font-mono uppercase font-semibold">{user?.role || 'Staff'}</p>
                             </div>
                         </div>
 
-                        <div className="flex items-center gap-1 text-[11px] font-bold text-[var(--theme-primary)] bg-[var(--theme-bg-card)] px-2.5 py-1 rounded-xl border border-[var(--theme-border)]">
+                        <div className="flex items-center gap-1 text-xs font-bold text-[var(--theme-primary)] bg-[var(--theme-bg-card)] px-2.5 py-1 rounded-xl border border-[var(--theme-border)]">
                             <Store size={13} />
                             <span>{activeSite?.name || 'POS Station'}</span>
                         </div>
                     </div>
 
-                    <div className="flex items-center gap-1.5 text-[10px] font-semibold text-[var(--theme-text-secondary)] pt-1 border-t border-[var(--theme-border)]">
+                    <div className="flex items-center gap-1.5 text-xs font-medium text-[var(--theme-text-secondary)] pt-1 border-t border-[var(--theme-border)]">
                         <Clock size={12} />
                         <span>Shift starting now ({new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })})</span>
                     </div>
@@ -127,7 +127,7 @@ export const StartShiftModal: React.FC = () => {
                 {/* Anti-Skimming Notice */}
                 <div className="p-3 bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-900/30 rounded-xl flex items-start gap-2.5">
                     <ShieldCheck size={18} className="text-blue-600 dark:text-blue-400 shrink-0 mt-0.5" />
-                    <p className="text-[11px] text-blue-900 dark:text-blue-300 leading-relaxed">
+                    <p className="text-xs text-blue-900 dark:text-blue-300 leading-relaxed font-medium">
                         This opening float will be credited to your cash drawer. At shift close, the system will verify your drawer cash against this starting float plus cash sales.
                     </p>
                 </div>

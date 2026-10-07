@@ -421,7 +421,7 @@ export const PurchaseOrdersList: React.FC<PurchaseOrdersListProps> = ({
             </div>
 
             {/* Pagination Controls */}
-            <div className="flex flex-col sm:flex-row items-center justify-between gap-4 px-6 py-4 border-t border-[var(--theme-border)] bg-[var(--theme-bg-subtle)]/20">
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-4 px-6 py-4 border-t border-[var(--theme-border)] bg-[var(--theme-bg-subtle)]">
                 <p className="text-xs text-[var(--theme-text-secondary)] font-mono">
                     Showing <span className="font-semibold text-[var(--theme-text-primary)] tabular-nums">{orders.length}</span> of <span className="font-semibold text-[var(--theme-text-primary)] tabular-nums">{totalCount}</span> Results
                 </p>

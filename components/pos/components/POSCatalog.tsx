@@ -95,13 +95,13 @@ export const POSCatalog: React.FC<POSCatalogProps> = ({
                                         
                                         let colorClasses = 'bg-[var(--theme-bg-card)] text-[var(--theme-text-secondary)] border border-[var(--theme-border)]';
                                         if (isOutOfStock) {
-                                            colorClasses = 'bg-rose-500/15 text-rose-500 border border-rose-500/20';
+                                            colorClasses = 'bg-rose-500/15 text-rose-500 border border-rose-500/30';
                                         } else if (isLowStock) {
-                                            colorClasses = 'bg-amber-500/15 text-amber-500 border border-amber-500/20';
+                                            colorClasses = 'bg-amber-500/15 text-amber-500 border border-amber-500/30';
                                         }
 
                                         return (
-                                            <div className={`absolute top-1.5 right-1.5 px-1.5 py-0.5 rounded-md text-[8px] font-bold tracking-wider shadow-xs flex items-center gap-0.5 ${colorClasses}`}>
+                                            <div className={`absolute top-1.5 right-1.5 px-2 py-0.5 rounded-lg text-[10px] font-bold tracking-wider shadow-xs flex items-center gap-0.5 ${colorClasses}`}>
                                                 {isOutOfStock ? (
                                                     <span>{t('common.outOfStock')}</span>
                                                 ) : (
@@ -134,10 +134,10 @@ export const POSCatalog: React.FC<POSCatalogProps> = ({
                                                                 native.haptic();
                                                             }
                                                         }}
-                                                        className="absolute top-1.5 left-1.5 bg-blue-600 hover:bg-blue-700 text-white px-1.5 py-0.5 rounded-md text-[7px] font-bold uppercase tracking-wider shadow-xs flex items-center gap-1 z-10 transition-colors cursor-pointer active:scale-95"
+                                                        className="absolute top-1.5 left-1.5 bg-blue-600 hover:bg-blue-700 text-white px-2 py-0.5 rounded-lg text-[10px] font-bold uppercase tracking-wider shadow-xs flex items-center gap-1 z-10 transition-colors cursor-pointer active:scale-95"
                                                         title="Price updated recently - tap to confirm"
                                                     >
-                                                        <span className="w-1 h-1 rounded-full bg-white animate-pulse" />
+                                                        <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
                                                         Changed
                                                     </span>
                                                 );
@@ -145,7 +145,7 @@ export const POSCatalog: React.FC<POSCatalogProps> = ({
                                         }
                                         if (product.isOnSale) {
                                             return (
-                                                <div className="absolute top-1.5 left-1.5 bg-rose-500 px-1.5 py-0.5 rounded-md text-[7px] font-bold text-white uppercase tracking-wider shadow-xs">
+                                                <div className="absolute top-1.5 left-1.5 bg-rose-500 px-2 py-0.5 rounded-lg text-[10px] font-bold text-white uppercase tracking-wider shadow-xs">
                                                     {t('pos.sale')}
                                                 </div>
                                             );
@@ -155,11 +155,11 @@ export const POSCatalog: React.FC<POSCatalogProps> = ({
                                 </div>
 
                                 <div className="flex-1 flex flex-col min-w-0">
-                                    <h3 className="font-bold text-[var(--theme-text-primary)] text-xs line-clamp-2 min-h-[1.75rem] leading-tight mb-1 group-hover:text-[var(--theme-accent)] transition-colors">{product.name}</h3>
+                                    <h3 className="font-bold text-[var(--theme-text-primary)] text-xs sm:text-sm line-clamp-2 min-h-[1.75rem] leading-snug mb-1 group-hover:text-[var(--theme-accent)] transition-colors">{product.name}</h3>
                                     {(() => {
                                         const badge = formatPackBadge(product);
                                         return badge ? (
-                                            <span className="inline-block mb-1 px-1 py-0.2 rounded bg-[var(--theme-pill-bg)] border border-[var(--theme-border)] text-[var(--theme-text-secondary)] text-[7px] font-bold uppercase tracking-wider max-w-fit">
+                                            <span className="inline-block mb-1 px-1.5 py-0.5 rounded-md bg-[var(--theme-pill-bg)] border border-[var(--theme-border)] text-[var(--theme-text-secondary)] text-[10px] font-bold uppercase tracking-wider max-w-fit">
                                                 {badge}
                                             </span>
                                         ) : null;
@@ -189,10 +189,10 @@ export const POSCatalog: React.FC<POSCatalogProps> = ({
                                                                         native.haptic();
                                                                     }
                                                                 }}
-                                                                className="inline-flex items-center gap-0.5 text-[7px] font-black text-blue-600 dark:text-blue-400 hover:underline uppercase mb-0.5 tracking-wider cursor-pointer"
+                                                                className="inline-flex items-center gap-1 text-[10px] font-black text-blue-600 dark:text-blue-400 hover:underline uppercase mb-0.5 tracking-wider cursor-pointer"
                                                                 title="Price updated recently - tap to confirm"
                                                             >
-                                                                <span className="w-1 h-1 rounded-full bg-blue-500 animate-pulse" />
+                                                                <span className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" />
                                                                 Updated
                                                             </span>
                                                         );
@@ -203,17 +203,17 @@ export const POSCatalog: React.FC<POSCatalogProps> = ({
                                             <div className="flex items-baseline gap-1 flex-wrap">
                                                 {product.isOnSale && product.salePrice ? (
                                                     <>
-                                                        <p className="text-rose-500 font-bold text-xs sm:text-sm tracking-tight">{CURRENCY_SYMBOL} {formatPriceValue(product.salePrice)}{product.unit && getSellUnit(product.unit).code !== 'UNIT' ? <span className="text-[7px] text-rose-500/70 font-bold">/{getSellUnit(product.unit).shortLabel}</span> : null}</p>
-                                                        <p className="text-[var(--theme-text-muted)] text-[9px] line-through">{CURRENCY_SYMBOL} {formatPriceValue(product.price)}</p>
+                                                        <p className="text-rose-500 font-bold text-xs sm:text-sm font-mono tabular-nums tracking-tight">{CURRENCY_SYMBOL} {formatPriceValue(product.salePrice)}{product.unit && getSellUnit(product.unit).code !== 'UNIT' ? <span className="text-xs text-rose-500 font-bold ml-0.5">/{getSellUnit(product.unit).shortLabel}</span> : null}</p>
+                                                        <p className="text-[var(--theme-text-secondary)] text-xs line-through font-mono tabular-nums font-semibold">{CURRENCY_SYMBOL} {formatPriceValue(product.price)}</p>
                                                     </>
                                                 ) : (
-                                                    <p className="text-[var(--theme-text-primary)] font-bold text-xs sm:text-sm tracking-tight">{CURRENCY_SYMBOL} {formatPriceValue(product.price)}{product.unit && getSellUnit(product.unit).code !== 'UNIT' ? <span className="text-[7px] text-[var(--theme-text-secondary)] font-bold">/{getSellUnit(product.unit).shortLabel}</span> : null}</p>
+                                                    <p className="text-[var(--theme-text-primary)] font-bold text-xs sm:text-sm font-mono tabular-nums tracking-tight">{CURRENCY_SYMBOL} {formatPriceValue(product.price)}{product.unit && getSellUnit(product.unit).code !== 'UNIT' ? <span className="text-xs text-[var(--theme-text-secondary)] font-bold ml-0.5">/{getSellUnit(product.unit).shortLabel}</span> : null}</p>
                                                 )}
                                             </div>
                                         </div>
                                         <div className={`w-7 h-7 rounded-lg flex items-center justify-center transition-transform group-hover:scale-105 shrink-0 ${inCartItem ? 'bg-[var(--theme-primary)] text-[var(--theme-primary-text)]' : 'bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] border border-[var(--theme-border)] group-hover:bg-[var(--theme-bg-card-hover)] group-hover:text-[var(--theme-text-primary)]'}`}>
                                             {inCartItem ? (
-                                                <span className="text-[11px] font-bold">{inCartItem.quantity}</span>
+                                                <span className="text-xs font-bold">{inCartItem.quantity}</span>
                                             ) : (
                                                 <Plus size={13} />
                                             )}

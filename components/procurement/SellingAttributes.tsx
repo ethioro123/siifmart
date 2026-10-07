@@ -112,6 +112,9 @@ export interface SellingAttributesProps {
     customAttributes: any;
     setCustomAttributes: React.Dispatch<React.SetStateAction<any>>;
 
+    /* Sovereign Currency */
+    currencySymbol?: string;
+
     /* Errors */
     errors: Record<string, string>;
     setErrors: React.Dispatch<React.SetStateAction<Record<string, string>>>;
@@ -124,6 +127,7 @@ export const SellingAttributes: React.FC<SellingAttributesProps> = ({
     currentRetailPrice, setCurrentRetailPrice,
     currentCost, customItemSize, sizeType,
     customAttributes, setCustomAttributes,
+    currencySymbol = 'ETB',
     errors, setErrors,
 }) => {
     const unitDef = getSellUnit(customItemUnit);
@@ -264,7 +268,7 @@ export const SellingAttributes: React.FC<SellingAttributesProps> = ({
                         {costPerSellUnit !== null && (
                             <div className="rounded-xl px-3 py-1 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)]">
                                 <span className="text-[10px] text-[var(--theme-text-secondary)] uppercase font-semibold tracking-tight">Cost/{unitDef.shortLabel}: </span>
-                                <span className="text-[11px] text-[var(--theme-text-primary)] font-mono font-bold tabular-nums">{costPerSellUnit.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                                <span className="text-[11px] text-[var(--theme-text-primary)] font-mono font-bold tabular-nums">{currencySymbol} {costPerSellUnit.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                             </div>
                         )}
 
@@ -298,7 +302,7 @@ export const SellingAttributes: React.FC<SellingAttributesProps> = ({
                         </div>
                         {currentRetailPrice > 0 && costPerSellUnit && costPerSellUnit > 0 && (
                             <span className="text-[10px] text-emerald-600 dark:text-emerald-400 block text-center font-mono font-semibold">
-                                Margin Gross: {(currentRetailPrice - costPerSellUnit).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}/{unitDef.shortLabel}
+                                Margin Gross: {currencySymbol} {(currentRetailPrice - costPerSellUnit).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}/{unitDef.shortLabel}
                             </span>
                         )}
                         {errors.retail && <span className="text-[9px] text-rose-500 ml-1 font-semibold">{errors.retail}</span>}

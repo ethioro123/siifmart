@@ -32,7 +32,7 @@ export const POSOfflineBanner: React.FC = () => {
                 )}
 
                 <div className="flex items-center gap-2">
-                    <span className="font-bold uppercase tracking-wider text-[10px] px-1.5 py-0.5 rounded bg-black/10 dark:bg-white/10">
+                    <span className="font-bold uppercase tracking-wider text-xs px-2 py-0.5 rounded-md bg-black/10 dark:bg-white/10">
                         {posSyncStatus === 'syncing' ? 'Sync in progress' : isOffline ? 'Offline Terminal' : 'Ready to Sync'}
                     </span>
                     <span>
@@ -47,7 +47,7 @@ export const POSOfflineBanner: React.FC = () => {
 
             <div className="flex items-center gap-3">
                 {hasPending && (
-                    <span className="text-[11px] font-mono bg-black/10 dark:bg-white/10 px-2 py-0.5 rounded-full font-bold">
+                    <span className="text-xs font-mono bg-black/10 dark:bg-white/10 px-2.5 py-0.5 rounded-full font-bold">
                         {posPendingSyncCount} Queued
                     </span>
                 )}
@@ -55,9 +55,9 @@ export const POSOfflineBanner: React.FC = () => {
                     <button
                         onClick={() => triggerSync && triggerSync()}
                         disabled={posSyncStatus === 'syncing'}
-                        className="px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white text-[11px] font-bold shadow-sm transition flex items-center gap-1.5 disabled:opacity-50"
+                        className="px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white text-xs font-bold shadow-xs transition flex items-center gap-1.5 disabled:opacity-50 cursor-pointer"
                     >
-                        <RefreshCw size={12} className={posSyncStatus === 'syncing' ? 'animate-spin' : ''} />
+                        <RefreshCw size={13} className={posSyncStatus === 'syncing' ? 'animate-spin' : ''} />
                         Sync Now
                     </button>
                 )}

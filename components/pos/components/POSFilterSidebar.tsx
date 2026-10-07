@@ -73,7 +73,7 @@ export const POSFilterSidebar: React.FC<POSFilterSidebarProps> = ({
                         <Filter className="w-4 h-4 text-[var(--theme-text-primary)]" />
                         <h2 className="text-base font-bold text-[var(--theme-text-primary)]">Filters & Sort</h2>
                         {activeFiltersCount > 0 && (
-                            <span className="bg-[var(--theme-primary)] text-[var(--theme-primary-text)] text-[10px] font-bold px-2 py-0.5 rounded-full">
+                            <span className="bg-[var(--theme-primary)] text-[var(--theme-primary-text)] text-xs font-bold px-2 py-0.5 rounded-full">
                                 {activeFiltersCount}
                             </span>
                         )}
@@ -97,7 +97,7 @@ export const POSFilterSidebar: React.FC<POSFilterSidebarProps> = ({
                             {selectedDepartment !== 'All' && (
                                 <button
                                     onClick={() => setSelectedDepartment('All')}
-                                    className="text-[10px] font-bold text-[var(--theme-primary)] hover:underline cursor-pointer"
+                                    className="text-xs font-bold text-[var(--theme-primary)] hover:underline cursor-pointer"
                                 >
                                     Reset to All
                                 </button>
@@ -127,7 +127,7 @@ export const POSFilterSidebar: React.FC<POSFilterSidebarProps> = ({
                                 {selectedCategory !== 'All' && (
                                     <button
                                         onClick={() => setSelectedCategory('All')}
-                                        className="text-[10px] font-bold text-[var(--theme-primary)] hover:underline cursor-pointer"
+                                        className="text-xs font-bold text-[var(--theme-primary)] hover:underline cursor-pointer"
                                     >
                                         Reset to All
                                     </button>

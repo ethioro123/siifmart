@@ -110,7 +110,7 @@ export const ReturnModal: React.FC = () => {
                         </div>
 
                         <div className="bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-2xl p-4 text-center">
-                            <span className="text-[10px] font-mono text-[var(--theme-text-secondary)] uppercase tracking-widest block mb-1">Receipt Reference</span>
+                            <span className="text-xs font-bold text-[var(--theme-text-secondary)] uppercase tracking-wider block mb-1">Receipt Reference</span>
                             <span className="text-sm font-black text-[var(--theme-text-primary)] font-mono block truncate">
                                 {foundSaleForReturn?.receiptNumber || `TX-${foundSaleForReturn?.id}`}
                             </span>
@@ -267,7 +267,7 @@ export const ReturnModal: React.FC = () => {
                         <div className="bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl p-4 space-y-4">
                             {/* Refund Tender Method Selector */}
                             <div className="space-y-2">
-                                <label className="text-[10px] text-[var(--theme-text-secondary)] uppercase font-black tracking-widest block">
+                                <label className="text-xs text-[var(--theme-text-secondary)] uppercase font-bold tracking-wider block">
                                     Select Refund Tender (Zero-Trust Policy)
                                 </label>
                                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
@@ -332,7 +332,7 @@ export const ReturnModal: React.FC = () => {
                             {/* Customer Phone Input for Digital / Store Credit */}
                             {refundMethod !== 'CASH' && (
                                 <div className="space-y-1">
-                                    <label className="text-[10px] text-[var(--theme-text-secondary)] uppercase font-black tracking-widest block">
+                                    <label className="text-xs text-[var(--theme-text-secondary)] uppercase font-bold tracking-wider block">
                                         Customer Mobile Number (For Credit / Digital Reversal)
                                     </label>
                                     <input

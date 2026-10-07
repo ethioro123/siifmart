@@ -157,7 +157,7 @@ export const POSCartPanel: React.FC = () => {
                                                     }}
                                                     className="w-12 bg-transparent text-[var(--theme-text-primary)] font-bold text-xs text-center outline-none tabular-nums"
                                                 />
-                                                <span className="text-[10px] text-[var(--theme-text-secondary)] font-bold uppercase">{unit.shortLabel}</span>
+                                                <span className="text-xs text-[var(--theme-text-secondary)] font-bold uppercase">{unit.shortLabel}</span>
                                             </div>
                                         ) : (
                                             <div className="flex items-center bg-[var(--theme-bg-card)] rounded-lg p-0.5 border border-[var(--theme-border)]">
@@ -241,21 +241,21 @@ export const POSCartPanel: React.FC = () => {
                                         <Protected permission="APPLY_DISCOUNT">
                                             <button
                                                 onClick={() => setIsDiscountModalOpen(true)}
-                                                className="text-[9px] bg-[var(--theme-bg-card)] border border-[var(--theme-border)] px-1.5 py-0.5 rounded font-bold text-[var(--theme-text-primary)] cursor-pointer"
+                                                className="text-xs bg-[var(--theme-bg-card)] border border-[var(--theme-border)] px-2.5 py-1 rounded-lg font-bold text-[var(--theme-text-primary)] cursor-pointer"
                                             >
-                                                <Tag size={8} className="inline mr-0.5" />
+                                                <Tag size={12} className="inline mr-1" />
                                                 {appliedDiscountCodeDetails ? appliedDiscountCodeDetails.code : 'Apply Code'}
                                             </button>
                                         </Protected>
                                     </div>
-                                    <span className={cartDiscount > 0 ? "text-[var(--theme-text-primary)] font-bold tabular-nums" : "tabular-nums"}>
+                                    <span className={cartDiscount > 0 ? "text-[var(--theme-text-primary)] font-bold font-mono tabular-nums" : "font-mono tabular-nums"}>
                                         {cartDiscount > 0 ? `- ${CURRENCY_SYMBOL} ${cartDiscount.toLocaleString()}` : `${CURRENCY_SYMBOL} 0`}
                                     </span>
                                 </div>
 
                                 <div className="flex justify-between items-center text-[var(--theme-text-secondary)]">
                                     <span>Tax ({taxBreakdown.map(t => t.name).join(', ') || 'Standard'})</span>
-                                    <span className="tabular-nums font-medium">{CURRENCY_SYMBOL} {tax.toFixed(2)}</span>
+                                    <span className="font-mono tabular-nums font-semibold text-[var(--theme-text-primary)]">{CURRENCY_SYMBOL} {tax.toFixed(2)}</span>
                                 </div>
 
                                 <div className="flex justify-between items-center text-[var(--theme-text-secondary)]">
@@ -269,7 +269,7 @@ export const POSCartPanel: React.FC = () => {
                                             <div className={`w-2.5 h-2.5 bg-[var(--theme-primary-text)] rounded-full absolute top-0.5 transition-all shadow-xs ${isRoundingEnabled ? 'left-3' : 'left-0.5'}`} />
                                         </button>
                                     </div>
-                                    <span className="tabular-nums font-medium">+{CURRENCY_SYMBOL} {roundingAdjustment.toFixed(2)}</span>
+                                    <span className="font-mono tabular-nums font-semibold text-[var(--theme-text-primary)]">+{CURRENCY_SYMBOL} {roundingAdjustment.toFixed(2)}</span>
                                 </div>
                             </div>
                         )}
@@ -372,12 +372,12 @@ export const POSCartPanel: React.FC = () => {
                         className="w-full bg-[var(--theme-primary)] text-[var(--theme-primary-text)] p-3.5 rounded-xl shadow-lg border border-transparent flex items-center justify-between font-bold active:scale-95 transition-all cursor-pointer"
                     >
                         <div className="flex items-center gap-2.5">
-                            <div className="bg-[var(--theme-pill-bg)] border border-[var(--theme-border)] px-2 py-0.5 rounded-lg text-xs font-bold">
+                            <div className="bg-black/15 dark:bg-black/20 border border-black/10 dark:border-black/25 text-inherit px-2 py-0.5 rounded-lg text-xs font-bold">
                                 {totalItemCount} {totalItemCount === 1 ? 'item' : 'items'}
                             </div>
                             <span className="text-xs font-bold uppercase tracking-wider">View Cart</span>
                         </div>
-                        <div className="flex items-center gap-2 text-sm font-bold font-mono">
+                        <div className="flex items-center gap-2 text-sm font-bold font-mono tabular-nums">
                             <span>{CURRENCY_SYMBOL} {total.toLocaleString()}</span>
                             <ArrowRight size={16} />
                         </div>

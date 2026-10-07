@@ -319,7 +319,7 @@ export const ViewPOModal: React.FC<ViewPOModalProps> = ({ isOpen, onClose, po, o
                                                 </td>
                                             </tr>
                                             {expandedItems[i] && item.customAttributes && (
-                                                <tr className="bg-[var(--theme-bg-subtle)]/40">
+                                                <tr className="bg-[var(--theme-bg-subtle)]">
                                                     <td colSpan={8} className="p-4 pl-12">
                                                         <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-xs text-[var(--theme-text-secondary)]">
                                                             {Object.entries(item.customAttributes).map(([category, attrs]) => (

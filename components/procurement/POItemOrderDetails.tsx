@@ -77,7 +77,7 @@ export const POItemOrderDetails: React.FC<POItemOrderDetailsProps> = ({
                         />
                         {showConversion && (
                             <span className="text-[10px] text-[var(--theme-text-secondary)] block text-center font-mono font-medium">
-                                = {totalUnits.toLocaleString()} sellable {sellUnit}s
+                                = {totalUnits.toLocaleString()} sellable {sellUnit === 'ea' ? 'units' : `${sellUnit}s`}
                             </span>
                         )}
                         {errors.qty && <span className="text-[9px] text-rose-500 block text-center font-semibold">{errors.qty}</span>}

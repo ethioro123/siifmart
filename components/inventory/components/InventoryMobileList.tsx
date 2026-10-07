@@ -8,6 +8,7 @@ import { getSellUnit, formatStockDisplay, formatProductSize, formatPackagingDesc
 import { useStore } from '../../../contexts/CentralStore';
 import { canViewCostPrice } from '../../../utils/roles';
 import { Protected } from '../../Protected';
+import { formatProductDisplayName } from '../../procurement/utils';
 
 interface InventoryMobileListProps {
     products: Product[];
@@ -88,7 +89,7 @@ export const InventoryMobileList: React.FC<InventoryMobileListProps> = ({
                             </div>
                             <div className="flex-1 min-w-0">
                                 <p className="text-xs font-semibold text-[var(--theme-text-primary)] truncate uppercase">
-                                    {product.name}
+                                    {formatProductDisplayName(product) || product.name}
                                 </p>
                                 <div className="flex flex-wrap items-center gap-1 mt-1">
                                     <span className="text-[8px] font-bold font-mono text-[var(--theme-text-primary)] bg-[var(--theme-pill-bg)] border border-[var(--theme-pill-border)] px-1.5 py-0.5 rounded">

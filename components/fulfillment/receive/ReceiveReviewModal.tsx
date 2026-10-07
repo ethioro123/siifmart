@@ -3,7 +3,7 @@ import { X, CheckCircle, AlertTriangle, FileText, Loader2 } from 'lucide-react';
 import { PurchaseOrder, WMSJob } from '../../../types';
 import { useFulfillment } from '../../fulfillment/FulfillmentContext';
 import { convertToSellableUnits } from '../useReceiving';
-import { formatPackBadge } from '../../procurement/utils';
+import { formatPackBadge, formatPOItemDescription } from '../../procurement/utils';
 
 interface ReceiveReviewModalProps {
     po: PurchaseOrder;
@@ -145,7 +145,7 @@ export const ReceiveReviewModal: React.FC<ReceiveReviewModalProps> = ({
                                 {stats.details.map((item, idx) => (
                                     <tr key={idx} className="hover:bg-slate-50 dark:hover:bg-white/5 transition-colors">
                                         <td className="p-2.5 md:p-4">
-                                            <p className="text-slate-900 dark:text-white font-black uppercase tracking-tight truncate max-w-[120px] md:max-w-[180px] text-[10px] md:text-xs">{item.productName}</p>
+                                            <p className="text-slate-900 dark:text-white font-black uppercase tracking-tight truncate max-w-[120px] md:max-w-[180px] text-[10px] md:text-xs">{formatPOItemDescription(item) || item.productName}</p>
                                             {(() => {
                                                 const badge = formatPackBadge(item);
                                                 return badge ? (

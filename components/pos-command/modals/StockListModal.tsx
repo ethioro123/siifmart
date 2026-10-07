@@ -9,6 +9,7 @@ import { formatPriceValue } from '../../../utils/formatting';
 import { ProductDetailsModal } from '../../inventory/ProductDetailsModal';
 import LabelPrintModal from '../../LabelPrintModal';
 import { getSellUnit, formatProductSize, formatStockDisplay } from '../../../utils/units';
+import { formatProductDisplayName } from '../../procurement/utils';
 import {
     Printer, TrendingUp, Package, CheckCheck,
     AlertTriangle, AlertCircle, Sparkles, X, Search, Tag, Scale
@@ -183,12 +184,14 @@ export const StockListModal: React.FC = () => {
                                             <div className="flex items-start gap-2">
                                                 <div className="flex-1 min-w-0">
                                                     <div className="flex items-center gap-2">
-                                                        <p className="font-semibold text-[var(--theme-text-primary)] truncate">{product.name}</p>
+                                                        <p className="font-semibold text-[var(--theme-text-primary)] truncate">{formatProductDisplayName(product) || product.name}</p>
                                                         {flags.isUnseen && <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-bold bg-amber-500/10 text-amber-500 border border-amber-500/20 uppercase shrink-0"><span className="w-1.5 h-1.5 rounded-full bg-amber-500" />Updated</span>}
                                                     </div>
                                                     <div className="flex flex-wrap items-center gap-1.5 mt-1">
                                                         <span className="text-xs text-[var(--theme-text-secondary)] font-mono font-bold">{product.sku}</span>
-                                                        {product.brand && <span className="text-[9px] font-bold text-[var(--theme-text-secondary)] bg-[var(--theme-bg-subtle)] px-1.5 py-0.5 rounded border border-[var(--theme-border)] uppercase">{product.brand}</span>}
+                                                        {product.brand && !formatProductDisplayName(product).toLowerCase().startsWith(product.brand.toLowerCase()) && (
+                                                            <span className="text-[9px] font-bold text-[var(--theme-text-secondary)] bg-[var(--theme-bg-subtle)] px-1.5 py-0.5 rounded border border-[var(--theme-border)] uppercase">{product.brand}</span>
+                                                        )}
                                                         {formatProductSize(product) && <span className="text-[9px] font-bold text-amber-500 bg-amber-500/10 px-1.5 py-0.5 rounded border border-amber-500/30 font-mono">{formatProductSize(product)}</span>}
                                                     </div>
                                                 </div>

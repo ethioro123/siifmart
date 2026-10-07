@@ -38,12 +38,12 @@ export const PrintReceiptModal: React.FC = () => {
 
                 <div className="w-full space-y-3 mb-6 px-6">
                     <div className="flex justify-between items-center py-3 border-b border-[var(--theme-border)]">
-                        <span className="text-xs font-semibold text-[var(--theme-text-muted)] uppercase tracking-wider">{t('pos.totalPaid')}</span>
+                        <span className="text-xs font-bold text-[var(--theme-text-secondary)] uppercase tracking-wider">{t('pos.totalPaid')}</span>
                         <span className="text-xl font-bold text-[var(--theme-primary)] tabular-nums font-mono">{CURRENCY_SYMBOL} {(lastSale?.total || 0).toLocaleString()}</span>
                     </div>
                     {lastSale && lastSale.method === 'Cash' && (
                         <div className="flex justify-between items-center py-3 border-b border-[var(--theme-border)]">
-                            <span className="text-xs font-semibold text-[var(--theme-text-muted)] uppercase tracking-wider">{t('pos.changeDue')}</span>
+                            <span className="text-xs font-bold text-[var(--theme-text-secondary)] uppercase tracking-wider">{t('pos.changeDue')}</span>
                             <span className="text-xl font-bold text-[var(--theme-text-primary)] tabular-nums font-mono">{CURRENCY_SYMBOL} {lastSale.change?.toLocaleString()}</span>
                         </div>
                     )}

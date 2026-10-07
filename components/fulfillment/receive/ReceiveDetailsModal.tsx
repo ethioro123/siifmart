@@ -8,6 +8,7 @@ import { getSellUnit } from '../../../utils/units';
 import { parseBatchNumber, getBatchExpiryStatus } from '../../../utils/batchNumber';
 import { useData } from '../../../contexts/DataContext';
 import { resolveReceivingPolicy } from '../../../utils/receivingPolicy';
+import { formatPOItemDescription, formatPackBadge } from '../../procurement/utils';
 
 interface ReceiveDetailsModalProps {
     selectedItem: WMSJob | PurchaseOrder;
@@ -178,7 +179,15 @@ export const ReceiveDetailsModal: React.FC<ReceiveDetailsModalProps> = ({
                                         {String(idx + 1).padStart(2, '0')}
                                     </div>
                                     <div className="flex-1 min-w-0">
-                                        <p className="text-slate-900 dark:text-white font-black uppercase tracking-tight text-xs md:text-sm truncate">{item.name || item.productName || 'Unknown Item'}</p>
+                                        <p className="text-slate-900 dark:text-white font-black uppercase tracking-tight text-xs md:text-sm truncate">{formatPOItemDescription(item) || item.name || item.productName || 'Unknown Item'}</p>
+                                        {(() => {
+                                            const badge = formatPackBadge(item);
+                                            return badge ? (
+                                                <span className="inline-block mt-1 px-1.5 py-0.5 rounded bg-amber-500/10 border border-amber-500/20 text-amber-700 dark:text-amber-400 text-[9px] font-black uppercase tracking-widest">
+                                                    {badge}
+                                                </span>
+                                            ) : null;
+                                        })()}
                                         <div className="flex flex-wrap items-center gap-3 mt-1.5">
                                             <span className="text-[9px] text-[#2C5E3B] dark:text-[#A9CBA2] font-black font-mono tracking-widest bg-[#2C5E3B]/10 dark:bg-[#A9CBA2]/10 px-1.5 py-0.5 rounded uppercase border border-[#2C5E3B]/20 dark:border-[#A9CBA2]/20">
                                                 {item.sku}

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Tag, ChevronDown, Lock } from 'lucide-react';
-import { PRODUCT_CATEGORIES, PACKAGE_TYPES, STORAGE_CONDITIONS } from './utils';
+import { PRODUCT_CATEGORIES, PACKAGE_TYPES, STORAGE_CONDITIONS, isConsumableCategory } from './utils';
 
 /* ─────────────── SIZE TYPES (Package Label) ──────────── */
 
@@ -153,7 +153,9 @@ export const BuyingAttributes: React.FC<BuyingAttributesProps> = ({
                 {/* ── Size & Packaging ──────────────────────── */}
                 <div className="grid grid-cols-6 gap-3.5 pt-3 border-t border-[var(--theme-border-subtle)]">
                     <div className="col-span-2 space-y-1">
-                        <label className="text-[10px] text-[var(--theme-text-secondary)] uppercase font-semibold ml-1 block">Size <span className="text-rose-500">*</span></label>
+                        <label className="text-[10px] text-[var(--theme-text-secondary)] uppercase font-semibold ml-1 block">
+                            Size {isConsumableCategory(selectedMainCategory) ? <span className="text-rose-500">*</span> : <span className="text-[9px] text-[var(--theme-text-secondary)] font-normal normal-case">(optional)</span>}
+                        </label>
                         <div className="flex gap-1">
                             <input
                                 type="number"
@@ -245,17 +247,40 @@ export const BuyingAttributes: React.FC<BuyingAttributesProps> = ({
                             />
                         </div>
                         <div className="col-span-3 space-y-1">
-                            <label className="text-[10px] text-[var(--theme-text-secondary)] uppercase font-semibold ml-1 block">
-                                Case Size <span className="text-[9px] text-[var(--theme-text-secondary)] normal-case font-medium">(packs per case)</span>
-                            </label>
-                            <input
-                                type="number"
-                                min="1"
-                                className="w-full h-10 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3 text-xs text-[var(--theme-text-primary)] font-mono font-bold focus:border-[var(--theme-accent)] outline-none transition-all placeholder:text-[var(--theme-text-secondary)]/70"
-                                placeholder="e.g. 24"
-                                value={customAttributes.packaging.caseSize || ''}
-                                onChange={e => setCustomAttributes((p: any) => ({ ...p, packaging: { ...p.packaging, caseSize: e.target.value } }))}
-                            />
+                            {Boolean(customAttributes.packaging.caseSize && parseInt(customAttributes.packaging.caseSize) > 0) ? (
+                                <>
+                                    <div className="flex items-center justify-between">
+                                        <label className="text-[10px] text-[var(--theme-text-secondary)] uppercase font-semibold ml-1 block">
+                                            Case Size <span className="text-[9px] text-[var(--theme-text-secondary)] normal-case font-medium">(packs per master case)</span>
+                                        </label>
+                                        <button
+                                            type="button"
+                                            onClick={() => setCustomAttributes((p: any) => ({ ...p, packaging: { ...p.packaging, caseSize: '' } }))}
+                                            className="text-[9px] text-[var(--theme-accent)] hover:underline cursor-pointer"
+                                        >
+                                            Single-tier
+                                        </button>
+                                    </div>
+                                    <input
+                                        type="number"
+                                        min="1"
+                                        className="w-full h-10 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3 text-xs text-[var(--theme-text-primary)] font-mono font-bold focus:border-[var(--theme-accent)] outline-none transition-all placeholder:text-[var(--theme-text-secondary)]/70"
+                                        placeholder="e.g. 24"
+                                        value={customAttributes.packaging.caseSize || ''}
+                                        onChange={e => setCustomAttributes((p: any) => ({ ...p, packaging: { ...p.packaging, caseSize: e.target.value } }))}
+                                    />
+                                </>
+                            ) : (
+                                <div className="h-full flex items-center pt-5">
+                                    <button
+                                        type="button"
+                                        onClick={() => setCustomAttributes((p: any) => ({ ...p, packaging: { ...p.packaging, caseSize: '12' } }))}
+                                        className="text-xs text-[var(--theme-accent)] hover:underline font-semibold cursor-pointer inline-flex items-center gap-1"
+                                    >
+                                        + Add 2-Tier Master Case (Packs per Case)
+                                    </button>
+                                </div>
+                            )}
                         </div>
                     </div>
                 )}

@@ -121,3 +121,67 @@ export const PRODUCT_CATEGORIES = {
         "Toys & Recreation"
     ]
 };
+
+/**
+ * Returns true if the product category represents consumables (food, beverages, pantry items, produce)
+ * where physical size/weight (e.g. 500g, 1L, 2kg) is essential to distinguish the SKU and pricing.
+ */
+export const isConsumableCategory = (category?: string): boolean => {
+    if (!category) return false;
+    const cat = category.toLowerCase();
+    const consumableKeywords = [
+        'fresh food & deli',
+        'pantry & groceries',
+        'pantry & dry goods',
+        'frozen food',
+        'baby & toddler',
+        'fruit & vegetables',
+        'fresh produce',
+        'dairy, eggs & fridge',
+        'dairy & eggs',
+        'meat & poultry',
+        'drinks & beverages',
+        'beverages',
+        'seafood',
+        'bakery & bread',
+        'deli & prepared meals',
+        'snacks & confectionery',
+        'baking & dessert needs',
+        'grains, pasta & rice',
+        'sauces, oils & condiments',
+        'canned food & soups',
+        'breakfast & cereals',
+        'tea, coffee & cocoa',
+        'baby food & formula'
+    ];
+    return consumableKeywords.some(keyword => cat.includes(keyword));
+};
+
+/**
+ * Returns true if the product category represents discrete general merchandise
+ * (electronics, appliances, apparel, stationery, hardware, automotive, books)
+ * where physical net weight (e.g. 217g) is a technical spec rather than part of the product name.
+ */
+export const isDiscreteGeneralMerch = (category?: string): boolean => {
+    if (!category) return false;
+    const cat = category.toLowerCase();
+    const discreteKeywords = [
+        'general merchandise & apparel',
+        'stationery, office & books',
+        'stationery & office',
+        'electronics & batteries',
+        'electronics',
+        'homewares, kitchen & dining',
+        'clothing & accessories',
+        'clothing',
+        'apparel & accessories',
+        'toys & recreation',
+        'toys & games',
+        'books & media',
+        'industrial',
+        'automotive',
+        'hardware',
+        'appliances'
+    ];
+    return discreteKeywords.some(keyword => cat.includes(keyword));
+};

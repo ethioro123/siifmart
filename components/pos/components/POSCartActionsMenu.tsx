@@ -70,7 +70,7 @@ export const POSCartActionsMenu: React.FC<POSCartActionsMenuProps> = ({
                         <span>Price Updates</span>
                     </div>
                     {unseenPriceUpdatesCount > 0 && (
-                        <span className="px-1.5 py-0.2 bg-blue-500 text-white text-[9px] font-bold rounded-full">
+                        <span className="px-2 py-0.5 bg-blue-500 text-white text-xs font-bold rounded-full">
                             {unseenPriceUpdatesCount}
                         </span>
                     )}

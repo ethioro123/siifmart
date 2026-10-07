@@ -74,6 +74,16 @@
   --theme-border-subtle: rgba(255, 255, 255, 0.04);
   --theme-border-focus: #0071E3;
   --theme-border-mocha: rgba(255, 255, 255, 0.12);
+  --theme-border-strong: rgba(255, 255, 255, 0.22);
+
+  /* Form Inputs & Controls (Dark Mode) */
+  --theme-input-bg: rgba(255, 255, 255, 0.05);
+  --theme-input-border: rgba(255, 255, 255, 0.12);
+  --theme-input-text: #F5F5F7;
+  --theme-bg-panel-hover: #1D1D1F;
+  --theme-thead-bg: rgba(255, 255, 255, 0.04);
+  --theme-thead-text: #86868B;
+  --theme-table-row-hover: rgba(255, 255, 255, 0.04);
 
   /* Apple Signature High-Contrast Typography */
   --theme-text-primary: #F5F5F7;
@@ -193,6 +203,16 @@
   --theme-border-subtle: rgba(0, 0, 0, 0.04);
   --theme-border-focus: #0071E3;
   --theme-border-mocha: rgba(0, 0, 0, 0.12);
+  --theme-border-strong: rgba(0, 0, 0, 0.22);
+
+  /* Form Inputs & Controls (Light Mode) */
+  --theme-input-bg: #FFFFFF;
+  --theme-input-border: rgba(0, 0, 0, 0.12);
+  --theme-input-text: #1D1D1F;
+  --theme-bg-panel-hover: #F0F0F2;
+  --theme-thead-bg: #F5F5F7;
+  --theme-thead-text: #6E6E73;
+  --theme-table-row-hover: rgba(0, 0, 0, 0.02);
 
   /* Apple Signature Deep Charcoal & Slate Typography */
   --theme-text-primary: #1D1D1F;

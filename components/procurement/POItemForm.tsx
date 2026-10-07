@@ -9,6 +9,7 @@ import { BuyingAttributes } from './BuyingAttributes';
 import { SellingAttributes } from './SellingAttributes';
 import { CatalogSearch } from './CatalogSearch';
 import { POItemOrderDetails } from './POItemOrderDetails';
+import { isConsumableCategory } from './utils';
 import type { Country } from '../../utils/localization';
 
 interface POItemFormProps {
@@ -189,7 +190,9 @@ export const POItemForm: React.FC<POItemFormProps> = ({
         if (productType === 'new') {
             if (!customItemBrand?.trim()) newErrors.brand = "Required";
             if (!customItemName?.trim()) newErrors.name = "Required";
-            if (!customItemSize?.trim()) newErrors.size = "Required";
+            if (isConsumableCategory(selectedMainCategory) && !customItemSize?.trim()) {
+                newErrors.size = "Required";
+            }
             if (!customItemUnit) newErrors.unit = "Required";
             if (!selectedMainCategory) newErrors.category = "Required";
 
@@ -424,6 +427,7 @@ export const POItemForm: React.FC<POItemFormProps> = ({
                             sizeType={customAttributes.physical?.sizeType || ''}
                             customAttributes={customAttributes}
                             setCustomAttributes={setCustomAttributes}
+                            currencySymbol={currencySymbol}
                             errors={errors}
                             setErrors={setErrors}
                         />

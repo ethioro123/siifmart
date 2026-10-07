@@ -50,7 +50,7 @@ export const PriceUpdatesModal: React.FC = () => {
             size="lg"
         >
             <div className="p-4 space-y-4">
-                <div className="flex justify-between items-center text-sm text-stone-700 dark:text-gray-300 font-medium mb-2">
+                <div className="flex justify-between items-center text-sm text-[var(--theme-text-secondary)] font-medium mb-2">
                     <span>Checking {products.length} products...</span>
                     <div className="flex items-center gap-2">
                         <span className="text-amber-600 dark:text-amber-400 font-bold">{priceUpdatedProducts.length} changes found</span>
@@ -62,7 +62,7 @@ export const PriceUpdatesModal: React.FC = () => {
                                     native.haptic();
                                     addNotification('info', 'Marked price updates as read');
                                 }}
-                                className="px-2.5 py-1 bg-amber-500 hover:bg-amber-600 text-white text-[10px] font-black uppercase tracking-wider rounded-lg transition-all flex items-center gap-1 shadow-sm cursor-pointer"
+                                className="px-2.5 py-1 bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold uppercase tracking-wider rounded-lg transition-all flex items-center gap-1 shadow-xs cursor-pointer"
                             >
                                 <CheckCheck size={13} />
                                 <span>Mark read</span>
@@ -81,12 +81,12 @@ export const PriceUpdatesModal: React.FC = () => {
                         <table className="w-full text-left bg-transparent">
                             <thead className="bg-[var(--theme-thead-bg)] text-xs uppercase text-[var(--theme-thead-text)] sticky top-0 font-bold border-b border-[var(--theme-border)]">
                                 <tr>
-                                    <th className="p-3 text-[10px] uppercase font-bold tracking-wider">Product</th>
-                                    <th className="p-3 text-[10px] uppercase font-bold tracking-wider text-center">Unit</th>
-                                    <th className="p-3 text-[10px] uppercase font-bold tracking-wider text-right">Old Price</th>
-                                    <th className="p-3 text-[10px] uppercase font-bold tracking-wider text-right">New Price</th>
-                                    <th className="p-3 text-[10px] uppercase font-bold tracking-wider text-right">Update Time</th>
-                                    <th className="p-3 text-[10px] uppercase font-bold tracking-wider text-center">Action</th>
+                                    <th className="p-3 text-xs uppercase font-bold tracking-wider">Product</th>
+                                    <th className="p-3 text-xs uppercase font-bold tracking-wider text-center">Unit</th>
+                                    <th className="p-3 text-xs uppercase font-bold tracking-wider text-right">Old Price</th>
+                                    <th className="p-3 text-xs uppercase font-bold tracking-wider text-right">New Price</th>
+                                    <th className="p-3 text-xs uppercase font-bold tracking-wider text-right">Update Time</th>
+                                    <th className="p-3 text-xs uppercase font-bold tracking-wider text-center">Action</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-[var(--theme-border)]">
@@ -99,16 +99,16 @@ export const PriceUpdatesModal: React.FC = () => {
                                                 <div className="flex items-center gap-2">
                                                     <div className="font-bold text-[var(--theme-text-primary)] text-xs">{p.name}</div>
                                                     {isUnseen && (
-                                                        <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-bold bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-400/30 uppercase">
+                                                        <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-bold bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-400/30 uppercase">
                                                             <span className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" />
                                                             New Price
                                                         </span>
                                                     )}
                                                 </div>
-                                                <div className="text-[10px] text-[var(--theme-text-secondary)] font-mono">{p.sku}</div>
+                                                <div className="text-xs text-[var(--theme-text-secondary)] font-mono font-semibold">{p.sku}</div>
                                             </td>
                                             <td className="p-3 text-center">
-                                                <span className="text-[10px] font-bold text-[var(--theme-text-secondary)] bg-[var(--theme-pill-bg)] border border-[var(--theme-border)] px-1.5 py-0.5 rounded uppercase">
+                                                <span className="text-xs font-bold text-[var(--theme-text-secondary)] bg-[var(--theme-pill-bg)] border border-[var(--theme-border)] px-1.5 py-0.5 rounded uppercase">
                                                     {getSellUnit(p.unit).shortLabel}
                                                 </span>
                                             </td>
@@ -118,7 +118,7 @@ export const PriceUpdatesModal: React.FC = () => {
                                             <td className="p-3 text-right text-amber-600 dark:text-amber-400 font-bold font-mono text-xs">
                                                 {p.price.toLocaleString()} {CURRENCY_SYMBOL}{getSellUnit(p.unit).code !== 'UNIT' ? `/${getSellUnit(p.unit).shortLabel}` : ''}
                                             </td>
-                                            <td className="p-3 text-right text-[10px] text-[var(--theme-text-secondary)] font-medium">
+                                            <td className="p-3 text-right text-xs text-[var(--theme-text-secondary)] font-medium font-mono tabular-nums">
                                                 {priceTime ? new Date(priceTime).toLocaleDateString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : '—'}
                                             </td>
                                             <td className="p-3 text-center">

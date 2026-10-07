@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, Trash2, Plus, Box, Check, ScanBarcode, ChevronRight, Clock, AlertTriangle, Loader2 } from 'lucide-react';
+import { X, Trash2, Plus, Box, Check, ScanBarcode, ChevronRight, Clock, AlertTriangle, Loader2, Package } from 'lucide-react';
 import { Product, PurchaseOrder, WMSJob } from '../../../types';
 import Badge from '../../shared/Badge';
 import { useStore } from '../../../contexts/CentralStore';
@@ -8,7 +8,7 @@ import { logger } from '../../../utils/logger';
 import { ReceiveSplitCard } from './ReceiveSplitCard';
 import { generateBatchNumber } from '../../../utils/batchNumber';
 import { convertToSellableUnits } from '../useReceiving';
-import { formatPackBadge } from '../../procurement/utils';
+import { formatPackBadge, formatPOItemDescription, getPOItemPackagingSummary } from '../../procurement/utils';
 import { useData } from '../../../contexts/DataContext';
 import { resolveReceivingPolicy } from '../../../utils/receivingPolicy';
 
@@ -151,13 +151,13 @@ export const ReceiveSplitModal: React.FC<ReceiveSplitModalProps> = ({
                         </div>
                         <div className="min-w-0 flex-1">
                             <div className="flex items-center gap-2 md:gap-3 flex-wrap">
-                                <h3 className="text-lg md:text-3xl font-black text-slate-900 dark:text-white tracking-tight truncate">{splitReceivingItem.productName}</h3>
+                                <h3 className="text-lg md:text-3xl font-black text-slate-900 dark:text-white tracking-tight truncate">{formatPOItemDescription(splitReceivingItem) || splitReceivingItem.productName}</h3>
                                 <Badge variant="neutral" className="bg-[#FAF8F5]/80 dark:bg-[#1C2620]/60 border-[#E2DCCE]/60 dark:border-[#A9CBA2]/[0.06] text-stone-600 dark:text-gray-400 font-mono text-[9px] md:text-xs">PO #{splitReceivingPO.poNumber}</Badge>
                                 {(() => {
                                     const badge = formatPackBadge(splitReceivingItem);
                                     return badge ? (
-                                        <span className="px-2 py-0.5 rounded bg-amber-500/10 border border-amber-500/20 text-amber-700 dark:text-amber-400 text-[10px] font-black uppercase tracking-wider">
-                                            📦 {badge}
+                                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-amber-500/10 border border-amber-500/20 text-amber-700 dark:text-amber-400 text-[10px] font-black uppercase tracking-wider">
+                                            <Package size={11} className="shrink-0 text-amber-600 dark:text-amber-400" /> {badge}
                                         </span>
                                     ) : null;
                                 })()}

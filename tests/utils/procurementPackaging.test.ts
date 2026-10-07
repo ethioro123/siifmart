@@ -4,7 +4,10 @@ import {
     getPOItemPackagingSummary,
     inferBulkPackaging,
     formatPackBadge,
-    formatPOItemDescription
+    formatPOItemDescription,
+    formatProductDisplayName,
+    isConsumableCategory,
+    isDiscreteGeneralMerch
 } from '../../components/procurement/utils';
 
 describe('Procurement Packaging & Sellable Units', () => {
@@ -176,6 +179,61 @@ describe('Procurement Packaging & Sellable Units', () => {
                 }
             };
             expect(formatPOItemDescription(flour)).toBe('Juma Ugali Flour 1kg');
+        });
+    });
+
+    describe('isConsumableCategory & isDiscreteGeneralMerch', () => {
+        it('correctly classifies food, grocery, and beverage categories as consumables', () => {
+            expect(isConsumableCategory('Pantry & Groceries')).toBe(true);
+            expect(isConsumableCategory('Fresh Food & Deli')).toBe(true);
+            expect(isConsumableCategory('Fruit & Vegetables')).toBe(true);
+            expect(isConsumableCategory('Drinks & Beverages')).toBe(true);
+            expect(isConsumableCategory('Baby Food & Formula')).toBe(true);
+
+            expect(isConsumableCategory('Electronics & Batteries')).toBe(false);
+            expect(isConsumableCategory('Stationery, Office & Books')).toBe(false);
+            expect(isConsumableCategory('Clothing & Accessories')).toBe(false);
+            expect(isConsumableCategory('Automotive')).toBe(false);
+
+            expect(isDiscreteGeneralMerch('Electronics & Batteries')).toBe(true);
+            expect(isDiscreteGeneralMerch('Clothing & Accessories')).toBe(true);
+            expect(isDiscreteGeneralMerch('Pantry & Groceries')).toBe(false);
+        });
+    });
+
+    describe('formatProductDisplayName', () => {
+        it('does not append physical net weight for discrete general merchandise', () => {
+            const kindle = {
+                name: 'Kindle',
+                brand: 'Amazon',
+                size: '217',
+                unit: 'g',
+                category: 'Electronics & Batteries',
+                customAttributes: {
+                    physical: {
+                        netWeight: '217',
+                        sizeType: 'g'
+                    }
+                }
+            };
+            expect(formatProductDisplayName(kindle)).toBe('Amazon Kindle');
+        });
+
+        it('appends size for food and beverages', () => {
+            const milk = {
+                name: 'Fresh Milk',
+                brand: 'Mama',
+                size: '500',
+                unit: 'ml',
+                category: 'Dairy, Eggs & Fridge',
+                customAttributes: {
+                    physical: {
+                        netWeight: '500',
+                        sizeType: 'ml'
+                    }
+                }
+            };
+            expect(formatProductDisplayName(milk)).toBe('Mama Fresh Milk 500ml');
         });
     });
 });

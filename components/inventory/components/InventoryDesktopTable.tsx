@@ -1,6 +1,6 @@
 import React from 'react';
 import {
-    ArrowUpDown, CheckCircle, Package, RefreshCw, Edit, Trash2
+    ArrowUpDown, CheckCircle, Package, RefreshCw, Edit, Trash2, Clock
 } from 'lucide-react';
 import { Product, Site } from '../../../types';
 import { CURRENCY_SYMBOL } from '../../../constants';
@@ -11,6 +11,7 @@ import { CompactLocationDisplay } from '../../ProductLocationDisplay';
 import { Protected } from '../../Protected';
 import { useStore } from '../../../contexts/CentralStore';
 import { canViewCostPrice } from '../../../utils/roles';
+import { formatProductDisplayName } from '../../procurement/utils';
 
 interface InventoryDesktopTableProps {
     products: Product[];
@@ -192,14 +193,9 @@ export const InventoryDesktopTable: React.FC<InventoryDesktopTableProps> = ({
                                     </div>
                                     <div>
                                         <p className="text-sm font-bold text-[var(--theme-text-primary)] tracking-tight group-hover:text-[var(--theme-primary)] transition-colors duration-150 uppercase">
-                                            {product.name}
+                                            {formatProductDisplayName(product) || product.name}
                                         </p>
                                         <div className="flex flex-wrap items-center gap-1.5 mt-1.5 max-w-md">
-                                            {product.brand && !product.name.toLowerCase().startsWith(product.brand.toLowerCase()) && (
-                                                <span className="text-[9px] font-bold text-amber-500 bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20 uppercase tracking-wider">
-                                                    {product.brand}
-                                                </span>
-                                            )}
                                             <span className="text-[9px] font-bold font-mono text-emerald-600 bg-emerald-500/10 dark:text-emerald-400 px-2 py-0.5 rounded border border-emerald-500/20 uppercase tracking-tighter shadow-sm">
                                                 {product.sku}
                                             </span>
@@ -217,8 +213,8 @@ export const InventoryDesktopTable: React.FC<InventoryDesktopTableProps> = ({
                                                 </span>
                                             )}
                                             {product.approvalStatus === 'pending' && (
-                                                <span className="text-[9px] font-extrabold bg-amber-500/10 text-amber-600 dark:text-amber-400 px-2 py-0.5 rounded border border-amber-500/20 uppercase tracking-wider shadow-sm animate-pulse">
-                                                    ⏳ Review
+                                                <span className="inline-flex items-center gap-1 text-[9px] font-extrabold bg-amber-500/10 text-amber-600 dark:text-amber-400 px-2 py-0.5 rounded border border-amber-500/20 uppercase tracking-wider shadow-sm animate-pulse">
+                                                    <Clock size={9} className="shrink-0" /> Review
                                                 </span>
                                             )}
                                         </div>

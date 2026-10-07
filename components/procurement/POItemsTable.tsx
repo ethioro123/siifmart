@@ -55,7 +55,7 @@ export const POItemsTable: React.FC<POItemsTableProps> = ({
     };
 
     return (
-        <div className="relative overflow-hidden rounded-2xl p-[1px] group mt-6 transition-all duration-300">
+        <div className="relative overflow-hidden rounded-2xl group mt-6 transition-all duration-300">
             <div className="relative bg-[var(--theme-bg-panel)] rounded-2xl overflow-x-auto border border-[var(--theme-border)] shadow-sm">
                 <table className="w-full text-left border-collapse min-w-[700px]">
                     <thead>

@@ -38,7 +38,9 @@ const PinPad: React.FC<PinPadProps> = ({ pin, setPin, onEnter, onCancel }) => {
                             : 'bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] border text-[var(--theme-text-muted)]'
                             }`}
                     >
-                        {pin.length > index ? '•' : ''}
+                        {pin.length > index ? (
+                            <span className="w-2.5 h-2.5 rounded-full bg-current" />
+                        ) : null}
                     </div>
                 ))}
             </div>

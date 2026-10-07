@@ -40,7 +40,7 @@ export const CatalogSearch: React.FC<CatalogSearchProps> = ({
                 <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--theme-text-secondary)] pointer-events-none" />
                 <input
                     type="text"
-                    className={`w-full h-11 bg-[var(--theme-bg-subtle)] border ${errors.search ? 'border-rose-500/50' : 'border-[var(--theme-border)]'} rounded-full pl-10 pr-4 text-xs text-[var(--theme-text-primary)] focus:border-[var(--theme-accent)] outline-none placeholder:text-[var(--theme-text-secondary)]/70 font-semibold transition-all`}
+                    className={`w-full h-11 bg-[var(--theme-bg-subtle)] border ${errors.search ? 'border-rose-500/50' : 'border-[var(--theme-border)]'} rounded-full pl-10 pr-4 text-xs text-[var(--theme-text-primary)] focus:border-[var(--theme-accent)] outline-none placeholder:text-[var(--theme-text-muted)] font-semibold transition-all`}
                     placeholder="Type product name, brand, or SKU to search catalog..."
                     value={searchTerm}
                     onChange={(e) => {

@@ -4,6 +4,7 @@ import { Product } from '../../../types';
 import { CURRENCY_SYMBOL } from '../../../constants';
 import { formatPriceValue } from '../../../utils/formatting';
 import { formatStockDisplay, getSellUnit } from '../../../utils/units';
+import { formatProductDisplayName } from '../../procurement/utils';
 
 interface ProductProfileHeaderProps {
     product: Product;
@@ -82,10 +83,7 @@ export const ProductProfileHeader: React.FC<ProductProfileHeaderProps> = ({
 
                         {/* Product Title */}
                         <h2 className="text-xl sm:text-2xl font-bold text-[var(--theme-text-primary)] uppercase tracking-tight leading-tight truncate">
-                            {product.brand && !brandAlreadyInName && (
-                                <span className="text-[var(--theme-accent)] mr-2">{product.brand}</span>
-                            )}
-                            {product.name}
+                            {formatProductDisplayName(product) || product.name}
                         </h2>
 
                         {/* Location Subtext */}

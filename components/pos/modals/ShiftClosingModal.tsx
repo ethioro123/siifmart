@@ -57,7 +57,7 @@ export const ShiftClosingModal: React.FC = () => {
                                 }`}>
                                 {closingStep > step ? <CheckCircle size={14} /> : step}
                             </div>
-                            <span className={`text-[10px] font-bold uppercase tracking-wider ${closingStep === step ? 'text-[var(--theme-text-primary)]' : 'text-[var(--theme-text-secondary)]'
+                            <span className={`text-xs font-bold uppercase tracking-wider ${closingStep === step ? 'text-[var(--theme-text-primary)]' : 'text-[var(--theme-text-secondary)]'
                                 }`}>
                                 {step === 1 ? "1. Blind Cash Tray Count" : "2. Reconciliation & Audit"}
                             </span>
@@ -75,7 +75,7 @@ export const ShiftClosingModal: React.FC = () => {
                                         <p className="text-xs font-bold text-emerald-900 dark:text-emerald-300">
                                             Blind Drawer Count Protocol (Anti-Skimming Active)
                                         </p>
-                                        <p className="text-[11px] text-emerald-800/80 dark:text-emerald-400/80 leading-relaxed">
+                                        <p className="text-xs text-emerald-800 dark:text-emerald-300 leading-relaxed font-medium">
                                             Please count each physical cash denomination currently in the cash drawer. System expected totals remain concealed until physical counting is finalized.
                                         </p>
                                     </div>
@@ -85,7 +85,7 @@ export const ShiftClosingModal: React.FC = () => {
                                     {Object.keys(cashDenominations).sort((a, b) => parseInt(b) - parseInt(a)).map((denom) => (
                                         <div key={denom} className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-4 flex flex-col gap-2 focus-within:border-[var(--theme-border-focus)] transition-all shadow-xs">
                                             <div className="flex justify-between items-center">
-                                                <span className="text-[10px] text-[var(--theme-text-secondary)] font-bold tracking-wider uppercase">{denom} Note</span>
+                                                <span className="text-xs text-[var(--theme-text-secondary)] font-bold tracking-wider uppercase">{denom} Note</span>
                                                 <span className="text-xs font-mono text-[var(--theme-primary)] font-bold">{CURRENCY_SYMBOL}{(parseInt(denom) * cashDenominations[denom]).toLocaleString()}</span>
                                             </div>
                                             <input
@@ -143,7 +143,7 @@ export const ShiftClosingModal: React.FC = () => {
                                         </p>
                                     </div>
                                     <div className="pt-2">
-                                        <span className="text-[10px] text-[var(--theme-text-muted)] uppercase tracking-wider font-bold block mb-0.5">Sealed Cash Total</span>
+                                        <span className="text-xs text-[var(--theme-text-secondary)] uppercase tracking-wider font-bold block mb-0.5">Sealed Cash Total</span>
                                         <p className="text-3xl font-mono font-bold text-[var(--theme-text-primary)]">
                                             {CURRENCY_SYMBOL} {actualCashCounted.toLocaleString()}
                                         </p>
@@ -152,7 +152,7 @@ export const ShiftClosingModal: React.FC = () => {
 
                                 <div className="space-y-4">
                                     <div className="space-y-2">
-                                        <label className="text-[10px] text-[var(--theme-text-secondary)] uppercase font-bold tracking-wider px-1">
+                                        <label className="text-xs text-[var(--theme-text-secondary)] uppercase font-bold tracking-wider px-1">
                                             Shift Handover Notes (Optional)
                                         </label>
                                         <textarea
@@ -168,7 +168,7 @@ export const ShiftClosingModal: React.FC = () => {
                                             <ShieldAlert size={14} className="text-[var(--theme-primary)]" />
                                             Zero-Trust Compliance
                                         </span>
-                                        <span className="text-emerald-600 dark:text-emerald-400 font-bold uppercase tracking-wider text-[10px]">
+                                        <span className="text-emerald-600 dark:text-emerald-400 font-bold uppercase tracking-wider text-xs">
                                             Direct HQ Dispatch
                                         </span>
                                     </div>

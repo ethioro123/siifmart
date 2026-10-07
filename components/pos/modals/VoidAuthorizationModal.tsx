@@ -103,7 +103,7 @@ export const VoidAuthorizationModal: React.FC<VoidAuthorizationModalProps> = ({
                         <h4 className="text-xs font-black text-rose-800 dark:text-rose-300 uppercase tracking-wider">
                             Supervisory Approval Required (SOP-POS-008)
                         </h4>
-                        <p className="text-[11px] text-rose-700 dark:text-rose-400 leading-relaxed">
+                        <p className="text-xs font-medium text-rose-700 dark:text-rose-300 leading-relaxed">
                             Under Zero-Trust Loss Prevention, cashiers cannot unilaterally void sales. Voiding <b>{itemsCount} item(s)</b> worth <b>{CURRENCY_SYMBOL} {voidTotal.toLocaleString()}</b> requires on-duty supervisor co-sign.
                         </p>
                     </div>
@@ -111,7 +111,7 @@ export const VoidAuthorizationModal: React.FC<VoidAuthorizationModalProps> = ({
 
                 {/* Reason Code Dropdown */}
                 <div className="space-y-1.5">
-                    <label className="text-[10px] font-bold uppercase text-[var(--theme-text-secondary)] tracking-wider">
+                    <label className="text-xs font-bold uppercase text-[var(--theme-text-secondary)] tracking-wider">
                         Mandatory Reason Code
                     </label>
                     <select
@@ -133,7 +133,7 @@ export const VoidAuthorizationModal: React.FC<VoidAuthorizationModalProps> = ({
 
                 {/* Pin Pad */}
                 <div className="flex flex-col items-center">
-                    <p className="text-[11px] text-[var(--theme-text-secondary)] uppercase tracking-wider font-bold mb-2">Supervisor Enter Staff PIN</p>
+                    <p className="text-xs text-[var(--theme-text-secondary)] uppercase tracking-wider font-bold mb-2">Supervisor Enter Staff PIN</p>
                     <PinPad pin={supervisorPin} setPin={setSupervisorPin} onEnter={handleConfirmVoid} />
                 </div>
 

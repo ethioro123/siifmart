@@ -91,14 +91,14 @@ export const NoSaleKickModal: React.FC<NoSaleKickModalProps> = ({ isOpen, onClos
                         <h4 className="text-xs font-black text-amber-800 dark:text-amber-300 uppercase tracking-wider">
                             Anti-Skimming Security Protocol
                         </h4>
-                        <p className="text-[11px] text-amber-700 dark:text-amber-400 leading-relaxed">
+                        <p className="text-xs font-medium text-amber-800 dark:text-amber-300 leading-relaxed">
                             Opening the cash drawer without a registered sale is an audited high-risk event. Supervisory co-sign is mandatory under store loss prevention policy.
                         </p>
                     </div>
                 </div>
 
                 <div className="space-y-1.5">
-                    <label className="text-[10px] font-bold uppercase text-stone-500 tracking-wider">
+                    <label className="text-xs font-bold uppercase text-[var(--theme-text-secondary)] tracking-wider">
                         Operational Reason
                     </label>
                     <select
@@ -120,7 +120,7 @@ export const NoSaleKickModal: React.FC<NoSaleKickModalProps> = ({ isOpen, onClos
                 )}
 
                 <div className="flex flex-col items-center">
-                    <p className="text-[11px] text-[var(--theme-text-secondary)] uppercase tracking-wider font-bold mb-2">Supervisor Staff PIN</p>
+                    <p className="text-xs text-[var(--theme-text-secondary)] uppercase tracking-wider font-bold mb-2">Supervisor Staff PIN</p>
                     <PinPad pin={supervisorPin} setPin={setSupervisorPin} onEnter={handleConfirmKick} />
                 </div>
 

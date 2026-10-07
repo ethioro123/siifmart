@@ -159,7 +159,7 @@ export const CashDropModal: React.FC<CashDropModalProps> = ({ isOpen, onClose })
                                     Current Till Cash: {policy.currency} {shiftTelemetry.cashOnHand.toLocaleString()}
                                 </p>
                                 {isOverThreshold && (
-                                    <p className="text-[11px] text-amber-700 dark:text-amber-400 leading-tight inline-flex items-center gap-1.5">
+                                    <p className="text-xs text-amber-800 dark:text-amber-300 font-medium leading-tight inline-flex items-center gap-1.5">
                                         <AlertTriangle className="w-3.5 h-3.5 text-amber-500 shrink-0" />
                                         <span>Safety Limit Exceeded! Company policy requires excess cash to be skimmed to the drop safe immediately.</span>
                                     </p>
@@ -189,7 +189,7 @@ export const CashDropModal: React.FC<CashDropModalProps> = ({ isOpen, onClose })
                         {/* Safe Bag & Reason */}
                         <div className="grid grid-cols-2 gap-3">
                             <div className="space-y-1.5">
-                                <label className="text-[10px] font-bold uppercase text-[var(--theme-text-secondary)]">Tamper-Proof Safe Bag #</label>
+                                <label className="text-xs font-bold uppercase tracking-wider text-[var(--theme-text-secondary)]">Tamper-Proof Safe Bag #</label>
                                 <input
                                     type="text"
                                     value={safeBagNumber}
@@ -198,7 +198,7 @@ export const CashDropModal: React.FC<CashDropModalProps> = ({ isOpen, onClose })
                                 />
                             </div>
                             <div className="space-y-1.5">
-                                <label className="text-[10px] font-bold uppercase text-[var(--theme-text-secondary)]">Reason</label>
+                                <label className="text-xs font-bold uppercase tracking-wider text-[var(--theme-text-secondary)]">Reason</label>
                                 <select
                                     value={reason}
                                     onChange={(e) => setReason(e.target.value)}
@@ -239,7 +239,7 @@ export const CashDropModal: React.FC<CashDropModalProps> = ({ isOpen, onClose })
                                 <h4 className="text-xs font-bold text-emerald-900 dark:text-emerald-300 uppercase tracking-wider">
                                     Supervisor Co-Sign Required (4-Eyes Principle)
                                 </h4>
-                                <p className="text-[11px] text-emerald-800/80 dark:text-emerald-400/80">
+                                <p className="text-xs text-emerald-800 dark:text-emerald-300 font-medium leading-relaxed">
                                     Authorizing drop of <b>{policy.currency} {amountNum.toLocaleString()}</b> into Bag #{safeBagNumber}. Store Manager or Supervisor must enter their staff PIN to verify physical cash deposit into drop safe.
                                 </p>
                             </div>

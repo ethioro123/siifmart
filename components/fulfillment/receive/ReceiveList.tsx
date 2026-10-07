@@ -3,7 +3,7 @@ import { Package, Layers, CheckCircle, Printer, Plus, Loader2 } from 'lucide-rea
 import { PurchaseOrder, WMSJob, Product } from '../../../types';
 import { ProgressBar } from '../../shared/ProgressBar';
 import Pagination from '../../shared/Pagination';
-import { formatPOItemDescription, formatPackBadge } from '../../procurement/utils';
+import { formatPOItemDescription, formatPackBadge, isDiscreteGeneralMerch } from '../../procurement/utils';
 import { getSellUnit } from '../../../utils/units';
 import { hasPermission } from '../../../utils/permissions';
 import { convertToSellableUnits } from '../useReceiving';
@@ -127,7 +127,12 @@ export const ReceiveList: React.FC<ReceiveListProps> = ({
                                     </div>
                                 </div>
                                 <div className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-[0.2em] border shadow-sm transition-all ${allItemsReceived ? 'text-[#1E3F27] dark:text-[#EAE5D9] border-[#2C5E3B]/40 dark:border-[#A9CBA2]/30 bg-white/50 dark:bg-white/10' : 'text-stone-400 dark:text-stone-500 border-stone-200 dark:border-white/5 bg-stone-50/50 dark:bg-black/20 group-hover:border-[#2C5E3B]/40 dark:group-hover:border-[#A9CBA2]/30'}`}>
-                                    {allItemsReceived ? `✓ ${t('warehouse.authenticated')}` : t('warehouse.awaitingProcessing')}
+                                    {allItemsReceived ? (
+                                        <span className="inline-flex items-center gap-1.5">
+                                            <CheckCircle size={12} className="text-[#2C5E3B] dark:text-[#A9CBA2]" />
+                                            {t('warehouse.authenticated')}
+                                        </span>
+                                    ) : t('warehouse.awaitingProcessing')}
                                 </div>
                             </div>
 
@@ -173,7 +178,9 @@ export const ReceiveList: React.FC<ReceiveListProps> = ({
                                                         {(() => {
                                                             const itemUnit = getSellUnit(item.unit);
                                                             const sizeNum = parseFloat(item.size || '') || 0;
-                                                            const isWeightOrVolume = itemUnit.category === 'weight' || itemUnit.category === 'volume';
+                                                            const category = item.category || product?.category || '';
+                                                            const isDiscrete = isDiscreteGeneralMerch(category);
+                                                            const isWeightOrVolume = (itemUnit.category === 'weight' || itemUnit.category === 'volume') && !isDiscrete;
 
                                                             if (isWeightOrVolume && sizeNum > 0) {
                                                                 const label = itemUnit.shortLabel.toLowerCase();
