@@ -221,7 +221,7 @@ export const getPOItemPackagingSummary = (item: any, allProducts?: any[]): POIte
         manifestUnitName = manifestQty === 1 ? 'Pack' : 'Packs';
     }
 
-    // Determine packBadge (e.g. "12 pk/Bale", "24 cans/case (Carton)", "1kg Bag")
+    // Determine packBadge (e.g. "12 pk/Bale", "24 cans/case (Carton)", "Single Unit (1 ea)")
     let packBadge: string | null = null;
     if (packageType && packQty > 1 && caseSize >= 1) {
         packBadge = `${packQty} ${sellUnitLabel} × ${caseSize} pk/${packageType}`;
@@ -230,27 +230,31 @@ export const getPOItemPackagingSummary = (item: any, allProducts?: any[]): POIte
     } else if (unitsPerOrderUnit > 1) {
         packBadge = `${unitsPerOrderUnit} ${sellUnitLabel}/pack`;
     } else {
-        const sizeStr = item.size || attrs?.physical?.netWeight || matchedProduct?.size || '';
-        if (packageType && sizeStr) {
-            packBadge = `${sizeStr} ${packageType}`;
+        // Multiplier is 1 (Single Consumer Unit / Each)
+        const category = item.category || attrs?.identity?.category || matchedProduct?.category || '';
+        const isConsumable = isConsumableCategory(category);
+        const rawSize = (item.size || attrs?.physical?.netWeight || matchedProduct?.size || '').toString().trim();
+        const sizeUnit = (attrs?.physical?.sizeType || attrs?.physical?.unit || '').toString().trim();
+        const hasExplicitUnit = /[a-zA-Z]/.test(rawSize) || Boolean(sizeUnit);
+
+        if (packageType && isConsumable && hasExplicitUnit) {
+            const formattedSize = /[a-zA-Z]/.test(rawSize) ? rawSize : `${rawSize}${sizeUnit}`;
+            packBadge = `${formattedSize} ${packageType}`;
         } else if (packageType) {
-            packBadge = packageType;
-        } else if (sizeStr) {
-            packBadge = `${sizeStr} Unit`;
+            packBadge = `${packageType} (1 ${sellUnitLabel})`;
+        } else {
+            packBadge = `Single Unit (1 ${sellUnitLabel})`;
         }
     }
 
-    // Determine detailed side text (e.g. "12 Bales × 12 pk" or "12 Bags (1kg each)")
+    // Determine detailed side text (e.g. "12 Bales × 12 pk" or "100 Units (1 ea each)")
     let packDetail = '';
-    const sizeVal = item.size || attrs?.physical?.netWeight || matchedProduct?.size || '';
     if (hasCases && packQty > 1) {
         packDetail = `${manifestQty} ${manifestUnitName} (${caseSize} packs × ${packQty} ${sellUnitLabel})`;
     } else if (hasMultiplier) {
         packDetail = `${manifestQty} ${manifestUnitName} (${unitsPerOrderUnit} ${sellUnitLabel}/${manifestUnitName.replace(/s$/, '').toLowerCase()})`;
-    } else if (sizeVal) {
-        packDetail = `${manifestQty} ${manifestUnitName} (${sizeVal} each)`;
     } else {
-        packDetail = `${manifestQty} ${manifestUnitName}`;
+        packDetail = `${manifestQty} ${manifestUnitName} (1 ${sellUnitLabel} each)`;
     }
 
     const costPerSellableUnit = unitsPerOrderUnit > 1 && item.unitCost
@@ -268,6 +272,60 @@ export const getPOItemPackagingSummary = (item: any, allProducts?: any[]): POIte
         hasMultiplier,
         unitsPerOrderUnit,
         costPerSellableUnit
+    };
+};
+
+export interface POItemPhysicalSummary {
+    netWeightFormatted: string | null;
+    grossWeightFormatted: string | null;
+    dimensionsFormatted: string | null;
+    form: string | null;
+    specBadge: string | null;
+}
+
+/**
+ * Returns structured physical specifications for a product or PO item
+ * strictly separated from packaging hierarchy (GS1 / Walmart Item 360 standard).
+ */
+export const getPOItemPhysicalSummary = (item: any, allProducts?: any[]): POItemPhysicalSummary => {
+    const matchedProduct = allProducts?.find(p => (item.productId && p.id === item.productId) || (item.sku && p.sku === item.sku) || (item.productName && p.name === item.productName));
+    const attrs = item.customAttributes || item.custom_attributes || matchedProduct?.customAttributes || (matchedProduct as any)?.custom_attributes;
+    const physical = attrs?.physical || {};
+
+    const rawNet = (physical.netWeight || item.size || matchedProduct?.size || '').toString().trim();
+    const sizeType = (physical.sizeType || physical.unit || '').toString().trim();
+    let netWeightFormatted: string | null = null;
+    if (rawNet) {
+        if (/[a-zA-Z]/.test(rawNet)) {
+            netWeightFormatted = rawNet;
+        } else if (sizeType) {
+            netWeightFormatted = `${rawNet} ${sizeType}`;
+        } else {
+            netWeightFormatted = rawNet;
+        }
+    }
+
+    const rawGross = (physical.grossWeight || '').toString().trim();
+    const grossWeightFormatted = rawGross ? (/[a-zA-Z]/.test(rawGross) ? rawGross : `${rawGross} kg`) : null;
+
+    const rawDims = (physical.dims || '').toString().trim();
+    const dimensionsFormatted = rawDims ? (/[a-zA-Z]/.test(rawDims) ? rawDims : `${rawDims} cm`) : null;
+
+    const form = physical.form || null;
+
+    const specParts: string[] = [];
+    if (netWeightFormatted) specParts.push(`Net: ${netWeightFormatted}`);
+    if (grossWeightFormatted) specParts.push(`Gross: ${grossWeightFormatted}`);
+    if (dimensionsFormatted) specParts.push(`Dims: ${dimensionsFormatted}`);
+
+    const specBadge = specParts.length > 0 ? specParts.join(' • ') : null;
+
+    return {
+        netWeightFormatted,
+        grossWeightFormatted,
+        dimensionsFormatted,
+        form,
+        specBadge
     };
 };
 

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { POItem } from '../../types';
 import { formatCompactNumber } from '../../utils/formatting';
 import { Package, Trash2, Edit3, FileText, Check, X } from 'lucide-react';
-import { formatPOItemDescription, getPOItemPackagingSummary } from './utils';
+import { formatPOItemDescription, getPOItemPackagingSummary, getPOItemPhysicalSummary } from './utils';
 
 interface POItemsTableProps {
     items: POItem[];
@@ -61,7 +61,7 @@ export const POItemsTable: React.FC<POItemsTableProps> = ({
                     <thead>
                         <tr className="bg-[var(--theme-bg-subtle)] border-b border-[var(--theme-border)] text-[10px] text-[var(--theme-text-secondary)] uppercase tracking-wider font-bold">
                             <th className="p-4 pl-6">Product Details</th>
-                            <th className="p-4 text-left w-36">Packaging</th>
+                            <th className="p-4 text-left w-40">Packaging</th>
                             <th className="p-4 text-right w-28">Sellable Qty</th>
                             <th className="p-4 text-right w-36">Order Cost</th>
                             <th className="p-4 text-right w-32">Total</th>
@@ -71,6 +71,7 @@ export const POItemsTable: React.FC<POItemsTableProps> = ({
                     <tbody className="divide-y divide-[var(--theme-border-subtle)]">
                         {items.map((item, i) => {
                             const pkg = getPOItemPackagingSummary(item);
+                            const phys = getPOItemPhysicalSummary(item);
                             return (
                                 <tr key={i} className="hover:bg-[var(--theme-bg-subtle)] transition-colors group/row">
                                     <td className="p-4 pl-6">
@@ -89,16 +90,21 @@ export const POItemsTable: React.FC<POItemsTableProps> = ({
                                                             CUSTOM
                                                         </span>
                                                     )}
+                                                    {phys.specBadge && (
+                                                        <span className="bg-[var(--theme-bg-subtle)] px-2 py-0.5 rounded-md text-[10px] border border-[var(--theme-border)] text-[var(--theme-text-secondary)] font-medium">
+                                                            {phys.specBadge}
+                                                        </span>
+                                                    )}
                                                 </div>
                                             </div>
                                         </div>
                                     </td>
                                     <td className="p-4">
                                         <div className="text-xs font-bold text-[var(--theme-text-primary)]">
-                                            {pkg.packBadge || pkg.manifestUnitName}
+                                            {pkg.packBadge || (pkg.hasMultiplier ? pkg.manifestUnitName : 'Single Unit (1 ea)')}
                                         </div>
                                         <div className="text-[10px] text-[var(--theme-text-secondary)] font-medium mt-0.5">
-                                            Ordered: {item.quantity} {pkg.manifestUnitName.toLowerCase()}
+                                            Ordered: {item.quantity} {pkg.hasMultiplier ? pkg.manifestUnitName.toLowerCase() : 'units'}
                                         </div>
                                     </td>
                                     <td className="p-4 text-right font-mono">
@@ -118,9 +124,13 @@ export const POItemsTable: React.FC<POItemsTableProps> = ({
                                                 <div className="text-[var(--theme-text-primary)] font-bold text-sm tabular-nums">
                                                     {pkg.sellableQty.toLocaleString()} <span className="text-xs text-[var(--theme-text-secondary)] font-medium">{pkg.sellUnitLabel}</span>
                                                 </div>
-                                                {pkg.hasMultiplier && (
+                                                {pkg.hasMultiplier ? (
                                                     <div className="text-[10px] text-[var(--theme-text-secondary)] font-medium">
                                                         ({item.quantity} {pkg.manifestUnitName.toLowerCase()})
+                                                    </div>
+                                                ) : (
+                                                    <div className="text-[9px] text-[var(--theme-text-secondary)] font-medium">
+                                                        (1:1 Consumer Each)
                                                     </div>
                                                 )}
                                             </div>
