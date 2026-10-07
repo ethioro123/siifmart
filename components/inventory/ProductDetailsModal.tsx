@@ -36,7 +36,7 @@ const DetailField = ({ label, value, icon: Icon, colorClass, highlight }: { labe
         }`}>
             {Icon && <Icon size={14} className={`mt-0.5 flex-shrink-0 ${colorClass || 'text-[var(--theme-text-primary)]'}`} />}
             <div className="space-y-0.5 min-w-0 flex-1">
-                <span className="text-[9px] text-[var(--theme-text-muted)] font-medium uppercase tracking-wider block">{label}</span>
+                <span className="text-[10px] text-[var(--theme-text-secondary)] font-bold uppercase tracking-wider block">{label}</span>
                 <div className="text-xs font-semibold text-[var(--theme-text-primary)] leading-tight">
                     {value !== undefined && value !== null && value !== '' ? value : <span className="text-[var(--theme-text-muted)] font-medium">—</span>}
                 </div>

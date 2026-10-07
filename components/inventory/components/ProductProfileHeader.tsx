@@ -29,15 +29,15 @@ export const ProductProfileHeader: React.FC<ProductProfileHeaderProps> = ({
     // Determine status badge
     let statusConfig = {
         label: 'In Stock',
-        badgeClass: 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/30',
+        badgeClass: 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border-emerald-500/30',
         dotClass: 'bg-emerald-500',
-        stockTextClass: 'text-emerald-700 dark:text-emerald-400'
+        stockTextClass: 'text-emerald-700 dark:text-emerald-300'
     };
 
     if (product.stock <= 0) {
         statusConfig = {
             label: 'Out of Stock',
-            badgeClass: 'bg-red-500/10 text-red-700 dark:text-red-400 border-red-500/30',
+            badgeClass: 'bg-red-500/10 text-red-700 dark:text-red-300 border-red-500/30',
             dotClass: 'bg-red-500',
             stockTextClass: 'text-red-600 dark:text-red-400'
         };
@@ -46,7 +46,7 @@ export const ProductProfileHeader: React.FC<ProductProfileHeaderProps> = ({
             label: 'Low Stock Alert',
             badgeClass: 'bg-amber-500/10 text-amber-800 dark:text-amber-300 border-amber-500/30',
             dotClass: 'bg-amber-500',
-            stockTextClass: 'text-amber-700 dark:text-amber-400'
+            stockTextClass: 'text-amber-700 dark:text-amber-300'
         };
     }
 
@@ -101,43 +101,43 @@ export const ProductProfileHeader: React.FC<ProductProfileHeaderProps> = ({
             {/* Executive KPI Grid */}
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 pt-1">
                 {/* 1. Retail Price */}
-                <div className="bg-[var(--theme-bg-card)] p-3.5 sm:p-4 rounded-2xl border border-[var(--theme-border)]">
-                    <span className="text-[9px] font-bold uppercase tracking-wider text-[var(--theme-text-muted)] block mb-1">
+                <div className="bg-[var(--theme-bg-card)] p-3.5 sm:p-4 rounded-2xl border border-[var(--theme-border)] shadow-xs">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--theme-text-secondary)] block mb-1">
                         Retail Selling Price
                     </span>
                     <div className="flex items-baseline gap-1.5">
                         <span className="text-lg sm:text-xl font-mono font-bold text-[var(--theme-text-primary)] tracking-tight">
                             {currencySymbol} {formatPriceValue(product.price)}
                         </span>
-                        <span className="text-[10px] font-medium text-[var(--theme-text-muted)] uppercase font-mono">
+                        <span className="text-[10px] font-semibold text-[var(--theme-text-secondary)] uppercase font-mono">
                             /{sellUnit?.shortLabel || 'unit'}
                         </span>
                     </div>
                     {product.salePrice && product.salePrice > 0 && (
-                        <span className="inline-block mt-1 text-[9px] font-bold text-amber-600 dark:text-amber-400 font-mono">
+                        <span className="inline-block mt-1 text-[9px] font-bold text-amber-600 dark:text-amber-300 font-mono">
                             Promo: {currencySymbol} {formatPriceValue(product.salePrice)}
                         </span>
                     )}
                 </div>
 
                 {/* 2. Stock Level */}
-                <div className="bg-[var(--theme-bg-card)] p-3.5 sm:p-4 rounded-2xl border border-[var(--theme-border)]">
-                    <span className="text-[9px] font-bold uppercase tracking-wider text-[var(--theme-text-muted)] block mb-1">
+                <div className="bg-[var(--theme-bg-card)] p-3.5 sm:p-4 rounded-2xl border border-[var(--theme-border)] shadow-xs">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--theme-text-secondary)] block mb-1">
                         Available On-Hand
                     </span>
                     <div className="flex items-baseline gap-1.5">
-                        <span className={`text-lg sm:text-xl font-mono font-bold tracking-tight ${statusConfig.stockTextClass}`}>
+                        <span className={`text-lg sm:text-xl font-mono font-black tracking-tight ${statusConfig.stockTextClass}`}>
                             {formatStockDisplay(product.stock, product)}
                         </span>
                     </div>
-                    <span className="text-[9px] font-medium text-[var(--theme-text-muted)] uppercase block mt-1">
+                    <span className="text-[10px] font-semibold text-[var(--theme-text-primary)] uppercase block mt-1 tracking-wide">
                         {product.packQuantity && product.packQuantity > 1 ? `Pack of ${product.packQuantity}` : 'Single Unit'}
                     </span>
                 </div>
 
                 {/* 3. Total Asset Value */}
-                <div className="bg-[var(--theme-bg-card)] p-3.5 sm:p-4 rounded-2xl border border-[var(--theme-border)]">
-                    <span className="text-[9px] font-bold uppercase tracking-wider text-[var(--theme-text-muted)] block mb-1">
+                <div className="bg-[var(--theme-bg-card)] p-3.5 sm:p-4 rounded-2xl border border-[var(--theme-border)] shadow-xs">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--theme-text-secondary)] block mb-1">
                         Total Stock Value
                     </span>
                     <div className="flex items-baseline gap-1.5">
@@ -145,37 +145,37 @@ export const ProductProfileHeader: React.FC<ProductProfileHeaderProps> = ({
                             {currencySymbol} {totalAssetValue.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
                         </span>
                     </div>
-                    <span className="text-[9px] font-medium text-[var(--theme-text-muted)] uppercase block mt-1 font-mono">
+                    <span className="text-[10px] font-semibold text-[var(--theme-text-secondary)] uppercase block mt-1 font-mono">
                         {product.stock} × {formatPriceValue(product.price)}
                     </span>
                 </div>
 
                 {/* 4. Margin & Profit (If privileged role) or Reorder Level */}
                 {showCostPrice ? (
-                    <div className="bg-[var(--theme-bg-card)] p-3.5 sm:p-4 rounded-2xl border border-[var(--theme-border)]">
-                        <span className="text-[9px] font-bold uppercase tracking-wider text-[var(--theme-text-muted)] block mb-1">
+                    <div className="bg-[var(--theme-bg-card)] p-3.5 sm:p-4 rounded-2xl border border-[var(--theme-border)] shadow-xs">
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--theme-text-secondary)] block mb-1">
                             Gross Margin
                         </span>
                         <div className="flex items-baseline gap-1.5">
-                            <span className="text-lg sm:text-xl font-mono font-bold text-emerald-600 dark:text-emerald-400 tracking-tight">
+                            <span className="text-lg sm:text-xl font-mono font-bold text-emerald-600 dark:text-emerald-300 tracking-tight">
                                 {marginPct > 0 ? `${marginPct.toFixed(1)}%` : '0%'}
                             </span>
                         </div>
-                        <span className="text-[9px] font-medium text-[var(--theme-text-muted)] uppercase block mt-1 font-mono">
+                        <span className="text-[10px] font-semibold text-[var(--theme-text-secondary)] uppercase block mt-1 font-mono">
                             Cost: {currencySymbol}{formatPriceValue(cost)}
                         </span>
                     </div>
                 ) : (
-                    <div className="bg-[var(--theme-bg-card)] p-3.5 sm:p-4 rounded-2xl border border-[var(--theme-border)]">
-                        <span className="text-[9px] font-bold uppercase tracking-wider text-[var(--theme-text-muted)] block mb-1">
+                    <div className="bg-[var(--theme-bg-card)] p-3.5 sm:p-4 rounded-2xl border border-[var(--theme-border)] shadow-xs">
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--theme-text-secondary)] block mb-1">
                             Min Safety Threshold
                         </span>
                         <div className="flex items-baseline gap-1.5">
-                            <span className="text-lg sm:text-xl font-mono font-bold text-amber-600 dark:text-amber-400 tracking-tight">
+                            <span className="text-lg sm:text-xl font-mono font-bold text-amber-600 dark:text-amber-300 tracking-tight">
                                 {product.minStock !== undefined && product.minStock !== null ? `${product.minStock} units` : 'Not Set'}
                             </span>
                         </div>
-                        <span className="text-[9px] font-medium text-[var(--theme-text-muted)] uppercase block mt-1">
+                        <span className="text-[10px] font-semibold text-[var(--theme-text-secondary)] uppercase block mt-1">
                             Safety Buffer
                         </span>
                     </div>

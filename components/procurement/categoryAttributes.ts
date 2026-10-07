@@ -185,3 +185,14 @@ export const isDiscreteGeneralMerch = (category?: string): boolean => {
     ];
     return discreteKeywords.some(keyword => cat.includes(keyword));
 };
+
+export const NET_CONTENT_UNITS = [
+    { value: 'g', label: 'g (Gram)', group: 'Weight' },
+    { value: 'kg', label: 'kg (Kilogram)', group: 'Weight' },
+    { value: 'ml', label: 'ml (Millilitre)', group: 'Volume' },
+    { value: 'L', label: 'L (Litre)', group: 'Volume' },
+    { value: 'oz', label: 'oz (Ounce)', group: 'Weight' },
+    { value: 'lb', label: 'lb (Pound)', group: 'Weight' },
+    { value: 'fl oz', label: 'fl oz (Fluid Ounce)', group: 'Volume' },
+    { value: 'pcs', label: 'pcs (Pieces / Count)', group: 'Count' },
+] as const;
