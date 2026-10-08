@@ -61,6 +61,7 @@ interface UsePOSCheckoutActionsProps {
     setIsValidatingCode: React.Dispatch<React.SetStateAction<boolean>>;
     validateDiscountCode: (code: string, siteId?: string, subtotal?: number, targetCountry?: string) => { valid: boolean; discountCode?: DiscountCode; error?: string };
     useDiscountCode: (id: string) => void;
+    setManualTaxRate?: React.Dispatch<React.SetStateAction<number | null>>;
 }
 
 export const usePOSCheckoutActions = ({
@@ -116,7 +117,8 @@ export const usePOSCheckoutActions = ({
     setDiscountCodeError,
     setIsValidatingCode,
     validateDiscountCode,
-    useDiscountCode
+    useDiscountCode,
+    setManualTaxRate
 }: UsePOSCheckoutActionsProps) => {
 
     const applyDiscountFromCode = React.useCallback((discountCode: any) => {
@@ -236,6 +238,7 @@ export const usePOSCheckoutActions = ({
             setIsPaymentModalOpen(false);
             setIsReceiptModalOpen(true);
             clearCart();
+            setManualTaxRate?.(null);
             setSelectedCustomer(null);
             setShowCart?.(false);
         } catch (e) {
@@ -244,7 +247,7 @@ export const usePOSCheckoutActions = ({
         }
     }, [
         isPaymentValid, selectedPaymentMethod, amountTendered, total, changeDue, activeSite, cart, user,
-        taxBreakdown, processSale, clearCart, setShowCart, setSelectedCustomer, setLastSale, setEarnedPointsData,
+        taxBreakdown, processSale, clearCart, setManualTaxRate, setShowCart, setSelectedCustomer, setLastSale, setEarnedPointsData,
         setShowPointsPopup, setIsPaymentModalOpen, setIsReceiptModalOpen, addNotification, setIsProcessing, activeShift
     ]);
 

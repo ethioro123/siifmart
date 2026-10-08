@@ -95,6 +95,7 @@ export interface SystemConfig {
   enableLoyalty: boolean;
   loyaltyPointsRate?: number; // ETB spent per 1 loyalty point earned (0 or undefined = disabled)
   enableWMS: boolean;
+  enablePoDraftAutoSave?: boolean;
   multiCurrency: boolean;
   requireShiftClosure: boolean;
   taxJurisdictions?: TaxJurisdiction[];

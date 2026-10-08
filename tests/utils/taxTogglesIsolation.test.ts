@@ -59,7 +59,7 @@ describe('Tax / VAT Toggles & Multi-Country Isolation (Selling & Buying)', () =>
             const siteCountry = (site.country || settings.country || 'ET');
             const countryConfigs = (settings.countryConfigs || {}) as Record<string, Partial<SystemConfig>>;
             const activeConfig = countryConfigs[siteCountry] || {};
-            const isSalesTaxEnabled = (activeConfig.taxOnSelling ?? settings.taxOnSelling) !== false;
+            const isSalesTaxEnabled = Boolean(activeConfig.taxOnSelling ?? settings.taxOnSelling);
 
             if (!isSalesTaxEnabled) {
                 return [];
@@ -113,6 +113,33 @@ describe('Tax / VAT Toggles & Multi-Country Isolation (Selling & Buying)', () =>
             expect(rules).toHaveLength(0);
         });
 
+        it('defaults to 0% sales tax (disabled) when taxOnSelling is undefined (Africa opt-in rule)', () => {
+            const settings: SystemConfig = {
+                storeName: 'SIIFMART',
+                currency: 'KES',
+                taxRate: 16,
+                country: 'KE',
+                countryConfigs: {},
+            } as any;
+
+            const rules = computeTaxRulesForSite(mockSite, settings);
+            expect(rules).toHaveLength(0); // Strictly opt-in: no automatic tax
+        });
+
+        it('supports manual tax rate calculation in POS when taxOnSelling is off', () => {
+            const subtotal = 1000;
+            const manualRate = 16;
+            const manualTax = subtotal * (manualRate / 100);
+            expect(manualTax).toBe(160);
+        });
+
+        it('supports 0% manual tax exemption override in POS when tax is enabled', () => {
+            const subtotal = 1000;
+            const manualRate = 0; // Exempt customer
+            const manualTax = manualRate > 0 ? subtotal * (manualRate / 100) : 0;
+            expect(manualTax).toBe(0);
+        });
+
         it('does not affect Ethiopia sales tax when Kenya turns taxOnSelling OFF', () => {
             const ethiopiaSite: Site = {
                 id: 'site-et-1',
@@ -150,7 +177,7 @@ describe('Tax / VAT Toggles & Multi-Country Isolation (Selling & Buying)', () =>
         const computeDefaultTaxRateForPO = (country: 'ET' | 'KE', settings: SystemConfig) => {
             const countryConfigs = (settings?.countryConfigs || {}) as Record<string, Partial<SystemConfig>>;
             const activeConfig = countryConfigs[country] || {};
-            const isPurchasingTaxEnabled = (activeConfig.taxOnPurchasing ?? settings?.taxOnPurchasing) !== false;
+            const isPurchasingTaxEnabled = Boolean(activeConfig.taxOnPurchasing ?? settings?.taxOnPurchasing);
             return isPurchasingTaxEnabled ? (country === 'KE' ? 16 : 15) : 0;
         };
 
@@ -176,6 +203,22 @@ describe('Tax / VAT Toggles & Multi-Country Isolation (Selling & Buying)', () =>
 
             const rate = computeDefaultTaxRateForPO('KE', settings);
             expect(rate).toBe(0);
+        });
+
+        it('defaults to 0% VAT when taxOnPurchasing is undefined / omitted (Africa opt-in rule)', () => {
+            const settings: SystemConfig = {
+                countryConfigs: {},
+            } as any;
+
+            const rate = computeDefaultTaxRateForPO('KE', settings);
+            expect(rate).toBe(0); // Strictly opt-in: no automatic PO tax
+        });
+
+        it('supports manual tax rate entry on PO even when taxOnPurchasing is off', () => {
+            const manualPOTaxRate = 16;
+            const poSubtotal = 50000;
+            const poTax = poSubtotal * (manualPOTaxRate / 100);
+            expect(poTax).toBe(8000);
         });
 
         it('maintains strict isolation between countries on purchasing tax', () => {

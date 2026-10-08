@@ -145,6 +145,25 @@ export const POTotalsSummary: React.FC<POTotalsSummaryProps> = ({
                             />
                             <span className="text-[var(--theme-text-secondary)] text-xs ml-1 font-bold">%</span>
                         </div>
+                        {taxRate === 0 ? (
+                            <button
+                                type="button"
+                                title="Manually apply national standard VAT"
+                                onClick={() => setTaxRate(currencySymbol === 'KSh' ? 16 : 15)}
+                                className="text-[10px] bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] px-1.5 py-0.5 rounded-lg font-bold text-[var(--theme-text-primary)] hover:border-[var(--theme-accent)] transition-colors cursor-pointer"
+                            >
+                                +{currencySymbol === 'KSh' ? '16%' : '15%'}
+                            </button>
+                        ) : (
+                            <button
+                                type="button"
+                                title="Exempt / Zero-rate tax on this PO"
+                                onClick={() => setTaxRate(0)}
+                                className="text-[10px] bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] px-1.5 py-0.5 rounded-lg font-bold text-[var(--theme-text-muted)] hover:text-rose-500 transition-colors cursor-pointer"
+                            >
+                                0%
+                            </button>
+                        )}
                     </div>
                 </div>
 

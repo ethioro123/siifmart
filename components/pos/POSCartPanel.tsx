@@ -38,6 +38,8 @@ export const POSCartPanel: React.FC = () => {
         cartDiscount,
         taxBreakdown,
         tax,
+        manualTaxRate,
+        setManualTaxRate,
         isRoundingEnabled,
         setIsRoundingEnabled,
         roundingAdjustment,
@@ -57,7 +59,7 @@ export const POSCartPanel: React.FC = () => {
         setIsMiscItemModalOpen,
     } = usePOS();
 
-    const { heldOrders } = useData();
+    const { heldOrders, activeSite } = useData();
     const [showActions, setShowActions] = useState(false);
     const [showDetails, setShowDetails] = useState(false);
     const [isNoSaleKickModalOpen, setIsNoSaleKickModalOpen] = useState(false);
@@ -254,7 +256,44 @@ export const POSCartPanel: React.FC = () => {
                                 </div>
 
                                 <div className="flex justify-between items-center text-[var(--theme-text-secondary)]">
-                                    <span>Tax ({taxBreakdown.map(t => t.name).join(', ') || 'Standard'})</span>
+                                    <div className="flex items-center gap-1.5">
+                                        <span>Tax ({taxBreakdown.map(t => t.name).join(', ') || (tax > 0 ? 'Applied' : '0%')})</span>
+                                        <div className="flex items-center bg-[var(--theme-bg-card)] rounded-lg border border-[var(--theme-border)] px-1.5 py-0.5 focus-within:border-[var(--theme-primary)]">
+                                            <input
+                                                type="number"
+                                                min="0"
+                                                max="100"
+                                                title="Manual VAT Rate (%)"
+                                                placeholder="0"
+                                                value={manualTaxRate !== null ? (manualTaxRate === 0 ? '0' : manualTaxRate) : (taxBreakdown.length > 0 ? (taxBreakdown[0].rate || 0) : '0')}
+                                                onChange={(e) => {
+                                                    const val = e.target.value === '' ? null : Math.max(0, Math.min(100, parseFloat(e.target.value) || 0));
+                                                    setManualTaxRate(val);
+                                                }}
+                                                className="w-7 bg-transparent text-right text-[var(--theme-text-primary)] font-mono text-[11px] outline-none font-bold"
+                                            />
+                                            <span className="text-[var(--theme-text-secondary)] text-[10px] ml-0.5 font-bold">%</span>
+                                        </div>
+                                        {tax === 0 ? (
+                                            <button
+                                                type="button"
+                                                title="Apply standard national VAT rate"
+                                                onClick={() => setManualTaxRate(activeSite?.country === 'KE' ? 16 : 15)}
+                                                className="text-[10px] bg-[var(--theme-bg-card)] border border-[var(--theme-border)] px-1.5 py-0.5 rounded-md font-bold text-[var(--theme-text-primary)] hover:border-[var(--theme-primary)] transition-colors cursor-pointer"
+                                            >
+                                                +{activeSite?.country === 'KE' ? '16%' : '15%'}
+                                            </button>
+                                        ) : (
+                                            <button
+                                                type="button"
+                                                title="Set 0% tax (Tax-exempt customer or zero-rated goods)"
+                                                onClick={() => setManualTaxRate(0)}
+                                                className="text-[10px] bg-[var(--theme-bg-card)] border border-[var(--theme-border)] px-1.5 py-0.5 rounded-md font-bold text-[var(--theme-text-muted)] hover:text-rose-500 transition-colors cursor-pointer"
+                                            >
+                                                0%
+                                            </button>
+                                        )}
+                                    </div>
                                     <span className="font-mono tabular-nums font-semibold text-[var(--theme-text-primary)]">{CURRENCY_SYMBOL} {tax.toFixed(2)}</span>
                                 </div>
 

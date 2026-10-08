@@ -127,7 +127,28 @@ export const suppliersService = {
             error = retry.error;
         }
 
-        if (error) throw error;
+        if (error) {
+            // If RLS blocked insert, check if supplier already exists by name for this country
+            if (error.code === '42501' && supplier.name) {
+                const { data: existingByName } = await supabase
+                    .from('suppliers')
+                    .select('*')
+                    .ilike('name', supplier.name.trim())
+                    .eq('country_code', country)
+                    .maybeSingle();
+
+                if (existingByName) {
+                    return {
+                        ...existingByName,
+                        countryCode: existingByName.country_code || country,
+                        leadTime: existingByName.lead_time,
+                        taxId: existingByName.tax_id,
+                        nationalId: existingByName.national_id
+                    };
+                }
+            }
+            throw error;
+        }
         return {
             ...data,
             countryCode: data.country_code || country,

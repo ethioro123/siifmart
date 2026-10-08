@@ -1,19 +1,19 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import Modal from '../../components/Modal';
 import { PurchaseOrder, POItem, Supplier } from '../../types';
-import { Loader2 } from 'lucide-react';
-import { formatCompactNumber } from '../../utils/formatting';
-import { getCountryProfile, getEffectiveCountry, type Country } from '../../utils/localization';
+import { getCountryProfile, type Country } from '../../utils/localization';
 import { useData } from '../../contexts/DataContext';
 import { useStore } from '../../contexts/CentralStore';
 import { suppliersService } from '../../services/supabase.service';
 import { usePurchaseOrderMutations } from '../../hooks/usePurchaseOrderMutations';
-import { generateSequentialSKU } from '../../utils/skuGenerator';
-
 import { POItemForm } from './POItemForm';
 import { POSupplierLogistics } from './POSupplierLogistics';
 import { POItemsTable } from './POItemsTable';
 import { POTotalsSummary } from './POTotalsSummary';
+import { usePODraft } from './hooks/usePODraft';
+import { PODraftBanner } from './PODraftBanner';
+import { buildPurchaseOrders, resolvePOVendor } from './createPOHelpers';
+import { CreatePOFooter } from './CreatePOFooter';
 import { logger } from '../../utils/logger';
 
 
@@ -65,8 +65,10 @@ export const CreatePOModal: React.FC<CreatePOModalProps> = ({
         );
     }, [sites, activeCountry]);
 
-    const isPurchasingTaxEnabled = (settings?.countryConfigs?.[activeCountry]?.taxOnPurchasing ?? settings?.taxOnPurchasing) !== false;
+    const isPurchasingTaxEnabled = Boolean(settings?.countryConfigs?.[activeCountry]?.taxOnPurchasing ?? settings?.taxOnPurchasing);
     const defaultTaxRate = isPurchasingTaxEnabled ? (countryProfile.taxRate ?? (activeCountry === 'KE' ? 16 : 15)) : 0;
+    const isEditMode = Boolean(editingPO?.id);
+    const enableAutoSave = (settings?.enablePoDraftAutoSave ?? true);
 
     // Form State
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -94,67 +96,28 @@ export const CreatePOModal: React.FC<CreatePOModalProps> = ({
     const [newPOItems, setNewPOItems] = useState<POItem[]>([]);
     const [fullEditingIndex, setFullEditingIndex] = useState<number | null>(null);
 
+    // Draft Management Hook
+    const {
+        hasDraft,
+        draftMeta,
+        isRestoredBannerVisible,
+        dismissBanner,
+        saveDraft,
+        readStoredDraft,
+        discardDraft
+    } = usePODraft({
+        countryCode: activeCountry,
+        userId: user?.id,
+        enabled: enableAutoSave,
+        isEditMode,
+        isOpen
+    });
+
     // Computed Totals
     const poSubtotal = newPOItems.reduce((sum, item) => sum + item.totalCost, 0);
     const poTax = poSubtotal * (taxRate / 100);
     const poDiscount = poSubtotal * (discountRate / 100);
     const poTotal = poSubtotal + poTax + shippingCost - poDiscount;
-
-    // Initialize
-    useEffect(() => {
-        if (isOpen) {
-            setPoRequestedBy(user?.name || '');
-
-            if (editingPO) {
-                // Populate from existing PO
-                const knownSupplier = allSuppliers.find(s => s.id === editingPO.supplierId);
-                if (!knownSupplier) {
-                    setIsManualVendor(true);
-                    setManualVendorName(editingPO.supplierName);
-                } else {
-                    setIsManualVendor(false);
-                    setNewPOSupplier(editingPO.supplierId);
-                }
-
-                setNewPOItems(editingPO.lineItems || []);
-                setPoNotes(editingPO.notes || '');
-                // Enforce destination must be a Warehouse or Distribution Center
-                const validWh = countryWarehouses.find(s => s.id === editingPO.siteId);
-                setDestinationSiteIds(validWh ? [editingPO.siteId] : (countryWarehouses[0] ? [countryWarehouses[0].id] : []));
-                setExpectedDate(editingPO.expectedDelivery || '');
-                setPoPriority(editingPO.priority as any || 'Normal');
-                setPaymentTerms(editingPO.paymentTerms || '');
-                setShippingCost(editingPO.shippingCost || 0);
-
-                const poItemsSubtotal = (editingPO.lineItems || []).reduce((sum, item) => sum + (item.totalCost || item.quantity * item.unitCost), 0);
-                if (editingPO.taxAmount !== undefined && poItemsSubtotal > 0) {
-                    setTaxRate(Math.round((editingPO.taxAmount / poItemsSubtotal) * 100));
-                } else {
-                    setTaxRate(defaultTaxRate);
-                }
-                if (editingPO.discount !== undefined && poItemsSubtotal > 0) {
-                    setDiscountRate(Math.round((editingPO.discount / poItemsSubtotal) * 100));
-                } else {
-                    setDiscountRate(0);
-                }
-
-            } else {
-                let defaultSiteId = '';
-                if (user?.siteId && countryWarehouses.find(w => w.id === user.siteId)) {
-                    defaultSiteId = user.siteId;
-                } else {
-                    defaultSiteId = countryWarehouses.length > 0 ? countryWarehouses[0].id : '';
-                }
-
-                setDestinationSiteIds(defaultSiteId ? [defaultSiteId] : []);
-                setTaxRate(defaultTaxRate);
-                setDiscountRate(0);
-            }
-        } else {
-            // Reset when closed
-            resetPOForm();
-        }
-    }, [isOpen, editingPO, user, countryWarehouses, activeCountry, defaultTaxRate]);
 
     const resetPOForm = () => {
         setNewPOSupplier('');
@@ -173,6 +136,127 @@ export const CreatePOModal: React.FC<CreatePOModalProps> = ({
         setQuantityDistribution('per-store');
         setFullEditingIndex(null);
     };
+
+    const handleDiscardDraft = () => {
+        discardDraft();
+        resetPOForm();
+        const defaultSiteId = user?.siteId && countryWarehouses.find(w => w.id === user.siteId)
+            ? user.siteId
+            : (countryWarehouses[0]?.id || '');
+        if (defaultSiteId) setDestinationSiteIds([defaultSiteId]);
+        showToast("Saved PO draft deleted", "info");
+    };
+
+    // Initialize & Hydrate Form State
+    useEffect(() => {
+        if (isOpen) {
+            setPoRequestedBy(user?.name || '');
+
+            if (editingPO) {
+                // Populate from existing PO
+                const knownSupplier = allSuppliers.find(s => s.id === editingPO.supplierId);
+                if (!knownSupplier) {
+                    setIsManualVendor(true);
+                    setManualVendorName(editingPO.supplierName);
+                } else {
+                    setIsManualVendor(false);
+                    setNewPOSupplier(editingPO.supplierId);
+                }
+
+                setNewPOItems(editingPO.lineItems || []);
+                setPoNotes(editingPO.notes || '');
+                const validWh = countryWarehouses.find(s => s.id === editingPO.siteId);
+                setDestinationSiteIds(validWh ? [editingPO.siteId] : (countryWarehouses[0] ? [countryWarehouses[0].id] : []));
+                setExpectedDate(editingPO.expectedDelivery || '');
+                setPoPriority(editingPO.priority as any || 'Normal');
+                setPaymentTerms(editingPO.paymentTerms || '');
+                setShippingCost(editingPO.shippingCost || 0);
+
+                const poItemsSubtotal = (editingPO.lineItems || []).reduce((sum, item) => sum + (item.totalCost || item.quantity * item.unitCost), 0);
+                if (editingPO.taxAmount !== undefined && poItemsSubtotal > 0) {
+                    setTaxRate(Math.round((editingPO.taxAmount / poItemsSubtotal) * 100));
+                } else {
+                    setTaxRate(defaultTaxRate);
+                }
+                if (editingPO.discount !== undefined && poItemsSubtotal > 0) {
+                    setDiscountRate(Math.round((editingPO.discount / poItemsSubtotal) * 100));
+                } else {
+                    setDiscountRate(0);
+                }
+            } else {
+                // Check if a saved draft exists for this country and user
+                const storedDraft = readStoredDraft();
+                if (storedDraft?.data) {
+                    const d = storedDraft.data;
+                    setIsManualVendor(Boolean(d.isManualVendor));
+                    setManualVendorName(d.manualVendorName || '');
+                    setNewPOSupplier(d.newPOSupplier || initialSupplierId || '');
+                    const validSites = (d.destinationSiteIds || []).filter(id => countryWarehouses.some(w => w.id === id));
+                    setDestinationSiteIds(validSites.length > 0 ? validSites : (countryWarehouses[0] ? [countryWarehouses[0].id] : []));
+                    setExpectedDate(d.expectedDate || '');
+                    setPoPriority(d.poPriority || 'Normal');
+                    setQuantityDistribution(d.quantityDistribution || 'per-store');
+                    setNewPOItems(d.newPOItems || []);
+                    setPoNotes(d.poNotes || '');
+                    setPaymentTerms(d.paymentTerms || '');
+                    setIncoterms(d.incoterms || '');
+                    setShippingCost(d.shippingCost || 0);
+                    setDiscountRate(d.discountRate || 0);
+                    setTaxRate(d.taxRate !== undefined ? d.taxRate : defaultTaxRate);
+                } else {
+                    let defaultSiteId = '';
+                    if (user?.siteId && countryWarehouses.find(w => w.id === user.siteId)) {
+                        defaultSiteId = user.siteId;
+                    } else {
+                        defaultSiteId = countryWarehouses.length > 0 ? countryWarehouses[0].id : '';
+                    }
+
+                    setDestinationSiteIds(defaultSiteId ? [defaultSiteId] : []);
+                    setTaxRate(defaultTaxRate);
+                    setDiscountRate(0);
+                    if (initialSupplierId) {
+                        setNewPOSupplier(initialSupplierId);
+                    }
+                }
+            }
+        } else {
+            resetPOForm();
+        }
+    }, [isOpen, editingPO, user, countryWarehouses, activeCountry, defaultTaxRate, readStoredDraft, initialSupplierId]);
+
+    // Debounced auto-save draft whenever user makes edits
+    useEffect(() => {
+        if (!isOpen || isEditMode || !enableAutoSave) return;
+
+        const timer = setTimeout(() => {
+            const selectedSupplierObj = allSuppliers.find(s => s.id === newPOSupplier);
+            const supplierDisplayName = isManualVendor ? manualVendorName : selectedSupplierObj?.name;
+
+            saveDraft({
+                isManualVendor,
+                manualVendorName,
+                newPOSupplier,
+                destinationSiteIds,
+                expectedDate,
+                poPriority,
+                quantityDistribution,
+                newPOItems,
+                poNotes,
+                paymentTerms,
+                incoterms,
+                shippingCost,
+                discountRate,
+                taxRate
+            }, supplierDisplayName);
+        }, 350);
+
+        return () => clearTimeout(timer);
+    }, [
+        isOpen, isEditMode, enableAutoSave, isManualVendor, manualVendorName,
+        newPOSupplier, destinationSiteIds, expectedDate, poPriority,
+        quantityDistribution, newPOItems, poNotes, paymentTerms, incoterms,
+        shippingCost, discountRate, taxRate, allSuppliers, saveDraft
+    ]);
 
     // --- Actions ---
 
@@ -238,124 +322,47 @@ export const CreatePOModal: React.FC<CreatePOModalProps> = ({
 
         setIsSubmitting(true);
         try {
-            // Determine Supplier
-            let vendorName = 'Unspecified';
-            let vendorId: string = crypto.randomUUID(); // Fallback for edge cases, ideally replaced below
-
-            if (isManualVendor) {
-                vendorName = manualVendorName || 'Unspecified';
-                // First create the manual vendor in the suppliers table to satisfy FK constraint
-                try {
-                    const newSupplier = await suppliersService.create({
-                        name: vendorName,
-                        type: 'One-Time',
-                        contact: 'Manual Entry',
-                        email: '',
-                        phone: '',
-                        category: 'Other',
-                        status: 'Active',
-                        rating: 3,
-                        location: 'Manual Entry',
-                        leadTime: 0,
-                        taxId: '',
-                        nationalId: ''
-                    });
-                    vendorId = newSupplier.id;
-                } catch (err) {
-                    logger.error('CreatePOModal', "Failed to create manual supplier:", err);
-                    showToast("Failed to create manual supplier record.", 'error');
-                    setIsSubmitting(false);
-                    return;
-                }
-            } else if (newPOSupplier) {
-                const s = allSuppliers.find(sup => sup.id === newPOSupplier);
-                vendorName = s?.name || 'Unknown';
-                vendorId = newPOSupplier;
-            }
+            const { vendorId, vendorName } = await resolvePOVendor({
+                isManualVendor,
+                manualVendorName,
+                newPOSupplier,
+                allSuppliers,
+                activeCountry
+            });
 
             const processedItems = [...newPOItems];
+            const generatedPOs = buildPurchaseOrders({
+                destinationSiteIds,
+                processedItems,
+                quantityDistribution,
+                shippingCost,
+                discountRate,
+                taxRate,
+                editingPO,
+                sites,
+                currencySymbol,
+                vendorId,
+                vendorName,
+                expectedDate,
+                poNotes,
+                paymentTerms,
+                poPriority,
+                userName: user?.name,
+                poRequestedBy
+            });
 
-            // NOTE: We do NOT create products at PO creation time.
-            // A PO is just an order — the product record should only be created
-            // when goods are physically received. The PO line items already store
-            // all product details (name, SKU, category, cost, retail, brand, size,
-            // unit, customAttributes) needed for the receiving flow to create
-            // the product at that time. This prevents empty stock=0 shell products
-            // and avoids duplicates.
-
-            // Create POs (Single or Multi-site)
             let successCount = 0;
-            const siteCount = destinationSiteIds.length;
-
-            for (const siteId of destinationSiteIds) {
-                // Clone items to avoid reference issues
-                const siteItems = processedItems.map(item => {
-                    let qty = item.quantity;
-                    let total = item.totalCost;
-
-                    // Apply split logic if enabled
-                    if (quantityDistribution === 'split' && siteCount > 1) {
-                        qty = Math.floor(item.quantity / siteCount);
-
-                        // Handle remainder on first site
-                        if (item.quantity % siteCount !== 0 && siteId === destinationSiteIds[0]) {
-                            qty += item.quantity % siteCount;
-                        }
-
-                        // Recalculate total cost
-                        total = Math.round(qty * item.unitCost * 100) / 100;
-                    }
-
-                    return {
-                        ...item,
-                        quantity: qty,
-                        totalCost: total
-                    };
-                }).filter(item => item.quantity > 0);
-
-                if (siteItems.length === 0) continue;
-
-                const siteSubtotal = siteItems.reduce((sum, item) => sum + item.totalCost, 0);
-                const siteTotalAmount = siteSubtotal + shippingCost - (siteSubtotal * discountRate / 100) + (siteSubtotal * taxRate / 100); // Updated total with new tax
-
-                const isEditMode = Boolean(editingPO?.id);
-                const destSite = sites.find(s => s.id === siteId);
-                const poCurrency = destSite?.currency || (destSite?.country === 'KE' ? 'KSh' : currencySymbol);
-
-                const newPO: PurchaseOrder = {
-                    id: (isEditMode && editingPO?.id) ? editingPO.id : crypto.randomUUID(),
-                    siteId: siteId,
-                    supplierId: vendorId,
-                    supplierName: vendorName,
-                    date: new Date().toISOString().split('T')[0],
-                    status: 'Draft',
-                    totalAmount: siteTotalAmount,
-                    itemsCount: siteItems.reduce((acc, item) => acc + item.quantity, 0),
-                    expectedDelivery: expectedDate || null,
-                    lineItems: siteItems,
-                    shippingCost: shippingCost,
-                    taxAmount: siteSubtotal * (taxRate / 100),
-                    discount: siteSubtotal * (discountRate / 100),
-                    notes: poNotes,
-                    paymentTerms: paymentTerms,
-                    priority: poPriority,
-                    createdBy: user?.name,
-                    requestedBy: poRequestedBy,
-                    currency: poCurrency,
-                    countryCode: destSite?.country || getEffectiveCountry({ country: destSite?.country, currency: poCurrency }),
-                    country_code: destSite?.country || getEffectiveCountry({ country: destSite?.country, currency: poCurrency }),
-                };
-
+            for (const { po: newPO, items: siteItems } of generatedPOs) {
                 if (isEditMode) {
                     await updatePOMutation.mutateAsync({ id: newPO.id, updates: newPO });
-                    successCount++;
                 } else {
                     await createPOMutation.mutateAsync({ po: newPO, items: siteItems });
-                    successCount++;
                 }
+                successCount++;
             }
 
-            const isEditMode = Boolean(editingPO && editingPO.id);
+            discardDraft();
+
             showToast(isEditMode ? 'PO Updated' : `Created ${successCount} PO(s)`, 'success');
             onSuccess();
             onClose();
@@ -368,37 +375,18 @@ export const CreatePOModal: React.FC<CreatePOModalProps> = ({
         }
     };
 
-    const isEditMode = Boolean(editingPO && editingPO.id);
     const isPendingAction = isSubmitting || createPOMutation.isPending || updatePOMutation.isPending;
 
     const createPOFooter = (
-        <div className="flex justify-between items-center w-full px-2">
-            <div className="flex items-center gap-4">
-                <div className="h-8 w-[1px] bg-[var(--theme-border-subtle)] hidden md:block"></div>
-                <div className="flex flex-col">
-                    <span className="text-[10px] text-[var(--theme-text-secondary)] uppercase font-bold tracking-wider leading-none">Total Value</span>
-                    <span className="text-lg font-mono text-[var(--theme-text-primary)] tracking-tight font-black tabular-nums">
-                        {currencySymbol} {formatCompactNumber(poTotal)}
-                    </span>
-                </div>
-            </div>
-            <div className="flex items-center gap-3">
-                <button
-                    onClick={onClose}
-                    className="px-5 py-2.5 rounded-full text-xs font-semibold transition-colors text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] cursor-pointer active:scale-[0.98]"
-                >
-                    Cancel
-                </button>
-                <button
-                    onClick={handleCreatePO}
-                    disabled={isPendingAction || newPOItems.length === 0}
-                    className="px-7 py-2.5 rounded-full text-xs font-semibold bg-[var(--theme-primary)] text-[var(--theme-primary-text)] hover:opacity-95 active:scale-[0.98] transition-all flex items-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer shadow-sm"
-                >
-                    {isPendingAction && <Loader2 size={14} className="animate-spin" />}
-                    {isEditMode ? 'Save Changes' : 'Create Purchase Order'}
-                </button>
-            </div>
-        </div>
+        <CreatePOFooter
+            currencySymbol={currencySymbol}
+            poTotal={poTotal}
+            onClose={onClose}
+            onCreatePO={handleCreatePO}
+            isPendingAction={isPendingAction}
+            isEditMode={isEditMode}
+            itemsCount={newPOItems.length}
+        />
     );
 
     return (
@@ -410,6 +398,15 @@ export const CreatePOModal: React.FC<CreatePOModalProps> = ({
             footer={createPOFooter}
         >
             <div className="relative space-y-8 pb-4 overflow-x-hidden">
+                {/* Draft Restoration Banner */}
+                {isRestoredBannerVisible && draftMeta && (
+                    <PODraftBanner
+                        meta={draftMeta}
+                        onDismiss={dismissBanner}
+                        onDiscard={handleDiscardDraft}
+                    />
+                )}
+
                 {/* 1. Supplier & Logistics */}
                 <POSupplierLogistics
                     isManualVendor={isManualVendor}

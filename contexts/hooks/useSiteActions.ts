@@ -58,7 +58,7 @@ export function useSiteActions(deps: UseSiteActionsDeps) {
         const siteCountry = (site?.country || settings.country || 'ET') as string;
         const countryConfigs = (settings.countryConfigs || {}) as Record<string, Partial<SystemConfig>>;
         const activeConfig = countryConfigs[siteCountry] || {};
-        const isSalesTaxEnabled = (activeConfig.taxOnSelling ?? settings.taxOnSelling) !== false;
+        const isSalesTaxEnabled = Boolean(activeConfig.taxOnSelling ?? settings.taxOnSelling);
 
         if (!isSalesTaxEnabled) {
             return [];

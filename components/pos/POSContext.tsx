@@ -74,6 +74,7 @@ export const POSProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     const [discountCodeInput, setDiscountCodeInput] = useState(''), [discountCodeError, setDiscountCodeError] = useState(''), [isValidatingCode, setIsValidatingCode] = useState(false);
     const [isMiscItemModalOpen, setIsMiscItemModalOpen] = useState(false), [miscItem, setMiscItem] = useState({ name: 'Misc Item', price: '' });
     const [isRoundingEnabled, setIsRoundingEnabled] = useState(true), [isReturnModalOpen, setIsReturnModalOpen] = useState(false);
+    const [manualTaxRate, setManualTaxRate] = useState<number | null>(null);
     const [returnSearchId, setReturnSearchId] = useState(''), [foundSaleForReturn, setFoundSaleForReturn] = useState<SaleRecord | null>(null);
     const [returnConfig, setReturnConfig] = useState<Record<string, { qty: number, condition: ReturnCondition, reason: ReturnReason }>>({});
     const [isStartShiftModalOpen, setIsStartShiftModalOpen] = useState(false);
@@ -202,6 +203,13 @@ export const POSProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
     const siteTaxRules = getTaxForSite(activeSite?.id);
     const taxResults = (() => {
+        if (manualTaxRate !== null) {
+            if (manualTaxRate <= 0) {
+                return { total: 0, breakdown: [] };
+            }
+            const manualTax = subtotal * (manualTaxRate / 100);
+            return { total: manualTax, breakdown: [{ name: `VAT ${manualTaxRate}%`, rate: manualTaxRate, amount: manualTax, compound: false }] };
+        }
         let runningTotalTax = 0;
         let currentBase = subtotal;
         const breakdown: any[] = [];
@@ -247,7 +255,7 @@ export const POSProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         cart, setCart, weightPromptProduct, setWeightPromptProduct,
         miscItem, setMiscItem, setIsMiscItemModalOpen, activeSite, addNotification,
         setCartDiscount, setAppliedDiscountCode, setAppliedDiscountCodeDetails,
-        setDiscountCodeInput, setDiscountCodeError, setIsRoundingEnabled, user
+        setDiscountCodeInput, setDiscountCodeError, setIsRoundingEnabled, setManualTaxRate, user
     });
 
     const {
@@ -266,7 +274,7 @@ export const POSProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         processSale, clearCart, setShowCart, addNotification, sales, activeShift,
         cartDiscount, setCartDiscount, setAppliedDiscountCode, setAppliedDiscountCodeDetails,
         setIsDiscountModalOpen, discountCodeInput, setDiscountCodeInput, setDiscountCodeError,
-        setIsValidatingCode, validateDiscountCode, useDiscountCode
+        setIsValidatingCode, validateDiscountCode, useDiscountCode, setManualTaxRate
     });
 
     const {
@@ -342,7 +350,9 @@ export const POSProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         appliedDiscountCodeDetails, setAppliedDiscountCodeDetails, isDiscountModalOpen, setIsDiscountModalOpen,
         discountCodeInput, setDiscountCodeInput, discountCodeError, setDiscountCodeError,
         isValidatingCode, setIsValidatingCode, isMiscItemModalOpen, setIsMiscItemModalOpen,
-        miscItem, setMiscItem, isRoundingEnabled, setIsRoundingEnabled, roundingAdjustment, isReturnModalOpen, setIsReturnModalOpen,
+        miscItem, setMiscItem, isRoundingEnabled, setIsRoundingEnabled, roundingAdjustment,
+        manualTaxRate, setManualTaxRate,
+        isReturnModalOpen, setIsReturnModalOpen,
         returnSearchId, setReturnSearchId, foundSaleForReturn, setFoundSaleForReturn, returnConfig,
         setReturnConfig, priceUpdatedProducts, isPriceUpdatesModalOpen, setIsPriceUpdatesModalOpen,
         isStartShiftModalOpen, setIsStartShiftModalOpen, handleStartShift, dismissStartShiftModal,
@@ -379,7 +389,7 @@ export const POSProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         selectedPaymentMethod, amountTendered, isProcessing, lastSale, showPointsPopup,
         earnedPointsData, isRecallModalOpen, cartDiscount, appliedDiscountCode,
         appliedDiscountCodeDetails, isDiscountModalOpen, discountCodeInput, discountCodeError,
-        isValidatingCode, isMiscItemModalOpen, miscItem, isRoundingEnabled, roundingAdjustment,
+        isValidatingCode, isMiscItemModalOpen, miscItem, isRoundingEnabled, roundingAdjustment, manualTaxRate,
         isReturnModalOpen, returnSearchId, foundSaleForReturn, returnConfig, priceUpdatedProducts,
         isPriceUpdatesModalOpen, lastSeenPriceUpdate, isStartShiftModalOpen, isShiftModalOpen, closingStep, cashDenominations,
         discrepancyReason, countedCash, shiftNotes, activeShift, shiftStartTime,

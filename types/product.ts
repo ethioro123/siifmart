@@ -263,6 +263,11 @@ export interface Supplier {
   taxId?: string;      // For Business
   nationalId?: string; // For Farmer/Individual
   location?: string;   // Farm Location / Address
+  countryCode?: string;
+  verificationStatus?: string;
+  bankName?: string;
+  bankAccountName?: string;
+  bankAccountNumber?: string;
 }
 
 export type PurchaseOrderItem = POItem; // Alias for clarity
@@ -283,6 +288,7 @@ export interface POItem {
   packageType?: string;
   caseSize?: number;
   pack_quantity?: number;
+  packaging?: any;
   case_size?: number;
   package_type?: string;
   custom_attributes?: any;

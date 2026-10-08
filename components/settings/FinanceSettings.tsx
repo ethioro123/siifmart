@@ -43,8 +43,8 @@ export default function FinanceSettings() {
         fiscalYearStart: activeCountry === 'KE' ? '2026-07' : '2026-01',
         accountingMethod: 'accrual',
         taxInclusive: true,
-        taxOnSelling: true,
-        taxOnPurchasing: true,
+        taxOnSelling: false,
+        taxOnPurchasing: false,
         taxRate: activeCountry === 'KE' ? 16 : 15,
         withholdingTax: 2,
     });
@@ -90,8 +90,8 @@ export default function FinanceSettings() {
             fiscalYearStart: activeConfig.fiscalYearStart || settings.fiscalYearStart || (activeCountry === 'KE' ? '2026-07' : '2026-01'),
             accountingMethod: activeConfig.accountingMethod || settings.accountingMethod || 'accrual',
             taxInclusive: activeConfig.taxInclusive ?? settings.taxInclusive ?? true,
-            taxOnSelling: activeConfig.taxOnSelling ?? settings.taxOnSelling ?? true,
-            taxOnPurchasing: activeConfig.taxOnPurchasing ?? settings.taxOnPurchasing ?? true,
+            taxOnSelling: activeConfig.taxOnSelling ?? settings.taxOnSelling ?? false,
+            taxOnPurchasing: activeConfig.taxOnPurchasing ?? settings.taxOnPurchasing ?? false,
             taxRate: activeConfig.taxRate ?? (activeCountry === 'KE' ? (settings.taxRate ?? 16) : (settings.taxRate ?? 15)),
             withholdingTax: activeConfig.withholdingTax ?? settings.withholdingTax ?? 2,
         });
@@ -324,7 +324,7 @@ export default function FinanceSettings() {
 
                                     <ToggleRow
                                         label="Tax / VAT on Sales (Selling)"
-                                        sub="Apply VAT / Tax to retail transactions and POS checkout (Turn OFF to disable sales tax)"
+                                        sub="Auto-apply VAT to POS checkout (Opt-in only. When OFF, sales tax defaults to 0% with manual override available)"
                                         checked={policy.taxOnSelling}
                                         disabled={!isAuthorized}
                                         onChange={() => setPolicy(prev => ({ ...prev, taxOnSelling: !prev.taxOnSelling }))}
@@ -332,7 +332,7 @@ export default function FinanceSettings() {
 
                                     <ToggleRow
                                         label="Tax / VAT on Procurement (Buying)"
-                                        sub="Apply VAT / Tax to supplier purchase orders and buying (Turn OFF to disable purchase tax)"
+                                        sub="Auto-apply VAT to purchase orders (Opt-in only. When OFF, PO tax defaults to 0% with manual override available)"
                                         checked={policy.taxOnPurchasing}
                                         disabled={!isAuthorized}
                                         onChange={() => setPolicy(prev => ({ ...prev, taxOnPurchasing: !prev.taxOnPurchasing }))}
