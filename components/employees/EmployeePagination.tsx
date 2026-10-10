@@ -1,5 +1,5 @@
 import React from 'react';
-import { ArrowLeft, ArrowRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface EmployeePaginationProps {
    currentPage: number;
@@ -15,19 +15,21 @@ export default function EmployeePagination({
    if (totalPages <= 1) return null;
 
    return (
-      <div className="flex items-center justify-between p-4 bg-[#FAF8F5]/85 dark:bg-black/25 border-t border-[#E2DCCE] dark:border-white/10 select-none">
-         <div className="text-xs text-stone-500 dark:text-gray-500 font-medium">
-            Showing {(currentPage - 1) * ITEMS_PER_PAGE + 1} to {Math.min(currentPage * ITEMS_PER_PAGE, totalCount)} of {totalCount}
+      <div className="h-14 px-4 sm:px-6 rounded-2xl bg-[var(--theme-bg-card)] border border-[var(--theme-border)] flex items-center justify-between select-none shadow-[var(--shadow-sm)]">
+         <div className="text-xs text-[var(--theme-text-secondary)]">
+            Showing <span className="font-mono tabular-nums font-semibold text-[var(--theme-text-primary)]">{(currentPage - 1) * ITEMS_PER_PAGE + 1}</span> to <span className="font-mono tabular-nums font-semibold text-[var(--theme-text-primary)]">{Math.min(currentPage * ITEMS_PER_PAGE, totalCount)}</span> of <span className="font-mono tabular-nums font-semibold text-[var(--theme-text-primary)]">{totalCount}</span> entries
          </div>
-         <div className="flex items-center gap-2">
+         <div className="flex items-center gap-1.5">
             <button
+               type="button"
                onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
                disabled={currentPage === 1}
-               className="p-2 rounded-xl bg-white dark:bg-white/5 border border-[#E2DCCE] dark:border-white/10 text-[#1E3F27] dark:text-white disabled:opacity-30 disabled:cursor-not-allowed hover:bg-stone-50 dark:hover:bg-white/10 transition-colors cursor-pointer"
+               className="h-8 px-2.5 rounded-xl bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-panel-hover)] border border-[var(--theme-border)] text-[var(--theme-text-primary)] disabled:opacity-30 disabled:pointer-events-none transition-all active:scale-[0.98] cursor-pointer flex items-center gap-1 text-xs font-medium"
                title="Previous Page"
                aria-label="Previous Page"
             >
-               <ArrowLeft size={16} />
+               <ChevronLeft size={14} />
+               <span className="hidden sm:inline">Previous</span>
             </button>
 
             <div className="flex items-center gap-1">
@@ -38,14 +40,18 @@ export default function EmployeePagination({
                   }
                   if (p > totalPages) return null;
 
+                  const isActive = currentPage === p;
+
                   return (
                      <button
                         key={p}
+                        type="button"
                         onClick={() => setCurrentPage(p)}
-                        className={`w-8 h-8 rounded-xl text-xs font-bold transition-all border cursor-pointer ${currentPage === p
-                           ? 'bg-[#224429] dark:bg-[#EAE5D9] text-white dark:text-[#1E3B24] border-[#224429] dark:border-[#EAE5D9] shadow-sm'
-                           : 'bg-white dark:bg-white/5 text-stone-550 dark:text-gray-400 border-[#E2DCCE] dark:border-white/10 hover:bg-stone-50 dark:hover:bg-white/10 hover:text-[#1E3F27] dark:hover:text-white'
-                           }`}
+                        className={`w-8 h-8 rounded-xl text-xs transition-all font-mono tabular-nums cursor-pointer active:scale-[0.98] ${
+                           isActive
+                              ? 'bg-[var(--theme-primary)] text-[var(--theme-primary-text)] font-semibold shadow-xs'
+                              : 'bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-panel-hover)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] border border-[var(--theme-border)] font-medium'
+                        }`}
                      >
                         {p}
                      </button>
@@ -54,13 +60,15 @@ export default function EmployeePagination({
             </div>
 
             <button
+               type="button"
                onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
                disabled={currentPage === totalPages}
-               className="p-2 rounded-xl bg-white dark:bg-white/5 border border-[#E2DCCE] dark:border-white/10 text-[#1E3F27] dark:text-white disabled:opacity-30 disabled:cursor-not-allowed hover:bg-stone-50 dark:hover:bg-white/10 transition-colors cursor-pointer"
+               className="h-8 px-2.5 rounded-xl bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-panel-hover)] border border-[var(--theme-border)] text-[var(--theme-text-primary)] disabled:opacity-30 disabled:pointer-events-none transition-all active:scale-[0.98] cursor-pointer flex items-center gap-1 text-xs font-medium"
                title="Next Page"
                aria-label="Next Page"
             >
-               <ArrowRight size={16} />
+               <span className="hidden sm:inline">Next</span>
+               <ChevronRight size={14} />
             </button>
          </div>
       </div>

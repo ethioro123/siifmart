@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useRef } from 'react';
+import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { WMSJob, Employee, WarehouseZone, Product } from '../../types';
 import { PutawayHistory } from './putaway/PutawayHistory';
 import { PutawayHeader } from './putaway/PutawayHeader';
@@ -34,6 +34,7 @@ interface PutawayTabProps {
     isDetailsOpen: boolean;
     resolveOrderRef: (ref?: string) => string;
     sites: any[];
+    loadHistoricalJobs?: (limit?: number) => Promise<void>;
 }
 
 const PUTAWAY_ITEMS_PER_PAGE = 10;
@@ -41,7 +42,8 @@ const PUTAWAY_ITEMS_PER_PAGE = 10;
 export const PutawayTab: React.FC<PutawayTabProps> = ({
     filteredJobs, historicalJobs, employees, user, orders,
     isSubmitting, setIsSubmitting, refreshData, handleStartJob,
-    selectedJob, setSelectedJob, setIsDetailsOpen, resolveOrderRef, isDetailsOpen, sites: tabSites
+    selectedJob, setSelectedJob, setIsDetailsOpen, resolveOrderRef, isDetailsOpen, sites: tabSites,
+    loadHistoricalJobs
 }) => {
     const isSubmittingRef = useRef(false);
 
@@ -52,6 +54,11 @@ export const PutawayTab: React.FC<PutawayTabProps> = ({
     const [putawayStatusFilter, setPutawayStatusFilter] = useState<'All' | 'Pending' | 'In-Progress'>('All');
     const [putawaySortBy, setPutawaySortBy] = useState<'priority' | 'date' | 'items'>('priority');
     const [viewMode, setViewMode] = useState<'Process' | 'History'>('Process');
+
+    // RULE 10: Fetch history on demand when user switches to History view
+    useEffect(() => {
+        if (viewMode === 'History' && loadHistoricalJobs) loadHistoricalJobs();
+    }, [viewMode]);
 
     // Temp location state for the scanner flow (moved up for scope access)
     const [scannedLocation, setScannedLocation] = useState<string>('');

@@ -26,32 +26,32 @@ export const DiscountModal: React.FC = () => {
             <div className="space-y-5">
                 {/* Current Applied Discount */}
                 {appliedDiscountCodeDetails && (
-                    <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-xl p-4">
+                    <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-2xl p-4">
                         <div className="flex items-center justify-between">
                             <div className="flex items-center gap-3">
-                                <div className="w-9 h-9 bg-emerald-500/20 rounded-lg flex items-center justify-center">
-                                    <CheckCircle className="w-5 h-5 text-emerald-500" />
+                                <div className="w-9 h-9 bg-emerald-500/20 text-emerald-500 rounded-xl flex items-center justify-center shrink-0">
+                                    <CheckCircle className="w-5 h-5" />
                                 </div>
                                 <div>
-                                    <p className="font-bold text-emerald-500 text-sm">{appliedDiscountCodeDetails.code}</p>
+                                    <p className="font-semibold text-emerald-500 text-sm tracking-tight">{appliedDiscountCodeDetails.code}</p>
                                     <p className="text-xs text-[var(--theme-text-secondary)]">{appliedDiscountCodeDetails.name}</p>
                                 </div>
                             </div>
                             <div className="text-right">
-                                <p className="text-base font-bold text-emerald-500">
+                                <p className="text-base font-bold text-emerald-500 font-mono tabular-nums">
                                     {appliedDiscountCodeDetails.type === 'PERCENTAGE'
                                         ? `-${appliedDiscountCodeDetails.value}%`
                                         : `-${CURRENCY_SYMBOL} ${appliedDiscountCodeDetails.value}`
                                     }
                                 </p>
-                                <p className="text-xs text-[var(--theme-text-secondary)]">
+                                <p className="text-xs text-[var(--theme-text-secondary)] font-mono tabular-nums">
                                     Saving: {formatCompactNumber(cartDiscount, { currency: CURRENCY_SYMBOL })}
                                 </p>
                             </div>
                         </div>
                         <button
                             onClick={handleRemoveDiscount}
-                            className="w-full mt-3 py-2 text-rose-500 text-xs font-bold border border-rose-500/20 bg-rose-500/10 rounded-lg hover:bg-rose-500/20 transition-colors cursor-pointer"
+                            className="w-full mt-3 py-2.5 text-rose-500 text-xs font-semibold border border-rose-500/20 bg-rose-500/10 rounded-xl hover:bg-rose-500/20 transition-all cursor-pointer active:scale-95 tracking-tight"
                         >
                             Remove Discount
                         </button>
@@ -62,17 +62,17 @@ export const DiscountModal: React.FC = () => {
                 {!appliedDiscountCodeDetails && (
                     <>
                         <div className="text-center">
-                            <div className="w-14 h-14 mx-auto mb-3 bg-[var(--theme-bg-subtle)] rounded-xl flex items-center justify-center border border-[var(--theme-border)]">
-                                <Tag className="w-7 h-7 text-[var(--theme-text-secondary)]" />
+                            <div className="w-14 h-14 mx-auto mb-3 bg-pink-500/10 rounded-2xl flex items-center justify-center border border-pink-500/20 text-pink-500 shadow-xs">
+                                <Tag className="w-7 h-7" />
                             </div>
-                            <p className="text-[var(--theme-text-secondary)] text-xs">
+                            <p className="text-[var(--theme-text-secondary)] text-xs font-medium">
                                 Enter the discount code provided to the customer
                             </p>
                         </div>
 
                         <div className="space-y-3">
                             <div>
-                                <label className="text-xs text-[var(--theme-text-secondary)] uppercase font-bold mb-1.5 block">
+                                <label className="text-xs text-[var(--theme-text-secondary)] uppercase font-semibold mb-1.5 block tracking-wider">
                                     Discount Code
                                 </label>
                                 <input
@@ -86,11 +86,11 @@ export const DiscountModal: React.FC = () => {
                                         if (e.key === 'Enter') handleValidateDiscountCode();
                                     }}
                                     placeholder="Enter code (e.g., SAVE10)"
-                                    className={`w-full bg-[var(--theme-bg-subtle)] border ${discountCodeError ? 'border-rose-500' : 'border-[var(--theme-border)]'} rounded-xl px-4 py-2.5 text-[var(--theme-text-primary)] text-center text-base font-mono tracking-wider uppercase focus:border-[var(--theme-border-focus)] transition-colors`}
+                                    className={`w-full bg-[var(--theme-bg-subtle)] border ${discountCodeError ? 'border-rose-500' : 'border-[var(--theme-border)]'} rounded-2xl px-4 py-3 text-[var(--theme-text-primary)] text-center text-base font-mono tracking-wider uppercase focus:border-[var(--theme-border-focus)] focus:ring-1 focus:ring-[var(--theme-border-focus)] transition-all`}
                                     autoFocus
                                 />
                                 {discountCodeError && (
-                                    <p className="mt-1.5 text-rose-500 text-xs flex items-center gap-1">
+                                    <p className="mt-1.5 text-rose-500 text-xs flex items-center justify-center gap-1 font-medium">
                                         <AlertTriangle className="w-3.5 h-3.5" />
                                         {discountCodeError}
                                     </p>
@@ -100,37 +100,39 @@ export const DiscountModal: React.FC = () => {
                             <button
                                 onClick={handleValidateDiscountCode}
                                 disabled={!discountCodeInput.trim() || isValidatingCode}
-                                className="w-full bg-[var(--theme-primary)] text-[var(--theme-primary-text)] py-3 rounded-xl font-bold flex items-center justify-center gap-2 disabled:opacity-30 border border-transparent disabled:cursor-not-allowed hover:opacity-90 active:scale-[0.98] transition-colors cursor-pointer shadow-xs text-xs uppercase tracking-wider"
+                                className="w-full bg-[var(--theme-primary)] text-[var(--theme-primary-text)] py-3.5 rounded-2xl font-semibold flex items-center justify-center gap-2 disabled:opacity-30 border border-transparent disabled:cursor-not-allowed hover:opacity-90 active:scale-[0.98] transition-all cursor-pointer shadow-xs text-xs tracking-tight uppercase"
                             >
                                 {isValidatingCode ? (
                                     <>
                                         <Loader2 className="w-4 h-4 animate-spin" />
-                                        Validating...
+                                        <span>Validating...</span>
                                     </>
                                 ) : (
                                     <>
                                         <CheckCircle className="w-4 h-4" />
-                                        Apply Code
+                                        <span>Apply Code</span>
                                     </>
                                 )}
                             </button>
                         </div>
 
                         {/* Anti-Fraud Security Policy Section */}
-                        <div className="bg-[var(--theme-bg-subtle)] rounded-xl p-4 border border-[var(--theme-border)] space-y-1.5">
-                            <div className="flex items-center gap-1.5 text-xs font-bold text-[var(--theme-text-primary)]">
-                                <Tag className="w-3.5 h-3.5 text-[var(--theme-primary)]" />
-                                Zero-Trust Promotion Policy
+                        <div className="bg-[var(--theme-bg-subtle)] rounded-2xl p-4 border border-[var(--theme-border)] space-y-1.5">
+                            <div className="flex items-center gap-2 text-xs font-semibold text-[var(--theme-text-primary)] tracking-tight">
+                                <div className="w-5 h-5 rounded-md bg-indigo-500/10 text-indigo-500 flex items-center justify-center shrink-0">
+                                    <Tag className="w-3 h-3" />
+                                </div>
+                                <span>Zero-Trust Promotion Policy</span>
                             </div>
-                            <p className="text-xs text-[var(--theme-text-secondary)] leading-relaxed">
+                            <p className="text-xs text-[var(--theme-text-secondary)] leading-relaxed font-normal">
                                 Arbitrary manual cashier or manager discounts are strictly disabled. Discounts can only be redeemed through verified promotional campaign codes generated and audited centrally by HQ Finance.
                             </p>
                         </div>
 
                         {/* Cart Summary */}
-                        <div className="flex justify-between text-sm text-[var(--theme-text-secondary)] pt-2 border-t border-[var(--theme-border)]">
-                            <span>Cart Subtotal:</span>
-                            <span className="text-[var(--theme-text-primary)] font-semibold tabular-nums">{formatCompactNumber(subtotal, { currency: CURRENCY_SYMBOL })}</span>
+                        <div className="flex justify-between items-baseline text-xs text-[var(--theme-text-secondary)] pt-2 border-t border-[var(--theme-border-subtle)]">
+                            <span className="font-semibold uppercase tracking-wider">Cart Subtotal:</span>
+                            <span className="text-[var(--theme-text-primary)] font-bold font-mono tabular-nums text-sm">{formatCompactNumber(subtotal, { currency: CURRENCY_SYMBOL })}</span>
                         </div>
                     </>
                 )}

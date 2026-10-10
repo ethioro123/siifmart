@@ -54,56 +54,56 @@ export default function TimeOffTab({
     return (
         <div className="space-y-6 animate-in fade-in">
             {/* Statutory Compliance Indicator */}
-            <div className="flex items-center justify-between p-3.5 bg-[#FAF8F5] dark:bg-black/30 rounded-xl border border-[#E2DCCE] dark:border-white/10 text-xs">
+            <div className="flex items-center justify-between p-3.5 bg-[var(--theme-bg-subtle)] rounded-xl border border-[var(--theme-border)] text-xs">
                 <div className="flex items-center gap-2">
-                    <ShieldCheck size={16} className="text-[#2C5E3B] dark:text-[#A9CBA2]" />
-                    <span className="font-bold text-[#1E3F27] dark:text-[#EAE5D9]">
+                    <ShieldCheck size={16} className="text-[var(--theme-accent)]" />
+                    <span className="font-semibold text-[var(--theme-text-primary)]">
                         Statutory Labor Policy ({statutoryConfig.countryCode})
                     </span>
                 </div>
-                <span className="font-mono text-stone-500 font-medium text-[11px]">
+                <span className="font-mono text-[var(--theme-text-secondary)] font-medium text-[11px] tabular-nums">
                     Statutory Baseline: {TOTAL_ANNUAL}d Annual • {TOTAL_SICK}d Medical • 4-Eyes Dual Control
                 </span>
             </div>
 
             {/* Leave Balance Cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="p-6 bg-[#FAF8F5] dark:bg-black/30 rounded-2xl border border-[#E2DCCE] dark:border-white/10 shadow-xs">
+                <div className="p-6 bg-[var(--theme-bg-card)] rounded-2xl border border-[var(--theme-border)] shadow-xs">
                     <div className="flex justify-between items-center mb-3">
-                        <span className="text-xs font-black uppercase tracking-wider text-[#1E3F27] dark:text-[#EAE5D9]">
+                        <span className="text-xs font-semibold uppercase tracking-wider text-[var(--theme-text-primary)]">
                             Annual Vacation Leave
                         </span>
-                        <span className="text-xs text-stone-500 font-mono font-bold">
+                        <span className="text-xs text-[var(--theme-text-secondary)] font-mono tabular-nums font-semibold">
                             {remainingAnnual} of {TOTAL_ANNUAL} Days Left
                         </span>
                     </div>
-                    <div className="w-full h-3 bg-stone-200 dark:bg-white/10 rounded-full overflow-hidden">
+                    <div className="w-full h-2.5 bg-[var(--theme-bg-subtle)] rounded-full overflow-hidden border border-[var(--theme-border)]">
                         <div
-                            className="h-full bg-[#2C5E3B] transition-all rounded-full"
+                            className="h-full bg-[var(--theme-accent)] transition-all rounded-full"
                             style={{ width: `${Math.min(100, (remainingAnnual / TOTAL_ANNUAL) * 100)}%` }}
                         />
                     </div>
-                    <p className="text-[11px] text-stone-400 mt-2 font-medium">
+                    <p className="text-[11px] text-[var(--theme-text-secondary)] mt-2 font-medium">
                         {usedAnnual} days taken this calendar year
                     </p>
                 </div>
 
-                <div className="p-6 bg-[#FAF8F5] dark:bg-black/30 rounded-2xl border border-[#E2DCCE] dark:border-white/10 shadow-xs">
+                <div className="p-6 bg-[var(--theme-bg-card)] rounded-2xl border border-[var(--theme-border)] shadow-xs">
                     <div className="flex justify-between items-center mb-3">
-                        <span className="text-xs font-black uppercase tracking-wider text-[#1E3F27] dark:text-[#EAE5D9]">
+                        <span className="text-xs font-semibold uppercase tracking-wider text-[var(--theme-text-primary)]">
                             Medical & Sick Leave
                         </span>
-                        <span className="text-xs text-stone-500 font-mono font-bold">
+                        <span className="text-xs text-[var(--theme-text-secondary)] font-mono tabular-nums font-semibold">
                             {remainingSick} of {TOTAL_SICK} Days Left
                         </span>
                     </div>
-                    <div className="w-full h-3 bg-stone-200 dark:bg-white/10 rounded-full overflow-hidden">
+                    <div className="w-full h-2.5 bg-[var(--theme-bg-subtle)] rounded-full overflow-hidden border border-[var(--theme-border)]">
                         <div
                             className="h-full bg-amber-500 transition-all rounded-full"
                             style={{ width: `${Math.min(100, (remainingSick / TOTAL_SICK) * 100)}%` }}
                         />
                     </div>
-                    <p className="text-[11px] text-stone-400 mt-2 font-medium">
+                    <p className="text-[11px] text-[var(--theme-text-secondary)] mt-2 font-medium">
                         {usedSick} days medical leave taken
                     </p>
                 </div>
@@ -112,10 +112,10 @@ export default function TimeOffTab({
             {/* Leave Requests Header & Action */}
             <div className="flex items-center justify-between pt-2">
                 <div>
-                    <h4 className="text-sm font-black text-[#1E3F27] dark:text-[#EAE5D9] uppercase tracking-wider">
+                    <h4 className="text-sm font-bold text-[var(--theme-text-primary)] uppercase tracking-wider">
                         Leave & Time-Off History
                     </h4>
-                    <p className="text-xs text-stone-500">
+                    <p className="text-xs text-[var(--theme-text-secondary)]">
                         Formal leave applications, medical time-off, and status
                     </p>
                 </div>
@@ -123,7 +123,7 @@ export default function TimeOffTab({
                 {(isOwnProfile || canManageEmployees) && (
                     <button
                         onClick={onRequestTimeOff}
-                        className="woody-btn-primary px-4 py-2 text-xs font-bold rounded-xl flex items-center gap-1.5 cursor-pointer shadow-xs"
+                        className="h-10 px-4 rounded-xl bg-[var(--theme-accent)] text-white hover:bg-[var(--theme-accent)]/90 text-xs font-semibold flex items-center gap-1.5 cursor-pointer shadow-xs transition-colors"
                     >
                         <Plus size={15} />
                         <span>Request Time Off</span>
@@ -133,12 +133,12 @@ export default function TimeOffTab({
 
             {/* Leave Requests List */}
             {leaveRequests.length === 0 ? (
-                <div className="text-center py-12 bg-[#FAF8F5] dark:bg-black/20 rounded-2xl border border-dashed border-[#E2DCCE] dark:border-white/10 space-y-2">
-                    <Calendar size={36} className="mx-auto text-stone-300 dark:text-stone-600" />
-                    <p className="font-bold text-sm text-[#1E3F27] dark:text-[#EAE5D9]">
+                <div className="text-center py-12 bg-[var(--theme-bg-card)] rounded-2xl border border-dashed border-[var(--theme-border)] space-y-2">
+                    <Calendar size={36} className="mx-auto text-[var(--theme-text-muted)]" />
+                    <p className="font-semibold text-sm text-[var(--theme-text-primary)]">
                         No Leave Requests Submitted
                     </p>
-                    <p className="text-xs text-stone-400">
+                    <p className="text-xs text-[var(--theme-text-secondary)]">
                         Submitted vacation, medical, or personal leave requests will appear here.
                     </p>
                 </div>
@@ -153,34 +153,34 @@ export default function TimeOffTab({
                         const reason = (req as any).reason;
 
                         const statusColors = {
-                            Approved: 'bg-emerald-50 text-emerald-800 dark:bg-emerald-950/20 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800/40',
-                            Pending: 'bg-amber-50 text-amber-800 dark:bg-amber-950/20 dark:text-amber-300 border-amber-200 dark:border-amber-800/40',
-                            Rejected: 'bg-red-50 text-red-800 dark:bg-red-950/20 dark:text-red-300 border-red-200 dark:border-red-800/40'
-                        }[status as 'Approved' | 'Pending' | 'Rejected'] || 'bg-stone-50 text-stone-700 border-stone-200';
+                            Approved: 'bg-emerald-500/15 text-emerald-500 border-emerald-500/25',
+                            Pending: 'bg-amber-500/15 text-amber-500 border-amber-500/25',
+                            Rejected: 'bg-rose-500/15 text-rose-500 border-rose-500/25'
+                        }[status as 'Approved' | 'Pending' | 'Rejected'] || 'bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] border-[var(--theme-border)]';
 
                         return (
                             <div
                                 key={req.id}
-                                className="p-4 bg-[#FAF8F5] dark:bg-black/30 rounded-2xl border border-[#E2DCCE] dark:border-white/10 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs"
+                                className="p-4 bg-[var(--theme-bg-card)] rounded-2xl border border-[var(--theme-border)] flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs"
                             >
                                 <div className="flex items-start gap-3">
-                                    <div className="p-2.5 rounded-xl bg-white dark:bg-white/5 border border-[#E2DCCE] dark:border-white/10 text-[#2C5E3B] dark:text-[#A9CBA2] mt-0.5">
+                                    <div className="p-2.5 rounded-xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-[var(--theme-accent)] mt-0.5">
                                         <Calendar size={18} />
                                     </div>
                                     <div>
                                         <div className="flex items-center gap-2">
-                                            <h5 className="font-bold text-sm text-[#1E3F27] dark:text-[#EAE5D9]">
+                                            <h5 className="font-semibold text-sm text-[var(--theme-text-primary)]">
                                                 {type}
                                             </h5>
-                                            <span className={`text-[10px] font-black uppercase px-2 py-0.5 rounded-lg border ${statusColors}`}>
+                                            <span className={`text-[11px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-lg border ${statusColors}`}>
                                                 {status}
                                             </span>
                                         </div>
-                                        <p className="text-xs text-stone-600 dark:text-stone-400 mt-0.5">
+                                        <p className="text-xs text-[var(--theme-text-secondary)] mt-0.5">
                                             {startDate} to {endDate} ({days} {days === 1 ? 'day' : 'days'})
                                         </p>
                                         {reason && (
-                                            <p className="text-xs text-stone-500 italic mt-1">
+                                            <p className="text-xs text-[var(--theme-text-muted)] italic mt-1">
                                                 "{reason}"
                                             </p>
                                         )}
@@ -192,13 +192,13 @@ export default function TimeOffTab({
                                     <div className="flex items-center gap-2 shrink-0">
                                         <button
                                             onClick={() => onRejectRequest(req.id)}
-                                            className="px-3 py-1.5 rounded-xl text-xs font-bold text-red-700 bg-red-50 dark:bg-red-950/20 border border-red-200 hover:bg-red-100 transition-colors cursor-pointer"
+                                            className="px-3 py-1.5 rounded-xl text-xs font-semibold text-rose-500 bg-rose-500/10 border border-rose-500/20 hover:bg-rose-500/20 transition-colors cursor-pointer"
                                         >
                                             Reject
                                         </button>
                                         <button
                                             onClick={() => onApproveRequest(req.id)}
-                                            className="woody-btn-primary px-3 py-1.5 rounded-xl text-xs font-bold cursor-pointer"
+                                            className="px-3 py-1.5 rounded-xl text-xs font-semibold text-white bg-[var(--theme-accent)] hover:bg-[var(--theme-accent)]/90 transition-colors cursor-pointer shadow-xs"
                                         >
                                             Approve
                                         </button>

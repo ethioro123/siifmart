@@ -1,13 +1,16 @@
 import React from 'react';
 import {
   Package, Truck, Activity, AlertTriangle, Thermometer,
-  ClipboardList, Clock, ArrowRight, CheckCircle, Box, ChevronRight, Target
+  ClipboardList, Clock, ArrowRight, CheckCircle, Box, ChevronRight, Target, UserPlus
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { MOCK_ZONES } from '../constants';
 import { useStore } from '../contexts/CentralStore';
 import { useData } from '../contexts/DataContext';
 import { useGamification } from '../contexts/GamificationContext';
+import OnboardTalentModal from '../components/employees/OnboardTalentModal';
+import NewHireHandoverBanner from '../components/employees/NewHireHandoverBanner';
+import { isManagerialRole } from '../utils/roles';
 
 import ClickableKPICard from '../components/ClickableKPICard';
 import { METRIC_ROUTES } from '../utils/metrics';
@@ -44,6 +47,8 @@ export default function WMSDashboard() {
   const [inventoryMetrics, setInventoryMetrics] = React.useState<any>(null);
   const [financialMetrics, setFinancialMetrics] = React.useState<any>(null);
   const [refreshing, setRefreshing] = React.useState(false);
+  const [isOnboardModalOpen, setIsOnboardModalOpen] = React.useState(false);
+  const canOnboard = isManagerialRole(user?.role) && ['warehouse_manager', 'logistics_manager', 'inventory_manager', 'dispatch_manager', 'shift_lead', 'super_admin', 'admin', 'operations_manager', 'regional_manager'].includes(user?.role || '');
 
   // Translate helper (in case page translations aren't globally bound, fallback to clean keys)
   const t = (key: string) => {
@@ -159,7 +164,11 @@ export default function WMSDashboard() {
         navigate('/procurement');
         break;
       case 'staff':
-        navigate('/employees');
+        if (canOnboard) {
+          setIsOnboardModalOpen(true);
+        } else {
+          addNotification('info', "Staff onboarding managed by facility supervisor.");
+        }
         break;
     }
   };
@@ -197,12 +206,27 @@ export default function WMSDashboard() {
               </div>
             </div>
 
+            {canOnboard && (
+              <button
+                type="button"
+                onClick={() => setIsOnboardModalOpen(true)}
+                className="px-4 py-2.5 bg-[#0071E3] dark:bg-[#2997FF] hover:opacity-95 text-white rounded-2xl text-xs font-semibold transition-all flex items-center gap-2 active:scale-95 shadow-xs cursor-pointer shrink-0"
+                title="Onboard warehouse pickers, packers, receivers, drivers & operators"
+              >
+                <UserPlus size={15} />
+                <span>Onboard Talent</span>
+              </button>
+            )}
+
             <DateRangeSelector
               value={dateRange}
               onChange={setDateRange}
             />
           </div>
         </div>
+
+        {/* ===== NEW RECRUIT CREDENTIAL HANDOVER ALERT ===== */}
+        <NewHireHandoverBanner />
 
         {/* KPI Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -320,15 +344,18 @@ export default function WMSDashboard() {
           <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-6 sm:p-8 relative overflow-hidden shadow-xs">
             <SiteRoster layout="grid" limit={8} className="relative z-10" />
 
-            <div className="mt-8 flex justify-center">
-              <button
-                onClick={() => navigate('/employees')}
-                className="px-6 py-2.5 bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-muted)] border border-[var(--theme-border)] rounded-xl text-xs font-bold text-[var(--theme-text-primary)] transition-all flex items-center gap-2 cursor-pointer shadow-xs"
-              >
-                Access Personnel Database
-                <ChevronRight size={14} />
-              </button>
-            </div>
+            {canOnboard && (
+              <div className="mt-8 flex justify-center">
+                <button
+                  type="button"
+                  onClick={() => setIsOnboardModalOpen(true)}
+                  className="px-6 py-2.5 bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card-hover)] border border-[var(--theme-border)] rounded-xl text-xs font-semibold text-[var(--theme-text-primary)] transition-all flex items-center gap-2 cursor-pointer shadow-xs active:scale-95"
+                >
+                  <UserPlus size={14} className="text-[#0071E3] dark:text-[#2997FF]" />
+                  <span>Onboard Facility Staff</span>
+                </button>
+              </div>
+            )}
           </div>
 
           <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-6 sm:p-8 relative overflow-visible shadow-xs">
@@ -378,6 +405,12 @@ export default function WMSDashboard() {
           </div>
         </div>
       </div>
+
+      {/* Onboard Facility Talent Modal */}
+      <OnboardTalentModal
+        isOpen={isOnboardModalOpen}
+        onClose={() => setIsOnboardModalOpen(false)}
+      />
     </div>
   );
 }

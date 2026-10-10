@@ -63,8 +63,8 @@ export const PERMISSIONS = {
     VIEW_CUSTOMER_HISTORY: ['super_admin', 'store_manager', 'assistant_manager', 'shift_lead', 'auditor', 'cs_manager', 'credit_control_officer'],
 
     // Employees
-    ACCESS_EMPLOYEES: ['super_admin', 'admin', 'regional_manager', 'operations_manager', 'hr', 'hr_manager', 'store_manager', 'assistant_manager', 'shift_lead', 'store_supervisor', 'security_manager', 'logistics_manager', 'inventory_manager', 'training_coordinator', 'payroll_specialist', 'talent_recruiter', 'fleet_maintenance_supervisor'],
-    ADD_EMPLOYEE: ['super_admin', 'admin', 'hr', 'hr_manager', 'talent_recruiter'],
+    ACCESS_EMPLOYEES: ['super_admin', 'admin', 'regional_manager', 'operations_manager', 'hr', 'hr_manager', 'warehouse_manager', 'store_manager', 'assistant_manager', 'shift_lead', 'store_supervisor', 'security_manager', 'logistics_manager', 'inventory_manager', 'training_coordinator', 'payroll_specialist', 'talent_recruiter', 'fleet_maintenance_supervisor'],
+    ADD_EMPLOYEE: ['super_admin', 'admin', 'hr', 'hr_manager', 'talent_recruiter', 'operations_manager', 'regional_manager'],
     EDIT_EMPLOYEE: ['super_admin', 'admin', 'hr', 'hr_manager', 'it_support', 'payroll_specialist', 'talent_recruiter'],
     DELETE_EMPLOYEE: ['super_admin'],
     TERMINATE_EMPLOYEE: ['super_admin', 'hr'],

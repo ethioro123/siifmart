@@ -53,8 +53,8 @@ export const FinanceModals: React.FC<FinanceModalsProps> = ({
                         onChange={(e) => setNewZone(prev => ({ ...prev, name: e.target.value }))}
                         icon={Globe}
                     />
-                    <div className="space-y-2">
-                        <label className="text-xs text-stone-600 dark:text-gray-400 font-bold uppercase tracking-wide">Type</label>
+                    <div className="space-y-1.5">
+                        <label className="text-[11px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider">Type</label>
                         <RadioCard<'National' | 'Region'>
                             value={newZone.type}
                             onChange={(val) => setNewZone(prev => ({ ...prev, type: val }))}

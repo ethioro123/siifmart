@@ -23,13 +23,18 @@ export function DesktopSearch({
    containerRef
 }: DesktopSearchProps) {
    return (
-    <div className="relative hidden lg:block" ref={containerRef}>
-         <form onSubmit={handleSearch} className="flex items-center bg-[#F4EFE6] dark:bg-black/20 rounded-full px-4 py-1.5 border border-[#E2DCCE] dark:border-white/10 focus-within:border-[#2C5E3B]/60 dark:focus-within:border-[#A9CBA2]/60 transition-colors">
-            <Search className="w-4 h-4 text-[#4D6E56] dark:text-[#7A9E83]" />
+      <div className="relative hidden lg:block" ref={containerRef}>
+         <form
+            onSubmit={handleSearch}
+            className="flex items-center bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card-hover)] border border-[var(--theme-border)] rounded-full px-3.5 py-1.5 focus-within:border-[var(--theme-primary)] focus-within:ring-2 focus-within:ring-[var(--theme-primary)]/15 focus-within:bg-[var(--theme-bg-card)] transition-all group shadow-2xs"
+         >
+            <div className="w-6 h-6 rounded-full bg-blue-500/10 text-blue-500 flex items-center justify-center shrink-0 group-focus-within:bg-blue-500 group-focus-within:text-white transition-all">
+               <Search size={13} />
+            </div>
             <input
                type="text"
                placeholder="Global Search..."
-               className="bg-transparent border-none focus:ring-0 text-sm text-[#1E3F27] dark:text-[#EAE5D9] ml-2 w-64 placeholder-[#4D6E56]/60 dark:placeholder-[#7A9E83]/60 outline-none"
+               className="bg-transparent border-none focus:ring-0 text-sm text-[var(--theme-text-primary)] ml-2.5 w-64 placeholder-[var(--theme-text-muted)] outline-none font-medium tracking-tight"
                value={searchValue}
                onChange={(e) => {
                   setSearchValue(e.target.value);
@@ -38,199 +43,268 @@ export function DesktopSearch({
                }}
                onFocus={() => searchValue.length >= 2 && setIsSearchOpen(true)}
             />
+            {searchValue.trim() ? (
+               <button
+                  type="button"
+                  onClick={() => {
+                     setSearchValue('');
+                     setIsSearchOpen(false);
+                  }}
+                  className="w-5 h-5 rounded-full bg-black/10 dark:bg-white/10 hover:bg-black/20 dark:hover:bg-white/20 text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] flex items-center justify-center transition-all cursor-pointer active:scale-90 shrink-0"
+                  aria-label="Clear Search"
+               >
+                  <X size={11} />
+               </button>
+            ) : (
+               <div className="hidden sm:flex items-center gap-0.5 px-1.5 py-0.5 rounded-md bg-[var(--theme-bg-card)] border border-[var(--theme-border)] text-[10px] font-mono text-[var(--theme-text-muted)] select-none shrink-0">
+                  <span>⌘</span><span>K</span>
+               </div>
+            )}
          </form>
 
          {/* Search Results Dropdown */}
          {isSearchOpen && searchResults && (
-            <>
-               <div className="absolute left-0 mt-2 w-96 bg-[#FDFBF7] dark:bg-[#18201B] border border-[#E2DCCE] dark:border-white/10 rounded-xl shadow-2xl z-40 animate-in fade-in slide-in-from-top-2 overflow-hidden max-h-[500px] overflow-y-auto">
-                  <div className="p-3 border-b border-[#E2DCCE] dark:border-white/5 bg-black/5 dark:bg-black/20 flex justify-between items-center">
-                     <h4 className="text-xs font-bold text-[#1E3F27] dark:text-white uppercase tracking-wider">
-                        Search Results ({searchResults.total})
-                     </h4>
-                     <button onClick={() => setIsSearchOpen(false)} className="text-[#4D6E56] dark:text-gray-400 hover:text-[#1E3F27] dark:hover:text-white" aria-label="Close search">
-                        <X size={14} />
-                     </button>
-                  </div>
-
-                  {searchResults.total > 0 ? (
-                     <>
-                        {/* Navigation & Commands */}
-                        {(searchResults.navigation?.length > 0 || searchResults.deepLinks?.length > 0) && (
-                           <div className="border-b border-[#2C5E3B]/20 bg-[#2C5E3B]/5 dark:border-[#A9CBA2]/20 dark:bg-[#A9CBA2]/5">
-                              <div className="px-3 py-2 bg-black/5 dark:bg-black/30">
-                                 <p className="text-[10px] font-black text-[#2C5E3B] dark:text-[#A9CBA2] uppercase flex items-center gap-1 tracking-widest">
-                                    <Layout size={10} /> Commands & Navigation
-                                 </p>
-                              </div>
-                              
-                              {/* Deep Links First */}
-                              {searchResults.deepLinks?.map((link: any, idx: number) => (
-                                 <button
-                                    key={`dl-${idx}`}
-                                    onClick={() => handleResultClick('job', link.id, link.path)}
-                                    className="w-full p-3 hover:bg-[#2C5E3B]/10 dark:hover:bg-[#A9CBA2]/10 transition-colors flex items-center gap-3 text-left border-b border-[#E2DCCE]/50 dark:border-white/5 last:border-0 group cursor-pointer"
-                                 >
-                                    <div className="w-8 h-8 rounded-lg bg-[#2C5E3B]/20 dark:bg-[#A9CBA2]/20 flex items-center justify-center flex-shrink-0">
-                                       <Activity size={16} className="text-amber-600 dark:text-amber-500 group-hover:animate-pulse" />
-                                    </div>
-                                    <div className="flex-1">
-                                       <p className="text-sm font-black text-[#1E3F27] dark:text-white">{link.title}</p>
-                                       <p className="text-[10px] text-[#4D6E56] dark:text-gray-400 font-mono tracking-wider">Direct Access Link</p>
-                                    </div>
-                                    <ArrowRight size={14} className="text-[#2C5E3B] dark:text-[#A9CBA2] opacity-0 group-hover:opacity-100 transition-all -translate-x-2 group-hover:translate-x-0" />
-                                 </button>
-                              ))}
-
-                              {/* Standard Navigation */}
-                              {searchResults.navigation?.map((nav: any, idx: number) => (
-                                 <button
-                                    key={`nav-${idx}`}
-                                    onClick={() => handleResultClick('navigation', nav.module, nav.path)}
-                                    className="w-full p-3 hover:bg-[#2C5E3B]/10 dark:hover:bg-[#A9CBA2]/10 transition-colors flex items-center gap-3 text-left border-b border-[#E2DCCE]/50 dark:border-white/5 last:border-0 group cursor-pointer"
-                                 >
-                                    <div className="w-8 h-8 rounded-lg bg-black/5 dark:bg-white/5 flex items-center justify-center flex-shrink-0 group-hover:bg-black/10 dark:group-hover:bg-white/10 transition-colors">
-                                       <Layout size={16} className="text-[#2C5E3B] dark:text-[#A9CBA2]" />
-                                    </div>
-                                    <div className="flex-1">
-                                       <p className="text-sm font-bold text-[#1E3F27] dark:text-white group-hover:text-[#2C5E3B] dark:group-hover:text-[#A9CBA2] transition-colors">{nav.title}</p>
-                                       <p className="text-[10px] text-[#4D6E56] dark:text-gray-500 uppercase tracking-widest">{nav.module} module</p>
-                                    </div>
-                                    <ArrowRight size={14} className="text-[#4D6E56] dark:text-gray-500 opacity-0 group-hover:opacity-100 transition-all -translate-x-2 group-hover:translate-x-0" />
-                                 </button>
-                              ))}
-                           </div>
-                        )}
-
-                        {/* Products */}
-                        {searchResults.products.length > 0 && (
-                           <div className="border-b border-white/5">
-                              <div className="px-3 py-2 bg-black/10">
-                                 <p className="text-[10px] font-bold text-gray-400 uppercase flex items-center gap-1">
-                                    <Package size={10} /> Products ({searchResults.products.length})
-                                 </p>
-                              </div>
-                              {searchResults.products.map((p: any) => (
-                                 <button
-                                    key={p.id}
-                                    onClick={() => handleResultClick('product', p.id)}
-                                    className="w-full p-3 hover:bg-white/5 transition-colors flex items-center gap-3 text-left border-b border-white/5 last:border-0"
-                                 >
-                                    <Package size={16} className="text-green-400" />
-                                    <div className="flex-1">
-                                       <p className="text-sm font-bold text-white">{p.name}</p>
-                                       <p className="text-[10px] text-gray-500">{p.sku} • Stock: {p.stock}</p>
-                                    </div>
-                                 </button>
-                              ))}
-                           </div>
-                        )}
-
-                        {/* Orders */}
-                        {searchResults.orders.length > 0 && (
-                           <div className="border-b border-white/5">
-                              <div className="px-3 py-2 bg-black/10">
-                                 <p className="text-[10px] font-bold text-gray-400 uppercase flex items-center gap-1">
-                                    <FileText size={10} /> Purchase Orders ({searchResults.orders.length})
-                                 </p>
-                              </div>
-                              {searchResults.orders.map((o: any) => (
-                                 <button
-                                    key={o.id}
-                                    onClick={() => handleResultClick('order', o.id)}
-                                    className="w-full p-3 hover:bg-white/5 transition-colors flex items-center gap-3 text-left border-b border-white/5 last:border-0"
-                                 >
-                                    <FileText size={16} className="text-blue-400" />
-                                    <div className="flex-1">
-                                       <p className="text-sm font-bold text-white">{o.poNumber || o.po_number}</p>
-                                       <p className="text-[10px] text-gray-500">{o.status} • {o.supplierName}</p>
-                                    </div>
-                                 </button>
-                              ))}
-                           </div>
-                        )}
-
-                        {/* Sales History */}
-                        {searchResults.sales.length > 0 && (
-                           <div className="border-b border-white/5">
-                              <div className="px-3 py-2 bg-black/10">
-                                 <p className="text-[10px] font-bold text-gray-400 uppercase flex items-center gap-1">
-                                    <ShoppingCart size={10} /> Sales History ({searchResults.sales.length})
-                                 </p>
-                              </div>
-                              {searchResults.sales.map((s: any) => (
-                                 <button
-                                    key={s.id}
-                                    onClick={() => handleResultClick('sale', s.id)}
-                                    className="w-full p-3 hover:bg-white/5 transition-colors flex items-center gap-3 text-left border-b border-white/5 last:border-0"
-                                 >
-                                    <ShoppingCart size={16} className="text-purple-400" />
-                                    <div className="flex-1">
-                                       <p className="text-sm font-bold text-white">{s.receiptNumber || `SALE-${s.id.substring(0, 8).toUpperCase()}`}</p>
-                                       <p className="text-[10px] text-gray-500">${s.total} • {s.date}</p>
-                                    </div>
-                                 </button>
-                              ))}
-                           </div>
-                        )}
-
-                        {/* Customers */}
-                        {searchResults.customers.length > 0 && (
-                           <div className="border-b border-white/5">
-                              <div className="px-3 py-2 bg-black/10">
-                                 <p className="text-[10px] font-bold text-gray-400 uppercase flex items-center gap-1">
-                                    <Users size={10} /> Customers ({searchResults.customers.length})
-                                 </p>
-                              </div>
-                              {searchResults.customers.map((c: any) => (
-                                 <button
-                                    key={c.id}
-                                    onClick={() => handleResultClick('customer', c.id)}
-                                    className="w-full p-3 hover:bg-white/5 transition-colors flex items-center gap-3 text-left border-b border-white/5 last:border-0"
-                                 >
-                                    <Users size={16} className="text-cyan-400" />
-                                    <div className="flex-1">
-                                       <p className="text-sm font-bold text-white">{c.name}</p>
-                                       <p className="text-[10px] text-gray-500">{c.email || c.phone}</p>
-                                    </div>
-                                 </button>
-                              ))}
-                           </div>
-                        )}
-
-                        {/* Team */}
-                        {searchResults.employees.length > 0 && (
-                           <div>
-                              <div className="px-3 py-2 bg-black/10">
-                                 <p className="text-[10px] font-bold text-gray-400 uppercase flex items-center gap-1">
-                                    <Users size={10} /> Team Members ({searchResults.employees.length})
-                                 </p>
-                              </div>
-                              {searchResults.employees.map((e: any) => (
-                                 <button
-                                    key={e.id}
-                                    onClick={() => handleResultClick('employee', e.id)}
-                                    className="w-full p-3 hover:bg-white/5 transition-colors flex items-center gap-3 text-left border-b border-white/5 last:border-0"
-                                 >
-                                    <Users size={16} className="text-yellow-400" />
-                                    <div className="flex-1">
-                                       <p className="text-sm font-bold text-white">{e.name}</p>
-                                       <p className="text-[10px] text-gray-500">{e.role} • {e.email}</p>
-                                    </div>
-                                 </button>
-                              ))}
-                           </div>
-                        )}
-                     </>
-                  ) : (
-                     <div className="p-10 text-center">
-                        <Search size={32} className="mx-auto text-gray-600 mb-2" />
-                        <p className="text-gray-400 text-sm italic">No intelligence found for "{searchValue}"</p>
-                        <p className="text-gray-500 text-[10px] mt-1">Try searching for products, orders, customers, or team members</p>
-                     </div>
-                  )}
+            <div className="absolute left-0 mt-2 w-[420px] bg-[var(--theme-bg-card)]/95 backdrop-blur-2xl border border-[var(--theme-border)] rounded-2xl shadow-2xl z-50 animate-in fade-in zoom-in-95 duration-150 overflow-hidden max-h-[520px] overflow-y-auto custom-scrollbar">
+               <div className="p-3.5 border-b border-[var(--theme-border)] bg-[var(--theme-bg-subtle)]/70 flex justify-between items-center">
+                  <h4 className="text-xs font-semibold text-[var(--theme-text-primary)] tracking-tight">
+                     Search Results ({searchResults.total})
+                  </h4>
+                  <button
+                     type="button"
+                     onClick={() => setIsSearchOpen(false)}
+                     className="p-1 rounded-lg text-[var(--theme-text-muted)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-card-hover)] transition-colors cursor-pointer active:scale-90"
+                     aria-label="Close search"
+                  >
+                     <X size={14} />
+                  </button>
                </div>
-            </>
+
+               {searchResults.total > 0 ? (
+                  <>
+                     {/* Navigation & Commands */}
+                     {(searchResults.navigation?.length > 0 || searchResults.deepLinks?.length > 0) && (
+                        <div className="border-b border-[var(--theme-border-subtle)]">
+                           <div className="px-3.5 py-2 bg-[var(--theme-bg-subtle)]/50 border-b border-[var(--theme-border-subtle)]">
+                              <p className="text-[10px] font-bold text-indigo-500 uppercase tracking-widest flex items-center gap-1.5">
+                                 <Layout size={12} /> Commands &amp; Navigation
+                              </p>
+                           </div>
+
+                           {/* Deep Links First */}
+                           {searchResults.deepLinks?.map((link: any, idx: number) => (
+                              <button
+                                 key={`dl-${idx}`}
+                                 onClick={() => handleResultClick('job', link.id, link.path)}
+                                 className="w-full p-3 hover:bg-[var(--theme-bg-subtle)] transition-colors flex items-center gap-3 text-left border-b border-[var(--theme-border-subtle)] last:border-0 group cursor-pointer"
+                              >
+                                 <div className="w-8 h-8 rounded-xl bg-amber-500/10 text-amber-500 flex items-center justify-center shrink-0">
+                                    <Activity size={16} className="group-hover:animate-pulse" />
+                                 </div>
+                                 <div className="flex-1 min-w-0">
+                                    <p className="text-sm font-semibold text-[var(--theme-text-primary)] group-hover:text-amber-500 transition-colors truncate">
+                                       {link.title}
+                                    </p>
+                                    <p className="text-[10px] text-[var(--theme-text-muted)] font-mono tracking-wider">
+                                       Direct Access Link
+                                    </p>
+                                 </div>
+                                 <ArrowRight size={14} className="text-[var(--theme-text-muted)] group-hover:text-[var(--theme-text-primary)] transition-all -translate-x-1 group-hover:translate-x-0 shrink-0" />
+                              </button>
+                           ))}
+
+                           {/* Standard Navigation */}
+                           {searchResults.navigation?.map((nav: any, idx: number) => (
+                              <button
+                                 key={`nav-${idx}`}
+                                 onClick={() => handleResultClick('navigation', nav.module, nav.path)}
+                                 className="w-full p-3 hover:bg-[var(--theme-bg-subtle)] transition-colors flex items-center gap-3 text-left border-b border-[var(--theme-border-subtle)] last:border-0 group cursor-pointer"
+                              >
+                                 <div className="w-8 h-8 rounded-xl bg-indigo-500/10 text-indigo-500 flex items-center justify-center shrink-0">
+                                    <Layout size={16} />
+                                 </div>
+                                 <div className="flex-1 min-w-0">
+                                    <p className="text-sm font-semibold text-[var(--theme-text-primary)] group-hover:text-indigo-500 transition-colors truncate">
+                                       {nav.title}
+                                    </p>
+                                    <p className="text-[10px] text-[var(--theme-text-muted)] uppercase tracking-wider">
+                                       {nav.module} module
+                                    </p>
+                                 </div>
+                                 <ArrowRight size={14} className="text-[var(--theme-text-muted)] group-hover:text-[var(--theme-text-primary)] transition-all -translate-x-1 group-hover:translate-x-0 shrink-0" />
+                              </button>
+                           ))}
+                        </div>
+                     )}
+
+                     {/* Products */}
+                     {searchResults.products?.length > 0 && (
+                        <div className="border-b border-[var(--theme-border-subtle)]">
+                           <div className="px-3.5 py-2 bg-[var(--theme-bg-subtle)]/50 border-b border-[var(--theme-border-subtle)]">
+                              <p className="text-[10px] font-bold text-emerald-500 uppercase tracking-widest flex items-center gap-1.5">
+                                 <Package size={12} /> Products ({searchResults.products.length})
+                              </p>
+                           </div>
+                           {searchResults.products.map((p: any) => (
+                              <button
+                                 key={p.id}
+                                 onClick={() => handleResultClick('product', p.id)}
+                                 className="w-full p-3 hover:bg-[var(--theme-bg-subtle)] transition-colors flex items-center gap-3 text-left border-b border-[var(--theme-border-subtle)] last:border-0 group cursor-pointer"
+                              >
+                                 <div className="w-8 h-8 rounded-xl bg-emerald-500/10 text-emerald-500 flex items-center justify-center shrink-0">
+                                    <Package size={16} />
+                                 </div>
+                                 <div className="flex-1 min-w-0">
+                                    <p className="text-sm font-semibold text-[var(--theme-text-primary)] group-hover:text-emerald-500 transition-colors truncate">
+                                       {p.name}
+                                    </p>
+                                    <p className="text-[10px] text-[var(--theme-text-muted)] font-mono truncate">
+                                       {p.sku} • Stock: {p.stock}
+                                    </p>
+                                 </div>
+                                 <ArrowRight size={14} className="text-[var(--theme-text-muted)] group-hover:text-[var(--theme-text-primary)] transition-all -translate-x-1 group-hover:translate-x-0 shrink-0" />
+                              </button>
+                           ))}
+                        </div>
+                     )}
+
+                     {/* Purchase Orders */}
+                     {searchResults.orders?.length > 0 && (
+                        <div className="border-b border-[var(--theme-border-subtle)]">
+                           <div className="px-3.5 py-2 bg-[var(--theme-bg-subtle)]/50 border-b border-[var(--theme-border-subtle)]">
+                              <p className="text-[10px] font-bold text-blue-500 uppercase tracking-widest flex items-center gap-1.5">
+                                 <FileText size={12} /> Purchase Orders ({searchResults.orders.length})
+                              </p>
+                           </div>
+                           {searchResults.orders.map((o: any) => (
+                              <button
+                                 key={o.id}
+                                 onClick={() => handleResultClick('order', o.id)}
+                                 className="w-full p-3 hover:bg-[var(--theme-bg-subtle)] transition-colors flex items-center gap-3 text-left border-b border-[var(--theme-border-subtle)] last:border-0 group cursor-pointer"
+                              >
+                                 <div className="w-8 h-8 rounded-xl bg-blue-500/10 text-blue-500 flex items-center justify-center shrink-0">
+                                    <FileText size={16} />
+                                 </div>
+                                 <div className="flex-1 min-w-0">
+                                    <p className="text-sm font-semibold text-[var(--theme-text-primary)] group-hover:text-blue-500 transition-colors truncate">
+                                       {o.poNumber || o.po_number}
+                                    </p>
+                                    <p className="text-[10px] text-[var(--theme-text-muted)] truncate">
+                                       {o.status} • {o.supplierName}
+                                    </p>
+                                 </div>
+                                 <ArrowRight size={14} className="text-[var(--theme-text-muted)] group-hover:text-[var(--theme-text-primary)] transition-all -translate-x-1 group-hover:translate-x-0 shrink-0" />
+                              </button>
+                           ))}
+                        </div>
+                     )}
+
+                     {/* Sales History */}
+                     {searchResults.sales?.length > 0 && (
+                        <div className="border-b border-[var(--theme-border-subtle)]">
+                           <div className="px-3.5 py-2 bg-[var(--theme-bg-subtle)]/50 border-b border-[var(--theme-border-subtle)]">
+                              <p className="text-[10px] font-bold text-purple-500 uppercase tracking-widest flex items-center gap-1.5">
+                                 <ShoppingCart size={12} /> Sales History ({searchResults.sales.length})
+                              </p>
+                           </div>
+                           {searchResults.sales.map((s: any) => (
+                              <button
+                                 key={s.id}
+                                 onClick={() => handleResultClick('sale', s.id)}
+                                 className="w-full p-3 hover:bg-[var(--theme-bg-subtle)] transition-colors flex items-center gap-3 text-left border-b border-[var(--theme-border-subtle)] last:border-0 group cursor-pointer"
+                              >
+                                 <div className="w-8 h-8 rounded-xl bg-purple-500/10 text-purple-500 flex items-center justify-center shrink-0">
+                                    <ShoppingCart size={16} />
+                                 </div>
+                                 <div className="flex-1 min-w-0">
+                                    <p className="text-sm font-semibold text-[var(--theme-text-primary)] group-hover:text-purple-500 transition-colors truncate">
+                                       {s.receiptNumber || `SALE-${s.id.substring(0, 8).toUpperCase()}`}
+                                    </p>
+                                    <p className="text-[10px] text-[var(--theme-text-muted)] font-mono truncate">
+                                       ${s.total} • {s.date}
+                                    </p>
+                                 </div>
+                                 <ArrowRight size={14} className="text-[var(--theme-text-muted)] group-hover:text-[var(--theme-text-primary)] transition-all -translate-x-1 group-hover:translate-x-0 shrink-0" />
+                              </button>
+                           ))}
+                        </div>
+                     )}
+
+                     {/* Customers */}
+                     {searchResults.customers?.length > 0 && (
+                        <div className="border-b border-[var(--theme-border-subtle)]">
+                           <div className="px-3.5 py-2 bg-[var(--theme-bg-subtle)]/50 border-b border-[var(--theme-border-subtle)]">
+                              <p className="text-[10px] font-bold text-cyan-500 uppercase tracking-widest flex items-center gap-1.5">
+                                 <Users size={12} /> Customers ({searchResults.customers.length})
+                              </p>
+                           </div>
+                           {searchResults.customers.map((c: any) => (
+                              <button
+                                 key={c.id}
+                                 onClick={() => handleResultClick('customer', c.id)}
+                                 className="w-full p-3 hover:bg-[var(--theme-bg-subtle)] transition-colors flex items-center gap-3 text-left border-b border-[var(--theme-border-subtle)] last:border-0 group cursor-pointer"
+                              >
+                                 <div className="w-8 h-8 rounded-xl bg-cyan-500/10 text-cyan-500 flex items-center justify-center shrink-0">
+                                    <Users size={16} />
+                                 </div>
+                                 <div className="flex-1 min-w-0">
+                                    <p className="text-sm font-semibold text-[var(--theme-text-primary)] group-hover:text-cyan-500 transition-colors truncate">
+                                       {c.name}
+                                    </p>
+                                    <p className="text-[10px] text-[var(--theme-text-muted)] truncate">
+                                       {c.email || c.phone}
+                                    </p>
+                                 </div>
+                                 <ArrowRight size={14} className="text-[var(--theme-text-muted)] group-hover:text-[var(--theme-text-primary)] transition-all -translate-x-1 group-hover:translate-x-0 shrink-0" />
+                              </button>
+                           ))}
+                        </div>
+                     )}
+
+                     {/* Team Members */}
+                     {searchResults.employees?.length > 0 && (
+                        <div>
+                           <div className="px-3.5 py-2 bg-[var(--theme-bg-subtle)]/50 border-b border-[var(--theme-border-subtle)]">
+                              <p className="text-[10px] font-bold text-amber-500 uppercase tracking-widest flex items-center gap-1.5">
+                                 <Users size={12} /> Team Members ({searchResults.employees.length})
+                              </p>
+                           </div>
+                           {searchResults.employees.map((e: any) => (
+                              <button
+                                 key={e.id}
+                                 onClick={() => handleResultClick('employee', e.id)}
+                                 className="w-full p-3 hover:bg-[var(--theme-bg-subtle)] transition-colors flex items-center gap-3 text-left border-b border-[var(--theme-border-subtle)] last:border-0 group cursor-pointer"
+                              >
+                                 <div className="w-8 h-8 rounded-xl bg-amber-500/10 text-amber-500 flex items-center justify-center shrink-0">
+                                    <Users size={16} />
+                                 </div>
+                                 <div className="flex-1 min-w-0">
+                                    <p className="text-sm font-semibold text-[var(--theme-text-primary)] group-hover:text-amber-500 transition-colors truncate">
+                                       {e.name}
+                                    </p>
+                                    <p className="text-[10px] text-[var(--theme-text-muted)] truncate">
+                                       {e.role} • {e.email}
+                                    </p>
+                                 </div>
+                                 <ArrowRight size={14} className="text-[var(--theme-text-muted)] group-hover:text-[var(--theme-text-primary)] transition-all -translate-x-1 group-hover:translate-x-0 shrink-0" />
+                              </button>
+                           ))}
+                        </div>
+                     )}
+                  </>
+               ) : (
+                  <div className="p-8 text-center select-none">
+                     <div className="w-12 h-12 rounded-2xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] flex items-center justify-center text-[var(--theme-text-muted)] mx-auto mb-3">
+                        <Search size={20} />
+                     </div>
+                     <p className="text-sm font-semibold text-[var(--theme-text-primary)]">
+                        No results for &ldquo;{searchValue}&rdquo;
+                     </p>
+                     <p className="text-xs text-[var(--theme-text-secondary)] mt-1">
+                        Try searching for products, POs, receipts, customers, or team members
+                     </p>
+                  </div>
+               )}
+            </div>
          )}
       </div>
    );

@@ -35,6 +35,7 @@ export const core: TranslationBlock = {
     completeJob: { en: 'Complete', am: 'ጨርስ', or: 'Xumuri' },
     jobId: { en: 'Job ID', am: 'የስራ መታወቂያ', or: 'Eenyummaa Hojii' },
     assignedTo: { en: 'Assigned To', am: 'የተመደበለት', or: 'Kan Ramadameef' },
+    completedBy: { en: 'Completed By', am: 'የተጠናቀቀው በ', or: 'Kan Xumure' },
     totalItems: { en: 'Total Items', am: 'ጠቅላላ ዕቃዎች', or: 'Meeshalee Walii Galaa' },
     workersActive: { en: 'Workers Active', am: 'ንቁ ሰራተኞች', or: 'Hojjettoota Jireenyaa' },
 

@@ -29,6 +29,8 @@ export interface JobItem {
   packed?: boolean;
   packedQty?: number;
   packQuantity?: number;
+  packageType?: string;
+  caseSize?: number;
   category?: string;
   customAttributes?: any;
   description?: string;

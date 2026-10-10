@@ -6,30 +6,49 @@ interface StatCardProps {
    title: string;
    value: string | number;
    icon: React.ElementType;
-   color: string;
+   iconBg: string;
+   iconColor: string;
    onClick?: () => void;
    active?: boolean;
 }
 
-const StatCard = ({ title, value, icon: Icon, color, onClick, active }: StatCardProps) => (
+const StatCard = ({ title, value, icon: Icon, iconBg, iconColor, onClick, active }: StatCardProps) => (
    <div
       onClick={onClick}
-      className={`relative overflow-hidden bg-white/80 dark:bg-[#18201B]/60 border rounded-2xl p-6 hover:bg-[#2C5E3B]/5 dark:hover:bg-white/5 transition-all group ${onClick ? 'cursor-pointer active:scale-[0.98]' : ''} ${active ? 'border-[#2C5E3B] dark:border-[#A9CBA2] shadow-[0_4px_16px_rgba(44,94,59,0.1)] bg-white/5' : 'border-[#E2DCCE] dark:border-emerald-950/20'}`}
+      className={`relative bg-[var(--theme-bg-card)] border rounded-2xl p-4 sm:p-5 transition-all flex flex-col justify-between ${
+         onClick ? 'cursor-pointer active:scale-[0.98]' : ''
+      } ${
+         active
+            ? 'border-[#0071E3] dark:border-[#2997FF] shadow-[0_2px_12px_rgba(0,113,227,0.15)] ring-1 ring-[#0071E3]/20'
+            : 'border-[var(--theme-border)] shadow-[var(--shadow-sm)] hover:border-[var(--theme-border-strong)]'
+      }`}
    >
-      <div className="flex items-center justify-between z-10 relative">
-         <div>
-            <p className="text-[#4D6E56] dark:text-[#7A9E83] text-xs font-black uppercase tracking-wider mb-1">{title}</p>
-            <h3 className="text-3xl font-black text-[#1E3F27] dark:text-white font-mono">{value}</h3>
-            {onClick && (
-               <div className={`flex items-center gap-1 mt-2 text-[10px] font-black uppercase tracking-wider ${active ? 'text-[#2C5E3B] dark:text-[#A9CBA2]' : 'text-stone-500 dark:text-gray-500 group-hover:text-[#2C5E3B] dark:group-hover:text-white'} transition-colors`}>
-                  <span>{active ? 'Hide Queue' : 'View Queue'}</span>
-                  <ArrowRight size={10} className={active ? '-rotate-90 transition-transform' : 'group-hover:translate-x-1 transition-transform'} />
-               </div>
-            )}
+      <div className="flex items-center justify-between mb-3">
+         <div className="flex items-center gap-2.5">
+            <div className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 ${iconBg} ${iconColor}`}>
+               <Icon size={16} />
+            </div>
+            <span className="text-[11px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider">
+               {title}
+            </span>
          </div>
-         <div className={`p-3 rounded-xl bg-[#FAF8F5] dark:bg-white/5 border border-[#E2DCCE] dark:border-white/10 group-hover:scale-110 transition-transform ${color}`}>
-            <Icon size={24} />
-         </div>
+      </div>
+
+      <div className="flex items-end justify-between">
+         <h3 className="text-2xl sm:text-3xl font-semibold text-[var(--theme-text-primary)] font-mono tabular-nums tracking-tight">
+            {value}
+         </h3>
+
+         {onClick && (
+            <div className={`inline-flex items-center gap-1 text-[11px] font-semibold transition-colors ${
+               active
+                  ? 'text-[#0071E3] dark:text-[#2997FF]'
+                  : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)]'
+            }`}>
+               <span>{active ? 'Hide' : 'Queue'}</span>
+               <ArrowRight size={12} className={active ? '-rotate-90 transition-transform' : 'transition-transform'} />
+            </div>
+         )}
       </div>
    </div>
 );
@@ -51,14 +70,14 @@ export default function EmployeeStats({
    isTaskQueueOpen,
    setIsTaskQueueOpen
 }: EmployeeStatsProps) {
-   // Real active shifts calculation (Zero fake math)
+   // Real active shifts calculation
    const activeShiftsCount = useMemo(() => {
       const openShifts = shifts.filter(s => (s.status as string) === 'Open' || (s.status as string) === 'open' || !s.endTime);
       if (openShifts.length > 0) return openShifts.length;
       return onlineIds.size;
    }, [shifts, onlineIds]);
 
-   // Real calculated average performance score (Zero hardcoded values)
+   // Real calculated average performance score
    const avgPerformanceText = useMemo(() => {
       const rated = employees.filter(e => typeof e.performanceScore === 'number' && e.performanceScore > 0);
       if (rated.length > 0) {
@@ -69,18 +88,37 @@ export default function EmployeeStats({
    }, [employees]);
 
    return (
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-         <StatCard title="Total Workforce" value={employees.length} icon={User} color="text-sky-700 dark:text-sky-400" />
-         <StatCard title="Active Shift" value={activeShiftsCount} icon={Clock} color="text-emerald-700 dark:text-[#A9CBA2]" />
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+         <StatCard
+            title="Workforce"
+            value={employees.length.toLocaleString()}
+            icon={User}
+            iconBg="bg-blue-500/10"
+            iconColor="text-[#0071E3] dark:text-[#2997FF]"
+         />
+         <StatCard
+            title="Active Shift"
+            value={activeShiftsCount.toLocaleString()}
+            icon={Clock}
+            iconBg="bg-emerald-500/10"
+            iconColor="text-emerald-600 dark:text-emerald-400"
+         />
          <StatCard
             title="Pending Tasks"
-            value={tasks.filter(t => t.status !== 'Completed').length}
+            value={tasks.filter(t => t.status !== 'Completed').length.toLocaleString()}
             icon={ClipboardList}
-            color="text-amber-700 dark:text-amber-400"
+            iconBg="bg-amber-500/10"
+            iconColor="text-amber-600 dark:text-amber-400"
             onClick={() => setIsTaskQueueOpen(!isTaskQueueOpen)}
             active={isTaskQueueOpen}
          />
-         <StatCard title="Avg Performance" value={avgPerformanceText} icon={TrendingUp} color="text-emerald-700 dark:text-[#A9CBA2]" />
+         <StatCard
+            title="Avg Score"
+            value={avgPerformanceText}
+            icon={TrendingUp}
+            iconBg="bg-indigo-500/10"
+            iconColor="text-indigo-500 dark:text-indigo-400"
+         />
       </div>
    );
 }

@@ -72,7 +72,7 @@ export default function OverviewTab({ employee, employeeTasks, sites, isOwnProfi
                         </div>
                     </div>
                     <div className="flex items-baseline gap-2">
-                        <span className="text-3xl sm:text-4xl font-extrabold text-[var(--theme-text-primary)] tabular-nums">
+                        <span className="text-3xl sm:text-4xl font-bold text-[var(--theme-text-primary)] tabular-nums">
                             {score}
                         </span>
                         <span className="text-xs font-semibold text-[var(--theme-text-muted)]">/ 100</span>
@@ -99,7 +99,7 @@ export default function OverviewTab({ employee, employeeTasks, sites, isOwnProfi
                         </div>
                     </div>
                     <div className="flex items-baseline gap-2">
-                        <span className="text-3xl sm:text-4xl font-extrabold text-[var(--theme-text-primary)] tabular-nums">
+                        <span className="text-3xl sm:text-4xl font-bold text-[var(--theme-text-primary)] tabular-nums">
                             {attendance}%
                         </span>
                         <span className="text-xs font-semibold text-[var(--theme-text-muted)]">punctuality</span>
@@ -126,7 +126,7 @@ export default function OverviewTab({ employee, employeeTasks, sites, isOwnProfi
                         </div>
                     </div>
                     <div className="flex items-baseline gap-2">
-                        <span className="text-3xl sm:text-4xl font-extrabold text-[var(--theme-text-primary)] tabular-nums">
+                        <span className="text-3xl sm:text-4xl font-bold text-[var(--theme-text-primary)] tabular-nums">
                             {completedTasks}
                         </span>
                         <span className="text-xs font-semibold text-[var(--theme-text-muted)]">/ {totalTasks} assigned</span>
@@ -164,7 +164,7 @@ export default function OverviewTab({ employee, employeeTasks, sites, isOwnProfi
                                     <Mail size={16} />
                                 </div>
                                 <div className="min-w-0">
-                                    <p className="text-[10px] text-[var(--theme-text-muted)] uppercase font-bold tracking-wider">Email Address</p>
+                                    <p className="text-[11px] text-[var(--theme-text-muted)] uppercase font-semibold tracking-wider">Email Address</p>
                                     <p className="text-sm font-semibold text-[var(--theme-text-primary)] truncate">{employee.email || 'N/A'}</p>
                                 </div>
                             </div>
@@ -186,7 +186,7 @@ export default function OverviewTab({ employee, employeeTasks, sites, isOwnProfi
                                     <Phone size={16} />
                                 </div>
                                 <div className="min-w-0">
-                                    <p className="text-[10px] text-[var(--theme-text-muted)] uppercase font-bold tracking-wider">Phone Number</p>
+                                    <p className="text-[11px] text-[var(--theme-text-muted)] uppercase font-semibold tracking-wider">Phone Number</p>
                                     <p className="text-sm font-semibold text-[var(--theme-text-primary)] truncate">{employee.phone || 'No phone recorded'}</p>
                                 </div>
                             </div>
@@ -208,7 +208,7 @@ export default function OverviewTab({ employee, employeeTasks, sites, isOwnProfi
                                     <MapPin size={16} />
                                 </div>
                                 <div className="min-w-0">
-                                    <p className="text-[10px] text-[var(--theme-text-muted)] uppercase font-bold tracking-wider">Residential Address</p>
+                                    <p className="text-[11px] text-[var(--theme-text-muted)] uppercase font-semibold tracking-wider">Residential Address</p>
                                     <p className="text-sm font-semibold text-[var(--theme-text-primary)] truncate">{employee.address || 'No residence address recorded'}</p>
                                 </div>
                             </div>
@@ -222,7 +222,7 @@ export default function OverviewTab({ employee, employeeTasks, sites, isOwnProfi
                                         <MapPin size={16} />
                                     </div>
                                     <div className="min-w-0">
-                                        <p className="text-[10px] text-[var(--theme-text-muted)] uppercase font-bold tracking-wider">Last Verified GPS</p>
+                                        <p className="text-[11px] text-[var(--theme-text-muted)] uppercase font-semibold tracking-wider">Last Verified GPS</p>
                                         <p className="text-sm font-mono font-medium text-[var(--theme-text-secondary)] truncate">
                                             {canSeeLocation ? (employee.lastLoginGps || user?.loginLocation) : 'Protected by Hierarchy'}
                                         </p>
@@ -288,7 +288,7 @@ export default function OverviewTab({ employee, employeeTasks, sites, isOwnProfi
 
                     {employee.emergencyContact && (
                         <div className="mt-5 pt-4 border-t border-[var(--theme-border)]">
-                            <p className="text-[10px] text-[var(--theme-text-muted)] uppercase font-bold tracking-wider mb-2">Emergency Safety Contact</p>
+                            <p className="text-[11px] text-[var(--theme-text-muted)] uppercase font-semibold tracking-wider mb-2">Emergency Safety Contact</p>
                             <div className="p-3 bg-rose-500/10 rounded-xl border border-rose-500/20 flex items-center gap-2.5 text-xs text-rose-500 font-semibold">
                                 <Phone size={14} />
                                 <span>{employee.emergencyContact}</span>
@@ -356,13 +356,13 @@ export default function OverviewTab({ employee, employeeTasks, sites, isOwnProfi
                                         <Laptop size={16} />
                                     </div>
                                     <div>
-                                        <span className="text-[10px] text-[var(--theme-text-muted)] uppercase font-bold block">Primary Registered Terminal</span>
+                                        <span className="text-[11px] text-[var(--theme-text-muted)] uppercase font-semibold block">Primary Registered Terminal</span>
                                         <span className="text-sm font-bold text-[var(--theme-text-primary)]">{employee.lastLoginDevice}</span>
                                     </div>
                                 </div>
                                 {employee.lastLoginAt && (
                                     <div className="md:text-right pl-11 md:pl-0">
-                                        <span className="text-[10px] text-[var(--theme-text-muted)] uppercase font-bold block">Last Sync Timestamp</span>
+                                        <span className="text-[11px] text-[var(--theme-text-muted)] uppercase font-semibold block">Last Sync Timestamp</span>
                                         <span className="text-xs text-[var(--theme-text-secondary)] font-mono tabular-nums">{new Date(employee.lastLoginAt).toLocaleString()}</span>
                                     </div>
                                 )}
@@ -373,7 +373,7 @@ export default function OverviewTab({ employee, employeeTasks, sites, isOwnProfi
                             <div className="flex items-center justify-between">
                                 <p className="text-xs font-bold text-[var(--theme-text-secondary)] uppercase tracking-wider">Recent Authenticated Sessions</p>
                                 {employee.loginHistory && employee.loginHistory.length > 0 && (
-                                    <span className="text-[10px] text-[var(--theme-text-muted)] font-mono">Last 10 sessions</span>
+                                    <span className="text-[11px] text-[var(--theme-text-muted)] font-mono">Last 10 sessions</span>
                                 )}
                             </div>
                             {employee.loginHistory && employee.loginHistory.length > 0 ? (
@@ -382,7 +382,7 @@ export default function OverviewTab({ employee, employeeTasks, sites, isOwnProfi
                                         <div key={idx} className="p-3 flex justify-between items-center text-xs text-[var(--theme-text-secondary)] hover:bg-[var(--theme-bg-card)] transition-colors">
                                             <div className="flex flex-col gap-0.5">
                                                 <span className="font-semibold text-[var(--theme-text-primary)]">{login.device || 'Standard Terminal'}</span>
-                                                <span className="text-[10px] text-[var(--theme-text-muted)] font-mono">{login.location || 'Branch Geofence Verified'}</span>
+                                                <span className="text-[11px] text-[var(--theme-text-muted)] font-mono">{login.location || 'Branch Geofence Verified'}</span>
                                             </div>
                                             <span className="font-mono text-[var(--theme-text-muted)] text-[11px] tabular-nums">
                                                 {new Date(login.timestamp).toLocaleString()}

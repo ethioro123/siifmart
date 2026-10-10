@@ -18,7 +18,6 @@ interface UsePOSCartActionsProps {
     setDiscountCodeInput: React.Dispatch<React.SetStateAction<string>>;
     setDiscountCodeError: React.Dispatch<React.SetStateAction<string>>;
     setIsRoundingEnabled: React.Dispatch<React.SetStateAction<boolean>>;
-    setManualTaxRate?: React.Dispatch<React.SetStateAction<number | null>>;
     user?: User | null;
 }
 
@@ -38,7 +37,6 @@ export const usePOSCartActions = ({
     setDiscountCodeInput,
     setDiscountCodeError,
     setIsRoundingEnabled,
-    setManualTaxRate,
     user
 }: UsePOSCartActionsProps) => {
 
@@ -173,8 +171,7 @@ export const usePOSCartActions = ({
         setDiscountCodeInput('');
         setDiscountCodeError('');
         setIsRoundingEnabled(true);
-        setManualTaxRate?.(null);
-    }, [cart, setCart, setCartDiscount, setAppliedDiscountCode, setAppliedDiscountCodeDetails, setDiscountCodeInput, setDiscountCodeError, setIsRoundingEnabled, setManualTaxRate]);
+    }, [cart, setCart, setCartDiscount, setAppliedDiscountCode, setAppliedDiscountCodeDetails, setDiscountCodeInput, setDiscountCodeError, setIsRoundingEnabled]);
 
     return {
         addToCart,

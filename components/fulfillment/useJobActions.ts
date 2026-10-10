@@ -197,10 +197,10 @@ export const useJobActions = (deps: UseJobActionsDeps) => {
             const result = await wmsJobsService.update(jobId, jobUpdates);
             queryClient.invalidateQueries({ queryKey: ['jobs'] });
 
-            logger.debug('useJobActions', `✅ [updateJobItem] DB update successful. Items count:`, result?.lineItems?.length || 0);
+            logger.debug('useJobActions', `[updateJobItem] DB update successful. Items count: ${result?.lineItems?.length || 0}`);
             addNotification('success', 'Item updated');
         } catch (error) {
-            logger.error('useJobActions', `❌ [updateJobItem] FAILED:`, error);
+            logger.error('useJobActions', '[updateJobItem] FAILED:', error as Error);
             addNotification('alert', getTranslation('warehouse.failedToUpdateJobItem'));
         }
     }, [jobs, setJobs, addNotification, queryClient]);

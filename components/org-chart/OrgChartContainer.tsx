@@ -1,9 +1,8 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Employee, Site } from '../../types';
-import { OrgChartFilterState, OrgViewMode, OrgLayoutNode } from './types';
-import { useOrgTreeLayout, getRoleDept } from './hooks/useOrgTreeLayout';
+import { OrgChartFilterState } from './types';
+import { getRoleDept } from './hooks/useOrgTreeLayout';
 import { OrgChartToolbar } from './controls/OrgChartToolbar';
-import { OrgTreeCanvas } from './tree/OrgTreeCanvas';
 import { OrgMatrixView } from './matrix/OrgMatrixView';
 import { EmployeeDetailDrawer } from './drawer/EmployeeDetailDrawer';
 import { employeesService } from '../../services/employees.service';
@@ -50,7 +49,6 @@ export const OrgChartContainer: React.FC<OrgChartContainerProps> = ({
     const activeOnlineIds = onlineIds || storeOnlineIds;
 
     const [isDark, setIsDark] = useState(false);
-    const [viewMode, setViewMode] = useState<OrgViewMode>('tree');
     const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null);
     const [fetchedEmployees, setFetchedEmployees] = useState<Employee[]>([]);
 
@@ -58,7 +56,8 @@ export const OrgChartContainer: React.FC<OrgChartContainerProps> = ({
         searchTerm: '',
         siteId: '',
         department: '',
-        status: ''
+        status: '',
+        hierarchyLevel: null
     });
 
     useEffect(() => {
@@ -71,10 +70,26 @@ export const OrgChartContainer: React.FC<OrgChartContainerProps> = ({
         return () => observer.disconnect();
     }, []);
 
-    // Fallback: If employees prop is initially empty, attempt direct service fetch
+    const [siteEmployees, setSiteEmployees] = useState<Map<string, Employee[]>>(new Map());
+
+    // On-demand facility roster loading:
+    // When a specific store/warehouse is filtered, fetch all personnel at that facility (including frontline staff)
+    useEffect(() => {
+        if (filters.siteId && filters.siteId !== 'All' && !siteEmployees.has(filters.siteId)) {
+            employeesService.getAll(filters.siteId)
+                .then(data => {
+                    if (data && data.length > 0) {
+                        setSiteEmployees(prev => new Map(prev).set(filters.siteId, data));
+                    }
+                })
+                .catch(() => {});
+        }
+    }, [filters.siteId, siteEmployees]);
+
+    // Initial fallback: Only fetch managers & leadership when employees prop is empty
     useEffect(() => {
         if ((!employees || employees.length === 0) && fetchedEmployees.length === 0) {
-            employeesService.getAll()
+            employeesService.getAll(undefined, true)
                 .then(data => {
                     if (data && data.length > 0) {
                         setFetchedEmployees(data);
@@ -84,12 +99,23 @@ export const OrgChartContainer: React.FC<OrgChartContainerProps> = ({
         }
     }, [employees, fetchedEmployees.length]);
 
-    // Determine active employee dataset (prop -> fetched -> demo default)
+    // Determine active employee dataset (prop -> site-specific on-demand -> fetched -> demo default)
     const activeEmployees = useMemo(() => {
+        if (filters.siteId && siteEmployees.has(filters.siteId)) {
+            const specificStaff = siteEmployees.get(filters.siteId) || [];
+            const base = (employees && employees.length > 0) ? employees : (fetchedEmployees.length > 0 ? fetchedEmployees : DEFAULT_ORG_EMPLOYEES);
+            const otherStaff = base.filter(e => (e.siteId || e.site_id) !== filters.siteId);
+            return [...otherStaff, ...specificStaff];
+        }
         if (employees && employees.length > 0) return employees;
         if (fetchedEmployees && fetchedEmployees.length > 0) return fetchedEmployees;
         return DEFAULT_ORG_EMPLOYEES;
-    }, [employees, fetchedEmployees]);
+    }, [filters.siteId, siteEmployees, employees, fetchedEmployees]);
+
+    // Active personnel count
+    const activeCount = useMemo(() => {
+        return activeEmployees.filter(e => e.status === 'Active').length;
+    }, [activeEmployees]);
 
     // Dynamic departments list derived from actual employees in database
     const dynamicDepartments = useMemo(() => {
@@ -108,28 +134,13 @@ export const OrgChartContainer: React.FC<OrgChartContainerProps> = ({
         return list;
     }, [activeEmployees]);
 
-    // Layout engine for hierarchy tree
-    const {
-        layoutNodes,
-        layoutConnectors,
-        bounds,
-        toggleCollapse,
-        expandAll,
-        collapseAll
-    } = useOrgTreeLayout({ employees: activeEmployees, sites, filters });
-
-    const handleSelectNode = (layoutNode: OrgLayoutNode) => {
-        if (layoutNode.node.employee) {
-            setSelectedEmployee(layoutNode.node.employee);
-        }
-    };
-
     const handleResetFilters = () => {
         setFilters({
             searchTerm: '',
             siteId: '',
             department: '',
-            status: ''
+            status: '',
+            hierarchyLevel: null
         });
     };
 
@@ -150,50 +161,34 @@ export const OrgChartContainer: React.FC<OrgChartContainerProps> = ({
 
     return (
         <div className="w-full flex flex-col gap-4 relative">
-            {/* Top Toolbar */}
+            {/* Dedicated Matrix Command Bar */}
             <OrgChartToolbar
                 filters={filters}
                 setFilters={setFilters}
-                viewMode={viewMode}
-                setViewMode={setViewMode}
                 sites={sites}
                 customDepartments={dynamicDepartments}
                 totalCount={activeEmployees.length}
+                activeCount={activeCount}
                 isDark={isDark}
-                onExpandAll={expandAll}
-                onCollapseAll={collapseAll}
                 onPrint={handlePrint}
+                onResetFilters={handleResetFilters}
             />
 
-            {/* Main Content Area */}
+            {/* Authoritative Matrix View (Tree Canvas completely removed) */}
             <div className="w-full relative">
-                {viewMode === 'tree' && (
-                    <OrgTreeCanvas
-                        layoutNodes={layoutNodes}
-                        layoutConnectors={layoutConnectors}
-                        bounds={bounds}
-                        isDark={isDark}
-                        onlineIds={activeOnlineIds}
-                        onSelectNode={handleSelectNode}
-                        onToggleCollapse={toggleCollapse}
-                        onResetFilters={handleResetFilters}
-                    />
-                )}
-
-                {viewMode === 'matrix' && (
-                    <OrgMatrixView
-                        employees={activeEmployees}
-                        sites={sites}
-                        filters={filters}
-                        isDark={isDark}
-                        onlineIds={activeOnlineIds}
-                        onSelectEmployee={setSelectedEmployee}
-                        onOpenProfile={onSelectEmployee}
-                        onOpenIdCard={onOpenIdCard}
-                        onOpenAddEmployee={onOpenAddEmployee}
-                        onResetFilters={handleResetFilters}
-                    />
-                )}
+                <OrgMatrixView
+                    employees={activeEmployees}
+                    sites={sites}
+                    filters={filters}
+                    setFilters={setFilters}
+                    isDark={isDark}
+                    onlineIds={activeOnlineIds}
+                    onSelectEmployee={setSelectedEmployee}
+                    onOpenProfile={onSelectEmployee}
+                    onOpenIdCard={onOpenIdCard}
+                    onOpenAddEmployee={onOpenAddEmployee}
+                    onResetFilters={handleResetFilters}
+                />
             </div>
 
             {/* Slide-over Profile Drawer */}

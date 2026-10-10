@@ -133,48 +133,41 @@ export const ReceiveSplitModal: React.FC<ReceiveSplitModalProps> = ({
     const progress = Math.min(100, expectedSellable > 0 ? ((previouslyReceived + totalScanned) / expectedSellable) * 100 : 0);
 
     return (
-        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-[200] p-2 sm:p-4 overflow-x-hidden animate-in fade-in duration-300">
-            <div className="w-full max-w-6xl max-h-[90vh] md:max-h-[95vh] rounded-3xl glass-panel relative overflow-hidden flex flex-col">
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-[200] p-2 sm:p-4 overflow-x-hidden animate-in fade-in duration-200">
+            <div className="w-full max-w-6xl max-h-[90vh] md:max-h-[95vh] rounded-3xl bg-[var(--theme-bg-card)] border border-[var(--theme-border)] shadow-2xl relative overflow-hidden flex flex-col">
 
-                {/* 🌟 Background Effects — hidden on mobile */}
-                <div className="hidden md:block absolute top-0 right-0 w-[500px] h-[500px] bg-[#2C5E3B]/10 dark:bg-[#A9CBA2]/5 blur-[120px] rounded-full pointer-events-none" />
-                <div className="hidden md:block absolute bottom-0 left-0 w-[500px] h-[500px] bg-amber-600/10 dark:bg-amber-700/5 blur-[100px] rounded-full pointer-events-none" />
-
-                {/* Header (HUD Style) */}
-                <div className="p-4 md:p-8 border-b border-[#E2DCCE]/60 dark:border-[#A9CBA2]/[0.06] relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-3 md:gap-6 bg-[#FAF8F5] dark:bg-[#1C2620]">
-                    <div className="flex items-center gap-3 md:gap-6">
-                        <div className="relative group hidden md:block">
-                            <div className="absolute -inset-1 bg-[#2C5E3B] dark:bg-[#A9CBA2] rounded-2xl blur opacity-0 group-hover:opacity-10 dark:group-hover:opacity-20 transition duration-1000"></div>
-                            <div className="relative p-4 bg-[#2C5E3B]/15 dark:bg-[#A9CBA2]/15 rounded-2xl border border-[#2C5E3B]/20 dark:border-[#A9CBA2]/20 shadow-sm transition-colors">
-                                <Box size={32} className="text-[#2C5E3B] dark:text-[#A9CBA2]" />
-                            </div>
+                {/* Header */}
+                <div className="p-4 md:p-6 border-b border-[var(--theme-border)] relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-3 md:gap-4 bg-[var(--theme-bg-subtle)]">
+                    <div className="flex items-center gap-3 md:gap-4">
+                        <div className="hidden md:flex p-3 rounded-2xl border border-[var(--theme-border)] bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)] items-center justify-center shadow-sm">
+                            <Box size={24} />
                         </div>
                         <div className="min-w-0 flex-1">
                             <div className="flex items-center gap-2 md:gap-3 flex-wrap">
-                                <h3 className="text-lg md:text-3xl font-black text-slate-900 dark:text-white tracking-tight truncate">{formatPOItemDescription(splitReceivingItem) || splitReceivingItem.productName}</h3>
-                                <Badge variant="neutral" className="bg-[#FAF8F5]/80 dark:bg-[#1C2620]/60 border-[#E2DCCE]/60 dark:border-[#A9CBA2]/[0.06] text-stone-600 dark:text-gray-400 font-mono text-[9px] md:text-xs">PO #{splitReceivingPO.poNumber}</Badge>
+                                <h3 className="text-lg md:text-2xl font-bold text-[var(--theme-text-primary)] tracking-tight truncate">{formatPOItemDescription(splitReceivingItem) || splitReceivingItem.productName}</h3>
+                                <Badge variant="neutral" className="bg-[var(--theme-bg-card)] border-[var(--theme-border)] text-[var(--theme-text-secondary)] font-mono text-[11px] rounded-full px-2.5 py-0.5">PO #{splitReceivingPO.poNumber}</Badge>
                                 {(() => {
                                     const badge = formatPackBadge(splitReceivingItem);
                                     return badge ? (
-                                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-amber-500/10 border border-amber-500/20 text-amber-700 dark:text-amber-400 text-[10px] font-black uppercase tracking-wider">
-                                            <Package size={11} className="shrink-0 text-amber-600 dark:text-amber-400" /> {badge}
+                                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-700 dark:text-amber-400 text-[11px] font-semibold">
+                                            <Package size={12} className="shrink-0" /> {badge}
                                         </span>
                                     ) : null;
                                 })()}
                             </div>
-                            <div className="hidden md:flex items-center gap-4 mt-2">
-                                <p className="text-sm font-black text-slate-500 dark:text-gray-400 font-mono tracking-wide uppercase">
-                                    SKU: <span className="text-slate-900 dark:text-white">{splitReceivingItem.sku}</span>
+                            <div className="hidden md:flex items-center gap-3 mt-1.5 text-xs text-[var(--theme-text-secondary)] font-medium">
+                                <p className="font-mono">
+                                    SKU: <span className="text-[var(--theme-text-primary)] font-semibold">{splitReceivingItem.sku}</span>
                                 </p>
-                                <span className="w-1 h-1 rounded-full bg-slate-200 dark:bg-gray-600" />
-                                <p className="text-sm font-black text-slate-500 dark:text-gray-400 uppercase tracking-widest">
-                                    {t('warehouse.supplier')}: <span className="text-slate-900 dark:text-white">{splitReceivingPO.supplierName}</span>
+                                <span className="w-1 h-1 rounded-full bg-[var(--theme-border)]" />
+                                <p>
+                                    {t('warehouse.supplier')}: <span className="text-[var(--theme-text-primary)] font-semibold">{splitReceivingPO.supplierName}</span>
                                 </p>
-                                <span className="w-1 h-1 rounded-full bg-slate-200 dark:bg-gray-600" />
-                                <p className="text-sm font-black text-[#2C5E3B] dark:text-[#A9CBA2] uppercase tracking-widest">
-                                    Target: <span className="font-mono">{expectedSellable} units</span>
+                                <span className="w-1 h-1 rounded-full bg-[var(--theme-border)]" />
+                                <p>
+                                    Target: <span className="text-[var(--theme-text-primary)] font-semibold font-mono">{expectedSellable} units</span>
                                     {splitReceivingItem.orderedPackages && splitReceivingItem.orderedPackages !== expectedSellable && (
-                                        <span className="text-stone-400 text-xs ml-1 font-normal">({splitReceivingItem.orderedPackages} pkgs)</span>
+                                        <span className="text-[var(--theme-text-secondary)] ml-1">({splitReceivingItem.orderedPackages} pkgs)</span>
                                     )}
                                 </p>
                             </div>
@@ -183,55 +176,55 @@ export const ReceiveSplitModal: React.FC<ReceiveSplitModalProps> = ({
 
                     <button
                         onClick={() => { setIsSplitReceiving(false); setSplitReceivingItem(null); setSplitReceivingPO(null); setSplitVariants([]); }}
-                        className="p-2 md:p-3 bg-zinc-100 dark:bg-white/5 text-zinc-600 dark:text-gray-400 rounded-full hover:bg-zinc-200 dark:hover:bg-white/10 hover:text-zinc-950 dark:hover:text-white hover:scale-110 transition-all border border-zinc-300 dark:border-white/10 shadow-sm absolute top-4 right-4 md:relative md:top-auto md:right-auto"
+                        className="p-2.5 rounded-xl text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-card)] transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center absolute top-4 right-4 md:relative md:top-auto md:right-auto"
                         aria-label="Close"
                     >
                         <X size={20} />
                     </button>
                 </div>
 
-                {/* 📊 Progress Dashboard */}
-                <div className="px-4 md:px-8 py-4 md:py-6 bg-white/40 dark:bg-[#1C2620]/20 border-b border-[#E2DCCE]/40 dark:border-[#A9CBA2]/[0.04] flex flex-wrap gap-4 md:gap-8 items-center relative overflow-hidden">
+                {/* Progress Dashboard */}
+                <div className="px-4 md:px-6 py-4 bg-[var(--theme-bg-card)] border-b border-[var(--theme-border)] flex flex-wrap gap-4 md:gap-8 items-center relative overflow-hidden">
                     {/* Progress Bar Background */}
                     {!isBlindReceiving && (
-                        <div className="absolute bottom-0 left-0 h-1 bg-slate-100 dark:bg-gray-800 w-full overflow-hidden">
+                        <div className="absolute bottom-0 left-0 h-1 bg-[var(--theme-bg-subtle)] w-full overflow-hidden">
                             <div
                                 ref={el => el?.style.setProperty('width', `${Math.min(100, Math.max(0, progress))}%`)}
-                                className={`h-full transition-all duration-300 ${remaining === 0 ? 'bg-[#2C5E3B] dark:bg-[#A9CBA2]' : 'bg-[#2C5E3B]/70 dark:bg-[#A9CBA2]/70'}`}
+                                className={`h-full transition-all duration-300 ${remaining === 0 ? 'bg-emerald-500' : 'bg-blue-600'}`}
                             />
                         </div>
                     )}
 
                     <div className="flex flex-col">
-                        <span className="text-[10px] uppercase tracking-[0.2em] font-black text-slate-400 dark:text-zinc-500 mb-1">{t('warehouse.expectedQty')}</span>
+                        <span className="text-[11px] uppercase tracking-wider font-semibold text-[var(--theme-text-secondary)] mb-1">{t('warehouse.expectedQty')}</span>
                         <div className="flex items-baseline gap-1.5">
                             {isBlindReceiving ? (
-                                <span className="text-xl md:text-3xl font-black text-amber-600 dark:text-amber-400 tabular-nums drop-shadow-sm font-mono tracking-widest">
-                                    *** <span className="text-[9px] uppercase tracking-wider font-sans font-bold text-amber-700 dark:text-amber-300">(Blind)</span>
+                                <span className="text-xl md:text-3xl font-bold text-amber-600 dark:text-amber-400 tabular-nums font-mono tracking-widest">
+                                    *** <span className="text-[11px] uppercase font-sans font-medium text-amber-700 dark:text-amber-300">(Blind)</span>
                                 </span>
                             ) : (
                                 <>
-                                    <span className="text-2xl md:text-4xl font-black text-slate-900 dark:text-white tabular-nums drop-shadow-sm font-mono">{expectedSellable}</span>
+                                    <span className="text-2xl md:text-3xl font-bold text-[var(--theme-text-primary)] tabular-nums font-mono">{expectedSellable}</span>
                                     {splitReceivingItem.orderedPackages && splitReceivingItem.orderedPackages !== expectedSellable && (
-                                        <span className="text-[10px] text-stone-400 font-mono">({splitReceivingItem.orderedPackages} pkgs)</span>
+                                        <span className="text-[11px] text-[var(--theme-text-secondary)] font-mono">({splitReceivingItem.orderedPackages} pkgs)</span>
                                     )}
                                 </>
                             )}
                         </div>
                     </div>
 
-                    <div className="h-8 md:h-10 w-px bg-[#E2DCCE]/60 dark:bg-white/10" />
+                    <div className="h-8 md:h-10 w-px bg-[var(--theme-border)]" />
 
                     <div className="flex flex-col">
-                        <span className="text-[10px] uppercase tracking-[0.2em] font-black mb-1 text-slate-500 dark:text-zinc-500">
+                        <span className="text-[11px] uppercase tracking-wider font-semibold mb-1 text-[var(--theme-text-secondary)]">
                             {t('warehouse.receivedQty')}
                         </span>
                         <div className="flex items-baseline gap-1.5">
-                            <span className={`text-2xl md:text-4xl font-black tabular-nums drop-shadow-sm font-mono ${!isBlindReceiving && remaining === 0 ? 'text-[#2C5E3B] dark:text-[#A9CBA2]' : 'text-slate-900 dark:text-white'}`}>
+                            <span className={`text-2xl md:text-3xl font-bold tabular-nums font-mono ${!isBlindReceiving && remaining === 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-[var(--theme-text-primary)]'}`}>
                                 {previouslyReceived + totalScanned}
                             </span>
                             {previouslyReceived > 0 && (
-                                <span className="text-[9px] font-black text-slate-400 dark:text-zinc-500 font-mono">
+                                <span className="text-[11px] text-[var(--theme-text-secondary)] font-mono">
                                     ({previouslyReceived} prev + {totalScanned} new)
                                 </span>
                             )}
@@ -240,25 +233,25 @@ export const ReceiveSplitModal: React.FC<ReceiveSplitModalProps> = ({
 
                     <div className="flex-1" />
 
-                    <div className={`px-4 md:px-6 py-2 md:py-3 rounded-xl border flex items-center gap-2 md:gap-3 shadow-lg transition-all ${isBlindReceiving ? 'bg-amber-500/10 border-amber-500/30 text-amber-700 dark:text-amber-400' : remaining === 0 ? 'bg-[#2C5E3B]/10 dark:bg-[#A9CBA2]/10 border-[#2C5E3B]/30 dark:border-[#A9CBA2]/30 text-[#2C5E3B] dark:text-[#A9CBA2]' : 'bg-[#FAF8F5]/80 dark:bg-[#1C2620]/80 border-[#E2DCCE]/60 dark:border-[#A9CBA2]/[0.06] text-stone-700 dark:text-[#EAE5D9]'}`}>
+                    <div className={`px-4 py-2 rounded-xl border flex items-center gap-2 shadow-sm transition-all font-semibold font-mono text-sm ${isBlindReceiving ? 'bg-amber-500/10 border-amber-500/20 text-amber-700 dark:text-amber-400' : remaining === 0 ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-600 dark:text-emerald-400' : 'bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] text-[var(--theme-text-primary)]'}`}>
                         {isBlindReceiving ? (
                             <Clock className="text-amber-600 dark:text-amber-400" size={16} />
                         ) : remaining === 0 ? (
-                            <Check className="text-[#2C5E3B] dark:text-[#A9CBA2]" size={16} />
+                            <Check className="text-emerald-600 dark:text-emerald-400" size={16} />
                         ) : remaining > 0 ? (
                             <Clock className="text-amber-600 dark:text-amber-400 animate-pulse" size={16} />
                         ) : (
-                            <AlertTriangle className="text-red-500 dark:text-red-400" size={16} />
+                            <AlertTriangle className="text-rose-500 dark:text-rose-400" size={16} />
                         )}
-                        <p className={`text-sm md:text-lg font-black tabular-nums font-mono ${isBlindReceiving ? 'text-amber-700 dark:text-amber-300' : remaining === 0 ? 'text-[#2C5E3B] dark:text-[#A9CBA2]' : 'text-slate-700 dark:text-white'}`}>
+                        <p className="tabular-nums">
                             {isBlindReceiving ? 'Blind Mode Active' : remaining === 0 ? t('warehouse.matched') : remaining > 0 ? `${remaining} ${t('warehouse.left')}` : `${Math.abs(remaining)} ${t('warehouse.over')}`}
                         </p>
                     </div>
                 </div>
 
                 <div className="flex flex-1 overflow-hidden relative">
-                    {/* 📦 Main Content - List of Splits */}
-                    <div className="flex-1 overflow-y-auto p-4 md:p-8 space-y-3 md:space-y-4 custom-scrollbar">
+                    {/* Main Content - List of Splits */}
+                    <div className="flex-1 overflow-y-auto p-4 md:p-6 space-y-4 custom-scrollbar bg-[var(--theme-bg-app)]">
                         {splitVariants.map((variant, index) => (
                             <ReceiveSplitCard
                                 key={variant.id}
@@ -295,21 +288,21 @@ export const ReceiveSplitModal: React.FC<ReceiveSplitModalProps> = ({
                                     batchNumber: newBatch
                                 }]);
                             }}
-                            className="w-full py-6 border-2 border-dashed border-[#E2DCCE] dark:border-emerald-950/30 hover:border-[#2C5E3B] dark:hover:border-[#A9CBA2] rounded-2xl text-[#2C4D35]/60 dark:text-[#A9CBA2]/60 hover:text-[#1E3F27] dark:hover:text-white transition-all flex items-center justify-center gap-3 group hover:bg-[#FAF8F5]/40 dark:hover:bg-[#1C2620]/20"
+                            className="w-full py-4 border border-dashed border-[var(--theme-border)] hover:border-[var(--theme-text-primary)] rounded-2xl text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] bg-[var(--theme-bg-card)] hover:bg-[var(--theme-bg-subtle)] transition-all flex items-center justify-center gap-2.5 group min-h-[48px]"
                         >
-                            <div className="p-2 bg-white/80 dark:bg-[#1C2620]/30 border border-[#E2DCCE] dark:border-emerald-950/20 rounded-full group-hover:bg-[#2C5E3B] dark:hover:bg-[#A9CBA2] group-hover:scale-110 transition-all shadow-sm group-hover:shadow-[#2C5E3B]/30">
-                                <Plus size={20} className="group-hover:text-white dark:group-hover:text-[#1E3B24]" />
+                            <div className="p-1.5 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-full text-[var(--theme-text-secondary)] group-hover:text-[var(--theme-text-primary)] transition-all shadow-sm">
+                                <Plus size={16} />
                             </div>
-                            <span className="font-black uppercase tracking-[0.2em] text-[10px]">{t('warehouse.addAnotherSplit')}</span>
+                            <span className="font-semibold uppercase tracking-wider text-xs">{t('warehouse.addAnotherSplit')}</span>
                         </button>
                     </div>
                 </div>
 
-                {/* 🦶 Footer */}
-                <div className="p-4 md:p-8 border-t border-[#E2DCCE]/50 dark:border-emerald-950/20 relative z-10 flex gap-3 md:gap-4 bg-[#FAF8F5] dark:bg-[#1C2620]">
+                {/* Footer */}
+                <div className="p-4 md:p-6 border-t border-[var(--theme-border)] relative z-10 flex gap-3 md:gap-4 bg-[var(--theme-bg-subtle)]">
                     <button
                         onClick={() => { setIsSplitReceiving(false); setSplitReceivingItem(null); setSplitReceivingPO(null); setSplitVariants([]); }}
-                        className="woody-btn-secondary px-4 md:px-8 py-3 md:py-4 text-[10px] uppercase tracking-widest font-black"
+                        className="px-6 md:px-8 py-3 rounded-xl border border-[var(--theme-border)] bg-[var(--theme-bg-card)] hover:bg-[var(--theme-bg-subtle)] text-[var(--theme-text-primary)] text-xs uppercase tracking-wider font-semibold min-h-[44px] transition-colors"
                     >
                         {t('warehouse.cancel')}
                     </button>
@@ -394,19 +387,19 @@ export const ReceiveSplitModal: React.FC<ReceiveSplitModalProps> = ({
                                 setLocalSubmitting(false);
                             }
                         }}
-                        className={`flex-1 py-3 md:py-4 font-black uppercase tracking-widest text-[10px] rounded-xl md:rounded-2xl shadow-md active:scale-[0.98] transition-all border flex items-center justify-center gap-2 md:gap-3 ${isSubmitting || localSubmitting || totalScanned < 1
-                            ? 'bg-slate-100/50 dark:bg-black/25 text-stone-400 border-[#E2DCCE]/40 dark:border-emerald-950/10 cursor-not-allowed opacity-50'
-                            : 'woody-btn-primary'
+                        className={`flex-1 py-3 px-6 font-semibold uppercase tracking-wider text-xs md:text-sm rounded-xl shadow-sm active:scale-95 transition-all flex items-center justify-center gap-2 min-h-[44px] ${isSubmitting || localSubmitting || totalScanned < 1
+                            ? 'bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] border border-[var(--theme-border)] cursor-not-allowed opacity-50'
+                            : 'bg-blue-600 hover:bg-blue-700 text-white'
                             }`}
                     >
                         {isSubmitting || localSubmitting ? (
                             <>
-                                <Loader2 size={16} className="animate-spin text-stone-450 dark:text-stone-400" />
+                                <Loader2 size={16} className="animate-spin text-white" />
                                 <span>{t('warehouse.processingStatus')}...</span>
                             </>
                         ) : (
                             <>
-                                <Check size={20} />
+                                <Check size={18} />
                                 {t('warehouse.confirmReceipt')}
                             </>
                         )}

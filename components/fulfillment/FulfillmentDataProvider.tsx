@@ -3,7 +3,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import {
     WMSJob, JobItem, TransferRecord, JobAssignment,
     WarehouseZone, BarcodeApproval, Product, PurchaseOrder, POReceivingInput,
-    SaleRecord, SystemConfig, Site
+    Site
 } from '../../types';
 import {
     wmsJobsService,
@@ -14,42 +14,27 @@ import {
     productsService,
     purchaseOrdersService,
     salesService,
-    systemLogsService // Added for logging
+    systemLogsService
 } from '../../services/supabase.service';
 import { supabase } from '../../lib/supabase';
-import { realtimeService } from '../../services/realtime.service'; // Import realtime service
-import { useData } from '../../contexts/DataContext'; // Consume DataContext for products/sites
-import { useStore } from '../../contexts/CentralStore'; // Consume Store for User
-import { TRANSLATIONS, Language } from '../../utils/translations';
-import { generateSKU } from '../../utils/skuGenerator';
-import { CURRENCY_SYMBOL } from '../../constants';
-import { useReceiving, convertToSellableUnits } from './useReceiving';
+import { realtimeService } from '../../services/realtime.service';
+import { useData } from '../../contexts/DataContext';
+import { useStore } from '../../contexts/CentralStore';
+import { useReceiving } from './useReceiving';
 import { useJobActions } from './useJobActions';
 import { useJobCompletion } from './useJobCompletion';
 import { useJobMaintenance } from './useJobMaintenance';
 import { useTransfers } from './useTransfers';
+import { useGhostJobCleanup } from './hooks/useGhostJobCleanup';
+import { mapWmsJobRow } from '../../services/wms-jobs.mapper';
 import { logger } from '../../utils/logger';
 import { isAdminSite } from '../../utils/countryAdmin';
-
-// convertToSellableUnits is now imported from ./useReceiving
-
-// Helper for translations (duplicated from DataContext until util is widespread)
-const getTranslation = (path: string): string => {
-    const lang = (localStorage.getItem('siifmart_language') as Language) || 'en';
-    const keys = path.split('.');
-    let current: any = TRANSLATIONS;
-    for (const key of keys) {
-        if (current[key] === undefined) return path;
-        current = current[key];
-    }
-    if (typeof current === 'object' && current[lang]) return current[lang];
-    if (typeof current === 'object' && current['en']) return current['en'];
-    return path;
-};
 
 interface FulfillmentDataContextType {
     // State
     jobs: WMSJob[];
+    /** RULE 10: Starts empty on mount. Populated only when user explicitly clicks History. */
+    historicalJobs: WMSJob[];
     transfers: TransferRecord[];
     jobAssignments: JobAssignment[];
     zones: WarehouseZone[];
@@ -68,6 +53,12 @@ interface FulfillmentDataContextType {
     fixBrokenJobs: () => Promise<void>;
     createPutawayJob: (product: Product, quantity: number, user: string, source?: string) => Promise<WMSJob | undefined>;
     deleteJob: (id: string) => Promise<void>;
+
+    /**
+     * RULE 10 — Zero Eager History: call this ONLY when the user explicitly clicks the History tab.
+     * Fetches the 25 most recent completed/cancelled jobs on demand.
+     */
+    loadHistoricalJobs: (limit?: number) => Promise<void>;
 
     // Receiving Actions (Moved from DataContext)
     receivePO: (poId: string, receivedItems?: POReceivingInput[], skuDecisions?: Record<string, 'keep' | 'generate'>, scannedSkus?: Record<string, string>, locationId?: string, user?: { name: string; email: string }) => Promise<any>;
@@ -118,6 +109,8 @@ export const FulfillmentDataProvider = ({ children }: { children: ReactNode }) =
 
     // --- LOCAL STATE ---
     const [jobs, setJobs] = useState<WMSJob[]>([]);
+    /** RULE 10: Never pre-populated. Filled only on user-triggered loadHistoricalJobs(). */
+    const [historicalJobs, setHistoricalJobs] = useState<WMSJob[]>([]);
     const [transfers, setTransfers] = useState<TransferRecord[]>([]);
     const [jobAssignments, setJobAssignments] = useState<JobAssignment[]>([]);
     const [zones, setZones] = useState<WarehouseZone[]>([]);
@@ -137,6 +130,22 @@ export const FulfillmentDataProvider = ({ children }: { children: ReactNode }) =
 
     // Call this from any child component to force a fresh fetch of WMS jobs
     const refreshJobs = useCallback(() => setRefreshCounter(c => c + 1), []);
+
+    /**
+     * RULE 10 — Zero Eager History: on-demand history loader.
+     * Called ONLY when the user explicitly switches to the History view in any tab.
+     * Clears stale cache and fetches the 25 most recent completed/cancelled jobs.
+     */
+    const loadHistoricalJobs = useCallback(async (limit: number = 25) => {
+        if (!activeSiteId) return;
+        try {
+            const activeCountryCode = effectiveCountry || settings?.country || 'ET';
+            const fetched = await wmsJobsService.getHistory(activeSiteId, limit, undefined, activeCountryCode);
+            setHistoricalJobs(fetched);
+        } catch (error) {
+            logger.error('FulfillmentDataProvider', 'Failed to load history', error);
+        }
+    }, [activeSiteId, effectiveCountry, settings?.country]);
 
     // --- FETCHING LOGIC (Migrated from DataContext hooks/useDataQueries) ---
     // In a real refactor, we should probably pull this out into a hook too, 
@@ -174,7 +183,7 @@ export const FulfillmentDataProvider = ({ children }: { children: ReactNode }) =
                     (user?.employeeId && e.id === user.employeeId) ||
                     e.id === user?.id
                 ) : undefined;
-                const employeeId = !isGlobalRole ? (currentEmployee?.id || user?.id) : undefined;
+                const employeeId = !isGlobalRole ? (currentEmployee?.id || user?.employeeId || user?.id) : undefined;
 
                 const isCountryAdmin = isAdminSite(activeSite);
                 const targetSiteId = isCountryAdmin ? undefined : activeSiteId;
@@ -187,13 +196,13 @@ export const FulfillmentDataProvider = ({ children }: { children: ReactNode }) =
                     loadedZones,
                     loadedApprovals
                 ] = await Promise.all([
-                    wmsJobsService.getAll(activeSiteId, 500, employeeId, activeCountryCode),
+                    // RULE 10: limit=0 → active jobs only, zero history on mount
+                    wmsJobsService.getAll(activeSiteId, 0, employeeId, activeCountryCode),
                     transfersService.getAll(activeSiteId),
                     jobAssignmentsService.getAll(activeSiteId),
                     warehouseZonesService.getAll(activeSiteId),
                     barcodeApprovalsService.getAuditLog(targetSiteId, activeCountryCode)
                 ]);
-
 
                 setJobs(loadedJobs);
                 setTransfers(loadedTransfers);
@@ -208,77 +217,22 @@ export const FulfillmentDataProvider = ({ children }: { children: ReactNode }) =
         };
 
         loadFulfillmentData();
-    }, [activeSiteId, refreshCounter, employees.length, user?.email, user?.id]);
+    }, [activeSiteId, refreshCounter, user?.email, user?.id]);
 
-    // Enriched Jobs Memoization (Previously in DataContext)
-    const enrichedJobs = useMemo(() => {
-        return jobs.map(j => {
-            // Clone job to allow extension
-            const enhancedJob = { ...j } as any;
-
-            // --- OUTBOUND ENRICHMENT (Pack/Dispatch) ---
-            if (j.type === 'PACK' || j.type === 'DISPATCH' || j.type === 'PICK') {
-                const orderRef = (j.orderRef || '').trim();
-
-                // 1. Try finding linked Sale (for Customer details)
-                const sale = sales.find(s => s.id === orderRef);
-                // Note: access to `customers` is needed here. 
-                // We need to grab customers from DataContext if we want this enrichment.
-                // For now, let's keep it simple. If we need deep enrichment we might need `customers`.
-            }
-            return enhancedJob;
-        });
-    }, [jobs, sales, orders]); // Simplified for now
     // --- REALTIME SUBSCRIPTIONS ---
     useEffect(() => {
         if (!activeSiteId) return;
 
         logger.debug('FulfillmentDataProvider', `📡 [Fulfillment] Subscribing to real-time updates for site: ${activeSiteId}`);
 
-        /**
-         * Map raw Supabase snake_case job payload → camelCase WMSJob
-         * Supabase postgres_changes sends the full row, but large JSONB columns
-         * (like line_items) may be truncated when the payload exceeds 1 MB.
-         * We detect this and fall back to a targeted single-row re-fetch.
-         */
-        const mapJobPayload = (payload: any) => ({
-            ...payload,
-            siteId: payload.site_id,
-            items: payload.items_count,
-            assignedTo: payload.assigned_to,
-            orderRef: payload.order_ref,
-            lineItems: payload.line_items || [],
-            jobNumber: payload.job_number,
-            sourceSiteId: payload.source_site_id,
-            destSiteId: payload.dest_site_id,
-            transferStatus: payload.transfer_status,
-            requestedBy: payload.requested_by,
-            approvedBy: payload.approved_by,
-            shippedAt: payload.shipped_at,
-            deliveredAt: payload.delivered_at,
-            receivedAt: payload.received_at,
-            receivedBy: payload.received_by,
-            trackingNumber: payload.tracking_number,
-            createdAt: payload.created_at,
-            updatedAt: payload.updated_at,
-            deliveryMethod: payload.delivery_method,
-            hasDiscrepancy: payload.has_discrepancy,
-            discrepancyDetails: payload.discrepancy_details,
-            completedBy: payload.completed_by,
-            completedAt: payload.completed_at,
-            externalCarrierName: payload.external_carrier_name,
-            assignedBy: payload.assigned_by,
-            notes: payload.notes
-        });
-
         const subscriptions = realtimeService.subscribeToSite(activeSiteId, {
             onWMSJobChange: (event, payload) => {
                 if (event === 'INSERT') {
-                    const mapped = mapJobPayload(payload);
+                    const mapped = mapWmsJobRow(payload);
                     setJobs(prev => prev.find(j => j.id === mapped.id) ? prev : [mapped, ...prev]);
                 }
                 else if (event === 'UPDATE') {
-                    const mapped = mapJobPayload(payload);
+                    const mapped = mapWmsJobRow(payload);
                     // Supabase may truncate large JSONB columns (line_items).
                     // If line_items came back null/empty but the job already exists locally,
                     // do a targeted single-row re-fetch to get the full data.
@@ -340,45 +294,7 @@ export const FulfillmentDataProvider = ({ children }: { children: ReactNode }) =
     }, [activeSiteId]);
 
     // --- AUTO CLEANUP OF GHOST JOBS ---
-    // Cleans up orphaned RECEIVE jobs where the PO was finalized,
-    // but the RECEIVE WMS job was stuck in Pending/In-Progress due to UI disconnects.
-    const hasRunGhostCleanup = React.useRef(false);
-    useEffect(() => {
-        if (!hasRunGhostCleanup.current && jobs.length > 0 && orders.length > 0) {
-            hasRunGhostCleanup.current = true;
-            let cleanupCount = 0;
-
-            const ghostReceiveJobs = jobs.filter(j => 
-                j.type === 'RECEIVE' && 
-                ['Pending', 'In-Progress'].includes(j.status || '')
-            );
-
-            for (const job of ghostReceiveJobs) {
-                const po = orders.find(o => o.id === job.orderRef);
-                // If PO is missing or status is no longer 'Approved', map it as ghost job
-                if (!po || po.status !== 'Approved') {
-                    logger.debug('FulfillmentDataProvider', `🧹 [Auto-Cleanup] Completing orphaned ghost job: ${job.jobNumber} (${job.id})`);
-                    cleanupCount++;
-                    
-                    wmsJobsService.update(job.id, { 
-                        status: 'Completed',
-                        completed_at: new Date().toISOString(),
-                        completed_by: user?.id || 'System Auto-Cleanup'
-                    } as any).catch(e => logger.error('FulfillmentDataProvider', 'Failed to auto-cleanup ghost job:', e as Error));
-
-                    setJobs(prev => prev.map(j => j.id === job.id ? { 
-                        ...j, 
-                        status: 'Completed', 
-                        completedAt: new Date().toISOString(),
-                        completedBy: user?.id || 'System Auto-Cleanup'
-                    } as WMSJob : j));
-                }
-            }
-            if (cleanupCount > 0) {
-                logger.debug('FulfillmentDataProvider', `✅ [Auto-Cleanup] Successfully cleared ${cleanupCount} ghost jobs.`);
-            }
-        }
-    }, [jobs, orders, user]);
+    useGhostJobCleanup({ jobs, orders, user, setJobs });
 
 
     // ═══════════════════════════════════════════════════════════════════
@@ -448,6 +364,7 @@ export const FulfillmentDataProvider = ({ children }: { children: ReactNode }) =
     return (
         <FulfillmentDataContext.Provider value={{
             jobs,
+            historicalJobs,
             transfers,
             jobAssignments,
             zones,
@@ -464,6 +381,7 @@ export const FulfillmentDataProvider = ({ children }: { children: ReactNode }) =
             fixBrokenJobs,
             createPutawayJob,
             deleteJob,
+            loadHistoricalJobs,
             receivePO,
             receivePOSplit,
             requestTransfer,

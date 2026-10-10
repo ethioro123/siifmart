@@ -27,9 +27,11 @@ import { DesktopDownloadButton } from '../components/dashboard/widgets/DesktopDo
 import { useDateFilter, DateRangeOption } from '../hooks/useDateFilter';
 import FiscalYearDeck from '../components/FiscalYearDeck';
 import { logger } from '../utils/logger';
+import { useQuery } from '@tanstack/react-query';
+import { systemLogsService } from '../services/system-logs.service';
 
 export default function CentralOperations() {
-    const { sites, employees, allSales, allOrders, allProducts, systemLogs, storePoints, effectiveCountry, settings } = useData();
+    const { sites, employees, allSales, allOrders, allProducts, systemLogs: contextLogs, storePoints, effectiveCountry, settings } = useData();
     const { jobs } = useFulfillmentData();
     const { workerPoints } = useGamification();
     const { loading, theme } = useStore();
@@ -47,6 +49,15 @@ export default function CentralOperations() {
     // Interactive View Modes & Facility Scoping
     const [viewMode, setViewMode] = useState<CentralOpsViewMode>('executive');
     const [facilityScope, setFacilityScope] = useState<FacilityScope>('all');
+
+    // On-demand Telemetry fetching: only load heavy audit logs when the user actually views Telemetry
+    const { data: fetchedLogs } = useQuery({
+        queryKey: ['systemLogs', 'centralOperations'],
+        queryFn: () => systemLogsService.getAll(),
+        staleTime: 1000 * 60 * 10,
+        enabled: viewMode === 'telemetry' || viewMode === 'all',
+    });
+    const systemLogs = fetchedLogs || contextLogs || [];
 
     // Default to 'This Quarter' as requested
     const defaultRange: DateRangeOption = 'This Quarter';

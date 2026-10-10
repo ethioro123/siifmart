@@ -7,6 +7,17 @@ const LOCAL_STORAGE_KEY = 'siifmart_disciplinary_backup';
 
 let inMemoryDisciplinary: DisciplinaryRecord[] = [];
 
+const generateUUID = (): string => {
+    if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+        return crypto.randomUUID();
+    }
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+        const r = Math.random() * 16 | 0;
+        const v = c === 'x' ? r : (r & 0x3 | 0x8);
+        return v.toString(16);
+    });
+};
+
 const getLocalBackup = (): DisciplinaryRecord[] => {
     try {
         if (typeof localStorage !== 'undefined') {
@@ -20,8 +31,9 @@ const getLocalBackup = (): DisciplinaryRecord[] => {
 };
 
 const saveLocalBackup = (records: DisciplinaryRecord[]): void => {
+    const existing = getLocalBackup();
     const map = new Map<string, DisciplinaryRecord>();
-    for (const r of inMemoryDisciplinary) map.set(r.id, r);
+    for (const r of existing) map.set(r.id, r);
     for (const r of records) map.set(r.id, r);
     inMemoryDisciplinary = Array.from(map.values());
     try {
@@ -54,25 +66,28 @@ const mapDBToRecord = (row: any): DisciplinaryRecord => ({
 });
 
 export const disciplinaryService = {
-    async fetchDisciplinaryRecords(countryCode: string = 'ET', employeeId?: string): Promise<DisciplinaryRecord[]> {
+    async fetchDisciplinaryRecords(countryCode: string = 'ET', employeeId?: string, siteId?: string): Promise<DisciplinaryRecord[]> {
         const country = (countryCode || 'ET').toUpperCase();
         try {
             let query = supabase
                 .from('disciplinary_records')
                 .select('*')
-                .eq('country_code', country)
-                .order('issued_at', { ascending: false });
+                .eq('country_code', country);
 
             if (employeeId) {
                 query = query.eq('employee_id', employeeId);
             }
+            if (siteId && siteId !== 'All') {
+                query = query.eq('site_id', siteId);
+            }
 
-            const { data, error } = await query;
+            const { data, error } = await query.order('issued_at', { ascending: false });
             if (error) {
                 logger.warn('disciplinaryService', 'Supabase error, fallback to local', { message: error.message });
                 return getLocalBackup().filter(r => 
                     (r.country_code || 'ET').toUpperCase() === country &&
-                    (!employeeId || r.employee_id === employeeId)
+                    (!employeeId || r.employee_id === employeeId) &&
+                    (!siteId || siteId === 'All' || r.site_id === siteId)
                 );
             }
 
@@ -83,7 +98,8 @@ export const disciplinaryService = {
             logger.warn('disciplinaryService', 'Exception fetching records', { error: String(err) });
             return getLocalBackup().filter(r => 
                 (r.country_code || 'ET').toUpperCase() === country &&
-                (!employeeId || r.employee_id === employeeId)
+                (!employeeId || r.employee_id === employeeId) &&
+                (!siteId || siteId === 'All' || r.site_id === siteId)
             );
         }
     },
@@ -108,7 +124,7 @@ export const disciplinaryService = {
         const newRecord: DisciplinaryRecord = {
             ...data,
             country_code: country,
-            id: typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : `disc-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+            id: generateUUID(),
             appeal_status: 'None',
             issued_at: now,
             created_at: now
@@ -120,7 +136,7 @@ export const disciplinaryService = {
                 .insert([{
                     id: newRecord.id,
                     country_code: country,
-                    site_id: newRecord.site_id,
+                    site_id: newRecord.site_id || null,
                     employee_id: newRecord.employee_id,
                     employee_name: newRecord.employee_name,
                     record_type: newRecord.record_type,
@@ -132,8 +148,8 @@ export const disciplinaryService = {
                     issued_by: newRecord.issued_by,
                     issued_by_role: newRecord.issued_by_role,
                     issued_at: newRecord.issued_at,
-                    expires_at: newRecord.expires_at,
-                    confidential_notes: newRecord.confidential_notes
+                    expires_at: newRecord.expires_at || null,
+                    confidential_notes: newRecord.confidential_notes || null
                 }])
                 .select()
                 .single();
@@ -179,10 +195,19 @@ export const disciplinaryService = {
             throw new Error('Access denied: You can only file an appeal against your own disciplinary notice.');
         }
 
+        const notesToSave = appealNotes 
+            ? (existing?.confidential_notes 
+                ? `${existing.confidential_notes}\n[Appeal filed]: ${appealNotes}` 
+                : `[Appeal filed]: ${appealNotes}`)
+            : existing?.confidential_notes;
+
         try {
             const { error } = await supabase
                 .from('disciplinary_records')
-                .update({ appeal_status: 'Pending Appeal' })
+                .update({ 
+                    appeal_status: 'Pending Appeal',
+                    confidential_notes: notesToSave || null
+                })
                 .eq('id', recordId);
 
             if (error) {
@@ -192,7 +217,11 @@ export const disciplinaryService = {
             logger.warn('disciplinaryService', 'Exception in fileAppeal', { error: String(err) });
         }
 
-        const updated = records.map(r => r.id === recordId ? { ...r, appeal_status: 'Pending Appeal' as const } : r);
+        const updated = records.map(r => r.id === recordId ? { 
+            ...r, 
+            appeal_status: 'Pending Appeal' as const,
+            confidential_notes: notesToSave
+        } : r);
         saveLocalBackup(updated);
 
         try {
@@ -212,20 +241,33 @@ export const disciplinaryService = {
     async resolveAppeal(
         recordId: string,
         resolution: 'Upheld' | 'Overturned',
-        reviewer: { id: string; name: string; role: string }
+        reviewer: { id: string; name: string; role: string },
+        adjudicationNotes?: string
     ): Promise<boolean> {
         const records = getLocalBackup();
         const existing = records.find(r => r.id === recordId);
 
-        // 4-Eyes rule: Issuer cannot resolve the appeal
-        if (existing && existing.issued_by === reviewer.id) {
+        // 4-Eyes rule: Issuer cannot resolve the appeal (checks both ID and name)
+        if (existing && (
+            (reviewer.id && existing.issued_by === reviewer.id) ||
+            (reviewer.name && existing.issued_by === reviewer.name)
+        )) {
             throw new Error('Maker-Checker violation: Disciplinary notice issuer cannot adjudicate the appeal.');
         }
+
+        const notesToSave = adjudicationNotes
+            ? (existing?.confidential_notes
+                ? `${existing.confidential_notes}\n[Adjudication ${resolution} by ${reviewer.name} (${reviewer.role})]: ${adjudicationNotes}`
+                : `[Adjudication ${resolution} by ${reviewer.name} (${reviewer.role})]: ${adjudicationNotes}`)
+            : existing?.confidential_notes;
 
         try {
             const { error } = await supabase
                 .from('disciplinary_records')
-                .update({ appeal_status: resolution })
+                .update({ 
+                    appeal_status: resolution,
+                    confidential_notes: notesToSave || null
+                })
                 .eq('id', recordId);
 
             if (error) {
@@ -235,7 +277,11 @@ export const disciplinaryService = {
             logger.warn('disciplinaryService', 'Exception resolving appeal', { error: String(err) });
         }
 
-        const updated = records.map(r => r.id === recordId ? { ...r, appeal_status: resolution } : r);
+        const updated = records.map(r => r.id === recordId ? { 
+            ...r, 
+            appeal_status: resolution,
+            confidential_notes: notesToSave
+        } : r);
         saveLocalBackup(updated);
 
         try {

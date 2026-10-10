@@ -25,25 +25,26 @@ export default function StaffProfileNavigation({
     const activeTab = PROFILE_TABS.find(t => t.id === activeProfileTab) || PROFILE_TABS[0];
 
     return (
-        <div className="mb-6">
-            {/* Desktop Segmented Pill Dock */}
-            <div className="hidden md:flex items-center gap-1.5 p-1.5 bg-[#FAF8F5] dark:bg-black/30 border border-[#E2DCCE] dark:border-white/10 rounded-2xl overflow-x-auto no-scrollbar shadow-inner" role="tablist">
+        <div className="mb-5">
+            {/* Desktop Segmented Control Dock */}
+            <div className="hidden md:flex items-center gap-1 p-1 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl overflow-x-auto no-scrollbar select-none" role="tablist">
                 {PROFILE_TABS.map((tab) => {
                     const isSelected = activeProfileTab === tab.id;
                     if (tab.id === 'payroll' && !canViewPayroll) return null;
                     return (
                         <button
                             key={tab.id}
+                            type="button"
                             role="tab"
                             aria-selected={isSelected}
                             onClick={() => setActiveProfileTab(tab.id)}
-                            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap cursor-pointer ${
+                            className={`flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs transition-all whitespace-nowrap cursor-pointer ${
                                 isSelected
-                                    ? 'bg-[#2C5E3B] text-white dark:bg-[#EAE5D9] dark:text-[#18201B] shadow-sm shadow-[#2C5E3B]/20'
-                                    : 'text-stone-600 dark:text-stone-400 hover:text-[#1E3F27] dark:hover:text-white hover:bg-white/80 dark:hover:bg-white/5'
+                                    ? 'bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)] shadow-[0_1px_3px_rgba(0,0,0,0.12)] font-semibold'
+                                    : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] font-medium'
                             }`}
                         >
-                            <tab.icon size={15} className={isSelected ? 'text-white dark:text-[#18201B]' : 'text-stone-400 dark:text-stone-500'} />
+                            <tab.icon size={14} className={isSelected ? 'text-[var(--theme-accent)]' : 'text-[var(--theme-text-muted)]'} />
                             <span>{tab.label}</span>
                         </button>
                     );
@@ -53,34 +54,36 @@ export default function StaffProfileNavigation({
             {/* Mobile Dropdown */}
             <div className="md:hidden relative">
                 <button 
+                    type="button"
                     onClick={() => setIsMobileTabsOpen(!isMobileTabsOpen)}
-                    className="w-full flex items-center justify-between px-4 py-3 bg-[#FAF8F5] dark:bg-black/30 border border-[#E2DCCE] dark:border-white/10 rounded-xl text-[#1E3F27] dark:text-[#EAE5D9] font-bold text-xs shadow-xs"
+                    className="w-full flex items-center justify-between px-4 py-2.5 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl text-[var(--theme-text-primary)] font-semibold text-xs shadow-xs"
                 >
-                    <div className="flex items-center gap-2.5">
-                        <div className="p-1.5 rounded-lg bg-[#2C5E3B]/10 text-[#2C5E3B] dark:text-[#A9CBA2]">
-                            <activeTab.icon size={16} />
+                    <div className="flex items-center gap-2">
+                        <div className="w-6 h-6 rounded-lg bg-blue-500/10 text-[var(--theme-accent)] flex items-center justify-center">
+                            <activeTab.icon size={13} />
                         </div>
                         <span>{activeTab.label}</span>
                     </div>
-                    <ChevronDown size={16} className={`text-stone-400 transition-transform duration-200 ${isMobileTabsOpen ? 'rotate-180' : ''}`} />
+                    <ChevronDown size={14} className={`text-[var(--theme-text-muted)] transition-transform duration-200 ${isMobileTabsOpen ? 'rotate-180' : ''}`} />
                 </button>
 
                 {isMobileTabsOpen && (
-                    <div className="absolute top-full left-0 right-0 mt-2 bg-white dark:bg-[#18201B] border border-[#E2DCCE] dark:border-white/10 rounded-xl shadow-xl z-50 overflow-hidden divide-y divide-[#E2DCCE]/60 dark:divide-white/5 animate-in fade-in duration-150">
+                    <div className="absolute top-full left-0 right-0 mt-2 bg-[var(--theme-bg-panel)] border border-[var(--theme-border)] rounded-2xl shadow-[var(--shadow-modal)] z-50 overflow-hidden divide-y divide-[var(--theme-border-subtle)] animate-in fade-in duration-150">
                         {PROFILE_TABS.map((tab) => {
                             if (tab.id === 'payroll' && !canViewPayroll) return null;
                             const isSelected = activeProfileTab === tab.id;
                             return (
                                 <button
                                     key={tab.id}
+                                    type="button"
                                     onClick={() => { setActiveProfileTab(tab.id); setIsMobileTabsOpen(false); }}
-                                    className={`w-full flex items-center gap-3 px-4 py-3 text-xs font-bold transition-colors text-left ${
+                                    className={`w-full flex items-center gap-2.5 px-4 py-3 text-xs transition-colors text-left ${
                                         isSelected 
-                                            ? 'bg-[#2C5E3B]/10 text-[#2C5E3B] dark:text-[#A9CBA2]' 
-                                            : 'text-stone-600 dark:text-stone-400 hover:bg-stone-50 dark:hover:bg-white/5'
+                                            ? 'bg-blue-500/10 text-[var(--theme-accent)] font-semibold' 
+                                            : 'text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-subtle)] font-medium'
                                     }`}
                                 >
-                                    <tab.icon size={16} className={isSelected ? 'text-[#2C5E3B] dark:text-[#A9CBA2]' : 'text-stone-400'} />
+                                    <tab.icon size={15} className={isSelected ? 'text-[var(--theme-accent)]' : 'text-[var(--theme-text-muted)]'} />
                                     <span>{tab.label}</span>
                                 </button>
                             );

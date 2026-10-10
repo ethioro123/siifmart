@@ -2,7 +2,6 @@ import React from 'react';
 import { Save, Sparkles } from 'lucide-react';
 import Modal from '../../Modal';
 import { useGamification } from './GamificationContext';
-import { CURRENCY_SYMBOL } from '../../../constants';
 
 const TIER_COLORS = [
     { value: 'gray', label: 'Gray', class: 'from-gray-400 to-gray-500' },
@@ -10,7 +9,7 @@ const TIER_COLORS = [
     { value: 'yellow', label: 'Gold', class: 'from-yellow-400 to-yellow-500' },
     { value: 'cyan', label: 'Platinum', class: 'from-cyan-400 to-cyan-500' },
     { value: 'purple', label: 'Diamond', class: 'from-purple-400 to-purple-600' },
-    { value: 'green', label: 'Emerald', class: 'from-green-400 to-green-600' },
+    { value: 'green', label: 'Emerald', class: 'from-emerald-400 to-emerald-600' },
     { value: 'rose', label: 'Ruby', class: 'from-rose-400 to-rose-600' },
     { value: 'blue', label: 'Sapphire', class: 'from-blue-400 to-blue-600' },
 ];
@@ -31,10 +30,10 @@ export const POSRoleModal: React.FC = () => {
             onClose={() => setIsRoleModalOpen(false)}
             title={editingRole ? 'Edit Role Distribution' : 'Add New Role'}
         >
-            <div className="space-y-4 max-h-[70vh] overflow-y-auto pr-2">
+            <div className="space-y-4 max-h-[70vh] overflow-y-auto pr-1">
                 {/* Role Name */}
-                <div>
-                    <label className="text-xs text-gray-400 uppercase font-bold mb-1 block">
+                <div className="space-y-1.5">
+                    <label className="text-xs font-semibold text-[var(--theme-text-primary)] block">
                         Role Name *
                     </label>
                     <input
@@ -42,78 +41,68 @@ export const POSRoleModal: React.FC = () => {
                         value={editedRole.role || ''}
                         onChange={(e) => setEditedRole({ ...editedRole, role: e.target.value })}
                         placeholder="e.g., Store Manager, Cashier"
-                        className="w-full bg-black/40 border border-white/10 rounded-lg px-4 py-3 text-white focus:border-purple-500 focus:outline-none"
+                        className="w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 py-2.5 text-xs text-[var(--theme-text-primary)] font-medium outline-none focus:border-[#0071E3] dark:focus:border-[#2997FF] transition-colors"
                     />
                 </div>
 
                 {/* Percentage */}
-                <div>
-                    <label className="text-xs text-gray-400 uppercase font-bold mb-1 block">
-                        Bonus Percentage (%) *
+                <div className="space-y-1.5">
+                    <label className="text-xs font-semibold text-[var(--theme-text-primary)] block">
+                        Pool Percentage (%) *
                     </label>
                     <input
                         type="number"
-                        min="0"
+                        min="1"
                         max="100"
-                        aria-label="Bonus Percentage"
+                        aria-label="Pool Percentage"
                         value={editedRole.percentage || 0}
-                        onChange={(e) => setEditedRole({ ...editedRole, percentage: parseFloat(e.target.value) || 0 })}
-                        className="w-full bg-black/40 border border-white/10 rounded-lg px-4 py-3 text-white focus:border-purple-500 focus:outline-none"
+                        onChange={(e) => setEditedRole({ ...editedRole, percentage: parseInt(e.target.value) || 0 })}
+                        className="w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 py-2.5 text-xs text-[var(--theme-text-primary)] font-medium outline-none focus:border-[#0071E3] dark:focus:border-[#2997FF] transition-colors"
                     />
-                    <p className="text-[10px] text-gray-500 mt-1">
-                        Share of the store bonus pool this role receives. All roles must total 100%.
-                    </p>
+                    <p className="text-[10px] text-[var(--theme-text-secondary)]">Share of the store's earned bonus pool</p>
                 </div>
 
-                {/* Color */}
-                <div>
-                    <label className="text-xs text-gray-400 uppercase font-bold mb-2 block">
-                        Role Color
+                {/* Role Color */}
+                <div className="space-y-1.5">
+                    <label className="text-xs font-semibold text-[var(--theme-text-primary)] block">
+                        Role Color Accent
                     </label>
                     <div className="flex gap-2 flex-wrap">
                         {TIER_COLORS.map(color => (
                             <button
                                 key={color.value}
+                                type="button"
                                 onClick={() => setEditedRole({ ...editedRole, color: color.value })}
-                                className={`w-10 h-10 rounded-lg bg-gradient-to-br ${color.class} flex items-center justify-center transition-all ${
+                                className={`w-8 h-8 rounded-xl bg-gradient-to-br ${color.class} flex items-center justify-center transition-all cursor-pointer ${
                                     editedRole.color === color.value
-                                        ? 'ring-2 ring-white ring-offset-2 ring-offset-cyber-gray scale-110'
-                                        : 'opacity-60 hover:opacity-100'
+                                        ? 'ring-2 ring-[#0071E3] dark:ring-[#2997FF] scale-110 shadow-xs'
+                                        : 'opacity-70 hover:opacity-100'
                                 }`}
                                 title={color.label}
                             >
                                 {editedRole.color === color.value && (
-                                    <Sparkles size={16} className="text-white" />
+                                    <Sparkles size={14} className="text-white" />
                                 )}
                             </button>
                         ))}
                     </div>
                 </div>
 
-                {/* Example Calculation */}
-                <div className="bg-blue-500/10 border border-blue-500/20 rounded-xl p-4">
-                    <p className="text-xs text-blue-400 font-bold mb-2">Example: {CURRENCY_SYMBOL}10,000 Store Bonus</p>
-                    <p className="text-2xl font-bold text-green-400">
-                        {CURRENCY_SYMBOL}{((10000 * (editedRole.percentage || 0)) / 100).toLocaleString()}
-                    </p>
-                    <p className="text-[10px] text-gray-500 mt-1">
-                        This role would receive {editedRole.percentage || 0}% of the bonus pool
-                    </p>
-                </div>
-
                 {/* Actions */}
-                <div className="flex gap-3 pt-4">
+                <div className="flex gap-2 pt-2 justify-end">
                     <button
+                        type="button"
                         onClick={() => setIsRoleModalOpen(false)}
-                        className="flex-1 px-4 py-3 bg-white/5 hover:bg-white/10 text-white rounded-lg font-medium transition-all"
+                        className="h-9 px-4 bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-border)] text-[var(--theme-text-primary)] border border-[var(--theme-border)] rounded-xl text-xs font-semibold transition-colors cursor-pointer"
                     >
                         Cancel
                     </button>
                     <button
+                        type="button"
                         onClick={handleSaveRole}
-                        className="flex-1 px-4 py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-lg font-bold flex items-center justify-center gap-2 hover:opacity-90 transition-all"
+                        className="h-9 px-4 bg-[#0071E3] dark:bg-[#2997FF] hover:opacity-90 active:scale-[0.98] text-white rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 transition-all cursor-pointer shadow-xs"
                     >
-                        <Save size={18} />
+                        <Save size={14} />
                         {editingRole ? 'Update Role' : 'Add Role'}
                     </button>
                 </div>
@@ -121,4 +110,3 @@ export const POSRoleModal: React.FC = () => {
         </Modal>
     );
 };
-export default POSRoleModal;

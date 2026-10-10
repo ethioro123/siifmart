@@ -164,9 +164,11 @@ export default function POSSettings() {
             {/* ── ROLE GATE ── */}
             {!canConfigurePOS && (
                 <div className="flex flex-col items-center justify-center py-24 gap-4 text-center">
-                    <Lock size={40} className="text-stone-400 dark:text-gray-600" />
-                    <h3 className="font-bold text-stone-600 dark:text-gray-300">Access Restricted</h3>
-                    <p className="text-xs text-stone-500 dark:text-gray-500 max-w-xs">
+                    <div className="w-12 h-12 rounded-2xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] flex items-center justify-center">
+                        <Lock size={22} className="text-[var(--theme-text-secondary)]" />
+                    </div>
+                    <h3 className="font-semibold text-[var(--theme-text-primary)] text-sm">Access Restricted</h3>
+                    <p className="text-xs text-[var(--theme-text-secondary)] max-w-xs leading-relaxed">
                         POS configuration requires Store Manager or higher access.
                         Contact your HQ Operations team.
                     </p>
@@ -176,7 +178,7 @@ export default function POSSettings() {
             {canConfigurePOS && (
             <>
             {/* Top Tab Bar */}
-            <div className="flex items-center gap-2 p-1.5 bg-[#FAF8F5] dark:bg-black/40 rounded-2xl border border-[#E2DCCE] dark:border-white/10">
+            <div className="flex items-center gap-1.5 p-1 bg-[var(--theme-bg-subtle)] rounded-xl border border-[var(--theme-border)] mb-6">
                 {([
                     { id: 'station' as const, label: 'Retail Station', icon: Monitor },
                     { id: 'connectivity' as const, label: 'Tender & Connectivity', icon: Globe },
@@ -188,12 +190,12 @@ export default function POSSettings() {
                         <button
                             key={tab.id}
                             onClick={() => setActiveTab(tab.id)}
-                            className={`flex-1 px-4 min-h-[44px] rounded-xl text-xs font-black tracking-widest uppercase transition-opacity flex items-center justify-center gap-2 cursor-pointer ${active
-                                ? 'bg-[#2C5E3B] text-white shadow-md'
-                                : 'text-stone-500 dark:text-gray-400 hover:text-[#1E3F27] dark:hover:text-white hover:bg-white/50 dark:hover:bg-white/5'
+                            className={`min-h-[38px] flex-1 px-4 py-2 rounded-lg text-xs font-medium transition-all flex items-center justify-center gap-2 cursor-pointer ${active
+                                ? 'bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)] shadow-xs font-semibold'
+                                : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-card)]/50'
                                 }`}
                         >
-                            <Icon size={16} /> {tab.label}
+                            <Icon size={15} /> {tab.label}
                         </button>
                     );
                 })}
@@ -204,10 +206,10 @@ export default function POSSettings() {
                 <button
                     onClick={() => setIsPreviewOpen(!isPreviewOpen)}
                     title="Toggle Receipt Preview"
-                    className="fixed bottom-8 right-8 p-3.5 px-5 rounded-2xl z-[60] bg-[#2C5E3B] text-white shadow-2xl flex items-center gap-2.5 hover:opacity-90 active:scale-95 transition-opacity cursor-pointer min-h-[44px]"
+                    className="fixed bottom-8 right-8 h-10 px-4 rounded-xl z-[60] bg-[#0071E3] dark:bg-[#2997FF] text-white shadow-lg flex items-center gap-2 hover:opacity-90 active:scale-95 transition-all cursor-pointer font-semibold text-xs"
                 >
-                    <Receipt size={20} />
-                    <span className="text-xs font-black uppercase tracking-wider">{isPreviewOpen ? 'Hide Preview' : 'Live Receipt Preview'}</span>
+                    <Receipt size={16} />
+                    <span>{isPreviewOpen ? 'Hide Preview' : 'Live Receipt Preview'}</span>
                 </button>
             )}
 
@@ -253,7 +255,7 @@ export default function POSSettings() {
 
             {/* Floating Side Preview Panel */}
             <div className={`
-                fixed top-0 right-0 h-screen w-full sm:w-[480px] bg-white dark:bg-[#18201B] z-[70] border-l border-[#E2DCCE] dark:border-white/10
+                fixed top-0 right-0 h-screen w-full sm:w-[480px] bg-[var(--theme-bg-card)] z-[70] border-l border-[var(--theme-border)]
                 transform transition-transform duration-200 ease-out shadow-2xl
                 ${isPreviewOpen ? 'translate-x-0' : 'translate-x-full'}
             `}>
@@ -261,14 +263,14 @@ export default function POSSettings() {
                     <button
                         onClick={() => setIsPreviewOpen(false)}
                         title="Close Live Preview"
-                        className="absolute top-6 right-6 p-2.5 bg-stone-100 dark:bg-white/10 rounded-2xl text-stone-500 hover:text-[#1E3F27] dark:hover:text-white transition-opacity cursor-pointer min-h-[44px] min-w-[44px] flex items-center justify-center"
+                        className="absolute top-6 right-6 p-2 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] transition-colors cursor-pointer min-h-[36px] min-w-[36px] flex items-center justify-center"
                     >
-                        <Plus className="rotate-45" size={22} />
+                        <Plus className="rotate-45" size={18} />
                     </button>
 
                     <div className="mb-6 text-center space-y-1">
-                        <h2 className="text-xl font-black text-[#1E3F27] dark:text-white uppercase tracking-tight">Thermal Slip Preview</h2>
-                        <p className="text-[10px] text-[#2C5E3B] dark:text-[#A9CBA2] font-black uppercase tracking-widest">
+                        <h2 className="text-base font-semibold text-[var(--theme-text-primary)] tracking-tight">Thermal Slip Preview</h2>
+                        <p className="text-xs text-[#0071E3] dark:text-[#2997FF] font-semibold">
                             {receiptBranding.posReceiptWidth} Standard ESC/POS
                         </p>
                     </div>

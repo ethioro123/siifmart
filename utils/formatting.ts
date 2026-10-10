@@ -117,7 +117,12 @@ export const formatDateTime = (date: string | Date | undefined | null, options?:
 }): string => {
     if (!date) return 'N/A';
 
-    const d = typeof date === 'string' ? new Date(date) : date;
+    let cleanDate: string | Date = date;
+    if (typeof cleanDate === 'string' && cleanDate.includes(' REASON:')) {
+        cleanDate = cleanDate.replace(/\s+REASON:.*$/i, '').trim();
+    }
+
+    const d = typeof cleanDate === 'string' ? new Date(cleanDate) : cleanDate;
     if (isNaN(d.getTime())) return 'Invalid Date';
 
     const useTz = options?.timeZone || globalTimezone;

@@ -1,16 +1,27 @@
-import React from 'react';
+import React, { useState, useMemo } from 'react';
 import { Employee, Site } from '../../../types';
 import { OrgChartFilterState, DEPT_COLORS, ROLE_LABELS } from '../types';
 import { getRoleDept, getRoleRank } from '../hooks/useOrgTreeLayout';
 import { getRoleReportingMeta, HIERARCHY_LEVEL_CONFIGS } from '../hooks/orgReportingLines';
-import { FilterX, UserPlus, Layers, Network } from 'lucide-react';
-import { OrgMatrixCard } from './OrgMatrixCard';
+import {
+    FilterX,
+    UserPlus,
+    Layers,
+    Shield,
+    MapPin,
+    ChevronsUpDown,
+    ChevronsDownUp
+} from 'lucide-react';
 import { OrgMatrixGuide } from './OrgMatrixGuide';
+import { OrgMatrixKPIs } from './OrgMatrixKPIs';
+import { OrgMatrixSwimlane } from './OrgMatrixSwimlane';
+import { getDeptIcon, getTierIcon, STANDARD_DEPTS } from './orgMatrixIcons';
 
 interface OrgMatrixViewProps {
     employees: Employee[];
     sites?: Site[];
     filters: OrgChartFilterState;
+    setFilters?: React.Dispatch<React.SetStateAction<OrgChartFilterState>>;
     isDark: boolean;
     onlineIds?: Set<string>;
     onSelectEmployee: (employee: Employee) => void;
@@ -32,34 +43,35 @@ export const OrgMatrixView: React.FC<OrgMatrixViewProps> = ({
     onOpenAddEmployee,
     onResetFilters
 }) => {
-    const [groupBy, setGroupBy] = React.useState<'department' | 'level'>('department');
+    const [groupBy, setGroupBy] = useState<'department' | 'level' | 'site'>('department');
+    const [collapsedKeys, setCollapsedKeys] = useState<Set<string>>(new Set());
 
-    const siteMap = React.useMemo(() => {
+    const siteMap = useMemo(() => {
         const m = new Map<string, string>();
         sites.forEach(s => m.set(s.id, s.name));
         return m;
     }, [sites]);
 
-    const standardDepts = [
-        { key: 'executive', label: 'Executive Leadership', icon: '👑' },
-        { key: 'store', label: 'Store Operations', icon: '🏪' },
-        { key: 'warehouse', label: 'Warehouse & Logistics', icon: '📦' },
-        { key: 'finance', label: 'Finance & Accounts', icon: '💰' },
-        { key: 'hr', label: 'Human Resources', icon: '👥' },
-        { key: 'procurement', label: 'Procurement & Supply', icon: '🔗' },
-        { key: 'support', label: 'IT & Loss Prevention', icon: '🛠️' },
-    ];
-
     // Filter employees according to filter state
-    const filteredEmployees = React.useMemo(() => {
+    const filteredEmployees = useMemo(() => {
+        // Selective loading: initially only load managers and level 1 & 2 & 3.
+        // When user filters for a facility/store/warehouse or searches, bring up all employees at that location.
+        const isLocationFiltered = Boolean(filters.siteId && filters.siteId !== 'All');
+        const isSearchActive = Boolean(filters.searchTerm && filters.searchTerm.trim() !== '');
+        const isSpecificTier = Boolean(filters.hierarchyLevel);
+        const onlyManagers = !isLocationFiltered && !isSearchActive && !isSpecificTier;
+
         return employees.filter(emp => {
             const role = emp.role || 'pos';
             const dept = getRoleDept(role, emp.department);
             const siteId = emp.siteId || emp.site_id;
+            const meta = getRoleReportingMeta(role);
 
+            if (onlyManagers && meta.level > 3) return false;
             if (filters.siteId && siteId !== filters.siteId) return false;
             if (filters.department && dept !== filters.department) return false;
             if (filters.status && emp.status !== filters.status) return false;
+            if (filters.hierarchyLevel && meta.level !== filters.hierarchyLevel) return false;
 
             if (filters.searchTerm.trim()) {
                 const q = filters.searchTerm.trim().toLowerCase();
@@ -74,25 +86,24 @@ export const OrgMatrixView: React.FC<OrgMatrixViewProps> = ({
     }, [employees, filters]);
 
     // Active departments including dynamic custom departments
-    const departments = React.useMemo(() => {
-        const set = new Set(standardDepts.map(d => d.key));
-        const extra: { key: string; label: string; icon: string }[] = [];
+    const departments = useMemo(() => {
+        const set = new Set(STANDARD_DEPTS.map(d => d.key));
+        const extra: { key: string; label: string }[] = [];
         filteredEmployees.forEach(e => {
             const d = getRoleDept(e.role, e.department);
             if (!set.has(d)) {
                 set.add(d);
                 extra.push({
                     key: d,
-                    label: d.charAt(0).toUpperCase() + d.slice(1),
-                    icon: '📁'
+                    label: d.charAt(0).toUpperCase() + d.slice(1)
                 });
             }
         });
-        return [...standardDepts, ...extra];
+        return [...STANDARD_DEPTS, ...extra];
     }, [filteredEmployees]);
 
     // Group employees by department
-    const deptGroups = React.useMemo(() => {
+    const deptGroups = useMemo(() => {
         const map = new Map<string, Employee[]>();
         departments.forEach(d => map.set(d.key, []));
 
@@ -116,7 +127,7 @@ export const OrgMatrixView: React.FC<OrgMatrixViewProps> = ({
     }, [filteredEmployees, departments]);
 
     // Group employees by hierarchy level (L1 to L4)
-    const levelGroups = React.useMemo(() => {
+    const levelGroups = useMemo(() => {
         const map = new Map<number, Employee[]>();
         [1, 2, 3, 4].forEach(l => map.set(l, []));
 
@@ -138,7 +149,71 @@ export const OrgMatrixView: React.FC<OrgMatrixViewProps> = ({
         return map;
     }, [filteredEmployees]);
 
-    const hasActiveFilters = Boolean(filters.searchTerm || filters.siteId || filters.department || filters.status);
+    // Group employees by site / location
+    const siteGroups = useMemo(() => {
+        const map = new Map<string, Employee[]>();
+        sites.forEach(s => map.set(s.id, []));
+        map.set('unassigned', []);
+
+        filteredEmployees.forEach(emp => {
+            const sId = emp.siteId || emp.site_id || 'unassigned';
+            const list = map.get(sId) || [];
+            list.push(emp);
+            map.set(sId, list);
+        });
+
+        map.forEach((list) => {
+            list.sort((a, b) => {
+                const rankDiff = getRoleRank(a.role) - getRoleRank(b.role);
+                if (rankDiff !== 0) return rankDiff;
+                return (a.name || '').localeCompare(b.name || '');
+            });
+        });
+
+        return map;
+    }, [filteredEmployees, sites]);
+
+    // Executive Metrics KPI calculation
+    const metrics = useMemo(() => {
+        const total = filteredEmployees.length;
+        const active = filteredEmployees.filter(e => e.status === 'Active').length;
+        const onLeave = filteredEmployees.filter(e => e.status === 'On Leave').length;
+        let l1 = 0, l2 = 0, l3 = 0, l4 = 0;
+
+        filteredEmployees.forEach(e => {
+            const meta = getRoleReportingMeta(e.role || 'pos');
+            if (meta.level === 1) l1++;
+            else if (meta.level === 2) l2++;
+            else if (meta.level === 3) l3++;
+            else l4++;
+        });
+
+        return { total, active, onLeave, l1, l2, l3, l4 };
+    }, [filteredEmployees]);
+
+    const toggleSwimlane = (key: string) => {
+        setCollapsedKeys(prev => {
+            const next = new Set(prev);
+            if (next.has(key)) next.delete(key);
+            else next.add(key);
+            return next;
+        });
+    };
+
+    const handleExpandAll = () => setCollapsedKeys(new Set());
+    const handleCollapseAll = () => {
+        if (groupBy === 'department') setCollapsedKeys(new Set(departments.map(d => d.key)));
+        else if (groupBy === 'level') setCollapsedKeys(new Set(['1', '2', '3', '4']));
+        else setCollapsedKeys(new Set([...sites.map(s => s.id), 'unassigned']));
+    };
+
+    const hasActiveFilters = Boolean(
+        filters.searchTerm ||
+        filters.siteId ||
+        filters.department ||
+        filters.status ||
+        filters.hierarchyLevel
+    );
 
     if (filteredEmployees.length === 0) {
         return (
@@ -148,11 +223,11 @@ export const OrgMatrixView: React.FC<OrgMatrixViewProps> = ({
                 <div className="w-14 h-14 rounded-2xl bg-amber-500/10 flex items-center justify-center text-amber-600 dark:text-amber-400 mb-4">
                     <FilterX size={28} />
                 </div>
-                <h3 className="text-lg font-bold text-[#1E3F27] dark:text-[#EAE5D9] mb-1">
-                    No Team Members Found
+                <h3 className="text-lg font-bold text-stone-900 dark:text-white mb-1">
+                    No Matrix Personnel Found
                 </h3>
                 <p className="text-xs text-stone-500 dark:text-stone-400 max-w-sm mb-4">
-                    No active employees match your filter criteria. Try adjusting your search query, site filter, or department selection.
+                    No active personnel match your current filter parameters. Try clearing your search keyword, site selection, or hierarchy level.
                 </p>
                 {hasActiveFilters && onResetFilters && (
                     <button
@@ -160,7 +235,7 @@ export const OrgMatrixView: React.FC<OrgMatrixViewProps> = ({
                         onClick={onResetFilters}
                         className="px-4 py-2 text-xs font-bold rounded-xl bg-[#2C5E3B] hover:bg-[#1E3F27] text-white shadow-sm transition-all cursor-pointer"
                     >
-                        Reset All Filters
+                        Reset All Matrix Filters
                     </button>
                 )}
             </div>
@@ -168,15 +243,18 @@ export const OrgMatrixView: React.FC<OrgMatrixViewProps> = ({
     }
 
     return (
-        <div className="w-full h-full overflow-y-auto pr-1 pb-12">
+        <div className="w-full h-full overflow-y-auto pr-1 pb-12 space-y-4">
             {/* Top Governance & Chain-of-Command Guide */}
             <OrgMatrixGuide isDark={isDark} />
 
-            {/* Matrix View Toolbar: Grouping Switch & Quick Count */}
-            <div className="flex flex-wrap items-center justify-between gap-3 mb-5">
+            {/* Matrix Executive Summary Strip */}
+            <OrgMatrixKPIs metrics={metrics} isDark={isDark} />
+
+            {/* Matrix View Toolbar: Grouping Switch & Fold Controls */}
+            <div className="flex flex-wrap items-center justify-between gap-3 pt-2">
                 <div className="flex items-center gap-2">
-                    <span className="text-xs font-bold text-[#1E3F27] dark:text-[#EAE5D9]">
-                        Matrix Grouping:
+                    <span className="text-xs font-bold text-stone-700 dark:text-stone-300">
+                        Matrix Dimension:
                     </span>
                     <div className={`flex items-center p-0.5 rounded-xl border ${
                         isDark ? 'bg-[#18201B] border-[#2C4D35]' : 'bg-[#FAF8F5] border-[#E2DCCE]'
@@ -184,38 +262,58 @@ export const OrgMatrixView: React.FC<OrgMatrixViewProps> = ({
                         <button
                             type="button"
                             onClick={() => setGroupBy('department')}
-                            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+                            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
                                 groupBy === 'department'
-                                    ? 'bg-[#2C5E3B] text-white shadow-sm'
+                                    ? 'bg-[#2C5E3B] text-white shadow-xs'
                                     : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200'
                             }`}
                         >
                             <Layers size={13} />
-                            <span>Department Swimlanes</span>
+                            <span>Departments</span>
                         </button>
                         <button
                             type="button"
                             onClick={() => setGroupBy('level')}
-                            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+                            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
                                 groupBy === 'level'
-                                    ? 'bg-[#2C5E3B] text-white shadow-sm'
+                                    ? 'bg-[#2C5E3B] text-white shadow-xs'
                                     : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200'
                             }`}
                         >
-                            <Network size={13} />
-                            <span>Hierarchy Levels (L1-L4)</span>
+                            <Shield size={13} />
+                            <span>Hierarchy Tiers (L1-L4)</span>
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => setGroupBy('site')}
+                            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                                groupBy === 'site'
+                                    ? 'bg-[#2C5E3B] text-white shadow-xs'
+                                    : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200'
+                            }`}
+                        >
+                            <MapPin size={13} />
+                            <span>Facilities</span>
                         </button>
                     </div>
                 </div>
 
-                <div className="text-xs text-stone-500 dark:text-stone-400 font-medium">
-                    Showing <span className="font-bold text-[#1E3F27] dark:text-[#EAE5D9]">{filteredEmployees.length}</span> staff members
+                <div className="flex items-center gap-2">
+                    <button
+                        type="button"
+                        onClick={collapsedKeys.size > 0 ? handleExpandAll : handleCollapseAll}
+                        className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl border border-stone-200 dark:border-stone-800 bg-[#FAF8F5] dark:bg-[#1E2822] hover:bg-stone-100 dark:hover:bg-white/10 text-stone-600 dark:text-stone-300 text-xs font-semibold transition-colors cursor-pointer"
+                        title={collapsedKeys.size > 0 ? 'Expand all swimlanes' : 'Collapse all swimlanes'}
+                    >
+                        {collapsedKeys.size > 0 ? <ChevronsUpDown size={13} /> : <ChevronsDownUp size={13} />}
+                        <span>{collapsedKeys.size > 0 ? 'Expand All' : 'Collapse All'}</span>
+                    </button>
                 </div>
             </div>
 
             {/* Department Swimlanes Grouping */}
             {groupBy === 'department' && (
-                <div className="space-y-6">
+                <div className="space-y-4">
                     {departments.map(dept => {
                         const deptEmps = deptGroups.get(dept.key) || [];
                         if (deptEmps.length === 0 && filters.department && filters.department !== dept.key) {
@@ -225,74 +323,48 @@ export const OrgMatrixView: React.FC<OrgMatrixViewProps> = ({
                         const colors = DEPT_COLORS[dept.key] || DEPT_COLORS.support;
 
                         return (
-                            <div
+                            <OrgMatrixSwimlane
                                 key={dept.key}
-                                className={`rounded-2xl border p-5 transition-all ${
-                                    isDark ? 'bg-[#18201B] border-[#2C4D35]' : 'bg-white border-[#E2DCCE]'
-                                }`}
-                            >
-                                {/* Department Header */}
-                                <div className="flex flex-wrap items-center justify-between gap-3 pb-3 mb-4 border-b border-black/5 dark:border-white/5">
-                                    <div className="flex items-center gap-2.5">
-                                        <span className="text-xl">{dept.icon}</span>
-                                        <div>
-                                            <h3 className="font-bold text-base text-[#1E3F27] dark:text-[#EAE5D9]">
-                                                {dept.label}
-                                            </h3>
-                                            <p className="text-xs text-stone-500 dark:text-stone-400">
-                                                {deptEmps.length} team {deptEmps.length === 1 ? 'member' : 'members'}
-                                            </p>
-                                        </div>
+                                id={dept.key}
+                                title={dept.label}
+                                count={deptEmps.length}
+                                activeCount={deptEmps.filter(e => e.status === 'Active').length}
+                                icon={
+                                    <div
+                                        className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
+                                        style={{
+                                            backgroundColor: isDark ? colors.bgDark : colors.bg,
+                                            color: isDark ? colors.textDark : colors.text,
+                                            border: `1px solid ${isDark ? colors.borderDark : colors.border}`
+                                        }}
+                                    >
+                                        {getDeptIcon(dept.key, 17)}
                                     </div>
-
-                                    <div className="flex items-center gap-2">
-                                        {onOpenAddEmployee && (
-                                            <button
-                                                type="button"
-                                                onClick={onOpenAddEmployee}
-                                                className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-xl bg-[#2C5E3B]/10 hover:bg-[#2C5E3B]/20 text-[#2C5E3B] dark:text-[#A9CBA2] border border-[#2C5E3B]/20 transition-colors cursor-pointer"
-                                                title={`Add new recruit to ${dept.label}`}
-                                            >
-                                                <UserPlus size={13} />
-                                                <span>Add Member</span>
-                                            </button>
-                                        )}
-
-                                        <span
-                                            className="text-xs font-semibold px-2.5 py-1 rounded-full"
-                                            style={{
-                                                backgroundColor: isDark ? colors.bgDark : colors.bg,
-                                                color: isDark ? colors.textDark : colors.text,
-                                                border: `1px solid ${isDark ? colors.borderDark : colors.border}`
-                                            }}
+                                }
+                                isCollapsed={collapsedKeys.has(dept.key)}
+                                onToggle={() => toggleSwimlane(dept.key)}
+                                isDark={isDark}
+                                action={
+                                    onOpenAddEmployee ? (
+                                        <button
+                                            type="button"
+                                            onClick={onOpenAddEmployee}
+                                            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-xl bg-[#2C5E3B]/10 hover:bg-[#2C5E3B]/20 text-[#2C5E3B] dark:text-[#A9CBA2] border border-[#2C5E3B]/20 transition-colors cursor-pointer"
+                                            title={`Add new member to ${dept.label}`}
                                         >
-                                            {deptEmps.filter(e => e.status === 'Active').length} Active
-                                        </span>
-                                    </div>
-                                </div>
-
-                                {/* Employee Cards Grid */}
-                                {deptEmps.length > 0 ? (
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3.5">
-                                        {deptEmps.map(emp => (
-                                            <OrgMatrixCard
-                                                key={emp.id}
-                                                employee={emp}
-                                                siteName={siteMap.get(emp.siteId || emp.site_id || '') || 'All Sites'}
-                                                isDark={isDark}
-                                                isOnline={onlineIds ? onlineIds.has(emp.id) : false}
-                                                onSelectEmployee={onSelectEmployee}
-                                                onOpenProfile={onOpenProfile}
-                                                onOpenIdCard={onOpenIdCard}
-                                            />
-                                        ))}
-                                    </div>
-                                ) : (
-                                    <p className="text-xs text-stone-400 italic py-2">
-                                        No employees assigned to this department matching current filters.
-                                    </p>
-                                )}
-                            </div>
+                                            <UserPlus size={13} />
+                                            <span>Add Member</span>
+                                        </button>
+                                    ) : null
+                                }
+                                employees={deptEmps}
+                                siteMap={siteMap}
+                                onlineIds={onlineIds}
+                                onSelectEmployee={onSelectEmployee}
+                                onOpenProfile={onOpenProfile}
+                                onOpenIdCard={onOpenIdCard}
+                                emptyMessage="No employees assigned to this department matching current filter criteria."
+                            />
                         );
                     })}
                 </div>
@@ -300,73 +372,95 @@ export const OrgMatrixView: React.FC<OrgMatrixViewProps> = ({
 
             {/* Hierarchy Level Grouping (L1 to L4) */}
             {groupBy === 'level' && (
-                <div className="space-y-6">
+                <div className="space-y-4">
                     {([1, 2, 3, 4] as const).map(lvl => {
                         const levelEmps = levelGroups.get(lvl) || [];
                         const cfg = HIERARCHY_LEVEL_CONFIGS[lvl];
 
                         return (
-                            <div
+                            <OrgMatrixSwimlane
                                 key={lvl}
-                                className={`rounded-2xl border p-5 transition-all ${
-                                    isDark ? 'bg-[#18201B] border-[#2C4D35]' : 'bg-white border-[#E2DCCE]'
-                                }`}
-                            >
-                                {/* Level Header */}
-                                <div className="flex flex-wrap items-center justify-between gap-3 pb-3 mb-4 border-b border-black/5 dark:border-white/5">
-                                    <div className="flex items-center gap-2.5">
-                                        <span className="text-2xl">{cfg.icon}</span>
-                                        <div>
-                                            <div className="flex items-center gap-2">
-                                                <h3 className="font-bold text-base text-[#1E3F27] dark:text-[#EAE5D9]">
-                                                    {cfg.title}
-                                                </h3>
-                                                <span
-                                                    className="text-xs font-bold px-2 py-0.5 rounded-full"
-                                                    style={{
-                                                        backgroundColor: isDark ? cfg.bgDark : cfg.bgLight,
-                                                        color: cfg.color,
-                                                        border: `1px solid ${isDark ? cfg.borderDark : cfg.borderLight}`
-                                                    }}
-                                                >
-                                                    {cfg.badge}
-                                                </span>
-                                            </div>
-                                            <p className="text-xs text-stone-500 dark:text-stone-400 mt-0.5">
-                                                {cfg.subtitle} • {levelEmps.length} appointed
-                                            </p>
-                                        </div>
+                                id={String(lvl)}
+                                title={cfg.title}
+                                subtitle={`${cfg.subtitle} • ${levelEmps.length} appointed (${levelEmps.filter(e => e.status === 'Active').length} active)`}
+                                count={levelEmps.length}
+                                badge={
+                                    <span
+                                        className="text-[10px] font-bold px-2 py-0.5 rounded-full"
+                                        style={{
+                                            backgroundColor: isDark ? cfg.bgDark : cfg.bgLight,
+                                            color: cfg.color,
+                                            border: `1px solid ${isDark ? cfg.borderDark : cfg.borderLight}`
+                                        }}
+                                    >
+                                        {cfg.badge}
+                                    </span>
+                                }
+                                icon={
+                                    <div
+                                        className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
+                                        style={{
+                                            backgroundColor: isDark ? cfg.bgDark : cfg.bgLight,
+                                            color: cfg.color,
+                                            border: `1px solid ${isDark ? cfg.borderDark : cfg.borderLight}`
+                                        }}
+                                    >
+                                        {getTierIcon(lvl, 17)}
                                     </div>
+                                }
+                                isCollapsed={collapsedKeys.has(String(lvl))}
+                                onToggle={() => toggleSwimlane(String(lvl))}
+                                isDark={isDark}
+                                employees={levelEmps}
+                                siteMap={siteMap}
+                                onlineIds={onlineIds}
+                                onSelectEmployee={onSelectEmployee}
+                                onOpenProfile={onOpenProfile}
+                                emptyMessage={
+                                    lvl === 4 && !filters.siteId && !filters.searchTerm.trim()
+                                        ? "Frontline staff hidden by default to minimize egress. Filter by Facility or search in toolbar to load frontline personnel."
+                                        : "No active personnel positioned at this hierarchy tier matching current filters."
+                                }
+                            />
+                        );
+                    })}
+                </div>
+            )}
 
-                                    <div className="flex items-center gap-2">
-                                        <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
-                                            {levelEmps.filter(e => e.status === 'Active').length} Active
-                                        </span>
-                                    </div>
-                                </div>
+            {/* Facility / Site Grouping */}
+            {groupBy === 'site' && (
+                <div className="space-y-4">
+                    {Array.from(siteGroups.entries()).map(([siteId, siteEmps]) => {
+                        if (siteEmps.length === 0 && filters.siteId && filters.siteId !== siteId) {
+                            return null;
+                        }
 
-                                {/* Cards Grid */}
-                                {levelEmps.length > 0 ? (
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3.5">
-                                        {levelEmps.map(emp => (
-                                            <OrgMatrixCard
-                                                key={emp.id}
-                                                employee={emp}
-                                                siteName={siteMap.get(emp.siteId || emp.site_id || '') || 'All Sites'}
-                                                isDark={isDark}
-                                                isOnline={onlineIds ? onlineIds.has(emp.id) : false}
-                                                onSelectEmployee={onSelectEmployee}
-                                                onOpenProfile={onOpenProfile}
-                                                onOpenIdCard={onOpenIdCard}
-                                            />
-                                        ))}
+                        const siteObj = sites.find(s => s.id === siteId);
+                        const siteLabel = siteObj ? siteObj.name : 'Central Headquarters / Enterprise Shared';
+
+                        return (
+                            <OrgMatrixSwimlane
+                                key={siteId}
+                                id={siteId}
+                                title={siteLabel}
+                                subtitle={`${siteEmps.filter(e => e.status === 'Active').length} active personnel`}
+                                count={siteEmps.length}
+                                icon={
+                                    <div className="w-9 h-9 rounded-xl bg-[#2C5E3B]/10 dark:bg-[#A9CBA2]/15 text-[#2C5E3B] dark:text-[#A9CBA2] border border-[#2C5E3B]/20 flex items-center justify-center shrink-0">
+                                        <MapPin size={17} />
                                     </div>
-                                ) : (
-                                    <p className="text-xs text-stone-400 italic py-2">
-                                        No active personnel positioned at this hierarchy level matching current filters.
-                                    </p>
-                                )}
-                            </div>
+                                }
+                                isCollapsed={collapsedKeys.has(siteId)}
+                                onToggle={() => toggleSwimlane(siteId)}
+                                isDark={isDark}
+                                employees={siteEmps}
+                                siteMap={siteMap}
+                                onlineIds={onlineIds}
+                                onSelectEmployee={onSelectEmployee}
+                                onOpenProfile={onOpenProfile}
+                                onOpenIdCard={onOpenIdCard}
+                                emptyMessage="No personnel assigned to this facility matching current filters."
+                            />
                         );
                     })}
                 </div>

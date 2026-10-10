@@ -136,32 +136,30 @@ export function generateSKU(
 ): string {
     // 1. Use Preferred/Existing if valid
     if (preferredSku && isValidSKU(preferredSku)) {
-        return preferredSku.trim().toUpperCase();
+        return preferredSku.trim().toUpperCase().replace(/[-\s]/g, '');
     }
 
-    // 2. Determine Category and Country Prefix
+    // 2. Determine Category and Country Prefix (Clean unhyphenated format, e.g. KECN or ETCN)
     const catPrefix = getCategoryPrefix(category);
-    const countryPrefix = country ? `${country.toUpperCase()}-` : '';
+    const countryPrefix = country ? `${country.toUpperCase()}` : '';
     const fullPrefix = `${countryPrefix}${catPrefix}`;
 
-    // 3. Find Max Sequence from Live Data
+    // 3. Find Max Sequence from Live Data (normalizing both unhyphenated & legacy hyphenated)
     let maxSequence = 0;
 
     existingProducts.forEach(p => {
         if (!p.sku) return;
-        const normalized = p.sku.trim().toUpperCase();
+        const normalized = p.sku.trim().toUpperCase().replace(/[-\s]/g, '');
 
-        if (normalized.startsWith(fullPrefix)) {
-            const remainder = normalized.slice(fullPrefix.length).replace(/^-/, '');
+        if (fullPrefix && normalized.startsWith(fullPrefix)) {
+            const remainder = normalized.slice(fullPrefix.length);
             const num = parseInt(remainder, 10);
             if (!isNaN(num) && num > maxSequence) {
                 maxSequence = num;
             }
-        } else if (!country && (normalized.startsWith(catPrefix + '-') || normalized.startsWith(catPrefix))) {
-            const numPart = normalized.startsWith(catPrefix + '-')
-                ? normalized.slice(catPrefix.length + 1)
-                : normalized.slice(catPrefix.length);
-            const num = parseInt(numPart, 10);
+        } else if (!country && normalized.startsWith(catPrefix)) {
+            const remainder = normalized.slice(catPrefix.length);
+            const num = parseInt(remainder, 10);
             if (!isNaN(num) && num > maxSequence) {
                 maxSequence = num;
             }
@@ -174,7 +172,7 @@ export function generateSKU(
 
 /**
  * Validate if a SKU has the correct format
- * Supports both legacy format (FR019, FR-019) and multi-country format (KE-FR019, ET-FR019, UG-FR019)
+ * Supports both clean sovereign format (KECN001, ETFR001, FR001) and legacy hyphenated format
  */
 export function isValidSKU(sku: string): boolean {
     if (!sku || typeof sku !== 'string') return false;
@@ -182,8 +180,8 @@ export function isValidSKU(sku: string): boolean {
     const trimmed = sku.trim().toUpperCase();
     if (trimmed === '') return false;
 
-    // Accept: [OPTIONAL_COUNTRY_PREFIX]-[CATEGORY_PREFIX][OPTIONAL_HYPHEN][DIGITS]
-    const skuPattern = /^([A-Z]{2,3}-)?[A-Z]{2,4}-?\d{3,5}$/;
+    // Accept: [OPTIONAL_COUNTRY_PREFIX][CATEGORY_PREFIX][DIGITS] or legacy hyphenated
+    const skuPattern = /^([A-Z]{2,3}-?)?[A-Z]{2,4}-?\d{3,5}$/;
     return skuPattern.test(trimmed);
 }
 
@@ -196,19 +194,28 @@ export function registerExistingSKU(sku: string): void {
 }
 
 /**
- * Helper to extract category from SKU (stripping optional country prefix)
+ * Helper to extract category from SKU (stripping country prefix and hyphens)
  */
 export function extractCategoryFromSKU(sku: string): string | null {
     if (!isValidSKU(sku)) return null;
 
-    let cleaned = sku.trim().toUpperCase();
-    // Strip country prefix if present (e.g. "KE-FR019" -> "FR019")
-    if (/^[A-Z]{2,3}-/.test(cleaned)) {
-        cleaned = cleaned.replace(/^[A-Z]{2,3}-/, '');
-    }
-    cleaned = cleaned.replace(/-/g, '');
-    const prefix = cleaned.substring(0, 2);
+    let cleaned = sku.trim().toUpperCase().replace(/[-\s]/g, '');
 
+    // Check if starts with a known country prefix (ET, KE, UG, RW, TZ, SO, SS, DJ)
+    const countryPrefixes = ['ET', 'KE', 'UG', 'RW', 'TZ', 'SO', 'SS', 'DJ'];
+    for (const cp of countryPrefixes) {
+        if (cleaned.startsWith(cp) && cleaned.length >= 4) {
+            const potentialPrefix = cleaned.substring(cp.length, cp.length + 2);
+            for (const [category, categoryPrefix] of Object.entries(CATEGORY_PREFIXES)) {
+                if (categoryPrefix === potentialPrefix) {
+                    return category;
+                }
+            }
+        }
+    }
+
+    // Direct 2-letter category prefix (e.g. FR001)
+    const prefix = cleaned.substring(0, 2);
     for (const [category, categoryPrefix] of Object.entries(CATEGORY_PREFIXES)) {
         if (categoryPrefix === prefix) {
             return category;
@@ -236,10 +243,12 @@ export async function generateSequentialSKU(
     try {
         const { supabase } = await import('../lib/supabase');
         const prefix = getCategoryPrefix(category);
+        const countryPrefix = country ? country.toUpperCase() : '';
+        const searchPrefix = `${countryPrefix}${prefix}`;
         const { data } = await supabase
             .from('products')
             .select('sku')
-            .or(`sku.ilike.${prefix}-%,sku.ilike.${prefix}0%,sku.ilike.${prefix}1%,sku.ilike.${prefix}2%,sku.ilike.${prefix}3%,sku.ilike.${prefix}4%,sku.ilike.${prefix}5%,sku.ilike.${prefix}6%,sku.ilike.${prefix}7%,sku.ilike.${prefix}8%,sku.ilike.${prefix}9%`)
+            .or(`sku.ilike.${searchPrefix}%,sku.ilike.${prefix}%`)
             .limit(100);
 
         return generateSKU(category, (data || []) as Array<{ sku?: string }>, undefined, country);

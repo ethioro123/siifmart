@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import {
-   ChevronRight, FileText, CheckCircle, ChevronLeft, CreditCard,
+   ChevronRight, Receipt, ChevronLeft, CreditCard, Banknote, Smartphone,
    Loader, RefreshCw, WifiOff, CloudOff, Download
 } from 'lucide-react';
 import { CURRENCY_SYMBOL } from '../constants';
@@ -21,8 +21,8 @@ import { SalesDetailModal } from './sales-history/components/SalesDetailModal';
 import { triggerReceiptPrint } from './sales-history/utils/receiptPrinter';
 import { logger } from '../utils/logger';
 
-// Pagination Config
-const ITEMS_PER_PAGE = 20;
+// Pagination Config (Rule 10: 25-Item Shelf Rule)
+const ITEMS_PER_PAGE = 25;
 
 export default function SalesHistory() {
    const { movements, sites, addNotification, settings, allSales, posSyncStatus, posPendingSyncCount, effectiveCountry } = useData();
@@ -113,8 +113,8 @@ export default function SalesHistory() {
 
          setSales(data);
          setTotalCount(count);
-      } catch (error) {
-         logger.warn('SalesHistory', 'Network fetch failed or offline, falling back to local data:');
+      } catch {
+         logger.warn('SalesHistory', 'Network fetch failed or offline, falling back to local data');
 
          // Fallback to local allSales filtering
          const effectiveSiteId = restricted ? (user?.siteId || 'NONE') : (storeFilter === 'All' ? undefined : storeFilter);
@@ -140,7 +140,6 @@ export default function SalesHistory() {
             filtered = filtered.filter(s => s.date >= dateRange.start);
          }
          if (dateRange.end) {
-            // Add one day to end date to include the full day
             const nextDay = new Date(dateRange.end);
             nextDay.setDate(nextDay.getDate() + 1);
             filtered = filtered.filter(s => s.date < nextDay.toISOString());
@@ -170,7 +169,7 @@ export default function SalesHistory() {
       return () => clearTimeout(timer);
    }, [fetchSales]);
 
-   const handleFilterChange = (setter: any, value: any) => {
+   const handleFilterChange = (setter: (val: any) => void, value: any) => {
       setter(value);
       setCurrentPage(1); // Reset to page 1 on filter change
    };
@@ -230,53 +229,60 @@ export default function SalesHistory() {
    };
 
    return (
-      <div className="space-y-6">
-         {/* Header */}
-         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-            <div>
-               <h2 className="text-2xl font-bold text-[var(--theme-text-primary)] flex items-center gap-2.5">
-                  <FileText className="text-[var(--theme-text-primary)]" />
-                  Audit Console
-               </h2>
-               <p className="text-[var(--theme-text-secondary)] text-sm font-medium">Search, audit, and report on store transaction history.</p>
-            </div>
+      <div className="space-y-5 sm:space-y-6">
+         {/* Apple Section Header */}
+         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div className="flex items-center gap-3">
-               {/* Sync Status Badge */}
-               <div className={`flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-bold border transition-colors duration-300 ${
+               <div className="w-10 h-10 rounded-2xl bg-blue-500/10 text-[#0071E3] dark:text-[#2997FF] flex items-center justify-center shrink-0">
+                  <Receipt size={20} />
+               </div>
+               <div>
+                  <h2 className="text-2xl font-bold tracking-tight text-[var(--theme-text-primary)]">
+                     Sales History
+                  </h2>
+                  <p className="text-xs sm:text-sm text-[var(--theme-text-secondary)] font-normal mt-0.5">
+                     Audit, inspect, and export verified store transaction records.
+                  </p>
+               </div>
+            </div>
+
+            <div className="flex items-center gap-2.5">
+               {/* Apple Sync Status Pill */}
+               <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold border transition-colors ${
                   posSyncStatus === 'offline' 
                      ? 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/20' 
                      : posSyncStatus === 'syncing' 
                         ? 'bg-sky-500/10 text-sky-600 dark:text-sky-400 border-sky-500/20' 
                         : (posPendingSyncCount || 0) > 0 
                            ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20' 
-                           : 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20'
+                           : 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20'
                   }`}>
                   {posSyncStatus === 'syncing' ? (
-                     <RefreshCw size={14} className="animate-spin" />
+                     <RefreshCw size={13} className="animate-spin" />
                   ) : posSyncStatus === 'offline' ? (
-                     <WifiOff size={14} />
+                     <WifiOff size={13} />
                   ) : (posPendingSyncCount || 0) > 0 ? (
-                     <CloudOff size={14} />
+                     <CloudOff size={13} />
                   ) : (
-                     <CheckCircle size={14} />
+                     <span className="w-2 h-2 rounded-full bg-emerald-500 inline-block animate-pulse" />
                   )}
                   <span>
                      {posSyncStatus === 'offline' ? 'Offline Mode' :
                         posSyncStatus === 'syncing' ? 'Syncing...' :
-                           (posPendingSyncCount || 0) > 0 ? 'Sync Pending' :
-                              'System Online'}
-                     {((posPendingSyncCount || 0) > 0) && ` (${posPendingSyncCount})`}
+                           (posPendingSyncCount || 0) > 0 ? `Pending Sync (${posPendingSyncCount})` :
+                              'Telemetry Active'}
                   </span>
                </div>
 
+               {/* Export Action Button */}
                <Protected permission="EXPORT_SALES_DATA">
                   <button
                      type="button"
                      onClick={handleExportCSV}
-                     className="bg-[var(--theme-bg-panel)] text-[var(--theme-text-primary)] border border-[var(--theme-border)] px-4 py-2 rounded-xl text-sm hover:bg-[var(--theme-bg-panel-hover)] flex items-center transition-all font-bold active:scale-[0.98] shadow-xs cursor-pointer"
+                     className="h-10 px-4 rounded-xl bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-panel-hover)] border border-[var(--theme-border)] text-[var(--theme-text-primary)] text-xs sm:text-sm font-semibold transition-all active:scale-[0.98] flex items-center gap-2 cursor-pointer shadow-xs"
                   >
-                     <Download className="w-4 h-4 mr-2" />
-                     Export Page Data
+                     <Download size={14} />
+                     <span>Export CSV</span>
                   </button>
                </Protected>
             </div>
@@ -303,25 +309,25 @@ export default function SalesHistory() {
          />
 
          {/* --- DATA GRID --- */}
-         <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl overflow-hidden flex flex-col min-h-[500px] shadow-xs">
+         <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl isolate overflow-hidden shadow-[var(--shadow-sm)] flex flex-col min-h-[500px]">
             <div className="overflow-x-auto flex-1 relative">
                {loading && (
-                  <div className="absolute inset-0 bg-[var(--theme-bg-card)]/50 backdrop-blur-xs z-10 flex items-center justify-center">
-                     <Loader className="w-8 h-8 text-[var(--theme-text-primary)] animate-spin" />
+                  <div className="absolute inset-0 bg-[var(--theme-bg-card)]/60 backdrop-blur-xs z-20 flex items-center justify-center">
+                     <Loader className="w-7 h-7 text-[var(--theme-text-primary)] animate-spin" />
                   </div>
                )}
                <table className="w-full text-left">
                   <thead>
-                     <tr className="bg-[var(--theme-bg-panel)] border-b border-[var(--theme-border)] text-[10px] uppercase tracking-wider font-bold text-[var(--theme-text-secondary)]">
-                        <th className="p-4">Receipt ID</th>
-                        <th className="p-4">Date & Time</th>
-                        <th className="p-4">Store</th>
-                        <th className="p-4">Cashier</th>
-                        <th className="p-4">Payment</th>
-                        <th className="p-4 text-right">Items</th>
-                        <th className="p-4 text-right">Total</th>
-                        <th className="p-4 text-center">Status</th>
-                        <th className="p-4"></th>
+                     <tr className="bg-[var(--theme-thead-bg)] border-b border-[var(--theme-border)] text-[11px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider sticky top-0 z-10">
+                        <th className="py-3.5 px-4">Receipt ID</th>
+                        <th className="py-3.5 px-4">Date & Time</th>
+                        <th className="py-3.5 px-4">Store</th>
+                        <th className="py-3.5 px-4">Cashier</th>
+                        <th className="py-3.5 px-4">Payment</th>
+                        <th className="py-3.5 px-4 text-right">Items</th>
+                        <th className="py-3.5 px-4 text-right">Total</th>
+                        <th className="py-3.5 px-4 text-center">Status</th>
+                        <th className="py-3.5 px-4 w-10"></th>
                      </tr>
                   </thead>
                   <tbody className="divide-y divide-[var(--theme-border)]">
@@ -329,41 +335,61 @@ export default function SalesHistory() {
                         <tr
                            key={sale.id}
                            onClick={() => { setSelectedSale(sale); setDetailTab('receipt'); }}
-                           className="hover:bg-[var(--theme-bg-panel-hover)] transition-colors cursor-pointer group text-[var(--theme-text-primary)]"
+                           className="hover:bg-[var(--theme-table-row-hover)] transition-colors cursor-pointer group text-[var(--theme-text-primary)]"
                         >
-                           <td className="p-4">
-                              <div className="flex items-center gap-2">
-                                 <FileText size={14} className="text-[var(--theme-text-secondary)]" />
-                                 <span className="text-sm font-mono text-[var(--theme-text-primary)] font-bold group-hover:underline transition-colors">{sale.receiptNumber || `S${sale.id.substring(0, 8).replace(/-/g, '').toUpperCase()}`}</span>
-                              </div>
-                           </td>
-                           <td className="p-4">
-                              <div className="text-xs text-[var(--theme-text-secondary)] font-medium">{formatDateTime(sale.date, { useRelative: true })}</div>
-                           </td>
-                           <td className="p-4">
-                              <span className="text-xs text-[var(--theme-text-secondary)] font-medium">
-                                 {sites.find(s => s.id === sale.siteId)?.name || 'Unknown'}
-                              </span>
-                           </td>
-                           <td className="p-4">
-                              <div className="flex items-center gap-2">
-                                 <div className="w-6 h-6 rounded-full bg-[var(--theme-bg-panel)] border border-[var(--theme-border)] flex items-center justify-center text-[10px] font-bold text-[var(--theme-text-primary)]">
-                                    {sale.cashierName?.charAt(0) || '?'}
+                           <td className="py-3.5 px-4">
+                              <div className="flex items-center gap-2.5">
+                                 <div className="w-7 h-7 rounded-lg bg-[var(--theme-bg-subtle)] group-hover:bg-blue-500/10 text-[var(--theme-text-secondary)] group-hover:text-[#0071E3] dark:group-hover:text-[#2997FF] flex items-center justify-center shrink-0 transition-colors">
+                                    <Receipt size={14} />
                                  </div>
-                                 <span className="text-xs text-[var(--theme-text-primary)] font-medium">{sale.cashierName || 'Unknown'}</span>
+                                 <span className="text-xs sm:text-sm font-mono tabular-nums text-[var(--theme-text-primary)] font-semibold group-hover:text-[#0071E3] dark:group-hover:text-[#2997FF] transition-colors">
+                                    {sale.receiptNumber || `S${sale.id.substring(0, 8).replace(/-/g, '').toUpperCase()}`}
+                                 </span>
                               </div>
                            </td>
-                           <td className="p-4">
-                              <span className="text-xs text-[var(--theme-text-secondary)] flex items-center gap-1.5 font-medium">
-                                 <CreditCard size={12} className="text-[var(--theme-text-secondary)]" /> {sale.method}
+                           <td className="py-3.5 px-4">
+                              <div className="text-xs text-[var(--theme-text-primary)] font-medium">
+                                 {formatDateTime(sale.date, { showTime: true }).split(', ')[0]}
+                              </div>
+                              <div className="text-[11px] text-[var(--theme-text-secondary)] font-mono tabular-nums">
+                                 {formatDateTime(sale.date, { showTime: true }).split(', ')[1] || ''}
+                              </div>
+                           </td>
+                           <td className="py-3.5 px-4">
+                              <span className="text-xs text-[var(--theme-text-primary)] font-medium">
+                                 {sites.find(s => s.id === sale.siteId)?.name || 'Primary Store'}
                               </span>
                            </td>
-                           <td className="p-4 text-xs text-[var(--theme-text-secondary)] text-right font-mono font-bold">{sale.items.length}</td>
-                           <td className="p-4 text-sm font-mono text-[var(--theme-text-primary)] font-bold text-right">
+                           <td className="py-3.5 px-4">
+                              <div className="flex items-center gap-2">
+                                 <div className="w-6 h-6 rounded-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] flex items-center justify-center text-[11px] font-semibold text-[var(--theme-text-primary)]">
+                                    {sale.cashierName?.charAt(0) || 'C'}
+                                 </div>
+                                 <span className="text-xs text-[var(--theme-text-primary)] font-medium">
+                                    {sale.cashierName || 'Cashier'}
+                                 </span>
+                              </div>
+                           </td>
+                           <td className="py-3.5 px-4">
+                              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[var(--theme-bg-subtle)] text-xs text-[var(--theme-text-secondary)] font-medium">
+                                 {sale.method === 'Cash' ? (
+                                    <Banknote size={12} className="text-[var(--theme-text-secondary)]" />
+                                 ) : sale.method === 'Card' ? (
+                                    <CreditCard size={12} className="text-[var(--theme-text-secondary)]" />
+                                 ) : (
+                                    <Smartphone size={12} className="text-[var(--theme-text-secondary)]" />
+                                 )}
+                                 <span>{sale.method}</span>
+                              </span>
+                           </td>
+                           <td className="py-3.5 px-4 text-xs font-mono tabular-nums text-[var(--theme-text-secondary)] text-right font-medium">
+                              {sale.items.length}
+                           </td>
+                           <td className="py-3.5 px-4 text-sm font-mono tabular-nums text-[var(--theme-text-primary)] font-semibold text-right">
                               {currencySymbol} {sale.total.toLocaleString()}
                            </td>
-                           <td className="p-4 text-center">
-                              <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold uppercase border ${
+                           <td className="py-3.5 px-4 text-center">
+                              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-semibold border ${
                                  sale.status === 'Completed' 
                                     ? 'text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 border-emerald-500/20' 
                                     : sale.status === 'Pending' 
@@ -373,41 +399,60 @@ export default function SalesHistory() {
                                  {sale.status}
                               </span>
                            </td>
-                           <td className="p-4 text-right">
-                              <ChevronRight size={16} className="text-[var(--theme-text-muted)] group-hover:text-[var(--theme-text-primary)] transition-colors" />
+                           <td className="py-3.5 px-4 text-right">
+                              <ChevronRight size={15} className="text-[var(--theme-text-muted)] group-hover:text-[var(--theme-text-primary)] group-hover:translate-x-0.5 transition-all" />
                            </td>
                         </tr>
                      ))}
                      {!loading && sales.length === 0 && (
-                        <tr><td colSpan={9} className="p-12 text-center text-[var(--theme-text-muted)] font-medium bg-transparent">No transactions found matching criteria.</td></tr>
+                        <tr>
+                           <td colSpan={9} className="py-16 px-4">
+                              <div className="flex flex-col items-center justify-center text-center">
+                                 <div className="w-12 h-12 rounded-2xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] flex items-center justify-center text-[var(--theme-text-secondary)] mb-3">
+                                    <Receipt size={22} />
+                                 </div>
+                                 <p className="text-sm font-semibold text-[var(--theme-text-primary)]">
+                                    No Transactions Found
+                                 </p>
+                                 <p className="text-xs text-[var(--theme-text-secondary)] mt-1 max-w-sm">
+                                    No sales records matched your search query or filters. Try adjusting the date range or filters.
+                                 </p>
+                              </div>
+                           </td>
+                        </tr>
                      )}
                   </tbody>
                </table>
             </div>
 
-            {/* Pagination Footer */}
-            <div className="p-4 border-t border-[var(--theme-border)] flex justify-between items-center bg-[var(--theme-bg-panel)]">
+            {/* Apple Pagination Footer */}
+            <div className="h-14 px-4 sm:px-6 border-t border-[var(--theme-border)] flex justify-between items-center bg-[var(--theme-bg-card)]">
                <p className="text-xs text-[var(--theme-text-secondary)]">
-                  Showing <span className="text-[var(--theme-text-primary)] font-bold">{totalCount > 0 ? (currentPage - 1) * ITEMS_PER_PAGE + 1 : 0}</span> to <span className="text-[var(--theme-text-primary)] font-bold">{Math.min(currentPage * ITEMS_PER_PAGE, totalCount)}</span> of {totalCount} entries
+                  Showing <span className="text-[var(--theme-text-primary)] font-semibold font-mono tabular-nums">{totalCount > 0 ? (currentPage - 1) * ITEMS_PER_PAGE + 1 : 0}</span> to <span className="text-[var(--theme-text-primary)] font-semibold font-mono tabular-nums">{Math.min(currentPage * ITEMS_PER_PAGE, totalCount)}</span> of <span className="text-[var(--theme-text-primary)] font-semibold font-mono tabular-nums">{totalCount}</span> entries
                </p>
-               <div className="flex gap-2">
+               <div className="flex items-center gap-2">
                   <button
                      type="button"
                      onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
                      disabled={currentPage === 1 || loading}
-                     className="p-2 rounded-xl bg-[var(--theme-bg-card)] border border-[var(--theme-border)] hover:bg-[var(--theme-bg-panel-hover)] disabled:opacity-30 text-[var(--theme-text-primary)] transition-all active:scale-95 cursor-pointer"
+                     className="h-8 px-3 rounded-xl bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-panel-hover)] border border-[var(--theme-border)] disabled:opacity-30 disabled:pointer-events-none text-[var(--theme-text-primary)] text-xs font-medium flex items-center gap-1 transition-all active:scale-[0.98] cursor-pointer"
                      aria-label="Previous Page"
                   >
-                     <ChevronLeft size={16} />
+                     <ChevronLeft size={14} />
+                     <span className="hidden sm:inline">Previous</span>
                   </button>
+                  <span className="text-xs text-[var(--theme-text-secondary)] px-2 font-mono tabular-nums">
+                     {currentPage} / {Math.max(totalPages, 1)}
+                  </span>
                   <button
                      type="button"
                      onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
                      disabled={currentPage >= totalPages || totalPages === 0 || loading}
-                     className="p-2 rounded-xl bg-[var(--theme-bg-card)] border border-[var(--theme-border)] hover:bg-[var(--theme-bg-panel-hover)] disabled:opacity-30 text-[var(--theme-text-primary)] transition-all active:scale-95 cursor-pointer"
+                     className="h-8 px-3 rounded-xl bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-panel-hover)] border border-[var(--theme-border)] disabled:opacity-30 disabled:pointer-events-none text-[var(--theme-text-primary)] text-xs font-medium flex items-center gap-1 transition-all active:scale-[0.98] cursor-pointer"
                      aria-label="Next Page"
                   >
-                     <ChevronRight size={16} />
+                     <span className="hidden sm:inline">Next</span>
+                     <ChevronRight size={14} />
                   </button>
                </div>
             </div>

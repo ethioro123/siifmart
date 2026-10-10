@@ -4,6 +4,7 @@ import { PurchaseOrder, WMSJob } from '../../../types';
 import { useFulfillment } from '../../fulfillment/FulfillmentContext';
 import { convertToSellableUnits } from '../useReceiving';
 import { formatPackBadge, formatPOItemDescription } from '../../procurement/utils';
+import { buildPOJobsReceivedMap, resolvePOLineItemProgress } from './receiveQuantityResolver';
 
 interface ReceiveReviewModalProps {
     po: PurchaseOrder;
@@ -27,42 +28,26 @@ export const ReceiveReviewModal: React.FC<ReceiveReviewModalProps> = ({
     // Calculate stats
     const stats = useMemo(() => {
         const poJobs = jobs.filter(j => (j.orderRef === po.id || (po.po_number && j.orderRef === po.po_number) || (po.poNumber && j.orderRef === po.poNumber)) && j.type === 'PUTAWAY');
-        const cleanSku = (s?: string) => s ? s.replace(/[-\s]/g, '').toUpperCase() : '';
-        const receivedMap: Record<string, number> = {};
-
-        poJobs.forEach(job => {
-            job.lineItems.forEach(item => {
-                const qty = item.expectedQty || item.receivedQty || (item as any).quantity || 0;
-                if (qty <= 0) return;
-                const canonKey = cleanSku(item.sku) || item.productId;
-                if (canonKey) {
-                    receivedMap[canonKey] = (receivedMap[canonKey] || 0) + qty;
-                }
-            });
-        });
+        const receivedMaps = buildPOJobsReceivedMap(poJobs);
 
         let totalExpectedSellable = 0;
         let totalReceivedSellable = 0;
         let totalOrderedCases = 0;
 
         const details = (po.lineItems || []).map(item => {
-            const product = allProducts.find(p => p.id === item.productId || (item.sku && cleanSku(p.sku) === cleanSku(item.sku)));
-            const canonKey = cleanSku(item.sku) || cleanSku(product?.sku) || item.productId || product?.id || '';
-            const receivedFromJobs = canonKey ? (receivedMap[canonKey] || 0) : 0;
-            const expectedSellable = convertToSellableUnits(item.quantity, item);
-            const received = Math.max(item.receivedQty || 0, receivedFromJobs);
+            const progress = resolvePOLineItemProgress(item, receivedMaps, allProducts);
             const unitsPerOrderUnit = convertToSellableUnits(1, item);
 
             totalOrderedCases += item.quantity;
-            totalExpectedSellable += expectedSellable;
-            totalReceivedSellable += received;
+            totalExpectedSellable += progress.expectedSellable;
+            totalReceivedSellable += progress.effectiveReceived;
 
             return {
                 ...item,
-                expectedSellable,
-                received,
+                expectedSellable: progress.expectedSellable,
+                received: progress.effectiveReceived,
                 unitsPerOrderUnit,
-                status: received >= expectedSellable ? 'Complete' : received > 0 ? 'Partial' : 'Pending'
+                status: progress.isComplete ? 'Complete' : progress.effectiveReceived > 0 ? 'Partial' : 'Pending'
             };
         });
 
@@ -72,68 +57,68 @@ export const ReceiveReviewModal: React.FC<ReceiveReviewModalProps> = ({
     const isFullyReceived = stats.totalReceivedSellable >= stats.totalExpectedSellable;
 
     return (
-        <div className="fixed inset-0 bg-black/80 flex items-center justify-center p-2 sm:p-4 z-50 overflow-x-hidden animate-in fade-in duration-200">
-            <div className="glass-panel rounded-3xl w-full max-w-2xl overflow-hidden flex flex-col max-h-[90vh] relative">
-                {/* 🌟 Modal Ambient Glow — hidden on mobile */}
-                <div className="hidden md:block absolute -top-24 -right-24 w-64 h-64 bg-[#2C5E3B]/10 dark:bg-[#A9CBA2]/5 blur-[100px] rounded-full pointer-events-none" />
-                <div className="hidden md:block absolute -bottom-24 -left-24 w-64 h-64 bg-amber-600/10 dark:bg-amber-700/5 blur-[100px] rounded-full pointer-events-none" />
-
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center p-2 sm:p-4 z-50 overflow-x-hidden animate-in fade-in duration-200">
+            <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-3xl w-full max-w-2xl overflow-hidden flex flex-col max-h-[90vh] relative shadow-2xl">
                 {/* Header */}
-                <div className="p-4 md:p-6 border-b border-[#E2DCCE]/60 dark:border-[#A9CBA2]/[0.06] flex justify-between items-start bg-[#FAF8F5] dark:bg-[#1C2620]">
+                <div className="p-4 md:p-6 border-b border-[var(--theme-border)] flex justify-between items-start bg-[var(--theme-bg-subtle)]">
                     <div>
-                        <h3 className="text-base md:text-xl font-black text-slate-900 dark:text-white flex items-center gap-2 md:gap-3 uppercase tracking-tight">
-                            <FileText className="text-[#2C5E3B] dark:text-[#A9CBA2]" size={20} />
+                        <h3 className="text-base md:text-xl font-bold text-[var(--theme-text-primary)] flex items-center gap-2 md:gap-3 tracking-tight">
+                            <FileText className="text-[var(--theme-text-primary)]" size={20} />
                             {t('warehouse.finalizeManifest')}
                         </h3>
-                        <p className="text-[10px] text-slate-500 dark:text-zinc-500 font-black uppercase tracking-widest mt-1.5 font-mono">
-                            Manifest #{po.poNumber} • <span className="text-[#2C5E3B] dark:text-[#A9CBA2]">{po.supplierName}</span>
+                        <p className="text-[11px] text-[var(--theme-text-secondary)] font-medium mt-1.5 font-mono">
+                            Manifest #{po.poNumber} • <span className="text-[var(--theme-text-primary)] font-semibold">{po.supplierName}</span>
                         </p>
                     </div>
-                    <button onClick={onClose} className="p-2 hover:bg-slate-100 dark:hover:bg-white/10 rounded-lg text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors" aria-label="Close">
+                    <button 
+                        onClick={onClose} 
+                        className="p-2.5 rounded-xl text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-card)] transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center" 
+                        aria-label="Close"
+                    >
                         <X size={20} />
                     </button>
                 </div>
 
                 {/* Content */}
-                <div className="flex-1 overflow-y-auto p-4 md:p-6 space-y-4 md:space-y-6 custom-scrollbar bg-[#FAF8F5]/30 dark:bg-[#18201B]/30">
+                <div className="flex-1 overflow-y-auto p-4 md:p-6 space-y-4 md:space-y-6 custom-scrollbar bg-[var(--theme-bg-app)]">
 
                     {/* Summary Stats */}
                     <div className="grid grid-cols-2 gap-3 md:gap-4">
-                        <div className="p-3 md:p-5 glass-panel-pushed text-center shadow-sm">
-                            <p className="text-[10px] text-slate-400 dark:text-zinc-500 uppercase font-black tracking-widest mb-1.5">{t('warehouse.totalOrdered')}</p>
-                            <p className="text-xl md:text-2xl font-black text-slate-900 dark:text-white uppercase tabular-nums font-mono leading-none">
-                                {stats.totalExpectedSellable} <span className="text-xs text-stone-400 font-normal">units</span>
+                        <div className="p-4 md:p-5 rounded-2xl bg-[var(--theme-bg-card)] border border-[var(--theme-border)] text-center shadow-sm">
+                            <p className="text-[11px] text-[var(--theme-text-secondary)] uppercase font-semibold tracking-wider mb-1.5">{t('warehouse.totalOrdered')}</p>
+                            <p className="text-xl md:text-2xl font-bold text-[var(--theme-text-primary)] tabular-nums font-mono leading-none">
+                                {stats.totalExpectedSellable} <span className="text-xs text-[var(--theme-text-secondary)] font-normal">units</span>
                             </p>
                             {stats.totalExpectedSellable !== stats.totalOrderedCases && (
-                                <p className="text-[9px] text-stone-500 dark:text-stone-400 font-bold uppercase mt-1">
+                                <p className="text-[11px] text-[var(--theme-text-secondary)] font-medium mt-1">
                                     ({stats.totalOrderedCases} ordered {stats.totalOrderedCases === 1 ? 'package' : 'packages'})
                                 </p>
                             )}
                         </div>
-                        <div className={`p-3 md:p-5 rounded-xl md:rounded-2xl border text-center transition-all shadow-sm ${isFullyReceived ? 'bg-[#2C5E3B] dark:bg-[#EAE5D9] border-[#2C5E3B] dark:border-[#EAE5D9]' : 'glass-panel-pushed'}`}>
-                            <p className={`text-[10px] uppercase font-black tracking-widest mb-1.5 ${isFullyReceived ? 'text-[#FAF8F5]/80 dark:text-[#1E3B24]/80' : 'text-slate-400 dark:text-zinc-500'}`}>{t('warehouse.totalReceived')}</p>
-                            <p className={`text-xl md:text-2xl font-black tabular-nums font-mono leading-none ${isFullyReceived ? 'text-[#FAF8F5] dark:text-[#1E3B24] drop-shadow-sm' : 'text-slate-900 dark:text-white'}`}>
+                        <div className={`p-4 md:p-5 rounded-2xl border text-center transition-all shadow-sm ${isFullyReceived ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-600 dark:text-emerald-400' : 'bg-[var(--theme-bg-card)] border-[var(--theme-border)] text-[var(--theme-text-primary)]'}`}>
+                            <p className="text-[11px] uppercase font-semibold tracking-wider mb-1.5 text-[var(--theme-text-secondary)]">{t('warehouse.totalReceived')}</p>
+                            <p className="text-xl md:text-2xl font-bold tabular-nums font-mono leading-none">
                                 {stats.totalReceivedSellable} <span className="text-xs opacity-75 font-normal">units</span>
                             </p>
                         </div>
                     </div>
 
                     {!isFullyReceived && (
-                        <div className="p-4 md:p-5 bg-amber-50 dark:bg-amber-500/5 border border-amber-200/50 dark:border-amber-500/20 rounded-2xl flex gap-3 shadow-sm border-l-4 border-l-amber-500">
+                        <div className="p-4 md:p-5 bg-amber-500/10 border border-amber-500/20 rounded-2xl flex gap-3 shadow-sm border-l-4 border-l-amber-500">
                             <AlertTriangle className="text-amber-600 dark:text-amber-400 shrink-0" size={20} />
                             <div>
-                                <h4 className="text-sm font-black text-amber-900 dark:text-amber-200 uppercase tracking-tight">{t('warehouse.discrepancyDetected')}</h4>
-                                <p className="text-[10px] text-amber-700/80 dark:text-amber-500/80 mt-1 uppercase tracking-widest font-black leading-relaxed">
+                                <h4 className="text-sm font-semibold text-amber-900 dark:text-amber-200 tracking-tight">{t('warehouse.discrepancyDetected')}</h4>
+                                <p className="text-[11px] text-amber-700/90 dark:text-amber-400/90 mt-1 font-medium leading-relaxed">
                                     Finalizing with {stats.totalExpectedSellable - stats.totalReceivedSellable} {t('warehouse.missingItems')}.
-                                    Marked as <span className="text-amber-900 dark:text-amber-100 underline decoration-amber-500/30">{t('warehouse.partialReceipt')}</span>.
+                                    Marked as <span className="font-semibold underline decoration-amber-500/30">{t('warehouse.partialReceipt')}</span>.
                                 </p>
                             </div>
                         </div>
                     )}
 
-                    <div className="rounded-xl md:rounded-2xl border border-[#E2DCCE]/60 dark:border-[#A9CBA2]/[0.06] overflow-hidden bg-white/40 dark:bg-[#1C2620]/30 shadow-sm relative">
+                    <div className="rounded-2xl border border-[var(--theme-border)] overflow-hidden bg-[var(--theme-bg-card)] shadow-sm relative">
                         <table className="w-full text-sm text-left">
-                            <thead className="bg-[#FAF8F5]/80 dark:bg-[#1C2620]/60 text-[#2C5E3B]/60 dark:text-[#A9CBA2]/60 font-black uppercase tracking-[0.2em] text-[8px]">
+                            <thead className="bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] font-semibold uppercase tracking-wider text-[11px] border-b border-[var(--theme-border)]">
                                 <tr>
                                     <th className="p-3 md:p-4">{t('warehouse.productAttributes')}</th>
                                     <th className="p-3 md:p-4 text-center">{t('warehouse.req')}</th>
@@ -141,39 +126,39 @@ export const ReceiveReviewModal: React.FC<ReceiveReviewModalProps> = ({
                                     <th className="p-3 md:p-4 text-right">{t('warehouse.status')}</th>
                                 </tr>
                             </thead>
-                            <tbody className="divide-y divide-[#E2DCCE]/30 dark:divide-[#A9CBA2]/[0.04]">
+                            <tbody className="divide-y divide-[var(--theme-border)]">
                                 {stats.details.map((item, idx) => (
-                                    <tr key={idx} className="hover:bg-slate-50 dark:hover:bg-white/5 transition-colors">
-                                        <td className="p-2.5 md:p-4">
-                                            <p className="text-slate-900 dark:text-white font-black uppercase tracking-tight truncate max-w-[120px] md:max-w-[180px] text-[10px] md:text-xs">{formatPOItemDescription(item) || item.productName}</p>
+                                    <tr key={idx} className="hover:bg-[var(--theme-bg-subtle)] transition-colors">
+                                        <td className="p-3 md:p-4">
+                                            <p className="text-[var(--theme-text-primary)] font-semibold tracking-tight truncate max-w-[140px] md:max-w-[200px] text-xs md:text-sm">{formatPOItemDescription(item) || item.productName}</p>
                                             {(() => {
                                                 const badge = formatPackBadge(item);
                                                 return badge ? (
-                                                    <span className="inline-block mt-1 px-1.5 py-0.5 rounded bg-amber-500/10 border border-amber-500/20 text-amber-700 dark:text-amber-400 text-[9px] font-black uppercase tracking-widest">
+                                                    <span className="inline-block mt-1 px-2 py-0.5 rounded-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-[var(--theme-text-secondary)] text-[11px] font-medium">
                                                         {badge}
                                                     </span>
                                                 ) : null;
                                             })()}
-                                            <p className="text-[9px] text-slate-400 dark:text-zinc-600 font-black tracking-widest uppercase mt-1 font-mono">{item.sku}</p>
+                                            <p className="text-[11px] text-[var(--theme-text-secondary)] font-mono mt-1">{item.sku}</p>
                                         </td>
-                                        <td className="p-2.5 md:p-4 text-center text-slate-500 dark:text-zinc-500 font-black tabular-nums text-xs">
+                                        <td className="p-3 md:p-4 text-center text-[var(--theme-text-secondary)] font-medium tabular-nums font-mono text-xs md:text-sm">
                                             {item.expectedSellable}
                                             {item.expectedSellable !== item.quantity && (
-                                                <div className="text-[9px] text-stone-400 dark:text-stone-500 font-normal">({item.quantity} pkgs)</div>
+                                                <div className="text-[11px] text-[var(--theme-text-secondary)] font-normal">({item.quantity} pkgs)</div>
                                             )}
                                         </td>
-                                        <td className="p-2.5 md:p-4 text-center font-black text-[#2C5E3B] dark:text-[#A9CBA2] tabular-nums text-xs">
+                                        <td className="p-3 md:p-4 text-center font-semibold text-[var(--theme-text-primary)] tabular-nums font-mono text-xs md:text-sm">
                                             {item.received}
                                             {(item.unitsPerOrderUnit || 1) > 1 && (
-                                                <div className="text-[9px] text-stone-400 dark:text-stone-500 font-normal">
+                                                <div className="text-[11px] text-[var(--theme-text-secondary)] font-normal">
                                                     ({Math.round((item.received / item.unitsPerOrderUnit) * 10) / 10} pkgs)
                                                 </div>
                                             )}
                                         </td>
-                                        <td className="p-2.5 md:p-4 text-right">
-                                            <span className={`px-2.5 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest border transition-all ${item.status === 'Complete' ? 'bg-[#2C5E3B] dark:bg-[#EAE5D9] text-[#FAF8F5] dark:text-[#1E3B24] border-[#2C5E3B] dark:border-[#EAE5D9] shadow-sm' :
-                                                item.status === 'Partial' ? 'bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-200 dark:border-amber-500/20' :
-                                                    'bg-[#FAF8F5]/50 dark:bg-white/5 text-[#2C4D35]/40 dark:text-zinc-700 border-[#E2DCCE]/50 dark:border-white/5 opacity-50'
+                                        <td className="p-3 md:p-4 text-right">
+                                            <span className={`px-2.5 py-1 rounded-full text-[11px] font-semibold border transition-all ${item.status === 'Complete' ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20' :
+                                                item.status === 'Partial' ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20' :
+                                                    'bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] border-[var(--theme-border)]'
                                                 }`}>
                                                 {item.status}
                                             </span>
@@ -187,10 +172,10 @@ export const ReceiveReviewModal: React.FC<ReceiveReviewModalProps> = ({
                 </div>
 
                 {/* Footer */}
-                <div className="p-4 md:p-6 border-t border-[#E2DCCE]/50 dark:border-emerald-950/20 bg-[#FAF8F5] dark:bg-[#1C2620] flex flex-col md:flex-row gap-3 justify-end shrink-0">
+                <div className="p-4 md:p-6 border-t border-[var(--theme-border)] bg-[var(--theme-bg-subtle)] flex flex-col md:flex-row gap-3 justify-end shrink-0">
                     <button
                         onClick={onClose}
-                        className="woody-btn-secondary w-full md:w-auto px-10 py-3.5 text-[10px] uppercase tracking-widest font-black order-2 md:order-1"
+                        className="w-full md:w-auto px-8 py-3 rounded-xl border border-[var(--theme-border)] bg-[var(--theme-bg-card)] hover:bg-[var(--theme-bg-subtle)] text-[var(--theme-text-primary)] text-xs uppercase tracking-wider font-semibold min-h-[44px] transition-colors order-2 md:order-1"
                         disabled={isSubmitting}
                     >
                         {t('warehouse.dismiss')}
@@ -198,7 +183,7 @@ export const ReceiveReviewModal: React.FC<ReceiveReviewModalProps> = ({
                     <button
                         onClick={onFinalize}
                         disabled={isSubmitting}
-                        className="woody-btn-primary w-full md:w-auto px-10 py-3.5 text-[10px] uppercase tracking-widest flex items-center justify-center gap-3 order-1 md:order-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="w-full md:w-auto px-8 py-3 rounded-xl bg-blue-600 hover:bg-blue-700 active:scale-95 text-white font-semibold text-xs uppercase tracking-wider min-h-[44px] flex items-center justify-center gap-2 transition-all order-1 md:order-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
                     >
                         {isSubmitting ? (
                             <>
@@ -207,7 +192,7 @@ export const ReceiveReviewModal: React.FC<ReceiveReviewModalProps> = ({
                             </>
                         ) : (
                             <>
-                                <CheckCircle size={14} />
+                                <CheckCircle size={16} />
                                 {isFullyReceived ? t('warehouse.finalizeManifest') : t('warehouse.confirmPartialReceipt')}
                             </>
                         )}

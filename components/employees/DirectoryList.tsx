@@ -13,13 +13,20 @@ interface DirectoryListProps {
    currentUser?: { id?: string; role?: UserRole; siteId?: string } | null;
 }
 
-export default function DirectoryList({ displayedEmployees, isLoadingEmployees, sites, setSelectedEmployee, canViewAll, currentUser }: DirectoryListProps) {
+export default function DirectoryList({
+   displayedEmployees,
+   isLoadingEmployees,
+   sites,
+   setSelectedEmployee,
+   canViewAll,
+   currentUser
+}: DirectoryListProps) {
    return (
-      <div className="bg-white/80 dark:bg-[#18201B]/40 border border-[#E2DCCE] dark:border-emerald-950/20 backdrop-blur-md rounded-2xl overflow-hidden shadow-sm">
-         <div className="divide-y divide-[#E2DCCE]/60 dark:divide-white/5">
+      <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl isolate overflow-hidden shadow-[var(--shadow-sm)]">
+         <div className="divide-y divide-[var(--theme-border-subtle)]">
             {isLoadingEmployees && (
-               <div className="flex justify-center py-12">
-                  <Loader2 className="animate-spin text-white/50" size={24} />
+               <div className="flex justify-center py-16">
+                  <Loader2 className="animate-spin text-[var(--theme-text-muted)]" size={24} />
                </div>
             )}
 
@@ -44,11 +51,16 @@ export default function DirectoryList({ displayedEmployees, isLoadingEmployees, 
                   );
                })
             ) : (
-               <div className="px-6 py-16 text-center text-gray-500">
-                  <div className="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center mx-auto mb-4">
-                     <User size={32} className="opacity-50" />
+               <div className="px-6 py-16 text-center">
+                  <div className="w-12 h-12 rounded-2xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] flex items-center justify-center text-[var(--theme-text-secondary)] mx-auto mb-3">
+                     <User size={22} />
                   </div>
-                  <p className="text-lg font-medium">{canViewAll ? "No employees found." : "Profile not found."}</p>
+                  <p className="text-sm font-semibold text-[var(--theme-text-primary)]">
+                     {canViewAll ? "No employees found" : "Profile not found"}
+                  </p>
+                  <p className="text-xs text-[var(--theme-text-secondary)] mt-1">
+                     Try adjusting your search query or filters.
+                  </p>
                </div>
             )}
          </div>

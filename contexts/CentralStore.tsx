@@ -57,7 +57,7 @@ const StoreContext = createContext<StoreContextType | undefined>(undefined);
 
 export function StoreProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
-  const [theme, setTheme] = useState<'dark' | 'light'>('dark');
+  const [theme, setTheme] = useState<'dark' | 'light'>('light');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [isServerDown, setIsServerDown] = useState(false);
@@ -287,55 +287,64 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     document.documentElement.setAttribute('data-theme', theme);
   }, [theme]);
 
-  // --- SERVER HEALTH KILL-SWITCH ---
+  // --- SERVER HEALTH KILL-SWITCH (Event-Driven On Suspected Error) ---
   useEffect(() => {
-    // We import supabase here to avoid circular dependencies if any
+    let recoveryTimeout: ReturnType<typeof setTimeout> | null = null;
+
     const checkServerHealth = async () => {
       try {
         const { supabase } = await import('../lib/supabase');
-        // Simple light-weight check: Read one site record
+        // Targeted check: read one site ID only when connection disruption is suspected
         const { error } = await supabase.from('sites').select('id').limit(1);
 
         if (error) {
-          // If message contains 'fetch' it's almost certainly a connection issue
           const msg = error.message.toLowerCase();
           if (msg.includes('fetch') || msg.includes('network') || msg.includes('failed')) {
-            if (!isServerDown) { // Only log on state change
-              logger.warn('CentralStore', '⚠️ Connection to server lost.');
+            if (!isServerDown) {
+              logger.warn('CentralStore', 'Connection to server lost.');
             }
             setIsServerDown(true);
+            // Single retry in 30s while connection remains down
+            if (recoveryTimeout) clearTimeout(recoveryTimeout);
+            recoveryTimeout = setTimeout(checkServerHealth, 30000);
           } else {
-            // Other errors (auth, etc) mean the server IS reachable
-            if (isServerDown) logger.debug('CentralStore', '✅ Connection to server restored.');
+            if (isServerDown) logger.debug('CentralStore', 'Connection to server restored.');
             setIsServerDown(false);
           }
         } else {
-          if (isServerDown) logger.debug('CentralStore', '✅ Connection to server restored.');
+          if (isServerDown) logger.debug('CentralStore', 'Connection to server restored.');
           setIsServerDown(false);
         }
       } catch (e) {
-        logger.error('CentralStore', 'CRITICAL: Health check exception!', e);
+        logger.error('CentralStore', 'Health check exception:', e as Error);
         setIsServerDown(true);
+        if (recoveryTimeout) clearTimeout(recoveryTimeout);
+        recoveryTimeout = setTimeout(checkServerHealth, 30000);
       }
     };
 
-    // Check every 60 seconds (throttled to reduce unnecessary egress)
-    // Only query when document is visible; trigger immediately on network reconnect
-    const runHealthCheckIfVisible = () => {
-      if (typeof document !== 'undefined' && document.hidden) return;
+    // Trigger ONLY when an error is suspected or network reconnects:
+    const handleOnline = () => {
       checkServerHealth();
     };
 
-    const interval = setInterval(runHealthCheckIfVisible, 60000);
-    checkServerHealth(); // Immediate check on mount
+    const handleRejection = (event: PromiseRejectionEvent) => {
+      const reason = event?.reason?.message || String(event?.reason || '');
+      const lower = reason.toLowerCase();
+      if (lower.includes('failed to fetch') || lower.includes('networkerror') || lower.includes('network request failed')) {
+        checkServerHealth();
+      }
+    };
 
-    window.addEventListener('online', checkServerHealth);
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('unhandledrejection', handleRejection);
 
     return () => {
-      clearInterval(interval);
-      window.removeEventListener('online', checkServerHealth);
+      if (recoveryTimeout) clearTimeout(recoveryTimeout);
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('unhandledrejection', handleRejection);
     };
-  }, []);
+  }, [isServerDown]);
 
   const checkSession = async () => {
     // FAIL-SAFE: Ensure loading is ALWAYS set to false within 6 seconds on slow mobile

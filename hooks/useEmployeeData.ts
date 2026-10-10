@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { Employee, Site, UserRole } from '../types';
 import { employeesService } from '../services/supabase.service';
 import { canViewAllSites, hasPermission } from '../utils/permissions';
-import { getRoleHierarchy } from '../utils/roles';
+import { getRoleHierarchy, isManagerialRole } from '../utils/roles';
 import { Country } from '../utils/localization';
 import { logger } from '../utils/logger';
 import type { EmployeeFilters } from '../services/employees.service';
@@ -62,13 +62,20 @@ export function useEmployeeData({
             // Derive site IDs belonging to the active country
             const countrySiteIds = countrySites.map(s => s.id);
 
+            // Selective loading: Only load managers & leadership at first unless filtering by store/warehouse, searching, or role
+            const isLocationFiltered = Boolean((querySiteId && querySiteId !== 'All') || (restricted && user?.siteId));
+            const isSearchActive = Boolean(searchTerm && searchTerm.trim() !== '');
+            const isSpecificRole = Boolean(filterRole && filterRole !== 'All');
+            const onlyManagers = !isLocationFiltered && !isSearchActive && !isSpecificRole;
+
             // Build country-scoped filters object
             const queryFilters: EmployeeFilters = {
                role: filterRole,
                status: filterStatus,
                department: filterDepartment,
                country,
-               countrySiteIds
+               countrySiteIds,
+               onlyManagers
             };
 
             const { data, count } = await employeesService.getPaginated(
@@ -93,6 +100,15 @@ export function useEmployeeData({
                filtered = filtered.filter(e => e.siteId === user.siteId);
             } else if (filterSite && filterSite !== 'All') {
                filtered = filtered.filter(e => e.siteId === filterSite);
+            }
+
+            const isLocationFiltered = Boolean((filterSite && filterSite !== 'All') || (restricted && user?.siteId));
+            const isSearchActive = Boolean(searchTerm && searchTerm.trim() !== '');
+            const isSpecificRole = Boolean(filterRole && filterRole !== 'All');
+            const onlyManagers = !isLocationFiltered && !isSearchActive && !isSpecificRole;
+
+            if (onlyManagers) {
+               filtered = filtered.filter(e => isManagerialRole(e.role));
             }
             if (filterRole !== 'All') filtered = filtered.filter(e => e.role === filterRole);
             if (filterStatus !== 'All') filtered = filtered.filter(e => e.status === filterStatus);
@@ -139,12 +155,20 @@ export function useEmployeeData({
       });
    }, [paginatedEmployees]);
 
+   const isOnlyManagers = useMemo(() => {
+      const isLocationFiltered = Boolean((filterSite && filterSite !== 'All') || (restricted && user?.siteId));
+      const isSearchActive = Boolean(searchTerm && searchTerm.trim() !== '');
+      const isSpecificRole = Boolean(filterRole && filterRole !== 'All');
+      return !isLocationFiltered && !isSearchActive && !isSpecificRole;
+   }, [filterSite, restricted, user?.siteId, searchTerm, filterRole]);
+
    return {
       displayedEmployees,
       totalCount,
       totalPages,
       isLoadingEmployees,
       canViewAll,
-      restricted
+      restricted,
+      isOnlyManagers
    };
 }

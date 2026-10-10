@@ -40,7 +40,7 @@ export const POSCartActionsMenu: React.FC<POSCartActionsMenuProps> = ({
     return (
         <>
             <div className="fixed inset-0 z-10" onClick={() => setShowActions(false)} />
-            <div className="absolute bottom-full mb-2 right-0 w-52 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl shadow-xl p-2 z-20 space-y-1 animate-in slide-in-from-bottom-2">
+            <div className="absolute bottom-full mb-2 right-0 w-60 bg-[var(--theme-bg-card)]/95 backdrop-blur-xl border border-[var(--theme-border)] rounded-2xl shadow-2xl p-1.5 z-20 space-y-0.5 animate-in slide-in-from-bottom-2 duration-200">
                 <Protected permission="ADD_PRODUCT">
                     <button
                         type="button"
@@ -49,9 +49,11 @@ export const POSCartActionsMenu: React.FC<POSCartActionsMenuProps> = ({
                             setShowActions(false);
                             native.haptic();
                         }}
-                        className="w-full flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-[var(--theme-bg-card-hover)] text-left text-xs font-bold text-[var(--theme-text-primary)] cursor-pointer"
+                        className="w-full flex items-center gap-2.5 px-2.5 py-2 rounded-xl hover:bg-[var(--theme-bg-subtle)] text-left text-xs font-semibold text-[var(--theme-text-primary)] tracking-tight cursor-pointer transition-colors active:scale-[0.98]"
                     >
-                        <ShoppingBag size={14} className="text-blue-500" />
+                        <div className="w-7 h-7 rounded-lg bg-blue-500/10 text-blue-500 flex items-center justify-center shrink-0">
+                            <ShoppingBag size={14} />
+                        </div>
                         <span>Misc Item</span>
                     </button>
                 </Protected>
@@ -63,14 +65,16 @@ export const POSCartActionsMenu: React.FC<POSCartActionsMenuProps> = ({
                         setShowActions(false);
                         native.haptic();
                     }}
-                    className="w-full flex items-center justify-between px-3 py-2 rounded-xl hover:bg-[var(--theme-bg-card-hover)] text-left text-xs font-bold text-[var(--theme-text-primary)] cursor-pointer"
+                    className="w-full flex items-center justify-between px-2.5 py-2 rounded-xl hover:bg-[var(--theme-bg-subtle)] text-left text-xs font-semibold text-[var(--theme-text-primary)] tracking-tight cursor-pointer transition-colors active:scale-[0.98]"
                 >
-                    <div className="flex items-center gap-2">
-                        <Tag size={14} className="text-blue-500" />
+                    <div className="flex items-center gap-2.5">
+                        <div className="w-7 h-7 rounded-lg bg-cyan-500/10 text-cyan-500 flex items-center justify-center shrink-0">
+                            <Tag size={14} />
+                        </div>
                         <span>Price Updates</span>
                     </div>
                     {unseenPriceUpdatesCount > 0 && (
-                        <span className="px-2 py-0.5 bg-blue-500 text-white text-xs font-bold rounded-full">
+                        <span className="px-2 py-0.5 bg-blue-500 text-white text-[10px] font-bold rounded-full">
                             {unseenPriceUpdatesCount}
                         </span>
                     )}
@@ -83,11 +87,15 @@ export const POSCartActionsMenu: React.FC<POSCartActionsMenuProps> = ({
                         setShowActions(false);
                     }}
                     disabled={heldOrdersCount === 0}
-                    className="w-full flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-[var(--theme-bg-card-hover)] text-left text-xs font-bold text-[var(--theme-text-primary)] disabled:opacity-30 cursor-pointer"
+                    className="w-full flex items-center gap-2.5 px-2.5 py-2 rounded-xl hover:bg-[var(--theme-bg-subtle)] text-left text-xs font-semibold text-[var(--theme-text-primary)] tracking-tight disabled:opacity-30 cursor-pointer transition-colors active:scale-[0.98]"
                 >
-                    <PlayCircle size={14} className="text-amber-500" />
-                    <span>Recall ({heldOrdersCount})</span>
+                    <div className="w-7 h-7 rounded-lg bg-amber-500/10 text-amber-500 flex items-center justify-center shrink-0">
+                        <PlayCircle size={14} />
+                    </div>
+                    <span>Recall Held ({heldOrdersCount})</span>
                 </button>
+
+                <div className="my-1 border-t border-[var(--theme-border-subtle)]" />
 
                 <Protected permission="REFUND_SALE">
                     <button
@@ -96,10 +104,12 @@ export const POSCartActionsMenu: React.FC<POSCartActionsMenuProps> = ({
                             onOpenReturn();
                             setShowActions(false);
                         }}
-                        className="w-full flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-[var(--theme-bg-card-hover)] text-left text-xs font-bold text-[var(--theme-text-primary)] cursor-pointer"
+                        className="w-full flex items-center gap-2.5 px-2.5 py-2 rounded-xl hover:bg-[var(--theme-bg-subtle)] text-left text-xs font-semibold text-[var(--theme-text-primary)] tracking-tight cursor-pointer transition-colors active:scale-[0.98]"
                     >
-                        <RotateCcw size={14} className="text-rose-500" />
-                        <span>Returns / Refund</span>
+                        <div className="w-7 h-7 rounded-lg bg-rose-500/10 text-rose-500 flex items-center justify-center shrink-0">
+                            <RotateCcw size={14} />
+                        </div>
+                        <span>Returns & Refunds</span>
                     </button>
                 </Protected>
 
@@ -109,9 +119,11 @@ export const POSCartActionsMenu: React.FC<POSCartActionsMenuProps> = ({
                         onOpenCashDrop();
                         setShowActions(false);
                     }}
-                    className="w-full flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-[var(--theme-bg-card-hover)] text-left text-xs font-bold text-emerald-500 cursor-pointer"
+                    className="w-full flex items-center gap-2.5 px-2.5 py-2 rounded-xl hover:bg-[var(--theme-bg-subtle)] text-left text-xs font-semibold text-[var(--theme-text-primary)] tracking-tight cursor-pointer transition-colors active:scale-[0.98]"
                 >
-                    <ArrowDownCircle size={14} />
+                    <div className="w-7 h-7 rounded-lg bg-emerald-500/10 text-emerald-500 flex items-center justify-center shrink-0">
+                        <ArrowDownCircle size={14} />
+                    </div>
                     <span>Safe Cash Drop</span>
                 </button>
 
@@ -121,11 +133,15 @@ export const POSCartActionsMenu: React.FC<POSCartActionsMenuProps> = ({
                         onOpenNoSaleKick();
                         setShowActions(false);
                     }}
-                    className="w-full flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-[var(--theme-bg-card-hover)] text-left text-xs font-bold text-[var(--theme-text-primary)] cursor-pointer"
+                    className="w-full flex items-center gap-2.5 px-2.5 py-2 rounded-xl hover:bg-[var(--theme-bg-subtle)] text-left text-xs font-semibold text-[var(--theme-text-primary)] tracking-tight cursor-pointer transition-colors active:scale-[0.98]"
                 >
-                    <Box size={14} className="text-[var(--theme-text-secondary)]" />
+                    <div className="w-7 h-7 rounded-lg bg-orange-500/10 text-orange-500 flex items-center justify-center shrink-0">
+                        <Box size={14} />
+                    </div>
                     <span>Open Cash Drawer</span>
                 </button>
+
+                <div className="my-1 border-t border-[var(--theme-border-subtle)]" />
 
                 <button
                     type="button"
@@ -133,9 +149,11 @@ export const POSCartActionsMenu: React.FC<POSCartActionsMenuProps> = ({
                         onReprintLast();
                         setShowActions(false);
                     }}
-                    className="w-full flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-[var(--theme-bg-card-hover)] text-left text-xs font-bold text-[var(--theme-text-primary)] cursor-pointer"
+                    className="w-full flex items-center gap-2.5 px-2.5 py-2 rounded-xl hover:bg-[var(--theme-bg-subtle)] text-left text-xs font-semibold text-[var(--theme-text-primary)] tracking-tight cursor-pointer transition-colors active:scale-[0.98]"
                 >
-                    <Printer size={14} className="text-[var(--theme-text-secondary)]" />
+                    <div className="w-7 h-7 rounded-lg bg-purple-500/10 text-purple-500 flex items-center justify-center shrink-0">
+                        <Printer size={14} />
+                    </div>
                     <span>Reprint Receipt</span>
                 </button>
 
@@ -145,9 +163,11 @@ export const POSCartActionsMenu: React.FC<POSCartActionsMenuProps> = ({
                         onCloseShift();
                         setShowActions(false);
                     }}
-                    className="w-full flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-[var(--theme-bg-card-hover)] text-left text-xs font-bold text-amber-500 cursor-pointer"
+                    className="w-full flex items-center gap-2.5 px-2.5 py-2 rounded-xl hover:bg-[var(--theme-bg-subtle)] text-left text-xs font-semibold text-[var(--theme-text-primary)] tracking-tight cursor-pointer transition-colors active:scale-[0.98]"
                 >
-                    <Lock size={14} />
+                    <div className="w-7 h-7 rounded-lg bg-indigo-500/10 text-indigo-500 flex items-center justify-center shrink-0">
+                        <Lock size={14} />
+                    </div>
                     <span>Shift Summary</span>
                 </button>
             </div>

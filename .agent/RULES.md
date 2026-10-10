@@ -65,6 +65,25 @@ await productsService.update(id, { stock: newStock });
 - **Every mutation MUST stimulate downstream operational synapses**: An update to one entity cannot stop at a single row write. It must propagate state changes, cache invalidations, and audit signals across the interconnected event mesh (POS → Inventory → WMS → Financials → Gamification → CentralOps).
 - **Zero Dead-End Silos**: If a business action occurs, all adjacent modules affected by that operational reality must immediately reflect the update without requiring page reloads or manual synchronization.
 
+### AI Database & Network Egress Efficiency Standard (Rule 10 — The "Zero-Eager-History & 25-Item Shelf" Doctrine)
+- **The "25-Item Shelf" Rule (Just-In-Time Fetching)**: Any list, history, or transaction query (sales history, purchase orders, historical WMS jobs, movements, expenses, audit logs) MUST default to an initial working limit of **25 records** maximum. Never load hundreds of records upfront. Users browse additional records strictly via pagination or on-demand "Load More" controls.
+- **Zero Eager History on Login/Mount (THE CARDINAL RULE)**: Never pre-fetch historical, completed, or archived records on login or module initialization. The system MUST boot showing only the current live/active working set. History queries MUST be deferred until the user explicitly clicks the "History", "Archive", or "Audit Log" tab/button. On demand, return a maximum of **25 records**. This applies universally to: WMS completed jobs, past sales receipts, archived purchase orders, audit logs, system logs, and any other "completed" or "historical" entity. Violation is a critical egress leak.
+- **Column Precision (No Naked `.select('*')`)**: Production queries must select only required columns (e.g. `id, name, sku, price, stock`). Never download dense nested JSON line items (`line_items`, `po_items`, `sale_items`) for overview or summary screens; only load line items when the user explicitly views that specific record.
+- **Multi-Country & Site Scoping Invariant**: Branch staff (cashiers, fulfillment pickers, store clerks) strictly query data scoped to their active `siteId` and `country_code`. Global cross-site fetching is strictly restricted to global administrative roles (`super_admin`, `CEO`, `Admin`, `Auditor`).
+- **Domain-Delegated & On-Demand Isolation**: Never query domain-specific data globally on app mount (e.g., WMS jobs belong in Fulfillment, telemetry audit logs belong in Admin Telemetry). Prune unused queries from global hooks.
+- **Selective Mutation Invalidation**: When modifying a single record, never invalidate or refetch the entire database. Update or invalidate only the specific query key affected.
+- **Cache Reuse & Zero-Polling**: Use TanStack React Query with appropriate `staleTime`s (10–30 mins for master rosters/suppliers). **Never create ad-hoc `setInterval` polling loops to the database**; use event-driven triggers (`online`, error events) or reactive WebSockets.
+
+### Token-Efficient High-Accuracy Interaction Protocol (Rule 11 — The AI Excellence Doctrine)
+To minimize token consumption while maximizing engineering precision, speed, and accuracy:
+- **Laser-Targeted Inspections**: Read focused slices (< 80 lines) with `view_file` using `StartLine` and `EndLine`. Never read entire 400+ line files when inspecting a function.
+- **Schema-First Verification (Zero Guessing Invariant)**: NEVER guess table column names or types (e.g. assuming `started_at` exists). Verify against `information_schema.columns` or `types/` before constructing projections or mutations. One query saves thousands of tokens in 400 Bad Request debug loops.
+- **High-Signal Conciseness**: Deliver solutions, diffs, and SQL directly. Avoid conversational filler, apologies, restating user prompts, or repeating unchanged code.
+- **Selective Audit Reporting**: Full 15-category checklist is reserved for explicit audit requests (`/audit`) or major multi-file milestones; routine edits confirm compliance concisely in bullet points.
+- **Rule 9 In-Chat SQL Delivery**: Whenever database entities are added/modified, deliver complete, runnable, copy-pasteable SQL in the response and save to `migrations/YYYYMMDD_<name>.sql`.
+- **Zero Guessing / Single-Shot Accuracy**: Diagnose root causes from logs/types before proposing code changes. Do not try blind iterative patches.
+- **Strict File Modularity (< 500 Lines)**: Split components and hooks before they exceed 500 lines to ensure fast editing, minimal context window bloat, and zero truncation.
+
 ---
 
 ## Role Hierarchy
@@ -175,9 +194,9 @@ const canApprove = ['super_admin', 'CEO'].includes(user?.role || '');
 - **Live Monospace Clock Digit Protection**: All live digital clock elements (`00:00:00`) MUST be protected against vertical character wrapping with `flex-nowrap whitespace-nowrap shrink-0`. Live time digits must NEVER be allowed to break or wrap vertically into a column under constrained container widths.
 - **Anti-Duplication UI Law**: A page or header MUST NEVER render duplicate instances of sovereign calendar dates (e.g. mounting a standalone date pill right next to a clock that already displays the date). A unified, single Sovereign Clock & Calendar card must be used.
 
-### 9. Dual Tax / VAT Controllability & Exempt Purchasing Framework
-- **National Tax Gating**: In emerging East African markets, enterprises purchase both from formal VAT-registered corporate vendors and informal smallholders/farmers (exempt from VAT or non-registered). Similarly, specific retail goods, basic foodstuffs, or promotional channels may be tax-exempt.
-- **Mandatory Independent Toggles**: Tax calculation on purchases (`taxOnPurchasing`) and sales (`taxOnSelling`) MUST be individually configurable per country in `SystemConfig`.
+### 9. Dual Tax / VAT Controllability & African Goods Taxation Law
+- **National Tax Gating & African Market Realities**: In emerging East African markets, national goods taxation is complex. Enterprises purchase both from formal VAT-registered corporate vendors and informal smallholders/farmers (exempt from VAT or non-registered). Similarly, at POS retail checkout, basic agricultural commodities, essential foodstuffs, or informal sales are zero-rated or exempt, while formal B2B sales require fiscal receipts.
+- **Settings-Only Controllability & Zero POS/Procurement Adjustability**: Taxation is strictly controllable and adjustable **ONLY** from country Finance Settings by authorized administrators. Tax must **NEVER** be adjustable or editable in Procurement (PO creation) or POS (retail checkout). Unless explicitly turned on in country Finance Settings, tax MUST NOT be present or calculated in POS or Procurement.
 - **Zero Hardcoded Taxing**: PO creation, vendor receiving, and POS checkout MUST check these country toggles before applying or calculating VAT/tax.
 
 ### 10. Header Ergonomics & Heavy Action Hierarchy
@@ -506,6 +525,7 @@ import { ROLES } from '../constants';
   - Liquid Glass 3 Tiers: Clear (`.glass-clear`), Standard (`.glass-standard`), Strong (`.glass-strong`)
 - Dark Mode Canvas: Level 0 Canvas — OLED `#000000` dark / Apple `#F5F5F7` light
 - Pure Contrast Surfaces: Dark mode uses pure OLED black surfaces (`#000000`) or deep onyx (`#1D1D1F`) with crisp 1px hairline borders (`rgba(255,255,255,0.08)`); Light mode uses pure white cards (`#FFFFFF`) with subtle hairline borders (`rgba(0,0,0,0.08)`). Strictly zero muddy gray cards (`#1C1C1E` / `#2C2C2E`).
+- SIIFMART Corporate Brand Logo Invariant: The official corporate logo is the typographic wordmark itself (`components/Logo.tsx`) without icon containers: `SIIF` in Apple high-contrast neutral (`#1D1D1F` light / `#F5F5F7` dark) and `MART` in signature green (`#2C5E3B` light / `#00FF9D` dark). All other application UI (canvas, surfaces, panels, controls, cards, navigation) strictly adheres to Apple minimalist tokens (`#000000`, `#F5F5F7`, `#FFFFFF`, Apple blue `#0071E3`).
 - Judicious Liquid Glass: Used selectively for navigation bars, toolbars, search pills, sidebars, segmented controls, and modal sheets (not everywhere).
 - Scope of Hardware Overrides: Low-end mobile performance constraints (stripping GPU blurs, restricting RAM/animations, solid opaque surfaces) are STRICTLY CONFINED to the Fulfillment domain (`pages/Fulfillment.tsx` and `components/fulfillment/`). In POS, POS Command, Administration, and all other domains, our full Apple Liquid Glass aesthetic applies completely.
 - Supreme Text Visibility & Contrast: Text readability is paramount. All typography tokens enforce high contrast (minimum WCAG AA 4.5:1, AAA 7:1 for data tables). Never use washed-out or dim text on dark or light backgrounds, and ensure text over Liquid Glass materials maintains a high-contrast backing.

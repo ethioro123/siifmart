@@ -108,7 +108,8 @@ export const FulfillmentContent: React.FC = () => {
         refreshJobs,
         fixBrokenJobs,
         completeJob,
-        jobAssignments
+        jobAssignments,
+        loadHistoricalJobs
     } = useFulfillment();
 
     const { relocateProduct } = useData();
@@ -207,6 +208,7 @@ export const FulfillmentContent: React.FC = () => {
                     addProduct={addProduct}
                     jobs={jobs}
                     t={t}
+                    loadHistoricalJobs={loadHistoricalJobs}
                 />
             )}
 
@@ -268,6 +270,7 @@ export const FulfillmentContent: React.FC = () => {
                         isDetailsOpen={isDetailsOpen}
                         resolveOrderRef={resolveOrderRef}
                         sites={sites}
+                        loadHistoricalJobs={loadHistoricalJobs}
                     />
                 )
             }

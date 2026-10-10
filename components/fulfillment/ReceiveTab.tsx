@@ -24,7 +24,7 @@ export const ReceiveTab: React.FC = () => {
         t, jobs, orders, products, allProducts, employees,
         isSubmitting, setIsSubmitting, receivePOSplit, addNotification,
         refreshData, historicalJobs, selectedJob, setSelectedJob, isDetailsOpen, setIsDetailsOpen,
-        resolveOrderRef, activeTab, finalizePO, user, wmsJobsService, sites
+        resolveOrderRef, activeTab, finalizePO, user, wmsJobsService, sites, loadHistoricalJobs
     } = useFulfillment();
     const { settings, effectiveCountry } = useData();
     const receivingPolicy = useMemo(() => resolveReceivingPolicy(settings, effectiveCountry), [settings, effectiveCountry]);
@@ -34,6 +34,11 @@ export const ReceiveTab: React.FC = () => {
     const [receiveCurrentPage, setReceiveCurrentPage] = useState(1);
     const RECEIVE_ITEMS_PER_PAGE = 25;
     const [viewMode, setViewMode] = useState<'Process' | 'History'>('Process');
+
+    // RULE 10: Fetch history on demand when user switches to History view
+    useEffect(() => {
+        if (viewMode === 'History') loadHistoricalJobs();
+    }, [viewMode]);
 
     const [receivingPO, setReceivingPO] = useState<PurchaseOrder | null>(null);
     const [unresolvedScans, setUnresolvedScans] = useState<Array<{ barcode: string; scannedAt: Date; qty: number; suggestions?: string[] }>>([]);
@@ -293,6 +298,15 @@ export const ReceiveTab: React.FC = () => {
                     itemsPerPage={RECEIVE_ITEMS_PER_PAGE}
                     user={user}
                     employees={employees}
+                    onAuthenticate={async (poId: string) => {
+                        if (isSubmitting) return;
+                        setIsSubmitting(true);
+                        try {
+                            await finalizePO(poId);
+                        } finally {
+                            setIsSubmitting(false);
+                        }
+                    }}
                 />
             ) : (
                 <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar">

@@ -25,7 +25,8 @@ export const PackTab: React.FC = () => {
         formatJobId,
         resolveOrderRef,
         generateTrackingNumber,
-        t
+        t,
+        loadHistoricalJobs
     } = useFulfillment();
 
     // --- LOCAL STATE ---
@@ -44,6 +45,12 @@ export const PackTab: React.FC = () => {
     const [isDiscrepancyModalOpen, setIsDiscrepancyModalOpen] = useState(false);
 
     const [viewMode, setViewMode] = useState<'Process' | 'History'>('Process');
+
+    // RULE 10: Fetch history on demand when user switches to History view
+    useEffect(() => {
+        if (viewMode === 'History') loadHistoricalJobs();
+    }, [viewMode]);
+
     const [isScannerOpen, setIsScannerOpen] = useState(false);
     const [returnJob, setReturnJob] = useState<WMSJob | null>(null);
     const [showSuccessScreen, setShowSuccessScreen] = useState(false);

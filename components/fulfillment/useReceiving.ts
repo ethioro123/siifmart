@@ -14,6 +14,8 @@ import { useReceivingSplit } from './useReceivingSplit';
 
 import { convertToSellableUnits } from '../procurement/utils';
 import { resolveReceivingPolicy } from '../../utils/receivingPolicy';
+import { mergeCustomAttributes, extractProductAttributesFromPOItem } from '../../utils/productAttributes';
+import { buildPOJobsReceivedMap, resolvePOLineItemProgress } from './receive/receiveQuantityResolver';
 export { convertToSellableUnits };
 
 // ─── Hook Dependencies ──────────────────────────────────────────────────────
@@ -113,16 +115,35 @@ export const useReceiving = (deps: UseReceivingDeps) => {
                 // Also find a global product to act as a template if we need to create one
                 let globalProduct = allProducts.find(p => p.id === targetProductId || p.sku === productSku);
 
+                const poAttrs = extractProductAttributesFromPOItem(lineItem);
+
                 if (localProduct) {
                     productSku = localProduct.sku; // Use canonical SKU
                     targetProductId = localProduct.id;
                     
-                    // Sync PO line item details if they are missing
+                    // Sync PO line item details if they are missing or updated
                     const updates: any = {};
-                    if (!localProduct.size && lineItem.size) updates.size = lineItem.size;
-                    if (!localProduct.brand && lineItem.brand) updates.brand = lineItem.brand;
-                    if (!localProduct.unit && lineItem.unit) updates.unit = lineItem.unit;
-                    if (!localProduct.category && lineItem.category) updates.category = lineItem.category;
+                    if (!localProduct.size && poAttrs.size) updates.size = poAttrs.size;
+                    if (!localProduct.brand && poAttrs.brand) updates.brand = poAttrs.brand;
+                    if (!localProduct.unit && poAttrs.unit) updates.unit = poAttrs.unit;
+                    if (!localProduct.category && poAttrs.category) updates.category = poAttrs.category;
+                    if (!localProduct.image && poAttrs.image) updates.image = poAttrs.image;
+                    if ((!localProduct.packQuantity || localProduct.packQuantity === 1) && poAttrs.packQuantity > 1) {
+                        updates.packQuantity = poAttrs.packQuantity;
+                    }
+                    if (!localProduct.packageType && poAttrs.packageType) updates.packageType = poAttrs.packageType;
+                    if (!localProduct.caseSize && poAttrs.caseSize) updates.caseSize = poAttrs.caseSize;
+                    if (!localProduct.description && poAttrs.description) updates.description = poAttrs.description;
+                    if (!localProduct.minStock && poAttrs.minStock) updates.minStock = poAttrs.minStock;
+                    if (!localProduct.maxStock && poAttrs.maxStock) updates.maxStock = poAttrs.maxStock;
+
+                    if (poAttrs.customAttributes) {
+                        const mergedAttrs = mergeCustomAttributes(localProduct.customAttributes, poAttrs.customAttributes);
+                        if (JSON.stringify(mergedAttrs) !== JSON.stringify(localProduct.customAttributes)) {
+                            updates.customAttributes = mergedAttrs;
+                        }
+                    }
+
                     if (policy.poPriceApplyAt === 'receive' && lineItem.retailPrice && lineItem.retailPrice > 0 && lineItem.retailPrice !== localProduct.price) {
                         updates.price = lineItem.retailPrice;
                         updates.priceUpdatedAt = new Date().toISOString();
@@ -136,11 +157,7 @@ export const useReceiving = (deps: UseReceivingDeps) => {
                         const unitsPerOrderUnit = convertToSellableUnits(1, lineItem);
                         updates.costPrice = unitsPerOrderUnit > 0 ? (lineItem.unitCost / unitsPerOrderUnit) : lineItem.unitCost;
                     }
-                    if (!localProduct.customAttributes && lineItem.customAttributes) updates.customAttributes = lineItem.customAttributes;
-                    if (!localProduct.description && lineItem.description) updates.description = lineItem.description;
-                    if (!localProduct.minStock && lineItem.minStock) updates.minStock = lineItem.minStock;
-                    if (!localProduct.maxStock && lineItem.maxStock) updates.maxStock = lineItem.maxStock;
- 
+
                     if (Object.keys(updates).length > 0) {
                         const updated = await productsService.update(localProduct.id, updates);
                         if (updated) {
@@ -162,22 +179,23 @@ export const useReceiving = (deps: UseReceivingDeps) => {
                                 const unitsPerOrderUnit = convertToSellableUnits(1, lineItem);
                                 return unitsPerOrderUnit > 0 ? (lineItem.unitCost / unitsPerOrderUnit) : (lineItem.unitCost || globalProduct?.costPrice || 0);
                             })(),
-                            category: lineItem.category || globalProduct?.category || 'Uncategorized',
+                            category: poAttrs.category || globalProduct?.category || 'Uncategorized',
                             status: 'active',
                             stock: 0,
                             location: 'On Order',
+                            image: poAttrs.image || globalProduct?.image || '',
                             expiryDate: (lineItem as any).expiryDate || (lineItem as any).expiry_date || globalProduct?.expiryDate,
                             batchNumber: (lineItem as any).batchNumber || (lineItem as any).batch_number || globalProduct?.batchNumber,
-                            size: lineItem.size || globalProduct?.size || '',
-                            brand: lineItem.brand || globalProduct?.brand || '',
-                            unit: lineItem.unit || globalProduct?.unit || 'UNIT',
-                            packQuantity: lineItem.packQuantity || globalProduct?.packQuantity || 1,
-                            packageType: lineItem.packageType || globalProduct?.packageType || lineItem.customAttributes?.packaging?.packageType || globalProduct?.customAttributes?.packaging?.packageType || '',
-                            caseSize: lineItem.caseSize || globalProduct?.caseSize || lineItem.customAttributes?.packaging?.caseSize || globalProduct?.customAttributes?.packaging?.caseSize || undefined,
-                            customAttributes: lineItem.customAttributes || globalProduct?.customAttributes || null,
-                            description: lineItem.description || globalProduct?.description || '',
-                            minStock: lineItem.minStock || globalProduct?.minStock || 0,
-                            maxStock: lineItem.maxStock || globalProduct?.maxStock || 0
+                            size: poAttrs.size || globalProduct?.size || '',
+                            brand: poAttrs.brand || globalProduct?.brand || '',
+                            unit: poAttrs.unit || globalProduct?.unit || 'UNIT',
+                            packQuantity: poAttrs.packQuantity || globalProduct?.packQuantity || 1,
+                            packageType: poAttrs.packageType || globalProduct?.packageType || '',
+                            caseSize: poAttrs.caseSize || globalProduct?.caseSize || undefined,
+                            customAttributes: mergeCustomAttributes(globalProduct?.customAttributes, poAttrs.customAttributes),
+                            description: poAttrs.description || globalProduct?.description || '',
+                            minStock: poAttrs.minStock || globalProduct?.minStock || 0,
+                            maxStock: poAttrs.maxStock || globalProduct?.maxStock || 0
                         } as any);
                         if (created) {
                             targetProductId = created.id;
@@ -191,7 +209,10 @@ export const useReceiving = (deps: UseReceivingDeps) => {
                     }
                 }
 
+                const targetCountry = po.countryCode || po.country_code || (po.currency === 'KSh' || po.currency === 'KES' ? 'KE' : undefined) || activeSite?.country || settings?.country || 'ET';
                 const newJob: Omit<WMSJob, 'id'> = {
+                    countryCode: targetCountry,
+                    country_code: targetCountry,
                     siteId: targetSiteId || '',
                     site_id: targetSiteId, // Supabase
                     type: 'PUTAWAY',
@@ -211,18 +232,21 @@ export const useReceiving = (deps: UseReceivingDeps) => {
                         // Pass cost/price for label printing if available
                         cost: lineItem.unitCost,
                         retailPrice: lineItem.retailPrice,
-                        unit: lineItem.unit,
+                        unit: poAttrs.unit || lineItem.unit,
                         expiryDate: (lineItem as any).expiryDate || (lineItem as any).expiry_date,
                         batchNumber: (lineItem as any).batchNumber || (lineItem as any).batch_number,
-                        // Pass PO attributes so putaway can create a complete Product record
-                        size: lineItem.size,
-                        brand: lineItem.brand,
-                        packQuantity: lineItem.packQuantity,
-                        category: lineItem.category,
-                        customAttributes: lineItem.customAttributes,
-                        description: lineItem.description,
-                        minStock: lineItem.minStock,
-                        maxStock: lineItem.maxStock
+                        // Pass full PO attributes so putaway can create/recycle complete Product record
+                        size: poAttrs.size,
+                        brand: poAttrs.brand,
+                        image: poAttrs.image,
+                        packQuantity: poAttrs.packQuantity,
+                        packageType: poAttrs.packageType,
+                        caseSize: poAttrs.caseSize,
+                        category: poAttrs.category,
+                        customAttributes: poAttrs.customAttributes,
+                        description: poAttrs.description,
+                        minStock: poAttrs.minStock,
+                        maxStock: poAttrs.maxStock
                     }]
                 };
 
@@ -236,13 +260,28 @@ export const useReceiving = (deps: UseReceivingDeps) => {
             // Update local state
             setJobs(prev => [...prev, ...newJobs]);
 
-            // Stamp who physically received the goods
-            if (actionUser?.name) {
-                try {
-                    await purchaseOrdersService.update(poId, { receivedBy: actionUser.name });
-                } catch (err) {
-                    logger.warn('useReceiving', 'Could not stamp receivedBy on PO', { error: err instanceof Error ? err.message : JSON.stringify(err) });
+            // Persist received line items and stamp receiver
+            const updatedLineItems = (po.lineItems || []).map((li, idx) => {
+                const processed = itemsToProcess.find(it => it.index === idx);
+                const matchedResult = results.find(r => r.productId === li.productId || r.sku === li.sku);
+                if (processed) {
+                    return {
+                        ...li,
+                        receivedQty: (li.receivedQty || 0) + convertToSellableUnits(processed.received, li),
+                        productId: matchedResult?.productId || li.productId,
+                        sku: matchedResult?.sku || li.sku
+                    };
                 }
+                return li;
+            });
+
+            try {
+                await purchaseOrdersService.update(poId, {
+                    lineItems: updatedLineItems,
+                    receivedBy: actionUser?.name || po.receivedBy
+                });
+            } catch (err) {
+                logger.warn('useReceiving', 'Could not sync line items on PO', { error: err instanceof Error ? err.message : JSON.stringify(err) });
             }
 
             // Refresh PO details
@@ -291,35 +330,20 @@ export const useReceiving = (deps: UseReceivingDeps) => {
             const po = orders.find(o => o.id === poId) || allOrders.find(o => o.id === poId);
             if (!po) throw new Error('PO not found');
 
-            const cleanSku = (s?: string) => s ? s.replace(/[-\s]/g, '').toUpperCase() : '';
-
-            // Calculate if full or partial
             const poJobs = jobs.filter(j => (j.orderRef === poId || (po.po_number && j.orderRef === po.po_number) || (po.poNumber && j.orderRef === po.poNumber)) && j.type === 'PUTAWAY');
-            const receivedMap: Record<string, number> = {};
-            poJobs.forEach(job => {
-                job.lineItems.forEach(item => {
-                    const expected = item.expectedQty || (item as any).quantity || 0;
-                    if (expected <= 0) return;
-                    const canonKey = cleanSku(item.sku) || item.productId;
-                    if (canonKey) {
-                        receivedMap[canonKey] = (receivedMap[canonKey] || 0) + expected;
-                    }
-                });
-            });
+            const receivedMaps = buildPOJobsReceivedMap(poJobs);
 
             const updatedLineItems = (po.lineItems || []).map((item: any) => {
-                const product = allProducts.find(p => p.id === item.productId || (item.sku && cleanSku(p.sku) === cleanSku(item.sku)));
-                const canonKey = cleanSku(item.sku) || cleanSku(product?.sku) || item.productId || product?.id || '';
-                const receivedFromJobs = canonKey ? (receivedMap[canonKey] || 0) : 0;
-                const received = Math.max(item.receivedQty || 0, receivedFromJobs);
-
+                const progress = resolvePOLineItemProgress(item, receivedMaps, allProducts);
                 return {
                     ...item,
-                    receivedQty: received
+                    receivedQty: progress.effectiveReceived,
+                    productId: progress.resolvedProductId || item.productId,
+                    sku: progress.resolvedSku || item.sku
                 };
             });
 
-            const allReceived = updatedLineItems.every((item: any) => {
+            const allReceived = updatedLineItems.length > 0 && updatedLineItems.every((item: any) => {
                 const expectedSellable = convertToSellableUnits(item.quantity, item);
                 return (item.receivedQty || 0) >= expectedSellable;
             });

@@ -201,12 +201,15 @@ export function useDataInitialization({
 
   const loadGlobalData = useCallback(async () => {
     try {
-      // Egress optimization: fetch reasonable working batches rather than dumping 5000 full records
+      // Egress optimization: Only global administrative roles need multi-site global batches on startup.
+      // Branch workers only require local activeSite data (fetched via useDataQueries).
+      const canSwitchSites = ['super_admin', 'CEO', 'Super Admin', 'Admin', 'Auditor'].includes(user?.role || '');
+
       const [allProds, allSls, allOrds, allEmps, allSupps] = await Promise.all([
-        productsService.getAll(undefined, 250).then(res => res.data),
-        salesService.getAll(undefined, 100).then(res => res.data),
-        purchaseOrdersService.getAll(undefined, 100).then(res => res.data),
-        employeesService.getAll(),
+        canSwitchSites ? productsService.getAll(undefined, 100).then(res => res.data) : Promise.resolve([]),
+        canSwitchSites ? salesService.getAll(undefined, 50).then(res => res.data) : Promise.resolve([]),
+        canSwitchSites ? purchaseOrdersService.getAll(undefined, 50).then(res => res.data) : Promise.resolve([]),
+        employeesService.getAll(undefined, true),
         suppliersService.getAll(100).then(res => res.data)
       ]);
 
@@ -226,7 +229,7 @@ export function useDataInitialization({
         setIsDataInitialLoading(false);
       }
     }
-  }, [activeSiteId, setAllProducts, setAllSales, setAllOrders, setEmployees, setSuppliers, setIsDataInitialLoading, setLoadError]);
+  }, [user?.role, activeSiteId, setAllProducts, setAllSales, setAllOrders, setEmployees, setSuppliers, setIsDataInitialLoading, setLoadError]);
 
   // --- INITIAL LOAD ---
   useEffect(() => {

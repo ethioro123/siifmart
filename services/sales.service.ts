@@ -5,7 +5,7 @@ import { wmsJobsService, generateReadableJobNumber } from './wms-jobs.service';
 import { customersService } from './customers.service';
 
 export const salesService = {
-    async getAll(siteId?: string, limit: number = 50, offset: number = 0, filters?: any) {
+    async getAll(siteId?: string, limit: number = 25, offset: number = 0, filters?: any) {
         let query = supabase
             .from('sales')
             .select('*, sale_items(*, products(category)), customers!left(*)', { count: 'exact' });

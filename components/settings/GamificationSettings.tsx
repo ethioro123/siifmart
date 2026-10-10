@@ -8,6 +8,8 @@ import { POSRoleModal } from './gamification/POSRoleModal';
 import { PointRuleModal } from './gamification/PointRuleModal';
 import { WarehouseRuleModal } from './gamification/WarehouseRuleModal';
 import { useGamificationState } from './gamification/hooks/useGamificationState';
+import { useData } from '../../contexts/DataContext';
+import { Country, getCountryProfile } from '../../utils/localization';
 
 export default function GamificationSettings() {
     const contextValue = useGamificationState();
@@ -18,67 +20,76 @@ export default function GamificationSettings() {
         handleSave
     } = contextValue;
 
+    const { settings, effectiveCountry } = useData();
+    const activeCountry: Country = (effectiveCountry || settings?.country || 'ET') as Country;
+    const countryProfile = getCountryProfile(activeCountry);
+
     return (
         <GamificationProvider value={contextValue}>
             <div className="w-full max-w-full space-y-6 animate-in fade-in slide-in-from-right-4">
                 {/* HEADER BANNER with SAVE BUTTON */}
-                <div className="p-5 bg-white/85 dark:bg-[#18201B]/65 border border-[#E2DCCE] dark:border-emerald-950/20 rounded-[24px] shadow-sm backdrop-blur-xl flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div className="p-4 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                     <div className="flex items-center gap-3">
-                        <div className="w-12 h-12 rounded-2xl bg-[#2C5E3B]/10 dark:bg-[#A9CBA2]/10 flex items-center justify-center shadow-inner">
-                            <Trophy className="text-[#2C5E3B] dark:text-[#A9CBA2]" size={22} />
+                        <div className="w-10 h-10 rounded-xl bg-[#0071E3]/10 dark:bg-[#2997FF]/10 text-[#0071E3] dark:text-[#2997FF] flex items-center justify-center shrink-0">
+                            <Trophy size={20} />
                         </div>
                         <div>
-                            <h4 className="text-[#1E3F27] dark:text-[#EAE5D9] font-black text-lg select-none">Gamification & Bonuses</h4>
-                            <p className="text-xs text-[#4D6E56] dark:text-[#7A9E83] mt-1">
+                            <div className="flex items-center gap-2">
+                                <h4 className="text-[var(--theme-text-primary)] font-semibold text-sm">Gamification & Performance Bonuses</h4>
+                                <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-[#0071E3]/10 text-[#0071E3] dark:text-[#2997FF]">
+                                    {countryProfile.name} ({activeCountry})
+                                </span>
+                            </div>
+                            <p className="text-xs text-[var(--theme-text-secondary)] mt-0.5">
                                 Configure performance-based incentives for warehouse workers (individual) and POS staff (team-based).
                             </p>
                         </div>
                     </div>
                     <button
+                        type="button"
                         onClick={handleSave}
                         disabled={isSaving}
-                        className={`px-6 py-3 rounded-2xl font-bold flex items-center justify-center gap-2 transition-all duration-300 text-sm shadow-sm select-none cursor-pointer transform hover:scale-[1.03] active:scale-95 ${isSaving
-                            ? 'bg-stone-300 dark:bg-[#18201B] text-stone-500 dark:text-stone-600 cursor-not-allowed border border-[#E2DCCE] dark:border-emerald-950/20'
-                            : activeTab === 'warehouse'
-                                ? 'bg-[#2C5E3B] text-white hover:bg-[#1E3F27] dark:bg-[#A9CBA2] dark:text-[#0B0F0D] dark:hover:bg-white'
-                                : 'bg-amber-600 text-white hover:bg-amber-700 dark:bg-amber-500 dark:text-[#0B0F0D] dark:hover:bg-amber-400'
-                            }`}
+                        className="h-9 px-4 bg-[#0071E3] dark:bg-[#2997FF] hover:opacity-90 active:scale-[0.98] text-white font-semibold rounded-xl text-xs shadow-xs transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 shrink-0"
                     >
                         {isSaving ? (
                             <>
-                                <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
-                                Saving...
+                                <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                <span>Saving...</span>
                             </>
                         ) : (
                             <>
-                                <Save size={16} />
-                                Save All Settings
+                                <Save size={15} />
+                                <span>Save Settings</span>
                             </>
                         )}
                     </button>
                 </div>
 
                 {/* TABS: Warehouse vs POS */}
-                <div className="flex gap-2 bg-white/80 dark:bg-[#18201B]/55 p-1.5 rounded-2xl border border-[#E2DCCE] dark:border-emerald-950/20 backdrop-blur-xl shadow-sm">
+                <div className="flex gap-1.5 bg-[var(--theme-bg-subtle)] p-1 rounded-xl border border-[var(--theme-border)]">
                     <button
+                        type="button"
                         onClick={() => setActiveTab('warehouse')}
-                        className={`flex-1 flex items-center justify-center gap-2 px-4 py-3.5 rounded-xl font-bold transition-all duration-300 cursor-pointer ${activeTab === 'warehouse'
-                            ? 'bg-[#2C5E3B] text-white dark:bg-[#A9CBA2] dark:text-[#0B0F0D] shadow-sm'
-                            : 'text-[#4D6E56] dark:text-[#7A9E83] hover:text-[#1E3F27] dark:hover:text-[#EAE5D9] hover:bg-stone-200/50 dark:hover:bg-black/35'
-                            }`}
+                        className={`flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+                            activeTab === 'warehouse'
+                                ? 'bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)] shadow-xs'
+                                : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)]'
+                        }`}
                     >
-                        <Trophy size={18} />
-                        Warehouse Operations
+                        <Trophy size={15} className={activeTab === 'warehouse' ? 'text-[#0071E3] dark:text-[#2997FF]' : ''} />
+                        <span>Warehouse Operations</span>
                     </button>
                     <button
+                        type="button"
                         onClick={() => setActiveTab('pos')}
-                        className={`flex-1 flex items-center justify-center gap-2 px-4 py-3.5 rounded-xl font-bold transition-all duration-300 cursor-pointer ${activeTab === 'pos'
-                            ? 'bg-amber-600 text-white dark:bg-amber-500 dark:text-[#0B0F0D] shadow-sm'
-                            : 'text-[#4D6E56] dark:text-[#7A9E83] hover:text-[#1E3F27] dark:hover:text-[#EAE5D9] hover:bg-stone-200/50 dark:hover:bg-black/35'
-                            }`}
+                        className={`flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+                            activeTab === 'pos'
+                                ? 'bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)] shadow-xs'
+                                : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)]'
+                        }`}
                     >
-                        <ShoppingBag size={18} />
-                        POS Team Rewards
+                        <ShoppingBag size={15} className={activeTab === 'pos' ? 'text-[#0071E3] dark:text-[#2997FF]' : ''} />
+                        <span>POS Team Rewards</span>
                     </button>
                 </div>
 
@@ -88,24 +99,20 @@ export default function GamificationSettings() {
                 {/* BOTTOM SAVE BAR */}
                 <div className="flex justify-end pt-2">
                     <button
+                        type="button"
                         onClick={handleSave}
                         disabled={isSaving}
-                        className={`px-7 py-3.5 rounded-2xl font-bold flex items-center justify-center gap-2 transition-all duration-300 shadow-sm cursor-pointer transform hover:scale-[1.03] active:scale-95 ${isSaving
-                            ? 'bg-stone-300 dark:bg-[#18201B] text-stone-500 dark:text-stone-600 cursor-not-allowed border border-[#E2DCCE] dark:border-emerald-950/20'
-                            : activeTab === 'warehouse'
-                                ? 'bg-[#2C5E3B] text-white hover:bg-[#1E3F27] dark:bg-[#A9CBA2] dark:text-[#0B0F0D] dark:hover:bg-white'
-                                : 'bg-amber-600 text-white hover:bg-amber-700 dark:bg-amber-500 dark:text-[#0B0F0D] dark:hover:bg-amber-400'
-                            }`}
+                        className="h-9 px-4 bg-[#0071E3] dark:bg-[#2997FF] hover:opacity-90 active:scale-[0.98] text-white font-semibold rounded-xl text-xs shadow-xs transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
                     >
                         {isSaving ? (
                             <>
-                                <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
-                                Saving Changes...
+                                <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                <span>Saving Changes...</span>
                             </>
                         ) : (
                             <>
-                                <Save size={18} />
-                                Commit Settings
+                                <Save size={15} />
+                                <span>Commit Settings</span>
                             </>
                         )}
                     </button>

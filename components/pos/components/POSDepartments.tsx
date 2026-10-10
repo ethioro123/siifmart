@@ -1,5 +1,8 @@
 import React from 'react';
-import { X, RotateCcw, Tag, Scale } from 'lucide-react';
+import {
+    X, RotateCcw, Tag, Scale, Layers, Folder,
+    Coins, Sparkles, Zap, Package, SlidersHorizontal
+} from 'lucide-react';
 import { usePOS } from '../POSContext';
 import { CURRENCY_SYMBOL } from '../../../constants';
 
@@ -49,87 +52,115 @@ export const POSDepartments: React.FC = () => {
     }
 
     return (
-        <div className="flex flex-wrap items-center gap-1.5 pt-2 border-t border-[var(--theme-border)] animate-in fade-in duration-200">
-            <span className="text-xs font-bold text-[var(--theme-text-secondary)]">Active Filters:</span>
+        <div className="flex flex-wrap items-center gap-1.5 pt-2.5 pb-0.5 border-t border-[var(--theme-border-subtle)] animate-in fade-in duration-200">
+            <span className="text-[11px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider mr-1">Active:</span>
             
             {selectedDepartment !== 'All' && (
-                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium bg-[var(--theme-pill-bg)] text-[var(--theme-pill-text)] border border-[var(--theme-border)]">
-                    Dept: {selectedDepartment}
-                    <button onClick={() => setSelectedDepartment('All')} title="Remove department filter" aria-label="Remove department filter" className="hover:text-rose-500 ml-0.5 cursor-pointer"><X size={12} /></button>
+                <span className="inline-flex items-center gap-1.5 pl-2 pr-1.5 py-1 rounded-full text-[11px] font-medium bg-[var(--theme-bg-subtle)] text-[var(--theme-text-primary)] border border-[var(--theme-border)] shadow-xs">
+                    <span className="w-4 h-4 rounded-full bg-indigo-500/10 text-indigo-500 flex items-center justify-center shrink-0">
+                        <Layers size={10} />
+                    </span>
+                    <span>Dept: <strong className="font-semibold">{selectedDepartment}</strong></span>
+                    <button onClick={() => setSelectedDepartment('All')} title="Remove department filter" aria-label="Remove department filter" className="hover:bg-rose-500/15 hover:text-rose-500 text-[var(--theme-text-muted)] rounded-full p-0.5 transition-colors cursor-pointer"><X size={11} /></button>
                 </span>
             )}
             
             {selectedCategory !== 'All' && (
-                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium bg-[var(--theme-pill-bg)] text-[var(--theme-pill-text)] border border-[var(--theme-border)]">
-                    Cat: {selectedCategory}
-                    <button onClick={() => setSelectedCategory('All')} title="Remove category filter" aria-label="Remove category filter" className="hover:text-rose-500 ml-0.5 cursor-pointer"><X size={12} /></button>
+                <span className="inline-flex items-center gap-1.5 pl-2 pr-1.5 py-1 rounded-full text-[11px] font-medium bg-[var(--theme-bg-subtle)] text-[var(--theme-text-primary)] border border-[var(--theme-border)] shadow-xs">
+                    <span className="w-4 h-4 rounded-full bg-blue-500/10 text-blue-500 flex items-center justify-center shrink-0">
+                        <Folder size={10} />
+                    </span>
+                    <span>Cat: <strong className="font-semibold">{selectedCategory}</strong></span>
+                    <button onClick={() => setSelectedCategory('All')} title="Remove category filter" aria-label="Remove category filter" className="hover:bg-rose-500/15 hover:text-rose-500 text-[var(--theme-text-muted)] rounded-full p-0.5 transition-colors cursor-pointer"><X size={11} /></button>
                 </span>
             )}
             
             {minPriceFilter !== '' && (
-                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium bg-[var(--theme-pill-bg)] text-[var(--theme-pill-text)] border border-[var(--theme-border)]">
-                    Min: {CURRENCY_SYMBOL} {minPriceFilter}
-                    <button onClick={() => setMinPriceFilter('')} title="Remove minimum price filter" aria-label="Remove minimum price filter" className="hover:text-rose-500 ml-0.5 cursor-pointer"><X size={12} /></button>
+                <span className="inline-flex items-center gap-1.5 pl-2 pr-1.5 py-1 rounded-full text-[11px] font-medium bg-[var(--theme-bg-subtle)] text-[var(--theme-text-primary)] border border-[var(--theme-border)] shadow-xs">
+                    <span className="w-4 h-4 rounded-full bg-emerald-500/10 text-emerald-500 flex items-center justify-center shrink-0">
+                        <Coins size={10} />
+                    </span>
+                    <span>Min: <strong className="font-semibold font-mono">{CURRENCY_SYMBOL} {minPriceFilter}</strong></span>
+                    <button onClick={() => setMinPriceFilter('')} title="Remove minimum price filter" aria-label="Remove minimum price filter" className="hover:bg-rose-500/15 hover:text-rose-500 text-[var(--theme-text-muted)] rounded-full p-0.5 transition-colors cursor-pointer"><X size={11} /></button>
                 </span>
             )}
 
             {maxPriceFilter !== '' && (
-                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium bg-[var(--theme-pill-bg)] text-[var(--theme-pill-text)] border border-[var(--theme-border)]">
-                    Max: {CURRENCY_SYMBOL} {maxPriceFilter}
-                    <button onClick={() => setMaxPriceFilter('')} title="Remove maximum price filter" aria-label="Remove maximum price filter" className="hover:text-rose-500 ml-0.5 cursor-pointer"><X size={12} /></button>
+                <span className="inline-flex items-center gap-1.5 pl-2 pr-1.5 py-1 rounded-full text-[11px] font-medium bg-[var(--theme-bg-subtle)] text-[var(--theme-text-primary)] border border-[var(--theme-border)] shadow-xs">
+                    <span className="w-4 h-4 rounded-full bg-emerald-500/10 text-emerald-500 flex items-center justify-center shrink-0">
+                        <Coins size={10} />
+                    </span>
+                    <span>Max: <strong className="font-semibold font-mono">{CURRENCY_SYMBOL} {maxPriceFilter}</strong></span>
+                    <button onClick={() => setMaxPriceFilter('')} title="Remove maximum price filter" aria-label="Remove maximum price filter" className="hover:bg-rose-500/15 hover:text-rose-500 text-[var(--theme-text-muted)] rounded-full p-0.5 transition-colors cursor-pointer"><X size={11} /></button>
                 </span>
             )}
 
             {selectedBrands.map(brand => (
-                <span key={brand} className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium bg-[var(--theme-pill-bg)] text-[var(--theme-pill-text)] border border-[var(--theme-border)]">
-                    Brand: {brand}
-                    <button onClick={() => setSelectedBrands(prev => prev.filter(b => b !== brand))} title={`Remove brand filter: ${brand}`} aria-label={`Remove brand filter: ${brand}`} className="hover:text-rose-500 ml-0.5 cursor-pointer"><X size={12} /></button>
+                <span key={brand} className="inline-flex items-center gap-1.5 pl-2 pr-1.5 py-1 rounded-full text-[11px] font-medium bg-[var(--theme-bg-subtle)] text-[var(--theme-text-primary)] border border-[var(--theme-border)] shadow-xs">
+                    <span className="w-4 h-4 rounded-full bg-purple-500/10 text-purple-500 flex items-center justify-center shrink-0">
+                        <Sparkles size={10} />
+                    </span>
+                    <span>Brand: <strong className="font-semibold">{brand}</strong></span>
+                    <button onClick={() => setSelectedBrands(prev => prev.filter(b => b !== brand))} title={`Remove brand filter: ${brand}`} aria-label={`Remove brand filter: ${brand}`} className="hover:bg-rose-500/15 hover:text-rose-500 text-[var(--theme-text-muted)] rounded-full p-0.5 transition-colors cursor-pointer"><X size={11} /></button>
                 </span>
             ))}
 
             {selectedVelocities.map(vel => (
-                <span key={vel} className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium bg-[var(--theme-pill-bg)] text-[var(--theme-pill-text)] border border-[var(--theme-border)]">
-                    Velocity: {vel}
-                    <button onClick={() => setSelectedVelocities(prev => prev.filter(v => v !== vel))} title={`Remove velocity filter: ${vel}`} aria-label={`Remove velocity filter: ${vel}`} className="hover:text-rose-500 ml-0.5 cursor-pointer"><X size={12} /></button>
+                <span key={vel} className="inline-flex items-center gap-1.5 pl-2 pr-1.5 py-1 rounded-full text-[11px] font-medium bg-[var(--theme-bg-subtle)] text-[var(--theme-text-primary)] border border-[var(--theme-border)] shadow-xs">
+                    <span className="w-4 h-4 rounded-full bg-amber-500/10 text-amber-500 flex items-center justify-center shrink-0">
+                        <Zap size={10} />
+                    </span>
+                    <span>Velocity: <strong className="font-semibold">{vel}</strong></span>
+                    <button onClick={() => setSelectedVelocities(prev => prev.filter(v => v !== vel))} title={`Remove velocity filter: ${vel}`} aria-label={`Remove velocity filter: ${vel}`} className="hover:bg-rose-500/15 hover:text-rose-500 text-[var(--theme-text-muted)] rounded-full p-0.5 transition-colors cursor-pointer"><X size={11} /></button>
                 </span>
             ))}
 
             {stockStatusFilter !== 'all' && (
-                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium bg-[var(--theme-pill-bg)] text-[var(--theme-pill-text)] border border-[var(--theme-border)]">
-                    Stock: {stockStatusFilter === 'in_stock' ? 'In Stock' : stockStatusFilter === 'low_stock' ? 'Low Stock' : 'Out of Stock'}
-                    <button onClick={() => setStockStatusFilter('all')} title="Remove stock status filter" aria-label="Remove stock status filter" className="hover:text-rose-500 ml-0.5 cursor-pointer"><X size={12} /></button>
+                <span className="inline-flex items-center gap-1.5 pl-2 pr-1.5 py-1 rounded-full text-[11px] font-medium bg-[var(--theme-bg-subtle)] text-[var(--theme-text-primary)] border border-[var(--theme-border)] shadow-xs">
+                    <span className="w-4 h-4 rounded-full bg-cyan-500/10 text-cyan-500 flex items-center justify-center shrink-0">
+                        <Package size={10} />
+                    </span>
+                    <span>Stock: <strong className="font-semibold">{stockStatusFilter === 'in_stock' ? 'In Stock' : stockStatusFilter === 'low_stock' ? 'Low Stock' : 'Out of Stock'}</strong></span>
+                    <button onClick={() => setStockStatusFilter('all')} title="Remove stock status filter" aria-label="Remove stock status filter" className="hover:bg-rose-500/15 hover:text-rose-500 text-[var(--theme-text-muted)] rounded-full p-0.5 transition-colors cursor-pointer"><X size={11} /></button>
                 </span>
             )}
 
             {onSaleOnly && (
-                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium bg-rose-500/10 text-rose-500 border border-rose-500/20">
-                    <Tag className="w-3.5 h-3.5 shrink-0" />
-                    <span>On Sale</span>
-                    <button onClick={() => setOnSaleOnly(false)} title="Remove sale filter" aria-label="Remove sale filter" className="hover:text-rose-500 ml-0.5 cursor-pointer"><X size={12} /></button>
+                <span className="inline-flex items-center gap-1.5 pl-2 pr-1.5 py-1 rounded-full text-[11px] font-medium bg-rose-500/10 text-rose-500 border border-rose-500/20 shadow-xs">
+                    <span className="w-4 h-4 rounded-full bg-rose-500/20 text-rose-500 flex items-center justify-center shrink-0">
+                        <Tag size={10} />
+                    </span>
+                    <strong className="font-semibold">On Sale</strong>
+                    <button onClick={() => setOnSaleOnly(false)} title="Remove sale filter" aria-label="Remove sale filter" className="hover:bg-rose-500/25 hover:text-rose-600 text-rose-500 rounded-full p-0.5 transition-colors cursor-pointer"><X size={11} /></button>
                 </span>
             )}
 
             {competitorMatchedOnly && (
-                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium bg-[var(--theme-pill-bg)] text-[var(--theme-pill-text)] border border-[var(--theme-border)]">
-                    <Scale className="w-3.5 h-3.5 shrink-0" />
-                    <span>Comp Price</span>
-                    <button onClick={() => setCompetitorMatchedOnly(false)} title="Remove competitor price matched filter" aria-label="Remove competitor price matched filter" className="hover:text-rose-500 ml-0.5 cursor-pointer"><X size={12} /></button>
+                <span className="inline-flex items-center gap-1.5 pl-2 pr-1.5 py-1 rounded-full text-[11px] font-medium bg-violet-500/10 text-violet-500 border border-violet-500/20 shadow-xs">
+                    <span className="w-4 h-4 rounded-full bg-violet-500/20 text-violet-500 flex items-center justify-center shrink-0">
+                        <Scale size={10} />
+                    </span>
+                    <strong className="font-semibold">Comp Price</strong>
+                    <button onClick={() => setCompetitorMatchedOnly(false)} title="Remove competitor price matched filter" aria-label="Remove competitor price matched filter" className="hover:bg-violet-500/25 hover:text-violet-600 text-violet-500 rounded-full p-0.5 transition-colors cursor-pointer"><X size={11} /></button>
                 </span>
             )}
 
             {sortBy !== 'default' && (
-                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium bg-[var(--theme-pill-bg)] text-[var(--theme-pill-text)] border border-[var(--theme-border)]">
-                    Sort: {sortBy === 'price-asc' ? 'Price Asc' : sortBy === 'price-desc' ? 'Price Desc' : sortBy === 'name-asc' ? 'A-Z' : sortBy === 'name-desc' ? 'Z-A' : sortBy === 'stock-desc' ? 'Stock Desc' : sortBy === 'velocity-desc' ? 'Velocity' : 'Expiry'}
-                    <button onClick={() => setSortBy('default')} title="Reset sorting to default" aria-label="Reset sorting to default" className="hover:text-rose-500 ml-0.5 cursor-pointer"><X size={12} /></button>
+                <span className="inline-flex items-center gap-1.5 pl-2 pr-1.5 py-1 rounded-full text-[11px] font-medium bg-sky-500/10 text-sky-500 border border-sky-500/20 shadow-xs">
+                    <span className="w-4 h-4 rounded-full bg-sky-500/20 text-sky-500 flex items-center justify-center shrink-0">
+                        <SlidersHorizontal size={10} />
+                    </span>
+                    <span>Sort: <strong className="font-semibold">{sortBy === 'price-asc' ? 'Price Asc' : sortBy === 'price-desc' ? 'Price Desc' : sortBy === 'name-asc' ? 'A-Z' : sortBy === 'name-desc' ? 'Z-A' : sortBy === 'stock-desc' ? 'Stock Desc' : sortBy === 'velocity-desc' ? 'Velocity' : 'Expiry'}</strong></span>
+                    <button onClick={() => setSortBy('default')} title="Reset sorting to default" aria-label="Reset sorting to default" className="hover:bg-sky-500/25 hover:text-sky-600 text-sky-500 rounded-full p-0.5 transition-colors cursor-pointer"><X size={11} /></button>
                 </span>
             )}
 
             <button
                 onClick={resetAllFilters}
-                className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold bg-rose-500/15 text-rose-500 hover:bg-rose-500/25 border border-rose-500/20 transition-colors ml-auto cursor-pointer"
+                className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-semibold bg-rose-500/10 text-rose-500 hover:bg-rose-500/20 active:scale-95 border border-rose-500/20 transition-all ml-auto cursor-pointer"
             >
-                <RotateCcw size={12} />
-                Reset All
+                <RotateCcw size={11} />
+                <span>Reset All</span>
             </button>
         </div>
     );

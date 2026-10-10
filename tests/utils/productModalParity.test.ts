@@ -137,15 +137,15 @@ describe('Product Details & Edit Modal Architectural Parity Audit', () => {
 
     it('verifies sovereign SKU auto-generation enforces active country prefix', async () => {
         const { generateSKU } = await import('../../utils/skuGenerator');
-        const existingET = [{ sku: 'ET-GR001' }];
+        const existingET = [{ sku: 'ETGR001' }];
         const etSKU = generateSKU('Grains, Pasta & Rice', existingET, undefined, 'ET' as any);
-        expect(etSKU).toMatch(/^ET-GR\d{3}$/);
-        expect(etSKU).toBe('ET-GR002');
+        expect(etSKU).toMatch(/^ETGR\d{3}$/);
+        expect(etSKU).toBe('ETGR002');
 
-        const existingKE = [{ sku: 'KE-BV001' }];
+        const existingKE = [{ sku: 'KEBV001' }];
         const keSKU = generateSKU('Drinks & Beverages', existingKE, undefined, 'KE' as any);
-        expect(keSKU).toMatch(/^KE-BV\d{3}$/);
-        expect(keSKU).toBe('KE-BV002');
+        expect(keSKU).toMatch(/^KEBV\d{3}$/);
+        expect(keSKU).toBe('KEBV002');
     });
 
     it('verifies internal EAN-13 barcode generation produces 13 digits with valid checksum', async () => {

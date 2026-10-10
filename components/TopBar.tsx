@@ -16,6 +16,7 @@ import { DesktopSearch } from './topbar/DesktopSearch';
 import { MobileSearch } from './topbar/MobileSearch';
 import { UserMenu } from './topbar/UserMenu';
 import { ActivityCenter } from './topbar/ActivityCenter';
+import Logo from './Logo';
 
 const NAVIGATION_TARGETS = [
     { title: 'Central Operations', path: '/admin', module: 'admin', keywords: ['hq', 'dashboard', 'control', 'central'] },
@@ -94,6 +95,25 @@ export default function TopBar() {
          document.removeEventListener('touchstart', handleClickOutside);
       };
    }, [isSearchOpen, isNotifOpen, isUserMenuOpen]);
+
+   // Global shortcut: Cmd+K / Ctrl+K to focus desktop search
+   useEffect(() => {
+      const handleGlobalKeyDown = (e: KeyboardEvent) => {
+         if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+            const activeTag = document.activeElement?.tagName;
+            if (activeTag === 'INPUT' || activeTag === 'TEXTAREA') return;
+            e.preventDefault();
+            const input = searchRef.current?.querySelector('input');
+            if (input) {
+               input.focus();
+               setIsSearchOpen(true);
+            }
+         }
+      };
+      window.addEventListener('keydown', handleGlobalKeyDown);
+      return () => window.removeEventListener('keydown', handleGlobalKeyDown);
+   }, []);
+
    const [showQuickAssign, setShowQuickAssign] = useState(false);
    const [quickTaskTitle, setQuickTaskTitle] = useState('');
    const [quickTaskPriority, setQuickTaskPriority] = useState<'High' | 'Medium' | 'Low'>('Medium');
@@ -363,6 +383,8 @@ export default function TopBar() {
             >
                <Menu size={22} className="md:w-6 md:h-6" />
             </button>
+
+            <Logo size={22} className="mr-1 hidden sm:inline-flex" />
 
             <DesktopSearch 
                searchValue={searchValue}

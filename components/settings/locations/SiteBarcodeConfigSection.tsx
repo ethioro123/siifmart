@@ -21,23 +21,23 @@ export function SiteBarcodeConfigSection({
   const currentPrefix = newSite.barcodePrefix || extractSitePrefix(newSite.code);
 
   return (
-    <div className="md:col-span-2 pt-4 border-t border-white/5 mt-2">
+    <div className="md:col-span-2 pt-4 border-t border-[var(--theme-border)] mt-2">
       <div className="flex justify-between items-center mb-3">
-        <label className="text-xs text-[#2C5E3B] dark:text-[#A9CBA2] uppercase font-bold block">Barcode Configuration</label>
-        <div className="px-2 py-1 rounded bg-emerald-50 dark:bg-[#2C5E3B]/20 border border-emerald-200 dark:border-emerald-950/30 text-[10px] text-[#2C5E3B] dark:text-[#A9CBA2] font-mono">
+        <label className="text-xs text-[var(--theme-text-primary)] uppercase font-semibold tracking-wider block">Barcode Configuration</label>
+        <div className="px-2.5 py-0.5 rounded-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-[11px] text-[var(--theme-text-secondary)] font-mono font-semibold">
           PROTOCOL: 15-DIGIT
         </div>
       </div>
 
-      <div className="bg-white/5 border border-white/10 rounded-lg p-3 mb-4">
-        <label className="text-[10px] text-[#2C5E3B] dark:text-[#A9CBA2] uppercase font-bold mb-2 block flex items-center gap-2">
-          <MapPin size={12} /> Test Location Barcode
+      <div className="bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl p-3.5 mb-4">
+        <label className="text-[11px] text-[var(--theme-text-primary)] uppercase font-semibold tracking-wider mb-2.5 block flex items-center gap-1.5">
+          <MapPin size={13} className="text-[var(--theme-text-muted)]" /> Test Location Barcode
         </label>
-        <div className="flex gap-2 items-end">
+        <div className="flex gap-2.5 items-end">
           <div className="flex-1">
-            <label className="text-[9px] text-gray-500 uppercase font-bold mb-1 block">Zone</label>
+            <label className="text-[11px] text-[var(--theme-text-secondary)] uppercase font-semibold mb-1 block">Zone</label>
             <select
-              className="w-full bg-black/30 border border-white/10 rounded px-2 py-1.5 text-white text-xs outline-none focus:border-[#2C5E3B]"
+              className="w-full h-9 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-lg px-2.5 text-[var(--theme-text-primary)] text-xs font-medium focus:outline-hidden focus:ring-2 focus:ring-[#0071E3]/40 dark:focus:ring-[#2997FF]/40"
               value={testLocation.zone}
               onChange={(e) => setTestLocation({ ...testLocation, zone: e.target.value })}
               aria-label="Test Zone"
@@ -48,9 +48,9 @@ export function SiteBarcodeConfigSection({
             </select>
           </div>
           <div className="flex-1">
-            <label className="text-[9px] text-gray-500 uppercase font-bold mb-1 block">Aisle</label>
+            <label className="text-[11px] text-[var(--theme-text-secondary)] uppercase font-semibold mb-1 block">Aisle</label>
             <select
-              className="w-full bg-black/30 border border-white/10 rounded px-2 py-1.5 text-white text-xs outline-none focus:border-[#2C5E3B]"
+              className="w-full h-9 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-lg px-2.5 text-[var(--theme-text-primary)] text-xs font-medium focus:outline-hidden focus:ring-2 focus:ring-[#0071E3]/40 dark:focus:ring-[#2997FF]/40"
               value={parseInt(testLocation.aisle, 10)}
               onChange={(e) => setTestLocation({ ...testLocation, aisle: e.target.value.padStart(2, '0') })}
               aria-label="Test Aisle"
@@ -63,9 +63,9 @@ export function SiteBarcodeConfigSection({
             </select>
           </div>
           <div className="flex-1">
-            <label className="text-[9px] text-gray-500 uppercase font-bold mb-1 block">Bay</label>
+            <label className="text-[11px] text-[var(--theme-text-secondary)] uppercase font-semibold mb-1 block">Bay</label>
             <select
-              className="w-full bg-black/30 border border-white/10 rounded px-2 py-1.5 text-white text-xs outline-none focus:border-[#2C5E3B]"
+              className="w-full h-9 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-lg px-2.5 text-[var(--theme-text-primary)] text-xs font-medium focus:outline-hidden focus:ring-2 focus:ring-[#0071E3]/40 dark:focus:ring-[#2997FF]/40"
               value={parseInt(testLocation.bay, 10)}
               onChange={(e) => setTestLocation({ ...testLocation, bay: e.target.value.padStart(2, '0') })}
               aria-label="Test Bay"
@@ -78,11 +78,11 @@ export function SiteBarcodeConfigSection({
             </select>
           </div>
         </div>
-        <div className="mt-3 flex items-center justify-between bg-black/40 p-2 rounded border border-white/5">
-          <span className="text-[10px] text-gray-500 font-mono">
+        <div className="mt-3 flex items-center justify-between bg-[var(--theme-bg-card)] p-2.5 rounded-lg border border-[var(--theme-border)]">
+          <span className="text-[11px] text-[var(--theme-text-secondary)] font-mono">
             {testLocation.zone}-{testLocation.aisle.toString().padStart(2, '0')}-{testLocation.bay.toString().padStart(2, '0')}
           </span>
-          <span className="text-xs font-mono font-bold text-[#2C5E3B] dark:text-[#A9CBA2]">
+          <span className="text-xs font-mono font-semibold text-[#0071E3] dark:text-[#2997FF]">
             {(() => {
               const label = `${testLocation.zone}-${testLocation.aisle.toString().padStart(2, '0')}-${testLocation.bay.toString().padStart(2, '0')}`;
               return encodeLocation(label, currentPrefix);
@@ -91,10 +91,10 @@ export function SiteBarcodeConfigSection({
         </div>
       </div>
 
-      <div className="flex gap-4 items-end">
+      <div className="flex gap-3 items-end">
         <div className="w-1/3">
-          <label className="text-[10px] text-gray-500 uppercase font-bold mb-1 block">Validation Prefix (System)</label>
-          <div className="w-full bg-black/40 border border-white/10 rounded-lg px-3 py-2 text-[#2C5E3B] dark:text-[#A9CBA2] text-sm font-mono tracking-widest text-center">
+          <label className="text-[11px] text-[var(--theme-text-secondary)] uppercase font-semibold mb-1 block">Prefix (System)</label>
+          <div className="w-full h-10 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3 py-2 text-[var(--theme-text-primary)] text-sm font-mono font-semibold tracking-widest text-center flex items-center justify-center">
             {currentPrefix}
           </div>
         </div>
@@ -102,21 +102,21 @@ export function SiteBarcodeConfigSection({
           <button
             type="button"
             onClick={() => generateBarcodes({ ...newSite, barcodePrefix: currentPrefix })}
-            className="w-full h-[38px] bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-xs font-bold text-gray-300 hover:text-white transition-all flex items-center justify-center gap-2 cursor-pointer"
+            className="w-full h-10 bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl text-xs font-semibold text-[var(--theme-text-primary)] transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-[0.98]"
           >
             {isGenerating ? <Loader2 size={14} className="animate-spin" /> : <FileDown size={14} />}
             Download Location Labels (CSV)
           </button>
         </div>
       </div>
-      <div className="mt-3 flex items-center gap-2 text-[10px] text-gray-500 bg-white/5 p-2 rounded-lg border border-white/5">
-        <span className="uppercase font-bold">Preview:</span>
+      <div className="mt-3 flex items-center gap-2 text-[11px] text-[var(--theme-text-secondary)] bg-[var(--theme-bg-subtle)] p-2.5 rounded-xl border border-[var(--theme-border)]">
+        <span className="uppercase font-semibold">Preview:</span>
         {newSite.code || newSite.barcodePrefix ? (
-          <span className="font-mono text-[#2C5E3B] dark:text-[#A9CBA2]">
+          <span className="font-mono text-[var(--theme-text-primary)] font-medium">
             {encodeLocation('A-01-01', currentPrefix)} (A-01-01)
           </span>
         ) : (
-          <span className="italic text-gray-600">Site Code or Prefix required for preview</span>
+          <span className="italic text-[var(--theme-text-muted)]">Site Code or Prefix required for preview</span>
         )}
       </div>
     </div>

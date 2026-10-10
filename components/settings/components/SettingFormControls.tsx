@@ -2,9 +2,9 @@ import React from 'react';
 import { AlertTriangle } from 'lucide-react';
 
 export const SectionHeader: React.FC<{ title: string; desc: string }> = ({ title, desc }) => (
-    <div className="mb-6 pb-4 border-b border-[#E2DCCE]/60 dark:border-white/5">
-        <h3 className="text-lg font-black text-[#1E3F27] dark:text-[#EAE5D9] tracking-tight">{title}</h3>
-        <p className="text-xs text-[#4D6E56] dark:text-[#7A9E83] mt-0.5">{desc}</p>
+    <div className="mb-6 pb-4 border-b border-[var(--theme-border)]">
+        <h3 className="text-base font-semibold text-[var(--theme-text-primary)] tracking-tight">{title}</h3>
+        <p className="text-xs text-[var(--theme-text-secondary)] mt-0.5">{desc}</p>
     </div>
 );
 
@@ -32,8 +32,8 @@ export function RadioGroup<T extends string = string>({
     return (
         <div className="space-y-2.5">
             {label && (
-                <label className="text-xs text-stone-600 dark:text-gray-400 font-bold uppercase tracking-wide flex items-center gap-1.5">
-                    {Icon && <Icon size={14} className="text-[#2C5E3B] dark:text-[#A9CBA2]" />} {label}
+                <label className="text-xs text-[var(--theme-text-secondary)] font-semibold uppercase tracking-wider flex items-center gap-1.5">
+                    {Icon && <Icon size={14} className="text-[#0071E3] dark:text-[#2997FF]" />} {label}
                 </label>
             )}
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2.5">
@@ -42,20 +42,20 @@ export function RadioGroup<T extends string = string>({
                         key={opt.value}
                         type="button"
                         onClick={() => onChange(opt.value)}
-                        className={`min-h-[44px] p-3.5 rounded-2xl border text-left transition-colors relative overflow-hidden group cursor-pointer ${value === opt.value
-                            ? 'bg-[#2C5E3B]/10 dark:bg-[#2C5E3B]/20 border-[#2C5E3B] dark:border-[#A9CBA2] text-[#1E3F27] dark:text-white shadow-sm'
-                            : 'bg-[#FAF8F5] dark:bg-black/30 border-[#E2DCCE] dark:border-white/5 text-stone-500 dark:text-gray-400 hover:border-[#2C5E3B]/40 hover:bg-white dark:hover:bg-white/5'
+                        className={`min-h-[44px] p-3.5 rounded-xl border text-left transition-colors relative overflow-hidden group cursor-pointer ${value === opt.value
+                            ? 'bg-[#0071E3]/10 dark:bg-[#2997FF]/15 border-[#0071E3] dark:border-[#2997FF] text-[var(--theme-text-primary)] shadow-xs'
+                            : 'bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] text-[var(--theme-text-secondary)] hover:border-[var(--theme-border)] hover:bg-[var(--theme-bg-card)]'
                             }`}
                     >
-                        <div className="relative z-10 flex flex-col h-full justify-between gap-1.5">
-                            <span className={`text-xs font-black tracking-tight ${value === opt.value ? 'text-[#2C5E3B] dark:text-[#A9CBA2]' : 'text-[#1E3F27] dark:text-gray-300'}`}>
+                        <div className="relative z-10 flex flex-col h-full justify-between gap-1.5 pr-3">
+                            <span className={`text-xs font-semibold tracking-tight ${value === opt.value ? 'text-[#0071E3] dark:text-[#2997FF]' : 'text-[var(--theme-text-primary)]'}`}>
                                 {opt.label}
                             </span>
-                            {opt.desc && <span className="text-[11px] opacity-75 leading-tight">{opt.desc}</span>}
+                            {opt.desc && <span className="text-[11px] text-[var(--theme-text-secondary)] leading-tight">{opt.desc}</span>}
                         </div>
                         {value === opt.value && (
-                            <div className="absolute top-2 right-2">
-                                <div className="w-2 h-2 rounded-full bg-[#2C5E3B] dark:bg-[#A9CBA2] shadow-[0_0_8px_rgba(44,94,59,0.5)]" />
+                            <div className="absolute top-2.5 right-2.5">
+                                <div className="w-2 h-2 rounded-full bg-[#0071E3] dark:bg-[#2997FF]" />
                             </div>
                         )}
                     </button>
@@ -90,10 +90,10 @@ export const SliderGroup: React.FC<SliderGroupProps> = ({
 }) => (
     <div className="group">
         <div className="flex justify-between items-end mb-2">
-            <label className="text-xs text-stone-600 dark:text-gray-400 font-bold uppercase tracking-wide group-hover:text-[#2C5E3B] dark:group-hover:text-[#A9CBA2] transition-colors flex items-center gap-1.5">
-                {Icon && <Icon size={14} className="text-[#2C5E3B] dark:text-[#A9CBA2]" />} {label}
+            <label className="text-xs text-[var(--theme-text-secondary)] font-semibold uppercase tracking-wider group-hover:text-[var(--theme-text-primary)] transition-colors flex items-center gap-1.5">
+                {Icon && <Icon size={14} className="text-[#0071E3] dark:text-[#2997FF]" />} {label}
             </label>
-            <span className="text-xs font-mono font-black text-[#2C5E3B] dark:text-[#A9CBA2] bg-emerald-50 dark:bg-[#2C5E3B]/20 border border-emerald-200 dark:border-emerald-950/30 px-2.5 py-0.5 rounded-lg">
+            <span className="text-xs font-mono font-semibold text-[#0071E3] dark:text-[#2997FF] bg-[#0071E3]/10 dark:bg-[#2997FF]/15 border border-[#0071E3]/20 dark:border-[#2997FF]/30 px-2.5 py-0.5 rounded-full">
                 {value}{unit}
             </span>
         </div>
@@ -105,9 +105,9 @@ export const SliderGroup: React.FC<SliderGroupProps> = ({
             value={value}
             title={label}
             onChange={(e) => onChange(Number(e.target.value))}
-            className="w-full accent-[#2C5E3B] h-2 bg-[#E2DCCE] dark:bg-black/40 rounded-lg appearance-none cursor-pointer"
+            className="w-full accent-[#0071E3] dark:accent-[#2997FF] h-1.5 bg-[var(--theme-border)] rounded-lg appearance-none cursor-pointer"
         />
-        {sub && <p className="text-[10px] text-stone-500 dark:text-gray-400 mt-1.5">{sub}</p>}
+        {sub && <p className="text-[11px] text-[var(--theme-text-secondary)] mt-1.5">{sub}</p>}
     </div>
 );
 
@@ -128,13 +128,13 @@ export const ToggleRow: React.FC<ToggleRowProps> = ({
     warning,
     disabled = false
 }) => (
-    <div className="flex items-start justify-between p-3.5 bg-[#FAF8F5] dark:bg-black/20 rounded-2xl border border-[#E2DCCE] dark:border-white/5 hover:border-[#2C5E3B]/30 transition-colors">
+    <div className="flex items-start justify-between p-3.5 bg-[var(--theme-bg-subtle)] rounded-xl border border-[var(--theme-border)] hover:border-[var(--theme-border)] transition-colors">
         <div className="space-y-0.5 pr-3">
-            <p className="text-xs font-black text-[#1E3F27] dark:text-gray-200">{label}</p>
-            {sub && <p className="text-[11px] text-stone-500 dark:text-gray-400">{sub}</p>}
+            <p className="text-xs font-semibold text-[var(--theme-text-primary)]">{label}</p>
+            {sub && <p className="text-[11px] text-[var(--theme-text-secondary)] leading-tight">{sub}</p>}
             {warning && (
-                <p className="text-[10px] text-amber-700 dark:text-amber-400 flex items-center gap-1 mt-1 font-bold">
-                    <AlertTriangle size={12} /> {warning}
+                <p className="text-[11px] text-amber-600 dark:text-amber-400 flex items-center gap-1 mt-1 font-medium">
+                    <AlertTriangle size={12} className="shrink-0" /> {warning}
                 </p>
             )}
         </div>
@@ -143,13 +143,13 @@ export const ToggleRow: React.FC<ToggleRowProps> = ({
             disabled={disabled}
             onClick={onChange}
             aria-label={label}
-            className={`min-w-[44px] min-h-[44px] flex items-center justify-center cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed`}
+            className="min-w-[44px] min-h-[44px] flex items-center justify-center cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed shrink-0"
         >
             <div
-                className={`w-11 h-6 rounded-full p-1 transition-colors relative shrink-0 ${checked ? 'bg-[#2C5E3B]' : 'bg-stone-300 dark:bg-stone-700'
+                className={`w-11 h-6 rounded-full p-0.5 transition-colors relative shrink-0 ${checked ? 'bg-[#0071E3] dark:bg-[#2997FF]' : 'bg-[var(--theme-border)]'
                     }`}
             >
-                <div className={`w-4 h-4 bg-white rounded-full shadow-md transition-transform transform ${checked ? 'translate-x-5' : 'translate-x-0'
+                <div className={`w-5 h-5 bg-white rounded-full shadow-xs transition-transform transform ${checked ? 'translate-x-5' : 'translate-x-0'
                     }`} />
             </div>
         </button>

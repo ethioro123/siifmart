@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
     Truck, FileText, Search, Plus, X, CheckCircle, ArrowRight, Layout, Layers,
     AlertTriangle, Clock, MapPin, List, ChevronRight, ChevronDown, ClipboardCheck, Minus,
@@ -46,6 +46,7 @@ interface DriverTabProps {
     addProduct: any;
     jobs: WMSJob[]; // Needed for parent transfer updates
     t: (key: string) => string;
+    loadHistoricalJobs?: (limit?: number) => Promise<void>;
 }
 
 export const DriverTab: React.FC<DriverTabProps> = ({
@@ -69,10 +70,16 @@ export const DriverTab: React.FC<DriverTabProps> = ({
     wmsJobsService,
     addProduct,
     jobs,
-    t
+    t,
+    loadHistoricalJobs
 }) => {
     // --- DRIVER TAB STATES ---
     const [viewMode, setViewMode] = useState<'Active' | 'History'>('Active');
+
+    // RULE 10: Fetch history on demand when user switches to History view
+    useEffect(() => {
+        if (viewMode === 'History' && loadHistoricalJobs) loadHistoricalJobs();
+    }, [viewMode]);
     const [processingJobIds, setProcessingJobIds] = useState<Set<string>>(new Set());
     const [driverScannerOpen, setDriverScannerOpen] = useState(false);
     const [isIncidentModalOpen, setIsIncidentModalOpen] = useState(false);

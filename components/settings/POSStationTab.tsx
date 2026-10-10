@@ -77,8 +77,8 @@ export function POSStationTab({
             sub="Target transactions per shift"
           />
 
-          <div className="space-y-4 md:col-span-2 xl:col-span-3">
-            <label className="text-[10px] text-gray-500 font-black uppercase tracking-[0.2em] pl-1">Operational Mode</label>
+          <div className="space-y-3 md:col-span-2 xl:col-span-3">
+            <label className="text-xs text-[var(--theme-text-secondary)] font-semibold uppercase tracking-wider pl-0.5">Operational Mode</label>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <RadioCard
                 value={workflow.posRegisterMode}
@@ -92,7 +92,7 @@ export function POSStationTab({
           </div>
         </div>
 
-        <div className="mt-16 pt-16 border-t border-white/[0.05] grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        <div className="mt-8 pt-8 border-t border-[var(--theme-border)] grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {/* ── GUEST CHECKOUT (ZERO-TRUST: default OFF) ──
                Anonymous sales are untraceable — enabling requires HQ-level decision. */}
           <ToggleRow
@@ -104,8 +104,8 @@ export function POSStationTab({
             help="Enable this to process sales without requiring a customer profile. Ideal for quick retail transactions."
           />
           {workflow.posGuestCheckout && (
-            <div className="flex items-center gap-2 text-amber-600 dark:text-amber-400 text-[10px] font-semibold col-span-full">
-              <AlertTriangle size={12} />
+            <div className="flex items-center gap-2 text-amber-600 dark:text-amber-400 text-[11px] font-medium col-span-full p-2.5 bg-amber-500/10 rounded-xl border border-amber-500/20">
+              <AlertTriangle size={14} className="shrink-0" />
               <span>Guest checkout is ON — anonymous cash sales are untraceable. HQ audit visibility required.</span>
             </div>
           )}
@@ -143,14 +143,14 @@ export function POSStationTab({
           />
         </div>
 
-        <div className="mt-10 pt-6 border-t border-[#E2DCCE]/60 dark:border-white/10 flex justify-end">
+        <div className="mt-8 pt-6 border-t border-[var(--theme-border)] flex justify-end">
           <button
             type="button"
             onClick={() => handleSaveSection('workflow')}
             disabled={isSavingWorkflow}
-            className="px-8 min-h-[44px] bg-[#2C5E3B] hover:opacity-90 text-white font-bold rounded-2xl text-xs uppercase tracking-wider flex items-center gap-2 shadow-md cursor-pointer transition-opacity disabled:opacity-50"
+            className="h-10 px-5 bg-[#0071E3] dark:bg-[#2997FF] hover:opacity-90 active:scale-[0.98] text-white font-semibold rounded-xl text-xs flex items-center gap-2 shadow-xs cursor-pointer transition-all disabled:opacity-40"
           >
-            {isSavingWorkflow ? <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <Save size={16} />}
+            {isSavingWorkflow ? <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <Save size={15} />}
             Apply Changes
           </button>
         </div>

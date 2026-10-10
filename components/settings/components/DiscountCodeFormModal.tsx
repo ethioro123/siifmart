@@ -57,11 +57,11 @@ export const DiscountCodeFormModal: React.FC<DiscountCodeFormModalProps> = ({
       title={editingCode ? 'Edit Discount Code' : 'Create Discount Code'}
       size="lg"
     >
-      <div className="space-y-6">
+      <div className="space-y-5">
         {/* Code & Name */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label className="block text-xs font-bold text-stone-600 dark:text-gray-400 uppercase mb-1.5">
+            <label className="block text-[11px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider mb-1.5">
               Code <span className="text-red-500">*</span>
             </label>
             <input
@@ -69,12 +69,12 @@ export const DiscountCodeFormModal: React.FC<DiscountCodeFormModalProps> = ({
               value={formData.code}
               onChange={(e) => setFormData({ ...formData, code: e.target.value.toUpperCase() })}
               placeholder="e.g., SAVE10"
-              className="w-full bg-[#FAF8F5] dark:bg-black/30 border border-[#E2DCCE] dark:border-white/10 rounded-2xl px-4 py-3 text-[#1E3F27] dark:text-white font-mono tracking-wider uppercase focus:border-[#2C5E3B] outline-none transition-all"
+              className="w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 py-2 text-xs text-[var(--theme-text-primary)] font-mono tracking-wider uppercase focus:outline-none focus:ring-2 focus:ring-[#0071E3]/20 focus:border-[#0071E3] dark:focus:border-[#2997FF] transition-all placeholder:text-[var(--theme-text-secondary)]/40"
             />
-            <p className="text-[10px] text-stone-500 dark:text-gray-400 mt-1">What customers enter at checkout</p>
+            <p className="text-[11px] text-[var(--theme-text-secondary)] mt-1">What customers enter at checkout</p>
           </div>
           <div>
-            <label className="block text-xs font-bold text-stone-600 dark:text-gray-400 uppercase mb-1.5">
+            <label className="block text-[11px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider mb-1.5">
               Name / Description <span className="text-red-500">*</span>
             </label>
             <input
@@ -82,45 +82,45 @@ export const DiscountCodeFormModal: React.FC<DiscountCodeFormModalProps> = ({
               value={formData.name}
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
               placeholder="e.g., Summer Member Promo"
-              className="w-full bg-[#FAF8F5] dark:bg-black/30 border border-[#E2DCCE] dark:border-white/10 rounded-2xl px-4 py-3 text-[#1E3F27] dark:text-white focus:border-[#2C5E3B] outline-none transition-all"
+              className="w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 py-2 text-xs text-[var(--theme-text-primary)] font-medium focus:outline-none focus:ring-2 focus:ring-[#0071E3]/20 focus:border-[#0071E3] dark:focus:border-[#2997FF] transition-all placeholder:text-[var(--theme-text-secondary)]/40"
             />
-            <p className="text-[10px] text-stone-500 dark:text-gray-400 mt-1">Descriptive promotional title</p>
+            <p className="text-[11px] text-[var(--theme-text-secondary)] mt-1">Descriptive promotional title</p>
           </div>
         </div>
 
         {/* Type & Value */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div>
-            <label className="block text-xs font-bold text-stone-600 dark:text-gray-400 uppercase mb-1.5">
+            <label className="block text-[11px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider mb-1.5">
               Discount Type
             </label>
             <div className="flex gap-2">
               <button
                 type="button"
                 onClick={() => setFormData({ ...formData, type: 'PERCENTAGE' })}
-                className={`flex-1 py-2.5 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 border transition-all cursor-pointer ${formData.type === 'PERCENTAGE'
-                  ? 'bg-emerald-50 dark:bg-[#2C5E3B]/20 border-[#2C5E3B] dark:border-[#A9CBA2] text-[#2C5E3B] dark:text-[#A9CBA2]'
-                  : 'bg-[#FAF8F5] dark:bg-black/20 border-[#E2DCCE] dark:border-white/10 text-stone-500 dark:text-gray-400'
+                className={`flex-1 py-2 px-3 rounded-xl text-xs flex items-center justify-center gap-1.5 border transition-all cursor-pointer ${formData.type === 'PERCENTAGE'
+                  ? 'bg-[#0071E3]/10 dark:bg-[#2997FF]/15 border-[#0071E3] dark:border-[#2997FF] text-[#0071E3] dark:text-[#2997FF] font-semibold shadow-xs'
+                  : 'bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] text-[var(--theme-text-secondary)] hover:border-[#0071E3]/40'
                   }`}
               >
-                <Percent size={14} />
+                <Percent size={13} />
                 Percent
               </button>
               <button
                 type="button"
                 onClick={() => setFormData({ ...formData, type: 'FIXED' })}
-                className={`flex-1 py-2.5 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 border transition-all cursor-pointer ${formData.type === 'FIXED'
-                  ? 'bg-emerald-50 dark:bg-[#2C5E3B]/20 border-[#2C5E3B] dark:border-[#A9CBA2] text-[#2C5E3B] dark:text-[#A9CBA2]'
-                  : 'bg-[#FAF8F5] dark:bg-black/20 border-[#E2DCCE] dark:border-white/10 text-stone-500 dark:text-gray-400'
+                className={`flex-1 py-2 px-3 rounded-xl text-xs flex items-center justify-center gap-1.5 border transition-all cursor-pointer ${formData.type === 'FIXED'
+                  ? 'bg-[#0071E3]/10 dark:bg-[#2997FF]/15 border-[#0071E3] dark:border-[#2997FF] text-[#0071E3] dark:text-[#2997FF] font-semibold shadow-xs'
+                  : 'bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] text-[var(--theme-text-secondary)] hover:border-[#0071E3]/40'
                   }`}
               >
-                <DollarSign size={14} />
+                <DollarSign size={13} />
                 Fixed
               </button>
             </div>
           </div>
           <div>
-            <label className="block text-xs font-bold text-stone-600 dark:text-gray-400 uppercase mb-1.5">
+            <label className="block text-[11px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider mb-1.5">
               Value <span className="text-red-500">*</span>
             </label>
             <div className="relative">
@@ -129,21 +129,21 @@ export const DiscountCodeFormModal: React.FC<DiscountCodeFormModalProps> = ({
                 value={formData.value}
                 onChange={(e) => setFormData({ ...formData, value: e.target.value })}
                 placeholder={formData.type === 'PERCENTAGE' ? '10' : '50'}
-                className="w-full bg-[#FAF8F5] dark:bg-black/30 border border-[#E2DCCE] dark:border-white/10 rounded-2xl px-4 py-2.5 text-[#1E3F27] dark:text-white focus:border-[#2C5E3B] outline-none transition-all pr-10 font-bold"
+                className="w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 py-2 text-xs text-[var(--theme-text-primary)] focus:outline-none focus:ring-2 focus:ring-[#0071E3]/20 focus:border-[#0071E3] dark:focus:border-[#2997FF] transition-all pr-10 font-bold"
               />
-              <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-stone-400 font-bold text-xs">
+              <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[var(--theme-text-secondary)] font-semibold text-xs">
                 {formData.type === 'PERCENTAGE' ? '%' : currencySymbol}
               </span>
             </div>
           </div>
           <div>
-            <label className="block text-xs font-bold text-stone-600 dark:text-gray-400 uppercase mb-1.5">
+            <label className="block text-[11px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider mb-1.5">
               Status
             </label>
             <select
               value={formData.status}
               onChange={(e) => setFormData({ ...formData, status: e.target.value as DiscountCode['status'] })}
-              className="w-full bg-[#FAF8F5] dark:bg-black/30 border border-[#E2DCCE] dark:border-white/10 rounded-2xl px-4 py-2.5 text-xs text-[#1E3F27] dark:text-white font-bold focus:border-[#2C5E3B] outline-none transition-all"
+              className="w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 py-2 text-xs text-[var(--theme-text-primary)] font-medium focus:outline-none focus:ring-2 focus:ring-[#0071E3]/20 focus:border-[#0071E3] dark:focus:border-[#2997FF] transition-all"
               title="Status"
             >
               <option value="Active">Active</option>
@@ -156,26 +156,26 @@ export const DiscountCodeFormModal: React.FC<DiscountCodeFormModalProps> = ({
         {/* Validity Period */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label className="block text-xs font-bold text-stone-600 dark:text-gray-400 uppercase mb-1.5">
+            <label className="block text-[11px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider mb-1.5">
               Valid From
             </label>
             <input
               type="date"
               value={formData.validFrom}
               onChange={(e) => setFormData({ ...formData, validFrom: e.target.value })}
-              className="w-full bg-[#FAF8F5] dark:bg-black/30 border border-[#E2DCCE] dark:border-white/10 rounded-2xl px-4 py-2.5 text-xs text-[#1E3F27] dark:text-white focus:border-[#2C5E3B] outline-none transition-all font-medium"
+              className="w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 py-2 text-xs text-[var(--theme-text-primary)] focus:outline-none focus:ring-2 focus:ring-[#0071E3]/20 focus:border-[#0071E3] dark:focus:border-[#2997FF] transition-all font-medium"
               title="Valid From"
             />
           </div>
           <div>
-            <label className="block text-xs font-bold text-stone-600 dark:text-gray-400 uppercase mb-1.5">
+            <label className="block text-[11px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider mb-1.5">
               Valid Until
             </label>
             <input
               type="date"
               value={formData.validUntil}
               onChange={(e) => setFormData({ ...formData, validUntil: e.target.value })}
-              className="w-full bg-[#FAF8F5] dark:bg-black/30 border border-[#E2DCCE] dark:border-white/10 rounded-2xl px-4 py-2.5 text-xs text-[#1E3F27] dark:text-white focus:border-[#2C5E3B] outline-none transition-all font-medium"
+              className="w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 py-2 text-xs text-[var(--theme-text-primary)] focus:outline-none focus:ring-2 focus:ring-[#0071E3]/20 focus:border-[#0071E3] dark:focus:border-[#2997FF] transition-all font-medium"
               title="Valid Until"
             />
           </div>
@@ -184,7 +184,7 @@ export const DiscountCodeFormModal: React.FC<DiscountCodeFormModalProps> = ({
         {/* Constraints */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div>
-            <label className="block text-xs font-bold text-stone-600 dark:text-gray-400 uppercase mb-1.5">
+            <label className="block text-[11px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider mb-1.5">
               Min Purchase ({currencySymbol})
             </label>
             <input
@@ -192,11 +192,11 @@ export const DiscountCodeFormModal: React.FC<DiscountCodeFormModalProps> = ({
               value={formData.minPurchaseAmount}
               onChange={(e) => setFormData({ ...formData, minPurchaseAmount: e.target.value })}
               placeholder="0 (No min)"
-              className="w-full bg-[#FAF8F5] dark:bg-black/30 border border-[#E2DCCE] dark:border-white/10 rounded-2xl px-4 py-2.5 text-xs text-[#1E3F27] dark:text-white focus:border-[#2C5E3B] outline-none transition-all"
+              className="w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 py-2 text-xs text-[var(--theme-text-primary)] focus:outline-none focus:ring-2 focus:ring-[#0071E3]/20 focus:border-[#0071E3] dark:focus:border-[#2997FF] transition-all"
             />
           </div>
           <div>
-            <label className="block text-xs font-bold text-stone-600 dark:text-gray-400 uppercase mb-1.5">
+            <label className="block text-[11px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider mb-1.5">
               Max Cap ({currencySymbol})
             </label>
             <input
@@ -205,11 +205,11 @@ export const DiscountCodeFormModal: React.FC<DiscountCodeFormModalProps> = ({
               onChange={(e) => setFormData({ ...formData, maxDiscountAmount: e.target.value })}
               placeholder="No limit"
               disabled={formData.type === 'FIXED'}
-              className="w-full bg-[#FAF8F5] dark:bg-black/30 border border-[#E2DCCE] dark:border-white/10 rounded-2xl px-4 py-2.5 text-xs text-[#1E3F27] dark:text-white focus:border-[#2C5E3B] outline-none transition-all disabled:opacity-40"
+              className="w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 py-2 text-xs text-[var(--theme-text-primary)] focus:outline-none focus:ring-2 focus:ring-[#0071E3]/20 focus:border-[#0071E3] dark:focus:border-[#2997FF] transition-all disabled:opacity-40"
             />
           </div>
           <div>
-            <label className="block text-xs font-bold text-stone-600 dark:text-gray-400 uppercase mb-1.5">
+            <label className="block text-[11px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider mb-1.5">
               Usage Limit
             </label>
             <input
@@ -217,7 +217,7 @@ export const DiscountCodeFormModal: React.FC<DiscountCodeFormModalProps> = ({
               value={formData.usageLimit}
               onChange={(e) => setFormData({ ...formData, usageLimit: e.target.value })}
               placeholder="Unlimited"
-              className="w-full bg-[#FAF8F5] dark:bg-black/30 border border-[#E2DCCE] dark:border-white/10 rounded-2xl px-4 py-2.5 text-xs text-[#1E3F27] dark:text-white focus:border-[#2C5E3B] outline-none transition-all"
+              className="w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 py-2 text-xs text-[var(--theme-text-primary)] focus:outline-none focus:ring-2 focus:ring-[#0071E3]/20 focus:border-[#0071E3] dark:focus:border-[#2997FF] transition-all"
             />
           </div>
         </div>
@@ -225,7 +225,7 @@ export const DiscountCodeFormModal: React.FC<DiscountCodeFormModalProps> = ({
         {/* Store Assignment */}
         {activeStore.length > 0 && (
           <div>
-            <label className="block text-xs font-bold text-stone-600 dark:text-gray-400 uppercase mb-1.5">
+            <label className="block text-[11px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider mb-1.5">
               Applicable Stores (Leave empty for All Stores)
             </label>
             <div className="flex flex-wrap gap-2">
@@ -241,12 +241,12 @@ export const DiscountCodeFormModal: React.FC<DiscountCodeFormModalProps> = ({
                         : [...prev.applicableSites, store.id]
                     }));
                   }}
-                  className={`p-2.5 px-4 rounded-xl border flex items-center gap-2 transition-all text-xs font-bold cursor-pointer ${formData.applicableSites.includes(store.id)
-                    ? 'bg-emerald-50 dark:bg-[#2C5E3B]/20 border-[#2C5E3B] text-[#2C5E3B] dark:text-[#A9CBA2]'
-                    : 'bg-[#FAF8F5] dark:bg-black/20 border-[#E2DCCE] dark:border-white/10 text-stone-500 dark:text-gray-400'
+                  className={`p-2 px-3 rounded-xl border flex items-center gap-1.5 transition-all text-xs font-medium cursor-pointer ${formData.applicableSites.includes(store.id)
+                    ? 'bg-[#0071E3]/10 dark:bg-[#2997FF]/15 border-[#0071E3] dark:border-[#2997FF] text-[#0071E3] dark:text-[#2997FF] font-semibold shadow-xs'
+                    : 'bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] text-[var(--theme-text-secondary)] hover:border-[#0071E3]/40'
                     }`}
                 >
-                  <Store size={14} />
+                  <Store size={13} />
                   <span>{store.name}</span>
                 </button>
               ))}
@@ -256,7 +256,7 @@ export const DiscountCodeFormModal: React.FC<DiscountCodeFormModalProps> = ({
 
         {/* Description */}
         <div>
-          <label className="block text-xs font-bold text-stone-600 dark:text-gray-400 uppercase mb-1.5">
+          <label className="block text-[11px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider mb-1.5">
             Internal Note (Optional)
           </label>
           <textarea
@@ -264,25 +264,25 @@ export const DiscountCodeFormModal: React.FC<DiscountCodeFormModalProps> = ({
             onChange={(e) => setFormData({ ...formData, description: e.target.value })}
             placeholder="Promotion campaign notes..."
             rows={2}
-            className="w-full bg-[#FAF8F5] dark:bg-black/30 border border-[#E2DCCE] dark:border-white/10 rounded-2xl px-4 py-2.5 text-xs text-[#1E3F27] dark:text-white focus:border-[#2C5E3B] outline-none transition-all resize-none"
+            className="w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 py-2 text-xs text-[var(--theme-text-primary)] focus:outline-none focus:ring-2 focus:ring-[#0071E3]/20 focus:border-[#0071E3] dark:focus:border-[#2997FF] transition-all resize-none placeholder:text-[var(--theme-text-secondary)]/40"
           />
         </div>
 
         {/* Actions */}
-        <div className="flex justify-end gap-3 pt-4 border-t border-[#E2DCCE]/60 dark:border-white/10">
+        <div className="flex justify-end gap-3 pt-4 border-t border-[var(--theme-border)]">
           <button
             type="button"
             onClick={onClose}
-            className="px-5 py-2.5 text-xs font-bold text-stone-500 hover:text-stone-800 dark:text-gray-400 dark:hover:text-white transition-colors cursor-pointer"
+            className="px-4 py-2 text-xs font-semibold text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] transition-colors cursor-pointer"
           >
             Cancel
           </button>
           <button
             type="button"
             onClick={handleSave}
-            className="bg-[#2C5E3B] hover:opacity-90 text-white px-6 py-2.5 rounded-2xl font-bold text-xs uppercase tracking-wider flex items-center gap-2 shadow-md cursor-pointer transition-all active:scale-95"
+            className="h-9 px-5 bg-[#0071E3] dark:bg-[#2997FF] hover:opacity-90 active:scale-[0.98] text-white font-semibold text-xs rounded-xl flex items-center gap-2 shadow-xs cursor-pointer transition-all"
           >
-            <CheckCircle size={16} />
+            <CheckCircle size={15} />
             {editingCode ? 'Save Changes' : 'Create Code'}
           </button>
         </div>

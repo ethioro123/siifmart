@@ -180,12 +180,12 @@ export function useCountryScoping({
     const explicitCountry = (p as any).country || (p as any).country_code;
     if (explicitCountry) return explicitCountry === effectiveCountry;
 
-    // 2. Check national SKU prefix (ET-, KE-, UG-, RW-, TZ-)
-    if (p.sku?.startsWith('KE-')) return effectiveCountry === 'KE';
-    if (p.sku?.startsWith('ET-')) return effectiveCountry === 'ET';
-    if (p.sku?.startsWith('UG-')) return effectiveCountry === 'UG';
-    if (p.sku?.startsWith('RW-')) return effectiveCountry === 'RW';
-    if (p.sku?.startsWith('TZ-')) return effectiveCountry === 'TZ';
+    // 2. Check national SKU prefix (ET-, KE-, UG-, RW-, TZ- or unhyphenated KECN..., ETCN...)
+    if (p.sku?.startsWith('KE-') || /^[kK][eE][A-Za-z]{2,4}\d+/.test(p.sku || '')) return effectiveCountry === 'KE';
+    if (p.sku?.startsWith('ET-') || /^[eE][tT][A-Za-z]{2,4}\d+/.test(p.sku || '')) return effectiveCountry === 'ET';
+    if (p.sku?.startsWith('UG-') || /^[uU][gG][A-Za-z]{2,4}\d+/.test(p.sku || '')) return effectiveCountry === 'UG';
+    if (p.sku?.startsWith('RW-') || /^[rR][wW][A-Za-z]{2,4}\d+/.test(p.sku || '')) return effectiveCountry === 'RW';
+    if (p.sku?.startsWith('TZ-') || /^[tT][zZ][A-Za-z]{2,4}\d+/.test(p.sku || '')) return effectiveCountry === 'TZ';
 
     // 3. Check site mapping if assigned
     if (p.siteId) {

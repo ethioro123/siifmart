@@ -42,7 +42,7 @@ export const HIERARCHY_LEVEL_CONFIGS: Record<number, HierarchyLevelConfig> = {
         bgDark: '#1e1b4b',
         borderLight: '#c7d2fe',
         borderDark: '#4338ca',
-        icon: '👑'
+        icon: 'crown'
     },
     2: {
         level: 2,
@@ -54,7 +54,7 @@ export const HIERARCHY_LEVEL_CONFIGS: Record<number, HierarchyLevelConfig> = {
         bgDark: '#18241b',
         borderLight: '#A9CBA2',
         borderDark: '#2C5E3B',
-        icon: '🏛️'
+        icon: 'building'
     },
     3: {
         level: 3,
@@ -66,7 +66,7 @@ export const HIERARCHY_LEVEL_CONFIGS: Record<number, HierarchyLevelConfig> = {
         bgDark: '#2c2112',
         borderLight: '#fde68a',
         borderDark: '#78350f',
-        icon: '🛡️'
+        icon: 'shield'
     },
     4: {
         level: 4,
@@ -78,6 +78,6 @@ export const HIERARCHY_LEVEL_CONFIGS: Record<number, HierarchyLevelConfig> = {
         bgDark: '#0c2333',
         borderLight: '#bae6fd',
         borderDark: '#0369a1',
-        icon: '⚡'
+        icon: 'zap'
     }
 };

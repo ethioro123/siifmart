@@ -1,12 +1,15 @@
 import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  Lock, ArrowLeft, Printer, Box, Power, Play, PackageCheck, Vault
+  Lock, ArrowLeft, Printer, Box, Power, Play, PackageCheck, Vault, UserPlus
 } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
 import Protected from '../components/Protected';
 import PinPad from '../components/pos/PinPad';
 import { matchStaffPin } from '../utils/employeeIdGenerator';
+import OnboardTalentModal from '../components/employees/OnboardTalentModal';
+import NewHireHandoverBanner from '../components/employees/NewHireHandoverBanner';
+import { isManagerialRole } from '../utils/roles';
 
 // Components & Context
 import { POSCommandProvider, usePOSCommand } from '../components/pos-command/POSCommandContext';
@@ -62,6 +65,8 @@ const POSCommandContent: React.FC = () => {
 
   const [pinError, setPinError] = useState('');
   const [isSafeLedgerOpen, setIsSafeLedgerOpen] = useState(false);
+  const [isOnboardModalOpen, setIsOnboardModalOpen] = useState(false);
+  const canOnboard = isManagerialRole(user?.role) && ['store_manager', 'assistant_manager', 'shift_lead', 'store_supervisor', 'super_admin', 'admin', 'operations_manager', 'regional_manager'].includes(user?.role || '');
 
   const handleUnlock = () => {
     const userPin = user?.code?.trim();
@@ -135,19 +140,21 @@ const POSCommandContent: React.FC = () => {
               title={t('common.back') || 'Back'}
               aria-label={t('common.back') || 'Back'}
               onClick={handleBack}
-              className="px-3.5 py-2 bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card-hover)] text-[var(--theme-text-primary)] rounded-xl transition-all active:scale-95 border border-[var(--theme-border)] shadow-xs flex items-center gap-2 text-xs font-bold cursor-pointer"
+              className="px-3.5 py-2 bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card-hover)] text-[var(--theme-text-primary)] rounded-2xl transition-all active:scale-95 border border-[var(--theme-border)] shadow-2xs flex items-center gap-2 text-xs font-semibold cursor-pointer group"
             >
-              <ArrowLeft size={15} />
+              <div className="w-5 h-5 rounded-md bg-blue-500/10 text-blue-500 flex items-center justify-center shrink-0 transition-transform group-hover:-translate-x-0.5">
+                <ArrowLeft size={13} />
+              </div>
               <span>{t('common.back') || 'Back'}</span>
             </button>
 
-            <span className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-xs font-bold text-[var(--theme-text-primary)] shadow-xs">
+            <span className="inline-flex items-center gap-2 px-3.5 py-2 rounded-2xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-xs font-semibold text-[var(--theme-text-primary)] shadow-2xs">
               <span className="w-2 h-2 rounded-full bg-amber-500" />
-              {activeSite?.name || t('posCommand.loadingLocation')}
+              <span>{activeSite?.name || t('posCommand.loadingLocation')}</span>
             </span>
 
             {currentShift ? (
-              <span className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-xs font-bold text-emerald-800 dark:text-emerald-300 shadow-xs">
+              <span className="inline-flex items-center gap-2 px-3.5 py-2 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-xs font-semibold text-emerald-800 dark:text-emerald-300 shadow-2xs">
                 <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
                 <span>Active Shift: {formatShiftId(currentShift)}</span>
                 <span className="text-[10px] opacity-75 font-mono">
@@ -159,7 +166,7 @@ const POSCommandContent: React.FC = () => {
                 </span>
               </span>
             ) : (
-              <span className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-xs font-semibold text-[var(--theme-text-muted)] shadow-xs">
+              <span className="inline-flex items-center gap-2 px-3.5 py-2 rounded-2xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-xs font-semibold text-[var(--theme-text-muted)] shadow-2xs">
                 <span className="w-2 h-2 rounded-full bg-stone-400" />
                 <span>Drawer Inactive • No Active Shift</span>
               </span>
@@ -177,32 +184,38 @@ const POSCommandContent: React.FC = () => {
             {currentShift ? (
               <button
                 onClick={handleEndShift}
-                className="px-4 py-2.5 bg-red-500/10 hover:bg-red-500/20 text-red-600 dark:text-red-400 text-xs font-bold uppercase tracking-wider rounded-xl border border-red-500/30 transition-all flex items-center gap-2 shadow-xs hover:shadow-sm active:scale-95 cursor-pointer"
+                className="px-4 py-2 bg-rose-500/10 hover:bg-rose-500/20 text-rose-600 dark:text-rose-400 text-xs font-semibold rounded-2xl border border-rose-500/25 transition-all flex items-center gap-2 shadow-2xs active:scale-95 cursor-pointer"
                 title="End Shift and Reconcile Cash Drawer"
               >
-                <Power size={14} />
+                <div className="w-5 h-5 rounded-md bg-rose-500/20 text-rose-500 flex items-center justify-center shrink-0">
+                  <Power size={13} />
+                </div>
                 <span>{t('posCommand.endShift') || 'End Shift'}</span>
               </button>
             ) : (
               <button
                 onClick={() => setIsStartShiftModalOpen(true)}
-                className="px-5 py-2.5 bg-[var(--theme-primary)] hover:opacity-90 text-[var(--theme-primary-text)] text-xs font-bold uppercase tracking-wider rounded-xl shadow-xs transition-all flex items-center gap-2 active:scale-95 cursor-pointer"
+                className="px-4 py-2 bg-[var(--theme-primary)] hover:opacity-90 text-[var(--theme-primary-text)] text-xs font-semibold rounded-2xl shadow-xs transition-all flex items-center gap-2 active:scale-95 cursor-pointer"
                 title="Input opening float and start daily cashier shift"
               >
-                <Play size={14} className="fill-current" />
+                <div className="w-5 h-5 rounded-md bg-black/10 dark:bg-white/10 flex items-center justify-center shrink-0">
+                  <Play size={12} className="fill-current" />
+                </div>
                 <span>Start Shift</span>
               </button>
             )}
 
             {/* Store Inventory Operations */}
-            <div className="flex items-center bg-[var(--theme-bg-card)] rounded-xl border border-[var(--theme-border)] p-1 shadow-xs">
+            <div className="flex items-center bg-[var(--theme-bg-card)] rounded-2xl border border-[var(--theme-border)] p-1 shadow-2xs gap-0.5">
               <div className="relative">
                 <button
                   onClick={() => setIsStockListOpen(true)}
-                  className="px-3.5 py-2 hover:bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] text-xs font-bold rounded-lg transition-all flex items-center gap-1.5 cursor-pointer"
+                  className="px-3 py-1.5 hover:bg-[var(--theme-bg-subtle)] text-[var(--theme-text-primary)] text-xs font-semibold rounded-xl transition-all flex items-center gap-2 cursor-pointer group"
                   title="Stock Catalog & Pricing"
                 >
-                  <Box size={14} />
+                  <div className="w-5 h-5 rounded-md bg-amber-500/10 text-amber-500 flex items-center justify-center shrink-0">
+                    <Box size={13} />
+                  </div>
                   <span>Stock List</span>
                 </button>
                 {updatedProductCount > 0 && (
@@ -214,49 +227,74 @@ const POSCommandContent: React.FC = () => {
 
               <button
                 onClick={() => setIsReceivingModalOpen(true)}
-                className="px-3.5 py-2 hover:bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] text-xs font-bold rounded-lg transition-all flex items-center gap-1.5 cursor-pointer"
+                className="px-3 py-1.5 hover:bg-[var(--theme-bg-subtle)] text-[var(--theme-text-primary)] text-xs font-semibold rounded-xl transition-all flex items-center gap-2 cursor-pointer group"
                 title="Receive Stock"
               >
-                <PackageCheck size={14} />
+                <div className="w-5 h-5 rounded-md bg-teal-500/10 text-teal-500 flex items-center justify-center shrink-0">
+                  <PackageCheck size={13} />
+                </div>
                 <span>Receive</span>
               </button>
 
               <button
                 onClick={() => setIsSafeLedgerOpen(true)}
-                className="px-3.5 py-2 hover:bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] text-xs font-bold rounded-lg transition-all flex items-center gap-1.5 cursor-pointer"
+                className="px-3 py-1.5 hover:bg-[var(--theme-bg-subtle)] text-[var(--theme-text-primary)] text-xs font-semibold rounded-xl transition-all flex items-center gap-2 cursor-pointer group"
                 title="Drop Safe Ledger & Armored Pickups"
               >
-                <Vault size={14} />
+                <div className="w-5 h-5 rounded-md bg-emerald-500/10 text-emerald-500 flex items-center justify-center shrink-0">
+                  <Vault size={13} />
+                </div>
                 <span>Safe Ledger</span>
               </button>
             </div>
 
+            {/* Store Talent Onboarding */}
+            {canOnboard && (
+              <button
+                type="button"
+                onClick={() => setIsOnboardModalOpen(true)}
+                className="px-3.5 py-2 bg-[#0071E3] dark:bg-[#2997FF] hover:opacity-95 text-white text-xs font-semibold rounded-2xl shadow-xs transition-all flex items-center gap-2 active:scale-95 cursor-pointer"
+                title="Onboard store cashiers, sales staff & stock clerks"
+              >
+                <div className="w-5 h-5 rounded-md bg-white/20 flex items-center justify-center shrink-0">
+                  <UserPlus size={13} />
+                </div>
+                <span>Onboard Talent</span>
+              </button>
+            )}
+
             {/* Terminal Controls */}
-            <div className="flex items-center bg-[var(--theme-bg-card)] rounded-xl border border-[var(--theme-border)] p-1 shadow-xs">
+            <div className="flex items-center bg-[var(--theme-bg-card)] rounded-2xl border border-[var(--theme-border)] p-1 shadow-2xs gap-0.5">
               <button
                 onClick={handleReprint}
-                className="px-3 py-2 hover:bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] text-xs font-bold rounded-lg transition-all flex items-center gap-1.5 cursor-pointer"
+                className="px-3 py-1.5 hover:bg-[var(--theme-bg-subtle)] text-[var(--theme-text-primary)] text-xs font-semibold rounded-xl transition-all flex items-center gap-2 cursor-pointer group"
                 title="Reprint Last Sale"
               >
-                <Printer size={14} />
+                <div className="w-5 h-5 rounded-md bg-purple-500/10 text-purple-500 flex items-center justify-center shrink-0">
+                  <Printer size={13} />
+                </div>
                 <span>Reprint</span>
               </button>
 
               <button
                 onClick={() => setIsPrintHubOpen(true)}
-                className="px-3 py-2 hover:bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] text-xs font-bold rounded-lg transition-all flex items-center gap-1.5 cursor-pointer"
+                className="px-3 py-1.5 hover:bg-[var(--theme-bg-subtle)] text-[var(--theme-text-primary)] text-xs font-semibold rounded-xl transition-all flex items-center gap-2 cursor-pointer group"
                 title="Print Hub"
               >
-                <Printer size={14} />
+                <div className="w-5 h-5 rounded-md bg-indigo-500/10 text-indigo-500 flex items-center justify-center shrink-0">
+                  <Printer size={13} />
+                </div>
                 <span>Print Hub</span>
               </button>
 
               <button
                 onClick={handleLockScreen}
-                className="px-3 py-2 hover:bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] text-xs font-bold rounded-lg transition-all flex items-center gap-1.5 cursor-pointer"
+                className="px-3 py-1.5 hover:bg-[var(--theme-bg-subtle)] text-[var(--theme-text-primary)] text-xs font-semibold rounded-xl transition-all flex items-center gap-2 cursor-pointer group"
                 title="Lock Terminal Screen"
               >
-                <Lock size={14} />
+                <div className="w-5 h-5 rounded-md bg-rose-500/10 text-rose-500 flex items-center justify-center shrink-0">
+                  <Lock size={13} />
+                </div>
                 <span>Lock</span>
               </button>
             </div>
@@ -266,6 +304,9 @@ const POSCommandContent: React.FC = () => {
           </div>
         </div>
 
+        {/* ===== NEW RECRUIT CREDENTIAL HANDOVER ALERT ===== */}
+        <NewHireHandoverBanner />
+
         {/* ===== SHIFT PROGRESS ===== */}
         <ShiftProgress />
 
@@ -274,10 +315,10 @@ const POSCommandContent: React.FC = () => {
 
         {/* ===== ROSTER GRID ===== */}
         <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-          <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-6 relative overflow-hidden shadow-xs">
+          <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-6 relative overflow-hidden shadow-xs isolate">
             <SiteRoster layout="list" limit={6} highlightUser={user?.id} />
           </div>
-          <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-6 relative overflow-hidden shadow-xs">
+          <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-6 relative overflow-hidden shadow-xs isolate">
             <RosterManager />
           </div>
         </div>
@@ -312,6 +353,7 @@ const POSCommandContent: React.FC = () => {
         {/* All Modals */}
         <POSCommandModals />
         <SafeLedgerModal isOpen={isSafeLedgerOpen} onClose={() => setIsSafeLedgerOpen(false)} />
+        <OnboardTalentModal isOpen={isOnboardModalOpen} onClose={() => setIsOnboardModalOpen(false)} />
       </div>
     </div>
   );

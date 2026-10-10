@@ -269,7 +269,7 @@ export const HIERARCHY_TREE: HierarchyNode[] = [
     }
 ];
 
-export type OrgViewMode = 'tree' | 'matrix';
+export type OrgViewMode = 'matrix' | 'tree';
 
 export interface OrgTreeNode {
     id: string;
@@ -313,4 +313,5 @@ export interface OrgChartFilterState {
     siteId: string;
     department: string;
     status: string;
+    hierarchyLevel?: number | null;
 }

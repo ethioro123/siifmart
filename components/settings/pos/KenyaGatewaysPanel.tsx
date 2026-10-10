@@ -40,20 +40,20 @@ export function KenyaGatewaysPanel({
     const [showSecrets, setShowSecrets] = useState(false);
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-4">
             {/* OPTION 1: SAFARICOM LIPA NA M-PESA BUY GOODS TILL */}
-            <div className="p-5 bg-[#FAF8F5] dark:bg-black/20 rounded-3xl border border-[#E2DCCE] dark:border-white/5 space-y-4">
+            <div className="p-4 bg-[var(--theme-bg-subtle)] rounded-xl border border-[var(--theme-border)] space-y-3">
                 <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-xl bg-emerald-100 dark:bg-emerald-950/40 text-[#00A859] flex items-center justify-center font-black text-xs">
+                        <div className="w-9 h-9 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center font-bold text-xs">
                             M1
                         </div>
                         <div>
-                            <h4 className="text-xs font-black text-[#1E3F27] dark:text-white uppercase tracking-wider flex items-center gap-2">
+                            <h4 className="text-xs font-semibold text-[var(--theme-text-primary)] uppercase tracking-wider flex items-center gap-2">
                                 Lipa Na M-Pesa (Buy Goods Till)
-                                <span className="text-[10px] bg-emerald-100 text-[#00A859] dark:bg-emerald-950/40 px-2 py-0.5 rounded-full font-bold">Popular</span>
+                                <span className="text-[10px] bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 px-2 py-0.5 rounded-full font-semibold">Popular</span>
                             </h4>
-                            <p className="text-[11px] text-stone-500 dark:text-gray-400">
+                            <p className="text-[11px] text-[var(--theme-text-secondary)] mt-0.5">
                                 Walk-in customers pay via M-Pesa menu; cashier enters 10-character SMS confirmation code.
                             </p>
                         </div>
@@ -67,7 +67,7 @@ export function KenyaGatewaysPanel({
                 </div>
 
                 {form.mpesaTillEnabled && (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-3 border-t border-[#E2DCCE]/50 dark:border-white/5">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-3 border-t border-[var(--theme-border)]">
                         <InputGroup
                             label="Buy Goods Till Number"
                             value={form.mpesaTillNumber}
@@ -87,18 +87,18 @@ export function KenyaGatewaysPanel({
             </div>
 
             {/* OPTION 2: M-PESA STK PUSH EXPRESS (DARAJA API) */}
-            <div className="p-5 bg-[#FAF8F5] dark:bg-black/20 rounded-3xl border border-[#E2DCCE] dark:border-white/5 space-y-4">
+            <div className="p-4 bg-[var(--theme-bg-subtle)] rounded-xl border border-[var(--theme-border)] space-y-3">
                 <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-xl bg-emerald-100 dark:bg-emerald-950/40 text-[#00A859] flex items-center justify-center font-black text-xs">
+                        <div className="w-9 h-9 rounded-xl bg-[#0071E3]/10 dark:bg-[#2997FF]/15 text-[#0071E3] dark:text-[#2997FF] flex items-center justify-center font-bold text-xs">
                             M2
                         </div>
                         <div>
-                            <h4 className="text-xs font-black text-[#1E3F27] dark:text-white uppercase tracking-wider flex items-center gap-2">
+                            <h4 className="text-xs font-semibold text-[var(--theme-text-primary)] uppercase tracking-wider flex items-center gap-2">
                                 M-Pesa STK Push Express (Daraja API)
-                                <span className="text-[10px] bg-blue-100 text-blue-700 dark:bg-blue-950/40 px-2 py-0.5 rounded-full font-bold">API Automated</span>
+                                <span className="text-[10px] bg-[#0071E3]/10 dark:bg-[#2997FF]/15 text-[#0071E3] dark:text-[#2997FF] px-2 py-0.5 rounded-full font-semibold">API Automated</span>
                             </h4>
-                            <p className="text-[11px] text-stone-500 dark:text-gray-400">
+                            <p className="text-[11px] text-[var(--theme-text-secondary)] mt-0.5">
                                 Sends interactive PIN prompt directly to customer phone handset; auto-completes transaction.
                             </p>
                         </div>
@@ -112,7 +112,7 @@ export function KenyaGatewaysPanel({
                 </div>
 
                 {form.mpesaStkEnabled && (
-                    <div className="space-y-4 pt-3 border-t border-[#E2DCCE]/50 dark:border-white/5">
+                    <div className="space-y-4 pt-3 border-t border-[var(--theme-border)]">
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <InputGroup
                                 label="Business Shortcode / Till"
@@ -120,20 +120,20 @@ export function KenyaGatewaysPanel({
                                 onChange={(e: any) => setForm(p => ({ ...p, mpesaStkShortcode: e.target.value }))}
                                 placeholder="e.g. 174379 or Till"
                             />
-                            <div className="space-y-2">
-                                <label className="text-xs text-stone-600 dark:text-gray-400 font-bold uppercase tracking-wider block">
+                            <div className="space-y-1.5">
+                                <label className="text-xs text-[var(--theme-text-secondary)] font-semibold uppercase tracking-wider block">
                                     Daraja Environment
                                 </label>
-                                <div className="grid grid-cols-2 gap-2">
+                                <div className="grid grid-cols-2 gap-1.5 p-1 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl">
                                     {(['sandbox', 'production'] as const).map(env => (
                                         <button
                                             key={env}
                                             type="button"
                                             onClick={() => setForm(p => ({ ...p, mpesaEnvironment: env }))}
-                                            className={`py-2.5 px-3 rounded-2xl text-xs font-bold uppercase tracking-wider border cursor-pointer transition-all ${
+                                            className={`py-1.5 px-3 rounded-lg text-xs font-medium uppercase tracking-wider cursor-pointer transition-all ${
                                                 form.mpesaEnvironment === env
-                                                    ? 'bg-[#2C5E3B] text-white border-[#2C5E3B] shadow-sm'
-                                                    : 'bg-white dark:bg-black/30 text-stone-500 border-[#E2DCCE] dark:border-white/10 hover:border-[#2C5E3B]'
+                                                    ? 'bg-[#0071E3] dark:bg-[#2997FF] text-white shadow-xs font-semibold'
+                                                    : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)]'
                                             }`}
                                         >
                                             {env}
@@ -171,7 +171,7 @@ export function KenyaGatewaysPanel({
                             <button
                                 type="button"
                                 onClick={() => setShowSecrets(!showSecrets)}
-                                className="text-xs text-stone-500 hover:text-[#2C5E3B] font-bold flex items-center gap-1.5 cursor-pointer"
+                                className="text-xs text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] font-medium flex items-center gap-1.5 cursor-pointer"
                             >
                                 {showSecrets ? <EyeOff size={13} /> : <Eye size={13} />}
                                 {showSecrets ? 'Hide Credentials' : 'Show Credentials'}
@@ -181,7 +181,7 @@ export function KenyaGatewaysPanel({
                                 type="button"
                                 onClick={onPingGateway}
                                 disabled={pingState === 'pinging'}
-                                className="text-xs font-bold text-[#2C5E3B] dark:text-[#A9CBA2] bg-emerald-50 dark:bg-emerald-950/30 px-3.5 py-1.5 rounded-xl border border-emerald-200 dark:border-emerald-950/40 flex items-center gap-1.5 cursor-pointer hover:bg-emerald-100 transition-all"
+                                className="text-xs font-semibold text-[#0071E3] dark:text-[#2997FF] bg-[#0071E3]/10 dark:bg-[#2997FF]/15 px-3.5 py-1.5 rounded-xl border border-[#0071E3]/20 dark:border-[#2997FF]/30 flex items-center gap-1.5 cursor-pointer hover:opacity-90 transition-all"
                             >
                                 <Zap size={13} />
                                 {pingState === 'pinging' ? 'Testing Handshake...' : pingState === 'success' ? 'Connected (200 OK)' : 'Ping Gateway'}
@@ -192,18 +192,18 @@ export function KenyaGatewaysPanel({
             </div>
 
             {/* OPTION 4: AIRTEL MONEY */}
-            <div className="p-5 bg-[#FAF8F5] dark:bg-black/20 rounded-3xl border border-[#E2DCCE] dark:border-white/5 space-y-4">
+            <div className="p-4 bg-[var(--theme-bg-subtle)] rounded-xl border border-[var(--theme-border)] space-y-3">
                 <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-xl bg-red-100 dark:bg-red-950/40 text-[#ED1C24] flex items-center justify-center font-black text-xs">
+                        <div className="w-9 h-9 rounded-xl bg-red-500/10 text-[#ED1C24] flex items-center justify-center font-bold text-xs">
                             AM
                         </div>
                         <div>
-                            <h4 className="text-xs font-black text-[#1E3F27] dark:text-white uppercase tracking-wider flex items-center gap-2">
+                            <h4 className="text-xs font-semibold text-[var(--theme-text-primary)] uppercase tracking-wider flex items-center gap-2">
                                 Airtel Money (Lipa / Interoperable)
-                                <span className="text-[10px] bg-red-100 text-[#ED1C24] dark:bg-red-950/40 px-2 py-0.5 rounded-full font-bold">0% Till Fee</span>
+                                <span className="text-[10px] bg-red-500/10 text-red-600 dark:text-red-400 px-2 py-0.5 rounded-full font-semibold">0% Till Fee</span>
                             </h4>
-                            <p className="text-[11px] text-stone-500 dark:text-gray-400">
+                            <p className="text-[11px] text-[var(--theme-text-secondary)] mt-0.5">
                                 Accept Airtel Money payments via dedicated Airtel Till or interoperable merchant code.
                             </p>
                         </div>
@@ -217,7 +217,7 @@ export function KenyaGatewaysPanel({
                 </div>
 
                 {form.airtelMoneyEnabled && (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-3 border-t border-[#E2DCCE]/50 dark:border-white/5">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-3 border-t border-[var(--theme-border)]">
                         <InputGroup
                             label="Airtel Till / Merchant Number"
                             value={form.airtelTillNumber}
@@ -237,17 +237,17 @@ export function KenyaGatewaysPanel({
             </div>
 
             {/* OPTION 3: M-PESA PAYBILL */}
-            <div className="p-5 bg-[#FAF8F5] dark:bg-black/20 rounded-3xl border border-[#E2DCCE] dark:border-white/5 space-y-4">
+            <div className="p-4 bg-[var(--theme-bg-subtle)] rounded-xl border border-[var(--theme-border)] space-y-3">
                 <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-xl bg-amber-100 dark:bg-amber-950/40 text-amber-700 dark:text-amber-400 flex items-center justify-center font-black text-xs">
+                        <div className="w-9 h-9 rounded-xl bg-amber-500/10 text-amber-700 dark:text-amber-400 flex items-center justify-center font-bold text-xs">
                             PB
                         </div>
                         <div>
-                            <h4 className="text-xs font-black text-[#1E3F27] dark:text-white uppercase tracking-wider flex items-center gap-2">
+                            <h4 className="text-xs font-semibold text-[var(--theme-text-primary)] uppercase tracking-wider flex items-center gap-2">
                                 M-Pesa Paybill (Business & Institutional)
                             </h4>
-                            <p className="text-[11px] text-stone-500 dark:text-gray-400">
+                            <p className="text-[11px] text-[var(--theme-text-secondary)] mt-0.5">
                                 For wholesale orders and invoice settlements with explicit account numbers.
                             </p>
                         </div>
@@ -261,7 +261,7 @@ export function KenyaGatewaysPanel({
                 </div>
 
                 {form.mpesaPaybillEnabled && (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-3 border-t border-[#E2DCCE]/50 dark:border-white/5">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-3 border-t border-[var(--theme-border)]">
                         <InputGroup
                             label="Paybill Business Number"
                             value={form.mpesaPaybillNumber}

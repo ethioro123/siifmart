@@ -1,59 +1,80 @@
 import React, { useState } from 'react';
 import {
-    Shield, Lock, Globe, AlertTriangle, FileText, Download,
-    CheckCircle, Smartphone, KeyRound, Plus
+    Shield, Lock, Globe, AlertTriangle, Download,
+    CheckCircle2, Plus, X, Network, LucideIcon
 } from 'lucide-react';
 import { useStore } from '../../contexts/CentralStore';
 import { useData } from '../../contexts/DataContext';
 import { RetailLossPreventionCard } from './components/RetailLossPreventionCard';
 
 // --- SUB-COMPONENTS ---
-const SecurityCard = ({ title, status, desc, icon: Icon }: any) => (
-    <div className={`p-5 rounded-3xl border bg-white/80 dark:bg-black/20 ${status === 'secure' ? 'border-emerald-200 dark:border-emerald-950/30' :
-        status === 'warning' ? 'border-amber-200 dark:border-amber-900/30' :
-            'border-red-200 dark:border-red-900/30'
-        }`}>
-        <div className="flex justify-between items-start mb-3">
-            <div className={`p-3 rounded-2xl ${status === 'secure' ? 'bg-emerald-50 text-[#2C5E3B] dark:bg-[#2C5E3B]/20 dark:text-[#A9CBA2]' :
-                status === 'warning' ? 'bg-amber-50 text-amber-800 dark:bg-amber-950/30 dark:text-amber-400' :
-                    'bg-red-50 text-red-600 dark:bg-red-950/30 dark:text-red-400'
+interface SecurityCardProps {
+    title: string;
+    status: 'secure' | 'warning' | 'critical';
+    desc: string;
+    icon: LucideIcon;
+}
+
+const SecurityCard: React.FC<SecurityCardProps> = ({ title, status, desc, icon: Icon }) => (
+    <div className="p-4 rounded-2xl border border-[var(--theme-border)] bg-[var(--theme-bg-card)] shadow-xs flex flex-col justify-between">
+        <div>
+            <div className="flex justify-between items-start mb-3">
+                <div className={`w-9 h-9 rounded-xl flex items-center justify-center ${
+                    status === 'secure' ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400' :
+                    status === 'warning' ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400' :
+                    'bg-red-500/10 text-red-600 dark:text-red-400'
                 }`}>
-                <Icon size={22} />
+                    <Icon size={18} />
+                </div>
+                {status === 'secure' && <CheckCircle2 size={16} className="text-emerald-600 dark:text-emerald-400" />}
+                {status === 'warning' && <AlertTriangle size={16} className="text-amber-600 dark:text-amber-400" />}
+                {status === 'critical' && <AlertTriangle size={16} className="text-red-600 dark:text-red-400" />}
             </div>
-            {status === 'secure' && <CheckCircle size={18} className="text-[#2C5E3B] dark:text-[#A9CBA2]" />}
-            {status === 'warning' && <AlertTriangle size={18} className="text-amber-600 dark:text-amber-400" />}
-            {status === 'critical' && <AlertTriangle size={18} className="text-red-500" />}
+            <h4 className="font-semibold text-[var(--theme-text-primary)] text-xs mb-1">{title}</h4>
+            <p className="text-[11px] text-[var(--theme-text-secondary)] leading-relaxed">{desc}</p>
         </div>
-        <h4 className="font-black text-[#1E3F27] dark:text-white text-sm mb-1">{title}</h4>
-        <p className="text-[11px] text-stone-500 dark:text-gray-400 leading-relaxed">{desc}</p>
     </div>
 );
 
-const PolicyToggle = ({ label, enabled, onChange }: any) => (
-    <div className="flex items-center justify-between p-4 bg-[#FAF8F5] dark:bg-black/20 rounded-2xl border border-[#E2DCCE] dark:border-white/5 group hover:border-[#2C5E3B]/30 transition-colors">
-        <span className="font-bold text-[#1E3F27] dark:text-gray-300 text-xs">{label}</span>
+interface PolicyToggleProps {
+    label: string;
+    enabled: boolean;
+    onChange: () => void;
+}
+
+const PolicyToggle: React.FC<PolicyToggleProps> = ({ label, enabled, onChange }) => (
+    <div
+        onClick={onChange}
+        className="flex items-center justify-between p-3.5 bg-[var(--theme-bg-subtle)] rounded-xl border border-[var(--theme-border)] hover:border-[#0071E3]/30 transition-colors cursor-pointer"
+    >
+        <span className="font-medium text-[var(--theme-text-primary)] text-xs pr-3">{label}</span>
         <button
             type="button"
-            onClick={onChange}
+            role="switch"
+            aria-checked={enabled}
+            onClick={(e) => {
+                e.stopPropagation();
+                onChange();
+            }}
             aria-label={label}
-            className={`w-11 h-6 rounded-full p-1 transition-all relative cursor-pointer ${enabled ? 'bg-[#2C5E3B]' : 'bg-stone-300 dark:bg-stone-700'}`}
+            className={`w-11 h-6 rounded-full p-0.5 transition-colors relative cursor-pointer flex-shrink-0 ${enabled ? 'bg-[#0071E3] dark:bg-[#2997FF]' : 'bg-[var(--theme-border)]'}`}
         >
-            <div className={`w-4 h-4 rounded-full bg-white shadow-sm transition-transform ${enabled ? 'translate-x-5' : 'translate-x-0'}`} />
+            <div className={`w-5 h-5 rounded-full bg-white shadow-xs transition-transform ${enabled ? 'translate-x-5' : 'translate-x-0'}`} />
         </button>
     </div>
 );
 
+interface GlobalAuthPolicies {
+    enforceMfaAdmin: boolean;
+    enforceMfaAll: boolean;
+    strongPasswords: boolean;
+    sessionTimeout: boolean;
+    ipTrust: boolean;
+}
+
 export default function SecuritySettings() {
     const { showToast } = useStore();
     const { systemLogs } = useData();
-
-    interface GlobalAuthPolicies {
-        enforceMfaAdmin: boolean;
-        enforceMfaAll: boolean;
-        strongPasswords: boolean;
-        sessionTimeout: boolean;
-        ipTrust: boolean;
-    }
 
     const [policies, setPolicies] = useState<GlobalAuthPolicies>(() => {
         const saved = localStorage.getItem('siifmart_global_auth_policies');
@@ -160,13 +181,14 @@ export default function SecuritySettings() {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
                 {/* GLOBAL POLICIES */}
-                <div className="lg:col-span-2 bg-white/85 dark:bg-[#18201B]/60 border border-[#E2DCCE] dark:border-emerald-950/20 rounded-[32px] p-6 lg:p-8 shadow-sm">
-                    <h3 className="text-lg font-black text-[#1E3F27] dark:text-[#EAE5D9] mb-4 flex items-center gap-2">
-                        <Lock size={20} className="text-[#2C5E3B] dark:text-[#A9CBA2]" /> Global Authentication Policies
+                <div className="lg:col-span-2 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-6 shadow-xs space-y-5">
+                    <h3 className="text-sm font-semibold text-[var(--theme-text-primary)] flex items-center gap-2">
+                        <Lock size={16} className="text-[#0071E3] dark:text-[#2997FF]" />
+                        Global Authentication Policies
                     </h3>
 
                     <div className="space-y-4">
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                             <PolicyToggle
                                 label="Enforce MFA for Admins"
                                 enabled={policies.enforceMfaAdmin}
@@ -190,11 +212,12 @@ export default function SecuritySettings() {
                         </div>
 
                         {/* Administrative IP Allowlist */}
-                        <div className="p-5 bg-[#FAF8F5] dark:bg-black/20 rounded-2xl border border-[#E2DCCE] dark:border-white/5 mt-4 space-y-3">
-                            <h5 className="font-black text-[#1E3F27] dark:text-white text-xs uppercase tracking-wider flex items-center gap-2">
-                                <AlertTriangle size={14} className="text-amber-700 dark:text-amber-400" /> Administrative IP Allowlist
+                        <div className="p-4 bg-[var(--theme-bg-subtle)] rounded-xl border border-[var(--theme-border)] space-y-3">
+                            <h5 className="font-semibold text-[var(--theme-text-primary)] text-xs flex items-center gap-2">
+                                <Network size={14} className="text-[#0071E3] dark:text-[#2997FF]" />
+                                Administrative IP Allowlist
                             </h5>
-                            <p className="text-[11px] text-stone-500 dark:text-gray-400 leading-relaxed">
+                            <p className="text-xs text-[var(--theme-text-secondary)] leading-relaxed">
                                 Restrict administrative and HQ panel access to verified corporate network ranges.
                             </p>
                             <div className="flex gap-2">
@@ -203,29 +226,29 @@ export default function SecuritySettings() {
                                     value={ipInput}
                                     onChange={(e) => setIpInput(e.target.value)}
                                     placeholder="e.g. 192.168.1.0/24"
-                                    className="flex-1 bg-white dark:bg-black/40 border border-[#E2DCCE] dark:border-white/10 rounded-xl px-4 py-2 text-xs text-[#1E3F27] dark:text-white focus:border-[#2C5E3B] dark:focus:border-[#A9CBA2] outline-none font-mono"
+                                    className="flex-1 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl px-3.5 py-2 text-xs text-[var(--theme-text-primary)] focus:border-[#0071E3] dark:focus:border-[#2997FF] outline-none font-mono transition-colors"
                                 />
                                 <button
                                     type="button"
                                     onClick={handleAddIp}
-                                    className="bg-[#2C5E3B] text-white font-bold px-4 py-2 rounded-xl text-xs hover:opacity-90 transition-all cursor-pointer flex items-center gap-1.5 shadow-sm"
+                                    className="h-8 px-3.5 bg-[#0071E3] dark:bg-[#2997FF] text-white font-semibold rounded-xl text-xs hover:opacity-90 active:scale-[0.98] transition-all cursor-pointer flex items-center gap-1.5 shadow-xs"
                                 >
                                     <Plus size={14} /> Add IP Range
                                 </button>
                             </div>
 
                             {ipList.length > 0 && (
-                                <div className="flex flex-wrap gap-2 pt-2">
+                                <div className="flex flex-wrap gap-2 pt-1">
                                     {ipList.map((ip) => (
-                                        <span key={ip} className="px-3 py-1 bg-white dark:bg-white/5 border border-[#E2DCCE] dark:border-white/10 rounded-xl text-xs font-mono font-bold text-[#1E3F27] dark:text-gray-300 flex items-center gap-2">
+                                        <span key={ip} className="px-2.5 py-1 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-lg text-xs font-mono text-[var(--theme-text-primary)] flex items-center gap-1.5">
                                             {ip}
                                             <button
                                                 type="button"
                                                 onClick={() => handleRemoveIp(ip)}
-                                                className="text-stone-400 hover:text-red-600 font-black cursor-pointer"
+                                                className="text-[var(--theme-text-secondary)] hover:text-red-500 transition-colors cursor-pointer p-0.5"
                                                 title="Remove IP range"
                                             >
-                                                ×
+                                                <X size={12} />
                                             </button>
                                         </span>
                                     ))}
@@ -237,11 +260,15 @@ export default function SecuritySettings() {
 
                 {/* COMPLIANCE & DATA */}
                 <div className="space-y-6">
-                    <div className="bg-white/85 dark:bg-[#18201B]/60 border border-[#E2DCCE] dark:border-emerald-950/20 rounded-[32px] p-6 shadow-sm">
-                        <h3 className="text-sm font-black text-[#1E3F27] dark:text-[#EAE5D9] uppercase tracking-wider mb-4">Audit & Data Retention</h3>
-                        <div className="space-y-4">
+                    <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-6 shadow-xs space-y-4">
+                        <h3 className="text-xs font-semibold text-[var(--theme-text-primary)] uppercase tracking-wider">
+                            Audit & Data Retention
+                        </h3>
+                        <div className="space-y-3.5">
                             <div className="space-y-1.5">
-                                <label className="text-[10px] text-stone-500 dark:text-gray-400 uppercase font-bold tracking-wider block">POS & Drawer Audit Logs</label>
+                                <label className="text-[11px] text-[var(--theme-text-secondary)] font-medium block">
+                                    POS & Drawer Audit Logs
+                                </label>
                                 <select
                                     aria-label="Customer Data Retention"
                                     value={retentionDrawer}
@@ -249,7 +276,7 @@ export default function SecuritySettings() {
                                         setRetentionDrawer(e.target.value);
                                         showToast('Audit log retention policy updated', 'success');
                                     }}
-                                    className="w-full bg-[#FAF8F5] dark:bg-black/40 border border-[#E2DCCE] dark:border-white/10 rounded-xl px-3 py-2 text-xs text-[#1E3F27] dark:text-white font-bold outline-none"
+                                    className="w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3 py-2 text-xs text-[var(--theme-text-primary)] font-medium outline-none focus:border-[#0071E3] dark:focus:border-[#2997FF] transition-colors cursor-pointer"
                                 >
                                     <option>Keep Indefinitely (Recommended)</option>
                                     <option>Delete after 3 years</option>
@@ -257,7 +284,9 @@ export default function SecuritySettings() {
                                 </select>
                             </div>
                             <div className="space-y-1.5">
-                                <label className="text-[10px] text-stone-500 dark:text-gray-400 uppercase font-bold tracking-wider block">Barcode Approvals History</label>
+                                <label className="text-[11px] text-[var(--theme-text-secondary)] font-medium block">
+                                    Barcode Approvals History
+                                </label>
                                 <select
                                     aria-label="Transaction Logs Retention"
                                     value={retentionBarcode}
@@ -265,7 +294,7 @@ export default function SecuritySettings() {
                                         setRetentionBarcode(e.target.value);
                                         showToast('Barcode approval retention policy updated', 'success');
                                     }}
-                                    className="w-full bg-[#FAF8F5] dark:bg-black/40 border border-[#E2DCCE] dark:border-white/10 rounded-xl px-3 py-2 text-xs text-[#1E3F27] dark:text-white font-bold outline-none"
+                                    className="w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3 py-2 text-xs text-[var(--theme-text-primary)] font-medium outline-none focus:border-[#0071E3] dark:focus:border-[#2997FF] transition-colors cursor-pointer"
                                 >
                                     <option>Keep for 7 years (Audit Trail)</option>
                                     <option>Keep Indefinitely</option>
@@ -274,20 +303,21 @@ export default function SecuritySettings() {
                         </div>
                     </div>
 
-                    <div className="bg-white/85 dark:bg-[#18201B]/60 border border-[#E2DCCE] dark:border-emerald-950/20 rounded-[32px] p-6 shadow-sm">
-                        <h3 className="text-sm font-black text-[#1E3F27] dark:text-[#EAE5D9] uppercase tracking-wider mb-2">Security Compliance Export</h3>
-                        <p className="text-[11px] text-stone-500 dark:text-gray-400 leading-relaxed mb-4">
+                    <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-6 shadow-xs space-y-3">
+                        <h3 className="text-xs font-semibold text-[var(--theme-text-primary)] uppercase tracking-wider">
+                            Security Compliance Export
+                        </h3>
+                        <p className="text-xs text-[var(--theme-text-secondary)] leading-relaxed">
                             Export certified system audit logs, user login history, and cashier void reports for executive review.
                         </p>
-                        <div className="flex gap-2">
-                            <button
-                                type="button"
-                                onClick={handleExportAudit}
-                                className="w-full py-2.5 bg-emerald-50 hover:bg-emerald-100 dark:bg-[#2C5E3B]/20 dark:hover:bg-[#2C5E3B]/30 text-[#2C5E3B] dark:text-[#A9CBA2] rounded-2xl text-xs font-bold border border-emerald-200 dark:border-emerald-950/30 transition-all flex items-center justify-center gap-2 cursor-pointer shadow-sm"
-                            >
-                                <Download size={14} /> Export Certified Audit Log
-                            </button>
-                        </div>
+                        <button
+                            type="button"
+                            onClick={handleExportAudit}
+                            className="w-full h-9 bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-border)] text-[var(--theme-text-primary)] rounded-xl text-xs font-semibold border border-[var(--theme-border)] transition-all flex items-center justify-center gap-2 cursor-pointer shadow-xs active:scale-[0.98]"
+                        >
+                            <Download size={14} className="text-[#0071E3] dark:text-[#2997FF]" />
+                            <span>Export Certified Audit Log</span>
+                        </button>
                     </div>
                 </div>
             </div>

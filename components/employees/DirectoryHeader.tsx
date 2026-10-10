@@ -1,5 +1,5 @@
 import React from 'react';
-import { Search, XCircle, LayoutGrid, List, ClipboardList, ChevronDown, ShieldCheck } from 'lucide-react';
+import { Search, X, LayoutGrid, List, ClipboardList, ChevronDown, ShieldCheck, RotateCcw } from 'lucide-react';
 import { Employee, Site } from '../../types';
 import { SYSTEM_ROLES } from '../../utils/roles';
 
@@ -27,6 +27,7 @@ interface DirectoryHeaderProps {
    visibleEmployees: Employee[];
    pendingSalaryCount?: number;
    onOpenSalaryQueue?: () => void;
+   isOnlyManagers?: boolean;
 }
 
 export default function DirectoryHeader({
@@ -34,7 +35,7 @@ export default function DirectoryHeader({
    filterDepartment, setFilterDepartment, filterSite, setFilterSite, sites,
    layoutMode, setLayoutMode, isTaskQueueOpen, setIsTaskQueueOpen,
    totalCount, tasksCount, canViewAll, restricted, setCurrentPage, visibleEmployees,
-   pendingSalaryCount = 0, onOpenSalaryQueue
+   pendingSalaryCount = 0, onOpenSalaryQueue, isOnlyManagers = false
 }: DirectoryHeaderProps) {
    
    const filterOptions = [
@@ -44,95 +45,163 @@ export default function DirectoryHeader({
       ...(restricted ? [] : [{ value: filterSite, setValue: setFilterSite, options: sites.map(s => ({ value: s.id, label: s.name })), default: 'All Locations' }])
    ];
 
+   const hasActiveFilters = filterRole !== 'All' || filterStatus !== 'All' || filterDepartment !== 'All' || filterSite !== 'All';
+
+   const handleClearFilters = () => {
+      setFilterRole('All');
+      setFilterStatus('All');
+      setFilterDepartment('All');
+      setFilterSite('All');
+      setSearchTerm('');
+      setCurrentPage(1);
+   };
+
    return (
-      <div className="space-y-6 text-[#1E3F27] dark:text-white">
-         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 animate-in fade-in slide-in-from-top-4">
+      <div className="space-y-4 text-[var(--theme-text-primary)]">
+         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
             <div>
-               <h2 className="text-xl font-bold text-[#1E3F27] dark:text-[#EAE5D9]">Team Directory</h2>
-               <p className="text-sm text-stone-500 dark:text-gray-450 mt-0.5 font-medium">{totalCount} employees</p>
+               <div className="flex items-center gap-2">
+                  <h3 className="text-lg font-semibold tracking-tight text-[var(--theme-text-primary)]">
+                     Team Directory
+                  </h3>
+                  {isOnlyManagers && (
+                     <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20">
+                        Management Tier
+                     </span>
+                  )}
+               </div>
+               <p className="text-xs text-[var(--theme-text-secondary)] font-normal mt-0.5">
+                  <span className="font-mono tabular-nums font-medium text-[var(--theme-text-primary)]">{totalCount}</span> {isOnlyManagers ? 'managers & higher-ups enrolled (filter by location or search to view frontline staff)' : 'team members enrolled'}
+               </p>
             </div>
 
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2.5 flex-wrap">
+               {/* Task Queue Pill Toggle */}
                <button
+                  type="button"
                   onClick={() => setIsTaskQueueOpen(!isTaskQueueOpen)}
-                  className={`px-4 py-2 rounded-xl flex items-center gap-2 font-bold transition-all border cursor-pointer ${
+                  className={`h-9 px-3 rounded-xl flex items-center gap-2 text-xs font-semibold transition-all border cursor-pointer active:scale-[0.98] ${
                      isTaskQueueOpen 
-                        ? 'bg-gradient-to-br from-[#224429] to-[#2C5E3B] text-white border-transparent shadow-[0_4px_16px_rgba(44,94,59,0.25)]' 
-                        : 'bg-white dark:bg-black/45 text-stone-600 dark:text-gray-400 border-[#E2DCCE] dark:border-white/10 hover:text-[#2C5E3B] dark:hover:text-white hover:border-[#2C5E3B]/40 dark:hover:border-white/30'
+                        ? 'bg-[#0071E3] dark:bg-[#2997FF] text-white border-transparent shadow-[0_2px_8px_rgba(0,113,227,0.25)]' 
+                        : 'bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-panel-hover)] text-[var(--theme-text-primary)] border-[var(--theme-border)]'
                   }`}
                >
-                  <ClipboardList size={18} />
-                  <span>Task Queue</span>
+                  <ClipboardList size={14} />
+                  <span>Tasks</span>
                   {tasksCount > 0 && (
-                     <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-black ${isTaskQueueOpen ? 'bg-white/20 text-white' : 'bg-amber-600 text-white'}`}>
+                     <span className={`text-[11px] font-mono tabular-nums px-1.5 py-0.2 rounded-full font-semibold ${
+                        isTaskQueueOpen ? 'bg-white/20 text-white' : 'bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/20'
+                     }`}>
                         {tasksCount}
                      </span>
                   )}
                </button>
 
+               {/* Salary Queue Pill Button */}
                {onOpenSalaryQueue && (
                   <button
+                     type="button"
                      onClick={onOpenSalaryQueue}
-                     className="px-4 py-2 rounded-xl flex items-center gap-2 font-bold transition-all border cursor-pointer bg-white dark:bg-black/45 text-stone-600 dark:text-gray-400 border-[#E2DCCE] dark:border-white/10 hover:text-[#2C5E3B] dark:hover:text-white hover:border-[#2C5E3B]/40 dark:hover:border-white/30"
+                     className="h-9 px-3 rounded-xl flex items-center gap-2 text-xs font-semibold transition-all border cursor-pointer bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-panel-hover)] text-[var(--theme-text-primary)] border-[var(--theme-border)] active:scale-[0.98]"
                   >
-                     <ShieldCheck size={18} />
-                     <span>Salary Queue</span>
+                     <ShieldCheck size={14} />
+                     <span>Compensation</span>
                      {pendingSalaryCount > 0 && (
-                        <span className="text-[10px] px-1.5 py-0.5 rounded-full font-black bg-emerald-600 text-white">
+                        <span className="text-[11px] font-mono tabular-nums px-1.5 py-0.2 rounded-full font-semibold bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
                            {pendingSalaryCount}
                         </span>
                      )}
                   </button>
                )}
 
-               <div className="bg-white/80 dark:bg-black/40 p-1 rounded-xl border border-[#E2DCCE] dark:border-white/10 flex shadow-sm">
-                  <button onClick={() => setLayoutMode('grid')} className={`p-2 rounded-lg transition-all cursor-pointer ${layoutMode === 'grid' ? 'bg-[#2C5E3B]/10 text-[#2C5E3B] dark:bg-[#A9CBA2]/20 dark:text-[#A9CBA2] font-bold' : 'text-stone-400 dark:text-gray-500 hover:text-[#2C5E3B] dark:hover:text-white'}`} title="Grid View"><LayoutGrid size={18} /></button>
-                  <button onClick={() => setLayoutMode('list')} className={`p-2 rounded-lg transition-all cursor-pointer ${layoutMode === 'list' ? 'bg-[#2C5E3B]/10 text-[#2C5E3B] dark:bg-[#A9CBA2]/20 dark:text-[#A9CBA2] font-bold' : 'text-stone-400 dark:text-gray-500 hover:text-[#2C5E3B] dark:hover:text-white'}`} title="List View"><List size={18} /></button>
+               {/* Apple Segmented Control for Layout Toggle */}
+               <div className="p-1 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl flex items-center gap-1 select-none">
+                  <button
+                     type="button"
+                     onClick={() => setLayoutMode('grid')}
+                     className={`p-1.5 rounded-lg transition-all cursor-pointer ${
+                        layoutMode === 'grid'
+                           ? 'bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)] shadow-[0_1px_3px_rgba(0,0,0,0.12)]'
+                           : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)]'
+                     }`}
+                     title="Grid View"
+                     aria-label="Grid View"
+                  >
+                     <LayoutGrid size={15} />
+                  </button>
+                  <button
+                     type="button"
+                     onClick={() => setLayoutMode('list')}
+                     className={`p-1.5 rounded-lg transition-all cursor-pointer ${
+                        layoutMode === 'list'
+                           ? 'bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)] shadow-[0_1px_3px_rgba(0,0,0,0.12)]'
+                           : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)]'
+                     }`}
+                     title="List View"
+                     aria-label="List View"
+                  >
+                     <List size={15} />
+                  </button>
                </div>
             </div>
          </div>
 
-         <div className="flex flex-col lg:flex-row gap-4">
-            <div className="flex items-center bg-white dark:bg-black/30 border border-[#E2DCCE] dark:border-white/10 rounded-xl px-4 py-2.5 focus-within:border-[#2C5E3B] dark:focus-within:border-[#A9CBA2] focus-within:ring-1 focus-within:ring-[#2C5E3B] dark:focus-within:ring-[#A9CBA2] transition-all flex-1">
-               <Search className="w-4 h-4 text-stone-400 dark:text-gray-500" />
+         {/* Search & Filter Bar */}
+         <div className="flex flex-col lg:flex-row gap-3">
+            {/* Apple Search Field */}
+            <div className="flex items-center h-11 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3 focus-within:border-[var(--theme-border-strong)] focus-within:ring-2 focus-within:ring-[#0071E3]/25 transition-all flex-1">
+               <div className="w-7 h-7 rounded-lg bg-blue-500/10 text-[#0071E3] dark:text-[#2997FF] flex items-center justify-center shrink-0">
+                  <Search size={14} />
+               </div>
                <input
                   type="text"
-                  placeholder={canViewAll ? "Search members..." : "Search profile..."}
-                  className="bg-transparent border-none ml-3 flex-1 text-[#1E3F27] dark:text-white text-sm outline-none placeholder-stone-400 dark:placeholder-gray-600"
+                  placeholder={canViewAll ? "Search by name, role, email..." : "Search profile..."}
+                  className="bg-transparent border-none ml-2.5 flex-1 text-[var(--theme-text-primary)] text-sm outline-none placeholder-[var(--theme-text-muted)] font-normal"
                   value={searchTerm}
                   onChange={(e) => { setSearchTerm(e.target.value); setCurrentPage(1); }}
                />
                {searchTerm && (
-                  <button onClick={() => setSearchTerm('')} className="ml-2 text-stone-400 hover:text-[#2C5E3B] dark:text-gray-500 dark:hover:text-white transition-colors" aria-label="Clear search"><XCircle size={14} /></button>
+                  <button
+                     type="button"
+                     onClick={() => setSearchTerm('')}
+                     className="w-5 h-5 rounded-full bg-[var(--theme-border)] hover:bg-[var(--theme-border-strong)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] flex items-center justify-center transition-colors cursor-pointer"
+                     aria-label="Clear search"
+                  >
+                     <X size={12} />
+                  </button>
                )}
             </div>
 
+            {/* Filter Selects */}
             {canViewAll && (
-               <div className="flex flex-wrap gap-2 select-none">
+               <div className="flex flex-wrap items-center gap-2 select-none">
                   {filterOptions.map((filter, i) => (
                      <div key={i} className="relative">
                         <select
                            aria-label={filter.default}
                            value={filter.value}
                            onChange={(e) => { filter.setValue(e.target.value); setCurrentPage(1); }}
-                           className="appearance-none bg-white dark:bg-[#18201B]/60 hover:bg-stone-50 dark:hover:bg-white/5 border border-[#E2DCCE] dark:border-white/10 rounded-xl pl-3 pr-8 py-2.5 text-sm text-[#1E3F27] dark:text-gray-300 focus:outline-none focus:border-[#2C5E3B] dark:focus:border-[#A9CBA2] cursor-pointer transition-colors max-w-[150px]"
+                           className="appearance-none h-11 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl pl-3 pr-8 text-xs font-medium text-[var(--theme-text-primary)] outline-none cursor-pointer hover:bg-[var(--theme-bg-panel-hover)] focus:ring-2 focus:ring-[#0071E3]/25 transition-all max-w-[150px]"
                         >
-                           <option value="All" className="bg-[#FAF8F5] dark:bg-[#18201B] text-[#1E3F27] dark:text-white">{filter.default}</option>
+                           <option value="All" className="bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)]">{filter.default}</option>
                            {filter.options.map((opt: { value: string; label: string }) => (
-                              <option key={opt.value} value={opt.value} className="bg-[#FAF8F5] dark:bg-[#18201B] text-[#1E3F27] dark:text-white">{opt.label}</option>
+                              <option key={opt.value} value={opt.value} className="bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)]">{opt.label}</option>
                            ))}
                         </select>
-                        <ChevronDown size={12} className="absolute right-2.5 top-3.5 text-stone-400 dark:text-gray-500 pointer-events-none" />
+                        <ChevronDown size={12} className="absolute right-2.5 top-4 text-[var(--theme-text-secondary)] pointer-events-none" />
                      </div>
                   ))}
 
-                  {(filterRole !== 'All' || filterStatus !== 'All' || filterDepartment !== 'All' || filterSite !== 'All') && (
+                  {/* Reset Filters Pill */}
+                  {hasActiveFilters && (
                      <button
-                        onClick={() => { setFilterRole('All'); setFilterStatus('All'); setFilterDepartment('All'); setFilterSite('All'); setSearchTerm(''); }}
-                        className="px-3 py-2.5 rounded-xl bg-white dark:bg-white/5 border border-[#E2DCCE] dark:border-white/10 text-stone-450 hover:text-rose-600 dark:text-gray-400 dark:hover:text-white text-sm transition-colors cursor-pointer"
+                        type="button"
+                        onClick={handleClearFilters}
+                        className="h-11 px-3 rounded-xl bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-panel-hover)] border border-[var(--theme-border)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] text-xs font-medium flex items-center gap-1.5 transition-all active:scale-[0.98] cursor-pointer"
                         title="Clear Filters"
                      >
-                        <XCircle size={16} />
+                        <RotateCcw size={12} />
+                        <span>Reset</span>
                      </button>
                   )}
                </div>

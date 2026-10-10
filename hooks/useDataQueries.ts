@@ -71,9 +71,9 @@ export const useDataQueries = ({ siteId, enabled, onProgress }: UseDataQueriesPr
             },
             {
                 queryKey: DATA_KEYS.employees(siteId),
-                queryFn: trackProgress('employees', () => employeesService.getAll()),
+                queryFn: trackProgress('employees', () => employeesService.getAll(siteId, !siteId)),
                 enabled: enabled,
-                staleTime: 1000 * 60 * 15, // 15 mins
+                staleTime: 1000 * 60 * 30, // 30 mins (infrequently changing roster)
             }
         ]
     });
@@ -83,114 +83,71 @@ export const useDataQueries = ({ siteId, enabled, onProgress }: UseDataQueriesPr
         queries: [
             {
                 queryKey: DATA_KEYS.orders(siteId),
-                queryFn: trackProgress('orders', () => purchaseOrdersService.getAll(siteId, 100).then(res => res.data)),
+                queryFn: trackProgress('orders', () => purchaseOrdersService.getAll(siteId, 25).then(res => res.data)),
                 enabled: enabled && !!siteId,
                 staleTime: 1000 * 60 * 10, // 10 mins
             },
             {
                 queryKey: DATA_KEYS.sales(siteId),
-                queryFn: trackProgress('sales', () => salesService.getAll(siteId, 100).then(res => res.data)),
+                queryFn: trackProgress('sales', () => salesService.getAll(siteId, 25).then(res => res.data)),
                 enabled: enabled && !!siteId,
                 staleTime: 1000 * 60 * 5, // 5 mins
             },
             {
                 queryKey: DATA_KEYS.customers(),
-                queryFn: trackProgress('customers', () => customersService.getAll(200)),
+                queryFn: trackProgress('customers', () => customersService.getAll(50)),
                 enabled: enabled,
-                staleTime: 1000 * 60 * 15, // 15 mins
+                staleTime: 1000 * 60 * 30, // 30 mins
             },
             {
                 queryKey: DATA_KEYS.suppliers(),
-                queryFn: trackProgress('suppliers', () => suppliersService.getAll(100).then(res => res.data)),
+                queryFn: trackProgress('suppliers', () => suppliersService.getAll(50).then(res => res.data)),
                 enabled: enabled,
-                staleTime: 1000 * 60 * 30, // 30 mins
+                staleTime: 1000 * 60 * 60, // 60 mins
             }
         ]
     });
 
-    // Tertiary Data (Everything else)
+    // Tertiary Data (Active operational entities strictly needed by DataContext)
+    // NOTE: jobs, transfers, assignments, barcodeApprovals, zones are handled by FulfillmentDataProvider
+    // workerPoints is handled by GamificationContext; schedules is handled by RosterContext;
+    // systemLogs is loaded on-demand in CentralOperations. Pruned here to stop 10GB+ egress leak.
     const tertiaryQueries = useQueries({
         queries: [
             {
-                queryKey: DATA_KEYS.jobs(siteId),
-                queryFn: trackProgress('jobs', () => wmsJobsService.getAll(siteId, 100)),
-                enabled: enabled && !!siteId,
-                staleTime: 1000 * 60 * 5,
-            },
-            {
                 queryKey: DATA_KEYS.movements(siteId),
-                queryFn: trackProgress('movements', () => stockMovementsService.getAll(siteId, undefined, 100).then(res => res.data)),
+                queryFn: trackProgress('movements', () => stockMovementsService.getAll(siteId, undefined, 25).then(res => res.data)),
                 enabled: enabled && !!siteId,
                 staleTime: 1000 * 60 * 5,
-            },
-            {
-                queryKey: DATA_KEYS.transfers(siteId),
-                queryFn: trackProgress('transfers', () => transfersService.getAll(siteId, 50)),
-                enabled: enabled && !!siteId,
-                staleTime: 1000 * 60 * 5,
-            },
-            {
-                queryKey: DATA_KEYS.assignments(siteId),
-                queryFn: trackProgress('assignments', () => jobAssignmentsService.getAll(siteId, undefined, 50)),
-                enabled: enabled && !!siteId,
-                staleTime: 1000 * 60 * 5,
-            },
-            {
-                queryKey: DATA_KEYS.workerPoints(siteId),
-                queryFn: trackProgress('workerPoints', () => workerPointsService.getAll(siteId)),
-                enabled: enabled && !!siteId,
-                staleTime: 1000 * 60 * 10,
             },
             {
                 queryKey: DATA_KEYS.storePoints(),
                 queryFn: trackProgress('storePoints', () => storePointsService.getAll()),
                 enabled: enabled,
-                staleTime: 1000 * 60 * 10,
+                staleTime: 1000 * 60 * 15,
             },
             {
                 queryKey: DATA_KEYS.tasks(siteId),
-                queryFn: trackProgress('tasks', () => tasksService.getAll(siteId, 50)),
+                queryFn: trackProgress('tasks', () => tasksService.getAll(siteId, 25)),
                 enabled: enabled && !!siteId,
-                staleTime: 1000 * 60 * 10,
-            },
-            {
-                queryKey: DATA_KEYS.schedules(siteId),
-                queryFn: trackProgress('schedules', () => schedulesService.getAll(siteId)),
-                enabled: enabled && !!siteId,
-                staleTime: 1000 * 60 * 10,
-            },
-            {
-                queryKey: DATA_KEYS.barcodeApprovals(siteId),
-                queryFn: trackProgress('barcodeApprovals', () => barcodeApprovalsService.getAuditLog(siteId).catch(() => [])),
-                enabled: enabled && !!siteId,
-                staleTime: 1000 * 60 * 10,
-            },
-            {
-                queryKey: DATA_KEYS.zones(siteId),
-                queryFn: trackProgress('zones', () => warehouseZonesService.getAll(siteId).catch(() => [])),
-                enabled: enabled && !!siteId,
-                staleTime: 1000 * 60 * 30,
+                staleTime: 1000 * 60 * 15,
             },
             {
                 queryKey: DATA_KEYS.expenses(siteId),
-                queryFn: trackProgress('expenses', () => expensesService.getAll(siteId, 100).then(res => res.data)),
+                queryFn: trackProgress('expenses', () => expensesService.getAll(siteId, 25).then(res => res.data)),
                 enabled: enabled && !!siteId,
-                staleTime: 1000 * 60 * 10,
-            },
-            {
-                queryKey: DATA_KEYS.systemLogs(),
-                queryFn: trackProgress('systemLogs', () => systemLogsService.getAll().catch(() => [])),
-                enabled: enabled,
-                staleTime: 1000 * 60 * 10,
+                staleTime: 1000 * 60 * 15,
             },
             {
                 queryKey: DATA_KEYS.shifts(siteId),
-                queryFn: trackProgress('shifts', () => shiftsService.getAll(siteId, 50).catch(() => [])),
+                queryFn: trackProgress('shifts', () => shiftsService.getAll(siteId, 25).catch(() => [])),
                 enabled: enabled,
-                staleTime: 1000 * 60 * 5,
+                staleTime: 1000 * 60 * 10,
             }
         ]
     });
+
+    const emptyQueryResult = { data: undefined, isLoading: false, isError: false, refetch: () => Promise.resolve() } as any;
 
     return {
         // Group 1
@@ -203,23 +160,24 @@ export const useDataQueries = ({ siteId, enabled, onProgress }: UseDataQueriesPr
         customers: secondaryQueries[2] as UseQueryResult<Customer[], Error>,
         suppliers: secondaryQueries[3] as UseQueryResult<Supplier[], Error>,
 
-        // Group 3
-        jobs: tertiaryQueries[0] as UseQueryResult<WMSJob[], Error>,
-        movements: tertiaryQueries[1] as UseQueryResult<StockMovement[], Error>,
-        transfers: tertiaryQueries[2] as UseQueryResult<TransferRecord[], Error>,
-        assignments: tertiaryQueries[3] as UseQueryResult<JobAssignment[], Error>,
-        workerPoints: tertiaryQueries[4] as UseQueryResult<WorkerPoints[], Error>,
-        storePoints: tertiaryQueries[5] as UseQueryResult<StorePoints[], Error>,
-        tasks: tertiaryQueries[6] as UseQueryResult<EmployeeTask[], Error>,
-        schedules: tertiaryQueries[7] as UseQueryResult<StaffSchedule[], Error>,
-        barcodeApprovals: tertiaryQueries[8] as UseQueryResult<BarcodeApproval[], Error>,
-        zones: tertiaryQueries[9] as UseQueryResult<WarehouseZone[], Error>,
-        expenses: tertiaryQueries[10] as UseQueryResult<ExpenseRecord[], Error>,
-        systemLogs: tertiaryQueries[11] as UseQueryResult<SystemLog[], Error>,
-        shifts: tertiaryQueries[12] as UseQueryResult<ShiftRecord[], Error>,
+        // Group 3 (Active DataContext entities)
+        movements: tertiaryQueries[0] as UseQueryResult<StockMovement[], Error>,
+        storePoints: tertiaryQueries[1] as UseQueryResult<StorePoints[], Error>,
+        tasks: tertiaryQueries[2] as UseQueryResult<EmployeeTask[], Error>,
+        expenses: tertiaryQueries[3] as UseQueryResult<ExpenseRecord[], Error>,
+        shifts: tertiaryQueries[4] as UseQueryResult<ShiftRecord[], Error>,
+
+        // Group 4 (Domain-delegated entities - mapped to safe fallbacks to protect types & save bandwidth)
+        jobs: emptyQueryResult as UseQueryResult<WMSJob[], Error>,
+        transfers: emptyQueryResult as UseQueryResult<TransferRecord[], Error>,
+        assignments: emptyQueryResult as UseQueryResult<JobAssignment[], Error>,
+        workerPoints: emptyQueryResult as UseQueryResult<WorkerPoints[], Error>,
+        schedules: emptyQueryResult as UseQueryResult<StaffSchedule[], Error>,
+        barcodeApprovals: emptyQueryResult as UseQueryResult<BarcodeApproval[], Error>,
+        zones: emptyQueryResult as UseQueryResult<WarehouseZone[], Error>,
+        systemLogs: emptyQueryResult as UseQueryResult<SystemLog[], Error>,
 
         // Meta
-
         isLoadingCritical: criticalQueries.some(q => q.isLoading),
         isErrorCritical: criticalQueries.some(q => q.isError),
         refetchAll: () => {

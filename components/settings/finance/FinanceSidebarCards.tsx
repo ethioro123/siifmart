@@ -50,17 +50,17 @@ export const FinanceSidebarCards: React.FC<FinanceSidebarCardsProps> = ({
     return (
         <div className="space-y-6">
             {/* LIMITS & APPROVALS */}
-            <div className="bg-white/85 dark:bg-[#18201B]/60 border border-[#E2DCCE] dark:border-emerald-950/20 rounded-3xl p-6 shadow-sm">
-                <div className="mb-4 border-b border-[#E2DCCE]/60 dark:border-white/5 pb-3 flex justify-between items-center">
+            <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-5 shadow-xs">
+                <div className="mb-4 border-b border-[var(--theme-border)] pb-3 flex justify-between items-center">
                     <div>
-                        <h3 className="text-sm font-black text-[#1E3F27] dark:text-white uppercase tracking-wider">Limits & Approvals</h3>
-                        <p className="text-[10px] text-stone-500 dark:text-gray-400">Drawer & B2B credit caps ({baseCurrency})</p>
+                        <h3 className="text-xs font-semibold text-[var(--theme-text-primary)] uppercase tracking-wider">Limits & Approvals</h3>
+                        <p className="text-[11px] text-[var(--theme-text-secondary)] mt-0.5">Drawer & B2B credit caps ({baseCurrency})</p>
                     </div>
                     <button
                         type="button"
                         onClick={() => handleSaveSection('limits')}
                         disabled={isSavingLimits || !isAuthorized}
-                        className="px-3.5 py-1.5 bg-[#2C5E3B] text-white font-bold text-[10px] uppercase tracking-wider rounded-xl flex items-center gap-1.5 shadow-sm cursor-pointer disabled:opacity-50"
+                        className="h-8 px-3 bg-[#0071E3] dark:bg-[#2997FF] hover:opacity-90 active:scale-[0.98] text-white font-semibold text-[11px] rounded-xl flex items-center gap-1.5 shadow-xs cursor-pointer transition-all disabled:opacity-40"
                     >
                         {isSavingLimits ? (
                             <span className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" />
@@ -71,7 +71,7 @@ export const FinanceSidebarCards: React.FC<FinanceSidebarCardsProps> = ({
                     </button>
                 </div>
 
-                <div className="space-y-4">
+                <div className="space-y-3.5">
                     <InputGroup
                         label="Max Petty Cash"
                         type="number"
@@ -104,17 +104,17 @@ export const FinanceSidebarCards: React.FC<FinanceSidebarCardsProps> = ({
             </div>
 
             {/* COMPLIANCE RULES (CONFIG-GATED) */}
-            <div className="bg-white/85 dark:bg-[#18201B]/60 border border-[#E2DCCE] dark:border-emerald-950/20 rounded-3xl p-6 shadow-sm">
-                <div className="mb-4 border-b border-[#E2DCCE]/60 dark:border-white/5 pb-3 flex justify-between items-center">
+            <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-5 shadow-xs">
+                <div className="mb-4 border-b border-[var(--theme-border)] pb-3 flex justify-between items-center">
                     <div>
-                        <h3 className="text-sm font-black text-[#1E3F27] dark:text-white uppercase tracking-wider">Compliance Rules</h3>
-                        <p className="text-[10px] text-stone-500 dark:text-gray-400">Automated tax & exemption policies</p>
+                        <h3 className="text-xs font-semibold text-[var(--theme-text-primary)] uppercase tracking-wider">Compliance Rules</h3>
+                        <p className="text-[11px] text-[var(--theme-text-secondary)] mt-0.5">Automated tax & exemption policies</p>
                     </div>
                     <button
                         type="button"
                         onClick={() => handleSaveSection('compliance')}
                         disabled={isSavingCompliance || !isAuthorized}
-                        className="px-3.5 py-1.5 bg-[#2C5E3B] text-white font-bold text-[10px] uppercase tracking-wider rounded-xl flex items-center gap-1.5 shadow-sm cursor-pointer disabled:opacity-50"
+                        className="h-8 px-3 bg-[#0071E3] dark:bg-[#2997FF] hover:opacity-90 active:scale-[0.98] text-white font-semibold text-[11px] rounded-xl flex items-center gap-1.5 shadow-xs cursor-pointer transition-all disabled:opacity-40"
                     >
                         {isSavingCompliance ? (
                             <span className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" />
@@ -144,17 +144,17 @@ export const FinanceSidebarCards: React.FC<FinanceSidebarCardsProps> = ({
             </div>
 
             {/* MULTI-CURRENCY & EXCHANGE RATES */}
-            <div className="bg-white/85 dark:bg-[#18201B]/60 border border-[#E2DCCE] dark:border-emerald-950/20 rounded-3xl p-6 shadow-sm">
-                <div className="flex justify-between items-center mb-4 pb-3 border-b border-[#E2DCCE]/60 dark:border-white/5">
+            <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-5 shadow-xs">
+                <div className="flex justify-between items-center mb-4 pb-3 border-b border-[var(--theme-border)]">
                     <div>
-                        <h3 className="text-sm font-black text-[#1E3F27] dark:text-white uppercase tracking-wider">Exchange Rates</h3>
-                        <p className="text-[10px] text-stone-500 dark:text-gray-400">Forex benchmark relative to {baseCurrency}</p>
+                        <h3 className="text-xs font-semibold text-[var(--theme-text-primary)] uppercase tracking-wider">Exchange Rates</h3>
+                        <p className="text-[11px] text-[var(--theme-text-secondary)] mt-0.5">Forex benchmark relative to {baseCurrency}</p>
                     </div>
                     <button
                         type="button"
                         onClick={() => handleSaveSection('currency')}
                         disabled={isSavingRates || !isAuthorized}
-                        className="px-3.5 py-1.5 bg-[#2C5E3B] text-white font-bold text-[10px] uppercase tracking-wider rounded-xl flex items-center gap-1.5 shadow-sm cursor-pointer disabled:opacity-50"
+                        className="h-8 px-3 bg-[#0071E3] dark:bg-[#2997FF] hover:opacity-90 active:scale-[0.98] text-white font-semibold text-[11px] rounded-xl flex items-center gap-1.5 shadow-xs cursor-pointer transition-all disabled:opacity-40"
                     >
                         {isSavingRates ? (
                             <span className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" />
@@ -166,21 +166,23 @@ export const FinanceSidebarCards: React.FC<FinanceSidebarCardsProps> = ({
                 </div>
 
                 <div className="space-y-3">
-                    <div className="flex items-center justify-between p-3.5 bg-emerald-50 dark:bg-[#2C5E3B]/20 border border-emerald-200 dark:border-emerald-950/30 rounded-2xl">
+                    <div className="flex items-center justify-between p-3.5 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl">
                         <div>
-                            <p className="text-[9px] text-[#2C5E3B] dark:text-[#A9CBA2] font-black uppercase tracking-wider">Base Currency ({baseCurrency})</p>
-                            <p className="text-lg font-black text-[#1E3F27] dark:text-white mt-0.5">{currencySymbol}</p>
+                            <p className="text-[10px] text-[#0071E3] dark:text-[#2997FF] font-semibold uppercase tracking-wider">Base Currency ({baseCurrency})</p>
+                            <p className="text-lg font-bold text-[var(--theme-text-primary)] mt-0.5">{currencySymbol}</p>
                         </div>
-                        <DollarSign className="text-[#2C5E3B] dark:text-[#A9CBA2]" size={22} />
+                        <div className="w-9 h-9 rounded-xl bg-[#0071E3]/10 dark:bg-[#2997FF]/15 text-[#0071E3] dark:text-[#2997FF] flex items-center justify-center border border-[#0071E3]/20 shrink-0">
+                            <DollarSign size={18} />
+                        </div>
                     </div>
 
                     <div className="space-y-2">
-                        <label className="text-[10px] text-stone-500 dark:text-gray-400 font-bold uppercase tracking-wider flex items-center gap-1.5">
+                        <label className="text-[10px] text-[var(--theme-text-secondary)] font-semibold uppercase tracking-wider flex items-center gap-1.5">
                             <ArrowRightLeft size={12} /> Foreign Benchmark Currencies
                         </label>
                         {exchangeRates.map((curr, idx) => (
                             <div key={curr.code} className="flex items-center gap-2">
-                                <div className="w-12 h-9 flex items-center justify-center bg-[#FAF8F5] dark:bg-black/30 border border-[#E2DCCE] dark:border-white/10 rounded-xl text-xs font-black text-[#1E3F27] dark:text-gray-300">
+                                <div className="w-12 h-9 flex items-center justify-center bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl text-xs font-semibold text-[var(--theme-text-primary)]">
                                     {curr.code}
                                 </div>
                                 <input
@@ -195,7 +197,7 @@ export const FinanceSidebarCards: React.FC<FinanceSidebarCardsProps> = ({
                                         setExchangeRates(newRates);
                                     }}
                                     title={`Exchange rate for ${curr.code}`}
-                                    className="flex-1 bg-[#FAF8F5] dark:bg-black/30 border border-[#E2DCCE] dark:border-white/10 rounded-xl px-3 py-2 text-[#1E3F27] dark:text-white text-xs font-bold outline-none focus:border-[#2C5E3B] disabled:opacity-50"
+                                    className="flex-1 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3 py-2 text-[var(--theme-text-primary)] text-xs font-medium outline-none focus:ring-2 focus:ring-[#0071E3]/20 focus:border-[#0071E3] dark:focus:border-[#2997FF] transition-all disabled:opacity-50"
                                 />
                             </div>
                         ))}

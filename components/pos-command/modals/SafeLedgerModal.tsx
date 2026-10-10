@@ -99,7 +99,7 @@ export const SafeLedgerModal: React.FC<SafeLedgerModalProps> = ({ isOpen, onClos
                                 onClick={() => setIsTransferModalOpen(true)}
                                 className="px-3.5 py-2 bg-[var(--theme-primary)] hover:opacity-90 text-[var(--theme-primary-text)] rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-xs cursor-pointer uppercase tracking-wider"
                             >
-                                <Truck size={14} />
+                                <Truck size={14} className="text-teal-300" />
                                 Transit
                             </button>
                         )}
@@ -107,10 +107,10 @@ export const SafeLedgerModal: React.FC<SafeLedgerModalProps> = ({ isOpen, onClos
                 </div>
 
                 {/* Drops Table */}
-                <div className="overflow-x-auto">
+                <div className="overflow-x-auto rounded-2xl border border-[var(--theme-border)] isolate">
                     <table className="w-full text-left text-xs">
                         <thead>
-                            <tr className="border-b border-[var(--theme-border)] text-[10px] uppercase font-bold tracking-wider text-[var(--theme-thead-text)] bg-[var(--theme-thead-bg)]">
+                            <tr className="border-b border-[var(--theme-border)] text-[10px] uppercase font-bold tracking-wider text-[var(--theme-thead-text)] bg-[var(--theme-bg-subtle)]">
                                 <th className="py-2.5 px-3">
                                     <input
                                         type="checkbox"
@@ -150,7 +150,7 @@ export const SafeLedgerModal: React.FC<SafeLedgerModalProps> = ({ isOpen, onClos
                                                     className="rounded border-[var(--theme-border)]"
                                                 />
                                             ) : (
-                                                <CheckCircle2 size={14} className="text-emerald-600" />
+                                                <CheckCircle2 size={14} className="text-emerald-500" />
                                             )}
                                         </td>
                                         <td className="py-3 px-3 font-bold text-[var(--theme-text-primary)]">
@@ -166,10 +166,10 @@ export const SafeLedgerModal: React.FC<SafeLedgerModalProps> = ({ isOpen, onClos
                                             {drop.currency} {drop.amount.toLocaleString()}
                                         </td>
                                         <td className="py-3 px-3 text-center">
-                                            <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold font-sans uppercase ${
+                                            <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-semibold font-sans uppercase border ${
                                                 drop.status === 'deposited_in_safe'
-                                                    ? 'bg-amber-100 text-amber-800 dark:bg-amber-950/40 dark:text-amber-300'
-                                                    : 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300'
+                                                    ? 'bg-amber-500/10 text-amber-500 border-amber-500/20'
+                                                    : 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20'
                                             }`}>
                                                 {drop.status === 'deposited_in_safe' ? 'In Safe' : 'Transferred to Bank'}
                                             </span>

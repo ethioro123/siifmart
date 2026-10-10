@@ -177,11 +177,11 @@ const DiscountCodesSettings: React.FC = () => {
 
   const getStatusColor = (status: DiscountCode['status']) => {
     switch (status) {
-      case 'Active': return 'bg-emerald-50 text-[#2C5E3B] dark:bg-[#2C5E3B]/20 dark:text-[#A9CBA2] border-emerald-200 dark:border-emerald-950/30';
-      case 'Expired': return 'bg-red-50 text-red-700 dark:bg-red-950/30 dark:text-red-400 border-red-200 dark:border-red-900/30';
-      case 'Disabled': return 'bg-stone-100 text-stone-600 dark:bg-stone-800 dark:text-stone-400 border-stone-200 dark:border-stone-700';
-      case 'Scheduled': return 'bg-amber-50 text-amber-800 dark:bg-amber-950/30 dark:text-amber-400 border-amber-200 dark:border-amber-900/30';
-      default: return 'bg-stone-100 text-stone-600 dark:bg-stone-800 dark:text-stone-400 border-stone-200';
+      case 'Active': return 'bg-[#0071E3]/10 text-[#0071E3] dark:bg-[#2997FF]/15 dark:text-[#2997FF] border-[#0071E3]/20';
+      case 'Expired': return 'bg-neutral-500/10 text-neutral-500 dark:text-neutral-400 border-neutral-500/20';
+      case 'Disabled': return 'bg-neutral-500/10 text-neutral-400 dark:text-neutral-500 border-neutral-500/20';
+      case 'Scheduled': return 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20';
+      default: return 'bg-neutral-500/10 text-neutral-400 border-neutral-500/20';
     }
   };
 
@@ -203,27 +203,27 @@ const DiscountCodesSettings: React.FC = () => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-xl font-black text-[#1E3F27] dark:text-white flex items-center gap-3">
-            <div className="w-10 h-10 bg-emerald-50 dark:bg-[#2C5E3B]/20 rounded-2xl flex items-center justify-center border border-emerald-200 dark:border-emerald-950/30">
-              <Tag className="w-5 h-5 text-[#2C5E3B] dark:text-[#A9CBA2]" />
+          <h2 className="text-xl font-semibold tracking-tight text-[var(--theme-text-primary)] flex items-center gap-3">
+            <div className="w-9 h-9 rounded-xl bg-[#0071E3]/10 dark:bg-[#2997FF]/15 text-[#0071E3] dark:text-[#2997FF] flex items-center justify-center border border-[#0071E3]/20 shrink-0">
+              <Tag className="w-4.5 h-4.5" />
             </div>
             Discount & Promotional Codes
           </h2>
-          <p className="text-xs text-[#4D6E56] dark:text-[#7A9E83] mt-1">
-            Manage authorized promotional codes for POS checkouts and marketing campaigns.
+          <p className="text-xs text-[var(--theme-text-secondary)] mt-1">
+            Manage authorized promotional codes for POS checkouts and marketing campaigns in {profile.name}.
           </p>
         </div>
         {isHQAdmin ? (
           <button
             onClick={handleOpenCreate}
             disabled={isPending}
-            className="bg-[#2C5E3B] hover:opacity-90 text-white px-5 py-2.5 rounded-2xl font-bold text-xs uppercase tracking-wider flex items-center gap-2 shadow-md cursor-pointer transition-all active:scale-95 disabled:opacity-50"
+            className="h-9 px-4 bg-[#0071E3] dark:bg-[#2997FF] hover:opacity-90 active:scale-[0.98] text-white font-semibold text-xs rounded-xl flex items-center gap-2 shadow-xs cursor-pointer transition-all disabled:opacity-40"
           >
-            {isPending ? <Loader2 size={16} className="animate-spin" /> : <Plus size={16} />}
+            {isPending ? <Loader2 size={15} className="animate-spin" /> : <Plus size={15} />}
             Create Code
           </button>
         ) : (
-          <div className="flex items-center gap-2 px-3 py-1.5 bg-stone-100 dark:bg-white/5 border border-stone-200 dark:border-white/10 rounded-xl text-xs text-stone-500 font-bold">
+          <div className="flex items-center gap-1.5 px-3 py-1.5 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl text-xs text-[var(--theme-text-secondary)] font-medium">
             <Lock size={13} />
             <span>HQ Managed</span>
           </div>
@@ -231,44 +231,46 @@ const DiscountCodesSettings: React.FC = () => {
       </div>
 
       {/* Info Banner */}
-      <div className="bg-emerald-50 dark:bg-[#2C5E3B]/20 border border-emerald-200 dark:border-emerald-950/30 rounded-2xl p-4 flex items-start gap-3">
-        <AlertTriangle className="w-5 h-5 text-[#2C5E3B] dark:text-[#A9CBA2] mt-0.5 shrink-0" />
-        <div className="text-xs text-[#1E3F27] dark:text-stone-200 leading-relaxed">
-          <strong className="font-bold">Zero-Trust Guard:</strong> Create authorized codes here for marketing campaigns.
+      <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-4 flex items-start gap-3 shadow-xs">
+        <div className="w-8 h-8 rounded-lg bg-[#0071E3]/10 dark:bg-[#2997FF]/15 text-[#0071E3] dark:text-[#2997FF] flex items-center justify-center border border-[#0071E3]/20 shrink-0 mt-0.5">
+          <AlertTriangle className="w-4 h-4" />
+        </div>
+        <div className="text-xs text-[var(--theme-text-secondary)] leading-relaxed">
+          <strong className="font-semibold text-[var(--theme-text-primary)]">Zero-Trust Guard:</strong> Create authorized codes here for marketing campaigns.
           Cashiers must enter a valid code at the checkout screen to apply promotional discounts.
           Free-form ad-hoc discounts are strictly blocked to eliminate unauthorized register price reductions.
         </div>
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-        <div className="bg-white/80 dark:bg-black/20 rounded-2xl p-4 border border-[#E2DCCE] dark:border-white/10 shadow-sm">
-          <p className="text-stone-500 dark:text-gray-400 text-[10px] uppercase font-bold tracking-wider mb-1">Total Codes</p>
-          <p className="text-2xl font-black text-[#1E3F27] dark:text-white">{discountCodes.length}</p>
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3.5">
+        <div className="bg-[var(--theme-bg-card)] rounded-2xl p-4 border border-[var(--theme-border)] shadow-xs">
+          <p className="text-[var(--theme-text-secondary)] text-[10px] uppercase font-semibold tracking-wider mb-1">Total Codes</p>
+          <p className="text-2xl font-bold text-[var(--theme-text-primary)]">{discountCodes.length}</p>
         </div>
-        <div className="bg-emerald-50 dark:bg-[#2C5E3B]/20 rounded-2xl p-4 border border-emerald-200 dark:border-emerald-950/30 shadow-sm">
-          <p className="text-[#2C5E3B] dark:text-[#A9CBA2] text-[10px] uppercase font-bold tracking-wider mb-1">Active</p>
-          <p className="text-2xl font-black text-[#2C5E3B] dark:text-[#A9CBA2]">
+        <div className="bg-[var(--theme-bg-card)] rounded-2xl p-4 border border-[var(--theme-border)] shadow-xs">
+          <p className="text-[var(--theme-text-secondary)] text-[10px] uppercase font-semibold tracking-wider mb-1">Active</p>
+          <p className="text-2xl font-bold text-[#0071E3] dark:text-[#2997FF]">
             {discountCodes.filter(c => getEffectiveStatus(c) === 'Active').length}
           </p>
         </div>
-        <div className="bg-amber-50 dark:bg-amber-950/20 rounded-2xl p-4 border border-amber-200 dark:border-amber-900/30 shadow-sm">
-          <p className="text-amber-800 dark:text-amber-400 text-[10px] uppercase font-bold tracking-wider mb-1">Scheduled</p>
-          <p className="text-2xl font-black text-amber-800 dark:text-amber-400">
+        <div className="bg-[var(--theme-bg-card)] rounded-2xl p-4 border border-[var(--theme-border)] shadow-xs">
+          <p className="text-[var(--theme-text-secondary)] text-[10px] uppercase font-semibold tracking-wider mb-1">Scheduled</p>
+          <p className="text-2xl font-bold text-amber-600 dark:text-amber-400">
             {discountCodes.filter(c => getEffectiveStatus(c) === 'Scheduled').length}
           </p>
         </div>
-        <div className="bg-red-50 dark:bg-red-950/20 rounded-2xl p-4 border border-red-200 dark:border-red-900/30 shadow-sm">
-          <p className="text-red-700 dark:text-red-400 text-[10px] uppercase font-bold tracking-wider mb-1">Expired</p>
-          <p className="text-2xl font-black text-red-700 dark:text-red-400">
+        <div className="bg-[var(--theme-bg-card)] rounded-2xl p-4 border border-[var(--theme-border)] shadow-xs">
+          <p className="text-[var(--theme-text-secondary)] text-[10px] uppercase font-semibold tracking-wider mb-1">Expired</p>
+          <p className="text-2xl font-bold text-neutral-400 dark:text-neutral-500">
             {discountCodes.filter(c => getEffectiveStatus(c) === 'Expired').length}
           </p>
         </div>
       </div>
 
       {/* Codes List */}
-      <div className="bg-white/85 dark:bg-[#18201B]/60 border border-[#E2DCCE] dark:border-emerald-950/20 rounded-3xl overflow-hidden shadow-sm">
-        <div className="grid grid-cols-12 gap-4 p-4 bg-[#FAF8F5] dark:bg-white/5 text-[10px] font-black text-[#4D6E56] dark:text-gray-400 uppercase tracking-wider border-b border-[#E2DCCE]/60 dark:border-white/10">
+      <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl overflow-hidden shadow-xs">
+        <div className="grid grid-cols-12 gap-4 px-4 py-3 bg-[var(--theme-bg-subtle)] text-[10px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider border-b border-[var(--theme-border)]">
           <div className="col-span-3">Code</div>
           <div className="col-span-2">Type</div>
           <div className="col-span-3">Valid Period</div>
@@ -279,56 +281,56 @@ const DiscountCodesSettings: React.FC = () => {
 
         {discountCodes.length === 0 ? (
           <div className="p-12 text-center">
-            <Tag className="w-10 h-10 mx-auto text-stone-400 dark:text-gray-600 mb-3" />
-            <p className="text-stone-600 dark:text-gray-400 font-bold mb-1">No discount codes for this market</p>
-            <p className="text-stone-400 dark:text-gray-500 text-xs">Create your first national discount code to get started</p>
+            <Tag className="w-10 h-10 mx-auto text-[var(--theme-text-secondary)] mb-3 opacity-40" />
+            <p className="text-[var(--theme-text-primary)] font-semibold text-xs mb-1">No discount codes for this market</p>
+            <p className="text-[var(--theme-text-secondary)] text-xs">Create your first national discount code to get started</p>
           </div>
         ) : (
-          <div className="divide-y divide-[#E2DCCE]/40 dark:divide-white/5">
+          <div className="divide-y divide-[var(--theme-border)]">
             {discountCodes.map((code) => {
               const effectiveStatus = getEffectiveStatus(code);
               const codeCurrency = code.currency || currentCurrency;
               return (
-                <div key={code.id} className="grid grid-cols-12 gap-4 p-4 items-center hover:bg-[#2C5E3B]/[0.02] transition-colors">
+                <div key={code.id} className="grid grid-cols-12 gap-4 px-4 py-3.5 items-center hover:bg-[var(--theme-bg-subtle)]/40 transition-colors">
                   {/* Code */}
                   <div className="col-span-3">
                     <div className="flex items-center gap-2">
-                      <code className="bg-[#FAF8F5] dark:bg-black/40 border border-[#E2DCCE] dark:border-white/10 px-3 py-1 rounded-xl font-mono text-[#2C5E3B] dark:text-[#A9CBA2] font-black text-xs tracking-wider">
+                      <code className="bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] px-2.5 py-1 rounded-lg font-mono text-[#0071E3] dark:text-[#2997FF] font-semibold text-xs tracking-wider">
                         {showCode[code.id] ? code.code : '••••••••'}
                       </code>
                       <button
                         onClick={() => toggleShowCode(code.id)}
-                        className="p-1 text-stone-400 hover:text-[#1E3F27] dark:hover:text-white transition-colors cursor-pointer"
+                        className="p-1 text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] transition-colors cursor-pointer"
                         title={showCode[code.id] ? "Hide Code" : "Show Code"}
                       >
                         {showCode[code.id] ? <EyeOff size={14} /> : <Eye size={14} />}
                       </button>
                       <button
                         onClick={() => handleCopyCode(code.code)}
-                        className="p-1 text-stone-400 hover:text-[#2C5E3B] dark:hover:text-[#A9CBA2] transition-colors cursor-pointer"
+                        className="p-1 text-[var(--theme-text-secondary)] hover:text-[#0071E3] dark:hover:text-[#2997FF] transition-colors cursor-pointer"
                         title="Copy Code"
                         aria-label="Copy code to clipboard"
                       >
                         <Copy size={14} />
                       </button>
                     </div>
-                    <p className="text-[11px] text-stone-500 dark:text-gray-400 mt-1 font-medium">{code.name}</p>
+                    <p className="text-[11px] text-[var(--theme-text-secondary)] mt-1 font-medium">{code.name}</p>
                   </div>
 
                   {/* Type & Value */}
                   <div className="col-span-2">
                     <div className="flex items-center gap-1.5">
                       {code.type === 'PERCENTAGE' ? (
-                        <Percent className="w-3.5 h-3.5 text-[#2C5E3B] dark:text-[#A9CBA2]" />
+                        <Percent className="w-3.5 h-3.5 text-[#0071E3] dark:text-[#2997FF]" />
                       ) : (
-                        <DollarSign className="w-3.5 h-3.5 text-[#2C5E3B] dark:text-[#A9CBA2]" />
+                        <DollarSign className="w-3.5 h-3.5 text-[#0071E3] dark:text-[#2997FF]" />
                       )}
-                      <span className="font-bold text-xs text-[#1E3F27] dark:text-white">
+                      <span className="font-semibold text-xs text-[var(--theme-text-primary)]">
                         {code.type === 'PERCENTAGE' ? `${code.value}%` : formatCompactNumber(code.value, { currency: codeCurrency })}
                       </span>
                     </div>
                     {code.minPurchaseAmount && (
-                      <p className="text-[10px] text-stone-400 dark:text-gray-500 mt-0.5 font-medium">
+                      <p className="text-[10px] text-[var(--theme-text-secondary)] mt-0.5 font-medium">
                         Min: {formatCompactNumber(code.minPurchaseAmount, { currency: codeCurrency })}
                       </p>
                     )}
@@ -336,26 +338,26 @@ const DiscountCodesSettings: React.FC = () => {
 
                   {/* Validity */}
                   <div className="col-span-3">
-                    <div className="flex items-center gap-1.5 text-xs text-stone-600 dark:text-gray-300 font-medium">
-                      <Calendar size={12} className="text-stone-400" />
+                    <div className="flex items-center gap-1.5 text-xs text-[var(--theme-text-primary)] font-medium">
+                      <Calendar size={12} className="text-[var(--theme-text-secondary)]" />
                       <span>{formatDateTime(code.validFrom)}</span>
                     </div>
-                    <div className="text-[10px] text-stone-400 dark:text-gray-500 mt-0.5 pl-4">
+                    <div className="text-[10px] text-[var(--theme-text-secondary)] mt-0.5 pl-4">
                       → {formatDateTime(code.validUntil)}
                     </div>
                   </div>
 
                   {/* Usage */}
                   <div className="col-span-1">
-                    <span className="text-xs font-bold text-[#1E3F27] dark:text-white">{code.usageCount}</span>
+                    <span className="text-xs font-semibold text-[var(--theme-text-primary)]">{code.usageCount}</span>
                     {code.usageLimit && (
-                      <span className="text-[10px] text-stone-400 dark:text-gray-500">/{code.usageLimit}</span>
+                      <span className="text-[10px] text-[var(--theme-text-secondary)]">/{code.usageLimit}</span>
                     )}
                   </div>
 
                   {/* Status */}
                   <div className="col-span-2">
-                    <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold border ${getStatusColor(effectiveStatus)}`}>
+                    <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold border ${getStatusColor(effectiveStatus)}`}>
                       {effectiveStatus === 'Active' && <CheckCircle size={12} />}
                       {effectiveStatus === 'Expired' && <XCircle size={12} />}
                       {effectiveStatus === 'Disabled' && <XCircle size={12} />}
@@ -371,7 +373,7 @@ const DiscountCodesSettings: React.FC = () => {
                         <button
                           onClick={() => handleOpenEdit(code)}
                           disabled={isPending}
-                          className="p-1.5 text-stone-400 hover:text-[#1E3F27] dark:hover:text-white hover:bg-stone-100 dark:hover:bg-white/10 rounded-xl transition-colors cursor-pointer"
+                          className="p-1.5 text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-subtle)] rounded-lg transition-colors cursor-pointer"
                           title="Edit Discount Code"
                         >
                           <Edit2 size={14} />
@@ -381,13 +383,13 @@ const DiscountCodesSettings: React.FC = () => {
                             <button
                               onClick={() => handleDelete(code.id)}
                               disabled={isPending}
-                              className="px-2 py-0.5 bg-red-600 text-white text-[10px] rounded-lg font-bold cursor-pointer disabled:opacity-50"
+                              className="px-2 py-0.5 bg-red-600 text-white text-[10px] rounded-lg font-semibold cursor-pointer disabled:opacity-50"
                             >
                               Confirm
                             </button>
                             <button
                               onClick={() => setDeleteConfirm(null)}
-                              className="px-2 py-0.5 bg-stone-500 text-white text-[10px] rounded-lg cursor-pointer"
+                              className="px-2 py-0.5 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-[var(--theme-text-primary)] text-[10px] rounded-lg cursor-pointer"
                             >
                               Cancel
                             </button>
@@ -396,7 +398,7 @@ const DiscountCodesSettings: React.FC = () => {
                           <button
                             onClick={() => setDeleteConfirm(code.id)}
                             disabled={isPending}
-                            className="p-1.5 text-stone-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/20 rounded-xl transition-colors cursor-pointer"
+                            className="p-1.5 text-[var(--theme-text-secondary)] hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-colors cursor-pointer"
                             title="Delete Discount Code"
                           >
                             <Trash2 size={14} />
@@ -404,7 +406,7 @@ const DiscountCodesSettings: React.FC = () => {
                         )}
                       </>
                     ) : (
-                      <span className="text-[10px] text-stone-400 font-mono">HQ Only</span>
+                      <span className="text-[10px] text-[var(--theme-text-secondary)] font-mono">HQ Only</span>
                     )}
                   </div>
                 </div>

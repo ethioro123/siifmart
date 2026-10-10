@@ -21,19 +21,19 @@ const ConnectionBadge: React.FC<ConnectionBadgeProps> = ({ type }) => {
     switch (type) {
         case 'network':
             return (
-                <span className="flex items-center gap-1 text-[10px] font-bold bg-blue-50 text-blue-700 dark:bg-blue-950/30 dark:text-blue-400 px-2 py-0.5 rounded-lg border border-blue-200 dark:border-blue-900/30">
+                <span className="flex items-center gap-1 text-[10px] font-semibold bg-[#0071E3]/10 text-[#0071E3] dark:bg-[#2997FF]/15 dark:text-[#2997FF] px-2 py-0.5 rounded-full border border-[#0071E3]/20">
                     <Wifi size={10} /> Network
                 </span>
             );
         case 'usb':
             return (
-                <span className="flex items-center gap-1 text-[10px] font-bold bg-stone-100 text-stone-700 dark:bg-stone-800 dark:text-stone-300 px-2 py-0.5 rounded-lg border border-stone-200 dark:border-stone-700">
+                <span className="flex items-center gap-1 text-[10px] font-semibold bg-[var(--theme-bg-card)] text-[var(--theme-text-secondary)] px-2 py-0.5 rounded-full border border-[var(--theme-border)]">
                     <Usb size={10} /> USB
                 </span>
             );
         case 'bluetooth':
             return (
-                <span className="flex items-center gap-1 text-[10px] font-bold bg-purple-50 text-purple-700 dark:bg-purple-950/30 dark:text-purple-400 px-2 py-0.5 rounded-lg border border-purple-200 dark:border-purple-900/30">
+                <span className="flex items-center gap-1 text-[10px] font-semibold bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 px-2 py-0.5 rounded-full border border-indigo-500/20">
                     <Bluetooth size={10} /> Bluetooth
                 </span>
             );
@@ -52,56 +52,56 @@ const DeviceCard: React.FC<DeviceCardProps> = ({ device, onTest, onConfig, isTes
     const renderIcon = () => {
         switch (device.type) {
             case 'printer':
-                return <Printer size={20} />;
+                return <Printer size={18} />;
             case 'scale':
-                return <Scale size={20} />;
+                return <Scale size={18} />;
             case 'scanner':
-                return <Scan size={20} />;
+                return <Scan size={18} />;
         }
     };
 
     return (
-        <div className="bg-[#FAF8F5] dark:bg-black/30 border border-[#E2DCCE] dark:border-white/10 rounded-3xl p-5 hover:border-[#2C5E3B]/40 transition-all flex flex-col gap-4 group relative overflow-hidden shadow-sm">
+        <div className="bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-2xl p-4.5 hover:border-[#0071E3]/30 transition-all flex flex-col gap-3.5 group relative overflow-hidden shadow-xs">
             {/* Status Indicator */}
             <div
-                className={`absolute top-4 right-4 w-2.5 h-2.5 rounded-full ${
+                className={`absolute top-4 right-4 w-2 h-2 rounded-full ${
                     device.status === 'online'
-                        ? 'bg-emerald-500 shadow-[0_0_8px_rgba(44,94,59,0.5)]'
-                        : 'bg-stone-300 dark:bg-stone-700'
+                        ? 'bg-emerald-500 shadow-[0_0_6px_rgba(16,185,129,0.5)]'
+                        : 'bg-neutral-400 dark:bg-neutral-600'
                 }`}
             />
 
             <div className="flex items-start gap-3">
-                <div className="w-11 h-11 rounded-2xl bg-emerald-50 dark:bg-[#2C5E3B]/20 text-[#2C5E3B] dark:text-[#A9CBA2] flex items-center justify-center border border-emerald-200 dark:border-emerald-950/30 shrink-0">
+                <div className="w-10 h-10 rounded-xl bg-[#0071E3]/10 dark:bg-[#2997FF]/15 text-[#0071E3] dark:text-[#2997FF] flex items-center justify-center border border-[#0071E3]/20 shrink-0">
                     {renderIcon()}
                 </div>
                 <div>
-                    <h4 className="font-black text-sm text-[#1E3F27] dark:text-white">{device.name}</h4>
-                    <p className="text-[10px] text-stone-500 dark:text-gray-400 mt-0.5 font-medium">{device.model}</p>
-                    <div className="flex items-center gap-2 mt-2">
+                    <h4 className="font-semibold text-xs text-[var(--theme-text-primary)]">{device.name}</h4>
+                    <p className="text-[11px] text-[var(--theme-text-secondary)] mt-0.5 font-medium">{device.model}</p>
+                    <div className="flex items-center gap-1.5 mt-2">
                         <ConnectionBadge type={device.connection} />
-                        <span className="text-[10px] text-stone-600 dark:text-gray-400 bg-white/80 dark:bg-white/5 px-2 py-0.5 rounded-lg font-mono border border-[#E2DCCE]/60 dark:border-white/5">
+                        <span className="text-[10px] text-[var(--theme-text-secondary)] bg-[var(--theme-bg-card)] px-2 py-0.5 rounded-md font-mono border border-[var(--theme-border)]">
                             {device.address}
                         </span>
                     </div>
                 </div>
             </div>
 
-            <div className="flex gap-2 pt-3 border-t border-[#E2DCCE]/60 dark:border-white/10">
+            <div className="flex gap-2 pt-3 border-t border-[var(--theme-border)]">
                 <button
                     type="button"
                     onClick={onTest}
                     disabled={isTesting}
-                    className="flex-1 py-2 bg-white dark:bg-white/5 hover:bg-stone-100 dark:hover:bg-white/10 text-stone-700 dark:text-gray-200 text-xs font-bold rounded-xl border border-[#E2DCCE] dark:border-white/10 transition-colors flex items-center justify-center gap-1.5 cursor-pointer shadow-sm disabled:opacity-50"
+                    className="flex-1 py-1.5 bg-[var(--theme-bg-card)] hover:bg-[var(--theme-bg-subtle)] text-[var(--theme-text-primary)] text-xs font-semibold rounded-xl border border-[var(--theme-border)] transition-colors flex items-center justify-center gap-1.5 cursor-pointer shadow-2xs disabled:opacity-50"
                 >
-                    <RefreshCw size={12} className={isTesting ? 'animate-spin text-[#2C5E3B]' : ''} />
+                    <RefreshCw size={12} className={isTesting ? 'animate-spin text-[#0071E3] dark:text-[#2997FF]' : ''} />
                     {isTesting ? 'Testing...' : 'Test Ping'}
                 </button>
                 {isAuthorized && (
                     <button
                         type="button"
                         onClick={onConfig}
-                        className="flex-1 py-2 bg-emerald-50 hover:bg-emerald-100 dark:bg-[#2C5E3B]/20 dark:hover:bg-[#2C5E3B]/30 text-[#2C5E3B] dark:text-[#A9CBA2] text-xs font-bold rounded-xl border border-emerald-200 dark:border-emerald-950/30 transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
+                        className="flex-1 py-1.5 bg-[#0071E3]/10 hover:bg-[#0071E3]/20 dark:bg-[#2997FF]/15 dark:hover:bg-[#2997FF]/25 text-[#0071E3] dark:text-[#2997FF] text-xs font-semibold rounded-xl border border-[#0071E3]/20 transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
                     >
                         <Settings2 size={12} /> Config
                     </button>
@@ -234,26 +234,28 @@ export default function InfrastructureSettings() {
         showToast(`Configuration updated for ${updated.name}.`, 'success');
     };
 
-    const cardBase = "bg-white/85 dark:bg-[#18201B]/60 border border-[#E2DCCE] dark:border-emerald-950/20 rounded-[32px] p-6 lg:p-8 shadow-sm";
+    const cardBase = "bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-5 lg:p-6 shadow-xs";
 
     return (
         <div className="w-full max-w-full space-y-6 animate-in fade-in slide-in-from-right-4">
             {/* ROLE WARNING BANNER IF UNAUTHORIZED */}
             {!isAuthorized && (
-                <div className="p-4 bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900/40 rounded-2xl flex items-center gap-3">
-                    <ShieldAlert className="text-amber-700 dark:text-amber-400 shrink-0" size={20} />
-                    <p className="text-xs text-amber-800 dark:text-amber-300 font-bold">
+                <div className="p-3.5 bg-amber-500/10 border border-amber-500/20 rounded-xl flex items-center gap-2.5">
+                    <ShieldAlert className="text-amber-600 dark:text-amber-400 shrink-0" size={18} />
+                    <p className="text-xs text-amber-700 dark:text-amber-300 font-medium">
                         Read-Only View: Modifying corporate hardware defaults and port mappings requires Store Manager or Executive credentials.
                     </p>
                 </div>
             )}
 
             {/* HEADER BANNER */}
-            <div className="p-4 bg-emerald-50 dark:bg-[#2C5E3B]/20 border border-emerald-200 dark:border-emerald-950/30 rounded-2xl flex items-start gap-3">
-                <Power className="text-[#2C5E3B] dark:text-[#A9CBA2] shrink-0 mt-0.5" size={20} />
+            <div className="p-4 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl flex items-start gap-3 shadow-xs">
+                <div className="w-9 h-9 rounded-xl bg-[#0071E3]/10 dark:bg-[#2997FF]/15 text-[#0071E3] dark:text-[#2997FF] flex items-center justify-center border border-[#0071E3]/20 shrink-0 mt-0.5">
+                    <Power size={18} />
+                </div>
                 <div>
-                    <h4 className="text-[#1E3F27] dark:text-white font-bold text-sm">Infrastructure & Hardware Device Manager</h4>
-                    <p className="text-xs text-[#4D6E56] dark:text-[#7A9E83] mt-0.5">
+                    <h4 className="text-[var(--theme-text-primary)] font-semibold text-sm">Infrastructure & Hardware Device Manager</h4>
+                    <p className="text-xs text-[var(--theme-text-secondary)] mt-0.5">
                         Manage thermal receipt printers, electronic scale calibration, hardware barcodes, and COM/IP port mappings ({countryProfile.name}).
                     </p>
                 </div>
@@ -262,16 +264,16 @@ export default function InfrastructureSettings() {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 {/* DEVICE TOPOLOGY */}
                 <div className={`lg:col-span-2 ${cardBase}`}>
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 border-b border-[#E2DCCE]/60 dark:border-white/5 pb-4">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-5 border-b border-[var(--theme-border)] pb-3.5">
                         <div>
-                            <h3 className="text-lg font-black text-[#1E3F27] dark:text-[#EAE5D9]">Connected Peripherals</h3>
-                            <p className="text-xs text-[#4D6E56] dark:text-[#7A9E83] mt-0.5">Active POS and warehouse hardware in current station</p>
+                            <h3 className="text-sm font-semibold tracking-tight text-[var(--theme-text-primary)]">Connected Peripherals</h3>
+                            <p className="text-xs text-[var(--theme-text-secondary)] mt-0.5">Active POS and warehouse hardware in current station</p>
                         </div>
                         {isAuthorized && (
                             <button
                                 type="button"
                                 onClick={() => setIsAddModalOpen(true)}
-                                className="bg-[#2C5E3B] hover:opacity-90 text-white px-4 py-2.5 rounded-2xl text-xs font-bold flex items-center gap-2 cursor-pointer shadow-md transition-all active:scale-95 self-start sm:self-auto"
+                                className="h-8 px-3.5 bg-[#0071E3] dark:bg-[#2997FF] hover:opacity-90 active:scale-[0.98] text-white font-semibold rounded-xl text-xs flex items-center gap-1.5 shadow-xs cursor-pointer transition-all self-start sm:self-auto"
                             >
                                 <Plus size={14} /> Add Device
                             </button>
@@ -295,59 +297,59 @@ export default function InfrastructureSettings() {
                 {/* DEVICE SETTINGS & DEFAULTS */}
                 <div className="space-y-6">
                     <div className={cardBase}>
-                        <div className="mb-6 border-b border-[#E2DCCE]/60 dark:border-white/5 pb-4">
-                            <h3 className="text-sm font-black text-[#1E3F27] dark:text-white uppercase tracking-wider">Device Settings</h3>
-                            <p className="text-[10px] text-stone-500 dark:text-gray-400 mt-0.5">Port and IP assignments ({countryProfile.code})</p>
+                        <div className="mb-4 border-b border-[var(--theme-border)] pb-3">
+                            <h3 className="text-xs font-semibold text-[var(--theme-text-primary)] uppercase tracking-wider">Device Settings</h3>
+                            <p className="text-[11px] text-[var(--theme-text-secondary)] mt-0.5">Port and IP assignments ({countryProfile.code})</p>
                         </div>
 
-                        <div className="space-y-4">
-                            <div className="space-y-1">
-                                <label className="text-xs text-stone-600 dark:text-gray-400 font-bold uppercase tracking-wide block">Counter Scale IP</label>
+                        <div className="space-y-3.5">
+                            <div className="space-y-1.5">
+                                <label className="text-[11px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider block">Counter Scale IP</label>
                                 <input
                                     type="text"
                                     value={hardware.scaleIpAddress}
                                     disabled={!isAuthorized}
                                     onChange={(e) => setHardware(prev => ({ ...prev, scaleIpAddress: e.target.value }))}
                                     placeholder="e.g. 192.168.1.50"
-                                    className="w-full bg-[#FAF8F5] dark:bg-black/30 border border-[#E2DCCE] dark:border-white/10 rounded-2xl px-4 py-2.5 text-xs text-[#1E3F27] dark:text-white font-mono font-bold outline-none focus:border-[#2C5E3B] transition-all disabled:opacity-50"
+                                    className="w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 py-2 text-xs text-[var(--theme-text-primary)] font-mono font-medium outline-none focus:ring-2 focus:ring-[#0071E3]/20 focus:border-[#0071E3] dark:focus:border-[#2997FF] transition-all disabled:opacity-50"
                                 />
                             </div>
-                            <div className="space-y-1">
-                                <label className="text-xs text-stone-600 dark:text-gray-400 font-bold uppercase tracking-wide block">Scanner COM Port</label>
+                            <div className="space-y-1.5">
+                                <label className="text-[11px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider block">Scanner COM Port</label>
                                 <input
                                     type="text"
                                     value={hardware.scannerComPort}
                                     disabled={!isAuthorized}
                                     onChange={(e) => setHardware(prev => ({ ...prev, scannerComPort: e.target.value }))}
                                     placeholder="e.g. COM3"
-                                    className="w-full bg-[#FAF8F5] dark:bg-black/30 border border-[#E2DCCE] dark:border-white/10 rounded-2xl px-4 py-2.5 text-xs text-[#1E3F27] dark:text-white font-mono font-bold outline-none focus:border-[#2C5E3B] transition-all disabled:opacity-50"
+                                    className="w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 py-2 text-xs text-[var(--theme-text-primary)] font-mono font-medium outline-none focus:ring-2 focus:ring-[#0071E3]/20 focus:border-[#0071E3] dark:focus:border-[#2997FF] transition-all disabled:opacity-50"
                                 />
                             </div>
 
-                            <div className="h-px bg-[#E2DCCE]/60 dark:bg-white/5 my-2" />
+                            <div className="h-px bg-[var(--theme-border)] my-2" />
 
-                            <div className="flex items-center justify-between p-3.5 bg-[#FAF8F5] dark:bg-black/20 rounded-2xl border border-[#E2DCCE] dark:border-white/5">
-                                <div className="flex items-center gap-3">
-                                    <Printer size={16} className="text-[#2C5E3B] dark:text-[#A9CBA2]" />
-                                    <div className="text-xs font-black text-[#1E3F27] dark:text-stone-300">Print Spooler Service</div>
+                            <div className="flex items-center justify-between p-3 bg-[var(--theme-bg-subtle)] rounded-xl border border-[var(--theme-border)]">
+                                <div className="flex items-center gap-2.5">
+                                    <Printer size={15} className="text-[#0071E3] dark:text-[#2997FF]" />
+                                    <div className="text-xs font-semibold text-[var(--theme-text-primary)]">Print Spooler Service</div>
                                 </div>
-                                <span className="text-[10px] font-black text-[#2C5E3B] dark:text-[#A9CBA2] flex items-center gap-1 bg-emerald-50 dark:bg-[#2C5E3B]/20 px-2.5 py-0.5 rounded-lg border border-emerald-200 dark:border-emerald-950/30">
+                                <span className="text-[10px] font-semibold text-[#0071E3] dark:text-[#2997FF] flex items-center gap-1 bg-[#0071E3]/10 dark:bg-[#2997FF]/15 px-2 py-0.5 rounded-full border border-[#0071E3]/20">
                                     <CheckCircle size={10} /> Active
                                 </span>
                             </div>
                         </div>
 
-                        <div className="mt-6 pt-4 border-t border-[#E2DCCE]/60 dark:border-white/10 flex justify-end">
+                        <div className="mt-5 pt-3.5 border-t border-[var(--theme-border)] flex justify-end">
                             <button
                                 type="button"
                                 onClick={handleSave}
                                 disabled={mutation.isPending || !isAuthorized}
-                                className="px-6 py-2.5 bg-[#2C5E3B] hover:opacity-90 text-white font-bold rounded-2xl text-xs uppercase tracking-wider flex items-center gap-2 shadow-md cursor-pointer transition-all disabled:opacity-50"
+                                className="h-8 px-4 bg-[#0071E3] dark:bg-[#2997FF] hover:opacity-90 active:scale-[0.98] text-white font-semibold rounded-xl text-xs flex items-center gap-1.5 shadow-xs cursor-pointer transition-all disabled:opacity-40"
                             >
                                 {mutation.isPending ? (
                                     <span className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                                 ) : (
-                                    <Save size={14} />
+                                    <Save size={13} />
                                 )}
                                 Save Device Config
                             </button>
@@ -355,14 +357,14 @@ export default function InfrastructureSettings() {
                     </div>
 
                     <div className={cardBase}>
-                        <h4 className="text-xs font-black text-[#1E3F27] dark:text-white uppercase tracking-wider mb-3">
+                        <h4 className="text-xs font-semibold text-[var(--theme-text-primary)] uppercase tracking-wider mb-3">
                             Hardware Defaults
                         </h4>
-                        <div className="space-y-4">
-                            <div className="space-y-1">
-                                <label className="text-[10px] text-stone-500 dark:text-gray-400 uppercase font-bold tracking-wider block">Default Terminal Printer</label>
+                        <div className="space-y-3.5">
+                            <div className="space-y-1.5">
+                                <label className="text-[10px] text-[var(--theme-text-secondary)] uppercase font-semibold tracking-wider block">Default Terminal Printer</label>
                                 <select
-                                    className="w-full bg-[#FAF8F5] dark:bg-black/30 border border-[#E2DCCE] dark:border-white/10 rounded-2xl px-4 py-2.5 text-xs text-[#1E3F27] dark:text-white font-bold outline-none focus:border-[#2C5E3B] disabled:opacity-50"
+                                    className="w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 py-2 text-xs text-[var(--theme-text-primary)] font-medium outline-none focus:border-[#0071E3] dark:focus:border-[#2997FF] focus:ring-1 focus:ring-[#0071E3]/20 disabled:opacity-50"
                                     value={hardware.defaultPrinter}
                                     disabled={!isAuthorized}
                                     onChange={(e) => setHardware(prev => ({ ...prev, defaultPrinter: e.target.value }))}
@@ -374,21 +376,21 @@ export default function InfrastructureSettings() {
                                     <option value="Label Printer 80mm">Label Printer 80mm</option>
                                 </select>
                             </div>
-                            <div className="space-y-1">
+                            <div className="space-y-1.5">
                                 <div className="flex justify-between items-center mb-1">
-                                    <label className="text-[10px] text-stone-500 dark:text-gray-400 uppercase font-bold tracking-wider block">Scale Calibration Unit</label>
+                                    <label className="text-[10px] text-[var(--theme-text-secondary)] uppercase font-semibold tracking-wider block">Scale Calibration Unit</label>
                                     {hardware.scaleUnit === 'LBS' && (
-                                        <span className="text-[9px] font-bold text-amber-700 dark:text-amber-400 flex items-center gap-1">
+                                        <span className="text-[9px] font-semibold text-amber-600 dark:text-amber-400 flex items-center gap-1">
                                             <AlertTriangle size={10} /> Metric Mandated
                                         </span>
                                     )}
                                 </div>
-                                <div className="flex bg-[#FAF8F5] dark:bg-black/30 rounded-2xl border border-[#E2DCCE] dark:border-white/10 p-1">
+                                <div className="flex bg-[var(--theme-bg-subtle)] rounded-xl border border-[var(--theme-border)] p-1">
                                     <button
                                         type="button"
                                         disabled={!isAuthorized}
                                         onClick={() => setHardware(prev => ({ ...prev, scaleUnit: 'KG' }))}
-                                        className={`flex-1 py-1.5 text-xs font-black rounded-xl transition-all cursor-pointer disabled:opacity-50 ${hardware.scaleUnit === 'KG' ? 'bg-[#2C5E3B] text-white shadow-sm' : 'text-stone-500 hover:text-[#1E3F27] dark:text-gray-400 dark:hover:text-white'}`}
+                                        className={`flex-1 py-1.5 text-xs font-semibold rounded-lg transition-all cursor-pointer disabled:opacity-50 ${hardware.scaleUnit === 'KG' ? 'bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)] shadow-xs' : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)]'}`}
                                     >
                                         KG (Metric)
                                     </button>
@@ -396,7 +398,7 @@ export default function InfrastructureSettings() {
                                         type="button"
                                         disabled={!isAuthorized}
                                         onClick={() => setHardware(prev => ({ ...prev, scaleUnit: 'LBS' }))}
-                                        className={`flex-1 py-1.5 text-xs font-black rounded-xl transition-all cursor-pointer disabled:opacity-50 ${hardware.scaleUnit === 'LBS' ? 'bg-[#2C5E3B] text-white shadow-sm' : 'text-stone-500 hover:text-[#1E3F27] dark:text-gray-400 dark:hover:text-white'}`}
+                                        className={`flex-1 py-1.5 text-xs font-semibold rounded-lg transition-all cursor-pointer disabled:opacity-50 ${hardware.scaleUnit === 'LBS' ? 'bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)] shadow-xs' : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)]'}`}
                                     >
                                         LBS (Imperial)
                                     </button>

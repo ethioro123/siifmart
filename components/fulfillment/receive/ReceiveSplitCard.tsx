@@ -61,19 +61,17 @@ export const ReceiveSplitCard: React.FC<ReceiveSplitCardProps> = ({
     };
 
     return (
-        <div className="group relative glass-panel-pushed hover:border-[#2C5E3B]/40 dark:hover:border-[#A9CBA2]/20 hover:bg-[#FAF8F5]/80 dark:hover:bg-[#1C2620]/40 rounded-xl md:rounded-2xl p-4 md:p-6 transition-colors shadow-sm hover:shadow-md animate-in fade-in duration-200">
-            <div className="hidden md:block absolute top-0 left-0 w-1 h-full bg-[#2C5E3B] dark:bg-[#A9CBA2] rounded-l-2xl opacity-10 group-hover:opacity-100 transition-opacity shadow-[2px_0_10px_rgba(44,94,59,0.3)]" />
-
-            <div className="flex flex-col gap-4 md:gap-6">
+        <div className="rounded-2xl bg-[var(--theme-bg-card)] border border-[var(--theme-border)] p-4 md:p-5 transition-colors shadow-sm animate-in fade-in duration-200">
+            <div className="flex flex-col gap-4">
                 {/* Top Row: Split Indicator & Quick Actions */}
-                <div className="flex items-center justify-between border-b border-stone-200/50 dark:border-white/5 pb-2.5">
+                <div className="flex items-center justify-between border-b border-[var(--theme-border)] pb-3">
                     <div className="flex items-center gap-2">
-                        <span className="px-2 py-0.5 rounded-md text-[10px] font-black uppercase tracking-wider bg-[#2C5E3B]/10 dark:bg-[#A9CBA2]/10 text-[#2C5E3B] dark:text-[#A9CBA2] font-mono border border-[#2C5E3B]/20">
+                        <span className="px-2.5 py-1 rounded-md text-[11px] font-semibold uppercase tracking-wider bg-[var(--theme-bg-subtle)] text-[var(--theme-text-primary)] font-mono border border-[var(--theme-border)]">
                             Split #{index + 1}
                         </span>
                         {parsedBatch.isStandard && (
-                            <span className="text-[10px] text-stone-500 dark:text-stone-400 font-mono flex items-center gap-1">
-                                <Calendar size={11} className="text-[#2C5E3B]" />
+                            <span className="text-[11px] text-[var(--theme-text-secondary)] font-mono flex items-center gap-1">
+                                <Calendar size={13} className="text-[var(--theme-text-secondary)]" />
                                 Date Rcvd: {parsedBatch.formattedDate || 'Today'}
                             </span>
                         )}
@@ -82,7 +80,7 @@ export const ReceiveSplitCard: React.FC<ReceiveSplitCardProps> = ({
                         <button
                             type="button"
                             onClick={onRemoveVariant}
-                            className="p-1.5 text-stone-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-lg transition-colors"
+                            className="p-2 text-[var(--theme-text-secondary)] hover:text-red-500 hover:bg-red-500/10 rounded-xl transition-colors min-h-[36px] min-w-[36px] flex items-center justify-center"
                             title={t('warehouse.removeScan')}
                             aria-label="Remove split"
                         >
@@ -92,30 +90,28 @@ export const ReceiveSplitCard: React.FC<ReceiveSplitCardProps> = ({
                 </div>
 
                 {/* Grid: Qty & Condition */}
-                <div className="grid grid-cols-2 gap-3 md:gap-6 w-full">
-                    <div className="space-y-1.5 md:space-y-2">
-                        <label className="text-[10px] font-black text-slate-500 dark:text-gray-500 uppercase tracking-widest pl-1">{t('warehouse.quantityToReceive')}</label>
-                        <div className="relative group/input">
-                            <input
-                                type="number"
-                                inputMode="decimal"
-                                pattern="[0-9]*"
-                                min="0"
-                                value={variant.quantity === 0 ? '' : variant.quantity}
-                                onChange={(e) => onUpdateVariant({ quantity: Math.max(0, parseInt(e.target.value) || 0) })}
-                                className="woody-input text-xl md:text-2xl font-black tabular-nums py-3 md:py-4 placeholder:text-slate-400 dark:placeholder:text-gray-750"
-                                aria-label="Quantity"
-                                placeholder="0"
-                            />
-                        </div>
+                <div className="grid grid-cols-2 gap-3 md:gap-4 w-full">
+                    <div className="space-y-1.5">
+                        <label className="text-[11px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider pl-0.5">{t('warehouse.quantityToReceive')}</label>
+                        <input
+                            type="number"
+                            inputMode="decimal"
+                            pattern="[0-9]*"
+                            min="0"
+                            value={variant.quantity === 0 ? '' : variant.quantity}
+                            onChange={(e) => onUpdateVariant({ quantity: Math.max(0, parseInt(e.target.value) || 0) })}
+                            className="w-full px-3.5 py-3 rounded-xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-lg md:text-xl font-bold font-mono text-[var(--theme-text-primary)] focus:outline-none focus:ring-2 focus:ring-blue-500/20 tabular-nums min-h-[44px]"
+                            aria-label="Quantity"
+                            placeholder="0"
+                        />
                     </div>
-                    <div className="space-y-1.5 md:space-y-2">
-                        <label className="text-[10px] font-black text-slate-500 dark:text-gray-500 uppercase tracking-widest pl-1">{t('warehouse.condition')}</label>
-                        <div className="relative group/select">
+                    <div className="space-y-1.5">
+                        <label className="text-[11px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider pl-0.5">{t('warehouse.condition')}</label>
+                        <div className="relative">
                             <select
                                 value={variant.condition || 'Good'}
                                 onChange={(e) => onUpdateVariant({ condition: e.target.value })}
-                                className="woody-input text-xs md:text-sm font-black uppercase tracking-widest cursor-pointer py-3.5 md:py-4.5 pr-8 appearance-none"
+                                className="w-full px-3.5 py-3 rounded-xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-xs md:text-sm font-semibold uppercase tracking-wider text-[var(--theme-text-primary)] focus:outline-none focus:ring-2 focus:ring-blue-500/20 min-h-[44px] cursor-pointer appearance-none pr-9"
                                 aria-label="Condition"
                             >
                                 <option value="Good">{t('warehouse.conditionGood')}</option>
@@ -123,21 +119,21 @@ export const ReceiveSplitCard: React.FC<ReceiveSplitCardProps> = ({
                                 <option value="Expired">{t('warehouse.conditionExpired')}</option>
                                 <option value="Missing Parts">{t('warehouse.conditionMissing')}</option>
                             </select>
-                            <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">
+                            <div className="absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none text-[var(--theme-text-secondary)]">
                                 <ChevronRight className="rotate-90" size={16} />
                             </div>
                         </div>
                     </div>
                 </div>
 
-                {/* Batch & Expiry (Date Received Anchored) */}
+                {/* Batch & Expiry */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4 w-full">
-                    {/* Expiry Date with Realtime Status Badge */}
+                    {/* Expiry Date */}
                     <div className="space-y-1.5">
                         <div className="flex items-center justify-between">
-                            <label className="text-[10px] font-black text-slate-500 dark:text-gray-500 uppercase tracking-widest pl-1">{t('warehouse.expiryDate')}</label>
+                            <label className="text-[11px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider pl-0.5">{t('warehouse.expiryDate')}</label>
                             {variant.expiryDate && (
-                                <span className={`text-[9px] font-black px-2 py-0.5 rounded-full border ${expiryStatus.badgeColor}`}>
+                                <span className={`text-[11px] font-medium px-2 py-0.5 rounded-full border ${expiryStatus.badgeColor}`}>
                                     {expiryStatus.label}
                                 </span>
                             )}
@@ -146,37 +142,35 @@ export const ReceiveSplitCard: React.FC<ReceiveSplitCardProps> = ({
                             type="date"
                             value={variant.expiryDate || ''}
                             onChange={(e) => onUpdateVariant({ expiryDate: e.target.value })}
-                            className="woody-input py-2 text-sm"
+                            className="w-full px-3.5 py-2.5 rounded-xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-xs md:text-sm font-mono text-[var(--theme-text-primary)] min-h-[44px] focus:outline-none focus:ring-2 focus:ring-blue-500/20"
                             aria-label="Expiry Date"
                         />
                     </div>
 
-                    {/* Batch / Lot Number (Editable + Auto-Gen + Visual Clarity) */}
+                    {/* Batch / Lot Number */}
                     <div className="space-y-1.5">
                         <div className="flex items-center justify-between">
-                            <label className="text-[10px] font-black text-slate-500 dark:text-gray-500 uppercase tracking-widest pl-1 flex items-center gap-1.5">
-                                <Layers size={11} className="text-[#2C5E3B]" /> Batch / Lot No (Date Rcvd)
+                            <label className="text-[11px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider pl-0.5 flex items-center gap-1.5">
+                                <Layers size={13} className="text-[var(--theme-text-secondary)]" /> Batch / Lot No
                             </label>
                             <button
                                 type="button"
                                 onClick={handleAutoGenerateLot}
-                                className="text-[9px] font-black text-[#2C5E3B] dark:text-[#A9CBA2] hover:underline flex items-center gap-1 uppercase tracking-wider"
+                                className="text-[11px] font-semibold text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] flex items-center gap-1 uppercase tracking-wider transition-colors"
                                 title="Reset to standard date-received lot format"
                             >
-                                <Sparkles size={10} /> Auto-Generate
+                                <Sparkles size={11} /> Auto-Generate
                             </button>
                         </div>
-                        <div className="relative">
-                            <input
-                                type="text"
-                                value={variant.batchNumber || ''}
-                                onChange={(e) => onUpdateVariant({ batchNumber: e.target.value })}
-                                placeholder="e.g. LOT-20261003-KEGR001-01"
-                                className="woody-input py-2 text-xs md:text-sm font-mono tracking-wider"
-                                aria-label="Batch Number"
-                            />
-                        </div>
-                        <p className="text-[9px] text-stone-400 dark:text-stone-500 pl-1 font-mono">
+                        <input
+                            type="text"
+                            value={variant.batchNumber || ''}
+                            onChange={(e) => onUpdateVariant({ batchNumber: e.target.value })}
+                            placeholder="e.g. LOT-20261003-KEGR001-01"
+                            className="w-full px-3.5 py-2.5 rounded-xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-xs md:text-sm font-mono tracking-wide text-[var(--theme-text-primary)] min-h-[44px] focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                            aria-label="Batch Number"
+                        />
+                        <p className="text-[11px] text-[var(--theme-text-secondary)] pl-0.5 font-mono">
                             Format: LOT-YYYYMMDD-[SKU]-[SEQ] or Supplier Lot
                         </p>
                     </div>
@@ -184,8 +178,8 @@ export const ReceiveSplitCard: React.FC<ReceiveSplitCardProps> = ({
 
                 {/* Barcodes Scanning & Chips */}
                 <div className="space-y-2 w-full">
-                    <label className="text-[10px] font-black text-zinc-500 dark:text-gray-500 uppercase tracking-widest pl-1 flex items-center gap-2">
-                        <ScanBarcode size={12} className="text-zinc-400" /> {t('warehouse.barcodes')}
+                    <label className="text-[11px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider pl-0.5 flex items-center gap-2">
+                        <ScanBarcode size={13} className="text-[var(--theme-text-secondary)]" /> {t('warehouse.barcodes')}
                     </label>
 
                     <div className="flex gap-2">
@@ -204,15 +198,15 @@ export const ReceiveSplitCard: React.FC<ReceiveSplitCardProps> = ({
                                 }}
                                 onPaste={scanOnlyHandlers.onPaste}
                                 placeholder={t('warehouse.scanBarcodePlaceholder')}
-                                className="woody-input !pl-10 font-mono py-2 text-sm"
+                                className="w-full pl-10 pr-3.5 py-2.5 rounded-xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-xs md:text-sm font-mono text-[var(--theme-text-primary)] min-h-[44px] focus:outline-none focus:ring-2 focus:ring-blue-500/20"
                                 aria-label="New Barcode Input"
                             />
-                            <ScanBarcode className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400 dark:text-gray-600" size={14} />
+                            <ScanBarcode className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--theme-text-secondary)]" size={16} />
                         </div>
                         <button
                             type="button"
                             onClick={onAddBarcode}
-                            className="woody-btn-secondary px-3 py-2 text-xs rounded-lg flex items-center justify-center"
+                            className="px-4 py-2.5 rounded-xl border border-[var(--theme-border)] bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)] min-h-[44px] min-w-[44px] flex items-center justify-center transition-colors"
                             aria-label="Add barcode"
                         >
                             <Plus size={16} />
@@ -221,23 +215,24 @@ export const ReceiveSplitCard: React.FC<ReceiveSplitCardProps> = ({
 
                     <div className="flex flex-wrap gap-2 min-h-[28px]">
                         {variant.barcode && (
-                            <Badge variant="neutral" className="bg-[#FAF8F5]/85 dark:bg-[#1C2620]/30 border-[#E2DCCE]/60 dark:border-[#A9CBA2]/[0.06] text-stone-600 dark:text-[#A9CBA2] font-mono text-[10px] pl-2 pr-3 py-1">
-                                {variant.barcode} <span className="opacity-50 ml-2 text-[8px] uppercase tracking-wider">{t('warehouse.primary')}</span>
+                            <Badge variant="neutral" className="bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] text-[var(--theme-text-primary)] font-mono text-[11px] px-2.5 py-1 rounded-full flex items-center gap-1.5">
+                                <span>{variant.barcode}</span>
+                                <span className="opacity-60 text-[10px] uppercase tracking-wider">{t('warehouse.primary')}</span>
                             </Badge>
                         )}
                         {(variant.barcodes || []).map(code => (
                             <span
                                 key={code}
-                                className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#2C5E3B]/10 dark:bg-[#A9CBA2]/10 border border-[#2C5E3B]/20 dark:border-[#A9CBA2]/20 text-xs text-[#2C5E3B] dark:text-[#A9CBA2] font-mono group/badge hover:bg-[#2C5E3B]/20 dark:hover:bg-[#A9CBA2]/20 transition-colors cursor-default shadow-sm"
+                                className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-[11px] text-[var(--theme-text-primary)] font-mono cursor-default shadow-sm"
                             >
                                 {code}
                                 <button
                                     type="button"
                                     onClick={() => onRemoveBarcode(code)}
-                                    className="opacity-50 hover:opacity-100 hover:text-white transition-opacity"
+                                    className="opacity-50 hover:opacity-100 hover:text-red-500 transition-opacity ml-0.5"
                                     aria-label="Remove barcode"
                                 >
-                                    <X size={10} />
+                                    <X size={12} />
                                 </button>
                             </span>
                         ))}

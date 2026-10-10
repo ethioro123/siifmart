@@ -1,6 +1,9 @@
 import { supabase } from '../lib/supabase';
 import type { WMSJob } from '../types';
+import { mapWmsJobRow } from './wms-jobs.mapper';
+import { logger } from '../utils/logger';
 
+export { mapWmsJobRow };
 
 // Helper to generate readable Job Numbers (Strict 4-Char Limit)
 // Generates a random alphanumeric code of the given length
@@ -24,66 +27,28 @@ export const generateTransferId = (): string => {
     return `TR-${result}`;
 };
 
-
+const WMS_JOB_COLUMNS = 'id, country_code, site_id, type, priority, status, items_count, assigned_to, location, order_ref, completed_at, completed_by, created_at, updated_at, line_items, source_site_id, dest_site_id, transfer_status, requested_by, approved_by, job_number, delivery_method, tracking_number, external_carrier_name, assigned_by, notes, has_discrepancy, discrepancy_details, shipped_at, delivered_at, received_at, received_by';
 
 export const wmsJobsService = {
     async getById(id: string) {
         // Fetch job using JSONB line_items (Standardized Architecture)
-        // We do NOT join wms_job_items because the system writes to the JSON column 'line_items'
         const { data, error } = await supabase
             .from('wms_jobs')
-            .select('*')
+            .select(WMS_JOB_COLUMNS)
             .eq('id', id)
             .maybeSingle();
 
         if (error) throw error;
         if (!data) return null;
 
-        // Map line items to match frontend structure
-        const job = {
-            ...data,
-            countryCode: data.country_code || 'ET',
-            country_code: data.country_code || 'ET',
-            siteId: data.site_id,
-            trackingNumber: data.tracking_number,
-            destSiteId: data.dest_site_id,
-            sourceSiteId: data.source_site_id,
-            items: data.items_count,
-            lineItems: (data.line_items || []).map((item: any) => ({
-                ...item,
-                id: item.id,
-                jobId: item.job_id || item.jobId,
-                productId: item.product_id || item.productId,
-                name: item.name,
-                sku: item.sku,
-                expectedQty: item.expected_qty !== undefined ? item.expected_qty : item.expectedQty,
-                pickedQty: item.picked_qty !== undefined ? item.picked_qty : item.pickedQty,
-                status: item.status,
-                location: item.location,
-                expiryDate: item.expiryDate || item.expiry_date,
-                batchNumber: item.batchNumber || item.batch_number,
-                condition: item.condition,
-                packQuantity: item.packQuantity || item.pack_quantity,
-                customAttributes: item.customAttributes || item.custom_attributes,
-                minStock: item.minStock || item.min_stock,
-                maxStock: item.maxStock || item.max_stock,
-                retailPrice: item.retailPrice || item.retail_price
-            })),
-            completedBy: data.completed_by, // [FIX] Map completed_by
-            completedAt: data.completed_at,  // [FIX] Map completed_at
-            externalCarrierName: data.external_carrier_name, // [NEW] Map external_carrier_name
-            assignedBy: data.assigned_by // [NEW] Map assigned_by
-        };
-
-        return job;
+        return mapWmsJobRow(data);
     },
 
-    async getAll(siteId?: string, limit: number = 500, employeeId?: string, countryCode?: string) {
-        // 1. Fetch ALL Active Jobs (Pending/In-Progress) for the site
-        // We don't limit these because they represent the operational backlog that MUST be visible
+    async getAll(siteId?: string, limit: number = 0, employeeId?: string, countryCode?: string) {
+        // 1. Fetch ALL Active Jobs (Pending/In-Progress) for the site (operational backlog)
         let activeQuery = supabase
             .from('wms_jobs')
-            .select('*')
+            .select(WMS_JOB_COLUMNS)
             .not('status', 'in', '("Completed","Cancelled")')
             .order('created_at', { ascending: true }); // Oldest first for FIFO
 
@@ -99,30 +64,32 @@ export const wmsJobsService = {
             activeQuery = activeQuery.eq('assigned_to', employeeId);
         }
 
-        // 2. Fetch Recent Historical Jobs (Completed/Cancelled)
-        // We limit these to prevent bloating the client state.
-        // ALWAYS sort by updated_at DESC so recently completed jobs stay at the top!
-        let historyQuery = supabase
-            .from('wms_jobs')
-            .select('*')
-            .in('status', ['Completed', 'Cancelled'])
-            .order('updated_at', { ascending: false })
-            .limit(limit);
+        // 2. RULE 10 — Zero Eager History: only fetch history when caller explicitly requests it
+        //    limit <= 0 means "active jobs only" — zero historical data downloaded on mount.
+        const historyPromise = limit > 0
+            ? (() => {
+                let historyQuery = supabase
+                    .from('wms_jobs')
+                    .select(WMS_JOB_COLUMNS)
+                    .in('status', ['Completed', 'Cancelled'])
+                    .order('updated_at', { ascending: false })
+                    .limit(limit);
 
-        if (countryCode) {
-            historyQuery = historyQuery.eq('country_code', countryCode);
-        }
+                if (countryCode) historyQuery = historyQuery.eq('country_code', countryCode);
 
-        if (siteId && employeeId) {
-            historyQuery = historyQuery.or(`site_id.eq.${siteId},dest_site_id.eq.${siteId},assigned_to.eq.${employeeId}`);
-        } else if (siteId) {
-            historyQuery = historyQuery.or(`site_id.eq.${siteId},dest_site_id.eq.${siteId}`);
-        } else if (employeeId) {
-            historyQuery = historyQuery.eq('assigned_to', employeeId);
-        }
+                if (siteId && employeeId) {
+                    historyQuery = historyQuery.or(`site_id.eq.${siteId},dest_site_id.eq.${siteId},assigned_to.eq.${employeeId}`);
+                } else if (siteId) {
+                    historyQuery = historyQuery.or(`site_id.eq.${siteId},dest_site_id.eq.${siteId}`);
+                } else if (employeeId) {
+                    historyQuery = historyQuery.eq('assigned_to', employeeId);
+                }
+                return historyQuery;
+            })()
+            : Promise.resolve({ data: [] as any[], error: null });
 
-        // Execute parallel queries
-        const [activeRes, historyRes] = await Promise.all([activeQuery, historyQuery]);
+        // Execute queries
+        const [activeRes, historyRes] = await Promise.all([activeQuery, historyPromise]);
 
         if (activeRes.error) throw activeRes.error;
         if (historyRes.error) throw historyRes.error;
@@ -130,43 +97,41 @@ export const wmsJobsService = {
         // Combine datasets
         const combinedData = [...(activeRes.data || []), ...(historyRes.data || [])];
 
-        // Map to domain model
-        return combinedData.map((j: any) => ({
-            ...j,
-            countryCode: j.country_code || 'ET',
-            country_code: j.country_code || 'ET',
-            siteId: j.site_id,
-            items: j.items_count,
-            assignedTo: j.assigned_to,
-            orderRef: j.order_ref,
-            lineItems: j.line_items || [],
-            jobNumber: j.job_number,
-            sourceSiteId: j.source_site_id,
-            destSiteId: j.dest_site_id,
-            transferStatus: j.transfer_status,
-            requestedBy: j.requested_by,
-            approvedBy: j.approved_by,
-            shippedAt: j.shipped_at,
-            deliveredAt: j.delivered_at,
-            receivedAt: j.received_at,
-            receivedBy: j.received_by,
-            trackingNumber: j.tracking_number,
-            createdAt: j.created_at,
-            updatedAt: j.updated_at,
-            deliveryMethod: j.delivery_method,
-            hasDiscrepancy: j.has_discrepancy,
-            discrepancyDetails: j.discrepancy_details,
-            completedBy: j.completed_by,
-            completedAt: j.completed_at,
-            externalCarrierName: j.external_carrier_name, // [NEW] Map external_carrier_name
-            assignedBy: j.assigned_by, // [NEW] Map assigned_by
-            notes: j.notes
-        }));
+        return combinedData.map(mapWmsJobRow);
     },
+
+    /**
+     * RULE 10 — On-demand history fetch. Call ONLY when user explicitly clicks the History tab.
+     * Never call on module mount/login. Returns latest 25 completed/cancelled jobs by default.
+     */
+    async getHistory(siteId?: string, limit: number = 25, employeeId?: string, countryCode?: string) {
+        let q = supabase
+            .from('wms_jobs')
+            .select(WMS_JOB_COLUMNS)
+            .in('status', ['Completed', 'Cancelled'])
+            .order('updated_at', { ascending: false })
+            .limit(limit);
+
+        if (countryCode) q = q.eq('country_code', countryCode);
+
+        if (siteId && employeeId) {
+            q = q.or(`site_id.eq.${siteId},dest_site_id.eq.${siteId},assigned_to.eq.${employeeId}`);
+        } else if (siteId) {
+            q = q.or(`site_id.eq.${siteId},dest_site_id.eq.${siteId}`);
+        } else if (employeeId) {
+            q = q.eq('assigned_to', employeeId);
+        }
+
+        const { data, error } = await q;
+        if (error) throw error;
+
+        return (data || []).map(mapWmsJobRow);
+    },
+
     async getDiscrepancies(siteId: string, countryCode?: string): Promise<WMSJob[]> {
         let query = supabase
             .from('wms_jobs')
-            .select('*')
+            .select(WMS_JOB_COLUMNS)
             .contains('line_items', JSON.stringify([{ status: 'Discrepancy' }]));
 
         if (countryCode) {
@@ -180,40 +145,40 @@ export const wmsJobsService = {
         const { data, error } = await query;
         if (error) throw error;
 
-        return (data || []).map((j: any) => ({
-            ...j,
-            countryCode: j.country_code || 'ET',
-            country_code: j.country_code || 'ET',
-            siteId: j.site_id,
-            items: j.items_count,
-            assignedTo: j.assigned_to,
-            orderRef: j.order_ref,
-            lineItems: j.line_items || [],
-            jobNumber: j.job_number,
-            sourceSiteId: j.source_site_id,
-            destSiteId: j.dest_site_id,
-            transferStatus: j.transfer_status,
-            requestedBy: j.requested_by,
-            approvedBy: j.approved_by,
-            shippedAt: j.shipped_at,
-            deliveredAt: j.delivered_at,
-            receivedAt: j.received_at,
-            receivedBy: j.received_by,
-            trackingNumber: j.tracking_number,
-            createdAt: j.created_at,
-            updatedAt: j.updated_at,
-            deliveryMethod: j.delivery_method,
-            hasDiscrepancy: j.has_discrepancy,
-            discrepancyDetails: j.discrepancy_details,
-            externalCarrierName: j.external_carrier_name,
-            assignedBy: j.assigned_by,
-            notes: j.notes
-        }));
+        return (data || []).map(mapWmsJobRow);
     },
 
     async create(job: Omit<WMSJob, 'id' | 'created_at' | 'updated_at'>) {
+        let countryCode = job.countryCode || job.country_code || (job as any).country;
+
+        // Auto-resolve country from site if not explicitly supplied
+        if (!countryCode) {
+            const targetSiteId = job.siteId || (job as any).site_id || job.sourceSiteId || job.destSiteId;
+            if (targetSiteId) {
+                try {
+                    const { data: siteRow } = await supabase
+                        .from('sites')
+                        .select('country')
+                        .or(`id.eq.${targetSiteId},code.eq.${targetSiteId}`)
+                        .maybeSingle();
+                    if (siteRow?.country) {
+                        countryCode = siteRow.country;
+                    }
+                } catch { }
+            }
+        }
+
+        if (!countryCode) {
+            const siteStr = String(job.siteId || (job as any).site_id || '');
+            if (siteStr.toUpperCase().includes('KE') || siteStr.toLowerCase().includes('-ke')) {
+                countryCode = 'KE';
+            } else {
+                countryCode = 'ET';
+            }
+        }
+
         const dbJob = {
-            country_code: job.countryCode || job.country_code || (job as any).country || 'ET',
+            country_code: countryCode,
             site_id: job.siteId,
             type: job.type,
             priority: job.priority,
@@ -222,13 +187,11 @@ export const wmsJobsService = {
             assigned_to: job.assignedTo,
             location: job.location,
             order_ref: job.orderRef,
-            // [FIX] Map completed_at to completedAt
             completed_at: job.completedAt,
             completed_by: job.completedBy,
-            started_at: job.startedAt,
             created_at: job.createdAt,
             // DATA OPTIMIZATION: Sanitize line items (strip images)
-            line_items: job.lineItems.map((item: any) => ({
+            line_items: (job.lineItems || []).map((item: any) => ({
                 ...item,
                 image: '' // Strip image to save storage
             })),
@@ -240,17 +203,15 @@ export const wmsJobsService = {
             job_number: (job as any).jobNumber, // Will be populated below if not present
             delivery_method: job.deliveryMethod,
             tracking_number: job.trackingNumber,
-            external_carrier_name: job.externalCarrierName, // [NEW] Persist external_carrier_name
-            assigned_by: job.assignedBy // [NEW] Persist assignedBy
+            external_carrier_name: job.externalCarrierName,
+            assigned_by: job.assignedBy
         };
 
         // Job types that own their own number (top-level jobs)
-        // Child outbound types (PICK, PACK, DISPATCH, DRIVER) derive display from orderRef via formatJobId
         const SELF_NUMBERED_TYPES = ['TRANSFER', 'RECEIVE', 'PUTAWAY', 'REPLENISH', 'COUNT', 'WASTE', 'RETURNS', 'ASSIGN'];
         const needsOwnNumber = SELF_NUMBERED_TYPES.includes((dbJob.type || '').toUpperCase());
 
         // RETRY LOGIC for Job Number Uniqueness
-        // Starts with 6-char codes; after MAX_RETRIES_PER_LENGTH collisions, expands to 7, 8... chars
         const MAX_RETRIES_PER_LENGTH = 10;
         let currentLength = 6;
         let retriesAtCurrentLength = 0;
@@ -258,18 +219,15 @@ export const wmsJobsService = {
         while (true) {
             const isRetry = retriesAtCurrentLength > 0 || currentLength > 6;
 
-            // Only generate a job_number for top-level job types
             if (needsOwnNumber && (!dbJob.job_number || isRetry)) {
                 dbJob.job_number = generateReadableJobNumber(currentLength);
 
-                // Also regen tracking number on retry if it's an auto-generated SF number
                 if (isRetry && dbJob.tracking_number && dbJob.tracking_number.startsWith('SF')) {
                     const random = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
                     const base = dbJob.tracking_number.slice(0, 14);
                     dbJob.tracking_number = `${base}${random}`;
                 }
             }
-
 
             const { data, error } = await supabase
                 .from('wms_jobs')
@@ -278,32 +236,7 @@ export const wmsJobsService = {
                 .single();
 
             if (!error) {
-                return {
-                    ...data,
-                    countryCode: data.country_code || 'ET',
-                    country_code: data.country_code || 'ET',
-                    siteId: data.site_id,
-                    items: data.items_count,
-                    assignedTo: data.assigned_to,
-                    orderRef: data.order_ref,
-                    lineItems: data.line_items || [],
-                    jobNumber: data.job_number,
-                    sourceSiteId: data.source_site_id,
-                    destSiteId: data.dest_site_id,
-                    transferStatus: data.transfer_status,
-                    requestedBy: data.requested_by,
-                    approvedBy: data.approved_by,
-                    shippedAt: data.shipped_at,
-                    deliveredAt: data.delivered_at,
-                    receivedAt: data.received_at,
-                    receivedBy: data.received_by,
-                    trackingNumber: data.tracking_number,
-                    createdAt: data.created_at,
-                    updatedAt: data.updated_at,
-                    deliveryMethod: data.delivery_method,
-                    externalCarrierName: data.external_carrier_name, // [NEW] Map external_carrier_name
-                    assignedBy: data.assigned_by
-                };
+                return mapWmsJobRow(data);
             }
 
             // Collision Handling
@@ -315,30 +248,23 @@ export const wmsJobsService = {
                 error.message?.includes('unique constraint') ||
                 JSON.stringify(error).toLowerCase().includes('duplicate')
             ) {
-                // IMPORTANT FIX: Only retry if we are actually generating our own numbers randomly.
-                // If needsOwnNumber is false (e.g. PICK job inheriting a number), retrying with the same data will just loop infinitely.
                 if (needsOwnNumber) {
                     retriesAtCurrentLength++;
                     if (retriesAtCurrentLength >= MAX_RETRIES_PER_LENGTH) {
-                        // Exhausted retries at this length — expand by one character
                         currentLength++;
                         retriesAtCurrentLength = 0;
-                        console.warn(`⚠️ Job number length expanded to ${currentLength} chars due to collision exhaustion.`);
+                        logger.warn('wmsJobsService', `Job number length expanded to ${currentLength} chars due to collision exhaustion.`);
                     }
                     continue;
                 } else {
-                    console.error('❌ WMS Job Insert Error: Job number conflict for inherited number. Ensure DB unique constraint is removed.', error);
+                    logger.error('wmsJobsService', 'WMS Job Insert Error: Job number conflict for inherited number.', error as Error);
                     throw new Error('Database rejected inherited job number due to remaining unique constraint. Please run the SQL script to drop the unique constraint.');
                 }
             }
 
-            // If other error, throw immediately
-            console.error('❌ WMS Job Insert Error:', error);
-            console.error('❌ Error Details:', JSON.stringify(error, null, 2));
+            logger.error('wmsJobsService', 'WMS Job Insert Error', error as Error);
             throw error;
         }
-
-        throw new Error('Failed to generate unique Job Number after multiple attempts.');
     },
 
     async update(id: string, updates: Partial<WMSJob>) {
@@ -373,35 +299,7 @@ export const wmsJobsService = {
             .single();
 
         if (error) throw error;
-        return {
-            ...data,
-            countryCode: data.country_code || 'ET',
-            country_code: data.country_code || 'ET',
-            siteId: data.site_id,
-            items: data.items_count,
-            assignedTo: data.assigned_to,
-            orderRef: data.order_ref,
-            lineItems: data.line_items || [],
-            sourceSiteId: data.source_site_id,
-            destSiteId: data.dest_site_id,
-            transferStatus: data.transfer_status,
-            requestedBy: data.requested_by,
-            approvedBy: data.approved_by,
-            shippedAt: data.shipped_at,
-            deliveredAt: data.delivered_at,
-            receivedAt: data.received_at,
-            receivedBy: data.received_by,
-            trackingNumber: data.tracking_number,
-            createdAt: data.created_at,
-            updatedAt: data.updated_at,
-            hasDiscrepancy: data.has_discrepancy,
-            discrepancyDetails: data.discrepancy_details,
-            completedBy: data.completed_by,
-            completedAt: data.completed_at,
-            externalCarrierName: data.external_carrier_name,
-            assignedBy: data.assigned_by,
-            notes: data.notes
-        };
+        return mapWmsJobRow(data);
     },
 
     async complete(id: string) {
@@ -418,14 +316,11 @@ export const wmsJobsService = {
     },
 
     async removeItem(jobId: string, itemIndex: number) {
-        // 1. Fetch current job
         const job = await this.getById(jobId);
         if (!job) throw new Error('Job not found');
 
-        // 2. Filter out the item
         const updatedLineItems = job.lineItems.filter((_: any, idx: number) => idx !== itemIndex);
 
-        // 3. Update the job
         return await this.update(jobId, {
             lineItems: updatedLineItems,
             items: updatedLineItems.length

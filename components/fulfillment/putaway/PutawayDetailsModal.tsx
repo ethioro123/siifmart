@@ -25,8 +25,15 @@ export const PutawayDetailsModal: React.FC<PutawayDetailsModalProps> = ({
     t
 }) => {
     const { user } = useStore();
-    // Resolve User Name
-    const userId = selectedItem.completedBy || selectedItem.assignedTo;
+    const isCompleted = (selectedItem.status || '').toLowerCase() === 'completed';
+    // Resolve User Name: prioritize actual completion author for completed jobs
+    const completedUserId = selectedItem.completedBy || (selectedItem as any).completed_by;
+    const assignedUserId = selectedItem.assignedTo || (selectedItem as any).assigned_to;
+    const userId = (isCompleted || completedUserId) ? (completedUserId || assignedUserId) : (assignedUserId || completedUserId);
+    const workerLabel = (isCompleted || Boolean(completedUserId))
+        ? (t('warehouse.completedBy') || 'Completed By')
+        : (t('warehouse.assignedTo') || 'Assigned To');
+
     const isUUID = (str: string) => /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(str);
     let userObj = employees.find(e => 
         e.id === userId || 
@@ -68,8 +75,8 @@ export const PutawayDetailsModal: React.FC<PutawayDetailsModalProps> = ({
     };
 
     return (
-        <div className="fixed inset-0 bg-black/80 flex items-stretch md:items-center justify-center z-[200] p-0 md:p-4 overflow-x-hidden animate-in fade-in duration-300">
-            <div className="bg-[#FAF8F5] dark:bg-[#1C2620] border border-[#E2DCCE] dark:border-emerald-950/20 md:rounded-3xl w-full md:max-w-2xl shadow-2xl flex flex-col h-full md:h-auto md:max-h-[92vh] overflow-hidden relative transition-all">
+        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-[200] p-2 sm:p-4 overflow-y-auto animate-in fade-in duration-300">
+            <div className="bg-[#FAF8F5] dark:bg-[#1C2620] border border-[#E2DCCE] dark:border-emerald-950/20 rounded-2xl md:rounded-3xl w-full max-w-2xl shadow-2xl flex flex-col h-full max-h-[92dvh] overflow-hidden relative transition-all">
                 {/* Visual Flair */}
                 <div className="hidden md:block absolute -top-32 -right-32 w-80 h-80 bg-[#2C5E3B]/10 dark:bg-[#2C5E3B]/20 blur-[100px] rounded-full pointer-events-none" />
                 <div className="hidden md:block absolute -bottom-32 -left-32 w-80 h-80 bg-[#A9CBA2]/10 dark:bg-[#A9CBA2]/25 blur-[100px] rounded-full pointer-events-none" />
@@ -102,7 +109,7 @@ export const PutawayDetailsModal: React.FC<PutawayDetailsModalProps> = ({
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-px bg-[#E2DCCE]/60 dark:bg-emerald-950/20 border-b border-[#E2DCCE]/60 dark:border-emerald-950/20 relative z-10">
                     {[
                         { label: t('warehouse.date'), icon: <Calendar size={18} />, value: formatDateTime(data.date), mono: true },
-                        { label: t('warehouse.assignedTo'), icon: <User size={18} />, value: `${data.user} (${displayId})`, mono: false },
+                        { label: workerLabel, icon: <User size={18} />, value: displayId ? `${data.user} (${displayId})` : data.user, mono: false },
                         { label: t('warehouse.putaway.hubTitle'), icon: <MapPin size={18} />, value: data.site ? `${data.site.name} (${data.site.code || data.site.id})` : 'UNLISTED SITE', mono: false }
                     ].map((item, i) => (
                         <div key={i} className="bg-white/40 dark:bg-[#1C2620]/40 p-5 flex items-center gap-4 transition-colors group hover:bg-[#FAF8F5]/60 dark:hover:bg-white/[0.02]">

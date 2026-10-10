@@ -78,8 +78,6 @@ export interface POSContextType {
     isRoundingEnabled: boolean;
     setIsRoundingEnabled: React.Dispatch<React.SetStateAction<boolean>>;
     roundingAdjustment: number;
-    manualTaxRate: number | null;
-    setManualTaxRate: React.Dispatch<React.SetStateAction<number | null>>;
 
     isReturnModalOpen: boolean;
     setIsReturnModalOpen: React.Dispatch<React.SetStateAction<boolean>>;

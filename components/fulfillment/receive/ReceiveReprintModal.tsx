@@ -57,41 +57,37 @@ export const ReceiveReprintModal: React.FC<ReceiveReprintModalProps> = ({
     };
 
     return (
-        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-[300] p-2 sm:p-4 overflow-x-hidden animate-in fade-in duration-300">
-            <div className="relative glass-panel rounded-3xl w-full max-w-2xl overflow-hidden flex flex-col max-h-[90vh] animate-in zoom-in-95 duration-200">
-                {/* 🌟 Background Glows (Futuristic Accents) */}
-                <div className="hidden md:block absolute top-0 right-0 w-64 h-64 bg-[#2C5E3B]/10 dark:bg-[#A9CBA2]/5 blur-[100px] rounded-full pointer-events-none" />
-                <div className="hidden md:block absolute bottom-0 left-0 w-64 h-64 bg-amber-600/10 dark:bg-amber-700/5 blur-[80px] rounded-full pointer-events-none" />
-
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-[300] p-2 sm:p-4 overflow-x-hidden animate-in fade-in duration-200">
+            <div className="relative bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-3xl w-full max-w-2xl overflow-hidden flex flex-col max-h-[90vh] shadow-2xl animate-in zoom-in-95 duration-200">
                 {/* Header */}
-                <div className="p-6 border-b border-[#E2DCCE]/60 dark:border-[#A9CBA2]/[0.06] flex justify-between items-center bg-[#FAF8F5] dark:bg-[#1C2620] shrink-0">
+                <div className="p-4 md:p-6 border-b border-[var(--theme-border)] flex justify-between items-center bg-[var(--theme-bg-subtle)] shrink-0">
                     <div className="flex items-center gap-3">
-                        <div className="p-2.5 bg-[#2C5E3B]/15 dark:bg-[#A9CBA2]/15 rounded-xl border border-[#2C5E3B]/20 dark:border-[#A9CBA2]/20 text-[#2C5E3B] dark:text-[#A9CBA2] shadow-sm">
+                        <div className="p-2.5 bg-[var(--theme-bg-card)] rounded-xl border border-[var(--theme-border)] text-[var(--theme-text-primary)] shadow-sm">
                             <Printer size={22} />
                         </div>
                         <div>
-                            <h3 className="text-xl font-black text-slate-900 dark:text-white tracking-tight uppercase">{t('warehouse.advancedPrinting')}</h3>
-                            <p className="text-[10px] text-slate-500 dark:text-zinc-500 font-black uppercase tracking-widest">{t('warehouse.dimensionsAndLayout')}</p>
+                            <h3 className="text-lg md:text-xl font-bold text-[var(--theme-text-primary)] tracking-tight">{t('warehouse.advancedPrinting')}</h3>
+                            <p className="text-[11px] text-[var(--theme-text-secondary)] font-medium">{t('warehouse.dimensionsAndLayout')}</p>
                         </div>
                     </div>
                     <button
                         onClick={() => setReprintItem(null)}
-                        className="p-2 hover:bg-slate-100 dark:hover:bg-white/10 rounded-full text-slate-400 hover:text-slate-900 dark:hover:text-white transition-all font-mono"
+                        className="p-2.5 rounded-xl text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-card)] transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center"
                         aria-label="Close"
                     >
                         <X size={20} />
                     </button>
                 </div>
 
-                <div className="p-8 space-y-6 overflow-y-auto flex-1 custom-scrollbar">
+                <div className="p-4 md:p-6 space-y-5 overflow-y-auto flex-1 custom-scrollbar bg-[var(--theme-bg-app)]">
                     {/* Label Purpose Selector */}
-                    <div className="flex items-center gap-2 p-1.5 bg-[#FAF8F5] dark:bg-black/40 rounded-2xl border border-[#E2DCCE] dark:border-white/10">
+                    <div className="flex items-center gap-1.5 p-1.5 bg-[var(--theme-bg-subtle)] rounded-2xl border border-[var(--theme-border)]">
                         <button
                             type="button"
                             onClick={() => setLabelType?.('LPN')}
-                            className={`flex-1 py-2.5 px-3 rounded-xl text-xs font-black uppercase tracking-wider flex items-center justify-center gap-2 transition-all ${labelType === 'LPN'
-                                ? 'bg-[#2C5E3B] text-white shadow-md'
-                                : 'text-stone-500 hover:text-stone-800 dark:hover:text-white'
+                            className={`flex-1 py-2.5 px-3 rounded-xl text-xs font-semibold tracking-wide flex items-center justify-center gap-2 min-h-[44px] transition-all ${labelType === 'LPN'
+                                ? 'bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)] shadow-sm'
+                                : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)]'
                             }`}
                         >
                             <Box size={14} />
@@ -100,9 +96,9 @@ export const ReceiveReprintModal: React.FC<ReceiveReprintModalProps> = ({
                         <button
                             type="button"
                             onClick={() => setLabelType?.('ITEM')}
-                            className={`flex-1 py-2.5 px-3 rounded-xl text-xs font-black uppercase tracking-wider flex items-center justify-center gap-2 transition-all ${labelType === 'ITEM'
-                                ? 'bg-[#2C5E3B] text-white shadow-md'
-                                : 'text-stone-500 hover:text-stone-800 dark:hover:text-white'
+                            className={`flex-1 py-2.5 px-3 rounded-xl text-xs font-semibold tracking-wide flex items-center justify-center gap-2 min-h-[44px] transition-all ${labelType === 'ITEM'
+                                ? 'bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)] shadow-sm'
+                                : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)]'
                             }`}
                         >
                             <Tags size={14} />
@@ -111,25 +107,25 @@ export const ReceiveReprintModal: React.FC<ReceiveReprintModalProps> = ({
                     </div>
 
                     {/* Product Summary HUD */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div className="glass-panel-pushed p-4 flex items-center gap-4">
-                            <div className="w-12 h-12 bg-white/50 dark:bg-black/30 rounded-xl border border-[#E2DCCE]/20 dark:border-[#A9CBA2]/[0.02] flex items-center justify-center text-[#2C5E3B]/60 dark:text-[#A9CBA2]/60">
-                                <Box size={24} />
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
+                        <div className="p-4 rounded-2xl bg-[var(--theme-bg-card)] border border-[var(--theme-border)] flex items-center gap-3.5 shadow-sm">
+                            <div className="w-11 h-11 bg-[var(--theme-bg-subtle)] rounded-xl border border-[var(--theme-border)] flex items-center justify-center text-[var(--theme-text-secondary)] shrink-0">
+                                <Box size={22} />
                             </div>
                             <div className="flex-1 min-w-0">
-                                <p className="text-[10px] text-slate-400 dark:text-zinc-500 uppercase font-black tracking-[0.2em] mb-0.5">{t('warehouse.product')}</p>
-                                <p className="text-sm font-black text-slate-900 dark:text-white truncate uppercase drop-shadow-sm">{reprintItem.name}</p>
-                                <p className="text-[10px] text-slate-400 dark:text-gray-500 font-black tracking-widest mt-1 truncate border-t border-[#E2DCCE]/20 dark:border-[#A9CBA2]/[0.02] pt-1">{reprintItem.sku}</p>
+                                <p className="text-[11px] text-[var(--theme-text-secondary)] uppercase font-semibold tracking-wider mb-0.5">{t('warehouse.product')}</p>
+                                <p className="text-sm font-semibold text-[var(--theme-text-primary)] truncate">{reprintItem.name}</p>
+                                <p className="text-[11px] text-[var(--theme-text-secondary)] font-mono mt-0.5 truncate">{reprintItem.sku}</p>
                             </div>
                         </div>
 
-                        <div className="glass-panel-pushed p-4">
-                            <p className="text-[10px] text-slate-400 dark:text-zinc-500 uppercase font-black tracking-[0.2em] mb-2">{t('warehouse.printQuantity')}</p>
-                            <div className="flex items-center justify-center gap-2">
+                        <div className="p-4 rounded-2xl bg-[var(--theme-bg-card)] border border-[var(--theme-border)] flex flex-col justify-between shadow-sm">
+                            <p className="text-[11px] text-[var(--theme-text-secondary)] uppercase font-semibold tracking-wider mb-2">{t('warehouse.printQuantity')}</p>
+                            <div className="flex items-center justify-center gap-3">
                                 <button
                                     onClick={() => setReprintItem({ ...reprintItem, qty: Math.max(1, reprintItem.qty - 1) })}
                                     title={t('warehouse.decreaseQuantity')}
-                                    className="w-9 h-9 bg-white/85 dark:bg-black/30 rounded-xl flex items-center justify-center border border-[#E2DCCE] dark:border-emerald-950/20 hover:border-[#2C5E3B] dark:hover:border-[#A9CBA2] text-[#2C5E3B] dark:text-[#A9CBA2] transition-all shadow-sm shrink-0"
+                                    className="w-10 h-10 min-h-[40px] rounded-xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-card)] flex items-center justify-center transition-colors shadow-sm shrink-0"
                                 >
                                     <Minus size={16} />
                                 </button>
@@ -141,12 +137,12 @@ export const ReceiveReprintModal: React.FC<ReceiveReprintModalProps> = ({
                                     aria-label={t('warehouse.quantityToPrint')}
                                     value={reprintItem.qty}
                                     onChange={(e) => setReprintItem({ ...reprintItem, qty: Math.max(1, parseInt(e.target.value) || 1) })}
-                                    className="w-16 bg-transparent border-none text-center text-xl font-black text-slate-900 dark:text-white focus:outline-none tabular-nums [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                                    className="w-20 bg-transparent border-none text-center text-xl font-bold text-[var(--theme-text-primary)] focus:outline-none tabular-nums font-mono [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                                 />
                                 <button
                                     onClick={() => setReprintItem({ ...reprintItem, qty: reprintItem.qty + 1 })}
                                     title={t('warehouse.increaseQuantity')}
-                                    className="w-9 h-9 bg-white/85 dark:bg-black/30 rounded-xl flex items-center justify-center border border-[#E2DCCE] dark:border-emerald-950/20 hover:border-[#2C5E3B] dark:hover:border-[#A9CBA2] text-[#2C5E3B] dark:text-[#A9CBA2] transition-all shadow-sm shrink-0"
+                                    className="w-10 h-10 min-h-[40px] rounded-xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-card)] flex items-center justify-center transition-colors shadow-sm shrink-0"
                                 >
                                     <Plus size={16} />
                                 </button>
@@ -155,18 +151,18 @@ export const ReceiveReprintModal: React.FC<ReceiveReprintModalProps> = ({
                     </div>
 
                     {/* Size Selector */}
-                    <div className="space-y-3">
-                        <label className="text-[10px] text-slate-500 dark:text-zinc-500 uppercase font-black tracking-[0.2em] pl-1 flex items-center gap-2">
-                            <LayoutTemplate size={12} className="text-slate-400 dark:text-zinc-400" /> {t('warehouse.labelSize')}
+                    <div className="space-y-2">
+                        <label className="text-[11px] text-[var(--theme-text-secondary)] uppercase font-semibold tracking-wider flex items-center gap-2">
+                            <LayoutTemplate size={14} /> {t('warehouse.labelSize')}
                         </label>
                         <div className="grid grid-cols-5 gap-2">
                             {sizes.map((size) => (
                                 <button
                                     key={size}
                                     onClick={() => setReprintSize(size)}
-                                    className={`py-2 text-[10px] font-black font-mono border rounded-lg transition-all ${reprintSize === size
-                                        ? 'bg-[#2C5E3B] dark:bg-[#EAE5D9] border-[#2C5E3B] dark:border-[#EAE5D9] text-[#FAF8F5] dark:text-[#1E3B24] shadow-md scale-105'
-                                        : 'bg-white/50 dark:bg-black/10 border-[#E2DCCE] dark:border-emerald-950/20 text-[#2C4D35]/60 dark:text-[#A9CBA2]/40 hover:border-[#2C5E3B]/50 dark:hover:border-[#A9CBA2]/30'
+                                    className={`py-2.5 min-h-[44px] text-xs font-semibold font-mono rounded-xl border transition-all ${reprintSize === size
+                                        ? 'bg-[var(--theme-bg-card)] border-[var(--theme-text-primary)] text-[var(--theme-text-primary)] shadow-sm font-bold'
+                                        : 'bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)]'
                                         }`}
                                 >
                                     {size}
@@ -176,18 +172,18 @@ export const ReceiveReprintModal: React.FC<ReceiveReprintModalProps> = ({
                     </div>
 
                     {/* Format Selector */}
-                    <div className="space-y-3">
-                        <label className="text-[10px] text-slate-500 dark:text-zinc-500 uppercase font-black tracking-[0.2em] pl-1 flex items-center gap-2">
-                            <Tags size={12} className="text-slate-400 dark:text-zinc-400" /> {t('warehouse.identifierFormat')}
+                    <div className="space-y-2">
+                        <label className="text-[11px] text-[var(--theme-text-secondary)] uppercase font-semibold tracking-wider flex items-center gap-2">
+                            <Tags size={14} /> {t('warehouse.identifierFormat')}
                         </label>
                         <div className="flex gap-2">
                             {formats.map((format) => (
                                 <button
                                     key={format}
                                     onClick={() => setReprintFormat(format)}
-                                    className={`flex-1 py-3 flex items-center justify-center gap-2 rounded-xl border font-black font-mono text-[10px] uppercase tracking-wider transition-all ${reprintFormat === format
-                                        ? 'bg-[#2C5E3B] dark:bg-[#EAE5D9] border-[#2C5E3B] dark:border-[#EAE5D9] text-[#FAF8F5] dark:text-[#1E3B24] shadow-lg scale-105'
-                                        : 'bg-white/50 dark:bg-black/10 border-[#E2DCCE] dark:border-emerald-950/20 text-[#2C4D35]/60 dark:text-[#A9CBA2]/40 hover:border-[#2C5E3B]/50 dark:hover:border-[#A9CBA2]/30'
+                                    className={`flex-1 py-2.5 min-h-[44px] flex items-center justify-center gap-2 rounded-xl border font-semibold font-mono text-xs uppercase tracking-wide transition-all ${reprintFormat === format
+                                        ? 'bg-[var(--theme-bg-card)] border-[var(--theme-text-primary)] text-[var(--theme-text-primary)] shadow-sm font-bold'
+                                        : 'bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)]'
                                         }`}
                                 >
                                     {format === 'QR' && <QrCode size={14} />}
@@ -200,29 +196,29 @@ export const ReceiveReprintModal: React.FC<ReceiveReprintModalProps> = ({
                     </div>
 
                     {/* Visibility Options */}
-                    <div className="space-y-3">
-                        <label className="text-[10px] text-slate-500 dark:text-zinc-500 uppercase font-black tracking-[0.2em] pl-1 flex items-center gap-2">
-                            <Eye size={12} className="text-slate-400 dark:text-zinc-400" /> {t('warehouse.displayAttributes')}
+                    <div className="space-y-2">
+                        <label className="text-[11px] text-[var(--theme-text-secondary)] uppercase font-semibold tracking-wider flex items-center gap-2">
+                            <Eye size={14} /> {t('warehouse.displayAttributes')}
                         </label>
-                        <div className="grid grid-cols-2 gap-3">
+                        <div className="grid grid-cols-2 gap-2.5">
                             {(Object.keys(reprintOptions) as Array<keyof typeof reprintOptions>).map((opt) => (
                                 <button
                                     key={opt}
                                     onClick={() => toggleOption(opt)}
-                                    className={`flex items-center justify-between px-4 py-3 rounded-xl border transition-all ${reprintOptions[opt]
-                                        ? 'bg-[#2C5E3B] dark:bg-[#EAE5D9] border-[#2C5E3B] dark:border-[#EAE5D9] text-[#FAF8F5] dark:text-[#1E3B24] font-black font-mono shadow-md scale-[1.02]'
-                                        : 'bg-white/50 dark:bg-black/10 border-[#E2DCCE] dark:border-emerald-950/20 text-[#2C4D35]/60 dark:text-[#A9CBA2]/40 hover:border-[#2C5E3B]/20 dark:hover:border-[#A9CBA2]/10'
+                                    className={`flex items-center justify-between px-4 py-2.5 min-h-[44px] rounded-xl border transition-all ${reprintOptions[opt]
+                                        ? 'bg-[var(--theme-bg-card)] border-[var(--theme-text-primary)] text-[var(--theme-text-primary)] shadow-sm font-semibold'
+                                        : 'bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)]'
                                         }`}
                                 >
-                                    <span className="text-[10px] uppercase tracking-widest">
+                                    <span className="text-xs uppercase tracking-wider">
                                         {opt === 'showPrice' ? (t('common.price') || 'Price') : opt === 'showCategory' ? (t('common.category') || 'Category') : (t('common.name') || 'Name')}
                                     </span>
-                                    {reprintOptions[opt] ? <Eye size={14} className="text-[#FAF8F5] dark:text-[#1E3B24]" /> : <EyeOff size={14} className="text-[#2C4D35]/40 dark:text-[#A9CBA2]/40" />}
+                                    {reprintOptions[opt] ? <Eye size={15} /> : <EyeOff size={15} className="opacity-60" />}
                                 </button>
                             ))}
                         </div>
                         {printPriceTagAt !== 'receive' && (
-                            <div className="p-3 bg-emerald-500/10 border border-emerald-500/20 rounded-xl flex items-start gap-2.5 text-[11px] text-emerald-800 dark:text-emerald-300">
+                            <div className="p-3 bg-emerald-500/10 border border-emerald-500/20 rounded-xl flex items-start gap-2.5 text-[11px] text-emerald-800 dark:text-emerald-300 font-medium">
                                 <Info size={14} className="shrink-0 mt-0.5 text-emerald-600 dark:text-emerald-400" />
                                 <span>
                                     <strong>Inventory Label Mode:</strong> Inbound receiving labels identify SKU, batch & barcode. Retail shelf price tags are printed in POS Command / Store Shelf Hub to maintain scanner price parity.
@@ -233,23 +229,20 @@ export const ReceiveReprintModal: React.FC<ReceiveReprintModalProps> = ({
                 </div>
 
                 {/* Footer Action */}
-                <div className="p-8 border-t border-[#E2DCCE]/50 dark:border-emerald-950/20 bg-[#FAF8F5] dark:bg-[#1C2620] shrink-0">
+                <div className="p-4 md:p-6 border-t border-[var(--theme-border)] bg-[var(--theme-bg-subtle)] shrink-0">
                     <button
                         disabled={isSubmitting}
                         onClick={handleReprintLabels}
-                        className="w-full relative group shadow-lg"
+                        className="w-full py-3.5 px-6 rounded-xl bg-blue-600 hover:bg-blue-700 active:scale-95 text-white font-semibold text-xs md:text-sm uppercase tracking-wider min-h-[48px] flex items-center justify-center gap-2 shadow-sm transition-all disabled:opacity-50"
                     >
-                        <div className="absolute -inset-1 bg-[#2C5E3B] dark:bg-[#A9CBA2] rounded-2xl blur opacity-0 group-hover:opacity-10 dark:group-hover:opacity-20 transition duration-1000 group-disabled:opacity-0" />
-                        <div className="relative flex items-center justify-center gap-3 py-4 woody-btn-primary w-full text-[#FAF8F5] dark:text-[#1E3B24] font-black shadow-md transition-all disabled:opacity-50 disabled:grayscale">
-                            {isSubmitting ? (
-                                <RefreshCw className="animate-spin" size={20} />
-                            ) : (
-                                <Printer size={20} />
-                            )}
-                            {t('warehouse.generateLabels').toUpperCase()} ({reprintItem.qty})
-                        </div>
+                        {isSubmitting ? (
+                            <RefreshCw className="animate-spin" size={18} />
+                        ) : (
+                            <Printer size={18} />
+                        )}
+                        <span>{t('warehouse.generateLabels').toUpperCase()} ({reprintItem.qty})</span>
                     </button>
-                    <p className="text-[9px] text-center text-slate-400 dark:text-zinc-600 mt-6 uppercase tracking-[0.3em] font-black">Unified Template System v2.4</p>
+                    <p className="text-[11px] text-center text-[var(--theme-text-secondary)] mt-3 font-mono">Unified Template System v2.4</p>
                 </div>
             </div>
         </div>

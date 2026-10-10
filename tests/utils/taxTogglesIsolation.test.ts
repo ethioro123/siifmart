@@ -126,18 +126,19 @@ describe('Tax / VAT Toggles & Multi-Country Isolation (Selling & Buying)', () =>
             expect(rules).toHaveLength(0); // Strictly opt-in: no automatic tax
         });
 
-        it('supports manual tax rate calculation in POS when taxOnSelling is off', () => {
-            const subtotal = 1000;
-            const manualRate = 16;
-            const manualTax = subtotal * (manualRate / 100);
-            expect(manualTax).toBe(160);
-        });
+        it('ensures sales tax is strictly governed by Settings and zero when taxOnSelling is off', () => {
+            const settings: SystemConfig = {
+                storeName: 'SIIFMART',
+                currency: 'KES',
+                taxRate: 16,
+                country: 'KE',
+                countryConfigs: {
+                    KE: { taxRate: 16, taxOnSelling: false },
+                },
+            } as any;
 
-        it('supports 0% manual tax exemption override in POS when tax is enabled', () => {
-            const subtotal = 1000;
-            const manualRate = 0; // Exempt customer
-            const manualTax = manualRate > 0 ? subtotal * (manualRate / 100) : 0;
-            expect(manualTax).toBe(0);
+            const rules = computeTaxRulesForSite(mockSite, settings);
+            expect(rules).toHaveLength(0); // Tax row does not appear / 0% tax
         });
 
         it('does not affect Ethiopia sales tax when Kenya turns taxOnSelling OFF', () => {
@@ -214,11 +215,15 @@ describe('Tax / VAT Toggles & Multi-Country Isolation (Selling & Buying)', () =>
             expect(rate).toBe(0); // Strictly opt-in: no automatic PO tax
         });
 
-        it('supports manual tax rate entry on PO even when taxOnPurchasing is off', () => {
-            const manualPOTaxRate = 16;
-            const poSubtotal = 50000;
-            const poTax = poSubtotal * (manualPOTaxRate / 100);
-            expect(poTax).toBe(8000);
+        it('ensures purchasing tax is strictly governed by Settings and zero when taxOnPurchasing is off', () => {
+            const settings: SystemConfig = {
+                countryConfigs: {
+                    KE: { taxOnPurchasing: false },
+                },
+            } as any;
+
+            const rate = computeDefaultTaxRateForPO('KE', settings);
+            expect(rate).toBe(0); // Tax not applied on PO
         });
 
         it('maintains strict isolation between countries on purchasing tax', () => {

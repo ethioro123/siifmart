@@ -1,20 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Box, Zap, UserIcon, Lock, RefreshCw, Play, Info, Archive, Clock, Package, MapPin, User, ChevronRight, Loader2, Trash2 } from 'lucide-react';
 
-/** Returns true when viewport < 768 px (md breakpoint). SSR-safe. */
-function useIsMobile(): boolean {
-    const [isMobile, setIsMobile] = useState(() =>
-        typeof window !== 'undefined' ? window.innerWidth < 768 : false
-    );
-    useEffect(() => {
-        const mq = window.matchMedia('(max-width: 767px)');
-        setIsMobile(mq.matches);
-        const handler = (e: MediaQueryListEvent) => setIsMobile(e.matches);
-        mq.addEventListener('change', handler);
-        return () => mq.removeEventListener('change', handler);
-    }, []);
-    return isMobile;
-}
 import { WMSJob, Employee } from '../../../types';
 import Pagination from '../../shared/Pagination';
 import { formatJobId } from '../../../utils/jobIdFormatter';
@@ -60,7 +46,6 @@ export const PutawayList: React.FC<PutawayListProps> = ({
     t
 }) => {
     const { deleteJob } = useFulfillment();
-    const isMobile = useIsMobile();
 
     const handleDelete = async (e: React.MouseEvent, jobId: string) => {
         e.stopPropagation();
@@ -91,42 +76,12 @@ export const PutawayList: React.FC<PutawayListProps> = ({
                     const progress = job.lineItems ? (completedItems / job.lineItems.length) * 100 : 0;
                     const isCritical = job.priority === 'Critical';
 
-                    if (isMobile) {
-                        return (
-                            <div
-                                key={job.id}
-                                className={`flex items-center gap-3 bg-[#FAF8F5]/80 dark:bg-[#1C2620]/60 border rounded-xl p-3 sm:p-4 active:bg-stone-50 dark:active:bg-white/5 transition-colors cursor-pointer shadow-sm min-h-[56px] ${isCritical ? 'border-red-500/50' : 'border-[#E2DCCE]/60 dark:border-[#A9CBA2]/10'}`}
-                                onClick={() => onShowDetails(job)}
-                            >
-                                {/* Progress circle */}
-                                <div className={`w-11 h-11 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center text-[10px] font-black flex-shrink-0 border transition-colors ${
-                                    progress >= 100 ? 'bg-emerald-50 dark:bg-emerald-500/20 border-emerald-100 dark:border-emerald-500/30 text-emerald-600 dark:text-emerald-400' : 'bg-[#2C5E3B]/10 dark:bg-[#A9CBA2]/10 border-[#2C5E3B]/20 dark:border-[#A9CBA2]/20 text-[#2C5E3B] dark:text-[#A9CBA2]'
-                                } shadow-sm`}>
-                                    {Math.round(progress)}%
-                                </div>
-                                {/* Job info */}
-                                <div className="flex-1 min-w-0 overflow-hidden">
-                                    <div className="flex items-center gap-2">
-                                        <span className="text-sm font-black text-slate-900 dark:text-white tracking-wider uppercase truncate">{formatJobId(job)}</span>
-                                        {isCritical && (
-                                            <span className="bg-red-500 text-white text-[8px] font-black px-2 py-0.5 rounded-lg uppercase shadow-lg shadow-red-500/20">!</span>
-                                        )}
-                                    </div>
-                                    <p className="text-[10px] text-slate-500 dark:text-zinc-500 font-black uppercase tracking-widest mt-1 truncate">{job.items} {t('warehouse.putaway.inventoryItems')}</p>
-                                </div>
-                                <div className="p-2.5 bg-stone-50 dark:bg-white/5 rounded-lg border border-[#E2DCCE]/30 dark:border-white/5 min-w-[40px] min-h-[40px] flex items-center justify-center">
-                                    <ChevronRight size={18} className="text-slate-400 dark:text-zinc-600 flex-shrink-0" />
-                                </div>
-                            </div>
-                        );
-                    }
-
                     return (
                         <div key={job.id} className={`group glass-panel hover:border-[#2C5E3B]/30 dark:hover:border-[#A9CBA2]/30 p-4 sm:p-6 relative overflow-hidden active:scale-[0.99] ${isCritical ? 'border-red-500/30 dark:border-red-500/20' : ''}`}>
                             {isCritical && <div className="absolute top-0 right-0 w-32 h-32 bg-red-500/5 dark:bg-red-500/10 blur-[60px] rounded-full pointer-events-none" />}
                             <div className="absolute -bottom-16 -left-16 w-32 h-32 bg-[#2C5E3B]/5 dark:bg-[#2C5E3B]/10 blur-[80px] rounded-full pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-1000" />
 
-                            <div className="flex justify-between items-start mb-8 relative z-10">
+                            <div className="flex justify-between items-start mb-4 sm:mb-8 relative z-10">
                                 <div className="flex-1 min-w-0">
                                     <div className="flex items-center gap-3 flex-wrap">
                                         <span className="text-base font-black text-gray-900 dark:text-white tracking-widest uppercase drop-shadow-sm">{formatJobId(job)}</span>

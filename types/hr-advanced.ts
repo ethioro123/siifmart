@@ -76,6 +76,8 @@ export interface JobCandidate {
     id: string;
     requisition_id?: string;
     country_code: string;
+    site_id?: string;
+    role?: string;
     name: string;
     email: string;
     phone: string;
@@ -86,6 +88,13 @@ export interface JobCandidate {
     interviewer_notes?: string;
     offered_salary?: number;
     resume_url?: string;
+    hr_approved_by?: string;
+    hr_approved_at?: string;
+    hr_notes?: string;
+    finance_approved_by?: string;
+    finance_approved_at?: string;
+    finance_notes?: string;
+    hired_employee_id?: string;
     created_at: string;
     updated_at: string;
 }

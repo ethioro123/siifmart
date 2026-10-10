@@ -1,12 +1,16 @@
 import React, { useState } from 'react';
-import { ShieldAlert, Lock, KeyRound, Eye, EyeOff, Save, CheckCircle2, ScanLine, AlertCircle } from 'lucide-react';
+import { ShieldAlert, KeyRound, Eye, EyeOff, Save, ScanLine } from 'lucide-react';
 import { useData } from '../../../contexts/DataContext';
 import { useStore } from '../../../contexts/CentralStore';
-import { CURRENCY_SYMBOL } from '../../../constants';
+import { Country, getCountryProfile } from '../../../utils/localization';
 
 export const RetailLossPreventionCard: React.FC = () => {
-    const { settings, updateSettings } = useData();
+    const { settings, updateSettings, effectiveCountry } = useData();
     const { user, showToast } = useStore();
+
+    const activeCountry: Country = (effectiveCountry || settings?.country || 'ET') as Country;
+    const countryProfile = getCountryProfile(activeCountry);
+    const currency = countryProfile.currencySymbol || (activeCountry === 'ET' ? 'ETB' : 'KES');
 
     const [pin, setPin] = useState(settings?.managerSecurityPin || '1234');
     const [showPin, setShowPin] = useState(false);
@@ -39,46 +43,46 @@ export const RetailLossPreventionCard: React.FC = () => {
     };
 
     return (
-        <div className="bg-white/85 dark:bg-[#18201B]/60 lg:backdrop-blur-2xl border border-[#E2DCCE] dark:border-emerald-950/20 rounded-[32px] p-6 lg:p-8 space-y-6 shadow-[0_4px_24px_-4px_rgba(34,50,38,0.04)] dark:shadow-[0_8px_32px_-4px_rgba(5,8,6,0.5)]">
+        <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-6 space-y-6 shadow-xs">
             {/* Header */}
-            <div className="flex items-center justify-between pb-4 border-b border-[#E2DCCE]/60 dark:border-white/10">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[var(--theme-border)]">
                 <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-2xl bg-[#2C5E3B]/10 dark:bg-[#A9CBA2]/10 border border-[#2C5E3B]/20 flex items-center justify-center text-[#2C5E3B] dark:text-[#A9CBA2]">
-                        <ShieldAlert size={24} />
+                    <div className="w-10 h-10 rounded-xl bg-[#0071E3]/10 dark:bg-[#2997FF]/10 text-[#0071E3] dark:text-[#2997FF] flex items-center justify-center">
+                        <ShieldAlert size={20} />
                     </div>
                     <div>
-                        <h3 className="text-lg font-black text-[#1E3F27] dark:text-[#EAE5D9] tracking-tight">
+                        <h3 className="text-base font-semibold text-[var(--theme-text-primary)]">
                             Retail Loss Prevention & POS Security
                         </h3>
-                        <p className="text-xs text-[#4D6E56] dark:text-[#7A9E83]">
-                            Manage Supervisor PIN overrides, Blind Drawer count, and anti-fraud thresholds.
+                        <p className="text-xs text-[var(--theme-text-secondary)]">
+                            Manage Supervisor PIN overrides, blind drawer reconciliation, and anti-fraud lock thresholds.
                         </p>
                     </div>
                 </div>
-                <span className="px-3 py-1 bg-emerald-50 dark:bg-[#2C5E3B]/20 text-emerald-800 dark:text-[#A9CBA2] border border-emerald-200 dark:border-emerald-950/30 rounded-full text-xs font-black uppercase tracking-wider">
+                <span className="self-start sm:self-auto px-2.5 py-1 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 rounded-full text-[11px] font-semibold tracking-wide">
                     Loss Prevention Active
                 </span>
             </div>
 
             {/* Manager PIN Setup */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="p-5 rounded-2xl bg-[#FAF8F5] dark:bg-black/20 border border-[#E2DCCE] dark:border-white/5 space-y-3">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="p-4 rounded-xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] space-y-3">
                     <div className="flex items-center justify-between">
-                        <label className="text-xs font-black text-[#1E3F27] dark:text-white uppercase tracking-wider flex items-center gap-2">
-                            <KeyRound size={16} className="text-[#2C5E3B] dark:text-[#A9CBA2]" />
+                        <label className="text-xs font-semibold text-[var(--theme-text-primary)] flex items-center gap-2">
+                            <KeyRound size={15} className="text-[#0071E3] dark:text-[#2997FF]" />
                             Manager Override PIN
                         </label>
                         <button
                             type="button"
                             onClick={() => setShowPin(!showPin)}
-                            className="text-xs text-stone-500 hover:text-[#2C5E3B] dark:hover:text-white flex items-center gap-1 cursor-pointer font-bold"
+                            className="text-xs text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] flex items-center gap-1 cursor-pointer font-medium"
                         >
                             {showPin ? <EyeOff size={14} /> : <Eye size={14} />}
                             {showPin ? 'Hide' : 'Reveal'}
                         </button>
                     </div>
-                    <p className="text-[11px] text-[#4D6E56] dark:text-gray-400 leading-relaxed">
-                        4-digit authorization PIN used for approving cash refunds, shift variances, and high-value barcode mappings.
+                    <p className="text-xs text-[var(--theme-text-secondary)] leading-relaxed">
+                        4-8 digit authorization PIN used for approving cash refunds, shift variances, and high-value barcode overrides.
                     </p>
                     <input
                         type={showPin ? "text" : "password"}
@@ -86,21 +90,23 @@ export const RetailLossPreventionCard: React.FC = () => {
                         value={pin}
                         onChange={(e) => setPin(e.target.value.replace(/\D/g, ''))}
                         placeholder="1234"
-                        className="w-full bg-white dark:bg-black/40 border border-[#E2DCCE] dark:border-white/10 rounded-xl px-4 py-3 font-mono text-lg font-black text-[#1E3F27] dark:text-white outline-none focus:border-[#2C5E3B] dark:focus:border-[#A9CBA2] transition-colors"
+                        className="w-full bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl px-3.5 py-2.5 font-mono text-base font-bold text-[var(--theme-text-primary)] outline-none focus:border-[#0071E3] dark:focus:border-[#2997FF] transition-colors"
                     />
                 </div>
 
                 {/* High Value Barcode Lock Threshold */}
-                <div className="p-5 rounded-2xl bg-[#FAF8F5] dark:bg-black/20 border border-[#E2DCCE] dark:border-white/5 space-y-3">
-                    <label className="text-xs font-black text-[#1E3F27] dark:text-white uppercase tracking-wider flex items-center gap-2">
-                        <ScanLine size={16} className="text-[#2C5E3B] dark:text-[#A9CBA2]" />
+                <div className="p-4 rounded-xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] space-y-3">
+                    <label className="text-xs font-semibold text-[var(--theme-text-primary)] flex items-center gap-2">
+                        <ScanLine size={15} className="text-[#0071E3] dark:text-[#2997FF]" />
                         High-Value Barcode Anomaly Lock
                     </label>
-                    <p className="text-[11px] text-[#4D6E56] dark:text-gray-400 leading-relaxed">
-                        Items priced at or above this amount require mandatory live camera proof and Supervisor PIN before barcode mapping.
+                    <p className="text-xs text-[var(--theme-text-secondary)] leading-relaxed">
+                        Items priced at or above this amount require mandatory live verification and Supervisor PIN before barcode mapping.
                     </p>
                     <div className="flex items-center gap-2">
-                        <span className="font-bold text-xs text-stone-500">{CURRENCY_SYMBOL}</span>
+                        <span className="font-semibold text-xs text-[var(--theme-text-secondary)] px-2 py-1 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-lg">
+                            {currency}
+                        </span>
                         <input
                             type="number"
                             min="100"
@@ -108,55 +114,73 @@ export const RetailLossPreventionCard: React.FC = () => {
                             value={threshold}
                             onChange={(e) => setThreshold(e.target.value)}
                             placeholder="3000"
-                            className="flex-1 bg-white dark:bg-black/40 border border-[#E2DCCE] dark:border-white/10 rounded-xl px-4 py-3 font-mono text-base font-black text-[#1E3F27] dark:text-white outline-none focus:border-[#2C5E3B] dark:focus:border-[#A9CBA2] transition-colors"
+                            className="flex-1 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl px-3.5 py-2.5 font-mono text-sm font-semibold text-[var(--theme-text-primary)] outline-none focus:border-[#0071E3] dark:focus:border-[#2997FF] transition-colors"
                         />
                     </div>
                 </div>
             </div>
 
             {/* Policy Toggles */}
-            <div className="space-y-3 pt-2">
-                <h4 className="text-xs font-black text-[#4D6E56] dark:text-[#7A9E83] uppercase tracking-wider">
+            <div className="space-y-3 pt-1">
+                <h4 className="text-xs font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider">
                     Anti-Fraud Enforcements
                 </h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div
                         onClick={() => setBlindClose(!blindClose)}
-                        className="p-4 rounded-2xl bg-[#FAF8F5] dark:bg-black/20 border border-[#E2DCCE] dark:border-white/5 flex items-center justify-between cursor-pointer hover:border-[#2C5E3B]/30 transition-all"
+                        className="p-4 rounded-xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] flex items-center justify-between cursor-pointer hover:border-[#0071E3]/30 transition-all"
                     >
                         <div className="pr-4 space-y-0.5">
-                            <p className="text-xs font-black text-[#1E3F27] dark:text-white">Enforce Blind Shift Close</p>
-                            <p className="text-[11px] text-stone-500 dark:text-gray-400">Conceal expected cash tallies in POS to eliminate drawer skimming.</p>
+                            <p className="text-xs font-semibold text-[var(--theme-text-primary)]">Enforce Blind Shift Close</p>
+                            <p className="text-xs text-[var(--theme-text-secondary)]">Conceal expected cash tallies in POS to eliminate drawer skimming.</p>
                         </div>
-                        <div className={`w-11 h-6 rounded-full p-1 transition-all ${blindClose ? 'bg-[#2C5E3B]' : 'bg-stone-300 dark:bg-stone-700'}`}>
-                            <div className={`w-4 h-4 rounded-full bg-white transition-transform ${blindClose ? 'translate-x-5' : 'translate-x-0'}`} />
-                        </div>
+                        <button
+                            type="button"
+                            role="switch"
+                            aria-checked={blindClose}
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                setBlindClose(!blindClose);
+                            }}
+                            className={`w-11 h-6 rounded-full p-0.5 transition-colors relative cursor-pointer flex-shrink-0 ${blindClose ? 'bg-[#0071E3] dark:bg-[#2997FF]' : 'bg-[var(--theme-border)]'}`}
+                        >
+                            <div className={`w-5 h-5 rounded-full bg-white shadow-xs transition-transform ${blindClose ? 'translate-x-5' : 'translate-x-0'}`} />
+                        </button>
                     </div>
 
                     <div
                         onClick={() => setRequireRefundPin(!requireRefundPin)}
-                        className="p-4 rounded-2xl bg-[#FAF8F5] dark:bg-black/20 border border-[#E2DCCE] dark:border-white/5 flex items-center justify-between cursor-pointer hover:border-[#2C5E3B]/30 transition-all"
+                        className="p-4 rounded-xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] flex items-center justify-between cursor-pointer hover:border-[#0071E3]/30 transition-all"
                     >
                         <div className="pr-4 space-y-0.5">
-                            <p className="text-xs font-black text-[#1E3F27] dark:text-white">Require PIN on Cash Refunds</p>
-                            <p className="text-[11px] text-stone-500 dark:text-gray-400">Prevent phantom returns by requiring supervisor authorization.</p>
+                            <p className="text-xs font-semibold text-[var(--theme-text-primary)]">Require PIN on Cash Refunds</p>
+                            <p className="text-xs text-[var(--theme-text-secondary)]">Prevent phantom returns by requiring supervisor authorization.</p>
                         </div>
-                        <div className={`w-11 h-6 rounded-full p-1 transition-all ${requireRefundPin ? 'bg-[#2C5E3B]' : 'bg-stone-300 dark:bg-stone-700'}`}>
-                            <div className={`w-4 h-4 rounded-full bg-white transition-transform ${requireRefundPin ? 'translate-x-5' : 'translate-x-0'}`} />
-                        </div>
+                        <button
+                            type="button"
+                            role="switch"
+                            aria-checked={requireRefundPin}
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                setRequireRefundPin(!requireRefundPin);
+                            }}
+                            className={`w-11 h-6 rounded-full p-0.5 transition-colors relative cursor-pointer flex-shrink-0 ${requireRefundPin ? 'bg-[#0071E3] dark:bg-[#2997FF]' : 'bg-[var(--theme-border)]'}`}
+                        >
+                            <div className={`w-5 h-5 rounded-full bg-white shadow-xs transition-transform ${requireRefundPin ? 'translate-x-5' : 'translate-x-0'}`} />
+                        </button>
                     </div>
                 </div>
             </div>
 
             {/* Save Action */}
-            <div className="flex justify-end pt-4 border-t border-[#E2DCCE]/60 dark:border-white/10">
+            <div className="flex justify-end pt-4 border-t border-[var(--theme-border)]">
                 <button
                     type="button"
                     onClick={handleSave}
                     disabled={isSaving}
-                    className="px-6 py-3 bg-gradient-to-r from-[#224429] to-[#2C5E3B] text-white font-bold rounded-xl flex items-center gap-2 hover:opacity-90 active:scale-[0.98] transition-all shadow-md cursor-pointer text-xs uppercase tracking-wider disabled:opacity-50"
+                    className="h-9 px-4 bg-[#0071E3] dark:bg-[#2997FF] hover:opacity-90 active:scale-[0.98] text-white font-semibold rounded-xl text-xs shadow-xs transition-all flex items-center gap-2 cursor-pointer disabled:opacity-50"
                 >
-                    {isSaving ? <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <Save size={16} />}
+                    {isSaving ? <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <Save size={15} />}
                     Save Security Policies
                 </button>
             </div>

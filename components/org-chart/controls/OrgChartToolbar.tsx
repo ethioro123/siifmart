@@ -3,52 +3,51 @@ import { Site } from '../../../types';
 import { OrgChartFilterState, OrgViewMode } from '../types';
 import {
     Search,
-    Filter,
-    Network,
     LayoutGrid,
-    ChevronsDownUp,
-    ChevronsUpDown,
     Printer,
-    Users
+    Users,
+    RotateCcw,
+    Shield,
+    X
 } from 'lucide-react';
 
 interface OrgChartToolbarProps {
     filters: OrgChartFilterState;
     setFilters: React.Dispatch<React.SetStateAction<OrgChartFilterState>>;
-    viewMode: OrgViewMode;
-    setViewMode: (mode: OrgViewMode) => void;
+    viewMode?: OrgViewMode;
+    setViewMode?: (mode: OrgViewMode) => void;
     sites?: Site[];
     customDepartments?: { id: string; label: string }[];
     totalCount: number;
+    activeCount?: number;
     isDark: boolean;
     onExpandAll?: () => void;
     onCollapseAll?: () => void;
     onPrint?: () => void;
+    onResetFilters?: () => void;
 }
 
 export const OrgChartToolbar: React.FC<OrgChartToolbarProps> = ({
     filters,
     setFilters,
-    viewMode,
-    setViewMode,
     sites = [],
     customDepartments = [],
     totalCount,
+    activeCount,
     isDark,
-    onExpandAll,
-    onCollapseAll,
-    onPrint
+    onPrint,
+    onResetFilters
 }) => {
     const departments = React.useMemo(() => {
         const base = [
             { id: '', label: 'All Departments' },
             { id: 'executive', label: 'Executive' },
-            { id: 'store', label: 'Store Ops' },
+            { id: 'store', label: 'Store Operations' },
             { id: 'warehouse', label: 'Warehouse & Logistics' },
-            { id: 'finance', label: 'Finance' },
+            { id: 'finance', label: 'Finance & Accounts' },
             { id: 'hr', label: 'Human Resources' },
-            { id: 'procurement', label: 'Procurement' },
-            { id: 'support', label: 'IT & Support' },
+            { id: 'procurement', label: 'Procurement & Supply' },
+            { id: 'support', label: 'IT & Loss Prevention' },
         ];
         customDepartments.forEach(cd => {
             if (!base.some(d => d.id === cd.id)) {
@@ -58,71 +57,89 @@ export const OrgChartToolbar: React.FC<OrgChartToolbarProps> = ({
         return base;
     }, [customDepartments]);
 
+    const hasActiveFilters = Boolean(
+        filters.searchTerm ||
+        filters.siteId ||
+        filters.department ||
+        filters.status ||
+        filters.hierarchyLevel
+    );
+
+    const handleClearSearch = () => {
+        setFilters(prev => ({ ...prev, searchTerm: '' }));
+    };
+
+    const handleReset = () => {
+        if (onResetFilters) {
+            onResetFilters();
+        } else {
+            setFilters({
+                searchTerm: '',
+                siteId: '',
+                department: '',
+                status: '',
+                hierarchyLevel: null
+            });
+        }
+    };
+
     return (
-        <div className={`flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3 p-3 rounded-2xl border transition-colors ${
-            isDark ? 'bg-[#18201B] border-[#2C4D35]' : 'bg-white border-[#E2DCCE] shadow-sm'
+        <div className={`flex flex-col xl:flex-row items-stretch xl:items-center justify-between gap-3 p-3.5 rounded-2xl border transition-colors ${
+            isDark ? 'bg-[#18201B] border-[#2C4D35]' : 'bg-white border-[#E2DCCE] shadow-xs'
         }`}>
-            {/* Left: View Mode Switcher + Headcount */}
-            <div className="flex items-center gap-2.5">
-                <div className="flex bg-stone-100 dark:bg-black/40 border border-stone-200 dark:border-[#2C4D35] rounded-xl p-1">
-                    <button
-                        type="button"
-                        onClick={() => setViewMode('tree')}
-                        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-                            viewMode === 'tree'
-                                ? 'bg-[#2C5E3B] text-white shadow-sm'
-                                : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-white'
-                        }`}
-                        title="Interactive Top-Down Hierarchy Tree"
-                    >
-                        <Network size={14} />
-                        <span>Tree View</span>
-                    </button>
-
-                    <button
-                        type="button"
-                        onClick={() => setViewMode('matrix')}
-                        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-                            viewMode === 'matrix'
-                                ? 'bg-[#2C5E3B] text-white shadow-sm'
-                                : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-white'
-                        }`}
-                        title="Department & Site Matrix View"
-                    >
-                        <LayoutGrid size={14} />
-                        <span>Matrix</span>
-                    </button>
+            {/* Left: Matrix Branding & Headcount Badges */}
+            <div className="flex items-center gap-2.5 flex-wrap">
+                <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-[#2C5E3B]/10 dark:bg-[#A9CBA2]/15 text-[#2C5E3B] dark:text-[#A9CBA2] border border-[#2C5E3B]/20">
+                    <LayoutGrid size={15} />
+                    <span className="text-xs font-black uppercase tracking-wider">Enterprise Matrix</span>
                 </div>
 
-                <div className="hidden sm:flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl border border-stone-200 dark:border-[#2C4D35] bg-[#FAF8F5] dark:bg-[#1E2822] text-xs font-semibold text-[#2C5E3B] dark:text-[#A9CBA2]">
-                    <Users size={14} />
-                    <span>{totalCount} Staff</span>
+                <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl border border-stone-200 dark:border-stone-800 bg-[#FAF8F5] dark:bg-[#1E2822] text-xs font-semibold text-stone-700 dark:text-stone-300">
+                    <Users size={13} className="text-[#2C5E3B] dark:text-[#A9CBA2]" />
+                    <span>{totalCount} Personnel</span>
                 </div>
+
+                {typeof activeCount === 'number' && (
+                    <div className="hidden sm:flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl border border-emerald-500/20 bg-emerald-500/10 text-xs font-semibold text-emerald-700 dark:text-emerald-400">
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                        <span>{activeCount} Active</span>
+                    </div>
+                )}
             </div>
 
-            {/* Right: Search, Filters, Branch Folding, Print */}
+            {/* Right: Search & Matrix Filtering Controls */}
             <div className="flex flex-wrap items-center gap-2">
                 {/* Search Bar */}
-                <div className="relative flex-1 sm:w-56">
+                <div className="relative flex-1 sm:w-56 min-w-[180px]">
                     <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-400" />
                     <input
                         type="text"
                         value={filters.searchTerm}
                         onChange={(e) => setFilters(prev => ({ ...prev, searchTerm: e.target.value }))}
                         placeholder="Search name, role, code..."
-                        className={`w-full pl-8 pr-3 py-1.5 text-xs rounded-xl border outline-none transition-colors ${
+                        className={`w-full pl-8 pr-7 py-1.5 text-xs rounded-xl border outline-none transition-colors ${
                             isDark
                                 ? 'bg-[#1E2822] border-[#2C4D35] text-white placeholder-stone-500 focus:border-[#A9CBA2]'
                                 : 'bg-[#FAF8F5] border-[#E2DCCE] text-stone-900 placeholder-stone-400 focus:border-[#2C5E3B]'
                         }`}
                     />
+                    {filters.searchTerm && (
+                        <button
+                            type="button"
+                            onClick={handleClearSearch}
+                            className="absolute right-2 top-1/2 -translate-y-1/2 p-0.5 rounded text-stone-400 hover:text-stone-600 dark:hover:text-stone-200"
+                            title="Clear search"
+                        >
+                            <X size={12} />
+                        </button>
+                    )}
                 </div>
 
-                {/* Site Filter */}
+                {/* Facility / Site Filter */}
                 <select
                     value={filters.siteId}
                     onChange={(e) => setFilters(prev => ({ ...prev, siteId: e.target.value }))}
-                    title="Filter by site or facility"
+                    title="Filter by facility or operational site"
                     className={`px-2.5 py-1.5 text-xs rounded-xl border outline-none cursor-pointer transition-colors ${
                         isDark
                             ? 'bg-[#1E2822] border-[#2C4D35] text-stone-200 focus:border-[#A9CBA2]'
@@ -139,7 +156,7 @@ export const OrgChartToolbar: React.FC<OrgChartToolbarProps> = ({
                 <select
                     value={filters.department}
                     onChange={(e) => setFilters(prev => ({ ...prev, department: e.target.value }))}
-                    title="Filter by corporate department"
+                    title="Filter by department swimlane"
                     className={`px-2.5 py-1.5 text-xs rounded-xl border outline-none cursor-pointer transition-colors ${
                         isDark
                             ? 'bg-[#1E2822] border-[#2C4D35] text-stone-200 focus:border-[#A9CBA2]'
@@ -151,30 +168,56 @@ export const OrgChartToolbar: React.FC<OrgChartToolbarProps> = ({
                     ))}
                 </select>
 
-                {/* Tree Expand/Collapse All (Tree mode only) */}
-                {viewMode === 'tree' && (
-                    <div className="flex items-center gap-1 border-l border-stone-200 dark:border-stone-800 pl-2">
-                        {onExpandAll && (
-                            <button
-                                type="button"
-                                onClick={onExpandAll}
-                                className="p-1.5 rounded-lg border border-stone-200 dark:border-[#2C4D35] hover:bg-stone-100 dark:hover:bg-white/10 text-stone-600 dark:text-stone-300 transition-colors cursor-pointer"
-                                title="Expand All Branches"
-                            >
-                                <ChevronsUpDown size={15} />
-                            </button>
-                        )}
-                        {onCollapseAll && (
-                            <button
-                                type="button"
-                                onClick={onCollapseAll}
-                                className="p-1.5 rounded-lg border border-stone-200 dark:border-[#2C4D35] hover:bg-stone-100 dark:hover:bg-white/10 text-stone-600 dark:text-stone-300 transition-colors cursor-pointer"
-                                title="Collapse All Branches"
-                            >
-                                <ChevronsDownUp size={15} />
-                            </button>
-                        )}
-                    </div>
+                {/* Hierarchy Level Filter (L1 - L4) */}
+                <select
+                    value={filters.hierarchyLevel ? String(filters.hierarchyLevel) : ''}
+                    onChange={(e) => setFilters(prev => ({
+                        ...prev,
+                        hierarchyLevel: e.target.value ? Number(e.target.value) : null
+                    }))}
+                    title="Filter by command hierarchy level"
+                    className={`px-2.5 py-1.5 text-xs rounded-xl border outline-none cursor-pointer transition-colors ${
+                        isDark
+                            ? 'bg-[#1E2822] border-[#2C4D35] text-stone-200 focus:border-[#A9CBA2]'
+                            : 'bg-[#FAF8F5] border-[#E2DCCE] text-stone-700 focus:border-[#2C5E3B]'
+                    }`}
+                >
+                    <option value="">All Hierarchy Tiers</option>
+                    <option value="1">L1: Executive Leadership</option>
+                    <option value="2">L2: Directorates & Regional</option>
+                    <option value="3">L3: Operations Supervisors</option>
+                    <option value="4">L4: Frontline Specialists</option>
+                </select>
+
+                {/* Status Filter */}
+                <select
+                    value={filters.status}
+                    onChange={(e) => setFilters(prev => ({ ...prev, status: e.target.value }))}
+                    title="Filter by employee operational status"
+                    className={`px-2.5 py-1.5 text-xs rounded-xl border outline-none cursor-pointer transition-colors ${
+                        isDark
+                            ? 'bg-[#1E2822] border-[#2C4D35] text-stone-200 focus:border-[#A9CBA2]'
+                            : 'bg-[#FAF8F5] border-[#E2DCCE] text-stone-700 focus:border-[#2C5E3B]'
+                    }`}
+                >
+                    <option value="">All Statuses</option>
+                    <option value="Active">Active</option>
+                    <option value="On Leave">On Leave</option>
+                    <option value="Suspended">Suspended</option>
+                    <option value="Terminated">Terminated</option>
+                </select>
+
+                {/* Reset Filters Button */}
+                {hasActiveFilters && (
+                    <button
+                        type="button"
+                        onClick={handleReset}
+                        className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl border border-amber-500/30 bg-amber-500/10 hover:bg-amber-500/20 text-amber-700 dark:text-amber-400 text-xs font-semibold transition-colors cursor-pointer"
+                        title="Reset all active filters"
+                    >
+                        <RotateCcw size={12} />
+                        <span>Reset</span>
+                    </button>
                 )}
 
                 {/* Print button */}
@@ -182,8 +225,8 @@ export const OrgChartToolbar: React.FC<OrgChartToolbarProps> = ({
                     <button
                         type="button"
                         onClick={onPrint}
-                        className="p-1.5 rounded-lg border border-stone-200 dark:border-[#2C4D35] hover:bg-stone-100 dark:hover:bg-white/10 text-stone-600 dark:text-stone-300 transition-colors cursor-pointer"
-                        title="Print Org Chart"
+                        className="p-1.5 rounded-xl border border-stone-200 dark:border-[#2C4D35] hover:bg-stone-100 dark:hover:bg-white/10 text-stone-600 dark:text-stone-300 transition-colors cursor-pointer"
+                        title="Print Organizational Matrix"
                     >
                         <Printer size={15} />
                     </button>

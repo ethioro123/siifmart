@@ -4,7 +4,7 @@ import { useLanguage } from '../../../contexts/LanguageContext';
 import { useStore } from '../../../contexts/CentralStore';
 import { useData } from '../../../contexts/DataContext';
 import { CURRENCY_SYMBOL } from '../../../constants';
-import { ShieldCheck, CheckCircle2, Zap, Play, Lock } from 'lucide-react';
+import { ShieldCheck, CheckCircle2, Zap, Play, Lock, Banknote, CreditCard, Smartphone } from 'lucide-react';
 
 export const ShiftProgress: React.FC = () => {
     const { t } = useLanguage();
@@ -25,12 +25,12 @@ export const ShiftProgress: React.FC = () => {
     // Inactive drawer zero-state for cashiers without an active shift
     if (!activeShift && !isCentralHQ) {
         return (
-            <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-6 lg:p-8 shadow-xs">
+            <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-6 lg:p-8 shadow-xs isolate">
                 <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
                     <div className="space-y-2">
                         <div className="flex items-center gap-2">
                             <span className="w-2.5 h-2.5 rounded-full bg-amber-500" />
-                            <h3 className="text-xs font-bold uppercase tracking-wider text-[var(--theme-text-secondary)]">
+                            <h3 className="text-xs font-semibold uppercase tracking-wider text-[var(--theme-text-secondary)]">
                                 Cash Drawer Closed • Daily Shift Inactive
                             </h3>
                         </div>
@@ -44,10 +44,10 @@ export const ShiftProgress: React.FC = () => {
 
                     <button
                         onClick={() => setIsStartShiftModalOpen(true)}
-                        className="px-6 py-3.5 bg-[var(--theme-primary)] hover:opacity-90 text-[var(--theme-primary-text)] text-xs font-bold uppercase tracking-wider rounded-xl shadow-xs transition-all flex items-center gap-2.5 active:scale-95 cursor-pointer shrink-0"
+                        className="px-6 py-3.5 bg-[var(--theme-primary)] hover:opacity-90 text-[var(--theme-primary-text)] text-xs font-semibold uppercase tracking-wider rounded-2xl shadow-xs transition-all flex items-center gap-2.5 active:scale-95 cursor-pointer shrink-0"
                     >
-                        <Play size={16} className="fill-current" />
-                        <span>Open Drawer & Start Shift</span>
+                        <Play size={15} className="fill-current" />
+                        <span>Open Drawer &amp; Start Shift</span>
                     </button>
                 </div>
             </div>
@@ -67,14 +67,14 @@ export const ShiftProgress: React.FC = () => {
         : Math.min((shiftTxCount / dailyTxTarget) * 100, 100);
 
     return (
-        <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-6 lg:p-8 shadow-xs">
+        <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-6 lg:p-8 shadow-xs isolate">
             <div>
                 {/* Header row */}
                 <div className="flex justify-between items-end mb-6">
                     <div>
                         <div className="flex items-center gap-2 mb-2">
                             <div className="w-2 h-2 rounded-full bg-[var(--theme-primary)]" />
-                            <h3 className="text-[var(--theme-text-secondary)] text-xs font-bold uppercase tracking-wider select-none">
+                            <h3 className="text-[var(--theme-text-secondary)] text-xs font-semibold uppercase tracking-wider select-none">
                                 {dateRange} {isCentralHQ ? t('posCommand.shiftTarget') : "Order Target"}
                             </h3>
                         </div>
@@ -121,27 +121,34 @@ export const ShiftProgress: React.FC = () => {
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     {isCentralHQ ? (
                         [
-                            { label: t('pos.cash'), display: `${CURRENCY_SYMBOL} ${getShiftSummary().cash.toLocaleString()}` },
-                            { label: t('pos.card'), display: `${CURRENCY_SYMBOL} ${getShiftSummary().card.toLocaleString()}` },
-                            { label: t('pos.mobileMoney'), display: `${CURRENCY_SYMBOL} ${getShiftSummary().mobile.toLocaleString()}` },
-                        ].map(({ label, display }) => (
-                            <div key={label} className="bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl p-4 transition-colors hover:bg-[var(--theme-bg-card-hover)]">
-                                <p className="text-[var(--theme-text-secondary)] text-[10px] uppercase font-bold tracking-wider select-none mb-1.5">{label}</p>
-                                <p className="text-lg font-mono font-bold tracking-tight text-[var(--theme-text-primary)]">{display}</p>
+                            { label: t('pos.cash'), display: `${CURRENCY_SYMBOL} ${getShiftSummary().cash.toLocaleString()}`, icon: Banknote, color: 'bg-emerald-500/10 text-emerald-500' },
+                            { label: t('pos.card'), display: `${CURRENCY_SYMBOL} ${getShiftSummary().card.toLocaleString()}`, icon: CreditCard, color: 'bg-blue-500/10 text-blue-500' },
+                            { label: t('pos.mobileMoney'), display: `${CURRENCY_SYMBOL} ${getShiftSummary().mobile.toLocaleString()}`, icon: Smartphone, color: 'bg-purple-500/10 text-purple-500' },
+                        ].map(({ label, display, icon: Icon, color }) => (
+                            <div key={label} className="bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-2xl p-4 transition-colors hover:bg-[var(--theme-bg-card-hover)] flex items-center gap-3.5 shadow-2xs">
+                                <div className={`w-10 h-10 rounded-xl ${color} flex items-center justify-center shrink-0`}>
+                                    <Icon size={18} />
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                    <p className="text-[var(--theme-text-secondary)] text-[10px] uppercase font-bold tracking-wider select-none mb-0.5">{label}</p>
+                                    <p className="text-lg font-mono font-bold tracking-tight text-[var(--theme-text-primary)] truncate">{display}</p>
+                                </div>
                             </div>
                         ))
                     ) : (
                         [
-                            { label: "Completed Orders", display: `${shiftTxCount} Processed`, icon: CheckCircle2 },
-                            { label: "Speed & Pace", display: "On Schedule", icon: Zap },
-                            { label: "Drawer Protocol", display: "Blind Active", icon: Lock },
-                        ].map(({ label, display, icon: Icon }) => (
-                            <div key={label} className="bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl p-4 transition-colors hover:bg-[var(--theme-bg-card-hover)]">
-                                <div className="flex items-center gap-1.5 mb-1.5">
-                                    <Icon size={13} className="text-[var(--theme-text-secondary)]" />
-                                    <p className="text-[var(--theme-text-secondary)] text-[10px] uppercase font-bold tracking-wider select-none">{label}</p>
+                            { label: "Completed Orders", display: `${shiftTxCount} Processed`, icon: CheckCircle2, color: 'bg-emerald-500/10 text-emerald-500' },
+                            { label: "Speed & Pace", display: "On Schedule", icon: Zap, color: 'bg-amber-500/10 text-amber-500' },
+                            { label: "Drawer Protocol", display: "Blind Active", icon: Lock, color: 'bg-indigo-500/10 text-indigo-500' },
+                        ].map(({ label, display, icon: Icon, color }) => (
+                            <div key={label} className="bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-2xl p-4 transition-colors hover:bg-[var(--theme-bg-card-hover)] flex items-center gap-3.5 shadow-2xs">
+                                <div className={`w-10 h-10 rounded-xl ${color} flex items-center justify-center shrink-0`}>
+                                    <Icon size={18} />
                                 </div>
-                                <p className="text-base font-bold tracking-tight text-[var(--theme-text-primary)] font-mono">{display}</p>
+                                <div className="flex-1 min-w-0">
+                                    <p className="text-[var(--theme-text-secondary)] text-[10px] uppercase font-bold tracking-wider select-none mb-0.5">{label}</p>
+                                    <p className="text-base font-bold tracking-tight text-[var(--theme-text-primary)] font-mono truncate">{display}</p>
+                                </div>
                             </div>
                         ))
                     )}

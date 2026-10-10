@@ -58,31 +58,31 @@ export const StartShiftModal: React.FC = () => {
                 {/* Cashier & Station Header */}
                 <div className="p-4 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-2xl space-y-2.5">
                     <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                            <div className="w-8 h-8 rounded-full bg-[var(--theme-bg-card)] border border-[var(--theme-border)] flex items-center justify-center text-[var(--theme-text-primary)]">
+                        <div className="flex items-center gap-2.5">
+                            <div className="w-8 h-8 rounded-xl bg-blue-500/10 text-blue-500 flex items-center justify-center shrink-0">
                                 <User size={16} />
                             </div>
                             <div>
-                                <p className="text-xs font-bold text-[var(--theme-text-primary)] leading-tight">{user?.name || 'Cashier'}</p>
-                                <p className="text-xs text-[var(--theme-text-secondary)] font-mono uppercase font-semibold">{user?.role || 'Staff'}</p>
+                                <p className="text-xs font-semibold text-[var(--theme-text-primary)] leading-tight tracking-tight">{user?.name || 'Cashier'}</p>
+                                <p className="text-[11px] text-[var(--theme-text-secondary)] font-mono uppercase font-semibold">{user?.role || 'Staff'}</p>
                             </div>
                         </div>
 
-                        <div className="flex items-center gap-1 text-xs font-bold text-[var(--theme-primary)] bg-[var(--theme-bg-card)] px-2.5 py-1 rounded-xl border border-[var(--theme-border)]">
-                            <Store size={13} />
+                        <div className="flex items-center gap-1.5 text-xs font-semibold text-[var(--theme-text-primary)] bg-[var(--theme-bg-card)] px-3 py-1.5 rounded-xl border border-[var(--theme-border)] shadow-xs">
+                            <Store size={13} className="text-emerald-500" />
                             <span>{activeSite?.name || 'POS Station'}</span>
                         </div>
                     </div>
 
-                    <div className="flex items-center gap-1.5 text-xs font-medium text-[var(--theme-text-secondary)] pt-1 border-t border-[var(--theme-border)]">
-                        <Clock size={12} />
+                    <div className="flex items-center gap-1.5 text-xs font-medium text-[var(--theme-text-secondary)] pt-2 border-t border-[var(--theme-border-subtle)]">
+                        <Clock size={13} className="text-amber-500" />
                         <span>Shift starting now ({new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })})</span>
                     </div>
                 </div>
 
                 {/* Opening Cash Float Input */}
                 <div className="space-y-3">
-                    <label className="block text-xs font-black uppercase tracking-wider text-[var(--theme-text-primary)]">
+                    <label className="block text-xs font-semibold uppercase tracking-wider text-[var(--theme-text-secondary)]">
                         Opening Drawer Cash Float ({CURRENCY_SYMBOL})
                     </label>
 
@@ -96,7 +96,7 @@ export const StartShiftModal: React.FC = () => {
                             step="1"
                             value={openingFloat}
                             onChange={(e) => setOpeningFloat(e.target.value)}
-                            className="w-full pl-14 pr-4 py-3.5 bg-[var(--theme-bg-card)] border-2 border-[var(--theme-border)] rounded-2xl font-mono text-2xl font-black text-[var(--theme-text-primary)] outline-none focus:border-[var(--theme-border-focus)] transition-colors tabular-nums"
+                            className="w-full pl-14 pr-4 py-3.5 bg-[var(--theme-bg-card)] border-2 border-[var(--theme-border)] rounded-2xl font-mono text-2xl font-black text-[var(--theme-text-primary)] outline-none focus:border-[var(--theme-border-focus)] transition-all tabular-nums tracking-tight"
                             placeholder="2000"
                             autoFocus
                         />
@@ -112,10 +112,10 @@ export const StartShiftModal: React.FC = () => {
                                     setOpeningFloat(String(amount));
                                     native.haptic();
                                 }}
-                                className={`py-2 px-1 rounded-xl text-xs font-bold border transition-colors cursor-pointer text-center tabular-nums ${
+                                className={`py-2.5 px-1 rounded-xl text-xs font-mono font-bold border transition-all cursor-pointer text-center tabular-nums active:scale-95 shadow-xs ${
                                     floatNum === amount
-                                        ? 'bg-[var(--theme-text-primary)] border-[var(--theme-text-primary)] text-[var(--theme-bg-app)] shadow-xs'
-                                        : 'bg-[var(--theme-bg-card)] border-[var(--theme-border)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:border-[var(--theme-border-strong)]'
+                                        ? 'bg-[var(--theme-primary)] border-transparent text-[var(--theme-primary-text)]'
+                                        : 'bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-card-hover)]'
                                 }`}
                             >
                                 {amount.toLocaleString()}
@@ -125,9 +125,9 @@ export const StartShiftModal: React.FC = () => {
                 </div>
 
                 {/* Anti-Skimming Notice */}
-                <div className="p-3 bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-900/30 rounded-xl flex items-start gap-2.5">
-                    <ShieldCheck size={18} className="text-blue-600 dark:text-blue-400 shrink-0 mt-0.5" />
-                    <p className="text-xs text-blue-900 dark:text-blue-300 leading-relaxed font-medium">
+                <div className="p-3.5 bg-blue-500/10 border border-blue-500/20 rounded-2xl flex items-start gap-2.5">
+                    <ShieldCheck size={18} className="text-blue-500 shrink-0 mt-0.5" />
+                    <p className="text-xs text-[var(--theme-text-primary)] leading-relaxed font-medium">
                         This opening float will be credited to your cash drawer. At shift close, the system will verify your drawer cash against this starting float plus cash sales.
                     </p>
                 </div>
@@ -137,7 +137,7 @@ export const StartShiftModal: React.FC = () => {
                     <button
                         type="button"
                         onClick={handleClose}
-                        className="flex-1 py-3 bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card-hover)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] rounded-xl font-bold uppercase tracking-wider text-xs flex items-center justify-center gap-1.5 transition-colors cursor-pointer border border-[var(--theme-border)] shadow-xs"
+                        className="flex-1 py-3.5 bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card-hover)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] rounded-2xl font-semibold text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer border border-[var(--theme-border)] shadow-xs active:scale-95 tracking-tight"
                     >
                         <ArrowLeft size={15} />
                         <span>Cancel</span>
@@ -146,7 +146,7 @@ export const StartShiftModal: React.FC = () => {
                     <button
                         type="submit"
                         disabled={floatNum < 0 || isSubmitting}
-                        className="flex-2 py-3 bg-[var(--theme-primary)] hover:opacity-90 disabled:opacity-40 text-[var(--theme-primary-text)] rounded-xl font-bold uppercase tracking-wider text-xs flex items-center justify-center gap-2 shadow-xs active:scale-[0.98] transition-all cursor-pointer border border-transparent"
+                        className="flex-2 py-3.5 bg-[var(--theme-primary)] hover:opacity-90 disabled:opacity-40 text-[var(--theme-primary-text)] rounded-2xl font-semibold text-xs flex items-center justify-center gap-2 shadow-xs active:scale-[0.98] transition-all cursor-pointer border border-transparent tracking-tight"
                     >
                         <DollarSign size={15} />
                         <span>{isSubmitting ? 'Starting...' : `Start Shift (${CURRENCY_SYMBOL} ${floatNum.toLocaleString()})`}</span>

@@ -156,6 +156,48 @@ describe('WMS Jobs Zero-Trust Architecture & Country Scoping', () => {
             expect(created.country_code).toBe('KE');
         });
 
+        it('auto-resolves country_code from site when countryCode is omitted in create', async () => {
+            const { mockQueryBuilder } = await import('../../lib/supabase') as any;
+
+            mockQueryBuilder.maybeSingle.mockResolvedValueOnce({
+                data: { country: 'KE' },
+                error: null
+            });
+
+            const insertedRow = {
+                id: 'job-ke-auto',
+                site_id: 'b74b26ff-da36-4381-912c-63c2b45b5d16',
+                country_code: 'KE',
+                type: 'PUTAWAY',
+                status: 'Pending',
+                items_count: 1,
+                line_items: []
+            };
+
+            mockQueryBuilder.single.mockResolvedValueOnce({
+                data: insertedRow,
+                error: null
+            });
+
+            const created = await wmsJobsService.create({
+                siteId: 'b74b26ff-da36-4381-912c-63c2b45b5d16',
+                type: 'PUTAWAY',
+                priority: 'Normal',
+                status: 'Pending',
+                items: 1,
+                lineItems: [{ productId: 'p-1', sku: 'KE-FD001', name: 'Maize Flour', expectedQty: 50, pickedQty: 0, status: 'Pending' }],
+                location: 'DOCK_1'
+            } as any);
+
+            expect(mockQueryBuilder.insert).toHaveBeenCalledWith(
+                expect.objectContaining({
+                    country_code: 'KE',
+                    site_id: 'b74b26ff-da36-4381-912c-63c2b45b5d16'
+                })
+            );
+            expect(created.countryCode).toBe('KE');
+        });
+
         it('maps country_code in update operations and preserves tenant isolation', async () => {
             const { mockQueryBuilder } = await import('../../lib/supabase') as any;
 
@@ -240,6 +282,73 @@ describe('WMS Jobs Zero-Trust Architecture & Country Scoping', () => {
 
             const isItemDeleted = tamperedManifest.length < originalManifest.length;
             expect(isItemDeleted).toBe(true);
+        });
+    });
+
+    describe('Rule 10 — Zero-Eager-History & 25-Item Shelf Architecture', () => {
+        it('getAll with limit=0 fetches active jobs without downloading historical records', async () => {
+            const activeJob = {
+                id: 'active-job-1',
+                site_id: 'site-ke-1',
+                country_code: 'KE',
+                type: 'PICK',
+                status: 'In-Progress',
+                items_count: 3,
+                line_items: []
+            };
+
+            const { mockQueryBuilder } = await import('../../lib/supabase') as any;
+            mockQueryBuilder.select.mockReturnValueOnce({
+                not: vi.fn().mockReturnValue({
+                    order: vi.fn().mockReturnValue({
+                        eq: vi.fn().mockReturnValue({
+                            or: vi.fn().mockResolvedValue({ data: [activeJob], error: null })
+                        })
+                    })
+                })
+            });
+
+            // Calling getAll with default limit=0 (zero history on mount)
+            const result = await wmsJobsService.getAll('site-ke-1', 0, undefined, 'KE');
+
+            expect(result).toHaveLength(1);
+            expect(result[0].id).toBe('active-job-1');
+            expect(result[0].status).toBe('In-Progress');
+        });
+
+        it('getHistory executes on-demand query with default limit of 25 and country scoping', async () => {
+            const historicalJob = {
+                id: 'hist-job-1',
+                site_id: 'site-ke-1',
+                country_code: 'KE',
+                type: 'PICK',
+                status: 'Completed',
+                items_count: 2,
+                completed_by: 'emp-001',
+                completed_at: new Date().toISOString(),
+                line_items: []
+            };
+
+            const { mockQueryBuilder } = await import('../../lib/supabase') as any;
+            mockQueryBuilder.select.mockReturnValueOnce({
+                in: vi.fn().mockReturnValue({
+                    order: vi.fn().mockReturnValue({
+                        limit: vi.fn().mockReturnValue({
+                            eq: vi.fn().mockReturnValue({
+                                or: vi.fn().mockResolvedValue({ data: [historicalJob], error: null })
+                            })
+                        })
+                    })
+                })
+            });
+
+            const history = await wmsJobsService.getHistory('site-ke-1', 25, undefined, 'KE');
+
+            expect(history).toHaveLength(1);
+            expect(history[0].id).toBe('hist-job-1');
+            expect(history[0].status).toBe('Completed');
+            expect(history[0].completedBy).toBe('emp-001');
+            expect(history[0].countryCode).toBe('KE');
         });
     });
 });

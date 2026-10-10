@@ -1,7 +1,7 @@
 import { supabase } from '../lib/supabase';
 import type { Employee } from '../types';
 import type { Country } from '../utils/localization';
-import { getRoleHierarchy } from '../utils/roles';
+import { getRoleHierarchy, MANAGERIAL_ROLES } from '../utils/roles';
 import { formatEmployeeCode, parseEmployeeCode, normalizeCountryCode } from '../utils/employeeIdGenerator';
 
 export interface EmployeeFilters {
@@ -10,6 +10,7 @@ export interface EmployeeFilters {
     department?: string;
     country?: Country;
     countrySiteIds?: string[];
+    onlyManagers?: boolean;
 }
 
 interface RawDbEmployee {
@@ -75,14 +76,18 @@ function mapDbEmployeeToEmployee(e: RawDbEmployee): Employee {
 }
 
 export const employeesService = {
-    async getAll(siteId?: string) {
+    async getAll(siteId?: string, onlyManagers: boolean = false) {
         let query = supabase
             .from('employees')
             .select('*')
             .order('created_at', { ascending: false });
 
-        if (siteId) {
+        if (siteId && siteId !== 'All') {
             query = query.eq('site_id', siteId);
+        }
+
+        if (onlyManagers) {
+            query = query.in('role', MANAGERIAL_ROLES as unknown as string[]);
         }
 
         const { data, error } = await query;
@@ -127,6 +132,11 @@ export const employeesService = {
         if (filters?.role && filters.role !== 'All') query = query.eq('role', filters.role);
         if (filters?.status && filters.status !== 'All') query = query.eq('status', filters.status);
         if (filters?.department && filters.department !== 'All') query = query.eq('department', filters.department);
+
+        // When onlyManagers is requested (e.g. initial global directory/org view), limit to L1-L3 leadership
+        if (filters?.onlyManagers) {
+            query = query.in('role', MANAGERIAL_ROLES as unknown as string[]);
+        }
 
         // Search
         if (searchTerm) {

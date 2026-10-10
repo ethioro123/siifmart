@@ -1,5 +1,5 @@
 import React from 'react';
-import { Globe, Trash2, MapPin, Plus, Layers } from 'lucide-react';
+import { Globe, Trash2, MapPin, Plus, Layers, X } from 'lucide-react';
 import type { TaxJurisdiction, Site } from '../../../types';
 
 interface TaxZoneCardProps {
@@ -29,18 +29,20 @@ export const TaxZoneCard: React.FC<TaxZoneCardProps> = ({
     const effectiveRate = (zone.rules || []).reduce((sum: number, r) => sum + (r.rate || 0), 0);
 
     return (
-        <div className="bg-[#FAF8F5] dark:bg-black/30 border border-[#E2DCCE] dark:border-white/10 rounded-3xl p-5 hover:border-[#2C5E3B]/40 transition-all group">
-            <div className="flex justify-between items-start mb-4">
+        <div className="bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-2xl p-4.5 hover:border-[#0071E3]/30 transition-all group shadow-xs">
+            <div className="flex justify-between items-start mb-3.5">
                 <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-2xl bg-emerald-50 text-[#2C5E3B] dark:bg-[#2C5E3B]/20 dark:text-[#A9CBA2] flex items-center justify-center border border-emerald-200 dark:border-emerald-950/30">
-                        <Globe size={18} />
+                    <div className="w-9 h-9 rounded-xl bg-[#0071E3]/10 dark:bg-[#2997FF]/15 text-[#0071E3] dark:text-[#2997FF] flex items-center justify-center border border-[#0071E3]/20 shrink-0">
+                        <Globe size={16} />
                     </div>
                     <div>
-                        <h4 className="font-black text-sm text-[#1E3F27] dark:text-white">{zone.name}</h4>
-                        <div className="flex items-center gap-2 mt-1">
-                            <span className="text-[9px] uppercase font-black tracking-wide text-stone-500 bg-white/60 dark:bg-white/5 px-2 py-0.5 rounded-lg">{zone.type}</span>
+                        <h4 className="font-semibold text-xs text-[var(--theme-text-primary)]">{zone.name}</h4>
+                        <div className="flex items-center gap-1.5 mt-1">
+                            <span className="text-[9px] uppercase font-semibold tracking-wider text-[var(--theme-text-secondary)] bg-[var(--theme-bg-card)] border border-[var(--theme-border)] px-2 py-0.5 rounded-full">
+                                {zone.type}
+                            </span>
                             {(zone.rules || []).length > 0 && (
-                                <span className="text-[10px] font-mono font-bold text-[#2C5E3B] dark:text-[#A9CBA2] bg-emerald-50 dark:bg-[#2C5E3B]/20 px-2 py-0.5 rounded-lg">
+                                <span className="text-[10px] font-mono font-semibold text-[#0071E3] dark:text-[#2997FF] bg-[#0071E3]/10 dark:bg-[#2997FF]/15 border border-[#0071E3]/20 px-2 py-0.5 rounded-full">
                                     {effectiveRate.toFixed(1)}% Total
                                 </span>
                             )}
@@ -52,33 +54,33 @@ export const TaxZoneCard: React.FC<TaxZoneCardProps> = ({
                         type="button"
                         onClick={onDelete}
                         title="Delete Jurisdiction"
-                        className="text-stone-400 hover:text-red-600 opacity-0 group-hover:opacity-100 transition-all p-1.5 rounded-lg cursor-pointer"
+                        className="text-[var(--theme-text-secondary)] hover:text-red-500 opacity-0 group-hover:opacity-100 transition-all p-1.5 rounded-lg cursor-pointer"
                     >
-                        <Trash2 size={16} />
+                        <Trash2 size={15} />
                     </button>
                 )}
             </div>
 
             {/* Assigned Sites */}
-            <div className="mb-4">
-                <p className="text-[10px] text-stone-500 dark:text-gray-400 uppercase font-black mb-2 flex items-center gap-1">
+            <div className="mb-3.5">
+                <p className="text-[10px] text-[var(--theme-text-secondary)] uppercase font-semibold tracking-wider mb-1.5 flex items-center gap-1">
                     <MapPin size={10} /> Assigned Locations ({assignedSites.length})
                 </p>
                 <div className="flex flex-wrap gap-1.5">
                     {assignedSites.length === 0 && (
-                        <span className="text-[10px] text-amber-700 dark:text-amber-400 italic">No locations linked</span>
+                        <span className="text-[11px] text-amber-600 dark:text-amber-400 italic">No locations linked</span>
                     )}
                     {assignedSites.map((s) => (
-                        <span key={s.id} className="text-[10px] font-bold bg-white dark:bg-white/5 border border-[#E2DCCE] dark:border-white/10 px-2 py-1 rounded-xl text-[#1E3F27] dark:text-gray-300 flex items-center gap-1.5">
+                        <span key={s.id} className="text-[11px] font-medium bg-[var(--theme-bg-card)] border border-[var(--theme-border)] px-2.5 py-1 rounded-lg text-[var(--theme-text-primary)] flex items-center gap-1.5 shadow-2xs">
                             {s.name}
                             {isAuthorized && (
                                 <button
                                     type="button"
                                     onClick={() => onUnassignSite(s.id)}
-                                    className="text-stone-400 hover:text-red-600 font-black cursor-pointer ml-1"
+                                    className="text-[var(--theme-text-secondary)] hover:text-red-500 cursor-pointer ml-0.5 p-0.5 rounded transition-colors"
                                     title="Unassign"
                                 >
-                                    ×
+                                    <X size={11} />
                                 </button>
                             )}
                         </span>
@@ -87,16 +89,16 @@ export const TaxZoneCard: React.FC<TaxZoneCardProps> = ({
             </div>
 
             {/* Rules */}
-            <div className="space-y-2 mb-4">
+            <div className="space-y-2 mb-3.5">
                 <div className="flex justify-between items-center">
-                    <p className="text-[10px] text-stone-500 dark:text-gray-400 uppercase font-black flex items-center gap-1">
+                    <p className="text-[10px] text-[var(--theme-text-secondary)] uppercase font-semibold tracking-wider flex items-center gap-1">
                         <Layers size={10} /> Tax Rules ({(zone.rules || []).length})
                     </p>
                     {isAuthorized && (
                         <button
                             type="button"
                             onClick={onAddRule}
-                            className="text-[10px] text-[#2C5E3B] dark:text-[#A9CBA2] font-black uppercase tracking-wider flex items-center gap-1 hover:underline cursor-pointer"
+                            className="text-[10px] text-[#0071E3] dark:text-[#2997FF] font-semibold uppercase tracking-wider flex items-center gap-1 hover:opacity-80 cursor-pointer"
                         >
                             <Plus size={10} /> Add Rule
                         </button>
@@ -105,18 +107,18 @@ export const TaxZoneCard: React.FC<TaxZoneCardProps> = ({
 
                 <div className="space-y-1.5">
                     {(zone.rules || []).map((rule, idx) => (
-                        <div key={idx} className="flex justify-between items-center p-2 bg-white/70 dark:bg-black/20 rounded-xl border border-[#E2DCCE]/60 dark:border-white/5 text-xs">
-                            <span className="text-stone-700 dark:text-gray-300 font-bold">{rule.name}</span>
+                        <div key={idx} className="flex justify-between items-center px-2.5 py-1.5 bg-[var(--theme-bg-card)] rounded-lg border border-[var(--theme-border)] text-xs">
+                            <span className="text-[var(--theme-text-primary)] font-medium">{rule.name}</span>
                             <div className="flex items-center gap-2">
-                                <span className="font-mono font-bold text-[#2C5E3B] dark:text-[#A9CBA2]">{rule.rate}%</span>
+                                <span className="font-mono font-semibold text-[#0071E3] dark:text-[#2997FF]">{rule.rate}%</span>
                                 {isAuthorized && (
                                     <button
                                         type="button"
                                         onClick={() => onDeleteRule(zone.id, idx)}
-                                        className="text-stone-400 hover:text-red-600 cursor-pointer"
+                                        className="text-[var(--theme-text-secondary)] hover:text-red-500 cursor-pointer p-0.5 rounded transition-colors"
                                         title="Delete rule"
                                     >
-                                        ×
+                                        <X size={11} />
                                     </button>
                                 )}
                             </div>
@@ -127,7 +129,7 @@ export const TaxZoneCard: React.FC<TaxZoneCardProps> = ({
 
             {/* Quick Assign Dropdown */}
             {isAuthorized && availableSites.length > 0 && (
-                <div className="pt-3 border-t border-[#E2DCCE]/60 dark:border-white/10 flex items-center gap-2">
+                <div className="pt-2.5 border-t border-[var(--theme-border)] flex items-center gap-2">
                     <select
                         onChange={(e) => {
                             if (e.target.value) {
@@ -135,7 +137,7 @@ export const TaxZoneCard: React.FC<TaxZoneCardProps> = ({
                                 e.target.value = '';
                             }
                         }}
-                        className="w-full bg-white dark:bg-black/30 border border-[#E2DCCE] dark:border-white/10 rounded-xl px-3 py-1.5 text-xs text-stone-600 dark:text-gray-300 font-medium outline-none focus:border-[#2C5E3B]"
+                        className="w-full bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl px-3 py-1.5 text-xs text-[var(--theme-text-primary)] font-medium outline-none focus:border-[#0071E3] dark:focus:border-[#2997FF] focus:ring-1 focus:ring-[#0071E3]/20"
                         defaultValue=""
                     >
                         <option value="" disabled>+ Assign Location...</option>

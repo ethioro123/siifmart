@@ -138,16 +138,18 @@ export default function WMSSettings() {
     );
 
     const activeProfile = getCountryProfile(activeCountry);
-    const cardBase = "bg-white/85 dark:bg-[#18201B]/60 lg:backdrop-blur-2xl border border-[#E2DCCE] dark:border-emerald-950/20 rounded-[32px] p-6 lg:p-8 shadow-[0_4px_24px_-4px_rgba(34,50,38,0.04)] dark:shadow-[0_8px_32px_-4px_rgba(5,8,6,0.5)]";
+    const cardBase = "bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-6 lg:p-8 shadow-xs";
 
     return (
         <React.Fragment>
         {/* ── ROLE GATE — L3/L4 staff cannot access WMS configuration ── */}
         {!canConfigureWMS && (
             <div className="flex flex-col items-center justify-center py-24 gap-4 text-center">
-                <Lock size={40} className="text-stone-400 dark:text-gray-600" />
-                <h3 className="font-bold text-stone-600 dark:text-gray-300">Access Restricted</h3>
-                <p className="text-xs text-stone-500 dark:text-gray-500 max-w-xs">
+                <div className="w-12 h-12 rounded-2xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] flex items-center justify-center">
+                    <Lock size={22} className="text-[var(--theme-text-secondary)]" />
+                </div>
+                <h3 className="font-semibold text-[var(--theme-text-primary)] text-sm">Access Restricted</h3>
+                <p className="text-xs text-[var(--theme-text-secondary)] max-w-xs leading-relaxed">
                     WMS Engine policy configuration requires Central Operations or Warehouse Manager access.
                     Local store managers cannot alter enterprise fulfillment rules.
                 </p>
@@ -156,7 +158,7 @@ export default function WMSSettings() {
 
         <div className={`w-full max-w-full space-y-6 ${canConfigureWMS ? 'block' : 'hidden'}`}>
             {/* Tab Switcher */}
-            <div className="flex items-center gap-2 p-1.5 bg-[#FAF8F5] dark:bg-black/40 rounded-2xl border border-[#E2DCCE] dark:border-white/10 mb-6">
+            <div className="flex items-center gap-1.5 p-1 bg-[var(--theme-bg-subtle)] rounded-xl border border-[var(--theme-border)] mb-6">
                 {[
                     { id: 'rules' as const, label: 'Fulfillment Rules', icon: Package },
                     { id: 'pick-control' as const, label: 'Pick Control Hub', icon: Scan },
@@ -169,12 +171,12 @@ export default function WMSSettings() {
                             key={tab.id}
                             type="button"
                             onClick={() => setActiveTab(tab.id)}
-                            className={`min-h-[44px] flex-1 px-4 py-2.5 rounded-xl text-xs font-black tracking-widest uppercase transition-colors flex items-center justify-center gap-2 cursor-pointer ${active
-                                ? 'bg-[#2C5E3B] text-white shadow-md'
-                                : 'text-stone-500 dark:text-gray-400 hover:text-[#1E3F27] dark:hover:text-white hover:bg-white/50 dark:hover:bg-white/5'
+                            className={`min-h-[38px] flex-1 px-4 py-2 rounded-lg text-xs font-medium transition-all flex items-center justify-center gap-2 cursor-pointer ${active
+                                ? 'bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)] shadow-xs'
+                                : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-card)]/50'
                                 }`}
                         >
-                            <Icon size={16} /> {tab.label}
+                            <Icon size={15} /> {tab.label}
                         </button>
                     );
                 })}
@@ -182,11 +184,11 @@ export default function WMSSettings() {
 
             {activeTab === 'rules' && (
                 <div className="space-y-6">
-                    <div className="p-4 bg-emerald-50 dark:bg-[#2C5E3B]/20 border border-emerald-200 dark:border-emerald-950/30 rounded-2xl flex items-start gap-3">
-                        <Shield className="text-[#2C5E3B] dark:text-[#A9CBA2] shrink-0 mt-0.5" size={20} />
+                    <div className="p-4 bg-[#0071E3]/10 dark:bg-[#2997FF]/15 border border-[#0071E3]/20 dark:border-[#2997FF]/30 rounded-2xl flex items-start gap-3">
+                        <Shield className="text-[#0071E3] dark:text-[#2997FF] shrink-0 mt-0.5" size={20} />
                         <div>
-                            <h4 className="text-[#1E3F27] dark:text-white font-bold text-sm">Enterprise WMS Engine</h4>
-                            <p className="text-xs text-[#4D6E56] dark:text-[#7A9E83] mt-0.5 leading-relaxed">
+                            <h4 className="text-[var(--theme-text-primary)] font-semibold text-sm">Enterprise WMS Engine</h4>
+                            <p className="text-xs text-[var(--theme-text-secondary)] mt-0.5 leading-relaxed">
                                 Configure the base rules for receiving inspection, FEFO/FIFO rotation, and pick scanning verification for {activeProfile.name}.
                             </p>
                         </div>
@@ -208,12 +210,12 @@ export default function WMSSettings() {
                                     onChange={(val) => setInbound(prev => ({ ...prev, receivingLogic: val }))}
                                 />
                                 {inbound.receivingLogic === 'verified' && (
-                                    <div className="flex items-center gap-2 p-3 bg-amber-500/10 border border-amber-500/20 rounded-xl text-[11px] text-amber-700 dark:text-amber-300">
+                                    <div className="flex items-center gap-2 p-3 bg-amber-500/10 border border-amber-500/20 rounded-xl text-[11px] text-amber-700 dark:text-amber-300 font-medium">
                                         <AlertTriangle size={14} className="shrink-0" />
                                         <span>Verified Receive exposes expected quantities to staff. Zero-trust blind receiving is recommended.</span>
                                     </div>
                                 )}
-                                <div className="p-4 bg-[#FAF8F5] dark:bg-black/20 rounded-2xl border border-[#E2DCCE] dark:border-white/5 space-y-4">
+                                <div className="p-4 bg-[var(--theme-bg-subtle)] rounded-xl border border-[var(--theme-border)] space-y-4">
                                     <SliderGroup
                                         label="QC Sampling Rate"
                                         icon={Search}
@@ -272,12 +274,12 @@ export default function WMSSettings() {
                                     checked={inbound.requirePutawayQuantityEntry}
                                     onChange={() => setInbound(prev => ({ ...prev, requirePutawayQuantityEntry: !prev.requirePutawayQuantityEntry }))}
                                 />
-                                <div className="pt-4 border-t border-[#E2DCCE]/60 dark:border-white/10 flex justify-end">
+                                <div className="pt-4 border-t border-[var(--theme-border)] flex justify-end">
                                     <button
                                         type="button"
                                         onClick={() => handleSaveSection('inbound')}
                                         disabled={isSaving === 'inbound' || !canConfigureWMS}
-                                        className="px-6 min-h-[44px] bg-[#2C5E3B] hover:opacity-90 text-white font-bold rounded-xl text-xs uppercase tracking-wider flex items-center gap-2 shadow-md cursor-pointer transition-opacity disabled:opacity-50"
+                                        className="h-10 px-5 bg-[#0071E3] dark:bg-[#2997FF] hover:opacity-90 active:scale-[0.98] text-white font-semibold rounded-xl text-xs flex items-center gap-2 shadow-xs cursor-pointer transition-all disabled:opacity-40"
                                     >
                                         {isSaving === 'inbound' ? <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <Save size={14} />}
                                         Save Inbound
@@ -323,12 +325,12 @@ export default function WMSSettings() {
                                         checked={health.requireSecondCounterOnVariance}
                                         onChange={() => setHealth(prev => ({ ...prev, requireSecondCounterOnVariance: !prev.requireSecondCounterOnVariance }))}
                                     />
-                                    <div className="pt-4 border-t border-[#E2DCCE]/60 dark:border-white/10 flex justify-end">
+                                    <div className="pt-4 border-t border-[var(--theme-border)] flex justify-end">
                                         <button
                                             type="button"
                                             onClick={() => handleSaveSection('health')}
                                             disabled={isSaving === 'health' || !canConfigureWMS}
-                                            className="px-6 min-h-[44px] bg-[#2C5E3B] hover:opacity-90 text-white font-bold rounded-xl text-xs uppercase tracking-wider flex items-center gap-2 shadow-md cursor-pointer transition-opacity disabled:opacity-50"
+                                            className="h-10 px-5 bg-[#0071E3] dark:bg-[#2997FF] hover:opacity-90 active:scale-[0.98] text-white font-semibold rounded-xl text-xs flex items-center gap-2 shadow-xs cursor-pointer transition-all disabled:opacity-40"
                                         >
                                             {isSaving === 'health' ? <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <Save size={14} />}
                                             Save Health
@@ -352,7 +354,7 @@ export default function WMSSettings() {
                                         value={outbound.pickingMethod}
                                         onChange={(val) => setOutbound(prev => ({ ...prev, pickingMethod: val }))}
                                     />
-                                    <div className="p-4 bg-[#FAF8F5] dark:bg-black/20 rounded-2xl border border-[#E2DCCE] dark:border-white/5 space-y-3">
+                                    <div className="p-4 bg-[var(--theme-bg-subtle)] rounded-xl border border-[var(--theme-border)] space-y-3">
                                         <ToggleRow
                                             label="Strict Barcode Validation"
                                             checked={outbound.strictScanning}
@@ -367,7 +369,7 @@ export default function WMSSettings() {
                                             warning={!isHQAdmin ? 'HQ Executive Admin required to toggle barcode scanning' : undefined}
                                         />
                                         {!outbound.strictScanning && (
-                                            <div className="flex items-center gap-2 text-amber-600 dark:text-amber-400 text-[10px] font-semibold p-2 bg-amber-500/10 rounded-xl border border-amber-500/20">
+                                            <div className="flex items-center gap-2 text-amber-600 dark:text-amber-400 text-[11px] font-medium p-2.5 bg-amber-500/10 rounded-xl border border-amber-500/20">
                                                 <AlertTriangle size={14} className="shrink-0" />
                                                 <span>Barcode validation disabled — scan fraud risk elevated. HQ audit active.</span>
                                             </div>
@@ -404,12 +406,12 @@ export default function WMSSettings() {
                                             onChange={() => setOutbound(prev => ({ ...prev, requirePackCartonWeight: !prev.requirePackCartonWeight }))}
                                         />
                                     </div>
-                                    <div className="pt-4 border-t border-[#E2DCCE]/60 dark:border-white/10 flex justify-end">
+                                    <div className="pt-4 border-t border-[var(--theme-border)] flex justify-end">
                                         <button
                                             type="button"
                                             onClick={() => handleSaveSection('outbound')}
                                             disabled={isSaving === 'outbound' || !canConfigureWMS}
-                                            className="px-6 min-h-[44px] bg-[#2C5E3B] hover:opacity-90 text-white font-bold rounded-xl text-xs uppercase tracking-wider flex items-center gap-2 shadow-md cursor-pointer transition-opacity disabled:opacity-50"
+                                            className="h-10 px-5 bg-[#0071E3] dark:bg-[#2997FF] hover:opacity-90 active:scale-[0.98] text-white font-semibold rounded-xl text-xs flex items-center gap-2 shadow-xs cursor-pointer transition-all disabled:opacity-40"
                                         >
                                             {isSaving === 'outbound' ? <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <Save size={14} />}
                                             Save Outbound

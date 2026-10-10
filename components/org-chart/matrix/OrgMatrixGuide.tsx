@@ -1,10 +1,36 @@
 import React from 'react';
-import { ChevronDown, ChevronUp, Shield, Network, ArrowRight, Info, CheckCircle2 } from 'lucide-react';
+import {
+    ChevronDown,
+    ChevronUp,
+    Shield,
+    Network,
+    ArrowRight,
+    Info,
+    CheckCircle2,
+    Crown,
+    Building2,
+    ShieldCheck,
+    Zap
+} from 'lucide-react';
 import { HIERARCHY_LEVEL_CONFIGS } from '../hooks/orgReportingLines';
 
 interface OrgMatrixGuideProps {
     isDark: boolean;
 }
+
+const renderTierIcon = (level: number, color: string) => {
+    switch (level) {
+        case 1:
+            return <Crown size={15} style={{ color }} />;
+        case 2:
+            return <Building2 size={15} style={{ color }} />;
+        case 3:
+            return <ShieldCheck size={15} style={{ color }} />;
+        case 4:
+        default:
+            return <Zap size={15} style={{ color }} />;
+    }
+};
 
 export const OrgMatrixGuide: React.FC<OrgMatrixGuideProps> = ({ isDark }) => {
     const [isExpanded, setIsExpanded] = React.useState(false);
@@ -113,7 +139,9 @@ export const OrgMatrixGuide: React.FC<OrgMatrixGuideProps> = ({ isDark }) => {
                                     >
                                         <div>
                                             <div className="flex items-center justify-between gap-1 mb-1">
-                                                <span className="text-base">{cfg.icon}</span>
+                                                <div className="p-1 rounded-lg bg-black/5 dark:bg-white/5">
+                                                    {renderTierIcon(lvl, cfg.color)}
+                                                </div>
                                                 <span
                                                     className="text-[10px] font-bold px-2 py-0.5 rounded-full"
                                                     style={{

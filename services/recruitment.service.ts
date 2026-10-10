@@ -1,102 +1,18 @@
 import { supabase } from '../lib/supabase';
 import type { JobRequisition, JobCandidate, RequisitionStatus, CandidateStage } from '../types/hr-advanced';
 import { systemLogsService } from './system-logs.service';
+import { employeesService } from './employees.service';
+import { SYSTEM_ROLES } from '../utils/roles';
 import { logger } from '../utils/logger';
 
-const LOCAL_STORAGE_REQS = 'siifmart_job_reqs_backup';
-const LOCAL_STORAGE_CANDS = 'siifmart_candidates_backup';
-
-let inMemoryReqs: JobRequisition[] = [];
-let inMemoryCands: JobCandidate[] = [];
-
-const getLocalReqs = (): JobRequisition[] => {
-    try {
-        if (typeof localStorage !== 'undefined') {
-            const raw = localStorage.getItem(LOCAL_STORAGE_REQS);
-            if (raw) return JSON.parse(raw);
-        }
-    } catch {
-        // Fallback
-    }
-    return inMemoryReqs;
-};
-
-const saveLocalReqs = (records: JobRequisition[]): void => {
-    const map = new Map<string, JobRequisition>();
-    for (const r of inMemoryReqs) map.set(r.id, r);
-    for (const r of records) map.set(r.id, r);
-    inMemoryReqs = Array.from(map.values());
-    try {
-        if (typeof localStorage !== 'undefined') {
-            localStorage.setItem(LOCAL_STORAGE_REQS, JSON.stringify(inMemoryReqs));
-        }
-    } catch {
-        // Safe
-    }
-};
-
-const getLocalCands = (): JobCandidate[] => {
-    try {
-        if (typeof localStorage !== 'undefined') {
-            const raw = localStorage.getItem(LOCAL_STORAGE_CANDS);
-            if (raw) return JSON.parse(raw);
-        }
-    } catch {
-        // Fallback
-    }
-    return inMemoryCands;
-};
-
-const saveLocalCands = (records: JobCandidate[]): void => {
-    const map = new Map<string, JobCandidate>();
-    for (const c of inMemoryCands) map.set(c.id, c);
-    for (const c of records) map.set(c.id, c);
-    inMemoryCands = Array.from(map.values());
-    try {
-        if (typeof localStorage !== 'undefined') {
-            localStorage.setItem(LOCAL_STORAGE_CANDS, JSON.stringify(inMemoryCands));
-        }
-    } catch {
-        // Safe
-    }
-};
-
-const mapDBToReq = (row: any): JobRequisition => ({
-    id: row.id,
-    country_code: (row.country_code || 'ET').toUpperCase(),
-    site_id: row.site_id,
-    title: row.title,
-    department: row.department,
-    role: row.role,
-    headcount: Number(row.headcount) || 1,
-    target_salary: Number(row.target_salary) || 0,
-    status: row.status as RequisitionStatus,
-    justification: row.justification,
-    requested_by: row.requested_by,
-    requested_by_role: row.requested_by_role,
-    approved_by: row.approved_by || undefined,
-    approved_at: row.approved_at || undefined,
-    created_at: row.created_at,
-    updated_at: row.updated_at
-});
-
-const mapDBToCand = (row: any): JobCandidate => ({
-    id: row.id,
-    requisition_id: row.requisition_id || undefined,
-    country_code: (row.country_code || 'ET').toUpperCase(),
-    name: row.name,
-    email: row.email,
-    phone: row.phone,
-    stage: row.stage as CandidateStage,
-    interview_score: Number(row.interview_score) || 0,
-    technical_score: Number(row.technical_score) || 0,
-    culture_fit_score: Number(row.culture_fit_score) || 0,
-    interviewer_notes: row.interviewer_notes || undefined,
-    offered_salary: row.offered_salary ? Number(row.offered_salary) : undefined,
-    resume_url: row.resume_url || undefined,
-    created_at: row.created_at,
-    updated_at: row.updated_at
-});
+import {
+    getLocalReqs,
+    saveLocalReqs,
+    getLocalCands,
+    saveLocalCands,
+    mapDBToReq,
+    mapDBToCand
+} from './recruitment-storage';
 
 export const recruitmentService = {
     async fetchRequisitions(countryCode: string = 'ET'): Promise<JobRequisition[]> {
@@ -322,6 +238,8 @@ export const recruitmentService = {
             culture_fit_score?: number;
             interviewer_notes?: string;
             offered_salary?: number;
+            site_id?: string;
+            role?: string;
         }
     ): Promise<boolean> {
         const now = new Date().toISOString();
@@ -340,5 +258,204 @@ export const recruitmentService = {
         const cands = getLocalCands().map(c => c.id === candidateId ? { ...c, ...updatePayload } : c);
         saveLocalCands(cands);
         return true;
+    },
+
+    canManageHiring(userRole: string): boolean {
+        const found = SYSTEM_ROLES.find(r => r.id === userRole);
+        if (!found) return false;
+        // Level 1 (CEO), Level 2 (Directors), Level 3 (Site/Unit Managers) can initiate hiring
+        return found.level <= 3;
+    },
+
+    getUserRoleLevel(userRole: string): number {
+        const found = SYSTEM_ROLES.find(r => r.id === userRole);
+        return found ? found.level : 99;
+    },
+
+    getAllowedRolesForManager(userRole: string): typeof SYSTEM_ROLES {
+        const userLevel = this.getUserRoleLevel(userRole);
+        // Strict hierarchy: managers can ONLY hire for roles strictly below their rank (level > userLevel)
+        return SYSTEM_ROLES.filter(r => r.level > userLevel);
+    },
+
+    async approveCandidateHR(
+        candidateId: string,
+        approver: { id: string; name: string; role: string },
+        notes?: string
+    ): Promise<boolean> {
+        const isHR = ['hr_manager', 'hr', 'super_admin', 'admin'].includes(approver.role);
+        if (!isHR) {
+            throw new Error('4-Eyes Violation: Only HR leadership can perform candidate identity & compliance approval.');
+        }
+
+        const now = new Date().toISOString();
+        const updatePayload = {
+            hr_approved_by: approver.name,
+            hr_approved_at: now,
+            hr_notes: notes || 'Identity, credentials & right-to-work verified.',
+            updated_at: now
+        };
+
+        try {
+            await supabase.from('job_candidates').update(updatePayload).eq('id', candidateId);
+        } catch (err) {
+            logger.warn('recruitmentService', 'Supabase HR approve error', { error: String(err) });
+        }
+
+        const cands = getLocalCands().map(c => c.id === candidateId ? { ...c, ...updatePayload } : c);
+        saveLocalCands(cands);
+
+        await systemLogsService.create({
+            user_name: approver.name,
+            action: 'CANDIDATE_HR_VETTING_APPROVED',
+            module: 'Human Resources',
+            details: JSON.stringify({ candidateId, approverRole: approver.role, notes })
+        });
+
+        return true;
+    },
+
+    async approveCandidateSalaryFinance(
+        candidateId: string,
+        approver: { id: string; name: string; role: string },
+        offeredSalary: number,
+        notes?: string
+    ): Promise<boolean> {
+        const isFinance = ['finance_manager', 'super_admin', 'admin'].includes(approver.role);
+        if (!isFinance) {
+            throw new Error('4-Eyes Violation: Only Finance leadership can authorize salary and compensation bands.');
+        }
+
+        if (!offeredSalary || offeredSalary <= 0) {
+            throw new Error('Offered salary must be greater than zero.');
+        }
+
+        const now = new Date().toISOString();
+        const updatePayload = {
+            finance_approved_by: approver.name,
+            finance_approved_at: now,
+            finance_notes: notes || 'Salary verified against site departmental budget and statutory laws.',
+            offered_salary: offeredSalary,
+            updated_at: now
+        };
+
+        try {
+            await supabase.from('job_candidates').update(updatePayload).eq('id', candidateId);
+        } catch (err) {
+            logger.warn('recruitmentService', 'Supabase Finance approve error', { error: String(err) });
+        }
+
+        const cands = getLocalCands().map(c => c.id === candidateId ? { ...c, ...updatePayload } : c);
+        saveLocalCands(cands);
+
+        await systemLogsService.create({
+            user_name: approver.name,
+            action: 'CANDIDATE_SALARY_FINANCE_APPROVED',
+            module: 'Finance',
+            details: JSON.stringify({ candidateId, approverRole: approver.role, offeredSalary, notes })
+        });
+
+        return true;
+    },
+
+    async finalizeAndActivateHire(
+        candidateId: string,
+        actor: { id: string; name: string; role: string },
+        siteId?: string,
+        role?: string,
+        department?: string
+    ): Promise<any> {
+        const candidate = getLocalCands().find(c => c.id === candidateId);
+        if (!candidate) throw new Error('Candidate not found.');
+
+        const isCEO = actor.role === 'super_admin' || actor.role === 'admin';
+        if (!isCEO) {
+            if (!candidate.hr_approved_at) {
+                throw new Error('Zero-Trust Guard: Mandatory HR identity verification required before hire activation.');
+            }
+            if (!candidate.finance_approved_at) {
+                throw new Error('Zero-Trust Guard: Mandatory Finance salary approval required before hire activation.');
+            }
+        }
+
+        // Resolve site from params, candidate, or requisition
+        let targetSiteId = siteId || candidate.site_id;
+        let targetRole = role || candidate.role;
+        let targetDept = department;
+
+        if (candidate.requisition_id) {
+            const req = getLocalReqs().find(r => r.id === candidate.requisition_id);
+            if (req) {
+                targetSiteId = targetSiteId || req.site_id;
+                targetRole = targetRole || req.role;
+                targetDept = targetDept || req.department;
+            }
+        }
+
+        if (!targetSiteId) {
+            throw new Error('Operating site location is mandatory for hire activation.');
+        }
+
+        const finalRole = (targetRole || 'stock_clerk') as any;
+        const finalDept = targetDept || 'Operations';
+        const finalSalary = candidate.offered_salary || 0;
+        const now = new Date().toISOString();
+        const joinDate = now.split('T')[0];
+
+        const assignedCode = await employeesService.getNextCode(candidate.country_code);
+
+        // Provision into public.employees
+        const newEmployee = await employeesService.create({
+            id: typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : `emp-${Date.now()}`,
+            code: assignedCode,
+            name: candidate.name,
+            email: candidate.email.toLowerCase(),
+            phone: candidate.phone,
+            role: finalRole,
+            siteId: targetSiteId,
+            department: finalDept,
+            salary: finalSalary,
+            status: 'Active',
+            joinDate,
+            avatar: '',
+            performanceScore: 100,
+            specialization: 'Floor Operations',
+            attendanceRate: 100,
+            badges: ['New Hire']
+        });
+
+        const updatePayload = {
+            stage: 'hired' as const,
+            hired_employee_id: newEmployee.id,
+            site_id: targetSiteId,
+            role: finalRole,
+            updated_at: now
+        };
+
+        try {
+            await supabase.from('job_candidates').update(updatePayload).eq('id', candidateId);
+        } catch {
+            // fallback handled
+        }
+
+        const cands = getLocalCands().map(c => c.id === candidateId ? { ...c, ...updatePayload } : c);
+        saveLocalCands(cands);
+
+        await systemLogsService.create({
+            user_name: actor.name,
+            action: 'EMPLOYEE_SYNAPTIC_HIRED',
+            module: 'Human Resources',
+            details: JSON.stringify({
+                candidateId,
+                newEmployeeId: newEmployee.id,
+                newEmployeeCode: newEmployee.code,
+                name: newEmployee.name,
+                role: finalRole,
+                siteId: targetSiteId,
+                salary: finalSalary
+            })
+        });
+
+        return newEmployee;
     }
 };

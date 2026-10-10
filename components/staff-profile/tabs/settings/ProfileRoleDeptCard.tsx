@@ -57,10 +57,10 @@ export const ProfileRoleDeptCard: React.FC<ProfileRoleDeptCardProps> = ({
     status,
     setStatus
 }) => {
-    const selectClasses = "w-full bg-[var(--theme-bg-panel)] border border-[var(--theme-border)] rounded-xl px-4 py-2.5 text-xs text-[var(--theme-text-primary)] outline-none focus:border-[var(--theme-primary)] transition-colors appearance-none cursor-pointer";
-    const inputClasses = "w-full bg-[var(--theme-bg-panel)] border border-[var(--theme-border)] rounded-xl px-4 py-2.5 text-xs text-[var(--theme-text-primary)] outline-none focus:border-[var(--theme-primary)] transition-colors";
-    const labelClasses = "text-[10px] text-[var(--theme-text-muted)] font-black uppercase tracking-wider mb-1 block px-1";
-    const readOnlyClasses = "flex items-center justify-between p-3.5 bg-[var(--theme-bg-panel)] rounded-xl border border-[var(--theme-border)]";
+    const selectClasses = "w-full h-11 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-4 text-xs text-[var(--theme-text-primary)] outline-none focus:border-[var(--theme-accent)] transition-colors appearance-none cursor-pointer";
+    const inputClasses = "w-full h-11 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-4 text-xs text-[var(--theme-text-primary)] outline-none focus:border-[var(--theme-accent)] transition-colors";
+    const labelClasses = "text-[11px] text-[var(--theme-text-secondary)] font-semibold uppercase tracking-wider mb-1.5 block px-1";
+    const readOnlyClasses = "flex items-center justify-between p-3.5 bg-[var(--theme-bg-subtle)] rounded-xl border border-[var(--theme-border)]";
 
     const isSalaryChanged = Number(salary) !== Number(employee.salary || 0);
     const isDeptChanged = department !== (employee.department || 'Retail Operations');
@@ -77,7 +77,7 @@ export const ProfileRoleDeptCard: React.FC<ProfileRoleDeptCardProps> = ({
                         <h4 className="text-sm font-bold text-[var(--theme-text-primary)]">
                             Organizational Assignment & Compensation
                         </h4>
-                        <p className="text-[11px] text-[var(--theme-text-muted)]">
+                        <p className="text-[11px] text-[var(--theme-text-secondary)]">
                             Department headcount, operational facility, access role, and payroll tier.
                         </p>
                     </div>
@@ -87,7 +87,7 @@ export const ProfileRoleDeptCard: React.FC<ProfileRoleDeptCardProps> = ({
             {/* Access Role */}
             <div>
                 <label className={labelClasses}>
-                    <Shield size={10} className="inline mr-1" /> System Access Role
+                    <Shield size={12} className="inline mr-1" /> System Access Role
                 </label>
                 {canEdit && assignableRoles.length > 0 ? (
                     <div className="relative">
@@ -118,7 +118,7 @@ export const ProfileRoleDeptCard: React.FC<ProfileRoleDeptCardProps> = ({
             {/* Department */}
             <div>
                 <label className={labelClasses}>
-                    <Briefcase size={10} className="inline mr-1" /> Assigned Department
+                    <Briefcase size={12} className="inline mr-1" /> Assigned Department
                 </label>
                 {canEdit ? (
                     <div className="relative">
@@ -143,7 +143,7 @@ export const ProfileRoleDeptCard: React.FC<ProfileRoleDeptCardProps> = ({
             {/* Primary Site */}
             <div>
                 <label className={labelClasses}>
-                    <Building size={10} className="inline mr-1" /> Primary Operating Facility
+                    <Building size={12} className="inline mr-1" /> Primary Operating Facility
                 </label>
                 {canEdit ? (
                     <div className="relative">
@@ -173,7 +173,7 @@ export const ProfileRoleDeptCard: React.FC<ProfileRoleDeptCardProps> = ({
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
                 <div>
                     <label className={labelClasses}>
-                        <DollarSign size={10} className="inline mr-1" /> Monthly Salary (ETB/KSh)
+                        <DollarSign size={12} className="inline mr-1" /> Monthly Salary (ETB/KSh)
                     </label>
                     {canEdit ? (
                         <input
@@ -195,7 +195,7 @@ export const ProfileRoleDeptCard: React.FC<ProfileRoleDeptCardProps> = ({
 
                 <div>
                     <label className={labelClasses}>
-                        <UserCheck size={10} className="inline mr-1" /> Employment Status
+                        <UserCheck size={12} className="inline mr-1" /> Employment Status
                     </label>
                     {canEdit ? (
                         <div className="relative">
@@ -222,7 +222,7 @@ export const ProfileRoleDeptCard: React.FC<ProfileRoleDeptCardProps> = ({
             {canEdit && (
                 <div>
                     <label className={labelClasses}>
-                        <Star size={10} className="inline mr-1" /> Domain Specialization
+                        <Star size={12} className="inline mr-1" /> Domain Specialization
                     </label>
                     <input
                         type="text"

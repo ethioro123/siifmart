@@ -2,7 +2,7 @@ import React from 'react';
 import { CURRENCY_SYMBOL } from '../../../constants';
 import { useStore } from '../../../contexts/CentralStore';
 import { hasPermission } from '../../../utils/permissions';
-import { Shield } from 'lucide-react';
+import { Shield, TrendingUp, Receipt, ShoppingBag, Layers } from 'lucide-react';
 
 interface SalesAnalyticsRibbonProps {
    metrics: {
@@ -13,38 +13,87 @@ interface SalesAnalyticsRibbonProps {
    totalCount: number;
    currencySymbol?: string;
 }
+
 export const SalesAnalyticsRibbon: React.FC<SalesAnalyticsRibbonProps> = ({ metrics, totalCount, currencySymbol = CURRENCY_SYMBOL }) => {
    const { user } = useStore();
    const canViewRevenue = hasPermission(user?.role, 'VIEW_REVENUE');
 
    return (
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-         <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] p-4 rounded-2xl shadow-xs transition-colors">
-            <div className="flex items-center justify-between">
-               <p className="text-[10px] text-[var(--theme-text-secondary)] uppercase font-bold tracking-wider">Page Revenue</p>
-               {!canViewRevenue && <Shield size={12} className="text-amber-500" />}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+         {/* Page Revenue Card */}
+         <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] p-4 sm:p-5 rounded-2xl shadow-[var(--shadow-sm)] transition-all flex flex-col justify-between">
+            <div className="flex items-center justify-between mb-3">
+               <div className="flex items-center gap-2.5">
+                  <div className="w-8 h-8 rounded-xl bg-blue-500/10 text-[#0071E3] dark:text-[#2997FF] flex items-center justify-center shrink-0">
+                     <TrendingUp size={16} />
+                  </div>
+                  <span className="text-[11px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider">
+                     Page Revenue
+                  </span>
+               </div>
+               {!canViewRevenue && (
+                  <span className="inline-flex items-center gap-1 text-[11px] text-amber-500 bg-amber-500/10 border border-amber-500/20 px-2 py-0.5 rounded-full font-medium">
+                     <Shield size={12} /> Hidden
+                  </span>
+               )}
             </div>
-            <p className="text-xl font-mono font-bold text-[var(--theme-text-primary)] mt-1">
+            <p className="text-2xl font-mono tabular-nums font-semibold tracking-tight text-[var(--theme-text-primary)]">
                {canViewRevenue ? `${currencySymbol} ${metrics.totalRev.toLocaleString()}` : '••••••'}
             </p>
          </div>
-         <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] p-4 rounded-2xl shadow-xs transition-colors">
-            <p className="text-[10px] text-[var(--theme-text-secondary)] uppercase font-bold tracking-wider">Page Transactions</p>
-            <p className="text-xl font-mono font-bold text-[var(--theme-text-primary)] mt-1">{metrics.txCount}</p>
-         </div>
-         <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] p-4 rounded-2xl shadow-xs transition-colors">
-            <div className="flex items-center justify-between">
-               <p className="text-[10px] text-[var(--theme-text-secondary)] uppercase font-bold tracking-wider">Avg Basket</p>
-               {!canViewRevenue && <Shield size={12} className="text-amber-500" />}
+
+         {/* Page Transactions Card */}
+         <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] p-4 sm:p-5 rounded-2xl shadow-[var(--shadow-sm)] transition-all flex flex-col justify-between">
+            <div className="flex items-center gap-2.5 mb-3">
+               <div className="w-8 h-8 rounded-xl bg-indigo-500/10 text-indigo-500 dark:text-indigo-400 flex items-center justify-center shrink-0">
+                  <Receipt size={16} />
+               </div>
+               <span className="text-[11px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider">
+                  Page Volume
+               </span>
             </div>
-            <p className="text-xl font-mono font-bold text-amber-600 dark:text-amber-400 mt-1">
-               {canViewRevenue ? `${currencySymbol} ${metrics.avgTicket.toFixed(0)}` : '••••••'}
+            <p className="text-2xl font-mono tabular-nums font-semibold tracking-tight text-[var(--theme-text-primary)]">
+               {metrics.txCount.toLocaleString()}
             </p>
          </div>
-         <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] p-4 rounded-2xl shadow-xs transition-colors">
-            <p className="text-[10px] text-[var(--theme-text-secondary)] uppercase font-bold tracking-wider">Total History Size</p>
-            <p className="text-xl font-mono font-bold text-[var(--theme-text-primary)] mt-1">{totalCount.toLocaleString()}</p>
+
+         {/* Average Basket Card */}
+         <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] p-4 sm:p-5 rounded-2xl shadow-[var(--shadow-sm)] transition-all flex flex-col justify-between">
+            <div className="flex items-center justify-between mb-3">
+               <div className="flex items-center gap-2.5">
+                  <div className="w-8 h-8 rounded-xl bg-amber-500/10 text-amber-500 dark:text-amber-400 flex items-center justify-center shrink-0">
+                     <ShoppingBag size={16} />
+                  </div>
+                  <span className="text-[11px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider">
+                     Avg Basket
+                  </span>
+               </div>
+               {!canViewRevenue && (
+                  <span className="inline-flex items-center gap-1 text-[11px] text-amber-500 bg-amber-500/10 border border-amber-500/20 px-2 py-0.5 rounded-full font-medium">
+                     <Shield size={12} /> Hidden
+                  </span>
+               )}
+            </div>
+            <p className="text-2xl font-mono tabular-nums font-semibold tracking-tight text-[var(--theme-text-primary)]">
+               {canViewRevenue ? `${currencySymbol} ${Math.round(metrics.avgTicket).toLocaleString()}` : '••••••'}
+            </p>
+         </div>
+
+         {/* Total History Size Card */}
+         <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] p-4 sm:p-5 rounded-2xl shadow-[var(--shadow-sm)] transition-all flex flex-col justify-between">
+            <div className="flex items-center gap-2.5 mb-3">
+               <div className="w-8 h-8 rounded-xl bg-neutral-500/10 text-[var(--theme-text-secondary)] flex items-center justify-center shrink-0">
+                  <Layers size={16} />
+               </div>
+               <span className="text-[11px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider">
+                  Total History
+               </span>
+            </div>
+            <p className="text-2xl font-mono tabular-nums font-semibold tracking-tight text-[var(--theme-text-primary)]">
+               {totalCount.toLocaleString()}
+            </p>
          </div>
       </div>
    );
 };
+

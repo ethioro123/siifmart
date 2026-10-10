@@ -76,12 +76,14 @@ export const ReceivingPendingList: React.FC = () => {
             <div className="bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-2xl p-4 mb-2">
                 <div className="flex items-center justify-between mb-3">
                     <label className="text-xs font-bold text-[var(--theme-text-primary)] uppercase flex items-center gap-2">
-                        <Scan size={14} />
+                        <div className="w-5 h-5 rounded-md bg-blue-500/10 text-blue-500 flex items-center justify-center shrink-0">
+                            <Scan size={13} />
+                        </div>
                         {t('posCommand.quickScanHandover')}
                     </label>
                     <span className="text-[10px] text-[var(--theme-text-secondary)] italic">{t('posCommand.scanPackingLabel')}</span>
                 </div>
-                <div className="relative">
+                <div className="relative flex items-center">
                     <input
                         type="text"
                         value={orderRefScanInput}
@@ -91,11 +93,11 @@ export const ReceivingPendingList: React.FC = () => {
                             if (e.key === 'Enter') handleScanOrderRef(orderRefScanInput);
                         }}
                         placeholder={t('posCommand.scanBarcodePlaceholder')}
-                        className="w-full bg-[var(--theme-input-bg)] border border-[var(--theme-border)] rounded-xl px-4 py-3 text-[var(--theme-text-primary)] font-mono outline-none transition-all placeholder:text-[var(--theme-text-muted)] focus:border-[var(--theme-border-focus)]"
+                        className="w-full bg-[var(--theme-input-bg)] border border-[var(--theme-border)] rounded-2xl px-4 py-3 pr-24 text-[var(--theme-text-primary)] font-mono text-xs outline-none transition-all placeholder:text-[var(--theme-text-muted)] focus:border-[var(--theme-border-focus)] shadow-2xs"
                     />
                     <button
                         onClick={() => handleScanOrderRef(orderRefScanInput)}
-                        className="absolute right-2 top-2 px-4 py-1.5 bg-[var(--theme-primary)] text-[var(--theme-primary-text)] hover:opacity-90 font-bold rounded-lg text-xs transition-all active:scale-95 cursor-pointer"
+                        className="absolute right-2 px-4 py-1.5 bg-[var(--theme-primary)] text-[var(--theme-primary-text)] hover:opacity-90 font-semibold rounded-xl text-xs transition-all active:scale-95 cursor-pointer shadow-xs"
                     >
                         {t('common.verify') || 'Verify'}
                     </button>
@@ -122,7 +124,7 @@ export const ReceivingPendingList: React.FC = () => {
                             return (
                                 <div
                                     key={item.id}
-                                    className={`bg-[var(--theme-bg-card)] border rounded-2xl overflow-hidden transition-all duration-150 ${
+                                    className={`bg-[var(--theme-bg-card)] border rounded-2xl overflow-hidden transition-all duration-150 isolate ${
                                         isExpanded
                                             ? 'border-[var(--theme-border-focus)] ring-2 ring-[var(--theme-primary)]/10'
                                             : 'border-[var(--theme-border)] hover:border-[var(--theme-border-strong)]'
@@ -135,7 +137,7 @@ export const ReceivingPendingList: React.FC = () => {
                                                 <span className="font-mono font-bold text-sm text-[var(--theme-text-primary)] uppercase tracking-tight">
                                                     {formatJobId({ ...item, type: 'TRANSFER' } as any)}
                                                 </span>
-                                                <span className="px-2 py-0.5 bg-amber-500/10 text-amber-500 border border-amber-500/20 rounded text-[9px] font-bold uppercase tracking-wider">
+                                                <span className="px-2.5 py-0.5 bg-amber-500/10 text-amber-500 border border-amber-500/20 rounded-full text-[9px] font-semibold uppercase tracking-wider">
                                                     {(() => {
                                                         const stat = ((item as any).transferStatus || item.status || '').toLowerCase();
                                                         return stat === 'in_transit' || stat === 'dispatched' ? t('posCommand.inTransit') : t('posCommand.pending');
@@ -154,26 +156,26 @@ export const ReceivingPendingList: React.FC = () => {
                                                     if (!isExt) {
                                                         if (!isDone) {
                                                             return (
-                                                                <span className="px-2 py-0.5 bg-amber-500/10 text-amber-500 border border-amber-500/20 rounded text-[9px] font-bold uppercase tracking-wider">
+                                                                <span className="px-2.5 py-0.5 bg-amber-500/10 text-amber-500 border border-amber-500/20 rounded-full text-[9px] font-semibold uppercase tracking-wider">
                                                                     Driver In-Transit (Awaiting Arrival)
                                                                 </span>
                                                             );
                                                         }
                                                         return (
-                                                            <span className="px-2 py-0.5 bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 rounded text-[9px] font-bold uppercase tracking-wider">
+                                                            <span className="px-2.5 py-0.5 bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 rounded-full text-[9px] font-semibold uppercase tracking-wider">
                                                                 Driver Delivered — Ready to Receive
                                                             </span>
                                                         );
                                                     } else {
                                                         if (!isDeparted) {
                                                             return (
-                                                                <span className="px-2 py-0.5 bg-amber-500/10 text-amber-500 border border-amber-500/20 rounded text-[9px] font-bold uppercase tracking-wider">
+                                                                <span className="px-2.5 py-0.5 bg-amber-500/10 text-amber-500 border border-amber-500/20 rounded-full text-[9px] font-semibold uppercase tracking-wider">
                                                                     EXT Carrier (Awaiting Departure)
                                                                 </span>
                                                             );
                                                         }
                                                         return (
-                                                            <span className="px-2 py-0.5 bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 rounded text-[9px] font-bold uppercase tracking-wider">
+                                                            <span className="px-2.5 py-0.5 bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 rounded-full text-[9px] font-semibold uppercase tracking-wider">
                                                                 EXT Carrier — Departure Confirmed
                                                             </span>
                                                         );

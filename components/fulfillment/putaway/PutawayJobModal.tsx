@@ -93,14 +93,14 @@ export const PutawayJobModal: React.FC<PutawayJobModalProps> = ({
     const progressPercent = totalItems > 0 ? (completedItems / totalItems) * 100 : 0;
 
     return (
-        <div className="fixed inset-0 z-[160] flex items-stretch md:items-center justify-center p-0 md:p-4 bg-black/80 overflow-x-hidden animate-in fade-in duration-300">
-            <div className="bg-[#FAF8F5] dark:bg-[#1C2620] w-full md:max-w-5xl md:max-h-[92vh] md:rounded-3xl border border-[#E2DCCE] dark:border-emerald-950/20 shadow-2xl flex flex-col overflow-hidden animate-in zoom-in-95 duration-500 relative">
+        <div className="fixed inset-0 z-[160] flex items-center justify-center p-2 sm:p-4 bg-black/80 overflow-y-auto animate-in fade-in duration-300">
+            <div className="bg-[#FAF8F5] dark:bg-[#1C2620] w-full max-w-5xl h-full max-h-[92dvh] rounded-2xl md:rounded-3xl border border-[#E2DCCE] dark:border-emerald-950/20 shadow-2xl flex flex-col overflow-hidden animate-in zoom-in-95 duration-500 relative">
                 {/* Visual Flair */}
                 <div className="hidden md:block absolute -top-32 -right-32 w-96 h-96 bg-[#2C5E3B]/10 dark:bg-[#2C5E3B]/20 blur-[100px] rounded-full pointer-events-none" />
                 <div className="hidden md:block absolute -bottom-32 -left-32 w-96 h-96 bg-[#A9CBA2]/10 dark:bg-[#A9CBA2]/25 blur-[100px] rounded-full pointer-events-none" />
 
                 {/* Header Section */}
-                <div className="relative p-5 md:p-10 border-b border-[#E2DCCE]/60 dark:border-[#2C5E3B]/10 bg-[#FAF8F5] dark:bg-[#1C2620] overflow-hidden shrink-0 z-10">
+                <div className="relative p-4 sm:p-6 md:p-8 border-b border-[#E2DCCE]/60 dark:border-[#2C5E3B]/10 bg-[#FAF8F5] dark:bg-[#1C2620] overflow-hidden shrink-0 z-10">
                     <div className="relative flex justify-between items-start">
                         <div className="flex items-center gap-6">
                             <div className="hidden md:flex w-20 h-20 rounded-[2rem] bg-[#2C5E3B]/10 dark:bg-[#A9CBA2]/25 border-2 border-[#2C5E3B]/20 dark:border-[#A9CBA2]/20 items-center justify-center text-[#2C5E3B] dark:text-[#A9CBA2] shadow-sm transition-all duration-700 active:scale-95">
@@ -166,7 +166,7 @@ export const PutawayJobModal: React.FC<PutawayJobModalProps> = ({
                 </div>
 
                 {/* Body Content */}
-                <div className="flex-1 overflow-y-auto p-5 md:p-10 custom-scrollbar space-y-8 bg-[#FAF8F5]/30 dark:bg-black/10">
+                <div className="flex-1 overflow-y-auto p-4 sm:p-6 md:p-8 custom-scrollbar space-y-5 md:space-y-6 bg-[#FAF8F5]/30 dark:bg-black/10">
                     {/* Interactive Payload Manifest */}
                     <div className="space-y-6 relative z-10">
                         <div className="flex items-center justify-between px-4">
@@ -299,51 +299,62 @@ export const PutawayJobModal: React.FC<PutawayJobModalProps> = ({
                 </div>
 
                 {/* Secure Footer Interface */}
-                <div className="p-6 md:p-10 border-t border-[#E2DCCE]/60 dark:border-emerald-950/20 bg-[#FAF8F5]/50 dark:bg-zinc-950/40 flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-6 shrink-0 relative z-20">
+                <div className="p-3 sm:p-5 md:p-8 border-t border-[#E2DCCE]/60 dark:border-emerald-950/20 bg-[#FAF8F5]/95 dark:bg-zinc-950/90 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 shrink-0 relative z-20">
                     <div className="hidden md:flex items-center gap-5">
-                        <div className="w-14 h-14 rounded-2xl bg-white dark:bg-white/5 border-2 border-gray-100 dark:border-white/10 flex items-center justify-center text-gray-300 dark:text-gray-755 shadow-inner group transition-all">
-                            <UserIcon size={28} className="group-hover:text-[#2C5E3B] dark:group-hover:text-[#A9CBA2] transition-colors" />
+                        <div className="w-12 h-12 rounded-2xl bg-white dark:bg-white/5 border-2 border-gray-100 dark:border-white/10 flex items-center justify-center text-gray-300 dark:text-gray-755 shadow-inner group transition-all">
+                            <UserIcon size={24} className="group-hover:text-[#2C5E3B] dark:group-hover:text-[#A9CBA2] transition-colors" />
                         </div>
                         <div className="flex flex-col">
-                            <span className="text-[10px] text-gray-400 dark:text-gray-650 font-black uppercase tracking-[0.4em] mb-1">{t('warehouse.assignedTo')}</span>
-                            <span className="text-sm font-black text-gray-950 dark:text-gray-300 uppercase tracking-[0.1em]">{(() => {
-                                if (!job.assignedTo) return t('warehouse.putaway.unassigned');
-                                const emp = employees.find(e => e.id === job.assignedTo || e.name === job.assignedTo);
-                                return emp?.name || job.assignedTo;
-                            })()}</span>
+                            {(() => {
+                                const isCompleted = job.status === 'Completed' || (job.status || '').toLowerCase() === 'completed';
+                                const completedUserId = job.completedBy || (job as any).completed_by;
+                                const assignedUserId = job.assignedTo || (job as any).assigned_to;
+                                const targetUserId = (isCompleted || completedUserId) ? (completedUserId || assignedUserId) : (assignedUserId || completedUserId);
+                                const workerLabel = (isCompleted || Boolean(completedUserId))
+                                    ? (t('warehouse.completedBy') || 'Completed By')
+                                    : (t('warehouse.assignedTo') || 'Assigned To');
+                                const emp = employees.find(e => e.id === targetUserId || e.name === targetUserId || e.code === targetUserId);
+                                const displayName = emp?.name || (targetUserId ? targetUserId : (isCompleted ? 'System' : t('warehouse.putaway.unassigned')));
+                                return (
+                                    <>
+                                        <span className="text-[10px] text-gray-400 dark:text-gray-650 font-black uppercase tracking-[0.4em] mb-0.5">{workerLabel}</span>
+                                        <span className="text-xs sm:text-sm font-black text-gray-950 dark:text-gray-300 uppercase tracking-[0.1em]">{displayName}</span>
+                                    </>
+                                );
+                            })()}
                         </div>
                     </div>
 
-                    <div className="flex flex-col sm:flex-row items-stretch gap-4">
+                    <div className="flex flex-col sm:flex-row items-stretch gap-2.5 sm:gap-4">
                         <button
                             onClick={onClose}
-                            className="woody-btn-secondary px-6 md:px-10 py-5 text-[11px]"
+                            className="woody-btn-secondary px-5 md:px-8 py-3.5 sm:py-4 text-[11px] min-h-[44px]"
                         >
                             {t('warehouse.dismiss')}
                         </button>
 
                         {job.status !== 'Completed' && (
-                            <div className="flex-1 flex flex-col sm:flex-row items-stretch gap-4">
+                            <div className="flex-1 flex flex-col sm:flex-row items-stretch gap-2.5 sm:gap-4">
                                 {progressPercent >= 100 ? (
                                     <button
                                         onClick={() => onCompleteJob(job)}
                                         disabled={isSubmitting}
-                                        className="w-full px-6 md:px-16 py-5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-2xl font-black text-[11px] uppercase tracking-[0.3em] shadow-md transition-all flex items-center justify-center gap-4 active:scale-95 disabled:opacity-40 border border-emerald-400/50"
+                                        className="w-full px-6 md:px-12 py-3.5 sm:py-4 bg-emerald-600 hover:bg-emerald-500 text-white rounded-2xl font-black text-[11px] uppercase tracking-[0.3em] shadow-md transition-all flex items-center justify-center gap-3 active:scale-95 disabled:opacity-40 border border-emerald-400/50 min-h-[48px]"
                                     >
-                                        {isSubmitting ? <Loader2 size={24} className="animate-spin" /> : <><CheckCircle size={24} strokeWidth={3} /> {t('warehouse.completeJob')}</>}
+                                        {isSubmitting ? <Loader2 size={20} className="animate-spin" /> : <><CheckCircle size={20} strokeWidth={3} /> {t('warehouse.completeJob')}</>}
                                     </button>
                                 ) : (
                                     <button
                                         onClick={() => onStartPutaway(job)}
                                         disabled={isSubmitting}
-                                        className="woody-btn-primary px-6 md:px-16 py-5 text-[11px] flex items-center justify-center gap-4"
+                                        className="woody-btn-primary px-6 md:px-12 py-3.5 sm:py-4 text-[11px] flex items-center justify-center gap-3 min-h-[48px]"
                                     >
                                         {isSubmitting ? (
-                                            <Loader2 size={24} className="animate-spin" />
+                                            <Loader2 size={20} className="animate-spin" />
                                         ) : (
                                             <>
                                                 <span className="whitespace-nowrap">{job.status === 'In-Progress' ? `${t('warehouse.continue')} ${t('warehouse.jobId')}` : t('warehouse.startJob')}</span>
-                                                <ArrowRight size={24} className="group-hover:translate-x-2 transition-transform duration-500 hidden xs:block" />
+                                                <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform duration-300" />
                                             </>
                                         )}
                                     </button>

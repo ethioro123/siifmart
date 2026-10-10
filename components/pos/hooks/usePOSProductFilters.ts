@@ -139,9 +139,14 @@ export const usePOSProductFilters = ({
             // Guard: Multi-Country National Catalog Scope (no cross-border catalog bleed)
             const explicitCountry = (p as any).country || (p as any).country_code;
             if (explicitCountry && explicitCountry !== siteCountry) return false;
-            if (siteCountry === 'ET' && p.sku?.startsWith('KE-')) return false;
-            if (siteCountry === 'KE' && p.sku?.startsWith('ET-')) return false;
-            if (siteCountry === 'UG' && (p.sku?.startsWith('ET-') || p.sku?.startsWith('KE-'))) return false;
+            const sku = p.sku || '';
+            const isKE = sku.startsWith('KE-') || /^[kK][eE][A-Za-z]{2,4}\d+/.test(sku);
+            const isET = sku.startsWith('ET-') || /^[eE][tT][A-Za-z]{2,4}\d+/.test(sku);
+            const isUG = sku.startsWith('UG-') || /^[uU][gG][A-Za-z]{2,4}\d+/.test(sku);
+
+            if (siteCountry === 'ET' && (isKE || isUG)) return false;
+            if (siteCountry === 'KE' && (isET || isUG)) return false;
+            if (siteCountry === 'UG' && (isET || isKE)) return false;
 
             const searchLower = searchTerm.toLowerCase();
             const matchesSearch = 

@@ -32,9 +32,9 @@ export const ProfileIdentityCard: React.FC<ProfileIdentityCardProps> = ({
     nationalIdNumber,
     setNationalIdNumber
 }) => {
-    const inputClasses = "w-full bg-[var(--theme-bg-panel)] border border-[var(--theme-border)] rounded-xl px-4 py-2.5 text-xs text-[var(--theme-text-primary)] outline-none focus:border-[var(--theme-primary)] transition-colors";
-    const labelClasses = "text-[10px] text-[var(--theme-text-muted)] font-black uppercase tracking-wider mb-1 block px-1";
-    const readOnlyClasses = "flex items-center justify-between p-3.5 bg-[var(--theme-bg-panel)] rounded-xl border border-[var(--theme-border)]";
+    const inputClasses = "w-full h-11 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-4 text-xs text-[var(--theme-text-primary)] outline-none focus:border-[var(--theme-accent)] transition-colors";
+    const labelClasses = "text-[11px] text-[var(--theme-text-secondary)] font-semibold uppercase tracking-wider mb-1.5 block px-1";
+    const readOnlyClasses = "flex items-center justify-between p-3.5 bg-[var(--theme-bg-subtle)] rounded-xl border border-[var(--theme-border)]";
 
     const isIdentityModified = 
         name !== employee.name ||
@@ -53,7 +53,7 @@ export const ProfileIdentityCard: React.FC<ProfileIdentityCardProps> = ({
                         <h4 className="text-sm font-bold text-[var(--theme-text-primary)]">
                             Legal Identity & Sovereign Records
                         </h4>
-                        <p className="text-[11px] text-[var(--theme-text-muted)]">
+                        <p className="text-[11px] text-[var(--theme-text-secondary)]">
                             Official personnel credentials, age verification, and national identification.
                         </p>
                     </div>
@@ -63,10 +63,10 @@ export const ProfileIdentityCard: React.FC<ProfileIdentityCardProps> = ({
             {/* Personnel Code — Always read-only */}
             <div className={readOnlyClasses}>
                 <div>
-                    <p className="text-[10px] text-[var(--theme-text-muted)] uppercase font-bold tracking-wider">Personnel Code</p>
+                    <p className="text-[11px] text-[var(--theme-text-secondary)] uppercase font-semibold tracking-wider">Personnel Code</p>
                     <p className="text-[var(--theme-text-primary)] font-mono text-sm font-bold">{formatDisplayEmployeeId(employee, sites)}</p>
                 </div>
-                <span className="px-2.5 py-1 bg-[var(--theme-bg-card)] rounded-lg border border-[var(--theme-border)] text-[10px] text-[var(--theme-text-secondary)] font-bold uppercase tracking-wider">
+                <span className="px-2.5 py-1 bg-[var(--theme-bg-card)] rounded-lg border border-[var(--theme-border)] text-[11px] text-[var(--theme-text-secondary)] font-semibold uppercase tracking-wider">
                     Sovereign ID
                 </span>
             </div>
@@ -112,7 +112,7 @@ export const ProfileIdentityCard: React.FC<ProfileIdentityCardProps> = ({
 
                 <div>
                     <label className={labelClasses}>
-                        <Calendar size={10} className="inline mr-1" /> Date of Birth
+                        <Calendar size={12} className="inline mr-1" /> Date of Birth
                     </label>
                     {canEdit ? (
                         <input
@@ -132,7 +132,7 @@ export const ProfileIdentityCard: React.FC<ProfileIdentityCardProps> = ({
             {/* National ID / Passport */}
             <div>
                 <label className={labelClasses}>
-                    <CreditCard size={10} className="inline mr-1" /> National ID / Passport Number
+                    <CreditCard size={12} className="inline mr-1" /> National ID / Passport Number
                 </label>
                 {canEdit ? (
                     <input

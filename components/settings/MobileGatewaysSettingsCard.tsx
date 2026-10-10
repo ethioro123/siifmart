@@ -106,15 +106,14 @@ export function MobileGatewaysSettingsCard({
     };
 
     return (
-        <GlassCard className="p-6 lg:p-8 space-y-8">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#E2DCCE]/60 dark:border-white/5 pb-6">
+        <GlassCard className="p-6 lg:p-8 space-y-6">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[var(--theme-border)] pb-4">
                 <SectionHeader
                     title="Mobile Money & Digital Payment Gateways"
                     desc="Configure Till Numbers, Daraja STK Push credentials, and Airtel Money accounts"
                     icon={Smartphone}
                     compact
                 />
-
             </div>
 
             {/* Content for the globally active national tenant — zero tenant switcher */}
@@ -133,9 +132,9 @@ export function MobileGatewaysSettingsCard({
             )}
 
             {/* ACTION FOOTER */}
-            <div className="pt-6 border-t border-[#E2DCCE]/60 dark:border-white/10 flex items-center justify-between">
-                <div className="text-[11px] text-stone-500 dark:text-gray-400 flex items-center gap-1.5">
-                    <Shield size={13} className="text-[#2C5E3B] dark:text-[#A9CBA2]" />
+            <div className="pt-6 border-t border-[var(--theme-border)] flex items-center justify-between">
+                <div className="text-[11px] text-[var(--theme-text-secondary)] flex items-center gap-1.5">
+                    <Shield size={14} className="text-[#0071E3] dark:text-[#2997FF] shrink-0" />
                     <span>Active gateways automatically populate on POS checkout and thermal receipts.</span>
                 </div>
 
@@ -143,7 +142,7 @@ export function MobileGatewaysSettingsCard({
                     type="button"
                     onClick={handleSave}
                     disabled={isSaving}
-                    className="px-6 py-2.5 bg-[#2C5E3B] hover:opacity-90 text-white font-bold rounded-2xl text-xs uppercase tracking-wider flex items-center gap-2 shadow-md cursor-pointer transition-all disabled:opacity-50"
+                    className="h-10 px-5 bg-[#0071E3] dark:bg-[#2997FF] hover:opacity-90 active:scale-[0.98] text-white font-semibold rounded-xl text-xs flex items-center gap-2 shadow-xs cursor-pointer transition-all disabled:opacity-40"
                 >
                     {isSaving ? <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <Save size={15} />}
                     Save Gateways

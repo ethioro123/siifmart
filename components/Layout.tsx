@@ -45,13 +45,13 @@ export default function Layout({ children }: { children?: React.ReactNode }) {
 
 
   return (
-    <div className="flex h-screen text-gray-700 dark:text-gray-300 font-sans overflow-hidden transition-colors duration-300" style={{ backgroundColor: 'var(--bg-app)' }}>
+    <div className="flex h-[100dvh] min-h-[100dvh] text-gray-700 dark:text-gray-300 font-sans overflow-hidden transition-colors duration-300" style={{ backgroundColor: 'var(--bg-app)' }}>
       <NetworkStatusIndicator />
       <Sidebar />
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
         <GhostModeBanner />
         <TopBar />
-        <main className="flex-1 overflow-y-auto p-4 lg:p-6 scroll-smooth">
+        <main className="flex-1 overflow-y-auto p-3 sm:p-4 lg:p-6 pb-20 md:pb-6 scroll-smooth">
           <div className="w-full space-y-6">
             {children}
           </div>

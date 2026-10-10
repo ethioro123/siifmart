@@ -198,7 +198,7 @@ export const ShiftClosureModal: React.FC = () => {
                         {/* Continue button */}
                         <button
                             onClick={() => setClosingStep(2)}
-                            className="w-full py-3.5 text-[var(--theme-primary-text)] font-bold rounded-xl transition-all active:scale-[0.98] hover:opacity-90 select-none bg-[var(--theme-primary)] shadow-xs cursor-pointer text-xs uppercase tracking-wider"
+                            className="w-full py-3.5 text-[var(--theme-primary-text)] font-semibold rounded-2xl transition-all active:scale-[0.98] hover:opacity-90 select-none bg-[var(--theme-primary)] shadow-xs cursor-pointer text-xs uppercase tracking-wider"
                         >
                             {t('common.continue')}
                         </button>
@@ -208,20 +208,20 @@ export const ShiftClosureModal: React.FC = () => {
                         {/* Balance status banner */}
                         <div className={`p-6 rounded-2xl border text-center ${
                             !isVariance
-                                ? 'bg-emerald-50 dark:bg-emerald-500/8 border-emerald-200 dark:border-emerald-500/20'
-                                : 'bg-red-50 dark:bg-red-500/8 border-red-200 dark:border-red-500/20'
+                                ? 'bg-emerald-500/10 border-emerald-500/20'
+                                : 'bg-rose-500/10 border-rose-500/20'
                         }`}>
-                            <div className={`w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3 ${
+                            <div className={`w-12 h-12 rounded-2xl flex items-center justify-center mx-auto mb-3 ${
                                 !isVariance
-                                    ? 'bg-emerald-100 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400'
-                                    : 'bg-red-100 dark:bg-red-500/20 text-red-600 dark:text-red-400'
+                                    ? 'bg-emerald-500/20 text-emerald-600 dark:text-emerald-400'
+                                    : 'bg-rose-500/20 text-rose-600 dark:text-rose-400'
                             }`}>
                                 {!isVariance ? <CheckCircle size={24} /> : <AlertTriangle size={24} />}
                             </div>
-                            <h3 className={`text-lg font-extrabold mb-1 ${!isVariance ? 'text-emerald-800 dark:text-emerald-300' : 'text-red-700 dark:text-red-300'}`}>
+                            <h3 className={`text-lg font-bold mb-1 ${!isVariance ? 'text-emerald-700 dark:text-emerald-300' : 'text-rose-700 dark:text-rose-300'}`}>
                                 {!isVariance ? t('pos.shiftBalanced') : variance > 0 ? t('pos.cashSurplus') : t('pos.cashShortage')}
                             </h3>
-                            <p className={`text-sm ${!isVariance ? 'text-emerald-600/70 dark:text-emerald-400/70' : 'text-red-500/70 dark:text-red-400/70'}`}>
+                            <p className={`text-xs ${!isVariance ? 'text-emerald-600/80 dark:text-emerald-400/80' : 'text-rose-600/80 dark:text-rose-400/80'}`}>
                                 {!isVariance ? t('pos.shiftBalancedDesc') : t('pos.varianceDetectedDesc')}
                             </p>
                         </div>
@@ -242,9 +242,9 @@ export const ShiftClosureModal: React.FC = () => {
                         {/* Variance section */}
                         {isVariance && (
                             <div className="space-y-3">
-                                <div className="flex justify-between items-center p-4 bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 rounded-2xl">
-                                    <span className="text-sm font-bold text-red-600 dark:text-red-400">{t('pos.variance')}</span>
-                                    <span className="text-lg font-mono font-bold text-red-600 dark:text-red-400">
+                                <div className="flex justify-between items-center p-4 bg-rose-500/10 border border-rose-500/20 rounded-2xl">
+                                    <span className="text-sm font-bold text-rose-600 dark:text-rose-400">{t('pos.variance')}</span>
+                                    <span className="text-lg font-mono font-bold text-rose-600 dark:text-rose-400">
                                         {variance > 0 ? '+' : ''}{CURRENCY_SYMBOL} {variance.toLocaleString()}
                                     </span>
                                 </div>
@@ -252,7 +252,7 @@ export const ShiftClosureModal: React.FC = () => {
                                 <textarea
                                     value={discrepancyReason}
                                     onChange={(e) => setDiscrepancyReason(e.target.value)}
-                                    className="w-full bg-[var(--theme-input-bg)] border border-[var(--theme-input-border)] rounded-xl p-3 text-[var(--theme-input-text)] placeholder:text-[var(--theme-text-muted)] outline-none transition-all text-sm focus:border-[var(--theme-border-focus)]"
+                                    className="w-full bg-[var(--theme-input-bg)] border border-[var(--theme-input-border)] rounded-2xl p-3 text-[var(--theme-input-text)] placeholder:text-[var(--theme-text-muted)] outline-none transition-all text-xs focus:border-[var(--theme-border-focus)] shadow-2xs"
                                     placeholder={t('posCommand.varianceReasonPlaceholder')}
                                     rows={3}
                                 />
@@ -264,30 +264,30 @@ export const ShiftClosureModal: React.FC = () => {
                             <button
                                 type="button"
                                 onClick={() => setClosingStep(1)}
-                                className="flex-1 py-3 bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card-hover)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] font-bold rounded-xl border border-[var(--theme-border)] transition-all flex items-center justify-center gap-2 select-none cursor-pointer text-xs uppercase tracking-wider shadow-xs"
+                                className="flex-1 py-3 bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card-hover)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] font-semibold rounded-2xl border border-[var(--theme-border)] transition-all flex items-center justify-center gap-2 select-none cursor-pointer text-xs uppercase tracking-wider shadow-2xs"
                             >
-                                <ArrowLeft size={14} />
+                                <ArrowLeft size={14} className="text-blue-500" />
                                 {t('posCommand.recount')}
                             </button>
                             <button
                                 type="button"
                                 onClick={handlePrintZReport}
-                                className="px-4 py-3 bg-[var(--theme-bg-card)] hover:bg-[var(--theme-bg-subtle)] text-[var(--theme-text-primary)] font-bold rounded-xl border border-[var(--theme-border)] transition-all flex items-center justify-center gap-1.5 select-none cursor-pointer text-xs uppercase tracking-wider shadow-xs"
+                                className="px-4 py-3 bg-[var(--theme-bg-card)] hover:bg-[var(--theme-bg-subtle)] text-[var(--theme-text-primary)] font-semibold rounded-2xl border border-[var(--theme-border)] transition-all flex items-center justify-center gap-1.5 select-none cursor-pointer text-xs uppercase tracking-wider shadow-2xs"
                                 title="Print Physical Z-Report Slip"
                             >
-                                <Printer size={14} />
+                                <Printer size={14} className="text-purple-500" />
                                 <span>Z-Report</span>
                             </button>
                             <button
                                 type="button"
                                 onClick={handleFinalizeClick}
                                 disabled={isSubmittingShift || (isVariance && !discrepancyReason)}
-                                className="flex-1 py-3 disabled:opacity-40 border border-transparent disabled:cursor-not-allowed text-[var(--theme-primary-text)] font-bold rounded-xl transition-all active:scale-[0.98] flex items-center justify-center gap-2 hover:opacity-90 bg-[var(--theme-primary)] shadow-xs select-none cursor-pointer text-xs uppercase tracking-wider"
+                                className="flex-1 py-3 disabled:opacity-40 border border-transparent disabled:cursor-not-allowed text-[var(--theme-primary-text)] font-semibold rounded-2xl transition-all active:scale-[0.98] flex items-center justify-center gap-2 hover:opacity-90 bg-[var(--theme-primary)] shadow-xs select-none cursor-pointer text-xs uppercase tracking-wider"
                             >
                                 {isSubmittingShift ? (
                                     <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                                 ) : isVariance && !isManagerOrAdmin ? (
-                                    <Lock size={14} />
+                                    <Lock size={14} className="text-amber-500" />
                                 ) : null}
                                 {isVariance && !isManagerOrAdmin ? "Authorize with Manager PIN" : t('posCommand.finalizeLogout')}
                             </button>

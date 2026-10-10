@@ -86,11 +86,14 @@ export function useInventoryOverviewData({
 
     // ABC chart: Pareto classification across active inventory
     const abcData = useMemo(() => {
-        const accent = theme === 'dark' ? '#A9CBA2' : '#2C5E3B';
+        const classAColor = theme === 'dark' ? '#2997FF' : '#0071E3';
+        const classBColor = theme === 'dark' ? '#30D158' : '#34C759';
+        const classCColor = theme === 'dark' ? '#FF9F0A' : '#FF9500';
+
         if (serverMetrics?.abc_stats?.length) {
             return serverMetrics.abc_stats.map((item: { name: string; value: number }, i: number) => ({
                 ...item,
-                color: i === 0 ? accent : i === 1 ? '#4D6E56' : '#d97706'
+                color: i === 0 ? classAColor : i === 1 ? classBColor : classCColor
             }));
         }
 
@@ -102,9 +105,9 @@ export function useInventoryOverviewData({
         });
 
         return [
-            { name: 'Class A (Vital)', value: data.A, color: accent },
-            { name: 'Class B (Important)', value: data.B, color: '#4D6E56' },
-            { name: 'Class C (Standard)', value: data.C, color: '#d97706' },
+            { name: 'Class A (Vital)', value: data.A, color: classAColor },
+            { name: 'Class B (Important)', value: data.B, color: classBColor },
+            { name: 'Class C (Standard)', value: data.C, color: classCColor },
         ];
     }, [serverMetrics, filteredProducts, totalInventoryValueRetail, theme]);
 

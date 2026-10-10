@@ -68,24 +68,23 @@ export default function PayrollTab({
     return (
         <div className="space-y-6 animate-in fade-in">
             {/* Summary Card */}
-            <div className="bg-[#FAF8F5] dark:bg-black/40 p-8 rounded-3xl border border-[#E2DCCE] dark:border-white/10 relative overflow-hidden group shadow-xs">
-                <div className="absolute inset-0 bg-emerald-500/5 opacity-0 group-hover:opacity-100 transition-opacity" />
+            <div className="bg-[var(--theme-bg-card)] p-6 sm:p-8 rounded-2xl border border-[var(--theme-border)] relative overflow-hidden group shadow-xs">
                 <div className="flex flex-col md:flex-row justify-between items-center gap-6 relative z-10">
                     <div className="text-center md:text-left">
-                        <p className="text-xs text-stone-500 font-black uppercase tracking-[0.15em] mb-2">
+                        <p className="text-xs text-[var(--theme-text-secondary)] font-semibold uppercase tracking-wider mb-2">
                             Base Monthly Gross Salary
                         </p>
-                        <p className="text-4xl md:text-5xl font-black text-[#1E3F27] dark:text-[#EAE5D9] font-mono tracking-tighter">
+                        <p className="text-3xl md:text-4xl font-bold text-[var(--theme-text-primary)] font-mono tabular-nums tracking-tight">
                             {currencySymbol} {employee.salary?.toLocaleString() || '0'}
                         </p>
-                        <p className="text-xs text-stone-400 mt-2 font-medium">
+                        <p className="text-xs text-[var(--theme-text-secondary)] mt-2 font-medium">
                             Standard statutory tax (PAYE 15%) and pension (7%) calculated automatically
                         </p>
                     </div>
                     {canManageEmployees && (
                         <button
                             onClick={handleEditSalary}
-                            className="woody-btn-primary px-6 py-3 text-xs font-black uppercase tracking-widest rounded-2xl cursor-pointer shrink-0 shadow-md"
+                            className="h-11 px-5 rounded-xl bg-[var(--theme-accent)] text-white hover:bg-[var(--theme-accent)]/90 text-xs font-semibold uppercase tracking-wider cursor-pointer shrink-0 transition-colors shadow-xs flex items-center justify-center"
                         >
                             Adjust Compensation
                         </button>
@@ -95,21 +94,21 @@ export default function PayrollTab({
 
             {/* Pending Salary Request Alert */}
             {pendingRequest && (
-                <div className="p-4 rounded-2xl bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800/30 flex items-start sm:items-center justify-between gap-4">
+                <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-start sm:items-center justify-between gap-4">
                     <div className="flex items-center gap-3">
-                        <div className="p-2 rounded-xl bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-400">
+                        <div className="p-2 rounded-xl bg-amber-500/15 text-amber-500">
                             <Clock size={18} />
                         </div>
                         <div>
-                            <p className="text-xs font-bold text-amber-900 dark:text-amber-300">
-                                Pending Salary Adjustment: {currencySymbol} {Number(pendingRequest.currentSalary).toLocaleString()} → {currencySymbol} {Number(pendingRequest.proposedSalary).toLocaleString()}
+                            <p className="text-xs font-bold text-[var(--theme-text-primary)]">
+                                Pending Salary Adjustment: <span className="font-mono tabular-nums">{currencySymbol} {Number(pendingRequest.currentSalary).toLocaleString()}</span> → <span className="font-mono tabular-nums text-amber-500">{currencySymbol} {Number(pendingRequest.proposedSalary).toLocaleString()}</span>
                             </p>
-                            <p className="text-[11px] text-amber-700 dark:text-amber-400/80 mt-0.5">
+                            <p className="text-[11px] text-[var(--theme-text-secondary)] mt-0.5">
                                 Proposed by {pendingRequest.requestedBy} ({pendingRequest.requestedByRole}) • Awaiting Finance Manager / CEO Authorization
                             </p>
                         </div>
                     </div>
-                    <span className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full bg-amber-200/80 dark:bg-amber-900/60 text-amber-800 dark:text-amber-300 shrink-0">
+                    <span className="text-[11px] font-semibold uppercase tracking-wider px-2.5 py-1 rounded-full bg-amber-500/15 text-amber-500 border border-amber-500/25 shrink-0">
                         In Queue
                     </span>
                 </div>
@@ -119,11 +118,11 @@ export default function PayrollTab({
             <div className="space-y-4">
                 <div className="flex items-center justify-between">
                     <div>
-                        <h4 className="text-sm font-black text-[#1E3F27] dark:text-[#EAE5D9] uppercase tracking-wider flex items-center gap-2">
-                            <FileText size={16} className="text-[#2C5E3B] dark:text-[#A9CBA2]" />
+                        <h4 className="text-sm font-bold text-[var(--theme-text-primary)] uppercase tracking-wider flex items-center gap-2">
+                            <FileText size={16} className="text-[var(--theme-accent)]" />
                             Official Payroll Statements
                         </h4>
-                        <p className="text-xs text-stone-500">
+                        <p className="text-xs text-[var(--theme-text-secondary)]">
                             Disbursed salary vouchers, deductions, and tax withholdings
                         </p>
                     </div>
@@ -134,31 +133,31 @@ export default function PayrollTab({
                         <div
                             key={slip.id}
                             onClick={() => handleSelectPayslip(slip)}
-                            className="flex justify-between items-center p-5 bg-[#FAF8F5] dark:bg-black/30 rounded-2xl border border-[#E2DCCE] dark:border-white/10 hover:border-[#2C5E3B]/60 dark:hover:border-emerald-500/40 cursor-pointer transition-all group shadow-xs hover:shadow-md"
+                            className="flex justify-between items-center p-5 bg-[var(--theme-bg-card)] rounded-2xl border border-[var(--theme-border)] hover:border-[var(--theme-accent)]/60 cursor-pointer transition-colors group shadow-xs"
                             role="button"
                             tabIndex={0}
                             onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') handleSelectPayslip(slip); }}
                         >
                             <div className="flex items-center gap-4">
-                                <div className="w-12 h-12 rounded-xl bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200/60 dark:border-emerald-800/40 flex items-center justify-center text-[#2C5E3B] dark:text-[#A9CBA2] group-hover:scale-105 transition-transform shrink-0">
-                                    <DollarSign size={22} />
+                                <div className="w-11 h-11 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-500 group-hover:scale-105 transition-transform shrink-0">
+                                    <DollarSign size={20} />
                                 </div>
                                 <div>
                                     <div className="flex items-center gap-2">
-                                        <p className="text-sm text-[#1E3F27] dark:text-[#EAE5D9] font-bold group-hover:text-[#2C5E3B] dark:group-hover:text-emerald-400 transition-colors">
+                                        <p className="text-sm text-[var(--theme-text-primary)] font-bold group-hover:text-[var(--theme-accent)] transition-colors">
                                             {slip.period}
                                         </p>
-                                        <span className="text-[10px] font-mono px-2 py-0.5 rounded-md bg-stone-100 dark:bg-white/5 text-stone-600 dark:text-stone-300">
+                                        <span className="text-[11px] font-mono px-2 py-0.5 rounded-lg bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-[var(--theme-text-secondary)]">
                                             {slip.id}
                                         </span>
                                     </div>
-                                    <p className="text-xs text-stone-500 font-mono mt-0.5">
-                                        Net: <span className="font-bold text-[#2C5E3B] dark:text-[#A9CBA2]">{currencySymbol} {slip.netSalary.toLocaleString()}</span> • Released {slip.releaseDate}
+                                    <p className="text-xs text-[var(--theme-text-secondary)] font-mono tabular-nums mt-0.5">
+                                        Net: <span className="font-bold text-[var(--theme-text-primary)]">{currencySymbol} {slip.netSalary.toLocaleString()}</span> • Released {slip.releaseDate}
                                     </p>
                                 </div>
                             </div>
-                            <div className="flex items-center gap-2 text-stone-400 group-hover:text-[#2C5E3B] dark:group-hover:text-[#EAE5D9] transition-colors">
-                                <span className="text-xs font-bold hidden sm:inline">View Statement</span>
+                            <div className="flex items-center gap-2 text-[var(--theme-text-muted)] group-hover:text-[var(--theme-accent)] transition-colors">
+                                <span className="text-xs font-semibold hidden sm:inline">View Statement</span>
                                 <ChevronRight size={18} className="transform group-hover:translate-x-0.5 transition-transform" />
                             </div>
                         </div>

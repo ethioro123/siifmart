@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { useFulfillment } from './FulfillmentContext';
 import { PickHistory } from './pick/PickHistory';
@@ -21,7 +21,7 @@ export const PickTab: React.FC = () => {
     const {
         filteredJobs, user, historicalJobs, employees, sites, products, jobs,
         resolveOrderRef, handleStartJob, setSelectedJob, selectedJob, setIsDetailsOpen, isDetailsOpen,
-        completeJob, updateJobItem, isSubmitting, addNotification, wmsJobsService
+        completeJob, updateJobItem, isSubmitting, addNotification, wmsJobsService, loadHistoricalJobs
     } = useFulfillment();
 
     const { t } = useLanguage();
@@ -32,6 +32,11 @@ export const PickTab: React.FC = () => {
     const [isPickSortDropdownOpen, setIsPickSortDropdownOpen] = useState(false);
     const [pickCurrentPage, setPickCurrentPage] = useState(1);
     const [viewMode, setViewMode] = useState<'Process' | 'History'>('Process');
+
+    // RULE 10: Fetch history on demand when user switches to History view
+    useEffect(() => {
+        if (viewMode === 'History') loadHistoricalJobs();
+    }, [viewMode]);
 
     // --- MODAL & SCANNER STATE ---
     const [isJobModalOpen, setIsJobModalOpen] = useState(false);

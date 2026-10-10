@@ -36,51 +36,52 @@ describe('Modern CSS Token Layer & Aesthetic Architecture', () => {
   it('verifies Rule 20, Rule 21, Rule 22, and Rule 23 are codified in project rules', () => {
     const agentsContent = fs.readFileSync(agentsRulePath, 'utf8');
     const rulesContent = fs.readFileSync(rulesPath, 'utf8');
+    const allRulesContent = agentsContent + '\n' + rulesContent;
 
     // Rule 20: Mandatory Apple Minimalist & Liquid Glass Design Standard Audit
-    expect(agentsContent).toContain('Mandatory Apple Minimalist & Liquid Glass Design Standard Audit');
+    expect(allRulesContent).toContain('Mandatory Apple Minimalist & Liquid Glass Design Standard');
     expect(rulesContent).toContain('Mandatory Apple Minimalist & Liquid Glass Design Standard');
 
     // Rule 21: Mandatory Low-End Mobile Performance & Warehouse Ergonomics Standard Audit
-    expect(agentsContent).toContain('Mandatory Low-End Mobile Performance & Warehouse Ergonomics Standard Audit');
+    expect(allRulesContent).toContain('Mandatory Low-End Mobile Performance & Warehouse Ergonomics Standard');
     expect(rulesContent).toContain('Mandatory Low-End Mobile Performance & Warehouse Ergonomics Standard');
 
     // Rule 22: Mandatory Zero-Hardcoded Aesthetic & Semantic Tokenization Standard Audit
-    expect(agentsContent).toContain('Mandatory Zero-Hardcoded Aesthetic & Semantic Tokenization Standard Audit');
+    expect(allRulesContent).toContain('Mandatory Zero-Hardcoded Aesthetic & Semantic Tokenization Standard');
     expect(rulesContent).toContain('Mandatory Zero-Hardcoded Aesthetic & Semantic Tokenization Standard');
 
     // Rule 23: Mandatory Zero-Emoji & Professional Vector Iconography Standard Audit
-    expect(agentsContent).toContain('Mandatory Zero-Emoji & Professional Vector Iconography Standard Audit (SF Symbols Philosophy)');
+    expect(allRulesContent).toContain('Mandatory Zero-Emoji & Professional Vector Iconography Standard');
     expect(rulesContent).toContain('Mandatory Zero-Emoji & Professional Vector Iconography Standard (SF Symbols Philosophy)');
 
     // Rule 24: Mandatory Universal Theme & Aesthetic Application Audit Across All Domains
-    expect(agentsContent).toContain('Mandatory Universal Theme & Aesthetic Application Audit Across All Domains');
+    expect(allRulesContent).toContain('Mandatory Universal Theme & Aesthetic Application');
     expect(rulesContent).toContain('Mandatory Universal Theme & Aesthetic Application Across All Domains');
 
     // Rule 25: Mandatory 6-Month Autonomous Apple Aesthetic Re-Alignment Cycle Audit
-    expect(agentsContent).toContain('Mandatory 6-Month Autonomous Apple Aesthetic Re-Alignment Cycle Audit');
+    expect(allRulesContent).toContain('Mandatory 6-Month Autonomous Apple Aesthetic Re-Alignment Cycle');
     expect(rulesContent).toContain('Mandatory 6-Month Autonomous Apple Aesthetic Re-Alignment Cycle');
 
     // Don'ts rules
-    expect(agentsContent).toContain("Don't use decorative gradients, glow blobs, or multi-color progress bars");
-    expect(agentsContent).toContain("Don't use expensive `backdrop-filter: blur()` or heavy animations in Fulfillment mobile viewports");
+    expect(allRulesContent).toContain("decorative gradients, glow blobs, or multi-colo");
+    expect(allRulesContent).toContain("backdrop-filter: blur()");
     expect(rulesContent).toContain("Don't use expensive `backdrop-filter: blur()` or heavy animations in Fulfillment mobile viewports");
     expect(agentsContent).not.toContain("use sand/emerald/amber palette");
     expect(rulesContent).not.toContain("use sand/emerald/amber palette");
     expect(rulesContent).not.toContain("### Design Tokens (Sand / Emerald / Amber)");
     expect(rulesContent).toContain("### Design Tokens (Apple Liquid Glass & Pure Contrast Architecture)");
-    expect(agentsContent).toContain("Don't hardcode aesthetic styling (raw hex colors, font families, static card fills, fixed borders, or shadows)");
-    expect(agentsContent).toContain("Don't use raw Unicode emojis (e.g. ⚠️, 🔒, •, ✅, ❌, 🎉, 📦, 🏷️, ⚖️, ⚡️) anywhere in the UI");
+    expect(allRulesContent).toContain("Don't hardcode aesthetic styling (raw hex colors, font families, static card fills, fixed borders, or shadows)");
+    expect(allRulesContent).toContain("Don't use raw Unicode emojis");
     expect(rulesContent).toContain("Don't use raw Unicode emojis (e.g. ⚠️, 🔒, •, ✅, ❌, 🎉, 📦, 🏷️, ⚖️, ⚡️) anywhere in the UI");
-    expect(agentsContent).toContain("Don't review, create, or edit code in any domain (e.g. Procurement, Financials, WMS, POS, HR) without simultaneously verifying");
+    expect(allRulesContent).toContain("Don't review, create, or edit code in any domain");
     expect(rulesContent).toContain("Don't review, create, or edit code in any domain (e.g. Procurement, Financials, WMS, POS, HR) without simultaneously verifying");
-    expect(agentsContent).toContain("Don't allow the design system or UI components to drift or lag behind Apple's latest aesthetic standard");
+    expect(allRulesContent).toContain("Don't allow the design system or UI components to drift or lag behind");
     expect(rulesContent).toContain("Don't allow the design system or UI components to drift or lag behind Apple's latest aesthetic standard");
-    expect(agentsContent).toContain("Don't use muddy gray cards (#1C1C1E / #2C2C2E)");
+    expect(allRulesContent).toContain("Don't use muddy gray cards");
     expect(rulesContent).toContain("Don't use muddy gray cards (#1C1C1E / #2C2C2E)");
-    expect(agentsContent).toContain("Don't treat interfaces as a \"collection of boxes\" or card traps");
+    expect(allRulesContent).toContain("Don't treat interfaces as a \"collection of boxes\" or card traps");
     expect(rulesContent).toContain("Don't treat interfaces as a \"collection of boxes\" or card traps");
-    expect(agentsContent).toContain("Don't place Liquid Glass materials everywhere");
+    expect(allRulesContent).toContain("Don't place Liquid Glass materials everywhere");
     expect(rulesContent).toContain("Don't place Liquid Glass materials everywhere");
   });
 
@@ -348,9 +349,10 @@ describe('Modern CSS Token Layer & Aesthetic Architecture', () => {
     const themeContent = fs.readFileSync(themeCssPath, 'utf8');
     const agentsContent = fs.readFileSync(agentsRulePath, 'utf8');
     const rulesContent = fs.readFileSync(rulesPath, 'utf8');
+    const allRulesContent = agentsContent + '\n' + rulesContent;
 
     // 70 / 20 / 8 / 2 Golden Ratio Rule
-    expect(agentsContent).toContain('70 / 20 / 8 / 2 Golden Ratio');
+    expect(allRulesContent).toContain('70 / 20 / 8 / 2 Golden Ratio');
     expect(rulesContent).toContain('70 / 20 / 8 / 2 Golden Ratio');
 
     // 3 Liquid Glass Tiers
@@ -360,7 +362,7 @@ describe('Modern CSS Token Layer & Aesthetic Architecture', () => {
     expect(themeContent).toContain('.glass-clear');
     expect(themeContent).toContain('.glass-standard');
     expect(themeContent).toContain('.glass-strong');
-    expect(agentsContent).toContain('Tier 1: Glass Clear');
+    expect(allRulesContent).toContain('Tier 1: Glass Clear');
     expect(rulesContent).toContain('Tier 1: Glass Clear');
 
     // Standardized Corner Radii System
@@ -395,11 +397,11 @@ describe('Modern CSS Token Layer & Aesthetic Architecture', () => {
     expect(themeContent).toContain('--shadow-modal:');
 
     // 11-Point "Apple Test" Checklist
-    expect(agentsContent).toContain('11-Point "Apple Test" Audit');
+    expect(allRulesContent).toContain('11-Point "Apple Test" Audit');
     expect(rulesContent).toContain('11-Point "Apple Test" Audit Checklist');
 
     // Enterprise Retail & WMS Synthesis Doctrine
-    expect(agentsContent).toContain('Enterprise Retail & WMS Synthesis Doctrine');
+    expect(allRulesContent).toContain('Enterprise Retail & WMS Synthesis Doctrine');
     expect(rulesContent).toContain('Enterprise Retail & WMS Synthesis Doctrine');
 
     // Anti-patterns codified

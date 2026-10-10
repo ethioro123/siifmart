@@ -87,30 +87,38 @@ export const PaymentModal: React.FC = () => {
                 {/* Payment Method Selector */}
                 <div className="grid grid-cols-3 gap-3">
                     {[
-                        { id: 'Cash', icon: <Banknote size={22} />, label: t('pos.cash') },
-                        { id: 'Card', icon: <CreditCard size={22} />, label: t('pos.card') },
-                        { id: 'Mobile Money', icon: <Smartphone size={22} />, label: isKenya ? 'M-Pesa' : t('pos.mobile') }
-                    ].map(method => (
-                        <button
-                            key={method.id}
-                            type="button"
-                            title={t('pos.initializePayment')}
-                            onClick={() => {
-                                setSelectedPaymentMethod(method.id as PaymentMethod);
-                                if (method.id === 'Cash' && (!amountTendered || parseFloat(amountTendered) < total)) {
-                                    setAmountTendered(Math.ceil(total).toString());
-                                }
-                            }}
-                            className={`p-4 rounded-2xl border flex flex-col items-center justify-center gap-2 transition-all duration-200 cursor-pointer ${
-                                selectedPaymentMethod === method.id
-                                    ? 'bg-[var(--theme-text-primary)] border-[var(--theme-text-primary)] text-[var(--theme-bg-app)] shadow-sm'
-                                    : 'bg-[var(--theme-bg-card)] border-[var(--theme-border)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:border-[var(--theme-border-strong)]'
-                            }`}
-                        >
-                            {method.icon}
-                            <span className="text-xs font-bold uppercase tracking-wider">{method.label}</span>
-                        </button>
-                    ))}
+                        { id: 'Cash', icon: Banknote, color: 'text-emerald-500', bg: 'bg-emerald-500/10', label: t('pos.cash') },
+                        { id: 'Card', icon: CreditCard, color: 'text-blue-500', bg: 'bg-blue-500/10', label: t('pos.card') },
+                        { id: 'Mobile Money', icon: Smartphone, color: 'text-amber-500', bg: 'bg-amber-500/10', label: isKenya ? 'M-Pesa' : t('pos.mobile') }
+                    ].map(method => {
+                        const Icon = method.icon;
+                        const isSelected = selectedPaymentMethod === method.id;
+                        return (
+                            <button
+                                key={method.id}
+                                type="button"
+                                title={t('pos.initializePayment')}
+                                onClick={() => {
+                                    setSelectedPaymentMethod(method.id as PaymentMethod);
+                                    if (method.id === 'Cash' && (!amountTendered || parseFloat(amountTendered) < total)) {
+                                        setAmountTendered(Math.ceil(total).toString());
+                                    }
+                                }}
+                                className={`p-4 rounded-2xl border flex flex-col items-center justify-center gap-2.5 transition-all duration-200 cursor-pointer active:scale-95 ${
+                                    isSelected
+                                        ? 'bg-[var(--theme-bg-card)] border-[var(--theme-primary)] ring-2 ring-[var(--theme-primary)] shadow-sm'
+                                        : 'bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:border-[var(--theme-border-strong)]'
+                                }`}
+                            >
+                                <div className={`w-10 h-10 rounded-xl ${method.bg} ${method.color} flex items-center justify-center shrink-0`}>
+                                    <Icon size={20} />
+                                </div>
+                                <span className={`text-xs font-semibold tracking-tight ${isSelected ? 'text-[var(--theme-text-primary)] font-bold' : 'text-[var(--theme-text-secondary)]'}`}>
+                                    {method.label}
+                                </span>
+                            </button>
+                        );
+                    })}
                 </div>
 
                 {/* Cash Tender Details */}
@@ -118,11 +126,11 @@ export const PaymentModal: React.FC = () => {
                     <div className="space-y-4 pt-1">
                         <div>
                             <div className="flex justify-between items-baseline mb-1.5">
-                                <label htmlFor="amount-tendered-input" className="block text-xs font-bold uppercase tracking-wider text-[var(--theme-text-secondary)]">
+                                <label htmlFor="amount-tendered-input" className="block text-xs font-semibold uppercase tracking-wider text-[var(--theme-text-secondary)]">
                                     {t('pos.amountTendered')}
                                 </label>
                                 {shortage > 0 && (
-                                    <span className="text-[11px] font-bold text-red-500 animate-pulse">
+                                    <span className="text-[11px] font-bold text-rose-500 animate-pulse">
                                         Need {CURRENCY_SYMBOL} {shortage.toLocaleString()} more
                                     </span>
                                 )}
@@ -133,10 +141,10 @@ export const PaymentModal: React.FC = () => {
                                 value={amountTendered}
                                 onChange={(e) => setAmountTendered(e.target.value)}
                                 placeholder="Enter amount..."
-                                className={`w-full bg-[var(--theme-bg-card)] border rounded-2xl px-4 py-3 text-[var(--theme-text-primary)] text-2xl outline-none font-mono font-bold transition-colors tabular-nums ${
+                                className={`w-full bg-[var(--theme-bg-subtle)] border rounded-2xl px-4 py-3 text-[var(--theme-text-primary)] text-2xl outline-none font-mono font-bold transition-all tabular-nums tracking-tight ${
                                     shortage > 0
-                                        ? 'border-red-400 focus:border-red-500'
-                                        : 'border-[var(--theme-border)] focus:border-[var(--theme-border-focus)]'
+                                        ? 'border-rose-400 focus:border-rose-500'
+                                        : 'border-[var(--theme-border)] focus:border-[var(--theme-border-focus)] focus:ring-1 focus:ring-[var(--theme-border-focus)]'
                                 }`}
                                 autoFocus
                             />
@@ -152,10 +160,10 @@ export const PaymentModal: React.FC = () => {
                                         key={i}
                                         type="button"
                                         onClick={() => setAmountTendered(amt.toString())}
-                                        className={`py-2.5 rounded-xl border text-sm font-mono font-bold transition-all cursor-pointer tabular-nums active:scale-95 ${
+                                        className={`py-2.5 rounded-xl border text-xs sm:text-sm font-mono font-bold transition-all cursor-pointer tabular-nums active:scale-95 shadow-xs ${
                                             isSelected
-                                                ? 'bg-[var(--theme-text-primary)] text-[var(--theme-bg-app)] border-[var(--theme-text-primary)] shadow-xs'
-                                                : 'bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-subtle)] border-[var(--theme-border)]'
+                                                ? 'bg-[var(--theme-primary)] text-[var(--theme-primary-text)] border-transparent'
+                                                : 'bg-[var(--theme-bg-subtle)] text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-card-hover)] border-[var(--theme-border)]'
                                         }`}
                                     >
                                         {isExact ? 'Exact' : `${CURRENCY_SYMBOL} ${amt}`}

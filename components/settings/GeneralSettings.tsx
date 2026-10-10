@@ -1,20 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { Upload, Globe, Building, Mail, Phone, Hash, MapPin, Save, Sparkles, Lock, ShieldCheck } from 'lucide-react';
+import { Globe, Building, Mail, Phone, Hash, MapPin, Save, Lock, ShieldCheck, Sparkles } from 'lucide-react';
 import { useData } from '../../contexts/DataContext';
 import { useStore } from '../../contexts/CentralStore';
-import { useLanguage } from '../../contexts/LanguageContext';
 import {
     Country,
     getCountryProfile,
     getCountryLegalDefaults,
     getCountryBrandingDefaults,
 } from '../../utils/localization';
-import Logo from '../Logo';
-import { logger } from '../../utils/logger';
 import { LocalizationSettingsCard } from './LocalizationSettingsCard';
 import { useGeneralSettingsMutation } from '../../hooks/useGeneralSettingsMutation';
 
-// --- STRICT SUB-COMPONENT INTERFACES (NO ANY) ---
 interface InputGroupProps {
     label: string;
     type?: string;
@@ -40,12 +36,12 @@ const InputGroup: React.FC<InputGroupProps> = ({
 }) => {
     const inputId = id || `input-${label.replace(/\s+/g, '-').toLowerCase()}`;
     return (
-        <div className="group">
+        <div className="space-y-1.5">
             <label
                 htmlFor={inputId}
-                className="text-xs text-stone-600 dark:text-gray-400 font-bold uppercase tracking-wide mb-2 block group-hover:text-[#2C5E3B] dark:group-hover:text-[#A9CBA2] transition-colors flex items-center gap-2"
+                className="text-[11px] text-[var(--theme-text-secondary)] font-semibold uppercase tracking-wider block flex items-center gap-1.5"
             >
-                {Icon && <Icon size={14} className="text-[#2C5E3B] dark:text-[#A9CBA2]" />} {label}
+                {Icon && <Icon size={13} className="text-[var(--theme-text-muted)]" />} {label}
             </label>
             <div className="relative">
                 <input
@@ -56,46 +52,27 @@ const InputGroup: React.FC<InputGroupProps> = ({
                     disabled={disabled}
                     onChange={onChange}
                     placeholder={placeholder}
-                    className="w-full bg-[#FAF8F5] dark:bg-black/40 border border-[#E2DCCE] dark:border-white/10 rounded-2xl px-4 py-3 text-[#1E3F27] dark:text-white text-sm focus:border-[#2C5E3B] dark:focus:border-[#A9CBA2] outline-none transition-colors placeholder:text-stone-400 dark:placeholder:text-gray-600 disabled:opacity-60"
+                    className="w-full h-10 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 text-[var(--theme-text-primary)] text-xs font-normal focus:outline-hidden focus:ring-2 focus:ring-[#0071E3]/40 dark:focus:ring-[#2997FF]/40 focus:border-[#0071E3] dark:focus:border-[#2997FF] transition-all placeholder:text-[var(--theme-text-muted)] disabled:opacity-50"
                 />
-                {sub && <p className="text-[10px] text-stone-500 dark:text-gray-400 mt-2 ml-1">{sub}</p>}
+                {sub && <p className="text-[11px] text-[var(--theme-text-secondary)] mt-1 ml-0.5">{sub}</p>}
             </div>
         </div>
     );
 };
 
-// Sand / Emerald / Amber Brand Design Tokens
-const BRAND_PALETTES = [
-    { name: 'Emerald Forest (Primary)', color: '#2C5E3B' },
-    { name: 'Sage Green (Accent)', color: '#5B8C69' },
-    { name: 'Warm Amber (Highlight)', color: '#D97706' },
-    { name: 'Deep Midnight (Dark Base)', color: '#1E3F27' },
-    { name: 'Sand Muted (Border/Subtle)', color: '#8C7E6A' },
-];
-
 export default function GeneralSettings() {
     const { user, showToast } = useStore();
     const { settings, effectiveCountry } = useData();
-    const { setLanguage } = useLanguage();
     const mutation = useGeneralSettingsMutation();
 
     const isAuthorized = ['super_admin', 'CEO'].includes(user?.role || '');
 
-    // ── INVISIBLE MULTI-TENANCY & BACKGROUND ISOLATION (AGENTS.md Rule 8 / §6) ──
-    // Country is determined exclusively by the central global switch (effectiveCountry).
-    // Individual settings pages MUST NEVER render country selector chips, dropdowns,
-    // or partition banners. Non-CEO users experience a native, single-nation interface.
+    // Multi-country isolation: country scoped by central global switch
     const activeCountry: Country = (effectiveCountry || settings?.country || 'ET') as Country;
 
-    const [branding, setBranding] = useState<{
-        storeName: string;
-        slogan: string;
-        logoUrl: string;
-        brandColor: string;
-    }>(() => ({
-        ...getCountryBrandingDefaults('ET'),
-        logoUrl: '',
-    }));
+    const [slogan, setSlogan] = useState<string>(() => {
+        return getCountryBrandingDefaults('ET').slogan || '';
+    });
 
     const [legal, setLegal] = useState<{
         legalBusinessName: string;
@@ -106,19 +83,18 @@ export default function GeneralSettings() {
         supportPhone: string;
     }>(() => getCountryLegalDefaults('ET'));
 
-    // Synchronize branding and legal state per country partition
+    // Synchronize slogan and legal state per country partition
     useEffect(() => {
         const countryDefaults = getCountryBrandingDefaults(activeCountry);
         const legalDefaults = getCountryLegalDefaults(activeCountry);
-
         const countryPartition = settings?.countryConfigs?.[activeCountry] || {};
 
-        setBranding({
-            storeName: countryPartition.storeName || (settings?.country === activeCountry ? settings?.storeName : '') || countryDefaults.storeName,
-            slogan: countryPartition.slogan || (settings?.country === activeCountry ? settings?.slogan : '') || countryDefaults.slogan,
-            logoUrl: countryPartition.logoUrl || (settings?.country === activeCountry ? settings?.logoUrl : '') || '',
-            brandColor: countryPartition.brandColor || (settings?.country === activeCountry ? settings?.brandColor : '') || countryDefaults.brandColor,
-        });
+        setSlogan(
+            countryPartition.slogan ||
+            (settings?.country === activeCountry ? settings?.slogan : '') ||
+            countryDefaults.slogan ||
+            ''
+        );
 
         setLegal({
             legalBusinessName: countryPartition.legalBusinessName || (settings?.country === activeCountry ? settings?.legalBusinessName : '') || legalDefaults.legalBusinessName,
@@ -136,25 +112,26 @@ export default function GeneralSettings() {
             return;
         }
 
-        if (section === 'branding' && !branding.storeName.trim()) {
-            showToast('Store name is required', 'warning');
-            return;
-        }
-
         if (section === 'legal' && !legal.legalBusinessName.trim()) {
             showToast('Legal business name is required', 'warning');
             return;
         }
 
         const dataPayload = section === 'branding'
-            ? { ...branding, country: activeCountry }
+            ? {
+                storeName: 'SIIFMART',
+                slogan: slogan.trim(),
+                brandColor: '#00FF9D',
+                logoUrl: '',
+                country: activeCountry,
+            }
             : {
-                legalBusinessName: legal.legalBusinessName,
-                taxVatNumber: legal.taxVatNumber,
-                posReceiptTaxId: legal.taxId,
-                registeredAddress: legal.registeredAddress,
-                supportContact: legal.supportContact,
-                supportPhone: legal.supportPhone,
+                legalBusinessName: legal.legalBusinessName.trim(),
+                taxVatNumber: legal.taxVatNumber.trim(),
+                posReceiptTaxId: legal.taxId.trim(),
+                registeredAddress: legal.registeredAddress.trim(),
+                supportContact: legal.supportContact.trim(),
+                supportPhone: legal.supportPhone.trim(),
                 country: activeCountry,
             };
 
@@ -163,170 +140,105 @@ export default function GeneralSettings() {
             targetCountry: activeCountry,
             data: dataPayload,
         });
-    };
 
-    const handleUploadLogo = () => {
-        if (!isAuthorized) {
-            showToast('Permission denied: Only CEO or Super Admin can upload brand logos.', 'error');
-            return;
+        if (section === 'branding') {
+            showToast('Corporate slogan updated successfully', 'success');
+        } else {
+            showToast('Legal entity details saved successfully', 'success');
         }
-
-        const input = document.createElement('input');
-        input.type = 'file';
-        input.accept = 'image/png,image/jpeg,image/jpg,image/webp';
-
-        input.onchange = async (e: Event) => {
-            const target = e.target as HTMLInputElement;
-            const file = target?.files?.[0];
-            if (!file) return;
-
-            if (file.size > 2 * 1024 * 1024) {
-                showToast('Logo file must be less than 2MB', 'warning');
-                return;
-            }
-
-            try {
-                const { systemConfigService } = await import('../../services/supabase.service');
-                showToast('Uploading logo...', 'info');
-                const publicUrl = await systemConfigService.uploadFile(file, 'logos');
-                setBranding(prev => ({ ...prev, logoUrl: publicUrl }));
-                showToast('Logo uploaded! Click Save Branding to apply.', 'success');
-            } catch (err) {
-                logger.error('GeneralSettings', 'Logo upload failed:', err);
-                showToast('Failed to upload logo.', 'error');
-            }
-        };
-
-        input.click();
     };
 
     const isSaving = mutation.isPending;
     const activeProfile = getCountryProfile(activeCountry);
-    const cardBase = "bg-white/85 dark:bg-[#18201B]/60 lg:backdrop-blur-2xl border border-[#E2DCCE] dark:border-emerald-950/20 rounded-[32px] p-6 lg:p-8 shadow-[0_4px_24px_-4px_rgba(34,50,38,0.04)] dark:shadow-[0_8px_32px_-4px_rgba(5,8,6,0.5)]";
+    const cardBase = "bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-5 sm:p-6 shadow-xs transition-all";
 
     return (
-        <div className="w-full max-w-full space-y-8">
-            {/* BRANDING CARD */}
+        <div className="w-full max-w-full space-y-6 animate-in fade-in">
+            {/* CORPORATE SLOGAN & RECEIPT TAGLINE CARD */}
             <div className={cardBase}>
-                <div className="flex flex-col md:flex-row gap-8 items-start relative z-10">
-                    {/* Logo Section */}
-                    <div className="w-full md:w-auto flex flex-col items-center md:items-start gap-3 shrink-0">
-                        <div
-                            className="w-36 h-36 rounded-3xl bg-[#FAF8F5] dark:bg-black/40 border-2 border-dashed border-[#E2DCCE] dark:border-white/20 flex items-center justify-center overflow-hidden relative group/logo cursor-pointer hover:border-[#2C5E3B] transition-colors"
-                            onClick={handleUploadLogo}
-                        >
-                            {branding.logoUrl ? (
-                                <img src={branding.logoUrl} alt="Company Logo" className="w-full h-full object-contain p-3" />
-                            ) : (
-                                <Logo size={56} showText={false} />
-                            )}
-                            <div className="absolute inset-0 bg-black/80 flex flex-col items-center justify-center opacity-0 group-hover/logo:opacity-100 transition-opacity">
-                                <Upload className="text-[#A9CBA2] mb-1" size={22} />
-                                <span className="text-[11px] font-black text-white uppercase tracking-wider">Upload Logo</span>
-                            </div>
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[var(--theme-border)] pb-4 mb-5">
+                    <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-xl bg-[#0071E3]/10 text-[#0071E3] dark:text-[#2997FF] flex items-center justify-center shrink-0">
+                            <Globe size={16} />
                         </div>
-                        <p className="text-[10px] text-stone-500 uppercase tracking-widest text-center md:text-left w-full font-bold">2MB Max • PNG/JPG</p>
+                        <div>
+                            <h3 className="text-base font-semibold tracking-tight text-[var(--theme-text-primary)]">
+                                Corporate Slogan & Customer Displays
+                            </h3>
+                            <p className="text-xs text-[var(--theme-text-secondary)] mt-0.5">
+                                Customer-facing value proposition displayed on receipts, quotes, and customer displays in {activeProfile.name}.
+                            </p>
+                        </div>
                     </div>
 
-                    {/* Brand Details form */}
-                    <div className="flex-1 w-full min-0 space-y-5">
-                        <div className="flex items-center justify-between">
-                            <div>
-                                <h3 className="text-lg font-black text-[#1E3F27] dark:text-[#EAE5D9] tracking-tight">Brand Identity</h3>
-                                <p className="text-xs text-[#4D6E56] dark:text-[#7A9E83]">Define how {activeProfile.name} operations appear on customer receipts and displays.</p>
-                            </div>
-                            {!isAuthorized && (
-                                <span className="text-[10px] font-bold text-amber-600 dark:text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded-full border border-amber-500/20 flex items-center gap-1">
-                                    <Lock size={10} /> View-Only (L1 Required)
-                                </span>
-                            )}
-                        </div>
-
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                            <InputGroup
-                                label="Store Name"
-                                value={branding.storeName}
-                                disabled={!isAuthorized}
-                                onChange={(e) => setBranding(prev => ({ ...prev, storeName: e.target.value }))}
-                                icon={Building}
-                                placeholder="e.g. SIIFMART Retail"
-                            />
-
-                            <div className="group">
-                                <label className="text-xs text-stone-600 dark:text-gray-400 font-bold uppercase tracking-wide mb-2 block group-hover:text-[#2C5E3B] dark:group-hover:text-[#A9CBA2] transition-colors flex items-center gap-2">
-                                    <Sparkles size={14} className="text-[#2C5E3B] dark:text-[#A9CBA2]" /> Brand Accent Color
-                                </label>
-                                <div className="flex items-center gap-2 p-2 bg-[#FAF8F5] dark:bg-black/40 border border-[#E2DCCE] dark:border-white/10 rounded-2xl">
-                                    <input
-                                        type="color"
-                                        aria-label="Brand Color"
-                                        title="Choose brand color"
-                                        disabled={!isAuthorized}
-                                        className="w-11 h-11 rounded-xl cursor-pointer bg-transparent border-0 p-0 shrink-0"
-                                        value={branding.brandColor}
-                                        onChange={(e) => setBranding(prev => ({ ...prev, brandColor: e.target.value }))}
-                                    />
-                                    <div className="flex items-center gap-2 overflow-x-auto flex-1 py-1">
-                                        {BRAND_PALETTES.map(p => (
-                                            <button
-                                                key={p.color}
-                                                type="button"
-                                                title={p.name}
-                                                disabled={!isAuthorized}
-                                                onClick={() => setBranding(prev => ({ ...prev, brandColor: p.color }))}
-                                                style={{ backgroundColor: p.color }}
-                                                className={`min-w-[44px] min-h-[44px] rounded-xl shrink-0 border-2 transition-transform hover:scale-105 ${branding.brandColor.toLowerCase() === p.color.toLowerCase() ? 'border-white ring-2 ring-[#2C5E3B]' : 'border-transparent'}`}
-                                            />
-                                        ))}
-                                    </div>
-                                    <span className="text-xs font-mono text-[#1E3F27] dark:text-white font-bold uppercase pr-2">{branding.brandColor}</span>
-                                </div>
-                            </div>
-
-                            <div className="md:col-span-2">
-                                <InputGroup
-                                    label="Slogan / Value Prop"
-                                    value={branding.slogan}
-                                    disabled={!isAuthorized}
-                                    onChange={(e) => setBranding(prev => ({ ...prev, slogan: e.target.value }))}
-                                    placeholder="e.g. Your trusted marketplace"
-                                    icon={Globe}
-                                    sub="Displayed on customer-facing screens and receipts"
-                                />
-                            </div>
-                        </div>
+                    <div className="flex items-center gap-2">
+                        <span className="text-[11px] font-semibold uppercase tracking-wider px-2.5 py-1 rounded-full bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] border border-[var(--theme-border)] flex items-center gap-1.5 font-mono">
+                            <ShieldCheck size={12} className="text-emerald-500" />
+                            <span>SIIFMART Permanent Brand</span>
+                        </span>
+                        {!isAuthorized && (
+                            <span className="text-[11px] font-semibold text-amber-600 dark:text-amber-400 bg-amber-500/10 px-2.5 py-0.5 rounded-full border border-amber-500/20 flex items-center gap-1.5">
+                                <Lock size={12} /> View-Only (L1 Required)
+                            </span>
+                        )}
                     </div>
                 </div>
 
-                <div className="mt-6 pt-4 border-t border-[#E2DCCE]/60 dark:border-white/10 flex justify-end">
-                    <button
-                        type="button"
-                        onClick={() => handleSaveSection('branding')}
-                        disabled={isSaving || !isAuthorized}
-                        className="min-h-[44px] px-6 py-2.5 bg-[#2C5E3B] hover:opacity-90 text-white font-bold rounded-xl text-xs uppercase tracking-wider flex items-center gap-2 shadow-md cursor-pointer transition-opacity disabled:opacity-50"
-                    >
-                        {isSaving ? <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <Save size={14} />}
-                        Save Branding
-                    </button>
+                <div className="space-y-4">
+                    <InputGroup
+                        label="Store Slogan / Value Proposition"
+                        value={slogan}
+                        disabled={!isAuthorized}
+                        onChange={(e) => setSlogan(e.target.value)}
+                        placeholder="e.g. Your trusted retail and wholesale marketplace"
+                        icon={Sparkles}
+                        sub={`Printed on the top header of till receipts, quotations, and customer displays for ${activeProfile.name} operations.`}
+                    />
+
+                    <div className="pt-2 flex justify-end">
+                        <button
+                            type="button"
+                            onClick={() => handleSaveSection('branding')}
+                            disabled={isSaving || !isAuthorized}
+                            className="h-10 px-5 bg-[#0071E3] dark:bg-[#2997FF] hover:opacity-95 text-white font-semibold rounded-xl text-xs flex items-center gap-2 shadow-[0_2px_8px_rgba(0,113,227,0.25)] transition-all active:scale-[0.98] cursor-pointer disabled:opacity-50"
+                        >
+                            {isSaving ? (
+                                <span className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                            ) : (
+                                <Save size={14} />
+                            )}
+                            <span>Save Slogan</span>
+                        </button>
+                    </div>
                 </div>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            {/* LEGAL ENTITY & LOCALIZATION GRID */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 {/* LEGAL ENTITY CARD */}
                 <div className={cardBase}>
-                    <div className="mb-5 pb-3 border-b border-[#E2DCCE]/60 dark:border-white/10 flex items-center justify-between">
-                        <div>
-                            <h3 className="text-base font-black text-[#1E3F27] dark:text-[#EAE5D9] tracking-tight">Legal Entity</h3>
-                            <p className="text-xs text-[#4D6E56] dark:text-[#7A9E83]">Official business identifiers for invoicing and tax compliance in {activeProfile.name}.</p>
+                    <div className="flex items-center justify-between border-b border-[var(--theme-border)] pb-4 mb-5">
+                        <div className="flex items-center gap-2.5">
+                            <div className="w-8 h-8 rounded-xl bg-stone-500/10 text-[var(--theme-text-primary)] flex items-center justify-center shrink-0">
+                                <Building size={16} />
+                            </div>
+                            <div>
+                                <h3 className="text-sm font-semibold text-[var(--theme-text-primary)]">
+                                    Legal Entity & Tax Registration
+                                </h3>
+                                <p className="text-[11px] text-[var(--theme-text-secondary)]">
+                                    Official business identifiers for invoicing in {activeProfile.name}.
+                                </p>
+                            </div>
                         </div>
                         {!isAuthorized && (
-                            <span className="text-[10px] font-bold text-amber-600 dark:text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded-full border border-amber-500/20 flex items-center gap-1">
-                                <Lock size={10} /> Locked
+                            <span className="text-[11px] font-semibold text-amber-600 dark:text-amber-400 bg-amber-500/10 px-2.5 py-0.5 rounded-full border border-amber-500/20 flex items-center gap-1.5">
+                                <Lock size={12} /> Locked
                             </span>
                         )}
                     </div>
 
-                    <div className="space-y-4">
+                    <div className="space-y-3.5">
                         <InputGroup
                             label="Legal Business Name"
                             value={legal.legalBusinessName}
@@ -336,7 +248,7 @@ export default function GeneralSettings() {
                             icon={Building}
                         />
 
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                             <InputGroup
                                 label={`Tax ID / ${activeProfile.taxIdLabel}`}
                                 value={legal.taxId}
@@ -346,7 +258,7 @@ export default function GeneralSettings() {
                                 icon={Hash}
                             />
                             <InputGroup
-                                label="VAT Reg No"
+                                label="VAT Registration No"
                                 value={legal.taxVatNumber}
                                 disabled={!isAuthorized}
                                 onChange={(e) => setLegal(prev => ({ ...prev, taxVatNumber: e.target.value }))}
@@ -356,7 +268,7 @@ export default function GeneralSettings() {
                         </div>
 
                         <InputGroup
-                            label="Registered Address"
+                            label="Registered Business Address"
                             value={legal.registeredAddress}
                             disabled={!isAuthorized}
                             onChange={(e) => setLegal(prev => ({ ...prev, registeredAddress: e.target.value }))}
@@ -364,7 +276,7 @@ export default function GeneralSettings() {
                             icon={MapPin}
                         />
 
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                             <InputGroup
                                 label="Support Email"
                                 value={legal.supportContact}
@@ -374,7 +286,7 @@ export default function GeneralSettings() {
                                 icon={Mail}
                             />
                             <InputGroup
-                                label="Support Phone"
+                                label="Support Telephone"
                                 value={legal.supportPhone}
                                 disabled={!isAuthorized}
                                 onChange={(e) => setLegal(prev => ({ ...prev, supportPhone: e.target.value }))}
@@ -384,15 +296,19 @@ export default function GeneralSettings() {
                         </div>
                     </div>
 
-                    <div className="mt-6 pt-4 border-t border-[#E2DCCE]/60 dark:border-white/10 flex justify-end">
+                    <div className="pt-5 mt-4 border-t border-[var(--theme-border)] flex justify-end">
                         <button
                             type="button"
                             onClick={() => handleSaveSection('legal')}
                             disabled={isSaving || !isAuthorized}
-                            className="min-h-[44px] px-6 py-2.5 bg-[#2C5E3B] hover:opacity-90 text-white font-bold rounded-xl text-xs uppercase tracking-wider flex items-center gap-2 shadow-md cursor-pointer transition-opacity disabled:opacity-50"
+                            className="h-10 px-5 bg-[#0071E3] dark:bg-[#2997FF] hover:opacity-95 text-white font-semibold rounded-xl text-xs flex items-center gap-2 shadow-[0_2px_8px_rgba(0,113,227,0.25)] transition-all active:scale-[0.98] cursor-pointer disabled:opacity-50"
                         >
-                            {isSaving ? <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <Save size={14} />}
-                            Save Legal Details
+                            {isSaving ? (
+                                <span className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                            ) : (
+                                <Save size={14} />
+                            )}
+                            <span>Save Legal Details</span>
                         </button>
                     </div>
                 </div>

@@ -27,13 +27,25 @@ export interface CrossBorderSkuValidationResult {
 export function getSkuCountry(sku: string): Country | null {
   if (!sku || typeof sku !== 'string') return null;
   const trimmed = sku.trim().toUpperCase();
-  const match = trimmed.match(/^([A-Z]{2,3})-/);
-  if (match && match[1]) {
-    const prefix = match[1];
+
+  // 1. Hyphenated: e.g. KE-CN001, ET-BV002
+  const hyphenMatch = trimmed.match(/^([A-Z]{2,3})-/);
+  if (hyphenMatch && hyphenMatch[1]) {
+    const prefix = hyphenMatch[1];
     if (KNOWN_COUNTRY_PREFIXES.includes(prefix as any)) {
       return prefix as Country;
     }
   }
+
+  // 2. Unhyphenated: e.g. KECN001, ETBV002 (Country 2-3 letters, Category 2-4 letters, sequence digits)
+  const unhyphenMatch = trimmed.match(/^([A-Z]{2,3})([A-Z]{2,4}\d{3,5})$/);
+  if (unhyphenMatch && unhyphenMatch[1]) {
+    const prefix = unhyphenMatch[1];
+    if (KNOWN_COUNTRY_PREFIXES.includes(prefix as any)) {
+      return prefix as Country;
+    }
+  }
+
   return null;
 }
 

@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Briefcase, User, Network, Calendar, UserPlus, Lock, Shield, AlertTriangle, ShieldCheck, DollarSign } from 'lucide-react';
+import { Briefcase, User, Network, Calendar, UserPlus, Lock, Shield, AlertTriangle } from 'lucide-react';
 import { Employee, PayrollRun } from '../types';
 import { useStore } from '../contexts/CentralStore';
 import { useData } from '../contexts/DataContext';
@@ -22,6 +22,7 @@ import EmployeePagination from '../components/employees/EmployeePagination';
 import EmployeeModals from '../components/employees/EmployeeModals';
 import SalaryApprovalQueueModal from '../components/employees/SalaryApprovalQueueModal';
 import { EmployeeChangeApprovalModal } from '../components/employees/modals/EmployeeChangeApprovalModal';
+import { EmployeeGovernanceBanners } from '../components/employees/EmployeeGovernanceBanners';
 import RecruitmentPipelineTab from '../components/employees/recruitment/RecruitmentPipelineTab';
 import DisciplinaryRegisterTab from '../components/employees/disciplinary/DisciplinaryRegisterTab';
 import AccessReviewTab from '../components/employees/compliance/AccessReviewTab';
@@ -30,6 +31,9 @@ import { employeeChangesService } from '../services/employee-changes.service';
 import { payrollRunsService } from '../services/payroll-runs.service';
 
 type ViewMode = 'directory' | 'recruitment' | 'disciplinary' | 'access-audit' | 'org' | 'shifts';
+
+// Pagination Shelf Limit (Rule 10: 25-Item Shelf Rule)
+const ITEMS_PER_PAGE = 25;
 
 export default function Employees() {
    const navigate = useNavigate();
@@ -130,7 +134,7 @@ export default function Employees() {
    };
 
    // --- HOOKS ---
-   const { displayedEmployees, totalCount, totalPages, isLoadingEmployees, canViewAll, restricted } = useEmployeeData({
+   const { displayedEmployees, totalCount, totalPages, isLoadingEmployees, canViewAll, restricted, isOnlyManagers } = useEmployeeData({
       user,
       activeSite: activeSite || null,
       filterSite,
@@ -139,7 +143,7 @@ export default function Employees() {
       filterDepartment,
       searchTerm,
       currentPage,
-      ITEMS_PER_PAGE: 20,
+      ITEMS_PER_PAGE,
       country: effectiveCountry,
       countrySites: sites,
       fallbackEmployees: employees
@@ -189,12 +193,23 @@ export default function Employees() {
 
    if (!canAccessDirectory) {
       const self = employees.find(e => e.id === user?.id || (user?.email && e.email === user.email));
-      return self ? <div className="p-6 max-w-7xl mx-auto"><StaffProfileView employee={self} isOwnProfile={true} /></div> : 
-      <div className="flex flex-col items-center justify-center min-h-[60vh] text-center p-6"><Shield size={64} className="text-stone-400 dark:text-gray-600 mb-4" /><h2 className="text-2xl font-bold text-[#1E3F27] dark:text-[#EAE5D9] mb-2">Access Restricted</h2></div>;
+      return self ? (
+         <div className="p-6 max-w-7xl mx-auto">
+            <StaffProfileView employee={self} isOwnProfile={true} />
+         </div>
+      ) : (
+         <div className="flex flex-col items-center justify-center min-h-[60vh] text-center p-6">
+            <div className="w-14 h-14 rounded-2xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] flex items-center justify-center text-[var(--theme-text-secondary)] mb-4">
+               <Shield size={26} />
+            </div>
+            <h2 className="text-xl font-bold tracking-tight text-[var(--theme-text-primary)] mb-2">Access Restricted</h2>
+            <p className="text-xs text-[var(--theme-text-secondary)] max-w-sm">You do not have permission to access the team directory.</p>
+         </div>
+      );
    }
 
    return (
-      <div className="space-y-6">
+      <div className="space-y-5 sm:space-y-6">
          <input 
             type="file" 
             ref={fileInputRef} 
@@ -204,123 +219,95 @@ export default function Employees() {
             accept="image/*"
          />
          
+         {/* Apple Section Header */}
          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div>
-               <h2 className="text-2xl font-bold text-[#1E3F27] dark:text-[#EAE5D9] flex items-center gap-2.5">
-                  <Briefcase className="text-[#2C5E3B] dark:text-[#A9CBA2]" />
-                  Human Capital Management
-               </h2>
-               <p className="text-[#4D6E56] dark:text-gray-400 text-sm font-medium">Orchestrate your workforce, track performance, and manage shifts.</p>
+            <div className="flex items-center gap-3">
+               <div className="w-10 h-10 rounded-2xl bg-blue-500/10 text-[#0071E3] dark:text-[#2997FF] flex items-center justify-center shrink-0">
+                  <Briefcase size={20} />
+               </div>
+               <div>
+                  <h2 className="text-2xl font-bold tracking-tight text-[var(--theme-text-primary)]">
+                     Human Capital Management
+                  </h2>
+                  <p className="text-xs sm:text-sm text-[var(--theme-text-secondary)] font-normal mt-0.5">
+                     Orchestrate your workforce, track performance, and manage shifts.
+                  </p>
+               </div>
             </div>
-             <div className="flex items-center gap-3">
-                <div className="flex bg-white/90 dark:bg-black/25 border border-[#E2DCCE] dark:border-emerald-950/20 rounded-xl p-1 mr-4 overflow-x-auto max-w-[55vw]">
-                   {[ 
-                      { id: 'directory', icon: User, label: 'Directory' }, 
-                      ...(canViewAll ? [
-                         { id: 'recruitment', icon: Briefcase, label: 'Recruitment' },
-                         { id: 'disciplinary', icon: AlertTriangle, label: 'Disciplinary' },
-                         { id: 'access-audit', icon: Shield, label: 'Access Review' }
-                      ] : []),
-                      { id: 'org', icon: Network, label: 'Org Chart' }, 
-                      { id: 'shifts', icon: Calendar, label: 'Shift Planner' } 
-                   ].map(v => (
-                      <button key={v.id} onClick={() => setViewMode(v.id as ViewMode)} className={`px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5 text-xs font-bold shrink-0 cursor-pointer ${viewMode === v.id ? 'bg-[#224429] dark:bg-[#EAE5D9] text-[#FAF8F5] dark:text-[#1E3B24]' : 'text-stone-500 dark:text-[#7A9E83] hover:text-[#1E3F27] dark:hover:text-white hover:bg-stone-200/20 dark:hover:bg-white/5'}`}><v.icon size={14} />{v.label}</button>
-                   ))}
-                </div>
-                {wizard.getCreatableRoles().length > 0 ? (
-                   <Protected permission="ADD_EMPLOYEE"><button onClick={wizard.handleOpenWizard} className="woody-btn-primary flex items-center cursor-pointer"><UserPlus className="w-4 h-4 mr-2" />Onboard Talent</button></Protected>
-                ) : <div className="px-4 py-2 rounded-lg bg-[#FAF8F5] dark:bg-white/5 border border-[#E2DCCE] dark:border-white/5 text-[#2C5E3B] dark:text-gray-400 text-sm flex items-center gap-2"><Lock size={14} /><span>{canViewAll ? 'Hiring Restricted' : 'My HR Profile'}</span></div>}
-             </div>
+
+            <div className="flex items-center gap-3 flex-wrap">
+               {/* Apple Segmented Control for Navigation Tabs */}
+               <div className="p-1 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl flex items-center gap-1 overflow-x-auto max-w-[60vw] select-none">
+                  {[ 
+                     { id: 'directory', icon: User, label: 'Directory' }, 
+                     ...(canViewAll ? [
+                        { id: 'recruitment', icon: Briefcase, label: 'Recruitment' },
+                        { id: 'disciplinary', icon: AlertTriangle, label: 'Disciplinary' },
+                        { id: 'access-audit', icon: Shield, label: 'Access Review' }
+                     ] : []),
+                     { id: 'org', icon: Network, label: 'Org Chart' }, 
+                     { id: 'shifts', icon: Calendar, label: 'Shift Planner' } 
+                  ].map(v => {
+                     const isActive = viewMode === v.id;
+                     return (
+                        <button
+                           key={v.id}
+                           type="button"
+                           onClick={() => setViewMode(v.id as ViewMode)}
+                           className={`px-3 py-1.5 rounded-lg text-xs flex items-center gap-1.5 shrink-0 cursor-pointer whitespace-nowrap transition-all ${
+                              isActive
+                                 ? 'bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)] shadow-[0_1px_3px_rgba(0,0,0,0.12)] font-semibold'
+                                 : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] font-medium'
+                           }`}
+                        >
+                           <v.icon size={14} />
+                           <span>{v.label}</span>
+                        </button>
+                     );
+                  })}
+               </div>
+
+               {/* Onboard Action */}
+               {wizard.getCreatableRoles().length > 0 ? (
+                  <Protected permission="ADD_EMPLOYEE">
+                     <button
+                        type="button"
+                        onClick={wizard.handleOpenWizard}
+                        className="h-10 px-4 rounded-xl bg-[#0071E3] dark:bg-[#2997FF] hover:opacity-95 text-white font-semibold text-xs sm:text-sm flex items-center gap-2 cursor-pointer shadow-[0_2px_8px_rgba(0,113,227,0.25)] active:scale-[0.98] transition-all"
+                     >
+                        <UserPlus size={15} />
+                        <span>Onboard Talent</span>
+                     </button>
+                  </Protected>
+               ) : (
+                  <div className="h-10 px-3.5 rounded-xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-[var(--theme-text-secondary)] text-xs font-medium flex items-center gap-1.5 select-none">
+                     <Lock size={13} />
+                     <span>{canViewAll ? 'Hiring Restricted' : 'My HR Profile'}</span>
+                  </div>
+               )}
+            </div>
          </div>
 
          <PhotoApprovalList photoRequests={actions.photoRequests} onApprove={actions.handleApprovePhoto} onReject={actions.handleRejectPhoto} />
          
-         {pendingSalaryCount > 0 && (
-            <div className="p-4 rounded-2xl bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-800/30 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-               <div className="flex items-center gap-3">
-                  <div className="p-2.5 rounded-xl bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 flex-shrink-0">
-                     <ShieldCheck size={20} />
-                  </div>
-                  <div>
-                     <h4 className="text-sm font-bold text-emerald-950 dark:text-emerald-300">
-                        {pendingSalaryCount} Compensation Adjustment {pendingSalaryCount === 1 ? 'Proposal' : 'Proposals'} Awaiting Authorization
-                     </h4>
-                     <p className="text-xs text-emerald-800 dark:text-emerald-400/80">
-                        Dual-Control 4-Eyes Governance: Compensation changes proposed by HR require Finance Manager or CEO co-signature.
-                     </p>
-                  </div>
-               </div>
-               <button
-                  type="button"
-                  onClick={() => setIsSalaryQueueOpen(true)}
-                  className="px-4 py-2 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs uppercase tracking-wider transition-colors cursor-pointer shrink-0 shadow-xs"
-               >
-                  Review Salary Queue
-               </button>
-            </div>
-         )}
+         {/* Governance Alert Banners */}
+         <EmployeeGovernanceBanners
+            pendingSalaryCount={pendingSalaryCount}
+            onOpenSalaryQueue={() => setIsSalaryQueueOpen(true)}
+            pendingChangeCount={pendingChangeCount}
+            onOpenChangeModal={() => setIsChangeApprovalModalOpen(true)}
+            pendingPayrollRun={pendingPayrollRun}
+            canViewAll={canViewAll}
+            userRole={user?.role}
+            onCertifyPayroll={handleCertifyPayrollAsHR}
+            onNavigateFinance={() => navigate('/finance')}
+            pendingRecruitsCount={pendingRecruits.length}
+            filterStatus={filterStatus}
+            onFilterPendingRecruits={() => { setFilterStatus('Pending Approval'); setCurrentPage(1); }}
+            onShowAllRecruits={() => { setFilterStatus('All'); setCurrentPage(1); }}
+         />
 
-         {pendingChangeCount > 0 && (
-            <div className="p-4 rounded-2xl bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800/30 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-               <div className="flex items-center gap-3">
-                  <div className="p-2.5 rounded-xl bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 flex-shrink-0">
-                     <ShieldCheck size={20} />
-                  </div>
-                  <div>
-                     <h4 className="text-sm font-bold text-amber-950 dark:text-amber-300">
-                        {pendingChangeCount} Cross-Department Profile {pendingChangeCount === 1 ? 'Change' : 'Changes'} Awaiting Sign-Off
-                     </h4>
-                     <p className="text-xs text-amber-800 dark:text-amber-400/80">
-                        Segregation of Duties: HR modifications to legal identity, age, departments, or roles require managerial authorization.
-                     </p>
-                  </div>
-               </div>
-               <button
-                  type="button"
-                  onClick={() => setIsChangeApprovalModalOpen(true)}
-                  className="px-4 py-2 rounded-xl bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs uppercase tracking-wider transition-colors cursor-pointer shrink-0 shadow-xs"
-               >
-                  Review Approvals Queue
-               </button>
-            </div>
-         )}
-
-         {pendingPayrollRun && !pendingPayrollRun.hrApprovedBy && pendingPayrollRun.status !== 'disbursed' && pendingPayrollRun.status !== 'rejected' && (
-            <div className="p-4 rounded-2xl bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800/30 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-               <div className="flex items-center gap-3">
-                  <div className="p-2.5 rounded-xl bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 flex-shrink-0">
-                     <DollarSign size={20} />
-                  </div>
-                  <div>
-                     <h4 className="text-sm font-bold text-blue-950 dark:text-blue-300">
-                        Monthly Payroll Cycle ({pendingPayrollRun.period}) Awaiting HR Certification
-                     </h4>
-                     <p className="text-xs text-blue-800 dark:text-blue-400/80">
-                        Zero-Trust Multi-Department Governance: Staff roster, active attendance, and leave deductions must be certified by HR before Finance can release funds.
-                     </p>
-                  </div>
-               </div>
-               <div className="flex items-center gap-2 shrink-0">
-                  <button
-                     type="button"
-                     onClick={() => navigate('/finance')}
-                     className="px-4 py-2 rounded-xl bg-blue-100 hover:bg-blue-200 dark:bg-white/10 dark:hover:bg-white/15 text-blue-900 dark:text-blue-200 font-bold text-xs uppercase tracking-wider transition-colors cursor-pointer shrink-0 shadow-xs"
-                  >
-                     Details in Financials
-                  </button>
-                  {canViewAll && (user?.role === 'hr' || user?.role === 'hr_manager' || user?.role === 'super_admin') && (
-                     <button
-                        type="button"
-                        onClick={handleCertifyPayrollAsHR}
-                        className="px-4 py-2 rounded-xl bg-blue-700 hover:bg-blue-800 text-white font-bold text-xs uppercase tracking-wider transition-colors cursor-pointer shrink-0 shadow-xs flex items-center gap-1.5"
-                     >
-                        <ShieldCheck size={14} />
-                        <span>Certify Roster & Attendance</span>
-                     </button>
-                  )}
-               </div>
-            </div>
-         )}
+         {/* --- DIRECTORY TAB CONTENT --- */}
          {canViewAll && viewMode === 'directory' && (
             <EmployeeStats
                employees={employees}
@@ -331,55 +318,71 @@ export default function Employees() {
                setIsTaskQueueOpen={setIsTaskQueueOpen}
             />
          )}
-         {canViewAll && isTaskQueueOpen && <GlobalTaskQueue tasks={tasks} employees={employees} setIsTaskQueueOpen={setIsTaskQueueOpen} />}
+
+         {canViewAll && isTaskQueueOpen && (
+            <GlobalTaskQueue tasks={tasks} employees={employees} setIsTaskQueueOpen={setIsTaskQueueOpen} />
+         )}
 
          {viewMode === 'directory' && (
-            <div className="space-y-6">
-               {pendingRecruits.length > 0 && (
-                  <div className="p-4 rounded-2xl bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                     <div className="flex items-center gap-3">
-                        <div className="p-2.5 rounded-xl bg-amber-100 dark:bg-amber-500/20 text-amber-600 dark:text-amber-400 flex-shrink-0">
-                           <AlertTriangle size={20} />
-                        </div>
-                        <div>
-                           <h4 className="text-sm font-bold text-amber-900 dark:text-amber-300">
-                              {pendingRecruits.length} Pending Onboarding {pendingRecruits.length === 1 ? 'Recruit' : 'Recruits'} Awaiting Approval
-                           </h4>
-                           <p className="text-xs text-amber-700 dark:text-amber-400/80">
-                              Talent onboarded with "Pending Approval" require authorization from HR or Super Admin before activating system access.
-                           </p>
-                        </div>
-                     </div>
-                     <div className="flex items-center gap-2">
-                        {filterStatus !== 'Pending Approval' ? (
-                           <button
-                              onClick={() => {
-                                 setFilterStatus('Pending Approval');
-                                 setCurrentPage(1);
-                              }}
-                              className="px-3.5 py-1.5 rounded-xl bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs transition-colors cursor-pointer"
-                           >
-                              Filter Pending ({pendingRecruits.length})
-                           </button>
-                        ) : (
-                           <button
-                              onClick={() => {
-                                 setFilterStatus('All');
-                                 setCurrentPage(1);
-                              }}
-                              className="px-3.5 py-1.5 rounded-xl bg-stone-200 dark:bg-white/10 hover:bg-stone-300 dark:hover:bg-white/20 text-stone-700 dark:text-gray-300 font-bold text-xs transition-colors cursor-pointer"
-                           >
-                              Show All
-                           </button>
-                        )}
-                     </div>
-                  </div>
+            <div className="space-y-4">
+               <DirectoryHeader
+                  searchTerm={searchTerm}
+                  setSearchTerm={setSearchTerm}
+                  filterRole={filterRole}
+                  setFilterRole={setFilterRole}
+                  filterStatus={filterStatus}
+                  setFilterStatus={setFilterStatus}
+                  filterDepartment={filterDepartment}
+                  setFilterDepartment={setFilterDepartment}
+                  filterSite={filterSite}
+                  setFilterSite={setFilterSite}
+                  sites={sites}
+                  layoutMode={layoutMode}
+                  setLayoutMode={setLayoutMode}
+                  isTaskQueueOpen={isTaskQueueOpen}
+                  setIsTaskQueueOpen={setIsTaskQueueOpen}
+                  totalCount={totalCount}
+                  tasksCount={tasks.length}
+                  canViewAll={canViewAll}
+                  restricted={restricted}
+                  setCurrentPage={setCurrentPage}
+                  visibleEmployees={employees}
+                  pendingSalaryCount={pendingSalaryCount}
+                  onOpenSalaryQueue={() => setIsSalaryQueueOpen(true)}
+                  isOnlyManagers={isOnlyManagers}
+               />
+
+               {layoutMode === 'grid' ? (
+                  <DirectoryGrid
+                     displayedEmployees={displayedEmployees}
+                     isLoadingEmployees={isLoadingEmployees}
+                     sites={sites}
+                     setSelectedEmployee={setSelectedEmployee}
+                     currentUser={user}
+                     onlineIds={onlineIds}
+                  />
+               ) : (
+                  <DirectoryList
+                     displayedEmployees={displayedEmployees}
+                     isLoadingEmployees={isLoadingEmployees}
+                     sites={sites}
+                     setSelectedEmployee={setSelectedEmployee}
+                     canViewAll={canViewAll}
+                     currentUser={user}
+                  />
                )}
-               <DirectoryHeader searchTerm={searchTerm} setSearchTerm={setSearchTerm} filterRole={filterRole} setFilterRole={setFilterRole} filterStatus={filterStatus} setFilterStatus={setFilterStatus} filterDepartment={filterDepartment} setFilterDepartment={setFilterDepartment} filterSite={filterSite} setFilterSite={setFilterSite} sites={sites} layoutMode={layoutMode} setLayoutMode={setLayoutMode} isTaskQueueOpen={isTaskQueueOpen} setIsTaskQueueOpen={setIsTaskQueueOpen} totalCount={totalCount} tasksCount={tasks.length} canViewAll={canViewAll} restricted={restricted} setCurrentPage={setCurrentPage} visibleEmployees={employees} pendingSalaryCount={pendingSalaryCount} onOpenSalaryQueue={() => setIsSalaryQueueOpen(true)} />
-               {layoutMode === 'grid' ? <DirectoryGrid displayedEmployees={displayedEmployees} isLoadingEmployees={isLoadingEmployees} sites={sites} setSelectedEmployee={setSelectedEmployee} currentUser={user} onlineIds={onlineIds} /> : <DirectoryList displayedEmployees={displayedEmployees} isLoadingEmployees={isLoadingEmployees} sites={sites} setSelectedEmployee={setSelectedEmployee} canViewAll={canViewAll} currentUser={user} />}
-               <EmployeePagination currentPage={currentPage} totalPages={totalPages} totalCount={totalCount} ITEMS_PER_PAGE={20} setCurrentPage={setCurrentPage} />
+
+               <EmployeePagination
+                  currentPage={currentPage}
+                  totalPages={totalPages}
+                  totalCount={totalCount}
+                  ITEMS_PER_PAGE={ITEMS_PER_PAGE}
+                  setCurrentPage={setCurrentPage}
+               />
             </div>
          )}
+
+         {/* --- OTHER TABS --- */}
          {viewMode === 'org' && (
             <OrgChart
                employees={employees && employees.length > 0 ? employees : (displayedEmployees || [])}
@@ -391,6 +394,7 @@ export default function Employees() {
                onOpenIdCard={setIdCardEmployee}
             />
          )}
+
          {viewMode === 'shifts' && (
             <ShiftPlanner
                employees={employees}
@@ -398,10 +402,12 @@ export default function Employees() {
                initialSiteFilter={filterSite !== 'All' ? filterSite : (activeSite?.id || 'All')}
             />
          )}
+
          {viewMode === 'recruitment' && <RecruitmentPipelineTab />}
          {viewMode === 'disciplinary' && <DisciplinaryRegisterTab />}
          {viewMode === 'access-audit' && <AccessReviewTab />}
 
+         {/* Modals Container */}
          <EmployeeModals 
             selectedEmployee={selectedEmployee} 
             setSelectedEmployee={setSelectedEmployee} 

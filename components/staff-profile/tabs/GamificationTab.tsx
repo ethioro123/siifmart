@@ -67,24 +67,21 @@ export default function GamificationTab({
     return (
         <div className="space-y-6 animate-in fade-in">
             {/* Header Stats Card */}
-            <div className={`p-6 rounded-3xl border relative overflow-hidden ${isWarehouse
-                ? 'bg-gradient-to-r from-emerald-500/20 to-[#2C5E3B]/10 border-emerald-500/20'
-                : 'bg-gradient-to-r from-blue-500/20 to-purple-500/10 border-blue-500/20'
-                }`}>
+            <div className="p-6 sm:p-7 rounded-2xl border border-[var(--theme-border)] bg-[var(--theme-bg-card)] shadow-xs relative overflow-hidden">
                 <div className="flex flex-col md:flex-row items-center justify-between gap-6 relative z-10">
                     <div className="flex items-center gap-4">
-                        <div className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${getTierColorClass(tierColor)} flex items-center justify-center shadow-lg shadow-black/20`}>
-                            <Trophy size={32} className="text-white" />
+                        <div className="w-14 h-14 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-500 shrink-0">
+                            <Trophy size={28} />
                         </div>
                         <div>
-                            <h4 className="text-2xl font-black text-white">
+                            <h4 className="text-2xl font-bold text-[var(--theme-text-primary)]">
                                 {isWarehouse ? 'Warehouse Pro' : 'Store Elite'}
                             </h4>
                             <div className="flex items-center gap-2 mt-1">
-                                <span className={`px-3 py-1 rounded-lg text-xs font-black bg-gradient-to-r ${getTierColorClass(tierColor)} text-white uppercase tracking-widest`}>
+                                <span className="px-2.5 py-0.5 rounded-lg text-xs font-semibold bg-amber-500/15 text-amber-500 border border-amber-500/25 uppercase tracking-wider">
                                     {empTierName || 'Standard'}
                                 </span>
-                                <span className="text-gray-400 text-xs font-bold">
+                                <span className="text-[var(--theme-text-secondary)] text-xs font-medium">
                                     {isWarehouse ? 'Individual Level' : `Team Share: ${empSite?.name}`}
                                 </span>
                             </div>
@@ -92,18 +89,13 @@ export default function GamificationTab({
                     </div>
 
                     {empBonus > 0 && (
-                        <div className="bg-black/40 backdrop-blur-md px-6 py-4 rounded-2xl border border-white/10 text-center md:text-right">
-                            <p className="text-[10px] text-gray-500 uppercase font-black tracking-widest mb-1">Estimated Bonus</p>
-                            <p className="text-3xl font-black text-green-400">
+                        <div className="bg-[var(--theme-bg-subtle)] px-5 py-3 rounded-xl border border-[var(--theme-border)] text-center md:text-right">
+                            <p className="text-[11px] text-[var(--theme-text-secondary)] uppercase font-semibold tracking-wider mb-0.5">Estimated Bonus</p>
+                            <p className="text-2xl sm:text-3xl font-bold font-mono tabular-nums text-emerald-500">
                                 {formatCompactNumber(empBonus, { currency: CURRENCY_SYMBOL, maxFractionDigits: 0 })}
                             </p>
                         </div>
                     )}
-                </div>
-
-                {/* Background decoration */}
-                <div className="absolute -right-10 -bottom-10 opacity-10">
-                    <Trophy size={150} className="text-white rotate-12" />
                 </div>
             </div>
 
@@ -111,125 +103,125 @@ export default function GamificationTab({
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 {isWarehouse && empPoints ? (
                     <>
-                        <div className="bg-gray-50 dark:bg-black/30 p-5 rounded-2xl border border-gray-100 dark:border-white/5 text-center group hover:border-emerald-500/30 transition-all">
-                            <div className="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center mx-auto mb-3">
-                                <Trophy className="text-emerald-600 dark:text-emerald-400" size={20} />
+                        <div className="bg-[var(--theme-bg-card)] p-5 rounded-2xl border border-[var(--theme-border)] text-center shadow-xs group hover:border-[var(--theme-accent)]/30 transition-colors">
+                            <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center mx-auto mb-3 text-emerald-500">
+                                <Trophy size={20} />
                             </div>
-                            <p className="text-2xl font-black text-gray-900 dark:text-white">{empPoints.totalPoints.toLocaleString()}</p>
-                            <p className="text-[10px] text-gray-500 dark:text-gray-400 uppercase font-black tracking-widest mt-1">Lifetime</p>
+                            <p className="text-2xl font-bold font-mono tabular-nums text-[var(--theme-text-primary)]">{empPoints.totalPoints.toLocaleString()}</p>
+                            <p className="text-[11px] text-[var(--theme-text-secondary)] uppercase font-semibold tracking-wider mt-1">Lifetime</p>
                         </div>
-                        <div className="bg-gray-50 dark:bg-black/30 p-5 rounded-2xl border border-gray-100 dark:border-white/5 text-center group hover:border-blue-400/30 transition-all">
-                            <div className="w-10 h-10 rounded-xl bg-blue-400/10 flex items-center justify-center mx-auto mb-3">
-                                <Target className="text-blue-400" size={20} />
+                        <div className="bg-[var(--theme-bg-card)] p-5 rounded-2xl border border-[var(--theme-border)] text-center shadow-xs group hover:border-[var(--theme-accent)]/30 transition-colors">
+                            <div className="w-10 h-10 rounded-xl bg-sky-500/10 border border-sky-500/20 flex items-center justify-center mx-auto mb-3 text-sky-500">
+                                <Target size={20} />
                             </div>
-                            <p className="text-2xl font-black text-gray-900 dark:text-white">{empPoints.monthlyPoints.toLocaleString()}</p>
-                            <p className="text-[10px] text-gray-500 dark:text-gray-400 uppercase font-black tracking-widest mt-1">This Month</p>
+                            <p className="text-2xl font-bold font-mono tabular-nums text-[var(--theme-text-primary)]">{empPoints.monthlyPoints.toLocaleString()}</p>
+                            <p className="text-[11px] text-[var(--theme-text-secondary)] uppercase font-semibold tracking-wider mt-1">This Month</p>
                         </div>
-                        <div className="bg-gray-50 dark:bg-black/30 p-5 rounded-2xl border border-gray-100 dark:border-white/5 text-center group hover:border-purple-400/30 transition-all">
-                            <div className="w-10 h-10 rounded-xl bg-purple-400/10 flex items-center justify-center mx-auto mb-3">
-                                <Zap className="text-purple-400" size={20} />
+                        <div className="bg-[var(--theme-bg-card)] p-5 rounded-2xl border border-[var(--theme-border)] text-center shadow-xs group hover:border-[var(--theme-accent)]/30 transition-colors">
+                            <div className="w-10 h-10 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center mx-auto mb-3 text-purple-500">
+                                <Zap size={20} />
                             </div>
-                            <p className="text-2xl font-black text-gray-900 dark:text-white">Lv. {empPoints.level}</p>
-                            <p className="text-[10px] text-gray-500 dark:text-gray-400 uppercase font-black tracking-widest mt-1">{empPoints.levelTitle}</p>
+                            <p className="text-2xl font-bold font-mono tabular-nums text-[var(--theme-text-primary)]">Lv. {empPoints.level}</p>
+                            <p className="text-[11px] text-[var(--theme-text-secondary)] uppercase font-semibold tracking-wider mt-1">{empPoints.levelTitle}</p>
                         </div>
-                        <div className="bg-gray-50 dark:bg-black/30 p-5 rounded-2xl border border-gray-100 dark:border-white/5 text-center group hover:border-yellow-400/30 transition-all">
-                            <div className="w-10 h-10 rounded-xl bg-yellow-400/10 flex items-center justify-center mx-auto mb-3">
-                                <Award className="text-yellow-400" size={20} />
+                        <div className="bg-[var(--theme-bg-card)] p-5 rounded-2xl border border-[var(--theme-border)] text-center shadow-xs group hover:border-[var(--theme-accent)]/30 transition-colors">
+                            <div className="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center mx-auto mb-3 text-amber-500">
+                                <Award size={20} />
                             </div>
-                            <p className="text-2xl font-black text-gray-900 dark:text-white">#{empPoints.rank || '12'}</p>
-                            <p className="text-[10px] text-gray-500 dark:text-gray-400 uppercase font-black tracking-widest mt-1">Leaderboard</p>
+                            <p className="text-2xl font-bold font-mono tabular-nums text-[var(--theme-text-primary)]">#{empPoints.rank || '12'}</p>
+                            <p className="text-[11px] text-[var(--theme-text-secondary)] uppercase font-semibold tracking-wider mt-1">Leaderboard</p>
                         </div>
                     </>
                 ) : storePointsData ? (
                     <>
-                        <div className="bg-gray-50 dark:bg-black/30 p-5 rounded-2xl border border-gray-100 dark:border-white/5 text-center group hover:border-blue-400/30 transition-all">
-                            <div className="w-10 h-10 rounded-xl bg-blue-400/10 flex items-center justify-center mx-auto mb-3">
-                                <Store className="text-blue-400" size={20} />
+                        <div className="bg-[var(--theme-bg-card)] p-5 rounded-2xl border border-[var(--theme-border)] text-center shadow-xs group hover:border-[var(--theme-accent)]/30 transition-colors">
+                            <div className="w-10 h-10 rounded-xl bg-sky-500/10 border border-sky-500/20 flex items-center justify-center mx-auto mb-3 text-sky-500">
+                                <Store size={20} />
                             </div>
-                            <p className="text-lg font-black text-gray-900 dark:text-white truncate">{empSite?.name}</p>
-                            <p className="text-[10px] text-gray-500 dark:text-gray-400 uppercase font-black tracking-widest mt-1">Origin Site</p>
+                            <p className="text-lg font-bold text-[var(--theme-text-primary)] truncate">{empSite?.name}</p>
+                            <p className="text-[11px] text-[var(--theme-text-secondary)] uppercase font-semibold tracking-wider mt-1">Origin Site</p>
                         </div>
-                        <div className="bg-gray-50 dark:bg-black/30 p-5 rounded-2xl border border-gray-100 dark:border-white/5 text-center group hover:border-yellow-400/30 transition-all">
-                            <div className="w-10 h-10 rounded-xl bg-yellow-400/10 flex items-center justify-center mx-auto mb-3">
-                                <Trophy className="text-yellow-400" size={20} />
+                        <div className="bg-[var(--theme-bg-card)] p-5 rounded-2xl border border-[var(--theme-border)] text-center shadow-xs group hover:border-[var(--theme-accent)]/30 transition-colors">
+                            <div className="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center mx-auto mb-3 text-amber-500">
+                                <Trophy size={20} />
                             </div>
-                            <p className="text-2xl font-black text-gray-900 dark:text-white">{storePointsData.monthlyPoints.toLocaleString()}</p>
-                            <p className="text-[10px] text-gray-500 dark:text-gray-400 uppercase font-black tracking-widest mt-1">Store Total</p>
+                            <p className="text-2xl font-bold font-mono tabular-nums text-[var(--theme-text-primary)]">{storePointsData.monthlyPoints.toLocaleString()}</p>
+                            <p className="text-[11px] text-[var(--theme-text-secondary)] uppercase font-semibold tracking-wider mt-1">Store Total</p>
                         </div>
-                        <div className="bg-gray-50 dark:bg-black/30 p-5 rounded-2xl border border-gray-100 dark:border-white/5 text-center group hover:border-purple-400/30 transition-all">
-                            <div className="w-10 h-10 rounded-xl bg-purple-400/10 flex items-center justify-center mx-auto mb-3">
-                                <UserCheck size={20} className="text-purple-400" />
+                        <div className="bg-[var(--theme-bg-card)] p-5 rounded-2xl border border-[var(--theme-border)] text-center shadow-xs group hover:border-[var(--theme-accent)]/30 transition-colors">
+                            <div className="w-10 h-10 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center mx-auto mb-3 text-purple-500">
+                                <UserCheck size={20} />
                             </div>
-                            <p className="text-lg font-black text-gray-900 dark:text-white capitalize">{formatRole(employee.role)}</p>
-                            <p className="text-[10px] text-gray-500 uppercase font-black tracking-widest mt-1">Role Type</p>
+                            <p className="text-lg font-bold text-[var(--theme-text-primary)] capitalize">{formatRole(employee.role)}</p>
+                            <p className="text-[11px] text-[var(--theme-text-secondary)] uppercase font-semibold tracking-wider mt-1">Role Type</p>
                         </div>
-                        <div className="bg-gray-50 dark:bg-black/30 p-5 rounded-2xl border border-gray-100 dark:border-white/5 text-center group hover:border-cyan-400/30 transition-all">
-                            <div className="w-10 h-10 rounded-xl bg-cyan-400/10 flex items-center justify-center mx-auto mb-3">
-                                <Target className="text-cyan-400" size={20} />
+                        <div className="bg-[var(--theme-bg-card)] p-5 rounded-2xl border border-[var(--theme-border)] text-center shadow-xs group hover:border-[var(--theme-accent)]/30 transition-colors">
+                            <div className="w-10 h-10 rounded-xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center mx-auto mb-3 text-cyan-500">
+                                <Target size={20} />
                             </div>
-                            <p className="text-2xl font-black text-gray-900 dark:text-white">{storePointsData.totalTransactions}</p>
-                            <p className="text-[10px] text-gray-500 dark:text-gray-400 uppercase font-black tracking-widest mt-1">Volume</p>
+                            <p className="text-2xl font-bold font-mono tabular-nums text-[var(--theme-text-primary)]">{storePointsData.totalTransactions}</p>
+                            <p className="text-[11px] text-[var(--theme-text-secondary)] uppercase font-semibold tracking-wider mt-1">Volume</p>
                         </div>
                     </>
                 ) : (
-                    <div className="col-span-4 text-center py-12 bg-gray-50 dark:bg-black/20 rounded-2xl border border-dashed border-gray-200 dark:border-white/10">
-                        <Trophy size={48} className="mx-auto mb-4 text-gray-300 dark:text-white/5" />
-                        <p className="text-gray-500 font-bold">No gamification data recorded yet.</p>
-                        <p className="text-xs text-gray-400 dark:text-gray-600 mt-2">Start processing orders to earn points and climb the ranks!</p>
+                    <div className="col-span-4 text-center py-12 bg-[var(--theme-bg-card)] rounded-2xl border border-dashed border-[var(--theme-border)]">
+                        <Trophy size={40} className="mx-auto mb-3 text-[var(--theme-text-muted)]" />
+                        <p className="text-[var(--theme-text-primary)] font-semibold text-sm">No gamification data recorded yet.</p>
+                        <p className="text-xs text-[var(--theme-text-secondary)] mt-1">Start processing orders to earn points and climb the ranks.</p>
                     </div>
                 )}
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 {/* Badges & Achievements */}
-                <div className="bg-gray-50 dark:bg-black/30 p-6 rounded-3xl border border-gray-100 dark:border-white/5">
-                    <h4 className="text-sm font-black text-gray-900 dark:text-white uppercase tracking-widest mb-6 flex items-center gap-2">
-                        <Star size={18} className="text-yellow-400" /> Badges & Achievements
+                <div className="bg-[var(--theme-bg-card)] p-6 rounded-2xl border border-[var(--theme-border)] shadow-xs">
+                    <h4 className="text-sm font-bold text-[var(--theme-text-primary)] uppercase tracking-wider mb-6 flex items-center gap-2">
+                        <Star size={18} className="text-amber-500" /> Badges & Achievements
                     </h4>
                     <div className="grid grid-cols-4 sm:grid-cols-5 gap-4">
                         {(employee.badges || ['Early Bird', 'Fast Picker', 'No Errors']).map((badge, i) => (
                             <div key={i} className="flex flex-col items-center gap-2 group cursor-help">
-                                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-yellow-400 to-amber-600 flex items-center justify-center shadow-lg transform group-hover:scale-110 transition-transform">
-                                    <Award size={24} className="text-white" />
+                                <div className="w-12 h-12 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-500 shadow-xs group-hover:scale-105 transition-transform">
+                                    <Award size={22} />
                                 </div>
-                                <span className="text-[8px] text-gray-400 font-black uppercase text-center tracking-tighter leading-tight">{badge}</span>
+                                <span className="text-[11px] text-[var(--theme-text-secondary)] font-medium text-center tracking-normal leading-tight max-w-[80px] truncate">{badge}</span>
                             </div>
                         ))}
                         {/* Empty Slots */}
                         {Array.from({ length: Math.max(0, 10 - (employee.badges?.length || 3)) }).map((_, i) => (
                             <div key={`empty-${i}`} className="flex flex-col items-center gap-2">
-                                <div className="w-12 h-12 rounded-full bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/5 flex items-center justify-center border-dashed">
-                                    <Plus size={16} className="text-gray-300 dark:text-white/10" />
+                                <div className="w-12 h-12 rounded-xl bg-[var(--theme-bg-subtle)] border border-dashed border-[var(--theme-border)] flex items-center justify-center text-[var(--theme-text-muted)]">
+                                    <Plus size={16} />
                                 </div>
-                                <span className="text-[8px] text-gray-400 dark:text-gray-600 font-black uppercase text-center tracking-tighter leading-tight">Locked</span>
+                                <span className="text-[11px] text-[var(--theme-text-muted)] font-medium text-center tracking-normal leading-tight">Locked</span>
                             </div>
                         ))}
                     </div>
                 </div>
 
-                {/* Point History Log (Simulation) */}
-                <div className="bg-gray-50 dark:bg-black/30 p-6 rounded-3xl border border-gray-100 dark:border-white/5">
-                    <h4 className="text-sm font-black text-gray-900 dark:text-white uppercase tracking-widest mb-6 flex items-center gap-2">
-                        <TrendingUp size={18} className="text-[#2C5E3B] dark:text-[#A9CBA2]" /> Recent Activity
+                {/* Point History Log */}
+                <div className="bg-[var(--theme-bg-card)] p-6 rounded-2xl border border-[var(--theme-border)] shadow-xs">
+                    <h4 className="text-sm font-bold text-[var(--theme-text-primary)] uppercase tracking-wider mb-6 flex items-center gap-2">
+                        <TrendingUp size={18} className="text-[var(--theme-accent)]" /> Recent Activity
                     </h4>
                     <div className="space-y-3">
                         {[
-                            { action: 'PICK completed', points: '+15', time: '2 hours ago', icon: Package, color: 'text-blue-400' },
-                            { action: '100% Accuracy Bonus', points: '+50', time: 'Yesterday', icon: CheckCircle, color: 'text-green-400' },
-                            { action: 'Shift Finished', points: '+10', time: '2 days ago', icon: Clock, color: 'text-purple-400' },
-                            { action: 'Team Multiplier', points: 'x2', time: 'Active', icon: Zap, color: 'text-yellow-400' },
+                            { action: 'PICK completed', points: '+15', time: '2 hours ago', icon: Package, color: 'text-sky-500 bg-sky-500/10 border-sky-500/20' },
+                            { action: '100% Accuracy Bonus', points: '+50', time: 'Yesterday', icon: CheckCircle, color: 'text-emerald-500 bg-emerald-500/10 border-emerald-500/20' },
+                            { action: 'Shift Finished', points: '+10', time: '2 days ago', icon: Clock, color: 'text-purple-500 bg-purple-500/10 border-purple-500/20' },
+                            { action: 'Team Multiplier', points: 'x2', time: 'Active', icon: Zap, color: 'text-amber-500 bg-amber-500/10 border-amber-500/20' },
                         ].map((log, i) => (
-                            <div key={i} className="flex items-center justify-between p-3 bg-gray-100 dark:bg-white/5 rounded-xl border border-gray-200 dark:border-white/5 hover:border-gray-300 dark:hover:border-white/10 transition-all">
+                            <div key={i} className="flex items-center justify-between p-3 bg-[var(--theme-bg-subtle)] rounded-xl border border-[var(--theme-border)] hover:border-[var(--theme-accent)]/30 transition-colors">
                                 <div className="flex items-center gap-3">
-                                    <div className={`w-8 h-8 rounded-lg bg-gray-200 dark:bg-white/5 flex items-center justify-center ${log.color}`}>
+                                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center border ${log.color}`}>
                                         <log.icon size={14} />
                                     </div>
                                     <div>
-                                        <p className="text-xs font-bold text-gray-900 dark:text-white">{log.action}</p>
-                                        <p className="text-[10px] text-gray-500 font-medium">{log.time}</p>
+                                        <p className="text-xs font-semibold text-[var(--theme-text-primary)]">{log.action}</p>
+                                        <p className="text-[11px] text-[var(--theme-text-secondary)] font-medium">{log.time}</p>
                                     </div>
                                 </div>
-                                <span className={`text-sm font-black ${log.points.startsWith('+') ? 'text-green-400' : 'text-yellow-400'}`}>
+                                <span className={`text-sm font-bold font-mono tabular-nums ${log.points.startsWith('+') ? 'text-emerald-500' : 'text-amber-500'}`}>
                                     {log.points}
                                 </span>
                             </div>

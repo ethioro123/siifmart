@@ -7,6 +7,7 @@ import { logger } from '../utils/logger';
 import { systemLogsService } from './system-logs.service';
 import { getEffectiveCountry } from '../utils/localization';
 import { purchaseOrdersApprovalService } from './purchase-orders.approval';
+import { purchaseOrdersLifecycleService } from './purchase-orders.lifecycle';
 
 async function validateWarehouseDestination(siteId?: string): Promise<void> {
     if (!siteId) return;
@@ -236,6 +237,27 @@ export const purchaseOrdersService = {
                 logger.error('PurchaseOrdersService', 'Failed to insert new PO items during update', insertError);
                 throw insertError;
             }
+        } else if (updates.lineItems && updates.lineItems.length > 0 && isSettled) {
+            // Zero-Trust: Never mutate commercial price/qty post-approval, but persist physical receipt metrics
+            for (const item of updates.lineItems) {
+                const itemUpdate: any = {};
+                if (item.receivedQty !== undefined) itemUpdate.received_qty = item.receivedQty;
+                if (item.rejectedQty !== undefined) itemUpdate.rejected_qty = item.rejectedQty;
+                if (item.productId && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(item.productId)) {
+                    itemUpdate.product_id = item.productId;
+                }
+                if (item.sku) itemUpdate.sku = item.sku;
+
+                if (Object.keys(itemUpdate).length > 0) {
+                    if (item.id) {
+                        await supabase.from('po_items').update(itemUpdate).eq('id', item.id);
+                    } else if (item.sku) {
+                        await supabase.from('po_items').update(itemUpdate).eq('po_id', id).eq('sku', item.sku);
+                    } else if (item.productName) {
+                        await supabase.from('po_items').update(itemUpdate).eq('po_id', id).eq('product_name', item.productName);
+                    }
+                }
+            }
         }
 
         // AUTO-CREATE JOB CHECK on Approved status
@@ -364,125 +386,7 @@ export const purchaseOrdersService = {
         return updated || ({ ...updates, id } as any);
     },
 
-    async receive(id: string, shouldCreateJob = true) {
-        const po = await getById(id);
-        if (!po) throw new Error('Purchase Order not found');
-
-        const { error } = await supabase
-            .from('purchase_orders')
-            .update({ status: 'Received', updated_at: new Date().toISOString() })
-            .eq('id', id);
-
-        if (error) {
-            logger.error('PurchaseOrdersService', 'Failed to update PO status', error);
-            throw error;
-        }
-
-        if (!shouldCreateJob) {
-            return await getById(id);
-        }
-
-        try {
-            const { data: existingJobs } = await supabase
-                .from('wms_jobs')
-                .select('id')
-                .eq('order_ref', id)
-                .eq('type', 'PUTAWAY')
-                .limit(1);
-
-            if (existingJobs && existingJobs.length > 0) {
-                return await getById(id);
-            }
-
-            const { data: receiveJob } = await supabase
-                .from('wms_jobs')
-                .select('job_number')
-                .eq('order_ref', id)
-                .eq('type', 'RECEIVE')
-                .maybeSingle();
-
-            const finalJobNumber = receiveJob?.job_number || po.poNumber || po.id;
-
-            await wmsJobsService.create({
-                siteId: po.siteId,
-                countryCode: (po as any).country_code || (po as any).countryCode || 'ET',
-                type: 'PUTAWAY',
-                priority: (po as any).priority || 'Normal',
-                status: 'Pending',
-                items: po.itemsCount,
-                orderRef: po.id,
-                jobNumber: finalJobNumber,
-                lineItems: po.lineItems.map((item: any) => ({
-                    productId: item.productId,
-                    name: item.productName,
-                    sku: item.sku,
-                    image: item.image || '',
-                    expectedQty: item.quantity,
-                    pickedQty: 0,
-                    status: 'Pending',
-                    receivedQty: 0,
-                    cost: item.unitCost,
-                    retailPrice: item.retailPrice,
-                    unit: item.unit,
-                    size: item.size,
-                    brand: item.brand,
-                    packQuantity: item.packQuantity,
-                    category: item.category,
-                    customAttributes: item.customAttributes,
-                    description: item.description,
-                    minStock: item.minStock,
-                    maxStock: item.maxStock
-                })),
-                requestedBy: 'System (PO Receipt)',
-                notes: `Auto-generated Putaway for PO ${po.poNumber || po.id}`
-            } as any);
-        } catch (e) {
-            logger.error('PurchaseOrdersService', 'Failed to create Putaway job during PO receive', e as Error);
-        }
-
-        // Close the associated RECEIVE job if it exists
-        try {
-            const { data: job } = await supabase
-                .from('wms_jobs')
-                .select('id')
-                .eq('type', 'RECEIVE')
-                .eq('order_ref', id)
-                .neq('status', 'Completed')
-                .maybeSingle();
-
-            if (job) {
-                await supabase.from('wms_jobs').update({ status: 'Completed' }).eq('id', job.id);
-            }
-        } catch (e) {
-            logger.error('PurchaseOrdersService', 'Failed to close WMS job during PO receive', e as Error);
-        }
-
-        return await getById(id);
-    },
-
-    async delete(id: string) {
-        // Zero-Trust Chain-of-Custody: Soft-cancel rather than destructive SQL deletion
-        return await this.cancel(id, 'Deleted by manager');
-    },
-
-    async cancel(id: string, reason?: string) {
-        const currentPO = await getById(id);
-        const currentNotes = currentPO?.notes || '';
-        const cancelTag = reason ? `\n[CANCELLED: ${reason}]` : '\n[CANCELLED]';
-
-        const { error } = await supabase
-            .from('purchase_orders')
-            .update({ 
-                status: 'Cancelled',
-                notes: currentNotes + cancelTag,
-                updated_at: new Date().toISOString()
-            })
-            .eq('id', id);
-
-        if (error) {
-            logger.error('PurchaseOrdersService', 'Failed to cancel PO', error as Error);
-            throw error;
-        }
-        return await getById(id);
-    }
+    receive: purchaseOrdersLifecycleService.receive,
+    delete: purchaseOrdersLifecycleService.delete,
+    cancel: purchaseOrdersLifecycleService.cancel
 };

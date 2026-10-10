@@ -10,6 +10,7 @@ import { logger } from '../../utils/logger';
 import { convertToSellableUnits } from './useReceiving';
 import { resolveReceivingPolicy, maxReceivable, buildOverReceiveMessage } from '../../utils/receivingPolicy';
 import { findMatchingProduct, resolveSmartPutawayLocation, cleanSku } from './receivingSplitHelpers';
+import { mergeCustomAttributes, extractProductAttributesFromPOItem } from '../../utils/productAttributes';
 
 interface UseReceivingSplitDeps {
     orders: PurchaseOrder[];
@@ -52,6 +53,7 @@ export const useReceivingSplit = (deps: UseReceivingSplitDeps) => {
                 return;
             }
             const item = po.lineItems![itemIndex];
+            const poAttrs = extractProductAttributesFromPOItem(item);
 
             // VALIDATION: Prevent over-receiving (helps avoid accidental duplicates)
             const clean = (s?: string) => s ? s.replace(/[-\s]/g, '').toUpperCase() : '';
@@ -112,18 +114,21 @@ export const useReceivingSplit = (deps: UseReceivingSplitDeps) => {
                                     const unitsPerOrderUnit = convertToSellableUnits(1, item);
                                     return unitsPerOrderUnit > 0 ? (item.unitCost / unitsPerOrderUnit) : (item.unitCost || 0);
                                 })(),
-                                category: item.category || 'Uncategorized',
+                                category: poAttrs.category || 'Uncategorized',
                                 status: 'active',
                                 stock: 0,
                                 location: 'On Order',
-                                size: item.size || '',
-                                brand: item.brand || '',
-                                unit: item.unit || 'UNIT',
-                                packQuantity: item.packQuantity || 1,
-                                customAttributes: item.customAttributes || null,
-                                description: item.description || '',
-                                minStock: item.minStock || 0,
-                                maxStock: item.maxStock || 0
+                                image: poAttrs.image || '',
+                                size: poAttrs.size || '',
+                                brand: poAttrs.brand || '',
+                                unit: poAttrs.unit || 'UNIT',
+                                packQuantity: poAttrs.packQuantity || 1,
+                                packageType: poAttrs.packageType || '',
+                                caseSize: poAttrs.caseSize,
+                                customAttributes: poAttrs.customAttributes || null,
+                                description: poAttrs.description || '',
+                                minStock: poAttrs.minStock || 0,
+                                maxStock: poAttrs.maxStock || 0
                             } as any);
                             if (created) {
                                 targetProductId = created.id;
@@ -162,11 +167,22 @@ export const useReceivingSplit = (deps: UseReceivingSplitDeps) => {
 
                         const updates: any = {};
                         
-                        // Sync PO line item details if they are missing
-                        if (!localProduct.size && item.size) updates.size = item.size;
-                        if (!localProduct.brand && item.brand) updates.brand = item.brand;
-                        if (!localProduct.unit && item.unit) updates.unit = item.unit;
-                        if (!localProduct.category && item.category) updates.category = item.category;
+                        // Sync PO line item details if they are missing or updated
+                        if (!localProduct.size && poAttrs.size) updates.size = poAttrs.size;
+                        if (!localProduct.brand && poAttrs.brand) updates.brand = poAttrs.brand;
+                        if (!localProduct.unit && poAttrs.unit) updates.unit = poAttrs.unit;
+                        if (!localProduct.category && poAttrs.category) updates.category = poAttrs.category;
+                        if (!localProduct.image && poAttrs.image) updates.image = poAttrs.image;
+                        if ((!localProduct.packQuantity || localProduct.packQuantity === 1) && poAttrs.packQuantity > 1) updates.packQuantity = poAttrs.packQuantity;
+                        if (!localProduct.packageType && poAttrs.packageType) updates.packageType = poAttrs.packageType;
+                        if (!localProduct.caseSize && poAttrs.caseSize) updates.caseSize = poAttrs.caseSize;
+                        if (!localProduct.description && poAttrs.description) updates.description = poAttrs.description;
+                        if (!localProduct.minStock && poAttrs.minStock) updates.minStock = poAttrs.minStock;
+                        if (!localProduct.maxStock && poAttrs.maxStock) updates.maxStock = poAttrs.maxStock;
+                        if (poAttrs.customAttributes) {
+                            const mergedAttrs = mergeCustomAttributes(localProduct.customAttributes, poAttrs.customAttributes);
+                            if (JSON.stringify(mergedAttrs) !== JSON.stringify(localProduct.customAttributes)) updates.customAttributes = mergedAttrs;
+                        }
                         if (policy.poPriceApplyAt === 'receive' && item.retailPrice && item.retailPrice > 0 && item.retailPrice !== localProduct.price) {
                             updates.price = item.retailPrice;
                             updates.priceUpdatedAt = new Date().toISOString();
@@ -180,10 +196,6 @@ export const useReceivingSplit = (deps: UseReceivingSplitDeps) => {
                             const unitsPerOrderUnit = convertToSellableUnits(1, item);
                             updates.costPrice = unitsPerOrderUnit > 0 ? (item.unitCost / unitsPerOrderUnit) : item.unitCost;
                         }
-                        if (!localProduct.customAttributes && item.customAttributes) updates.customAttributes = item.customAttributes;
-                        if (!localProduct.description && item.description) updates.description = item.description;
-                        if (!localProduct.minStock && item.minStock) updates.minStock = item.minStock;
-                        if (!localProduct.maxStock && item.maxStock) updates.maxStock = item.maxStock;
                         if (variant.expiryDate) updates.expiryDate = variant.expiryDate;
                         if (variant.batchNumber) updates.batchNumber = variant.batchNumber;
 
@@ -245,22 +257,23 @@ export const useReceivingSplit = (deps: UseReceivingSplitDeps) => {
                                     const unitsPerOrderUnit = convertToSellableUnits(1, item);
                                     return unitsPerOrderUnit > 0 ? (item.unitCost / unitsPerOrderUnit) : (item.unitCost || globalProduct?.costPrice || 0);
                                 })(),
-                                category: item.category || globalProduct?.category || 'Uncategorized',
+                                category: poAttrs.category || globalProduct?.category || 'Uncategorized',
                                 status: 'active',
                                 stock: 0,
                                 location: 'On Order',
+                                image: poAttrs.image || globalProduct?.image || '',
                                 expiryDate: variant.expiryDate,
                                 batchNumber: variant.batchNumber,
-                                size: item.size || globalProduct?.size || '',
-                                brand: item.brand || globalProduct?.brand || '',
-                                unit: item.unit || globalProduct?.unit || 'UNIT',
-                                packQuantity: item.packQuantity || globalProduct?.packQuantity || 1,
-                                packageType: item.packageType || globalProduct?.packageType || item.customAttributes?.packaging?.packageType || globalProduct?.customAttributes?.packaging?.packageType || '',
-                                caseSize: item.caseSize || globalProduct?.caseSize || item.customAttributes?.packaging?.caseSize || globalProduct?.customAttributes?.packaging?.caseSize || undefined,
-                                customAttributes: item.customAttributes || globalProduct?.customAttributes || null,
-                                description: item.description || globalProduct?.description || '',
-                                minStock: item.minStock || globalProduct?.minStock || 0,
-                                maxStock: item.maxStock || globalProduct?.maxStock || 0
+                                size: poAttrs.size || globalProduct?.size || '',
+                                brand: poAttrs.brand || globalProduct?.brand || '',
+                                unit: poAttrs.unit || globalProduct?.unit || 'UNIT',
+                                packQuantity: poAttrs.packQuantity || globalProduct?.packQuantity || 1,
+                                packageType: poAttrs.packageType || globalProduct?.packageType || '',
+                                caseSize: poAttrs.caseSize || globalProduct?.caseSize,
+                                customAttributes: mergeCustomAttributes(globalProduct?.customAttributes, poAttrs.customAttributes),
+                                description: poAttrs.description || globalProduct?.description || '',
+                                minStock: poAttrs.minStock || globalProduct?.minStock || 0,
+                                maxStock: poAttrs.maxStock || globalProduct?.maxStock || 0
                             } as any);
                             if (created) {
                                 targetProductId = created.id;
@@ -298,7 +311,10 @@ export const useReceivingSplit = (deps: UseReceivingSplitDeps) => {
                     po.siteId || activeSite?.id || ''
                 );
 
+                const targetCountry = po.countryCode || po.country_code || (po.currency === 'KSh' || po.currency === 'KES' ? 'KE' : undefined) || activeSite?.country || settings?.country || 'ET';
                 const newJob: Omit<WMSJob, 'id'> = {
+                    countryCode: targetCountry,
+                    country_code: targetCountry,
                     siteId: po.siteId || activeSite?.id || '',
                     site_id: po.siteId || activeSite?.id || '',
                     type: 'PUTAWAY',
@@ -325,16 +341,19 @@ export const useReceivingSplit = (deps: UseReceivingSplitDeps) => {
                         // Pass pricing data for labels and inventory creation
                         cost: item.unitCost,
                         retailPrice: item.retailPrice,
-                        // Pass PO attributes so putaway can create a complete Product record
-                        unit: item.unit,
-                        size: item.size,
-                        brand: item.brand,
-                        packQuantity: item.packQuantity,
-                        category: item.category,
-                        customAttributes: item.customAttributes,
-                        description: item.description,
-                        minStock: item.minStock,
-                        maxStock: item.maxStock
+                        // Pass full PO attributes so putaway can create a complete Product record
+                        unit: poAttrs.unit || item.unit,
+                        size: poAttrs.size,
+                        brand: poAttrs.brand,
+                        image: poAttrs.image,
+                        packQuantity: poAttrs.packQuantity,
+                        packageType: poAttrs.packageType,
+                        caseSize: poAttrs.caseSize,
+                        category: poAttrs.category,
+                        customAttributes: poAttrs.customAttributes,
+                        description: poAttrs.description,
+                        minStock: poAttrs.minStock,
+                        maxStock: poAttrs.maxStock
                     }]
                 };
 
@@ -387,7 +406,8 @@ export const useReceivingSplit = (deps: UseReceivingSplitDeps) => {
                 for (const rj of matchingReceiveJobs) {
                     const rjUpdatedLineItems = (rj.lineItems || []).map((rli: any) => {
                         const matchedPOItem = updatedLineItems.find((uli: any) => 
-                            uli.productId === rli.productId || (uli.sku && clean(uli.sku) === clean(rli.sku))
+                            uli.productId === rli.productId || (uli.sku && clean(uli.sku) === clean(rli.sku)) ||
+                            ((uli.productName || uli.name) && String(uli.productName || uli.name).toLowerCase() === String(rli.name).toLowerCase())
                         );
                         const targetQty = convertToSellableUnits(rli.expectedQty || 0, rli);
                         return {

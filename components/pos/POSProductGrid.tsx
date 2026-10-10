@@ -64,9 +64,9 @@ export const POSProductGrid: React.FC = () => {
     }, [searchTerm, selectedCategory, selectedDepartment, minPriceFilter, maxPriceFilter, selectedBrands, selectedVelocities, stockStatusFilter, onSaleOnly, competitorMatchedOnly, sortBy]);
 
     return (
-        <div className="flex-1 flex flex-col bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl overflow-hidden pb-24 lg:pb-0 shadow-xs transition-colors duration-200 relative">
+        <div className="flex-1 flex flex-col bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-3xl overflow-hidden pb-24 lg:pb-0 shadow-xs transition-colors duration-200 relative">
             <POSOfflineBanner />
-            <div className="p-3 border-b border-[var(--theme-border)] space-y-2">
+            <div className="p-4 border-b border-[var(--theme-border-subtle)] space-y-3">
                 {/* Header elements search barcode warnings and trophy sync badges */}
                 <POSHeader
                     setIsFilterPanelOpen={setIsFilterPanelOpen}

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Shield, Loader2, Save, Plus, Code, Trash2 } from 'lucide-react';
+import { Shield, Loader2, Save, Plus, Edit2, Trash2, Globe } from 'lucide-react';
 import Modal from '../Modal';
 import { User, SystemConfig, LogisticsZone } from '../../types';
 import { logger } from '../../utils/logger';
@@ -44,18 +44,22 @@ export function ZoneManagerModal({
   handleDeleteZone
 }: ZoneManagerModalProps) {
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="🌐 Manage Logistics Zones" size="lg">
+    <Modal isOpen={isOpen} onClose={onClose} title="Manage Logistics Zones" size="lg">
       <div className="space-y-6">
-        <div className="flex items-start justify-between p-4 bg-white/5 rounded-xl border border-white/5 hover:border-white/10 transition-colors">
+        <div className="flex items-start justify-between p-4 bg-[var(--theme-bg-subtle)] rounded-2xl border border-[var(--theme-border)]">
           <div className="space-y-1 pr-4">
-            <p className="text-sm font-bold text-white flex items-center gap-2">
-              <Shield className="text-[#2C5E3B] dark:text-[#A9CBA2]" size={16} /> Enforce Regional Replenishment
+            <p className="text-sm font-semibold text-[var(--theme-text-primary)] flex items-center gap-2">
+              <Shield className="text-[#0071E3] dark:text-[#2997FF]" size={16} /> Enforce Regional Replenishment
             </p>
-            <p className="text-[10px] text-gray-500 leading-relaxed">
+            <p className="text-[11px] text-[var(--theme-text-secondary)] leading-relaxed">
               Restrict stock transfer requests to stores and warehouses within the same Logistics Zone. Bypass authorization is reserved for the CEO.
             </p>
           </div>
-          <div
+          <button
+            type="button"
+            role="switch"
+            aria-checked={settings.enforceRegionalZoning}
+            title="Toggle Regional Replenishment Enforcement"
             onClick={async () => {
               try {
                 await updateSettings({ enforceRegionalZoning: !settings.enforceRegionalZoning }, user?.name || 'Admin');
@@ -65,25 +69,26 @@ export function ZoneManagerModal({
                 addNotification('alert', 'Failed to update regional zoning enforcement');
               }
             }}
-            className={`w-11 h-6 rounded-full p-1 cursor-pointer transition-colors relative shrink-0 ${
-              settings.enforceRegionalZoning ? 'bg-[#2C5E3B]' : 'bg-white/10'
+            className={`w-11 h-6 rounded-full p-0.5 cursor-pointer transition-colors relative shrink-0 ${
+              settings.enforceRegionalZoning ? 'bg-[#0071E3] dark:bg-[#2997FF]' : 'bg-[var(--theme-border)]'
             }`}
           >
-            <div className={`w-4 h-4 bg-white rounded-full shadow-md transition-transform transform ${
+            <div className={`w-5 h-5 bg-white rounded-full shadow-xs transition-transform transform ${
               settings.enforceRegionalZoning ? 'translate-x-5' : 'translate-x-0'
             }`} />
-          </div>
+          </button>
         </div>
 
-        <div className="bg-[#1A221E] border border-white/10 rounded-xl p-4 space-y-4 shadow-lg">
-          <h4 className="text-sm font-bold text-[#2C5E3B] dark:text-[#A9CBA2] uppercase tracking-wider">
-            {editingZone ? '✏️ Edit Logistics Zone' : '➕ Create New Logistics Zone'}
+        <div className="bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-2xl p-4.5 space-y-4 shadow-xs">
+          <h4 className="text-xs font-semibold text-[var(--theme-text-primary)] uppercase tracking-wider flex items-center gap-1.5">
+            {editingZone ? <Edit2 size={13} className="text-[#0071E3] dark:text-[#2997FF]" /> : <Plus size={13} className="text-[#0071E3] dark:text-[#2997FF]" />}
+            <span>{editingZone ? 'Edit Logistics Zone' : 'Create New Logistics Zone'}</span>
           </h4>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="text-xs text-gray-400 uppercase font-bold mb-1 block">Zone Name *</label>
+              <label className="text-[11px] text-[var(--theme-text-secondary)] font-semibold uppercase tracking-wider mb-1 block">Zone Name *</label>
               <input
-                className="w-full bg-black/30 border border-white/10 rounded-lg px-4 py-2.5 text-white outline-none focus:border-[#2C5E3B] transition-colors text-sm"
+                className="w-full h-10 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl px-3.5 text-[var(--theme-text-primary)] text-xs font-normal focus:outline-hidden focus:ring-2 focus:ring-[#0071E3]/40 dark:focus:ring-[#2997FF]/40 focus:border-[#0071E3] dark:focus:border-[#2997FF] transition-all"
                 placeholder="e.g. South Hub Zone"
                 value={zoneNameInput}
                 onChange={(e) => setZoneNameInput(e.target.value)}
@@ -91,9 +96,9 @@ export function ZoneManagerModal({
               />
             </div>
             <div>
-              <label className="text-xs text-gray-400 uppercase font-bold mb-1 block">Description</label>
+              <label className="text-[11px] text-[var(--theme-text-secondary)] font-semibold uppercase tracking-wider mb-1 block">Description</label>
               <input
-                className="w-full bg-black/30 border border-white/10 rounded-lg px-4 py-2.5 text-white outline-none focus:border-[#2C5E3B] transition-colors text-sm"
+                className="w-full h-10 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl px-3.5 text-[var(--theme-text-primary)] text-xs font-normal focus:outline-hidden focus:ring-2 focus:ring-[#0071E3]/40 dark:focus:ring-[#2997FF]/40 focus:border-[#0071E3] dark:focus:border-[#2997FF] transition-all"
                 placeholder="e.g. Southern region stores and Warehouses"
                 value={zoneDescInput}
                 onChange={(e) => setZoneDescInput(e.target.value)}
@@ -104,67 +109,73 @@ export function ZoneManagerModal({
           <div className="flex gap-2 justify-end pt-2">
             {editingZone && (
               <button
+                type="button"
                 onClick={() => {
                   setEditingZone(null);
                   setZoneNameInput('');
                   setZoneDescInput('');
                 }}
-                className="px-4 py-2 bg-white/5 hover:bg-white/10 text-white rounded-lg text-xs font-bold transition-colors cursor-pointer"
+                className="h-9 px-4 bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card)] border border-[var(--theme-border)] text-[var(--theme-text-primary)] rounded-xl text-xs font-semibold transition-all cursor-pointer"
               >
                 Cancel Edit
               </button>
             )}
             <button
+              type="button"
               onClick={handleSaveZone}
               disabled={isZoneSaving || !zoneNameInput.trim()}
-              className="px-5 py-2 bg-[#2C5E3B] text-white rounded-lg text-xs font-bold hover:bg-[#1E3F27] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1.5 cursor-pointer"
+              className="h-9 px-5 bg-[#0071E3] dark:bg-[#2997FF] text-white rounded-xl text-xs font-semibold hover:opacity-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1.5 cursor-pointer shadow-xs active:scale-[0.98]"
             >
-              {isZoneSaving ? <Loader2 size={12} className="animate-spin" /> : editingZone ? <Save size={12} /> : <Plus size={12} />}
-              {editingZone ? 'Update Zone' : 'Create Zone'}
+              {isZoneSaving ? <Loader2 size={13} className="animate-spin" /> : editingZone ? <Save size={13} /> : <Plus size={13} />}
+              <span>{editingZone ? 'Update Zone' : 'Create Zone'}</span>
             </button>
           </div>
         </div>
 
         <div className="space-y-3">
-          <label className="text-xs text-gray-400 uppercase font-bold block">Active Logistics Zones ({logisticsZones.length})</label>
+          <label className="text-xs text-[var(--theme-text-secondary)] uppercase font-semibold tracking-wider block">
+            Active Logistics Zones ({logisticsZones.length})
+          </label>
           {isLoadingZones ? (
-            <div className="py-8 flex items-center justify-center gap-2 text-gray-400 text-sm">
+            <div className="py-8 flex items-center justify-center gap-2 text-[var(--theme-text-secondary)] text-xs">
               <Loader2 className="animate-spin" size={16} /> Loading zones...
             </div>
           ) : logisticsZones.length === 0 ? (
-            <p className="text-xs text-gray-500 italic py-4 text-center">No zones configured yet. Create one above.</p>
+            <p className="text-xs text-[var(--theme-text-muted)] italic py-4 text-center">No zones configured yet. Create one above.</p>
           ) : (
-            <div className="border border-white/5 rounded-xl overflow-hidden divide-y divide-white/5 max-h-80 overflow-y-auto custom-scrollbar">
+            <div className="border border-[var(--theme-border)] rounded-2xl overflow-hidden divide-y divide-[var(--theme-border)] max-h-80 overflow-y-auto custom-scrollbar">
               {logisticsZones.map(zone => (
-                <div key={zone.id} className="p-4 bg-black/10 hover:bg-white/5 transition-colors flex items-center justify-between gap-4">
+                <div key={zone.id} className="p-3.5 bg-[var(--theme-bg-card)] hover:bg-[var(--theme-bg-subtle)] transition-colors flex items-center justify-between gap-4">
                   <div className="min-w-0 flex-1">
-                    <h5 className="text-white font-bold text-sm truncate flex items-center gap-1.5">
-                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_6px_rgba(16,185,129,0.5)] shrink-0" />
+                    <h5 className="text-[var(--theme-text-primary)] font-semibold text-xs truncate flex items-center gap-1.5">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0" />
                       {zone.name}
                     </h5>
                     {zone.description && (
-                      <p className="text-xs text-gray-400 mt-0.5 line-clamp-1">{zone.description}</p>
+                      <p className="text-[11px] text-[var(--theme-text-secondary)] mt-0.5 line-clamp-1">{zone.description}</p>
                     )}
                   </div>
                   <div className="flex gap-2 flex-shrink-0">
                     <button
+                      type="button"
                       onClick={() => {
                         setEditingZone(zone);
                         setZoneNameInput(zone.name);
                         setZoneDescInput(zone.description || '');
                       }}
-                      className="px-2.5 py-1.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-white text-[10px] font-bold transition-colors flex items-center gap-1 cursor-pointer"
+                      className="h-8 px-2.5 bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-lg text-[var(--theme-text-primary)] text-[11px] font-semibold transition-all flex items-center gap-1 cursor-pointer active:scale-[0.98]"
                       title="Edit Zone"
                     >
-                      <Code size={10} className="text-[#2C5E3B] dark:text-[#A9CBA2]" />
+                      <Edit2 size={11} className="text-[#0071E3] dark:text-[#2997FF]" />
                       <span>Edit</span>
                     </button>
                     <button
+                      type="button"
                       onClick={() => handleDeleteZone(zone.id)}
-                      className="px-2.5 py-1.5 bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 rounded-lg text-red-400 text-[10px] font-bold transition-colors flex items-center gap-1 cursor-pointer"
+                      className="h-8 px-2.5 bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 rounded-lg text-red-600 dark:text-red-400 text-[11px] font-semibold transition-all flex items-center gap-1 cursor-pointer active:scale-[0.98]"
                       title="Delete Zone"
                     >
-                      <Trash2 size={10} />
+                      <Trash2 size={11} />
                       <span>Delete</span>
                     </button>
                   </div>

@@ -1,12 +1,15 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
-    Briefcase, Plus, CheckCircle2, Clock, UserCheck, Star, 
-    FileText, ArrowRight, ShieldCheck, AlertCircle, XCircle 
+    Briefcase, Plus, CheckCircle2, Clock, 
+    ArrowRight, ShieldCheck, Banknote, UserPlus, Building2, Sparkles 
 } from 'lucide-react';
 import { recruitmentService } from '../../../services/recruitment.service';
 import type { JobRequisition, JobCandidate, CandidateStage } from '../../../types/hr-advanced';
 import { useStore } from '../../../contexts/CentralStore';
 import { useData } from '../../../contexts/DataContext';
+import { RequisitionModal } from './RequisitionModal';
+import { CandidateModal } from './CandidateModal';
+import { CandidateApprovalModal } from './CandidateApprovalModal';
 
 export default function RecruitmentPipelineTab() {
     const { user, showToast } = useStore();
@@ -18,20 +21,15 @@ export default function RecruitmentPipelineTab() {
     const [selectedReqId, setSelectedReqId] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(false);
 
-    // Requisition modal
+    // Modals
     const [isReqModalOpen, setIsReqModalOpen] = useState(false);
-    const [reqTitle, setReqTitle] = useState('');
-    const [reqDept, setReqDept] = useState('Operations');
-    const [reqRole, setReqRole] = useState('picker');
-    const [reqHeadcount, setReqHeadcount] = useState(1);
-    const [reqSalary, setReqSalary] = useState(12000);
-    const [reqJustification, setReqJustification] = useState('');
-
-    // Candidate modal
     const [isCandModalOpen, setIsCandModalOpen] = useState(false);
-    const [candName, setCandName] = useState('');
-    const [candEmail, setCandEmail] = useState('');
-    const [candPhone, setCandPhone] = useState('');
+    const [approvalCandidate, setApprovalCandidate] = useState<JobCandidate | null>(null);
+
+    const userRoleLevel = recruitmentService.getUserRoleLevel(user?.role || '');
+    const isSiteManager = userRoleLevel === 3;
+    const canManageHiring = recruitmentService.canManageHiring(user?.role || '');
+    const isHQ = userRoleLevel <= 2;
 
     const loadData = async () => {
         setIsLoading(true);
@@ -53,63 +51,20 @@ export default function RecruitmentPipelineTab() {
         loadData();
     }, [country]);
 
-    const handleCreateRequisition = async (e: React.FormEvent) => {
-        e.preventDefault();
-        try {
-            await recruitmentService.createRequisition({
-                country_code: country,
-                site_id: activeSite?.id || 'SITE-01',
-                title: reqTitle,
-                department: reqDept,
-                role: reqRole,
-                headcount: reqHeadcount,
-                target_salary: reqSalary,
-                justification: reqJustification,
-                requested_by: user?.name || 'HR Officer',
-                requested_by_role: user?.role || 'talent_recruiter'
-            });
-            showToast('Headcount requisition submitted for HQ approval', 'success');
-            setIsReqModalOpen(false);
-            setReqTitle('');
-            setReqJustification('');
-            loadData();
-        } catch (err: any) {
-            showToast(err.message || 'Failed to submit requisition', 'error');
-        }
-    };
-
     const handleApproveRequisition = async (reqId: string) => {
         try {
-            await recruitmentService.approveRequisition(reqId, {
-                id: user?.id || 'hq_approver',
-                name: user?.name || 'Executive HQ',
-                role: user?.role || 'super_admin'
-            });
-            showToast('Requisition approved for active recruitment', 'success');
-            loadData();
-        } catch (err: any) {
-            showToast(err.message || 'Approval rejected under 4-Eyes rule', 'error');
-        }
-    };
-
-    const handleCreateCandidate = async (e: React.FormEvent) => {
-        e.preventDefault();
-        try {
-            await recruitmentService.createCandidate({
-                country_code: country,
-                requisition_id: selectedReqId || undefined,
-                name: candName,
-                email: candEmail,
-                phone: candPhone
-            });
-            showToast('Candidate added to talent pipeline', 'success');
-            setIsCandModalOpen(false);
-            setCandName('');
-            setCandEmail('');
-            setCandPhone('');
+            await recruitmentService.approveRequisition(
+                reqId, 
+                {
+                    id: user?.id || 'hq_approver', 
+                    name: user?.name || 'Operations Director',
+                    role: user?.role || 'operations_manager'
+                }
+            );
+            showToast('Headcount requisition approved for active hiring', 'success');
             loadData();
         } catch {
-            showToast('Failed to add candidate', 'error');
+            showToast('Failed to approve requisition', 'error');
         }
     };
 
@@ -123,138 +78,256 @@ export default function RecruitmentPipelineTab() {
         }
     };
 
-    const isHQ = user?.role === 'super_admin' || user?.role === 'admin' || user?.role === 'operations_manager';
+    // Scoped filtering: Site managers only see their branch's reqs & candidates
+    const filteredRequisitions = isSiteManager && user?.siteId
+        ? requisitions.filter(r => r.site_id === user.siteId)
+        : requisitions;
+
+    const filteredCandidates = isSiteManager && user?.siteId
+        ? candidates.filter(c => {
+            if (c.site_id && c.site_id !== user.siteId) return false;
+            if (c.requisition_id) {
+                const req = requisitions.find(r => r.id === c.requisition_id);
+                if (req && req.site_id !== user.siteId) return false;
+            }
+            return true;
+        })
+        : candidates;
 
     return (
-        <div className="space-y-6 animate-in fade-in">
-            {/* Header */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-6 bg-white/80 dark:bg-black/30 rounded-3xl border border-[#E2DCCE] dark:border-white/10 shadow-xs">
+        <div className="space-y-5 sm:space-y-6">
+            {/* Apple Section Banner */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 sm:p-5 bg-[var(--theme-bg-card)] rounded-2xl border border-[var(--theme-border)] shadow-[var(--shadow-sm)]">
                 <div className="flex items-center gap-3">
-                    <div className="p-3 bg-[#2C5E3B]/10 rounded-2xl text-[#2C5E3B] dark:text-[#A9CBA2]">
-                        <Briefcase size={24} />
+                    <div className="w-10 h-10 rounded-2xl bg-blue-500/10 text-[#0071E3] dark:text-[#2997FF] flex items-center justify-center shrink-0">
+                        <Briefcase size={20} />
                     </div>
                     <div>
-                        <h3 className="text-base font-black text-[#1E3F27] dark:text-[#EAE5D9]">
-                            Recruitment Pipeline & Headcount Requisitions
-                        </h3>
-                        <p className="text-xs text-stone-500 font-medium">
-                            Dual-control requisition sign-off, applicant scoring rubrics, and formal offers
+                        <div className="flex items-center gap-2">
+                            <h3 className="text-base font-semibold tracking-tight text-[var(--theme-text-primary)]">
+                                Delegated Recruitment & 4-Eyes Onboarding
+                            </h3>
+                            {isSiteManager && (
+                                <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-blue-500/10 text-[#0071E3] dark:text-[#2997FF] border border-blue-500/20">
+                                    Branch Scope
+                                </span>
+                            )}
+                        </div>
+                        <p className="text-xs text-[var(--theme-text-secondary)] mt-0.5">
+                            {isSiteManager
+                                ? `Location-locked to ${activeSite?.name || user?.siteId || 'your branch'}. You can recruit floor staff below your level.`
+                                : 'Dual-control sign-offs: Manager sourcing ➔ HR compliance vetting ➔ Finance salary authorization ➔ Synaptic activation.'
+                            }
                         </p>
                     </div>
                 </div>
 
-                <div className="flex items-center gap-2">
-                    <button
-                        onClick={() => setIsCandModalOpen(true)}
-                        className="px-4 py-2 bg-stone-100 dark:bg-white/5 hover:bg-stone-200 dark:hover:bg-white/10 rounded-xl text-xs font-bold text-stone-700 dark:text-stone-300 transition-colors cursor-pointer"
-                    >
-                        + Add Candidate
-                    </button>
-                    <button
-                        onClick={() => setIsReqModalOpen(true)}
-                        className="woody-btn-primary px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 cursor-pointer shadow-xs"
-                    >
-                        <Plus size={15} />
-                        <span>New Requisition</span>
-                    </button>
-                </div>
+                {canManageHiring && (
+                    <div className="flex items-center gap-2.5">
+                        <button
+                            type="button"
+                            onClick={() => setIsCandModalOpen(true)}
+                            className="h-10 px-3.5 rounded-xl bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-panel-hover)] border border-[var(--theme-border)] text-xs font-semibold text-[var(--theme-text-primary)] transition-all active:scale-[0.98] cursor-pointer flex items-center gap-1.5"
+                        >
+                            <UserPlus size={14} />
+                            <span>+ Candidate</span>
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => setIsReqModalOpen(true)}
+                            className="h-10 px-4 rounded-xl bg-[#0071E3] dark:bg-[#2997FF] hover:opacity-95 text-white text-xs sm:text-sm font-semibold flex items-center gap-1.5 shadow-[0_2px_8px_rgba(0,113,227,0.25)] active:scale-[0.98] transition-all cursor-pointer"
+                        >
+                            <Plus size={15} />
+                            <span>New Requisition</span>
+                        </button>
+                    </div>
+                )}
             </div>
 
             {/* Requisitions List */}
             <div className="space-y-3">
-                <h4 className="text-xs font-black uppercase tracking-wider text-stone-500">
-                    Active Headcount Requisitions ({requisitions.length})
-                </h4>
+                <div className="flex items-center justify-between">
+                    <h4 className="text-[11px] font-semibold uppercase tracking-wider text-[var(--theme-text-secondary)]">
+                        Headcount Requisitions ({filteredRequisitions.length})
+                    </h4>
+                    {isSiteManager && (
+                        <span className="text-xs text-[var(--theme-text-muted)] flex items-center gap-1">
+                            <Building2 size={12} />
+                            <span>{activeSite?.name || 'Local Site'}</span>
+                        </span>
+                    )}
+                </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {requisitions.map(req => (
-                        <div
-                            key={req.id}
-                            className={`p-5 rounded-2xl border transition-all ${
-                                selectedReqId === req.id
-                                    ? 'bg-[#2C5E3B]/5 border-[#2C5E3B] shadow-xs'
-                                    : 'bg-white/80 dark:bg-black/30 border-[#E2DCCE] dark:border-white/10'
-                            }`}
-                        >
-                            <div className="flex items-start justify-between gap-2 mb-2">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+                    {filteredRequisitions.map(req => {
+                        const isSelected = selectedReqId === req.id;
+                        return (
+                            <div
+                                key={req.id}
+                                onClick={() => setSelectedReqId(isSelected ? null : req.id)}
+                                className={`p-4 sm:p-5 rounded-2xl border transition-all cursor-pointer flex flex-col justify-between ${
+                                    isSelected
+                                        ? 'bg-[var(--theme-bg-card)] border-[#0071E3] dark:border-[#2997FF] ring-1 ring-[#0071E3]/20 shadow-[0_2px_12px_rgba(0,113,227,0.12)]'
+                                        : 'bg-[var(--theme-bg-card)] border-[var(--theme-border)] shadow-[var(--shadow-sm)] hover:border-[var(--theme-border-strong)]'
+                                }`}
+                            >
                                 <div>
-                                    <h5 className="font-bold text-sm text-[#1E3F27] dark:text-[#EAE5D9]">
-                                        {req.title}
-                                    </h5>
-                                    <p className="text-xs text-stone-500 font-medium">
-                                        {req.department} • {req.role} ({req.headcount} {req.headcount === 1 ? 'Opening' : 'Openings'})
+                                    <div className="flex items-start justify-between gap-2 mb-2">
+                                        <div>
+                                            <h5 className="font-semibold text-sm text-[var(--theme-text-primary)]">
+                                                {req.title}
+                                            </h5>
+                                            <p className="text-xs text-[var(--theme-text-secondary)] mt-0.5">
+                                                {req.department} • <span className="font-medium text-[var(--theme-text-primary)]">{req.role}</span> (<span className="font-mono tabular-nums">{req.headcount}</span> {req.headcount === 1 ? 'Opening' : 'Openings'})
+                                            </p>
+                                        </div>
+                                        <span className={`text-[11px] font-semibold px-2.5 py-0.5 rounded-full border shrink-0 ${
+                                            req.status === 'approved' || req.status === 'active_recruiting'
+                                                ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20'
+                                                : 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20'
+                                        }`}>
+                                            {req.status === 'pending_hq_approval' ? 'Pending HQ' : req.status}
+                                        </span>
+                                    </div>
+
+                                    <p className="text-xs text-[var(--theme-text-secondary)] italic mb-3 line-clamp-2">
+                                        "{req.justification}"
                                     </p>
                                 </div>
-                                <span className={`text-[10px] font-black uppercase px-2 py-0.5 rounded-lg border ${
-                                    req.status === 'approved' || req.status === 'active_recruiting'
-                                        ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
-                                        : 'bg-amber-50 text-amber-800 border-amber-200'
-                                }`}>
-                                    {req.status === 'pending_hq_approval' ? 'Pending HQ' : req.status}
-                                </span>
-                            </div>
 
-                            <p className="text-xs text-stone-600 dark:text-stone-400 italic mb-3 line-clamp-2">
-                                "{req.justification}"
-                            </p>
-
-                            <div className="flex items-center justify-between text-[11px] text-stone-400 pt-2 border-t border-stone-100 dark:border-white/5">
-                                <span>Target: {req.target_salary?.toLocaleString()} {country === 'KE' ? 'KSh' : 'ETB'}</span>
-                                {req.status === 'pending_hq_approval' && isHQ && (
-                                    <button
-                                        onClick={() => handleApproveRequisition(req.id)}
-                                        className="woody-btn-primary px-3 py-1 rounded-lg text-[10px] font-bold cursor-pointer"
-                                    >
-                                        Approve HQ
-                                    </button>
-                                )}
+                                <div className="flex items-center justify-between text-xs text-[var(--theme-text-muted)] pt-3 border-t border-[var(--theme-border-subtle)]">
+                                    <span className="font-mono tabular-nums">Budget: {req.target_salary?.toLocaleString()} {country === 'KE' ? 'KSh' : 'ETB'}</span>
+                                    {req.status === 'pending_hq_approval' && isHQ && (
+                                        <button
+                                            type="button"
+                                            onClick={(e) => { e.stopPropagation(); handleApproveRequisition(req.id); }}
+                                            className="h-7 px-2.5 rounded-lg bg-[#0071E3] dark:bg-[#2997FF] hover:opacity-95 text-white text-[11px] font-semibold cursor-pointer active:scale-[0.98] transition-all"
+                                        >
+                                            Approve HQ
+                                        </button>
+                                    )}
+                                </div>
                             </div>
+                        );
+                    })}
+
+                    {filteredRequisitions.length === 0 && (
+                        <div className="col-span-full py-8 text-center bg-[var(--theme-bg-card)] rounded-2xl border border-[var(--theme-border)] text-xs text-[var(--theme-text-muted)]">
+                            No active headcount requisitions logged for this location.
                         </div>
-                    ))}
+                    )}
                 </div>
             </div>
 
             {/* Candidate Pipeline Stages */}
             <div className="space-y-3">
-                <h4 className="text-xs font-black uppercase tracking-wider text-stone-500">
-                    Applicant Tracking Pipeline ({candidates.length})
-                </h4>
+                <div className="flex items-center justify-between">
+                    <h4 className="text-[11px] font-semibold uppercase tracking-wider text-[var(--theme-text-secondary)]">
+                        Applicant Tracking & 4-Eyes Sign-Off Pipeline ({filteredCandidates.length})
+                    </h4>
+                    {selectedReqId && (
+                        <button
+                            type="button"
+                            onClick={() => setSelectedReqId(null)}
+                            className="text-xs text-[#0071E3] dark:text-[#2997FF] font-medium hover:underline cursor-pointer"
+                        >
+                            Clear Requisition Filter
+                        </button>
+                    )}
+                </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-5 gap-3">
                     {(['applied', 'screening', 'interview', 'offered', 'hired'] as CandidateStage[]).map(stage => {
-                        const stageCandidates = candidates.filter(c => c.stage === stage);
-                        return (
-                            <div key={stage} className="bg-stone-50 dark:bg-black/20 rounded-2xl p-3 border border-[#E2DCCE] dark:border-white/10 space-y-2.5">
-                                <div className="flex items-center justify-between border-b border-stone-200 dark:border-white/5 pb-2">
-                                    <span className="text-[11px] font-black uppercase text-stone-600 dark:text-stone-300">
-                                        {stage}
-                                    </span>
-                                    <span className="text-xs font-mono font-bold text-stone-400">
-                                        {stageCandidates.length}
-                                    </span>
-                                </div>
+                        const stageCandidates = filteredCandidates
+                            .filter(c => !selectedReqId || c.requisition_id === selectedReqId)
+                            .filter(c => c.stage === stage);
 
-                                <div className="space-y-2">
-                                    {stageCandidates.map(cand => (
-                                        <div key={cand.id} className="p-3 bg-white dark:bg-black/40 rounded-xl border border-stone-200 dark:border-white/10 space-y-1.5 shadow-2xs">
-                                            <p className="text-xs font-bold text-[#1E3F27] dark:text-[#EAE5D9]">{cand.name}</p>
-                                            <p className="text-[10px] text-stone-400 font-mono">{cand.phone || cand.email}</p>
-                                            
-                                            {stage !== 'hired' && (
-                                                <button
-                                                    onClick={() => {
-                                                        const stages: CandidateStage[] = ['applied', 'screening', 'interview', 'offered', 'hired'];
-                                                        const next = stages[stages.indexOf(stage) + 1];
-                                                        if (next) handleStageUpdate(cand.id, next);
-                                                    }}
-                                                    className="w-full mt-1 py-1 rounded bg-[#2C5E3B]/10 hover:bg-[#2C5E3B]/20 text-[#2C5E3B] dark:text-[#A9CBA2] text-[10px] font-bold flex items-center justify-center gap-1 cursor-pointer transition-colors"
+                        return (
+                            <div key={stage} className="bg-[var(--theme-bg-subtle)] rounded-2xl p-3 border border-[var(--theme-border)] space-y-2.5 flex flex-col justify-between min-h-[220px]">
+                                <div>
+                                    <div className="flex items-center justify-between border-b border-[var(--theme-border)] pb-2 mb-2">
+                                        <span className="text-[11px] font-semibold uppercase tracking-wider text-[var(--theme-text-secondary)]">
+                                            {stage}
+                                        </span>
+                                        <span className="text-xs font-mono tabular-nums font-semibold text-[var(--theme-text-primary)]">
+                                            {stageCandidates.length}
+                                        </span>
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        {stageCandidates.map(cand => {
+                                            const hasHR = Boolean(cand.hr_approved_at);
+                                            const hasFin = Boolean(cand.finance_approved_at);
+
+                                            return (
+                                                <div 
+                                                    key={cand.id} 
+                                                    onClick={() => setApprovalCandidate(cand)}
+                                                    className="p-3 bg-[var(--theme-bg-card)] rounded-xl border border-[var(--theme-border)] space-y-2 shadow-xs hover:border-[var(--theme-border-strong)] transition-all cursor-pointer"
                                                 >
-                                                    <span>Advance</span>
-                                                    <ArrowRight size={10} />
-                                                </button>
-                                            )}
-                                        </div>
-                                    ))}
+                                                    <div>
+                                                        <p className="text-xs font-semibold text-[var(--theme-text-primary)] truncate">{cand.name}</p>
+                                                        <p className="text-[11px] text-[var(--theme-text-secondary)] font-mono tabular-nums truncate">{cand.phone || cand.email}</p>
+                                                    </div>
+
+                                                    {/* Dual 4-Eyes Compliance Badges */}
+                                                    <div className="flex items-center gap-1.5 pt-1 border-t border-[var(--theme-border-subtle)] text-[10px]">
+                                                        <span className={`px-1.5 py-0.5 rounded-md border flex items-center gap-1 ${
+                                                            hasHR ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20' : 'bg-stone-500/10 text-stone-500 border-stone-500/20'
+                                                        }`}>
+                                                            <ShieldCheck size={10} />
+                                                            <span>HR {hasHR ? '✓' : 'Pending'}</span>
+                                                        </span>
+                                                        <span className={`px-1.5 py-0.5 rounded-md border flex items-center gap-1 ${
+                                                            hasFin ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20' : 'bg-stone-500/10 text-stone-500 border-stone-500/20'
+                                                        }`}>
+                                                            <Banknote size={10} />
+                                                            <span>Fin {hasFin ? '✓' : 'Pending'}</span>
+                                                        </span>
+                                                    </div>
+
+                                                    {/* Stage Transition & Details Button */}
+                                                    <div className="flex items-center gap-1.5 pt-1">
+                                                        {stage === 'offered' ? (
+                                                            <button
+                                                                type="button"
+                                                                onClick={(e) => { e.stopPropagation(); setApprovalCandidate(cand); }}
+                                                                className="w-full h-7 rounded-lg bg-[#0071E3] dark:bg-[#2997FF] hover:opacity-95 text-white text-[11px] font-semibold flex items-center justify-center gap-1 cursor-pointer active:scale-95 transition-all shadow-xs"
+                                                            >
+                                                                <Sparkles size={11} />
+                                                                <span>Review 4-Eyes</span>
+                                                            </button>
+                                                        ) : stage !== 'hired' ? (
+                                                            <button
+                                                                type="button"
+                                                                onClick={(e) => {
+                                                                    e.stopPropagation();
+                                                                    const stages: CandidateStage[] = ['applied', 'screening', 'interview', 'offered', 'hired'];
+                                                                    const next = stages[stages.indexOf(stage) + 1];
+                                                                    if (next) handleStageUpdate(cand.id, next);
+                                                                }}
+                                                                className="w-full h-7 rounded-lg bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-panel-hover)] text-[#0071E3] dark:text-[#2997FF] border border-[var(--theme-border)] text-[11px] font-semibold flex items-center justify-center gap-1 cursor-pointer active:scale-[0.98] transition-all"
+                                                            >
+                                                                <span>Advance</span>
+                                                                <ArrowRight size={11} />
+                                                            </button>
+                                                        ) : (
+                                                            <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-semibold flex items-center gap-1 justify-center w-full py-0.5">
+                                                                <CheckCircle2 size={12} />
+                                                                <span>Active Staff</span>
+                                                            </span>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            );
+                                        })}
+
+                                        {stageCandidates.length === 0 && (
+                                            <div className="py-8 text-center text-xs text-[var(--theme-text-muted)] font-normal">
+                                                No candidates
+                                            </div>
+                                        )}
+                                    </div>
                                 </div>
                             </div>
                         );
@@ -262,138 +335,31 @@ export default function RecruitmentPipelineTab() {
                 </div>
             </div>
 
-            {/* Requisition Modal */}
-            {isReqModalOpen && (
-                <div className="fixed inset-0 bg-black/50 backdrop-blur-xs flex items-center justify-center z-50 p-4">
-                    <form onSubmit={handleCreateRequisition} className="bg-white dark:bg-[#18201B] rounded-3xl border border-[#E2DCCE] dark:border-white/10 p-6 max-w-md w-full space-y-4">
-                        <h4 className="font-black text-sm text-[#1E3F27] dark:text-[#EAE5D9]">
-                            Submit Headcount Requisition
-                        </h4>
+            {/* Subcomponent Modals */}
+            <RequisitionModal
+                isOpen={isReqModalOpen}
+                onClose={() => setIsReqModalOpen(false)}
+                onSuccess={loadData}
+                country={country}
+            />
 
-                        <div className="space-y-1">
-                            <label className="text-xs font-bold text-stone-700 dark:text-stone-300">Job Title</label>
-                            <input
-                                type="text"
-                                value={reqTitle}
-                                onChange={(e) => setReqTitle(e.target.value)}
-                                placeholder="e.g. Senior Inventory Specialist"
-                                required
-                                className="w-full px-3 py-2 bg-stone-50 dark:bg-black/30 border border-stone-200 dark:border-white/10 rounded-xl text-xs"
-                            />
-                        </div>
+            <CandidateModal
+                isOpen={isCandModalOpen}
+                onClose={() => setIsCandModalOpen(false)}
+                onSuccess={loadData}
+                country={country}
+                requisitions={filteredRequisitions}
+                selectedReqId={selectedReqId}
+            />
 
-                        <div className="grid grid-cols-2 gap-3">
-                            <div className="space-y-1">
-                                <label className="text-xs font-bold text-stone-700 dark:text-stone-300">Headcount</label>
-                                <input
-                                    type="number"
-                                    min="1"
-                                    value={reqHeadcount}
-                                    onChange={(e) => setReqHeadcount(Number(e.target.value))}
-                                    className="w-full px-3 py-2 bg-stone-50 dark:bg-black/30 border border-stone-200 dark:border-white/10 rounded-xl text-xs font-mono"
-                                />
-                            </div>
-                            <div className="space-y-1">
-                                <label className="text-xs font-bold text-stone-700 dark:text-stone-300">Target Salary</label>
-                                <input
-                                    type="number"
-                                    value={reqSalary}
-                                    onChange={(e) => setReqSalary(Number(e.target.value))}
-                                    className="w-full px-3 py-2 bg-stone-50 dark:bg-black/30 border border-stone-200 dark:border-white/10 rounded-xl text-xs font-mono"
-                                />
-                            </div>
-                        </div>
-
-                        <div className="space-y-1">
-                            <label className="text-xs font-bold text-stone-700 dark:text-stone-300">Business Justification</label>
-                            <textarea
-                                value={reqJustification}
-                                onChange={(e) => setReqJustification(e.target.value)}
-                                placeholder="Explain the operational necessity for this opening..."
-                                rows={3}
-                                required
-                                className="w-full px-3 py-2 bg-stone-50 dark:bg-black/30 border border-stone-200 dark:border-white/10 rounded-xl text-xs resize-none"
-                            />
-                        </div>
-
-                        <div className="flex justify-end gap-2 pt-2 border-t border-stone-100 dark:border-white/5">
-                            <button
-                                type="button"
-                                onClick={() => setIsReqModalOpen(false)}
-                                className="px-4 py-2 rounded-xl text-xs font-bold text-stone-600 dark:text-stone-400"
-                            >
-                                Cancel
-                            </button>
-                            <button
-                                type="submit"
-                                className="woody-btn-primary px-4 py-2 rounded-xl text-xs font-bold"
-                            >
-                                Submit Requisition
-                            </button>
-                        </div>
-                    </form>
-                </div>
-            )}
-
-            {/* Candidate Modal */}
-            {isCandModalOpen && (
-                <div className="fixed inset-0 bg-black/50 backdrop-blur-xs flex items-center justify-center z-50 p-4">
-                    <form onSubmit={handleCreateCandidate} className="bg-white dark:bg-[#18201B] rounded-3xl border border-[#E2DCCE] dark:border-white/10 p-6 max-w-md w-full space-y-4">
-                        <h4 className="font-black text-sm text-[#1E3F27] dark:text-[#EAE5D9]">
-                            Add Candidate to Pipeline
-                        </h4>
-
-                        <div className="space-y-1">
-                            <label className="text-xs font-bold text-stone-700 dark:text-stone-300">Full Name</label>
-                            <input
-                                type="text"
-                                value={candName}
-                                onChange={(e) => setCandName(e.target.value)}
-                                required
-                                className="w-full px-3 py-2 bg-stone-50 dark:bg-black/30 border border-stone-200 dark:border-white/10 rounded-xl text-xs"
-                            />
-                        </div>
-
-                        <div className="space-y-1">
-                            <label className="text-xs font-bold text-stone-700 dark:text-stone-300">Email Address</label>
-                            <input
-                                type="email"
-                                value={candEmail}
-                                onChange={(e) => setCandEmail(e.target.value)}
-                                required
-                                className="w-full px-3 py-2 bg-stone-50 dark:bg-black/30 border border-stone-200 dark:border-white/10 rounded-xl text-xs"
-                            />
-                        </div>
-
-                        <div className="space-y-1">
-                            <label className="text-xs font-bold text-stone-700 dark:text-stone-300">Phone Number</label>
-                            <input
-                                type="text"
-                                value={candPhone}
-                                onChange={(e) => setCandPhone(e.target.value)}
-                                required
-                                className="w-full px-3 py-2 bg-stone-50 dark:bg-black/30 border border-stone-200 dark:border-white/10 rounded-xl text-xs"
-                            />
-                        </div>
-
-                        <div className="flex justify-end gap-2 pt-2 border-t border-stone-100 dark:border-white/5">
-                            <button
-                                type="button"
-                                onClick={() => setIsCandModalOpen(false)}
-                                className="px-4 py-2 rounded-xl text-xs font-bold text-stone-600 dark:text-stone-400"
-                            >
-                                Cancel
-                            </button>
-                            <button
-                                type="submit"
-                                className="woody-btn-primary px-4 py-2 rounded-xl text-xs font-bold"
-                            >
-                                Add Candidate
-                            </button>
-                        </div>
-                    </form>
-                </div>
-            )}
+            <CandidateApprovalModal
+                isOpen={Boolean(approvalCandidate)}
+                onClose={() => setApprovalCandidate(null)}
+                onSuccess={loadData}
+                candidate={approvalCandidate}
+                requisition={requisitions.find(r => r.id === approvalCandidate?.requisition_id)}
+                country={country}
+            />
         </div>
     );
 }

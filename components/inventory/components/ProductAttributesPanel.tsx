@@ -1,5 +1,5 @@
 import React from 'react';
-import { Package, Layers, ShieldCheck, Tag, Info } from 'lucide-react';
+import { Package, Layers, ShieldCheck, Tag, Info, Sparkles } from 'lucide-react';
 import { Product } from '../../../types';
 
 // ── Compact Attribute Badge ──
@@ -37,19 +37,39 @@ interface ProductAttributesPanelProps {
 export const ProductAttributesPanel: React.FC<ProductAttributesPanelProps> = ({ product }) => {
     const customAttrs = product.customAttributes || (product as any).custom_attributes;
 
+    const hasIdentity = !!(customAttrs?.identity?.variant || customAttrs?.identity?.modelNumber || customAttrs?.identity?.subcategory);
     const hasPhysical = !!(customAttrs?.physical?.netWeight || customAttrs?.physical?.grossWeight || customAttrs?.physical?.form || customAttrs?.physical?.color || customAttrs?.physical?.texture || customAttrs?.physical?.dims);
     const hasPackaging = !!(customAttrs?.packaging?.packQty || customAttrs?.packaging?.caseSize || customAttrs?.packaging?.packagingLevel || customAttrs?.packaging?.packageType || customAttrs?.packaging?.material || customAttrs?.packaging?.isBreakable);
     const hasStorage = !!(customAttrs?.storage?.type || customAttrs?.storage?.isPerishable || customAttrs?.storage?.isHazardous || customAttrs?.storage?.isFragile || customAttrs?.storage?.isLightSensitive || customAttrs?.storage?.stackLimit);
     const hasCommercial = !!(customAttrs?.commercial?.sellBy || customAttrs?.commercial?.priceType || customAttrs?.commercial?.isWeighted || customAttrs?.commercial?.isReturnable || customAttrs?.commercial?.isBundleEligible);
     const hasDescriptive = !!(customAttrs?.descriptive?.usage || customAttrs?.descriptive?.audience || customAttrs?.descriptive?.scent || customAttrs?.descriptive?.flavor || customAttrs?.descriptive?.strength);
 
-    const hasAnyAttributes = hasPhysical || hasPackaging || hasStorage || hasCommercial || hasDescriptive;
+    const categorySpecific = customAttrs?.categorySpecific || {};
+    const categorySpecificKeys = Object.keys(categorySpecific).filter(k => categorySpecific[k] !== undefined && categorySpecific[k] !== null && categorySpecific[k] !== '');
+    const hasCategorySpecific = categorySpecificKeys.length > 0;
+
+    const hasAnyAttributes = hasIdentity || hasPhysical || hasPackaging || hasStorage || hasCommercial || hasDescriptive || hasCategorySpecific;
 
     if (!hasAnyAttributes) return null;
 
     return (
         <div className="space-y-3">
-            {/* 1. Packaging Domain */}
+            {/* 1. Identity & Variant Domain */}
+            {hasIdentity && (
+                <div className="p-3.5 bg-[var(--theme-bg-panel)] rounded-2xl border border-[var(--theme-border)] space-y-2">
+                    <div className="flex items-center gap-1.5 text-[10px] font-bold text-[var(--theme-text-secondary)] uppercase tracking-wider">
+                        <Tag size={12} className="text-indigo-500 shrink-0" />
+                        <span>Identity & Variant Specs</span>
+                    </div>
+                    <div className="flex flex-wrap gap-1.5">
+                        <AttrBadge label="Variant" value={customAttrs?.identity?.variant} color="blue" />
+                        <AttrBadge label="Model" value={customAttrs?.identity?.modelNumber} />
+                        <AttrBadge label="Subcategory" value={customAttrs?.identity?.subcategory} />
+                    </div>
+                </div>
+            )}
+
+            {/* 2. Packaging Domain */}
             {hasPackaging && (
                 <div className="p-3.5 bg-[var(--theme-bg-panel)] rounded-2xl border border-[var(--theme-border)] space-y-2">
                     <div className="flex items-center gap-1.5 text-[10px] font-bold text-[var(--theme-text-secondary)] uppercase tracking-wider">
@@ -67,7 +87,7 @@ export const ProductAttributesPanel: React.FC<ProductAttributesPanelProps> = ({ 
                 </div>
             )}
 
-            {/* 2. Physical Specs Domain */}
+            {/* 3. Physical Specs Domain */}
             {hasPhysical && (
                 <div className="p-3.5 bg-[var(--theme-bg-panel)] rounded-2xl border border-[var(--theme-border)] space-y-2">
                     <div className="flex items-center gap-1.5 text-[10px] font-bold text-[var(--theme-text-secondary)] uppercase tracking-wider">
@@ -85,7 +105,7 @@ export const ProductAttributesPanel: React.FC<ProductAttributesPanelProps> = ({ 
                 </div>
             )}
 
-            {/* 3. Storage & Care Domain */}
+            {/* 4. Storage & Care Domain */}
             {hasStorage && (
                 <div className="p-3.5 bg-[var(--theme-bg-panel)] rounded-2xl border border-[var(--theme-border)] space-y-2">
                     <div className="flex items-center gap-1.5 text-[10px] font-bold text-[var(--theme-text-secondary)] uppercase tracking-wider">
@@ -103,7 +123,7 @@ export const ProductAttributesPanel: React.FC<ProductAttributesPanelProps> = ({ 
                 </div>
             )}
 
-            {/* 4. Commercial & POS Domain */}
+            {/* 5. Commercial & POS Domain */}
             {hasCommercial && (
                 <div className="p-3.5 bg-[var(--theme-bg-panel)] rounded-2xl border border-[var(--theme-border)] space-y-2">
                     <div className="flex items-center gap-1.5 text-[10px] font-bold text-[var(--theme-text-secondary)] uppercase tracking-wider">
@@ -120,7 +140,7 @@ export const ProductAttributesPanel: React.FC<ProductAttributesPanelProps> = ({ 
                 </div>
             )}
 
-            {/* 5. Sensory & Usage Domain */}
+            {/* 6. Sensory & Usage Domain */}
             {hasDescriptive && (
                 <div className="p-3.5 bg-[var(--theme-bg-panel)] rounded-2xl border border-[var(--theme-border)] space-y-2">
                     <div className="flex items-center gap-1.5 text-[10px] font-bold text-[var(--theme-text-secondary)] uppercase tracking-wider">
@@ -133,6 +153,25 @@ export const ProductAttributesPanel: React.FC<ProductAttributesPanelProps> = ({ 
                         <AttrBadge label="Scent" value={customAttrs?.descriptive?.scent} color="pink" />
                         <AttrBadge label="Flavor" value={customAttrs?.descriptive?.flavor} color="orange" />
                         <AttrBadge label="Strength" value={customAttrs?.descriptive?.strength} />
+                    </div>
+                </div>
+            )}
+
+            {/* 7. Category-Specific Specifications */}
+            {hasCategorySpecific && (
+                <div className="p-3.5 bg-[var(--theme-bg-panel)] rounded-2xl border border-[var(--theme-border)] space-y-2">
+                    <div className="flex items-center gap-1.5 text-[10px] font-bold text-[var(--theme-text-secondary)] uppercase tracking-wider">
+                        <Sparkles size={12} className="text-amber-500 shrink-0" />
+                        <span>Category Specifications</span>
+                    </div>
+                    <div className="flex flex-wrap gap-1.5">
+                        {categorySpecificKeys.map(key => (
+                            <AttrBadge
+                                key={key}
+                                label={key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}
+                                value={String(categorySpecific[key])}
+                            />
+                        ))}
                     </div>
                 </div>
             )}

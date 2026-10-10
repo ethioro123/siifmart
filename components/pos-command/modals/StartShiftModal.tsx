@@ -45,7 +45,7 @@ export const StartShiftModal: React.FC = () => {
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2.5">
                             <div className="w-9 h-9 rounded-xl bg-[var(--theme-pill-bg)] text-[var(--theme-text-primary)] flex items-center justify-center border border-[var(--theme-border)]">
-                                <User size={18} />
+                                <User size={18} className="text-blue-500" />
                             </div>
                             <div>
                                 <p className="text-xs font-bold text-[var(--theme-text-primary)] leading-tight">{user?.name || 'Staff Cashier'}</p>
@@ -54,14 +54,14 @@ export const StartShiftModal: React.FC = () => {
                         </div>
 
                         <div className="flex items-center gap-1.5 text-xs font-bold text-[var(--theme-text-primary)] bg-[var(--theme-bg-card)] px-3 py-1.5 rounded-xl border border-[var(--theme-border)] shadow-xs">
-                            <Store size={14} />
+                            <Store size={14} className="text-orange-500" />
                             <span>{activeSite?.name || 'Store Register'}</span>
                         </div>
                     </div>
 
                     <div className="flex items-center justify-between text-[11px] font-semibold text-[var(--theme-text-secondary)] pt-2 border-t border-[var(--theme-border)]">
                         <div className="flex items-center gap-1.5">
-                            <Clock size={12} />
+                            <Clock size={12} className="text-teal-500" />
                             <span>Shift starting {new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
                         </div>
                         <span className="text-[10px] uppercase font-bold text-amber-500">Zero-Trust Audit Logged</span>
@@ -72,7 +72,7 @@ export const StartShiftModal: React.FC = () => {
                 <div className="space-y-3">
                     <div className="flex justify-between items-baseline">
                         <label className="text-xs font-bold text-[var(--theme-text-primary)] uppercase tracking-wider flex items-center gap-1.5">
-                            <DollarSign size={14} className="text-[var(--theme-text-primary)]" />
+                            <DollarSign size={14} className="text-emerald-500" />
                             Opening Cash Float
                         </label>
                         <span className="text-[11px] text-[var(--theme-text-secondary)] font-medium">Count physical cash in drawer</span>
@@ -114,7 +114,7 @@ export const StartShiftModal: React.FC = () => {
                 </div>
 
                 {/* Audit Notice */}
-                <div className="p-3 bg-amber-500/10 border border-amber-500/20 rounded-xl flex items-start gap-2.5">
+                <div className="p-3.5 bg-amber-500/10 border border-amber-500/20 rounded-2xl flex items-start gap-2.5">
                     <ShieldCheck size={16} className="text-amber-500 shrink-0 mt-0.5" />
                     <p className="text-[11px] text-amber-500 leading-relaxed font-medium">
                         Opening float syncs in real-time to Supabase for central HQ reconciliation. End-of-day drawer count will be reconciled against this amount.
@@ -126,14 +126,14 @@ export const StartShiftModal: React.FC = () => {
                     <button
                         type="button"
                         onClick={() => setIsStartShiftModalOpen(false)}
-                        className="flex-1 py-3 bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card-hover)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] text-xs font-bold uppercase tracking-wider rounded-xl transition-colors cursor-pointer border border-[var(--theme-border)] shadow-xs"
+                        className="flex-1 py-3 bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card-hover)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] text-xs font-semibold uppercase tracking-wider rounded-2xl transition-colors cursor-pointer border border-[var(--theme-border)] shadow-2xs"
                     >
                         Cancel
                     </button>
                     <button
                         type="submit"
                         disabled={isSubmitting || floatNum < 0}
-                        className="flex-2 py-3 bg-[var(--theme-primary)] hover:opacity-90 disabled:opacity-50 text-[var(--theme-primary-text)] text-xs font-bold uppercase tracking-wider rounded-xl shadow-xs transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-95"
+                        className="flex-2 py-3 bg-[var(--theme-primary)] hover:opacity-90 disabled:opacity-50 text-[var(--theme-primary-text)] text-xs font-semibold uppercase tracking-wider rounded-2xl shadow-xs transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-95"
                     >
                         <Play size={14} className="fill-current" />
                         <span>{isSubmitting ? 'Starting...' : 'Open Drawer & Start Shift'}</span>

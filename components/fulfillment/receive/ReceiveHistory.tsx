@@ -280,153 +280,151 @@ export const ReceiveHistory: React.FC<ReceiveHistoryProps> = ({
     };
 
     return (
-        <div className="border-t border-[#E2DCCE]/60 dark:border-[#A9CBA2]/10 mt-4 md:mt-8 pt-4 md:pt-8 relative overflow-hidden group/history">
-            {/* 🌈 Futuristic Mesh Accent — hidden on mobile */}
-            <div className="hidden md:block absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-[#E2DCCE] dark:via-[#A9CBA2]/10 to-transparent" />
-
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 md:gap-6 mb-4 md:mb-8">
-                <h4 className="text-base md:text-xl font-black text-[#1E3F27] dark:text-[#EAE5D9] flex items-center gap-2 md:gap-3 uppercase tracking-tight">
-                    <div className="hidden md:block p-2 bg-white/80 dark:bg-[#18201B]/50 rounded-xl border border-[#E2DCCE]/60 dark:border-[#A9CBA2]/10 group-hover/history:bg-[#2C5E3B]/10 group-hover/history:dark:bg-[#A9CBA2]/10 transition-colors">
-                        <HistoryIcon size={20} className="text-[#2C5E3B] dark:text-[#A9CBA2]" />
+        <div className="mt-4 md:mt-6 relative">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 md:gap-4 p-4 md:p-5 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl shadow-[var(--shadow-sm)] mb-4 md:mb-6">
+                <div className="flex items-center gap-3">
+                    <div className="w-9 h-9 rounded-xl bg-[#0071E3]/10 dark:bg-[#2997FF]/10 text-[#0071E3] dark:text-[#2997FF] border border-[#0071E3]/20 dark:border-[#2997FF]/20 flex items-center justify-center shrink-0">
+                        <HistoryIcon size={18} />
                     </div>
-                    {t('warehouse.recentHistory')}
-                </h4>
-                <div className="relative w-full sm:w-72 group">
-                    <div className="hidden md:block absolute -inset-0.5 bg-zinc-900 dark:bg-zinc-100 rounded-xl blur opacity-0 group-hover:opacity-10 dark:group-hover:opacity-5 transition duration-500"></div>
-                    <div className="relative flex items-center bg-white/90 dark:bg-black/25 border border-[#E2DCCE] dark:border-emerald-950/20 rounded-xl focus-within:border-[#2C5E3B] dark:focus-within:border-[#A9CBA2] transition-all shadow-sm">
-                        <Search className="absolute left-3 text-[#4D6E56] dark:text-[#7A9E83] group-focus-within:text-[#2C5E3B] dark:group-focus-within:text-[#A9CBA2] transition-colors" size={16} />
-                        <input
-                            type="text"
-                            placeholder={t('warehouse.searchHistoryPlaceholder')}
-                            aria-label={t('warehouse.searchHistoryPlaceholder')}
-                            title={t('warehouse.searchHistoryPlaceholder')}
-                            value={search}
-                            onChange={(e) => setSearch(e.target.value)}
-                            className="w-full bg-transparent border-none rounded-xl pl-10 pr-4 py-2.5 md:py-3 text-xs text-[#1E3F27] dark:text-[#EAE5D9] font-black uppercase tracking-widest focus:outline-none placeholder:text-stone-400 dark:placeholder:text-stone-500"
-                        />
+                    <h4 className="text-base md:text-lg font-semibold text-[var(--theme-text-primary)] tracking-tight">
+                        {t('warehouse.recentHistory')}
+                    </h4>
+                </div>
+                <div className="relative w-full sm:w-72">
+                    <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none text-[var(--theme-text-secondary)]">
+                        <Search size={16} />
                     </div>
+                    <input
+                        type="text"
+                        placeholder={t('warehouse.searchHistoryPlaceholder')}
+                        aria-label={t('warehouse.searchHistoryPlaceholder')}
+                        title={t('warehouse.searchHistoryPlaceholder')}
+                        value={search}
+                        onChange={(e) => setSearch(e.target.value)}
+                        className="w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] hover:border-[var(--theme-border-strong)] rounded-xl py-2 pl-9 pr-4 text-xs text-[var(--theme-text-primary)] placeholder:[var(--theme-text-secondary)]/60 focus:outline-none focus:border-[#0071E3] focus:ring-2 focus:ring-[#0071E3]/20 transition-colors"
+                    />
                 </div>
             </div>
 
             {paginatedHistory.length > 0 ? (
                 <>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-4">
-                        <>
-                            {paginatedHistory.map((item: any, index) => (
-                                    <div
-                                    key={`${item.type}-${item.id}`}
-                                    onClick={() => {
-                                        setSelectedJob(item.rawData);
-                                        setIsDetailsOpen(true);
-                                    }}
-                                    className="group relative bg-[#FAF8F5]/80 dark:bg-[#1C2620]/60 hover:bg-[#FAF8F5] dark:hover:bg-[#1C2620] border border-[#E2DCCE]/60 dark:border-[#A9CBA2]/[0.06] hover:border-[#2C5E3B]/30 dark:hover:border-[#A9CBA2]/30 rounded-[2rem] p-3 md:p-5 transition-colors cursor-pointer overflow-hidden shadow-sm hover:shadow-xl active:scale-[0.98]"
-                                >
-                                    {/* Hover Glow — hidden on mobile */}
-                                    <div className="hidden md:block absolute inset-0 bg-stone-900/5 dark:bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
-
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-4 mb-4">
+                        {paginatedHistory.map((item: any) => (
+                            <div
+                                key={`${item.type}-${item.id}`}
+                                onClick={() => {
+                                    setSelectedJob(item.rawData);
+                                    setIsDetailsOpen(true);
+                                }}
+                                className="group bg-[var(--theme-bg-card)] border border-[var(--theme-border)] hover:border-[var(--theme-border-strong)] rounded-2xl p-4 md:p-5 transition-all cursor-pointer shadow-[var(--shadow-sm)] active:scale-[0.98] flex flex-col justify-between"
+                            >
+                                <div>
                                     {/* Top Row: Type & Status */}
-                                    <div className="relative flex justify-between items-start mb-2 md:mb-4">
+                                    <div className="flex justify-between items-center mb-3">
                                         <div className="flex items-center gap-2">
-                                            <div className={`p-1.5 rounded-lg transition-colors ${item.type === 'PO' ? 'bg-[#2C5E3B]/10 dark:bg-[#EAE5D9] text-[#2C5E3B] dark:text-[#1E3B24] shadow-md dark:shadow-none border border-transparent dark:border-[#EAE5D9]/15' : 'bg-stone-50 dark:bg-white/5 text-stone-500 dark:text-[#A9CBA2] group-hover:bg-[#2C5E3B]/10 dark:group-hover:bg-[#A9CBA2]/10'}`}>
+                                            <div className="w-7 h-7 rounded-lg bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-[var(--theme-text-secondary)] flex items-center justify-center">
                                                 {item.type === 'PO' ? <ReceiptText size={14} /> : <PackageCheck size={14} />}
                                             </div>
-                                            <span className="text-[10px] uppercase tracking-widest font-black text-stone-500 dark:text-stone-400">
+                                            <span className="text-[11px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider">
                                                 {item.actionType}
                                             </span>
                                         </div>
-                                        <span className="text-[10px] font-black text-[#2C5E3B] dark:text-[#A9CBA2] group-hover:text-[#2C5E3B]/80 dark:group-hover:text-[#A9CBA2]/80 transition-colors uppercase tracking-widest font-mono">
+                                        <span className="text-[11px] font-mono tabular-nums text-[var(--theme-text-secondary)]">
                                             {getRelativeTime(item.date)}
                                         </span>
-                                        {item.type === 'JOB' && ((item.rawData as any)?.lineItems || (item.rawData as any)?.line_items || []).some((li: any) => (li.returnedQty || li.returned_qty) > 0) && (
-                                            <span className="text-[9px] px-1.5 py-0.5 rounded uppercase font-black tracking-widest bg-red-100 dark:bg-red-500/10 text-red-700 dark:text-red-400 border border-transparent dark:border-red-500/20">
-                                                Returned
-                                            </span>
-                                        )}
                                     </div>
 
                                     {/* Main Content */}
-                                    <div className="relative mb-2 md:mb-4">
-                                        <h5 className="text-[#1E3F27] dark:text-[#EAE5D9] font-black text-xs md:text-sm truncate pr-2 transition-colors uppercase tracking-tight">
+                                    <div className="mb-4">
+                                        <h5 className="text-sm font-semibold text-[var(--theme-text-primary)] truncate tracking-tight">
                                             {item.subtitle}
                                         </h5>
-                                        <p className="text-[9px] text-stone-400 dark:text-stone-500 font-black uppercase tracking-[0.2em] mt-1 flex items-center gap-2">
-                                            <span className="bg-[#FAF8F5] dark:bg-[#2C5E3B]/10 px-1.5 py-0.5 rounded text-stone-500 dark:text-[#A9CBA2] border border-[#E2DCCE]/50 dark:border-transparent transition-colors group-hover:bg-[#2C5E3B]/10 group-hover:text-[#2C5E3B] dark:group-hover:bg-[#A9CBA2]/15 dark:group-hover:text-white">#{item.reference}</span>
-                                            {item.sku && <span className="hidden md:inline text-[#E2DCCE] dark:text-zinc-800 font-black">| <span className="text-stone-400 dark:text-stone-500 group-hover:text-[#2C5E3B] dark:group-hover:text-[#A9CBA2]">{item.sku}</span></span>}
-                                        </p>
-                                    </div>
-
-                                    {/* Footer: User & Details */}
-                                    <div className="relative flex items-center justify-between border-t border-[#E2DCCE]/40 dark:border-white/5 pt-2 md:pt-3 mt-auto">
-                                        <div className="hidden md:flex items-center gap-2">
-                                            <div className="w-6 h-6 rounded-full bg-[#FAF8F5] dark:bg-[#1E3B24]/40 flex items-center justify-center border border-[#E2DCCE] dark:border-[#A9CBA2]/20 shadow-inner group-hover/history:scale-110 transition-transform">
-                                                <span className="text-[9px] font-black text-[#2C5E3B] dark:text-[#A9CBA2]">{(item.resolvedUser?.name || 'S').charAt(0).toUpperCase()}</span>
-                                            </div>
-                                            <div className="flex flex-col">
-                                                <span className="text-[9px] font-black text-stone-400 dark:text-stone-500 uppercase tracking-widest leading-tight">By</span>
-                                                <span className="text-[9px] font-black text-[#1E3F27] dark:text-[#EAE5D9] uppercase tracking-wider leading-tight">
-                                                    {item.resolvedUser?.name} <span className="text-stone-400 dark:text-stone-500 font-normal">({item.resolvedUser?.displayId})</span>
+                                        <div className="flex items-center gap-2 mt-1.5 flex-wrap">
+                                            <span className="text-[11px] font-mono text-[var(--theme-text-secondary)] bg-[var(--theme-bg-subtle)] px-2 py-0.5 rounded-md border border-[var(--theme-border)]">
+                                                #{item.reference}
+                                            </span>
+                                            {item.sku && (
+                                                <span className="text-[11px] font-mono text-[var(--theme-text-secondary)]">
+                                                    {item.sku}
                                                 </span>
-                                            </div>
+                                            )}
+                                            {item.type === 'JOB' && ((item.rawData as any)?.lineItems || (item.rawData as any)?.line_items || []).some((li: any) => (li.returnedQty || li.returned_qty) > 0) && (
+                                                <span className="px-2 py-0.5 rounded-full text-[11px] font-semibold bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20">
+                                                    Returned
+                                                </span>
+                                            )}
                                         </div>
-
-                                            <div className="flex items-center gap-2">
-                                                {item.displayQty ? (
-                                                    <div className="flex items-center gap-1.5 bg-stone-50 dark:bg-white/5 px-2 py-1 rounded-lg border border-stone-200 dark:border-white/5 group-hover:border-[#2C5E3B]/30 dark:group-hover:border-[#A9CBA2]/30 transition-all">
-                                                        <Box size={12} className="text-stone-500 dark:text-[#A9CBA2]" />
-                                                        <span className="text-[10px] font-black text-[#1E3F27] dark:text-[#EAE5D9] tabular-nums">{item.displayQty}</span>
-                                                    </div>
-                                                ) : (
-                                                    <span className="text-[10px] font-black uppercase tracking-widest text-stone-500 dark:text-stone-400">{item.items} {t('warehouse.unitsLabel')}</span>
-                                                )}
-                                                {item.type === 'JOB' && (item.rawData as any)?.status === 'Completed' && (
-                                                    <button
-                                                        onClick={(e) => {
-                                                            e.stopPropagation();
-                                                            setReturnType('warehouse');
-                                                            setReturnJob(item.rawData as WMSJob);
-                                                        }}
-                                                        className="flex items-center gap-1 bg-amber-100 hover:bg-amber-200 dark:bg-amber-500/5 dark:hover:bg-amber-500/15 px-2 py-1 rounded-lg border border-amber-300 dark:border-amber-500/10 hover:border-amber-400 dark:hover:border-amber-500/30 transition-all text-amber-800 hover:text-amber-900 dark:text-amber-400 dark:hover:text-amber-300"
-                                                        title={t('warehouse.returnToWarehouse')}
-                                                    >
-                                                        <Undo2 size={10} />
-                                                        <span className="text-[9px] font-black uppercase tracking-widest">{t('warehouse.undoAction')}</span>
-                                                    </button>
-                                                )}
-                                                {item.type === 'PO' && (
-                                                    <button
-                                                        onClick={(e) => {
-                                                            e.stopPropagation();
-                                                            const po = item.rawData as any;
-                                                            // Adapt PO data to WMSJob-like shape
-                                                            const adaptedJob = {
-                                                                ...po,
-                                                                type: 'RECEIVE',
-                                                                status: 'Completed',
-                                                                lineItems: (po.lineItems || []).map((li: any) => ({
-                                                                    productId: li.productId || li.product_id || '',
-                                                                    name: li.productName || li.name || li.sku || 'Unknown',
-                                                                    sku: li.sku || '',
-                                                                    receivedQty: li.receivedQty || li.received_qty || li.quantity || 0,
-                                                                    expectedQty: li.quantity || 0,
-                                                                    quantity: li.receivedQty || li.received_qty || li.quantity || 0
-                                                                }))
-                                                            };
-                                                            setReturnType('procurement');
-                                                            setReturnJob(adaptedJob as any);
-                                                        }}
-                                                        className="flex items-center gap-1 bg-amber-100 hover:bg-amber-200 dark:bg-amber-500/5 dark:hover:bg-amber-500/15 px-2 py-1 rounded-lg border border-amber-300 dark:border-amber-500/10 hover:border-amber-400 dark:hover:border-amber-500/30 transition-all text-amber-800 hover:text-amber-900 dark:text-amber-400 dark:hover:text-amber-300"
-                                                        title={t('warehouse.returnToWarehouse')}
-                                                    >
-                                                        <Undo2 size={10} />
-                                                        <span className="text-[9px] font-black uppercase tracking-widest">{t('warehouse.undoAction')}</span>
-                                                    </button>
-                                                )}
-                                                <ChevronRight size={14} className="text-stone-400 dark:text-[#A9CBA2] group-hover:translate-x-1 transition-all" />
-                                            </div>
                                     </div>
                                 </div>
-                            ))}
-                        </>
+
+                                {/* Footer: User & Details */}
+                                <div className="flex items-center justify-between border-t border-[var(--theme-border)] pt-3 mt-auto">
+                                    <div className="flex flex-col min-w-0 pr-2">
+                                        <span className="text-[11px] text-[var(--theme-text-secondary)] font-medium">By</span>
+                                        <span className="text-xs font-semibold text-[var(--theme-text-primary)] truncate">
+                                            {item.resolvedUser?.name} {item.resolvedUser?.displayId && <span className="font-mono text-[var(--theme-text-secondary)] font-normal">({item.resolvedUser.displayId})</span>}
+                                        </span>
+                                    </div>
+
+                                    <div className="flex items-center gap-2 shrink-0">
+                                        {item.displayQty ? (
+                                            <div className="flex items-center gap-1.5 bg-[var(--theme-bg-subtle)] px-2.5 py-1 rounded-lg border border-[var(--theme-border)]">
+                                                <Box size={12} className="text-[var(--theme-text-secondary)]" />
+                                                <span className="text-xs font-mono font-semibold tabular-nums text-[var(--theme-text-primary)]">{item.displayQty}</span>
+                                            </div>
+                                        ) : (
+                                            <span className="text-[11px] font-mono text-[var(--theme-text-secondary)]">{item.items} {t('warehouse.unitsLabel')}</span>
+                                        )}
+
+                                        {item.type === 'JOB' && (item.rawData as any)?.status === 'Completed' && (
+                                            <button
+                                                type="button"
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    setReturnType('warehouse');
+                                                    setReturnJob(item.rawData as WMSJob);
+                                                }}
+                                                className="flex items-center gap-1 bg-amber-500/10 hover:bg-amber-500/20 text-amber-600 dark:text-amber-400 px-2 py-1 rounded-lg border border-amber-500/20 text-[11px] font-semibold transition-all cursor-pointer"
+                                                title={t('warehouse.returnToWarehouse')}
+                                            >
+                                                <Undo2 size={12} />
+                                                <span>{t('warehouse.undoAction')}</span>
+                                            </button>
+                                        )}
+                                        {item.type === 'PO' && (
+                                            <button
+                                                type="button"
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    const po = item.rawData as any;
+                                                    const adaptedJob = {
+                                                        ...po,
+                                                        type: 'RECEIVE',
+                                                        status: 'Completed',
+                                                        lineItems: (po.lineItems || []).map((li: any) => ({
+                                                            productId: li.productId || li.product_id || '',
+                                                            name: li.productName || li.name || li.sku || 'Unknown',
+                                                            sku: li.sku || '',
+                                                            receivedQty: li.receivedQty || li.received_qty || li.quantity || 0,
+                                                            expectedQty: li.quantity || 0,
+                                                            quantity: li.receivedQty || li.received_qty || li.quantity || 0
+                                                        }))
+                                                    };
+                                                    setReturnType('procurement');
+                                                    setReturnJob(adaptedJob as any);
+                                                }}
+                                                className="flex items-center gap-1 bg-amber-500/10 hover:bg-amber-500/20 text-amber-600 dark:text-amber-400 px-2 py-1 rounded-lg border border-amber-500/20 text-[11px] font-semibold transition-all cursor-pointer"
+                                                title={t('warehouse.returnToWarehouse')}
+                                            >
+                                                <Undo2 size={12} />
+                                                <span>{t('warehouse.undoAction')}</span>
+                                            </button>
+                                        )}
+                                        <ChevronRight size={14} className="text-[var(--theme-text-secondary)] group-hover:translate-x-0.5 transition-transform" />
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
                     </div>
                     <Pagination
                         currentPage={currentPage}
@@ -438,12 +436,16 @@ export const ReceiveHistory: React.FC<ReceiveHistoryProps> = ({
                     />
                 </>
             ) : (
-                <div className="flex flex-col items-center justify-center py-12 md:py-20 bg-stone-50 dark:bg-zinc-100/[0.02] rounded-2xl md:rounded-3xl border border-dashed border-[#E2DCCE]/60 dark:border-white/10">
-                    <div className="p-4 bg-stone-50 dark:bg-[#1C2620]/30 rounded-2xl mb-4 border border-[#E2DCCE]/60 dark:border-[#A9CBA2]/10 shadow-xl">
-                        <HistoryIcon size={32} className="text-[#2C5E3B] dark:text-[#A9CBA2]" />
+                <div className="flex flex-col items-center justify-center py-16 bg-[var(--theme-bg-card)] rounded-2xl border border-dashed border-[var(--theme-border)] text-center">
+                    <div className="w-14 h-14 rounded-2xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] flex items-center justify-center text-[var(--theme-text-secondary)] mb-3">
+                        <HistoryIcon size={28} />
                     </div>
-                    <h3 className="text-lg font-black text-[#1E3F27] dark:text-white mb-1 uppercase tracking-widest">{t('warehouse.noHistoryFound')}</h3>
-                    <p className="text-stone-500 dark:text-stone-400 text-xs uppercase tracking-[0.2em] font-black">{t('warehouse.completedAndFinalizedShipments')}</p>
+                    <h3 className="text-sm font-semibold text-[var(--theme-text-primary)] mb-1">
+                        {t('warehouse.noHistoryFound')}
+                    </h3>
+                    <p className="text-xs text-[var(--theme-text-secondary)] font-medium">
+                        {t('warehouse.completedAndFinalizedShipments')}
+                    </p>
                 </div>
             )}
 

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import {
-    Globe, ShoppingCart, Box, Shield, Bell, Database, Printer,
-    FileText, Tag, Users, DollarSign, MapPin, List, Trophy, CloudLightning
+    LucideIcon, Globe, ShoppingCart, Box, Shield, Bell, Database, Printer,
+    FileText, Tag, Users, DollarSign, MapPin, List, Trophy, CloudLightning, X
 } from 'lucide-react';
 import { useStore } from '../contexts/CentralStore';
 import { Protected } from '../components/Protected';
@@ -29,19 +29,19 @@ export default function SettingsPage() {
     const [activeTab, setActiveTab] = useState<SettingsTab>('general');
     const [isNavOpen, setIsNavOpen] = useState(false);
 
-    const TabButton = ({ id, icon: Icon, label }: { id: SettingsTab, icon: any, label: string }) => (
+    const TabButton = ({ id, icon: Icon, label }: { id: SettingsTab, icon: LucideIcon, label: string }) => (
         <button
             type="button"
             onClick={() => {
                 setActiveTab(id);
                 setIsNavOpen(false);
             }}
-            className={`w-full flex items-center gap-3 px-4 py-3 rounded-2xl transition-all text-xs font-bold mb-1.5 cursor-pointer ${activeTab === id
-                ? 'bg-[#2C5E3B] text-white shadow-md'
-                : 'text-stone-600 dark:text-gray-400 hover:text-[#1E3F27] dark:hover:text-white hover:bg-white/60 dark:hover:bg-white/5'
+            className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl transition-all text-xs font-medium mb-1 cursor-pointer ${activeTab === id
+                ? 'bg-[#0071E3] dark:bg-[#2997FF] text-white shadow-xs font-semibold'
+                : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-subtle)]'
                 }`}
         >
-            <Icon size={16} className={activeTab === id ? 'text-white' : 'text-stone-500 dark:text-gray-400'} />
+            <Icon size={16} className={activeTab === id ? 'text-white' : 'text-[var(--theme-text-secondary)]'} />
             <span>{label}</span>
         </button>
     );
@@ -63,17 +63,17 @@ export default function SettingsPage() {
                 ${isNavOpen ? 'translate-x-0' : '-translate-x-full'}
                 lg:relative lg:translate-x-0 lg:flex-shrink-0 lg:z-0
             `}>
-                <div className="bg-white/85 dark:bg-[#18201B]/60 border border-[#E2DCCE] dark:border-emerald-950/20 rounded-[32px] p-4 h-full overflow-y-auto custom-scrollbar shadow-sm">
+                <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-3.5 h-full overflow-y-auto custom-scrollbar shadow-xs">
                     <div className="flex items-center justify-between mb-4 px-2 lg:hidden">
-                        <p className="text-xs font-black text-[#2C5E3B] dark:text-[#A9CBA2] uppercase tracking-widest">Configuration</p>
-                        <button onClick={() => setIsNavOpen(false)} title="Close Menu" className="text-stone-500 hover:text-[#1E3F27] dark:hover:text-white text-xl font-bold">
-                            &times;
+                        <p className="text-xs font-bold text-[var(--theme-text-primary)] uppercase tracking-wider">Configuration</p>
+                        <button onClick={() => setIsNavOpen(false)} title="Close Menu" className="p-1 rounded-lg text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-subtle)] cursor-pointer">
+                            <X size={18} />
                         </button>
                     </div>
 
-                    <p className="text-[10px] font-black text-stone-400 dark:text-gray-500 uppercase tracking-wider mb-3 px-2">Operational Rules</p>
+                    <p className="text-[11px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider mb-2 px-2">Operational Rules</p>
                     <Protected permission="ACCESS_SETTINGS">
-                        <TabButton id="general" icon={Globe} label="General & Branding" />
+                        <TabButton id="general" icon={Globe} label="General & Slogan" />
                     </Protected>
                     <Protected permission="MANAGE_WAREHOUSE">
                         <TabButton id="locations" icon={MapPin} label="Locations & Sites" />
@@ -99,7 +99,7 @@ export default function SettingsPage() {
 
                     {(user?.role === 'super_admin' || user?.role === 'admin' || user?.role === 'auditor') && (
                         <>
-                            <p className="text-[10px] font-black text-stone-400 dark:text-gray-500 uppercase tracking-wider mt-5 mb-3 px-2">Enterprise Security</p>
+                            <p className="text-[11px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider mt-4 mb-2 px-2">Enterprise Security</p>
                             <Protected permission="MANAGE_ROLES">
                                 <TabButton id="roles" icon={Users} label="Roles & Zero-Trust" />
                             </Protected>
@@ -127,19 +127,19 @@ export default function SettingsPage() {
             </div>
 
             {/* Main Content */}
-            <div className="flex-1 bg-white/85 dark:bg-[#18201B]/60 border border-[#E2DCCE] dark:border-emerald-950/20 rounded-[32px] flex flex-col relative overflow-hidden h-full shadow-sm">
+            <div className="flex-1 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl flex flex-col relative overflow-hidden h-full shadow-xs">
                 {/* Toolbar */}
-                <div className="p-4 border-b border-[#E2DCCE]/60 dark:border-white/5 flex justify-between items-center bg-[#FAF8F5]/80 dark:bg-black/20 backdrop-blur-md z-10 sticky top-0">
+                <div className="p-4 border-b border-[var(--theme-border)] flex justify-between items-center bg-[var(--theme-bg-card)]/80 backdrop-blur-md z-10 sticky top-0">
                     <div className="flex items-center gap-3">
                         <button
                             onClick={() => setIsNavOpen(true)}
                             title="Open Configuration Menu"
-                            className="p-2 bg-stone-100 dark:bg-white/5 rounded-xl text-stone-600 dark:text-gray-400 hover:text-[#1E3F27] dark:hover:text-white transition-colors lg:hidden cursor-pointer"
+                            className="p-2 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] transition-colors lg:hidden cursor-pointer"
                         >
                             <List size={18} />
                         </button>
-                        <div className="text-xs text-stone-500 dark:text-gray-400 font-bold">
-                            Configuration / <span className="text-[#1E3F27] dark:text-white capitalize font-black">{activeTab}</span>
+                        <div className="text-xs text-[var(--theme-text-secondary)] font-medium">
+                            Configuration / <span className="text-[var(--theme-text-primary)] capitalize font-semibold">{activeTab === 'general' ? 'General & Slogan' : activeTab}</span>
                         </div>
                     </div>
                 </div>

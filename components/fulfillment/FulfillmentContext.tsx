@@ -56,7 +56,10 @@ export interface FulfillmentContextType {
     filteredProducts: Product[];
 
     filteredMovements: StockMovement[];
+    /** RULE 10: Empty on mount. Populated when user clicks History tab. */
     historicalJobs: WMSJob[];
+    /** RULE 10: Call ONLY when user explicitly switches to History view. */
+    loadHistoricalJobs: (limit?: number) => Promise<void>;
     resolveOrderRef: (ref: string | undefined) => string;
 
     // --- Permissions ---

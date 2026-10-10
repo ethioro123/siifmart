@@ -248,8 +248,8 @@ input {
   border: 1px solid var(--theme-glass-border);
   border-radius: 1rem;
   box-shadow: var(--theme-glass-shadow);
-  backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px);
   transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
@@ -347,8 +347,8 @@ input {
 
   /* Low-end mobile performance fallback: solid background support */
   .fulfillment-view [class*="backdrop-blur"] {
-    backdrop-filter: none !important;
     -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
     background-color: var(--theme-bg-panel) !important;
   }
 

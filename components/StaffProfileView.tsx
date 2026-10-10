@@ -73,7 +73,7 @@ export default function StaffProfileView(props: StaffProfileViewProps) {
     const handleDirectApprove = async () => {
         try {
             await updateEmployee({ ...employee, status: 'Active' }, user?.name || 'Admin');
-            addNotification('success', `✅ Approved: ${employee.name} is now Active.`);
+            addNotification('success', `Approved: ${employee.name} is now Active.`);
         } catch (err: any) {
             addNotification('alert', `Failed to approve employee: ${err?.message || 'Unknown error'}`);
         }
@@ -83,7 +83,7 @@ export default function StaffProfileView(props: StaffProfileViewProps) {
     const currencySymbol = (employee as any).salaryCurrency || settings?.currency || 'ETB';
 
     return (
-        <div className="space-y-6 animate-in fade-in duration-300">
+        <div className="space-y-5 sm:space-y-6">
             <StaffProfileHeader 
                 employee={employee} sites={sites} isOwnProfile={isOwnProfile} canManageEmployees={canManage} 
                 canResetPassword={userRoleLevel > targetRoleLevel} canTerminate={canTerminate} canDelete={canDelete}
@@ -97,25 +97,26 @@ export default function StaffProfileView(props: StaffProfileViewProps) {
             />
 
             {employee.status === 'Pending Approval' && (
-                <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-amber-500/10 via-amber-500/5 to-transparent border border-amber-500/30 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-xs">
-                    <div className="flex items-center gap-3.5">
-                        <div className="p-2.5 rounded-xl bg-amber-500/20 text-amber-600 dark:text-amber-400 flex-shrink-0">
-                            <AlertCircle size={22} />
+                <div className="p-4 sm:p-5 rounded-2xl bg-amber-500/5 border border-amber-500/20 shadow-[var(--shadow-sm)] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                    <div className="flex items-center gap-3">
+                        <div className="w-9 h-9 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0">
+                            <AlertCircle size={18} />
                         </div>
                         <div>
-                            <h4 className="text-sm font-bold text-amber-950 dark:text-amber-200">Pending Onboarding Approval</h4>
-                            <p className="text-xs text-amber-800/90 dark:text-amber-300/80 mt-0.5">
+                            <h4 className="text-sm font-semibold text-[var(--theme-text-primary)]">Pending Onboarding Approval</h4>
+                            <p className="text-xs text-[var(--theme-text-secondary)] mt-0.5">
                                 This employee was onboarded with "Pending Approval" status and requires HR / Super Admin sign-off before being granted active system access.
                             </p>
                         </div>
                     </div>
                     {canApprove && (
                         <button
+                            type="button"
                             onClick={handleApprove}
-                            className="px-4 py-2 rounded-xl bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 text-white font-bold text-xs flex items-center gap-2 transition-all flex-shrink-0 cursor-pointer shadow-md shadow-emerald-600/20 active:scale-98"
+                            className="h-10 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs flex items-center gap-2 transition-all shrink-0 cursor-pointer shadow-xs active:scale-[0.98]"
                         >
                             <CheckCircle size={15} />
-                            Approve Talent
+                            <span>Approve Talent</span>
                         </button>
                     )}
                 </div>

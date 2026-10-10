@@ -49,24 +49,26 @@ export function POSIdentityTab({
   return (
     <div className="space-y-6 animate-in fade-in duration-200">
       <GlassCard className="p-6 lg:p-8">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[#E2DCCE]/60 dark:border-white/10 mb-6">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[var(--theme-border)] mb-6">
           <SectionHeader
             title="Receipt Layout & Thermal Branding"
             desc="Configure how your brand appears on printed slips and digital invoices."
             icon={Sparkles}
           />
-          <div className="flex items-center gap-2 px-3 py-1.5 bg-[#FAF8F5] dark:bg-black/40 border border-[#E2DCCE] dark:border-white/10 rounded-xl self-start sm:self-auto">
-            <span className="text-base">{countryProfile.flag}</span>
-            <span className="text-xs font-bold text-[#1E3F27] dark:text-[#EAE5D9]">
+          <div className="flex items-center gap-2 px-3 py-1.5 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl self-start sm:self-auto">
+            <span className="w-5 h-5 rounded-md bg-[var(--theme-bg-card)] border border-[var(--theme-border)] flex items-center justify-center font-bold text-[10px] text-[var(--theme-text-primary)]">
+              {selectedCountry}
+            </span>
+            <span className="text-xs font-semibold text-[var(--theme-text-primary)]">
               {countryProfile.name}
             </span>
-            <span className="text-[10px] font-black text-[#2C5E3B] dark:text-[#A9CBA2] uppercase px-1.5 py-0.5 bg-[#2C5E3B]/10 rounded">
+            <span className="text-[10px] font-semibold text-[#0071E3] dark:text-[#2997FF] uppercase px-2 py-0.5 bg-[#0071E3]/10 dark:bg-[#2997FF]/15 rounded-full">
               {countryProfile.currency} ({countryProfile.currencySymbol})
             </span>
           </div>
         </div>
 
-        <div className="space-y-10">
+        <div className="space-y-8">
           {/* Visual Assets */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 items-end">
             <div className="lg:col-span-2">
@@ -113,8 +115,8 @@ export function POSIdentityTab({
               icon={FileText}
               placeholder={isKenya ? 'Asante kwa ununuzi wako!' : 'Thank you for shopping with us!'}
             />
-            <div className="md:col-span-2 lg:col-span-1 space-y-2">
-              <label className="text-xs text-stone-600 dark:text-gray-400 font-bold uppercase tracking-wider block">
+            <div className="md:col-span-2 lg:col-span-1 space-y-1.5">
+              <label className="text-xs text-[var(--theme-text-secondary)] font-semibold uppercase tracking-wider block">
                 Return Policy Text
               </label>
               <textarea
@@ -124,7 +126,7 @@ export function POSIdentityTab({
                   setReceiptBranding(prev => ({ ...prev, posReceiptPolicy: e.target.value }))
                 }
                 placeholder="Items may be returned within 7 days with valid receipt."
-                className="w-full h-24 bg-[#FAF8F5] dark:bg-black/40 border border-[#E2DCCE] dark:border-white/10 rounded-2xl p-3 text-xs text-[#1E3F27] dark:text-white outline-none focus:border-[#2C5E3B] transition-colors resize-none"
+                className="w-full h-24 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl p-3 text-xs text-[var(--theme-text-primary)] outline-none focus:ring-2 focus:ring-[#0071E3]/30 focus:border-[#0071E3] dark:focus:border-[#2997FF] transition-colors resize-none placeholder:text-[var(--theme-text-secondary)]/40"
               />
             </div>
           </div>
@@ -161,8 +163,8 @@ export function POSIdentityTab({
           </div>
 
           {/* Hardware geometry */}
-          <div className="space-y-4 pt-4 border-t border-[#E2DCCE]/60 dark:border-white/10">
-            <h4 className="text-xs font-black text-[#1E3F27] dark:text-[#EAE5D9] uppercase tracking-wider">
+          <div className="space-y-3 pt-4 border-t border-[var(--theme-border)]">
+            <h4 className="text-xs font-semibold text-[var(--theme-text-primary)] uppercase tracking-wider">
               Thermal Paper Dimensions & Font
             </h4>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -195,7 +197,7 @@ export function POSIdentityTab({
             </div>
           </div>
 
-          <div className="pt-6 border-t border-[#E2DCCE]/60 dark:border-white/10 grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
+          <div className="pt-6 border-t border-[var(--theme-border)] grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
             <ToggleRow
               label="Customer Feedback QR"
               sub="Print survey code on slip bottom"
@@ -220,17 +222,17 @@ export function POSIdentityTab({
           </div>
         </div>
 
-        <div className="mt-8 pt-6 border-t border-[#E2DCCE]/60 dark:border-white/10 flex justify-end">
+        <div className="mt-8 pt-6 border-t border-[var(--theme-border)] flex justify-end">
           <button
             type="button"
             onClick={() => handleSaveSection('branding')}
             disabled={isSavingBranding}
-            className="px-8 min-h-[44px] bg-[#2C5E3B] hover:opacity-90 text-white font-bold rounded-2xl text-xs uppercase tracking-wider flex items-center gap-2 shadow-md cursor-pointer transition-opacity disabled:opacity-50"
+            className="h-10 px-5 bg-[#0071E3] dark:bg-[#2997FF] hover:opacity-90 active:scale-[0.98] text-white font-semibold rounded-xl text-xs flex items-center gap-2 shadow-xs cursor-pointer transition-all disabled:opacity-40"
           >
             {isSavingBranding ? (
               <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
             ) : (
-              <Save size={16} />
+              <Save size={15} />
             )}
             Update Receipt Branding ({selectedCountry})
           </button>

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Globe, Calendar, Save, CheckCircle2, ShieldCheck, DollarSign, AlertCircle, Lock } from 'lucide-react';
+import { Globe, Calendar, Save, CheckCircle2, ShieldCheck, DollarSign, AlertCircle } from 'lucide-react';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { useStore } from '../../contexts/CentralStore';
 import { canSwitchCountry } from '../../utils/permissions';
@@ -21,7 +21,6 @@ interface LocalizationSettingsCardProps {
 export const LocalizationSettingsCard: React.FC<LocalizationSettingsCardProps> = ({
     settings,
     selectedCountry,
-    onCountryChange,
     cardBase
 }) => {
     const { setLanguage: setContextLanguage } = useLanguage();
@@ -61,8 +60,6 @@ export const LocalizationSettingsCard: React.FC<LocalizationSettingsCardProps> =
     const activeProfile = getCountryProfile(selectedCountry);
     const isKenya = selectedCountry === 'KE';
 
-
-
     const handleSaveLocalization = async () => {
         if (!isCeo) {
             showToast('Only CEO or Super Admin can apply market localization changes.', 'error');
@@ -94,6 +91,7 @@ export const LocalizationSettingsCard: React.FC<LocalizationSettingsCardProps> =
         });
 
         setContextLanguage(cleanLang as 'en' | 'am' | 'or');
+        showToast(`Market localization updated for ${activeProfile.name}`, 'success');
     };
 
     const getFormattedDatePreview = (fmt: string) => {
@@ -110,79 +108,86 @@ export const LocalizationSettingsCard: React.FC<LocalizationSettingsCardProps> =
 
     return (
         <div className={cardBase}>
-            <div className="mb-6 pb-4 border-b border-[#E2DCCE]/60 dark:border-white/10 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-                <div>
-                    <h3 className="text-base font-black text-[#1E3F27] dark:text-[#EAE5D9] tracking-tight flex items-center gap-2">
-                        <Globe size={18} className="text-[#2C5E3B] dark:text-[#A9CBA2]" />
-                        Market Localization & Country System
-                    </h3>
-                    <p className="text-xs text-[#4D6E56] dark:text-[#7A9E83]">
-                        Isolated sovereign configurations for East African retail markets.
-                    </p>
+            <div className="flex items-center justify-between border-b border-[var(--theme-border)] pb-4 mb-5">
+                <div className="flex items-center gap-2.5">
+                    <div className="w-8 h-8 rounded-xl bg-blue-500/10 text-[#0071E3] dark:text-[#2997FF] flex items-center justify-center shrink-0">
+                        <Globe size={16} />
+                    </div>
+                    <div>
+                        <h3 className="text-sm font-semibold text-[var(--theme-text-primary)]">
+                            Market Localization & Country System
+                        </h3>
+                        <p className="text-[11px] text-[var(--theme-text-secondary)]">
+                            Isolated sovereign configuration for {activeProfile.name}.
+                        </p>
+                    </div>
                 </div>
-                <div className="flex items-center gap-1.5 self-start sm:self-auto px-3 py-1 bg-[#2C5E3B]/10 dark:bg-[#A9CBA2]/10 border border-[#2C5E3B]/20 dark:border-[#A9CBA2]/20 rounded-full">
-                    <span className="text-xs">{activeProfile.flag}</span>
-                    <span className="text-[11px] font-black text-[#1E3F27] dark:text-white uppercase tracking-wider font-mono">
-                        {activeProfile.code} Active
-                    </span>
-                </div>
+                <span className="text-[11px] font-semibold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-[var(--theme-bg-subtle)] text-[var(--theme-text-primary)] border border-[var(--theme-border)] font-mono">
+                    {activeProfile.code} Active
+                </span>
             </div>
 
-            <div className="space-y-6">
-                {/* 1. ACTIVE NATIONAL COUNTRY PROFILE */}
-                <div>
-                    <div className="flex items-center justify-between mb-2.5">
-                        <label className="text-xs text-stone-600 dark:text-gray-400 font-bold uppercase tracking-wider block">
-                            Operating Market & Fiscal Profile
-                        </label>
-                        <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20 flex items-center gap-1 font-mono">
-                            <ShieldCheck size={11} /> {activeProfile.name}
-                        </span>
-                    </div>
-                    <div className="p-4 rounded-2xl border-2 bg-[#2C5E3B]/5 dark:bg-[#A9CBA2]/5 border-[#2C5E3B] dark:border-[#A9CBA2] shadow-sm">
-                        <div className="flex items-start justify-between">
-                            <div className="flex items-center gap-3">
-                                <span className="text-3xl">{activeProfile.flag}</span>
-                                <div>
-                                    <h4 className="text-sm font-black text-[#1E3F27] dark:text-white">{activeProfile.name}</h4>
-                                    <p className="text-[11px] text-stone-500 dark:text-gray-400 font-mono truncate max-w-[280px]">{activeProfile.complianceStandard}</p>
-                                </div>
+            <div className="space-y-4">
+                {/* Fiscal Profile Summary Tile */}
+                <div className="p-4 rounded-xl border border-[var(--theme-border)] bg-[var(--theme-bg-subtle)] space-y-3">
+                    <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                            <span className="text-xs font-mono font-semibold px-2 py-0.5 rounded-md bg-[#0071E3]/15 text-[#0071E3] dark:text-[#2997FF]">
+                                {activeProfile.code}
+                            </span>
+                            <div>
+                                <h4 className="text-xs font-bold text-[var(--theme-text-primary)]">{activeProfile.name}</h4>
+                                <p className="text-[11px] text-[var(--theme-text-secondary)] font-mono truncate max-w-[260px]">{activeProfile.complianceStandard}</p>
                             </div>
-                            <CheckCircle2 size={18} className="text-[#2C5E3B] dark:text-[#A9CBA2]" />
                         </div>
-                        <div className="mt-3 pt-3 border-t border-[#E2DCCE]/50 dark:border-white/5 grid grid-cols-2 sm:grid-cols-4 gap-2 text-[10px] font-mono">
-                            <div><span className="opacity-60">Currency:</span> <strong className="text-[#1E3F27] dark:text-white">{activeProfile.currencySymbol} ({activeProfile.currencyCode})</strong></div>
-                            <div><span className="opacity-60">Tax:</span> <strong className="text-[#1E3F27] dark:text-white">{activeProfile.taxRate}% VAT ({activeProfile.taxIdLabel})</strong></div>
-                            <div><span className="opacity-60">Mobile:</span> <strong className="text-[#1E3F27] dark:text-white truncate block">{activeProfile.primaryMobileMoney.split('&')[0]}</strong></div>
-                            <div><span className="opacity-60">Languages:</span> <strong className="text-[#1E3F27] dark:text-white">{activeProfile.supportedLanguages.map(l => l.code.toUpperCase()).join(', ')}</strong></div>
+                        <CheckCircle2 size={16} className="text-emerald-500" />
+                    </div>
+
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-[11px] font-mono border-t border-[var(--theme-border)] pt-2.5">
+                        <div>
+                            <span className="text-[var(--theme-text-muted)] block">Currency:</span>
+                            <strong className="text-[var(--theme-text-primary)]">{activeProfile.currencySymbol} ({activeProfile.currencyCode})</strong>
+                        </div>
+                        <div>
+                            <span className="text-[var(--theme-text-muted)] block">Tax Standard:</span>
+                            <strong className="text-[var(--theme-text-primary)]">{activeProfile.taxRate}% VAT</strong>
+                        </div>
+                        <div>
+                            <span className="text-[var(--theme-text-muted)] block">Mobile Money:</span>
+                            <strong className="text-[var(--theme-text-primary)] truncate block">{activeProfile.primaryMobileMoney.split('&')[0]}</strong>
+                        </div>
+                        <div>
+                            <span className="text-[var(--theme-text-muted)] block">Languages:</span>
+                            <strong className="text-[var(--theme-text-primary)]">{activeProfile.supportedLanguages.map(l => l.code.toUpperCase()).join(', ')}</strong>
                         </div>
                     </div>
                 </div>
 
-                {/* 2. REGIONAL ADAPTIVE NOTICE */}
+                {/* Regional Adaptive Notice */}
                 {isKenya && (
-                    <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-start gap-3">
-                        <AlertCircle className="w-5 h-5 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
-                        <div className="text-xs text-stone-700 dark:text-stone-300">
-                            <strong className="font-bold text-amber-700 dark:text-amber-300 block mb-0.5">
+                    <div className="p-3.5 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-start gap-2.5">
+                        <AlertCircle className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
+                        <div className="text-[11px] text-[var(--theme-text-secondary)] leading-relaxed">
+                            <strong className="font-semibold text-amber-700 dark:text-amber-300 block mb-0.5">
                                 Kenya Localization Active:
                             </strong>
-                            Ethiopian regional languages (Amharic and Afaan Oromoo) are disabled. Primary mobile money tender is locked to M-Pesa. Standard KRA tax rate is 16%.
+                            Ethiopian regional languages are disabled. Primary tender locked to M-Pesa. Standard KRA tax rate is 16%.
                         </div>
                     </div>
                 )}
 
-                {/* 3. CORE FIELD CONTROLS */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {/* Core Field Controls */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
                     {/* Currency */}
-                    <div>
-                        <label className="text-xs text-stone-600 dark:text-gray-400 font-bold uppercase tracking-wider block mb-1.5 flex items-center gap-1.5">
-                            <DollarSign size={14} className="text-[#2C5E3B] dark:text-[#A9CBA2]" /> Base Currency
+                    <div className="space-y-1.5">
+                        <label className="text-[11px] text-[var(--theme-text-secondary)] font-semibold uppercase tracking-wider block flex items-center gap-1.5">
+                            <DollarSign size={13} className="text-[var(--theme-text-muted)]" /> Base Currency
                         </label>
                         <select
                             value={currency}
                             onChange={(e) => setCurrency(e.target.value)}
-                            className="w-full bg-[#FAF8F5] dark:bg-black/30 border border-[#E2DCCE] dark:border-white/10 rounded-xl px-3.5 py-2.5 text-xs text-[#1E3F27] dark:text-white font-bold outline-none focus:border-[#2C5E3B]"
+                            disabled={!isCeo}
+                            className="w-full h-10 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 text-xs text-[var(--theme-text-primary)] font-normal focus:outline-hidden focus:ring-2 focus:ring-[#0071E3]/40 dark:focus:ring-[#2997FF]/40 focus:border-[#0071E3] dark:focus:border-[#2997FF] transition-all disabled:opacity-50"
                         >
                             <option value="KSh">Kenyan Shilling (KSh)</option>
                             <option value="ETB">Ethiopian Birr (ETB)</option>
@@ -191,20 +196,21 @@ export const LocalizationSettingsCard: React.FC<LocalizationSettingsCardProps> =
                             <option value="TSh">Tanzanian Shilling (TSh)</option>
                             <option value="USD">US Dollar (USD)</option>
                         </select>
-                        <p className="text-[10px] text-stone-500 dark:text-gray-500 mt-1">
+                        <p className="text-[11px] text-[var(--theme-text-secondary)]">
                             Applied across POS catalog, sales reports, inventory valuations, and receipts.
                         </p>
                     </div>
 
                     {/* Timezone */}
-                    <div>
-                        <label className="text-xs text-stone-600 dark:text-gray-400 font-bold uppercase tracking-wider block mb-1.5 flex items-center gap-1.5">
-                            <Globe size={14} className="text-[#2C5E3B] dark:text-[#A9CBA2]" /> Timezone
+                    <div className="space-y-1.5">
+                        <label className="text-[11px] text-[var(--theme-text-secondary)] font-semibold uppercase tracking-wider block flex items-center gap-1.5">
+                            <Globe size={13} className="text-[var(--theme-text-muted)]" /> Timezone
                         </label>
                         <select
                             value={timezone}
                             onChange={(e) => setTimezone(e.target.value)}
-                            className="w-full bg-[#FAF8F5] dark:bg-black/30 border border-[#E2DCCE] dark:border-white/10 rounded-xl px-3.5 py-2.5 text-xs text-[#1E3F27] dark:text-white font-bold outline-none focus:border-[#2C5E3B]"
+                            disabled={!isCeo}
+                            className="w-full h-10 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 text-xs text-[var(--theme-text-primary)] font-normal focus:outline-hidden focus:ring-2 focus:ring-[#0071E3]/40 dark:focus:ring-[#2997FF]/40 focus:border-[#0071E3] dark:focus:border-[#2997FF] transition-all disabled:opacity-50"
                         >
                             <option value="Africa/Nairobi">East Africa Time - Nairobi (UTC+3)</option>
                             <option value="Africa/Addis_Ababa">East Africa Time - Addis Ababa (UTC+3)</option>
@@ -213,36 +219,34 @@ export const LocalizationSettingsCard: React.FC<LocalizationSettingsCardProps> =
                             <option value="Africa/Dar_es_Salaam">East Africa Time - Dar es Salaam (UTC+3)</option>
                             <option value="UTC">Universal Coordinated Time (UTC)</option>
                         </select>
-                        <p className="text-[10px] text-stone-500 dark:text-gray-500 mt-1">
+                        <p className="text-[11px] text-[var(--theme-text-secondary)]">
                             Used for timestamps in audit logs, shifts, receipts, and order tracking.
                         </p>
                     </div>
 
                     {/* System Language */}
-                    <div>
-                        <div className="flex items-center justify-between mb-1.5">
-                            <label className="text-xs text-stone-600 dark:text-gray-400 font-bold uppercase tracking-wider">
+                    <div className="space-y-1.5">
+                        <div className="flex items-center justify-between">
+                            <label className="text-[11px] text-[var(--theme-text-secondary)] font-semibold uppercase tracking-wider">
                                 System Language
                             </label>
                             {isKenya && (
-                                <span className="text-[9px] font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded-full border border-amber-500/20">
-                                    Ethiopian Dialects Disabled
+                                <span className="text-[11px] font-semibold uppercase tracking-wider text-amber-600 dark:text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded-full border border-amber-500/20">
+                                    English Standard
                                 </span>
                             )}
                         </div>
                         <select
                             value={language}
-                            disabled={isKenya}
+                            disabled={isKenya || !isCeo}
                             onChange={(e) => setLanguage(e.target.value)}
-                            className={`w-full bg-[#FAF8F5] dark:bg-black/30 border border-[#E2DCCE] dark:border-white/10 rounded-xl px-3.5 py-2.5 text-xs text-[#1E3F27] dark:text-white font-bold outline-none ${
-                                isKenya ? 'opacity-70 cursor-not-allowed' : 'focus:border-[#2C5E3B]'
-                            }`}
+                            className="w-full h-10 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 text-xs text-[var(--theme-text-primary)] font-normal focus:outline-hidden focus:ring-2 focus:ring-[#0071E3]/40 dark:focus:ring-[#2997FF]/40 focus:border-[#0071E3] dark:focus:border-[#2997FF] transition-all disabled:opacity-50"
                         >
                             <option value="en">English (Official System Language)</option>
                             {!isKenya && <option value="am">አማርኛ (Amharic)</option>}
                             {!isKenya && <option value="or">Afaan Oromoo (Oromo)</option>}
                         </select>
-                        <p className="text-[10px] text-stone-500 dark:text-gray-500 mt-1">
+                        <p className="text-[11px] text-[var(--theme-text-secondary)]">
                             {isKenya
                                 ? 'Kenya operations are standardized in English.'
                                 : 'Select default language for terminals, navigation, and receipts.'}
@@ -250,25 +254,26 @@ export const LocalizationSettingsCard: React.FC<LocalizationSettingsCardProps> =
                     </div>
 
                     {/* Date Format */}
-                    <div>
-                        <div className="flex justify-between items-center mb-1.5">
-                            <label className="text-xs text-stone-600 dark:text-gray-400 font-bold uppercase tracking-wider flex items-center gap-1.5">
-                                <Calendar size={14} className="text-[#2C5E3B] dark:text-[#A9CBA2]" /> Date Format
+                    <div className="space-y-1.5">
+                        <div className="flex justify-between items-center">
+                            <label className="text-[11px] text-[var(--theme-text-secondary)] font-semibold uppercase tracking-wider flex items-center gap-1.5">
+                                <Calendar size={13} className="text-[var(--theme-text-muted)]" /> Date Format
                             </label>
-                            <span className="text-[10px] bg-emerald-50 dark:bg-[#2C5E3B]/20 text-emerald-800 dark:text-[#A9CBA2] border border-emerald-200 dark:border-emerald-950/30 px-2 py-0.5 rounded-md font-mono font-bold">
+                            <span className="text-[11px] bg-[var(--theme-bg-subtle)] text-[var(--theme-text-primary)] border border-[var(--theme-border)] px-2 py-0.5 rounded-full font-mono font-semibold">
                                 {getFormattedDatePreview(dateFormat)}
                             </span>
                         </div>
-                        <div className="grid grid-cols-3 gap-2">
+                        <div className="bg-[var(--theme-bg-subtle)] p-1 rounded-xl border border-[var(--theme-border)] grid grid-cols-3 gap-1">
                             {(['DD/MM/YYYY', 'MM/DD/YYYY', 'YYYY-MM-DD'] as const).map(fmt => (
                                 <button
                                     key={fmt}
                                     type="button"
+                                    disabled={!isCeo}
                                     onClick={() => setDateFormat(fmt)}
-                                    className={`min-h-[44px] py-2.5 rounded-xl text-xs font-bold transition-colors border cursor-pointer ${
+                                    className={`h-8 rounded-lg text-xs font-medium transition-all cursor-pointer disabled:opacity-50 ${
                                         dateFormat === fmt
-                                            ? 'bg-[#2C5E3B] text-white border-[#2C5E3B] shadow-sm'
-                                            : 'bg-white dark:bg-black/20 text-stone-600 dark:text-gray-400 border-[#E2DCCE] dark:border-white/10 hover:border-[#2C5E3B]/30'
+                                            ? 'bg-[#0071E3] dark:bg-[#2997FF] text-white shadow-xs font-semibold'
+                                            : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-card)]'
                                     }`}
                                 >
                                     {fmt}
@@ -278,54 +283,20 @@ export const LocalizationSettingsCard: React.FC<LocalizationSettingsCardProps> =
                     </div>
                 </div>
 
-                {/* 4. LIVE REGIONAL PREVIEW DECK */}
-                <div className="p-4 rounded-2xl bg-stone-50 dark:bg-black/30 border border-[#E2DCCE] dark:border-white/10">
-                    <h5 className="text-xs font-black uppercase tracking-wider text-stone-500 dark:text-gray-400 mb-3 flex items-center gap-2">
-                        <ShieldCheck size={14} className="text-[#2C5E3B] dark:text-[#A9CBA2]" />
-                        Active Market Configuration Summary ({activeProfile.name})
-                    </h5>
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
-                        <div className="p-2.5 rounded-xl bg-white dark:bg-black/40 border border-[#E2DCCE]/60 dark:border-white/5">
-                            <span className="text-[9px] uppercase tracking-wider text-stone-400 font-bold block mb-0.5">Sample Price</span>
-                            <span className="font-mono font-black text-[#1E3F27] dark:text-white text-sm">
-                                {activeProfile.currencySymbol} 2,499.00
-                            </span>
-                        </div>
-                        <div className="p-2.5 rounded-xl bg-white dark:bg-black/40 border border-[#E2DCCE]/60 dark:border-white/5">
-                            <span className="text-[9px] uppercase tracking-wider text-stone-400 font-bold block mb-0.5">Tax Standard</span>
-                            <span className="font-mono font-bold text-[#1E3F27] dark:text-white">
-                                {activeProfile.taxRate}% ({activeProfile.taxIdLabel})
-                            </span>
-                        </div>
-                        <div className="p-2.5 rounded-xl bg-white dark:bg-black/40 border border-[#E2DCCE]/60 dark:border-white/5">
-                            <span className="text-[9px] uppercase tracking-wider text-stone-400 font-bold block mb-0.5">Tax ID Format</span>
-                            <span className="font-mono font-bold text-[#1E3F27] dark:text-white">
-                                {activeProfile.taxIdLabel} ({activeProfile.taxIdPlaceholder})
-                            </span>
-                        </div>
-                        <div className="p-2.5 rounded-xl bg-white dark:bg-black/40 border border-[#E2DCCE]/60 dark:border-white/5">
-                            <span className="text-[9px] uppercase tracking-wider text-stone-400 font-bold block mb-0.5">Mobile Money</span>
-                            <span className="font-mono font-bold text-[#00A859] truncate block">
-                                {activeProfile.primaryMobileMoney.split('&')[0]}
-                            </span>
-                        </div>
-                    </div>
-                </div>
-
-                {/* SAVE BUTTON */}
-                <div className="pt-2 flex justify-end">
+                {/* Save Button */}
+                <div className="pt-3 border-t border-[var(--theme-border)] flex justify-end">
                     <button
                         type="button"
                         onClick={handleSaveLocalization}
                         disabled={isSaving || !isCeo}
-                        className="min-h-[44px] px-6 py-2.5 bg-[#2C5E3B] hover:opacity-90 text-white font-bold rounded-xl text-xs uppercase tracking-wider flex items-center gap-2 shadow-md cursor-pointer transition-opacity disabled:opacity-50"
+                        className="h-10 px-5 bg-[#0071E3] dark:bg-[#2997FF] hover:opacity-95 text-white font-semibold rounded-xl text-xs flex items-center gap-2 shadow-[0_2px_8px_rgba(0,113,227,0.25)] transition-all active:scale-[0.98] cursor-pointer disabled:opacity-50"
                     >
                         {isSaving ? (
-                            <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                            <span className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                         ) : (
                             <Save size={14} />
                         )}
-                        Apply & Save Localization ({selectedCountry})
+                        <span>Apply & Save Localization</span>
                     </button>
                 </div>
             </div>

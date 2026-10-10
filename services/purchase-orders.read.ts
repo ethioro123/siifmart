@@ -11,7 +11,7 @@ import { getEffectiveCountry, getCountryProfile } from '../utils/localization';
 // getAll
 // ============================================================================
 
-export async function getAll(siteId?: string, limit: number = 500, offset: number = 0, filters?: any) {
+export async function getAll(siteId?: string, limit: number = 25, offset: number = 0, filters?: any) {
     let query = supabase
         .from('purchase_orders')
         .select('*, po_items(*, products(sku))', { count: 'exact' });
@@ -100,15 +100,24 @@ export async function getAll(siteId?: string, limit: number = 500, offset: numbe
     if (error) throw error;
 
     const mappedData = (data || []).map((p: any) => {
-        // Parse approval info from notes (stored as [APPROVED_BY:name:date] tag)
-        let approvedBy = null;
-        let approvedAt = null;
+        // Resolve approval info from DB columns or notes tag [APPROVED_BY:name:date]
+        let approvedBy = p.approved_by
+            ? (p.approver_role ? `${p.approved_by} (${p.approver_role})` : p.approved_by)
+            : null;
+        let approvedAt = p.approved_at || null;
         let notes = p.notes;
 
         const approvalMatch = p.notes ? p.notes.match(/\[APPROVED_BY:(.*?):(.*?)]/) : null;
         if (approvalMatch) {
-            approvedBy = approvalMatch[1];
-            approvedAt = approvalMatch[2];
+            if (!approvedBy || approvalMatch[1].includes('(')) {
+                approvedBy = approvalMatch[1].trim();
+            }
+            if (!approvedAt) {
+                approvedAt = approvalMatch[2].replace(/\s+REASON:.*$/i, '').trim();
+            }
+        }
+        if (typeof approvedAt === 'string' && approvedAt.includes(' REASON:')) {
+            approvedAt = approvedAt.replace(/\s+REASON:.*$/i, '').trim();
         }
 
         // Reverse map status: Pending without approval = Draft
@@ -220,15 +229,24 @@ export async function getById(id: string) {
 
     if (!data) return null;
 
-    // Parse approval info from notes (stored as [APPROVED_BY:name:date] tag)
-    let approvedBy = null;
-    let approvedAt = null;
+    // Resolve approval info from DB columns or notes tag [APPROVED_BY:name:date]
+    let approvedBy = data.approved_by
+        ? (data.approver_role ? `${data.approved_by} (${data.approver_role})` : data.approved_by)
+        : null;
+    let approvedAt = data.approved_at || null;
     let notes = data.notes;
 
     const approvalMatch = data.notes ? data.notes.match(/\[APPROVED_BY:(.*?):(.*?)]/) : null;
     if (approvalMatch) {
-        approvedBy = approvalMatch[1];
-        approvedAt = approvalMatch[2];
+        if (!approvedBy || approvalMatch[1].includes('(')) {
+            approvedBy = approvalMatch[1].trim();
+        }
+        if (!approvedAt) {
+            approvedAt = approvalMatch[2].replace(/\s+REASON:.*$/i, '').trim();
+        }
+    }
+    if (typeof approvedAt === 'string' && approvedAt.includes(' REASON:')) {
+        approvedAt = approvedAt.replace(/\s+REASON:.*$/i, '').trim();
     }
 
     // Reverse map status: Pending without approval = Draft

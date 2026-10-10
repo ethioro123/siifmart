@@ -1,29 +1,40 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { 
-    AlertTriangle, ShieldAlert, Plus, Scale, CheckCircle2, 
-    XCircle, Clock, FileText, User
+    Scale, AlertTriangle, Plus, Search, Filter, Clock, 
+    CheckCircle2, XCircle, Eye, ShieldAlert, FileText, ArrowRight
 } from 'lucide-react';
 import { disciplinaryService } from '../../../services/disciplinary.service';
 import type { DisciplinaryRecord, DisciplinaryType, DisciplinarySeverity } from '../../../types/hr-advanced';
 import { useStore } from '../../../contexts/CentralStore';
 import { useData } from '../../../contexts/DataContext';
+import { DisciplinaryKPIs } from './DisciplinaryKPIs';
+import { IssueNoticeModal } from './IssueNoticeModal';
+import { AppealModal } from './AppealModal';
+import { DisciplinaryDetailModal } from './DisciplinaryDetailModal';
+
+const ADJUDICATION_ROLES = [
+    'super_admin', 'admin', 'CEO', 'ceo', 'hr_manager', 'hr', 'regional_manager'
+];
 
 export default function DisciplinaryRegisterTab() {
     const { user, showToast } = useStore();
-    const { effectiveCountry, employees } = useData();
+    const { effectiveCountry, employees, activeSite } = useData();
     const country = effectiveCountry || 'ET';
 
     const [records, setRecords] = useState<DisciplinaryRecord[]>([]);
     const [isLoading, setIsLoading] = useState(false);
-    const [isNoticeModalOpen, setIsNoticeModalOpen] = useState(false);
 
-    // Notice form states
-    const [targetEmpId, setTargetEmpId] = useState('');
-    const [recordType, setRecordType] = useState<DisciplinaryType>('Written Warning');
-    const [severity, setSeverity] = useState<DisciplinarySeverity>('Medium');
-    const [title, setTitle] = useState('');
-    const [description, setDescription] = useState('');
-    const [actionTaken, setActionTaken] = useState('');
+    // Filters
+    const [searchTerm, setSearchTerm] = useState('');
+    const [filterSeverity, setFilterSeverity] = useState('All');
+    const [filterType, setFilterType] = useState('All');
+    const [filterStatus, setFilterStatus] = useState('All');
+
+    // Modals
+    const [isNoticeModalOpen, setIsNoticeModalOpen] = useState(false);
+    const [isAppealModalOpen, setIsAppealModalOpen] = useState(false);
+    const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+    const [selectedRecord, setSelectedRecord] = useState<DisciplinaryRecord | null>(null);
 
     const loadRecords = async () => {
         setIsLoading(true);
@@ -31,7 +42,7 @@ export default function DisciplinaryRegisterTab() {
             const data = await disciplinaryService.fetchDisciplinaryRecords(country);
             setRecords(data);
         } catch {
-            // Handled
+            // Handled safely
         } finally {
             setIsLoading(false);
         }
@@ -41,277 +52,378 @@ export default function DisciplinaryRegisterTab() {
         loadRecords();
     }, [country]);
 
-    const handleIssueNotice = async (e: React.FormEvent) => {
-        e.preventDefault();
-        const emp = employees.find(e => e.id === targetEmpId);
-        if (!emp) {
-            showToast('Please select a target employee', 'warning');
-            return;
-        }
-
-        try {
-            await disciplinaryService.issueDisciplinaryNotice({
-                country_code: country,
-                employee_id: emp.id,
-                employee_name: emp.name,
-                record_type: recordType,
-                severity,
-                title,
-                description,
-                action_taken: actionTaken,
-                issued_by: user?.name || 'Supervisory Manager',
-                issued_by_role: user?.role || 'store_manager'
-            });
-            showToast(`Disciplinary notice issued to ${emp.name}`, 'success');
-            setIsNoticeModalOpen(false);
-            setTitle('');
-            setDescription('');
-            setActionTaken('');
-            loadRecords();
-        } catch {
-            showToast('Failed to issue notice', 'error');
-        }
-    };
+    const canAdjudicate = useMemo(() => {
+        return ADJUDICATION_ROLES.includes(user?.role || '');
+    }, [user?.role]);
 
     const handleResolveAppeal = async (recordId: string, resolution: 'Upheld' | 'Overturned') => {
         try {
-            await disciplinaryService.resolveAppeal(recordId, resolution, {
-                id: user?.id || 'hr_dir',
-                name: user?.name || 'HR Director',
-                role: user?.role || 'hr_manager'
-            });
-            showToast(`Appeal has been ${resolution.toLowerCase()}`, 'info');
+            await disciplinaryService.resolveAppeal(
+                recordId, 
+                resolution, 
+                {
+                    id: user?.id || 'hr_dir',
+                    name: user?.name || 'HR Officer',
+                    role: user?.role || 'hr_manager'
+                }
+            );
+            showToast(`Appeal has been ${resolution.toLowerCase()} successfully`, 'info');
             loadRecords();
         } catch (err: any) {
-            showToast(err.message || 'Adjudication rejected under 4-Eyes rule', 'error');
+            showToast(err.message || 'Adjudication rejected under Maker-Checker rule', 'error');
         }
     };
 
+    const handleOpenFileAppeal = (rec: DisciplinaryRecord) => {
+        setSelectedRecord(rec);
+        setIsAppealModalOpen(true);
+    };
+
+    const handleOpenDetail = (rec: DisciplinaryRecord) => {
+        setSelectedRecord(rec);
+        setIsDetailModalOpen(true);
+    };
+
+    const filteredRecords = useMemo(() => {
+        return records.filter(rec => {
+            const matchesSearch = 
+                rec.employee_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                rec.employee_id.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                rec.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                rec.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                rec.action_taken.toLowerCase().includes(searchTerm.toLowerCase());
+
+            const matchesSeverity = filterSeverity === 'All' || rec.severity === filterSeverity;
+            const matchesType = filterType === 'All' || rec.record_type === filterType;
+
+            let matchesStatus = true;
+            if (filterStatus === 'Active') {
+                matchesStatus = rec.appeal_status !== 'Overturned';
+            } else if (filterStatus !== 'All') {
+                matchesStatus = rec.appeal_status === filterStatus;
+            }
+
+            return matchesSearch && matchesSeverity && matchesType && matchesStatus;
+        });
+    }, [records, searchTerm, filterSeverity, filterType, filterStatus]);
+
     return (
-        <div className="space-y-6 animate-in fade-in">
-            {/* Header */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-6 bg-white/80 dark:bg-black/30 rounded-3xl border border-[#E2DCCE] dark:border-white/10 shadow-xs">
+        <div className="space-y-5 sm:space-y-6 animate-in fade-in">
+            {/* Header Banner */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 sm:p-5 bg-[var(--theme-bg-card)] rounded-2xl border border-[var(--theme-border)] shadow-[var(--shadow-sm)]">
                 <div className="flex items-center gap-3">
-                    <div className="p-3 bg-red-500/10 rounded-2xl text-red-600 dark:text-red-400">
-                        <Scale size={24} />
+                    <div className="w-10 h-10 rounded-2xl bg-blue-500/10 text-[#0071E3] dark:text-[#2997FF] flex items-center justify-center shrink-0">
+                        <Scale size={20} />
                     </div>
                     <div>
-                        <h3 className="text-base font-black text-[#1E3F27] dark:text-[#EAE5D9]">
+                        <h3 className="text-base font-semibold tracking-tight text-[var(--theme-text-primary)]">
                             Disciplinary & Grievance Register
                         </h3>
-                        <p className="text-xs text-stone-500 font-medium">
-                            Formal policy warnings, misconduct investigations, and independent 4-Eyes appeals
+                        <p className="text-xs text-[var(--theme-text-secondary)] mt-0.5">
+                            Dual-control compliance, formal misconduct hearings, and independent 4-Eyes appeals ({country})
                         </p>
                     </div>
                 </div>
 
-                <button
-                    onClick={() => setIsNoticeModalOpen(true)}
-                    className="woody-btn-primary px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 cursor-pointer shadow-xs self-start sm:self-auto"
-                >
-                    <Plus size={15} />
-                    <span>Issue Disciplinary Notice</span>
-                </button>
+                <div className="flex items-center gap-2.5">
+                    <button
+                        type="button"
+                        onClick={() => setIsNoticeModalOpen(true)}
+                        className="h-10 px-4 rounded-xl bg-[#0071E3] dark:bg-[#2997FF] hover:opacity-95 text-white text-xs sm:text-sm font-semibold flex items-center gap-1.5 shadow-[0_2px_8px_rgba(0,113,227,0.25)] active:scale-[0.98] transition-all cursor-pointer"
+                    >
+                        <Plus size={15} />
+                        <span>Issue Disciplinary Notice</span>
+                    </button>
+                </div>
             </div>
 
-            {/* Records List */}
-            {records.length === 0 ? (
-                <div className="text-center py-12 bg-white/80 dark:bg-black/20 rounded-3xl border border-dashed border-[#E2DCCE] dark:border-white/10 space-y-2">
-                    <CheckCircle2 size={36} className="mx-auto text-emerald-500" />
-                    <p className="font-bold text-sm text-[#1E3F27] dark:text-[#EAE5D9]">
-                        Zero Active Disciplinary Notices
-                    </p>
-                    <p className="text-xs text-stone-400">
-                        No active warnings or grievances recorded for {country} operations.
-                    </p>
+            {/* KPI Ribbon */}
+            <DisciplinaryKPIs records={records} />
+
+            {/* Filter Bar */}
+            <div className="p-4 bg-[var(--theme-bg-card)] rounded-2xl border border-[var(--theme-border)] shadow-[var(--shadow-sm)] space-y-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5">
+                    {/* Search */}
+                    <div className="relative">
+                        <Search size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--theme-text-secondary)]" />
+                        <input
+                            type="text"
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            placeholder="Search employee, ID, title..."
+                            className="w-full pl-9 pr-3.5 py-2 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl text-xs text-[var(--theme-text-primary)] placeholder:text-[var(--theme-text-secondary)] focus:outline-hidden focus:border-[#0071E3]"
+                        />
+                    </div>
+
+                    {/* Severity Filter */}
+                    <select
+                        value={filterSeverity}
+                        onChange={(e) => setFilterSeverity(e.target.value)}
+                        className="px-3 py-2 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl text-xs text-[var(--theme-text-primary)] focus:outline-hidden focus:border-[#0071E3]"
+                    >
+                        <option value="All">All Severities</option>
+                        <option value="Critical">Critical Severity</option>
+                        <option value="High">High Severity</option>
+                        <option value="Medium">Medium Severity</option>
+                        <option value="Low">Low Severity</option>
+                    </select>
+
+                    {/* Type Filter */}
+                    <select
+                        value={filterType}
+                        onChange={(e) => setFilterType(e.target.value)}
+                        className="px-3 py-2 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl text-xs text-[var(--theme-text-primary)] focus:outline-hidden focus:border-[#0071E3]"
+                    >
+                        <option value="All">All Notice Types</option>
+                        <option value="Verbal Warning">Verbal Warning</option>
+                        <option value="Written Warning">Written Warning</option>
+                        <option value="Final Warning">Final Warning</option>
+                        <option value="Suspension">Suspension</option>
+                        <option value="Formal Investigation">Formal Investigation</option>
+                        <option value="Grievance">Grievance</option>
+                    </select>
+
+                    {/* Status Filter */}
+                    <select
+                        value={filterStatus}
+                        onChange={(e) => setFilterStatus(e.target.value)}
+                        className="px-3 py-2 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl text-xs text-[var(--theme-text-primary)] focus:outline-hidden focus:border-[#0071E3]"
+                    >
+                        <option value="All">All Appeal Statuses</option>
+                        <option value="Pending Appeal">Pending Appeal</option>
+                        <option value="None">No Appeal (Standard)</option>
+                        <option value="Upheld">Sanction Upheld</option>
+                        <option value="Overturned">Warning Overturned</option>
+                    </select>
                 </div>
-            ) : (
+            </div>
+
+            {/* Records List / States */}
+            {isLoading ? (
                 <div className="space-y-3">
-                    {records.map(rec => (
-                        <div
-                            key={rec.id}
-                            className="p-5 bg-white/80 dark:bg-black/30 rounded-2xl border border-[#E2DCCE] dark:border-white/10 space-y-3 shadow-2xs"
-                        >
-                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-stone-100 dark:border-white/5 pb-3">
-                                <div>
-                                    <div className="flex items-center gap-2">
-                                        <h4 className="font-bold text-sm text-[#1E3F27] dark:text-[#EAE5D9]">
-                                            {rec.title}
-                                        </h4>
-                                        <span className={`text-[10px] font-black uppercase px-2 py-0.5 rounded-lg border ${
-                                            rec.severity === 'Critical' || rec.severity === 'High'
-                                                ? 'bg-red-50 text-red-800 border-red-200'
-                                                : 'bg-amber-50 text-amber-800 border-amber-200'
-                                        }`}>
-                                            {rec.severity} Severity
-                                        </span>
-                                    </div>
-                                    <p className="text-xs text-stone-500 font-medium mt-0.5">
-                                        Issued to: <strong className="text-stone-800 dark:text-stone-200">{rec.employee_name}</strong> ({rec.employee_id}) • {rec.record_type}
-                                    </p>
-                                </div>
-
-                                <div className="flex items-center gap-2">
-                                    <span className="text-[11px] font-mono text-stone-400">
-                                        Issued: {rec.issued_at ? new Date(rec.issued_at).toLocaleDateString() : 'Recent'}
-                                    </span>
-                                    {rec.appeal_status === 'Pending Appeal' && (
-                                        <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded-lg bg-purple-50 text-purple-800 border border-purple-200">
-                                            Appeal Pending
-                                        </span>
-                                    )}
-                                </div>
-                            </div>
-
-                            <p className="text-xs text-stone-600 dark:text-stone-300">
-                                {rec.description}
-                            </p>
-
-                            <div className="p-3 bg-stone-50 dark:bg-black/40 rounded-xl text-xs flex items-center justify-between">
-                                <span className="font-medium text-stone-600 dark:text-stone-400">
-                                    Action: <strong>{rec.action_taken}</strong>
-                                </span>
-                                <span className="text-stone-400 text-[11px]">
-                                    Issued by: {rec.issued_by} ({rec.issued_by_role})
-                                </span>
-                            </div>
-
-                            {/* Appeal Resolution Controls */}
-                            {rec.appeal_status === 'Pending Appeal' && user?.role === 'hr_manager' && (
-                                <div className="flex items-center justify-end gap-2 pt-1">
-                                    <button
-                                        onClick={() => handleResolveAppeal(rec.id, 'Overturned')}
-                                        className="px-3 py-1.5 rounded-xl text-xs font-bold text-stone-600 hover:bg-stone-100 dark:hover:bg-white/5 border border-stone-200 cursor-pointer"
-                                    >
-                                        Overturn Warning
-                                    </button>
-                                    <button
-                                        onClick={() => handleResolveAppeal(rec.id, 'Upheld')}
-                                        className="woody-btn-primary px-3 py-1.5 rounded-xl text-xs font-bold cursor-pointer"
-                                    >
-                                        Uphold Sanction
-                                    </button>
-                                </div>
-                            )}
+                    {[1, 2, 3].map(n => (
+                        <div key={n} className="p-5 rounded-2xl bg-[var(--theme-bg-card)] border border-[var(--theme-border)] animate-pulse space-y-3">
+                            <div className="h-4 bg-[var(--theme-bg-subtle)] rounded-md w-1/3" />
+                            <div className="h-3 bg-[var(--theme-bg-subtle)] rounded-md w-2/3" />
+                            <div className="h-8 bg-[var(--theme-bg-subtle)] rounded-lg w-full" />
                         </div>
                     ))}
                 </div>
-            )}
-
-            {/* Notice Modal */}
-            {isNoticeModalOpen && (
-                <div className="fixed inset-0 bg-black/50 backdrop-blur-xs flex items-center justify-center z-50 p-4">
-                    <form onSubmit={handleIssueNotice} className="bg-white dark:bg-[#18201B] rounded-3xl border border-[#E2DCCE] dark:border-white/10 p-6 max-w-lg w-full space-y-4">
-                        <div className="flex items-center gap-2 pb-2 border-b border-stone-100 dark:border-white/5">
-                            <AlertTriangle className="text-amber-500" size={20} />
-                            <h4 className="font-black text-sm text-[#1E3F27] dark:text-[#EAE5D9]">
-                                Issue Formal Disciplinary Notice
-                            </h4>
-                        </div>
-
-                        <div className="space-y-1">
-                            <label className="text-xs font-bold text-stone-700 dark:text-stone-300">Target Personnel</label>
-                            <select
-                                value={targetEmpId}
-                                onChange={(e) => setTargetEmpId(e.target.value)}
-                                required
-                                className="w-full px-3 py-2 bg-stone-50 dark:bg-black/30 border border-stone-200 dark:border-white/10 rounded-xl text-xs font-bold"
-                            >
-                                <option value="">Select Employee...</option>
-                                {employees.map(emp => (
-                                    <option key={emp.id} value={emp.id}>
-                                        {emp.name} ({emp.code || emp.id}) - {emp.role}
-                                    </option>
-                                ))}
-                            </select>
-                        </div>
-
-                        <div className="grid grid-cols-2 gap-3">
-                            <div className="space-y-1">
-                                <label className="text-xs font-bold text-stone-700 dark:text-stone-300">Notice Type</label>
-                                <select
-                                    value={recordType}
-                                    onChange={(e) => setRecordType(e.target.value as DisciplinaryType)}
-                                    className="w-full px-3 py-2 bg-stone-50 dark:bg-black/30 border border-stone-200 dark:border-white/10 rounded-xl text-xs"
-                                >
-                                    <option value="Verbal Warning">Verbal Warning</option>
-                                    <option value="Written Warning">Written Warning</option>
-                                    <option value="Final Warning">Final Warning</option>
-                                    <option value="Suspension">Suspension</option>
-                                    <option value="Formal Investigation">Formal Investigation</option>
-                                    <option value="Grievance">Grievance</option>
-                                </select>
-                            </div>
-
-                            <div className="space-y-1">
-                                <label className="text-xs font-bold text-stone-700 dark:text-stone-300">Severity</label>
-                                <select
-                                    value={severity}
-                                    onChange={(e) => setSeverity(e.target.value as DisciplinarySeverity)}
-                                    className="w-full px-3 py-2 bg-stone-50 dark:bg-black/30 border border-stone-200 dark:border-white/10 rounded-xl text-xs"
-                                >
-                                    <option value="Low">Low</option>
-                                    <option value="Medium">Medium</option>
-                                    <option value="High">High</option>
-                                    <option value="Critical">Critical</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <div className="space-y-1">
-                            <label className="text-xs font-bold text-stone-700 dark:text-stone-300">Incident Subject / Title</label>
-                            <input
-                                type="text"
-                                value={title}
-                                onChange={(e) => setTitle(e.target.value)}
-                                placeholder="e.g. Unexplained Cash Discrepancy at POS Till 2"
-                                required
-                                className="w-full px-3 py-2 bg-stone-50 dark:bg-black/30 border border-stone-200 dark:border-white/10 rounded-xl text-xs"
-                            />
-                        </div>
-
-                        <div className="space-y-1">
-                            <label className="text-xs font-bold text-stone-700 dark:text-stone-300">Description & Evidence</label>
-                            <textarea
-                                value={description}
-                                onChange={(e) => setDescription(e.target.value)}
-                                placeholder="Detail the documented facts, CCTV reviews, or witness statements..."
-                                rows={3}
-                                required
-                                className="w-full px-3 py-2 bg-stone-50 dark:bg-black/30 border border-stone-200 dark:border-white/10 rounded-xl text-xs resize-none"
-                            />
-                        </div>
-
-                        <div className="space-y-1">
-                            <label className="text-xs font-bold text-stone-700 dark:text-stone-300">Mandated Corrective Action</label>
-                            <input
-                                type="text"
-                                value={actionTaken}
-                                onChange={(e) => setActionTaken(e.target.value)}
-                                placeholder="e.g. Mandatory retraining on cash handling and 3-month probation"
-                                required
-                                className="w-full px-3 py-2 bg-stone-50 dark:bg-black/30 border border-stone-200 dark:border-white/10 rounded-xl text-xs"
-                            />
-                        </div>
-
-                        <div className="flex justify-end gap-2 pt-2 border-t border-stone-100 dark:border-white/5">
+            ) : filteredRecords.length === 0 ? (
+                <div className="text-center py-12 bg-[var(--theme-bg-card)] rounded-2xl border border-dashed border-[var(--theme-border)] space-y-2">
+                    {records.length === 0 ? (
+                        <>
+                            <CheckCircle2 size={36} className="mx-auto text-emerald-500" />
+                            <p className="font-bold text-sm text-[var(--theme-text-primary)]">
+                                Zero Active Disciplinary Notices
+                            </p>
+                            <p className="text-xs text-[var(--theme-text-secondary)]">
+                                No active warnings or grievances recorded for {country} operations.
+                            </p>
+                        </>
+                    ) : (
+                        <>
+                            <AlertTriangle size={36} className="mx-auto text-amber-500" />
+                            <p className="font-bold text-sm text-[var(--theme-text-primary)]">
+                                No Matching Records Found
+                            </p>
+                            <p className="text-xs text-[var(--theme-text-secondary)]">
+                                Try adjusting your search keyword or severity/type filters.
+                            </p>
                             <button
                                 type="button"
-                                onClick={() => setIsNoticeModalOpen(false)}
-                                className="px-4 py-2 rounded-xl text-xs font-bold text-stone-600 dark:text-stone-400"
+                                onClick={() => {
+                                    setSearchTerm('');
+                                    setFilterSeverity('All');
+                                    setFilterType('All');
+                                    setFilterStatus('All');
+                                }}
+                                className="mt-2 text-xs font-semibold text-[#0071E3] dark:text-[#2997FF] hover:underline cursor-pointer"
                             >
-                                Cancel
+                                Clear all filters
                             </button>
-                            <button
-                                type="submit"
-                                className="woody-btn-primary px-4 py-2 rounded-xl text-xs font-bold"
+                        </>
+                    )}
+                </div>
+            ) : (
+                <div className="space-y-3">
+                    {filteredRecords.map(rec => {
+                        const isIssuer = Boolean(
+                            (user?.id && rec.issued_by === user.id) ||
+                            (user?.name && rec.issued_by === user.name)
+                        );
+                        const isExpired = rec.expires_at ? new Date(rec.expires_at) < new Date() : false;
+
+                        return (
+                            <div
+                                key={rec.id}
+                                className="p-5 bg-[var(--theme-bg-card)] rounded-2xl border border-[var(--theme-border)] shadow-[var(--shadow-sm)] space-y-3 transition-all hover:border-[var(--theme-border-strong)]"
                             >
-                                Issue Formal Notice
-                            </button>
-                        </div>
-                    </form>
+                                {/* Top Header Row */}
+                                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-[var(--theme-border)] pb-3">
+                                    <div>
+                                        <div className="flex flex-wrap items-center gap-2">
+                                            <h4 className="font-bold text-sm text-[var(--theme-text-primary)]">
+                                                {rec.title}
+                                            </h4>
+                                            <span className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded-md ${
+                                                rec.severity === 'Critical'
+                                                    ? 'bg-red-500/15 text-red-600 dark:text-red-400 border border-red-500/30'
+                                                    : rec.severity === 'High'
+                                                    ? 'bg-orange-500/15 text-orange-600 dark:text-orange-400 border border-orange-500/30'
+                                                    : 'bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/30'
+                                            }`}>
+                                                {rec.severity} Severity
+                                            </span>
+                                            <span className="text-[10px] font-semibold px-2 py-0.5 rounded-md bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] border border-[var(--theme-border)]">
+                                                {rec.record_type}
+                                            </span>
+                                            {rec.site_id && (
+                                                <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)]">
+                                                    {rec.site_id}
+                                                </span>
+                                            )}
+                                        </div>
+
+                                        <p className="text-xs text-[var(--theme-text-secondary)] font-medium mt-1">
+                                            Personnel: <strong className="text-[var(--theme-text-primary)]">{rec.employee_name}</strong> ({rec.employee_id.slice(0, 8)})
+                                        </p>
+                                    </div>
+
+                                    <div className="flex items-center gap-2 self-start sm:self-auto">
+                                        <span className="text-[11px] font-mono text-[var(--theme-text-secondary)]">
+                                            {rec.issued_at ? new Date(rec.issued_at).toLocaleDateString() : 'Recent'}
+                                        </span>
+                                        {rec.appeal_status === 'Pending Appeal' && (
+                                            <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded-md bg-purple-500/15 text-purple-600 dark:text-purple-400 border border-purple-500/30 flex items-center gap-1 animate-pulse">
+                                                <Clock size={11} /> Appeal Pending
+                                            </span>
+                                        )}
+                                        {rec.appeal_status === 'Upheld' && (
+                                            <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded-md bg-red-500/15 text-red-600 dark:text-red-400 border border-red-500/30">
+                                                Sanction Upheld
+                                            </span>
+                                        )}
+                                        {rec.appeal_status === 'Overturned' && (
+                                            <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded-md bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30">
+                                                Overturned
+                                            </span>
+                                        )}
+                                    </div>
+                                </div>
+
+                                {/* Description */}
+                                <p className="text-xs text-[var(--theme-text-primary)] line-clamp-2 leading-relaxed">
+                                    {rec.description}
+                                </p>
+
+                                {/* Action Taken & Validity Banner */}
+                                <div className="p-3 bg-[var(--theme-bg-subtle)] rounded-xl text-xs flex flex-col sm:flex-row sm:items-center justify-between gap-2 border border-[var(--theme-border)]">
+                                    <span className="text-[var(--theme-text-primary)] font-medium">
+                                        Mandated Sanction: <strong className="text-[var(--theme-text-primary)]">{rec.action_taken}</strong>
+                                    </span>
+                                    <div className="flex items-center gap-3 text-[11px] text-[var(--theme-text-secondary)]">
+                                        {rec.expires_at && (
+                                            <span className={isExpired ? 'text-stone-400 line-through' : 'text-emerald-600 dark:text-emerald-400'}>
+                                                {isExpired ? `Expired (${rec.expires_at})` : `Expires: ${rec.expires_at}`}
+                                            </span>
+                                        )}
+                                        <span>Issued by: {rec.issued_by} ({rec.issued_by_role})</span>
+                                    </div>
+                                </div>
+
+                                {/* Controls Row */}
+                                <div className="flex flex-wrap items-center justify-between gap-2 pt-1 border-t border-[var(--theme-border)]">
+                                    <button
+                                        type="button"
+                                        onClick={() => handleOpenDetail(rec)}
+                                        className="h-8 px-3 rounded-xl text-xs font-semibold text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-subtle)] flex items-center gap-1.5 transition-colors cursor-pointer"
+                                    >
+                                        <Eye size={13} />
+                                        <span>View Case File</span>
+                                    </button>
+
+                                    <div className="flex items-center gap-2">
+                                        {/* Appeal Trigger Button */}
+                                        {rec.appeal_status === 'None' && (
+                                            <button
+                                                type="button"
+                                                onClick={() => handleOpenFileAppeal(rec)}
+                                                className="h-8 px-3 rounded-xl text-xs font-semibold text-purple-600 dark:text-purple-400 hover:bg-purple-500/10 border border-purple-500/30 transition-all cursor-pointer"
+                                            >
+                                                File Appeal
+                                            </button>
+                                        )}
+
+                                        {/* 4-Eyes Adjudication Controls */}
+                                        {rec.appeal_status === 'Pending Appeal' && canAdjudicate && (
+                                            <>
+                                                {isIssuer ? (
+                                                    <span className="text-[11px] text-amber-500 font-semibold px-2">
+                                                        4-Eyes rule: Issuer cannot resolve
+                                                    </span>
+                                                ) : (
+                                                    <>
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => handleResolveAppeal(rec.id, 'Overturned')}
+                                                            className="h-8 px-3 rounded-xl text-xs font-semibold text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/10 border border-emerald-500/30 transition-all cursor-pointer"
+                                                        >
+                                                            Overturn Warning
+                                                        </button>
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => handleResolveAppeal(rec.id, 'Upheld')}
+                                                            className="h-8 px-3 rounded-xl text-xs font-semibold text-white bg-red-600 hover:bg-red-700 shadow-xs transition-all cursor-pointer"
+                                                        >
+                                                            Uphold Sanction
+                                                        </button>
+                                                    </>
+                                                )}
+                                            </>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+                        );
+                    })}
                 </div>
             )}
+
+            {/* Modals */}
+            <IssueNoticeModal
+                isOpen={isNoticeModalOpen}
+                onClose={() => setIsNoticeModalOpen(false)}
+                onSuccess={loadRecords}
+                country={country}
+                employees={employees}
+            />
+
+            <AppealModal
+                isOpen={isAppealModalOpen}
+                onClose={() => {
+                    setIsAppealModalOpen(false);
+                    setSelectedRecord(null);
+                }}
+                onSuccess={loadRecords}
+                record={selectedRecord}
+            />
+
+            <DisciplinaryDetailModal
+                isOpen={isDetailModalOpen}
+                onClose={() => {
+                    setIsDetailModalOpen(false);
+                    setSelectedRecord(null);
+                }}
+                record={selectedRecord}
+                onResolveAppeal={handleResolveAppeal}
+                canAdjudicate={canAdjudicate}
+                isIssuer={Boolean(
+                    (user?.id && selectedRecord?.issued_by === user.id) ||
+                    (user?.name && selectedRecord?.issued_by === user.name)
+                )}
+                onOpenFileAppeal={handleOpenFileAppeal}
+            />
         </div>
     );
 }

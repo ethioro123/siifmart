@@ -42,16 +42,16 @@ export default function DocumentsTab({
             {canUpload && (
                 <div
                     onClick={() => documentInputRef.current?.click()}
-                    className="p-8 border-2 border-dashed border-[#E2DCCE] dark:border-white/10 rounded-2xl text-center hover:border-[#2C5E3B]/60 transition-all cursor-pointer bg-[#FAF8F5] dark:bg-white/5 group relative overflow-hidden shadow-xs"
+                    className="p-8 border-2 border-dashed border-[var(--theme-border)] rounded-2xl text-center hover:border-[var(--theme-accent)]/60 transition-colors cursor-pointer bg-[var(--theme-bg-card)] group relative overflow-hidden shadow-xs"
                     role="button"
                     tabIndex={0}
                     onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') documentInputRef.current?.click(); }}
                 >
-                    <Upload className="mx-auto text-stone-400 group-hover:text-[#2C5E3B] dark:group-hover:text-[#A9CBA2] group-hover:scale-110 transition-all mb-3" size={36} />
-                    <p className="text-base text-[#1E3F27] dark:text-[#EAE5D9] font-black uppercase tracking-wider">
+                    <Upload className="mx-auto text-[var(--theme-text-muted)] group-hover:text-[var(--theme-accent)] group-hover:scale-105 transition-all mb-3" size={32} />
+                    <p className="text-base text-[var(--theme-text-primary)] font-bold tracking-normal">
                         Upload Staff Document
                     </p>
-                    <p className="text-xs text-stone-500 mt-1 font-medium">
+                    <p className="text-xs text-[var(--theme-text-secondary)] mt-1 font-medium">
                         Employment contracts, government IDs, certifications, and compliance forms
                     </p>
                 </div>
@@ -69,18 +69,18 @@ export default function DocumentsTab({
             {/* Documents List */}
             <div className="space-y-3">
                 <div className="flex items-center justify-between">
-                    <h4 className="text-sm font-black text-[#1E3F27] dark:text-[#EAE5D9] uppercase tracking-wider">
+                    <h4 className="text-sm font-bold text-[var(--theme-text-primary)] uppercase tracking-wider">
                         Official Personnel Files ({documents.length})
                     </h4>
                 </div>
 
                 {documents.length === 0 ? (
-                    <div className="text-center py-16 bg-[#FAF8F5] dark:bg-black/20 rounded-2xl border border-dashed border-[#E2DCCE] dark:border-white/10 space-y-2">
-                        <FileText size={40} className="mx-auto text-stone-300 dark:text-stone-600" />
-                        <p className="font-bold text-sm text-[#1E3F27] dark:text-[#EAE5D9]">
+                    <div className="text-center py-16 bg-[var(--theme-bg-card)] rounded-2xl border border-dashed border-[var(--theme-border)] space-y-2">
+                        <FileText size={40} className="mx-auto text-[var(--theme-text-muted)]" />
+                        <p className="font-semibold text-sm text-[var(--theme-text-primary)]">
                             No Documents Uploaded Yet
                         </p>
-                        <p className="text-xs text-stone-400">
+                        <p className="text-xs text-[var(--theme-text-secondary)]">
                             Signed employment agreements, ID cards, and medical certificates will appear here.
                         </p>
                     </div>
@@ -89,17 +89,17 @@ export default function DocumentsTab({
                         {documents.map(doc => (
                             <div
                                 key={doc.id}
-                                className="p-4 bg-[#FAF8F5] dark:bg-black/30 rounded-2xl border border-[#E2DCCE] dark:border-white/10 flex items-center justify-between gap-3 shadow-xs group"
+                                className="p-4 bg-[var(--theme-bg-card)] rounded-2xl border border-[var(--theme-border)] hover:border-[var(--theme-accent)]/30 flex items-center justify-between gap-3 shadow-xs group transition-colors"
                             >
                                 <div className="flex items-center gap-3 min-w-0">
-                                    <div className="p-2.5 rounded-xl bg-white dark:bg-white/5 border border-[#E2DCCE] dark:border-white/10 text-[#2C5E3B] dark:text-[#A9CBA2] shrink-0">
+                                    <div className="p-2.5 rounded-xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-[var(--theme-accent)] shrink-0">
                                         <FileCheck size={20} />
                                     </div>
                                     <div className="min-w-0">
-                                        <p className="font-bold text-sm text-[#1E3F27] dark:text-[#EAE5D9] truncate">
+                                        <p className="font-semibold text-sm text-[var(--theme-text-primary)] truncate">
                                             {doc.name}
                                         </p>
-                                        <p className="text-[10px] text-stone-400 font-mono mt-0.5">
+                                        <p className="text-[11px] text-[var(--theme-text-secondary)] font-mono tabular-nums mt-0.5">
                                             Uploaded: {doc.uploadedAt} • {doc.size}
                                         </p>
                                     </div>
@@ -108,14 +108,14 @@ export default function DocumentsTab({
                                 <div className="flex items-center gap-1.5 shrink-0">
                                     <button
                                         onClick={() => handleDownload(doc)}
-                                        className="p-2 rounded-xl text-[#2C5E3B] dark:text-[#A9CBA2] hover:bg-emerald-50 dark:hover:bg-emerald-950/20 transition-colors cursor-pointer"
+                                        className="p-2 rounded-xl text-[var(--theme-text-secondary)] hover:text-[var(--theme-accent)] hover:bg-[var(--theme-bg-subtle)] transition-colors cursor-pointer"
                                         title="Download / View Document"
                                     >
                                         <Download size={16} />
                                     </button>
                                     <button
                                         onClick={() => handleDeleteDocument(doc.id)}
-                                        className="p-2 rounded-xl text-stone-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/20 transition-colors cursor-pointer"
+                                        className="p-2 rounded-xl text-[var(--theme-text-muted)] hover:text-rose-500 hover:bg-rose-500/10 transition-colors cursor-pointer"
                                         title="Delete Document"
                                     >
                                         <Trash2 size={16} />

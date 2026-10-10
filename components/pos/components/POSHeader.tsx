@@ -2,7 +2,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
     ArrowLeft, Search, ArrowRight, X, Link,
-    RefreshCw, WifiOff, CloudOff, CheckCircle, Trophy, SlidersHorizontal
+    RefreshCw, WifiOff, CloudOff, CheckCircle, Trophy, SlidersHorizontal, ScanBarcode
 } from 'lucide-react';
 import { usePOS } from '../POSContext';
 import { useData } from '../../../contexts/DataContext';
@@ -60,22 +60,27 @@ export const POSHeader: React.FC<POSHeaderProps> = ({ setIsFilterPanelOpen, acti
 
     return (
         <div className="flex gap-3">
-            <Button
-                variant="secondary"
+            <button
+                type="button"
                 onClick={() => navigate('/')}
-                icon={<ArrowLeft size={18} />}
                 title={t('pos.exitDashboard')}
                 aria-label="Exit to Dashboard"
-                className="hidden lg:flex p-2.5 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-card-hover)] active:scale-95 transition-all shadow-xs cursor-pointer"
-            />
+                className="hidden lg:flex items-center justify-center p-2.5 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-2xl text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-card-hover)] active:scale-95 transition-all shadow-xs cursor-pointer group shrink-0"
+            >
+                <div className="w-5 h-5 rounded-md bg-blue-500/10 text-blue-500 flex items-center justify-center transition-transform group-hover:-translate-x-0.5">
+                    <ArrowLeft size={14} />
+                </div>
+            </button>
             <div className="flex-1 relative">
-                <div className="flex items-center bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 py-2 focus-within:border-[var(--theme-border-focus)] transition-colors group">
-                    <Search className="w-4 h-4 text-[var(--theme-text-secondary)] group-focus-within:text-[var(--theme-text-primary)] transition-colors flex-shrink-0" />
+                <div className="flex items-center bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card-hover)] border border-[var(--theme-border)] rounded-2xl px-3.5 py-2 focus-within:border-[var(--theme-primary)] focus-within:ring-2 focus-within:ring-[var(--theme-primary)]/15 focus-within:bg-[var(--theme-bg-card)] hover:border-[var(--theme-border-strong)] transition-all group shadow-2xs">
+                    <div className="w-7 h-7 rounded-xl bg-blue-500/10 text-blue-500 flex items-center justify-center shrink-0 group-focus-within:bg-blue-500 group-focus-within:text-white transition-all">
+                        <Search size={14} />
+                    </div>
                     <input
                         ref={searchInputRef}
                         type="text"
-                        placeholder={t('pos.searchProducts')}
-                        className="bg-transparent border-none ml-2.5 flex-1 text-[var(--theme-text-primary)] outline-none placeholder-[var(--theme-text-muted)] font-medium text-xs sm:text-sm min-w-0"
+                        placeholder={t('pos.searchProducts') || 'Search products or scan barcode...'}
+                        className="bg-transparent border-none ml-2.5 flex-1 text-[var(--theme-text-primary)] outline-none placeholder-[var(--theme-text-muted)] font-medium text-[13px] min-w-0 tracking-tight"
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                         onKeyDown={handleSearchKeyDown}
@@ -87,14 +92,25 @@ export const POSHeader: React.FC<POSHeaderProps> = ({ setIsFilterPanelOpen, acti
                                 setSearchTerm('');
                                 if (searchInputRef.current) searchInputRef.current.value = '';
                             }}
-                            className="ml-1.5 p-1 rounded-lg hover:bg-[var(--theme-bg-card-hover)] text-[var(--theme-text-muted)] hover:text-[var(--theme-text-primary)] transition-colors flex-shrink-0 cursor-pointer"
+                            className="ml-1.5 w-6 h-6 rounded-full bg-black/10 dark:bg-white/10 hover:bg-black/20 dark:hover:bg-white/20 text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] transition-all flex items-center justify-center shrink-0 cursor-pointer active:scale-90"
                             aria-label="Clear Search"
                         >
-                            <X size={15} />
+                            <X size={12} />
                         </button>
                     ) : null}
+                    {!searchTerm && (
+                        <div className="hidden sm:flex items-center gap-1.5">
+                            <div className="flex items-center gap-1 px-2 py-0.5 rounded-md bg-[var(--theme-bg-card)] border border-[var(--theme-border)] text-[10px] font-mono font-medium text-[var(--theme-text-muted)] select-none">
+                                <ScanBarcode size={11} className="text-blue-500" />
+                                <span>Scan</span>
+                            </div>
+                            <div className="flex items-center gap-0.5 px-1.5 py-0.5 rounded-md bg-[var(--theme-bg-card)] border border-[var(--theme-border)] text-[10px] font-mono font-medium text-[var(--theme-text-muted)] select-none">
+                                <span>⌘</span><span>K</span>
+                            </div>
+                        </div>
+                    )}
                     {unseenPriceChanges.length > 0 && (
-                        <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-lg bg-blue-500/10 border border-blue-500/20 text-blue-500 ml-2 flex-shrink-0">
+                        <div className="flex items-center gap-1.5 pl-2.5 pr-1 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-500 ml-2 flex-shrink-0">
                             <button
                                 type="button"
                                 onClick={() => {
@@ -105,14 +121,14 @@ export const POSHeader: React.FC<POSHeaderProps> = ({ setIsFilterPanelOpen, acti
                                 title="Review and confirm product price updates"
                             >
                                 <span className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" />
-                                <span className="text-xs font-bold uppercase tracking-wider">
+                                <span className="text-[11px] font-semibold tracking-tight">
                                     {unseenPriceChanges.length} Price {unseenPriceChanges.length === 1 ? 'Change' : 'Changes'}
                                 </span>
                             </button>
                             <button
                                 type="button"
                                 onClick={markPriceUpdatesAsRead}
-                                className="ml-1 text-xs font-bold uppercase px-2 py-0.5 rounded-lg bg-blue-500 text-white hover:bg-blue-600 transition-colors cursor-pointer"
+                                className="ml-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-500 text-white hover:bg-blue-600 transition-colors cursor-pointer"
                                 title="Dismiss price notifications"
                             >
                                 Dismiss
@@ -164,12 +180,14 @@ export const POSHeader: React.FC<POSHeaderProps> = ({ setIsFilterPanelOpen, acti
             {/* Advanced Filter & Sort Button */}
             <button
                 onClick={() => setIsFilterPanelOpen(true)}
-                className="relative bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3 py-2 text-xs font-bold text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-card-hover)] transition-colors flex items-center gap-1.5 active:scale-95 shadow-xs cursor-pointer shrink-0"
+                className="relative bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-2xl px-3.5 py-2.5 text-xs font-semibold text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-card-hover)] transition-all flex items-center gap-2 active:scale-95 shadow-xs cursor-pointer shrink-0 tracking-tight"
             >
-                <SlidersHorizontal size={14} className="text-[var(--theme-text-secondary)]" />
+                <div className="w-5 h-5 rounded-md bg-indigo-500/10 text-indigo-500 flex items-center justify-center shrink-0">
+                    <SlidersHorizontal size={13} />
+                </div>
                 <span className="hidden sm:inline">Filter & Sort</span>
                 {activeFiltersCount > 0 && (
-                    <span className="w-5 h-5 bg-rose-500 text-white rounded-full flex items-center justify-center text-xs font-bold">
+                    <span className="w-4.5 h-4.5 bg-rose-500 text-white rounded-full flex items-center justify-center text-[10px] font-bold">
                         {activeFiltersCount}
                     </span>
                 )}
@@ -179,23 +197,23 @@ export const POSHeader: React.FC<POSHeaderProps> = ({ setIsFilterPanelOpen, acti
             <div className="hidden md:block shrink-0">
                 <button
                     onClick={() => triggerSync()}
-                    className={`flex items-center gap-1.5 px-2.5 py-2 rounded-xl text-xs font-bold border transition-colors cursor-pointer ${posSyncStatus === 'offline' ? 'bg-rose-500/10 border-rose-500/20 text-rose-500' :
+                    className={`flex items-center gap-2 px-3 py-2.5 rounded-2xl text-xs font-semibold border transition-all cursor-pointer tracking-tight shadow-xs active:scale-95 ${posSyncStatus === 'offline' ? 'bg-rose-500/10 border-rose-500/20 text-rose-500' :
                         posSyncStatus === 'syncing' ? 'bg-blue-500/10 border-blue-500/20 text-blue-500' :
                             (posPendingSyncCount || 0) > 0 ? 'bg-amber-500/10 border-amber-500/20 text-amber-500' :
-                                'bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] text-[var(--theme-text-primary)]'
+                                'bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-card-hover)]'
                          }`}
                     title={posLatencyMs ? `Server Latency: ${posLatencyMs}ms (Click to force sync)` : 'Click to force sync'}
                 >
                     {posSyncStatus === 'syncing' ? (
-                        <RefreshCw size={13} className="animate-spin" />
+                        <RefreshCw size={13} className="animate-spin text-blue-500" />
                     ) : posSyncStatus === 'offline' ? (
-                        <WifiOff size={13} />
+                        <WifiOff size={13} className="text-rose-500" />
                     ) : (posPendingSyncCount || 0) > 0 ? (
-                        <CloudOff size={13} />
+                        <CloudOff size={13} className="text-amber-500" />
                     ) : (
-                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                        <span className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]" />
                     )}
-                    <span className="hidden lg:inline text-[11px]">
+                    <span className="hidden lg:inline text-[11px] font-medium">
                         {posSyncStatus === 'offline' ? t('pos.offline') :
                             posSyncStatus === 'syncing' ? t('pos.syncing') :
                                 (posPendingSyncCount || 0) > 0 ? t('pos.syncPending') :
@@ -213,16 +231,18 @@ export const POSHeader: React.FC<POSHeaderProps> = ({ setIsFilterPanelOpen, acti
             {/* Store Bonus Widget - Compact Apple Liquid Glass Pill with Hover Breakdown */}
             {settings.posBonusEnabled !== false && currentStorePoints && storeBonus && (
                 <div className="relative group hidden lg:block shrink-0">
-                    <div className="flex items-center gap-1.5 bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card-hover)] border border-[var(--theme-border)] rounded-xl px-2.5 py-2 text-xs font-bold text-[var(--theme-text-primary)] cursor-pointer transition-colors shadow-xs">
-                        <Trophy size={14} className="text-amber-500 shrink-0" />
-                        <span className="font-mono tabular-nums text-[11px]">{currentStorePoints.monthlyPoints.toLocaleString()} {t('pos.pts')}</span>
+                    <div className="flex items-center gap-2 bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card-hover)] border border-[var(--theme-border)] rounded-2xl px-3 py-2.5 text-xs font-semibold text-[var(--theme-text-primary)] cursor-pointer transition-all shadow-xs">
+                        <div className="w-5 h-5 rounded-md bg-amber-500/10 text-amber-500 flex items-center justify-center shrink-0">
+                            <Trophy size={13} />
+                        </div>
+                        <span className="font-mono tabular-nums text-[11px] tracking-tight">{currentStorePoints.monthlyPoints.toLocaleString()} {t('pos.pts')}</span>
                     </div>
 
                     {/* Popover Breakdown on Hover */}
                     <div className="absolute right-0 top-full mt-2 hidden group-hover:block z-50 w-56 p-3 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl shadow-xl animate-in fade-in duration-200">
                         <div className="flex items-center justify-between mb-1">
-                            <span className="text-xs font-bold text-[var(--theme-text-primary)]">{t('pos.teamBonus')}</span>
-                            <span className="px-2 py-0.5 rounded-md text-xs font-bold uppercase bg-[var(--theme-pill-bg)] text-[var(--theme-text-primary)] border border-[var(--theme-border)]">
+                            <span className="text-xs font-semibold text-[var(--theme-text-primary)]">{t('pos.teamBonus')}</span>
+                            <span className="px-2 py-0.5 rounded-md text-[10px] font-bold uppercase bg-[var(--theme-pill-bg)] text-[var(--theme-text-primary)] border border-[var(--theme-border)]">
                                 {storeBonus.tier.tierName}
                             </span>
                         </div>
@@ -230,7 +250,7 @@ export const POSHeader: React.FC<POSHeaderProps> = ({ setIsFilterPanelOpen, acti
                             {currentStorePoints.monthlyPoints.toLocaleString()} {t('pos.pts')}
                         </p>
                         {userBonusShare && (
-                            <div className="mt-2 pt-2 border-t border-[var(--theme-border)] flex items-center justify-between">
+                            <div className="mt-2 pt-2 border-t border-[var(--theme-border-subtle)] flex items-center justify-between">
                                 <span className="text-xs text-[var(--theme-text-secondary)]">{t('pos.yourShare')}</span>
                                 <span className="text-xs font-mono font-bold text-[var(--theme-text-primary)] tabular-nums">
                                     {formatCompactNumber(userBonusShare.amount, { currency: CURRENCY_SYMBOL, maxFractionDigits: 0 })}

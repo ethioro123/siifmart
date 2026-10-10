@@ -118,51 +118,54 @@ export const StockListModal: React.FC = () => {
                             <p className="text-xs font-semibold text-amber-500">{filterCounts.unseen} product{filterCounts.unseen !== 1 ? 's' : ''} updated recently</p>
                         </div>
                         <button type="button" onClick={markUpdatesAsRead} title="Mark all updates as read" aria-label="Mark all updates as read" className="px-3 py-1 bg-amber-500 hover:bg-amber-600 text-white text-[10px] font-bold uppercase tracking-wider rounded-lg transition-all flex items-center gap-1 cursor-pointer">
-                            <CheckCheck size={13} /><span>Mark all as read</span>
+                            <CheckCheck size={13} className="text-emerald-300" /><span>Mark all as read</span>
                         </button>
                     </div>
                 )}
 
                 <div className="flex items-center gap-1.5 overflow-x-auto pb-1 custom-scrollbar">
                     {filterTabs.map(tab => (
-                        <button key={tab.id} type="button" onClick={() => setActiveFilter(tab.id)} title={`Filter by ${tab.label}`} aria-label={`Filter by ${tab.label}`} className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 shrink-0 cursor-pointer ${activeFilter === tab.id ? tab.activeColor : tab.color}`}>
-                            {tab.icon}<span>{tab.label}</span><span className="px-1.5 py-0.5 rounded-full text-[10px] bg-black/20 text-white font-extrabold">{tab.count}</span>
+                        <button key={tab.id} type="button" onClick={() => setActiveFilter(tab.id)} title={`Filter by ${tab.label}`} aria-label={`Filter by ${tab.label}`} className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-all flex items-center gap-1.5 shrink-0 cursor-pointer ${activeFilter === tab.id ? tab.activeColor : tab.color}`}>
+                            {tab.icon}<span>{tab.label}</span><span className="px-1.5 py-0.2 rounded-full text-[10px] bg-black/15 dark:bg-white/15 font-bold">{tab.count}</span>
                         </button>
                     ))}
                     {filterCounts.unseen > 0 && (
-                        <button type="button" onClick={() => setActiveFilter('UNSEEN')} title="Filter by unseen updates" aria-label="Filter by unseen updates" className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 shrink-0 cursor-pointer ${activeFilter === 'UNSEEN' ? 'bg-amber-600 text-white shadow-xs' : 'bg-amber-500/15 text-amber-500 border border-amber-500/30 hover:bg-amber-500/25'}`}>
-                            <Sparkles size={13} /><span>Unseen Updates</span><span className="px-1.5 py-0.5 rounded-full text-[10px] bg-amber-600 text-white font-extrabold">{filterCounts.unseen}</span>
+                        <button type="button" onClick={() => setActiveFilter('UNSEEN')} title="Filter by unseen updates" aria-label="Filter by unseen updates" className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-all flex items-center gap-1.5 shrink-0 cursor-pointer ${activeFilter === 'UNSEEN' ? 'bg-amber-600 text-white shadow-xs' : 'bg-amber-500/10 text-amber-500 border border-amber-500/20 hover:bg-amber-500/20'}`}>
+                            <Sparkles size={13} /><span>Unseen Updates</span><span className="px-1.5 py-0.2 rounded-full text-[10px] bg-amber-600 text-white font-bold">{filterCounts.unseen}</span>
                         </button>
                     )}
                     {(activeFilter !== 'ALL' || selectedCategory !== 'ALL_CATEGORIES' || stockSearch) && (
-                        <button type="button" onClick={() => { setActiveFilter('ALL'); setSelectedCategory('ALL_CATEGORIES'); setStockSearch(''); }} className="px-2.5 py-1.5 bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card-hover)] text-[var(--theme-text-primary)] border border-[var(--theme-border)] rounded-xl text-xs font-bold transition-all flex items-center gap-1 shrink-0 cursor-pointer ml-auto" title="Reset all filters" aria-label="Reset all filters">
+                        <button type="button" onClick={() => { setActiveFilter('ALL'); setSelectedCategory('ALL_CATEGORIES'); setStockSearch(''); }} className="px-2.5 py-1.5 bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card-hover)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] border border-[var(--theme-border)] rounded-full text-xs font-semibold transition-all flex items-center gap-1 shrink-0 cursor-pointer ml-auto" title="Reset all filters" aria-label="Reset all filters">
                             <X size={13} /><span>Reset</span>
                         </button>
                     )}
                 </div>
 
-                <div className="flex flex-wrap items-center gap-2 bg-[var(--theme-input-bg)] p-2.5 rounded-xl border border-[var(--theme-border)] focus-within:border-[var(--theme-border-focus)] transition-colors">
-                    <Search className="w-4 h-4 text-[var(--theme-text-secondary)] ml-1 shrink-0" />
-                    <input type="text" value={stockSearch} onChange={(e) => setStockSearch(e.target.value)} placeholder={t('posCommand.searchStockPlaceholder')} className="flex-1 bg-transparent border-none outline-none text-[var(--theme-text-primary)] px-2 py-1 placeholder:text-[var(--theme-text-muted)] min-w-[150px]" autoFocus />
+                {/* Apple Liquid Glass Product Search Bar */}
+                <div className="flex flex-wrap items-center gap-2.5 bg-[var(--theme-input-bg)] p-1.5 pl-2.5 rounded-2xl border border-[var(--theme-border)] focus-within:border-[var(--theme-border-focus)] transition-all shadow-2xs">
+                    <div className="w-7 h-7 rounded-xl bg-blue-500/10 text-blue-500 flex items-center justify-center shrink-0">
+                        <Search className="w-3.5 h-3.5" />
+                    </div>
+                    <input type="text" value={stockSearch} onChange={(e) => setStockSearch(e.target.value)} placeholder={t('posCommand.searchStockPlaceholder')} className="flex-1 bg-transparent border-none outline-none text-[var(--theme-text-primary)] px-1 py-1 text-xs placeholder:text-[var(--theme-text-muted)] min-w-[150px]" autoFocus />
                     {stockSearch && (
-                        <button type="button" onClick={() => setStockSearch('')} title="Clear search" aria-label="Clear search" className="p-1 hover:bg-[var(--theme-bg-subtle)] rounded-lg text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] transition-colors cursor-pointer">
-                            <X size={14} />
+                        <button type="button" onClick={() => setStockSearch('')} title="Clear search" aria-label="Clear search" className="w-6 h-6 rounded-full hover:bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] flex items-center justify-center transition-colors cursor-pointer mr-1">
+                            <X size={13} />
                         </button>
                     )}
                     {availableCategories.length > 0 && (
-                        <select value={selectedCategory} onChange={(e) => setSelectedCategory(e.target.value)} className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl px-2.5 py-1.5 text-xs font-bold text-[var(--theme-text-primary)] outline-none cursor-pointer focus:border-[var(--theme-border-focus)]" title="Filter by Category" aria-label="Filter by Category">
+                        <select value={selectedCategory} onChange={(e) => setSelectedCategory(e.target.value)} className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl px-2.5 py-1.5 text-xs font-semibold text-[var(--theme-text-primary)] outline-none cursor-pointer focus:border-[var(--theme-border-focus)] shadow-2xs" title="Filter by Category" aria-label="Filter by Category">
                             <option value="ALL_CATEGORIES">All Categories ({availableCategories.length})</option>
                             {availableCategories.map(cat => <option key={cat} value={cat}>{cat}</option>)}
                         </select>
                     )}
-                    <button type="button" onClick={() => { setLabelsToPrint([]); setIsPrintHubOpen(true); }} title="Open print hub for barcode labels" aria-label="Open print hub for barcode labels" className="px-3.5 py-2 bg-[var(--theme-primary)] text-[var(--theme-primary-text)] hover:opacity-90 text-xs font-bold rounded-xl transition-all flex items-center gap-1.5 shrink-0 active:scale-95 cursor-pointer ml-1">
-                        <Printer size={15} /><span>Print Hub</span>
+                    <button type="button" onClick={() => { setLabelsToPrint([]); setIsPrintHubOpen(true); }} title="Open print hub for barcode labels" aria-label="Open print hub for barcode labels" className="px-3.5 py-1.5 bg-[var(--theme-primary)] text-[var(--theme-primary-text)] hover:opacity-90 text-xs font-semibold rounded-xl transition-all flex items-center gap-1.5 shrink-0 active:scale-95 cursor-pointer shadow-xs">
+                        <Printer size={13} className="opacity-90" /><span>Print Hub</span>
                     </button>
                 </div>
 
-                <div className="overflow-x-auto">
+                <div className="overflow-x-auto rounded-2xl border border-[var(--theme-border)] isolate">
                     <table className="w-full text-sm">
-                        <thead className="text-[var(--theme-thead-text)] bg-[var(--theme-thead-bg)] border-b border-[var(--theme-border)]">
+                        <thead className="text-[var(--theme-thead-text)] bg-[var(--theme-bg-subtle)] border-b border-[var(--theme-border)]">
                             <tr>
                                 <th className="text-left p-3 font-semibold uppercase tracking-wider text-[10px]">{t('inventory.product')}</th>
                                 <th className="text-left p-3 font-semibold uppercase tracking-wider text-[10px]">{t('inventory.category')}</th>
@@ -272,7 +275,7 @@ export const StockListModal: React.FC = () => {
                                         <td className="p-3 text-center" onClick={(e) => e.stopPropagation()}>
                                             <div className="flex items-center justify-center gap-1">
                                                 <button type="button" onClick={() => { setLabelsToPrint([{ product, quantity: 1 }]); setIsPrintHubOpen(true); }} title="Print Price Tag / Barcode Label" aria-label="Print Price Tag / Barcode Label" className="p-1.5 rounded-lg bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card-hover)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] transition-colors border border-[var(--theme-border)] cursor-pointer">
-                                                    <Printer size={14} />
+                                                    <Printer size={14} className="text-purple-500" />
                                                 </button>
                                             </div>
                                         </td>

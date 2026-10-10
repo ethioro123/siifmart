@@ -1,5 +1,5 @@
 import React from 'react';
-import { Search, Calendar, ChevronDown } from 'lucide-react';
+import { Search, Calendar, ChevronDown, X, RotateCcw, Building2, CreditCard } from 'lucide-react';
 import { Site } from '../../../types';
 
 interface SalesToolbarProps {
@@ -33,36 +33,67 @@ export const SalesToolbar: React.FC<SalesToolbarProps> = ({
    sites,
    handleFilterChange
 }) => {
+   const hasActiveFilters = Boolean(
+      searchTerm ||
+      statusFilter !== 'All' ||
+      methodFilter !== 'All' ||
+      (!restricted && storeFilter !== 'All')
+   );
+
+   const handleResetFilters = () => {
+      handleFilterChange(setSearchTerm, '');
+      handleFilterChange(setStatusFilter, 'All');
+      handleFilterChange(setMethodFilter, 'All');
+      if (!restricted) {
+         handleFilterChange(setStoreFilter, 'All');
+      }
+   };
+
    return (
-      <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-4 space-y-4 shadow-xs">
-         <div className="flex flex-col md:flex-row gap-4">
-            {/* Search */}
-            <div className="flex items-center bg-[var(--theme-bg-panel)] border border-[var(--theme-border)] rounded-xl px-4 py-2 flex-1 focus-within:border-[var(--theme-border-strong)] transition-all">
-               <Search className="w-4 h-4 text-[var(--theme-text-secondary)]" />
+      <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-4 sm:p-5 space-y-4 shadow-[var(--shadow-sm)]">
+         {/* Top Row: Search & Date Range */}
+         <div className="flex flex-col md:flex-row gap-3 sm:gap-4">
+            {/* Apple Search Field */}
+            <div className="flex-1 relative flex items-center h-11 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3 focus-within:border-[var(--theme-border-strong)] focus-within:ring-2 focus-within:ring-[#0071E3]/25 transition-all">
+               <div className="w-7 h-7 rounded-lg bg-blue-500/10 text-[#0071E3] dark:text-[#2997FF] flex items-center justify-center shrink-0">
+                  <Search size={14} />
+               </div>
                <input
                   type="text"
-                  placeholder="Search Receipt ID, Cashier Name..."
-                  className="bg-transparent border-none ml-3 flex-1 text-[var(--theme-text-primary)] text-sm outline-none placeholder-[var(--theme-text-muted)]"
+                  placeholder="Search receipt ID, cashier name..."
+                  className="bg-transparent border-none ml-2.5 flex-1 text-[var(--theme-text-primary)] text-sm outline-none placeholder-[var(--theme-text-muted)] font-normal"
                   value={searchTerm}
                   onChange={(e) => handleFilterChange(setSearchTerm, e.target.value)}
                   aria-label="Search transactions"
                />
+               {searchTerm && (
+                  <button
+                     type="button"
+                     onClick={() => handleFilterChange(setSearchTerm, '')}
+                     className="w-5 h-5 rounded-full bg-[var(--theme-border)] hover:bg-[var(--theme-border-strong)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] flex items-center justify-center transition-colors cursor-pointer"
+                     aria-label="Clear search"
+                  >
+                     <X size={12} />
+                  </button>
+               )}
             </div>
 
-            {/* Date Range */}
-            <div className="flex items-center gap-2 bg-[var(--theme-bg-panel)] border border-[var(--theme-border)] rounded-xl px-3 py-2 text-[var(--theme-text-primary)]">
-               <Calendar size={16} className="text-[var(--theme-text-secondary)]" />
+            {/* Date Range Picker */}
+            <div className="flex items-center h-11 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3 gap-2 text-[var(--theme-text-primary)] shrink-0">
+               <div className="w-7 h-7 rounded-lg bg-neutral-500/10 text-[var(--theme-text-secondary)] flex items-center justify-center shrink-0">
+                  <Calendar size={14} />
+               </div>
                <input
                   type="date"
-                  className="bg-transparent border-none text-[var(--theme-text-primary)] text-xs outline-none focus:ring-0 cursor-pointer"
+                  className="bg-transparent border-none text-[var(--theme-text-primary)] text-xs font-medium outline-none focus:ring-0 cursor-pointer"
                   value={dateRange.start}
                   onChange={e => handleFilterChange(setDateRange, { ...dateRange, start: e.target.value })}
                   aria-label="Start Date"
                />
-               <span className="text-[var(--theme-text-muted)] text-xs">to</span>
+               <span className="text-[var(--theme-text-muted)] text-xs font-medium">to</span>
                <input
                   type="date"
-                  className="bg-transparent border-none text-[var(--theme-text-primary)] text-xs outline-none focus:ring-0 cursor-pointer"
+                  className="bg-transparent border-none text-[var(--theme-text-primary)] text-xs font-medium outline-none focus:ring-0 cursor-pointer"
                   value={dateRange.end}
                   onChange={e => handleFilterChange(setDateRange, { ...dateRange, end: e.target.value })}
                   aria-label="End Date"
@@ -70,56 +101,82 @@ export const SalesToolbar: React.FC<SalesToolbarProps> = ({
             </div>
          </div>
 
-         <div className="flex gap-3 overflow-x-auto pb-1 select-none">
-            {/* Method Filter */}
-            <div className="relative">
-               <select
-                  className="appearance-none bg-[var(--theme-bg-panel)] border border-[var(--theme-border)] rounded-xl pl-3 pr-8 py-2 text-xs font-bold text-[var(--theme-text-primary)] outline-none cursor-pointer hover:bg-[var(--theme-bg-panel-hover)] transition-all"
-                  value={methodFilter}
-                  onChange={(e) => handleFilterChange(setMethodFilter, e.target.value)}
-                  aria-label="Filter by Payment Method"
-               >
-                  <option value="All" className="bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)]">All Methods</option>
-                  <option value="Cash" className="bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)]">Cash</option>
-                  <option value="Card" className="bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)]">Card</option>
-                  <option value="Mobile Money" className="bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)]">Mobile Money</option>
-               </select>
-               <ChevronDown size={12} className="absolute right-2.5 top-3 text-[var(--theme-text-secondary)] pointer-events-none" />
+         {/* Bottom Row: Segmented Status Controls + Method & Store Dropdowns */}
+         <div className="flex flex-wrap items-center justify-between gap-3 pt-1 border-t border-[var(--theme-border-subtle)]">
+            {/* Apple Segmented Control: Status */}
+            <div className="p-1 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl inline-flex items-center gap-1 select-none overflow-x-auto max-w-full">
+               {(['All', 'Completed', 'Pending', 'Refunded'] as const).map((status) => {
+                  const isActive = statusFilter === status;
+                  return (
+                     <button
+                        key={status}
+                        type="button"
+                        onClick={() => handleFilterChange(setStatusFilter, status)}
+                        className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all cursor-pointer whitespace-nowrap ${
+                           isActive
+                              ? 'bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)] shadow-[0_1px_3px_rgba(0,0,0,0.12)] font-semibold'
+                              : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)]'
+                        }`}
+                     >
+                        {status === 'All' ? 'All Status' : status}
+                     </button>
+                  );
+               })}
             </div>
 
-            {/* Status Filter */}
-            <div className="relative">
-               <select
-                  className="appearance-none bg-[var(--theme-bg-panel)] border border-[var(--theme-border)] rounded-xl pl-3 pr-8 py-2 text-xs font-bold text-[var(--theme-text-primary)] outline-none cursor-pointer hover:bg-[var(--theme-bg-panel-hover)] transition-all"
-                  value={statusFilter}
-                  onChange={(e) => handleFilterChange(setStatusFilter, e.target.value)}
-                  aria-label="Filter by Status"
-               >
-                  <option value="All" className="bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)]">All Statuses</option>
-                  <option value="Completed" className="bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)]">Completed</option>
-                  <option value="Pending" className="bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)]">Pending</option>
-                  <option value="Refunded" className="bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)]">Refunded</option>
-               </select>
-               <ChevronDown size={12} className="absolute right-2.5 top-3 text-[var(--theme-text-secondary)] pointer-events-none" />
-            </div>
-
-            {/* Store Filter - Only show if not restricted */}
-            {!restricted && (
+            {/* Select Controls & Reset Action */}
+            <div className="flex items-center gap-2.5 flex-wrap">
+               {/* Payment Method Select */}
                <div className="relative">
                   <select
-                     className="appearance-none bg-[var(--theme-bg-panel)] border border-[var(--theme-border)] rounded-xl pl-3 pr-8 py-2 text-xs font-bold text-[var(--theme-text-primary)] outline-none cursor-pointer hover:bg-[var(--theme-bg-panel-hover)] transition-all"
-                     value={storeFilter}
-                     onChange={(e) => handleFilterChange(setStoreFilter, e.target.value)}
-                     aria-label="Filter by Store"
+                     className="appearance-none h-9 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl pl-8 pr-8 text-xs font-medium text-[var(--theme-text-primary)] outline-none cursor-pointer hover:bg-[var(--theme-bg-panel-hover)] focus:ring-2 focus:ring-[#0071E3]/25 transition-all"
+                     value={methodFilter}
+                     onChange={(e) => handleFilterChange(setMethodFilter, e.target.value)}
+                     aria-label="Filter by Payment Method"
                   >
-                     <option value="All" className="bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)]">All Stores</option>
-                     {sites.map(site => (
-                        <option key={site.id} value={site.id} className="bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)]">{site.name}</option>
-                     ))}
+                     <option value="All" className="bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)]">All Methods</option>
+                     <option value="Cash" className="bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)]">Cash</option>
+                     <option value="Card" className="bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)]">Card</option>
+                     <option value="Mobile Money" className="bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)]">Mobile Money</option>
                   </select>
-                  <ChevronDown size={12} className="absolute right-2.5 top-3 text-[var(--theme-text-secondary)] pointer-events-none" />
+                  <CreditCard size={13} className="absolute left-2.5 top-2.5 text-[var(--theme-text-secondary)] pointer-events-none" />
+                  <ChevronDown size={12} className="absolute right-2.5 top-2.5 text-[var(--theme-text-secondary)] pointer-events-none" />
                </div>
-            )}
+
+               {/* Store Filter - Only show if not restricted */}
+               {!restricted && (
+                  <div className="relative">
+                     <select
+                        className="appearance-none h-9 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl pl-8 pr-8 text-xs font-medium text-[var(--theme-text-primary)] outline-none cursor-pointer hover:bg-[var(--theme-bg-panel-hover)] focus:ring-2 focus:ring-[#0071E3]/25 transition-all"
+                        value={storeFilter}
+                        onChange={(e) => handleFilterChange(setStoreFilter, e.target.value)}
+                        aria-label="Filter by Store"
+                     >
+                        <option value="All" className="bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)]">All Stores</option>
+                        {sites.map(site => (
+                           <option key={site.id} value={site.id} className="bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)]">
+                              {site.name}
+                           </option>
+                        ))}
+                     </select>
+                     <Building2 size={13} className="absolute left-2.5 top-2.5 text-[var(--theme-text-secondary)] pointer-events-none" />
+                     <ChevronDown size={12} className="absolute right-2.5 top-2.5 text-[var(--theme-text-secondary)] pointer-events-none" />
+                  </div>
+               )}
+
+               {/* Reset Filters Pill */}
+               {hasActiveFilters && (
+                  <button
+                     type="button"
+                     onClick={handleResetFilters}
+                     className="h-9 px-3 rounded-xl bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-panel-hover)] border border-[var(--theme-border)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] text-xs font-medium flex items-center gap-1.5 transition-all active:scale-[0.98] cursor-pointer"
+                     title="Reset all filters"
+                  >
+                     <RotateCcw size={12} />
+                     <span>Reset</span>
+                  </button>
+               )}
+            </div>
          </div>
       </div>
    );

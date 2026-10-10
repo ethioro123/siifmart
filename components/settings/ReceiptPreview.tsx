@@ -202,7 +202,7 @@ export function ReceiptPreview({ settings }: ReceiptPreviewProps) {
   `;
 
   return (
-    <div className={`bg-white shadow-2xl rounded-lg overflow-hidden border border-black/10 flex flex-col ${is80mm ? 'w-[320px]' : 'w-[240px]'} h-[500px]`}>
+    <div className={`bg-white shadow-md rounded-xl overflow-hidden border border-[var(--theme-border)] flex flex-col ${is80mm ? 'w-[320px]' : 'w-[240px]'} h-[500px]`}>
       <iframe
         srcDoc={html}
         title="Receipt Preview"

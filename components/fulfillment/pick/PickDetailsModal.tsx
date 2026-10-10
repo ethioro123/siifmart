@@ -31,8 +31,14 @@ export const PickDetailsModal: React.FC<PickDetailsModalProps> = ({
     const { user, jobs, wmsJobsService, addNotification, refreshData } = useFulfillment();
     const [amendModalOpen, setAmendModalOpen] = useState(false);
 
-    // Resolve User Name
-    const userId = selectedItem.completedBy || selectedItem.assignedTo;
+    // Resolve User Name: prioritize completion author for completed jobs
+    const isCompleted = (selectedItem.status || '').toLowerCase() === 'completed';
+    const completedUserId = selectedItem.completedBy || (selectedItem as any).completed_by;
+    const assignedUserId = selectedItem.assignedTo || (selectedItem as any).assigned_to;
+    const userId = (isCompleted || completedUserId) ? (completedUserId || assignedUserId) : (assignedUserId || completedUserId);
+    const workerLabel = (isCompleted || Boolean(completedUserId))
+        ? (t('warehouse.completedBy') || 'Completed By')
+        : (t('warehouse.assignedTo') || 'Assigned To');
     const isUUID = (str: string) => /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(str);
     let userObj = employees.find(e => 
         e.id === userId || 
@@ -168,7 +174,7 @@ export const PickDetailsModal: React.FC<PickDetailsModalProps> = ({
                             <span className="text-[10px] font-black text-[#2C5E3B] dark:text-[#A9CBA2]">{(data.user || 'S').charAt(0).toUpperCase()}</span>
                         </div>
                         <div>
-                            <p className="text-[10px] text-stone-400 dark:text-stone-500 uppercase font-black tracking-widest leading-none mb-1">{t('warehouse.putaway.jobDetails').split(' ')[0]}</p>
+                            <p className="text-[10px] text-stone-400 dark:text-stone-500 uppercase font-black tracking-widest leading-none mb-1">{workerLabel}</p>
                             <p className="text-xs text-slate-900 dark:text-zinc-200 font-black uppercase break-words leading-tight">{data.userDisplay}</p>
                         </div>
                     </div>

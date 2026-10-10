@@ -84,7 +84,13 @@ export async function createProduct(product: Omit<Product, 'id' | 'created_at' |
         brand: product.brand,
         size: product.size,
         unit: product.unit,
-        custom_attributes: product.customAttributes,
+        custom_attributes: (product.packageType || product.caseSize)
+            ? {
+                ...(product.customAttributes || {}),
+                ...(product.packageType ? { package_type: product.packageType, packageType: product.packageType } : {}),
+                ...(product.caseSize ? { case_size: product.caseSize, caseSize: product.caseSize } : {})
+            }
+            : product.customAttributes,
         description: product.description,
         min_stock: product.minStock,
         max_stock: product.maxStock,
@@ -192,7 +198,8 @@ export async function updateProduct(id: string, updates: Partial<Product>) {
         }
     }
 
-    const dbUpdates: any = { ...updates };
+    // Explicit Column Allowlist Architecture (Rule Invariant)
+    const dbUpdates: Record<string, any> = {};
 
     const stockChanged = updates.stock !== undefined;
     const minStockChanged = updates.minStock !== undefined;
@@ -218,43 +225,62 @@ export async function updateProduct(id: string, updates: Partial<Product>) {
         }
     }
 
-    const fieldsToRemove = ['id', 'created_at', 'createdAt'];
-    fieldsToRemove.forEach(field => delete dbUpdates[field]);
+    const u = updates as any;
 
-    if (updates.siteId !== undefined) { dbUpdates.site_id = updates.siteId; delete dbUpdates.siteId; }
-    if (updates.costPrice !== undefined) { dbUpdates.cost_price = updates.costPrice; delete dbUpdates.costPrice; delete dbUpdates.cost; }
-    if (updates.expiryDate !== undefined) { dbUpdates.expiry_date = updates.expiryDate; delete dbUpdates.expiryDate; }
-    if (updates.batchNumber !== undefined) { dbUpdates.batch_number = updates.batchNumber; delete dbUpdates.batchNumber; }
-    if (updates.shelfPosition !== undefined) { dbUpdates.shelf_position = updates.shelfPosition; delete dbUpdates.shelfPosition; }
-    if (updates.competitorPrice !== undefined) { dbUpdates.competitor_price = updates.competitorPrice; delete dbUpdates.competitorPrice; }
-    if (updates.salesVelocity !== undefined) { dbUpdates.sales_velocity = updates.salesVelocity; delete dbUpdates.salesVelocity; }
-    if (updates.posReceivedAt !== undefined) { dbUpdates.pos_received_at = updates.posReceivedAt; delete dbUpdates.posReceivedAt; }
-    if (updates.posReceivedBy !== undefined) { dbUpdates.pos_received_by = updates.posReceivedBy; delete dbUpdates.posReceivedBy; }
-    if (updates.approvalStatus !== undefined) { dbUpdates.approval_status = updates.approvalStatus; delete dbUpdates.approvalStatus; }
-    if (updates.approvedBy !== undefined) { dbUpdates.approved_by = updates.approvedBy; delete dbUpdates.approvedBy; }
-    if (updates.approvedAt !== undefined) { dbUpdates.approved_at = updates.approvedAt; delete dbUpdates.approvedAt; }
-    if (updates.rejectedBy !== undefined) { dbUpdates.rejected_by = updates.rejectedBy; delete dbUpdates.rejectedBy; }
-    if (updates.rejectedAt !== undefined) { dbUpdates.rejected_at = updates.rejectedAt; delete dbUpdates.rejectedAt; }
-    if (updates.rejectionReason !== undefined) { dbUpdates.rejection_reason = updates.rejectionReason; delete dbUpdates.rejectionReason; }
-    if (updates.priceUpdatedAt !== undefined) { dbUpdates.price_updated_at = updates.priceUpdatedAt; delete dbUpdates.priceUpdatedAt; }
-    if (updates.oldPrice !== undefined) { delete dbUpdates.oldPrice; }
-    if (updates.old_price !== undefined) { delete dbUpdates.old_price; }
-
-    if (updates.productId !== undefined) {
-        dbUpdates.product_id = updates.productId;
-        delete dbUpdates.productId;
+    if (updates.name !== undefined) dbUpdates.name = updates.name;
+    if (updates.sku !== undefined) dbUpdates.sku = updates.sku.replace(/[-\s]/g, '').toUpperCase();
+    if (updates.category !== undefined) dbUpdates.category = updates.category;
+    if (updates.price !== undefined) dbUpdates.price = updates.price;
+    if (updates.salePrice !== undefined || u.sale_price !== undefined) dbUpdates.sale_price = updates.salePrice ?? u.sale_price;
+    if (updates.isOnSale !== undefined || u.is_on_sale !== undefined) dbUpdates.is_on_sale = updates.isOnSale ?? u.is_on_sale;
+    if (updates.stock !== undefined) dbUpdates.stock = updates.stock;
+    if (updates.status !== undefined && dbUpdates.status === undefined) dbUpdates.status = updates.status;
+    if (updates.location !== undefined) dbUpdates.location = updates.location;
+    if (updates.image !== undefined) dbUpdates.image = updates.image;
+    if (updates.barcode !== undefined) dbUpdates.barcode = updates.barcode;
+    if (updates.barcodes !== undefined) dbUpdates.barcodes = updates.barcodes;
+    if (updates.brand !== undefined) dbUpdates.brand = updates.brand;
+    if (updates.size !== undefined) dbUpdates.size = updates.size;
+    if (updates.unit !== undefined) dbUpdates.unit = updates.unit;
+    if (updates.description !== undefined) dbUpdates.description = updates.description;
+    if (updates.siteId !== undefined || u.site_id !== undefined) dbUpdates.site_id = updates.siteId ?? u.site_id;
+    if (updates.costPrice !== undefined || u.cost !== undefined || u.cost_price !== undefined) {
+        dbUpdates.cost_price = updates.costPrice ?? u.cost ?? u.cost_price;
     }
+    if (updates.expiryDate !== undefined || u.expiry_date !== undefined) dbUpdates.expiry_date = updates.expiryDate ?? u.expiry_date;
+    if (updates.batchNumber !== undefined || u.batch_number !== undefined) dbUpdates.batch_number = updates.batchNumber ?? u.batch_number;
+    if (updates.shelfPosition !== undefined || u.shelf_position !== undefined) dbUpdates.shelf_position = updates.shelfPosition ?? u.shelf_position;
+    if (updates.competitorPrice !== undefined || u.competitor_price !== undefined) dbUpdates.competitor_price = updates.competitorPrice ?? u.competitor_price;
+    if (updates.salesVelocity !== undefined || u.sales_velocity !== undefined) dbUpdates.sales_velocity = updates.salesVelocity ?? u.sales_velocity;
+    if (updates.posReceivedAt !== undefined || u.pos_received_at !== undefined) dbUpdates.pos_received_at = updates.posReceivedAt ?? u.pos_received_at;
+    if (updates.posReceivedBy !== undefined || u.pos_received_by !== undefined) dbUpdates.pos_received_by = updates.posReceivedBy ?? u.pos_received_by;
+    if (updates.approvalStatus !== undefined || u.approval_status !== undefined) dbUpdates.approval_status = updates.approvalStatus ?? u.approval_status;
+    if (updates.approvedBy !== undefined || u.approved_by !== undefined) dbUpdates.approved_by = updates.approvedBy ?? u.approved_by;
+    if (updates.approvedAt !== undefined || u.approved_at !== undefined) dbUpdates.approved_at = updates.approvedAt ?? u.approved_at;
+    if (updates.rejectedBy !== undefined || u.rejected_by !== undefined) dbUpdates.rejected_by = updates.rejectedBy ?? u.rejected_by;
+    if (updates.rejectedAt !== undefined || u.rejected_at !== undefined) dbUpdates.rejected_at = updates.rejectedAt ?? u.rejected_at;
+    if (updates.rejectionReason !== undefined || u.rejection_reason !== undefined) dbUpdates.rejection_reason = updates.rejectionReason ?? u.rejection_reason;
+    if (updates.priceUpdatedAt !== undefined || u.price_updated_at !== undefined) dbUpdates.price_updated_at = updates.priceUpdatedAt ?? u.price_updated_at;
+    if (updates.productId !== undefined || u.product_id !== undefined) dbUpdates.product_id = updates.productId ?? u.product_id;
+    if (updates.packQuantity !== undefined || u.pack_quantity !== undefined) dbUpdates.pack_quantity = updates.packQuantity ?? u.pack_quantity;
+    if (updates.minStock !== undefined || u.min_stock !== undefined) dbUpdates.min_stock = updates.minStock ?? u.min_stock;
+    if (updates.maxStock !== undefined || u.max_stock !== undefined) dbUpdates.max_stock = updates.maxStock ?? u.max_stock;
+    if (updates.zoneId !== undefined || u.zone_id !== undefined) dbUpdates.zone_id = updates.zoneId ?? u.zone_id;
 
-    if (updates.packQuantity !== undefined) { dbUpdates.pack_quantity = updates.packQuantity; delete dbUpdates.packQuantity; }
-    if (updates.customAttributes !== undefined) { dbUpdates.custom_attributes = updates.customAttributes; delete dbUpdates.customAttributes; }
-    if (updates.minStock !== undefined) { dbUpdates.min_stock = updates.minStock; delete dbUpdates.minStock; }
-    if (updates.maxStock !== undefined) { dbUpdates.max_stock = updates.maxStock; delete dbUpdates.maxStock; }
+    // Safely fold packageType, caseSize, and customAttributes into custom_attributes
+    let customAttrs = updates.customAttributes !== undefined 
+        ? updates.customAttributes 
+        : (u.custom_attributes !== undefined ? u.custom_attributes : undefined);
 
-    const extraFields = ['minStockLevel', 'maxStockLevel', 'retailPrice', 'zoneId', 'barcodeType', 'costPrice', 'salePrice', 'isOnSale', 'salesVelocity', 'competitorPrice', 'shelfPosition', 'packQuantity', 'approvalStatus', 'createdBy'];
-    extraFields.forEach(f => delete dbUpdates[f]);
-
-    if (updates.barcodes !== undefined) {
-        dbUpdates.barcodes = updates.barcodes;
+    if (updates.packageType !== undefined || updates.caseSize !== undefined) {
+        customAttrs = {
+            ...(customAttrs || {}),
+            ...(updates.packageType !== undefined ? { package_type: updates.packageType, packageType: updates.packageType } : {}),
+            ...(updates.caseSize !== undefined ? { case_size: updates.caseSize, caseSize: updates.caseSize } : {})
+        };
+    }
+    if (customAttrs !== undefined) {
+        dbUpdates.custom_attributes = customAttrs;
     }
 
     const isPriceUpdate =

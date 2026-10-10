@@ -16,7 +16,7 @@ interface POTotalsSummaryProps {
     discountRate: number;
     setDiscountRate: (val: number) => void;
     taxRate: number;
-    setTaxRate: (val: number) => void;
+    setTaxRate?: (val: number) => void;
 
     // Computed (Read-only)
     poSubtotal: number;
@@ -117,55 +117,20 @@ export const POTotalsSummary: React.FC<POTotalsSummaryProps> = ({
                 </div>
 
                 {/* Tax */}
-                <div className="flex justify-between items-center">
-                    <span className="text-xs font-bold text-[var(--theme-text-secondary)] flex items-center gap-1.5">
-                        <Percent size={13} className="text-amber-600 dark:text-amber-400" /> Regulatory Tax
-                        <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-700 dark:text-amber-400 font-black">
-                            {currencySymbol === 'KSh' ? 'KRA 16%' : 'ERCA 15%'}
+                {/* Tax (Only rendered when purchasing tax is enabled in Country Finance Settings) */}
+                {taxRate > 0 && (
+                    <div className="flex justify-between items-center">
+                        <span className="text-xs font-bold text-[var(--theme-text-secondary)] flex items-center gap-1.5">
+                            <Percent size={13} className="text-amber-600 dark:text-amber-400" /> Regulatory Tax
+                            <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-700 dark:text-amber-400 font-black">
+                                {currencySymbol === 'KSh' ? 'KRA' : 'ERCA'} {taxRate}%
+                            </span>
                         </span>
-                    </span>
-                    <div className="flex items-center gap-2">
-                        {taxRate > 0 ? (
-                            <span className="text-[10px] text-amber-700 dark:text-amber-300 font-bold font-mono tabular-nums">
-                                + {formatCompactNumber(poTax, { currency: currencySymbol })}
-                            </span>
-                        ) : (
-                            <span className="text-[9px] text-[var(--theme-text-secondary)] font-bold uppercase tracking-tight">
-                                Exempt
-                            </span>
-                        )}
-                        <div className="flex items-center bg-[var(--theme-bg-subtle)] rounded-xl border border-[var(--theme-border)] px-2.5 py-1 focus-within:border-[var(--theme-accent)]">
-                            <input
-                                type="number"
-                                min="0" max="100"
-                                className="w-10 bg-transparent text-right text-[var(--theme-text-primary)] font-mono text-xs outline-none font-bold"
-                                value={taxRate === 0 ? '0' : (taxRate || '')}
-                                onChange={(e) => setTaxRate(parseFloat(e.target.value) || 0)}
-                                placeholder="0"
-                            />
-                            <span className="text-[var(--theme-text-secondary)] text-xs ml-1 font-bold">%</span>
-                        </div>
-                        {taxRate === 0 ? (
-                            <button
-                                type="button"
-                                title="Manually apply national standard VAT"
-                                onClick={() => setTaxRate(currencySymbol === 'KSh' ? 16 : 15)}
-                                className="text-[10px] bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] px-1.5 py-0.5 rounded-lg font-bold text-[var(--theme-text-primary)] hover:border-[var(--theme-accent)] transition-colors cursor-pointer"
-                            >
-                                +{currencySymbol === 'KSh' ? '16%' : '15%'}
-                            </button>
-                        ) : (
-                            <button
-                                type="button"
-                                title="Exempt / Zero-rate tax on this PO"
-                                onClick={() => setTaxRate(0)}
-                                className="text-[10px] bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] px-1.5 py-0.5 rounded-lg font-bold text-[var(--theme-text-muted)] hover:text-rose-500 transition-colors cursor-pointer"
-                            >
-                                0%
-                            </button>
-                        )}
+                        <span className="text-xs font-black text-amber-700 dark:text-amber-300 font-mono tabular-nums">
+                            + {formatCompactNumber(poTax, { currency: currencySymbol })}
+                        </span>
                     </div>
-                </div>
+                )}
 
                 {/* Shipping */}
                 <div className="flex justify-between items-center">

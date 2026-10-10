@@ -33,28 +33,34 @@ export const ReceiveResolutionModal: React.FC<ReceiveResolutionModalProps> = ({
     const [mappingProductId, setMappingProductId] = useState<string | null>(null);
 
     return (
-        <div className="fixed inset-0 bg-black/80 z-[100] flex items-center justify-center p-2 sm:p-4 overflow-x-hidden">
-            <div className="glass-panel rounded-3xl w-full max-w-2xl overflow-hidden relative">
-                {/* 🌟 Modal Ambient Glow */}
-                <div className="absolute -top-24 -right-24 w-64 h-64 bg-[#2C5E3B]/10 dark:bg-[#A9CBA2]/5 blur-[100px] rounded-full pointer-events-none opacity-50" />
-                <div className="absolute bottom-0 left-0 w-48 h-48 bg-amber-600/10 dark:bg-amber-700/5 blur-[80px] rounded-full pointer-events-none opacity-50" />
-                <div className="p-6 border-b border-[#E2DCCE]/60 dark:border-[#A9CBA2]/[0.06] bg-[#FAF8F5]/30 dark:bg-[#1C2620]/30 flex justify-between items-center">
-                    <h3 className="text-sm font-black text-slate-900 dark:text-zinc-100 uppercase tracking-[0.2em] leading-tight">{t('warehouse.resolveUnknownBarcode')}: <span className="text-[#2C5E3B] dark:text-[#A9CBA2] font-mono underline decoration-slate-900/20 dark:decoration-zinc-700">{resolvingBarcode.barcode}</span></h3>
-                    <button onClick={() => setResolvingBarcode(null)} className="p-2 hover:bg-slate-100 dark:hover:bg-white/10 rounded-full text-slate-400 hover:text-slate-900 dark:hover:text-zinc-100 transition-all" aria-label="Close Resolution Modal"><X size={20} /></button>
+        <div className="fixed inset-0 bg-black/70 z-[100] flex items-center justify-center p-2 sm:p-4 overflow-x-hidden animate-in fade-in duration-200">
+            <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-3xl w-full max-w-2xl overflow-hidden relative shadow-2xl">
+                <div className="p-4 md:p-6 border-b border-[var(--theme-border)] bg-[var(--theme-bg-subtle)] flex justify-between items-center">
+                    <h3 className="text-sm md:text-base font-bold text-[var(--theme-text-primary)] leading-tight flex items-center gap-2">
+                        <span>{t('warehouse.resolveUnknownBarcode')}:</span>
+                        <span className="text-[var(--theme-text-primary)] font-mono px-2 py-0.5 rounded-md bg-[var(--theme-bg-card)] border border-[var(--theme-border)] text-xs md:text-sm">{resolvingBarcode.barcode}</span>
+                    </h3>
+                    <button 
+                        onClick={() => setResolvingBarcode(null)} 
+                        className="p-2.5 rounded-xl text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-card)] transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center" 
+                        aria-label="Close Resolution Modal"
+                    >
+                        <X size={20} />
+                    </button>
                 </div>
-                <div className="p-8 space-y-6">
+                <div className="p-4 md:p-6 space-y-4 bg-[var(--theme-bg-app)]">
                     <div className="relative group">
-                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 dark:text-zinc-400 group-focus-within:text-[#2C5E3B] dark:group-focus-within:text-[#A9CBA2] transition-colors" size={16} />
+                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--theme-text-secondary)]" size={16} />
                         <input
                             type="text"
                             placeholder={t('warehouse.searchProductToMap')}
                             value={resolutionSearch}
                             onChange={(e) => setResolutionSearch(e.target.value)}
-                            className="woody-input !pl-11 py-4 text-[10px] uppercase tracking-widest font-mono"
+                            className="w-full pl-11 pr-4 py-3 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl text-xs md:text-sm text-[var(--theme-text-primary)] placeholder-[var(--theme-text-secondary)] focus:outline-none focus:ring-2 focus:ring-blue-500/20 font-mono min-h-[44px]"
                             aria-label="Search product to map"
                         />
                     </div>
-                    <div className="max-h-72 overflow-y-auto space-y-3 pr-2 custom-scrollbar">
+                    <div className="max-h-80 overflow-y-auto space-y-2.5 pr-1 custom-scrollbar">
                         {products.filter(p => !resolutionSearch || p.name.toLowerCase().includes(resolutionSearch.toLowerCase()) || p.sku.toLowerCase().includes(resolutionSearch.toLowerCase())).slice(0, 10).map(product => {
                             const isMapping = mappingProductId === product.id;
                             const isBusy = isSubmitting || isMapping || mappingProductId !== null;
@@ -127,16 +133,16 @@ export const ReceiveResolutionModal: React.FC<ReceiveResolutionModalProps> = ({
                                     } finally {
                                         setMappingProductId(null);
                                     }
-                                }} className={`p-4 bg-white/40 dark:bg-[#1C2620]/40 border border-[#E2DCCE]/60 dark:border-[#A9CBA2]/[0.06] rounded-2xl flex justify-between items-center group transition-all hover:scale-[1.01] shadow-sm hover:border-[#2C5E3B]/30 dark:hover:border-[#A9CBA2]/30 ${isBusy ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer hover:bg-[#FAF8F5]/80 dark:hover:bg-[#2C5E3B]/10'}`}>
+                                }} className={`p-3.5 md:p-4 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl flex justify-between items-center group transition-colors shadow-sm ${isBusy ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer hover:bg-[var(--theme-bg-subtle)]'}`}>
                                     <div>
-                                        <p className="font-black text-slate-900 dark:text-zinc-100 uppercase tracking-tight text-xs group-hover:text-[#2C5E3B] dark:group-hover:text-[#A9CBA2] transition-colors">{product.name}</p>
-                                        <p className="text-[9px] text-slate-400 dark:text-zinc-600 tracking-[0.2em] uppercase mt-1 font-mono transition-colors group-hover:text-[#2C5E3B]/60 dark:group-hover:text-[#A9CBA2]/60">{product.sku}</p>
+                                        <p className="font-semibold text-[var(--theme-text-primary)] text-xs md:text-sm transition-colors">{product.name}</p>
+                                        <p className="text-[11px] text-[var(--theme-text-secondary)] font-mono mt-0.5">{product.sku}</p>
                                     </div>
-                                    <div className="p-2 bg-[#FAF8F5] dark:bg-[#1C2620]/30 rounded-lg group-hover:bg-[#2C5E3B] dark:group-hover:bg-[#A9CBA2] transition-all border border-[#E2DCCE] dark:border-emerald-950/20">
+                                    <div className="p-2 bg-[var(--theme-bg-subtle)] rounded-xl border border-[var(--theme-border)] text-[var(--theme-text-secondary)] group-hover:text-[var(--theme-text-primary)] transition-colors">
                                         {isMapping ? (
-                                            <Loader2 size={16} className="animate-spin text-[#2C5E3B] dark:text-[#A9CBA2]" />
+                                            <Loader2 size={16} className="animate-spin text-[var(--theme-text-primary)]" />
                                         ) : (
-                                            <ChevronRight size={16} className="text-[#2C5E3B] dark:text-[#A9CBA2] group-hover:text-white dark:group-hover:text-[#1E3B24]" />
+                                            <ChevronRight size={16} />
                                         )}
                                     </div>
                                 </div>

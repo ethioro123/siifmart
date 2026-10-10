@@ -27,7 +27,7 @@ export const GovernanceApprovalBadge: React.FC<GovernanceApprovalBadgeProps> = (
                             <span className="text-xs font-bold text-[var(--theme-text-primary)]">
                                 Sovereign CEO Direct Update
                             </span>
-                            <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-500/10 text-blue-500 border border-blue-500/20">
+                            <span className="px-2 py-0.5 rounded-full text-[11px] font-semibold bg-blue-500/10 text-blue-500 border border-blue-500/20">
                                 Zero-Approval Bypass
                             </span>
                         </div>
@@ -69,7 +69,7 @@ export const GovernanceApprovalBadge: React.FC<GovernanceApprovalBadgeProps> = (
                         <span className="text-xs font-bold text-[var(--theme-text-primary)]">
                             Cross-Department Sign-Off Required
                         </span>
-                        <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/10 text-amber-500 border border-amber-500/20">
+                        <span className="px-2 py-0.5 rounded-full text-[11px] font-semibold bg-amber-500/10 text-amber-500 border border-amber-500/20">
                             Segregation of Duties
                         </span>
                     </div>
@@ -80,7 +80,7 @@ export const GovernanceApprovalBadge: React.FC<GovernanceApprovalBadgeProps> = (
                         {ruleResult.requiredApprovers.map((dept, idx) => (
                             <span 
                                 key={idx} 
-                                className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[10px] font-bold bg-[var(--theme-bg-panel)] border border-[var(--theme-border)] text-[var(--theme-text-secondary)]"
+                                className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-[var(--theme-bg-panel)] border border-[var(--theme-border)] text-[var(--theme-text-secondary)]"
                             >
                                 {dept.includes('Finance') && <DollarSign size={11} className="text-rose-500" />}
                                 {dept.includes('Logistics') && <Building2 size={11} className="text-blue-500" />}

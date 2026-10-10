@@ -5,6 +5,7 @@ import { logger } from '../../../../utils/logger';
 import { convertToSellableUnits } from '../../useReceiving';
 import { resolveReceivingPolicy } from '../../../../utils/receivingPolicy';
 import { Product } from '../../../../types';
+import { mergeCustomAttributes } from '../../../../utils/productAttributes';
 
 export function usePutawayStock() {
     const { user } = useStore();
@@ -25,7 +26,10 @@ export function usePutawayStock() {
         size?: string, 
         brand?: string, 
         unit?: string, 
+        image?: string,
         packQuantity?: number, 
+        packageType?: string,
+        caseSize?: number,
         category?: string, 
         retailPrice?: number, 
         customAttributes?: any, 
@@ -131,12 +135,22 @@ export function usePutawayStock() {
                     if (!placeholderRecord.size && params.size) updates.size = params.size;
                     if (!placeholderRecord.brand && params.brand) updates.brand = params.brand;
                     if (!placeholderRecord.unit && params.unit) updates.unit = params.unit;
-                    if (!placeholderRecord.packQuantity && params.packQuantity) updates.packQuantity = params.packQuantity;
+                    if (!placeholderRecord.image && params.image) updates.image = params.image;
+                    if ((!placeholderRecord.packQuantity || placeholderRecord.packQuantity === 1) && (params.packQuantity && params.packQuantity > 1)) {
+                        updates.packQuantity = params.packQuantity;
+                    }
+                    if (!placeholderRecord.packageType && params.packageType) updates.packageType = params.packageType;
+                    if (!placeholderRecord.caseSize && params.caseSize) updates.caseSize = params.caseSize;
                     if (!placeholderRecord.category && params.category) updates.category = params.category;
-                    if (!placeholderRecord.customAttributes && params.customAttributes) updates.customAttributes = params.customAttributes;
                     if (!placeholderRecord.description && params.description) updates.description = params.description;
                     if (!placeholderRecord.minStock && params.minStock) updates.minStock = params.minStock;
                     if (!placeholderRecord.maxStock && params.maxStock) updates.maxStock = params.maxStock;
+                    if (params.customAttributes) {
+                        const mergedAttrs = mergeCustomAttributes(placeholderRecord.customAttributes, params.customAttributes);
+                        if (JSON.stringify(mergedAttrs) !== JSON.stringify(placeholderRecord.customAttributes)) {
+                            updates.customAttributes = mergedAttrs;
+                        }
+                    }
 
                     const updated = await productsService.update(placeholderRecord.id, updates);
                     destProductId = updated.id;
@@ -165,13 +179,14 @@ export function usePutawayStock() {
                                 brand: poItem.brand || sourceProduct.brand,
                                 size: poItem.size || sourceProduct.size,
                                 unit: poItem.unit || sourceProduct.unit,
+                                image: poItem.image || sourceProduct.image,
                                 packQuantity: poItem.packQuantity || sourceProduct.packQuantity,
                                 packageType: poItem.packageType || sourceProduct.packageType,
                                 caseSize: poItem.caseSize || sourceProduct.caseSize,
                                 description: poItem.description || sourceProduct.description,
                                 minStock: poItem.minStock || sourceProduct.minStock,
                                 maxStock: poItem.maxStock || sourceProduct.maxStock,
-                                customAttributes: poItem.customAttributes || sourceProduct.customAttributes
+                                customAttributes: mergeCustomAttributes(sourceProduct.customAttributes, poItem.customAttributes)
                             };
                         }
                     }

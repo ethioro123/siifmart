@@ -6,6 +6,7 @@ import { useStore } from '../../../contexts/CentralStore';
 import { hasPermission } from '../../../utils/permissions';
 import { useNavigate } from 'react-router-dom';
 import { CURRENCY_SYMBOL } from '../../../constants';
+import { Receipt } from 'lucide-react';
 
 export const RecentTransactions: React.FC = () => {
     const { t } = useLanguage();
@@ -16,15 +17,20 @@ export const RecentTransactions: React.FC = () => {
     const canAccessSalesHistory = hasPermission(user?.role, 'ACCESS_SALES');
 
     return (
-        <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl overflow-hidden shadow-xs">
+        <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl overflow-hidden shadow-xs isolate">
             {/* Header */}
-            <div className="px-6 py-5 border-b border-[var(--theme-border)] flex justify-between items-center bg-[var(--theme-bg-subtle)]">
-                <h3 className="font-bold text-[var(--theme-text-primary)] tracking-tight">{t('posCommand.recentTransactions')}</h3>
+            <div className="px-6 py-4 border-b border-[var(--theme-border)] flex justify-between items-center bg-[var(--theme-bg-subtle)]">
+                <div className="flex items-center gap-2.5">
+                    <div className="w-7 h-7 rounded-xl bg-indigo-500/10 text-indigo-500 flex items-center justify-center shrink-0">
+                        <Receipt className="w-3.5 h-3.5" />
+                    </div>
+                    <h3 className="font-bold text-[var(--theme-text-primary)] tracking-tight">{t('posCommand.recentTransactions')}</h3>
+                </div>
                 {canAccessSalesHistory && (
                     <button
                         type="button"
                         onClick={() => navigate('/sales')}
-                        className="text-xs font-bold text-[var(--theme-text-primary)] hover:opacity-80 transition-opacity hover:underline underline-offset-2 cursor-pointer"
+                        className="text-xs font-semibold text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] transition-colors hover:underline underline-offset-2 cursor-pointer"
                     >
                         {t('posCommand.viewAllHistory')}
                     </button>
@@ -67,7 +73,7 @@ export const RecentTransactions: React.FC = () => {
                                     </td>
                                     <td className="px-5 py-4 text-sm font-mono font-bold text-[var(--theme-text-primary)] text-right">{CURRENCY_SYMBOL} {sale.total.toLocaleString()}</td>
                                     <td className="px-5 py-4 text-center">
-                                        <span className={`px-2.5 py-1 rounded-xl text-[10px] font-bold uppercase border ${
+                                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wider border ${
                                             sale.status === 'Completed'
                                                 ? 'text-emerald-500 bg-emerald-500/10 border-emerald-500/20'
                                                 : 'text-amber-500 bg-amber-500/10 border-amber-500/20'
@@ -83,22 +89,22 @@ export const RecentTransactions: React.FC = () => {
             </div>
 
             {/* Pagination footer */}
-            <div className="px-5 py-4 bg-[var(--theme-bg-subtle)] border-t border-[var(--theme-border)] flex items-center justify-between">
-                <div className="text-[10px] text-[var(--theme-text-secondary)] font-bold uppercase tracking-wider select-none">
+            <div className="px-5 py-3.5 bg-[var(--theme-bg-subtle)] border-t border-[var(--theme-border)] flex items-center justify-between">
+                <div className="text-[10px] text-[var(--theme-text-secondary)] font-semibold uppercase tracking-wider select-none">
                     {t('common.page')} {txPage} {t('common.of')} {Math.max(1, Math.ceil(filteredSales.length / TX_PER_PAGE))}
                 </div>
                 <div className="flex gap-2">
                     <button
                         onClick={() => setTxPage(p => Math.max(1, p - 1))}
                         disabled={txPage === 1}
-                        className="px-3.5 py-1.5 bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card-hover)] text-[var(--theme-text-primary)] text-[10px] font-bold rounded-xl border border-[var(--theme-border)] disabled:opacity-30 disabled:cursor-not-allowed transition-all cursor-pointer"
+                        className="px-3.5 py-1.5 bg-[var(--theme-bg-card)] hover:bg-[var(--theme-bg-card-hover)] text-[var(--theme-text-primary)] text-xs font-semibold rounded-xl border border-[var(--theme-border)] disabled:opacity-30 disabled:cursor-not-allowed transition-all cursor-pointer shadow-2xs"
                     >
                         {t('common.previous')}
                     </button>
                     <button
                         onClick={() => setTxPage(p => Math.min(Math.ceil(filteredSales.length / TX_PER_PAGE), p + 1))}
                         disabled={txPage >= Math.ceil(filteredSales.length / TX_PER_PAGE)}
-                        className="px-3.5 py-1.5 bg-[var(--theme-primary)] hover:opacity-90 text-[var(--theme-primary-text)] text-[10px] font-bold rounded-xl border border-transparent disabled:opacity-30 disabled:cursor-not-allowed transition-all shadow-xs cursor-pointer"
+                        className="px-3.5 py-1.5 bg-[var(--theme-primary)] hover:opacity-90 text-[var(--theme-primary-text)] text-xs font-semibold rounded-xl border border-transparent disabled:opacity-30 disabled:cursor-not-allowed transition-all shadow-xs cursor-pointer"
                     >
                         {t('common.next')}
                     </button>

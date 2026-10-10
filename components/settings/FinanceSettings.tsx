@@ -224,21 +224,23 @@ export default function FinanceSettings() {
         <div className="w-full max-w-full space-y-6 animate-in fade-in slide-in-from-right-4">
             {/* ROLE WARNING BANNER IF UNAUTHORIZED */}
             {!isAuthorized && (
-                <div className="p-4 bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900/40 rounded-2xl flex items-center gap-3">
-                    <ShieldAlert className="text-amber-700 dark:text-amber-400 shrink-0" size={20} />
-                    <p className="text-xs text-amber-800 dark:text-amber-300 font-bold">
+                <div className="p-3.5 bg-amber-500/10 border border-amber-500/20 rounded-xl flex items-center gap-2.5">
+                    <ShieldAlert className="text-amber-600 dark:text-amber-400 shrink-0" size={18} />
+                    <p className="text-xs text-amber-700 dark:text-amber-300 font-medium">
                         Read-Only View: Modifying corporate financial policies, tax matrices, and drawer caps requires CEO, Super Admin, or Finance Manager authorization.
                     </p>
                 </div>
             )}
 
             {/* HEADER BANNER */}
-            <div className="p-4 bg-emerald-50 dark:bg-[#2C5E3B]/20 border border-emerald-200 dark:border-emerald-950/30 rounded-2xl flex items-start gap-3">
-                <Landmark className="text-[#2C5E3B] dark:text-[#A9CBA2] shrink-0 mt-0.5" size={20} />
+            <div className="p-4 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl flex items-start gap-3 shadow-xs">
+                <div className="w-9 h-9 rounded-xl bg-[#0071E3]/10 dark:bg-[#2997FF]/15 text-[#0071E3] dark:text-[#2997FF] flex items-center justify-center border border-[#0071E3]/20 shrink-0 mt-0.5">
+                    <Landmark size={18} />
+                </div>
                 <div>
-                    <h4 className="text-[#1E3F27] dark:text-white font-bold text-sm">Financial & Tax Control Center</h4>
-                    <p className="text-xs text-[#4D6E56] dark:text-[#7A9E83] mt-0.5">
-                        Manage fiscal reporting cycles, tax jurisdictions, currency conversion, and drawer petty cash limits.
+                    <h4 className="text-[var(--theme-text-primary)] font-semibold text-sm">Financial & Tax Control Center</h4>
+                    <p className="text-xs text-[var(--theme-text-secondary)] mt-0.5">
+                        Manage fiscal reporting cycles, tax jurisdictions, currency conversion, and drawer petty cash limits for {countryProfile.name}.
                     </p>
                 </div>
             </div>
@@ -246,28 +248,28 @@ export default function FinanceSettings() {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 {/* COLUMN 1: FISCAL & GLOBAL TAX */}
                 <div className="lg:col-span-2 space-y-6">
-                    <div className="bg-white/85 dark:bg-[#18201B]/60 border border-[#E2DCCE] dark:border-emerald-950/20 rounded-[32px] p-6 lg:p-8 shadow-sm">
-                        <div className="mb-6 border-b border-[#E2DCCE]/60 dark:border-white/5 pb-4 flex justify-between items-center">
+                    <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-5 lg:p-6 shadow-xs">
+                        <div className="mb-5 border-b border-[var(--theme-border)] pb-3.5 flex justify-between items-center">
                             <div>
-                                <h3 className="text-lg font-black text-[#1E3F27] dark:text-[#EAE5D9]">Fiscal & Tax Policy</h3>
-                                <p className="text-xs text-[#4D6E56] dark:text-[#7A9E83] mt-0.5">Foundational accounting rules</p>
+                                <h3 className="text-sm font-semibold tracking-tight text-[var(--theme-text-primary)]">Fiscal & Tax Policy</h3>
+                                <p className="text-xs text-[var(--theme-text-secondary)] mt-0.5">Foundational accounting rules</p>
                             </div>
                             <button
                                 type="button"
                                 onClick={() => handleSaveSection('policy')}
                                 disabled={savingSection === 'policy' || !isAuthorized}
-                                className="px-5 py-2.5 bg-[#2C5E3B] hover:opacity-90 text-white font-bold rounded-2xl text-xs uppercase tracking-wider flex items-center gap-2 shadow-md cursor-pointer transition-all disabled:opacity-50"
+                                className="h-8 px-3.5 bg-[#0071E3] dark:bg-[#2997FF] hover:opacity-90 active:scale-[0.98] text-white font-semibold rounded-xl text-xs flex items-center gap-1.5 shadow-xs cursor-pointer transition-all disabled:opacity-40"
                             >
                                 {savingSection === 'policy' ? (
                                     <span className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                                 ) : (
-                                    <Save size={14} />
+                                    <Save size={13} />
                                 )}
                                 Save Policy
                             </button>
                         </div>
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                             <div className="space-y-4">
                                 <InputGroup
                                     label="Fiscal Year Start"
@@ -279,8 +281,8 @@ export default function FinanceSettings() {
                                     sub="Reporting cycles will align with this start date"
                                 />
 
-                                <div className="space-y-2">
-                                    <label className="text-xs text-stone-600 dark:text-gray-400 font-bold uppercase tracking-wide">Accounting Basis</label>
+                                <div className="space-y-1.5">
+                                    <label className="text-[11px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider">Accounting Basis</label>
                                     <RadioCard<'accrual' | 'cash'>
                                         value={policy.accountingMethod}
                                         disabled={!isAuthorized}
@@ -294,14 +296,14 @@ export default function FinanceSettings() {
                             </div>
 
                             <div className="space-y-4">
-                                <div className="p-4 bg-[#FAF8F5] dark:bg-black/20 rounded-2xl border border-[#E2DCCE] dark:border-white/5 space-y-4">
-                                    <label className="text-xs text-stone-600 dark:text-gray-400 font-bold uppercase tracking-wide flex items-center gap-2">
-                                        <Calculator size={14} className="text-[#2C5E3B] dark:text-[#A9CBA2]" /> Tax Configuration
+                                <div className="p-4 bg-[var(--theme-bg-subtle)] rounded-xl border border-[var(--theme-border)] space-y-3.5">
+                                    <label className="text-[11px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider flex items-center gap-2">
+                                        <Calculator size={14} className="text-[#0071E3] dark:text-[#2997FF]" /> Tax Configuration
                                     </label>
 
-                                    <div className="flex items-center gap-4 bg-white dark:bg-black/40 p-3 rounded-xl border border-[#E2DCCE] dark:border-white/5">
+                                    <div className="flex items-center gap-3 bg-[var(--theme-bg-card)] p-3 rounded-xl border border-[var(--theme-border)]">
                                         <div className="flex-1">
-                                            <p className="text-[10px] text-stone-500 uppercase font-black tracking-wider mb-1">Base Tax Rate</p>
+                                            <p className="text-[10px] text-[var(--theme-text-secondary)] uppercase font-semibold tracking-wider mb-1">Base Tax Rate</p>
                                             <div className="flex items-center gap-2">
                                                 <input
                                                     type="number"
@@ -312,13 +314,13 @@ export default function FinanceSettings() {
                                                     disabled={!isAuthorized}
                                                     title="Base Tax Rate"
                                                     onChange={(e) => setPolicy(prev => ({ ...prev, taxRate: Math.max(0, Math.min(100, parseFloat(e.target.value) || 0)) }))}
-                                                    className="w-20 bg-[#FAF8F5] dark:bg-black/40 border border-[#E2DCCE] dark:border-white/10 rounded-lg px-2.5 py-1 text-[#2C5E3B] dark:text-[#A9CBA2] font-mono font-black text-sm focus:border-[#2C5E3B] outline-none disabled:opacity-50"
+                                                    className="w-20 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-lg px-2.5 py-1 text-[#0071E3] dark:text-[#2997FF] font-mono font-bold text-sm focus:border-[#0071E3] dark:focus:border-[#2997FF] focus:ring-1 focus:ring-[#0071E3]/20 outline-none disabled:opacity-50"
                                                 />
-                                                <span className="text-xs font-bold text-[#1E3F27] dark:text-white">%</span>
+                                                <span className="text-xs font-semibold text-[var(--theme-text-primary)]">%</span>
                                             </div>
                                         </div>
-                                        <div className="w-10 h-10 rounded-xl bg-emerald-50 text-[#2C5E3B] dark:bg-[#2C5E3B]/20 dark:text-[#A9CBA2] flex items-center justify-center">
-                                            <Percent size={18} />
+                                        <div className="w-9 h-9 rounded-xl bg-[#0071E3]/10 dark:bg-[#2997FF]/15 text-[#0071E3] dark:text-[#2997FF] flex items-center justify-center border border-[#0071E3]/20 shrink-0">
+                                            <Percent size={16} />
                                         </div>
                                     </div>
 
@@ -362,22 +364,22 @@ export default function FinanceSettings() {
                     </div>
 
                     {/* TAX JURISDICTIONS (TAX MATRIX) */}
-                    <div className="bg-white/85 dark:bg-[#18201B]/60 border border-[#E2DCCE] dark:border-emerald-950/20 rounded-[32px] p-6 lg:p-8 shadow-sm">
-                        <div className="mb-6 border-b border-[#E2DCCE]/60 dark:border-white/5 pb-4 flex justify-between items-center">
+                    <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-5 lg:p-6 shadow-xs">
+                        <div className="mb-5 border-b border-[var(--theme-border)] pb-3.5 flex justify-between items-center">
                             <div>
-                                <h3 className="text-lg font-black text-[#1E3F27] dark:text-[#EAE5D9]">Tax Jurisdictions</h3>
-                                <p className="text-xs text-[#4D6E56] dark:text-[#7A9E83] mt-0.5">Manage multiple nexus and regional tax overrides ({countryProfile.name})</p>
+                                <h3 className="text-sm font-semibold tracking-tight text-[var(--theme-text-primary)]">Tax Jurisdictions</h3>
+                                <p className="text-xs text-[var(--theme-text-secondary)] mt-0.5">Manage multiple nexus and regional tax overrides ({countryProfile.name})</p>
                             </div>
                             <button
                                 type="button"
                                 onClick={() => handleSaveSection('jurisdictions')}
                                 disabled={savingSection === 'jurisdictions' || !isAuthorized}
-                                className="px-5 py-2.5 bg-stone-100 hover:bg-stone-200 dark:bg-stone-800 dark:hover:bg-stone-700 text-[#1E3F27] dark:text-white font-bold rounded-2xl text-xs uppercase tracking-wider flex items-center gap-2 border border-[#E2DCCE] dark:border-white/10 cursor-pointer transition-all disabled:opacity-50"
+                                className="h-8 px-3.5 bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)] font-semibold rounded-xl text-xs flex items-center gap-1.5 border border-[var(--theme-border)] cursor-pointer transition-all disabled:opacity-40"
                             >
                                 {savingSection === 'jurisdictions' ? (
-                                    <span className="w-3.5 h-3.5 border-2 border-stone-400 border-t-stone-800 rounded-full animate-spin" />
+                                    <span className="w-3.5 h-3.5 border-2 border-[var(--theme-text-secondary)] border-t-[var(--theme-text-primary)] rounded-full animate-spin" />
                                 ) : (
-                                    <Save size={14} />
+                                    <Save size={13} />
                                 )}
                                 Save Matrix
                             </button>
@@ -385,10 +387,10 @@ export default function FinanceSettings() {
 
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             {taxZones.length === 0 && (
-                                <div className="sm:col-span-2 text-center py-10 bg-[#FAF8F5] dark:bg-black/20 rounded-2xl border border-dashed border-[#E2DCCE] dark:border-white/10">
-                                    <Globe size={36} className="mx-auto text-stone-400 dark:text-gray-600 mb-2" />
-                                    <h4 className="text-stone-600 dark:text-gray-400 font-bold text-sm">No Tax Jurisdictions</h4>
-                                    <p className="text-xs text-stone-400 dark:text-gray-500 mt-1">Create your first jurisdiction to apply location-specific tax rules.</p>
+                                <div className="sm:col-span-2 text-center py-10 bg-[var(--theme-bg-subtle)] rounded-xl border border-dashed border-[var(--theme-border)]">
+                                    <Globe size={32} className="mx-auto text-[var(--theme-text-secondary)] mb-2 opacity-50" />
+                                    <h4 className="text-[var(--theme-text-primary)] font-semibold text-xs">No Tax Jurisdictions</h4>
+                                    <p className="text-xs text-[var(--theme-text-secondary)] mt-1">Create your first jurisdiction to apply location-specific tax rules.</p>
                                 </div>
                             )}
                             {taxZones.map(zone => (
@@ -413,12 +415,12 @@ export default function FinanceSettings() {
                                     type="button"
                                     onClick={() => setIsAddingZone(true)}
                                     title="Add New Jurisdiction"
-                                    className="bg-[#FAF8F5] dark:bg-black/20 border-2 border-dashed border-[#E2DCCE] dark:border-white/10 rounded-3xl p-5 flex flex-col items-center justify-center gap-2 text-stone-500 dark:text-gray-400 hover:text-[#1E3F27] dark:hover:text-white hover:border-[#2C5E3B]/40 hover:bg-white dark:hover:bg-white/5 transition-all group min-h-[140px] cursor-pointer"
+                                    className="bg-[var(--theme-bg-subtle)] border-2 border-dashed border-[var(--theme-border)] hover:border-[#0071E3]/40 rounded-2xl p-4.5 flex flex-col items-center justify-center gap-2 text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] transition-all group min-h-[130px] cursor-pointer"
                                 >
-                                    <div className="w-10 h-10 rounded-2xl bg-emerald-50 text-[#2C5E3B] dark:bg-[#2C5E3B]/20 dark:text-[#A9CBA2] flex items-center justify-center group-hover:scale-110 transition-transform">
-                                        <Plus size={20} />
+                                    <div className="w-9 h-9 rounded-xl bg-[#0071E3]/10 dark:bg-[#2997FF]/15 text-[#0071E3] dark:text-[#2997FF] flex items-center justify-center border border-[#0071E3]/20 group-hover:scale-105 transition-transform">
+                                        <Plus size={18} />
                                     </div>
-                                    <span className="text-xs font-black uppercase tracking-wider">Add Jurisdiction</span>
+                                    <span className="text-xs font-semibold uppercase tracking-wider">Add Jurisdiction</span>
                                 </button>
                             )}
                         </div>

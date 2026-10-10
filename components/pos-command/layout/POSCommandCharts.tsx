@@ -1,33 +1,35 @@
-import React from 'react';
+import React, { useState, useMemo } from 'react';
 import { usePOSCommand } from '../POSCommandContext';
 import { useLanguage } from '../../../contexts/LanguageContext';
 import { useStore } from '../../../contexts/CentralStore';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
-import { TrendingUp, PieChart as PieChartIcon, ShieldCheck, Lock } from 'lucide-react';
-
-// Apple Minimalist Clean Monochrome / High-Contrast Palette
-const COLORS = ['var(--theme-text-primary)', 'var(--theme-text-secondary)', 'var(--theme-text-muted)'];
+import { TrendingUp, PieChart as PieChartIcon, ShieldCheck } from 'lucide-react';
+import {
+    BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid,
+    PieChart, Pie, Cell
+} from 'recharts';
 
 export const POSCommandCharts: React.FC = () => {
     const { t } = useLanguage();
     const { user } = useStore();
-    const { hourlyData, paymentChartData } = usePOSCommand();
-    const [isMounted, setIsMounted] = React.useState(false);
+    const { hourlyData, paymentChartData = [] } = usePOSCommand();
+    const [isMounted, setIsMounted] = useState(false);
 
     const isCentralHQ = [
         'super_admin',
         'ceo',
+        'admin',
         'regional_manager',
         'operations_manager',
-        'finance_manager',
-        'store_manager'
+        'finance_manager'
     ].includes(user?.role?.toLowerCase() || '');
+
+    const COLORS = ['#10b981', '#3b82f6', '#8b5cf6', '#f59e0b'];
 
     React.useEffect(() => {
         setIsMounted(true);
     }, []);
 
-    const cardClass = "bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-6 shadow-xs";
+    const cardClass = "bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-6 shadow-xs isolate";
 
     if (!isMounted) {
         return (
@@ -43,9 +45,11 @@ export const POSCommandCharts: React.FC = () => {
             {/* Hourly Orders Chart */}
             <div className={`${cardClass} relative overflow-hidden`}>
                 <div className="flex items-center justify-between mb-6">
-                    <h3 className="text-xs font-bold text-[var(--theme-text-secondary)] uppercase tracking-widest flex items-center gap-2 select-none">
-                        <TrendingUp className="w-4 h-4 text-[var(--theme-text-primary)]" />
-                        {t('posCommand.hourlyPerformance')}
+                    <h3 className="text-xs font-semibold text-[var(--theme-text-primary)] uppercase tracking-wider flex items-center gap-2.5 select-none">
+                        <div className="w-7 h-7 rounded-lg bg-indigo-500/10 text-indigo-500 flex items-center justify-center shrink-0">
+                            <TrendingUp size={14} />
+                        </div>
+                        <span>{t('posCommand.hourlyPerformance')}</span>
                     </h3>
                 </div>
 
@@ -68,7 +72,7 @@ export const POSCommandCharts: React.FC = () => {
                                 content={({ active, payload }) => {
                                     if (active && payload && payload.length) {
                                         return (
-                                            <div className="bg-[var(--theme-bg-panel)] border border-[var(--theme-border)] p-3 rounded-xl shadow-lg text-[var(--theme-text-primary)] text-xs">
+                                            <div className="bg-[var(--theme-bg-card)]/95 backdrop-blur-xl border border-[var(--theme-border)] p-3 rounded-2xl shadow-xl text-[var(--theme-text-primary)] text-xs">
                                                 <p className="text-[10px] text-[var(--theme-text-secondary)] uppercase font-bold tracking-widest mb-1">{payload[0].payload.hour}</p>
                                                 <p className="font-bold">{payload[0].value} Transactions</p>
                                             </div>
@@ -86,9 +90,11 @@ export const POSCommandCharts: React.FC = () => {
             {/* Payment Methods Chart (Managers Only) / Operational Protection Card (Cashiers) */}
             <div className={`${cardClass} relative overflow-hidden`}>
                 <div className="flex items-center justify-between mb-6">
-                    <h3 className="text-xs font-bold text-[var(--theme-text-secondary)] uppercase tracking-widest flex items-center gap-2 select-none">
-                        <PieChartIcon className="w-4 h-4 text-[var(--theme-text-primary)]" />
-                        {isCentralHQ ? t('posCommand.paymentMethods') : "Shift Integrity & Security"}
+                    <h3 className="text-xs font-semibold text-[var(--theme-text-primary)] uppercase tracking-wider flex items-center gap-2.5 select-none">
+                        <div className="w-7 h-7 rounded-lg bg-purple-500/10 text-purple-500 flex items-center justify-center shrink-0">
+                            <PieChartIcon size={14} />
+                        </div>
+                        <span>{isCentralHQ ? t('posCommand.paymentMethods') : "Shift Integrity & Security"}</span>
                     </h3>
                 </div>
 
@@ -106,7 +112,7 @@ export const POSCommandCharts: React.FC = () => {
                                         paddingAngle={4}
                                         dataKey="value"
                                     >
-                                        {paymentChartData.map((entry, index) => (
+                                        {paymentChartData.map((entry: { name: string; value: number }, index: number) => (
                                             <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                                         ))}
                                     </Pie>
@@ -114,7 +120,7 @@ export const POSCommandCharts: React.FC = () => {
                                         content={({ active, payload }) => {
                                             if (active && payload && payload.length) {
                                                 return (
-                                                    <div className="bg-[var(--theme-bg-panel)] border border-[var(--theme-border)] p-3 rounded-xl shadow-lg text-[var(--theme-text-primary)] text-xs">
+                                                    <div className="bg-[var(--theme-bg-card)]/95 backdrop-blur-xl border border-[var(--theme-border)] p-3 rounded-2xl shadow-xl text-[var(--theme-text-primary)] text-xs">
                                                         <p className="text-[10px] text-[var(--theme-text-secondary)] uppercase font-bold tracking-widest mb-1">{payload[0].name}</p>
                                                         <p className="font-bold">{payload[0].value}%</p>
                                                     </div>
@@ -129,7 +135,7 @@ export const POSCommandCharts: React.FC = () => {
 
                         {/* Legend */}
                         <div className="flex gap-5 mt-2">
-                            {paymentChartData.map((entry, index) => {
+                            {paymentChartData.map((entry: { name: string; value: number }, index: number) => {
                                 const dotColor = COLORS[index % COLORS.length];
                                 return (
                                     <div key={entry.name} className="flex items-center gap-2">
@@ -144,7 +150,7 @@ export const POSCommandCharts: React.FC = () => {
                 ) : (
                     <div className="h-[240px] w-full flex flex-col items-center justify-center p-6 text-center space-y-3">
                         <div className="w-14 h-14 rounded-2xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] flex items-center justify-center text-[var(--theme-text-primary)]">
-                            <ShieldCheck size={28} />
+                            <ShieldCheck size={28} className="text-emerald-500" />
                         </div>
                         <div className="space-y-1">
                             <h4 className="text-sm font-bold text-[var(--theme-text-primary)] uppercase tracking-wider">

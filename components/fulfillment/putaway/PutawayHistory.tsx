@@ -49,7 +49,7 @@ export const PutawayHistory: React.FC<PutawayHistoryProps> = ({
             .filter((j: WMSJob) => j.type === 'PUTAWAY' || j.type === 'REPLENISH')
             .map(j => {
                 const item = j.lineItems?.[0];
-                const userId = j.completedBy || j.assignedTo;
+                const userId = j.completedBy || (j as any).completed_by || j.assignedTo || (j as any).assigned_to;
                 const isUUID = (str: string) => /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(str);
                 let userObj = employees.find(e => 
                     e.id === userId || 
@@ -248,7 +248,7 @@ export const PutawayHistory: React.FC<PutawayHistoryProps> = ({
                                                 <span className="text-[10px] font-black text-gray-900 dark:text-[#A9CBA2]">{(item.resolvedUser?.name || 'S').charAt(0).toUpperCase()}</span>
                                             </div>
                                             <div className="flex flex-col">
-                                                <span className="text-[8px] font-black text-gray-400 dark:text-gray-555 uppercase tracking-widest leading-none mb-0.5">{t('warehouse.putaway.worker')}</span>
+                                                <span className="text-[8px] font-black text-gray-400 dark:text-gray-555 uppercase tracking-widest leading-none mb-0.5">{t('warehouse.completedBy') || 'Completed By'}</span>
                                                 <span className="text-[10px] font-black text-gray-900 dark:text-gray-300 uppercase tracking-tight leading-none">
                                                     {item.resolvedUser?.name} <span className="text-gray-400 dark:text-gray-555 font-bold">({item.resolvedUser?.displayId})</span>
                                                 </span>

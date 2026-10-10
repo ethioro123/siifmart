@@ -234,3 +234,37 @@ export const canEmployRole = (
     return true;
 };
 
+// Canonical list of Level 1, 2, and 3 managerial & leadership roles for selective egress loading
+export const MANAGERIAL_ROLES: readonly string[] = [
+    'super_admin',
+    'admin',
+    'CEO',
+    'ceo',
+    'regional_manager',
+    'operations_manager',
+    'finance_manager',
+    'hr_manager',
+    'hr',
+    'procurement_manager',
+    'supply_chain_manager',
+    'merchandising_manager',
+    'store_manager',
+    'warehouse_manager',
+    'logistics_manager',
+    'inventory_manager',
+    'security_manager',
+    'dispatch_manager',
+    'assistant_manager',
+    'vendor_relations_manager',
+    'fleet_maintenance_supervisor',
+    'shift_lead',
+    'cs_manager',
+    'store_supervisor',
+    'manager'
+] as const;
+
+export const isManagerialRole = (role?: string): boolean => {
+    if (!role) return false;
+    return MANAGERIAL_ROLES.includes(role);
+};
+

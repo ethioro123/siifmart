@@ -102,12 +102,14 @@ export const ReceivingForm: React.FC = () => {
 
             {/* Quick Hardware Scanner Only Input */}
             <div className="bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-2xl p-4">
-                <div className="flex items-center justify-between mb-2">
-                    <label className="text-xs font-bold text-[var(--theme-text-secondary)] uppercase tracking-wider flex items-center gap-2">
-                        <Scan size={14} className="text-[var(--theme-text-primary)]" />
+                <div className="flex items-center justify-between mb-2.5">
+                    <label className="text-xs font-bold text-[var(--theme-text-primary)] uppercase tracking-wider flex items-center gap-2">
+                        <div className="w-5 h-5 rounded-md bg-blue-500/10 text-blue-500 flex items-center justify-center shrink-0">
+                            <Scan size={13} />
+                        </div>
                         {t('posCommand.scanNextItem')}
                     </label>
-                    <span className="px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 text-[9px] font-bold uppercase tracking-wider">
+                    <span className="px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 text-[9px] font-semibold uppercase tracking-wider">
                         Hardware Scanner Active
                     </span>
                 </div>
@@ -121,16 +123,16 @@ export const ReceivingForm: React.FC = () => {
                         onChange={(e) => setTransferScanBarcode(e.target.value)}
                         onBlur={() => setTimeout(() => inputRef.current?.focus(), 150)}
                         placeholder="Scan barcode with hardware scanner (Manual typing & paste disabled)..."
-                        className="w-full bg-[var(--theme-input-bg)] border border-[var(--theme-border)] rounded-xl px-4 py-3 text-[var(--theme-text-primary)] font-mono outline-none transition-all placeholder:text-[var(--theme-text-muted)] focus:border-[var(--theme-border-focus)]"
+                        className="w-full bg-[var(--theme-input-bg)] border border-[var(--theme-border)] rounded-2xl px-4 py-3 text-[var(--theme-text-primary)] font-mono text-xs outline-none transition-all placeholder:text-[var(--theme-text-muted)] focus:border-[var(--theme-border-focus)] shadow-2xs"
                     />
                 </div>
             </div>
 
             {/* Items Table Grid */}
-            <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl overflow-hidden">
+            <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl overflow-hidden isolate">
                 <div className="max-h-[400px] overflow-y-auto custom-scrollbar">
                     <table className="w-full text-left">
-                        <thead className="bg-[var(--theme-thead-bg)] sticky top-0 z-10 border-b border-[var(--theme-border)]">
+                        <thead className="bg-[var(--theme-bg-subtle)] sticky top-0 z-10 border-b border-[var(--theme-border)]">
                             <tr>
                                 <th className="p-3 text-[10px] text-[var(--theme-thead-text)] uppercase font-bold tracking-wider">{t('posCommand.itemDetails')}</th>
                                 <th className="p-3 text-[10px] text-[var(--theme-thead-text)] uppercase font-bold tracking-wider text-center">
@@ -179,7 +181,7 @@ export const ReceivingForm: React.FC = () => {
                                             <div className="flex items-center justify-center gap-2">
                                                 <button
                                                     onClick={() => handleUpdateTransferItem(index, 'receivedQty', Math.max(0, item.receivedQty - (isWeightVol ? sizeNum : 1)))}
-                                                    className="w-7 h-7 bg-[var(--theme-bg-subtle)] hover:bg-rose-500/10 text-[var(--theme-text-primary)] hover:text-rose-500 rounded-lg flex items-center justify-center transition-all active:scale-95 border border-[var(--theme-border)] hover:border-rose-500/30 cursor-pointer"
+                                                    className="w-7 h-7 bg-[var(--theme-bg-subtle)] hover:bg-rose-500/10 text-[var(--theme-text-primary)] hover:text-rose-500 rounded-xl flex items-center justify-center transition-all active:scale-95 border border-[var(--theme-border)] hover:border-rose-500/30 cursor-pointer text-xs font-bold"
                                                 >-</button>
                                                 <input
                                                     title={t('posCommand.receivedQty') || "Received Quantity"}
@@ -192,7 +194,7 @@ export const ReceivingForm: React.FC = () => {
                                                         const val = parseFloat(e.target.value) || 0;
                                                         handleUpdateTransferItem(index, 'receivedQty', isWeightVol ? val * sizeNum : Math.round(val));
                                                     }}
-                                                    className={`w-14 bg-[var(--theme-input-bg)] border rounded-lg text-center font-mono py-1 focus:outline-none transition-all ${
+                                                    className={`w-14 bg-[var(--theme-input-bg)] border rounded-xl text-center font-mono py-1 text-xs focus:outline-none transition-all ${
                                                         isOverReceived && isCentralHQOnly
                                                             ? 'border-amber-500/50 text-amber-500 bg-amber-500/10'
                                                             : isFullyReceived && isCentralHQOnly
@@ -202,7 +204,7 @@ export const ReceivingForm: React.FC = () => {
                                                 />
                                                 <button
                                                     onClick={() => handleUpdateTransferItem(index, 'receivedQty', item.receivedQty + (isWeightVol ? sizeNum : 1))}
-                                                    className="w-7 h-7 bg-[var(--theme-bg-subtle)] hover:bg-emerald-500/10 text-[var(--theme-text-primary)] hover:text-emerald-500 rounded-lg flex items-center justify-center transition-all active:scale-95 border border-[var(--theme-border)] hover:border-emerald-500/30 cursor-pointer"
+                                                    className="w-7 h-7 bg-[var(--theme-bg-subtle)] hover:bg-emerald-500/10 text-[var(--theme-text-primary)] hover:text-emerald-500 rounded-xl flex items-center justify-center transition-all active:scale-95 border border-[var(--theme-border)] hover:border-emerald-500/30 cursor-pointer text-xs font-bold"
                                                 >+</button>
                                                 {isWeightVol ? (
                                                     <span className="text-[10px] text-[var(--theme-text-secondary)] uppercase font-bold ml-1">x {sizeNum} {unit}</span>
@@ -220,7 +222,7 @@ export const ReceivingForm: React.FC = () => {
                                                 aria-label={t('posCommand.condition') || "Condition"}
                                                 value={item.condition}
                                                 onChange={(e) => handleUpdateTransferItem(index, 'condition', e.target.value)}
-                                                className={`bg-[var(--theme-input-bg)] border rounded-lg text-xs p-2 outline-none w-full cursor-pointer transition-all ${
+                                                className={`bg-[var(--theme-input-bg)] border rounded-xl text-xs p-2 outline-none w-full cursor-pointer transition-all ${
                                                     item.condition === 'Good'
                                                         ? 'text-emerald-500 border-emerald-500/30 font-bold'
                                                         : item.condition === 'Damaged'

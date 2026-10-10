@@ -1,5 +1,5 @@
 import React from 'react';
-import { ChevronDown, Code, Trash2, Lock, Hash } from 'lucide-react';
+import { ChevronDown, Edit2, Trash2, Lock, Hash, Landmark, Globe } from 'lucide-react';
 import { Site } from '../../types';
 import { isAdminSite } from '../../utils/countryAdmin';
 import { formatDisplaySiteId, getSiteCountryId } from '../../utils/siteIdGenerator';
@@ -35,88 +35,89 @@ export function SiteCard({
   return (
     <div
       onClick={() => setExpandedSiteId(isExpanded ? null : site.id)}
-      className={`bg-white/80 dark:bg-black/20 hover:bg-white dark:hover:bg-white/5 border ${
-        isExpanded ? 'border-[#2C5E3B]/40 bg-[#2C5E3B]/5' : 'border-[#E2DCCE]/60 dark:border-white/5'
-      } rounded-2xl p-3.5 cursor-pointer transition-all duration-200 group shadow-sm`}
+      className={`bg-[var(--theme-bg-card)] border transition-all duration-200 rounded-2xl p-3.5 cursor-pointer shadow-xs ${
+        isExpanded ? 'border-[#0071E3] dark:border-[#2997FF]' : 'border-[var(--theme-border)] hover:border-[var(--theme-border-hover)]'
+      }`}
     >
-      <div className="flex items-start justify-between gap-1.5">
+      <div className="flex items-start justify-between gap-2">
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-1.5 flex-wrap">
-            <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${
-              site.status === 'Active' ? 'bg-[#2C5E3B]' :
+            <span className={`w-2 h-2 rounded-full shrink-0 ${
+              site.status === 'Active' ? 'bg-emerald-500' :
               site.status === 'Maintenance' ? 'bg-amber-500' : 'bg-red-500'
             }`} />
-            <h6 className="text-[#1E3F27] dark:text-white font-black text-xs leading-tight truncate group-hover:text-[#2C5E3B] dark:group-hover:text-[#A9CBA2] transition-colors" title={site.name}>
+            <h6 className="text-[var(--theme-text-primary)] font-semibold text-xs leading-tight truncate" title={site.name}>
               {site.name}
             </h6>
 
-            {/* Country ID Badge */}
-            <span className="text-[9px] px-1.5 py-0.5 rounded-md font-mono font-bold shrink-0 bg-[#2C5E3B]/10 text-[#2C5E3B] dark:text-[#A9CBA2] border border-[#2C5E3B]/20 flex items-center gap-1">
-              <span>{countryProfile.flag}</span>
+            {/* Sovereign Country ID Badge */}
+            <span className="text-[11px] px-2 py-0.5 rounded-full font-mono font-semibold shrink-0 bg-[#0071E3]/10 text-[#0071E3] dark:text-[#2997FF] border border-[#0071E3]/20 flex items-center gap-1">
+              <Globe size={11} />
               <span>{countryId}</span>
             </span>
 
             {/* Human-Readable Site ID */}
-            <span className="text-[9px] px-1.5 py-0.5 rounded-md font-mono font-extrabold shrink-0 bg-stone-100 dark:bg-white/10 text-stone-800 dark:text-stone-200 border border-stone-300/80 dark:border-white/10 flex items-center gap-0.5" title={`Human-Readable Site ID: ${humanReadableSiteId}`}>
-              <Hash size={10} className="opacity-50" />
+            <span className="text-[11px] px-2 py-0.5 rounded-full font-mono font-semibold shrink-0 bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] border border-[var(--theme-border)] flex items-center gap-0.5" title={`Human-Readable Site ID: ${humanReadableSiteId}`}>
+              <Hash size={11} className="opacity-60" />
               <span>{humanReadableSiteId}</span>
             </span>
 
             {isAdmin && (
-              <span className="text-[9px] px-1.5 py-0.5 rounded-md font-bold shrink-0 bg-purple-500/15 text-purple-700 dark:text-purple-300 border border-purple-500/30">
-                🏛️ Central HQ
+              <span className="text-[11px] px-2 py-0.5 rounded-full font-semibold shrink-0 bg-purple-500/10 text-purple-700 dark:text-purple-300 border border-purple-500/20 flex items-center gap-1">
+                <Landmark size={11} />
+                <span>Central HQ</span>
               </span>
             )}
           </div>
-          <p className="text-[10px] text-stone-500 dark:text-gray-400 mt-1 line-clamp-2" title={site.address}>
+          <p className="text-[11px] text-[var(--theme-text-secondary)] mt-1 line-clamp-2" title={site.address}>
             {site.address}
           </p>
         </div>
         <ChevronDown
-          size={14}
-          className={`text-stone-400 dark:text-gray-500 shrink-0 transition-transform mt-0.5 ${
-            isExpanded ? 'rotate-180 text-[#2C5E3B] dark:text-[#A9CBA2]' : ''
+          size={16}
+          className={`text-[var(--theme-text-muted)] shrink-0 transition-transform mt-0.5 ${
+            isExpanded ? 'rotate-180 text-[#0071E3] dark:text-[#2997FF]' : ''
           }`}
         />
       </div>
 
       {isExpanded && (
-        <div className="mt-2.5 pt-2.5 border-t border-white/5 space-y-2 text-[10px] text-gray-400" onClick={(e) => e.stopPropagation()}>
+        <div className="mt-3 pt-3 border-t border-[var(--theme-border)] space-y-2.5 text-[11px] text-[var(--theme-text-secondary)] bg-[var(--theme-bg-subtle)]/40 p-3 rounded-xl" onClick={(e) => e.stopPropagation()}>
           <div className="grid grid-cols-2 gap-2">
             <div>
-              <span className="font-bold text-gray-500 block uppercase tracking-wider text-[8px]">Country & Site ID</span>
-              <span className="font-bold text-white flex items-center gap-1">
-                <span>{countryProfile.flag} {countryId}</span>
-                <span className="text-stone-400 font-normal">({countryProfile.name.replace(/\s*\(.*\)/, '')})</span>
-                <span className="text-[9px] text-[#A9CBA2] font-mono font-extrabold ml-1">[{humanReadableSiteId}]</span>
+              <span className="font-semibold text-[var(--theme-text-muted)] block uppercase tracking-wider text-[11px]">Country & Site ID</span>
+              <span className="font-semibold text-[var(--theme-text-primary)] flex items-center gap-1 mt-0.5">
+                <span>{countryId}</span>
+                <span className="text-[var(--theme-text-secondary)] font-normal">({countryProfile.name.replace(/\s*\(.*\)/, '')})</span>
+                <span className="text-[11px] text-[#0071E3] dark:text-[#2997FF] font-mono font-semibold ml-0.5">[{humanReadableSiteId}]</span>
               </span>
             </div>
             <div>
-              <span className="font-bold text-gray-500 block uppercase tracking-wider text-[8px]">Status</span>
-              <span className={`font-semibold ${
-                site.status === 'Active' ? 'text-green-400' :
-                site.status === 'Maintenance' ? 'text-yellow-400' : 'text-red-400'
+              <span className="font-semibold text-[var(--theme-text-muted)] block uppercase tracking-wider text-[11px]">Status</span>
+              <span className={`font-semibold mt-0.5 block ${
+                site.status === 'Active' ? 'text-emerald-600 dark:text-emerald-400' :
+                site.status === 'Maintenance' ? 'text-amber-600 dark:text-amber-400' : 'text-red-600 dark:text-red-400'
               }`}>{site.status}</span>
             </div>
           </div>
           <div className="grid grid-cols-2 gap-2">
             <div>
-              <span className="font-bold text-gray-500 block uppercase tracking-wider text-[8px]">Manager</span>
-              <span className="text-white font-medium truncate block font-bold" title={site.manager || 'Unassigned'}>
+              <span className="font-semibold text-[var(--theme-text-muted)] block uppercase tracking-wider text-[11px]">Manager</span>
+              <span className="text-[var(--theme-text-primary)] font-semibold truncate block mt-0.5" title={site.manager || 'Unassigned'}>
                 {site.manager || 'Unassigned'}
               </span>
             </div>
             <div>
-              <span className="font-bold text-gray-500 block uppercase tracking-wider text-[8px]">Internal System ID</span>
-              <span className="text-stone-400 font-mono text-[9px] truncate block flex items-center gap-1" title={site.id}>
-                <Lock size={9} className="text-stone-500" />
+              <span className="font-semibold text-[var(--theme-text-muted)] block uppercase tracking-wider text-[11px]">Internal System ID</span>
+              <span className="text-[var(--theme-text-secondary)] font-mono text-[11px] truncate block flex items-center gap-1 mt-0.5" title={site.id}>
+                <Lock size={11} className="text-[var(--theme-text-muted)] shrink-0" />
                 <span className="truncate">{site.id}</span>
               </span>
             </div>
           </div>
           <div>
-            <span className="font-bold text-gray-500 block uppercase tracking-wider text-[8px]">Logistics Zone</span>
-            <span className="text-yellow-400 font-medium truncate block font-bold" title={
+            <span className="font-semibold text-[var(--theme-text-muted)] block uppercase tracking-wider text-[11px]">Logistics Zone</span>
+            <span className="text-[var(--theme-text-primary)] font-medium truncate block mt-0.5" title={
               site.logisticsZoneId
                 ? (logisticsZones.find(z => z.id === site.logisticsZoneId)?.name || 'Unknown')
                 : 'Unassigned'
@@ -127,14 +128,14 @@ export function SiteCard({
             </span>
           </div>
           <div>
-            <span className="font-bold text-gray-500 block uppercase tracking-wider text-[8px]">
+            <span className="font-semibold text-[var(--theme-text-muted)] block uppercase tracking-wider text-[11px]">
               {site.type === 'Warehouse' || site.type === 'Distribution Center'
                 ? 'Capacity'
                 : site.type === 'Administration'
                   ? 'Staff Limit'
                   : 'Terminals'}
             </span>
-            <span className="text-white font-semibold">
+            <span className="text-[var(--theme-text-primary)] font-semibold mt-0.5 block">
               {site.type === 'Warehouse' || site.type === 'Distribution Center'
                 ? `${site.capacity || 0} m²`
                 : site.type === 'Administration'
@@ -143,31 +144,31 @@ export function SiteCard({
             </span>
           </div>
 
-          <div className="flex gap-2 justify-end pt-2 border-t border-white/5">
+          <div className="flex gap-2 justify-end pt-2.5 border-t border-[var(--theme-border)]">
             <button
               onClick={() => { setNewSite(site); setIsSiteModalOpen(true); }}
-              className="px-2.5 py-1.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-white text-[9px] font-bold transition-colors flex items-center gap-1"
+              className="h-8 px-3 bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-lg text-[var(--theme-text-primary)] text-[11px] font-semibold transition-all flex items-center gap-1.5 cursor-pointer active:scale-[0.98]"
               title="Edit Location"
             >
-              <Code size={10} className="text-[#2C5E3B] dark:text-[#A9CBA2]" />
+              <Edit2 size={12} className="text-[#0071E3] dark:text-[#2997FF]" />
               <span>Edit</span>
             </button>
             {isAdmin ? (
               <span
-                className="px-2.5 py-1.5 bg-stone-500/10 border border-stone-500/20 rounded-lg text-stone-400 text-[9px] font-bold flex items-center gap-1 cursor-not-allowed select-none"
+                className="h-8 px-3 bg-stone-500/10 border border-stone-500/20 rounded-lg text-[var(--theme-text-muted)] text-[11px] font-semibold flex items-center gap-1.5 cursor-not-allowed select-none"
                 title="Administration HQ is protected and cannot be deleted"
               >
-                <Lock size={10} />
+                <Lock size={12} />
                 <span>Protected HQ</span>
               </span>
             ) : (
               <button
                 onClick={() => handleDeleteSite(site.id)}
-                className="px-2.5 py-1.5 bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 rounded-lg text-red-400 text-[9px] font-bold transition-colors flex items-center gap-1"
+                className="h-8 px-3 bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 rounded-lg text-red-600 dark:text-red-400 text-[11px] font-semibold transition-all flex items-center gap-1.5 cursor-pointer active:scale-[0.98]"
                 title="Delete Location"
                 disabled={isDeleting}
               >
-                <Trash2 size={10} />
+                <Trash2 size={12} />
                 <span>Delete</span>
               </button>
             )}

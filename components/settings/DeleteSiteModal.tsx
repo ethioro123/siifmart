@@ -23,31 +23,42 @@ export function DeleteSiteModal({
   isDeleting
 }: DeleteSiteModalProps) {
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="⚠️ Delete Location">
+    <Modal isOpen={isOpen} onClose={onClose} title="Delete Location">
       <div className="space-y-4">
-        <div className="bg-red-500/10 border border-red-500/30 rounded-xl p-4">
-          <h4 className="text-red-400 font-bold mb-2 flex items-center gap-2">
-            <AlertTriangle size={20} />
+        <div className="bg-red-500/10 border border-red-500/20 rounded-2xl p-4">
+          <h4 className="text-red-600 dark:text-red-400 font-semibold mb-2 flex items-center gap-2 text-sm">
+            <AlertTriangle size={18} />
             Permanent Deletion Warning
           </h4>
-          <p className="text-sm text-gray-300 mb-3">
-            You are about to permanently delete <span className="font-bold text-white">"{siteToDelete?.name}"</span>
+          <p className="text-xs text-[var(--theme-text-secondary)] mb-3 leading-relaxed">
+            You are about to permanently delete <span className="font-semibold text-[var(--theme-text-primary)]">"{siteToDelete?.name}"</span>
           </p>
-          <div className="text-xs text-gray-400 space-y-1">
-            <p>• All products at this location will be deleted</p>
-            <p>• All employees assigned here will be unassigned</p>
-            <p>• All sales and inventory records will be affected</p>
-            <p className="text-red-400 font-bold mt-2">⚠️ This action cannot be undone!</p>
+          <div className="text-[11px] text-[var(--theme-text-secondary)] space-y-1.5 border-t border-red-500/10 pt-2.5">
+            <p className="flex items-center gap-1.5">
+              <span className="w-1 h-1 rounded-full bg-red-500" />
+              All products at this location will be deleted
+            </p>
+            <p className="flex items-center gap-1.5">
+              <span className="w-1 h-1 rounded-full bg-red-500" />
+              All employees assigned here will be unassigned
+            </p>
+            <p className="flex items-center gap-1.5">
+              <span className="w-1 h-1 rounded-full bg-red-500" />
+              All sales and inventory records will be affected
+            </p>
+            <p className="text-red-600 dark:text-red-400 font-semibold mt-2">
+              This action is permanent and cannot be undone.
+            </p>
           </div>
         </div>
 
         <div>
-          <label className="text-sm text-gray-300 font-bold mb-2 block">
-            To confirm, type <span className="font-mono font-bold text-red-400 bg-red-500/10 px-2 py-1 rounded">DELETE</span> below:
+          <label className="text-[11px] text-[var(--theme-text-secondary)] font-semibold uppercase tracking-wider mb-2 block">
+            To confirm, type <span className="font-mono font-semibold text-red-600 dark:text-red-400 bg-red-500/10 px-2 py-0.5 rounded-md border border-red-500/20">DELETE</span> below:
           </label>
           <input
             type="text"
-            className="w-full bg-black/30 border border-white/10 rounded-lg px-4 py-3 text-white outline-none focus:border-red-500 font-mono"
+            className="w-full h-11 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-4 text-xs font-mono font-medium text-[var(--theme-text-primary)] focus:outline-hidden focus:ring-2 focus:ring-red-500/40 focus:border-red-500 transition-all placeholder:text-[var(--theme-text-muted)]"
             placeholder="Type DELETE to confirm"
             value={deleteConfirmText}
             onChange={(e) => setDeleteConfirmText(e.target.value)}
@@ -59,18 +70,20 @@ export function DeleteSiteModal({
 
         <div className="flex gap-3 pt-2">
           <button
+            type="button"
             onClick={onClose}
-            className="flex-1 py-3 bg-white/5 hover:bg-white/10 rounded-xl text-white font-bold transition-colors"
+            className="flex-1 h-11 bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl text-xs font-semibold text-[var(--theme-text-primary)] transition-all cursor-pointer active:scale-[0.98]"
           >
             Cancel
           </button>
           <button
+            type="button"
             onClick={confirmDeleteSite}
             disabled={deleteConfirmText !== "DELETE" || isDeleting}
-            className="flex-1 py-3 bg-red-500 hover:bg-red-600 text-white font-bold rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+            className="flex-1 h-11 bg-red-600 hover:bg-red-700 text-white font-semibold text-xs rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 cursor-pointer active:scale-[0.98]"
           >
-            {isDeleting ? <Loader2 className="animate-spin" size={18} /> : <Trash2 size={18} />}
-            {isDeleting ? 'Deleting...' : 'Delete Permanently'}
+            {isDeleting ? <Loader2 className="animate-spin" size={16} /> : <Trash2 size={16} />}
+            <span>{isDeleting ? 'Deleting...' : 'Delete Permanently'}</span>
           </button>
         </div>
       </div>

@@ -54,9 +54,9 @@ export default function WarehouseOperations() {
     } = useData();
 
     const {
-        jobs, transfers, jobAssignments,
+        jobs, transfers, jobAssignments, historicalJobs,
         receivePO, receivePOSplit, finalizePO, assignJob, updateJobItem, completeJob, resetJob, updateJobStatus, deleteJob,
-        refreshJobs, fixBrokenJobs
+        refreshJobs, fixBrokenJobs, loadHistoricalJobs
     } = useFulfillmentData();
 
     const { workerPoints, getWorkerPoints, getLeaderboard } = useGamification();
@@ -142,8 +142,7 @@ export default function WarehouseOperations() {
         filteredJobs,
         filteredEmployees,
         filteredProducts,
-        filteredMovements,
-        historicalJobs
+        filteredMovements
     } = useFilteredFulfillmentData({
         jobs,
         employees: employees as any,
@@ -152,6 +151,8 @@ export default function WarehouseOperations() {
         user,
         activeSite: activeSite || null
     });
+    // RULE 10: historicalJobs comes from FulfillmentDataProvider (on-demand),
+    // NOT derived from filteredJobs (which only contains active jobs).
 
 
     // 🔒 TAB-LEVEL ACCESS CONTROL
@@ -301,6 +302,7 @@ export default function WarehouseOperations() {
         filteredEmployees,
         filteredMovements,
         historicalJobs,
+        loadHistoricalJobs,
         resolveOrderRef,
         canApprove,
         isMultiSiteRole,

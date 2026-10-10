@@ -22,8 +22,8 @@ export const ProfileSecurityCard: React.FC<ProfileSecurityCardProps> = ({
     isChangingPassword,
     handleUpdatePassword
 }) => {
-    const inputClasses = "w-full bg-[var(--theme-bg-panel)] border border-[var(--theme-border)] rounded-xl px-4 py-2.5 text-xs text-[var(--theme-text-primary)] outline-none focus:border-[var(--theme-primary)] transition-colors";
-    const labelClasses = "text-[10px] text-[var(--theme-text-muted)] font-black uppercase tracking-wider mb-1 block px-1";
+    const inputClasses = "w-full h-11 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-4 text-xs text-[var(--theme-text-primary)] outline-none focus:border-[var(--theme-accent)] transition-colors";
+    const labelClasses = "text-[11px] text-[var(--theme-text-secondary)] font-semibold uppercase tracking-wider mb-1.5 block px-1";
 
     const canSubmit = !isChangingPassword && !!newPasswordInput && newPasswordInput.length >= 6 && newPasswordInput === confirmPasswordInput;
 
@@ -37,7 +37,7 @@ export const ProfileSecurityCard: React.FC<ProfileSecurityCardProps> = ({
                     <h4 className="text-sm font-bold text-[var(--theme-text-primary)]">
                         Authentication & Security Credentials
                     </h4>
-                    <p className="text-[11px] text-[var(--theme-text-muted)]">
+                    <p className="text-[11px] text-[var(--theme-text-secondary)]">
                         Update session login password and cryptographic credentials.
                     </p>
                 </div>
@@ -84,7 +84,7 @@ export const ProfileSecurityCard: React.FC<ProfileSecurityCardProps> = ({
                 <button
                     onClick={handleUpdatePassword}
                     disabled={!canSubmit}
-                    className="w-full mt-2 flex items-center justify-center gap-2 bg-[var(--theme-primary)] text-white hover:opacity-95 font-bold text-xs uppercase tracking-wider py-2.5 rounded-xl transition-all disabled:opacity-40 cursor-pointer shadow-xs"
+                    className="w-full mt-2 h-11 flex items-center justify-center gap-2 bg-[var(--theme-accent)] text-white hover:bg-[var(--theme-accent)]/90 font-semibold text-xs uppercase tracking-wider rounded-xl transition-colors disabled:opacity-40 cursor-pointer shadow-xs"
                 >
                     {isChangingPassword ? (
                         <Loader2 size={16} className="animate-spin" />

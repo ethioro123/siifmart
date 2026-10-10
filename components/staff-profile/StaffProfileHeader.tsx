@@ -1,5 +1,5 @@
 import React from 'react';
-import { Camera, Building, CreditCard, MessageSquare, Key, AlertTriangle, Trash2, User, UserCheck, ShieldCheck, Clock } from 'lucide-react';
+import { Camera, Building, CreditCard, MessageSquare, Key, AlertTriangle, Trash2, User, UserCheck, ShieldCheck } from 'lucide-react';
 import { Employee } from '../../types';
 import { formatRole } from '../../utils/formatting';
 import { formatDisplayEmployeeId } from '../../utils/employeeIdGenerator';
@@ -35,30 +35,27 @@ export default function StaffProfileHeader({
     const isActive = employee.status === 'Active';
 
     return (
-        <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-white via-[#FAF8F5] to-emerald-50/30 dark:from-[#151D18] dark:via-[#18201B] dark:to-[#101612] border border-[#E2DCCE] dark:border-white/10 p-5 sm:p-7 mb-6 shadow-sm">
-            {/* Ambient Lighting */}
-            <div className="absolute top-0 right-0 w-80 h-80 bg-emerald-500/5 dark:bg-emerald-400/5 rounded-full blur-3xl pointer-events-none -mr-20 -mt-20" />
-            <div className="absolute bottom-0 left-1/3 w-60 h-60 bg-amber-500/5 dark:bg-amber-400/5 rounded-full blur-2xl pointer-events-none" />
-
-            <div className="relative z-10 flex flex-col md:flex-row items-center md:items-start gap-5 sm:gap-7">
+        <div className="rounded-2xl bg-[var(--theme-bg-card)] border border-[var(--theme-border)] p-5 sm:p-6 mb-5 shadow-[var(--shadow-sm)]">
+            <div className="flex flex-col md:flex-row items-center md:items-start gap-5 sm:gap-6">
                 {/* Avatar with Presence Ring */}
-                <div className="relative flex-shrink-0 group">
-                    <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-2xl overflow-hidden ring-4 ring-emerald-600/10 dark:ring-emerald-400/15 border-2 border-white dark:border-[#1E2822] shadow-md bg-stone-100 dark:bg-black/40 relative">
+                <div className="relative shrink-0 group select-none">
+                    <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-2xl overflow-hidden border border-[var(--theme-border)] bg-[var(--theme-bg-subtle)] shadow-xs relative">
                         {employee.avatar ? (
                             <img src={employee.avatar} className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" alt={employee.name} />
                         ) : (
-                            <div className="w-full h-full flex items-center justify-center text-stone-400 dark:text-stone-600">
-                                <User size={44} />
+                            <div className="w-full h-full flex items-center justify-center text-[var(--theme-text-muted)]">
+                                <User size={40} />
                             </div>
                         )}
                         {(isOwnProfile || canManageEmployees) && (
                             <button
+                                type="button"
                                 onClick={onPhotoRequest}
                                 className="absolute inset-0 bg-black/50 backdrop-blur-xs flex flex-col items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
                                 title="Change Profile Photo"
                             >
-                                <Camera size={22} className="mb-1" />
-                                <span className="text-[10px] font-bold">Edit</span>
+                                <Camera size={20} className="mb-1" />
+                                <span className="text-xs font-semibold">Edit</span>
                             </button>
                         )}
                     </div>
@@ -66,13 +63,13 @@ export default function StaffProfileHeader({
                     {/* Online / Offline Presence Badge */}
                     <div
                         title={isOnline ? 'Online now' : 'Offline'}
-                        className={`absolute -bottom-1 -right-1 px-2 py-0.5 rounded-full border-2 border-white dark:border-[#18201B] text-[10px] font-bold flex items-center gap-1 shadow-xs ${
+                        className={`absolute -bottom-1 -right-1 px-2 py-0.5 rounded-full border-2 border-[var(--theme-bg-card)] text-[11px] font-semibold flex items-center gap-1 shadow-xs ${
                             isOnline 
                                 ? 'bg-emerald-500 text-white' 
-                                : 'bg-stone-200 dark:bg-stone-700 text-stone-600 dark:text-stone-300'
+                                : 'bg-neutral-200 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-400'
                         }`}
                     >
-                        <span className={`w-1.5 h-1.5 rounded-full ${isOnline ? 'bg-white animate-pulse' : 'bg-stone-400'}`} />
+                        <span className={`w-1.5 h-1.5 rounded-full ${isOnline ? 'bg-white animate-pulse' : 'bg-neutral-400'}`} />
                         <span>{isOnline ? 'Online' : 'Offline'}</span>
                     </div>
 
@@ -83,34 +80,34 @@ export default function StaffProfileHeader({
                 <div className="flex-1 text-center md:text-left min-w-0">
                     <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
                         <div className="min-w-0">
-                            <h2 className="text-2xl sm:text-3xl font-extrabold text-[#1E3F27] dark:text-[#EAE5D9] tracking-tight truncate">
+                            <h2 className="text-2xl sm:text-3xl font-bold text-[var(--theme-text-primary)] tracking-tight truncate">
                                 {employee.name}
                             </h2>
                             <div className="flex flex-wrap items-center justify-center md:justify-start gap-2 mt-2">
-                                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-[#2C5E3B]/10 dark:bg-emerald-500/15 text-[#2C5E3B] dark:text-[#A9CBA2] border border-[#2C5E3B]/20 dark:border-emerald-500/30">
+                                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-blue-500/10 text-[var(--theme-accent)] border border-blue-500/20">
                                     <ShieldCheck size={13} />
                                     {formatRole(employee.role)}
                                 </span>
-                                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-stone-100 dark:bg-white/5 text-stone-600 dark:text-stone-300 border border-stone-200 dark:border-white/10">
-                                    <Building size={13} className="text-stone-400" />
+                                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] border border-[var(--theme-border)]">
+                                    <Building size={13} className="text-[var(--theme-text-muted)]" />
                                     {employee.department || 'Retail Operations'}
                                 </span>
-                                <span className="inline-flex items-center font-mono text-xs font-semibold px-2.5 py-1 rounded-full bg-stone-100 dark:bg-white/5 text-stone-700 dark:text-stone-300 border border-stone-200 dark:border-white/10">
+                                <span className="inline-flex items-center font-mono text-xs font-semibold px-2.5 py-1 rounded-full bg-[var(--theme-bg-subtle)] text-[var(--theme-text-primary)] border border-[var(--theme-border)] tabular-nums">
                                     ID: {formatDisplayEmployeeId(employee, sites)}
                                 </span>
                             </div>
                         </div>
 
                         {/* Status Badge */}
-                        <div className="self-center lg:self-start flex-shrink-0">
-                            <span className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-extrabold border ${
+                        <div className="self-center lg:self-start shrink-0">
+                            <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold border ${
                                 isActive 
-                                    ? 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-500/25'
+                                    ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20'
                                     : isPending
-                                        ? 'bg-amber-50 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-200 dark:border-amber-500/25'
-                                        : 'bg-rose-50 dark:bg-rose-500/10 text-rose-700 dark:text-rose-400 border-rose-200 dark:border-rose-500/25'
+                                        ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20'
+                                        : 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/20'
                             }`}>
-                                <span className={`w-2 h-2 rounded-full ${
+                                <span className={`w-1.5 h-1.5 rounded-full ${
                                     isActive ? 'bg-emerald-500' : isPending ? 'bg-amber-500 animate-pulse' : 'bg-rose-500'
                                 }`} />
                                 {employee.status}
@@ -119,12 +116,13 @@ export default function StaffProfileHeader({
                     </div>
 
                     {/* Actions Toolbar */}
-                    <div className="flex flex-wrap items-center justify-center md:justify-start gap-2.5 mt-5">
+                    <div className="flex flex-wrap items-center justify-center md:justify-start gap-2 mt-4 pt-3 border-t border-[var(--theme-border-subtle)]">
                         <button
+                            type="button"
                             onClick={onIdCard}
-                            className="inline-flex items-center gap-1.5 text-xs font-bold bg-white dark:bg-white/5 hover:bg-stone-50 dark:hover:bg-white/10 text-stone-700 dark:text-[#EAE5D9] border border-[#E2DCCE] dark:border-white/10 px-3.5 py-2 rounded-xl transition-all shadow-xs hover:shadow-sm active:scale-98 cursor-pointer"
+                            className="h-9 px-3 rounded-xl bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-panel-hover)] border border-[var(--theme-border)] text-xs font-semibold text-[var(--theme-text-primary)] transition-all active:scale-[0.98] cursor-pointer flex items-center gap-1.5"
                         >
-                            <CreditCard size={14} className="text-[#2C5E3B] dark:text-[#A9CBA2]" />
+                            <CreditCard size={14} className="text-[var(--theme-text-secondary)]" />
                             <span>ID Card</span>
                         </button>
 
@@ -132,8 +130,9 @@ export default function StaffProfileHeader({
                             <>
                                 {canApprove && onApprove && (
                                     <button
+                                        type="button"
                                         onClick={onApprove}
-                                        className="inline-flex items-center gap-1.5 text-xs font-bold bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 text-white px-4 py-2 rounded-xl shadow-md shadow-emerald-600/20 hover:shadow-emerald-600/30 transition-all active:scale-98 cursor-pointer"
+                                        className="h-9 px-3.5 rounded-xl bg-[var(--theme-accent)] hover:opacity-95 text-white text-xs font-semibold transition-all active:scale-[0.98] cursor-pointer flex items-center gap-1.5 shadow-xs"
                                     >
                                         <UserCheck size={14} />
                                         <span>Approve & Activate</span>
@@ -141,17 +140,19 @@ export default function StaffProfileHeader({
                                 )}
 
                                 <button
+                                    type="button"
                                     onClick={onMessage}
-                                    className="inline-flex items-center gap-1.5 text-xs font-bold bg-white dark:bg-white/5 hover:bg-[#2C5E3B]/5 dark:hover:bg-white/10 text-stone-700 dark:text-[#EAE5D9] hover:text-[#2C5E3B] dark:hover:text-[#A9CBA2] border border-[#E2DCCE] dark:border-white/10 px-3.5 py-2 rounded-xl transition-all shadow-xs hover:shadow-sm active:scale-98 cursor-pointer"
+                                    className="h-9 px-3 rounded-xl bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-panel-hover)] border border-[var(--theme-border)] text-xs font-semibold text-[var(--theme-text-primary)] transition-all active:scale-[0.98] cursor-pointer flex items-center gap-1.5"
                                 >
-                                    <MessageSquare size={14} className="text-stone-500 dark:text-stone-400" />
+                                    <MessageSquare size={14} className="text-[var(--theme-text-secondary)]" />
                                     <span>Message</span>
                                 </button>
 
                                 {canResetPassword && (
                                     <button
+                                        type="button"
                                         onClick={onResetPassword}
-                                        className="inline-flex items-center gap-1.5 text-xs font-bold bg-amber-50 dark:bg-amber-500/10 hover:bg-amber-100 dark:hover:bg-amber-500/20 text-amber-800 dark:text-amber-300 border border-amber-200 dark:border-amber-500/20 px-3.5 py-2 rounded-xl transition-all shadow-xs active:scale-98 cursor-pointer"
+                                        className="h-9 px-3 rounded-xl bg-amber-500/10 hover:bg-amber-500/15 border border-amber-500/20 text-xs font-semibold text-amber-600 dark:text-amber-400 transition-all active:scale-[0.98] cursor-pointer flex items-center gap-1.5"
                                     >
                                         <Key size={14} />
                                         <span>Reset</span>
@@ -160,8 +161,9 @@ export default function StaffProfileHeader({
 
                                 {canTerminate && employee.status !== 'Terminated' && (
                                     <button
+                                        type="button"
                                         onClick={onTerminate}
-                                        className="inline-flex items-center gap-1.5 text-xs font-bold bg-rose-50 dark:bg-rose-500/10 hover:bg-rose-100 dark:hover:bg-rose-500/20 text-rose-700 dark:text-rose-400 border border-rose-200 dark:border-rose-500/20 px-3.5 py-2 rounded-xl transition-all shadow-xs active:scale-98 cursor-pointer"
+                                        className="h-9 px-3 rounded-xl bg-rose-500/10 hover:bg-rose-500/15 border border-rose-500/20 text-xs font-semibold text-rose-600 dark:text-rose-400 transition-all active:scale-[0.98] cursor-pointer flex items-center gap-1.5"
                                     >
                                         <AlertTriangle size={14} />
                                         <span>Terminate</span>
@@ -170,8 +172,9 @@ export default function StaffProfileHeader({
 
                                 {canDelete && (
                                     <button
+                                        type="button"
                                         onClick={onDelete}
-                                        className="inline-flex items-center gap-1.5 text-xs font-bold bg-red-50 dark:bg-red-500/10 hover:bg-red-100 dark:hover:bg-red-500/20 text-red-700 dark:text-red-400 border border-red-200 dark:border-red-500/20 px-3.5 py-2 rounded-xl transition-all shadow-xs active:scale-98 cursor-pointer"
+                                        className="h-9 px-3 rounded-xl bg-rose-500/10 hover:bg-rose-500/15 border border-rose-500/20 text-xs font-semibold text-rose-600 dark:text-rose-400 transition-all active:scale-[0.98] cursor-pointer flex items-center gap-1.5"
                                     >
                                         <Trash2 size={14} />
                                         <span>Delete</span>

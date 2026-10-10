@@ -22,9 +22,9 @@ import { isAdminSite } from '../../utils/countryAdmin';
 import { generateNextSiteCode } from '../../utils/siteIdGenerator';
 
 const SectionHeader = ({ title, desc }: { title: string, desc: string }) => (
-    <div className="mb-6 pb-4 border-b border-[#E2DCCE]/60 dark:border-white/5">
-        <h3 className="text-lg font-black text-[#1E3F27] dark:text-[#EAE5D9] tracking-tight">{title}</h3>
-        <p className="text-xs text-[#4D6E56] dark:text-[#7A9E83] mt-0.5">{desc}</p>
+    <div className="mb-6 pb-4 border-b border-[var(--theme-border)]">
+        <h3 className="text-base font-semibold text-[var(--theme-text-primary)] tracking-tight">{title}</h3>
+        <p className="text-xs text-[var(--theme-text-secondary)] mt-0.5">{desc}</p>
     </div>
 );
 
@@ -290,44 +290,46 @@ export default function LocationSettings() {
 
     return (
         <Protected permission="MANAGE_SITES" fallback={
-            <div className="max-w-4xl">
-                <div className="bg-red-500/10 border border-red-500/20 rounded-3xl p-8 text-center">
-                    <Lock className="w-16 h-16 text-red-400 mx-auto mb-4" />
-                    <h3 className="text-xl font-bold text-white mb-2">Access Restricted</h3>
-                    <p className="text-gray-400">Only the CEO can manage physical facilities.</p>
+            <div className="max-w-2xl mx-auto py-12">
+                <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-8 text-center shadow-xs">
+                    <div className="w-12 h-12 rounded-2xl bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center mx-auto mb-3">
+                        <Lock size={20} />
+                    </div>
+                    <h3 className="text-base font-semibold text-[var(--theme-text-primary)] mb-1">Access Restricted</h3>
+                    <p className="text-xs text-[var(--theme-text-secondary)]">Only executive leadership can configure physical facilities.</p>
                 </div>
             </div>
         }>
-            <div className="w-full space-y-6 animate-in fade-in slide-in-from-right-4">
+            <div className="w-full space-y-6 animate-in fade-in">
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
                     <div>
                         <SectionHeader
                             title="Physical Locations"
                             desc={`Manage Warehouses, Distribution Centers, and Retail Stores across ${countryProfile.name}.`}
                         />
-                        <div className="flex flex-wrap items-center gap-4 mt-2">
-                            <div className="flex items-center gap-2 text-xs font-bold text-purple-700 dark:text-purple-300">
-                                <Building size={15} />
+                        <div className="flex flex-wrap items-center gap-2 mt-2">
+                            <div className="flex items-center gap-1.5 text-xs font-semibold text-purple-700 dark:text-purple-300 bg-purple-500/10 px-2.5 py-1 rounded-full border border-purple-500/20">
+                                <Building size={14} />
                                 <span>{sites.filter((s: Site) => s.type === 'Administration').length} Administration</span>
                             </div>
-                            <div className="flex items-center gap-2 text-xs font-bold text-blue-700 dark:text-blue-300">
-                                <Building size={15} />
+                            <div className="flex items-center gap-1.5 text-xs font-semibold text-[#0071E3] dark:text-[#2997FF] bg-[#0071E3]/10 px-2.5 py-1 rounded-full border border-[#0071E3]/20">
+                                <Building size={14} />
                                 <span>{sites.filter((s: Site) => s.type === 'Warehouse').length} Warehouses</span>
                             </div>
-                            <div className="flex items-center gap-2 text-xs font-bold text-[#2C5E3B] dark:text-[#A9CBA2]">
-                                <Store size={15} />
+                            <div className="flex items-center gap-1.5 text-xs font-semibold text-emerald-700 dark:text-emerald-300 bg-emerald-500/10 px-2.5 py-1 rounded-full border border-emerald-500/20">
+                                <Store size={14} />
                                 <span>{sites.filter((s: Site) => s.type === 'Store').length} Stores</span>
                             </div>
                         </div>
 
-                        <div className="flex items-center gap-1.5 mt-4 bg-[#FAF8F5] dark:bg-black/30 p-1 rounded-2xl w-fit border border-[#E2DCCE] dark:border-white/10">
+                        <div className="flex items-center gap-1 mt-4 bg-[var(--theme-bg-subtle)] p-1 rounded-xl border border-[var(--theme-border)] w-fit">
                             <button
                                 type="button"
                                 onClick={() => setLocationViewMode('category')}
-                                className={`px-3.5 py-1.5 rounded-xl text-xs font-black uppercase tracking-wider transition-all cursor-pointer ${
+                                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all cursor-pointer ${
                                     locationViewMode === 'category'
-                                        ? 'bg-[#2C5E3B] text-white shadow-sm'
-                                        : 'text-stone-500 dark:text-gray-400 hover:text-[#1E3F27] dark:hover:text-white'
+                                        ? 'bg-[#0071E3] dark:bg-[#2997FF] text-white shadow-xs font-semibold'
+                                        : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-card)]'
                                 }`}
                             >
                                 By Category
@@ -335,10 +337,10 @@ export default function LocationSettings() {
                             <button
                                 type="button"
                                 onClick={() => setLocationViewMode('zone')}
-                                className={`px-3.5 py-1.5 rounded-xl text-xs font-black uppercase tracking-wider transition-all cursor-pointer ${
+                                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all cursor-pointer ${
                                     locationViewMode === 'zone'
-                                        ? 'bg-[#2C5E3B] text-white shadow-sm'
-                                        : 'text-stone-500 dark:text-gray-400 hover:text-[#1E3F27] dark:hover:text-white'
+                                        ? 'bg-[#0071E3] dark:bg-[#2997FF] text-white shadow-xs font-semibold'
+                                        : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-card)]'
                                 }`}
                             >
                                 By Logistics Zone
@@ -350,14 +352,14 @@ export default function LocationSettings() {
                         <button
                             type="button"
                             onClick={() => setIsZoneManagerOpen(true)}
-                            className="bg-amber-50 dark:bg-amber-950/20 text-amber-800 dark:text-amber-400 hover:bg-amber-100 dark:hover:bg-amber-950/40 border border-amber-200 dark:border-amber-900/30 px-4 py-2.5 rounded-2xl font-black text-xs uppercase tracking-wider flex items-center gap-2 transition-all cursor-pointer shadow-sm"
+                            className="h-10 bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)] border border-[var(--theme-border)] px-4 rounded-xl font-semibold text-xs flex items-center gap-2 transition-all cursor-pointer active:scale-[0.98]"
                         >
-                            <Globe size={15} /> Manage Zones
+                            <Globe size={15} className="text-[#0071E3] dark:text-[#2997FF]" /> Manage Zones
                         </button>
                         <button
                             type="button"
                             onClick={handleOpenAddSite}
-                            className="bg-[#2C5E3B] text-white hover:bg-[#1E3F27] px-5 py-2.5 rounded-2xl font-black text-xs uppercase tracking-wider flex items-center gap-2 transition-all cursor-pointer shadow-sm"
+                            className="h-10 bg-[#0071E3] dark:bg-[#2997FF] text-white hover:opacity-95 px-5 rounded-xl font-semibold text-xs flex items-center gap-2 shadow-[0_2px_8px_rgba(0,113,227,0.25)] transition-all cursor-pointer active:scale-[0.98]"
                         >
                             <Plus size={16} /> Add Location
                         </button>

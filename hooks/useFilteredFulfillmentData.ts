@@ -152,18 +152,10 @@ export const useFilteredFulfillmentData = ({
         return baseFiltered;
     }, [movements, user?.role, user?.siteId, activeSite]);
 
-    const historicalJobs = useMemo(() => {
-        return filteredJobs.filter((j: WMSJob) => {
-            const status = (j.status || '').toLowerCase();
-            return status === 'completed' || status === 'cancelled' || status === 'deleted';
-        });
-    }, [filteredJobs]);
-
     return {
         filteredJobs,
         filteredEmployees,
         filteredProducts,
-        filteredMovements,
-        historicalJobs
+        filteredMovements
     };
 };

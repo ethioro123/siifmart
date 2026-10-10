@@ -212,7 +212,7 @@ export const ViewPOModal: React.FC<ViewPOModalProps> = ({ isOpen, onClose, po, o
                             <div className="flex items-center gap-1.5 text-xs">
                                 <span className="text-[var(--theme-text-secondary)] uppercase font-semibold tracking-wider text-[10px]">Approved By:</span>
                                 <span className="text-[var(--theme-text-primary)] font-semibold">{po.approvedBy}</span>
-                                {po.approvedAt && (
+                                {po.approvedAt && formatDateTime(po.approvedAt, { showTime: true }) !== 'Invalid Date' && (
                                     <span className="text-[var(--theme-text-secondary)] font-mono text-xs">({formatDateTime(po.approvedAt, { showTime: true })})</span>
                                 )}
                             </div>
