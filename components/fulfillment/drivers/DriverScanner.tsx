@@ -26,23 +26,22 @@ export const DriverScanner: React.FC<DriverScannerProps> = ({
             <button
                 onClick={() => setDriverScannerOpen(false)}
                 title={t('warehouse.misc.closeScanner')}
-                className="absolute top-4 right-4 sm:top-10 sm:right-10 p-2.5 sm:p-4 min-w-[44px] min-h-[44px] flex items-center justify-center bg-white/10 hover:bg-white/20 rounded-full text-white transition-colors shrink-0"
+                className="absolute top-4 right-4 sm:top-10 sm:right-10 min-w-[44px] min-h-[44px] flex items-center justify-center bg-white/10 hover:bg-white/20 rounded-full text-white transition-colors shrink-0 touch-manipulation"
             >
-                <X size={20} className="sm:w-[32px] sm:h-[32px]" />
+                <X size={22} />
             </button>
  
             <div className="w-full max-w-lg space-y-6 sm:space-y-8 text-center">
                 <div className="relative inline-block">
-                    <div className="absolute-inset-4 bg-[#2C5E3B]/20 blur-xl animate-pulse rounded-full" />
-                    <div className="w-48 h-48 xs:w-56 xs:h-56 sm:w-64 sm:h-64 border-2 border-dashed border-[#A9CBA2]/50 rounded-3xl flex items-center justify-center relative overflow-hidden">
-                         <div className="absolute left-0 w-full h-1 bg-[#A9CBA2]/50 shadow-[0_0_15px_rgba(169,203,162,0.8)] animate-[scan_2s_infinite]" />
-                        <QrCode className="text-[#A9CBA2] opacity-20 w-24 h-24 sm:w-[120px] sm:h-[120px]" />
+                    <div className="w-48 h-48 xs:w-56 xs:h-56 sm:w-64 sm:h-64 border-2 border-dashed border-primary/50 rounded-3xl flex items-center justify-center relative overflow-hidden bg-black/40">
+                        <div className="absolute left-0 w-full h-1 bg-primary/70 animate-[scan_2s_infinite]" />
+                        <QrCode className="text-primary opacity-20 w-24 h-24 sm:w-[120px] sm:h-[120px]" />
                     </div>
                 </div>
  
                 <div>
-                    <h3 className="text-xl sm:text-2xl font-black text-white uppercase tracking-tighter">{t('warehouse.driverHub.readyToScan')}</h3>
-                    <p className="text-gray-500 font-bold uppercase tracking-widest text-[10px] sm:text-xs mt-2">{t('warehouse.driverHub.scanPrompt')}</p>
+                    <h3 className="text-xl sm:text-2xl font-bold text-white tracking-tight">{t('warehouse.driverHub.readyToScan')}</h3>
+                    <p className="text-gray-400 font-semibold uppercase tracking-wider text-[11px] sm:text-xs mt-2">{t('warehouse.driverHub.scanPrompt')}</p>
                 </div>
  
                 <div className="grid grid-cols-1 gap-3 sm:gap-4">
@@ -67,13 +66,13 @@ export const DriverScanner: React.FC<DriverScannerProps> = ({
                             setDriverScannerOpen(false);
                             setSelectedJob(null);
                         }}
-                        className="w-full py-3.5 sm:py-4 bg-[#2C5E3B] text-white font-black uppercase tracking-widest rounded-2xl shadow-[0_0_20px_rgba(44,94,59,0.4)] hover:bg-[#3a7a4d] transition-colors active:scale-95 text-xs sm:text-sm min-h-[48px]"
+                        className="w-full min-h-[48px] py-3.5 sm:py-4 bg-primary text-white font-bold uppercase tracking-wider rounded-2xl hover:opacity-90 transition-all active:scale-[0.99] text-xs sm:text-sm shadow-xs touch-manipulation cursor-pointer"
                     >
                         {t('warehouse.driverHub.completeDeliveryBtn')}
                     </button>
                     <button
                         onClick={() => setDriverScannerOpen(false)}
-                        className="w-full py-3.5 sm:py-4 bg-white/5 text-white font-black uppercase tracking-widest rounded-2xl border border-white/10 hover:bg-white/10 transition-colors text-xs sm:text-sm min-h-[48px]"
+                        className="w-full min-h-[48px] py-3.5 sm:py-4 bg-white/5 text-white font-semibold uppercase tracking-wider rounded-2xl border border-white/10 hover:bg-white/10 transition-colors text-xs sm:text-sm touch-manipulation"
                     >
                         {t('warehouse.driverHub.abortScan')}
                     </button>

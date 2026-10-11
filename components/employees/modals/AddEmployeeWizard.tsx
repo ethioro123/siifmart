@@ -58,7 +58,14 @@ export default function AddEmployeeWizard({
     const currencySymbol = (activeSite as any)?.currency || settings?.currency || CURRENCY_SYMBOL;
 
     return (
-        <Modal isOpen={isOpen} onClose={resetWizard} title="Onboard Talent" size="xl">
+        <Modal
+            isOpen={isOpen}
+            onClose={resetWizard}
+            title="Onboard Talent"
+            size="xl"
+            closeOnClickOutside={false}
+            closeOnEscape={false}
+        >
             <div className="flex flex-col min-h-[480px]">
                 {/* 5-Step Stepper */}
                 <WizardStepper currentStep={addStep} steps={WIZARD_STEPS} />

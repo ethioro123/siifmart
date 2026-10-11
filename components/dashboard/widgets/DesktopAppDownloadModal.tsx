@@ -230,32 +230,32 @@ export const DesktopAppDownloadModal: React.FC<DesktopAppDownloadModalProps> = (
     return (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md animate-in fade-in duration-200">
             <div
-                className="relative w-full max-w-2xl bg-[#151D18] border border-[#2C5E3B]/40 rounded-3xl shadow-[0_32px_128px_rgba(0,0,0,0.8)] overflow-hidden text-stone-100 flex flex-col"
+                className="relative w-full max-w-2xl bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-3xl shadow-2xl overflow-hidden text-[var(--theme-text-primary)] flex flex-col"
                 onClick={e => e.stopPropagation()}
             >
-                {/* Header Gradient Top Banner */}
-                <div className="relative px-6 pt-6 pb-5 bg-gradient-to-br from-[#1E3F27]/90 via-[#151D18] to-transparent border-b border-[#2C5E3B]/30 flex items-start justify-between">
+                {/* Header Banner */}
+                <div className="relative px-6 pt-6 pb-5 bg-[var(--theme-bg-subtle)] border-b border-[var(--theme-border)] flex items-start justify-between">
                     <div className="flex items-center gap-3.5">
-                        <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-[#2C5E3B] to-[#1E3F27] border border-[#A9CBA2]/30 flex items-center justify-center shadow-lg shadow-[#2C5E3B]/20">
-                            <Monitor className="text-[#A9CBA2]" size={24} />
+                        <div className="w-10 h-10 rounded-xl bg-[var(--theme-primary)]/10 text-[var(--theme-primary)] border border-[var(--theme-primary)]/20 flex items-center justify-center shrink-0">
+                            <Monitor size={22} />
                         </div>
                         <div>
                             <div className="flex items-center gap-2">
-                                <h2 className="text-xl font-bold tracking-tight text-white">
+                                <h2 className="text-xl font-bold tracking-tight text-[var(--theme-text-primary)]">
                                     Download SIIFMART Apps
                                 </h2>
-                                <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-[#A9CBA2]/20 text-[#A9CBA2] border border-[#A9CBA2]/30">
+                                <span className="px-2 py-0.5 rounded-full text-[11px] font-mono font-semibold bg-[var(--theme-bg-card)] text-[var(--theme-text-secondary)] border border-[var(--theme-border)]">
                                     v3.5.3
                                 </span>
                             </div>
-                            <p className="text-xs text-stone-400 mt-0.5">
+                            <p className="text-xs text-[var(--theme-text-secondary)] mt-0.5">
                                 Native desktop and mobile terminal apps with offline capability & hardware printing.
                             </p>
                         </div>
                     </div>
                     <button
                         onClick={onClose}
-                        className="p-2 text-stone-400 hover:text-white rounded-xl hover:bg-white/10 transition"
+                        className="p-2 text-[var(--theme-text-muted)] hover:text-[var(--theme-text-primary)] rounded-xl hover:bg-[var(--theme-bg-card)] transition active:scale-[0.98] cursor-pointer"
                         aria-label="Close modal"
                     >
                         <X size={18} />
@@ -263,18 +263,18 @@ export const DesktopAppDownloadModal: React.FC<DesktopAppDownloadModalProps> = (
                 </div>
 
                 {/* Body Content */}
-                <div className="p-6 space-y-5 overflow-y-auto max-h-[calc(85vh-120px)]">
+                <div className="p-6 space-y-5 overflow-y-auto max-h-[calc(85vh-120px)] custom-scrollbar">
 
                     {/* Already on Desktop Banner */}
                     {isElectron && (
-                        <div className="p-3.5 rounded-2xl bg-[#2C5E3B]/20 border border-[#2C5E3B]/40 flex items-center justify-between">
+                        <div className="p-3.5 rounded-xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] flex items-center justify-between">
                             <div className="flex items-center gap-2.5">
-                                <ShieldCheck className="text-[#A9CBA2]" size={18} />
-                                <span className="text-xs font-semibold text-stone-200">
+                                <ShieldCheck className="text-[var(--theme-primary)]" size={18} />
+                                <span className="text-xs font-semibold text-[var(--theme-text-primary)]">
                                     You are currently running the native desktop app ({appVersion || 'v3.5.3'}).
                                 </span>
                             </div>
-                            <span className="text-[10px] font-bold px-2 py-1 rounded bg-[#2C5E3B] text-white">
+                            <span className="text-[11px] font-semibold px-2 py-1 rounded-lg bg-[var(--theme-bg-card)] text-[var(--theme-text-secondary)] border border-[var(--theme-border)]">
                                 Active Desktop
                             </span>
                         </div>
@@ -282,7 +282,7 @@ export const DesktopAppDownloadModal: React.FC<DesktopAppDownloadModalProps> = (
 
                     {/* OS Selector Tabs */}
                     <div>
-                        <label className="text-[11px] font-bold uppercase tracking-wider text-stone-400 block mb-2">
+                        <label className="text-[11px] font-semibold uppercase tracking-wider text-[var(--theme-text-secondary)] block mb-2">
                             Select Operating System / Device
                         </label>
                         <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
@@ -296,16 +296,18 @@ export const DesktopAppDownloadModal: React.FC<DesktopAppDownloadModalProps> = (
                                     <button
                                         key={osKey}
                                         onClick={() => setSelectedOS(osKey)}
-                                        className={`relative p-3 rounded-2xl border text-left transition-all duration-200 flex flex-col justify-between ${
+                                        className={`relative p-3 rounded-xl border text-left transition-all duration-200 flex flex-col justify-between active:scale-[0.98] cursor-pointer ${
                                             isSelected
-                                                ? 'bg-[#2C5E3B]/30 border-[#A9CBA2]/60 ring-1 ring-[#A9CBA2]/40 text-white shadow-md'
-                                                : 'bg-white/5 border-white/10 hover:bg-white/10 text-stone-300'
+                                                ? 'bg-[var(--theme-primary)] border-[var(--theme-primary)] text-[var(--theme-primary-text)] shadow-xs'
+                                                : 'bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] hover:bg-[var(--theme-bg-card)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)]'
                                         }`}
                                     >
                                         <div className="flex items-center justify-between mb-2">
-                                            <Icon size={20} className={isSelected ? 'text-[#A9CBA2]' : 'text-stone-400'} />
+                                            <Icon size={20} className={isSelected ? 'text-[var(--theme-primary-text)]' : 'text-[var(--theme-text-secondary)]'} />
                                             {isDetected && (
-                                                <span className="text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-400 border border-amber-500/30">
+                                                <span className={`text-[11px] font-semibold uppercase tracking-wider px-1.5 py-0.5 rounded-full ${
+                                                    isSelected ? 'bg-black/20 text-white' : 'bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)] border border-[var(--theme-border)]'
+                                                }`}>
                                                     Detected
                                                 </span>
                                             )}
@@ -313,7 +315,7 @@ export const DesktopAppDownloadModal: React.FC<DesktopAppDownloadModalProps> = (
                                         <div className="font-bold text-xs capitalize">
                                             {osKey === 'mac' ? 'macOS' : osKey === 'windows' ? 'Windows' : osKey === 'android' ? 'Android' : 'Linux'}
                                         </div>
-                                        <div className="text-[10px] text-stone-400 font-mono mt-0.5">
+                                        <div className={`text-[11px] font-mono mt-0.5 ${isSelected ? 'opacity-80' : 'text-[var(--theme-text-muted)]'}`}>
                                             {p.variants[0].format.split(' ')[0]}
                                         </div>
                                     </button>
@@ -323,24 +325,24 @@ export const DesktopAppDownloadModal: React.FC<DesktopAppDownloadModalProps> = (
                     </div>
 
                     {/* Active OS Card & Download CTA */}
-                    <div className="p-4 rounded-2xl bg-white/5 border border-white/10 space-y-4">
+                    <div className="p-4 rounded-xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] space-y-4">
                         <div className="flex items-center justify-between">
                             <div>
-                                <h3 className="text-sm font-bold text-white flex items-center gap-2">
+                                <h3 className="text-sm font-bold text-[var(--theme-text-primary)] flex items-center gap-2">
                                     {currentVariant.label}
                                 </h3>
-                                <p className="text-[11px] text-stone-400 mt-0.5">
-                                    File: <span className="font-mono text-stone-300">{currentVariant.filename}</span> ({currentVariant.size})
+                                <p className="text-[11px] text-[var(--theme-text-secondary)] mt-0.5">
+                                    File: <span className="font-mono text-[var(--theme-text-primary)]">{currentVariant.filename}</span> ({currentVariant.size})
                                 </p>
                             </div>
-                            <span className="text-[10px] font-mono font-bold px-2 py-1 rounded bg-[#2C5E3B]/40 text-[#A9CBA2] border border-[#2C5E3B]/60">
+                            <span className="text-[11px] font-mono font-semibold px-2 py-1 rounded bg-[var(--theme-bg-card)] text-[var(--theme-text-secondary)] border border-[var(--theme-border)]">
                                 {currentVariant.format}
                             </span>
                         </div>
 
                         {/* Architecture / Package Format Variants */}
                         <div className="space-y-1.5">
-                            <label className="text-[10px] font-bold uppercase tracking-wider text-stone-400">
+                            <label className="text-[11px] font-semibold uppercase tracking-wider text-[var(--theme-text-secondary)]">
                                 Choose Package Format:
                             </label>
                             <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
@@ -350,14 +352,14 @@ export const DesktopAppDownloadModal: React.FC<DesktopAppDownloadModalProps> = (
                                         <button
                                             key={v.id}
                                             onClick={() => setSelectedVariant(v.id)}
-                                            className={`px-3 py-2 rounded-xl text-left border transition-all text-xs flex flex-col justify-between ${
+                                            className={`px-3 py-2 rounded-xl text-left border transition-all text-xs flex flex-col justify-between active:scale-[0.98] cursor-pointer ${
                                                 isVarSelected
-                                                    ? 'bg-[#2C5E3B]/40 border-[#A9CBA2] text-white shadow-sm'
-                                                    : 'bg-black/20 border-white/10 hover:bg-white/10 text-stone-300'
+                                                    ? 'bg-[var(--theme-primary)] border-[var(--theme-primary)] text-[var(--theme-primary-text)] shadow-xs font-semibold'
+                                                    : 'bg-[var(--theme-bg-card)] border-[var(--theme-border)] hover:bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)]'
                                             }`}
                                         >
                                             <span className="font-bold text-[11px] leading-tight truncate">{v.label}</span>
-                                            <span className="text-[9px] font-mono text-stone-400 mt-1">{v.size}</span>
+                                            <span className={`text-[11px] font-mono mt-1 ${isVarSelected ? 'opacity-80' : 'text-[var(--theme-text-muted)]'}`}>{v.size}</span>
                                         </button>
                                     );
                                 })}
@@ -368,7 +370,7 @@ export const DesktopAppDownloadModal: React.FC<DesktopAppDownloadModalProps> = (
                         <div className="flex flex-col sm:flex-row gap-2.5">
                             <button
                                 onClick={handleDownload}
-                                className="flex-1 py-3 px-4 rounded-xl bg-gradient-to-r from-[#2C5E3B] to-[#1E3F27] hover:from-[#357248] hover:to-[#244b2f] active:scale-[0.98] border border-[#A9CBA2]/40 text-white font-bold text-xs shadow-lg shadow-[#2C5E3B]/25 flex items-center justify-center gap-2 transition"
+                                className="flex-1 py-3 px-4 rounded-xl bg-[var(--theme-primary)] hover:opacity-90 active:scale-[0.98] text-[var(--theme-primary-text)] font-semibold text-xs shadow-sm flex items-center justify-center gap-2 transition cursor-pointer"
                             >
                                 <Download size={16} />
                                 Download {currentVariant.label.split(' ')[0]} ({currentVariant.format.split(' ')[0]})
@@ -376,13 +378,13 @@ export const DesktopAppDownloadModal: React.FC<DesktopAppDownloadModalProps> = (
 
                             <button
                                 onClick={handleCopyBuildCmd}
-                                className="py-3 px-3.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 active:scale-[0.98] text-stone-300 font-mono text-[11px] font-semibold flex items-center justify-center gap-1.5 transition"
+                                className="py-3 px-3.5 rounded-xl bg-[var(--theme-bg-card)] hover:bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] active:scale-[0.98] text-[var(--theme-text-primary)] font-mono text-[11px] font-semibold flex items-center justify-center gap-1.5 transition cursor-pointer"
                                 title="Copy local CLI build command"
                             >
                                 {copiedCommand ? (
                                     <>
-                                        <Check size={14} className="text-emerald-400" />
-                                        <span className="text-emerald-400">Copied!</span>
+                                        <Check size={14} className="text-[var(--theme-primary)]" />
+                                        <span className="text-[var(--theme-primary)]">Copied!</span>
                                     </>
                                 ) : (
                                     <>
@@ -394,13 +396,13 @@ export const DesktopAppDownloadModal: React.FC<DesktopAppDownloadModalProps> = (
                         </div>
 
                         {/* Installation Instructions */}
-                        <div className="pt-3 border-t border-white/10 space-y-1.5">
-                            <p className="text-[10px] font-bold uppercase tracking-wider text-stone-400">
+                        <div className="pt-3 border-t border-[var(--theme-border)] space-y-1.5">
+                            <p className="text-[11px] font-semibold uppercase tracking-wider text-[var(--theme-text-secondary)]">
                                 Quick Install Steps:
                             </p>
                             {currentPlatform.instructions.map((step, idx) => (
-                                <div key={idx} className="flex items-start gap-2 text-xs text-stone-300">
-                                    <span className="w-4 h-4 rounded-full bg-[#2C5E3B]/40 text-[#A9CBA2] font-mono text-[9px] font-bold flex items-center justify-center flex-shrink-0 mt-0.5">
+                                <div key={idx} className="flex items-start gap-2 text-xs text-[var(--theme-text-secondary)]">
+                                    <span className="w-4 h-4 rounded-full bg-[var(--theme-primary)]/10 text-[var(--theme-primary)] font-mono text-[11px] font-bold flex items-center justify-center flex-shrink-0 mt-0.5">
                                         {idx + 1}
                                     </span>
                                     <span>{step}</span>
@@ -411,36 +413,36 @@ export const DesktopAppDownloadModal: React.FC<DesktopAppDownloadModalProps> = (
 
                     {/* Hardware Capabilities Features Grid */}
                     <div>
-                        <p className="text-[10px] font-bold uppercase tracking-wider text-stone-400 mb-2">
+                        <p className="text-[11px] font-semibold uppercase tracking-wider text-[var(--theme-text-secondary)] mb-2">
                             Native Desktop Advantages
                         </p>
                         <div className="grid grid-cols-2 gap-2 text-xs">
-                            <div className="p-2.5 rounded-xl bg-white/5 border border-white/5 flex items-start gap-2">
-                                <WifiOff size={15} className="text-amber-400 mt-0.5 flex-shrink-0" />
+                            <div className="p-2.5 rounded-xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] flex items-start gap-2">
+                                <WifiOff size={15} className="text-amber-500 mt-0.5 flex-shrink-0" />
                                 <div>
-                                    <p className="font-bold text-stone-200">100% Offline POS</p>
-                                    <p className="text-[10px] text-stone-400">Local barcode scan, sale queue & auto-sync.</p>
+                                    <p className="font-bold text-[var(--theme-text-primary)]">100% Offline POS</p>
+                                    <p className="text-[11px] text-[var(--theme-text-secondary)]">Local barcode scan, sale queue & auto-sync.</p>
                                 </div>
                             </div>
-                            <div className="p-2.5 rounded-xl bg-white/5 border border-white/5 flex items-start gap-2">
-                                <Printer size={15} className="text-emerald-400 mt-0.5 flex-shrink-0" />
+                            <div className="p-2.5 rounded-xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] flex items-start gap-2">
+                                <Printer size={15} className="text-[var(--theme-primary)] mt-0.5 flex-shrink-0" />
                                 <div>
-                                    <p className="font-bold text-stone-200">Silent Thermal Printing</p>
-                                    <p className="text-[10px] text-stone-400">Direct spooler print with zero popup dialogs.</p>
+                                    <p className="font-bold text-[var(--theme-text-primary)]">Silent Thermal Printing</p>
+                                    <p className="text-[11px] text-[var(--theme-text-secondary)]">Direct spooler print with zero popup dialogs.</p>
                                 </div>
                             </div>
-                            <div className="p-2.5 rounded-xl bg-white/5 border border-white/5 flex items-start gap-2">
-                                <Sparkles size={15} className="text-blue-400 mt-0.5 flex-shrink-0" />
+                            <div className="p-2.5 rounded-xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] flex items-start gap-2">
+                                <Sparkles size={15} className="text-blue-500 mt-0.5 flex-shrink-0" />
                                 <div>
-                                    <p className="font-bold text-stone-200">Cash Drawer Kick</p>
-                                    <p className="text-[10px] text-stone-400">Automated ESC/POS pulse on cash sales.</p>
+                                    <p className="font-bold text-[var(--theme-text-primary)]">Cash Drawer Kick</p>
+                                    <p className="text-[11px] text-[var(--theme-text-secondary)]">Automated ESC/POS pulse on cash sales.</p>
                                 </div>
                             </div>
-                            <div className="p-2.5 rounded-xl bg-white/5 border border-white/5 flex items-start gap-2">
-                                <Monitor size={15} className="text-purple-400 mt-0.5 flex-shrink-0" />
+                            <div className="p-2.5 rounded-xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] flex items-start gap-2">
+                                <Monitor size={15} className="text-purple-500 mt-0.5 flex-shrink-0" />
                                 <div>
-                                    <p className="font-bold text-stone-200">F11 Kiosk Mode</p>
-                                    <p className="text-[10px] text-stone-400">Fullscreen dedicated POS touch interface.</p>
+                                    <p className="font-bold text-[var(--theme-text-primary)]">F11 Kiosk Mode</p>
+                                    <p className="text-[11px] text-[var(--theme-text-secondary)]">Fullscreen dedicated POS touch interface.</p>
                                 </div>
                             </div>
                         </div>
@@ -448,14 +450,14 @@ export const DesktopAppDownloadModal: React.FC<DesktopAppDownloadModalProps> = (
                 </div>
 
                 {/* Footer Bar */}
-                <div className="px-6 py-3.5 bg-black/40 border-t border-white/10 flex items-center justify-between text-[11px] text-stone-400">
+                <div className="px-6 py-3.5 bg-[var(--theme-bg-subtle)] border-t border-[var(--theme-border)] flex items-center justify-between text-[11px] text-[var(--theme-text-secondary)]">
                     <span className="flex items-center gap-1.5">
-                        <ShieldCheck size={14} className="text-[#A9CBA2]" />
+                        <ShieldCheck size={14} className="text-[var(--theme-primary)]" />
                         Signed & Verified for macOS, Windows & Linux
                     </span>
                     <button
                         onClick={onClose}
-                        className="px-3 py-1 rounded-lg bg-white/10 hover:bg-white/20 text-stone-200 font-bold transition"
+                        className="px-3.5 py-1.5 rounded-xl bg-[var(--theme-bg-card)] hover:bg-[var(--theme-bg-subtle)] text-[var(--theme-text-primary)] border border-[var(--theme-border)] font-semibold transition active:scale-[0.98] cursor-pointer"
                     >
                         Close
                     </button>

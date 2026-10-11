@@ -1,18 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import {
-    Truck, FileText, Search, Plus, X, CheckCircle, ArrowRight, Layout, Layers,
-    AlertTriangle, Clock, MapPin, List, ChevronRight, ChevronDown, ClipboardCheck, Minus,
-    AlertOctagon, RefreshCw, History as HistoryIcon, Package, Lock, Snowflake, Zap,
-    Trash2, RotateCcw, Shield, ShieldCheck, Hash, ArrowDown, ArrowLeft, MoreHorizontal, User as UserIcon,
-    Box, Printer, Scan, Navigation, Rocket, Warehouse, ShoppingBag, Activity, QrCode, LogOut, Archive
+    Activity, ChevronDown, Search, X
 } from 'lucide-react';
 import { WMSJob, User, Site, Product } from '../../types';
 import { useAdjustStockMutation } from '../../hooks/useAdjustStockMutation';
 import { inventoryRequestsService } from '../../services/supabase.service';
 import { DriversHistory } from './drivers/DriversHistory';
 import { DriverHeader } from './drivers/DriverHeader';
-import { isWeightBased, isVolumeBased } from '../../utils/units';
-import { formatJobId } from '../../utils/jobIdFormatter';
 import { DriverActiveMission } from './drivers/DriverActiveMission';
 import { DriverTools } from './drivers/DriverTools';
 import { DriverMetrics } from './drivers/DriverMetrics';
@@ -58,7 +52,6 @@ export const DriverTab: React.FC<DriverTabProps> = ({
     products,
     activeSite,
     isSubmitting,
-    setIsSubmitting,
     refreshData,
     refreshJobs,
     setSelectedJob,
@@ -79,7 +72,8 @@ export const DriverTab: React.FC<DriverTabProps> = ({
     // RULE 10: Fetch history on demand when user switches to History view
     useEffect(() => {
         if (viewMode === 'History' && loadHistoricalJobs) loadHistoricalJobs();
-    }, [viewMode]);
+    }, [viewMode, loadHistoricalJobs]);
+
     const [processingJobIds, setProcessingJobIds] = useState<Set<string>>(new Set());
     const [driverScannerOpen, setDriverScannerOpen] = useState(false);
     const [isIncidentModalOpen, setIsIncidentModalOpen] = useState(false);
@@ -196,13 +190,13 @@ export const DriverTab: React.FC<DriverTabProps> = ({
                     {/* MOBILE COLLAPSIBLE TOGGLE */}
                     <button
                         onClick={() => setShowControlCenter(!showControlCenter)}
-                        className="flex md:hidden items-center justify-between w-full p-4 bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-2xl shadow-sm hover:bg-gray-50 dark:hover:bg-white/10 transition-all text-xs font-black uppercase tracking-wider text-gray-900 dark:text-white"
+                        className="flex md:hidden items-center justify-between w-full p-3.5 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl shadow-sm hover:bg-[var(--theme-bg-subtle)] transition-colors text-xs font-semibold uppercase tracking-wider text-[var(--theme-text-primary)] min-h-[44px] touch-manipulation"
                     >
                         <div className="flex items-center gap-2">
-                            <Activity size={14} className="text-[#2C5E3B] dark:text-[#A9CBA2]" />
+                            <Activity size={15} className="text-primary" />
                             <span>Shift Summary & Actions</span>
                         </div>
-                        <ChevronDown size={14} className={`text-gray-400 transition-transform duration-300 ${showControlCenter ? 'rotate-180' : ''}`} />
+                        <ChevronDown size={15} className={`text-[var(--theme-text-muted)] transition-transform duration-300 ${showControlCenter ? 'rotate-180' : ''}`} />
                     </button>
 
                     {/* METRICS, TOOLS & SEARCH CONTAINER */}
@@ -229,7 +223,7 @@ export const DriverTab: React.FC<DriverTabProps> = ({
                         {/* GLOBAL SEARCH */}
                         <div className="relative w-full">
                             <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
-                                <Search className="h-4 w-4 text-[#A9CBA2]" />
+                                <Search className="h-4 w-4 text-primary" />
                             </div>
                             <input
                                 type="text"
@@ -238,16 +232,16 @@ export const DriverTab: React.FC<DriverTabProps> = ({
                                 title="Search Missions"
                                 value={globalSearch}
                                 onChange={(e) => setGlobalSearch(e.target.value)}
-                                className="w-full bg-white dark:bg-black/40 border border-gray-200 dark:border-white/10 rounded-2xl pl-10 pr-10 py-3 text-xs md:text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-600 focus:outline-none focus:border-cyan-500/50 shadow-sm dark:shadow-inner transition-colors"
+                                className="w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl pl-10 pr-10 py-2.5 text-xs text-[var(--theme-text-primary)] placeholder:text-[var(--theme-text-muted)] focus:outline-none focus:border-primary shadow-sm transition-colors min-h-[44px]"
                             />
                             {globalSearch && (
                                 <button 
                                     onClick={() => setGlobalSearch('')}
                                     aria-label="Clear search"
                                     title="Clear search"
-                                    className="absolute inset-y-0 right-3 flex items-center text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
+                                    className="absolute inset-y-0 right-3 flex items-center text-[var(--theme-text-muted)] hover:text-[var(--theme-text-primary)] transition-colors"
                                 >
-                                    <X size={14} />
+                                    <X size={15} />
                                 </button>
                             )}
                         </div>
@@ -278,7 +272,7 @@ export const DriverTab: React.FC<DriverTabProps> = ({
                     </div>
 
                     {/* COLLAPSED JOB BOARD */}
-                    <div className="mt-4 border-t border-white/10 pt-4">
+                    <div className="mt-4 border-t border-[var(--theme-border)] pt-4">
                         <DriverJobBoard
                             t={t}
                             filteredJobs={filteredJobs}

@@ -37,48 +37,66 @@ export const AdjustStockModal: React.FC<AdjustStockModalProps> = ({
 
     return (
         <Modal isOpen={isOpen} onClose={onClose} title="Adjust Stock Level" size="md">
-            <div className="space-y-6">
+            <div className="space-y-5">
                 {!canApprove && (
-                    <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center gap-2 text-amber-700 dark:text-amber-400 text-xs font-bold">
-                        <Shield size={14} className="shrink-0" />
+                    <div className="p-3.5 rounded-2xl bg-[#FF9F0A]/10 border border-[#FF9F0A]/20 flex items-center gap-2.5 text-[#FF9F0A] text-[12px] font-semibold">
+                        <Shield size={15} className="shrink-0" />
                         <span>Central HQ Approval Required. Your adjustment request will route to HQ before inventory is modified.</span>
                     </div>
                 )}
-                <div className="p-4 bg-[var(--theme-bg-subtle)] rounded-xl border border-[var(--theme-border)] flex items-center gap-4">
-                    <div className="w-16 h-16 rounded-lg bg-[var(--theme-bg-card)] border border-[var(--theme-border)] overflow-hidden">
-                        {product.image && <img src={product.image} alt="" className="w-full h-full object-cover" />}
+                <div className="p-3.5 bg-[var(--theme-bg-hover)]/40 rounded-2xl border border-[var(--theme-border)] flex items-center gap-3.5 shadow-xs">
+                    <div className="w-14 h-14 rounded-xl bg-[var(--theme-bg-card)] border border-[var(--theme-border)] overflow-hidden shrink-0 flex items-center justify-center">
+                        {product.image ? (
+                            <img src={product.image} alt={product.name} className="w-full h-full object-cover" />
+                        ) : (
+                            <span className="text-[var(--theme-text-secondary)] text-[11px] font-semibold">No img</span>
+                        )}
                     </div>
                     <div>
-                        <h4 className="font-bold text-[var(--theme-text-primary)]">{product.name}</h4>
-                        <p className="text-xs text-[var(--theme-text-secondary)] font-mono mt-1">{product.sku}</p>
-                        <div className="mt-2 text-xs font-bold text-[var(--theme-text-primary)] bg-[var(--theme-pill-bg)] border border-[var(--theme-pill-border)] px-2 py-0.5 rounded inline-block">
+                        <h4 className="font-semibold text-sm text-[var(--theme-text-primary)] tracking-tight">{product.name}</h4>
+                        <p className="text-[12px] text-[var(--theme-text-secondary)] font-mono tabular-nums mt-0.5">{product.sku}</p>
+                        <div className="mt-2 text-[11px] font-mono tabular-nums font-semibold text-[var(--theme-text-primary)] bg-[var(--theme-bg-hover)] border border-[var(--theme-border)] px-2.5 py-0.5 rounded-full inline-block">
                             Current Stock: {product.stock}
                         </div>
                     </div>
                 </div>
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-2 gap-3">
                     <button 
+                        type="button"
                         onClick={() => setAdjustType('IN')} 
-                        className={`p-4 rounded-xl border flex flex-col items-center gap-2 transition-all ${adjustType === 'IN' ? 'bg-emerald-500/10 border-emerald-500 text-emerald-600 dark:text-emerald-400' : 'border-[var(--theme-border)] bg-[var(--theme-bg-subtle)] text-[var(--theme-text-muted)] hover:bg-[var(--theme-bg-card-hover)]'}`}
+                        className={`p-3.5 rounded-xl border flex flex-col items-center gap-2 transition-all cursor-pointer active:scale-[0.98] ${
+                            adjustType === 'IN' 
+                                ? 'bg-[#34C759]/10 border-[#34C759] text-[#34C759] shadow-xs' 
+                                : 'border-[var(--theme-border)] bg-[var(--theme-bg-card)] text-[var(--theme-text-secondary)] hover:bg-[var(--theme-bg-hover)]'
+                        }`}
                     >
-                        <div className="p-2 rounded-full bg-current bg-opacity-10"><Plus size={20} /></div>
-                        <span className="font-bold text-sm">Stock In (+)</span>
+                        <div className="w-8 h-8 rounded-lg bg-current/15 flex items-center justify-center">
+                            <Plus size={16} />
+                        </div>
+                        <span className="font-semibold text-[13px]">Stock In (+)</span>
                     </button>
                     <button 
+                        type="button"
                         onClick={() => setAdjustType('OUT')} 
-                        className={`p-4 rounded-xl border flex flex-col items-center gap-2 transition-all ${adjustType === 'OUT' ? 'bg-amber-500/10 border-amber-500 text-amber-600 dark:text-amber-400' : 'border-[var(--theme-border)] bg-[var(--theme-bg-subtle)] text-[var(--theme-text-muted)] hover:bg-[var(--theme-bg-card-hover)]'}`}
+                        className={`p-3.5 rounded-xl border flex flex-col items-center gap-2 transition-all cursor-pointer active:scale-[0.98] ${
+                            adjustType === 'OUT' 
+                                ? 'bg-[#FF3B30]/10 border-[#FF3B30] text-[#FF3B30] shadow-xs' 
+                                : 'border-[var(--theme-border)] bg-[var(--theme-bg-card)] text-[var(--theme-text-secondary)] hover:bg-[var(--theme-bg-hover)]'
+                        }`}
                     >
-                        <div className="p-2 rounded-full bg-current bg-opacity-10"><Minus size={20} /></div>
-                        <span className="font-bold text-sm">Stock Out (-)</span>
+                        <div className="w-8 h-8 rounded-lg bg-current/15 flex items-center justify-center">
+                            <Minus size={16} />
+                        </div>
+                        <span className="font-semibold text-[13px]">Stock Out (-)</span>
                     </button>
                 </div>
                 <div>
-                    <label className="block text-xs font-bold uppercase text-[var(--theme-text-muted)] mb-1">Quantity</label>
+                    <label className="block text-[11px] font-semibold uppercase tracking-wider text-[var(--theme-text-secondary)] mb-1.5">Quantity</label>
                     <input 
                         type="number" 
                         value={adjustQty} 
                         onChange={(e) => setAdjustQty(e.target.value)} 
-                        className="w-full bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl px-4 py-3 text-lg font-bold text-[var(--theme-text-primary)] outline-none focus:border-[var(--theme-accent)] transition-all" 
+                        className="w-full h-11 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl px-3.5 text-base font-semibold font-mono tabular-nums text-[var(--theme-text-primary)] outline-none focus:ring-2 focus:ring-[var(--theme-accent)]/20 focus:border-[var(--theme-accent)] transition-all shadow-xs" 
                         placeholder="0" 
                         min="0.01"
                         step="any" 
@@ -86,12 +104,12 @@ export const AdjustStockModal: React.FC<AdjustStockModalProps> = ({
                     />
                 </div>
                 <div>
-                    <label className="block text-xs font-bold uppercase text-[var(--theme-text-muted)] mb-1">Reason</label>
+                    <label className="block text-[11px] font-semibold uppercase tracking-wider text-[var(--theme-text-secondary)] mb-1.5">Reason</label>
                     <select 
                         aria-label="Adjustment Reason" 
                         value={adjustReason} 
                         onChange={(e) => setAdjustReason(e.target.value)} 
-                        className="w-full bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl px-4 py-3 text-sm font-medium text-[var(--theme-text-primary)] outline-none focus:border-[var(--theme-accent)] transition-all"
+                        className="w-full h-11 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl px-3.5 text-[13px] font-medium text-[var(--theme-text-primary)] outline-none focus:ring-2 focus:ring-[var(--theme-accent)]/20 focus:border-[var(--theme-accent)] transition-all shadow-xs cursor-pointer"
                     >
                         <option>Stock Correction</option>
                         <option>Damaged Goods</option>
@@ -100,16 +118,24 @@ export const AdjustStockModal: React.FC<AdjustStockModalProps> = ({
                         <option>Other</option>
                     </select>
                 </div>
-                <div className="flex justify-end gap-3 pt-2">
-                    <Button variant="ghost" onClick={onClose}>Cancel</Button>
-                    <Button 
-                        variant={adjustType === 'IN' ? 'success' : 'danger'} 
+                <div className="flex justify-end items-center gap-2.5 pt-2">
+                    <button
+                        type="button"
+                        onClick={onClose}
+                        className="h-9 px-4 rounded-xl text-[13px] font-semibold bg-[var(--theme-bg-card)] hover:bg-[var(--theme-bg-hover)] text-[var(--theme-text-primary)] border border-[var(--theme-border)] shadow-xs transition-all active:scale-[0.98] cursor-pointer"
+                    >
+                        Cancel
+                    </button>
+                    <button 
+                        type="button"
                         onClick={onConfirm} 
                         disabled={!adjustQty || parseFloat(adjustQty) <= 0 || isSubmitting} 
-                        loading={isSubmitting}
+                        className={`h-9 px-4 rounded-xl text-[13px] font-semibold text-white shadow-xs transition-all active:scale-[0.98] cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed ${
+                            adjustType === 'IN' ? 'bg-[#34C759] hover:opacity-95' : 'bg-[#FF3B30] hover:opacity-95'
+                        }`}
                     >
                         {canApprove ? 'Confirm Adjustment' : 'Submit for HQ Approval'}
-                    </Button>
+                    </button>
                 </div>
             </div>
         </Modal>

@@ -1,11 +1,10 @@
-
 import React, { useState, useEffect } from 'react';
 import {
     AlertTriangle, CheckCircle, Search, FileText, RefreshCw, RotateCcw,
     Trash2, Hash, Lock, ChevronRight, Shield, ArrowRight, ArrowDown, ArrowLeft,
-    AlertOctagon, X, Package
+    AlertOctagon, X
 } from 'lucide-react';
-import { WMSJob, User, DiscrepancyType, ResolutionType, Product } from '../../types';
+import { WMSJob, User, DiscrepancyType, ResolutionType } from '../../types';
 import { useData } from '../../contexts/DataContext';
 import { useAdjustStockMutation } from '../../hooks/useAdjustStockMutation';
 import { wmsJobsService, discrepancyService } from '../../services/supabase.service';
@@ -33,17 +32,13 @@ export function DiscrepancyResolutionModal({
     refreshData,
     activeSite
 }: DiscrepancyResolutionModalProps) {
-    // --- MUTATIONS ---
     const adjustStockMutation = useAdjustStockMutation();
-    // --- STATE ---
     const [step, setStep] = useState<'TYPE' | 'ACTION' | 'DETAILS' | 'REVIEW'>('TYPE');
     const [discrepancyType, setDiscrepancyType] = useState<DiscrepancyType | null>(null);
     const [resolutionAction, setResolutionAction] = useState<ResolutionType | null>(null);
 
-    // Fix: Access products context for fallback lookups
     const { products } = useData();
 
-    // Details
     const [notes, setNotes] = useState('');
     const [resolveQty, setResolveQty] = useState('');
     const [reasonCode, setReasonCode] = useState('');
@@ -52,7 +47,6 @@ export function DiscrepancyResolutionModal({
 
     useEffect(() => {
         if (!isOpen) {
-            // Reset state on close
             setStep('TYPE');
             setDiscrepancyType(null);
             setResolutionAction(null);
@@ -60,11 +54,9 @@ export function DiscrepancyResolutionModal({
             setResolveQty('');
             setReasonCode('');
             setClaimAmount('');
-
         }
     }, [isOpen]);
 
-    // Auto-detect type if obvious (e.g., Shortage/Overage based on math)
     useEffect(() => {
         if (item && step === 'TYPE') {
             const diff = (item.item.receivedQty || 0) - (item.item.expectedQty || 0);
@@ -76,7 +68,6 @@ export function DiscrepancyResolutionModal({
                 setDiscrepancyType('overage');
                 setResolveQty(diff.toString());
             }
-            // 'damaged', 'wrong_item', 'missing' are user selected if math doesn't explain it fully
         }
     }, [item, step]);
 
@@ -85,26 +76,24 @@ export function DiscrepancyResolutionModal({
     const diff = (item.item.receivedQty || 0) - (item.item.expectedQty || 0);
     const productName = item.item.productName || item.item.name || 'Unknown Product';
 
-    // Config
     const DISCREPANCY_TYPES: { id: DiscrepancyType, label: string, icon: any, color: string }[] = [
-        { id: 'shortage', label: 'Shortage (Received Less)', icon: ArrowDown, color: 'text-orange-400' },
-        { id: 'overage', label: 'Overage (Received More)', icon: ArrowLeft, color: 'text-[#A9CBA2]' },
-        { id: 'damaged', label: 'Damaged Items', icon: AlertTriangle, color: 'text-red-400' },
-        { id: 'wrong_item', label: 'Wrong Item Sent', icon: AlertOctagon, color: 'text-amber-400' },
-        { id: 'missing', label: 'Completely Missing', icon: X, color: 'text-gray-400' },
+        { id: 'shortage', label: 'Shortage (Received Less)', icon: ArrowDown, color: 'text-amber-500' },
+        { id: 'overage', label: 'Overage (Received More)', icon: ArrowLeft, color: 'text-primary' },
+        { id: 'damaged', label: 'Damaged Items', icon: AlertTriangle, color: 'text-red-500' },
+        { id: 'wrong_item', label: 'Wrong Item Sent', icon: AlertOctagon, color: 'text-amber-600 dark:text-amber-400' },
+        { id: 'missing', label: 'Completely Missing', icon: X, color: 'text-[var(--theme-text-muted)]' },
     ];
 
     const RESOLUTION_ACTIONS: { id: ResolutionType, label: string, desc: string, icon: any, color: string, reqAuth: boolean }[] = [
-        { id: 'accept', label: 'Accept As-Is', desc: 'Update inventory to match received qty.', icon: CheckCircle, color: 'text-green-400', reqAuth: false },
-        { id: 'investigate', label: 'Request Investigation', desc: 'Flag for warehouse team to check.', icon: Search, color: 'text-yellow-400', reqAuth: false },
-        { id: 'replace', label: 'Resend Missing Items', desc: 'Generate a new transfer from warehouse.', icon: FileText, color: 'text-[#A9CBA2]', reqAuth: true },
-        { id: 'adjust', label: 'Adjust Inventory', desc: 'Accept with manual adjustment record.', icon: RefreshCw, color: 'text-[#2C5E3B]', reqAuth: false },
-        { id: 'reject', label: 'Reject & Return', desc: 'Send items back to source.', icon: RotateCcw, color: 'text-red-400', reqAuth: true },
+        { id: 'accept', label: 'Accept As-Is', desc: 'Update inventory to match received qty.', icon: CheckCircle, color: 'text-emerald-500', reqAuth: false },
+        { id: 'investigate', label: 'Request Investigation', desc: 'Flag for warehouse team to check.', icon: Search, color: 'text-amber-500', reqAuth: false },
+        { id: 'replace', label: 'Resend Missing Items', desc: 'Generate a new transfer from warehouse.', icon: FileText, color: 'text-primary', reqAuth: true },
+        { id: 'adjust', label: 'Adjust Inventory', desc: 'Accept with manual adjustment record.', icon: RefreshCw, color: 'text-primary', reqAuth: false },
+        { id: 'reject', label: 'Reject & Return', desc: 'Send items back to source.', icon: RotateCcw, color: 'text-red-500', reqAuth: true },
         { id: 'dispose', label: 'Dispose / Destroy', desc: 'Remove from inventory (Waste).', icon: Trash2, color: 'text-red-500', reqAuth: true },
-        { id: 'recount', label: 'Request Recount', desc: 'Ask source to count again.', icon: Hash, color: 'text-[#A9CBA2]', reqAuth: false },
+        { id: 'recount', label: 'Request Recount', desc: 'Ask source to count again.', icon: Hash, color: 'text-primary', reqAuth: false },
     ];
 
-    // Helper to check permissions (placeholder)
     const canDoAction = (action: ResolutionType) => {
         if (action === 'claim' || action === 'reject') {
             return ['store_manager', 'warehouse_manager', 'super_admin', 'regional_manager', 'operations_manager'].includes(currentUser?.role || '');
@@ -120,7 +109,6 @@ export function DiscrepancyResolutionModal({
             let replacementJobId: string | undefined = undefined;
             const isHqApprover = ['super_admin', 'ceo', 'admin', 'regional_manager', 'operations_manager'].includes((currentUser?.role || '').toLowerCase());
 
-            // --- PHASE 1: SIDE EFFECTS & REPLACEMENTS ---
             const reasons = {
                 overage: `Resolution: Reject Overage (Trf: ${formatJobId(job)})`,
                 damaged: `Resolution: Damaged/Defective (Trf: ${formatJobId(job)})`,
@@ -129,7 +117,6 @@ export function DiscrepancyResolutionModal({
             };
 
             if (qty > 0) {
-                // Reject (Return) - Reduces Stock
                 if (resolutionAction === 'reject') {
                     const product = products.find((p: any) => p.id === (item.item.productId || item.item.id));
                     await adjustStockMutation.mutateAsync({
@@ -143,7 +130,6 @@ export function DiscrepancyResolutionModal({
                         canApprove: isHqApprover
                     });
                 }
-                // Dispose (Waste) - Reduces Stock
                 if (resolutionAction === 'dispose') {
                     const product = products.find((p: any) => p.id === (item.item.productId || item.item.id));
                     await adjustStockMutation.mutateAsync({
@@ -157,7 +143,6 @@ export function DiscrepancyResolutionModal({
                         canApprove: isHqApprover
                     });
                 }
-                // Adjust (Shortage Found) - Adds Stock
                 if (resolutionAction === 'adjust' && discrepancyType === 'shortage') {
                     const product = products.find((p: any) => p.id === (item.item.productId || item.item.id));
                     await adjustStockMutation.mutateAsync({
@@ -171,7 +156,6 @@ export function DiscrepancyResolutionModal({
                         canApprove: isHqApprover
                     });
                 }
-                // Resend Missing Items - Creates new replacement job
                 if (resolutionAction === 'replace') {
                     const newJob = await wmsJobsService.create({
                         siteId: job.sourceSiteId || activeSite?.id,
@@ -182,7 +166,6 @@ export function DiscrepancyResolutionModal({
                         lineItems: [{
                             productId: item.item.productId || item.item.id,
                             name: item.item.name || 'Unknown',
-                            // Fix: Ensure SKU is populated from product registry if missing on item
                             sku: item.item.sku || products.find((p: any) => p.id === (item.item.productId || item.item.id))?.sku || 'N/A',
                             image: item.item.image || '',
                             expectedQty: qty,
@@ -201,7 +184,6 @@ export function DiscrepancyResolutionModal({
                 }
             }
 
-            // --- PHASE 2: RECORD DISCREPANCY ---
             await discrepancyService.createResolution({
                 transferId: job.id,
                 lineItemIndex: item.index,
@@ -221,13 +203,10 @@ export function DiscrepancyResolutionModal({
                 replacementJobId: replacementJobId
             });
 
-            // 2. UPDATE JOB ITEM STATUS
-            // If resolved (Accept, Reject, Adjust), mark item as Resolved
             if (['accept', 'reject', 'adjust', 'dispose', 'replace'].includes(resolutionAction)) {
                 const updatedLineItems = (job.lineItems || []).map((li: any, i: number) =>
                     i === item.index ? { ...li, status: 'Resolved' } : li
                 );
-                // Check if all items are now resolved/completed
                 const allDone = updatedLineItems.every((li: any) => ['Completed', 'Resolved'].includes(li.status));
 
                 await wmsJobsService.update(job.id, {
@@ -239,10 +218,8 @@ export function DiscrepancyResolutionModal({
 
             await refreshData();
             onClose();
-            alert('Discrepancy resolution submitted successfully!');
         } catch (err) {
             logger.error('DiscrepancyResolutionModal', 'caught error', err as Error);
-            alert('Failed to submit resolution. Please try again.');
         } finally {
             setIsSubmitting(false);
         }
@@ -251,41 +228,39 @@ export function DiscrepancyResolutionModal({
     return (
         <Modal isOpen={isOpen} onClose={onClose} title="Resolve Discrepancy">
             <div className="space-y-6">
-
                 {/* Header Info */}
-                <div className="bg-stone-100/30 dark:bg-black/20 p-4 rounded-2xl flex items-center justify-between border border-[#E2DCCE]/30 dark:border-[#A9CBA2]/[0.04] relative overflow-hidden">
-                    <div className="absolute top-0 left-0 w-1 h-full bg-[#2C5E3B] dark:bg-[#A9CBA2]" />
+                <div className="bg-[var(--theme-bg-subtle)] p-4 rounded-2xl flex items-center justify-between border border-[var(--theme-border)]">
                     <div>
-                        <h4 className="text-lg font-bold text-stone-850 dark:text-[#EAE5D9] mb-1">{productName}</h4>
-                        <div className="text-sm text-stone-500 dark:text-stone-400 font-mono">
-                            Expected: <span className="text-stone-800 dark:text-[#EAE5D9]">{item.item.expectedQty}</span> &nbsp;|&nbsp;
-                            Received: <span className="text-yellow-600 dark:text-yellow-400">{item.item.receivedQty || 0}</span>
+                        <h4 className="text-base font-bold text-[var(--theme-text-primary)] mb-1">{productName}</h4>
+                        <div className="text-xs text-[var(--theme-text-secondary)] font-mono tabular-nums">
+                            Expected: <span className="text-[var(--theme-text-primary)] font-semibold">{item.item.expectedQty}</span> &nbsp;|&nbsp;
+                            Received: <span className="text-amber-600 dark:text-amber-400 font-semibold">{item.item.receivedQty || 0}</span>
                         </div>
                     </div>
                     <div className="text-right">
-                        <div className="text-3xl font-black text-red-500 font-mono tracking-tighter">
+                        <div className="text-2xl font-bold text-red-500 font-mono tabular-nums">
                             {diff > 0 ? '+' : ''}{diff}
                         </div>
-                        <div className="text-[10px] uppercase tracking-widest text-red-500 opacity-70 font-bold">Variance</div>
+                        <div className="text-[11px] uppercase tracking-wider text-red-500 font-semibold">Variance</div>
                     </div>
                 </div>
 
                 {/* STEPS PREVIEW */}
                 <div className="flex items-center gap-2 mb-6">
-                    {['TYPE', 'ACTION', 'DETAILS', 'REVIEW'].map((s, i) => {
+                    {(['TYPE', 'ACTION', 'DETAILS', 'REVIEW'] as const).map((s, i) => {
                         const isCurrent = step === s;
                         const isPast = ['TYPE', 'ACTION', 'DETAILS', 'REVIEW'].indexOf(step) > i;
                         return (
                             <div key={s} className="flex-1 flex flex-col items-center gap-2">
-                                <div className={`w-full h-1 rounded-full ${isPast ? 'bg-[#2C5E3B] dark:bg-[#A9CBA2]' : isCurrent ? 'bg-[#2C5E3B] dark:bg-[#A9CBA2]' : 'bg-stone-200 dark:bg-white/10'}`} />
-                                <span className={`text-[10px] font-bold uppercase ${isCurrent ? 'text-[#2C5E3B] dark:text-[#A9CBA2]' : 'text-stone-400 dark:text-stone-600'}`}>{s}</span>
+                                <div className={`w-full h-1.5 rounded-full ${isPast || isCurrent ? 'bg-primary' : 'bg-[var(--theme-border)]'}`} />
+                                <span className={`text-[11px] font-semibold uppercase tracking-wider ${isCurrent ? 'text-primary' : 'text-[var(--theme-text-muted)]'}`}>{s}</span>
                             </div>
                         );
                     })}
                 </div>
 
                 {/* CONTENT AREA */}
-                <div className="min-h-[300px]">
+                <div className="min-h-[280px]">
                     {step === 'TYPE' && (
                         <div className="grid grid-cols-1 gap-3">
                             {DISCREPANCY_TYPES.map(t => (
@@ -295,19 +270,19 @@ export function DiscrepancyResolutionModal({
                                         setDiscrepancyType(t.id);
                                         setStep('ACTION');
                                     }}
-                                    className={`p-4 rounded-xl border flex items-center gap-4 transition-all group text-left
+                                    className={`p-4 min-h-[48px] rounded-xl border flex items-center gap-4 transition-colors group text-left touch-manipulation
                                         ${discrepancyType === t.id
-                                            ? 'bg-[#2C5E3B]/10 dark:bg-[#A9CBA2]/10 border-[#2C5E3B]/50 dark:border-[#A9CBA2]/50'
-                                            : 'bg-stone-50/50 dark:bg-[#1C2620]/30 border-[#E2DCCE]/30 dark:border-[#A9CBA2]/[0.04] hover:bg-stone-100/50 dark:hover:bg-[#EAE5D9]/10 hover:border-[#CFC6B4]/60 dark:hover:border-[#A9CBA2]/10'}`}
+                                            ? 'bg-primary/10 border-primary text-primary'
+                                            : 'bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] hover:bg-[var(--theme-bg-card)]'}`}
                                 >
-                                    <div className={`p-3 rounded-full bg-stone-100 dark:bg-black/40 ${t.color}`}>
-                                        <t.icon size={24} />
+                                    <div className={`p-2.5 rounded-xl bg-[var(--theme-bg-card)] ${t.color}`}>
+                                        <t.icon size={20} />
                                     </div>
                                     <div>
-                                        <div className="font-bold text-stone-850 dark:text-white text-lg">{t.label}</div>
-                                        <div className="text-stone-500 dark:text-stone-400 text-sm">Select if this best describes the issue.</div>
+                                        <div className="font-semibold text-[var(--theme-text-primary)] text-sm">{t.label}</div>
+                                        <div className="text-[var(--theme-text-secondary)] text-xs mt-0.5">Select if this best describes the issue.</div>
                                     </div>
-                                    <ChevronRight className={`ml-auto opacity-0 group-hover:opacity-100 transition-opacity ${discrepancyType === t.id ? 'opacity-100 text-[#2C5E3B] dark:text-[#A9CBA2]' : 'text-stone-500'}`} />
+                                    <ChevronRight className={`ml-auto opacity-0 group-hover:opacity-100 transition-opacity ${discrepancyType === t.id ? 'opacity-100 text-primary' : 'text-[var(--theme-text-muted)]'}`} size={16} />
                                 </button>
                             ))}
                         </div>
@@ -325,25 +300,25 @@ export function DiscrepancyResolutionModal({
                                             setResolutionAction(a.id);
                                             setStep('DETAILS');
                                         }}
-                                        className={`p-4 rounded-xl border flex flex-col gap-3 transition-all text-left relative overflow-hidden
-                                            ${!allowed ? 'opacity-50 cursor-not-allowed grayscale' : 'hover:scale-[1.02]'}
+                                        className={`p-4 min-h-[48px] rounded-xl border flex flex-col gap-2 transition-colors text-left relative overflow-hidden touch-manipulation
+                                            ${!allowed ? 'opacity-50 cursor-not-allowed' : 'hover:bg-[var(--theme-bg-subtle)]'}
                                             ${resolutionAction === a.id
-                                                ? 'bg-[#2C5E3B]/10 dark:bg-[#A9CBA2]/10 border-[#2C5E3B]/50 dark:border-[#A9CBA2]/50'
-                                                : 'bg-stone-50/50 dark:bg-[#1C2620]/30 border-[#E2DCCE]/30 dark:border-[#A9CBA2]/[0.04] hover:bg-stone-100/50 dark:hover:bg-[#EAE5D9]/10 hover:border-[#CFC6B4]/60 dark:hover:border-[#A9CBA2]/10'}`}
+                                                ? 'bg-primary/10 border-primary'
+                                                : 'bg-[var(--theme-bg-card)] border-[var(--theme-border)]'}`}
                                     >
                                         <div className="flex justify-between items-start">
-                                            <div className={`p-2 rounded-lg bg-stone-100 dark:bg-black/40 ${a.color}`}>
-                                                <a.icon size={20} />
+                                            <div className={`p-2 rounded-xl bg-[var(--theme-bg-subtle)] ${a.color}`}>
+                                                <a.icon size={18} />
                                             </div>
-                                            {a.id === resolutionAction && <div className="bg-[#2C5E3B] dark:bg-[#A9CBA2] text-white dark:text-black text-[10px] font-bold px-2 py-1 rounded">SELECTED</div>}
+                                            {a.id === resolutionAction && <div className="bg-primary text-white text-[11px] font-semibold px-2 py-0.5 rounded-md">SELECTED</div>}
                                         </div>
                                         <div>
-                                            <div className="font-bold text-stone-850 dark:text-white">{a.label}</div>
-                                            <div className="text-stone-500 dark:text-[#EAE5D9]/70 text-xs mt-1 leading-relaxed">{a.desc}</div>
+                                            <div className="font-semibold text-[var(--theme-text-primary)] text-xs">{a.label}</div>
+                                            <div className="text-[var(--theme-text-secondary)] text-[11px] mt-1 leading-relaxed">{a.desc}</div>
                                         </div>
                                         {!allowed && <div className="absolute inset-0 bg-black/75 flex items-center justify-center">
-                                            <span className="bg-red-500/20 text-red-500 border border-red-500/50 px-2 py-1 rounded text-xs font-bold uppercase flex items-center gap-1">
-                                                <Lock size={10} /> Locked
+                                            <span className="bg-red-500/20 text-red-500 border border-red-500/50 px-2 py-1 rounded text-xs font-semibold uppercase flex items-center gap-1">
+                                                <Lock size={12} /> Locked
                                             </span>
                                         </div>}
                                     </button>
@@ -355,33 +330,33 @@ export function DiscrepancyResolutionModal({
                     {step === 'DETAILS' && (
                         <div className="space-y-4 animate-in fade-in slide-in-from-right-4">
                             <div>
-                                <label className="block text-sm font-bold text-stone-500 dark:text-stone-400 mb-2">Quantity to Resolve</label>
+                                <label className="block text-xs font-semibold text-[var(--theme-text-secondary)] mb-2 uppercase tracking-wider">Quantity to Resolve</label>
                                 <input
                                     type="number"
                                     value={resolveQty}
                                     onChange={e => setResolveQty(e.target.value)}
-                                    className="woody-input font-mono"
+                                    className="woody-input font-mono tabular-nums text-xs min-h-[44px] rounded-xl border border-[var(--theme-border)] bg-[var(--theme-bg-app)] text-[var(--theme-text-primary)] px-3 py-2 w-full"
                                     placeholder="Enter quantity..."
                                 />
                             </div>
-                             <div>
-                                <label className="block text-sm font-bold text-stone-500 dark:text-stone-400 mb-2">Resolution Notes / Explanation</label>
+                            <div>
+                                <label className="block text-xs font-semibold text-[var(--theme-text-secondary)] mb-2 uppercase tracking-wider">Resolution Notes / Explanation</label>
                                 <textarea
                                     value={notes}
                                     onChange={e => setNotes(e.target.value)}
                                     placeholder="Please describe why this resolution was chosen..."
-                                    className="woody-input h-32 resize-none"
+                                    className="woody-input h-28 resize-none text-xs rounded-xl border border-[var(--theme-border)] bg-[var(--theme-bg-app)] text-[var(--theme-text-primary)] p-3 w-full"
                                 />
-                             </div>
+                            </div>
 
-                             {['claim', 'adjust', 'reject'].includes(resolutionAction || '') && (
+                            {['claim', 'adjust', 'reject'].includes(resolutionAction || '') && (
                                 <div>
-                                    <label className="block text-sm font-bold text-stone-500 dark:text-stone-400 mb-2">Internal Reason Code</label>
+                                    <label className="block text-xs font-semibold text-[var(--theme-text-secondary)] mb-2 uppercase tracking-wider">Internal Reason Code</label>
                                     <select
                                         value={reasonCode}
                                         onChange={e => setReasonCode(e.target.value)}
                                         title="Reason Code"
-                                        className="woody-input appearance-none"
+                                        className="woody-input text-xs min-h-[44px] rounded-xl border border-[var(--theme-border)] bg-[var(--theme-bg-app)] text-[var(--theme-text-primary)] px-3 py-2 w-full"
                                     >
                                         <option value="">Select a reason code...</option>
                                         <option value="DAMAGED_TRANSIT">Damaged in Transit</option>
@@ -391,59 +366,56 @@ export function DiscrepancyResolutionModal({
                                         <option value="THEFT">Suspected Theft</option>
                                     </select>
                                 </div>
-                             )}
+                            )}
 
-                             {resolutionAction === 'claim' && (
+                            {resolutionAction === 'claim' && (
                                 <div>
-                                    <label className="block text-sm font-bold text-stone-500 dark:text-stone-400 mb-2">Estimated Claim Amount</label>
-                                    <div className="relative">
-                                        <span className="absolute left-4 top-1/2 -translate-y-1/2 text-stone-400 font-bold">$</span>
-                                        <input
-                                            type="number"
-                                            value={claimAmount}
-                                            onChange={e => setClaimAmount(e.target.value)}
-                                            placeholder="0.00"
-                                            className="woody-input !pl-8 pr-4"
-                                        />
-                                    </div>
+                                    <label className="block text-xs font-semibold text-[var(--theme-text-secondary)] mb-2 uppercase tracking-wider">Estimated Claim Amount</label>
+                                    <input
+                                        type="number"
+                                        value={claimAmount}
+                                        onChange={e => setClaimAmount(e.target.value)}
+                                        placeholder="0.00"
+                                        className="woody-input text-xs min-h-[44px] rounded-xl border border-[var(--theme-border)] bg-[var(--theme-bg-app)] text-[var(--theme-text-primary)] px-3 py-2 w-full font-mono tabular-nums"
+                                    />
                                 </div>
-                             )}
+                            )}
 
-                             <div className="pt-4 flex justify-end">
+                            <div className="pt-4 flex justify-end">
                                 <Button
                                     onClick={() => setStep('REVIEW')}
                                     disabled={!notes || (['claim', 'adjust', 'reject'].includes(resolutionAction || '') && !reasonCode)}
                                 >
                                     Review Resolution <ArrowRight size={16} className="ml-2" />
                                 </Button>
-                             </div>
+                            </div>
                         </div>
                     )}
 
                     {step === 'REVIEW' && (
                         <div className="space-y-6 animate-in fade-in slide-in-from-right-4">
-                            <div className="bg-[#2C5E3B]/10 dark:bg-[#A9CBA2]/10 border border-[#2C5E3B]/20 dark:border-[#A9CBA2]/20 p-6 rounded-2xl space-y-4">
-                                <h3 className="text-stone-850 dark:text-white font-bold flex items-center gap-2">
-                                    <Shield className="text-[#2C5E3B] dark:text-[#A9CBA2]" /> Confirm Resolution
+                            <div className="bg-primary/5 border border-primary/20 p-5 rounded-2xl space-y-4">
+                                <h3 className="text-[var(--theme-text-primary)] font-semibold flex items-center gap-2 text-sm">
+                                    <Shield className="text-primary" size={18} /> Confirm Resolution
                                 </h3>
 
-                                <div className="grid grid-cols-2 gap-4 text-sm">
+                                <div className="grid grid-cols-2 gap-4 text-xs">
                                     <div>
-                                        <div className="text-gray-400 mb-1">Discrepancy Type</div>
-                                        <div className="text-white font-bold capitalize">{DISCREPANCY_TYPES.find(t => t.id === discrepancyType)?.label}</div>
+                                        <div className="text-[var(--theme-text-muted)] mb-1">Discrepancy Type</div>
+                                        <div className="text-[var(--theme-text-primary)] font-semibold capitalize">{DISCREPANCY_TYPES.find(t => t.id === discrepancyType)?.label}</div>
                                     </div>
                                     <div>
-                                        <div className="text-gray-400 mb-1">Resolution Action</div>
-                                        <div className="text-white font-bold capitalize">{RESOLUTION_ACTIONS.find(a => a.id === resolutionAction)?.label}</div>
+                                        <div className="text-[var(--theme-text-muted)] mb-1">Resolution Action</div>
+                                        <div className="text-[var(--theme-text-primary)] font-semibold capitalize">{RESOLUTION_ACTIONS.find(a => a.id === resolutionAction)?.label}</div>
                                     </div>
                                     <div className="col-span-2">
-                                        <div className="text-stone-500 dark:text-stone-400 mb-1">Notes</div>
-                                        <div className="text-stone-800 dark:text-[#EAE5D9] italic bg-stone-100/30 dark:bg-black/20 p-2 rounded-xl border border-[#E2DCCE]/30 dark:border-[#A9CBA2]/[0.04]">{notes}</div>
+                                        <div className="text-[var(--theme-text-muted)] mb-1">Notes</div>
+                                        <div className="text-[var(--theme-text-primary)] italic bg-[var(--theme-bg-subtle)] p-2.5 rounded-xl border border-[var(--theme-border)]">{notes}</div>
                                     </div>
                                     {claimAmount && (
                                         <div>
-                                            <div className="text-stone-500 dark:text-stone-400 mb-1">Claim Value</div>
-                                            <div className="text-emerald-600 dark:text-emerald-400 font-mono font-bold">${claimAmount}</div>
+                                            <div className="text-[var(--theme-text-muted)] mb-1">Claim Value</div>
+                                            <div className="text-emerald-600 dark:text-emerald-400 font-mono tabular-nums font-semibold">${claimAmount}</div>
                                         </div>
                                     )}
                                 </div>
@@ -453,10 +425,10 @@ export function DiscrepancyResolutionModal({
                                 <Button variant="secondary" onClick={() => setStep('DETAILS')} className="flex-1">Back</Button>
                                 <button
                                     onClick={handleSubmit}
-                                    className="flex-[2] woody-btn-primary flex items-center justify-center gap-2"
+                                    className="flex-[2] min-h-[44px] bg-primary text-white font-semibold rounded-xl flex items-center justify-center gap-2 hover:opacity-90 active:scale-95 transition-all touch-manipulation text-xs"
                                     disabled={isSubmitting}
                                 >
-                                    <CheckCircle size={18} /> Confirm & Submit
+                                    <CheckCircle size={16} /> Confirm & Submit
                                 </button>
                             </div>
                         </div>
@@ -465,13 +437,13 @@ export function DiscrepancyResolutionModal({
 
                 {/* Footer Nav (Back) */}
                 {step !== 'TYPE' && step !== 'REVIEW' && (
-                    <div className="pt-6 border-t border-[#E2DCCE]/30 dark:border-[#A9CBA2]/[0.04] flex justify-between">
+                    <div className="pt-4 border-t border-[var(--theme-border)] flex justify-between">
                         <button
                             onClick={() => {
                                 if (step === 'ACTION') setStep('TYPE');
                                 if (step === 'DETAILS') setStep('ACTION');
                             }}
-                            className="text-stone-500 hover:text-stone-850 dark:hover:text-white flex items-center gap-2 text-sm font-bold transition-colors"
+                            className="text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] flex items-center gap-2 text-xs font-semibold transition-colors min-h-[44px] touch-manipulation"
                         >
                             <ArrowLeft size={14} /> Back
                         </button>

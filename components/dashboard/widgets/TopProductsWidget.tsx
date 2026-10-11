@@ -8,33 +8,37 @@ interface TopProductsWidgetProps {
 
 export const TopProductsWidget = ({ products }: TopProductsWidgetProps) => {
     return (
-        <div className="glass-panel rounded-3xl p-6 h-full relative overflow-hidden flex flex-col">
+        <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-6 h-full relative overflow-hidden flex flex-col shadow-sm">
             <div className="flex justify-between items-center mb-4 relative z-10">
-                <h3 className="font-bold text-gray-900 dark:text-white flex items-center gap-2 text-sm">
-                    <Zap className="text-yellow-500 dark:text-yellow-400" size={16} />
+                <h3 className="font-bold text-[var(--theme-text-primary)] flex items-center gap-2 text-sm">
+                    <Zap className="text-amber-500" size={16} />
                     Top Performing Products
                 </h3>
             </div>
 
-            <div className="space-y-2 relative z-10 overflow-y-auto custom-scrollbar pr-1">
+            <div className="space-y-3 relative z-10 overflow-y-auto custom-scrollbar pr-1">
                 {products.length === 0 ? (
-                    <div className="text-xs text-gray-500 font-mono text-center py-4">NO SALES DATA</div>
+                    <div className="text-xs text-[var(--theme-text-muted)] font-mono text-center py-4">NO SALES DATA</div>
                 ) : (
                     products.map((p, i) => (
                         <div key={i} className="group relative">
                             <div className="flex justify-between items-end mb-1 text-xs">
-                                <span className="font-bold text-gray-700 dark:text-gray-300 truncate w-2/3 flex items-center gap-2">
-                                    <span className={`flex items-center justify-center w-4 h-4 rounded-full text-[9px] ${i === 0 ? 'bg-amber-500 text-stone-900 font-bold' : 'bg-gray-200 dark:bg-white/10 text-gray-500 dark:text-gray-400'}`}>
+                                <span className="font-semibold text-[var(--theme-text-primary)] truncate w-2/3 flex items-center gap-2">
+                                    <span className={`flex items-center justify-center w-5 h-5 rounded-full text-[11px] shrink-0 font-bold ${
+                                        i === 0
+                                            ? 'bg-[var(--theme-accent)] text-white shadow-xs'
+                                            : 'bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] border border-[var(--theme-border)]'
+                                    }`}>
                                         {i + 1}
                                     </span>
-                                    {p.name}
+                                    <span className="truncate">{p.name}</span>
                                 </span>
-                                <span className="font-mono font-bold text-emerald-600 dark:text-emerald-400">{formatCurrency(p.sales)}</span>
+                                <span className="font-mono font-bold text-[var(--theme-text-primary)] tabular-nums">{formatCurrency(p.sales)}</span>
                             </div>
-                            <div className="w-full bg-gray-200 dark:bg-black/40 h-1.5 rounded-full overflow-hidden">
+                            <div className="w-full bg-[var(--theme-border)] h-1.5 rounded-full overflow-hidden">
                                 {/* eslint-disable-next-line react/forbid-dom-props */}
                                 <div
-                                    className="h-full bg-gradient-to-r from-emerald-600 to-teal-500 rounded-full transition-all duration-1000"
+                                    className="h-full bg-[var(--theme-accent)] rounded-full transition-all duration-500"
                                     ref={(el) => { if (el) el.style.width = `${(p.sales / products[0].sales) * 100}%`; }}
                                 ></div>
                             </div>

@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { ArrowRight, SlidersHorizontal, RotateCcw, ArrowUpDown, Building2, Search, AlertTriangle, List, Check } from 'lucide-react';
 import { WMSJob, Site, Employee } from '../../../types';
 import { AssignJobCard } from './AssignJobCard';
-import { useStore } from '../../../contexts/CentralStore';
 import { canWorkerPerformJob } from '../../../utils/fulfillmentRoles';
 
 interface AssignPendingJobsProps {
@@ -44,8 +43,6 @@ export const AssignPendingJobs: React.FC<AssignPendingJobsProps> = ({
     setIsDetailsOpen,
     t
 }) => {
-    const { user } = useStore();
-
     // Local filter and sorting states
     const [isAdvancedOpen, setIsAdvancedOpen] = useState(false);
     const [selectedSiteId, setSelectedSiteId] = useState<string>('ALL');
@@ -63,7 +60,6 @@ export const AssignPendingJobs: React.FC<AssignPendingJobsProps> = ({
                d.getDate() === today.getDate();
     };
 
-    // Filter lists to only include today's jobs for WMS stats and lists
     const activeJobsToday = filteredJobs;
     const historicalJobsToday = (historicalJobs || []).filter(j => isToday(j.completedAt || j.completed_at || j.createdAt || j.created_at));
 
@@ -83,11 +79,9 @@ export const AssignPendingJobs: React.FC<AssignPendingJobsProps> = ({
         if (type !== 'ALL') {
             list = list.filter(j => j.type?.toUpperCase() === type.toUpperCase());
         }
-        // Apply priority filter
         if (dispatchPriorityFilter !== 'ALL') {
             list = list.filter(j => j.priority?.toLowerCase() === dispatchPriorityFilter.toLowerCase());
         }
-        // Apply search query (job ID / PO Number)
         if (dispatchSearch) {
             const query = dispatchSearch.toLowerCase();
             list = list.filter(j => 
@@ -96,17 +90,14 @@ export const AssignPendingJobs: React.FC<AssignPendingJobsProps> = ({
                 (j.poNumber && j.poNumber.toLowerCase().includes(query))
             );
         }
-        // Apply site filter
         if (selectedSiteId !== 'ALL') {
             list = list.filter(j => j.sourceSiteId === selectedSiteId || j.destSiteId === selectedSiteId || j.siteId === selectedSiteId);
         }
-        // Apply assignment status filter
         if (assignmentFilter === 'UNASSIGNED') {
             list = list.filter(j => !j.assignedTo && j.status?.toLowerCase() === 'pending');
         } else if (assignmentFilter === 'ASSIGNED') {
             list = list.filter(j => !!j.assignedTo || !['pending'].includes(j.status?.toLowerCase() || ''));
         }
-        // Apply job size filter
         if (jobSizeFilter === 'SMALL') {
             list = list.filter(j => j.items < 5);
         } else if (jobSizeFilter === 'MEDIUM') {
@@ -124,7 +115,6 @@ export const AssignPendingJobs: React.FC<AssignPendingJobsProps> = ({
         ['PICK', 'PACK', 'PUTAWAY', 'RECEIVE', 'COUNT', 'REPLENISH'].includes(j.type?.toUpperCase() || '')
     );
 
-    // Apply filters to completed jobs count
     if (assignJobFilter !== 'ALL') {
         completedWmsJobs = completedWmsJobs.filter(j => j.type?.toUpperCase() === assignJobFilter.toUpperCase());
     }
@@ -186,14 +176,13 @@ export const AssignPendingJobs: React.FC<AssignPendingJobsProps> = ({
         } else if (assignSortBy === 'items') {
             comparison = (a.items || 0) - (b.items || 0);
         } else if (assignSortBy === 'eta') {
-            let etaA = a.type === 'PICK' ? Math.max(15, a.items * 3) : a.type === 'PACK' ? Math.max(10, a.items * 2) : Math.max(20, a.items * 4);
-            let etaB = b.type === 'PICK' ? Math.max(15, b.items * 3) : b.type === 'PACK' ? Math.max(10, b.items * 2) : Math.max(20, b.items * 4);
+            const etaA = a.type === 'PICK' ? Math.max(15, a.items * 3) : a.type === 'PACK' ? Math.max(10, a.items * 2) : Math.max(20, a.items * 4);
+            const etaB = b.type === 'PICK' ? Math.max(15, b.items * 3) : b.type === 'PACK' ? Math.max(10, b.items * 2) : Math.max(20, b.items * 4);
             comparison = etaA - etaB;
         }
         return sortDirection === 'asc' ? comparison : -comparison;
     });
 
-    // Counts for Stats Bar
     const unassignedCount = filteredActiveJobs.filter(j => !j.assignedTo && j.status?.toLowerCase() === 'pending').length;
     const assignedCount = filteredActiveJobs.filter(j => !!j.assignedTo || !['pending'].includes(j.status?.toLowerCase() || '')).length;
     const totalCount = filteredActiveJobs.length + completedWmsJobs.length;
@@ -210,39 +199,39 @@ export const AssignPendingJobs: React.FC<AssignPendingJobsProps> = ({
     };
 
     return (
-        <div className="glass-panel flex flex-col overflow-hidden h-[800px]">
+        <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl flex flex-col overflow-hidden h-[800px]">
             {/* Header section */}
-            <div className="p-4 border-b border-[#E2DCCE]/30 dark:border-[#A9CBA2]/[0.04] bg-stone-50/50 dark:bg-black/20 flex justify-between items-center transition-colors">
+            <div className="p-4 border-b border-[var(--theme-border)] bg-[var(--theme-bg-subtle)] flex justify-between items-center">
                 <div className="flex items-center gap-2">
-                    <span className="w-2 h-2 rounded-full bg-[#2C5E3B] dark:bg-[#A9CBA2] animate-pulse" />
-                    <span className="font-black text-[10px] text-stone-550 dark:text-stone-400 uppercase tracking-widest">{t('warehouse.pendingJobs')}</span>
-                    <span className="bg-[#2C5E3B]/10 dark:bg-[#A9CBA2]/10 text-[#2C5E3B] dark:text-[#A9CBA2] px-2 py-0.5 rounded-full border border-[#2C5E3B]/20 dark:border-[#A9CBA2]/20 ml-1 font-bold text-[10px]">
+                    <span className="w-2 h-2 rounded-full bg-primary animate-pulse" />
+                    <span className="font-semibold text-xs text-[var(--theme-text-secondary)] uppercase tracking-wider">{t('warehouse.pendingJobs')}</span>
+                    <span className="bg-primary/10 text-primary px-2 py-0.5 rounded-full border border-primary/20 ml-1 font-mono tabular-nums text-xs font-semibold">
                         {filteredActiveJobs.length}
                     </span>
                 </div>
                 
                 <div className="flex items-center gap-2">
                     {!selectedJob && filteredActiveJobs.filter(j => j.status?.toLowerCase() === 'pending').length > 0 && (
-                        <span className="text-[10px] text-[#2C5E3B] dark:text-[#A9CBA2] font-medium hidden sm:flex items-center gap-1">
-                            <ArrowRight size={10} /> {t('warehouse.selectJobToAssign')}
+                        <span className="text-xs text-primary font-medium hidden sm:flex items-center gap-1">
+                            <ArrowRight size={12} /> {t('warehouse.selectJobToAssign')}
                         </span>
                     )}
                     <button
                         onClick={() => setIsAdvancedOpen(!isAdvancedOpen)}
-                        className={`flex items-center gap-1.5 px-3 py-1 rounded-xl text-[10px] font-black uppercase tracking-widest border transition-all ${
+                        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold uppercase tracking-wider border transition-colors min-h-[38px] touch-manipulation ${
                             isAdvancedOpen 
-                                ? 'bg-[#2C5E3B] text-white border-[#2C5E3B] dark:bg-[#A9CBA2] dark:text-black dark:border-[#A9CBA2]' 
-                                : 'bg-stone-150/40 dark:bg-white/5 text-stone-600 dark:text-stone-400 border-stone-200 dark:border-white/5 hover:bg-stone-200/50 dark:hover:bg-white/10'
+                                ? 'bg-primary text-white border-primary shadow-sm' 
+                                : 'bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] border-[var(--theme-border)] hover:bg-[var(--theme-bg-card)]'
                         }`}
                     >
-                        <SlidersHorizontal size={12} />
+                        <SlidersHorizontal size={14} />
                         <span>Filters</span>
                     </button>
                 </div>
             </div>
 
-            {/* Quick Job Type Tabs (Simple) */}
-            <div className="flex items-center gap-1 p-2 bg-stone-100/30 dark:bg-black/10 border-b border-[#E2DCCE]/20 dark:border-[#A9CBA2]/[0.02] overflow-x-auto scrollbar-none">
+            {/* Quick Job Type Tabs */}
+            <div className="flex items-center gap-1.5 p-2 bg-[var(--theme-bg-subtle)] border-b border-[var(--theme-border)] overflow-x-auto scrollbar-none">
                 {wmsJobTypes.map(type => {
                     const count = getJobTypeCount(type);
                     const isActive = assignJobFilter.toUpperCase() === type.toUpperCase();
@@ -250,17 +239,17 @@ export const AssignPendingJobs: React.FC<AssignPendingJobsProps> = ({
                         <button
                             key={type}
                             onClick={() => setAssignJobFilter(type)}
-                            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest whitespace-nowrap transition-all ${
+                            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold uppercase tracking-wider whitespace-nowrap min-h-[38px] transition-colors touch-manipulation ${
                                 isActive
-                                    ? 'bg-[#2C5E3B] text-white shadow-sm dark:bg-[#A9CBA2] dark:text-black'
-                                    : 'text-stone-550 dark:text-stone-400 hover:bg-stone-150/50 dark:hover:bg-white/5'
+                                    ? 'bg-primary text-white shadow-sm'
+                                    : 'text-[var(--theme-text-secondary)] hover:bg-[var(--theme-bg-card)]'
                             }`}
                         >
                             <span>{type}</span>
-                            <span className={`px-1.5 py-0.5 rounded-full text-[8px] font-black ${
+                            <span className={`px-2 py-0.5 rounded-full text-[11px] font-mono tabular-nums font-semibold ${
                                 isActive 
-                                    ? 'bg-white/20 text-white dark:bg-black/10 dark:text-black' 
-                                    : 'bg-stone-200/60 text-stone-600 dark:bg-white/10 dark:text-stone-400'
+                                    ? 'bg-white/20 text-white' 
+                                    : 'bg-[var(--theme-bg-card)] text-[var(--theme-text-muted)]'
                             }`}>
                                 {count}
                             </span>
@@ -271,12 +260,12 @@ export const AssignPendingJobs: React.FC<AssignPendingJobsProps> = ({
 
             {/* Advanced Filters panel (Collapsible) */}
             {isAdvancedOpen && (
-                <div className="p-4 bg-stone-50/70 dark:bg-zinc-900/60 border-b border-[#E2DCCE]/30 dark:border-[#A9CBA2]/[0.04] space-y-4 animate-in fade-in slide-in-from-top duration-200">
+                <div className="p-4 bg-[var(--theme-bg-subtle)] border-b border-[var(--theme-border)] space-y-4 animate-in fade-in slide-in-from-top duration-200">
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                         {/* Site Filter */}
                         <div className="space-y-1.5">
-                            <label htmlFor="site-filter-select" className="text-[9px] font-black uppercase tracking-widest text-stone-500 dark:text-stone-400 flex items-center gap-1">
-                                <Building2 size={10} /> Location / Site
+                            <label htmlFor="site-filter-select" className="text-xs font-semibold uppercase tracking-wider text-[var(--theme-text-secondary)] flex items-center gap-1">
+                                <Building2 size={12} /> Location / Site
                             </label>
                             <select
                                 id="site-filter-select"
@@ -284,7 +273,7 @@ export const AssignPendingJobs: React.FC<AssignPendingJobsProps> = ({
                                 aria-label="Filter by Location / Site"
                                 value={selectedSiteId}
                                 onChange={(e) => setSelectedSiteId(e.target.value)}
-                                className="woody-input text-[10px] font-bold py-1.5"
+                                className="woody-input text-xs font-medium py-2 rounded-xl border border-[var(--theme-border)] bg-[var(--theme-bg-app)] text-[var(--theme-text-primary)] min-h-[38px]"
                             >
                                 <option value="ALL">ALL SITES</option>
                                 {sites.map(s => (
@@ -295,18 +284,18 @@ export const AssignPendingJobs: React.FC<AssignPendingJobsProps> = ({
 
                         {/* Priority Filter */}
                         <div className="space-y-1.5">
-                            <label className="text-[9px] font-black uppercase tracking-widest text-stone-500 dark:text-stone-400 flex items-center gap-1">
-                                <AlertTriangle size={10} /> Priority
+                            <label className="text-xs font-semibold uppercase tracking-wider text-[var(--theme-text-secondary)] flex items-center gap-1">
+                                <AlertTriangle size={12} /> Priority
                             </label>
                             <div className="flex gap-1">
                                 {['ALL', 'Critical', 'High', 'Normal'].map(p => (
                                     <button
                                         key={p}
                                         onClick={() => setDispatchPriorityFilter(p)}
-                                        className={`flex-1 py-1 px-1.5 rounded-lg text-[8px] font-black uppercase tracking-wider border transition-all ${
+                                        className={`flex-1 min-h-[38px] py-1.5 px-2 rounded-xl text-[11px] font-semibold uppercase tracking-wider border transition-colors touch-manipulation ${
                                             dispatchPriorityFilter === p
-                                                ? 'bg-[#2C5E3B] text-white border-[#2C5E3B] dark:bg-[#A9CBA2] dark:text-black dark:border-[#A9CBA2]'
-                                                : 'bg-white dark:bg-white/5 text-stone-600 dark:text-stone-400 border-[#E2DCCE]/50 dark:border-white/5 hover:bg-stone-50'
+                                                ? 'bg-primary text-white border-primary shadow-sm'
+                                                : 'bg-[var(--theme-bg-card)] text-[var(--theme-text-secondary)] border-[var(--theme-border)] hover:bg-[var(--theme-bg-app)]'
                                         }`}
                                     >
                                         {p}
@@ -317,18 +306,18 @@ export const AssignPendingJobs: React.FC<AssignPendingJobsProps> = ({
 
                         {/* Assignment Status */}
                         <div className="space-y-1.5">
-                            <label className="text-[9px] font-black uppercase tracking-widest text-stone-500 dark:text-stone-400 flex items-center gap-1">
-                                <Check size={10} /> Assignment Status
+                            <label className="text-xs font-semibold uppercase tracking-wider text-[var(--theme-text-secondary)] flex items-center gap-1">
+                                <Check size={12} /> Assignment Status
                             </label>
                             <div className="flex gap-1">
-                                {['ALL', 'UNASSIGNED', 'ASSIGNED'].map(a => (
+                                {(['ALL', 'UNASSIGNED', 'ASSIGNED'] as const).map(a => (
                                     <button
                                         key={a}
-                                        onClick={() => setAssignmentFilter(a as any)}
-                                        className={`flex-1 py-1 px-1.5 rounded-lg text-[8px] font-black uppercase tracking-wider border transition-all ${
+                                        onClick={() => setAssignmentFilter(a)}
+                                        className={`flex-1 min-h-[38px] py-1.5 px-2 rounded-xl text-[11px] font-semibold uppercase tracking-wider border transition-colors touch-manipulation ${
                                             assignmentFilter === a
-                                                ? 'bg-[#2C5E3B] text-white border-[#2C5E3B] dark:bg-[#A9CBA2] dark:text-black dark:border-[#A9CBA2]'
-                                                : 'bg-white dark:bg-white/5 text-stone-600 dark:text-stone-400 border-[#E2DCCE]/50 dark:border-white/5 hover:bg-stone-50'
+                                                ? 'bg-primary text-white border-primary shadow-sm'
+                                                : 'bg-[var(--theme-bg-card)] text-[var(--theme-text-secondary)] border-[var(--theme-border)] hover:bg-[var(--theme-bg-app)]'
                                         }`}
                                     >
                                         {a}
@@ -339,22 +328,22 @@ export const AssignPendingJobs: React.FC<AssignPendingJobsProps> = ({
 
                         {/* Search field */}
                         <div className="space-y-1.5">
-                            <label className="text-[9px] font-black uppercase tracking-widest text-stone-500 dark:text-stone-400 flex items-center gap-1">
-                                <Search size={10} /> Search payload id or po
+                            <label className="text-xs font-semibold uppercase tracking-wider text-[var(--theme-text-secondary)] flex items-center gap-1">
+                                <Search size={12} /> Search payload id or po
                             </label>
                             <input
                                 type="text"
                                 placeholder="Search..."
                                 value={dispatchSearch}
                                 onChange={(e) => setDispatchSearch(e.target.value)}
-                                className="woody-input text-[10px] font-bold py-1.5"
+                                className="woody-input text-xs font-medium py-2 rounded-xl border border-[var(--theme-border)] bg-[var(--theme-bg-app)] text-[var(--theme-text-primary)] min-h-[38px]"
                             />
                         </div>
 
                         {/* Job Size */}
                         <div className="space-y-1.5">
-                            <label className="text-[9px] font-black uppercase tracking-widest text-stone-500 dark:text-stone-400 flex items-center gap-1">
-                                <List size={10} /> Job Size (Items)
+                            <label className="text-xs font-semibold uppercase tracking-wider text-[var(--theme-text-secondary)] flex items-center gap-1">
+                                <List size={12} /> Job Size (Items)
                             </label>
                             <div className="flex gap-1">
                                 {[
@@ -366,10 +355,10 @@ export const AssignPendingJobs: React.FC<AssignPendingJobsProps> = ({
                                     <button
                                         key={size.id}
                                         onClick={() => setJobSizeFilter(size.id as any)}
-                                        className={`flex-1 py-1 px-1 rounded-lg text-[8px] font-black uppercase tracking-tighter border transition-all ${
+                                        className={`flex-1 min-h-[38px] py-1.5 px-1 rounded-xl text-[11px] font-semibold uppercase tracking-wider border transition-colors touch-manipulation ${
                                             jobSizeFilter === size.id
-                                                ? 'bg-[#2C5E3B] text-white border-[#2C5E3B] dark:bg-[#A9CBA2] dark:text-black dark:border-[#A9CBA2]'
-                                                : 'bg-white dark:bg-white/5 text-stone-600 dark:text-stone-400 border-[#E2DCCE]/50 dark:border-white/5 hover:bg-stone-50'
+                                                ? 'bg-primary text-white border-primary shadow-sm'
+                                                : 'bg-[var(--theme-bg-card)] text-[var(--theme-text-secondary)] border-[var(--theme-border)] hover:bg-[var(--theme-bg-app)]'
                                         }`}
                                     >
                                         {size.label}
@@ -380,8 +369,8 @@ export const AssignPendingJobs: React.FC<AssignPendingJobsProps> = ({
 
                         {/* Sorting Direction & Order */}
                         <div className="space-y-1.5">
-                            <label htmlFor="sort-jobs-select" className="text-[9px] font-black uppercase tracking-widest text-stone-500 dark:text-stone-400 flex items-center gap-1">
-                                <ArrowUpDown size={10} /> Sorting
+                            <label htmlFor="sort-jobs-select" className="text-xs font-semibold uppercase tracking-wider text-[var(--theme-text-secondary)] flex items-center gap-1">
+                                <ArrowUpDown size={12} /> Sorting
                             </label>
                             <div className="flex gap-1.5">
                                 <select
@@ -390,7 +379,7 @@ export const AssignPendingJobs: React.FC<AssignPendingJobsProps> = ({
                                     aria-label="Sort jobs by"
                                     value={assignSortBy}
                                     onChange={(e) => setAssignSortBy(e.target.value)}
-                                    className="woody-input text-[10px] font-bold py-1.5 flex-1"
+                                    className="woody-input text-xs font-medium py-2 rounded-xl border border-[var(--theme-border)] bg-[var(--theme-bg-app)] text-[var(--theme-text-primary)] min-h-[38px] flex-1"
                                 >
                                     <option value="priority">Priority</option>
                                     <option value="date">Date</option>
@@ -399,11 +388,12 @@ export const AssignPendingJobs: React.FC<AssignPendingJobsProps> = ({
                                 </select>
                                 <button
                                     onClick={() => setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc')}
-                                    className="px-3 bg-white dark:bg-white/5 border border-[#E2DCCE]/50 dark:border-white/5 rounded-xl text-stone-600 dark:text-stone-400 hover:bg-stone-50/50 dark:hover:bg-white/10 flex items-center justify-center transition-all"
+                                    className="min-h-[38px] px-3 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-app)] flex items-center justify-center transition-colors touch-manipulation"
                                     title={`Toggle order: current is ${sortDirection}`}
+                                    aria-label={`Toggle order: current is ${sortDirection}`}
                                 >
-                                    <ArrowUpDown size={12} className={sortDirection === 'asc' ? 'rotate-180 transition-transform duration-300' : 'transition-transform duration-300'} />
-                                    <span className="text-[8px] font-black ml-1 uppercase">{sortDirection}</span>
+                                    <ArrowUpDown size={14} className={sortDirection === 'asc' ? 'rotate-180 transition-transform' : 'transition-transform'} />
+                                    <span className="text-[11px] font-semibold ml-1 uppercase">{sortDirection}</span>
                                 </button>
                             </div>
                         </div>
@@ -413,9 +403,9 @@ export const AssignPendingJobs: React.FC<AssignPendingJobsProps> = ({
                     <div className="flex justify-end pt-1">
                         <button
                             onClick={handleClearFilters}
-                            className="flex items-center gap-1 px-3 py-1 bg-amber-50 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-500/20 rounded-xl text-[9px] font-black uppercase tracking-wider hover:bg-amber-100 hover:scale-105 active:scale-95 transition-all"
+                            className="min-h-[44px] flex items-center gap-1.5 px-4 py-2 bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-500/20 rounded-xl text-xs font-semibold uppercase tracking-wider hover:bg-amber-500/20 active:scale-95 transition-all touch-manipulation"
                         >
-                            <RotateCcw size={10} />
+                            <RotateCcw size={14} />
                             Reset All Filters
                         </button>
                     </div>
@@ -423,22 +413,22 @@ export const AssignPendingJobs: React.FC<AssignPendingJobsProps> = ({
             )}
 
             {/* WMS Stats Summary Bar */}
-            <div className="p-3 border-b border-[#E2DCCE]/25 dark:border-[#A9CBA2]/[0.02] bg-stone-50/20 dark:bg-black/10 grid grid-cols-2 sm:grid-cols-4 gap-3">
-                <div className="bg-white/50 dark:bg-white/5 border border-[#E2DCCE]/40 dark:border-[#A9CBA2]/[0.02] rounded-xl p-2.5 flex flex-col shadow-sm">
-                    <span className="text-[9px] font-black text-stone-500 dark:text-stone-400 uppercase tracking-wider">Unassigned</span>
-                    <span className="text-base font-black text-[#2C5E3B] dark:text-[#A9CBA2] mt-0.5">{unassignedCount}</span>
+            <div className="p-3 border-b border-[var(--theme-border)] bg-[var(--theme-bg-subtle)] grid grid-cols-2 sm:grid-cols-4 gap-3">
+                <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl p-3 flex flex-col shadow-sm">
+                    <span className="text-[11px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider">Unassigned</span>
+                    <span className="text-lg font-bold font-mono tabular-nums text-primary mt-0.5">{unassignedCount}</span>
                 </div>
-                <div className="bg-white/50 dark:bg-white/5 border border-[#E2DCCE]/40 dark:border-[#A9CBA2]/[0.02] rounded-xl p-2.5 flex flex-col shadow-sm">
-                    <span className="text-[9px] font-black text-stone-500 dark:text-stone-400 uppercase tracking-wider">Assigned</span>
-                    <span className="text-base font-black text-stone-550 dark:text-slate-400 mt-0.5">{assignedCount}</span>
+                <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl p-3 flex flex-col shadow-sm">
+                    <span className="text-[11px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider">Assigned</span>
+                    <span className="text-lg font-bold font-mono tabular-nums text-[var(--theme-text-primary)] mt-0.5">{assignedCount}</span>
                 </div>
-                <div className="bg-white/50 dark:bg-white/5 border border-[#E2DCCE]/40 dark:border-[#A9CBA2]/[0.02] rounded-xl p-2.5 flex flex-col shadow-sm">
-                    <span className="text-[9px] font-black text-stone-500 dark:text-stone-400 uppercase tracking-wider">Total</span>
-                    <span className="text-base font-black text-[#8C6239] dark:text-[#E2C899] mt-0.5">{totalCount}</span>
+                <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl p-3 flex flex-col shadow-sm">
+                    <span className="text-[11px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider">Total</span>
+                    <span className="text-lg font-bold font-mono tabular-nums text-amber-600 dark:text-amber-400 mt-0.5">{totalCount}</span>
                 </div>
-                <div className="bg-white/50 dark:bg-white/5 border border-[#E2DCCE]/40 dark:border-[#A9CBA2]/[0.02] rounded-xl p-2.5 flex flex-col shadow-sm">
-                    <span className="text-[9px] font-black text-stone-500 dark:text-stone-400 uppercase tracking-wider">Completed</span>
-                    <span className="text-base font-black text-emerald-600 dark:text-emerald-400 mt-0.5">{completedWmsJobs.length}</span>
+                <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl p-3 flex flex-col shadow-sm">
+                    <span className="text-[11px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider">Completed</span>
+                    <span className="text-lg font-bold font-mono tabular-nums text-emerald-600 dark:text-emerald-400 mt-0.5">{completedWmsJobs.length}</span>
                 </div>
             </div>
 
@@ -446,7 +436,6 @@ export const AssignPendingJobs: React.FC<AssignPendingJobsProps> = ({
             <div className="flex-1 overflow-y-auto p-3 space-y-3 custom-scrollbar">
                 {filteredActiveJobs.length > 0 ? (
                     filteredActiveJobs.map(job => {
-                        // Find best match employee based on fulfillment role eligibility
                         const bestMatchEmployee = employees
                             .filter(e => e.status === 'Active' && e.role?.toLowerCase() !== 'super_admin' && canWorkerPerformJob(e.role, job.type))
                             .map(e => {
@@ -476,7 +465,7 @@ export const AssignPendingJobs: React.FC<AssignPendingJobsProps> = ({
                         );
                     })
                 ) : (
-                    <div className="text-center py-8 text-slate-400 dark:text-gray-500 text-sm">
+                    <div className="text-center py-8 text-[var(--theme-text-muted)] text-sm">
                         {t('warehouse.noPendingJobsMatch')}
                     </div>
                 )}

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Package } from 'lucide-react';
+import { Package, Search } from 'lucide-react';
 
 interface PickHeaderProps {
     pendingCount: number;
@@ -23,24 +23,20 @@ export const PickHeader: React.FC<PickHeaderProps> = ({
     setPickSearch
 }) => {
     return (
-        <div className="glass-panel p-3 sm:p-5 md:p-8 relative overflow-hidden group">
-            {/* Background Accent Glow */}
-            <div className="hidden md:block absolute -top-24 -right-24 w-64 h-64 bg-[#2C5E3B]/5 dark:bg-[#2C5E3B]/10 blur-[120px] rounded-full pointer-events-none" />
-            <div className="hidden md:block absolute -bottom-24 -left-24 w-48 h-48 bg-[#A9CBA2]/5 dark:bg-[#A9CBA2]/10 blur-[100px] rounded-full pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-1000" />
-
-            <div className="relative z-10 flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4 sm:gap-6 xl:gap-8">
+        <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-4 sm:p-6 shadow-sm">
+            <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4 sm:gap-6">
                 {/* Title Section */}
-                <div className="flex items-center gap-3 sm:gap-4 md:gap-6 min-w-0 w-full sm:w-auto">
-                    <div className="w-11 h-11 sm:w-14 sm:h-14 md:w-16 md:h-16 rounded-xl sm:rounded-2xl md:rounded-[1.25rem] bg-[#2C5E3B]/10 dark:bg-[#A9CBA2]/25 border border-[#2C5E3B]/20 dark:border-[#A9CBA2]/20 flex items-center justify-center shadow-sm shrink-0">
-                        <Package size={22} className="sm:w-7 sm:h-7 text-[#2C5E3B] dark:text-[#A9CBA2]" />
+                <div className="flex items-center gap-3.5 sm:gap-4 min-w-0 w-full sm:w-auto">
+                    <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-[var(--theme-accent)]/10 border border-[var(--theme-accent)]/20 flex items-center justify-center text-[var(--theme-accent)] shrink-0">
+                        <Package size={24} strokeWidth={1.75} />
                     </div>
                     <div className="min-w-0 flex-1">
-                        <h3 className="text-lg sm:text-xl md:text-3xl font-black text-slate-900 dark:text-white tracking-tight uppercase leading-none mb-1.5 truncate">
+                        <h3 className="text-xl sm:text-2xl font-bold text-[var(--theme-text-primary)] tracking-tight uppercase leading-tight truncate">
                             {t('warehouse.pickQueue')}
                         </h3>
-                        <div className="flex items-center gap-2 font-mono">
-                            <span className="flex h-2 w-2 rounded-full bg-[#2C5E3B] dark:bg-[#A9CBA2] animate-pulse shrink-0" />
-                            <p className="text-[9px] sm:text-[10px] md:text-xs text-slate-500 dark:text-zinc-400 font-bold uppercase tracking-[0.15em] truncate">
+                        <div className="flex items-center gap-2">
+                            <span className="flex h-2 w-2 rounded-full bg-[var(--theme-accent)] shrink-0" />
+                            <p className="text-[11px] text-[var(--theme-text-secondary)] font-medium uppercase tracking-wider truncate">
                                 {t('warehouse.selectJobToAssign')}
                             </p>
                         </div>
@@ -48,12 +44,10 @@ export const PickHeader: React.FC<PickHeaderProps> = ({
                 </div>
 
                 {/* Dashboard Controls */}
-                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 sm:gap-3 w-full xl:w-auto">
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full xl:w-auto">
                     {/* Search Hub */}
-                    <div className="relative group/search flex-1 xl:w-72 lg:w-96 min-w-0">
-                        <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="text-slate-400 dark:text-zinc-500 group-focus-within/search:text-[#2C5E3B] dark:group-focus-within/search:text-[#A9CBA2] transition-colors"><circle cx="11" cy="11" r="8" /><path d="m21 21-4.3-4.3" /></svg>
-                        </div>
+                    <div className="relative flex-1 xl:w-72 lg:w-80 min-w-0">
+                        <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--theme-text-secondary)] pointer-events-none" />
                         <input
                             type="text"
                             placeholder={`${t('warehouse.searchByIdOrOrder')}`}
@@ -61,43 +55,48 @@ export const PickHeader: React.FC<PickHeaderProps> = ({
                             title={t('warehouse.searchByIdOrOrder')}
                             value={pickSearch}
                             onChange={(e) => setPickSearch(e.target.value)}
-                            className="woody-input w-full !pl-10 pr-4 py-2.5 sm:py-3 text-xs min-h-[44px]"
+                            className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-[var(--theme-border)] bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)] placeholder:text-[var(--theme-text-secondary)] text-xs font-medium focus:outline-none focus:border-[var(--theme-accent)] transition-colors min-h-[44px]"
                         />
                     </div>
 
-                    {/* View Switcher & Stats wrapper for mobile */}
-                    <div className="flex items-center gap-2 sm:gap-3">
-                        {/* View Switcher */}
-                        <div className="glass-panel-pushed p-1 flex shadow-inner shrink-0 min-h-[44px] items-center">
-                            <button
-                                onClick={() => setViewMode('Process')}
-                                className={`px-4 sm:px-5 py-2 rounded-lg sm:rounded-xl text-[10px] font-black uppercase tracking-[0.12em] min-h-[36px] transition-colors ${viewMode === 'Process' ? 'bg-[#2C5E3B] dark:bg-[#EAE5D9] text-[#FAF8F5] dark:text-[#1E3B24] shadow-sm' : 'text-slate-500 dark:text-zinc-400 hover:text-[#2C5E3B] dark:hover:text-white'}`}
-                            >
-                                {t('warehouse.putaway.process')}
-                            </button>
-                            <button
-                                onClick={() => setViewMode('History')}
-                                className={`px-4 sm:px-5 py-2 rounded-lg sm:rounded-xl text-[10px] font-black uppercase tracking-[0.12em] min-h-[36px] transition-colors ${viewMode === 'History' ? 'bg-[#2C5E3B] dark:bg-[#EAE5D9] text-[#FAF8F5] dark:text-[#1E3B24] shadow-sm' : 'text-slate-500 dark:text-zinc-400 hover:text-[#2C5E3B] dark:hover:text-white'}`}
-                            >
-                                {t('warehouse.history')}
-                            </button>
-                        </div>
+                    {/* View Switcher Segmented Control */}
+                    <div className="bg-[var(--theme-bg-subtle)] p-1 rounded-xl border border-[var(--theme-border)] flex items-center shrink-0 min-h-[44px]">
+                        <button
+                            onClick={() => setViewMode('Process')}
+                            className={`px-4 sm:px-5 py-2 rounded-lg text-xs font-semibold uppercase tracking-wider min-h-[36px] transition-colors ${
+                                viewMode === 'Process'
+                                    ? 'bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)] shadow-sm'
+                                    : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)]'
+                            }`}
+                        >
+                            {t('warehouse.putaway.process')}
+                        </button>
+                        <button
+                            onClick={() => setViewMode('History')}
+                            className={`px-4 sm:px-5 py-2 rounded-lg text-xs font-semibold uppercase tracking-wider min-h-[36px] transition-colors ${
+                                viewMode === 'History'
+                                    ? 'bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)] shadow-sm'
+                                    : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)]'
+                            }`}
+                        >
+                            {t('warehouse.history')}
+                        </button>
                     </div>
 
                     {/* Stats Dashboard */}
-                    <div className="grid grid-cols-3 gap-1.5 sm:gap-2.5 w-full sm:w-auto">
+                    <div className="grid grid-cols-3 gap-2 w-full sm:w-auto">
                         {[
-                            { count: pendingCount, label: t('warehouse.pending'), theme: 'amber' },
-                            { count: inProgressCount, label: t('warehouse.inProgress'), theme: 'blue' },
-                            { count: completedCount, label: t('warehouse.completed'), theme: 'emerald' }
+                            { count: pendingCount, label: t('warehouse.pending'), color: 'text-amber-500' },
+                            { count: inProgressCount, label: t('warehouse.inProgress'), color: 'text-[var(--theme-accent)]' },
+                            { count: completedCount, label: t('warehouse.completed'), color: 'text-emerald-500' }
                         ].map((stat, i) => (
-                            <div key={i} className="bg-stone-50 dark:bg-white/5 border border-stone-200/50 dark:border-white/10 rounded-xl sm:rounded-2xl px-2.5 sm:px-4 py-2 sm:py-2.5 text-center sm:text-left shadow-inner transition-colors">
-                                <p className={`text-base sm:text-lg md:text-xl font-mono font-black tabular-nums leading-none mb-1 ${
-                                    stat.theme === 'amber' ? 'text-amber-600 dark:text-amber-400' :
-                                    stat.theme === 'blue' ? 'text-[#2C5E3B] dark:text-[#A9CBA2]' :
-                                    'text-emerald-600 dark:text-emerald-400'
-                                }`}>{stat.count}</p>
-                                <p className="text-[9px] text-slate-400 dark:text-zinc-400 font-black uppercase tracking-wider truncate">{stat.label}</p>
+                            <div key={i} className="bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3 py-2 text-center sm:text-left min-w-[70px]">
+                                <p className={`text-base sm:text-lg font-mono font-bold tabular-nums leading-none mb-1 ${stat.color}`}>
+                                    {stat.count}
+                                </p>
+                                <p className="text-[11px] text-[var(--theme-text-secondary)] font-semibold uppercase tracking-wider truncate">
+                                    {stat.label}
+                                </p>
                             </div>
                         ))}
                     </div>

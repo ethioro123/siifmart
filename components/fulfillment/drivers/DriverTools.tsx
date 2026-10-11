@@ -1,5 +1,5 @@
 import React from 'react';
-import { QrCode, AlertTriangle, FileText, LogOut, Scan } from 'lucide-react';
+import { QrCode, AlertTriangle, FileText, LogOut } from 'lucide-react';
 
 interface DriverToolsProps {
     t: (key: string) => string;
@@ -16,25 +16,24 @@ export const DriverTools: React.FC<DriverToolsProps> = ({
     onIssue,
     onDocs,
     onEnd,
-    addNotification
 }) => {
     return (
-        <div className="bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl p-2 flex items-center justify-between gap-2 shadow-sm dark:shadow-inner">
+        <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-2.5 flex items-center justify-between gap-2.5 shadow-xs">
             {[
-                { icon: QrCode, label: t('warehouse.driverHub.scan'), action: () => setDriverScannerOpen(true), color: 'text-[#2C5E3B] dark:text-[#A9CBA2]', bg: 'bg-[#2C5E3B]/10' },
-                { icon: AlertTriangle, label: t('warehouse.driverHub.report'), action: onIssue, color: 'text-orange-600 dark:text-orange-400', bg: 'bg-orange-500/10' },
-                { icon: FileText, label: t('warehouse.driverHub.docs'), action: onDocs, color: 'text-[#2C5E3B] dark:text-[#A9CBA2]', bg: 'bg-[#2C5E3B]/10' },
-                { icon: LogOut, label: t('warehouse.driverHub.finish'), action: onEnd, color: 'text-red-600 dark:text-red-400', bg: 'bg-red-500/10' }
+                { icon: QrCode, label: t('warehouse.driverHub.scan'), action: () => setDriverScannerOpen(true), color: 'text-primary', bg: 'bg-primary/10' },
+                { icon: AlertTriangle, label: t('warehouse.driverHub.report'), action: onIssue, color: 'text-amber-500', bg: 'bg-amber-500/10' },
+                { icon: FileText, label: t('warehouse.driverHub.docs'), action: onDocs, color: 'text-primary', bg: 'bg-primary/10' },
+                { icon: LogOut, label: t('warehouse.driverHub.finish'), action: onEnd, color: 'text-red-500', bg: 'bg-red-500/10' }
             ].map((btn, i) => (
                 <button
                     key={i}
                     onClick={btn.action}
-                    className="flex-1 flex flex-col items-center justify-center gap-1 py-2 rounded-lg bg-gray-50 dark:bg-white/5 hover:bg-gray-100 dark:hover:bg-white/10 active:scale-95 transition-colors border border-gray-200 dark:border-white/5 shadow-sm min-h-[44px]"
+                    className="flex-1 min-h-[44px] flex flex-col items-center justify-center gap-1.5 py-2 px-1 rounded-xl bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card)] active:scale-[0.98] transition-all border border-[var(--theme-border)] shadow-xs touch-manipulation"
                 >
-                    <div className={`p-1.5 rounded-md ${btn.bg}`}>
-                        <btn.icon size={14} className={btn.color} />
+                    <div className={`p-1.5 rounded-lg ${btn.bg}`}>
+                        <btn.icon size={16} className={btn.color} />
                     </div>
-                    <span className="text-[8px] font-black text-gray-900 dark:text-white uppercase tracking-wider">{btn.label}</span>
+                    <span className="text-[11px] font-bold text-[var(--theme-text-primary)] uppercase tracking-wider">{btn.label}</span>
                 </button>
             ))}
         </div>

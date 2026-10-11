@@ -60,7 +60,7 @@ export default function SalesHistory() {
    }, [countrySiteIds, storeFilter]);
 
    const [dateRange, setDateRange] = useState({
-      start: new Date(new Date().setFullYear(new Date().getFullYear() - 1)).toISOString().split('T')[0], // Default to last 1 year
+      start: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // RULE 10: Default to recent 30 days
       end: new Date().toISOString().split('T')[0]
    });
 
@@ -172,6 +172,20 @@ export default function SalesHistory() {
    const handleFilterChange = (setter: (val: any) => void, value: any) => {
       setter(value);
       setCurrentPage(1); // Reset to page 1 on filter change
+   };
+
+   // RULE 10: Lazy loading — load line items on-demand only when a sale is opened
+   const handleOpenSaleDetail = async (sale: SaleRecord) => {
+      setDetailTab('receipt');
+      setSelectedSale(sale);
+      if (!sale.items || sale.items.length === 0) {
+         try {
+            const fullSale = await salesService.getById(sale.id);
+            if (fullSale) setSelectedSale(fullSale);
+         } catch (err) {
+            logger.warn('SalesHistory', 'Failed to lazy-fetch sale items', { id: sale.id, err });
+         }
+      }
    };
 
    // --- METRICS (Page Level) ---
@@ -334,7 +348,7 @@ export default function SalesHistory() {
                      {sales.map((sale) => (
                         <tr
                            key={sale.id}
-                           onClick={() => { setSelectedSale(sale); setDetailTab('receipt'); }}
+                           onClick={() => handleOpenSaleDetail(sale)}
                            className="hover:bg-[var(--theme-table-row-hover)] transition-colors cursor-pointer group text-[var(--theme-text-primary)]"
                         >
                            <td className="py-3.5 px-4">

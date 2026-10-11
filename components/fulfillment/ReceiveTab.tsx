@@ -246,7 +246,7 @@ export const ReceiveTab: React.FC = () => {
 
     const handleReprintLabels = async () => {
         if (!reprintItem || isSubmitting) return;
-        logger.debug('ReceiveTab', '🔍 REPRINT_ITEM');
+        logger.debug('ReceiveTab', '[REPRINT_ITEM]');
         await handlePrintBatch([reprintItem], reprintLabelType);
         setReprintItem(null);
     };

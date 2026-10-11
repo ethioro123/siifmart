@@ -25,13 +25,13 @@ export const ProductLocationBreakdown: React.FC<Props> = ({ product, locationBre
     const formattedTotal = formatStockDisplay(totalStockSum, product);
 
     return (
-        <div className="bg-[var(--theme-bg-card)] p-5 rounded-2xl border border-[var(--theme-border)] space-y-4 shadow-sm">
-            <div className="flex items-center justify-between border-b border-[var(--theme-border)] pb-2">
+        <div className="bg-[var(--theme-bg-card)] p-5 rounded-2xl border border-[var(--theme-border)] space-y-4 shadow-xs">
+            <div className="flex items-center justify-between border-b border-[var(--theme-border)] pb-2.5">
                 <div className="flex items-center gap-2">
                     <Building2 size={14} className="text-[var(--theme-text-secondary)]" />
-                    <h3 className="text-[10px] font-bold uppercase tracking-wider">Multi-Site & Store Stock Breakdown</h3>
+                    <h3 className="text-xs font-bold uppercase tracking-wider text-[var(--theme-text-primary)]">Multi-Site & Store Stock Breakdown</h3>
                 </div>
-                <span className="text-[9px] font-mono font-bold px-2 py-0.5 rounded-full bg-[var(--theme-pill-bg)] text-[var(--theme-text-primary)] border border-[var(--theme-pill-border)]">
+                <span className="text-[11px] font-mono font-bold px-2.5 py-0.5 rounded-full bg-[var(--theme-pill-bg)] text-[var(--theme-text-primary)] border border-[var(--theme-pill-border)]">
                     {formattedTotal} Across {locationBreakdown.length} {locationBreakdown.length === 1 ? 'Location' : 'Locations'}
                 </span>
             </div>
@@ -41,7 +41,7 @@ export const ProductLocationBreakdown: React.FC<Props> = ({ product, locationBre
                         key={i}
                         className={`p-3 rounded-xl border flex items-center justify-between ${
                             loc.isCurrentSite
-                                ? 'bg-[var(--theme-pill-bg)] border-[var(--theme-pill-border)]'
+                                ? 'bg-[var(--theme-accent)]/10 border-[var(--theme-accent)]/40 shadow-xs'
                                 : 'bg-[var(--theme-bg-subtle)] border-[var(--theme-border)]'
                         }`}
                     >
@@ -49,10 +49,10 @@ export const ProductLocationBreakdown: React.FC<Props> = ({ product, locationBre
                             <div className="flex items-center gap-1.5">
                                 <span className="text-xs font-semibold text-[var(--theme-text-primary)] truncate">{loc.siteName}</span>
                                 {loc.isCurrentSite && (
-                                    <span className="text-[8px] font-bold uppercase px-1.5 py-0.5 rounded bg-[var(--theme-primary)] text-[var(--theme-primary-text)]">This Store</span>
+                                    <span className="text-[11px] font-bold uppercase px-1.5 py-0.5 rounded-md bg-[var(--theme-accent)] text-white">This Store</span>
                                 )}
                             </div>
-                            <p className="text-[10px] font-mono text-[var(--theme-text-muted)] mt-0.5 truncate">Shelf / Bin: {loc.location}</p>
+                            <p className="text-[11px] font-mono text-[var(--theme-text-secondary)] mt-0.5 truncate">Shelf / Bin: {loc.location}</p>
                         </div>
                         <div className="text-right shrink-0">
                             <p className={`text-xs font-bold font-mono ${loc.stock > 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-500'}`}>

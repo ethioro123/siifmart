@@ -144,13 +144,14 @@ export const systemLogsService = {
         };
     },
 
-    async getAll(module?: string) {
+    async getAll(module?: string, limit: number = 25) {
         try {
+            // RULE 10: 25-record shelf limit
             let query = supabase
                 .from('system_logs')
                 .select('*')
                 .order('created_at', { ascending: false })
-                .limit(100);
+                .limit(limit);
 
             if (module) {
                 query = query.eq('module', module);

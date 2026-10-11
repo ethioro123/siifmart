@@ -5,8 +5,8 @@ export const isUUID = (id: string) => /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9
 
 export const MetricBadge = ({ label, value, color }: { label: string, value: string | number, color: string }) => (
     <div className={`flex flex-col px-4 py-2 rounded-xl border ${color} bg-opacity-10`}>
-        <span className="text-[10px] uppercase font-bold opacity-70">{label}</span>
-        <span className="text-lg font-mono font-bold">{value}</span>
+        <span className="text-[11px] uppercase font-semibold opacity-80">{label}</span>
+        <span className="text-base font-mono tabular-nums font-bold">{value}</span>
     </div>
 );
 
@@ -28,9 +28,9 @@ export const SortDropdown = <T extends string>({
     <div className="relative">
         <button
             onClick={() => setIsOpen(!isOpen)}
-            className="flex items-center gap-2 px-3 py-2 bg-stone-100/40 dark:bg-black/20 border border-[#E2DCCE]/30 dark:border-[#A9CBA2]/[0.04] rounded-xl text-[10px] font-black text-stone-600 dark:text-stone-400 hover:text-[#1E3F27] dark:hover:text-white transition-all whitespace-nowrap uppercase tracking-widest"
+            className="flex items-center gap-2 px-3.5 py-2 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl text-xs font-semibold text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] transition-colors whitespace-nowrap uppercase tracking-wider min-h-[44px] touch-manipulation"
         >
-            <ListFilter size={14} className={value !== options[0].id ? 'text-[#2C5E3B] dark:text-[#A9CBA2]' : ''} />
+            <ListFilter size={14} className={value !== options[0].id ? 'text-primary' : ''} />
             <span>{label}: {options.find(o => o.id === value)?.label.toUpperCase() || value.toUpperCase()}</span>
             <ChevronDown size={14} className={`transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`} />
         </button>
@@ -38,7 +38,7 @@ export const SortDropdown = <T extends string>({
         {isOpen && (
             <>
                 <div className="fixed inset-0 z-[50]" onClick={() => setIsOpen(false)} />
-                <div className="absolute top-full right-0 mt-2 w-48 glass-panel p-2 shadow-2xl z-[51] animate-in fade-in slide-in-from-top-2 duration-200">
+                <div className="absolute top-full right-0 mt-2 w-52 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-2 shadow-2xl z-[51] animate-in fade-in slide-in-from-top-2 duration-200">
                     {options.map(option => (
                         <button
                             key={option.id}
@@ -46,9 +46,9 @@ export const SortDropdown = <T extends string>({
                                 onChange(option.id);
                                 setIsOpen(false);
                             }}
-                            className={`w-full text-left px-4 py-2.5 rounded-xl text-[10px] font-black transition-all flex items-center justify-between group uppercase tracking-widest ${value === option.id
-                                ? 'bg-[#2C5E3B] dark:bg-[#A9CBA2] text-white dark:text-black cursor-default shadow-sm'
-                                : 'text-stone-600 dark:text-stone-400 hover:bg-stone-50/50 dark:hover:bg-[#EAE5D9]/10 hover:text-[#1E3F27] dark:hover:text-white'
+                            className={`w-full text-left px-4 py-2.5 rounded-xl text-xs font-semibold transition-colors flex items-center justify-between group uppercase tracking-wider min-h-[44px] touch-manipulation ${value === option.id
+                                ? 'bg-primary text-white cursor-default shadow-sm'
+                                : 'text-[var(--theme-text-secondary)] hover:bg-[var(--theme-bg-subtle)] hover:text-[var(--theme-text-primary)]'
                                 }`}
                         >
                             <div className="flex items-center gap-2">

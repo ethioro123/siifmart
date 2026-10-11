@@ -60,9 +60,10 @@ const mapDBToSalaryRequest = (row: any): SalaryChangeRequest => ({
 });
 
 export const salaryRequestsService = {
-    async getAll(siteId?: string, countryCode?: string): Promise<SalaryChangeRequest[]> {
+    async getAll(siteId?: string, countryCode?: string, limit: number = 25): Promise<SalaryChangeRequest[]> {
         try {
-            let query = supabase.from('salary_requests').select('*');
+            // RULE 10: 25-record shelf limit
+            let query = supabase.from('salary_requests').select('*').limit(limit);
             if (siteId) query = query.eq('site_id', siteId);
             if (countryCode) query = query.eq('country_code', countryCode.toUpperCase());
 

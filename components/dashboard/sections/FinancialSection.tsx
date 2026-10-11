@@ -82,12 +82,12 @@ export const FinancialSection = ({
 
             <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 h-[400px]">
                 {/* Revenue Velocity Chart */}
-                <div className="lg:col-span-3 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-3xl p-8 relative overflow-hidden group shadow-sm">
+                <div className="lg:col-span-3 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-8 relative overflow-hidden group shadow-sm">
                     <WidgetErrorBoundary title="Revenue Chart">
                         {revenueBySiteData.length === 0 && <EmptyState message="No revenue data available" />}
                         <div className="flex justify-between items-center mb-6">
                             <h3 className="font-bold text-[var(--theme-text-primary)] flex items-center gap-2">
-                                <Activity className="text-[var(--theme-text-primary)]" size={20} />
+                                <Activity className="text-[var(--theme-accent)]" size={20} />
                                 Revenue Velocity <span className="text-xs font-normal text-[var(--theme-text-muted)] ml-2">(Top 10 Sites)</span>
                             </h3>
                         </div>
@@ -104,19 +104,19 @@ export const FinancialSection = ({
                 </div>
 
                 {/* Category Sales Bar Chart */}
-                <div className="lg:col-span-1 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-3xl p-6 flex flex-col overflow-hidden relative shadow-sm">
+                <div className="lg:col-span-1 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-6 flex flex-col overflow-hidden relative shadow-sm">
                     <WidgetErrorBoundary title="Category Performance">
                         <h3 className="font-bold text-[var(--theme-text-primary)] mb-4 flex items-center gap-2 text-sm">
-                            <Layers className="text-[var(--theme-text-primary)]" size={18} />
+                            <Layers className="text-indigo-600 dark:text-indigo-400" size={18} />
                             Category Sales
                         </h3>
                         <div className="flex-1 w-full min-h-0">
                             <ResponsiveContainer width="100%" height={300}>
                                 <BarChart data={revenueByCategory} layout="vertical">
                                     <XAxis type="number" hide />
-                                    <YAxis dataKey="name" type="category" width={80} tick={{ fill: chartAxisColor, fontSize: 10 }} axisLine={false} tickLine={false} />
+                                    <YAxis dataKey="name" type="category" width={80} tick={{ fill: chartAxisColor, fontSize: 11 }} axisLine={false} tickLine={false} />
                                     <Tooltip cursor={{ fill: 'transparent' }} contentStyle={{ backgroundColor: tooltipBg, border: `1px solid ${tooltipBorder}`, borderRadius: '12px' }} itemStyle={{ color: tooltipText }} />
-                                    <Bar dataKey="value" fill={accentColor} barSize={12} radius={[0, 4, 4, 0]} />
+                                    <Bar dataKey="value" fill="#5E5CE6" barSize={12} radius={[0, 4, 4, 0]} />
                                 </BarChart>
                             </ResponsiveContainer>
                         </div>

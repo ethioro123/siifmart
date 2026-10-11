@@ -1,5 +1,11 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { Search, Calendar, Box, Package, ArrowRight, History as HistoryIcon, User, Undo2, Clock } from 'lucide-react';
+import Pagination from '../../shared/Pagination';
+import { WMSJob, Product } from '../../../types';
+import { formatJobId } from '../../../utils/jobIdFormatter';
+import { formatDateTime } from '../../../utils/formatting';
+import { formatDisplayEmployeeId } from '../../../utils/employeeIdGenerator';
+import { ReturnToWarehouseModal } from '../returns/ReturnToWarehouseModal';
 
 /** Returns true when viewport < 768 px (md breakpoint). SSR-safe. */
 function useIsMobile(): boolean {
@@ -15,13 +21,6 @@ function useIsMobile(): boolean {
     }, []);
     return isMobile;
 }
-import Pagination from '../../shared/Pagination';
-import { WMSJob, Product } from '../../../types';
-import { formatJobId } from '../../../utils/jobIdFormatter';
-import { formatDateTime } from '../../../utils/formatting';
-import { formatDisplayEmployeeId } from '../../../utils/employeeIdGenerator';
-
-import { ReturnToWarehouseModal } from '../returns/ReturnToWarehouseModal';
 
 interface PickHistoryProps {
     historicalJobs: WMSJob[];
@@ -61,7 +60,7 @@ export const PickHistory: React.FC<PickHistoryProps> = ({
 
     const filteredHistory = useMemo(() => {
         const mapped = historicalJobs.filter((j: WMSJob) => j.type === 'PICK').map(j => {
-            const userId = j.completedBy || j.assignedTo;
+            const userId = j.completedBy || (j as any).completed_by || j.assignedTo || (j as any).assigned_to;
             const isUUID = (str: string) => /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(str);
             let userObj = employees?.find(e => 
                 e.id === userId || 
@@ -146,118 +145,113 @@ export const PickHistory: React.FC<PickHistoryProps> = ({
     }, [filteredHistory, currentPage]);
 
     return (
-        <div className="border-t border-[#E2DCCE]/60 dark:border-white/10 mt-8 pt-8 relative overflow-hidden group/history">
-            <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-zinc-200 dark:via-white/10 to-transparent" />
-
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6 mb-8">
-                <h4 className="text-xl font-black text-zinc-900 dark:text-zinc-100 flex items-center gap-3 uppercase tracking-tight">
-                    <div className="p-2 bg-[#2C5E3B]/10 dark:bg-[#A9CBA2]/25 border border-[#2C5E3B]/20 dark:border-[#A9CBA2]/20 group-hover/history:bg-[#2C5E3B]/20 transition-colors">
-                        <HistoryIcon size={20} className="text-[#2C5E3B] dark:text-[#A9CBA2]" />
+        <div className="border-t border-[var(--theme-border)] mt-8 pt-8">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+                <h4 className="text-lg font-bold text-[var(--theme-text-primary)] flex items-center gap-2.5 uppercase tracking-wide">
+                    <div className="w-8 h-8 rounded-xl bg-[var(--theme-accent)]/10 border border-[var(--theme-accent)]/20 flex items-center justify-center text-[var(--theme-accent)]">
+                        <HistoryIcon size={16} />
                     </div>
                     {t('warehouse.putaway.history')}
                 </h4>
 
                 {/* History Search */}
-                <div className="relative w-full sm:w-72 group">
-                    <div className="relative flex items-center rounded-xl focus-within:border-zinc-500 transition-all shadow-sm">
-                        <Search className="absolute left-3 text-zinc-550 dark:text-zinc-655 group-focus-within:text-zinc-950 dark:group-focus-within:text-zinc-200 transition-colors" size={16} />
-                        <input
-                            type="text"
-                            placeholder={`${t('warehouse.searchByIdOrOrder')}`}
-                            aria-label={t('warehouse.searchByIdOrOrder')}
-                            title={t('warehouse.searchByIdOrOrder')}
-                            value={search}
-                            onChange={(e) => setSearch(e.target.value)}
-                            className="woody-input w-full !pl-10 pr-4 py-3 text-xs"
-                        />
-                    </div>
+                <div className="relative w-full sm:w-80">
+                    <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--theme-text-secondary)] pointer-events-none" size={16} />
+                    <input
+                        type="text"
+                        placeholder={`${t('warehouse.searchByIdOrOrder')}`}
+                        aria-label={t('warehouse.searchByIdOrOrder')}
+                        title={t('warehouse.searchByIdOrOrder')}
+                        value={search}
+                        onChange={(e) => setSearch(e.target.value)}
+                        className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-[var(--theme-border)] bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)] placeholder:text-[var(--theme-text-secondary)] text-xs font-medium focus:outline-none focus:border-[var(--theme-accent)] transition-colors min-h-[44px]"
+                    />
                 </div>
             </div>
 
             {paginatedHistory.length > 0 ? (
                 <>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 pb-12">
-                        <>
-                            {paginatedHistory.map((job, index) => {
-                                const formattedId = formatJobId(job);
-                                // Parse items for product name preview
-                                let rawItems = job.lineItems || [];
-                                if (typeof rawItems === 'string') { try { rawItems = JSON.parse(rawItems); } catch { rawItems = []; } }
-                                if (typeof rawItems === 'number') rawItems = [];
-                                const itemsArr = Array.isArray(rawItems) ? rawItems : [];
-                                const productNames = itemsArr.map((li: any) => li.name || li.product?.name || li.sku || t('warehouse.picking.unknownUser')).filter(Boolean);
+                        {paginatedHistory.map((job) => {
+                            const formattedId = formatJobId(job);
+                            let rawItems = job.lineItems || [];
+                            if (typeof rawItems === 'string') { try { rawItems = JSON.parse(rawItems); } catch { rawItems = []; } }
+                            if (typeof rawItems === 'number') rawItems = [];
+                            const itemsArr = Array.isArray(rawItems) ? rawItems : [];
+                            const productNames = itemsArr.map((li: any) => li.name || li.product?.name || li.sku || t('warehouse.picking.unknownUser')).filter(Boolean);
+                            const isCompleted = (job.status || '').toLowerCase() === 'completed';
 
-                                if (isMobile) {
-                                    return (
-                                        <div
-                                            key={job.id}
-                                            onClick={() => { setSelectedJob(job); setIsDetailsOpen(true); }}
-                                            className={`flex items-center gap-3 bg-[#FAF8F5]/80 dark:bg-white/5 border rounded-xl p-3 active:bg-[#FAF8F5]/90 dark:active:bg-white/10 transition-colors cursor-pointer ${(job.status || '').toLowerCase() === 'completed' ? 'border-[#E2DCCE]/60 dark:border-white/10' : 'border-red-500/30'}`}
-                                        >
-                                            <div className="flex-1 min-w-0">
-                                                <div className="flex items-center gap-2 mb-1">
-                                                    <span className="text-sm font-black text-zinc-900 dark:text-white tracking-wider uppercase">{formatJobId(job)}</span>
-                                                    <span className={`text-[8px] px-1.5 py-0.5 rounded uppercase font-black tracking-widest ${(job.status || '').toLowerCase() === 'completed' ? 'bg-green-500/20 text-green-600 dark:text-green-400' : 'bg-red-500/20 text-red-600 dark:text-red-400'}`}>
-                                                        {job.status}
-                                                    </span>
-                                                    {(job.lineItems || []).some((li: any) => li.returnedQty > 0) && (
-                                                        <span className="text-[8px] px-1.5 py-0.5 rounded uppercase font-black tracking-widest bg-red-500/20 text-red-600 dark:text-red-400">
-                                                            {t('warehouse.picking.returning')}
-                                                        </span>
-                                                    )}
-                                                </div>
-                                                <div className="flex items-center gap-2 text-[10px] text-zinc-550 dark:text-gray-400 font-bold uppercase tracking-widest">
-                                                    <span className="flex items-center gap-1">
-                                                        <User size={10} />
-                                                        {job.resolvedUser?.name} {job.resolvedUser?.displayId && `(${job.resolvedUser.displayId})`}
-                                                    </span>
-                                                    <span className="w-1.5 h-1.5 rounded-full bg-zinc-300 dark:bg-gray-600" />
-                                                    <span className="flex items-center gap-1">
-                                                        <Clock size={10} />
-                                                        {formatDateTime(job.updatedAt || job.createdAt || '', { showTime: true }).split(',')[1]?.trim() || t('warehouse.picking.justNow')}
-                                                    </span>
-                                                </div>
-                                            </div>
-                                            <ArrowRight size={16} className="text-zinc-400 dark:text-gray-600 flex-shrink-0" />
-                                        </div>
-                                    );
-                                }
-
+                            if (isMobile) {
                                 return (
                                     <div
                                         key={job.id}
                                         onClick={() => { setSelectedJob(job); setIsDetailsOpen(true); }}
-                                        className="group relative bg-[#FAF8F5]/80 dark:bg-[#1C2620]/60 hover:bg-[#FAF8F5] dark:hover:bg-[#1C2620] border border-[#E2DCCE]/60 dark:border-[#A9CBA2]/[0.06] hover:border-[#2C5E3B]/30 dark:hover:border-[#A9CBA2]/30 rounded-[2rem] p-5 transition-colors cursor-pointer overflow-hidden shadow-sm hover:shadow-xl active:scale-[0.98]"
+                                        className="flex items-center gap-3 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl p-3.5 transition-colors cursor-pointer"
                                     >
-                                        {/* Hover Glow */}
-                                        <div className="absolute inset-0 bg-zinc-900/5 dark:bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
+                                        <div className="flex-1 min-w-0">
+                                            <div className="flex items-center gap-2 mb-1">
+                                                <span className="text-sm font-bold text-[var(--theme-text-primary)] font-mono tracking-wide uppercase">{formattedId}</span>
+                                                <span className={`text-[11px] px-2 py-0.5 rounded-md uppercase font-semibold ${isCompleted ? 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20' : 'bg-red-500/10 text-red-500 border border-red-500/20'}`}>
+                                                    {job.status}
+                                                </span>
+                                                {(job.lineItems || []).some((li: any) => li.returnedQty > 0) && (
+                                                    <span className="text-[11px] px-2 py-0.5 rounded-md uppercase font-semibold bg-red-500/10 text-red-500 border border-red-500/20">
+                                                        {t('warehouse.picking.returning')}
+                                                    </span>
+                                                )}
+                                            </div>
+                                            <div className="flex items-center gap-2 text-[11px] text-[var(--theme-text-secondary)] font-medium uppercase tracking-wider font-mono">
+                                                <span className="flex items-center gap-1">
+                                                    <User size={11} />
+                                                    {job.resolvedUser?.name} {job.resolvedUser?.displayId && `(${job.resolvedUser.displayId})`}
+                                                </span>
+                                                <span className="opacity-40">/</span>
+                                                <span className="flex items-center gap-1">
+                                                    <Clock size={11} />
+                                                    {formatDateTime(job.updatedAt || job.createdAt || '', { showTime: true }).split(',')[1]?.trim() || t('warehouse.picking.justNow')}
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <ArrowRight size={16} className="text-[var(--theme-text-secondary)] shrink-0" />
+                                    </div>
+                                );
+                            }
 
-                                        <div className="relative flex justify-between items-start mb-4">
+                            return (
+                                <div
+                                    key={job.id}
+                                    onClick={() => { setSelectedJob(job); setIsDetailsOpen(true); }}
+                                    className="bg-[var(--theme-bg-card)] hover:bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-2xl p-4 sm:p-5 transition-colors cursor-pointer flex flex-col justify-between"
+                                >
+                                    <div>
+                                        <div className="flex justify-between items-start mb-3">
                                             <div className="flex items-center gap-2">
-                                                <div className="p-1.5 rounded-lg transition-colors bg-[#2C5E3B]/10 dark:bg-[#A9CBA2]/15 text-[#2C5E3B] dark:text-[#A9CBA2]">
+                                                <div className="p-1.5 rounded-lg bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] border border-[var(--theme-accent)]/20">
                                                     <Package size={14} />
                                                 </div>
-                                                <span className="text-[10px] uppercase tracking-widest font-black text-zinc-550 dark:text-zinc-500">
+                                                <span className="text-[11px] uppercase tracking-wider font-semibold text-[var(--theme-text-secondary)]">
                                                     {t('warehouse.pickJobs').split(' ')[0]}
                                                 </span>
                                             </div>
-                                            <span className={`text-[9px] px-1.5 py-0.5 rounded uppercase font-black tracking-widest ${(job.status || '').toLowerCase() === 'completed' ? 'bg-green-100 dark:bg-green-500/10 text-green-700 dark:text-green-400 border border-transparent dark:border-green-500/20' : 'bg-red-100 dark:bg-red-500/10 text-red-700 dark:text-red-400 border border-transparent dark:border-red-500/20'}`}>
-                                                {job.status}
-                                            </span>
-                                            {(job.lineItems || []).some((li: any) => li.returnedQty > 0) && (
-                                                <span className="text-[9px] px-1.5 py-0.5 rounded uppercase font-black tracking-widest bg-red-100 dark:bg-red-500/10 text-red-700 dark:text-red-400 border border-transparent dark:border-red-500/20">
-                                                    {(job.lineItems || []).filter((li: any) => li.returnedQty > 0).length} {t('warehouse.returned')}
+                                            <div className="flex items-center gap-1.5">
+                                                <span className={`text-[11px] px-2 py-0.5 rounded-md uppercase font-semibold ${isCompleted ? 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20' : 'bg-red-500/10 text-red-500 border border-red-500/20'}`}>
+                                                    {job.status}
                                                 </span>
-                                            )}
+                                                {(job.lineItems || []).some((li: any) => li.returnedQty > 0) && (
+                                                    <span className="text-[11px] px-2 py-0.5 rounded-md uppercase font-semibold bg-red-500/10 text-red-500 border border-red-500/20">
+                                                        {(job.lineItems || []).filter((li: any) => li.returnedQty > 0).length} {t('warehouse.returned')}
+                                                    </span>
+                                                )}
+                                            </div>
                                         </div>
 
-                                        <div className="relative mb-4">
-                                            <h5 className="text-gray-900 dark:text-white font-black text-sm truncate pr-2 group-hover:text-[#2C5E3B] dark:group-hover:text-[#A9CBA2] transition-colors uppercase tracking-tight leading-tight">
+                                        <div className="mb-3">
+                                            <h5 className="text-[var(--theme-text-primary)] font-semibold text-sm truncate font-mono uppercase tracking-tight">
                                                 {formattedId}
                                             </h5>
-                                            <div className="flex items-center gap-1.5 mt-2 transition-colors">
-                                                <Calendar size={10} className="text-[#2C5E3B]/50 dark:text-[#A9CBA2]/50" />
-                                                <span className="text-[10px] font-mono font-black text-[#2C5E3B] dark:text-[#A9CBA2] bg-[#2C5E3B]/10 dark:bg-[#A9CBA2]/10 px-1.5 py-0.5 rounded tracking-tighter uppercase transition-colors group-hover:bg-[#2C5E3B]/20">
+                                            <div className="flex items-center gap-1.5 mt-1.5 font-mono">
+                                                <Calendar size={12} className="text-[var(--theme-accent)]" />
+                                                <span className="text-[11px] font-semibold text-[var(--theme-accent)] bg-[var(--theme-accent)]/10 px-2 py-0.5 rounded-md border border-[var(--theme-accent)]/20 uppercase">
                                                     {formatDateTime(job.updatedAt || job.createdAt || '', { showTime: true })}
                                                 </span>
                                             </div>
@@ -265,48 +259,54 @@ export const PickHistory: React.FC<PickHistoryProps> = ({
 
                                         {/* Product Names Preview */}
                                         {productNames.length > 0 && (
-                                            <div className="relative mb-3 px-0.5">
-                                                <p className="text-[10px] text-zinc-550 dark:text-zinc-500 truncate leading-relaxed">
+                                            <div className="mb-3">
+                                                <p className="text-[11px] text-[var(--theme-text-secondary)] truncate">
                                                     {productNames.slice(0, 2).join(', ')}
-                                                    {productNames.length > 2 && <span className="text-[#2C5E3B] dark:text-[#A9CBA2]"> +{productNames.length - 2} {t('warehouse.remaining')}</span>}
+                                                    {productNames.length > 2 && <span className="text-[var(--theme-accent)] font-semibold"> +{productNames.length - 2} {t('warehouse.remaining')}</span>}
                                                 </p>
                                             </div>
                                         )}
+                                    </div>
 
-                                        <div className="relative flex items-center justify-between border-t border-[#E2DCCE]/60 dark:border-white/5 pt-3 mt-auto">
-                                            <div className="flex items-center gap-2">
-                                                <div className="w-6 h-6 rounded-full bg-stone-100 dark:bg-white/5 flex items-center justify-center border border-stone-200 dark:border-white/10 shadow-inner group-hover/history:scale-110 transition-transform">
-                                                    <span className="text-[9px] font-black text-[#2C5E3B] dark:text-[#A9CBA2]">{(job.resolvedUser?.name || 'S').charAt(0).toUpperCase()}</span>
-                                                </div>
-                                                <div className="flex flex-col">
-                                                    <span className="text-[9px] font-black text-gray-400 dark:text-gray-600 uppercase tracking-widest leading-tight">{t('warehouse.picking.by')}</span>
-                                                    <span className="text-[9px] font-black text-gray-900 dark:text-gray-300 uppercase tracking-wider leading-tight">
-                                                        {job.resolvedUser?.name} <span className="text-gray-450 dark:text-gray-600 font-normal">({job.resolvedUser?.displayId})</span>
-                                                    </span>
-                                                </div>
+                                    <div className="flex items-center justify-between border-t border-[var(--theme-border)] pt-3 mt-auto">
+                                        <div className="flex items-center gap-2">
+                                            <div className="w-7 h-7 rounded-lg bg-[var(--theme-bg-subtle)] flex items-center justify-center border border-[var(--theme-border)] shrink-0">
+                                                <span className="text-[11px] font-bold text-[var(--theme-text-primary)] font-mono">
+                                                    {(job.resolvedUser?.name || 'S').charAt(0).toUpperCase()}
+                                                </span>
                                             </div>
+                                            <div className="flex flex-col">
+                                                <span className="text-[10px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider leading-none mb-0.5">
+                                                    {isCompleted ? (t('warehouse.completedBy') || 'Completed By') : t('warehouse.picking.by')}
+                                                </span>
+                                                <span className="text-xs font-semibold text-[var(--theme-text-primary)] uppercase tracking-tight leading-none truncate max-w-[120px]">
+                                                    {job.resolvedUser?.name} <span className="text-[var(--theme-text-secondary)] font-normal font-mono">({job.resolvedUser?.displayId})</span>
+                                                </span>
+                                            </div>
+                                        </div>
 
-                                            <div className="flex items-center gap-2 bg-stone-50 dark:bg-white/5 px-2 py-1 rounded-lg border border-stone-200 dark:border-white/5 group-hover:border-[#2C5E3B]/20 transition-colors shadow-inner">
-                                                {(job.status || '').toLowerCase() === 'completed' && (
-                                                    <button
-                                                        onClick={(e) => { e.stopPropagation(); setReturnJob(job); }}
-                                                        className="flex items-center gap-1.5 bg-amber-100 hover:bg-amber-200 dark:bg-amber-500/5 dark:hover:bg-amber-500/15 px-2 py-1 rounded-lg border border-amber-300 dark:border-amber-500/10 hover:border-amber-400 dark:hover:border-amber-500/30 transition-colors text-amber-800 hover:text-amber-900 dark:text-amber-400 dark:hover:text-amber-300"
-                                                        title={t('warehouse.packing.returnItemsToWarehouse')}
-                                                    >
-                                                        <Undo2 size={10} />
-                                                        <span className="text-[9px] font-black uppercase tracking-widest">{t('warehouse.driverHub.return')}</span>
-                                                    </button>
-                                                )}
-                                                <div className="flex items-center gap-1.5 bg-[#FAF8F5] dark:bg-white/5 px-2 py-1 rounded-lg border border-[#E2DCCE]/60 dark:border-white/10 group-hover:border-[#2C5E3B]/30 transition-colors">
-                                                    <Box size={12} className="text-[#2C5E3B] dark:text-[#A9CBA2]" />
-                                                    <span className="text-[10px] font-black text-[#2C5E3B] dark:text-[#A9CBA2] tabular-nums">{job.items} {job.items === 1 ? t('warehouse.itemSingular') : t('warehouse.itemPlural')}</span>
-                                                </div>
+                                        <div className="flex items-center gap-1.5">
+                                            {isCompleted && (
+                                                <button
+                                                    onClick={(e) => { e.stopPropagation(); setReturnJob(job); }}
+                                                    className="flex items-center gap-1 bg-amber-500/10 hover:bg-amber-500/20 text-amber-600 dark:text-amber-400 border border-amber-500/30 px-2 py-1 rounded-lg text-[11px] font-semibold uppercase tracking-wider transition-colors min-h-[32px]"
+                                                    title={t('warehouse.packing.returnItemsToWarehouse')}
+                                                >
+                                                    <Undo2 size={11} />
+                                                    <span>{t('warehouse.driverHub.return')}</span>
+                                                </button>
+                                            )}
+                                            <div className="flex items-center gap-1.5 bg-[var(--theme-bg-subtle)] px-2.5 py-1 rounded-lg border border-[var(--theme-border)]">
+                                                <Box size={12} className="text-[var(--theme-accent)]" />
+                                                <span className="text-[11px] font-mono font-semibold text-[var(--theme-text-primary)] tabular-nums">
+                                                    {job.items} {job.items === 1 ? t('warehouse.itemSingular') : t('warehouse.itemPlural')}
+                                                </span>
                                             </div>
                                         </div>
                                     </div>
-                                );
-                            })}
-                        </>
+                                </div>
+                            );
+                        })}
                     </div>
                     <Pagination
                         currentPage={currentPage}
@@ -318,12 +318,12 @@ export const PickHistory: React.FC<PickHistoryProps> = ({
                     />
                 </>
             ) : (
-                <div className="flex flex-col items-center justify-center py-20 bg-[#FAF8F5]/30 dark:bg-zinc-100/[0.02] rounded-3xl border border-dashed border-[#E2DCCE]/60 dark:border-white/10">
-                    <div className="p-4 bg-[#FAF8F5] dark:bg-gray-900 rounded-2xl mb-4 border border-[#E2DCCE]/60 dark:border-white/5 shadow-xl">
-                        <HistoryIcon size={32} className="text-zinc-400 dark:text-gray-600" />
+                <div className="flex flex-col items-center justify-center py-16 bg-[var(--theme-bg-card)] rounded-2xl border border-dashed border-[var(--theme-border)] text-center">
+                    <div className="w-12 h-12 rounded-xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] flex items-center justify-center mb-3 text-[var(--theme-text-secondary)]">
+                        <HistoryIcon size={24} />
                     </div>
-                    <h3 className="text-lg font-black text-zinc-900 dark:text-white mb-1 uppercase tracking-widest">{t('warehouse.noHistoryFound')}</h3>
-                    <p className="text-[#2C5E3B] dark:text-gray-500 text-xs uppercase tracking-[0.2em] font-black">{t('warehouse.picking.historyLogsEmpty')}</p>
+                    <h3 className="text-sm font-semibold text-[var(--theme-text-primary)] uppercase tracking-wider mb-1">{t('warehouse.noHistoryFound')}</h3>
+                    <p className="text-[11px] text-[var(--theme-text-secondary)] uppercase tracking-wider font-medium">{t('warehouse.picking.historyLogsEmpty')}</p>
                 </div>
             )}
 

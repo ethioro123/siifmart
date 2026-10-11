@@ -23,14 +23,13 @@ import EmployeeModals from '../components/employees/EmployeeModals';
 import SalaryApprovalQueueModal from '../components/employees/SalaryApprovalQueueModal';
 import { EmployeeChangeApprovalModal } from '../components/employees/modals/EmployeeChangeApprovalModal';
 import { EmployeeGovernanceBanners } from '../components/employees/EmployeeGovernanceBanners';
+import { EmployeesHeader, ViewMode } from '../components/employees/EmployeesHeader';
 import RecruitmentPipelineTab from '../components/employees/recruitment/RecruitmentPipelineTab';
 import DisciplinaryRegisterTab from '../components/employees/disciplinary/DisciplinaryRegisterTab';
 import AccessReviewTab from '../components/employees/compliance/AccessReviewTab';
 import { salaryRequestsService } from '../services/salary-requests.service';
 import { employeeChangesService } from '../services/employee-changes.service';
 import { payrollRunsService } from '../services/payroll-runs.service';
-
-type ViewMode = 'directory' | 'recruitment' | 'disciplinary' | 'access-audit' | 'org' | 'shifts';
 
 // Pagination Shelf Limit (Rule 10: 25-Item Shelf Rule)
 const ITEMS_PER_PAGE = 25;
@@ -219,74 +218,32 @@ export default function Employees() {
             accept="image/*"
          />
          
-         {/* Apple Section Header */}
-         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div className="flex items-center gap-3">
-               <div className="w-10 h-10 rounded-2xl bg-blue-500/10 text-[#0071E3] dark:text-[#2997FF] flex items-center justify-center shrink-0">
-                  <Briefcase size={20} />
-               </div>
-               <div>
-                  <h2 className="text-2xl font-bold tracking-tight text-[var(--theme-text-primary)]">
-                     Human Capital Management
-                  </h2>
-                  <p className="text-xs sm:text-sm text-[var(--theme-text-secondary)] font-normal mt-0.5">
-                     Orchestrate your workforce, track performance, and manage shifts.
-                  </p>
-               </div>
-            </div>
-
-            <div className="flex items-center gap-3 flex-wrap">
-               {/* Apple Segmented Control for Navigation Tabs */}
-               <div className="p-1 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl flex items-center gap-1 overflow-x-auto max-w-[60vw] select-none">
-                  {[ 
-                     { id: 'directory', icon: User, label: 'Directory' }, 
-                     ...(canViewAll ? [
-                        { id: 'recruitment', icon: Briefcase, label: 'Recruitment' },
-                        { id: 'disciplinary', icon: AlertTriangle, label: 'Disciplinary' },
-                        { id: 'access-audit', icon: Shield, label: 'Access Review' }
-                     ] : []),
-                     { id: 'org', icon: Network, label: 'Org Chart' }, 
-                     { id: 'shifts', icon: Calendar, label: 'Shift Planner' } 
-                  ].map(v => {
-                     const isActive = viewMode === v.id;
-                     return (
-                        <button
-                           key={v.id}
-                           type="button"
-                           onClick={() => setViewMode(v.id as ViewMode)}
-                           className={`px-3 py-1.5 rounded-lg text-xs flex items-center gap-1.5 shrink-0 cursor-pointer whitespace-nowrap transition-all ${
-                              isActive
-                                 ? 'bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)] shadow-[0_1px_3px_rgba(0,0,0,0.12)] font-semibold'
-                                 : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] font-medium'
-                           }`}
-                        >
-                           <v.icon size={14} />
-                           <span>{v.label}</span>
-                        </button>
-                     );
-                  })}
-               </div>
-
-               {/* Onboard Action */}
-               {wizard.getCreatableRoles().length > 0 ? (
-                  <Protected permission="ADD_EMPLOYEE">
-                     <button
-                        type="button"
-                        onClick={wizard.handleOpenWizard}
-                        className="h-10 px-4 rounded-xl bg-[#0071E3] dark:bg-[#2997FF] hover:opacity-95 text-white font-semibold text-xs sm:text-sm flex items-center gap-2 cursor-pointer shadow-[0_2px_8px_rgba(0,113,227,0.25)] active:scale-[0.98] transition-all"
-                     >
-                        <UserPlus size={15} />
-                        <span>Onboard Talent</span>
-                     </button>
-                  </Protected>
-               ) : (
-                  <div className="h-10 px-3.5 rounded-xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-[var(--theme-text-secondary)] text-xs font-medium flex items-center gap-1.5 select-none">
-                     <Lock size={13} />
-                     <span>{canViewAll ? 'Hiring Restricted' : 'My HR Profile'}</span>
-                  </div>
-               )}
-            </div>
-         </div>
+         {/* Apple Section Header with Maker-Checker Sign-Offs */}
+         <EmployeesHeader
+            viewMode={viewMode}
+            setViewMode={setViewMode}
+            canViewAll={canViewAll}
+            canOnboard={wizard.getCreatableRoles().length > 0}
+            onOpenWizard={wizard.handleOpenWizard}
+            userRole={user?.role}
+            pendingSignOffsCount={
+               pendingSalaryCount + 
+               pendingChangeCount + 
+               (pendingPayrollRun && !pendingPayrollRun.hrApprovedBy && pendingPayrollRun.status !== 'disbursed' && pendingPayrollRun.status !== 'rejected' ? 1 : 0) + 
+               pendingRecruits.length
+            }
+            onOpenSignOffQueue={() => {
+               if (pendingRecruits.length > 0) {
+                  setViewMode('directory');
+                  setFilterStatus('Pending Approval');
+                  setCurrentPage(1);
+               } else if (pendingSalaryCount > 0) {
+                  setIsSalaryQueueOpen(true);
+               } else if (pendingChangeCount > 0) {
+                  setIsChangeApprovalModalOpen(true);
+               }
+            }}
+         />
 
          <PhotoApprovalList photoRequests={actions.photoRequests} onApprove={actions.handleApprovePhoto} onReject={actions.handleRejectPhoto} />
          

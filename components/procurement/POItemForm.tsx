@@ -212,6 +212,7 @@ export const POItemForm: React.FC<POItemFormProps> = ({
 
             const catSpecs = getPOItemCategorySpecsSummary({
                 category: selectedMainCategory,
+                subcategory: customAttributes.identity?.subcategory,
                 customAttributes
             });
 

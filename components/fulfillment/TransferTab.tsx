@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import {
-    Layout, Layers, Plus, Scan
+    Layout, Layers, Plus
 } from 'lucide-react';
 import {
     WMSJob, JobItem, PurchaseOrder, ReceivingItem, TransferRecord, Product, Site, User
@@ -15,9 +15,7 @@ import { TransferReceiving } from './transfer/TransferReceiving';
 import { TransferJobDetails } from './transfer/TransferJobDetails';
 import { QRScanner } from '../QRScanner';
 import { DiscrepancyResolutionModal } from './DiscrepancyResolutionModal';
-import { formatJobId } from '../../utils/jobIdFormatter';
 import { logger } from '../../utils/logger';
-// import { generatePackLabelHTML } from '../../utils/labels/PackLabelGenerator'; // Not used in this file anymore?
 
 interface TransferTabProps {
     activeTab: 'TRANSFER';
@@ -57,10 +55,8 @@ export const TransferTab: React.FC<TransferTabProps> = ({
     sites,
     products,
     allProducts,
-    jobs,
     filteredJobs,
     transfers,
-    orders,
     t,
     addNotification,
     refreshData,
@@ -74,7 +70,6 @@ export const TransferTab: React.FC<TransferTabProps> = ({
     selectedJob,
     updateJobItem,
     completeJob,
-    relocateProductMutation,
     logSystemEvent,
     playBeep,
     setShowTransferArchive,
@@ -103,13 +98,10 @@ export const TransferTab: React.FC<TransferTabProps> = ({
     const [scannedItem, setScannedItem] = useState('');
     const [isProcessingScan, setIsProcessingScan] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
-    const [scannedBay, setScannedBay] = useState('');
-    const [scannerStep, setScannerStep] = useState<'NAV' | 'SCAN'>('NAV');
-
+    const [, setScannedBay] = useState('');
+    const [, setScannerStep] = useState<'NAV' | 'SCAN'>('NAV');
 
     // --- QR SCANNER HANDLING ---
-    // Note: Kept scanner logic here as it interacts with selectedJob and global state.
-    // If complex, could move to a custom hook.
     useEffect(() => {
         const handleScan = (e: KeyboardEvent) => {
             if (activeTab !== 'TRANSFER') return;
@@ -154,8 +146,6 @@ export const TransferTab: React.FC<TransferTabProps> = ({
     };
 
     const handleItemScan = async (actualQty?: number, forcedStatus?: JobItem['status']) => {
-        // ... (Scanning logic is preserved here as it was in original)
-        // For brevity in refactor, we keep it. Ideally move to hook.
         if (!selectedJob || isProcessingScan || isSubmitting) return;
         setIsProcessingScan(true);
         setIsSubmitting(true);
@@ -167,10 +157,6 @@ export const TransferTab: React.FC<TransferTabProps> = ({
             if (item) {
                 const originalIdx = (item as any).originalIndex;
                 const updateTargetIndex = typeof originalIdx === 'number' ? originalIdx : itemIndex;
-                // ... (Rest of scan logic)
-                // Keeping it short for the "Orchestrator" view update but assuming full logic is retained if I copy-pasted.
-                // Since I am overwriting, I MUST include the logic.
-                // I will include the core logic from the original file I read.
 
                 const scanJobTypes: string[] = ['PICK', 'PACK', 'PUTAWAY'];
                 if (scanJobTypes.includes(selectedJob.type) && scannedItem && scannedItem.trim()) {
@@ -216,7 +202,7 @@ export const TransferTab: React.FC<TransferTabProps> = ({
                         normalizedInput === normSku(expectedBarcode);
 
                     if (!isValidScan) {
-                        addNotification('alert', `❌ Wrong item! Expected: ${item.name}`);
+                        addNotification('alert', `Wrong item! Expected: ${item.name}`);
                         playBeep('error');
                         setScannedItem('');
                         setIsProcessingScan(false);
@@ -225,19 +211,16 @@ export const TransferTab: React.FC<TransferTabProps> = ({
                     }
                 }
 
-                // ... (simplified for this tool call, assume standard update)
                 const qtyToRecord = actualQty !== undefined ? actualQty : item.expectedQty;
                 const statusToRecord = forcedStatus || ((actualQty !== undefined && actualQty < item.expectedQty) ? 'Short' : 'Picked');
 
                 await updateJobItem(selectedJob.id, updateTargetIndex, statusToRecord, qtyToRecord);
 
-                // Update local state to reflect change immediately
                 const updatedJob = { ...selectedJob };
                 updatedJob.lineItems = [...selectedJob.lineItems];
                 updatedJob.lineItems[itemIndex] = { ...item, status: statusToRecord, pickedQty: qtyToRecord };
                 setSelectedJob(updatedJob);
 
-                // Check completion
                 const isJobDone = updatedJob.lineItems.every(i => i.status === 'Picked' || i.status === 'Short' || i.status === 'Discontinued');
                 if (isJobDone) {
                     setTimeout(async () => {
@@ -262,44 +245,43 @@ export const TransferTab: React.FC<TransferTabProps> = ({
         }
     };
 
-
     const renderTransferCenterTabs = () => (
-        <div className="flex bg-stone-200/60 dark:bg-black/40 rounded-xl p-1 gap-1 border border-[#E2DCCE]/60 dark:border-white/5">
+        <div className="flex bg-[var(--theme-bg-subtle)] rounded-xl p-1 gap-1 border border-[var(--theme-border)]">
             {(activeSite?.type === 'HQ' || activeSite?.type === 'Administration' || ['super_admin', 'admin', 'warehouse_manager', 'operations_manager', 'regional_manager'].includes(user?.role || '')) && (
                 <button
                     onClick={() => { setTransferCenterTab('smart'); }}
-                    className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-black uppercase tracking-wider transition-all ${
+                    className={`min-h-[36px] flex-1 flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold uppercase tracking-wider transition-all touch-manipulation ${
                         transferCenterTab === 'smart'
-                            ? 'bg-[#2C5E3B] text-white shadow-xs'
-                            : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-white hover:bg-white/40 dark:hover:bg-white/5'
+                            ? 'bg-primary text-white shadow-xs'
+                            : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-card)]'
                     }`}
                 >
-                    <Layout size={13} />
+                    <Layout size={14} />
                     Smart Replenish
                 </button>
             )}
             {(activeSite?.type === 'HQ' || activeSite?.type === 'Administration' || activeSite?.type === 'Warehouse' || activeSite?.type === 'Distribution Center' || ['super_admin', 'admin', 'warehouse_manager', 'operations_manager', 'regional_manager'].includes(user?.role || '')) && (
                 <button
                     onClick={() => setTransferCenterTab('bulk')}
-                    className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-black uppercase tracking-wider transition-all ${
+                    className={`min-h-[36px] flex-1 flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold uppercase tracking-wider transition-all touch-manipulation ${
                         transferCenterTab === 'bulk'
-                            ? 'bg-[#2C5E3B] text-white shadow-xs'
-                            : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-white hover:bg-white/40 dark:hover:bg-white/5'
+                            ? 'bg-primary text-white shadow-xs'
+                            : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-card)]'
                     }`}
                 >
-                    <Layers size={13} />
+                    <Layers size={14} />
                     Bulk Push
                 </button>
             )}
             <button
                 onClick={() => setTransferCenterTab('request')}
-                className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-black uppercase tracking-wider transition-all ${
+                className={`min-h-[36px] flex-1 flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold uppercase tracking-wider transition-all touch-manipulation ${
                     transferCenterTab === 'request'
-                        ? 'bg-[#2C5E3B] text-white shadow-xs'
-                        : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-white hover:bg-white/40 dark:hover:bg-white/5'
+                        ? 'bg-primary text-white shadow-xs'
+                        : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-card)]'
                 }`}
             >
-                <Plus size={13} />
+                <Plus size={14} />
                 Request
             </button>
         </div>
@@ -325,7 +307,7 @@ export const TransferTab: React.FC<TransferTabProps> = ({
                     />
 
                     {/* Content */}
-                    <div className="bg-white/85 dark:bg-[#18201B]/80 border border-[#E2DCCE] dark:border-emerald-950/20 rounded-2xl p-4 md:p-6 shadow-xs">
+                    <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-4 md:p-6 shadow-xs">
                         {viewMode === 'Process' ? (
                             <TransferActiveList
                                 filteredJobs={filteredJobs}
@@ -444,18 +426,6 @@ export const TransferTab: React.FC<TransferTabProps> = ({
                 setTransferReceiveItems={setTransferReceiveItems}
                 onResolveDiscrepancy={handleResolveDiscrepancy}
             />
-
-            {/* Note: Job Details Modal was inline in the original, often handled by parent or a global modal. 
-               In previous code, there was a HUGE inline Job Details Modal (lines 933-1136).
-               I should ideally extract this too, but for now I will leave it out of this specific refactor step if the goal is "TransferTab split".
-               However, strictly speaking, if I delete it, I break functionality. 
-               I should check if I missed extracting it?
-               Ah, `AssignJobDetails` was created for Assign tab. `TransferTab` had its own inline one.
-               I should probably assume the user wants that logic preserved.
-               Wait, `TransferTab` lines 933+ "Transfer Job Details Modal".
-               It is quite large. I should probably put it in `TransferJobDetails.tsx` or `JobDetailsModal.tsx`?
-               The prompt was "split transfer". I should definitely split this out.
-            */}
         </div>
     );
 };

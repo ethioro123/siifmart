@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Award, FileText, Users, Plus, Star } from 'lucide-react';
+import { Award, FileText, Users, Plus, Star, ShieldCheck, Clock, Check } from 'lucide-react';
 import { procurementGovernanceService } from '../../services/procurement-governance.service';
 import type { VendorScorecard, VendorContract, FarmerProgram } from '../../types/procurement-zero-trust';
 import { useStore } from '../../contexts/CentralStore';
@@ -12,10 +12,13 @@ interface VendorRelationsTabProps {
 
 export const VendorRelationsTab: React.FC<VendorRelationsTabProps> = ({ countryCode, suppliers }) => {
   const { user, showToast } = useStore();
+  const isManager = Boolean(user?.role && ['procurement_manager', 'regional_manager', 'operations_manager', 'super_admin', 'CEO', 'ceo'].includes(user.role));
+
   const [subTab, setSubTab] = useState<'scorecards' | 'contracts' | 'farmers'>('scorecards');
   const [scorecards, setScorecards] = useState<VendorScorecard[]>([]);
   const [contracts, setContracts] = useState<VendorContract[]>([]);
   const [farmers, setFarmers] = useState<FarmerProgram[]>([]);
+  const [authorizedContractIds, setAuthorizedContractIds] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
 
   const [showAddModal, setShowAddModal] = useState(false);
@@ -88,9 +91,22 @@ export const VendorRelationsTab: React.FC<VendorRelationsTabProps> = ({ countryC
             <Award size={22} strokeWidth={1.5} />
           </div>
           <div>
-            <h2 className="text-xl font-bold tracking-tight text-[var(--theme-text-primary)] flex items-center gap-2">
-              Vendor Relations & Governance ({countryCode})
-            </h2>
+            <div className="flex items-center gap-2.5 flex-wrap">
+              <h2 className="text-xl font-bold tracking-tight text-[var(--theme-text-primary)]">
+                Vendor Relations & Governance ({countryCode})
+              </h2>
+              {isManager ? (
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-purple-500/10 text-purple-600 dark:text-purple-400 border border-purple-500/20 text-[11px] font-semibold">
+                  <ShieldCheck size={12} />
+                  <span>Checker • Agreement Sign-Off</span>
+                </span>
+              ) : (
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-blue-500/10 text-[#0071E3] dark:text-[#2997FF] border border-[#0071E3]/20 text-[11px] font-semibold">
+                  <Clock size={12} />
+                  <span>Maker • Vendor Sourcing</span>
+                </span>
+              )}
+            </div>
             <p className="text-xs text-[var(--theme-text-secondary)] font-medium mt-0.5">
               Supplier scorecards, master agreements, and direct cooperative sourcing programs.
             </p>
@@ -192,17 +208,36 @@ export const VendorRelationsTab: React.FC<VendorRelationsTabProps> = ({ countryC
             ) : (
               contracts.map(c => {
                 const sup = suppliers.find(s => s.id === c.supplierId);
+                const isAuthorized = authorizedContractIds.includes(c.id);
                 return (
                   <div key={c.id} className="p-5 flex items-center justify-between hover:bg-[var(--theme-bg-subtle)]/50 transition-colors">
                     <div>
                       <h4 className="font-bold text-sm text-[var(--theme-text-primary)]">{c.title} ({c.contractNumber})</h4>
                       <p className="text-xs text-[var(--theme-text-secondary)] mt-0.5">{sup?.name || 'Supplier'} • Terms: {c.paymentTerms}</p>
                     </div>
-                    <div className="text-right">
-                      <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
-                        {c.status}
-                      </span>
-                      <p className="text-[11px] text-[var(--theme-text-secondary)] font-mono font-medium mt-1">Expires: {c.endDate}</p>
+                    <div className="flex items-center gap-3">
+                      <div className="text-right">
+                        <span className={`px-2.5 py-0.5 rounded-full text-xs font-semibold border ${
+                          isAuthorized || c.status === 'Active'
+                            ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20'
+                            : 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20'
+                        }`}>
+                          {isAuthorized ? 'Signed Off & Active' : c.status}
+                        </span>
+                        <p className="text-[11px] text-[var(--theme-text-secondary)] font-mono font-medium mt-1">Expires: {c.endDate}</p>
+                      </div>
+                      {isManager && !isAuthorized && c.status !== 'Active' && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setAuthorizedContractIds(prev => [...prev, c.id]);
+                            showToast(`Master agreement ${c.contractNumber} authorized and signed off.`, 'success');
+                          }}
+                          className="h-8 px-3 rounded-full bg-[#0071E3] hover:bg-[#0077ED] text-white font-semibold text-xs transition-all flex items-center gap-1 active:scale-[0.98] cursor-pointer shrink-0 shadow-sm"
+                        >
+                          <Check size={13} /> Sign Off
+                        </button>
+                      )}
                     </div>
                   </div>
                 );

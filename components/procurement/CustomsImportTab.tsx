@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Anchor, CheckCircle2, Clock, Plus, Ship } from 'lucide-react';
+import { Anchor, CheckCircle2, Clock, Plus, Ship, ShieldCheck, Check } from 'lucide-react';
 import { procurementGovernanceService } from '../../services/procurement-governance.service';
 import type { CustomsDeclaration } from '../../types/procurement-zero-trust';
 import { useStore } from '../../contexts/CentralStore';
@@ -11,7 +11,10 @@ interface CustomsImportTabProps {
 
 export const CustomsImportTab: React.FC<CustomsImportTabProps> = ({ countryCode }) => {
   const { user, showToast } = useStore();
+  const isManager = Boolean(user?.role && ['procurement_manager', 'regional_manager', 'operations_manager', 'super_admin', 'CEO', 'ceo'].includes(user.role));
+
   const [declarations, setDeclarations] = useState<CustomsDeclaration[]>([]);
+  const [clearedDeclarationIds, setClearedDeclarationIds] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
 
@@ -78,9 +81,22 @@ export const CustomsImportTab: React.FC<CustomsImportTabProps> = ({ countryCode 
             <Anchor size={22} strokeWidth={1.5} />
           </div>
           <div>
-            <h2 className="text-xl font-bold tracking-tight text-[var(--theme-text-primary)] flex items-center gap-2">
-              Cross-Border Freight & Customs Clearance ({countryCode})
-            </h2>
+            <div className="flex items-center gap-2.5 flex-wrap">
+              <h2 className="text-xl font-bold tracking-tight text-[var(--theme-text-primary)]">
+                Cross-Border Freight & Customs Clearance ({countryCode})
+              </h2>
+              {isManager ? (
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-purple-500/10 text-purple-600 dark:text-purple-400 border border-purple-500/20 text-[11px] font-semibold">
+                  <ShieldCheck size={12} />
+                  <span>Checker • Release Sign-Off</span>
+                </span>
+              ) : (
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-blue-500/10 text-[#0071E3] dark:text-[#2997FF] border border-[#0071E3]/20 text-[11px] font-semibold">
+                  <Clock size={12} />
+                  <span>Maker • Customs Specialist</span>
+                </span>
+              )}
+            </div>
             <p className="text-xs text-[var(--theme-text-secondary)] font-medium mt-0.5">
               Port of Djibouti / Mombasa clearances, Letters of Credit (LC), and customs duty assessment.
             </p>
@@ -104,54 +120,71 @@ export const CustomsImportTab: React.FC<CustomsImportTabProps> = ({ countryCode 
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-          {declarations.map(d => (
-            <div key={d.id} className="p-6 rounded-3xl bg-[var(--theme-bg-panel)] border border-[var(--theme-border)] shadow-sm space-y-4 hover:border-[var(--theme-accent)]/50 transition-all">
-              <div className="flex items-start justify-between gap-3">
-                <div>
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <span className="font-mono font-bold text-sm text-[var(--theme-text-primary)]">{d.declarationNumber}</span>
-                    <span className={`px-2.5 py-0.5 rounded-full text-[11px] font-semibold border ${
-                      d.customsStatus === 'Cleared'
-                        ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20'
-                        : 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20'
-                    }`}>
-                      {d.customsStatus}
-                    </span>
+          {declarations.map(d => {
+            const isCleared = clearedDeclarationIds.includes(d.id) || d.customsStatus === 'Cleared';
+            return (
+              <div key={d.id} className="p-6 rounded-3xl bg-[var(--theme-bg-panel)] border border-[var(--theme-border)] shadow-sm space-y-4 hover:border-[var(--theme-accent)]/50 transition-all">
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="font-mono font-bold text-sm text-[var(--theme-text-primary)]">{d.declarationNumber}</span>
+                      <span className={`px-2.5 py-0.5 rounded-full text-[11px] font-semibold border ${
+                        isCleared
+                          ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20'
+                          : 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20'
+                      }`}>
+                        {isCleared ? 'Cleared & Released' : d.customsStatus}
+                      </span>
+                    </div>
+                    <p className="text-xs text-[var(--theme-text-secondary)] font-medium mt-1 flex items-center gap-1.5">
+                      <Ship size={14} className="text-[var(--theme-accent)] shrink-0" /> {d.portOfEntry} • {d.transportMode}
+                    </p>
                   </div>
-                  <p className="text-xs text-[var(--theme-text-secondary)] font-medium mt-1 flex items-center gap-1.5">
-                    <Ship size={14} className="text-[var(--theme-accent)] shrink-0" /> {d.portOfEntry} • {d.transportMode}
+                  <div className="text-right shrink-0">
+                    <p className="text-[10px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider">Assessed Duty</p>
+                    <p className="text-sm font-bold font-mono tabular-nums text-[var(--theme-text-primary)]">{d.currency} {d.dutyAmount.toLocaleString()}</p>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-2.5 text-xs bg-[var(--theme-bg-subtle)]/60 border border-[var(--theme-border)] p-3.5 rounded-2xl font-mono">
+                  <div>
+                    <span className="text-[10px] text-[var(--theme-text-secondary)] font-semibold uppercase block">Bill of Lading:</span>
+                    <span className="font-semibold text-[var(--theme-text-primary)] truncate block">{d.billOfLading || 'N/A'}</span>
+                  </div>
+                  <div>
+                    <span className="text-[10px] text-[var(--theme-text-secondary)] font-semibold uppercase block">Letter of Credit (LC):</span>
+                    <span className="font-semibold text-[var(--theme-text-primary)] truncate block">{d.letterOfCreditRef || 'Direct Transfer'}</span>
+                  </div>
+                  <div>
+                    <span className="text-[10px] text-[var(--theme-text-secondary)] font-semibold uppercase block">Clearing Agent:</span>
+                    <span className="font-semibold text-[var(--theme-text-primary)] truncate block">{d.clearingAgent || 'In-House'}</span>
+                  </div>
+                  <div>
+                    <span className="text-[10px] text-[var(--theme-text-secondary)] font-semibold uppercase block">Carrier / Line:</span>
+                    <span className="font-semibold text-[var(--theme-text-primary)] truncate block">{d.carrierName || 'Maersk'}</span>
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between pt-1">
+                  <p className="text-[10px] text-[var(--theme-text-secondary)] font-mono font-medium">
+                    Filed by {d.specialistName || 'Customs Specialist'} on {formatDateTime(d.createdAt)}
                   </p>
-                </div>
-                <div className="text-right shrink-0">
-                  <p className="text-[10px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider">Assessed Duty</p>
-                  <p className="text-sm font-bold font-mono tabular-nums text-[var(--theme-text-primary)]">{d.currency} {d.dutyAmount.toLocaleString()}</p>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-2.5 text-xs bg-[var(--theme-bg-subtle)]/60 border border-[var(--theme-border)] p-3.5 rounded-2xl font-mono">
-                <div>
-                  <span className="text-[10px] text-[var(--theme-text-secondary)] font-semibold uppercase block">Bill of Lading:</span>
-                  <span className="font-semibold text-[var(--theme-text-primary)] truncate block">{d.billOfLading || 'N/A'}</span>
-                </div>
-                <div>
-                  <span className="text-[10px] text-[var(--theme-text-secondary)] font-semibold uppercase block">Letter of Credit (LC):</span>
-                  <span className="font-semibold text-[var(--theme-text-primary)] truncate block">{d.letterOfCreditRef || 'Direct Transfer'}</span>
-                </div>
-                <div>
-                  <span className="text-[10px] text-[var(--theme-text-secondary)] font-semibold uppercase block">Clearing Agent:</span>
-                  <span className="font-semibold text-[var(--theme-text-primary)] truncate block">{d.clearingAgent || 'In-House'}</span>
-                </div>
-                <div>
-                  <span className="text-[10px] text-[var(--theme-text-secondary)] font-semibold uppercase block">Carrier / Line:</span>
-                  <span className="font-semibold text-[var(--theme-text-primary)] truncate block">{d.carrierName || 'Maersk'}</span>
+                  {isManager && !isCleared && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setClearedDeclarationIds(prev => [...prev, d.id]);
+                        showToast(`Customs clearance for declaration ${d.declarationNumber} authorized and signed off.`, 'success');
+                      }}
+                      className="h-8 px-3 rounded-full bg-[#0071E3] hover:bg-[#0077ED] text-white font-semibold text-xs transition-all flex items-center gap-1 active:scale-[0.98] cursor-pointer shadow-sm shrink-0"
+                    >
+                      <Check size={13} /> Authorize Release
+                    </button>
+                  )}
                 </div>
               </div>
-
-              <p className="text-[10px] text-[var(--theme-text-secondary)] font-mono font-medium">
-                Filed by {d.specialistName || 'Customs Specialist'} on {formatDateTime(d.createdAt)}
-              </p>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
 

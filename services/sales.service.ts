@@ -3,12 +3,40 @@ import type { SaleRecord, FulfillmentPlan, CartItem } from '../types';
 import { productsService } from './products.service';
 import { wmsJobsService, generateReadableJobNumber } from './wms-jobs.service';
 import { customersService } from './customers.service';
+function mapSaleRow(s: any): any {
+    return {
+        ...s,
+        siteId: s.site_id,
+        date: s.sale_date,
+        method: s.payment_method,
+        amountTendered: s.amount_tendered,
+        cashierName: s.cashier_name,
+        customerId: s.customer_id,
+        receiptNumber: s.receipt_number,
+        customerName: s.customers?.name,
+        items: Array.isArray(s.sale_items)
+            ? s.sale_items.map((i: any) => ({
+                ...i,
+                id: i.product_id,
+                name: i.product_name,
+                costPrice: i.cost_price,
+                category: i.products?.category || i.category
+            }))
+            : []
+    };
+}
 
 export const salesService = {
     async getAll(siteId?: string, limit: number = 25, offset: number = 0, filters?: any) {
+        // RULE 10: Lazy loading — list views default to receipt header columns only.
+        // Nested sale_items and deep product joins are loaded on-demand via getById().
+        const selectFields = filters?.includeItems
+            ? '*, sale_items(*, products(category)), customers!left(*)'
+            : 'id, site_id, customer_id, sale_date, subtotal, tax, total, payment_method, status, amount_tendered, change, cashier_name, receipt_number, type, fulfillment_status, created_at';
+
         let query = supabase
             .from('sales')
-            .select('*, sale_items(*, products(category)), customers!left(*)', { count: 'exact' });
+            .select(selectFields, { count: 'exact' });
 
         if (filters?.siteIds && Array.isArray(filters.siteIds)) {
             if (filters.siteIds.length === 0) return { data: [], count: 0 };
@@ -44,27 +72,7 @@ export const salesService = {
 
         const { data, error, count } = await query;
         if (error) throw error;
-
-        const mappedData = data.map((s: any) => ({
-            ...s,
-            siteId: s.site_id,
-            date: s.sale_date,
-            method: s.payment_method,
-            amountTendered: s.amount_tendered,
-            cashierName: s.cashier_name,
-            customerId: s.customer_id,
-            items: s.sale_items.map((i: any) => ({
-                ...i,
-                id: i.product_id,
-                name: i.product_name,
-                costPrice: i.cost_price,
-                category: i.products?.category || i.category
-            })),
-            receiptNumber: s.receipt_number,
-            customerName: s.customers?.name
-        }));
-
-        return { data: mappedData, count: count || 0 };
+        return { data: data.map(mapSaleRow), count: count || 0 };
     },
 
     async getById(id: string) {
@@ -75,22 +83,7 @@ export const salesService = {
             .single();
 
         if (error) throw error;
-        return {
-            ...data,
-            siteId: data.site_id,
-            date: data.sale_date,
-            method: data.payment_method,
-            amountTendered: data.amount_tendered,
-            cashierName: data.cashier_name,
-            customerId: data.customer_id,
-            items: data.sale_items.map((i: any) => ({
-                ...i,
-                id: i.product_id,
-                name: i.product_name,
-                costPrice: i.cost_price,
-                category: i.products?.category || i.category
-            }))
-        };
+        return mapSaleRow(data);
     },
 
     async create(sale: Omit<SaleRecord, 'created_at' | 'updated_at'>, items: any[]) {

@@ -31,15 +31,6 @@ export function usePOActions(deps: UsePOActionsDeps) {
             setAllOrders(prev => [newPO, ...prev]);
             addNotification('success', `PO #${newPO.id.slice(0, 8)} created successfully`);
 
-            const allUpdatedOrders = await purchaseOrdersService.getAll().then(res => res.data);
-            setAllOrders(allUpdatedOrders);
-
-            if (activeSiteId) {
-                const siteOrders = await purchaseOrdersService.getAll(activeSiteId).then(res => res.data);
-                setOrders(siteOrders);
-            } else {
-                setOrders(allUpdatedOrders);
-            }
             return newPO;
         } catch (error) {
             logger.error('usePOActions', 'Error creating PO:', error as Error);

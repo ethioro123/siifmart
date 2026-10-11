@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import Modal from '../../components/Modal';
 import { PurchaseOrder, Product } from '../../types';
 import { getCountryProfile } from '../../utils/localization';
-import { CheckCircle, XCircle, Printer, Edit3, Trash2, Package, Loader2, MapPin, ChevronDown, ChevronUp } from 'lucide-react';
+import { CheckCircle, XCircle, Printer, Edit3, Trash2, Package, Loader2, MapPin, ChevronDown, ChevronUp, Clock, ShieldCheck } from 'lucide-react';
 import { useData } from '../../contexts/DataContext';
 import { useStore } from '../../contexts/CentralStore';
 import { purchaseOrdersService } from '../../services/supabase.service';
@@ -10,6 +10,7 @@ import { formatCompactNumber } from '../../utils/formatting';
 import { formatDateTime } from '../../utils/formatting';
 import { formatPONumber } from '../../utils/jobIdFormatter';
 import { formatPOItemDescription, getPOItemPackagingSummary } from './utils';
+import { POItemExpandedDetails } from './POItemExpandedDetails';
 import { POPrintView, generatePOHTML } from './POPrintView';
 import { printHtmlContent } from '../../utils/printHelper';
 import { logger } from '../../utils/logger';
@@ -321,24 +322,7 @@ export const ViewPOModal: React.FC<ViewPOModalProps> = ({ isOpen, onClose, po, o
                                             {expandedItems[i] && item.customAttributes && (
                                                 <tr className="bg-[var(--theme-bg-subtle)]">
                                                     <td colSpan={8} className="p-4 pl-12">
-                                                        <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-xs text-[var(--theme-text-secondary)]">
-                                                            {Object.entries(item.customAttributes).map(([category, attrs]) => (
-                                                                <div key={category} className="space-y-1">
-                                                                    <h4 className="font-semibold text-[var(--theme-text-secondary)] uppercase text-[10px] mb-1">{category}</h4>
-                                                                    {Object.entries(attrs).map(([key, value]) => {
-                                                                        if (!value) return null;
-                                                                        return (
-                                                                            <div key={key} className="flex justify-between border-b border-[var(--theme-border-subtle)] pb-0.5">
-                                                                                <span className="capitalize">{key.replace(/([A-Z])/g, ' $1').trim()}:</span>
-                                                                                <span className="text-[var(--theme-text-primary)] ml-2 text-right font-medium">
-                                                                                    {value === true ? 'Yes' : String(value)}
-                                                                                </span>
-                                                                            </div>
-                                                                        );
-                                                                    })}
-                                                                </div>
-                                                            ))}
-                                                        </div>
+                                                        <POItemExpandedDetails item={item} />
                                                     </td>
                                                 </tr>
                                             )}
@@ -394,25 +378,37 @@ export const ViewPOModal: React.FC<ViewPOModalProps> = ({ isOpen, onClose, po, o
                 {/* Actions */}
                 <div className="pt-4 border-t border-[var(--theme-border)] space-y-3">
                     {/* Primary Actions for Draft POs */}
-                    {po.status === 'Draft' && canApprove && (
-                        <div className="grid grid-cols-2 gap-3">
-                            <button
-                                onClick={handleApprovePO}
-                                disabled={isSubmitting}
-                                className={`h-11 px-5 bg-[var(--theme-primary)] hover:opacity-90 active:scale-[0.98] text-[var(--theme-primary-text)] font-semibold text-sm rounded-full transition-all flex items-center justify-center gap-2 shadow-sm ${isSubmitting ? 'opacity-50 cursor-not-allowed' : ''}`}
-                            >
-                                {isSubmitting ? <Loader2 size={16} className="animate-spin" /> : <CheckCircle size={16} />}
-                                {isSubmitting ? 'Approving...' : 'Approve'}
-                            </button>
-                            {user?.role === 'super_admin' && (
+                    {po.status === 'Draft' && (
+                        canApprove ? (
+                            <div className="grid grid-cols-2 gap-3">
                                 <button
-                                    onClick={handleRejectPO}
-                                    className="h-11 px-5 bg-red-500/10 hover:bg-red-500/20 text-red-500 font-semibold text-sm rounded-full border border-red-500/30 transition-all flex items-center justify-center gap-2 active:scale-[0.98]"
+                                    onClick={handleApprovePO}
+                                    disabled={isSubmitting}
+                                    className={`h-11 px-5 bg-[var(--theme-primary)] hover:opacity-90 active:scale-[0.98] text-[var(--theme-primary-text)] font-semibold text-sm rounded-full transition-all flex items-center justify-center gap-2 shadow-sm ${isSubmitting ? 'opacity-50 cursor-not-allowed' : ''}`}
                                 >
-                                    <XCircle size={16} /> Reject
+                                    {isSubmitting ? <Loader2 size={16} className="animate-spin" /> : <ShieldCheck size={16} />}
+                                    {isSubmitting ? 'Signing Off...' : 'Sign Off & Authorize PO'}
                                 </button>
-                            )}
-                        </div>
+                                {user?.role === 'super_admin' && (
+                                    <button
+                                        onClick={handleRejectPO}
+                                        className="h-11 px-5 bg-red-500/10 hover:bg-red-500/20 text-red-500 font-semibold text-sm rounded-full border border-red-500/30 transition-all flex items-center justify-center gap-2 active:scale-[0.98]"
+                                    >
+                                        <XCircle size={16} /> Reject
+                                    </button>
+                                )}
+                            </div>
+                        ) : isCreator && !isCEO ? (
+                            <div className="p-3.5 px-4 bg-purple-500/10 border border-purple-500/20 rounded-2xl flex items-center gap-2.5 text-purple-600 dark:text-purple-400 text-xs font-medium">
+                                <Clock size={16} className="shrink-0" />
+                                <span>Anti-Self-Approval: You created this PO. Dual sign-off by a secondary manager or CEO is required.</span>
+                            </div>
+                        ) : (
+                            <div className="p-3.5 px-4 bg-amber-500/10 border border-amber-500/20 rounded-2xl flex items-center gap-2.5 text-amber-600 dark:text-amber-400 text-xs font-medium">
+                                <Clock size={16} className="shrink-0" />
+                                <span>Maker Draft: PO drafted by {po.createdBy || 'Staff'} • Awaiting Procurement Manager Sign-Off</span>
+                            </div>
+                        )
                     )}
 
                     {/* Status Messages */}

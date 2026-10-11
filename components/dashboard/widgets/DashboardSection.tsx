@@ -9,12 +9,12 @@ interface DashboardSectionProps {
 
 export const DashboardSection = ({ title, icon: Icon, children, className = "" }: DashboardSectionProps) => (
     <div className={`space-y-4 mb-10 ${className}`}>
-        <div className="flex items-center gap-3 px-2">
-            <div className="p-1.5 bg-[#FFDBBB]/15 dark:bg-[#FFDBBB]/15 rounded-lg border border-[#997E67]/30">
-                <Icon size={16} className="text-[#664930] dark:text-[#FFDBBB]" />
+        <div className="flex items-center gap-2.5 px-1">
+            <div className="w-7 h-7 rounded-lg bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] border border-[var(--theme-accent)]/20 flex items-center justify-center shrink-0">
+                <Icon size={15} />
             </div>
-            <h2 className="text-xs font-black text-[#664930] dark:text-[#CCBEB1] uppercase tracking-[0.25em]">{title}</h2>
-            <div className="flex-1 h-[1px] bg-gradient-to-r from-[#CCBEB1]/40 to-transparent dark:from-[#CCBEB1]/20 dark:to-transparent ml-4"></div>
+            <h2 className="text-xs font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider">{title}</h2>
+            <div className="flex-1 h-[1px] bg-[var(--theme-border)] ml-3" />
         </div>
         {children}
     </div>

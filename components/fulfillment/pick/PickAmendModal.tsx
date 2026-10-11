@@ -76,7 +76,6 @@ export const PickAmendModal: React.FC<PickAmendModalProps> = ({
         setReasonCode('BIN_SHORTAGE');
         setGpsLocation('Locating terminal...');
 
-        // Async GPS capture
         let isMounted = true;
         fetchLoginLocation().then(loc => {
             if (isMounted) setGpsLocation(loc || 'GPS: Undefined');
@@ -172,67 +171,67 @@ export const PickAmendModal: React.FC<PickAmendModalProps> = ({
     };
 
     return (
-        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-[300] p-2 sm:p-4 overflow-x-hidden animate-in fade-in duration-200">
-            <div className="bg-white dark:bg-zinc-950 border-2 border-amber-500/30 rounded-3xl w-full max-w-2xl shadow-2xl flex flex-col max-h-[90vh] overflow-hidden relative">
-
-                {/* Ambient glow */}
-                <div className="absolute -top-20 -right-20 w-60 h-60 bg-amber-500/5 blur-[80px] rounded-full pointer-events-none" />
-
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-[300] p-2 sm:p-4 overflow-y-auto animate-in fade-in duration-200">
+            <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-3xl w-full max-w-2xl shadow-2xl flex flex-col max-h-[92dvh] overflow-hidden animate-in zoom-in-95 duration-200 relative">
                 {/* Header */}
-                <div className="p-6 border-b border-zinc-200 dark:border-white/10 bg-amber-50/60 dark:bg-amber-900/5 flex justify-between items-center shrink-0">
+                <div className="p-4 sm:p-6 border-b border-[var(--theme-border)] bg-[var(--theme-bg-card)] flex justify-between items-center shrink-0">
                     <div className="flex items-center gap-3">
-                        <div className="p-2.5 bg-amber-500/15 rounded-xl border border-amber-500/30">
-                            <FileEdit size={20} className="text-amber-600 dark:text-amber-400" />
+                        <div className="p-2.5 bg-amber-500/10 rounded-2xl border border-amber-500/20 text-amber-500">
+                            <FileEdit size={20} />
                         </div>
                         <div>
                             <div className="flex items-center gap-2">
-                                <h3 className="text-sm font-black text-zinc-900 dark:text-zinc-100 uppercase tracking-widest">
+                                <h3 className="text-sm font-bold text-[var(--theme-text-primary)] uppercase tracking-wider">
                                     {t('warehouse.picking.amendPickQuantities')}
                                 </h3>
-                                <span className="px-2 py-0.5 rounded text-[9px] font-black uppercase tracking-wider bg-amber-500/20 text-amber-700 dark:text-amber-300 border border-amber-500/30">
+                                <span className="px-2 py-0.5 rounded-full text-[11px] font-semibold uppercase tracking-wider bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">
                                     Zero-Trust
                                 </span>
                             </div>
-                            <div className="flex items-center gap-2 mt-0.5 text-[10px] text-zinc-500 font-mono">
+                            <div className="flex items-center gap-2 mt-0.5 text-[11px] text-[var(--theme-text-secondary)] font-mono">
                                 <span>{formatJobId(job)}</span>
-                                <span>·</span>
-                                <span className="flex items-center gap-1 text-emerald-600 dark:text-emerald-400">
-                                    <MapPin size={10} /> {gpsLocation}
+                                <span className="opacity-40">/</span>
+                                <span className="flex items-center gap-1 text-[var(--theme-accent)]">
+                                    <MapPin size={11} /> {gpsLocation}
                                 </span>
                             </div>
                         </div>
                     </div>
-                    <button onClick={onClose} className="p-2 hover:bg-zinc-100 dark:hover:bg-white/10 rounded-lg transition-colors" aria-label={t('warehouse.dismiss')}>
-                        <X size={18} className="text-zinc-500" />
+                    <button
+                        onClick={onClose}
+                        className="w-10 h-10 rounded-xl bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-border)] flex items-center justify-center text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] transition-colors shrink-0"
+                        aria-label={t('warehouse.dismiss')}
+                    >
+                        <X size={18} />
                     </button>
                 </div>
 
                 {/* Auth guard */}
                 {!isManager ? (
-                    <div className="flex-1 flex flex-col items-center justify-center p-10 text-center">
-                        <div className="p-4 bg-red-500/10 rounded-2xl border border-red-500/20 mb-4">
-                            <ShieldAlert size={32} className="text-red-500" />
+                    <div className="flex-1 flex flex-col items-center justify-center p-8 sm:p-10 text-center">
+                        <div className="p-4 bg-red-500/10 rounded-2xl border border-red-500/20 mb-4 text-red-500">
+                            <ShieldAlert size={32} />
                         </div>
-                        <p className="text-sm font-black text-zinc-800 dark:text-zinc-200 uppercase tracking-widest">
+                        <p className="text-sm font-bold text-[var(--theme-text-primary)] uppercase tracking-wider">
                             {t('warehouse.picking.supervisorRequired') || 'Supervisory Authority Required'}
                         </p>
-                        <p className="text-xs text-zinc-500 mt-2 max-w-md">
+                        <p className="text-xs text-[var(--theme-text-secondary)] mt-2 max-w-md">
                             Zero-Trust Rule 18: Pick amendments are managerial overrides that affect stock balances and require authenticated supervisor credentials.
                         </p>
                     </div>
                 ) : step === 'EDIT' ? (
                     <>
                         {/* Info Banner */}
-                        <div className="mx-6 mt-4 p-3 bg-amber-50 dark:bg-amber-900/10 border border-amber-200 dark:border-amber-500/20 rounded-xl flex items-start gap-2 shrink-0">
-                            <AlertTriangle size={14} className="text-amber-600 dark:text-amber-400 mt-0.5 shrink-0" />
-                            <div className="text-[10px] text-amber-700 dark:text-amber-400 font-medium leading-relaxed">
-                                <span className="font-bold">Zero-Trust Notice:</span> Amending quantities creates a pending inventory request for Central HQ review and preserves original customer requirement on linked pack jobs.
+                        <div className="mx-4 sm:mx-6 mt-4 p-3.5 bg-amber-500/10 border border-amber-500/20 rounded-2xl flex items-start gap-2.5 shrink-0">
+                            <AlertTriangle size={15} className="text-amber-500 mt-0.5 shrink-0" />
+                            <div className="text-[11px] text-[var(--theme-text-primary)] leading-relaxed">
+                                <span className="font-semibold">Zero-Trust Notice:</span> Amending quantities creates a pending inventory request for Central HQ review and preserves original customer requirement on linked pack jobs.
                             </div>
                         </div>
 
                         {/* Line Items */}
-                        <div className="flex-1 overflow-y-auto p-6 space-y-3 custom-scrollbar">
-                            <p className="text-[10px] font-black text-zinc-400 uppercase tracking-[0.2em] mb-3">
+                        <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-3 custom-scrollbar bg-[var(--theme-bg-subtle)]">
+                            <p className="text-[11px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider mb-2">
                                 {t('warehouse.picking.correctQuantities')}
                             </p>
                             {lines.map((line, i) => {
@@ -241,24 +240,29 @@ export const PickAmendModal: React.FC<PickAmendModalProps> = ({
                                 const isDiff = isValid && amendedVal !== line.picked;
                                 const isOver = isValid && amendedVal > line.required;
                                 return (
-                                    <div key={i} className={`p-4 rounded-2xl border transition-all ${isDiff ? 'bg-amber-50 dark:bg-amber-900/10 border-amber-300 dark:border-amber-500/30' : 'bg-zinc-50 dark:bg-white/5 border-zinc-200 dark:border-white/10'}`}>
-                                        <div className="flex items-center justify-between gap-4">
-                                            <div className="flex-1 min-w-0">
-                                                <p className="text-xs font-black text-zinc-900 dark:text-zinc-100 uppercase tracking-tight truncate">{line.name}</p>
-                                                <p className="text-[9px] font-mono text-zinc-400 uppercase tracking-widest mt-0.5">{line.sku}</p>
+                                    <div
+                                        key={i}
+                                        className={`p-4 rounded-2xl border transition-colors ${
+                                            isDiff ? 'bg-[var(--theme-bg-card)] border-amber-500/40' : 'bg-[var(--theme-bg-card)] border-[var(--theme-border)]'
+                                        }`}
+                                    >
+                                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                                            <div className="min-w-0">
+                                                <p className="text-xs font-semibold text-[var(--theme-text-primary)] uppercase tracking-tight truncate">{line.name}</p>
+                                                <p className="text-[11px] font-mono text-[var(--theme-text-secondary)] uppercase tracking-wider mt-0.5">{line.sku}</p>
                                             </div>
-                                            <div className="flex items-center gap-4 shrink-0">
+                                            <div className="flex items-center gap-3 shrink-0 self-end sm:self-auto">
                                                 <div className="text-center">
-                                                    <p className="text-[8px] font-black text-zinc-400 uppercase tracking-widest">{t('warehouse.expected')}</p>
-                                                    <p className="text-sm font-black text-zinc-600 dark:text-zinc-400 font-mono">{line.required}</p>
+                                                    <p className="text-[11px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider">{t('warehouse.expected')}</p>
+                                                    <p className="text-sm font-bold text-[var(--theme-text-primary)] font-mono">{line.required}</p>
                                                 </div>
                                                 <div className="text-center">
-                                                    <p className="text-[8px] font-black text-zinc-400 uppercase tracking-widest">{t('warehouse.picking')}</p>
-                                                    <p className={`text-sm font-black font-mono ${isDiff ? 'line-through text-zinc-400' : 'text-zinc-800 dark:text-zinc-200'}`}>{line.picked}</p>
+                                                    <p className="text-[11px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider">{t('warehouse.picking')}</p>
+                                                    <p className={`text-sm font-bold font-mono ${isDiff ? 'line-through text-[var(--theme-text-secondary)]' : 'text-[var(--theme-text-primary)]'}`}>{line.picked}</p>
                                                 </div>
                                                 {isDiff && <ArrowRight size={14} className="text-amber-500" />}
                                                 <div className="text-center">
-                                                    <p className="text-[8px] font-black text-amber-500 uppercase tracking-widest">{t('warehouse.picking.correctTo')}</p>
+                                                    <p className="text-[11px] font-semibold text-amber-500 uppercase tracking-wider">{t('warehouse.picking.correctTo')}</p>
                                                     <input
                                                         type="number"
                                                         inputMode="decimal"
@@ -270,16 +274,17 @@ export const PickAmendModal: React.FC<PickAmendModalProps> = ({
                                                         aria-label="Amended quantity"
                                                         title="Amended quantity"
                                                         placeholder="0"
-                                                        className={`w-16 text-center text-sm font-black font-mono border rounded-lg px-2 py-1 focus:outline-none transition-all ${isOver
-                                                            ? 'border-red-400 bg-red-50 dark:bg-red-900/10 text-red-600 dark:text-red-400'
-                                                            : 'border-amber-300 dark:border-amber-500/30 bg-white dark:bg-black/40 text-amber-700 dark:text-amber-300 focus:border-amber-500'
+                                                        className={`w-16 text-center text-sm font-bold font-mono border rounded-xl px-2 py-1.5 focus:outline-none transition-colors min-h-[36px] ${
+                                                            isOver
+                                                                ? 'border-red-400 bg-red-500/10 text-red-500'
+                                                                : 'border-[var(--theme-border)] bg-[var(--theme-bg-subtle)] text-[var(--theme-text-primary)] focus:border-amber-400'
                                                         }`}
                                                     />
                                                 </div>
                                             </div>
                                         </div>
                                         {isOver && (
-                                            <p className="text-[9px] text-red-500 font-bold mt-1.5 text-right">{t('warehouse.picking.exceedsExpectedWarning')}</p>
+                                            <p className="text-[11px] text-red-500 font-semibold mt-1 text-right">{t('warehouse.picking.exceedsExpectedWarning')}</p>
                                         )}
                                     </div>
                                 );
@@ -287,15 +292,15 @@ export const PickAmendModal: React.FC<PickAmendModalProps> = ({
                         </div>
 
                         {/* Structured Reason Code & Explanatory Note */}
-                        <div className="px-6 pb-4 space-y-3 shrink-0">
+                        <div className="p-4 sm:p-6 bg-[var(--theme-bg-card)] border-t border-[var(--theme-border)] space-y-3 shrink-0">
                             <div>
-                                <label className="text-[9px] font-black text-zinc-400 uppercase tracking-widest block mb-1">
+                                <label className="text-[11px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider block mb-1">
                                     Structured Reason Code (Rule 18 Mandatory)
                                 </label>
                                 <select
                                     value={reasonCode}
                                     onChange={e => setReasonCode(e.target.value as PickAmendReasonCode)}
-                                    className="w-full text-xs font-bold border border-zinc-200 dark:border-white/10 bg-zinc-50 dark:bg-black/40 rounded-xl px-3 py-2 text-zinc-800 dark:text-zinc-200 focus:outline-none focus:border-amber-400"
+                                    className="w-full text-xs font-medium border border-[var(--theme-border)] bg-[var(--theme-bg-subtle)] rounded-xl px-3 py-2.5 text-[var(--theme-text-primary)] focus:outline-none focus:border-amber-400 min-h-[44px]"
                                 >
                                     {PICK_AMEND_REASON_CODES.map(rc => (
                                         <option key={rc.code} value={rc.code}>
@@ -306,7 +311,7 @@ export const PickAmendModal: React.FC<PickAmendModalProps> = ({
                             </div>
 
                             <div>
-                                <label className="text-[9px] font-black text-zinc-400 uppercase tracking-widest block mb-1">
+                                <label className="text-[11px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider block mb-1">
                                     {t('warehouse.picking.reasonForAmendment') || 'Explanatory Note'}
                                 </label>
                                 <textarea
@@ -314,30 +319,33 @@ export const PickAmendModal: React.FC<PickAmendModalProps> = ({
                                     onChange={e => setReasonNotes(e.target.value)}
                                     placeholder={t('warehouse.picking.reasonPlaceholder') || 'Detail the specific bin condition, item condition, or supervisor finding...'}
                                     rows={2}
-                                    className="w-full text-xs border border-zinc-200 dark:border-white/10 bg-zinc-50 dark:bg-black/40 rounded-xl px-4 py-2.5 text-zinc-800 dark:text-zinc-200 placeholder:text-zinc-400 dark:placeholder:text-zinc-700 focus:outline-none focus:border-amber-400 transition-all resize-none"
+                                    className="w-full text-xs border border-[var(--theme-border)] bg-[var(--theme-bg-subtle)] rounded-xl px-3 py-2.5 text-[var(--theme-text-primary)] placeholder:text-[var(--theme-text-secondary)] focus:outline-none focus:border-amber-400 transition-colors resize-none"
                                 />
                             </div>
                         </div>
 
                         {/* Footer */}
-                        <div className="p-5 border-t border-zinc-200 dark:border-white/10 bg-zinc-50/50 dark:bg-zinc-950/50 flex justify-between items-center shrink-0">
-                            <button onClick={onClose} className="px-6 py-2.5 text-xs font-black uppercase tracking-widest text-zinc-500 hover:text-zinc-800 dark:hover:text-white transition-colors">
+                        <div className="p-4 sm:p-5 border-t border-[var(--theme-border)] bg-[var(--theme-bg-card)] flex justify-between items-center shrink-0">
+                            <button
+                                onClick={onClose}
+                                className="px-6 py-2.5 text-xs font-semibold uppercase tracking-wider text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] transition-colors min-h-[44px]"
+                            >
                                 {t('warehouse.dismiss')}
                             </button>
                             <button
                                 disabled={!hasChanges || !reasonNotes.trim()}
                                 onClick={() => setStep('CONFIRM')}
-                                className="px-8 py-2.5 bg-amber-500 hover:bg-amber-400 disabled:opacity-40 disabled:grayscale text-white font-black text-xs uppercase tracking-widest rounded-xl transition-all shadow-md shadow-amber-500/20 flex items-center gap-2"
+                                className="px-6 py-2.5 bg-amber-600 hover:bg-amber-500 disabled:opacity-40 text-white font-semibold text-xs uppercase tracking-wider rounded-xl transition-all flex items-center gap-2 min-h-[44px]"
                             >
-                                <Edit3 size={13} /> {t('warehouse.picking.reviewChanges')}
+                                <Edit3 size={14} /> {t('warehouse.picking.reviewChanges')}
                             </button>
                         </div>
                     </>
                 ) : (
                     /* CONFIRM STEP */
                     <>
-                        <div className="flex-1 overflow-y-auto p-6 space-y-4 custom-scrollbar">
-                            <p className="text-[10px] font-black text-zinc-400 uppercase tracking-[0.2em]">
+                        <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4 custom-scrollbar bg-[var(--theme-bg-subtle)]">
+                            <p className="text-[11px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider">
                                 {t('warehouse.picking.confirmTheseCorrections') || 'Confirm Supervisory Overrides'}
                             </p>
                             {lines.filter(l => {
@@ -346,59 +354,59 @@ export const PickAmendModal: React.FC<PickAmendModalProps> = ({
                             }).map((line, i) => {
                                 const delta = parseInt(line.amended, 10) - line.picked;
                                 return (
-                                    <div key={i} className="p-4 rounded-2xl bg-amber-50 dark:bg-amber-900/10 border border-amber-300 dark:border-amber-500/30 flex items-center justify-between">
+                                    <div key={i} className="p-4 rounded-2xl bg-[var(--theme-bg-card)] border border-amber-500/30 flex items-center justify-between gap-3">
                                         <div>
-                                            <p className="text-xs font-black text-zinc-900 dark:text-zinc-100 uppercase">{line.name}</p>
-                                            <p className="text-[9px] font-mono text-zinc-400 mt-0.5">{line.sku}</p>
-                                            <span className="inline-block mt-1 text-[9px] font-black font-mono text-amber-700 dark:text-amber-400">
+                                            <p className="text-xs font-semibold text-[var(--theme-text-primary)] uppercase">{line.name}</p>
+                                            <p className="text-[11px] font-mono text-[var(--theme-text-secondary)] mt-0.5">{line.sku}</p>
+                                            <span className="inline-block mt-1 text-[11px] font-semibold font-mono text-amber-600 dark:text-amber-400">
                                                 Stock Request: {delta < 0 ? `+${Math.abs(delta)} Return to Stock (IN)` : `-${delta} Deduct from Stock (OUT)`}
                                             </span>
                                         </div>
                                         <div className="flex items-center gap-3">
-                                            <span className="text-sm font-black font-mono text-zinc-400 line-through">{line.picked}</span>
+                                            <span className="text-sm font-semibold font-mono text-[var(--theme-text-secondary)] line-through">{line.picked}</span>
                                             <ArrowRight size={14} className="text-amber-500" />
-                                            <span className="text-sm font-black font-mono text-amber-600 dark:text-amber-300">{line.amended}</span>
+                                            <span className="text-sm font-bold font-mono text-amber-600 dark:text-amber-400">{line.amended}</span>
                                         </div>
                                     </div>
                                 );
                             })}
 
                             {linkedPackJob && (
-                                <div className="p-3 bg-blue-50 dark:bg-blue-900/10 border border-blue-200 dark:border-blue-500/20 rounded-xl flex items-start gap-2">
-                                    <CheckCircle size={13} className="text-blue-500 mt-0.5 shrink-0" />
-                                    <p className="text-[10px] text-blue-700 dark:text-blue-400 font-medium">
+                                <div className="p-3.5 bg-blue-500/10 border border-blue-500/20 rounded-2xl flex items-start gap-2">
+                                    <CheckCircle size={14} className="text-blue-500 mt-0.5 shrink-0" />
+                                    <p className="text-[11px] text-blue-600 dark:text-blue-400 font-medium">
                                         Linked PACK job ({formatJobId(linkedPackJob)}) will record shortage variance while strictly preserving original customer demand.
                                     </p>
                                 </div>
                             )}
 
-                            <div className="p-3 bg-zinc-50 dark:bg-white/5 border border-zinc-200 dark:border-white/10 rounded-xl space-y-1">
-                                <div className="flex justify-between text-[9px] font-mono text-zinc-500">
+                            <div className="p-3.5 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl space-y-1 font-mono text-[11px]">
+                                <div className="flex justify-between text-[var(--theme-text-secondary)]">
                                     <span>Supervisor: {currentUser?.name} ({currentUser?.role})</span>
                                     <span>{gpsLocation}</span>
                                 </div>
-                                <p className="text-[9px] font-black text-zinc-400 uppercase tracking-widest">
+                                <p className="text-[var(--theme-text-secondary)] font-semibold uppercase">
                                     Reason: {reasonCode}
                                 </p>
-                                <p className="text-xs text-zinc-700 dark:text-zinc-300 italic">{reasonNotes}</p>
+                                <p className="text-[var(--theme-text-primary)] italic font-sans">{reasonNotes}</p>
                             </div>
                         </div>
 
-                        <div className="p-5 border-t border-zinc-200 dark:border-white/10 bg-zinc-50/50 dark:bg-zinc-950/50 flex justify-between items-center shrink-0">
+                        <div className="p-4 sm:p-5 border-t border-[var(--theme-border)] bg-[var(--theme-bg-card)] flex justify-between items-center shrink-0">
                             <button
                                 onClick={() => setStep('EDIT')}
-                                className="px-6 py-2.5 text-xs font-black uppercase tracking-widest text-zinc-500 hover:text-zinc-800 dark:hover:text-white transition-colors"
+                                className="px-6 py-2.5 text-xs font-semibold uppercase tracking-wider text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] transition-colors min-h-[44px]"
                             >
-                                &larr; {t('warehouse.back')}
+                                {t('warehouse.back')}
                             </button>
                             <button
                                 disabled={isSubmitting}
                                 onClick={handleConfirm}
-                                className="px-8 py-2.5 bg-amber-500 hover:bg-amber-400 disabled:opacity-50 text-white font-black text-xs uppercase tracking-widest rounded-xl transition-all shadow-md shadow-amber-500/20 flex items-center gap-2"
+                                className="px-6 py-2.5 bg-amber-600 hover:bg-amber-500 disabled:opacity-50 text-white font-semibold text-xs uppercase tracking-wider rounded-xl transition-all flex items-center gap-2 min-h-[44px]"
                             >
                                 {isSubmitting
-                                    ? <><Loader2 size={13} className="animate-spin" /> {t('warehouse.saving')}</>
-                                    : <><Send size={13} /> Submit Amendment & Stock Requests</>
+                                    ? <><Loader2 size={14} className="animate-spin" /> {t('warehouse.saving')}</>
+                                    : <><Send size={14} /> Submit Amendment & Stock Requests</>
                                 }
                             </button>
                         </div>

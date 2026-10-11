@@ -63,14 +63,14 @@ export const SovereignDateWidget: React.FC<SovereignDateWidgetProps> = ({
                     raw = raw.replace('pagume', 'Qaammee');
 
                     return {
-                        title: '🇪🇹 Kalandara Itoophiyaa',
+                        title: 'ET · Kalandara Itoophiyaa',
                         dateString: raw,
                         badgeTheme: 'border-amber-500/30 text-amber-700 dark:text-amber-400 bg-amber-500/10'
                     };
                 } else if (language === 'en') {
                     // Pure English
                     return {
-                        title: '🇪🇹 Ethiopian Solar Calendar',
+                        title: 'ET · Ethiopian Solar Calendar',
                         dateString: raw.charAt(0).toUpperCase() + raw.slice(1),
                         badgeTheme: 'border-amber-500/30 text-amber-700 dark:text-amber-400 bg-amber-500/10'
                     };
@@ -99,14 +99,14 @@ export const SovereignDateWidget: React.FC<SovereignDateWidgetProps> = ({
                     raw = raw.replace('pagume', 'ጳጉሜ');
 
                     return {
-                        title: '🇪🇹 የኢትዮጵያ ዘመን አቆጣጠር',
+                        title: 'ET · የኢትዮጵያ ዘመን አቆጣጠር',
                         dateString: `${raw} ዓ.ም`,
                         badgeTheme: 'border-amber-500/30 text-amber-700 dark:text-amber-400 bg-amber-500/10'
                     };
                 }
             } catch {
                 return {
-                    title: '🇪🇹 Ethiopian Calendar',
+                    title: 'ET · Ethiopian Calendar',
                     dateString: 'ETHIOPIAN CALENDAR',
                     badgeTheme: 'border-amber-500/30 text-amber-700 dark:text-amber-400 bg-amber-500/10'
                 };
@@ -118,13 +118,13 @@ export const SovereignDateWidget: React.FC<SovereignDateWidgetProps> = ({
                     timeZone: timezone
                 }).format(time).toUpperCase();
                 return {
-                    title: '🇰🇪 Kenyan National Calendar',
+                    title: 'KE · Kenyan National Calendar',
                     dateString: sw,
                     badgeTheme: 'border-emerald-600/30 text-emerald-800 dark:text-emerald-400 bg-emerald-600/10'
                 };
             } catch {
                 return {
-                    title: '🇰🇪 Kenyan Calendar',
+                    title: 'KE · Kenyan Calendar',
                     dateString: time.toDateString().toUpperCase(),
                     badgeTheme: 'border-emerald-600/30 text-emerald-800 dark:text-emerald-400 bg-emerald-600/10'
                 };
@@ -136,7 +136,7 @@ export const SovereignDateWidget: React.FC<SovereignDateWidgetProps> = ({
                     timeZone: timezone
                 }).format(time).toUpperCase();
                 return {
-                    title: `${profile.flag} ${profile.name} Calendar`,
+                    title: `${profile.name} Calendar`,
                     dateString: dateStr,
                     badgeTheme: 'border-stone-400/30 text-stone-700 dark:text-stone-300 bg-stone-500/10'
                 };
@@ -148,15 +148,15 @@ export const SovereignDateWidget: React.FC<SovereignDateWidgetProps> = ({
                 };
             }
         }
-    }, [activeCountry, time, timezone, profile.flag, profile.name]);
+    }, [activeCountry, time, timezone, profile.name]);
 
     if (compact) {
         return (
-            <div className={`flex flex-col items-end px-3 py-1.5 rounded-xl border backdrop-blur-md ${calendarInfo.badgeTheme} ${className}`}>
-                <span className="text-[8px] font-black uppercase tracking-wider leading-none mb-0.5">
+            <div className={`flex flex-col items-end px-3 py-1.5 rounded-xl border ${calendarInfo.badgeTheme} ${className}`}>
+                <span className="text-[11px] font-semibold uppercase tracking-wider leading-none mb-0.5">
                     {calendarInfo.title}
                 </span>
-                <span className="text-[10px] font-mono font-bold leading-none truncate max-w-[200px]">
+                <span className="text-[11px] font-mono font-bold leading-none truncate max-w-[200px]">
                     {calendarInfo.dateString}
                 </span>
             </div>
@@ -164,11 +164,11 @@ export const SovereignDateWidget: React.FC<SovereignDateWidgetProps> = ({
     }
 
     return (
-        <div className={`hidden lg:flex px-5 py-2 backdrop-blur-md rounded-2xl border h-[46px] flex-col justify-center items-end text-right relative overflow-hidden group shadow-inner ${calendarInfo.badgeTheme} ${className}`}>
-            <p className="text-[8px] font-black uppercase tracking-[0.2em] leading-none mb-1 shadow-xs">
+        <div className={`hidden lg:flex px-4 py-2 rounded-xl border h-[42px] flex-col justify-center items-end text-right relative overflow-hidden group shadow-xs ${calendarInfo.badgeTheme} ${className}`}>
+            <p className="text-[11px] font-semibold uppercase tracking-wider leading-none mb-0.5">
                 {calendarInfo.title}
             </p>
-            <p className="text-[10px] sm:text-[11px] font-mono font-bold leading-none tracking-wider truncate max-w-[280px] drop-shadow-xs">
+            <p className="text-[11px] font-mono font-bold leading-none tracking-wider truncate max-w-[280px]">
                 {calendarInfo.dateString}
             </p>
         </div>

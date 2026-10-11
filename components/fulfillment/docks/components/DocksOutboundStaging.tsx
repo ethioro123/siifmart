@@ -62,19 +62,19 @@ export const DocksOutboundStaging: React.FC<DocksOutboundStagingProps> = ({
 
     return (
         <div className="relative z-10 shrink-0">
-            <h4 className="text-sm font-black text-slate-900 dark:text-white uppercase tracking-widest flex items-center gap-2 mb-6">
-                <Package size={16} className="text-[#2C5E3B] dark:text-[#A9CBA2]" />
+            <h4 className="text-xs sm:text-sm font-semibold text-[var(--theme-text-primary)] uppercase tracking-wider flex items-center gap-2 mb-4">
+                <Package size={16} className="text-primary" />
                 {t('warehouse.docks.stagingArea')}
-                <span className="text-[10px] text-stone-500 dark:text-stone-400 bg-stone-100 dark:bg-white/5 px-2 py-0.5 rounded-full ml-auto font-mono font-black">
+                <span className="text-[11px] text-[var(--theme-text-muted)] bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] px-2.5 py-0.5 rounded-full ml-auto font-mono font-medium">
                     {stagingJobs.length} READY
                 </span>
             </h4>
-            <div className="glass-panel-pushed rounded-[2rem] p-6 shadow-inner">
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2 gap-4 max-h-[340px] overflow-y-auto custom-scrollbar pr-2">
+            <div className="bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-2xl p-4 sm:p-5 shadow-sm">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2 gap-3 sm:gap-4 max-h-[340px] overflow-y-auto pr-1">
                     {stagingJobs.length === 0 ? (
-                        <div className="col-span-full py-12 text-center">
-                            <Box size={40} className="text-gray-800 mx-auto mb-4" />
-                            <p className="text-xs text-gray-600 font-bold uppercase tracking-widest">No Shipments in Staging</p>
+                        <div className="col-span-full py-10 text-center">
+                            <Box size={36} className="text-[var(--theme-text-muted)] mx-auto mb-3" />
+                            <p className="text-xs text-[var(--theme-text-secondary)] font-semibold uppercase tracking-wider">No Shipments in Staging</p>
                         </div>
                     ) : (
                         stagingJobs.map(job => {
@@ -87,31 +87,31 @@ export const DocksOutboundStaging: React.FC<DocksOutboundStagingProps> = ({
                                         setSelectedJob(job);
                                         setIsDetailsOpen(true);
                                     }}
-                                    className="bg-[#FAF8F5]/50 dark:bg-[#1C2620]/30 hover:bg-[#FAF8F5]/80 dark:hover:bg-[#1C2620]/50 p-4 rounded-2xl border border-[#E2DCCE]/60 dark:border-[#A9CBA2]/[0.06] hover:border-[#2C5E3B]/30 dark:hover:border-[#A9CBA2]/30 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 group transition-all cursor-pointer shadow-sm"
+                                    className="bg-[var(--theme-bg-card)] hover:bg-[var(--theme-bg-subtle)] p-3.5 sm:p-4 rounded-xl border border-[var(--theme-border)] hover:border-primary/30 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 group transition-colors cursor-pointer shadow-sm touch-manipulation"
                                 >
                                     <div className="flex items-center gap-3 min-w-0">
-                                        <div className="w-10 h-10 bg-[#2C5E3B]/20 rounded-xl flex shrink-0 items-center justify-center text-[#2C5E3B] dark:text-[#A9CBA2]">
-                                            <Package size={20} />
+                                        <div className="w-10 h-10 bg-primary/10 rounded-xl flex shrink-0 items-center justify-center text-primary border border-primary/20">
+                                            <Package size={18} />
                                         </div>
                                         <div className="min-w-0">
                                             <div className="flex items-center gap-2 flex-wrap">
-                                                <p className="text-[11px] font-black text-slate-900 dark:text-white uppercase tracking-widest truncate">{formatJobId(job)}</p>
-                                                <span className="px-1.5 py-0.5 bg-[#2C5E3B]/10 text-[#2C5E3B] dark:text-[#A9CBA2] text-[8px] font-black rounded border border-[#2C5E3B]/20 dark:border-[#A9CBA2]/20">READY</span>
+                                                <p className="text-xs font-mono font-medium text-[var(--theme-text-primary)] uppercase tracking-wider truncate">{formatJobId(job)}</p>
+                                                <span className="px-2 py-0.5 bg-primary/10 text-primary text-[11px] font-semibold rounded-full border border-primary/20">READY</span>
                                             </div>
-                                            <p className="text-[9px] text-gray-500 font-bold uppercase mt-0.5 truncate">
+                                            <p className="text-[11px] text-[var(--theme-text-muted)] font-medium uppercase mt-0.5 truncate">
                                                 Dest: {destSite ? destSite.name : 'Unknown Destination'}
                                             </p>
                                             {job.deliveryMethod === 'External' ? (
-                                                <div className="flex items-center gap-1 mt-0.5">
-                                                    <Truck size={10} className="text-amber-500 dark:text-amber-400" />
-                                                    <span className="text-[8px] text-amber-600 dark:text-amber-400 font-black uppercase tracking-tighter truncate">
+                                                <div className="flex items-center gap-1.5 mt-0.5">
+                                                    <Truck size={12} className="text-amber-500" />
+                                                    <span className="text-[11px] text-amber-600 dark:text-amber-400 font-semibold uppercase tracking-tight truncate">
                                                         {job.externalCarrierName || 'EXT Carrier'}
                                                     </span>
                                                 </div>
                                             ) : job.assignedTo && (
-                                                <div className="flex items-center gap-1 mt-0.5">
-                                                    <UserIcon size={10} className="text-[#2C5E3B] dark:text-[#A9CBA2]" />
-                                                    <span className="text-[8px] text-[#2C5E3B] dark:text-[#A9CBA2] font-black uppercase tracking-tighter truncate">
+                                                <div className="flex items-center gap-1.5 mt-0.5">
+                                                    <UserIcon size={12} className="text-primary" />
+                                                    <span className="text-[11px] text-primary font-semibold uppercase tracking-tight truncate">
                                                         {employees.find(e => e.id === job.assignedTo)?.name || 'Assigned'}
                                                     </span>
                                                 </div>
@@ -122,14 +122,14 @@ export const DocksOutboundStaging: React.FC<DocksOutboundStagingProps> = ({
                                     {/* Right Side: Units + Delete + Space-Saving Dock Select Dropdown */}
                                     <div className="flex sm:flex-col items-center sm:items-end justify-between w-full sm:w-auto gap-2 shrink-0" onClick={e => e.stopPropagation()}>
                                         <div className="flex items-center gap-2">
-                                            <span className="text-[10px] text-gray-400 font-mono font-bold">{job.items || job.lineItems?.length || 0} Units</span>
+                                            <span className="text-[11px] text-[var(--theme-text-muted)] font-mono font-medium tabular-nums">{job.items || job.lineItems?.length || 0} Units</span>
                                             {['super_admin', 'warehouse_manager', 'operations_manager', 'regional_manager'].includes(user?.role as string) && (
                                                 <button
                                                     onClick={(e) => handleDelete(e, job.id)}
-                                                    className="w-5 h-5 rounded border bg-slate-100 dark:bg-white/5 border-slate-200 dark:border-white/10 text-red-500 hover:text-white hover:bg-red-500 hover:border-red-500 transition-all flex items-center justify-center shrink-0"
+                                                    className="w-8 h-8 rounded-lg bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-red-500 hover:text-white hover:bg-red-500 hover:border-red-500 transition-colors flex items-center justify-center shrink-0 touch-manipulation"
                                                     title="Delete Job"
                                                 >
-                                                    <Trash2 size={10} />
+                                                    <Trash2 size={13} />
                                                 </button>
                                             )}
                                         </div>
@@ -145,10 +145,10 @@ export const DocksOutboundStaging: React.FC<DocksOutboundStagingProps> = ({
                                                 }
                                             }}
                                             aria-label="Select Outbound Dock"
-                                            className="px-2.5 py-1.5 rounded-xl bg-[#2C5E3B]/10 hover:bg-[#2C5E3B]/20 dark:bg-[#A9CBA2]/10 dark:hover:bg-[#A9CBA2]/20 border border-[#2C5E3B]/30 dark:border-[#A9CBA2]/30 text-[#2C5E3B] dark:text-[#A9CBA2] text-[10px] font-black uppercase tracking-wider cursor-pointer outline-none transition-all shadow-xs"
+                                            className="min-h-[44px] px-3 py-2 rounded-xl bg-primary/10 hover:bg-primary/20 border border-primary/30 text-primary text-[11px] font-semibold uppercase tracking-wider cursor-pointer outline-none transition-colors shadow-xs touch-manipulation"
                                         >
-                                            <option value="" disabled className="text-stone-700 dark:text-stone-300 bg-white dark:bg-[#1C2620]">
-                                                ⚡ LOAD DOCK ▾
+                                            <option value="" disabled className="bg-[var(--theme-bg-card)] text-[var(--theme-text-secondary)]">
+                                                LOAD DOCK ▾
                                             </option>
                                             {OUTBOUND_DOCKS.map((dock) => {
                                                 const occupying = findDockJob(jobs, dock);
@@ -158,7 +158,7 @@ export const DocksOutboundStaging: React.FC<DocksOutboundStagingProps> = ({
                                                         key={dock}
                                                         value={dock}
                                                         disabled={!isAvailable}
-                                                        className="text-slate-900 dark:text-white bg-white dark:bg-[#1C2620]"
+                                                        className="bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)]"
                                                     >
                                                         {dock} {isAvailable ? '(Open)' : `(Occupied)`}
                                                     </option>

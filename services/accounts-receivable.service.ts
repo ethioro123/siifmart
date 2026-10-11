@@ -7,13 +7,15 @@ export const accountsReceivableService = {
     /**
      * Get B2B AR invoices with country isolation
      */
-    async getInvoices(countryCode: string = 'ET', customerId?: string, status?: string): Promise<ArInvoice[]> {
+    async getInvoices(countryCode: string = 'ET', customerId?: string, status?: string, limit: number = 25, offset: number = 0): Promise<ArInvoice[]> {
         try {
+            // RULE 10: 25-record shelf limit
             let query = supabase
                 .from('ar_invoices')
                 .select('*')
                 .eq('country_code', countryCode)
-                .order('due_date', { ascending: true });
+                .order('due_date', { ascending: true })
+                .range(offset, offset + limit - 1);
 
             if (customerId) query = query.eq('customer_id', customerId);
             if (status && status !== 'All') query = query.eq('status', status);

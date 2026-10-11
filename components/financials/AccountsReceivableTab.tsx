@@ -1,8 +1,20 @@
-import React, { useState, useEffect } from 'react';
-import { CreditCard, AlertCircle, CheckCircle, Search, Filter, Loader2 } from 'lucide-react';
+import React, { useState, useEffect, useMemo } from 'react';
+import {
+    CreditCard,
+    AlertCircle,
+    CheckCircle2,
+    Search,
+    Filter,
+    Loader2,
+    Clock,
+    ShieldCheck,
+    Calendar,
+    ArrowUpRight
+} from 'lucide-react';
 import { useFinance } from './FinanceContext';
 import { accountsReceivableService } from '../../services/accounts-receivable.service';
 import type { ArInvoice, ArAgingReport } from '../../types';
+import { ArInvoiceModal } from './ArInvoiceModal';
 
 export const AccountsReceivableTab: React.FC = () => {
     const { user, currencySymbol, effectiveCountry, addNotification } = useFinance();
@@ -11,6 +23,7 @@ export const AccountsReceivableTab: React.FC = () => {
     const [loading, setLoading] = useState(true);
     const [statusFilter, setStatusFilter] = useState<string>('All');
     const [searchTerm, setSearchTerm] = useState('');
+    const [selectedInvoice, setSelectedInvoice] = useState<ArInvoice | null>(null);
 
     const canManageCredit = ['credit_control_officer', 'finance_manager', 'super_admin', 'CEO', 'ceo', 'admin'].includes(user?.role);
 
@@ -34,149 +47,240 @@ export const AccountsReceivableTab: React.FC = () => {
         loadData();
     }, [effectiveCountry, statusFilter]);
 
-    const filteredInvoices = invoices.filter(i =>
-        i.customerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        i.invoiceNumber.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    const filteredInvoices = useMemo(() => {
+        const query = searchTerm.trim().toLowerCase();
+        if (!query) return invoices;
+        return invoices.filter(i =>
+            (i.customerName && i.customerName.toLowerCase().includes(query)) ||
+            (i.invoiceNumber && i.invoiceNumber.toLowerCase().includes(query))
+        );
+    }, [invoices, searchTerm]);
 
     return (
-        <div className="space-y-6 animate-in fade-in">
-            {/* Header */}
-            <div className="bg-white/90 dark:bg-stone-900/60 border border-[#E2DCCE] dark:border-white/5 rounded-2xl p-4 flex flex-wrap justify-between items-center gap-4">
-                <div>
-                    <h3 className="text-base font-bold text-[#1E3F27] dark:text-white flex items-center gap-2">
-                        <CreditCard className="text-emerald-600 dark:text-emerald-400" size={18} />
-                        Accounts Receivable (AR) &amp; Commercial Credit Control
-                    </h3>
-                    <p className="text-xs text-stone-500 dark:text-gray-400 mt-0.5">
-                        B2B wholesale customer invoicing, payment terms, due-date aging, and credit hold governance.
+        <div className="space-y-4">
+            {/* Header & Aging Schedule Ribbon */}
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+                <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-4 shadow-xs">
+                    <span className="text-xs text-[var(--theme-text-secondary)] font-medium">
+                        Current (0-30 Days)
+                    </span>
+                    <h4 className="text-xl font-semibold tracking-tight text-emerald-600 dark:text-emerald-400 font-mono tabular-nums mt-1">
+                        {currencySymbol} {aging.current.toLocaleString()}
+                    </h4>
+                    <p className="text-[11px] text-[var(--theme-text-secondary)] mt-1">
+                        Within standard terms
                     </p>
                 </div>
 
-                <div className="flex items-center gap-3">
-                    <div className="flex items-center bg-stone-100 dark:bg-black/40 border border-[#E2DCCE] dark:border-white/10 rounded-xl px-2.5 py-1.5 text-xs">
-                        <Search size={14} className="text-stone-400 dark:text-gray-400 mr-2" />
-                        <input
-                            type="text"
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                            placeholder="Search customer or invoice..."
-                            className="bg-transparent text-[#1E3F27] dark:text-white outline-none w-44 placeholder-stone-400 dark:placeholder-gray-500"
-                        />
-                    </div>
-
-                    <div className="flex items-center bg-stone-100 dark:bg-black/40 border border-[#E2DCCE] dark:border-white/10 rounded-xl px-2.5 py-1.5 text-xs">
-                        <Filter size={14} className="text-stone-400 dark:text-gray-400 mr-2" />
-                        <select
-                            value={statusFilter}
-                            onChange={(e) => setStatusFilter(e.target.value)}
-                            className="bg-transparent text-[#1E3F27] dark:text-gray-200 outline-none cursor-pointer"
-                        >
-                            <option value="All">All Statuses</option>
-                            <option value="Sent">Open / Sent</option>
-                            <option value="Overdue">Overdue</option>
-                            <option value="Paid">Paid</option>
-                        </select>
-                    </div>
-                </div>
-            </div>
-
-            {/* AR Aging Summary Cards */}
-            <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
-                <div className="bg-white/90 dark:bg-stone-900/60 border border-emerald-200 dark:border-emerald-500/20 rounded-2xl p-3">
-                    <span className="text-[10px] text-stone-500 dark:text-gray-400 uppercase font-bold block">Current (0-30 Days)</span>
-                    <span className="text-sm font-bold font-mono text-emerald-600 dark:text-emerald-400 mt-1 block">
-                        {currencySymbol} {aging.current.toLocaleString()}
+                <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-4 shadow-xs">
+                    <span className="text-xs text-[var(--theme-text-secondary)] font-medium">
+                        31-60 Days
                     </span>
-                </div>
-                <div className="bg-white/90 dark:bg-stone-900/60 border border-blue-200 dark:border-blue-500/20 rounded-2xl p-3">
-                    <span className="text-[10px] text-stone-500 dark:text-gray-400 uppercase font-bold block">31-60 Days</span>
-                    <span className="text-sm font-bold font-mono text-blue-600 dark:text-blue-400 mt-1 block">
+                    <h4 className="text-xl font-semibold tracking-tight text-blue-600 dark:text-blue-400 font-mono tabular-nums mt-1">
                         {currencySymbol} {aging.days31to60.toLocaleString()}
-                    </span>
+                    </h4>
+                    <p className="text-[11px] text-[var(--theme-text-secondary)] mt-1">
+                        Mild aging tier
+                    </p>
                 </div>
-                <div className="bg-white/90 dark:bg-stone-900/60 border border-amber-200 dark:border-amber-500/20 rounded-2xl p-3">
-                    <span className="text-[10px] text-stone-500 dark:text-gray-400 uppercase font-bold block">61-90 Days</span>
-                    <span className="text-sm font-bold font-mono text-amber-600 dark:text-amber-400 mt-1 block">
+
+                <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-4 shadow-xs">
+                    <span className="text-xs text-[var(--theme-text-secondary)] font-medium">
+                        61-90 Days
+                    </span>
+                    <h4 className="text-xl font-semibold tracking-tight text-amber-600 dark:text-amber-400 font-mono tabular-nums mt-1">
                         {currencySymbol} {aging.days61to90.toLocaleString()}
-                    </span>
+                    </h4>
+                    <p className="text-[11px] text-[var(--theme-text-secondary)] mt-1">
+                        Follow-up scheduled
+                    </p>
                 </div>
-                <div className="bg-white/90 dark:bg-stone-900/60 border border-rose-200 dark:border-rose-500/30 rounded-2xl p-3">
-                    <span className="text-[10px] text-stone-500 dark:text-gray-400 uppercase font-bold block">90+ Days Overdue</span>
-                    <span className="text-sm font-bold font-mono text-rose-600 dark:text-rose-400 mt-1 block">
+
+                <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-4 shadow-xs">
+                    <span className="text-xs text-[var(--theme-text-secondary)] font-medium">
+                        90+ Days Overdue
+                    </span>
+                    <h4 className="text-xl font-semibold tracking-tight text-rose-600 dark:text-rose-400 font-mono tabular-nums mt-1">
                         {currencySymbol} {aging.days90Plus.toLocaleString()}
-                    </span>
+                    </h4>
+                    <p className="text-[11px] text-[var(--theme-text-secondary)] mt-1">
+                        Credit hold candidates
+                    </p>
                 </div>
-                <div className="bg-white/90 dark:bg-stone-900/60 border border-[#E2DCCE] dark:border-white/10 rounded-2xl p-3 col-span-2 md:col-span-1">
-                    <span className="text-[10px] text-stone-500 dark:text-gray-400 uppercase font-bold block">Total Outstanding AR</span>
-                    <span className="text-sm font-bold font-mono text-[#1E3F27] dark:text-white mt-1 block">
-                        {currencySymbol} {aging.totalOutstanding.toLocaleString()}
+
+                <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-4 shadow-xs col-span-2 md:col-span-1">
+                    <span className="text-xs text-[var(--theme-text-secondary)] font-medium">
+                        Total Outstanding AR
                     </span>
+                    <h4 className="text-xl font-semibold tracking-tight text-[var(--theme-text-primary)] font-mono tabular-nums mt-1">
+                        {currencySymbol} {aging.totalOutstanding.toLocaleString()}
+                    </h4>
+                    <p className="text-[11px] text-[var(--theme-text-secondary)] mt-1">
+                        All commercial receivables
+                    </p>
                 </div>
             </div>
 
-            {/* Invoices Table */}
-            <div className="bg-white/90 dark:bg-stone-900/60 border border-[#E2DCCE] dark:border-white/5 rounded-2xl overflow-x-auto">
-                <table className="w-full text-left text-xs">
-                    <thead className="bg-stone-100/80 dark:bg-black/20 border-b border-[#E2DCCE] dark:border-white/5 uppercase text-stone-500 dark:text-gray-500">
-                        <tr>
-                            <th className="p-4">Invoice #</th>
-                            <th className="p-4">Customer</th>
-                            <th className="p-4">Date / Due</th>
-                            <th className="p-4">Terms</th>
-                            <th className="p-4 text-right">Total</th>
-                            <th className="p-4 text-right">Balance Due</th>
-                            <th className="p-4 text-center">Status</th>
-                        </tr>
-                    </thead>
-                    <tbody className="divide-y divide-[#E2DCCE] dark:divide-white/5">
-                        {loading ? (
+            {/* Invoices Table Card */}
+            <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl overflow-hidden shadow-xs">
+                {/* Header & Filter Toolbar */}
+                <div className="p-4 border-b border-[var(--theme-border)] flex flex-col md:flex-row md:items-center justify-between gap-3 bg-[var(--theme-bg-card)]">
+                    <div className="flex flex-wrap items-center gap-2.5">
+                        <div className="flex items-center gap-2">
+                            <h3 className="text-sm font-semibold text-[var(--theme-text-primary)]">
+                                Accounts Receivable (AR) &amp; Credit Ledger
+                            </h3>
+                            <div className="flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 text-xs font-medium">
+                                <ShieldCheck size={12} />
+                                <span>Commercial Credit Governance</span>
+                            </div>
+                        </div>
+
+                        {/* Search Input */}
+                        <div className="flex items-center bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-2.5 py-1.5 h-9 w-56">
+                            <Search size={14} className="text-[var(--theme-text-secondary)] mr-2 shrink-0" />
+                            <input
+                                type="text"
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                                placeholder="Search customer, invoice..."
+                                className="bg-transparent text-xs text-[var(--theme-text-primary)] outline-none w-full placeholder:text-[var(--theme-text-secondary)]/60"
+                                aria-label="Search receivables"
+                            />
+                        </div>
+
+                        {/* Status Filter Dropdown */}
+                        <div className="flex items-center bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-2.5 py-1.5 h-9">
+                            <Filter size={13} className="text-[var(--theme-text-secondary)] mr-2 shrink-0" />
+                            <select
+                                value={statusFilter}
+                                onChange={(e) => setStatusFilter(e.target.value)}
+                                className="bg-transparent text-xs text-[var(--theme-text-primary)] outline-none cursor-pointer pr-1"
+                                aria-label="Filter receivables by status"
+                            >
+                                <option value="All">All Statuses</option>
+                                <option value="Sent">Open / Sent</option>
+                                <option value="Overdue">Overdue</option>
+                                <option value="Paid">Settled / Paid</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div className="text-xs text-[var(--theme-text-secondary)] font-mono">
+                        Tenancy: <span className="font-semibold text-[var(--theme-text-primary)]">{effectiveCountry}</span> ({currencySymbol})
+                    </div>
+                </div>
+
+                {/* Table */}
+                <div className="overflow-x-auto">
+                    <table className="w-full text-left">
+                        <thead className="bg-[var(--theme-bg-subtle)]/75 border-b border-[var(--theme-border)]">
                             <tr>
-                                <td colSpan={7} className="p-12 text-center text-stone-400 dark:text-gray-400">
-                                    <Loader2 className="animate-spin inline mr-2" size={18} /> Loading AR Invoices...
-                                </td>
+                                <th className="py-3 px-4 text-[11px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider">Invoice #</th>
+                                <th className="py-3 px-4 text-[11px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider">Customer</th>
+                                <th className="py-3 px-4 text-[11px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider">Date / Due</th>
+                                <th className="py-3 px-4 text-[11px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider">Terms</th>
+                                <th className="py-3 px-4 text-[11px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider text-right">Total</th>
+                                <th className="py-3 px-4 text-[11px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider text-right">Balance Due</th>
+                                <th className="py-3 px-4 text-[11px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider text-center">Status</th>
+                                <th className="py-3 px-4 text-[11px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider text-right">Action</th>
                             </tr>
-                        ) : filteredInvoices.length === 0 ? (
-                            <tr>
-                                <td colSpan={7} className="p-12 text-center text-stone-400 dark:text-gray-500">
-                                    No B2B receivables found matching criteria.
-                                </td>
-                            </tr>
-                        ) : (
-                            filteredInvoices.map((inv) => (
-                                <tr key={inv.id} className="hover:bg-stone-50 dark:hover:bg-white/5 transition-colors">
-                                    <td className="p-4 font-mono font-bold text-[#1E3F27] dark:text-white whitespace-nowrap">{inv.invoiceNumber}</td>
-                                    <td className="p-4 text-stone-700 dark:text-gray-200 font-medium">{inv.customerName}</td>
-                                    <td className="p-4 whitespace-nowrap text-stone-500 dark:text-gray-400 font-mono text-[11px]">
-                                        <div>Inv: {inv.invoiceDate}</div>
-                                        <div className="text-stone-400 dark:text-gray-500">Due: {inv.dueDate}</div>
-                                    </td>
-                                    <td className="p-4 text-stone-500 dark:text-gray-400 uppercase font-mono text-[10px]">{inv.paymentTerms.replace('_', ' ')}</td>
-                                    <td className="p-4 text-right font-mono text-stone-600 dark:text-gray-300">
-                                        {currencySymbol} {inv.totalAmount.toLocaleString()}
-                                    </td>
-                                    <td className="p-4 text-right font-mono font-bold text-[#1E3F27] dark:text-white whitespace-nowrap">
-                                        {currencySymbol} {inv.balanceDue.toLocaleString()}
-                                    </td>
-                                    <td className="p-4 text-center">
-                                        <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold uppercase border ${
-                                            inv.status === 'Paid'
-                                                ? 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-500/20'
-                                                : inv.status === 'Overdue'
-                                                    ? 'bg-rose-50 dark:bg-rose-500/10 text-rose-700 dark:text-rose-400 border-rose-200 dark:border-rose-500/30'
-                                                    : 'bg-blue-50 dark:bg-blue-500/10 text-blue-700 dark:text-blue-400 border-blue-200 dark:border-blue-500/20'
-                                        }`}>
-                                            {inv.status === 'Paid' && <CheckCircle size={10} />}
-                                            {inv.status === 'Overdue' && <AlertCircle size={10} />}
-                                            {inv.status}
-                                        </span>
+                        </thead>
+                        <tbody className="divide-y divide-[var(--theme-border)]">
+                            {loading ? (
+                                <tr>
+                                    <td colSpan={8} className="py-16 text-center text-[var(--theme-text-secondary)]">
+                                        <Loader2 className="animate-spin inline mr-2 text-[#0071E3] dark:text-[#2997FF]" size={18} />
+                                        <span className="text-xs">Loading Accounts Receivable invoices...</span>
                                     </td>
                                 </tr>
-                            ))
-                        )}
-                    </tbody>
-                </table>
+                            ) : filteredInvoices.length === 0 ? (
+                                <tr>
+                                    <td colSpan={8} className="py-16 text-center">
+                                        <div className="flex flex-col items-center justify-center text-[var(--theme-text-secondary)]">
+                                            <div className="w-12 h-12 rounded-2xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] flex items-center justify-center mb-3">
+                                                <CreditCard size={22} />
+                                            </div>
+                                            <p className="text-xs font-semibold text-[var(--theme-text-primary)]">
+                                                No B2B receivables found
+                                            </p>
+                                            <p className="text-[11px] mt-0.5">
+                                                No invoices match the selected status or search term.
+                                            </p>
+                                        </div>
+                                    </td>
+                                </tr>
+                            ) : (
+                                filteredInvoices.map((inv) => (
+                                    <tr key={inv.id} className="hover:bg-[var(--theme-bg-subtle)]/40 transition-colors">
+                                        <td className="py-3.5 px-4 font-mono text-xs font-semibold text-[var(--theme-text-primary)] whitespace-nowrap">
+                                            {inv.invoiceNumber}
+                                        </td>
+                                        <td className="py-3.5 px-4 text-xs font-medium text-[var(--theme-text-primary)] whitespace-nowrap">
+                                            {inv.customerName}
+                                        </td>
+                                        <td className="py-3.5 px-4 whitespace-nowrap font-mono text-xs text-[var(--theme-text-secondary)]">
+                                            <div>{inv.invoiceDate}</div>
+                                            <div className="text-[11px] text-[var(--theme-text-secondary)]/70">Due: {inv.dueDate}</div>
+                                        </td>
+                                        <td className="py-3.5 px-4 whitespace-nowrap">
+                                            <span className="px-2.5 py-1 rounded-lg text-xs font-mono font-medium border border-[var(--theme-border)] bg-[var(--theme-bg-subtle)] text-[var(--theme-text-primary)]">
+                                                {inv.paymentTerms.replace(/_/g, ' ')}
+                                            </span>
+                                        </td>
+                                        <td className="py-3.5 px-4 text-xs text-right font-mono text-[var(--theme-text-secondary)] tabular-nums whitespace-nowrap">
+                                            {currencySymbol} {inv.totalAmount.toLocaleString()}
+                                        </td>
+                                        <td className="py-3.5 px-4 text-xs text-right font-mono font-semibold text-[var(--theme-text-primary)] tabular-nums whitespace-nowrap">
+                                            {currencySymbol} {inv.balanceDue.toLocaleString()}
+                                        </td>
+                                        <td className="py-3.5 px-4 text-center whitespace-nowrap">
+                                            <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-medium border ${
+                                                inv.status === 'Paid'
+                                                    ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20'
+                                                    : inv.status === 'Overdue'
+                                                        ? 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/20'
+                                                        : 'bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20'
+                                            }`}>
+                                                {inv.status === 'Paid' && <CheckCircle2 size={11} />}
+                                                {inv.status === 'Overdue' && <AlertCircle size={11} />}
+                                                {inv.status === 'Sent' && <Clock size={11} />}
+                                                <span>{inv.status}</span>
+                                            </span>
+                                        </td>
+                                        <td className="py-3.5 px-4 text-right whitespace-nowrap">
+                                            <button
+                                                onClick={() => setSelectedInvoice(inv)}
+                                                className="px-3 py-1.5 bg-[var(--theme-bg-card)] hover:bg-[var(--theme-bg-subtle)] text-[var(--theme-text-primary)] border border-[var(--theme-border)] text-xs font-semibold rounded-lg transition-colors shadow-xs"
+                                            >
+                                                Details
+                                            </button>
+                                        </td>
+                                    </tr>
+                                ))
+                            )}
+                        </tbody>
+                    </table>
+                </div>
+
+                {/* Footer Count */}
+                <div className="p-3.5 border-t border-[var(--theme-border)] bg-[var(--theme-bg-subtle)]/40 text-xs text-[var(--theme-text-secondary)] flex justify-between items-center">
+                    <span>
+                        Loaded <span className="font-mono tabular-nums font-semibold text-[var(--theme-text-primary)]">{filteredInvoices.length}</span> receivables in ledger
+                    </span>
+                    <span className="text-[11px]">
+                        Zero-Trust Commercial Aging Telemetry
+                    </span>
+                </div>
             </div>
+
+            {/* AR Invoice Detail Modal */}
+            <ArInvoiceModal
+                invoice={selectedInvoice}
+                isOpen={Boolean(selectedInvoice)}
+                onClose={() => setSelectedInvoice(null)}
+                currencySymbol={currencySymbol}
+            />
         </div>
     );
 };

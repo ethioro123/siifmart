@@ -70,7 +70,7 @@ export default function WarehouseOperations() {
     const [isMobileTabMenuOpen, setIsMobileTabMenuOpen] = useState(false); // Mobile Tab Selector Toggle
 
 
-    // 🛡️ PO UUID RESOLUTION HELPER
+    // PO UUID RESOLUTION HELPER
     // Maps UUIDs (orderRef) back to readable PO Numbers for display
     const poNumberMap = useMemo(() => {
         const map = new Map<string, string>();
@@ -128,7 +128,7 @@ export default function WarehouseOperations() {
     // Calculate bonus for current user
 
 
-    // 🔒 LOCATION-BASED ACCESS CONTROL
+    // LOCATION-BASED ACCESS CONTROL
     // CEOs MUST select a specific warehouse/store to view operations
     // If at HQ or no site selected, show empty results
     const isMultiSiteRole = ['CEO', 'Super Admin', 'Admin', 'Auditor', 'super_admin'].includes(user?.role || '');
@@ -155,7 +155,7 @@ export default function WarehouseOperations() {
     // NOT derived from filteredJobs (which only contains active jobs).
 
 
-    // 🔒 TAB-LEVEL ACCESS CONTROL
+    // TAB-LEVEL ACCESS CONTROL
 
 
     // Get list of tabs user can access
@@ -335,7 +335,7 @@ export default function WarehouseOperations() {
 
 
 
-    // 🔒 SITE SELECTION REMOVED: User requested to delete the "Select a Location" page.
+    // SITE SELECTION REMOVED: User requested to delete the "Select a Location" page.
     // If we are in Global View, we simply fall through to the main UI.
     // Filter logic below handles what data is shown.
 

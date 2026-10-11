@@ -30,20 +30,20 @@ export const SmartUnitIntelligencePanel: React.FC<SmartUnitIntelligencePanelProp
             <div className="bg-[var(--theme-bg-subtle)] p-5 rounded-2xl border border-[var(--theme-border)] space-y-3 relative overflow-hidden">
                 <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                        <Sparkles size={18} className="text-amber-600 dark:text-amber-400 animate-pulse" />
+                        <Sparkles size={16} className="text-amber-500 animate-pulse" />
                         <h4 className="text-xs font-bold uppercase tracking-wider text-[var(--theme-text-primary)]">Smart Intelligence</h4>
                     </div>
-                    <span className="px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-500/30">
+                    <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold uppercase tracking-wider bg-amber-500/10 text-amber-700 dark:text-amber-300 border border-amber-500/20">
                         Auto-Detected
                     </span>
                 </div>
 
-                <div className="bg-[var(--theme-bg-card)] p-3.5 rounded-xl border border-[var(--theme-border)] space-y-1">
+                <div className="bg-[var(--theme-bg-card)] p-3.5 rounded-xl border border-[var(--theme-border)] space-y-1 shadow-xs">
                     <p className="text-base font-bold font-mono text-[var(--theme-text-primary)]">
                         {smartIntelligence?.autoConversionText}
                     </p>
                     {smartIntelligence?.subUnitRateText && (
-                        <p className="text-xs text-amber-700 dark:text-amber-400 font-bold font-mono">
+                        <p className="text-xs text-amber-600 dark:text-amber-400 font-bold font-mono">
                             = {smartIntelligence.subUnitRateText}
                         </p>
                     )}
@@ -60,9 +60,9 @@ export const SmartUnitIntelligencePanel: React.FC<SmartUnitIntelligencePanelProp
                 <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                         <Box size={16} className="text-[var(--theme-text-secondary)]" />
-                        <h4 className="text-xs font-bold uppercase tracking-wider">Supplier Specification</h4>
+                        <h4 className="text-xs font-bold uppercase tracking-wider text-[var(--theme-text-primary)]">Supplier Specification</h4>
                     </div>
-                    <span className="px-2 py-0.5 rounded-full text-[9px] font-medium uppercase bg-[var(--theme-bg-card)] text-[var(--theme-text-muted)] border border-[var(--theme-border)]">
+                    <span className="px-2.5 py-0.5 rounded-full text-[11px] font-semibold uppercase bg-[var(--theme-bg-card)] text-[var(--theme-text-muted)] border border-[var(--theme-border)]">
                         Read-Only
                     </span>
                 </div>
@@ -72,27 +72,27 @@ export const SmartUnitIntelligencePanel: React.FC<SmartUnitIntelligencePanelProp
                 </p>
 
                 <div className="grid grid-cols-2 gap-2 text-xs font-mono pt-1">
-                    <div className="p-2.5 bg-[var(--theme-bg-card)] rounded-xl border border-[var(--theme-border)]">
-                        <span className="text-[9px] text-[var(--theme-text-muted)] block font-sans font-medium uppercase">Pack / Case Size</span>
-                        <span className="font-bold text-[var(--theme-text-primary)]">{supplierSpec.packSize}</span>
+                    <div className="p-2.5 bg-[var(--theme-bg-card)] rounded-xl border border-[var(--theme-border)] shadow-xs">
+                        <span className="text-[11px] text-[var(--theme-text-muted)] block font-sans font-medium uppercase">Pack / Case Size</span>
+                        <span className="font-bold text-[var(--theme-text-primary)] text-sm">{supplierSpec.packSize}</span>
                     </div>
-                    <div className="p-2.5 bg-[var(--theme-bg-card)] rounded-xl border border-[var(--theme-border)]">
-                        <span className="text-[9px] text-[var(--theme-text-muted)] block font-sans font-medium uppercase">Base Unit Type</span>
-                        <span className="font-bold text-[var(--theme-text-primary)]">{supplierSpec.sizeType}</span>
+                    <div className="p-2.5 bg-[var(--theme-bg-card)] rounded-xl border border-[var(--theme-border)] shadow-xs">
+                        <span className="text-[11px] text-[var(--theme-text-muted)] block font-sans font-medium uppercase">Base Unit Type</span>
+                        <span className="font-bold text-[var(--theme-text-primary)] text-sm">{supplierSpec.sizeType}</span>
                     </div>
                 </div>
             </div>
 
             {/* Live POS Label Preview */}
-            <div className="bg-[var(--theme-bg-card)] p-4 rounded-2xl border border-[var(--theme-border)] space-y-2 shadow-sm">
+            <div className="bg-[var(--theme-bg-card)] p-4 rounded-2xl border border-[var(--theme-border)] space-y-2 shadow-xs">
                 <div className="flex items-center gap-2">
                     <Eye size={16} className="text-[var(--theme-text-secondary)]" />
-                    <h4 className="text-xs font-bold uppercase tracking-wider">POS Label & Card Preview</h4>
+                    <h4 className="text-xs font-bold uppercase tracking-wider text-[var(--theme-text-primary)]">POS Label & Card Preview</h4>
                 </div>
                 <div className="p-3 rounded-xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] flex items-center justify-between">
                     <div>
                         <p className="text-xs font-bold text-[var(--theme-text-primary)]">{product.name}</p>
-                        <p className="text-[10px] text-[var(--theme-text-secondary)] font-medium">
+                        <p className="text-[11px] text-[var(--theme-text-secondary)] font-medium mt-0.5">
                             Sold per <span className="uppercase text-[var(--theme-accent)] font-bold">{smartIntelligence?.sellUnit.shortLabel}</span>
                         </p>
                     </div>

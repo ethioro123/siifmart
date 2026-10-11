@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, Package, Box, CheckCircle, XCircle, Trash2, Truck, Clock, Info, ArrowRight, Loader2, AlertTriangle } from 'lucide-react';
+import { X, Package, Box, CheckCircle, XCircle, Trash2, Truck, Clock, ArrowRight, Loader2, AlertTriangle } from 'lucide-react';
 import { WMSJob, Product, User, Site, ReceivingItem } from '../../../types';
 import { formatJobId } from '../../../utils/jobIdFormatter';
 import { getSellUnit, getEffectivePackageSize } from '../../../utils/units';
@@ -9,23 +9,44 @@ import { useLanguage } from '../../../contexts/LanguageContext';
 import { logger } from '../../../utils/logger';
 
 interface TransferJobDetailsProps {
-    selectedJob: WMSJob | null; setSelectedJob: (job: WMSJob | null) => void;
-    isDetailsOpen: boolean; setIsDetailsOpen: (val: boolean) => void;
-    products: Product[]; sites: Site[]; user: User | null;
-    activeSite: Site | null; wmsJobsService: any;
+    selectedJob: WMSJob | null;
+    setSelectedJob: (job: WMSJob | null) => void;
+    isDetailsOpen: boolean;
+    setIsDetailsOpen: (val: boolean) => void;
+    products: Product[];
+    sites: Site[];
+    user: User | null;
+    activeSite: Site | null;
+    wmsJobsService: any;
     addNotification: (type: string, message: string) => void;
-    refreshData: () => Promise<void>; setActiveTransferJob: (job: WMSJob | null) => void;
-    setTransferReceiveMode: (val: boolean) => void; setTransferReceiveItems: (items: ReceivingItem[]) => void;
+    refreshData: () => Promise<void>;
+    setActiveTransferJob: (job: WMSJob | null) => void;
+    setTransferReceiveMode: (val: boolean) => void;
+    setTransferReceiveItems: (items: ReceivingItem[]) => void;
     onResolveDiscrepancy?: (job: WMSJob, item: any, index: number) => void;
 }
 
 const MANAGER_ROLES = ['super_admin', 'warehouse_manager'];
 
 export const TransferJobDetails: React.FC<TransferJobDetailsProps> = ({
-    selectedJob, setSelectedJob, isDetailsOpen, setIsDetailsOpen, products, sites, user, activeSite, wmsJobsService, addNotification, refreshData, setActiveTransferJob, setTransferReceiveMode, setTransferReceiveItems, onResolveDiscrepancy
+    selectedJob,
+    setSelectedJob,
+    isDetailsOpen,
+    products,
+    sites,
+    user,
+    activeSite,
+    wmsJobsService,
+    addNotification,
+    refreshData,
+    setActiveTransferJob,
+    setTransferReceiveMode,
+    setTransferReceiveItems,
+    onResolveDiscrepancy
 }) => {
     const { t } = useLanguage();
     const [loading, setLoading] = useState<'approve' | 'reject' | 'delete' | null>(null);
+
     if (!selectedJob || !isDetailsOpen || ['PICK', 'PACK', 'DISPATCH'].includes(selectedJob.type)) return null;
 
     const isManager = MANAGER_ROLES.includes(user?.role || '');
@@ -34,25 +55,55 @@ export const TransferJobDetails: React.FC<TransferJobDetailsProps> = ({
     const handleApprove = async () => {
         setLoading('approve');
         try {
-            const sourceSiteId = selectedJob.sourceSiteId || selectedJob.siteId; if (!sourceSiteId) throw new Error('Missing source');
-            const lineItems = selectedJob.lineItems || (selectedJob as any).line_items || []; if (lineItems.length === 0) throw new Error('No items');
-            const pickJob: any = { siteId: sourceSiteId, site_id: sourceSiteId, type: 'PICK', sourceSiteId, destSiteId: selectedJob.destSiteId, status: 'Pending', priority: selectedJob.priority || 'Normal', items: lineItems.length, lineItems: lineItems.map((item: any) => ({ ...item, status: 'Pending', pickedQty: 0 })), orderRef: selectedJob.id, createdBy: user, createdAt: new Date().toISOString(), jobNumber: selectedJob.jobNumber };
-            await wmsJobsService.create(pickJob); await wmsJobsService.update(selectedJob.id, { transferStatus: 'Picking', approvedBy: user?.name } as any);
-            addNotification('success', 'Transfer approved'); await refreshData(); setSelectedJob(null);
-        } catch (e: any) { addNotification('alert', e.message); } finally { setLoading(null); }
+            const sourceSiteId = selectedJob.sourceSiteId || selectedJob.siteId;
+            if (!sourceSiteId) throw new Error('Missing source');
+            const lineItems = selectedJob.lineItems || (selectedJob as any).line_items || [];
+            if (lineItems.length === 0) throw new Error('No items');
+            const pickJob: any = {
+                siteId: sourceSiteId,
+                site_id: sourceSiteId,
+                type: 'PICK',
+                sourceSiteId,
+                destSiteId: selectedJob.destSiteId,
+                status: 'Pending',
+                priority: selectedJob.priority || 'Normal',
+                items: lineItems.length,
+                lineItems: lineItems.map((item: any) => ({ ...item, status: 'Pending', pickedQty: 0 })),
+                orderRef: selectedJob.id,
+                createdBy: user,
+                createdAt: new Date().toISOString(),
+                jobNumber: selectedJob.jobNumber
+            };
+            await wmsJobsService.create(pickJob);
+            await wmsJobsService.update(selectedJob.id, { transferStatus: 'Picking', approvedBy: user?.name } as any);
+            addNotification('success', 'Transfer approved');
+            await refreshData();
+            setSelectedJob(null);
+        } catch (e: any) {
+            addNotification('alert', e.message);
+        } finally {
+            setLoading(null);
+        }
     };
 
     const handleReject = async () => {
         setLoading('reject');
-        try { await wmsJobsService.update(selectedJob.id, { transferStatus: 'Rejected', approvedBy: user?.name } as any); addNotification('success', 'Rejected'); await refreshData(); setSelectedJob(null); }
-        catch (e: any) { addNotification('alert', e.message); } finally { setLoading(null); }
+        try {
+            await wmsJobsService.update(selectedJob.id, { transferStatus: 'Rejected', approvedBy: user?.name } as any);
+            addNotification('success', 'Rejected');
+            await refreshData();
+            setSelectedJob(null);
+        } catch (e: any) {
+            addNotification('alert', e.message);
+        } finally {
+            setLoading(null);
+        }
     };
 
     const handleDelete = async () => {
-        if (!window.confirm('Delete this transfer?')) return;
+        if (!window.confirm('Delete this transfer manifest?')) return;
         setLoading('delete');
         try {
-            // Check if picking is already completed
             const { data: childPickJobs, error: checkError } = await supabase
                 .from('wms_jobs')
                 .select('status')
@@ -70,7 +121,6 @@ export const TransferJobDetails: React.FC<TransferJobDetailsProps> = ({
                 return;
             }
 
-            // Delete all child jobs (PICK, PACK, DISPATCH)
             const { error: deleteChildrenError } = await supabase
                 .from('wms_jobs')
                 .delete()
@@ -80,11 +130,9 @@ export const TransferJobDetails: React.FC<TransferJobDetailsProps> = ({
                 logger.error('TransferJobDetails', 'Failed to delete child jobs:', deleteChildrenError);
             }
 
-            // Delete the main transfer job
             await wmsJobsService.delete(selectedJob.id);
             addNotification('success', 'Manifest deleted successfully');
 
-            // Trigger smart replenishment check again for each product in the deleted manifest
             const lineItems = selectedJob.lineItems || (selectedJob as any).line_items || [];
             for (const item of lineItems) {
                 const product = products.find(p => p.id === item.productId || p.sku === item.sku);
@@ -141,57 +189,74 @@ export const TransferJobDetails: React.FC<TransferJobDetailsProps> = ({
     };
 
     return (
-        <div className="fixed inset-0 z-[150] flex items-center justify-center p-4 bg-black/60 dark:bg-black/80 backdrop-blur-sm animate-in fade-in duration-300">
-            <div className="bg-[#FAF8F5]/95 dark:bg-[#1C2620]/95 w-full max-w-4xl max-h-[90vh] rounded-[2.5rem] border border-[#E2DCCE] dark:border-emerald-950/20 shadow-2xl flex flex-col overflow-hidden animate-in zoom-in-95 duration-500 relative">
-                {/* Visual Flair Glow Blobs */}
-                <div className="hidden md:block absolute -top-32 -right-32 w-96 h-96 bg-[#2C5E3B]/10 dark:bg-[#2C5E3B]/20 blur-[100px] rounded-full pointer-events-none" />
-                <div className="hidden md:block absolute -bottom-32 -left-32 w-96 h-96 bg-[#A9CBA2]/10 dark:bg-[#A9CBA2]/25 blur-[100px] rounded-full pointer-events-none" />
-                
+        <div className="fixed inset-0 z-[150] flex items-center justify-center p-4 bg-black/80 animate-in fade-in duration-200">
+            <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] w-full max-w-4xl max-h-[90vh] rounded-3xl shadow-xl flex flex-col overflow-hidden relative">
                 {/* Header */}
-                <div className="relative px-6 py-4 border-b border-[#E2DCCE]/60 dark:border-[#2C5E3B]/10 bg-[#FAF8F5]/50 dark:bg-[#1C2620]/50 backdrop-blur-md shrink-0 z-10">
-                    <div className="flex justify-between items-center">
-                        <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-xl bg-[#2C5E3B]/10 dark:bg-[#A9CBA2]/20 border border-[#2C5E3B]/20 dark:border-[#A9CBA2]/20 flex items-center justify-center text-[#2C5E3B] dark:text-[#A9CBA2] shrink-0">
+                <div className="px-5 sm:px-6 py-4 border-b border-[var(--theme-border)] bg-[var(--theme-bg-card)] shrink-0 z-10">
+                    <div className="flex justify-between items-center gap-3">
+                        <div className="flex items-center gap-3 min-w-0">
+                            <div className="w-10 h-10 rounded-xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] flex items-center justify-center text-[var(--theme-accent)] shrink-0">
                                 <Truck size={20} />
                             </div>
-                            <div>
-                                <div className="flex items-center gap-2.5">
-                                    <h2 className="text-base font-black text-gray-900 dark:text-white tracking-tight uppercase">{t('warehouse.transferDetails')}</h2>
-                                    <span className="px-2 py-0.5 rounded-lg bg-stone-200/60 dark:bg-white/10 border border-stone-300/30 dark:border-white/10 text-[10px] font-mono font-black text-[#2C5E3B] dark:text-[#A9CBA2] uppercase tracking-wider">#{formatJobId(selectedJob)}</span>
+                            <div className="min-w-0">
+                                <div className="flex items-center gap-2 flex-wrap">
+                                    <h2 className="text-base font-bold text-[var(--theme-text-primary)] tracking-tight uppercase truncate">
+                                        {t('warehouse.transferDetails')}
+                                    </h2>
+                                    <span className="px-2 py-0.5 rounded-md bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-[11px] font-mono tabular-nums font-semibold text-[var(--theme-accent)] uppercase">
+                                        #{formatJobId(selectedJob)}
+                                    </span>
                                 </div>
-                                <div className="flex flex-wrap items-center gap-2 mt-0.5 text-[10px] font-black uppercase tracking-wider text-gray-500">
-                                    <span className="flex items-center gap-1.5 text-gray-900 dark:text-white">
-                                        <span className={`w-2 h-2 rounded-full ${transferStatus === 'Received' ? 'bg-green-500 shadow-[0_0_10px_rgba(34,197,94,0.4)]' : 'bg-amber-400 animate-pulse shadow-[0_0_10px_rgba(251,191,36,0.4)]'}`} />
+                                <div className="flex flex-wrap items-center gap-2 mt-1 text-[11px] text-[var(--theme-text-secondary)] font-medium">
+                                    <span className="flex items-center gap-1.5 text-[var(--theme-text-primary)] font-semibold">
+                                        <span className={`w-2 h-2 rounded-full ${transferStatus === 'Received' ? 'bg-green-500' : 'bg-amber-400'}`} />
                                         {getLocalizedStatus(transferStatus)}
                                     </span>
-                                    <span className="text-gray-300 dark:text-gray-700">•</span>
-                                    <span className={`px-1.5 py-0.2 rounded border text-[9px] font-black ${selectedJob.priority === 'Critical' ? 'border-red-500/30 text-red-500 bg-red-500/10' : selectedJob.priority === 'High' ? 'border-amber-500/30 text-amber-600 bg-amber-500/10' : 'border-stone-200 dark:border-white/5 text-gray-500 dark:text-gray-400'}`}>
+                                    <span>•</span>
+                                    <span className={`px-2 py-0.5 rounded-full border text-[11px] font-semibold ${
+                                        selectedJob.priority === 'Critical'
+                                            ? 'border-red-500/20 text-red-500 bg-red-500/10'
+                                            : selectedJob.priority === 'High'
+                                                ? 'border-amber-500/20 text-amber-600 dark:text-amber-400 bg-amber-500/10'
+                                                : 'border-[var(--theme-border)] text-[var(--theme-text-secondary)] bg-[var(--theme-bg-subtle)]'
+                                    }`}>
                                         {selectedJob.priority || 'Normal'}
                                     </span>
-                                    <span className="text-gray-300 dark:text-gray-700">•</span>
-                                    <span>Req: <strong className="text-gray-800 dark:text-gray-200">{selectedJob.requestedBy || 'System'}</strong></span>
+                                    <span>•</span>
+                                    <span>Req: <strong className="text-[var(--theme-text-primary)]">{selectedJob.requestedBy || 'System'}</strong></span>
                                     {selectedJob.approvedBy && (
                                         <>
-                                            <span className="text-gray-300 dark:text-gray-700">•</span>
-                                            <span>Appr: <strong className="text-gray-800 dark:text-gray-200">{selectedJob.approvedBy}</strong></span>
+                                            <span>•</span>
+                                            <span>Appr: <strong className="text-[var(--theme-text-primary)]">{selectedJob.approvedBy}</strong></span>
                                         </>
                                     )}
-                                    <span className="text-gray-300 dark:text-gray-700">•</span>
-                                    <span className="flex items-center gap-1 font-mono text-[9px]"><Clock size={11} className="text-gray-400" />{new Date(selectedJob.createdAt || (selectedJob as any).date || '').toLocaleString([], { dateStyle: 'short', timeStyle: 'short' })}</span>
+                                    <span>•</span>
+                                    <span className="flex items-center gap-1 font-mono tabular-nums">
+                                        <Clock size={12} className="text-[var(--theme-text-secondary)]" />
+                                        {new Date(selectedJob.createdAt || (selectedJob as any).date || '').toLocaleString([], { dateStyle: 'short', timeStyle: 'short' })}
+                                    </span>
                                 </div>
                             </div>
                         </div>
-                        <button onClick={() => setSelectedJob(null)} aria-label={t('warehouse.dismiss')} className="p-2 bg-stone-100 dark:bg-white/5 hover:bg-stone-200 dark:hover:bg-white/10 border border-stone-200 dark:border-white/10 rounded-xl text-gray-500 hover:text-gray-900 dark:hover:text-white transition-all">
+                        <button
+                            onClick={() => setSelectedJob(null)}
+                            aria-label={t('warehouse.dismiss')}
+                            className="p-2 bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center shrink-0"
+                        >
                             <X size={18} />
                         </button>
                     </div>
                 </div>
 
                 {/* Content */}
-                <div className="flex-1 overflow-y-auto px-6 py-4 space-y-3 custom-scrollbar bg-transparent z-10">
-                    <div className="flex items-center justify-between pb-1 border-b border-stone-200/50 dark:border-white/5">
-                        <h3 className="font-black text-[#2C5E3B] dark:text-[#A9CBA2] flex items-center gap-2 text-xs uppercase tracking-[0.2em]"><Package size={14} /> {t('warehouse.transferRequest')}</h3>
-                        <span className="text-[10px] font-black text-gray-500 bg-stone-100 dark:bg-white/5 px-2.5 py-0.5 rounded-lg border border-stone-200 dark:border-white/5 uppercase tracking-wider">{totalItems} {t('warehouse.itemPlural')}</span>
+                <div className="flex-1 overflow-y-auto px-5 sm:px-6 py-4 space-y-3 custom-scrollbar z-10">
+                    <div className="flex items-center justify-between pb-2 border-b border-[var(--theme-border)]">
+                        <h3 className="font-semibold text-[var(--theme-accent)] flex items-center gap-2 text-xs uppercase tracking-wider">
+                            <Package size={14} /> {t('warehouse.transferRequest')}
+                        </h3>
+                        <span className="text-[11px] font-mono tabular-nums text-[var(--theme-text-secondary)] bg-[var(--theme-bg-subtle)] px-2.5 py-0.5 rounded-lg border border-[var(--theme-border)] uppercase">
+                            {totalItems} {t('warehouse.itemPlural')}
+                        </span>
                     </div>
 
                     <div className="space-y-2">
@@ -208,35 +273,62 @@ export const TransferJobDetails: React.FC<TransferJobDetailsProps> = ({
                             const isDone = showReceived && !hasDiscrepancy;
 
                             return (
-                                <div key={idx} className={`group relative bg-stone-50 dark:bg-white/5 border ${isDone ? 'border-green-500/25 bg-green-500/[0.03]' : 'border-stone-200 dark:border-white/5'} rounded-xl px-4 py-2.5 flex items-center justify-between gap-3 hover:border-[#2C5E3B]/30 transition-all shadow-sm`}>
+                                <div
+                                    key={idx}
+                                    className={`bg-[var(--theme-bg-card)] border ${isDone ? 'border-green-500/30' : 'border-[var(--theme-border)]'} rounded-xl px-4 py-3 flex items-center justify-between gap-3 shadow-sm`}
+                                >
                                     <div className="flex items-center gap-3 min-w-0">
-                                        <div className="relative w-10 h-10 rounded-lg bg-white dark:bg-black/40 border border-stone-200 dark:border-white/10 flex items-center justify-center overflow-hidden shrink-0 shadow-sm">
-                                            {product?.image ? <img src={product.image} alt="" className="w-full h-full object-cover" /> : <Box size={18} className="text-gray-300 dark:text-white/20" />}
-                                            {isDone && <div className="absolute inset-0 bg-green-500/20 flex items-center justify-center"><CheckCircle size={16} className="text-green-600 dark:text-green-400" /></div>}
-                                            {hasDiscrepancy && <div className="absolute inset-0 bg-red-500/20 flex items-center justify-center"><XCircle size={16} className="text-red-600 dark:text-red-400" /></div>}
+                                        <div className="relative w-10 h-10 rounded-lg bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] flex items-center justify-center overflow-hidden shrink-0">
+                                            {product?.image ? (
+                                                <img src={product.image} alt="" className="w-full h-full object-cover" />
+                                            ) : (
+                                                <Box size={18} className="text-[var(--theme-text-secondary)]/50" />
+                                            )}
+                                            {isDone && (
+                                                <div className="absolute inset-0 bg-green-500/20 flex items-center justify-center">
+                                                    <CheckCircle size={16} className="text-green-600 dark:text-green-400" />
+                                                </div>
+                                            )}
+                                            {hasDiscrepancy && (
+                                                <div className="absolute inset-0 bg-red-500/20 flex items-center justify-center">
+                                                    <XCircle size={16} className="text-red-600 dark:text-red-400" />
+                                                </div>
+                                            )}
                                         </div>
                                         <div className="min-w-0">
-                                            <h4 className="text-gray-900 dark:text-white font-bold tracking-tight truncate uppercase text-xs leading-snug">{item.name || item.productName || product?.name || 'Unknown'}</h4>
-                                            <span className="text-[9px] font-mono font-bold text-gray-500 dark:text-gray-400 bg-stone-200/50 dark:bg-black/30 px-1.5 py-0.2 rounded border border-stone-300/30 dark:border-white/5 uppercase tracking-tighter">{itemSku}</span>
+                                            <h4 className="text-[var(--theme-text-primary)] font-semibold tracking-tight truncate uppercase text-xs leading-snug">
+                                                {item.name || item.productName || product?.name || 'Unknown'}
+                                            </h4>
+                                            <span className="text-[11px] font-mono tabular-nums text-[var(--theme-text-secondary)] bg-[var(--theme-bg-subtle)] px-1.5 py-0.5 rounded border border-[var(--theme-border)] uppercase">
+                                                {itemSku}
+                                            </span>
                                         </div>
                                     </div>
 
-                                    <div className="flex items-center gap-6 shrink-0">
+                                    <div className="flex items-center gap-4 sm:gap-6 shrink-0">
                                         <div className="text-right">
-                                            <span className="text-[8px] text-gray-400 dark:text-gray-500 font-extrabold uppercase tracking-widest block">{t('warehouse.expected')}</span>
+                                            <span className="text-[11px] text-[var(--theme-text-secondary)] font-medium uppercase tracking-wider block">
+                                                {t('warehouse.expected')}
+                                            </span>
                                             <QtyDisplay qty={itemQty} size={product?.size || item.size} unit={itemUnit} t={t} />
                                         </div>
 
                                         {showReceived && (
                                             <div className="text-right">
-                                                <span className={`text-[8px] font-extrabold uppercase tracking-widest block ${hasDiscrepancy ? 'text-red-500' : 'text-green-600'}`}>{t('warehouse.received')}</span>
+                                                <span className={`text-[11px] font-medium uppercase tracking-wider block ${hasDiscrepancy ? 'text-red-500' : 'text-green-600 dark:text-green-400'}`}>
+                                                    {t('warehouse.received')}
+                                                </span>
                                                 <QtyDisplay qty={item.receivedQty} size={product?.size || item.size} unit={itemUnit} color={hasDiscrepancy ? 'red' : 'green'} t={t} />
                                             </div>
                                         )}
 
                                         {hasDiscrepancy && onResolveDiscrepancy && (
-                                            <button onClick={(e) => { e.stopPropagation(); onResolveDiscrepancy(selectedJob, item, idx); }} className="px-2.5 py-1 bg-red-500/10 hover:bg-red-500 text-red-500 hover:text-white border border-red-500/20 text-[9px] uppercase font-bold tracking-wider rounded-lg transition-all flex items-center gap-1">
-                                                <AlertTriangle size={10} /> Resolve
+                                            <button
+                                                onClick={(e) => { e.stopPropagation(); onResolveDiscrepancy(selectedJob, item, idx); }}
+                                                className="px-2.5 py-1.5 bg-red-500/10 hover:bg-red-500 text-red-500 hover:text-white border border-red-500/20 text-[11px] uppercase font-semibold tracking-wider rounded-lg transition-colors flex items-center gap-1 min-h-[36px]"
+                                            >
+                                                <AlertTriangle size={12} />
+                                                <span>Resolve</span>
                                             </button>
                                         )}
                                     </div>
@@ -247,19 +339,19 @@ export const TransferJobDetails: React.FC<TransferJobDetailsProps> = ({
                 </div>
 
                 {/* Footer */}
-                <div className="px-5 py-2.5 border-t border-[#E2DCCE]/60 dark:border-white/5 bg-[#FAF8F5]/90 dark:bg-[#1C2620]/90 backdrop-blur-md flex flex-wrap items-center justify-between gap-2 shrink-0 z-10">
-                    <div className="flex items-center gap-1.5 text-[10px] font-bold text-gray-600 dark:text-gray-400">
-                        <span className="text-[9px] text-[#2C5E3B] dark:text-[#A9CBA2] font-black uppercase tracking-wider">Route:</span>
+                <div className="px-5 sm:px-6 py-3 border-t border-[var(--theme-border)] bg-[var(--theme-bg-card)] flex flex-wrap items-center justify-between gap-3 shrink-0 z-10">
+                    <div className="flex items-center gap-2 text-xs font-medium text-[var(--theme-text-secondary)]">
+                        <span className="text-[11px] text-[var(--theme-accent)] font-semibold uppercase tracking-wider">Route:</span>
                         {(() => {
                             const srcSite = sites.find(x => x.id === selectedJob.sourceSiteId);
                             const destSite = sites.find(x => x.id === selectedJob.destSiteId);
                             return (
                                 <div className="flex items-center gap-1.5">
-                                    <span className="px-2 py-0.5 rounded-md bg-stone-200/50 dark:bg-white/5 border border-stone-300/30 dark:border-white/10 text-gray-800 dark:text-gray-200 font-bold text-[10px]">
+                                    <span className="px-2 py-0.5 rounded-md bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-[var(--theme-text-primary)] font-medium text-[11px]">
                                         {srcSite?.name || selectedJob.sourceSiteId}
                                     </span>
-                                    <ArrowRight size={10} className="text-[#2C5E3B] dark:text-[#A9CBA2] shrink-0" />
-                                    <span className="px-2 py-0.5 rounded-md bg-stone-200/50 dark:bg-white/5 border border-stone-300/30 dark:border-white/10 text-gray-800 dark:text-gray-200 font-bold text-[10px]">
+                                    <ArrowRight size={12} className="text-[var(--theme-accent)] shrink-0" />
+                                    <span className="px-2 py-0.5 rounded-md bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-[var(--theme-text-primary)] font-medium text-[11px]">
                                         {destSite?.name || selectedJob.destSiteId}
                                     </span>
                                 </div>
@@ -269,18 +361,33 @@ export const TransferJobDetails: React.FC<TransferJobDetailsProps> = ({
 
                     <div className="flex items-center gap-2 ml-auto">
                         {['Requested', 'Draft'].includes(transferStatus) && isManager && (
-                            <button onClick={handleApprove} disabled={loading !== null} className="px-3.5 py-1.5 rounded-lg font-bold text-[11px] uppercase tracking-wider bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm transition-all flex items-center gap-1.5 active:scale-95 disabled:opacity-50">
-                                {loading === 'approve' ? <Loader2 size={12} className="animate-spin" /> : <CheckCircle size={12} />} Approve
+                            <button
+                                onClick={handleApprove}
+                                disabled={loading !== null}
+                                className="px-4 py-2 rounded-xl font-semibold text-xs uppercase tracking-wider bg-green-600 hover:bg-green-700 text-white shadow-sm transition-opacity flex items-center gap-1.5 min-h-[44px] disabled:opacity-50"
+                            >
+                                {loading === 'approve' ? <Loader2 size={14} className="animate-spin" /> : <CheckCircle size={14} />}
+                                <span>Approve</span>
                             </button>
                         )}
                         {['Requested', 'Draft', 'Picking'].includes(transferStatus) && isManager && (
-                            <button onClick={handleReject} disabled={loading !== null} className="px-3.5 py-1.5 rounded-lg font-bold text-[11px] uppercase tracking-wider bg-red-500/10 hover:bg-red-500 text-red-500 hover:text-white border border-red-500/20 transition-all flex items-center gap-1.5 active:scale-95 disabled:opacity-50">
-                                {loading === 'reject' ? <Loader2 size={12} className="animate-spin" /> : <XCircle size={12} />} Reject
+                            <button
+                                onClick={handleReject}
+                                disabled={loading !== null}
+                                className="px-4 py-2 rounded-xl font-semibold text-xs uppercase tracking-wider bg-red-500/10 hover:bg-red-500 text-red-500 hover:text-white border border-red-500/20 transition-colors flex items-center gap-1.5 min-h-[44px] disabled:opacity-50"
+                            >
+                                {loading === 'reject' ? <Loader2 size={14} className="animate-spin" /> : <XCircle size={14} />}
+                                <span>Reject</span>
                             </button>
                         )}
                         {['Requested', 'Draft', 'Approved', 'Picking', 'Rejected'].includes(transferStatus) && isManager && (
-                            <button onClick={handleDelete} disabled={loading !== null} className="px-3.5 py-1.5 rounded-lg font-bold text-[11px] uppercase tracking-wider bg-stone-200/40 hover:bg-red-500 hover:text-white dark:bg-white/5 border border-stone-300/30 dark:border-white/10 text-gray-600 dark:text-gray-400 transition-all flex items-center gap-1.5 active:scale-95 disabled:opacity-50">
-                                {loading === 'delete' ? <Loader2 size={12} className="animate-spin" /> : <Trash2 size={12} />} Delete Manifest
+                            <button
+                                onClick={handleDelete}
+                                disabled={loading !== null}
+                                className="px-4 py-2 rounded-xl font-semibold text-xs uppercase tracking-wider bg-[var(--theme-bg-subtle)] hover:bg-red-500 hover:text-white border border-[var(--theme-border)] text-[var(--theme-text-secondary)] transition-colors flex items-center gap-1.5 min-h-[44px] disabled:opacity-50"
+                            >
+                                {loading === 'delete' ? <Loader2 size={14} className="animate-spin" /> : <Trash2 size={14} />}
+                                <span>Delete Manifest</span>
                             </button>
                         )}
                         {['In-Transit', 'Shipped', 'Delivered', 'Partially Delivered'].includes(transferStatus) && (selectedJob.destSiteId === activeSite?.id || ['super_admin', 'admin', 'warehouse_manager', 'inventory_specialist', 'stock_clerk', 'receiver', 'store_manager'].includes(user?.role || '')) && (
@@ -299,12 +406,16 @@ export const TransferJobDetails: React.FC<TransferJobDetailsProps> = ({
                                     setTransferReceiveMode(true);
                                     setSelectedJob(null);
                                 }}
-                                className="px-3.5 py-1.5 rounded-lg font-bold text-[11px] uppercase tracking-wider bg-[#2C5E3B] hover:bg-[#20452B] dark:bg-[#EAE5D9] dark:hover:bg-[#D8D2C4] text-white dark:text-[#1C2620] shadow-sm transition-all flex items-center gap-1.5 active:scale-95 disabled:opacity-50"
+                                className="px-4 py-2 rounded-xl font-semibold text-xs uppercase tracking-wider bg-[var(--theme-accent)] hover:opacity-90 text-white shadow-sm transition-opacity flex items-center gap-1.5 min-h-[44px] disabled:opacity-50"
                             >
-                                <Package size={12} /> {t('warehouse.received')}
+                                <Package size={14} />
+                                <span>{t('warehouse.received')}</span>
                             </button>
                         )}
-                        <button onClick={() => setSelectedJob(null)} className="px-3.5 py-1.5 rounded-lg font-bold text-[11px] uppercase tracking-wider border border-stone-200 dark:border-white/10 bg-stone-100 hover:bg-stone-200 dark:bg-white/5 dark:hover:bg-white/10 text-gray-600 dark:text-gray-400 transition-all">
+                        <button
+                            onClick={() => setSelectedJob(null)}
+                            className="px-4 py-2 rounded-xl font-semibold text-xs uppercase tracking-wider border border-[var(--theme-border)] bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)] transition-colors min-h-[44px]"
+                        >
                             {t('warehouse.dismiss')}
                         </button>
                     </div>
@@ -314,15 +425,8 @@ export const TransferJobDetails: React.FC<TransferJobDetailsProps> = ({
     );
 };
 
-const DashboardStat = ({ label, value, icon: Icon, color }: any) => (
-    <div className="bg-white/80 dark:bg-white/[0.02] border border-[#E2DCCE] dark:border-emerald-950/20 p-5 rounded-[2rem] flex items-center justify-between group hover:border-[#2C5E3B]/20 dark:hover:border-[#2C5E3B]/40 transition-all shadow-sm">
-        <div><span className="text-[10px] text-gray-400 dark:text-gray-500 font-black uppercase tracking-[0.2em] block mb-1">{label}</span><span className="text-base font-black text-gray-900 dark:text-white tracking-tight">{value}</span></div>
-        <div className={`w-12 h-12 rounded-2xl border flex items-center justify-center ${color === 'red' ? 'bg-red-50 dark:bg-red-950/20 border-red-200 dark:border-red-800/30 text-red-600' : color === 'green' ? 'bg-green-50 dark:bg-[#1C2620]/30 border-green-200 dark:border-green-800/30 text-green-600 dark:text-[#A9CBA2]' : 'bg-[#FAF8F5] dark:bg-[#1C2620]/30 border-[#E2DCCE]/60 dark:border-[#2C5E3B]/20 text-[#2C5E3B] dark:text-[#A9CBA2]'}`}><Icon size={22} /></div>
-    </div>
-);
-
 const QtyDisplay = ({ qty, size, unit, color, t }: any) => {
-    const textColor = color === 'red' ? 'text-red-600' : color === 'green' ? 'text-green-600 dark:text-green-400' : 'text-gray-900 dark:text-[#A9CBA2]';
+    const textColor = color === 'red' ? 'text-red-600 dark:text-red-400' : color === 'green' ? 'text-green-600 dark:text-green-400' : 'text-[var(--theme-text-primary)]';
     const isWeightVol = unit && (unit.category === 'weight' || unit.category === 'volume');
 
     let unitLabel = unit?.code !== 'UNIT' ? unit?.shortLabel : (qty === 1 ? t('warehouse.itemSingular') : t('warehouse.itemPlural'));
@@ -333,8 +437,10 @@ const QtyDisplay = ({ qty, size, unit, color, t }: any) => {
     }
 
     return (
-        <span className={`text-base font-mono font-black ${textColor}`}>
-            {qty.toLocaleString()} <span className="text-[10px] opacity-75 font-bold uppercase">{unitLabel}</span>
+        <span className={`text-sm font-mono tabular-nums font-bold ${textColor}`}>
+            {qty.toLocaleString()} <span className="text-[11px] opacity-75 font-normal uppercase">{unitLabel}</span>
         </span>
     );
 };
+
+export default TransferJobDetails;

@@ -56,13 +56,13 @@ export const PutawayList: React.FC<PutawayListProps> = ({
 
     if (sortedPutawayJobs.length === 0) {
         return (
-            <div className="col-span-full flex flex-col items-center justify-center py-20 text-center space-y-4 glass-panel-pushed rounded-3xl border border-dashed border-[#E2DCCE]/60 dark:border-[#A9CBA2]/10 shadow-sm transition-all">
-                <div className="p-6 md:p-8 bg-[#FAF8F5]/30 dark:bg-white/[0.05] rounded-full border border-gray-100 dark:border-white/5 shadow-inner">
-                    <Box size={48} className="text-gray-300 dark:text-gray-600" />
+            <div className="col-span-full flex flex-col items-center justify-center py-16 text-center space-y-4 rounded-2xl border border-dashed border-[var(--theme-border)] bg-[var(--theme-bg-card)]">
+                <div className="w-14 h-14 rounded-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] flex items-center justify-center text-[var(--theme-text-secondary)]">
+                    <Box size={28} />
                 </div>
                 <div>
-                    <p className="text-gray-900 dark:text-white font-black uppercase tracking-[0.2em] text-sm">{t('warehouse.putaway.noJobsFound')}</p>
-                    <p className="text-gray-500 dark:text-gray-500 font-black uppercase tracking-widest text-[9px] mt-2">{t('warehouse.putaway.noJobsMatchingFilters')}</p>
+                    <p className="text-[var(--theme-text-primary)] font-semibold uppercase tracking-wider text-sm">{t('warehouse.putaway.noJobsFound')}</p>
+                    <p className="text-[var(--theme-text-secondary)] font-medium text-xs mt-1">{t('warehouse.putaway.noJobsMatchingFilters')}</p>
                 </div>
             </div>
         );
@@ -75,32 +75,32 @@ export const PutawayList: React.FC<PutawayListProps> = ({
                     const completedItems = job.lineItems?.filter(item => item.status === 'Completed').length || 0;
                     const progress = job.lineItems ? (completedItems / job.lineItems.length) * 100 : 0;
                     const isCritical = job.priority === 'Critical';
+                    const isJobDone = job.status === 'Completed';
+                    const workerId = isJobDone ? (job.completedBy || (job as any).completed_by || job.assignedTo) : job.assignedTo;
+                    const workerLabel = isJobDone ? (t('warehouse.completedBy') || 'Completed By') : (t('warehouse.assignedTo') || 'Assigned To');
 
                     return (
-                        <div key={job.id} className={`group glass-panel hover:border-[#2C5E3B]/30 dark:hover:border-[#A9CBA2]/30 p-4 sm:p-6 relative overflow-hidden active:scale-[0.99] ${isCritical ? 'border-red-500/30 dark:border-red-500/20' : ''}`}>
-                            {isCritical && <div className="absolute top-0 right-0 w-32 h-32 bg-red-500/5 dark:bg-red-500/10 blur-[60px] rounded-full pointer-events-none" />}
-                            <div className="absolute -bottom-16 -left-16 w-32 h-32 bg-[#2C5E3B]/5 dark:bg-[#2C5E3B]/10 blur-[80px] rounded-full pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-1000" />
-
-                            <div className="flex justify-between items-start mb-4 sm:mb-8 relative z-10">
+                        <div key={job.id} className={`group p-4 sm:p-5 rounded-2xl bg-[var(--theme-bg-card)] border border-[var(--theme-border)] relative overflow-hidden transition-all shadow-[var(--shadow-sm)] ${isCritical ? 'border-red-500/40' : ''}`}>
+                            <div className="flex justify-between items-start mb-4 sm:mb-6 relative z-10">
                                 <div className="flex-1 min-w-0">
-                                    <div className="flex items-center gap-3 flex-wrap">
-                                        <span className="text-base font-black text-gray-900 dark:text-white tracking-widest uppercase drop-shadow-sm">{formatJobId(job)}</span>
+                                    <div className="flex items-center gap-2.5 flex-wrap">
+                                        <span className="text-base font-bold text-[var(--theme-text-primary)] tracking-wide uppercase font-mono">{formatJobId(job)}</span>
                                         {job.orderRef && (
-                                            <span className="text-[10px] text-gray-400 dark:text-gray-500 font-black border-l border-[#E2DCCE]/60 dark:border-white/10 pl-3 uppercase tracking-widest font-mono">
+                                            <span className="text-[11px] text-[var(--theme-text-secondary)] font-medium border-l border-[var(--theme-border)] pl-2.5 font-mono">
                                                 Ref: {resolveOrderRef(job.orderRef)}
                                             </span>
                                         )}
                                     </div>
                                     <div className="flex items-center gap-2 mt-2 font-mono">
-                                        <div className="flex items-center gap-1.5 px-2.5 py-1 bg-stone-50 dark:bg-white/5 rounded-lg border border-[#E2DCCE]/60 dark:border-white/10">
-                                            <div className="w-1.5 h-1.5 rounded-full bg-[#2C5E3B] dark:bg-[#A9CBA2] shadow-[0_0_8px_rgba(44,94,59,0.4)]" />
-                                            <span className="text-[9px] text-stone-700 dark:text-stone-300 font-black uppercase tracking-widest">
+                                        <div className="flex items-center gap-1.5 px-2.5 py-1 bg-[var(--theme-bg-subtle)] rounded-lg border border-[var(--theme-border)]">
+                                            <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                                            <span className="text-[11px] text-[var(--theme-text-primary)] font-semibold uppercase tracking-wider">
                                                 {job.items} {t('warehouse.items')}
                                             </span>
                                         </div>
-                                        <div className="flex items-center gap-1.5 px-2.5 py-1 bg-stone-50 dark:bg-white/5 rounded-lg border border-[#E2DCCE]/60 dark:border-white/10">
-                                            <MapPin size={10} className="text-[#2C5E3B] dark:text-[#A9CBA2]" />
-                                            <span className="text-[9px] text-stone-700 dark:text-stone-300 font-black uppercase tracking-widest truncate max-w-[100px] sm:max-w-[120px]">
+                                        <div className="flex items-center gap-1.5 px-2.5 py-1 bg-[var(--theme-bg-subtle)] rounded-lg border border-[var(--theme-border)]">
+                                            <MapPin size={12} className="text-[var(--theme-text-secondary)]" />
+                                            <span className="text-[11px] text-[var(--theme-text-primary)] font-semibold uppercase tracking-wider truncate max-w-[100px] sm:max-w-[120px]">
                                                 {(() => {
                                                     const loc = (job as any).zone || job.location;
                                                     if (!loc) return t('warehouse.putaway.unassigned');
@@ -110,20 +110,20 @@ export const PutawayList: React.FC<PutawayListProps> = ({
                                             </span>
                                         </div>
                                         {isCritical && (
-                                            <div className="flex items-center gap-1.5 px-2.5 py-1 bg-red-500 text-white text-[9px] font-black rounded-lg uppercase tracking-wider animate-pulse shadow-lg shadow-red-500/20">
-                                                <Zap size={10} className="fill-current" />
+                                            <div className="flex items-center gap-1 px-2.5 py-1 bg-red-500/10 text-red-600 dark:text-red-400 border border-red-500/20 text-[11px] font-semibold rounded-lg uppercase tracking-wider">
+                                                <Zap size={11} className="fill-current" />
                                                 {t('warehouse.priority')}
                                             </div>
                                         )}
                                     </div>
                                 </div>
-                                <div className="flex items-center gap-2 ml-4">
+                                <div className="flex items-center gap-2 ml-3">
                                     <Protected permission="ASSIGN_TASKS">
                                         <button
                                             onClick={() => setSelectedJob(selectedJob?.id === job.id ? null : job)}
-                                            className={`w-11 h-11 rounded-xl border flex items-center justify-center transition-colors shadow-md ${selectedJob?.id === job.id
-                                                ? 'bg-[#2C5E3B] dark:bg-[#EAE5D9] border-[#2C5E3B] dark:border-[#EAE5D9] text-[#FAF8F5] dark:text-[#1E3B24]'
-                                                : 'bg-white/80 dark:bg-[#18201B]/70 border border-[#E2DCCE] dark:border-emerald-950/20 text-[#2C4D35] dark:text-[#A9CBA2] hover:text-[#1E3F27] dark:hover:text-white'
+                                            className={`w-10 h-10 rounded-xl border flex items-center justify-center transition-colors min-h-[40px] min-w-[40px] ${selectedJob?.id === job.id
+                                                ? 'bg-[var(--theme-text-primary)] border-[var(--theme-text-primary)] text-[var(--theme-bg-card)]'
+                                                : 'bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-card)]'
                                                 }`}
                                             aria-label={t('warehouse.putaway.assignUser')}
                                         >
@@ -133,7 +133,7 @@ export const PutawayList: React.FC<PutawayListProps> = ({
                                     {['super_admin', 'warehouse_manager'].includes(user?.role) && (
                                         <button
                                             onClick={(e) => handleDelete(e, job.id)}
-                                            className="w-11 h-11 rounded-xl border bg-white/5 border-white/10 text-red-500 hover:text-white hover:bg-red-500 hover:border-red-500 transition-colors flex items-center justify-center"
+                                            className="w-10 h-10 rounded-xl border border-[var(--theme-border)] bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] hover:text-red-500 hover:bg-red-500/10 transition-colors flex items-center justify-center min-h-[40px] min-w-[40px]"
                                             title="Delete Job"
                                         >
                                             <Trash2 size={16} />
@@ -142,94 +142,94 @@ export const PutawayList: React.FC<PutawayListProps> = ({
                                 </div>
                             </div>
 
-                            <div className="space-y-5 relative z-10">
+                            <div className="space-y-4 relative z-10">
                                 <div>
-                                    <div className="flex justify-between text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-zinc-500 mb-2.5">
+                                    <div className="flex justify-between text-[11px] font-semibold uppercase tracking-wider text-[var(--theme-text-secondary)] mb-2">
                                         <span>{t('warehouse.putaway.putawayProgress')}</span>
-                                        <span className={progress === 100 ? 'text-emerald-600 dark:text-emerald-400' : 'text-[#2C5E3B] dark:text-[#A9CBA2]'}>{Math.round(progress)}%</span>
+                                        <span className={`font-mono ${progress === 100 ? 'text-emerald-600 dark:text-emerald-400' : 'text-[var(--theme-text-primary)]'}`}>{Math.round(progress)}%</span>
                                     </div>
-                                    <div className="w-full h-2 bg-stone-100 dark:bg-white/5 rounded-full overflow-hidden shadow-inner">
+                                    <div className="w-full h-1.5 bg-[var(--theme-bg-subtle)] rounded-full overflow-hidden">
                                         <div
-                                            className="h-full bg-gradient-to-r from-[#2C5E3B] to-[#1E3B24] dark:from-[#A9CBA2] dark:to-[#FAF8F5] shadow-[0_0_10px_rgba(44,94,59,0.3)] transition-[width] duration-1000 ease-out"
+                                            className={`h-full transition-[width] duration-500 rounded-full ${progress === 100 ? 'bg-emerald-500' : 'bg-blue-600'}`}
                                             ref={(el) => { if (el) el.style.width = `${Math.round(progress)}%`; }}
                                         />
                                     </div>
                                 </div>
                                     
-                                    <div className="flex items-center justify-between border-t border-[#E2DCCE]/60 dark:border-white/5 pt-5 mt-5">
-                                        <div>
-                                            {job.assignedTo ? (
-                                                (() => {
-                                                    const employee = employees.find(e => e.id === job.assignedTo || e.name === job.assignedTo || e.email === job.assignedTo);
-                                                    const displayId = employee?.code || (isUUID(job.assignedTo) ? job.assignedTo.slice(-4).toUpperCase() : '');
-                                                    const displayName = employee?.name ? `${employee.name} (${displayId})` : (isUUID(job.assignedTo) ? `User (${displayId})` : `${job.assignedTo} (${displayId})`);
-                                                    const displayInitial = (employee?.name || job.assignedTo).charAt(0).toUpperCase();
+                                <div className="flex items-center justify-between border-t border-[var(--theme-border)] pt-4">
+                                    <div>
+                                        {workerId ? (
+                                            (() => {
+                                                const employee = employees.find(e => e.id === workerId || e.name === workerId || e.email === workerId);
+                                                const displayId = employee?.code || (isUUID(workerId) ? workerId.slice(-4).toUpperCase() : '');
+                                                const displayName = employee?.name ? `${employee.name} (${displayId})` : (isUUID(workerId) ? `User (${displayId})` : `${workerId} (${displayId})`);
+                                                const displayInitial = (employee?.name || workerId).charAt(0).toUpperCase();
 
-                                                    return (
-                                                        <div className="flex items-center gap-3">
-                                                            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#2C5E3B] to-[#1E3B24] dark:from-[#A9CBA2]/20 dark:to-[#A9CBA2]/5 flex items-center justify-center border border-[#E2DCCE]/30 dark:border-[#A9CBA2]/10 shrink-0 shadow-sm">
-                                                                <span className="text-[11px] font-black text-white dark:text-[#A9CBA2]">{displayInitial}</span>
-                                                            </div>
-                                                            <div>
-                                                                <p className="text-[8px] font-black text-stone-400 dark:text-stone-500 uppercase tracking-widest mb-0.5">{t('warehouse.putaway.worker')}</p>
-                                                                <p className="text-[10px] font-black text-[#1E3F27] dark:text-[#EAE5D9] uppercase tracking-tight">{displayName}</p>
-                                                            </div>
+                                                return (
+                                                    <div className="flex items-center gap-2.5">
+                                                        <div className="w-9 h-9 rounded-xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-[var(--theme-text-primary)] flex items-center justify-center shrink-0">
+                                                            <span className="text-xs font-bold">{displayInitial}</span>
                                                         </div>
-                                                    );
-                                                })()
-                                            ) : (
-                                                <div className="flex items-center gap-3">
-                                                    <div className="w-9 h-9 rounded-xl bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900/30 flex items-center justify-center">
-                                                        <User size={18} className="text-amber-600 dark:text-amber-400" />
+                                                        <div>
+                                                            <p className="text-[11px] font-medium text-[var(--theme-text-secondary)] uppercase tracking-wider mb-0.5">{workerLabel}</p>
+                                                            <p className="text-xs font-semibold text-[var(--theme-text-primary)] uppercase tracking-tight">{displayName}</p>
+                                                        </div>
                                                     </div>
-                                                    <div>
-                                                        <p className="text-[8px] font-black text-stone-400 dark:text-stone-500 uppercase tracking-widest mb-0.5">{t('warehouse.assignedTo')}</p>
-                                                        <p className="text-[10px] font-black text-amber-700 dark:text-amber-400 uppercase tracking-tight">{t('warehouse.putaway.unassigned')}</p>
-                                                    </div>
+                                                );
+                                            })()
+                                        ) : (
+                                            <div className="flex items-center gap-2.5">
+                                                <div className="w-9 h-9 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-600 dark:text-amber-400 flex items-center justify-center">
+                                                    <User size={16} />
                                                 </div>
-                                            )}
-                                        </div>
-                                        <div className="flex flex-col items-end">
-                                            <p className="text-[8px] font-black text-stone-400 dark:text-stone-500 uppercase tracking-widest mb-0.5">{t('warehouse.putaway.registered')}</p>
-                                            <div className="flex items-center gap-1.5 text-gray-900 dark:text-white">
-                                                <Clock size={12} className="text-[#2C5E3B] dark:text-[#A9CBA2]" />
-                                                <span className="text-[10px] font-black font-mono">
-                                                    {(() => {
-                                                        const date = new Date(job.createdAt || '');
-                                                        const now = new Date();
-                                                        const diffInMins = Math.floor((now.getTime() - date.getTime()) / 60000);
-                                                        if (diffInMins < 1) return 'JUST NOW';
-                                                        if (diffInMins < 60) return `${diffInMins}M AGO`;
-                                                        const diffInHours = Math.floor(diffInMins / 60);
-                                                        if (diffInHours < 24) return `${diffInHours}H AGO`;
-                                                        return date.toLocaleDateString([], { month: 'short', day: 'numeric' }).toUpperCase();
-                                                    })()}
-                                                </span>
+                                                <div>
+                                                    <p className="text-[11px] font-medium text-[var(--theme-text-secondary)] uppercase tracking-wider mb-0.5">{workerLabel}</p>
+                                                    <p className="text-xs font-semibold text-amber-600 dark:text-amber-400 uppercase tracking-tight">{t('warehouse.putaway.unassigned')}</p>
+                                                </div>
                                             </div>
+                                        )}
+                                    </div>
+                                    <div className="flex flex-col items-end">
+                                        <p className="text-[11px] font-medium text-[var(--theme-text-secondary)] uppercase tracking-wider mb-0.5">{t('warehouse.putaway.registered')}</p>
+                                        <div className="flex items-center gap-1.5 text-[var(--theme-text-primary)]">
+                                            <Clock size={12} className="text-[var(--theme-text-secondary)]" />
+                                            <span className="text-xs font-semibold font-mono">
+                                                {(() => {
+                                                    const date = new Date(job.createdAt || '');
+                                                    const now = new Date();
+                                                    const diffInMins = Math.floor((now.getTime() - date.getTime()) / 60000);
+                                                    if (diffInMins < 1) return 'JUST NOW';
+                                                    if (diffInMins < 60) return `${diffInMins}M AGO`;
+                                                    const diffInHours = Math.floor(diffInMins / 60);
+                                                    if (diffInHours < 24) return `${diffInHours}H AGO`;
+                                                    return date.toLocaleDateString([], { month: 'short', day: 'numeric' }).toUpperCase();
+                                                })()}
+                                            </span>
                                         </div>
                                     </div>
-
-                                    <button
-                                        onClick={() => onShowDetails(job)}
-                                        disabled={isSubmitting}
-                                        className="woody-btn-primary w-full h-12 sm:h-14 text-[10px] uppercase tracking-[0.2em] flex items-center justify-center gap-3 active:scale-[0.98] group font-black"
-                                    >
-                                        {isSubmitting ? (
-                                            <Loader2 size={20} className="animate-spin" />
-                                        ) : (
-                                            <>
-                                                {t('warehouse.putaway.storeReceivedGoods')}
-                                                <ChevronRight size={18} className="group-hover:translate-x-1 transition-transform" />
-                                            </>
-                                        )}
-                                    </button>
                                 </div>
+
+                                <button
+                                    onClick={() => onShowDetails(job)}
+                                    disabled={isSubmitting}
+                                    className="w-full h-12 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold uppercase tracking-wider flex items-center justify-center gap-2 active:scale-95 transition-all shadow-sm min-h-[48px]"
+                                >
+                                    {isSubmitting ? (
+                                        <Loader2 size={18} className="animate-spin" />
+                                    ) : (
+                                        <>
+                                            {t('warehouse.putaway.storeReceivedGoods')}
+                                            <ChevronRight size={16} />
+                                        </>
+                                    )}
+                                </button>
                             </div>
-                        );
-                    })}
+                        </div>
+                    );
+                })}
             </div>
 
-            <div className="col-span-full pt-8 border-t border-[#E2DCCE]/60 dark:border-white/5">
+            <div className="col-span-full pt-6 border-t border-[var(--theme-border)]">
                 <Pagination
                     currentPage={putawayCurrentPage}
                     totalPages={putawayTotalPages}

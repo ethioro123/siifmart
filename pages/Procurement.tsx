@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { Truck, Plus, Filter, Download, RefreshCw } from 'lucide-react';
+import { Truck, Plus, Filter, Download, RefreshCw, ShieldAlert, Clock } from 'lucide-react';
 import { useData } from '../contexts/DataContext';
 import { useStore } from '../contexts/CentralStore';
 import { PurchaseOrder, Supplier, Product } from '../types';
@@ -40,6 +40,7 @@ export default function Procurement() {
     const [localSuppliers, setLocalSuppliers] = useState<Supplier[]>([]); // For management tab
     const [totalCount, setTotalCount] = useState(0);
     const [totalSuppliersCount, setTotalSuppliersCount] = useState(0);
+    const [pendingSignOffsCount, setPendingSignOffsCount] = useState(0);
 
     // Dashboard Metrics
     const [procurementMetrics, setProcurementMetrics] = useState({
@@ -83,15 +84,15 @@ export default function Procurement() {
                 // Original code calculated from 'orders' state, but 'orders' state is paginated now? 
                 // Original fetched ALL orders for metrics?
                 // Let's assume we need to fetch a summary or "all" for metrics.
-                // Using purchaseOrdersService.getAll with large limit for stats for now (or implement a stats RPC)
-                const res = await purchaseOrdersService.getAll(undefined, 1000, 0, {
+                // RULE 10: Cap metrics query to 50 lightweight header records
+                const res = await purchaseOrdersService.getAll(undefined, 50, 0, {
                     isRequest: false,
                     siteIds: countrySiteIds,
                     countryCode: activeCountry
                 });
                 const allPOs: PurchaseOrder[] = res.data;
 
-                const filteredPOs = allPOs.filter(po => isWithinRange(po.date));
+                const filteredPOs = allPOs.filter(po => isWithinRange(po.date || po.created_at || ''));
 
                 // Calculate metrics
                 const totalSpend = filteredPOs.reduce((sum, po) => sum + (po.totalAmount || 0), 0);
@@ -100,17 +101,22 @@ export default function Procurement() {
                     .filter(po => ['Pending', 'Ordered', 'Approved'].includes(po.status))
                     .reduce((sum, po) => sum + (po.totalAmount || 0), 0);
 
-                // Potential Revenue (Calculated from line items retail prices where available)
+                // Potential Revenue (Calculated from line items retail prices where available, or estimated margin)
                 const potentialRevenue = filteredPOs.reduce((sum, po) =>
-                    sum + (po.lineItems?.reduce((isum, item) => isum + (item.retailPrice ? item.quantity * item.retailPrice : (item.totalCost || 0)), 0) || 0), 0);
+                    sum + (po.lineItems?.reduce((isum, item) => isum + (item.retailPrice ? item.quantity * item.retailPrice : (item.totalCost || 0)), 0) || ((po.totalAmount || 0) * 1.25)), 0);
 
                 // Category Data
                 const categorySpend: Record<string, number> = {};
                 filteredPOs.forEach(po => {
-                    po.lineItems?.forEach(item => {
-                        const cat = item.category || 'General';
-                        categorySpend[cat] = (categorySpend[cat] || 0) + (item.totalCost || 0);
-                    });
+                    if (po.lineItems && po.lineItems.length > 0) {
+                        po.lineItems.forEach(item => {
+                            const cat = item.category || 'General';
+                            categorySpend[cat] = (categorySpend[cat] || 0) + (item.totalCost || 0);
+                        });
+                    } else if (po.supplierName) {
+                        const cat = po.supplierName || 'General';
+                        categorySpend[cat] = (categorySpend[cat] || 0) + (po.totalAmount || 0);
+                    }
                 });
                 const categoryData = Object.entries(categorySpend)
                     .map(([name, value]) => ({ name, value }))
@@ -139,6 +145,7 @@ export default function Procurement() {
                     categoryData,
                     trendData
                 });
+                setPendingSignOffsCount(allPOs.filter(po => po.status === 'Draft' || po.status === 'Pending').length);
 
             } else if (activeTab === 'orders') {
                 const offset = (currentPage - 1) * ITEMS_PER_PAGE;
@@ -154,6 +161,7 @@ export default function Procurement() {
                 const res = await purchaseOrdersService.getAll(undefined, ITEMS_PER_PAGE, offset, filters);
                 setOrders(res.data);
                 setTotalCount(res.count);
+                setPendingSignOffsCount((res.data || []).filter((po: PurchaseOrder) => po.status === 'Draft' || po.status === 'Pending').length);
             } else if (activeTab === 'suppliers') {
                 const offset = (supplierPage - 1) * ITEMS_PER_PAGE;
                 const res = await suppliersService.getAll(ITEMS_PER_PAGE, offset, activeCountry);
@@ -199,7 +207,36 @@ export default function Procurement() {
                         Manage supply chain, purchase orders, and vendor relationships.
                     </p>
                 </div>
-                <div className="flex gap-3">
+                <div className="flex items-center gap-3">
+                    {/* Maker-Checker Sign-off Hub Badge */}
+                    {(() => {
+                        const isApproverRole = Boolean(user?.role && ['procurement_manager', 'finance_manager', 'regional_manager', 'operations_manager', 'super_admin', 'CEO', 'ceo', 'admin'].includes(user.role));
+                        if (pendingSignOffsCount === 0) return null;
+
+                        return isApproverRole ? (
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    setActiveTab('orders');
+                                    setStatusFilter('Draft');
+                                }}
+                                className="h-11 px-4 flex items-center gap-2 bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 rounded-full transition-all cursor-pointer shadow-xs text-xs font-semibold text-amber-700 dark:text-amber-300 shrink-0"
+                                title={`${pendingSignOffsCount} PO draft(s) awaiting manager sign-off`}
+                            >
+                                <ShieldAlert size={16} className="text-amber-600 dark:text-amber-400 shrink-0" />
+                                <span className="font-mono tabular-nums">{pendingSignOffsCount} Pending Sign-Off{pendingSignOffsCount > 1 ? 's' : ''}</span>
+                            </button>
+                        ) : (
+                            <div
+                                className="h-11 px-4 flex items-center gap-2 bg-blue-500/10 border border-blue-500/20 rounded-full text-xs font-semibold text-[#0071E3] dark:text-[#2997FF] shrink-0"
+                                title={`${pendingSignOffsCount} PO draft(s) in supervisory review`}
+                            >
+                                <Clock size={16} className="text-[#0071E3] dark:text-[#2997FF] shrink-0" />
+                                <span className="font-mono tabular-nums">{pendingSignOffsCount} In Review</span>
+                            </div>
+                        );
+                    })()}
+
                     <Protected permission="CREATE_PO">
                         <button
                             onClick={() => handleCreatePOOpen()}

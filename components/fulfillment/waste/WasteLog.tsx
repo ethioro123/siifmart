@@ -27,16 +27,56 @@ export const WasteLog: React.FC<WasteLogProps> = ({
     }[]>([]);
     const [isDisposingWaste, setIsDisposingWaste] = useState(false);
 
+    // Controlled Form State
+    const [selectedProductId, setSelectedProductId] = useState('');
+    const [wasteQuantity, setWasteQuantity] = useState('');
+    const [wasteReason, setWasteReason] = useState('Expired');
+    const [wasteNotes, setWasteNotes] = useState('');
+
+    const handleAddToBasket = () => {
+        if (!selectedProductId || !wasteQuantity) {
+            addNotification('alert', 'Please select product and quantity');
+            return;
+        }
+
+        const qty = parseInt(wasteQuantity, 10);
+        if (isNaN(qty) || qty <= 0) {
+            addNotification('alert', 'Please enter a valid quantity greater than zero');
+            return;
+        }
+
+        setWasteBasket(prev => [...prev, {
+            productId: selectedProductId,
+            quantity: qty,
+            reason: wasteReason,
+            notes: wasteNotes.trim() || undefined
+        }]);
+
+        // Reset form
+        setSelectedProductId('');
+        setWasteQuantity('');
+        setWasteNotes('');
+        setWasteReason('Expired');
+        addNotification('success', 'Item added to waste basket');
+    };
+
     return (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Input Form */}
             <div className="lg:col-span-1 space-y-4">
-                <div className="bg-black/20 p-4 rounded-xl border border-white/5 space-y-4">
-                    <h4 className="font-bold text-white text-sm border-b border-white/10 pb-2">Add Item to Log</h4>
+                <div className="bg-[var(--theme-bg-card)] p-5 rounded-2xl border border-[var(--theme-border)] space-y-4 shadow-xs">
+                    <h4 className="font-bold text-[var(--theme-text-primary)] text-sm border-b border-[var(--theme-border)] pb-3">
+                        Add Item to Log
+                    </h4>
 
                     <div>
-                        <label className="text-xs text-gray-500 uppercase font-bold mb-1 block">Product</label>
-                        <select className="w-full bg-black/30 border border-white/10 rounded-lg p-3 text-white text-sm focus:border-red-500 outline-none" id="wasteProd" aria-label="Select Product">
+                        <label className="text-xs text-[var(--theme-text-secondary)] uppercase font-semibold mb-1.5 block">Product</label>
+                        <select
+                            value={selectedProductId}
+                            onChange={(e) => setSelectedProductId(e.target.value)}
+                            className="w-full min-h-[44px] bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl p-3 text-[var(--theme-text-primary)] text-sm focus:border-primary outline-none touch-manipulation"
+                            aria-label="Select Product"
+                        >
                             <option value="">Select Product...</option>
                             {products.map(p => <option key={p.id} value={p.id}>{p.name} (Stock: {p.stock})</option>)}
                         </select>
@@ -44,52 +84,47 @@ export const WasteLog: React.FC<WasteLogProps> = ({
 
                     <div className="grid grid-cols-2 gap-3">
                         <div>
-                            <label className="text-xs text-gray-500 uppercase font-bold mb-1 block">Quantity</label>
-                            <input title="Waste Quantity" type="number" min="1" className="w-full bg-black/30 border border-white/10 rounded-lg p-3 text-white text-sm focus:border-red-500 outline-none" id="wasteQty" placeholder="0" />
+                            <label className="text-xs text-[var(--theme-text-secondary)] uppercase font-semibold mb-1.5 block">Quantity</label>
+                            <input
+                                title="Waste Quantity"
+                                type="number"
+                                min="1"
+                                value={wasteQuantity}
+                                onChange={(e) => setWasteQuantity(e.target.value)}
+                                className="w-full min-h-[44px] bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl p-3 text-[var(--theme-text-primary)] text-sm font-mono font-bold focus:border-primary outline-none touch-manipulation tabular-nums"
+                                placeholder="0"
+                            />
                         </div>
                         <div>
-                            <label className="text-xs text-gray-500 uppercase font-bold mb-1 block">Reason</label>
-                            <select className="w-full bg-black/30 border border-white/10 rounded-lg p-3 text-white text-sm focus:border-red-500 outline-none" id="wasteReason" aria-label="Select Reason">
-                                <option>Expired</option>
-                                <option>Damaged</option>
-                                <option>Spoiled</option>
-                                <option>Theft</option>
-                                <option>Other</option>
+                            <label className="text-xs text-[var(--theme-text-secondary)] uppercase font-semibold mb-1.5 block">Reason</label>
+                            <select
+                                value={wasteReason}
+                                onChange={(e) => setWasteReason(e.target.value)}
+                                className="w-full min-h-[44px] bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl p-3 text-[var(--theme-text-primary)] text-sm focus:border-primary outline-none touch-manipulation"
+                                aria-label="Select Reason"
+                            >
+                                <option value="Expired">Expired</option>
+                                <option value="Damaged">Damaged</option>
+                                <option value="Spoiled">Spoiled</option>
+                                <option value="Theft">Theft</option>
+                                <option value="Other">Other</option>
                             </select>
                         </div>
                     </div>
 
                     <div>
-                        <label className="text-xs text-gray-500 uppercase font-bold mb-1 block">Notes / Evidence</label>
-                        <textarea className="w-full bg-black/30 border border-white/10 rounded-lg p-3 text-white text-sm focus:border-red-500 outline-none h-20" id="wasteNotes" placeholder="Describe damage..." />
+                        <label className="text-xs text-[var(--theme-text-secondary)] uppercase font-semibold mb-1.5 block">Notes / Evidence</label>
+                        <textarea
+                            value={wasteNotes}
+                            onChange={(e) => setWasteNotes(e.target.value)}
+                            className="w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl p-3 text-[var(--theme-text-primary)] text-sm focus:border-primary outline-none h-24 touch-manipulation"
+                            placeholder="Describe damage..."
+                        />
                     </div>
 
                     <button
-                        onClick={() => {
-                            const prodSelect = document.getElementById('wasteProd') as HTMLSelectElement;
-                            const qtyInput = document.getElementById('wasteQty') as HTMLInputElement;
-                            const reasonSelect = document.getElementById('wasteReason') as HTMLSelectElement;
-                            const notesInput = document.getElementById('wasteNotes') as HTMLTextAreaElement;
-
-                            if (!prodSelect.value || !qtyInput.value) {
-                                addNotification('alert', 'Please select product and quantity');
-                                return;
-                            }
-
-                            setWasteBasket(prev => [...prev, {
-                                productId: prodSelect.value,
-                                quantity: parseInt(qtyInput.value),
-                                reason: reasonSelect.value,
-                                notes: notesInput.value
-                            }]);
-
-                            // Reset form
-                            prodSelect.value = '';
-                            qtyInput.value = '';
-                            notesInput.value = '';
-                            addNotification('success', 'Item added to waste basket');
-                        }}
-                        className="w-full py-3 bg-white/10 hover:bg-white/20 text-white font-bold rounded-lg transition-colors flex items-center justify-center gap-2"
+                        onClick={handleAddToBasket}
+                        className="w-full min-h-[44px] py-3 bg-primary hover:opacity-90 text-white font-bold rounded-xl transition-all flex items-center justify-center gap-2 shadow-xs touch-manipulation active:scale-[0.99]"
                     >
                         <Plus size={18} /> Add to Basket
                     </button>
@@ -98,28 +133,33 @@ export const WasteLog: React.FC<WasteLogProps> = ({
 
             {/* Basket & Summary */}
             <div className="lg:col-span-2 flex flex-col h-full">
-                <div className="bg-black/20 rounded-xl border border-white/5 flex-1 flex flex-col overflow-hidden">
-                    <div className="p-4 border-b border-white/10 flex justify-between items-center">
-                        <h4 className="font-bold text-white text-sm">Waste Basket ({wasteBasket.length})</h4>
+                <div className="bg-[var(--theme-bg-card)] rounded-2xl border border-[var(--theme-border)] flex-1 flex flex-col overflow-hidden shadow-xs">
+                    <div className="p-4 border-b border-[var(--theme-border)] flex justify-between items-center bg-[var(--theme-bg-subtle)]">
+                        <h4 className="font-bold text-[var(--theme-text-primary)] text-sm">Waste Basket ({wasteBasket.length})</h4>
                         {wasteBasket.length > 0 && (
-                            <button onClick={() => setWasteBasket([])} className="text-xs text-red-400 hover:text-red-300">Clear All</button>
+                            <button
+                                onClick={() => setWasteBasket([])}
+                                className="min-h-[36px] px-2.5 text-xs text-red-500 hover:text-red-400 font-semibold touch-manipulation transition-colors"
+                            >
+                                Clear All
+                            </button>
                         )}
                     </div>
 
-                    <div className="flex-1 overflow-y-auto p-4 space-y-2">
+                    <div className="flex-1 overflow-y-auto p-4 space-y-2.5 custom-scrollbar">
                         {wasteBasket.length === 0 ? (
-                            <div className="h-full flex flex-col items-center justify-center text-gray-500 opacity-50">
+                            <div className="h-full flex flex-col items-center justify-center text-[var(--theme-text-secondary)] opacity-50 py-16">
                                 <Trash2 size={48} className="mb-2" />
-                                <p>Basket is empty</p>
+                                <p className="text-xs font-semibold">Basket is empty</p>
                             </div>
                         ) : (
                             wasteBasket.map((item, idx) => {
                                 const product = products.find(p => p.id === item.productId);
                                 const cost = (product?.price || 0) * item.quantity;
                                 return (
-                                    <div key={idx} className="bg-white/5 p-3 rounded-lg flex justify-between items-center group">
+                                    <div key={idx} className="bg-[var(--theme-bg-subtle)] p-3.5 rounded-xl border border-[var(--theme-border)] flex justify-between items-center group">
                                         <div className="flex items-center gap-3">
-                                            <div className="w-10 h-10 rounded bg-black flex items-center justify-center overflow-hidden">
+                                            <div className="w-10 h-10 rounded-lg bg-[var(--theme-bg-card)] border border-[var(--theme-border)] flex items-center justify-center overflow-hidden shrink-0">
                                                 {product?.image && !product.image.includes('placeholder.com') ? (
                                                     <img
                                                         src={product.image}
@@ -127,23 +167,22 @@ export const WasteLog: React.FC<WasteLogProps> = ({
                                                         className="w-full h-full object-cover"
                                                         onError={(e) => {
                                                             e.currentTarget.style.display = 'none';
-                                                            (e.currentTarget.parentElement as HTMLElement).innerHTML = '<div class="w-full h-full flex items-center justify-center"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-package text-gray-600"><path d="m7.5 4.27 9 5.15"/><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg></div>';
                                                         }}
                                                     />
                                                 ) : (
-                                                    <Package size={16} className="text-gray-600" />
+                                                    <Package size={16} className="text-[var(--theme-text-secondary)]" />
                                                 )}
                                             </div>
                                             <div>
-                                                <p className="font-bold text-white text-sm">{product?.name}</p>
-                                                <p className="text-xs text-gray-400">{item.reason} • {item.quantity} units</p>
+                                                <p className="font-bold text-[var(--theme-text-primary)] text-sm">{product?.name || 'Unknown'}</p>
+                                                <p className="text-[11px] text-[var(--theme-text-secondary)]">{item.reason} • {item.quantity} units</p>
                                             </div>
                                         </div>
                                         <div className="flex items-center gap-4">
-                                            <p className="font-mono text-white text-sm">{formatCompactNumber(cost, { currency: CURRENCY_SYMBOL })}</p>
+                                            <p className="font-mono font-bold text-[var(--theme-text-primary)] text-sm tabular-nums">{formatCompactNumber(cost, { currency: CURRENCY_SYMBOL })}</p>
                                             <button
                                                 onClick={() => setWasteBasket(prev => prev.filter((_, i) => i !== idx))}
-                                                className="text-gray-500 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity"
+                                                className="min-h-[36px] min-w-[36px] flex items-center justify-center text-[var(--theme-text-secondary)] hover:text-red-500 rounded-lg transition-colors touch-manipulation"
                                                 aria-label="Remove Item"
                                             >
                                                 <X size={16} />
@@ -155,10 +194,10 @@ export const WasteLog: React.FC<WasteLogProps> = ({
                         )}
                     </div>
 
-                    <div className="p-4 bg-white/5 border-t border-white/10">
+                    <div className="p-4 bg-[var(--theme-bg-subtle)] border-t border-[var(--theme-border)]">
                         <div className="flex justify-between items-center mb-4">
-                            <span className="text-gray-400">Total Value Loss</span>
-                            <span className="text-xl font-bold text-white">
+                            <span className="text-xs font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider">Total Value Loss</span>
+                            <span className="text-xl font-bold font-mono text-[var(--theme-text-primary)] tabular-nums">
                                 {formatCompactNumber(wasteBasket.reduce((sum, item) => {
                                     const product = products.find(p => p.id === item.productId);
                                     return sum + ((product?.price || 0) * item.quantity);
@@ -176,7 +215,7 @@ export const WasteLog: React.FC<WasteLogProps> = ({
                                 }, 0);
 
                                 if (totalValue > 100) {
-                                    if (!confirm(`High value waste(${CURRENCY_SYMBOL}${totalValue.toFixed(2)}).Are you sure ? This will be flagged for review.`)) return;
+                                    if (!confirm(`High value waste (${CURRENCY_SYMBOL}${totalValue.toFixed(2)}). Are you sure? This will be flagged for review.`)) return;
                                 } else {
                                     if (!confirm('Confirm disposal of these items?')) return;
                                 }
@@ -211,9 +250,9 @@ export const WasteLog: React.FC<WasteLogProps> = ({
                                     setIsDisposingWaste(false);
                                 }
                             }}
-                            className={`w-full py-3 font-bold rounded-xl transition-all flex items-center justify-center gap-2 ${isDisposingWaste || wasteBasket.length === 0
-                                ? 'bg-gray-600 text-gray-400 cursor-not-allowed'
-                                : 'bg-red-500 hover:bg-red-600 text-white shadow-lg shadow-red-500/20'
+                            className={`w-full min-h-[44px] py-3 font-bold rounded-xl transition-all flex items-center justify-center gap-2 shadow-xs touch-manipulation ${isDisposingWaste || wasteBasket.length === 0
+                                ? 'bg-[var(--theme-bg-card)] text-[var(--theme-text-secondary)] opacity-50 cursor-not-allowed border border-[var(--theme-border)]'
+                                : 'bg-red-500 hover:bg-red-600 text-white active:scale-[0.99] cursor-pointer'
                                 }`}
                         >
                             {isDisposingWaste ? (

@@ -49,26 +49,26 @@ export const CountHistory: React.FC<CountHistoryProps> = ({
     return (
         <div className="space-y-6">
             {/* KPI Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="glass-panel p-6 rounded-2xl">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5">
+                <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-4 sm:p-5 shadow-sm">
                     <div className="flex items-center gap-3 mb-2">
-                        <div className="p-2 bg-[#2C5E3B]/10 dark:bg-[#A9CBA2]/10 rounded-xl text-[#2C5E3B] dark:text-[#A9CBA2]">
-                            <CheckCircle size={20} />
+                        <div className="w-9 h-9 bg-green-500/10 text-green-600 dark:text-green-400 border border-green-500/20 rounded-xl flex items-center justify-center shrink-0">
+                            <CheckCircle size={18} />
                         </div>
-                        <h4 className="text-stone-500 dark:text-stone-400 text-sm font-bold uppercase">{t('warehouse.inventoryAccuracy')}</h4>
+                        <h4 className="text-[var(--theme-text-secondary)] text-xs font-semibold uppercase tracking-wider">{t('warehouse.inventoryAccuracy')}</h4>
                     </div>
-                    <p className="text-3xl font-bold text-stone-900 dark:text-stone-100">98.5%</p>
-                    <p className="text-xs text-green-600 dark:text-green-400 mt-1">{t('warehouse.varianceFromLastMonth')}</p>
+                    <p className="text-2xl sm:text-3xl font-bold font-mono tabular-nums text-[var(--theme-text-primary)]">98.5%</p>
+                    <p className="text-[11px] text-green-600 dark:text-green-400 mt-1 font-medium">{t('warehouse.varianceFromLastMonth')}</p>
                 </div>
 
-                <div className="glass-panel p-6 rounded-2xl">
+                <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-4 sm:p-5 shadow-sm">
                     <div className="flex items-center gap-3 mb-2">
-                        <div className="p-2 bg-red-500/10 rounded-xl text-red-600 dark:text-red-400">
-                            <AlertTriangle size={20} />
+                        <div className="w-9 h-9 bg-red-500/10 text-red-600 dark:text-red-400 border border-red-500/20 rounded-xl flex items-center justify-center shrink-0">
+                            <AlertTriangle size={18} />
                         </div>
-                        <h4 className="text-stone-500 dark:text-stone-400 text-sm font-bold uppercase">{t('warehouse.netVarianceValue')}</h4>
+                        <h4 className="text-[var(--theme-text-secondary)] text-xs font-semibold uppercase tracking-wider">{t('warehouse.netVarianceValue')}</h4>
                     </div>
-                    <p className="text-3xl font-bold text-stone-900 dark:text-stone-100">
+                    <p className="text-2xl sm:text-3xl font-bold font-mono tabular-nums text-[var(--theme-text-primary)]">
                         {formatCompactNumber(movements
                              .filter(m => m.reason.includes('Cycle Count') || m.reason.includes('Adjustment'))
                              .reduce((sum, m) => {
@@ -77,37 +77,37 @@ export const CountHistory: React.FC<CountHistoryProps> = ({
                                  return sum + (m.type === 'IN' ? value : -value);
                              }, 0), { currency: CURRENCY_SYMBOL })}
                     </p>
-                    <p className="text-xs text-stone-500 dark:text-stone-400 mt-1">{t('warehouse.totalAdjustmentValue')}</p>
+                    <p className="text-[11px] text-[var(--theme-text-secondary)] mt-1 font-medium">{t('warehouse.totalAdjustmentValue')}</p>
                 </div>
 
-                <div className="glass-panel p-6 rounded-2xl">
+                <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-4 sm:p-5 shadow-sm">
                     <div className="flex items-center gap-3 mb-2">
-                        <div className="p-2 bg-[#2C5E3B]/10 dark:bg-[#A9CBA2]/10 rounded-xl text-[#2C5E3B] dark:text-[#A9CBA2]">
-                            <RotateCcw size={20} />
+                        <div className="w-9 h-9 bg-[var(--theme-bg-subtle)] text-[var(--theme-accent)] border border-[var(--theme-border)] rounded-xl flex items-center justify-center shrink-0">
+                            <RotateCcw size={18} />
                         </div>
-                        <h4 className="text-stone-500 dark:text-stone-400 text-sm font-bold uppercase">{t('warehouse.cycleCountsYTD')}</h4>
+                        <h4 className="text-[var(--theme-text-secondary)] text-xs font-semibold uppercase tracking-wider">{t('warehouse.cycleCountsYTD')}</h4>
                     </div>
-                    <p className="text-3xl font-bold text-stone-900 dark:text-stone-100">
+                    <p className="text-2xl sm:text-3xl font-bold font-mono tabular-nums text-[var(--theme-text-primary)]">
                         {movements.filter(m => m.reason.includes('Cycle Count')).length}
                     </p>
-                    <p className="text-xs text-stone-500 dark:text-stone-400 mt-1">{t('warehouse.itemsCountedThisYear')}</p>
+                    <p className="text-[11px] text-[var(--theme-text-secondary)] mt-1 font-medium">{t('warehouse.itemsCountedThisYear')}</p>
                 </div>
             </div>
 
             {/* COUNT History Section */}
-            <div className="border-t border-[#E2DCCE]/30 dark:border-[#A9CBA2]/[0.04] mt-10 pt-8 pb-10">
-                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
+            <div className="space-y-4">
+                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                     <div>
-                        <h4 className="text-sm font-bold text-stone-900 dark:text-stone-100 flex items-center gap-2 uppercase tracking-wide">
-                            <HistoryIcon size={18} className="text-stone-500 dark:text-stone-400" />
+                        <h4 className="text-sm font-bold text-[var(--theme-text-primary)] flex items-center gap-2 uppercase tracking-wide">
+                            <HistoryIcon size={18} className="text-[var(--theme-text-secondary)]" />
                             {t('warehouse.countHistory')}
                         </h4>
-                        <p className="text-stone-500 dark:text-stone-400 text-[10px]">{t('warehouse.recentVarianceAdjustments')}</p>
+                        <p className="text-[11px] text-[var(--theme-text-secondary)] font-medium">{t('warehouse.recentVarianceAdjustments')}</p>
                     </div>
 
                     {/* History Search */}
                     <div className="relative w-full md:w-72">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-500" size={14} />
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--theme-text-secondary)]" size={14} />
                         <input
                             type="text"
                             placeholder={t('warehouse.searchHistory')}
@@ -115,7 +115,7 @@ export const CountHistory: React.FC<CountHistoryProps> = ({
                             title="Search count history"
                             value={countHistorySearch}
                             onChange={(e) => setCountHistorySearch(e.target.value)}
-                            className="woody-input !pl-9 text-xs py-2"
+                            className="w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] focus:border-[var(--theme-accent)] rounded-xl py-2 pl-9 pr-3 text-xs text-[var(--theme-text-primary)] placeholder:text-[var(--theme-text-secondary)]/50 outline-none transition-colors min-h-[44px]"
                         />
                     </div>
                 </div>
@@ -132,42 +132,61 @@ export const CountHistory: React.FC<CountHistoryProps> = ({
                                             setSelectedJob(m);
                                             setIsDetailsOpen(true);
                                         }}
-                                        className="glass-panel rounded-2xl p-3 hover:bg-stone-100/50 dark:hover:bg-[#EAE5D9]/10 transition-all group cursor-pointer"
+                                        className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-4 hover:border-[var(--theme-accent)]/40 transition-colors shadow-sm cursor-pointer flex flex-col justify-between gap-3"
                                     >
-                                        <div className="flex justify-between items-start mb-2">
-                                            <span className="text-[10px] font-mono text-[#2C5E3B] dark:text-[#A9CBA2] font-bold">{m.id.slice(0, 8)}</span>
-                                            <span className={`text-[9px] px-1.5 py-0.5 rounded uppercase font-black ${m.type === 'IN' ? 'bg-[#2C5E3B]/10 text-[#2C5E3B] dark:bg-[#A9CBA2]/10 dark:text-[#A9CBA2]' : 'bg-red-500/10 text-red-600 dark:text-red-400'}`}>
+                                        <div className="flex justify-between items-start gap-2">
+                                            <span className="text-xs font-mono tabular-nums text-[var(--theme-accent)] font-semibold truncate">
+                                                {m.id.slice(0, 10)}
+                                            </span>
+                                            <span className={`text-[11px] px-2.5 py-0.5 rounded-full uppercase font-semibold border ${
+                                                m.type === 'IN'
+                                                    ? 'bg-green-500/10 text-green-600 dark:text-green-400 border-green-500/20'
+                                                    : 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20'
+                                            }`}>
                                                 {m.type}
                                             </span>
                                         </div>
-                                        <div className="flex justify-between items-end">
-                                            <div>
-                                                <p className="text-[10px] text-stone-500 dark:text-stone-400 truncate max-w-[100px]">{product?.name || 'Unknown Item'}</p>
-                                                <p className="text-[9px] text-stone-400 dark:text-stone-500 mt-0.5">{formatDateTime(m.date)}</p>
+                                        <div className="flex justify-between items-end gap-2 pt-2 border-t border-[var(--theme-border)]">
+                                            <div className="min-w-0 flex-1">
+                                                <p className="text-xs font-medium text-[var(--theme-text-primary)] truncate">
+                                                    {product?.name || 'Unknown Item'}
+                                                </p>
+                                                <p className="text-[11px] font-mono tabular-nums text-[var(--theme-text-secondary)] mt-0.5">
+                                                    {formatDateTime(m.date)}
+                                                </p>
                                             </div>
-                                            <div className="text-right text-stone-900 dark:text-stone-100 font-bold text-xs">
-                                                {m.quantity} <span className="text-[9px] text-stone-500 dark:text-stone-400 font-normal">{t('warehouse.units')}</span>
+                                            <div className="text-right shrink-0">
+                                                <span className="text-xs font-bold font-mono tabular-nums text-[var(--theme-text-primary)]">
+                                                    {m.quantity}
+                                                </span>
+                                                <span className="text-[11px] text-[var(--theme-text-secondary)] font-normal ml-1">
+                                                    {t('warehouse.units')}
+                                                </span>
                                             </div>
                                         </div>
                                     </div>
                                 );
                             })}
                         </div>
-                        <Pagination
-                            currentPage={countHistoryPage}
-                            totalPages={countHistoryTotalPages}
-                            totalItems={filteredCountHistory.length}
-                            itemsPerPage={COUNT_HISTORY_PER_PAGE}
-                            onPageChange={setCountHistoryPage}
-                            itemName="history"
-                        />
+                        <div className="pt-2">
+                            <Pagination
+                                currentPage={countHistoryPage}
+                                totalPages={countHistoryTotalPages}
+                                totalItems={filteredCountHistory.length}
+                                itemsPerPage={COUNT_HISTORY_PER_PAGE}
+                                onPageChange={setCountHistoryPage}
+                                itemName="history"
+                            />
+                        </div>
                     </>
                 ) : (
-                    <div className="text-center py-10 bg-stone-50/10 dark:bg-[#1C2620]/10 rounded-2xl border border-dashed border-[#E2DCCE]/30 dark:border-[#A9CBA2]/[0.04]">
-                        <p className="text-stone-500 dark:text-stone-400 text-xs">{t('warehouse.noMatchingHistory')}</p>
+                    <div className="text-center py-12 px-4 bg-[var(--theme-bg-card)] rounded-2xl border border-[var(--theme-border)] shadow-sm">
+                        <p className="text-xs text-[var(--theme-text-secondary)] font-medium">{t('warehouse.noMatchingHistory')}</p>
                     </div>
                 )}
             </div>
         </div>
     );
 };
+
+export default CountHistory;

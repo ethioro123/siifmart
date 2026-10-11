@@ -21,17 +21,17 @@ export const EditableStockPoliciesCard: React.FC<EditableStockPoliciesCardProps>
     const isOptimal = minStock > 0 && maxStock > 0 && stock >= minStock && stock <= maxStock;
 
     return (
-        <div className="bg-[var(--theme-bg-card)] p-5 rounded-2xl border border-[var(--theme-border)] space-y-4 shadow-sm">
-            <div className="flex items-center justify-between border-b border-[var(--theme-border)] pb-2">
+        <div className="bg-[var(--theme-bg-card)] p-5 rounded-2xl border border-[var(--theme-border)] space-y-4 shadow-xs">
+            <div className="flex items-center justify-between border-b border-[var(--theme-border)] pb-2.5">
                 <div className="flex items-center gap-2">
                     <Layers size={14} className="text-[var(--theme-text-secondary)]" />
-                    <h3 className="text-[10px] font-bold uppercase tracking-wider text-[var(--theme-text-primary)]">
+                    <h3 className="text-xs font-bold uppercase tracking-wider text-[var(--theme-text-primary)]">
                         Stock Policies
                     </h3>
                 </div>
                 {thresholdsDisabled && (
-                    <span className="text-[9px] text-amber-500 dark:text-amber-400 font-bold uppercase tracking-wider flex items-center gap-1 bg-amber-500/10 px-2 py-0.5 rounded-full border border-amber-500/20">
-                        <Lock size={10} /> Manager Access Required
+                    <span className="text-[11px] text-amber-600 dark:text-amber-400 font-bold uppercase tracking-wider flex items-center gap-1.5 bg-amber-500/10 px-2.5 py-0.5 rounded-full border border-amber-500/20">
+                        <Lock size={11} /> Manager Access Required
                     </span>
                 )}
             </div>
@@ -39,7 +39,7 @@ export const EditableStockPoliciesCard: React.FC<EditableStockPoliciesCardProps>
             <div className="grid grid-cols-2 gap-3">
                 {/* Min Stock */}
                 <div className="p-3 bg-[var(--theme-bg-subtle)] rounded-xl border border-[var(--theme-border)] space-y-1">
-                    <label className="text-[9px] text-[var(--theme-text-muted)] font-medium uppercase tracking-wider block">
+                    <label className="text-[11px] text-[var(--theme-text-muted)] font-medium uppercase tracking-wider block">
                         Min Stock (Reorder Point)
                     </label>
                     <div className="flex items-center gap-1.5">
@@ -55,12 +55,12 @@ export const EditableStockPoliciesCard: React.FC<EditableStockPoliciesCardProps>
                             }`}
                         />
                     </div>
-                    <span className="text-[9px] text-[var(--theme-text-muted)] block">Safety buffer alert</span>
+                    <span className="text-[11px] text-[var(--theme-text-muted)] block">Safety buffer alert</span>
                 </div>
 
                 {/* Max Stock */}
                 <div className="p-3 bg-[var(--theme-bg-subtle)] rounded-xl border border-[var(--theme-border)] space-y-1">
-                    <label className="text-[9px] text-[var(--theme-text-muted)] font-medium uppercase tracking-wider block">
+                    <label className="text-[11px] text-[var(--theme-text-muted)] font-medium uppercase tracking-wider block">
                         Max Stock (Capacity)
                     </label>
                     <div className="flex items-center gap-1.5">
@@ -76,25 +76,25 @@ export const EditableStockPoliciesCard: React.FC<EditableStockPoliciesCardProps>
                             }`}
                         />
                     </div>
-                    <span className="text-[9px] text-[var(--theme-text-muted)] block">Capacity ceiling</span>
+                    <span className="text-[11px] text-[var(--theme-text-muted)] block">Capacity ceiling</span>
                 </div>
             </div>
 
             {/* Live Stock Health Bar */}
             {(minStock > 0 || maxStock > 0) && (
-                <div className="p-3 bg-[var(--theme-bg-subtle)] rounded-xl border border-[var(--theme-border)] space-y-2">
-                    <div className="flex items-center justify-between text-[9px] font-bold uppercase tracking-wider">
+                <div className="p-3.5 bg-[var(--theme-bg-subtle)] rounded-xl border border-[var(--theme-border)] space-y-2">
+                    <div className="flex items-center justify-between text-[11px] font-bold uppercase tracking-wider">
                         {isLow ? (
                             <span className="text-red-500 flex items-center gap-1">
-                                <AlertTriangle size={11} className="shrink-0" /> Below Min — Triggers Replenishment
+                                <AlertTriangle size={12} className="shrink-0" /> Below Min — Triggers Replenishment
                             </span>
                         ) : isOptimal ? (
                             <span className="text-emerald-500 flex items-center gap-1">
-                                <CheckCircle size={11} className="shrink-0" /> Optimal Stock Range
+                                <CheckCircle size={12} className="shrink-0" /> Optimal Stock Range
                             </span>
                         ) : (
                             <span className="text-[var(--theme-text-muted)] flex items-center gap-1">
-                                <Info size={11} className="shrink-0" /> Stock Policy Active
+                                <Info size={12} className="shrink-0" /> Stock Policy Active
                             </span>
                         )}
                         {stockPct !== null && (
@@ -111,7 +111,7 @@ export const EditableStockPoliciesCard: React.FC<EditableStockPoliciesCardProps>
                             />
                         </div>
                     )}
-                    <div className="flex items-center justify-between text-[9px] text-[var(--theme-text-muted)] font-mono">
+                    <div className="flex items-center justify-between text-[11px] text-[var(--theme-text-muted)] font-mono">
                         <span>Min: {minStock || '—'}</span>
                         <span>Current: <strong className="text-[var(--theme-text-primary)]">{stock}</strong></span>
                         <span>Max: {maxStock || '—'}</span>

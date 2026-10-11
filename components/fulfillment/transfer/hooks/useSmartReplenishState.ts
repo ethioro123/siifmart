@@ -87,9 +87,15 @@ export const useSmartReplenishState = ({
     const fetchDistHubData = async () => {
         setDistHubLoading(true);
         try {
-            // 1. Analyze entire network stock
-            const result = await productsService.getAll(); // Fetch ALL products across ALL sites
-            const allSiteProducts = result.data || [];
+            // 1. Analyze store stock for replenishment (Rule 10: bounded query)
+            const targetSiteId = isRestricted && userSiteObj ? userSiteObj.id : undefined;
+            let allSiteProducts: any[] = [];
+            if (allProducts && allProducts.length > 0) {
+                allSiteProducts = allProducts;
+            } else {
+                const result = await productsService.getAll(targetSiteId, 50, 0);
+                allSiteProducts = result.data || [];
+            }
             const lowStock: any[] = [];
             let totalItems = 0;
             let healthyItems = 0;
@@ -118,8 +124,8 @@ export const useSmartReplenishState = ({
             setDistHubLowStockItems(lowStock);
             setDistHubSectorIntegrity(totalItems > 0 ? (healthyItems / totalItems) * 100 : 100);
 
-            // 2. Fetch staged draft WMS jobs from database
-            const allJobs = await wmsJobsService.getAll(undefined, 1000, undefined, settings?.country || 'ET');
+            // 2. Fetch staged draft WMS jobs from database (Rule 10: capped to 25 records)
+            const allJobs = await wmsJobsService.getAll(targetSiteId, 25, undefined, settings?.country || 'ET');
             const drafts = allJobs.filter((j: WMSJob) => j.type === 'TRANSFER' && j.transferStatus === 'Draft' && j.status === 'Pending');
             setDbDraftJobs(drafts);
         } catch (err) {

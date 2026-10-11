@@ -13,27 +13,36 @@ export const ReturnsHeader: React.FC<ReturnsHeaderProps> = ({
     returnStep
 }) => {
     return (
-        <div className="flex justify-between items-center mb-8 border-b border-white/5 pb-6">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 border-b border-[var(--theme-border)] pb-5">
             <div>
-                <h3 className="font-bold text-white flex items-center gap-2 text-xl">
-                    <RefreshCw className="text-[#A9CBA2]" size={24} />
+                <h3 className="font-bold text-[var(--theme-text-primary)] flex items-center gap-2 text-lg sm:text-xl tracking-tight">
+                    <RefreshCw className="text-primary" size={22} />
                     Returns Management (RMA)
                 </h3>
-                <div className="flex items-center gap-6 mt-2">
+                <div className="flex items-center gap-2 mt-3 bg-[var(--theme-bg-subtle)] p-1 rounded-xl border border-[var(--theme-border)] w-fit">
                     <button
                         onClick={() => setReturnViewMode('Process')}
-                        className={`text-[10px] uppercase font-black tracking-widest transition-all ${returnViewMode === 'Process' ? 'text-[#2C5E3B] dark:text-[#A9CBA2] border-b-2 border-[#2C5E3B] dark:border-[#A9CBA2] pb-1' : 'text-gray-500 hover:text-white'}`}
+                        className={`min-h-[36px] px-3.5 py-1.5 rounded-lg text-xs font-semibold uppercase tracking-wider transition-all touch-manipulation ${
+                            returnViewMode === 'Process'
+                                ? 'bg-primary text-white shadow-xs'
+                                : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)]'
+                        }`}
                     >
-                        Process New Return
+                        Process Return
                     </button>
                     <button
                         onClick={() => setReturnViewMode('History')}
-                        className={`text-[10px] uppercase font-black tracking-widest transition-all ${returnViewMode === 'History' ? 'text-[#2C5E3B] dark:text-[#A9CBA2] border-b-2 border-[#2C5E3B] dark:border-[#A9CBA2] pb-1' : 'text-gray-500 hover:text-white'}`}
+                        className={`min-h-[36px] px-3.5 py-1.5 rounded-lg text-xs font-semibold uppercase tracking-wider transition-all touch-manipulation ${
+                            returnViewMode === 'History'
+                                ? 'bg-primary text-white shadow-xs'
+                                : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)]'
+                        }`}
                     >
                         Returns History
                     </button>
                 </div>
             </div>
+
             {returnViewMode === 'Process' && (
                 <div className="flex items-center gap-2">
                     {['Search', 'Select', 'Review', 'Complete'].map((step, i) => {
@@ -41,10 +50,14 @@ export const ReturnsHeader: React.FC<ReturnsHeaderProps> = ({
                         const isActive = i <= currentIndex;
                         return (
                             <div key={step} className="flex items-center">
-                                <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold ${isActive ? 'bg-[#2C5E3B] text-white' : 'bg-white/5 text-gray-500'}`}>
+                                <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-mono font-bold tabular-nums ${
+                                    isActive
+                                        ? 'bg-primary text-white shadow-xs'
+                                        : 'bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-[var(--theme-text-secondary)]'
+                                }`}>
                                     {i + 1}
                                 </div>
-                                {i < 3 && <div className={`w-8 h-0.5 mx-1 ${isActive ? 'bg-[#2C5E3B]' : 'bg-white/5'}`} />}
+                                {i < 3 && <div className={`w-6 sm:w-8 h-0.5 mx-1 ${isActive ? 'bg-primary' : 'bg-[var(--theme-border)]'}`} />}
                             </div>
                         );
                     })}

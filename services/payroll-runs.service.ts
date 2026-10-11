@@ -72,9 +72,10 @@ const mapDBToPayrollRun = (row: any): PayrollRun => ({
 });
 
 export const payrollRunsService = {
-  async getAll(siteId?: string, countryCode?: string): Promise<PayrollRun[]> {
+  async getAll(siteId?: string, countryCode?: string, limit: number = 25): Promise<PayrollRun[]> {
     try {
-      let query = supabase.from('payroll_runs').select('*');
+      // RULE 10: 25-record shelf limit
+      let query = supabase.from('payroll_runs').select('*').limit(limit);
       if (siteId && siteId !== 'ALL') query = query.eq('site_id', siteId);
       if (countryCode) query = query.eq('country_code', countryCode.toUpperCase());
 

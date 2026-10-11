@@ -22,46 +22,46 @@ export const RulesTab: React.FC = () => {
             {pricingRules.map(rule => (
                <div
                   key={rule.id}
-                  className="bg-white/85 dark:bg-[#18201B]/60 border border-[#E2DCCE] dark:border-emerald-950/20 rounded-3xl p-5 sm:p-6 shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 transition-all hover:border-[#2C5E3B]/40 group"
+                  className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-3xl p-5 sm:p-6 shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 transition-all hover:border-[var(--theme-accent)]/40 group"
                >
                   <div className="flex items-start gap-4">
                      <div
                         className={`p-3 rounded-2xl border transition-colors shrink-0 ${
                            rule.isActive
-                              ? 'bg-emerald-50 text-[#2C5E3B] dark:bg-[#2C5E3B]/20 dark:text-[#A9CBA2] border-emerald-200 dark:border-emerald-950/30'
-                              : 'bg-[#FAF8F5] text-stone-400 dark:bg-black/30 dark:text-stone-500 border-[#E2DCCE] dark:border-white/10'
+                              ? 'bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] border-[var(--theme-accent)]/20'
+                              : 'bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] border-[var(--theme-border)]'
                         }`}
                      >
                         <BrainCircuit size={22} />
                      </div>
                      <div>
                         <div className="flex items-center gap-2.5">
-                           <h3 className="font-bold text-[#1E3F27] dark:text-white text-sm sm:text-base">
+                           <h3 className="font-semibold text-[var(--theme-text-primary)] text-sm sm:text-base leading-tight">
                               {rule.name}
                            </h3>
                            {rule.isActive ? (
-                              <span className="text-[10px] bg-emerald-50 text-[#2C5E3B] dark:bg-[#2C5E3B]/20 dark:text-[#A9CBA2] px-2.5 py-0.5 rounded-full uppercase border border-emerald-200 dark:border-emerald-950/30 font-black tracking-wider">
+                              <span className="text-[10px] bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 px-2.5 py-0.5 rounded-full uppercase border border-emerald-500/20 font-semibold tracking-wider">
                                  Active
                               </span>
                            ) : (
-                              <span className="text-[10px] bg-stone-100 text-stone-500 dark:bg-black/30 dark:text-stone-400 px-2.5 py-0.5 rounded-full uppercase border border-stone-200 dark:border-white/10 font-bold tracking-wider">
+                              <span className="text-[10px] bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] px-2.5 py-0.5 rounded-full uppercase border border-[var(--theme-border)] font-medium tracking-wider">
                                  Paused
                               </span>
                            )}
                         </div>
 
                         <div className="flex flex-wrap items-center gap-2 mt-2.5 text-xs font-mono">
-                           <span className="bg-[#FAF8F5] dark:bg-black/30 px-2.5 py-1 rounded-xl text-[#1E3F27] dark:text-[#EAE5D9] border border-[#E2DCCE] dark:border-white/10 font-bold">
+                           <span className="bg-[var(--theme-bg-subtle)] px-2.5 py-1 rounded-xl text-[var(--theme-text-primary)] border border-[var(--theme-border)] font-medium">
                               IF {rule.condition.replace('X', rule.threshold.toString())}
                            </span>
-                           <ArrowRight size={13} className="text-stone-400" />
-                           <span className="bg-emerald-50 dark:bg-[#2C5E3B]/20 text-[#2C5E3B] dark:text-[#A9CBA2] px-2.5 py-1 rounded-xl border border-emerald-200 dark:border-emerald-950/30 font-bold">
+                           <ArrowRight size={13} className="text-[var(--theme-text-secondary)]" />
+                           <span className="bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] px-2.5 py-1 rounded-xl border border-[var(--theme-accent)]/20 font-semibold">
                               {rule.action} {rule.value}%
                            </span>
                         </div>
 
-                        <p className="text-xs text-stone-500 dark:text-stone-400 mt-2 font-medium">
-                           Applies to: <span className="text-[#1E3F27] dark:text-white font-bold">{rule.targetCategory}</span>
+                        <p className="text-xs text-[var(--theme-text-secondary)] mt-2 font-medium">
+                           Applies to: <span className="text-[var(--theme-text-primary)] font-semibold">{rule.targetCategory}</span>
                         </p>
                      </div>
                   </div>
@@ -72,7 +72,7 @@ export const RulesTab: React.FC = () => {
                         type="button"
                         onClick={() => runPricingRule(rule)}
                         disabled={isSubmitting}
-                        className="p-2.5 bg-emerald-50 hover:bg-[#2C5E3B] text-[#2C5E3B] hover:text-white dark:bg-[#2C5E3B]/20 dark:text-[#A9CBA2] dark:hover:bg-[#A9CBA2] dark:hover:text-[#18201B] rounded-2xl transition-all border border-emerald-200 dark:border-emerald-950/30 disabled:opacity-50 cursor-pointer shadow-sm"
+                        className="p-2.5 bg-[var(--theme-accent)]/10 hover:bg-[var(--theme-accent)] text-[var(--theme-accent)] hover:text-white rounded-2xl transition-all border border-[var(--theme-accent)]/20 disabled:opacity-50 cursor-pointer shadow-sm"
                         aria-label="Run Rule Now"
                         title="Execute Rule Immediately"
                      >
@@ -87,8 +87,8 @@ export const RulesTab: React.FC = () => {
                         onClick={() => toggleRuleStatus(rule.id)}
                         className={`p-2.5 rounded-2xl border transition-all cursor-pointer ${
                            rule.isActive
-                              ? 'bg-emerald-50 border-emerald-200 text-[#2C5E3B] dark:bg-[#2C5E3B]/20 dark:text-[#A9CBA2] dark:border-emerald-950/30'
-                              : 'bg-[#FAF8F5] border-[#E2DCCE] text-stone-400 dark:bg-black/30 dark:border-white/10 dark:text-stone-500'
+                              ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-600 dark:text-emerald-400'
+                              : 'bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] text-[var(--theme-text-secondary)]'
                         }`}
                         title={rule.isActive ? 'Deactivate Rule' : 'Activate Rule'}
                      >
@@ -97,7 +97,7 @@ export const RulesTab: React.FC = () => {
                      <button
                         type="button"
                         onClick={() => deleteRule(rule.id)}
-                        className="p-2.5 bg-red-50 hover:bg-red-100 text-red-600 dark:bg-red-950/20 dark:hover:bg-red-900/30 dark:text-red-400 border border-red-200 dark:border-red-900/30 rounded-2xl transition-colors cursor-pointer"
+                        className="p-2.5 bg-rose-500/10 hover:bg-rose-500/20 text-rose-600 dark:text-rose-400 border border-rose-500/20 rounded-2xl transition-colors cursor-pointer"
                         title="Delete Rule"
                      >
                         <Trash2 size={16} />
@@ -109,7 +109,7 @@ export const RulesTab: React.FC = () => {
             <button
                type="button"
                onClick={() => setIsRuleModalOpen(true)}
-               className="w-full py-4 border-2 border-dashed border-[#E2DCCE] dark:border-emerald-950/40 hover:border-[#2C5E3B] dark:hover:border-[#A9CBA2] rounded-3xl text-stone-500 hover:text-[#2C5E3B] dark:hover:text-[#A9CBA2] hover:bg-emerald-50/40 dark:hover:bg-[#2C5E3B]/10 transition-all flex items-center justify-center gap-2 text-xs font-black uppercase tracking-wider cursor-pointer"
+               className="w-full py-4 border border-dashed border-[var(--theme-border)] hover:border-[var(--theme-accent)] rounded-3xl text-[var(--theme-text-secondary)] hover:text-[var(--theme-accent)] hover:bg-[var(--theme-accent)]/5 transition-all flex items-center justify-center gap-2 text-xs font-semibold uppercase tracking-wider cursor-pointer"
             >
                <Plus size={16} />
                <span>Create New Automation Rule</span>
@@ -117,35 +117,38 @@ export const RulesTab: React.FC = () => {
          </div>
 
          {/* Right: Rule Simulator Card */}
-         <div className="bg-white/85 dark:bg-[#18201B]/60 border border-[#E2DCCE] dark:border-emerald-950/20 rounded-3xl p-6 shadow-sm flex flex-col justify-between">
+         <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-3xl p-5 sm:p-6 shadow-sm flex flex-col justify-between">
             <div>
-               <div className="flex items-center gap-2 pb-3 mb-4 border-b border-[#E2DCCE]/60 dark:border-white/5">
-                  <div className="p-1.5 bg-amber-50 text-amber-700 dark:bg-amber-950/30 dark:text-amber-400 rounded-xl border border-amber-200 dark:border-amber-900/30">
-                     <Sparkles size={16} />
+               <div className="flex items-center gap-3 pb-3 mb-4 border-b border-[var(--theme-border)]">
+                  <div className="w-9 h-9 rounded-xl bg-amber-500/10 text-amber-500 flex items-center justify-center shrink-0">
+                     <Sparkles size={18} />
                   </div>
-                  <h3 className="text-xs font-black text-[#1E3F27] dark:text-[#EAE5D9] uppercase tracking-wider">Rule Simulator</h3>
+                  <div>
+                     <h3 className="text-sm font-semibold text-[var(--theme-text-primary)]">Rule Simulator</h3>
+                     <p className="text-xs text-[var(--theme-text-secondary)] mt-0.5">Pre-flight impact testing</p>
+                  </div>
                </div>
-               <p className="text-xs text-stone-500 dark:text-stone-400 mb-5 leading-relaxed">
+               <p className="text-xs text-[var(--theme-text-secondary)] mb-5 leading-relaxed">
                   Test how rules affect your revenue and profit margins across affected catalog SKUs before activating them network-wide.
                </p>
 
-               <div className="p-4 bg-[#FAF8F5] dark:bg-black/30 rounded-2xl border border-[#E2DCCE] dark:border-white/10 space-y-3">
-                  <p className="text-[10px] text-stone-500 font-bold uppercase tracking-wider">Projected Portfolio Impact</p>
+               <div className="p-4 bg-[var(--theme-bg-subtle)] rounded-2xl border border-[var(--theme-border)] space-y-3">
+                  <p className="text-[10px] text-[var(--theme-text-secondary)] font-semibold uppercase tracking-wider">Projected Portfolio Impact</p>
                   <div className="flex justify-between items-center text-xs">
-                     <span className="text-stone-600 dark:text-stone-400 font-bold">Revenue</span>
+                     <span className="text-[var(--theme-text-secondary)] font-medium">Revenue</span>
                      <span
-                        className={`font-mono font-black ${
-                           simResult && simResult.rev > 0 ? 'text-emerald-700 dark:text-[#A9CBA2]' : 'text-stone-700 dark:text-stone-300'
+                        className={`font-mono font-semibold tabular-nums ${
+                           simResult && simResult.rev > 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-[var(--theme-text-primary)]'
                         }`}
                      >
                         {simResult ? `${simResult.rev > 0 ? '+' : ''}${simResult.rev}% ` : '--'}
                      </span>
                   </div>
                   <div className="flex justify-between items-center text-xs">
-                     <span className="text-stone-600 dark:text-stone-400 font-bold">Margin Delta</span>
+                     <span className="text-[var(--theme-text-secondary)] font-medium">Margin Delta</span>
                      <span
-                        className={`font-mono font-black ${
-                           simResult && simResult.margin < 0 ? 'text-red-600 dark:text-red-400' : 'text-emerald-700 dark:text-[#A9CBA2]'
+                        className={`font-mono font-semibold tabular-nums ${
+                           simResult && simResult.margin < 0 ? 'text-rose-600 dark:text-rose-400' : 'text-emerald-600 dark:text-emerald-400'
                         }`}
                      >
                         {simResult ? `${simResult.margin > 0 ? '+' : ''}${simResult.margin}% ` : '--'}
@@ -154,12 +157,12 @@ export const RulesTab: React.FC = () => {
                </div>
             </div>
 
-            <div className="pt-5 border-t border-[#E2DCCE]/60 dark:border-white/5">
+            <div className="pt-5 border-t border-[var(--theme-border)] mt-4">
                <button
                   type="button"
                   onClick={handleRunSimulation}
                   disabled={isSimulating}
-                  className="woody-btn-primary w-full py-2.5 rounded-2xl text-xs font-black flex items-center justify-center gap-2 disabled:opacity-50 cursor-pointer shadow-sm"
+                  className="w-full py-2.5 rounded-xl text-xs font-semibold flex items-center justify-center gap-2 bg-[var(--theme-accent)] hover:opacity-90 text-white disabled:opacity-50 cursor-pointer shadow-sm transition-colors"
                >
                   {isSimulating ? <RefreshCw className="animate-spin" size={15} /> : <Zap size={15} />}
                   <span>{isSimulating ? 'Simulating Elasticity...' : 'Run Simulation'}</span>

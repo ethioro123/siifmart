@@ -78,7 +78,7 @@ export default function Sidebar() {
       { to: "/wms-ops", icon: ClipboardList, label: "Fulfillment", section: "warehouse", roles: ['super_admin', 'admin', 'warehouse_manager', 'operations_manager', 'dispatch_manager', 'dispatcher', 'picker', 'packer', 'receiver', 'driver', 'inventory_specialist', 'regional_manager', 'supply_chain_manager', 'inventory_manager', 'logistics_manager', 'inbound_qc_inspector', 'replenishment_planner', 'fleet_maintenance_supervisor'] },
 
       // PROCUREMENT - Corporate administration, procurement & operational leadership
-      { to: "/procurement", icon: Truck, label: "Procurement", section: "procurement", roles: ['super_admin', 'admin', 'procurement_manager', 'buyer', 'demand_planner', 'vendor_relations_manager', 'customs_import_specialist', 'supply_chain_manager', 'finance_manager', 'operations_manager', 'regional_manager', 'replenishment_planner', 'credit_control_officer', 'accountant'] },
+      { to: "/procurement", icon: Truck, label: "Procurement", section: "procurement", roles: ['super_admin', 'admin', 'procurement_manager', 'buyer', 'demand_planner', 'vendor_relations_manager', 'customs_import_specialist', 'supply_chain_manager', 'finance_manager', 'operations_manager', 'regional_manager', 'replenishment_planner', 'credit_control_officer', 'accountant', 'inbound_qc_inspector'] },
 
       // ROADMAP - CEO Only (Confidential Strategic Canvas)
       { to: "/roadmap", icon: Map, label: "Roadmap", section: "dashboard", roles: ['super_admin'] },
@@ -96,7 +96,7 @@ export default function Sidebar() {
       { to: "/sales", icon: FileText, label: "Sales History", section: "sales", roles: ['super_admin', 'store_manager', 'assistant_manager', 'shift_lead', 'auditor', 'finance_manager', 'cs_manager', 'store_supervisor', 'operations_manager', 'regional_manager', 'accountant', 'treasury_officer', 'tax_compliance_officer', 'credit_control_officer', 'demand_planner', 'replenishment_planner', 'store_operations_auditor'] },
 
       // MERCHANDISING
-      { to: "/pricing", icon: Tags, label: "Merchandising", section: "pricing", roles: ['super_admin', 'merchandising_manager', 'finance_manager', 'procurement_manager', 'regional_manager', 'operations_manager', 'vendor_relations_manager', 'store_operations_auditor'] },
+      { to: "/pricing", icon: Tags, label: "Merchandising", section: "pricing", roles: ['super_admin', 'merchandising_manager', 'merchandiser', 'finance_manager', 'procurement_manager', 'regional_manager', 'operations_manager', 'vendor_relations_manager', 'store_operations_auditor'] },
 
       // FINANCE
       { to: "/finance", icon: DollarSign, label: "Financials", section: "finance", roles: ['super_admin', 'auditor', 'finance_manager', 'regional_manager', 'operations_manager', 'hr_manager', 'hr', 'accountant', 'payroll_specialist', 'treasury_officer', 'tax_compliance_officer', 'credit_control_officer'] },
@@ -135,9 +135,15 @@ export default function Sidebar() {
       if (isWarehouse) {
         // ═══ WAREHOUSE / FULFILLMENT SITE CONTEXT ═══
         // Warehouse Manager view: WMS Dashboard, Fulfillment, Inventory, Procurement, Staff.
-        // POS, Sales, Customers, Merchandising, Financials, and Settings are strictly hidden.
+        // POS, Sales, Customers, Merchandising, Financials, and Settings are strictly hidden for floor workers.
+        // Departmental specialists retain access to their respective modules.
+        const isMerchandisingSpecialist = item.section === 'pricing' && ['merchandising_manager', 'merchandiser'].includes(userRole);
+        const isFinanceSpecialist = item.section === 'finance' && ['finance_manager', 'accountant', 'treasury_officer', 'tax_compliance_officer', 'credit_control_officer', 'auditor'].includes(userRole);
+
         if (['pos', 'sales', 'customers', 'pricing', 'finance', 'settings'].includes(item.section)) {
-          isAllowedForSite = false;
+          if (!isMerchandisingSpecialist && !isFinanceSpecialist) {
+            isAllowedForSite = false;
+          }
         }
         if (item.to === '/network-inventory' || item.to === '/roadmap') {
           isAllowedForSite = false;
@@ -149,9 +155,16 @@ export default function Sidebar() {
       } else if (isStore) {
         // ═══ STORE / POS SITE CONTEXT ═══
         // Store Manager view: POS Terminal, POS Command, Inventory, Sales, Customers, Staff.
-        // WMS Dashboard, Fulfillment, Procurement, Merchandising, Financials, and Settings are strictly hidden.
+        // Floor staff have warehouse, procurement, merchandising, financials, settings hidden.
+        // Departmental specialists retain access to their respective modules.
+        const isMerchandisingSpecialist = item.section === 'pricing' && ['merchandising_manager', 'merchandiser'].includes(userRole);
+        const isFinanceSpecialist = item.section === 'finance' && ['finance_manager', 'accountant', 'treasury_officer', 'tax_compliance_officer', 'credit_control_officer', 'auditor'].includes(userRole);
+        const isProcurementSpecialist = item.section === 'procurement' && ['procurement_manager', 'supply_chain_manager', 'buyer', 'vendor_relations_manager', 'inbound_qc_inspector'].includes(userRole);
+
         if (['warehouse', 'procurement', 'pricing', 'finance', 'settings'].includes(item.section)) {
-          isAllowedForSite = false;
+          if (!isMerchandisingSpecialist && !isFinanceSpecialist && !isProcurementSpecialist) {
+            isAllowedForSite = false;
+          }
         }
         if (item.to === '/network-inventory' || item.to === '/roadmap') {
           isAllowedForSite = false;

@@ -42,53 +42,53 @@ export const BarcodeAuditDetailsModal: React.FC<BarcodeAuditDetailsModalProps> =
                                 });
                             }
                         }}
-                        className={`w-24 h-24 rounded-2xl bg-black/40 border border-white/10 overflow-hidden shrink-0 relative group/img ${record.image_url ? 'cursor-zoom-in' : ''}`}
+                        className={`w-24 h-24 rounded-2xl bg-[var(--theme-bg-hover)] border border-[var(--theme-border)] overflow-hidden shrink-0 relative group/img shadow-xs ${record.image_url ? 'cursor-zoom-in' : ''}`}
                         title={record.image_url ? 'Click to view full photo' : ''}
                     >
                         {record.image_url ? (
                             <img src={record.image_url} alt="Evidence" className="w-full h-full object-cover group-hover/img:scale-105 transition-transform" />
                         ) : (
-                            <div className="w-full h-full flex items-center justify-center text-stone-400">
-                                <Barcode className="opacity-20" size={32} />
+                            <div className="w-full h-full flex items-center justify-center text-[var(--theme-text-secondary)]">
+                                <Barcode className="opacity-30" size={32} />
                             </div>
                         )}
                     </div>
                     <div>
-                        <h3 className="text-lg font-bold text-[var(--theme-text-primary)] font-sans">{record.product?.name || 'Catalog Product'}</h3>
+                        <h3 className="text-base font-semibold text-[var(--theme-text-primary)] tracking-tight">{record.product?.name || 'Catalog Product'}</h3>
                         <div className="flex gap-2 mt-2 flex-wrap">
-                            <span className="px-2 py-1 rounded-xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-[var(--theme-text-secondary)] text-xs font-mono">
+                            <span className="px-2.5 py-1 rounded-xl bg-[var(--theme-bg-hover)] border border-[var(--theme-border)] text-[var(--theme-text-secondary)] text-[12px] font-mono tabular-nums">
                                 {record.product?.sku || 'NO SKU'}
                             </span>
-                            <span className="px-2 py-1 rounded-xl bg-[var(--theme-pill-bg)] text-[var(--theme-text-primary)] border border-[var(--theme-pill-border)] text-xs font-mono font-bold flex items-center gap-1">
-                                <Barcode size={12} /> {record.barcode}
+                            <span className="px-2.5 py-1 rounded-xl bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] border border-[var(--theme-accent)]/20 text-[12px] font-mono tabular-nums font-semibold flex items-center gap-1">
+                                <Barcode size={13} /> {record.barcode}
                             </span>
                         </div>
-                        <div className="mt-4 flex items-center gap-4 text-xs text-[var(--theme-text-muted)]">
-                            <div className="flex items-center gap-1 font-medium text-[var(--theme-text-secondary)]">
-                                <User size={12} /> {employeeName}
+                        <div className="mt-3.5 flex items-center gap-4 text-[12px] text-[var(--theme-text-secondary)]">
+                            <div className="flex items-center gap-1.5 font-medium">
+                                <User size={13} className="text-[var(--theme-text-secondary)]" /> {employeeName}
                             </div>
-                            <div className="flex items-center gap-1">
-                                <Clock size={12} /> {formatDateTime(record.created_at || record.createdAt || '', { showTime: true })}
+                            <div className="flex items-center gap-1.5 tabular-nums">
+                                <Clock size={13} className="text-[var(--theme-text-secondary)]" /> {formatDateTime(record.created_at || record.createdAt || '', { showTime: true })}
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <div className="p-4 rounded-2xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-sm space-y-2">
-                    <h4 className="font-bold text-[var(--theme-text-primary)] uppercase text-[10px] tracking-wider mb-1">Audit Summary</h4>
-                    <p className="text-[var(--theme-text-secondary)]">
-                        Barcode <b className="font-mono text-[var(--theme-text-primary)]">{record.barcode}</b> was registered by <b>{employeeName}</b> and mapped to <b>"{record.product?.name || 'Product'}"</b>.
+                <div className="p-4 rounded-2xl bg-[var(--theme-bg-hover)]/40 border border-[var(--theme-border)] text-[13px] space-y-2">
+                    <h4 className="font-semibold text-[var(--theme-text-secondary)] uppercase text-[11px] tracking-wider mb-1">Audit Summary</h4>
+                    <p className="text-[var(--theme-text-primary)] leading-relaxed">
+                        Barcode <b className="font-mono tabular-nums text-[var(--theme-text-primary)]">{record.barcode}</b> was registered by <b className="font-semibold">{employeeName}</b> and mapped to <b className="font-semibold">"{record.product?.name || 'Product'}"</b>.
                     </p>
-                    <p className="text-[var(--theme-text-muted)] text-xs">
+                    <p className="text-[var(--theme-text-secondary)] text-[12px]">
                         Automatically synced across all store POS checkout registers and WMS pick/pack scanners.
                     </p>
                 </div>
 
-                <div className="flex justify-end gap-3 pt-4 border-t border-[var(--theme-border)]">
+                <div className="flex justify-end items-center gap-2.5 pt-3 border-t border-[var(--theme-border)]">
                     <button
                         type="button"
                         onClick={onClose}
-                        className="px-4 py-2 rounded-xl text-[var(--theme-text-muted)] hover:text-[var(--theme-text-primary)] transition-colors text-sm font-medium cursor-pointer"
+                        className="h-9 px-4 rounded-xl text-[13px] font-semibold bg-[var(--theme-bg-card)] hover:bg-[var(--theme-bg-hover)] text-[var(--theme-text-primary)] border border-[var(--theme-border)] shadow-xs transition-all active:scale-[0.98] cursor-pointer"
                     >
                         Close
                     </button>
@@ -99,9 +99,10 @@ export const BarcodeAuditDetailsModal: React.FC<BarcodeAuditDetailsModalProps> =
                                 onDelete(record);
                                 onClose();
                             }}
-                            className="px-4 py-2 rounded-xl bg-red-500/10 text-red-600 dark:text-red-400 hover:bg-red-500 hover:text-white transition-all text-sm font-bold flex items-center gap-2 cursor-pointer active:scale-95"
+                            className="h-9 px-4 rounded-xl bg-[#FF3B30]/10 hover:bg-[#FF3B30]/15 text-[#FF3B30] border border-[#FF3B30]/20 shadow-xs transition-all text-[13px] font-semibold flex items-center gap-1.5 cursor-pointer active:scale-[0.98]"
                         >
-                            <Trash2 size={14} /> Remove Mapping
+                            <Trash2 size={13} />
+                            <span>Remove Mapping</span>
                         </button>
                     )}
                 </div>

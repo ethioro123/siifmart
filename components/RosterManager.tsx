@@ -1,12 +1,12 @@
 import React, { useState, useMemo } from 'react';
 import {
     Calendar, Clock, User, Plus, Trash2, Edit2,
-    Check, X, ChevronLeft, ChevronRight, Briefcase
+    ChevronLeft, ChevronRight, Briefcase
 } from 'lucide-react';
 import { useData } from '../contexts/DataContext';
 import { useRoster } from '../contexts/RosterContext';
 import { useStore } from '../contexts/CentralStore';
-import { StaffSchedule, Employee } from '../types';
+import { StaffSchedule } from '../types';
 import Modal from './Modal';
 import { useLanguage } from '../contexts/LanguageContext';
 
@@ -127,104 +127,111 @@ export default function RosterManager({ className = "" }: RosterManagerProps) {
     return (
         <div className={`space-y-6 ${className}`}>
             {/* Header with Date Navigation */}
-            <div className="flex items-center justify-between mb-2">
-                <div>
-                    <h3 className="text-xl font-black dark:text-[#EAE5D9] text-[#1E3F27] flex items-center gap-3 uppercase tracking-tight">
-                        <div className="p-2.5 rounded-2xl bg-emerald-50 text-[#2C5E3B] dark:bg-[#2C5E3B]/20 dark:text-[#A9CBA2] border border-emerald-200 dark:border-emerald-950/30 shadow-inner">
-                            <Calendar size={22} />
-                        </div>
-                        {t('posCommand.rosterManager')}
-                    </h3>
-                    <p className="text-stone-500 dark:text-stone-400 text-[10px] mt-1.5 font-bold uppercase tracking-wider">
-                        {t('posCommand.shiftAssignment')} • {siteEmployees.length} Staff Stationed at {activeSite.name}
-                    </p>
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-2">
+                <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-[#0071E3]/10 dark:bg-[#2997FF]/10 text-[#0071E3] dark:text-[#2997FF] flex items-center justify-center shrink-0">
+                        <Calendar size={20} />
+                    </div>
+                    <div>
+                        <h3 className="text-base font-semibold text-[var(--theme-text-primary)]">
+                            {t('posCommand.rosterManager')}
+                        </h3>
+                        <p className="text-xs text-[var(--theme-text-secondary)] mt-0.5">
+                            {t('posCommand.shiftAssignment')} • {siteEmployees.length} Staff at {activeSite.name}
+                        </p>
+                    </div>
                 </div>
 
-                <div className="flex items-center gap-2 bg-white/80 dark:bg-black/30 p-1.5 rounded-2xl border border-[#E2DCCE] dark:border-white/10 shadow-xs">
+                <div className="flex items-center gap-1.5 bg-[var(--theme-bg-subtle)] p-1 rounded-xl border border-[var(--theme-border)] shadow-xs self-start sm:self-auto">
                     <button
+                        type="button"
                         onClick={() => changeDate(-1)}
                         title="Previous Day"
                         aria-label="Previous Day"
-                        className="p-2 hover:bg-stone-100 dark:hover:bg-white/10 rounded-xl transition-colors text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-white"
+                        className="p-1.5 hover:bg-[var(--theme-bg-card)] rounded-lg transition-colors text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] cursor-pointer"
                     >
-                        <ChevronLeft size={18} />
+                        <ChevronLeft size={16} />
                     </button>
 
-                    <div className="flex flex-col items-center min-w-[120px] px-1">
-                        <span className="text-xs font-black dark:text-white text-stone-900 uppercase tracking-tight">
+                    <div className="flex flex-col items-center min-w-[110px] px-2">
+                        <span className="text-xs font-semibold text-[var(--theme-text-primary)]">
                             {new Date(selectedDate).toLocaleDateString(locale, { weekday: 'short', month: 'short', day: 'numeric' })}
                         </span>
-                        <span className="text-[10px] text-[#2C5E3B] dark:text-[#A9CBA2] font-mono font-bold">
+                        <span className="text-[10px] text-[#0071E3] dark:text-[#2997FF] font-mono font-medium">
                             {selectedDate}
                         </span>
                     </div>
 
                     <button
+                        type="button"
                         onClick={() => changeDate(1)}
                         title="Next Day"
                         aria-label="Next Day"
-                        className="p-2 hover:bg-stone-100 dark:hover:bg-white/10 rounded-xl transition-colors text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-white"
+                        className="p-1.5 hover:bg-[var(--theme-bg-card)] rounded-lg transition-colors text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] cursor-pointer"
                     >
-                        <ChevronRight size={18} />
+                        <ChevronRight size={16} />
                     </button>
                 </div>
             </div>
 
             {/* Roster Grid/List */}
-            <div className="grid grid-cols-1 gap-3">
+            <div className="space-y-3">
                 {daySchedules.length > 0 ? (
                     daySchedules.map((schedule) => (
                         <div
                             key={schedule.id}
-                            className="group p-4 sm:p-5 rounded-2xl bg-white/90 dark:bg-[#18201B]/80 border border-[#E2DCCE] dark:border-emerald-950/20 flex items-center justify-between hover:border-[#2C5E3B]/40 dark:hover:border-[#A9CBA2]/30 transition-all shadow-xs"
+                            className="group p-4 rounded-2xl bg-[var(--theme-bg-card)] border border-[var(--theme-border)] flex items-center justify-between hover:border-[#0071E3]/30 transition-all shadow-xs"
                         >
-                            <div className="flex items-center gap-4 sm:gap-5 min-w-0">
-                                <div className="w-11 h-11 rounded-2xl bg-stone-100 dark:bg-black/40 flex items-center justify-center border border-[#E2DCCE] dark:border-white/10 overflow-hidden shadow-sm shrink-0">
-                                    <User size={20} className="text-stone-400 dark:text-stone-500" />
+                            <div className="flex items-center gap-3.5 min-w-0">
+                                <div className="w-10 h-10 rounded-xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] flex items-center justify-center shrink-0">
+                                    <User size={18} className="text-[var(--theme-text-secondary)]" />
                                 </div>
                                 <div className="min-w-0">
-                                    <h4 className="text-sm font-black dark:text-[#EAE5D9] text-[#1E3F27] tracking-tight truncate">{schedule.employeeName}</h4>
-                                    <div className="flex items-center gap-2.5 mt-1 flex-wrap">
-                                        <span className="text-[9px] text-stone-500 dark:text-stone-400 font-bold uppercase tracking-wider flex items-center gap-1">
-                                            <Briefcase size={10} className="text-[#2C5E3B] dark:text-[#A9CBA2]" />
+                                    <h4 className="text-xs font-semibold text-[var(--theme-text-primary)] truncate">{schedule.employeeName}</h4>
+                                    <div className="flex items-center gap-2 mt-1 flex-wrap">
+                                        <span className="text-[11px] text-[var(--theme-text-secondary)] flex items-center gap-1">
+                                            <Briefcase size={12} className="text-[#0071E3] dark:text-[#2997FF]" />
                                             {schedule.role}
                                         </span>
-                                        <span className="text-[9px] text-stone-500 dark:text-stone-400 font-mono font-bold uppercase tracking-wider flex items-center gap-1">
-                                            <Clock size={10} className="text-[#2C5E3B] dark:text-[#A9CBA2]" />
+                                        <span className="text-[11px] text-[var(--theme-text-secondary)] font-mono flex items-center gap-1">
+                                            <Clock size={12} className="text-[#0071E3] dark:text-[#2997FF]" />
                                             {schedule.startTime} - {schedule.endTime}
                                         </span>
                                     </div>
                                 </div>
                             </div>
 
-                            <div className="flex items-center gap-1.5 opacity-80 group-hover:opacity-100 transition-opacity shrink-0">
+                            <div className="flex items-center gap-1.5 shrink-0">
                                 <button
+                                    type="button"
                                     onClick={() => handleOpenModal(schedule)}
                                     title="Edit Shift"
                                     aria-label="Edit Shift"
-                                    className="p-2 rounded-xl bg-stone-100 dark:bg-white/5 text-stone-600 dark:text-stone-400 hover:text-[#2C5E3B] hover:bg-stone-200 dark:hover:bg-white/10 transition-all shadow-xs"
+                                    className="p-2 rounded-xl bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card-hover)] border border-[var(--theme-border)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] transition-all cursor-pointer"
                                 >
-                                    <Edit2 size={14} />
+                                    <Edit2 size={13} />
                                 </button>
                                 <button
+                                    type="button"
                                     onClick={() => deleteSchedule(schedule.id, user?.name || 'Manager')}
                                     title="Delete Shift"
                                     aria-label="Delete Shift"
-                                    className="p-2 rounded-xl bg-red-50 dark:bg-red-500/10 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-500/20 transition-all shadow-xs"
+                                    className="p-2 rounded-xl bg-red-500/10 border border-red-500/20 text-red-600 dark:text-red-400 hover:bg-red-500/20 transition-all cursor-pointer"
                                 >
-                                    <Trash2 size={14} />
+                                    <Trash2 size={13} />
                                 </button>
                             </div>
                         </div>
                     ))
                 ) : (
-                    <div className="py-16 text-center bg-stone-50/60 dark:bg-white/[0.01] rounded-3xl border border-dashed border-[#E2DCCE] dark:border-white/10 p-6">
-                        <Calendar size={40} className="mx-auto text-stone-300 dark:text-stone-600 mb-3" />
-                        <p className="text-xs text-stone-500 dark:text-stone-400 font-black uppercase tracking-wider">{t('posCommand.noTasks')}</p>
-                        <p className="text-[10px] text-stone-400 dark:text-stone-500 mt-1">No staff shifts scheduled for {activeSite.name} on this date.</p>
+                    <div className="py-12 text-center bg-[var(--theme-bg-subtle)] rounded-2xl border border-dashed border-[var(--theme-border)] p-6">
+                        <Calendar size={32} className="mx-auto text-[var(--theme-text-secondary)] opacity-40 mb-2" />
+                        <p className="text-xs font-semibold text-[var(--theme-text-primary)]">{t('posCommand.noTasks')}</p>
+                        <p className="text-[11px] text-[var(--theme-text-secondary)] mt-1">No staff shifts scheduled for {activeSite.name} on this date.</p>
                         <button
+                            type="button"
                             onClick={() => handleOpenModal()}
-                            className="mt-5 px-6 py-2.5 bg-[#2C5E3B] hover:bg-[#234b2f] text-white rounded-xl text-xs font-black uppercase tracking-wider transition-all shadow-xs cursor-pointer active:scale-95"
+                            className="mt-4 px-4 py-2 bg-[#0071E3] dark:bg-[#2997FF] hover:opacity-90 active:scale-95 text-white rounded-xl text-xs font-semibold transition-all shadow-xs cursor-pointer"
                         >
                             {t('common.add')} Shift
                         </button>
@@ -234,10 +241,11 @@ export default function RosterManager({ className = "" }: RosterManagerProps) {
                 {/* Action Button at bottom */}
                 {daySchedules.length > 0 && (
                     <button
+                        type="button"
                         onClick={() => handleOpenModal()}
-                        className="w-full flex items-center justify-center gap-2 py-3.5 px-4 rounded-2xl border-2 border-dashed border-[#E2DCCE] dark:border-white/10 text-stone-500 dark:text-stone-400 hover:border-[#2C5E3B] dark:hover:border-[#A9CBA2] hover:text-[#2C5E3B] dark:hover:text-[#A9CBA2] transition-all group font-black text-xs uppercase tracking-wider cursor-pointer"
+                        className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl border border-dashed border-[var(--theme-border)] text-xs font-medium text-[var(--theme-text-secondary)] hover:text-[#0071E3] dark:hover:text-[#2997FF] hover:border-[#0071E3]/40 dark:hover:border-[#2997FF]/40 transition-all cursor-pointer"
                     >
-                        <Plus size={16} className="group-hover:scale-110 transition-transform" />
+                        <Plus size={15} />
                         <span>Schedule Shift for {activeSite.name}</span>
                     </button>
                 )}
@@ -250,11 +258,11 @@ export default function RosterManager({ className = "" }: RosterManagerProps) {
                 title={editingSchedule ? "Modify Shift Schedule" : "Schedule Staff Shift"}
                 variant="side"
             >
-                <form onSubmit={handleSubmit} className="space-y-5">
-                    <div className="space-y-4">
+                <form onSubmit={handleSubmit} className="space-y-4">
+                    <div className="space-y-3.5">
                         {/* Employee Selection */}
                         <div>
-                            <label className="block text-[10px] font-black text-stone-500 dark:text-stone-400 uppercase tracking-widest mb-1.5">
+                            <label className="block text-xs font-medium text-[var(--theme-text-secondary)] mb-1.5">
                                 Appointed Staff Member ({siteEmployees.length} at {activeSite.name})
                             </label>
                             <select
@@ -270,7 +278,7 @@ export default function RosterManager({ className = "" }: RosterManagerProps) {
                                 }}
                                 required
                                 title="Select Staff Member"
-                                className="w-full bg-white dark:bg-black/40 border border-[#E2DCCE] dark:border-white/10 rounded-xl px-4 py-2.5 text-stone-900 dark:text-white text-xs font-bold focus:border-[#2C5E3B] dark:focus:border-[#A9CBA2] focus:outline-none transition-all shadow-xs"
+                                className="w-full h-10 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 text-xs text-[var(--theme-text-primary)] focus:border-[#0071E3] focus:ring-2 focus:ring-[#0071E3]/20 focus:outline-none transition-all"
                             >
                                 <option value="">Select Appointed Staff Member...</option>
                                 {siteEmployees.map(emp => (
@@ -282,67 +290,67 @@ export default function RosterManager({ className = "" }: RosterManagerProps) {
                         {/* Time Grid */}
                         <div className="grid grid-cols-2 gap-3">
                             <div>
-                                <label className="block text-[10px] font-black text-stone-500 dark:text-stone-400 uppercase tracking-widest mb-1.5">Shift Start</label>
+                                <label className="block text-xs font-medium text-[var(--theme-text-secondary)] mb-1.5">Shift Start</label>
                                 <input
                                     type="time"
                                     value={formState.startTime}
                                     onChange={(e) => setFormState({ ...formState, startTime: e.target.value })}
                                     required
                                     title="Shift Start Time"
-                                    className="w-full bg-white dark:bg-black/40 border border-[#E2DCCE] dark:border-white/10 rounded-xl px-4 py-2 text-stone-900 dark:text-white text-xs font-mono font-bold focus:border-[#2C5E3B] dark:focus:border-[#A9CBA2] focus:outline-none transition-all shadow-xs"
+                                    className="w-full h-10 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 text-xs font-mono text-[var(--theme-text-primary)] focus:border-[#0071E3] focus:ring-2 focus:ring-[#0071E3]/20 focus:outline-none transition-all"
                                 />
                             </div>
                             <div>
-                                <label className="block text-[10px] font-black text-stone-500 dark:text-stone-400 uppercase tracking-widest mb-1.5">Shift End</label>
+                                <label className="block text-xs font-medium text-[var(--theme-text-secondary)] mb-1.5">Shift End</label>
                                 <input
                                     type="time"
                                     value={formState.endTime}
                                     onChange={(e) => setFormState({ ...formState, endTime: e.target.value })}
                                     required
                                     title="Shift End Time"
-                                    className="w-full bg-white dark:bg-black/40 border border-[#E2DCCE] dark:border-white/10 rounded-xl px-4 py-2 text-stone-900 dark:text-white text-xs font-mono font-bold focus:border-[#2C5E3B] dark:focus:border-[#A9CBA2] focus:outline-none transition-all shadow-xs"
+                                    className="w-full h-10 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 text-xs font-mono text-[var(--theme-text-primary)] focus:border-[#0071E3] focus:ring-2 focus:ring-[#0071E3]/20 focus:outline-none transition-all"
                                 />
                             </div>
                         </div>
 
                         {/* Custom Role */}
                         <div>
-                            <label className="block text-[10px] font-black text-stone-500 dark:text-stone-400 uppercase tracking-widest mb-1.5">Assigned Role / Function (Optional)</label>
+                            <label className="block text-xs font-medium text-[var(--theme-text-secondary)] mb-1.5">Assigned Role / Function (Optional)</label>
                             <input
                                 type="text"
                                 placeholder="e.g. Inbound Receiver, Order Picker, Lead Dispatcher"
                                 value={formState.role}
                                 onChange={(e) => setFormState({ ...formState, role: e.target.value })}
                                 title="Assigned Role"
-                                className="w-full bg-white dark:bg-black/40 border border-[#E2DCCE] dark:border-white/10 rounded-xl px-4 py-2 text-stone-900 dark:text-white text-xs focus:border-[#2C5E3B] dark:focus:border-[#A9CBA2] focus:outline-none transition-all shadow-xs"
+                                className="w-full h-10 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 text-xs text-[var(--theme-text-primary)] focus:border-[#0071E3] focus:ring-2 focus:ring-[#0071E3]/20 focus:outline-none transition-all"
                             />
                         </div>
 
                         {/* Notes */}
                         <div>
-                            <label className="block text-[10px] font-black text-stone-500 dark:text-stone-400 uppercase tracking-widest mb-1.5">Shift Notes & Instructions</label>
+                            <label className="block text-xs font-medium text-[var(--theme-text-secondary)] mb-1.5">Shift Notes & Instructions</label>
                             <textarea
                                 rows={3}
                                 value={formState.notes}
                                 onChange={(e) => setFormState({ ...formState, notes: e.target.value })}
-                                className="w-full bg-white dark:bg-black/40 border border-[#E2DCCE] dark:border-white/10 rounded-xl px-4 py-2 text-stone-900 dark:text-white text-xs focus:border-[#2C5E3B] dark:focus:border-[#A9CBA2] focus:outline-none transition-all shadow-xs"
+                                className="w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl p-3 text-xs text-[var(--theme-text-primary)] focus:border-[#0071E3] focus:ring-2 focus:ring-[#0071E3]/20 focus:outline-none transition-all"
                                 placeholder="Station assignment, task details or specific notes..."
                                 title="Shift Notes"
                             />
                         </div>
                     </div>
 
-                    <div className="flex gap-3 pt-3 border-t border-[#E2DCCE]/60 dark:border-white/10">
+                    <div className="flex gap-3 pt-3 border-t border-[var(--theme-border)]">
                         <button
                             type="button"
                             onClick={() => setIsModalOpen(false)}
-                            className="flex-1 py-3 bg-stone-100 dark:bg-white/5 border border-[#E2DCCE] dark:border-white/10 rounded-xl text-xs font-black text-stone-600 dark:text-stone-400 uppercase tracking-wider hover:bg-stone-200 dark:hover:bg-white/10 transition-all"
+                            className="flex-1 h-10 bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card-hover)] border border-[var(--theme-border)] rounded-xl text-xs font-semibold text-[var(--theme-text-secondary)] transition-all cursor-pointer"
                         >
                             Cancel
                         </button>
                         <button
                             type="submit"
-                            className="flex-1 py-3 bg-[#2C5E3B] hover:bg-[#234b2f] text-white rounded-xl text-xs font-black uppercase tracking-wider transition-all shadow-xs"
+                            className="flex-1 h-10 bg-[#0071E3] dark:bg-[#2997FF] hover:opacity-90 active:scale-95 text-white rounded-xl text-xs font-semibold transition-all shadow-xs cursor-pointer"
                         >
                             Save Shift
                         </button>
@@ -352,4 +360,3 @@ export default function RosterManager({ className = "" }: RosterManagerProps) {
         </div>
     );
 }
-

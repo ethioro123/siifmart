@@ -115,102 +115,103 @@ export const PackDetailsModal: React.FC<PackDetailsModalProps> = ({
 
     return (
         <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-[200] p-0 md:p-4 overflow-x-hidden animate-in fade-in duration-200">
-            <div className="bg-[#FAF8F5] dark:bg-[#1C2620] border-0 md:border border-[#E2DCCE] dark:border-emerald-950/20 w-full max-w-4xl h-[100dvh] md:h-auto md:max-h-[90vh] md:rounded-3xl shadow-2xl flex flex-col overflow-hidden relative">
-                {/* 🌟 Modal Ambient Glow - Cyan Theme for Pack */}
-                <div className="absolute -top-24 -right-24 w-64 h-64 bg-[#2C5E3B]/10 dark:bg-[#2C5E3B]/20 blur-[100px] rounded-full pointer-events-none" />
-                <div className="absolute -bottom-24 -left-24 w-64 h-64 bg-teal-500/10 dark:bg-teal-550/5 blur-[100px] rounded-full pointer-events-none" />
+            <div className="bg-[var(--theme-bg-card)] border-0 md:border border-[var(--theme-border)] w-full max-w-4xl h-[100dvh] md:h-auto md:max-h-[90vh] md:rounded-3xl shadow-2xl flex flex-col overflow-hidden relative">
 
                 {/* Header */}
-                <div className="p-3 md:p-6 border-b border-[#E2DCCE]/60 dark:border-emerald-950/20 flex justify-between items-start bg-[#FAF8F5] dark:bg-[#1C2620] shrink-0">
-                    <div className="flex gap-3 md:gap-4 relative z-10">
-                        <div className="p-2 md:p-3 rounded-lg md:rounded-xl border border-[#E2DCCE]/25 dark:border-[#A9CBA2]/20 bg-[#2C5E3B]/15 dark:bg-[#A9CBA2]/15 text-[#2C5E3B] dark:text-[#A9CBA2] shadow-sm transition-all duration-500">
-                            <Archive size={20} className="md:w-6 md:h-6" />
+                <div className="p-4 md:p-6 border-b border-[var(--theme-border)] flex justify-between items-start bg-[var(--theme-bg-card)] shrink-0">
+                    <div className="flex gap-3 md:gap-4 items-center">
+                        <div className="p-2.5 md:p-3 rounded-2xl border border-[var(--theme-accent)]/20 bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] shadow-sm shrink-0">
+                            <Archive size={22} className="md:w-6 md:h-6" />
                         </div>
                         <div>
-                            <div className="flex items-center gap-2 mb-0.5 md:mb-1">
-                                <h3 className="text-lg md:text-xl font-black text-slate-900 dark:text-white uppercase tracking-tight font-mono leading-none">{data.reference}</h3>
-                                <div className="flex gap-1 md:gap-2">
-                                    <span className={`px-1.5 md:px-2 py-0.5 rounded text-[8px] md:text-[9px] font-mono border ${data.status === 'Completed' ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-600 dark:text-emerald-400' : 'bg-red-500/10 border-red-500/20 text-red-600 dark:text-red-400'}`}>
+                            <div className="flex items-center gap-2 mb-1">
+                                <h3 className="text-lg md:text-xl font-bold text-[var(--theme-text-primary)] uppercase tracking-tight font-mono leading-none">{data.reference}</h3>
+                                <div className="flex gap-1.5">
+                                    <span className={`px-2 py-0.5 rounded-full text-[11px] font-semibold border ${data.status === 'Completed' ? 'bg-green-500/10 border-green-500/20 text-green-600 dark:text-green-400' : 'bg-red-500/10 border-red-500/20 text-red-600 dark:text-red-400'}`}>
                                         {data.status}
                                     </span>
                                     {itemsArray.some(li => (li.returnedQty || 0) > 0) && (
-                                        <span className="px-1.5 md:px-2 py-0.5 rounded text-[8px] md:text-[9px] font-mono border bg-red-500/10 border-red-500/20 text-red-600 dark:text-red-400">
+                                        <span className="px-2 py-0.5 rounded-full text-[11px] font-semibold border bg-red-500/10 border-red-500/20 text-red-600 dark:text-red-400">
                                             {itemsArray.filter(li => (li.returnedQty || 0) > 0).length} {t('warehouse.packing.ret')}
                                         </span>
                                     )}
                                 </div>
                             </div>
-                            <p className="text-[#4D6E56] dark:text-[#7A9E83] text-[9px] md:text-[10px] font-black uppercase tracking-widest flex items-center gap-1.5 md:gap-2 md:mt-1">
-                                <Box size={10} className="md:w-3 md:h-3 text-[#2C5E3B]/60 dark:text-[#A9CBA2]/60" />
+                            <p className="text-[var(--theme-text-secondary)] text-[11px] font-semibold uppercase tracking-wider flex items-center gap-1.5">
+                                <Box size={12} className="text-[var(--theme-accent)]" />
                                 {data.title}
                             </p>
                         </div>
                     </div>
-                    <button onClick={onClose} className="p-2 md:p-2.5 rounded-xl bg-[#E2DCCE]/40 dark:bg-white/5 text-[#2C5E3B] dark:text-[#A9CBA2] hover:text-[#1E3F27] dark:hover:text-white hover:bg-[#E2DCCE]/60 dark:hover:bg-white/10 transition-colors" aria-label={t('warehouse.dismiss')}>
+                    <button
+                        onClick={onClose}
+                        className="p-2.5 min-w-[44px] min-h-[44px] rounded-xl bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] border border-[var(--theme-border)] transition-colors flex items-center justify-center shrink-0"
+                        aria-label={t('warehouse.dismiss')}
+                    >
                         <X size={18} className="md:w-5 md:h-5" />
                     </button>
                 </div>
 
                 {/* Metadata Grid */}
-                <div className="grid grid-cols-2 lg:grid-cols-5 gap-px bg-[#E2DCCE]/60 dark:bg-emerald-950/20 border-b border-[#E2DCCE]/60 dark:border-emerald-950/20 shrink-0">
-                    <div className="bg-white/40 dark:bg-[#1C2620]/40 p-3 md:p-4 flex items-center gap-2 md:gap-3 lg:col-span-1">
-                        <div className="p-1.5 md:p-2 bg-[#FAF8F5]/85 dark:bg-[#1C2620]/30 rounded-lg text-[#2C5E3B] dark:text-[#A9CBA2] border border-[#E2DCCE]/30 dark:border-white/5">
-                            <Calendar size={14} className="md:w-[18px] md:h-[18px]" />
+                <div className="grid grid-cols-2 lg:grid-cols-5 gap-px bg-[var(--theme-border)] border-b border-[var(--theme-border)] shrink-0">
+                    <div className="bg-[var(--theme-bg-card)] p-3.5 md:p-4 flex items-center gap-2.5 md:gap-3 lg:col-span-1">
+                        <div className="p-2 bg-[var(--theme-bg-subtle)] rounded-xl text-[var(--theme-accent)] border border-[var(--theme-border)] shrink-0">
+                            <Calendar size={16} />
                         </div>
                         <div className="min-w-0">
-                            <p className="text-[8px] md:text-[10px] text-stone-400 dark:text-stone-500 uppercase font-black tracking-widest leading-none mb-0.5 md:mb-1 truncate">{t('warehouse.completed')}</p>
-                            <p className="text-[10px] md:text-xs text-slate-900 dark:text-zinc-200 font-mono tracking-tighter truncate">{formatDateTime(data.date, { showTime: true })}</p>
+                            <p className="text-[11px] text-[var(--theme-text-secondary)] uppercase font-semibold tracking-wider leading-none mb-1 truncate">{t('warehouse.completed')}</p>
+                            <p className="text-xs text-[var(--theme-text-primary)] font-mono tabular-nums tracking-tight truncate">{formatDateTime(data.date, { showTime: true })}</p>
                         </div>
                     </div>
                     
-                    <div className="bg-white/40 dark:bg-[#1C2620]/40 p-3 md:p-4 flex items-center gap-2 md:gap-3 lg:col-span-1">
-                        <div className="w-6 h-6 md:w-8 md:h-8 shrink-0 rounded-full bg-[#FAF8F5]/85 dark:bg-[#2C5E3B]/25 flex items-center justify-center border border-[#E2DCCE]/60 dark:border-[#2C5E3B]/45 shadow-inner">
-                            <span className="text-[8px] md:text-[10px] font-black text-[#2C5E3B] dark:text-[#A9CBA2]">{(data.userName || 'S').charAt(0).toUpperCase()}</span>
+                    <div className="bg-[var(--theme-bg-card)] p-3.5 md:p-4 flex items-center gap-2.5 md:gap-3 lg:col-span-1">
+                        <div className="w-8 h-8 shrink-0 rounded-full bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] flex items-center justify-center border border-[var(--theme-accent)]/20 shadow-xs">
+                            <span className="text-xs font-semibold">{(data.userName || 'S').charAt(0).toUpperCase()}</span>
                         </div>
                         <div className="min-w-0">
-                            <p className="text-[8px] md:text-[10px] text-stone-400 dark:text-stone-500 uppercase font-black tracking-widest leading-none mb-0.5 md:mb-1 truncate">{workerLabel}</p>
-                            <p className="text-[10px] md:text-xs text-slate-900 dark:text-zinc-200 font-black uppercase break-words leading-tight">
-                                {data.userName} <span className="text-stone-400 dark:text-stone-500 font-normal">({data.userDisplayId})</span>
+                            <p className="text-[11px] text-[var(--theme-text-secondary)] uppercase font-semibold tracking-wider leading-none mb-1 truncate">{workerLabel}</p>
+                            <p className="text-xs text-[var(--theme-text-primary)] font-semibold truncate leading-tight">
+                                {data.userName} <span className="text-[var(--theme-text-secondary)] font-normal font-mono">({data.userDisplayId})</span>
                             </p>
                         </div>
                     </div>
 
-                    <div className="bg-white/40 dark:bg-[#1C2620]/40 p-3 md:p-4 flex items-center gap-2 md:gap-3 col-span-2 lg:col-span-1">
-                        <div className="p-1.5 md:p-2 bg-[#FAF8F5]/85 dark:bg-[#1C2620]/30 rounded-lg text-[#2C5E3B] dark:text-[#A9CBA2] border border-[#E2DCCE]/30 dark:border-white/5 shrink-0">
-                            <Printer size={14} className="md:w-[18px] md:h-[18px]" />
+                    <div className="bg-[var(--theme-bg-card)] p-3.5 md:p-4 flex items-center gap-2.5 md:gap-3 col-span-2 lg:col-span-1">
+                        <div className="p-2 bg-[var(--theme-bg-subtle)] rounded-xl text-[var(--theme-accent)] border border-[var(--theme-border)] shrink-0">
+                            <Printer size={16} />
                         </div>
                         <div className="min-w-0">
-                            <p className="text-[8px] md:text-[10px] text-stone-400 dark:text-stone-500 uppercase font-black tracking-widest leading-none mb-0.5 md:mb-1 truncate">{t('warehouse.labelSize').split(' ')[0]}</p>
-                            <p className="text-[10px] md:text-xs text-[#2C5E3B] dark:text-[#A9CBA2] font-mono tracking-tight font-black truncate">{data.trackingNumber}</p>
+                            <p className="text-[11px] text-[var(--theme-text-secondary)] uppercase font-semibold tracking-wider leading-none mb-1 truncate">{t('warehouse.labelSize').split(' ')[0]}</p>
+                            <p className="text-xs text-[var(--theme-accent)] font-mono tracking-tight font-semibold truncate">{data.trackingNumber}</p>
                         </div>
                     </div>
 
-                    <div className="bg-white/40 dark:bg-[#1C2620]/40 p-3 md:p-4 flex items-center gap-2 md:gap-3 lg:col-span-1">
-                        <div className="p-1.5 md:p-2 bg-[#FAF8F5]/85 dark:bg-[#1C2620]/30 rounded-lg text-[#2C5E3B] dark:text-[#A9CBA2] border border-[#E2DCCE]/30 dark:border-white/5 shrink-0">
-                            <MapPin size={14} className="md:w-[18px] md:h-[18px]" />
+                    <div className="bg-[var(--theme-bg-card)] p-3.5 md:p-4 flex items-center gap-2.5 md:gap-3 lg:col-span-1">
+                        <div className="p-2 bg-[var(--theme-bg-subtle)] rounded-xl text-[var(--theme-accent)] border border-[var(--theme-border)] shrink-0">
+                            <MapPin size={16} />
                         </div>
                         <div className="min-w-0">
-                            <p className="text-[8px] md:text-[10px] text-stone-400 dark:text-stone-500 uppercase font-black tracking-widest leading-none mb-0.5 md:mb-1 truncate">{t('warehouse.from')}</p>
-                            <p className="text-[10px] md:text-xs text-slate-900 dark:text-zinc-200 font-black uppercase break-words leading-tight">
+                            <p className="text-[11px] text-[var(--theme-text-secondary)] uppercase font-semibold tracking-wider leading-none mb-1 truncate">{t('warehouse.from')}</p>
+                            <p className="text-xs text-[var(--theme-text-primary)] font-semibold truncate leading-tight">
                                 {data.sourceSite ? (
                                     <>
-                                        {data.sourceSite.name} <span className="text-stone-400 dark:text-stone-500 font-normal lowercase">({data.sourceSite.code || data.sourceSite.id})</span>
+                                        {data.sourceSite.name} <span className="text-[var(--theme-text-secondary)] font-normal font-mono">({data.sourceSite.code || data.sourceSite.id})</span>
                                     </>
                                 ) : t('warehouse.packing.unknownSource')}
                             </p>
                         </div>
                     </div>
                     
-                    <div className="bg-white/40 dark:bg-[#1C2620]/40 p-3 md:p-4 flex items-center gap-2 md:gap-3 lg:col-span-1">
-                        <div className="p-1.5 md:p-2 bg-[#FAF8F5]/85 dark:bg-[#1C2620]/30 rounded-lg text-[#2C5E3B] dark:text-[#A9CBA2] border border-[#E2DCCE]/30 dark:border-white/5 shrink-0">
-                            <ArrowRight size={14} className="md:w-[18px] md:h-[18px]" />
+                    <div className="bg-[var(--theme-bg-card)] p-3.5 md:p-4 flex items-center gap-2.5 md:gap-3 lg:col-span-1">
+                        <div className="p-2 bg-[var(--theme-bg-subtle)] rounded-xl text-[var(--theme-accent)] border border-[var(--theme-border)] shrink-0">
+                            <ArrowRight size={16} />
                         </div>
                         <div className="min-w-0">
-                            <p className="text-[8px] md:text-[10px] text-stone-400 dark:text-stone-500 uppercase font-black tracking-widest leading-none mb-0.5 md:mb-1 truncate">{t('warehouse.to')}</p>
-                            <p className="text-[10px] md:text-xs text-slate-900 dark:text-zinc-200 font-black uppercase break-words leading-tight">
+                            <p className="text-[11px] text-[var(--theme-text-secondary)] uppercase font-semibold tracking-wider leading-none mb-1 truncate">{t('warehouse.to')}</p>
+                            <p className="text-xs text-[var(--theme-text-primary)] font-semibold truncate leading-tight">
                                 {data.destSite ? (
                                     <>
-                                        {data.destSite.name} <span className="text-stone-400 dark:text-stone-500 font-normal lowercase">({data.destSite.code || data.destSite.id})</span>
+                                        {data.destSite.name} <span className="text-[var(--theme-text-secondary)] font-normal font-mono">({data.destSite.code || data.destSite.id})</span>
                                     </>
                                 ) : t('warehouse.packing.unknownDestination')}
                             </p>
@@ -219,9 +220,9 @@ export const PackDetailsModal: React.FC<PackDetailsModalProps> = ({
                 </div>
 
                 {/* Line Items */}
-                <div className="flex-1 overflow-y-auto p-3 md:p-6 custom-scrollbar bg-[#FAF8F5]/30 dark:bg-[#18201B]/30">
-                    <h4 className="text-[9px] md:text-[10px] font-black text-slate-500 dark:text-gray-500 uppercase tracking-[0.2em] mb-2 md:mb-4">{t('warehouse.picking')}</h4>
-                    <div className="space-y-2 md:space-y-3">
+                <div className="flex-1 overflow-y-auto p-4 md:p-6 custom-scrollbar bg-[var(--theme-bg-app)]">
+                    <h4 className="text-[11px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider mb-3">{t('warehouse.picking')}</h4>
+                    <div className="space-y-2.5">
                         {itemsArray.map((item: any, idx: number) => {
                             const isShortPicked = item.orderedQty && item.orderedQty > (item.expectedQty || item.quantity || 1);
 
@@ -233,56 +234,55 @@ export const PackDetailsModal: React.FC<PackDetailsModalProps> = ({
                             );
 
                             return (
-                                <div key={idx} className="bg-white/85 dark:bg-[#1C2620]/50 border border-[#E2DCCE] dark:border-emerald-950/20 rounded-xl p-2.5 md:p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 group hover:bg-[#FAF8F5]/60 dark:hover:bg-[#1C2620]/80 transition-all shadow-sm">
+                                <div key={idx} className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-3 md:p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 group hover:border-[var(--theme-accent)]/30 transition-colors shadow-sm">
                                     <div className="flex flex-row items-center gap-3 md:gap-4 min-w-0">
-                                        <div className="w-8 h-8 md:w-10 md:h-10 bg-[#FAF8F5]/80 dark:bg-[#1C2620]/30 rounded-lg border border-[#E2DCCE]/60 dark:border-[#A9CBA2]/[0.06] flex items-center justify-center text-[#2C5E3B]/60 dark:text-[#A9CBA2]/60 font-black text-[10px] md:text-xs shrink-0 mt-0.5 sm:mt-0 self-start sm:self-center font-mono">
+                                        <div className="w-9 h-9 md:w-10 md:h-10 bg-[var(--theme-bg-subtle)] rounded-xl border border-[var(--theme-border)] flex items-center justify-center text-[var(--theme-text-secondary)] font-semibold text-xs shrink-0 font-mono">
                                             {String(idx + 1).padStart(2, '0')}
                                         </div>
                                         <div className="min-w-0 pr-2">
-                                            <p className="text-[11px] md:text-sm text-slate-900 dark:text-white font-black uppercase tracking-tight break-words leading-tight">{item.name || item.product?.name || productInfo?.name || 'Unknown Item'}</p>
-                                            <div className="flex flex-wrap items-center gap-1.5 md:gap-2 mt-1 md:mt-2">
-                                                <span className="text-[8px] md:text-[10px] text-[#2C5E3B] dark:text-[#A9CBA2] font-mono tracking-widest bg-[#2C5E3B]/10 dark:bg-[#A9CBA2]/10 px-1.5 md:px-2 py-0.5 rounded uppercase border border-[#2C5E3B]/20 dark:border-[#A9CBA2]/20 shrink-0">
+                                            <p className="text-xs md:text-sm text-[var(--theme-text-primary)] font-semibold uppercase tracking-tight break-words leading-tight">{item.name || item.product?.name || productInfo?.name || 'Unknown Item'}</p>
+                                            <div className="flex flex-wrap items-center gap-1.5 md:gap-2 mt-1">
+                                                <span className="text-[11px] text-[var(--theme-accent)] font-mono font-medium bg-[var(--theme-accent)]/10 px-2 py-0.5 rounded-md border border-[var(--theme-accent)]/20 uppercase shrink-0">
                                                     {item.sku || item.product?.sku || productInfo?.sku}
                                                 </span>
 
                                                 {(productInfo?.brand || (item as any).brand) && (
-                                                    <span className="text-[8px] md:text-[10px] text-[#4D6E56] dark:text-[#7A9E83] font-black uppercase tracking-widest bg-stone-100 dark:bg-white/5 px-1.5 md:px-2 py-0.5 rounded border border-dashed border-[#E2DCCE] dark:border-[#A9CBA2]/20 shrink-0 hidden sm:inline-flex">
+                                                    <span className="text-[11px] text-[var(--theme-text-secondary)] font-medium uppercase tracking-wider bg-[var(--theme-bg-subtle)] px-2 py-0.5 rounded-md border border-[var(--theme-border)] shrink-0 hidden sm:inline-flex">
                                                         {productInfo?.brand || (item as any).brand}
                                                     </span>
                                                 )}
 
                                                 {(productInfo?.category || item.category) && (
-                                                    <span className="text-[8px] md:text-[10px] text-[#2C5E3B] dark:text-[#A9CBA2] font-black uppercase tracking-widest border border-[#2C5E3B]/20 bg-[#2C5E3B]/5 dark:bg-[#2C5E3B]/10 px-1.5 md:px-2 py-0.5 rounded shadow-sm shrink-0">
+                                                    <span className="text-[11px] text-[var(--theme-text-primary)] font-medium uppercase tracking-wider border border-[var(--theme-border)] bg-[var(--theme-bg-subtle)] px-2 py-0.5 rounded-md shrink-0">
                                                         {productInfo?.category || item.category}
                                                     </span>
                                                 )}
 
                                                 {productInfo?.size && (
-                                                    <span className="text-[8px] md:text-[10px] text-[#4D6E56] dark:text-[#7A9E83] font-black uppercase tracking-widest bg-stone-100 dark:bg-white/5 px-1.5 md:px-2 py-0.5 rounded border border-[#E2DCCE] dark:border-[#A9CBA2]/20 shrink-0">
+                                                    <span className="text-[11px] text-[var(--theme-text-secondary)] font-medium uppercase tracking-wider bg-[var(--theme-bg-subtle)] px-2 py-0.5 rounded-md border border-[var(--theme-border)] shrink-0">
                                                         {formatProductSize(productInfo)}
                                                     </span>
                                                 )}
-
                                             </div>
                                         </div>
                                     </div>
 
-                                    <div className="flex items-center gap-4 sm:gap-6 ml-11 sm:ml-0 shrink-0 pt-2 sm:pt-0 border-t sm:border-0 border-black/5 dark:border-white/5 justify-end">
+                                    <div className="flex items-center gap-4 sm:gap-6 ml-11 sm:ml-0 shrink-0 pt-2 sm:pt-0 border-t sm:border-0 border-[var(--theme-border)] justify-end">
                                         {item.returnedQty > 0 && (
                                             <div className="text-right">
-                                                <p className="text-[8px] md:text-[9px] text-red-500 dark:text-red-400 uppercase font-black tracking-widest">{t('warehouse.packing.returned')}</p>
-                                                <p className="text-sm md:text-lg font-black text-red-600 dark:text-red-400 tabular-nums font-mono leading-none">
+                                                <p className="text-[11px] text-red-500 uppercase font-semibold tracking-wider">{t('warehouse.packing.returned')}</p>
+                                                <p className="text-base md:text-lg font-bold text-red-600 dark:text-red-400 tabular-nums font-mono leading-none">
                                                     {item.returnedQty}
                                                 </p>
                                             </div>
                                         )}
                                         <div className="text-right">
-                                            <p className="text-[8px] md:text-[9px] text-zinc-400 dark:text-zinc-655 uppercase font-black tracking-widest">{t('warehouse.packing.reqPkd')}</p>
+                                            <p className="text-[11px] text-[var(--theme-text-secondary)] uppercase font-semibold tracking-wider">{t('warehouse.packing.reqPkd')}</p>
                                             <div className="flex items-center gap-1.5 md:gap-2 justify-end">
                                                 {isShortPicked && (
-                                                    <span className="text-[10px] md:text-xs font-mono font-bold text-red-500 line-through opacity-80 leading-none" title={t('warehouse.packing.shortPicked')}>{item.orderedQty}</span>
+                                                    <span className="text-xs font-mono font-semibold text-red-500 line-through opacity-80 leading-none" title={t('warehouse.packing.shortPicked')}>{item.orderedQty}</span>
                                                 )}
-                                                <p className="text-sm md:text-lg font-black text-zinc-955 dark:text-[#A9CBA2] tabular-nums font-mono leading-none">
+                                                <div className="text-base md:text-lg font-bold text-[var(--theme-text-primary)] tabular-nums font-mono leading-none">
                                                     {(() => {
                                                         const expected = item.expectedQty || (item as any).quantity || 0;
                                                         const picked = item.pickedQty !== undefined && item.pickedQty !== null ? item.pickedQty : 0;
@@ -292,18 +292,18 @@ export const PackDetailsModal: React.FC<PackDetailsModalProps> = ({
 
                                                         return (
                                                             <div className="flex flex-col items-end">
-                                                                <span className="text-sm md:text-lg font-mono font-black text-teal-400">
-                                                                    {picked} / {expected} <span className="text-[8px] md:text-[10px] text-teal-500/60 font-bold uppercase tracking-widest">{unitLabel}</span>
+                                                                <span className="text-base md:text-lg font-mono font-bold text-[var(--theme-accent)]">
+                                                                    {picked} / {expected} <span className="text-[11px] font-semibold uppercase">{unitLabel}</span>
                                                                 </span>
                                                                 {packDesc && (
-                                                                    <span className="text-[8px] md:text-[9px] font-mono font-bold text-teal-400/80 uppercase">
+                                                                    <span className="text-[11px] font-mono font-medium text-[var(--theme-text-secondary)] uppercase">
                                                                         ({packDesc})
                                                                     </span>
                                                                 )}
                                                             </div>
                                                         );
                                                     })()}
-                                                </p>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
@@ -314,31 +314,28 @@ export const PackDetailsModal: React.FC<PackDetailsModalProps> = ({
                 </div>
 
                 {/* Footer */}
-                <div className="p-3 md:p-6 border-t border-zinc-200 dark:border-zinc-900 bg-zinc-50/50 dark:bg-zinc-955/40 flex justify-between items-center gap-3 shrink-0">
+                <div className="p-4 md:p-6 border-t border-[var(--theme-border)] bg-[var(--theme-bg-card)] flex justify-between items-center gap-3 shrink-0">
                     <div className="flex gap-2">
                         {data.status === 'Completed' && (
-                            <>
-                                <button
-                                    onClick={() => onReturn?.(selectedItem)}
-                                    className="flex items-center gap-1.5 md:gap-2 px-3 md:px-4 py-2 bg-amber-500/10 hover:bg-amber-500/20 text-amber-600 dark:text-amber-400 border border-amber-500/20 rounded-xl font-black uppercase tracking-widest text-[9px] md:text-[10px] transition-all"
-                                >
-                                    <Undo2 size={12} className="md:w-3.5 md:h-3.5" />
-                                    <span className="hidden sm:inline">{t('warehouse.packing.returnItems')}</span><span className="sm:hidden">{t('warehouse.driverHub.return')}</span>
-                                </button>
-
-                            </>
+                            <button
+                                onClick={() => onReturn?.(selectedItem)}
+                                className="flex items-center gap-1.5 md:gap-2 px-3.5 md:px-4 py-2.5 min-h-[44px] bg-amber-500/10 hover:bg-amber-500/20 text-amber-600 dark:text-amber-400 border border-amber-500/20 rounded-xl font-semibold uppercase tracking-wider text-xs transition-colors"
+                            >
+                                <Undo2 size={14} />
+                                <span className="hidden sm:inline">{t('warehouse.packing.returnItems')}</span><span className="sm:hidden">{t('warehouse.driverHub.return')}</span>
+                            </button>
                         )}
                         <div className="relative">
                             <button
                                 onClick={() => setIsPrintMenuOpen(!isPrintMenuOpen)}
-                                className="flex items-center gap-1.5 md:gap-2 px-3 md:px-4 py-2 bg-[#2C5E3B]/10 hover:bg-[#2C5E3B]/20 text-[#2C5E3B] dark:text-[#A9CBA2] border border-[#2C5E3B]/20 rounded-xl font-black uppercase tracking-widest text-[9px] md:text-[10px] transition-all"
+                                className="flex items-center gap-1.5 md:gap-2 px-3.5 md:px-4 py-2.5 min-h-[44px] bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-app)] text-[var(--theme-text-primary)] border border-[var(--theme-border)] rounded-xl font-semibold uppercase tracking-wider text-xs transition-colors"
                             >
-                                <Printer size={12} className="md:w-3.5 md:h-3.5" />
+                                <Printer size={14} />
                                 <span className="hidden sm:inline">{t('warehouse.reprintPackLabel')}</span><span className="sm:hidden">{t('warehouse.reprintPackLabel').split(' ').slice(-1)[0]}</span>
                             </button>
 
                             {isPrintMenuOpen && (
-                                <div className="absolute bottom-full left-0 mb-2 w-32 md:w-40 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-white/10 rounded-xl shadow-2xl overflow-hidden py-1 z-50 animate-in slide-in-from-bottom-2 duration-200">
+                                <div className="absolute bottom-full left-0 mb-2 w-36 md:w-44 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl shadow-xl overflow-hidden p-1.5 z-50 animate-in slide-in-from-bottom-2 duration-150">
                                     {(['TINY', 'SMALL', 'MEDIUM', 'LARGE', 'XL'] as const).map(size => (
                                         <button
                                             key={size}
@@ -346,7 +343,7 @@ export const PackDetailsModal: React.FC<PackDetailsModalProps> = ({
                                                 onReprintLabel?.(selectedItem, size);
                                                 setIsPrintMenuOpen(false);
                                             }}
-                                            className="w-full text-left px-3 md:px-4 py-2 text-[10px] font-black uppercase tracking-widest text-zinc-650 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-white/5 hover:text-[#2C5E3B] transition-colors"
+                                            className="w-full text-left px-3 py-2 text-xs font-semibold uppercase tracking-wider text-[var(--theme-text-secondary)] hover:bg-[var(--theme-bg-subtle)] hover:text-[var(--theme-text-primary)] rounded-lg transition-colors"
                                         >
                                             {size}
                                         </button>
@@ -358,7 +355,7 @@ export const PackDetailsModal: React.FC<PackDetailsModalProps> = ({
 
                     <button
                         onClick={onClose}
-                        className="px-6 md:px-8 py-2 md:py-2.5 bg-zinc-100 dark:bg-white text-zinc-955 dark:text-black hover:bg-zinc-200 dark:hover:bg-zinc-100 font-black uppercase tracking-widest text-[9px] md:text-[10px] rounded-xl transition-all shadow-md border border-zinc-300 dark:border-white/10"
+                        className="px-6 md:px-8 py-2.5 min-h-[44px] bg-[var(--theme-bg-subtle)] text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-app)] font-semibold uppercase tracking-wider text-xs rounded-xl transition-colors border border-[var(--theme-border)]"
                     >
                         {t('warehouse.dismiss')}
                     </button>

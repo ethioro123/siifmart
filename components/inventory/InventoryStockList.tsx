@@ -142,7 +142,7 @@ export const InventoryStockList: React.FC<InventoryStockListProps> = ({
 
     return (
         <div className="flex flex-col">
-            <div className="flex-1 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] flex flex-col rounded-2xl overflow-hidden shadow-sm">
+            <div className="flex-1 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] flex flex-col rounded-2xl isolate overflow-hidden shadow-xs">
                 {/* Search, Filter Toolbar & Bulk Indicators */}
                 <InventoryToolbar
                     products={visibleProducts}
@@ -200,39 +200,39 @@ export const InventoryStockList: React.FC<InventoryStockListProps> = ({
                     {visibleProducts.length === 0 && (
                         <div className="text-center py-12 text-[var(--theme-text-muted)]">
                             <Box size={48} className="mx-auto mb-4 opacity-50" />
-                            <p className="font-bold text-[var(--theme-text-secondary)]">No products found</p>
-                            <p className="text-xs mt-2">Try adjusting your filters or search term</p>
+                            <p className="font-semibold text-sm text-[var(--theme-text-secondary)]">No products found</p>
+                            <p className="text-xs mt-1">Try adjusting your filters or search term</p>
                         </div>
                     )}
                 </div>
 
                 {/* Product Pagination Controls */}
-                <div className="flex justify-between items-center p-6 border-t border-[var(--theme-border)] bg-[var(--theme-bg-subtle)] rounded-b-2xl">
-                    <div className="text-[11px] font-bold text-[var(--theme-text-secondary)] uppercase tracking-wider flex items-center gap-3">
+                <div className="flex flex-col sm:flex-row justify-between items-center gap-4 p-4 sm:p-5 border-t border-[var(--theme-border)] bg-[var(--theme-bg-subtle)] rounded-b-2xl">
+                    <div className="text-[11px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider flex items-center gap-2.5">
                         <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                        Displays: <span className="text-[var(--theme-text-primary)] font-bold">{products.length}</span> <span className="text-[var(--theme-text-muted)]">/</span> <span className="text-[var(--theme-text-secondary)]">{formatCompactNumber(totalCount)}</span> Records
+                        Displays: <span className="text-[var(--theme-text-primary)] font-bold font-mono tabular-nums">{products.length}</span> <span className="text-[var(--theme-text-muted)]">/</span> <span className="text-[var(--theme-text-secondary)] font-mono tabular-nums">{formatCompactNumber(totalCount)}</span> Records
                     </div>
-                    <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-3">
                         <button
                             onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
                             disabled={currentPage === 1 || isLoading}
-                            className="px-4 py-2 bg-[var(--theme-bg-card)] hover:bg-[var(--theme-bg-card-hover)] disabled:opacity-30 rounded-full text-xs font-bold text-[var(--theme-text-primary)] transition-all border border-[var(--theme-border)] flex items-center gap-2 group cursor-pointer"
+                            className="h-9 px-3.5 bg-[var(--theme-bg-card)] hover:bg-[var(--theme-bg-card-hover)] disabled:opacity-30 rounded-xl text-xs font-semibold text-[var(--theme-text-primary)] transition-colors border border-[var(--theme-border)] flex items-center gap-1.5 group cursor-pointer shadow-xs active:scale-[0.98]"
                         >
                             <ChevronLeft size={14} className="group-hover:-translate-x-0.5 transition-transform" />
                             Prev
                         </button>
 
-                        <div className="flex items-center gap-2 bg-[var(--theme-bg-card)] px-3 py-1.5 rounded-full border border-[var(--theme-border)]">
-                            <span className="text-[10px] font-bold text-[var(--theme-text-secondary)] uppercase tracking-wider">Page</span>
-                            <span className="text-xs font-bold text-[var(--theme-text-primary)] font-mono">{currentPage}</span>
-                            <span className="text-[var(--theme-text-muted)] mx-1 text-[10px]">/</span>
-                            <span className="text-xs font-bold text-[var(--theme-text-secondary)] font-mono">{Math.max(1, Math.ceil(totalCount / itemsPerPage))}</span>
+                        <div className="flex items-center gap-2 bg-[var(--theme-bg-card)] px-3 py-1.5 rounded-xl border border-[var(--theme-border)] shadow-xs">
+                            <span className="text-[11px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider">Page</span>
+                            <span className="text-xs font-semibold text-[var(--theme-text-primary)] font-mono tabular-nums">{currentPage}</span>
+                            <span className="text-[var(--theme-text-muted)] mx-0.5 text-[11px]">/</span>
+                            <span className="text-xs font-semibold text-[var(--theme-text-secondary)] font-mono tabular-nums">{Math.max(1, Math.ceil(totalCount / itemsPerPage))}</span>
                         </div>
 
                         <button
                             onClick={() => setCurrentPage(prev => Math.min(prev + 1, Math.max(1, Math.ceil(totalCount / itemsPerPage))))}
                             disabled={currentPage >= Math.ceil(totalCount / itemsPerPage) || isLoading}
-                            className="px-4 py-2 bg-[var(--theme-bg-card)] hover:bg-[var(--theme-bg-card-hover)] disabled:opacity-30 rounded-full text-xs font-bold text-[var(--theme-text-primary)] transition-all border border-[var(--theme-border)] flex items-center gap-2 group cursor-pointer"
+                            className="h-9 px-3.5 bg-[var(--theme-bg-card)] hover:bg-[var(--theme-bg-card-hover)] disabled:opacity-30 rounded-xl text-xs font-semibold text-[var(--theme-text-primary)] transition-colors border border-[var(--theme-border)] flex items-center gap-1.5 group cursor-pointer shadow-xs active:scale-[0.98]"
                         >
                             Next
                             <ChevronRight size={14} className="group-hover:translate-x-0.5 transition-transform" />

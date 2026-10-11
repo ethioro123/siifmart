@@ -155,23 +155,23 @@ export const UnitTab: React.FC<Props> = ({
 
                 {/* Smart Intelligence Panel */}
                 {smartInsights && (
-                    <div className="rounded-2xl border-2 border-violet-300/60 dark:border-violet-500/40 overflow-hidden shadow-sm">
-                        <div className="flex items-center gap-2 px-4 py-2.5 bg-violet-50 dark:bg-violet-900/20 border-b border-violet-200/60 dark:border-violet-500/30">
-                            <Sparkles size={14} className="text-violet-600 dark:text-violet-400 flex-shrink-0" />
-                            <p className="text-xs font-black uppercase tracking-wider text-violet-700 dark:text-violet-300">Smart Intelligence</p>
-                            <span className={`ml-auto text-[10px] font-black uppercase px-2 py-0.5 rounded-md ${
+                    <div className="rounded-2xl border border-[var(--theme-border)] bg-[var(--theme-bg-card)] overflow-hidden shadow-sm">
+                        <div className="flex items-center gap-2 px-4 py-2.5 bg-[var(--theme-bg-subtle)] border-b border-[var(--theme-border)]">
+                            <Sparkles size={14} className="text-[var(--theme-accent)] flex-shrink-0" />
+                            <p className="text-xs font-semibold uppercase tracking-wider text-[var(--theme-text-primary)]">Smart Intelligence</p>
+                            <span className={`ml-auto text-[10px] font-semibold uppercase px-2 py-0.5 rounded-full border ${
                                 smartInsights.confidence === 'high'
-                                    ? 'bg-violet-500/15 text-violet-700 dark:text-violet-300'
-                                    : 'bg-amber-500/15 text-amber-700 dark:text-amber-300'
+                                    ? 'bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] border-[var(--theme-accent)]/20'
+                                    : 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20'
                             }`}>
                                 {smartInsights.confidence === 'high' ? 'Auto-Detected' : 'Inferred'}
                             </span>
                         </div>
                         <div className="p-4 space-y-2">
                             {smartInsights.lines.map((line, i) => (
-                                <div key={i} className={`flex items-center gap-2 ${i === 0 ? '' : 'pl-2 border-l-2 border-violet-200 dark:border-violet-700'}`}>
-                                    {i === 0 && <Zap size={13} className="text-violet-500 flex-shrink-0" />}
-                                    <p className={`font-mono ${i === 0 ? 'text-sm font-black text-violet-900 dark:text-violet-100' : 'text-xs font-bold text-violet-700 dark:text-violet-300'}`}>
+                                <div key={i} className={`flex items-center gap-2 ${i === 0 ? '' : 'pl-2 border-l-2 border-[var(--theme-accent)]/30'}`}>
+                                    {i === 0 && <Zap size={13} className="text-[var(--theme-accent)] flex-shrink-0" />}
+                                    <p className={`font-mono tabular-nums ${i === 0 ? 'text-sm font-semibold text-[var(--theme-text-primary)]' : 'text-xs font-medium text-[var(--theme-text-secondary)]'}`}>
                                         {line}
                                     </p>
                                 </div>
@@ -179,10 +179,10 @@ export const UnitTab: React.FC<Props> = ({
                         </div>
                         {isAutoDetected && (
                             <div className="px-4 pb-3">
-                                <div className="flex items-center gap-2 px-2.5 py-1.5 bg-violet-500/10 rounded-lg">
-                                    <Info size={12} className="text-violet-500 flex-shrink-0" />
-                                    <p className="text-[11px] text-violet-700 dark:text-violet-300 font-semibold">
-                                        Sell mode auto-matched from product unit: <span className="font-black uppercase">{product.unit}</span>
+                                <div className="flex items-center gap-2 px-2.5 py-1.5 bg-[var(--theme-accent)]/10 rounded-lg">
+                                    <Info size={12} className="text-[var(--theme-accent)] flex-shrink-0" />
+                                    <p className="text-[11px] text-[var(--theme-text-primary)] font-medium">
+                                        Sell mode auto-matched from product unit: <span className="font-semibold uppercase">{product.unit}</span>
                                     </p>
                                 </div>
                             </div>
@@ -191,35 +191,35 @@ export const UnitTab: React.FC<Props> = ({
                 )}
 
                 {/* Supplier / Manufacturer Spec */}
-                <div className="rounded-2xl border-2 border-stone-200 dark:border-white/10 overflow-hidden shadow-sm">
-                    <div className="flex items-center gap-2.5 px-4 py-3 bg-stone-100 dark:bg-black/30 border-b border-stone-200 dark:border-white/10">
-                        <Lock size={15} className="text-stone-500 flex-shrink-0" />
-                        <p className="text-xs font-black uppercase tracking-wider text-stone-700 dark:text-stone-200">Supplier Specification</p>
-                        <span className="ml-auto text-[10px] font-black uppercase px-2 py-0.5 bg-stone-200 dark:bg-white/10 text-stone-600 dark:text-stone-400 rounded-md">Read-Only</span>
+                <div className="rounded-2xl border border-[var(--theme-border)] bg-[var(--theme-bg-card)] overflow-hidden shadow-sm">
+                    <div className="flex items-center gap-2.5 px-4 py-3 bg-[var(--theme-bg-subtle)] border-b border-[var(--theme-border)]">
+                        <Lock size={15} className="text-[var(--theme-text-secondary)] flex-shrink-0" />
+                        <p className="text-xs font-semibold uppercase tracking-wider text-[var(--theme-text-primary)]">Supplier Specification</p>
+                        <span className="ml-auto text-[10px] font-semibold uppercase px-2 py-0.5 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-[var(--theme-text-secondary)] rounded-md">Read-Only</span>
                     </div>
                     <div className="p-4">
                         {hasData ? (
                             <div className="grid grid-cols-2 gap-3.5">
                                 {suppBrand && (
                                     <div className="flex items-start gap-2">
-                                        <Tag size={14} className="text-stone-400 mt-0.5 flex-shrink-0" />
+                                        <Tag size={14} className="text-[var(--theme-text-secondary)] mt-0.5 flex-shrink-0" />
                                         <div>
-                                            <p className="text-xs text-stone-500 font-bold uppercase tracking-wider">Brand</p>
-                                            <p className="text-sm font-black text-gray-900 dark:text-white mt-0.5">{suppBrand}</p>
+                                            <p className="text-[10px] text-[var(--theme-text-secondary)] font-semibold uppercase tracking-wider">Brand</p>
+                                            <p className="text-sm font-semibold text-[var(--theme-text-primary)] mt-0.5">{suppBrand}</p>
                                         </div>
                                     </div>
                                 )}
                                 {suppSize && (
                                     <div className="flex items-start gap-2">
-                                        <Ruler size={14} className="text-stone-400 mt-0.5 flex-shrink-0" />
+                                        <Ruler size={14} className="text-[var(--theme-text-secondary)] mt-0.5 flex-shrink-0" />
                                         <div>
-                                            <p className="text-xs text-stone-500 font-bold uppercase tracking-wider">Net Content</p>
-                                            <p className="text-sm font-black text-gray-900 dark:text-white font-mono mt-0.5">
+                                            <p className="text-[10px] text-[var(--theme-text-secondary)] font-semibold uppercase tracking-wider">Net Content</p>
+                                            <p className="text-sm font-semibold font-mono tabular-nums text-[var(--theme-text-primary)] mt-0.5">
                                                 {suppSize}{suppUnit ? ` ${suppUnit}` : ''}
                                             </p>
                                             {smartAttrs.formattedNet && (
-                                                <span className="text-[11px] font-black px-2 py-0.5 bg-green-500/10 text-green-700 dark:text-green-400 rounded-md inline-block mt-1 border border-green-500/20">
-                                                    ≡ {smartAttrs.formattedNet}
+                                                <span className="text-[10px] font-semibold px-2 py-0.5 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 rounded-md inline-block mt-1 border border-emerald-500/20 font-mono">
+                                                    = {smartAttrs.formattedNet}
                                                 </span>
                                             )}
                                         </div>
@@ -227,31 +227,31 @@ export const UnitTab: React.FC<Props> = ({
                                 )}
                                 {caseSize && (
                                     <div className="flex items-start gap-2">
-                                        <Package size={14} className="text-stone-400 mt-0.5 flex-shrink-0" />
+                                        <Package size={14} className="text-[var(--theme-text-secondary)] mt-0.5 flex-shrink-0" />
                                         <div>
-                                            <p className="text-xs text-stone-500 font-bold uppercase tracking-wider">Case Size</p>
-                                            <p className="text-sm font-black text-gray-900 dark:text-white font-mono mt-0.5">{caseSize}</p>
+                                            <p className="text-[10px] text-[var(--theme-text-secondary)] font-semibold uppercase tracking-wider">Case Size</p>
+                                            <p className="text-sm font-semibold font-mono tabular-nums text-[var(--theme-text-primary)] mt-0.5">{caseSize}</p>
                                         </div>
                                     </div>
                                 )}
                                 {packQty && (
                                     <div className="flex items-start gap-2">
-                                        <Layers size={14} className="text-stone-400 mt-0.5 flex-shrink-0" />
+                                        <Layers size={14} className="text-[var(--theme-text-secondary)] mt-0.5 flex-shrink-0" />
                                         <div>
-                                            <p className="text-xs text-stone-500 font-bold uppercase tracking-wider">Units / Case</p>
-                                            <p className="text-sm font-black text-gray-900 dark:text-white font-mono mt-0.5">{packQty}</p>
+                                            <p className="text-[10px] text-[var(--theme-text-secondary)] font-semibold uppercase tracking-wider">Units / Case</p>
+                                            <p className="text-sm font-semibold font-mono tabular-nums text-[var(--theme-text-primary)] mt-0.5">{packQty}</p>
                                         </div>
                                     </div>
                                 )}
                             </div>
                         ) : (
-                            <p className="text-xs text-stone-500 font-semibold italic">No supplier spec on record. Captured from POs on stock receipt.</p>
+                            <p className="text-xs text-[var(--theme-text-secondary)] font-medium italic">No supplier spec on record. Captured from POs on stock receipt.</p>
                         )}
                     </div>
                     <div className="px-4 pb-4">
-                        <div className="flex items-start gap-2 p-2.5 bg-amber-50 dark:bg-amber-900/15 border border-amber-300/60 dark:border-amber-500/30 rounded-xl">
-                            <AlertTriangle size={14} className="text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
-                            <p className="text-xs text-amber-800 dark:text-amber-300 font-medium leading-snug">
+                        <div className="flex items-start gap-2 p-2.5 bg-amber-500/10 border border-amber-500/20 rounded-xl">
+                            <AlertTriangle size={14} className="text-amber-500 flex-shrink-0 mt-0.5" />
+                            <p className="text-xs text-amber-700 dark:text-amber-300 font-medium leading-snug">
                                 Physical content is supplier-defined. Configure how you sell it on the right.
                             </p>
                         </div>
@@ -259,68 +259,68 @@ export const UnitTab: React.FC<Props> = ({
                 </div>
 
                 {/* Live POS Label Preview */}
-                <div className="p-4 bg-[#2C5E3B]/10 border-2 border-[#2C5E3B]/30 rounded-2xl flex items-center gap-3 shadow-sm">
-                    <div className="w-10 h-10 rounded-xl bg-[#2C5E3B] flex items-center justify-center flex-shrink-0 text-white shadow-sm">
+                <div className="p-4 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-2xl flex items-center gap-3 shadow-sm">
+                    <div className="w-10 h-10 rounded-xl bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] flex items-center justify-center flex-shrink-0 shadow-sm">
                         <Check size={18} />
                     </div>
                     <div className="min-w-0">
-                        <p className="text-xs text-[#2C5E3B] dark:text-[#A9CBA2] font-black uppercase tracking-wider">POS Label Preview</p>
-                        <p className="text-sm font-black text-stone-900 dark:text-white truncate mt-0.5">{product.name} · {preview}</p>
+                        <p className="text-xs text-[var(--theme-accent)] font-semibold uppercase tracking-wider">POS Label Preview</p>
+                        <p className="text-sm font-semibold text-[var(--theme-text-primary)] truncate mt-0.5 font-mono">{product.name} · {preview}</p>
                     </div>
                 </div>
             </div>
 
             {/* ── RIGHT COLUMN (lg:col-span-7): How You Sell It (EDITABLE) ── */}
             <div className="lg:col-span-7 space-y-4">
-                <div className="rounded-2xl border-2 border-[#2C5E3B]/30 dark:border-[#A9CBA2]/25 overflow-hidden shadow-sm">
-                    <div className="flex items-center gap-2.5 px-4 py-3 bg-[#2C5E3B]/10 dark:bg-[#A9CBA2]/10 border-b border-[#2C5E3B]/20 dark:border-[#A9CBA2]/15">
-                        <ShoppingCart size={15} className="text-[#2C5E3B] dark:text-[#A9CBA2] flex-shrink-0" />
-                        <p className="text-xs font-black uppercase tracking-wider text-[#2C5E3B] dark:text-[#A9CBA2]">How You Sell It</p>
-                        <span className="ml-auto text-[10px] font-black uppercase px-2 py-0.5 bg-[#2C5E3B]/15 dark:bg-[#A9CBA2]/20 text-[#2C5E3B] dark:text-[#A9CBA2] rounded-md">Editable</span>
+                <div className="rounded-2xl border border-[var(--theme-border)] bg-[var(--theme-bg-card)] overflow-hidden shadow-sm">
+                    <div className="flex items-center gap-2.5 px-4 py-3 bg-[var(--theme-bg-subtle)] border-b border-[var(--theme-border)]">
+                        <ShoppingCart size={15} className="text-[var(--theme-accent)] flex-shrink-0" />
+                        <p className="text-xs font-semibold uppercase tracking-wider text-[var(--theme-text-primary)]">How You Sell It</p>
+                        <span className="ml-auto text-[10px] font-semibold uppercase px-2 py-0.5 bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] border border-[var(--theme-accent)]/20 rounded-md">Editable</span>
                     </div>
                     <div className="p-5 space-y-5">
 
                         {/* Step 0: Location Scope Application */}
                         <div>
-                            <p className="text-xs font-black uppercase tracking-wider text-stone-700 dark:text-stone-300 mb-2 flex items-center gap-2">
-                                <span className="w-5 h-5 rounded-full bg-[#2C5E3B] text-white text-[11px] flex items-center justify-center font-black flex-shrink-0 shadow-sm">0</span>
+                            <p className="text-xs font-semibold uppercase tracking-wider text-[var(--theme-text-primary)] mb-2 flex items-center gap-2">
+                                <span className="w-5 h-5 rounded-full bg-[var(--theme-accent)] text-white text-[11px] flex items-center justify-center font-semibold flex-shrink-0 shadow-sm">0</span>
                                 Apply to Location(s)
                             </p>
                             <div className="grid grid-cols-3 gap-2">
                                 <button type="button" onClick={() => setUnitCfg(c => ({ ...c, scope: 'single' }))}
-                                    className={`p-2.5 rounded-xl border text-left transition-all cursor-pointer flex flex-col justify-between ${ (unitCfg.scope || 'single') === 'single' ? 'bg-[#2C5E3B] border-[#2C5E3B] text-white shadow-md' : 'bg-stone-50 dark:bg-black/20 border-stone-200 dark:border-white/10 text-stone-700 dark:text-stone-300 hover:border-[#2C5E3B]/50' }`}>
+                                    className={`p-2.5 rounded-xl border text-left transition-all cursor-pointer flex flex-col justify-between ${ (unitCfg.scope || 'single') === 'single' ? 'bg-[var(--theme-accent)] border-[var(--theme-accent)] text-white shadow-sm' : 'bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:border-[var(--theme-accent)]/50' }`}>
                                     <div className="flex items-center justify-between mb-1">
-                                        <p className="text-xs font-black uppercase">Certain Location</p>
+                                        <p className="text-xs font-semibold uppercase">Certain Location</p>
                                         {(unitCfg.scope || 'single') === 'single' && <Check size={14} className="text-white" />}
                                     </div>
-                                    <p className={`text-[10px] leading-tight ${ (unitCfg.scope || 'single') === 'single' ? 'text-white/80' : 'text-stone-400' }`}>This store only</p>
+                                    <p className={`text-[10px] leading-tight ${ (unitCfg.scope || 'single') === 'single' ? 'text-white/80' : 'text-[var(--theme-text-secondary)]' }`}>This store only</p>
                                 </button>
                                 <button type="button" onClick={() => setUnitCfg(c => ({ ...c, scope: 'custom', selectedSiteIds: c.selectedSiteIds?.length ? c.selectedSiteIds : (sites || []).map(s => s.id) }))}
-                                    className={`p-2.5 rounded-xl border text-left transition-all cursor-pointer flex flex-col justify-between ${ unitCfg.scope === 'custom' ? 'bg-amber-600 border-amber-600 text-white shadow-md' : 'bg-stone-50 dark:bg-black/20 border-stone-200 dark:border-white/10 text-stone-700 dark:text-stone-300 hover:border-amber-600/50' }`}>
+                                    className={`p-2.5 rounded-xl border text-left transition-all cursor-pointer flex flex-col justify-between ${ unitCfg.scope === 'custom' ? 'bg-amber-600 border-amber-600 text-white shadow-sm' : 'bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:border-amber-600/50' }`}>
                                     <div className="flex items-center justify-between mb-1">
-                                        <p className="text-xs font-black uppercase">Several Places</p>
+                                        <p className="text-xs font-semibold uppercase">Several Places</p>
                                         {unitCfg.scope === 'custom' && <Check size={14} className="text-white" />}
                                     </div>
-                                    <p className={`text-[10px] leading-tight ${ unitCfg.scope === 'custom' ? 'text-white/80' : 'text-stone-400' }`}>{(unitCfg.selectedSiteIds || []).length} site(s) selected</p>
+                                    <p className={`text-[10px] leading-tight ${ unitCfg.scope === 'custom' ? 'text-white/80' : 'text-[var(--theme-text-secondary)]' }`}>{(unitCfg.selectedSiteIds || []).length} site(s) selected</p>
                                 </button>
                                 <button type="button" onClick={() => setUnitCfg(c => ({ ...c, scope: 'all' }))}
-                                    className={`p-2.5 rounded-xl border text-left transition-all cursor-pointer flex flex-col justify-between ${ unitCfg.scope === 'all' ? 'bg-blue-600 border-blue-600 text-white shadow-md' : 'bg-stone-50 dark:bg-black/20 border-stone-200 dark:border-white/10 text-stone-700 dark:text-stone-300 hover:border-blue-600/50' }`}>
+                                    className={`p-2.5 rounded-xl border text-left transition-all cursor-pointer flex flex-col justify-between ${ unitCfg.scope === 'all' ? 'bg-blue-600 border-blue-600 text-white shadow-sm' : 'bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:border-blue-600/50' }`}>
                                     <div className="flex items-center justify-between mb-1">
-                                        <p className="text-xs font-black uppercase">All Locations</p>
+                                        <p className="text-xs font-semibold uppercase">All Locations</p>
                                         {unitCfg.scope === 'all' && <Check size={14} className="text-white" />}
                                     </div>
-                                    <p className={`text-[10px] leading-tight ${ unitCfg.scope === 'all' ? 'text-white/80' : 'text-stone-400' }`}>Global network</p>
+                                    <p className={`text-[10px] leading-tight ${ unitCfg.scope === 'all' ? 'text-white/80' : 'text-[var(--theme-text-secondary)]' }`}>Global network</p>
                                 </button>
                             </div>
                             {unitCfg.scope === 'custom' && sites && sites.length > 0 && (
-                                <div className="mt-2 p-2 bg-amber-50 dark:bg-amber-950/30 border border-amber-300 dark:border-amber-700/50 rounded-xl grid grid-cols-2 gap-1.5 max-h-32 overflow-y-auto">
+                                <div className="mt-2 p-2 bg-amber-500/10 border border-amber-500/20 rounded-xl grid grid-cols-2 gap-1.5 max-h-32 overflow-y-auto">
                                     {sites.map(site => (
-                                        <label key={site.id} className="flex items-center gap-2 text-xs font-semibold text-stone-700 dark:text-stone-200 cursor-pointer p-1 hover:bg-amber-100/50 dark:hover:bg-white/5 rounded-lg">
+                                        <label key={site.id} className="flex items-center gap-2 text-xs font-medium text-[var(--theme-text-primary)] cursor-pointer p-1 hover:bg-white/5 rounded-lg">
                                             <input type="checkbox" checked={(unitCfg.selectedSiteIds || []).includes(site.id)}
                                                 onChange={e => {
                                                     const cur = unitCfg.selectedSiteIds || [];
                                                     setUnitCfg(c => ({ ...c, selectedSiteIds: e.target.checked ? [...cur, site.id] : cur.filter(id => id !== site.id) }));
-                                                }} className="rounded border-stone-300 text-amber-600 focus:ring-amber-500" />
+                                                }} className="rounded border-[var(--theme-border)] text-[var(--theme-accent)] focus:ring-[var(--theme-accent)]" />
                                             <span className="truncate">{site.name}</span>
                                         </label>
                                     ))}
@@ -330,8 +330,8 @@ export const UnitTab: React.FC<Props> = ({
 
                         {/* Step 1: Selling mode */}
                         <div>
-                            <p className="text-xs font-black uppercase tracking-wider text-stone-700 dark:text-stone-300 mb-2.5 flex items-center gap-2">
-                                <span className="w-6 h-6 rounded-full bg-[#2C5E3B] text-white text-xs flex items-center justify-center font-black flex-shrink-0 shadow-sm">1</span>
+                            <p className="text-xs font-semibold uppercase tracking-wider text-[var(--theme-text-primary)] mb-2.5 flex items-center gap-2">
+                                <span className="w-6 h-6 rounded-full bg-[var(--theme-accent)] text-white text-xs flex items-center justify-center font-semibold flex-shrink-0 shadow-sm">1</span>
                                 Charged at POS by…
                             </p>
                             <div className="grid grid-cols-3 gap-2.5">
@@ -346,22 +346,22 @@ export const UnitTab: React.FC<Props> = ({
                                             }}
                                             className={`relative p-3 rounded-xl border text-left transition-all cursor-pointer ${
                                                 isActive
-                                                    ? 'bg-[#2C5E3B] border-[#2C5E3B] text-white shadow-md'
-                                                    : 'bg-stone-50 dark:bg-black/20 border-stone-200 dark:border-white/10 text-stone-700 dark:text-stone-300 hover:border-[#2C5E3B]/50'
+                                                    ? 'bg-[var(--theme-accent)] border-[var(--theme-accent)] text-white shadow-sm'
+                                                    : 'bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:border-[var(--theme-accent)]/40'
                                             }`}>
                                             {isAutoMatch && !isActive && (
-                                                <span className="absolute -top-1.5 -right-1.5 bg-violet-500 text-white text-[9px] font-black px-1.5 py-0.5 rounded-full uppercase shadow-sm">
+                                                <span className="absolute -top-1.5 -right-1.5 bg-violet-500 text-white text-[9px] font-semibold px-1.5 py-0.5 rounded-full uppercase shadow-sm">
                                                     Auto
                                                 </span>
                                             )}
                                             {isAutoMatch && isActive && (
-                                                <span className="absolute -top-1.5 -right-1.5 bg-white text-[#2C5E3B] text-[9px] font-black px-1.5 py-0.5 rounded-full uppercase shadow-sm">
-                                                    ✓ Auto
+                                                <span className="absolute -top-1.5 -right-1.5 bg-white text-[var(--theme-accent)] text-[9px] font-semibold px-1.5 py-0.5 rounded-full uppercase shadow-sm">
+                                                    Auto
                                                 </span>
                                             )}
                                             <opt.icon size={16} className="mb-1" />
-                                            <p className="text-xs font-black uppercase">{opt.label}</p>
-                                            <p className={`text-[11px] mt-0.5 leading-snug font-medium ${isActive ? 'text-white/80' : 'text-stone-500 dark:text-stone-400'}`}>{opt.desc}</p>
+                                            <p className="text-xs font-semibold uppercase">{opt.label}</p>
+                                            <p className={`text-[11px] mt-0.5 leading-snug font-medium ${isActive ? 'text-white/80' : 'text-[var(--theme-text-secondary)]'}`}>{opt.desc}</p>
                                         </button>
                                     );
                                 })}
@@ -370,8 +370,8 @@ export const UnitTab: React.FC<Props> = ({
 
                         {/* Step 2: Selling unit */}
                         <div>
-                            <p className="text-xs font-black uppercase tracking-wider text-stone-700 dark:text-stone-300 mb-2.5 flex items-center gap-2">
-                                <span className="w-6 h-6 rounded-full bg-[#2C5E3B] text-white text-xs flex items-center justify-center font-black flex-shrink-0 shadow-sm">2</span>
+                            <p className="text-xs font-semibold uppercase tracking-wider text-[var(--theme-text-primary)] mb-2.5 flex items-center gap-2">
+                                <span className="w-6 h-6 rounded-full bg-[var(--theme-accent)] text-white text-xs flex items-center justify-center font-semibold flex-shrink-0 shadow-sm">2</span>
                                 Selling unit — what is "1" at checkout?
                             </p>
                             <div className="grid grid-cols-4 gap-2 max-h-36 overflow-y-auto pr-1">
@@ -380,11 +380,11 @@ export const UnitTab: React.FC<Props> = ({
                                         onClick={() => setUnitCfg(c => ({ ...c, sellUnit: u.code }))}
                                         className={`p-2.5 rounded-xl border text-left transition-all cursor-pointer ${
                                             unitCfg.sellUnit === u.code
-                                                ? 'bg-[#2C5E3B]/15 border-[#2C5E3B] text-[#2C5E3B] dark:text-[#A9CBA2] font-black'
-                                                : 'bg-stone-50 dark:bg-black/20 border-stone-200 dark:border-white/10 text-stone-700 dark:text-stone-300 hover:border-[#2C5E3B]/30'
+                                                ? 'bg-[var(--theme-accent)]/10 border-[var(--theme-accent)] text-[var(--theme-accent)] font-semibold'
+                                                : 'bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:border-[var(--theme-accent)]/30'
                                         }`}>
-                                        <p className="text-xs font-bold truncate">{u.label}</p>
-                                        <p className="text-xs text-stone-500 dark:text-stone-400 font-mono mt-0.5">{u.shortLabel}</p>
+                                        <p className="text-xs font-semibold truncate">{u.label}</p>
+                                        <p className="text-xs text-[var(--theme-text-secondary)] font-mono mt-0.5">{u.shortLabel}</p>
                                     </button>
                                 ))}
                             </div>
@@ -393,13 +393,13 @@ export const UnitTab: React.FC<Props> = ({
                         {/* Step 3: Pack & Case Multipliers */}
                         {unitCfg.sellMode === 'count' && (
                             <div>
-                                <p className="text-xs font-black uppercase tracking-wider text-stone-700 dark:text-stone-300 mb-2.5 flex items-center gap-2">
-                                    <span className="w-6 h-6 rounded-full bg-amber-500 text-white text-xs flex items-center justify-center font-black flex-shrink-0 shadow-sm">3</span>
-                                    Pack &amp; Case Multipliers <span className="font-normal normal-case text-stone-500">(supplier units per pack/case)</span>
+                                <p className="text-xs font-semibold uppercase tracking-wider text-[var(--theme-text-primary)] mb-2.5 flex items-center gap-2">
+                                    <span className="w-6 h-6 rounded-full bg-amber-500 text-white text-xs flex items-center justify-center font-semibold flex-shrink-0 shadow-sm">3</span>
+                                    Pack &amp; Case Multipliers <span className="font-normal normal-case text-[var(--theme-text-secondary)]">(supplier units per pack/case)</span>
                                 </p>
                                 <div className="grid grid-cols-3 gap-2.5">
                                     <div>
-                                        <label className="text-xs text-stone-600 dark:text-stone-300 font-bold uppercase block mb-1">Units per Pack</label>
+                                        <label className="text-xs text-[var(--theme-text-secondary)] font-medium block mb-1">Units per Pack</label>
                                         <input type="number" min="1" value={unitCfg.packOf}
                                             aria-label="Units per Pack"
                                             title="Units per Pack"
@@ -408,7 +408,7 @@ export const UnitTab: React.FC<Props> = ({
                                             className={inputCls} />
                                     </div>
                                     <div>
-                                        <label className="text-xs text-stone-600 dark:text-stone-300 font-bold uppercase block mb-1">Packs per Case</label>
+                                        <label className="text-xs text-[var(--theme-text-secondary)] font-medium block mb-1">Packs per Case</label>
                                         <input type="number" min="1" value={unitCfg.caseOf}
                                             aria-label="Packs per Case"
                                             title="Packs per Case"
@@ -417,7 +417,7 @@ export const UnitTab: React.FC<Props> = ({
                                             className={inputCls} />
                                     </div>
                                     <div>
-                                        <label className="text-xs text-stone-600 dark:text-stone-300 font-bold uppercase block mb-1">Label Override</label>
+                                        <label className="text-xs text-[var(--theme-text-secondary)] font-medium block mb-1">Label Override</label>
                                         <input type="text" value={unitCfg.label}
                                             aria-label="Display Label Override"
                                             title="Display Label Override"
@@ -431,13 +431,13 @@ export const UnitTab: React.FC<Props> = ({
 
                         {/* Step 3 (weight/volume): Quantity definition */}
                         {(unitCfg.sellMode === 'weight' || unitCfg.sellMode === 'volume') && smartInsights && (
-                            <div className="p-3.5 bg-violet-50 dark:bg-violet-900/15 border border-violet-200 dark:border-violet-700/50 rounded-xl">
-                                <p className="text-xs font-black uppercase tracking-wider text-violet-700 dark:text-violet-300 mb-2 flex items-center gap-1.5">
+                            <div className="p-3.5 bg-violet-500/10 border border-violet-500/20 rounded-xl">
+                                <p className="text-xs font-semibold uppercase tracking-wider text-violet-600 dark:text-violet-400 mb-2 flex items-center gap-1.5">
                                     <Sparkles size={12} /> Smart Conversion Summary
                                 </p>
                                 <div className="space-y-1">
                                     {smartInsights.lines.map((line, i) => (
-                                        <p key={i} className={`font-mono ${i === 0 ? 'text-sm font-black text-violet-900 dark:text-violet-100' : 'text-xs font-bold text-violet-600 dark:text-violet-400'}`}>
+                                        <p key={i} className={`font-mono tabular-nums ${i === 0 ? 'text-sm font-semibold text-[var(--theme-text-primary)]' : 'text-xs font-medium text-[var(--theme-text-secondary)]'}`}>
                                             {line}
                                         </p>
                                     ))}
@@ -450,14 +450,14 @@ export const UnitTab: React.FC<Props> = ({
                 {!canDirectEdit && (
                     <div className="flex items-start gap-2.5 p-3.5 bg-amber-500/10 border border-amber-500/20 rounded-xl">
                         <AlertTriangle size={15} className="text-amber-500 flex-shrink-0 mt-0.5" />
-                        <p className="text-xs font-bold text-amber-800 dark:text-amber-300">Selling config changes require CEO approval. Your save will submit a change request.</p>
+                        <p className="text-xs font-medium text-amber-700 dark:text-amber-300">Selling config changes require CEO approval. Your save will submit a change request.</p>
                     </div>
                 )}
 
                 <button onClick={handleSaveUnit} disabled={isSaving}
-                    className="w-full py-3.5 bg-[#2C5E3B] hover:bg-[#1B3520] text-white rounded-xl font-black text-sm uppercase tracking-wider disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer shadow-md transition-all">
+                    className="w-full py-3 bg-[var(--theme-accent)] hover:opacity-90 text-white rounded-xl font-semibold text-xs uppercase tracking-wider disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer shadow-sm transition-opacity">
                     {isSaving ? <RefreshCw size={16} className="animate-spin" /> : <Save size={16} />}
-                    {isSaving ? 'Saving...' : 'Save Selling Configuration'}
+                    <span>{isSaving ? 'Saving...' : 'Save Selling Configuration'}</span>
                 </button>
             </div>
         </div>

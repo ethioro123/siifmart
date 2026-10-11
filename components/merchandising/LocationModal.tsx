@@ -30,9 +30,9 @@ export const LocationModal: React.FC<LocationModalProps> = ({
          size="lg"
       >
          {selectedLocationProduct && (
-            <div className="space-y-6">
-               <div className="flex items-center gap-4 glass-panel-pushed p-4 rounded-2xl">
-                  <div className="w-16 h-16 rounded-xl bg-white/90 dark:bg-black/25 border border-[#E2DCCE] dark:border-emerald-950/20 flex items-center justify-center flex-shrink-0 overflow-hidden">
+            <div className="space-y-5">
+               <div className="flex items-center gap-4 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] p-4 rounded-2xl">
+                  <div className="w-14 h-14 rounded-xl bg-[var(--theme-bg-card)] border border-[var(--theme-border)] flex items-center justify-center shrink-0 overflow-hidden">
                      {selectedLocationProduct.image && !selectedLocationProduct.image.includes('placeholder.com') ? (
                         <img
                            src={selectedLocationProduct.image}
@@ -40,20 +40,19 @@ export const LocationModal: React.FC<LocationModalProps> = ({
                            alt=""
                            onError={(e) => {
                               e.currentTarget.style.display = 'none';
-                              (e.currentTarget.parentElement as HTMLElement).innerHTML = '<div class="text-stone-500"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-package"><path d="m7.5 4.27 9 5.15"/><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg></div>';
                            }}
                         />
                      ) : (
-                        <Package size={24} className="text-stone-500" />
+                        <Package size={22} className="text-[var(--theme-text-secondary)]" />
                      )}
                   </div>
                   <div>
-                     <h3 className="text-xl font-bold text-[#1E3F27] dark:text-[#EAE5D9]">{selectedLocationProduct.name}</h3>
-                     <p className="text-stone-400 dark:text-stone-500 font-mono text-sm">{selectedLocationProduct.sku}</p>
+                     <h3 className="text-base font-semibold text-[var(--theme-text-primary)] leading-tight">{selectedLocationProduct.name}</h3>
+                     <p className="text-[var(--theme-text-secondary)] font-mono text-xs mt-0.5">{selectedLocationProduct.sku}</p>
                   </div>
                   <div className="ml-auto text-right">
-                     <p className="text-xs text-stone-400 dark:text-stone-500 uppercase font-bold tracking-wider">Total Network Asset</p>
-                     <p className="text-2xl font-bold text-[#2C5E3B] dark:text-[#A9CBA2] font-mono">
+                     <p className="text-[11px] text-[var(--theme-text-secondary)] uppercase font-semibold tracking-wider">Total Network Asset</p>
+                     <p className="text-xl font-bold text-[var(--theme-text-primary)] font-mono tabular-nums">
                         {products
                            .filter(p => p.sku === selectedLocationProduct.sku)
                            .reduce((sum, p) => sum + p.stock, 0)} Units
@@ -61,27 +60,27 @@ export const LocationModal: React.FC<LocationModalProps> = ({
                   </div>
                </div>
 
-               <div className="overflow-hidden rounded-2xl border border-[#E2DCCE]/60 dark:border-[#A9CBA2]/[0.06] bg-white/40 dark:bg-black/10">
+               <div className="overflow-hidden rounded-2xl border border-[var(--theme-border)] bg-[var(--theme-bg-card)]">
                   <table className="w-full text-left">
-                     <thead className="bg-[#2C5E3B]/5 dark:bg-[#A9CBA2]/5 border-b border-[#E2DCCE]/60 dark:border-[#A9CBA2]/[0.06] text-stone-600 dark:text-stone-400 text-xs uppercase font-bold">
+                     <thead className="bg-[var(--theme-bg-subtle)] border-b border-[var(--theme-border)] text-[var(--theme-text-secondary)] text-[11px] uppercase font-semibold tracking-wider">
                         <tr>
-                           <th className="p-4">Location</th>
-                           <th className="p-4">Type</th>
-                           <th className="p-4 text-center">Stock Level</th>
-                           <th className="p-4 text-right">Aisle / Shelf</th>
+                           <th className="p-3.5">Location</th>
+                           <th className="p-3.5">Type</th>
+                           <th className="p-3.5 text-center">Stock Level</th>
+                           <th className="p-3.5 text-right">Aisle / Shelf</th>
                         </tr>
                      </thead>
-                     <tbody className="divide-y divide-[#E2DCCE]/40 dark:divide-[#A9CBA2]/[0.04]">
+                     <tbody className="divide-y divide-[var(--theme-border-subtle)]">
                         {products
                            .filter(p => p.sku === selectedLocationProduct.sku)
                            .map(p => {
                               const site = sites.find(s => s.id === p.siteId || s.id === (p as any).site_id);
                               return (
-                                 <tr key={p.id} className="hover:bg-stone-50/50 dark:hover:bg-white/[0.02] transition-colors">
-                                    <td className="p-4 font-bold text-[#1E3F27] dark:text-white">
+                                 <tr key={p.id} className="hover:bg-[var(--theme-bg-subtle)] transition-colors">
+                                    <td className="p-3.5 font-semibold text-xs text-[var(--theme-text-primary)]">
                                        {site ? site.name : 'Unknown Site'}
                                     </td>
-                                    <td className="p-4 text-sm text-stone-500 dark:text-stone-400">
+                                    <td className="p-3.5 text-xs text-[var(--theme-text-secondary)]">
                                        {site ? site.type : '-'}
                                        {/* --- INCOMING PO DATA --- */}
                                        {(() => {
@@ -92,20 +91,20 @@ export const LocationModal: React.FC<LocationModalProps> = ({
                                              .filter(item => item.productId === p.id);
 
                                           const totalOnOrder = openPOs.reduce((sum, item) => sum + item.quantity, 0);
-                                          const latestPO = openPOs[openPOs.length - 1]; // Simple latest check
+                                          const latestPO = openPOs[openPOs.length - 1];
                                           const incomingCost = latestPO ? latestPO.unitCost : 0;
 
                                           return (
                                              <div className="flex flex-col gap-1 mt-1">
                                                 {totalOnOrder > 0 && (
-                                                   <div className="text-[10px] text-blue-500 dark:text-blue-400 font-bold flex items-center gap-1">
-                                                      <Truck size={10} />
+                                                   <div className="text-[10px] text-[var(--theme-accent)] font-medium flex items-center gap-1 font-mono">
+                                                      <Truck size={11} />
                                                       On Order: {totalOnOrder}
                                                    </div>
                                                 )}
                                                 {incomingCost > 0 && incomingCost !== (p.costPrice || 0) && (
-                                                   <div className={`text-[10px] flex items-center gap-1 ${incomingCost > (p.costPrice || 0) ? 'text-red-500 dark:text-red-400' : 'text-green-600 dark:text-green-400'}`}>
-                                                      {incomingCost > (p.costPrice || 0) ? <TrendingUp size={10} /> : <TrendingDown size={10} />}
+                                                   <div className={`text-[10px] font-mono tabular-nums flex items-center gap-1 ${incomingCost > (p.costPrice || 0) ? 'text-rose-600 dark:text-rose-400' : 'text-emerald-600 dark:text-emerald-400'}`}>
+                                                      {incomingCost > (p.costPrice || 0) ? <TrendingUp size={11} /> : <TrendingDown size={11} />}
                                                       New Cost: {currencySymbol} {(incomingCost).toFixed(2)}
                                                    </div>
                                                 )}
@@ -113,13 +112,13 @@ export const LocationModal: React.FC<LocationModalProps> = ({
                                           );
                                        })()}
                                     </td>
-                                    <td className="p-4 align-top text-center">
-                                       <span className={`px-2 py-1 rounded-lg text-xs font-bold border ${p.stock < 20 ? 'bg-red-500/10 text-red-600 dark:text-red-400 border-red-500/20' : 'bg-[#2C5E3B]/10 text-[#2C5E3B] dark:text-[#A9CBA2] border-[#2C5E3B]/20 dark:border-[#A9CBA2]/20'}`}>
+                                    <td className="p-3.5 align-top text-center">
+                                       <span className={`px-2 py-0.5 rounded-lg text-xs font-mono font-medium tabular-nums border ${p.stock < 20 ? 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/20' : 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20'}`}>
                                           {p.stock} Units
                                        </span>
                                     </td>
-                                    <td className="p-4 text-right font-mono text-[#1E3F27] dark:text-white">
-                                       {p.shelfPosition || <span className="text-stone-400 dark:text-stone-600 italic">Unassigned</span>}
+                                    <td className="p-3.5 text-right font-mono text-xs text-[var(--theme-text-primary)]">
+                                       {p.shelfPosition || <span className="text-[var(--theme-text-tertiary)] italic">Unassigned</span>}
                                     </td>
                                  </tr>
                               );

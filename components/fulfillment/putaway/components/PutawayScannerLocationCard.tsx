@@ -48,7 +48,7 @@ export const PutawayScannerLocationCard: React.FC<PutawayScannerLocationCardProp
     return (
         <div className="text-center w-full max-w-sm mx-auto">
             {/* Header label */}
-            <p className="text-stone-400 dark:text-stone-500 text-[10px] font-black uppercase tracking-[0.2em] mb-3">
+            <p className="text-[var(--theme-text-secondary)] text-[11px] font-semibold uppercase tracking-wider mb-2">
                 {recommendation?.type === 'ASSIGNED' 
                     ? t('warehouse.putaway.assignedLocation') 
                     : recommendation?.type === 'SUGGESTED' 
@@ -56,18 +56,17 @@ export const PutawayScannerLocationCard: React.FC<PutawayScannerLocationCardProp
                         : t('warehouse.putaway.awaitingScan')}
             </p>
 
-            {/* Main Location Box - Original aesthetic with guaranteed 1-line horizontal fit */}
-            <div className={`relative w-full px-5 sm:px-8 py-5 sm:py-6 rounded-3xl border-2 transition-all duration-500 shadow-xl ${
+            {/* Main Location Box */}
+            <div className={`w-full px-5 sm:px-6 py-5 rounded-2xl border transition-colors ${
                 recommendation?.type === 'ASSIGNED'
-                    ? 'bg-amber-50 dark:bg-amber-500/10 border-amber-400 text-amber-700 dark:text-amber-400 shadow-amber-500/10'
+                    ? 'bg-amber-500/10 border-amber-500/30 text-amber-600 dark:text-amber-400'
                     : recommendation?.type === 'SUGGESTED'
-                        ? 'bg-[#2C5E3B]/10 dark:bg-[#A9CBA2]/5 border-[#2C5E3B]/30 dark:border-[#A9CBA2]/50 text-[#2C5E3B] dark:text-[#A9CBA2] shadow-[#2C5E3B]/10'
-                        : 'bg-[#FAF8F5] dark:bg-white/5 border-[#E2DCCE]/60 dark:border-white/10 text-stone-900 dark:text-white'
+                        ? 'bg-[var(--theme-accent)]/10 border-[var(--theme-accent)]/30 text-[var(--theme-accent)]'
+                        : 'bg-[var(--theme-bg-card)] border-[var(--theme-border)] text-[var(--theme-text-primary)]'
             }`}>
-                {/* Location code: single horizontal line, no truncation, responsive font size */}
-                <p className={`font-mono font-black whitespace-nowrap leading-none tracking-normal sm:tracking-[0.05em] ${
+                <p className={`font-mono font-bold whitespace-nowrap leading-none tracking-wider ${
                     isStrictlyValid
-                        ? 'text-4xl sm:text-5xl md:text-6xl text-[#2C5E3B] dark:text-[#A9CBA2]'
+                        ? 'text-4xl sm:text-5xl text-[var(--theme-accent)]'
                         : locStr.length > 10
                             ? 'text-2xl sm:text-3xl'
                             : 'text-4xl sm:text-5xl'
@@ -75,28 +74,28 @@ export const PutawayScannerLocationCard: React.FC<PutawayScannerLocationCardProp
                     {locStr}
                 </p>
 
-                {/* Zone / Aisle / Bay segmented breakdown */}
+                {/* Zone / Aisle / Bay breakdown */}
                 {parts && (
-                    <div className="grid grid-cols-3 gap-2 mt-4 pt-4 border-t border-current/15">
-                        <div className="bg-white/60 dark:bg-black/30 p-2 sm:p-2.5 rounded-2xl border border-current/10 flex flex-col items-center justify-center">
-                            <span className="text-[9px] font-black uppercase tracking-wider opacity-60">{t('warehouse.putaway.zone')}</span>
-                            <span className="text-base sm:text-lg font-black font-mono leading-tight">{parts.zone}</span>
+                    <div className="grid grid-cols-3 gap-2 mt-4 pt-4 border-t border-[var(--theme-border)]">
+                        <div className="bg-[var(--theme-bg-subtle)] p-2 rounded-xl border border-[var(--theme-border)] flex flex-col items-center justify-center">
+                            <span className="text-[11px] font-semibold uppercase tracking-wider text-[var(--theme-text-secondary)]">{t('warehouse.putaway.zone')}</span>
+                            <span className="text-base font-bold font-mono text-[var(--theme-text-primary)]">{parts.zone}</span>
                         </div>
-                        <div className="bg-white/60 dark:bg-black/30 p-2 sm:p-2.5 rounded-2xl border border-current/10 flex flex-col items-center justify-center">
-                            <span className="text-[9px] font-black uppercase tracking-wider opacity-60">{t('warehouse.putaway.aisle')}</span>
-                            <span className="text-base sm:text-lg font-black font-mono leading-tight">{parts.aisle}</span>
+                        <div className="bg-[var(--theme-bg-subtle)] p-2 rounded-xl border border-[var(--theme-border)] flex flex-col items-center justify-center">
+                            <span className="text-[11px] font-semibold uppercase tracking-wider text-[var(--theme-text-secondary)]">{t('warehouse.putaway.aisle')}</span>
+                            <span className="text-base font-bold font-mono text-[var(--theme-text-primary)]">{parts.aisle}</span>
                         </div>
-                        <div className="bg-white/60 dark:bg-black/30 p-2 sm:p-2.5 rounded-2xl border border-current/10 flex flex-col items-center justify-center">
-                            <span className="text-[9px] font-black uppercase tracking-wider opacity-60">{t('warehouse.putaway.bay')}</span>
-                            <span className="text-base sm:text-lg font-black font-mono leading-tight">{parts.bin}</span>
+                        <div className="bg-[var(--theme-bg-subtle)] p-2 rounded-xl border border-[var(--theme-border)] flex flex-col items-center justify-center">
+                            <span className="text-[11px] font-semibold uppercase tracking-wider text-[var(--theme-text-secondary)]">{t('warehouse.putaway.bay')}</span>
+                            <span className="text-base font-bold font-mono text-[var(--theme-text-primary)]">{parts.bin}</span>
                         </div>
                     </div>
                 )}
 
                 {/* Category label */}
                 {category && recommendation?.type === 'SUGGESTED' && !normalizeLocation(inputVal) && (
-                    <div className="mt-3.5 border-t border-current/15 pt-2.5">
-                        <p className="text-[10px] text-[#2C5E3B] dark:text-[#A9CBA2] font-black uppercase tracking-widest">
+                    <div className="mt-3 border-t border-[var(--theme-border)] pt-2">
+                        <p className="text-[11px] text-[var(--theme-accent)] font-semibold uppercase tracking-wider">
                             {category}
                         </p>
                     </div>

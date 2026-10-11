@@ -1,9 +1,11 @@
 import React from 'react';
 import { RefreshCw, Search, Filter, ChevronDown, CheckCircle, Box, AlertTriangle, Hash, Zap, Loader2 } from 'lucide-react';
 import { SortDropdown } from '../FulfillmentShared';
-import { WMSJob, Product, Site } from '../../../types';
+import { WMSJob, Product } from '../../../types';
 
 interface ReplenishHeaderProps {
+    viewMode?: 'Process' | 'History';
+    setViewMode?: (val: 'Process' | 'History') => void;
     filteredProducts: Product[];
     products: Product[];
     replenishSearch: string;
@@ -26,6 +28,8 @@ interface ReplenishHeaderProps {
 }
 
 export const ReplenishHeader: React.FC<ReplenishHeaderProps> = ({
+    viewMode = 'Process',
+    setViewMode,
     filteredProducts,
     products,
     replenishSearch,
@@ -46,157 +50,186 @@ export const ReplenishHeader: React.FC<ReplenishHeaderProps> = ({
     addNotification,
     activeSite
 }) => {
-    return (
-        <div className="glass-panel p-6 shadow-2xl relative overflow-hidden group">
-            <div className="absolute -top-24 -right-24 w-64 h-64 bg-[#2C5E3B]/10 dark:bg-[#A9CBA2]/10 blur-[120px] rounded-full pointer-events-none" />
+    const alertCount = filteredProducts.filter(p => p.stock < (p.minStock || 10)).length;
 
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 relative z-10">
-                <div className="flex items-center gap-4">
-                    <div className="p-3 bg-[#2C5E3B]/10 dark:bg-[#A9CBA2]/10 rounded-2xl">
-                        <RefreshCw className="text-[#2C5E3B] dark:text-[#A9CBA2] animate-spin [animation-duration:3s]" size={24} />
+    return (
+        <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-4 sm:p-5 shadow-sm">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] flex items-center justify-center text-[var(--theme-accent)] shrink-0">
+                        <RefreshCw size={20} />
                     </div>
                     <div>
-                        <h3 className="text-xl font-black text-stone-900 dark:text-stone-100 tracking-tight uppercase">Replenishment Matrix</h3>
-                        <p className="text-xs text-stone-500 dark:text-stone-400 font-bold uppercase tracking-widest flex items-center gap-2">
-                            Forward Pick Optimization Hub
-                            <span className="w-1 h-1 rounded-full bg-[#2C5E3B] dark:bg-[#A9CBA2]"></span>
-                            {filteredProducts.filter(p => p.stock < (p.minStock || 10)).length} Alerts
+                        <h3 className="text-lg font-bold text-[var(--theme-text-primary)] tracking-tight uppercase">Replenishment Matrix</h3>
+                        <p className="text-xs text-[var(--theme-text-secondary)] font-medium flex items-center gap-2">
+                            <span>Forward Pick Hub</span>
+                            <span className="w-1 h-1 rounded-full bg-[var(--theme-border)]" />
+                            <span className="font-mono tabular-nums text-[var(--theme-accent)] font-semibold">{alertCount} Alerts</span>
                         </p>
                     </div>
                 </div>
 
-                <div className="flex flex-wrap items-center gap-3">
-                    {/* Status Filter Dropdown */}
-                    <div className="relative">
-                        <button
-                            onClick={() => setIsReplenishFilterDropdownOpen(!isReplenishFilterDropdownOpen)}
-                            className="woody-btn-secondary px-4 py-2 text-[10px] font-black tracking-widest uppercase flex items-center gap-2 whitespace-nowrap"
-                        >
-                            <Filter size={14} className={replenishFilter !== 'all' ? 'text-[#2C5E3B] dark:text-[#A9CBA2]' : ''} />
-                            <span>STATUS: {replenishFilter === 'all' ? 'ALL STOCK LEVELS' : replenishFilter.toUpperCase()}</span>
-                            <ChevronDown size={14} className={`transition-transform duration-300 ${isReplenishFilterDropdownOpen ? 'rotate-180' : ''}`} />
-                        </button>
+                <div className="flex flex-wrap items-center gap-2.5 w-full md:w-auto">
+                    {/* View Mode Segmented Control */}
+                    {setViewMode && (
+                        <div className="bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] p-1 rounded-xl flex items-center">
+                            <button
+                                onClick={() => setViewMode('Process')}
+                                className={`px-3 py-1.5 rounded-lg text-xs font-semibold uppercase tracking-wider transition-colors min-h-[36px] ${
+                                    viewMode === 'Process'
+                                        ? 'bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)] shadow-sm'
+                                        : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)]'
+                                }`}
+                            >
+                                Process
+                            </button>
+                            <button
+                                onClick={() => setViewMode('History')}
+                                className={`px-3 py-1.5 rounded-lg text-xs font-semibold uppercase tracking-wider transition-colors min-h-[36px] ${
+                                    viewMode === 'History'
+                                        ? 'bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)] shadow-sm'
+                                        : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)]'
+                                }`}
+                            >
+                                History
+                            </button>
+                        </div>
+                    )}
 
-                        {isReplenishFilterDropdownOpen && (
-                            <>
-                                <div className="fixed inset-0 z-[50]" onClick={() => setIsReplenishFilterDropdownOpen(false)} />
-                                <div className="absolute top-full left-0 mt-2 w-56 glass-panel rounded-2xl p-2 shadow-2xl z-[51] animate-in fade-in slide-in-from-top-2 duration-200">
-                                    {['all', 'critical', 'low', 'optimal'].map(filter => (
-                                        <button
-                                            key={filter}
-                                            onClick={() => {
-                                                setReplenishFilter(filter as any);
-                                                setIsReplenishFilterDropdownOpen(false);
-                                            }}
-                                            className={`w-full text-left px-4 py-2.5 rounded-xl text-[10px] font-black transition-all flex items-center justify-between group uppercase tracking-widest ${replenishFilter === filter
-                                                ? 'bg-[#2C5E3B] text-white dark:bg-[#A9CBA2] dark:text-stone-900'
-                                                : 'text-stone-500 dark:text-stone-400 hover:bg-stone-100/50 dark:hover:bg-[#EAE5D9]/10 hover:text-stone-900 dark:hover:text-stone-100'
-                                                }`}
-                                        >
-                                            {filter === 'all' ? 'ALL ARCHIVES' : filter.toUpperCase()}
-                                            {replenishFilter === filter && <CheckCircle size={12} />}
-                                        </button>
-                                    ))}
-                                </div>
-                            </>
-                        )}
-                    </div>
+                    {viewMode === 'Process' && (
+                        <>
+                            {/* Status Filter Dropdown */}
+                            <div className="relative">
+                                <button
+                                    onClick={() => setIsReplenishFilterDropdownOpen(!isReplenishFilterDropdownOpen)}
+                                    className="flex items-center gap-1.5 px-3 py-2 bg-[var(--theme-bg-card)] rounded-xl border border-[var(--theme-border)] text-xs font-semibold text-[var(--theme-text-primary)] uppercase tracking-wider transition-colors min-h-[44px]"
+                                >
+                                    <Filter size={14} className={replenishFilter !== 'all' ? 'text-[var(--theme-accent)]' : 'text-[var(--theme-text-secondary)]'} />
+                                    <span>{replenishFilter === 'all' ? 'ALL LEVELS' : replenishFilter.toUpperCase()}</span>
+                                    <ChevronDown size={14} className={`transition-transform duration-200 text-[var(--theme-text-secondary)] ${isReplenishFilterDropdownOpen ? 'rotate-180' : ''}`} />
+                                </button>
 
-                    {/* Sort Dropdown */}
-                    <SortDropdown
-                        label="Sort"
-                        options={[
-                            { id: 'urgency' as const, label: 'Urgency', icon: <AlertTriangle size={12} /> },
-                            { id: 'stock' as const, label: 'Stock', icon: <Box size={12} /> },
-                            { id: 'name' as const, label: 'Name', icon: <Hash size={12} /> }
-                        ]}
-                        value={replenishSortBy}
-                        onChange={(val) => setReplenishSortBy(val)}
-                        isOpen={isReplenishSortDropdownOpen}
-                        setIsOpen={setIsReplenishSortDropdownOpen}
-                    />
+                                {isReplenishFilterDropdownOpen && (
+                                    <>
+                                        <div className="fixed inset-0 z-[50]" onClick={() => setIsReplenishFilterDropdownOpen(false)} />
+                                        <div className="absolute top-full left-0 mt-2 w-48 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-1.5 shadow-xl z-[51] animate-in fade-in zoom-in-95 duration-150">
+                                            {(['all', 'critical', 'low', 'optimal'] as const).map(filter => (
+                                                <button
+                                                    key={filter}
+                                                    onClick={() => {
+                                                        setReplenishFilter(filter);
+                                                        setIsReplenishFilterDropdownOpen(false);
+                                                    }}
+                                                    className={`w-full text-left px-3 py-2 rounded-xl text-xs font-semibold transition-colors flex items-center justify-between uppercase tracking-wider min-h-[38px] ${
+                                                        replenishFilter === filter
+                                                            ? 'bg-[var(--theme-accent)] text-white'
+                                                            : 'text-[var(--theme-text-secondary)] hover:bg-[var(--theme-bg-subtle)] hover:text-[var(--theme-text-primary)]'
+                                                    }`}
+                                                >
+                                                    {filter === 'all' ? 'ALL ARCHIVES' : filter.toUpperCase()}
+                                                    {replenishFilter === filter && <CheckCircle size={14} />}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </>
+                                )}
+                            </div>
 
-                    {/* Bulk Actions */}
-                    <div className="flex gap-2 h-full">
-                        <button
-                            onClick={() => {
-                                const lowStock = filteredProducts.filter(p => p.stock < (p.minStock || 10));
-                                setSelectedReplenishItems(new Set(lowStock.map(p => p.id)));
-                                addNotification('info', `Selected ${lowStock.length} items for optimization`);
-                            }}
-                            className="woody-btn-secondary px-4 py-2 text-[10px] font-black tracking-widest uppercase transition-all active:scale-95"
-                        >
-                            Select Low Stock
-                        </button>
-                        <button
-                            disabled={selectedReplenishItems.size === 0 || isSubmitting}
-                            onClick={async () => {
-                                setIsSubmitting(true);
-                                try {
-                                    let createdCount = 0;
-                                    for (const id of Array.from(selectedReplenishItems)) {
-                                        const p = products.find(prod => prod.id === id);
-                                        if (!p) continue;
-                                        const restockQty = Math.min((p.maxStock || 100) - p.stock, 50);
-                                        if (restockQty <= 0) continue;
+                            {/* Sort Dropdown */}
+                            <SortDropdown
+                                label="Sort"
+                                options={[
+                                    { id: 'urgency' as const, label: 'Urgency', icon: <AlertTriangle size={14} /> },
+                                    { id: 'stock' as const, label: 'Stock', icon: <Box size={14} /> },
+                                    { id: 'name' as const, label: 'Name', icon: <Hash size={14} /> }
+                                ]}
+                                value={replenishSortBy}
+                                onChange={(val) => setReplenishSortBy(val)}
+                                isOpen={isReplenishSortDropdownOpen}
+                                setIsOpen={setIsReplenishSortDropdownOpen}
+                            />
 
-                                        const job: WMSJob = {
-                                            id: `REP-${Date.now()}-${createdCount}`,
-                                            siteId: activeSite?.id || '',
-                                            site_id: activeSite?.id,
-                                            sourceSiteId: activeSite?.id || '',
-                                            source_site_id: activeSite?.id,
-                                            destSiteId: activeSite?.id || '',
-                                            dest_site_id: activeSite?.id,
-                                            type: 'PUTAWAY', // Note: Original code used PUTAWAY for bulk action but REPLENISH for single action? Need to verify intent. Keeping as per original logic.
-                                            status: 'Pending',
-                                            priority: p.stock === 0 ? 'Critical' : p.stock < (p.minStock || 10) / 2 ? 'High' : 'Normal',
-                                            location: p.location || 'Warehouse Floor',
-                                            assignedTo: '',
-                                            items: 1,
-                                            lineItems: [{
-                                                productId: p.id,
-                                                sku: p.sku,
-                                                name: p.name,
-                                                image: p.image,
-                                                expectedQty: restockQty,
-                                                pickedQty: 0,
-                                                status: 'Pending'
-                                            }],
-                                            jobNumber: (p.sku || 'UNKNOWN').toUpperCase(),
-                                            orderRef: `REPLENISH-${p.sku}`
-                                        };
-                                        await wmsJobsService.create(job);
-                                        createdCount++;
+                            {/* Bulk Actions */}
+                            <button
+                                onClick={() => {
+                                    const lowStock = filteredProducts.filter(p => p.stock < (p.minStock || 10));
+                                    setSelectedReplenishItems(new Set(lowStock.map(p => p.id)));
+                                    addNotification('info', `Selected ${lowStock.length} items for optimization`);
+                                }}
+                                className="px-3.5 py-2 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] hover:bg-[var(--theme-bg-card)] rounded-xl text-xs font-semibold text-[var(--theme-text-primary)] uppercase tracking-wider transition-colors min-h-[44px]"
+                            >
+                                Select Low Stock
+                            </button>
+                            <button
+                                disabled={selectedReplenishItems.size === 0 || isSubmitting}
+                                onClick={async () => {
+                                    setIsSubmitting(true);
+                                    try {
+                                        let createdCount = 0;
+                                        for (const id of Array.from(selectedReplenishItems)) {
+                                            const p = products.find(prod => prod.id === id);
+                                            if (!p) continue;
+                                            const restockQty = Math.min((p.maxStock || 100) - p.stock, 50);
+                                            if (restockQty <= 0) continue;
+
+                                            const job: WMSJob = {
+                                                id: `REP-${Date.now()}-${createdCount}`,
+                                                siteId: activeSite?.id || '',
+                                                site_id: activeSite?.id,
+                                                sourceSiteId: activeSite?.id || '',
+                                                source_site_id: activeSite?.id,
+                                                destSiteId: activeSite?.id || '',
+                                                dest_site_id: activeSite?.id,
+                                                type: 'REPLENISH',
+                                                status: 'Pending',
+                                                priority: p.stock === 0 ? 'Critical' : p.stock < (p.minStock || 10) / 2 ? 'High' : 'Normal',
+                                                location: p.location || 'Warehouse Floor',
+                                                assignedTo: '',
+                                                items: 1,
+                                                lineItems: [{
+                                                    productId: p.id,
+                                                    sku: p.sku,
+                                                    name: p.name,
+                                                    image: p.image,
+                                                    expectedQty: restockQty,
+                                                    pickedQty: 0,
+                                                    status: 'Pending'
+                                                }],
+                                                jobNumber: (p.sku || 'UNKNOWN').toUpperCase(),
+                                                orderRef: `REPLENISH-${p.sku}`
+                                            };
+                                            await wmsJobsService.create(job);
+                                            createdCount++;
+                                        }
+                                        addNotification('success', `Initialized ${createdCount} Optimization Sequences`);
+                                        setSelectedReplenishItems(new Set());
+                                    } finally {
+                                        setIsSubmitting(false);
                                     }
-                                    addNotification('success', `Initialized ${createdCount} Optimization Sequences`);
-                                    setSelectedReplenishItems(new Set());
-                                } finally {
-                                    setIsSubmitting(false);
-                                }
-                            }}
-                            className={`woody-btn-primary px-6 py-2 text-[10px] font-black tracking-widest uppercase transition-all active:scale-95 flex items-center gap-2 disabled:bg-stone-100 dark:disabled:bg-stone-800 disabled:text-stone-400 dark:disabled:text-stone-500 disabled:cursor-not-allowed disabled:border-[#E2DCCE]/30 dark:disabled:border-[#A9CBA2]/[0.04]`}
-                        >
-                            {isSubmitting ? <Loader2 size={12} className="animate-spin" /> : <Zap size={12} />}
-                            {isSubmitting ? 'Processing...' : `Execute ${selectedReplenishItems.size} Tasks`}
-                        </button>
-                    </div>
+                                }}
+                                className="px-4 py-2 bg-[var(--theme-accent)] hover:opacity-90 text-white rounded-xl text-xs font-semibold uppercase tracking-wider transition-opacity flex items-center gap-2 min-h-[44px] shadow-sm disabled:opacity-40 disabled:cursor-not-allowed"
+                            >
+                                {isSubmitting ? <Loader2 size={14} className="animate-spin" /> : <Zap size={14} />}
+                                {isSubmitting ? 'Processing...' : `Execute (${selectedReplenishItems.size})`}
+                            </button>
+                        </>
+                    )}
                 </div>
             </div>
 
             {/* Search Hub */}
-            <div className="mt-6 flex-1 relative group">
-                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                    <Search size={14} className="text-stone-500 group-focus-within:text-[#2C5E3B] dark:group-focus-within:text-[#A9CBA2] transition-colors" />
+            <div className="mt-4 relative">
+                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-[var(--theme-text-secondary)]">
+                    <Search size={16} />
                 </div>
                 <input
                     type="text"
-                    placeholder="Scan Product Barcode or Search Inventory Matrix..."
+                    placeholder="Scan product barcode or search inventory matrix..."
                     aria-label="Scan or Search Inventory"
                     title="Scan or Search Inventory"
                     value={replenishSearch}
                     onChange={(e) => setReplenishSearch(e.target.value)}
-                    className="woody-input !pl-11 text-[11px]"
+                    className="w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] focus:border-[var(--theme-accent)] rounded-xl py-2.5 pl-10 pr-4 text-xs font-medium text-[var(--theme-text-primary)] placeholder:text-[var(--theme-text-secondary)]/50 outline-none transition-colors min-h-[44px]"
                 />
             </div>
         </div>

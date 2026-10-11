@@ -39,32 +39,40 @@ export const DriverMetrics: React.FC<DriverMetricsProps> = ({
         items: [...filteredJobs, ...historicalJobs].filter(j => shouldInclude(j)).reduce((sum, j) => sum + (j.items || j.lineItems?.length || 0), 0)
     };
 
+    const totalJobs = stats.completed + stats.active;
+    const progressPct = totalJobs > 0 ? Math.round((stats.completed / totalJobs) * 100) : 0;
+
     return (
-        <div className="bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-2xl p-2.5 sm:p-3 flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-4 shadow-sm dark:shadow-inner overflow-hidden">
-            <div className="grid grid-cols-3 gap-2 sm:gap-3 md:gap-6 w-full sm:w-auto">
-                <div className="text-center px-1">
-                    <p className="text-[7px] md:text-[8px] text-gray-500 dark:text-gray-400 font-black uppercase tracking-widest leading-none mb-1.5 italic">{t('warehouse.driverHub.totalJobs')}</p>
-                    <p className="text-sm md:text-lg font-black text-gray-900 dark:text-white leading-none">{stats.completed + stats.active}</p>
+        <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-4 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-xs overflow-hidden">
+            <div className="grid grid-cols-3 gap-3 md:gap-6 w-full sm:w-auto">
+                <div className="text-center px-2">
+                    <p className="text-[11px] text-[var(--theme-text-secondary)] font-semibold uppercase tracking-wider mb-1">{t('warehouse.driverHub.totalJobs')}</p>
+                    <p className="text-base sm:text-xl font-bold font-mono text-[var(--theme-text-primary)] tabular-nums leading-none">{totalJobs}</p>
                 </div>
-                <div className="text-center px-1 border-x border-gray-100 dark:border-white/10">
-                    <p className="text-[7px] md:text-[8px] text-green-600 dark:text-green-500 font-black uppercase tracking-widest leading-none mb-1.5 italic">{t('warehouse.driverHub.done')}</p>
-                    <p className="text-sm md:text-lg font-black text-green-600 dark:text-green-400 leading-none">{stats.completed}</p>
+                <div className="text-center px-2 border-x border-[var(--theme-border)]">
+                    <p className="text-[11px] text-emerald-600 dark:text-emerald-400 font-semibold uppercase tracking-wider mb-1">{t('warehouse.driverHub.done')}</p>
+                    <p className="text-base sm:text-xl font-bold font-mono text-emerald-600 dark:text-emerald-400 tabular-nums leading-none">{stats.completed}</p>
                 </div>
-                <div className="text-center px-1">
-                    <p className="text-[7px] md:text-[8px] text-[#2C5E3B] dark:text-[#A9CBA2] font-black uppercase tracking-widest leading-none mb-1.5 italic">{t('warehouse.driverHub.units')}</p>
-                    <p className="text-sm md:text-lg font-black text-[#2C5E3B] dark:text-[#A9CBA2] leading-none">{stats.items}</p>
+                <div className="text-center px-2">
+                    <p className="text-[11px] text-primary font-semibold uppercase tracking-wider mb-1">{t('warehouse.driverHub.units')}</p>
+                    <p className="text-base sm:text-xl font-bold font-mono text-primary tabular-nums leading-none">{stats.items}</p>
                 </div>
             </div>
             
-            <div className="w-full sm:w-auto flex items-center justify-between sm:justify-start gap-4 pt-3 sm:pt-0 border-t sm:border-none border-gray-50 dark:border-white/5">
+            <div className="w-full sm:w-auto flex items-center justify-between sm:justify-start gap-4 pt-3 sm:pt-0 border-t sm:border-none border-[var(--theme-border)]">
                 <div className="text-left sm:text-right">
-                    <p className="text-[7px] md:text-[8px] text-gray-500 dark:text-gray-505 font-black uppercase tracking-widest leading-none mb-1 italic">{t('warehouse.driverHub.shiftProgress')}</p>
-                    <div className="h-1.5 bg-gray-100 dark:bg-white/10 rounded-full w-20 sm:w-24 md:w-16 overflow-hidden">
-                        <div className="h-full bg-[#2C5E3B] rounded-full w-3/4 shadow-[0_0_8px_rgba(44,94,59,0.4)] transition-all" />
+                    <div className="flex items-center gap-2 mb-1 justify-start sm:justify-end">
+                        <span className="text-[11px] text-[var(--theme-text-secondary)] font-semibold uppercase tracking-wider">{t('warehouse.driverHub.shiftProgress')}</span>
+                        <span className="text-[11px] font-mono font-bold text-[var(--theme-text-primary)] tabular-nums">{progressPct}%</span>
+                    </div>
+                    <div className="h-2 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-full w-24 sm:w-32 overflow-hidden">
+                        <div
+                            className="h-full bg-primary rounded-full transition-all"
+                            style={{ width: `${progressPct}%` }}
+                        />
                     </div>
                 </div>
             </div>
         </div>
     );
-
 };

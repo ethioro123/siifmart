@@ -37,47 +37,47 @@ export const TransferRequestReview: React.FC<TransferRequestReviewProps> = ({
     const isCrossZone = sourceSiteObj && destSiteObj && (sourceSiteObj.logisticsZoneId || '') !== (destSiteObj.logisticsZoneId || '');
 
     return (
-        <div className="space-y-6">
-            <div className="bg-[#2C5E3B]/10 border border-[#2C5E3B]/20 rounded-xl p-6">
-                <h3 className="font-black text-[#2C5E3B] dark:text-[#A9CBA2] mb-4 flex items-center gap-2 uppercase tracking-tight">
-                    <Truck size={18} /> {t('warehouse.transferRequest')}
+        <div className="space-y-5">
+            <div className="bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-2xl p-5 shadow-xs">
+                <h3 className="font-bold text-[var(--theme-text-primary)] mb-4 flex items-center gap-2 tracking-tight">
+                    <Truck size={18} className="text-primary" /> {t('warehouse.transferRequest')}
                 </h3>
                 {isCrossZone && settings?.enforceRegionalZoning && (
-                    <div className="bg-yellow-500/10 border border-yellow-500/30 text-yellow-400 p-4 rounded-xl flex items-start gap-3 mb-6 animate-pulse">
-                        <AlertTriangle className="shrink-0 mt-0.5 text-yellow-400" size={18} />
+                    <div className="bg-amber-500/10 border border-amber-500/30 text-amber-600 dark:text-amber-400 p-4 rounded-xl flex items-start gap-3 mb-5">
+                        <AlertTriangle className="shrink-0 mt-0.5 text-amber-500" size={18} />
                         <div>
-                            <h4 className="font-bold text-sm text-yellow-400">⚠️ Cross-Zone Replenishment Override</h4>
-                            <p className="text-xs mt-1 text-yellow-500/90 leading-relaxed">
-                                Transferring stock from <span className="font-bold text-white">{getZoneName(sourceSiteObj?.logisticsZoneId)}</span> to <span className="font-bold text-white">{getZoneName(destSiteObj?.logisticsZoneId)}</span>. As CEO, you are authorized to override this restriction.
+                            <h4 className="font-bold text-sm text-amber-700 dark:text-amber-400">Cross-Zone Replenishment Override</h4>
+                            <p className="text-xs mt-1 text-amber-800/90 dark:text-amber-300/90 leading-relaxed">
+                                Transferring stock from <span className="font-bold text-[var(--theme-text-primary)]">{getZoneName(sourceSiteObj?.logisticsZoneId)}</span> to <span className="font-bold text-[var(--theme-text-primary)]">{getZoneName(destSiteObj?.logisticsZoneId)}</span>. Authorized leadership override active.
                             </p>
                         </div>
                     </div>
                 )}
-                <div className="grid grid-cols-2 gap-4 mb-6">
-                    <div>
-                        <p className="text-[10px] text-gray-500 font-bold uppercase tracking-wider mb-1">{t('warehouse.from')}</p>
-                        <p className="text-white font-medium">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-5">
+                    <div className="p-3.5 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl">
+                        <p className="text-[11px] text-[var(--theme-text-secondary)] font-semibold uppercase tracking-wider mb-1">{t('warehouse.from')}</p>
+                        <p className="text-[var(--theme-text-primary)] font-medium text-sm">
                             {sites.find(s => s.id === (transferSourceSite || activeSite?.id))?.name || 'Current Site'}
                             {(() => {
                                 const s = sites.find(s => s.id === (transferSourceSite || activeSite?.id));
-                                return s?.logisticsZoneId ? <span className="text-[10px] text-gray-400 block mt-0.5">Zone: {getZoneName(s.logisticsZoneId)}</span> : null;
+                                return s?.logisticsZoneId ? <span className="text-[11px] text-[var(--theme-text-secondary)] block mt-0.5 font-mono">Zone: {getZoneName(s.logisticsZoneId)}</span> : null;
                             })()}
                         </p>
                     </div>
-                    <div>
-                        <p className="text-[10px] text-gray-500 font-bold uppercase tracking-wider mb-1">{t('warehouse.to')}</p>
-                        <p className="text-white font-medium">
+                    <div className="p-3.5 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl">
+                        <p className="text-[11px] text-[var(--theme-text-secondary)] font-semibold uppercase tracking-wider mb-1">{t('warehouse.to')}</p>
+                        <p className="text-[var(--theme-text-primary)] font-medium text-sm">
                             {sites.find(s => s.id === transferDestSite)?.name}
                             {(() => {
                                 const s = sites.find(s => s.id === transferDestSite);
-                                return s?.logisticsZoneId ? <span className="text-[10px] text-gray-400 block mt-0.5">Zone: {getZoneName(s.logisticsZoneId)}</span> : null;
+                                return s?.logisticsZoneId ? <span className="text-[11px] text-[var(--theme-text-secondary)] block mt-0.5 font-mono">Zone: {getZoneName(s.logisticsZoneId)}</span> : null;
                             })()}
                         </p>
                     </div>
                 </div>
 
                 <div className="space-y-2">
-                    <p className="text-[10px] text-gray-500 font-bold uppercase tracking-wider mb-2">{t('warehouse.putaway.itemsToPutaway')}</p>
+                    <p className="text-[11px] text-[var(--theme-text-secondary)] font-semibold uppercase tracking-wider mb-2">{t('warehouse.putaway.itemsToPutaway')}</p>
                     {transferItems.map((item, idx) => {
                         const prod = allProducts.find(p => p.id === item.productId);
                         const unitDef = getSellUnit(prod?.unit || '');
@@ -89,12 +89,12 @@ export const TransferRequestReview: React.FC<TransferRequestReviewProps> = ({
                         }
 
                         return (
-                            <div key={idx} className="flex justify-between items-center bg-black/40 p-3 rounded-lg border border-white/5">
+                            <div key={idx} className="flex justify-between items-center bg-[var(--theme-bg-card)] p-3 rounded-xl border border-[var(--theme-border)]">
                                 <div className="flex items-center gap-3">
-                                    <span className="text-[10px] text-gray-550 font-mono bg-white/5 px-2 py-1 rounded">{prod?.sku}</span>
-                                    <span className="text-sm font-medium text-white">{prod?.name}</span>
+                                    <span className="text-[11px] text-[var(--theme-text-secondary)] font-mono bg-[var(--theme-bg-subtle)] px-2 py-0.5 rounded border border-[var(--theme-border)]">{prod?.sku}</span>
+                                    <span className="text-sm font-medium text-[var(--theme-text-primary)]">{prod?.name}</span>
                                 </div>
-                                <div className="font-mono text-[#2C5E3B] dark:text-[#A9CBA2] font-bold">
+                                <div className="font-mono text-primary font-bold tabular-nums">
                                     {displayQty}
                                 </div>
                             </div>
@@ -102,18 +102,18 @@ export const TransferRequestReview: React.FC<TransferRequestReviewProps> = ({
                     })}
                 </div>
 
-                <div className="grid grid-cols-2 gap-4 mt-6 pt-4 border-t border-[#2C5E3B]/20">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-5 pt-4 border-t border-[var(--theme-border)]">
                     <div>
-                        <p className="text-[10px] text-gray-500 font-bold uppercase tracking-wider mb-1">{t('warehouse.priority')}</p>
-                        <span className={`text-xs px-2 py-1 rounded font-bold uppercase ${transferPriority === 'Critical' ? 'bg-red-500/20 text-red-400' :
-                            transferPriority === 'High' ? 'bg-orange-500/20 text-orange-400' :
-                                'bg-[#2C5E3B]/20 text-[#A9CBA2]'
+                        <p className="text-[11px] text-[var(--theme-text-secondary)] font-semibold uppercase tracking-wider mb-1">{t('warehouse.priority')}</p>
+                        <span className={`text-xs px-2.5 py-1 rounded-lg font-semibold uppercase tracking-wider ${transferPriority === 'Critical' ? 'bg-red-500/20 text-red-500 border border-red-500/30' :
+                            transferPriority === 'High' ? 'bg-orange-500/20 text-orange-500 border border-orange-500/30' :
+                                'bg-primary/20 text-primary border border-primary/30'
                             }`}>{transferPriority}</span>
                     </div>
                     {transferNote && (
                         <div>
-                            <p className="text-[10px] text-gray-500 font-bold uppercase tracking-wider mb-1">{t('warehouse.putaway.jobDetails')}</p>
-                            <p className="text-gray-300 text-sm italic">"{transferNote}"</p>
+                            <p className="text-[11px] text-[var(--theme-text-secondary)] font-semibold uppercase tracking-wider mb-1">{t('warehouse.putaway.jobDetails')}</p>
+                            <p className="text-[var(--theme-text-secondary)] text-sm italic">"{transferNote}"</p>
                         </div>
                     )}
                 </div>

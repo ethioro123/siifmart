@@ -1,9 +1,8 @@
 import React, { useMemo, useState, useEffect } from 'react';
-import { MapPin, Navigation, RefreshCw, Truck, CheckCircle, Shield, AlertTriangle } from 'lucide-react';
+import { MapPin, Navigation, Truck, CheckCircle, Shield } from 'lucide-react';
 import { WMSJob, Site, User, Product } from '../../../types';
 import { formatJobId } from '../../../utils/jobIdFormatter';
 import Pagination from '../../shared/Pagination';
-import { isWeightBased, isVolumeBased } from '../../../utils/units';
 import { PartialDeliveryModal } from './PartialDeliveryModal';
 
 interface DriverActiveMissionProps {
@@ -45,45 +44,45 @@ export const DriverActiveMission: React.FC<DriverActiveMissionProps> = ({
     const paginatedJobs = useMemo(() => myJobs.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE), [myJobs, currentPage]);
 
     return (
-        <div className="space-y-5">
-            <div className="flex items-center justify-between px-3">
-                <h4 className="text-[11px] font-black text-gray-500 dark:text-gray-400 uppercase tracking-[0.25em] flex items-center gap-2.5 italic">
-                    <div className="w-2 h-2 rounded-full bg-[#A9CBA2] animate-pulse shadow-[0_0_10px_rgba(169,203,162,0.4)]" />
+        <div className="space-y-4">
+            <div className="flex items-center justify-between px-1">
+                <h4 className="text-xs font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider flex items-center gap-2">
+                    <div className="w-2 h-2 rounded-full bg-primary" />
                     {t('warehouse.docks.currentMission') || 'Active Mission'}
                 </h4>
             </div>
 
             {myJobs.length === 0 ? (
-                <div className="bg-gray-50 dark:bg-black/20 border-2 border-dashed border-gray-200 dark:border-white/5 rounded-[2.5rem] p-10 text-center shadow-inner">
-                    <div className="w-16 h-16 bg-gray-100 dark:bg-white/5 rounded-3xl flex items-center justify-center mx-auto mb-4 shadow-sm"><Shield className="text-gray-400 dark:text-gray-700" size={32} /></div>
-                    <p className="text-[10px] text-gray-400 dark:text-gray-500 font-black uppercase tracking-[0.2em]">{globalSearch ? t('warehouse.archiveEmpty') : t('warehouse.driverHub.noActiveJob')}</p>
+                <div className="bg-[var(--theme-bg-subtle)] border border-dashed border-[var(--theme-border)] rounded-2xl p-8 text-center">
+                    <div className="w-12 h-12 bg-[var(--theme-bg-card)] rounded-2xl flex items-center justify-center mx-auto mb-3 border border-[var(--theme-border)]"><Shield className="text-[var(--theme-text-muted)]" size={24} /></div>
+                    <p className="text-xs text-[var(--theme-text-muted)] font-semibold uppercase tracking-wider">{globalSearch ? t('warehouse.archiveEmpty') : t('warehouse.driverHub.noActiveJob')}</p>
                 </div>
             ) : (
-                <div className="space-y-5">
+                <div className="space-y-4">
                     {paginatedJobs.map((job, idx) => {
                         const destSite = sites.find(s => s.id === job.destSiteId); const isPending = job.status === 'Pending'; const isFirst = idx === 0 && !isPending;
                         return (
-                            <div key={job.id} className={`group rounded-2xl sm:rounded-3xl transition-colors border shadow-sm ${isPending ? 'bg-gray-100 dark:bg-black/30 border-gray-200 dark:border-white/5 opacity-60' : isFirst ? 'bg-[#2C5E3B]/5 dark:bg-[#2C5E3B]/10 border-[#2C5E3B]/20 dark:border-[#A9CBA2]/20 shadow-[#2C5E3B]/5' : 'bg-gray-50 dark:bg-white/5 border-gray-200 dark:border-white/10'}`}>
-                                <div className="p-3 sm:p-4 flex flex-col gap-2.5">
+                            <div key={job.id} className={`group rounded-2xl transition-colors border shadow-sm ${isPending ? 'bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] opacity-60' : isFirst ? 'bg-[var(--theme-bg-card)] border-primary/30' : 'bg-[var(--theme-bg-card)] border-[var(--theme-border)]'}`}>
+                                <div className="p-3.5 sm:p-4 flex flex-col gap-3">
                                     {/* Stop Header */}
                                     <div className="flex justify-between items-center">
                                         <div className="flex items-center gap-2">
-                                            <span className="px-2 py-0.5 rounded bg-[#2C5E3B]/15 text-[#2C5E3B] dark:text-[#A9CBA2] text-[9px] font-black uppercase tracking-widest">
+                                            <span className="px-2 py-0.5 rounded-full bg-primary/10 text-primary text-[11px] font-semibold uppercase tracking-wider border border-primary/20">
                                                 {t('warehouse.driverHub.stop').toUpperCase()} {idx + 1}
                                             </span>
-                                            <span className="text-[10px] font-black text-gray-500 dark:text-gray-400 tracking-[0.1em] uppercase">{formatJobId(job)}</span>
+                                            <span className="text-[11px] font-mono font-medium text-[var(--theme-text-secondary)] tracking-wider uppercase">{formatJobId(job)}</span>
                                         </div>
-                                        <span className="px-2.5 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider border bg-[#2C5E3B]/10 dark:bg-[#A9CBA2]/10 text-[#2C5E3B] dark:text-[#A9CBA2] border-[#2C5E3B]/20 dark:border-[#A9CBA2]/20">
+                                        <span className="px-2.5 py-0.5 rounded-full text-[11px] font-semibold uppercase tracking-wider border bg-primary/10 text-primary border-primary/20">
                                             {job.transferStatus === 'In-Transit' || job.transferStatus === 'Shipped' ? t('warehouse.driverHub.inTransit') : t('warehouse.active')}
                                         </span>
                                     </div>
- 
+
                                     {/* Destination & Address */}
                                     <div onClick={() => { setSelectedJob(job); setIsDetailsOpen(true); }} className="cursor-pointer hover:opacity-80 transition-opacity min-w-0">
-                                        <h3 className="text-sm sm:text-base font-bold text-gray-900 dark:text-white leading-tight tracking-tight truncate">{destSite?.name || t('warehouse.driverHub.customer')}</h3>
-                                        <div className="flex items-start gap-1 text-gray-500 dark:text-gray-400 mt-0.5">
-                                            <MapPin size={11} className="mt-0.5 shrink-0 text-[#2C5E3B] dark:text-[#A9CBA2]" />
-                                            <p className="text-[9px] font-bold uppercase tracking-wider leading-relaxed truncate">
+                                        <h3 className="text-sm sm:text-base font-semibold text-[var(--theme-text-primary)] leading-tight tracking-tight truncate">{destSite?.name || t('warehouse.driverHub.customer')}</h3>
+                                        <div className="flex items-start gap-1.5 text-[var(--theme-text-muted)] mt-1">
+                                            <MapPin size={13} className="mt-0.5 shrink-0 text-primary" />
+                                            <p className="text-[11px] font-medium leading-relaxed truncate">
                                                 {destSite?.address || t('warehouse.driverHub.addressPending')}{job.location ? ` • ${job.location}` : ''}
                                             </p>
                                         </div>
@@ -94,19 +93,19 @@ export const DriverActiveMission: React.FC<DriverActiveMissionProps> = ({
                                         const lineItems = job.lineItems || (job as any).line_items || [];
                                         if (lineItems.length === 0) return null;
                                         return (
-                                            <div className="p-2.5 bg-white/40 dark:bg-black/25 rounded-xl border border-gray-100 dark:border-white/5">
-                                                <div className="flex flex-wrap gap-1">
-                                                    {lineItems.slice(0, 3).map((item: any, idx: number) => {
+                                            <div className="p-2.5 bg-[var(--theme-bg-subtle)] rounded-xl border border-[var(--theme-border)]">
+                                                <div className="flex flex-wrap gap-1.5">
+                                                    {lineItems.slice(0, 3).map((item: any, idxItem: number) => {
                                                         const qty = item.pickedQty || item.quantity || item.expectedQty || 0;
                                                         return (
-                                                            <span key={idx} className="inline-flex items-center gap-1 bg-gray-100 dark:bg-white/5 px-2 py-0.5 rounded text-[9px] text-gray-700 dark:text-gray-300 font-medium max-w-[130px] sm:max-w-[150px] truncate">
+                                                            <span key={idxItem} className="inline-flex items-center gap-1.5 bg-[var(--theme-bg-card)] px-2 py-1 rounded-lg text-[11px] text-[var(--theme-text-secondary)] font-medium border border-[var(--theme-border)] max-w-[140px] sm:max-w-[160px] truncate">
                                                                 <span className="truncate">{item.name || item.sku}</span>
-                                                                <span className="font-bold text-gray-900 dark:text-white shrink-0">x{qty}</span>
+                                                                <span className="font-bold font-mono tabular-nums text-[var(--theme-text-primary)] shrink-0">x{qty}</span>
                                                             </span>
                                                         );
                                                     })}
                                                     {lineItems.length > 3 && (
-                                                        <span className="inline-flex items-center bg-gray-100 dark:bg-white/5 px-2 py-0.5 rounded text-[9px] text-[#2C5E3B] dark:text-[#A9CBA2] font-bold italic">
+                                                        <span className="inline-flex items-center bg-[var(--theme-bg-card)] px-2 py-1 rounded-lg text-[11px] text-primary font-semibold border border-primary/20">
                                                             + {lineItems.length - 3} {t('warehouse.driverHub.more')}
                                                         </span>
                                                     )}
@@ -116,24 +115,24 @@ export const DriverActiveMission: React.FC<DriverActiveMissionProps> = ({
                                     })()}
 
                                     {/* Actions & Driver Info */}
-                                    <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-gray-100 dark:border-white/5">
+                                    <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-[var(--theme-border)]">
                                         {(() => {
                                             const canSeeGlobalQueue = ['super_admin', 'admin', 'manager', 'regional_manager', 'operations_manager', 'warehouse_manager', 'dispatcher'].includes((user?.role || '').toLowerCase());
                                             if (canSeeGlobalQueue && job.assignedTo) {
                                                 const assignedEmployee = employees.find(e => e.id === job.assignedTo);
                                                 return (
-                                                    <div className="flex items-center gap-1 text-[8px] font-black text-gray-400 dark:text-gray-500 bg-gray-100 dark:bg-white/5 px-2 py-0.5 rounded-full uppercase tracking-widest italic shrink-0">
-                                                        <Truck size={8} />{t('warehouse.driverFallback')}: {assignedEmployee?.name || 'Self'}
+                                                    <div className="flex items-center gap-1.5 text-[11px] font-medium text-[var(--theme-text-muted)] bg-[var(--theme-bg-subtle)] px-2.5 py-1 rounded-full uppercase tracking-wider border border-[var(--theme-border)] shrink-0">
+                                                        <Truck size={12} className="text-primary" />{t('warehouse.driverFallback')}: {assignedEmployee?.name || 'Self'}
                                                     </div>
                                                 );
                                             }
                                             return <div />;
                                         })()}
 
-                                        <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
+                                        <div className="flex flex-wrap items-center gap-2">
                                             {(job.transferStatus === 'In-Transit' || job.transferStatus === 'Shipped') && (
-                                                <button onClick={(e) => { e.stopPropagation(); if (destSite?.address) window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(destSite.address)}`, '_blank'); else addNotification('info', t('warehouse.driverHub.addressPending')); }} className="px-3 py-2 min-h-[40px] bg-gray-200 dark:bg-white/10 hover:bg-gray-300 dark:hover:bg-white/20 rounded-lg text-[9px] font-black text-gray-900 dark:text-white uppercase flex items-center justify-center gap-1.5 transition-colors shadow-sm active:scale-95">
-                                                    <Navigation size={11} className="text-[#2C5E3B] dark:text-[#A9CBA2]" />{t('warehouse.driverHub.nav')}
+                                                <button onClick={(e) => { e.stopPropagation(); if (destSite?.address) window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(destSite.address)}`, '_blank'); else addNotification('info', t('warehouse.driverHub.addressPending')); }} className="px-3 py-2 min-h-[44px] bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl text-[11px] font-semibold text-[var(--theme-text-primary)] uppercase flex items-center justify-center gap-1.5 transition-colors shadow-sm active:scale-[0.98] touch-manipulation">
+                                                    <Navigation size={13} className="text-primary" />{t('warehouse.driverHub.nav')}
                                                 </button>
                                             )}
                                             {(job.transferStatus === 'In-Transit' || job.transferStatus === 'Shipped') ? (
@@ -149,10 +148,10 @@ export const DriverActiveMission: React.FC<DriverActiveMissionProps> = ({
                                                             <button
                                                                 disabled
                                                                 onClick={(e) => e.stopPropagation()}
-                                                                className="px-4 py-1.5 bg-stone-200 dark:bg-white/10 text-stone-400 dark:text-gray-500 rounded-lg text-[9px] font-black uppercase flex items-center justify-center gap-1.5 cursor-not-allowed opacity-60"
+                                                                className="px-4 py-2 min-h-[44px] bg-[var(--theme-bg-subtle)] text-[var(--theme-text-muted)] border border-[var(--theme-border)] rounded-xl text-[11px] font-semibold uppercase flex items-center justify-center gap-1.5 cursor-not-allowed opacity-60"
                                                                 title="Only the assigned driver can complete this mission"
                                                             >
-                                                                <CheckCircle size={11} /> Assigned Driver Only
+                                                                <CheckCircle size={13} /> Assigned Driver Only
                                                             </button>
                                                         );
                                                     }
@@ -160,15 +159,15 @@ export const DriverActiveMission: React.FC<DriverActiveMissionProps> = ({
                                                     return (
                                                         <button
                                                             onClick={(e) => { e.stopPropagation(); setPartialDeliveryJob(job); }}
-                                                            className="px-3 sm:px-4 py-2 min-h-[40px] bg-[#224429] dark:bg-[#EAE5D9] hover:bg-[#1B3520] dark:hover:bg-[#DFD9CA] text-[#FAF8F5] dark:text-[#1E3B24] rounded-lg text-[9px] font-black uppercase flex items-center justify-center gap-1.5 shadow-md active:scale-95 transition-colors"
+                                                            className="px-4 py-2 min-h-[44px] bg-primary hover:bg-primary/90 text-white rounded-xl text-xs font-semibold uppercase tracking-wider flex items-center justify-center gap-1.5 shadow-sm active:scale-[0.98] transition-colors touch-manipulation"
                                                         >
-                                                            <CheckCircle size={11} /> {(t('warehouse.driverHub.completeDeliveryBtn') || 'Complete Delivery').toUpperCase()}
+                                                            <CheckCircle size={14} /> {(t('warehouse.driverHub.completeDeliveryBtn') || 'Complete Delivery').toUpperCase()}
                                                         </button>
                                                     );
                                                 })()
                                             ) : (
-                                                <div className="py-1.5 px-3 bg-green-500/10 border border-green-500/20 rounded-lg text-[9px] font-black text-green-600 dark:text-green-400 uppercase flex items-center justify-center gap-1.5 italic tracking-widest">
-                                                    <CheckCircle size={11} /> {t('warehouse.driverHub.completedCaps') || 'Success'}
+                                                <div className="py-2 px-3 min-h-[44px] bg-green-500/10 border border-green-500/20 rounded-xl text-xs font-semibold text-green-600 dark:text-green-400 uppercase flex items-center justify-center gap-1.5 tracking-wider">
+                                                    <CheckCircle size={14} /> {t('warehouse.driverHub.completedCaps') || 'Success'}
                                                 </div>
                                             )}
                                         </div>

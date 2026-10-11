@@ -11,6 +11,8 @@ interface ModalProps {
   size?: 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '3xl' | '4xl';
   zIndex?: string;
   variant?: 'center' | 'side';
+  closeOnClickOutside?: boolean;
+  closeOnEscape?: boolean;
 }
 
 export default function Modal({
@@ -21,12 +23,14 @@ export default function Modal({
   footer,
   size = 'md',
   zIndex = 'z-[9999]',
-  variant = 'center'
+  variant = 'center',
+  closeOnClickOutside = true,
+  closeOnEscape = true
 }: ModalProps) {
   // Close on Escape key
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
+      if (closeOnEscape && e.key === 'Escape') onClose();
     };
 
     if (isOpen) {
@@ -38,7 +42,7 @@ export default function Modal({
       document.removeEventListener('keydown', handleEscape);
       document.body.style.overflow = 'unset';
     };
-  }, [isOpen, onClose]);
+  }, [isOpen, onClose, closeOnEscape]);
 
   if (!isOpen) return null;
 
@@ -59,7 +63,7 @@ export default function Modal({
       {/* Backdrop with blur and darken */}
       <div
         className="absolute inset-0 bg-black/60 backdrop-blur-[2px] transition-opacity print:hidden"
-        onClick={onClose}
+        onClick={closeOnClickOutside ? onClose : undefined}
       />
 
       {/* Modal Content */}

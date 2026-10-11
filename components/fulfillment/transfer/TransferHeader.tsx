@@ -1,5 +1,5 @@
 import React from 'react';
-import { Truck } from 'lucide-react';
+import { Truck, AlertTriangle } from 'lucide-react';
 import { WMSJob, User, Site } from '../../../types';
 
 interface TransferHeaderProps {
@@ -22,34 +22,50 @@ export const TransferHeader: React.FC<TransferHeaderProps> = ({
     setShowTransferCenter,
     setTransferCenterTab,
     user,
-    activeSite,
-    fixBrokenJobs
+    activeSite
 }) => {
     return (
-        <div className="bg-white/85 dark:bg-[#18201B]/80 border border-[#E2DCCE] dark:border-emerald-950/20 rounded-2xl p-6 shadow-xs">
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
-                <div>
-                    <h3 className="font-black text-stone-900 dark:text-white flex items-center gap-2 text-lg uppercase tracking-tight">
-                        <Truck className="text-[#2C5E3B] dark:text-[#A9CBA2]" size={22} />
-                        {t('warehouse.interSiteTransfers')}
-                    </h3>
-                    <p className="text-xs text-stone-500 dark:text-stone-400 mt-1 font-bold uppercase tracking-wider">{t('warehouse.requestManageTransfers')}</p>
+        <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-4 sm:p-5 shadow-sm">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-5">
+                <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] flex items-center justify-center text-[var(--theme-accent)] shrink-0">
+                        <Truck size={20} />
+                    </div>
+                    <div>
+                        <h3 className="font-bold text-[var(--theme-text-primary)] text-lg tracking-tight uppercase">
+                            {t('warehouse.interSiteTransfers')}
+                        </h3>
+                        <p className="text-xs text-[var(--theme-text-secondary)] font-medium mt-0.5">
+                            {t('warehouse.requestManageTransfers')}
+                        </p>
+                    </div>
                 </div>
-                <div className="flex gap-2">
-                    <div className="bg-stone-200/60 dark:bg-black/40 backdrop-blur-md p-1 rounded-xl border border-[#E2DCCE]/60 dark:border-white/5 flex gap-1 shadow-xs">
+
+                <div className="flex items-center gap-2.5 w-full md:w-auto justify-between md:justify-end">
+                    {/* View Mode Segmented Control */}
+                    <div className="bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] p-1 rounded-xl flex items-center">
                         <button
                             onClick={() => setViewMode('Process')}
-                            className={`px-3 py-1.5 rounded-lg text-xs font-black uppercase tracking-wider transition-all ${viewMode === 'Process' ? 'bg-[#2C5E3B] text-white shadow-xs' : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-white'}`}
+                            className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold uppercase tracking-wider transition-colors min-h-[36px] ${
+                                viewMode === 'Process'
+                                    ? 'bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)] shadow-sm'
+                                    : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)]'
+                            }`}
                         >
                             {t('warehouse.activeTransfers').split(' ')[0]}
                         </button>
                         <button
                             onClick={() => setViewMode('History')}
-                            className={`px-3 py-1.5 rounded-lg text-xs font-black uppercase tracking-wider transition-all ${viewMode === 'History' ? 'bg-[#2C5E3B] text-white shadow-xs' : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-white'}`}
+                            className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold uppercase tracking-wider transition-colors min-h-[36px] ${
+                                viewMode === 'History'
+                                    ? 'bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)] shadow-sm'
+                                    : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)]'
+                            }`}
                         >
                             {t('warehouse.history')}
                         </button>
                     </div>
+
                     <button
                         onClick={() => {
                             const isHQ = activeSite?.type === 'HQ' || activeSite?.type === 'Administration' || ['super_admin', 'admin'].includes(user?.role || '');
@@ -57,46 +73,55 @@ export const TransferHeader: React.FC<TransferHeaderProps> = ({
                             setTransferCenterTab(isHQ ? 'smart' : isWarehouse ? 'bulk' : 'request');
                             setShowTransferCenter(true);
                         }}
-                        className="px-4 py-2 bg-[#2C5E3B] hover:bg-[#20452B] dark:bg-[#EAE5D9] dark:hover:bg-[#D8D2C4] text-white dark:text-[#1C2620] font-bold rounded-xl transition-all flex items-center gap-2 shadow-sm active:scale-[0.98]"
+                        className="px-4 py-2 bg-[var(--theme-accent)] hover:opacity-90 text-white font-semibold rounded-xl transition-opacity flex items-center gap-2 shadow-sm min-h-[44px]"
                     >
                         <Truck size={16} />
-                        {t('warehouse.transferCenter')}
+                        <span>{t('warehouse.transferCenter')}</span>
                     </button>
                 </div>
             </div>
 
             {/* Transfer Summary */}
-            <div className="flex items-center gap-6 text-sm flex-wrap">
+            <div className="flex items-center gap-5 text-xs flex-wrap pt-3 border-t border-[var(--theme-border)]">
                 <div className="flex items-center gap-2">
-                    <span className="w-2 h-2 rounded-full bg-yellow-400"></span>
-                    <span className="text-stone-500 dark:text-stone-400">{t('warehouse.activeTransfers').split(' ')[0]}:</span>
-                    <span className="font-bold text-stone-900 dark:text-white tabular-nums">{filteredJobs.filter(j => j.type === 'TRANSFER' && !['Received', 'Cancelled'].includes(j.transferStatus || '')).length}</span>
+                    <span className="w-2 h-2 rounded-full bg-amber-400" />
+                    <span className="text-[var(--theme-text-secondary)] font-medium">{t('warehouse.activeTransfers').split(' ')[0]}:</span>
+                    <span className="font-bold font-mono tabular-nums text-[var(--theme-text-primary)]">
+                        {filteredJobs.filter(j => j.type === 'TRANSFER' && !['Received', 'Cancelled'].includes(j.transferStatus || '')).length}
+                    </span>
                 </div>
                 <div className="flex items-center gap-2">
-                    <span className="w-2 h-2 rounded-full bg-amber-400"></span>
-                    <span className="text-stone-500 dark:text-stone-400">{t('warehouse.inTransitLabel')}:</span>
-                    <span className="font-bold text-stone-900 dark:text-white tabular-nums">{filteredJobs.filter(j => {
-                        if (j.type !== 'TRANSFER') return false;
-                        let status = j.transferStatus || '';
-                        // If a child DISPATCH has progressed further, use its status
-                        const child = filteredJobs.find(d => d.type === 'DISPATCH' && (d.orderRef === j.id || d.orderRef === j.jobNumber) && d.status !== 'Cancelled');
-                        if (child && ['Shipped', 'In-Transit'].includes(child.transferStatus || '')) status = child.transferStatus!;
-                        return status === 'In-Transit' || status === 'Shipped';
-                    }).length}</span>
+                    <span className="w-2 h-2 rounded-full bg-blue-400" />
+                    <span className="text-[var(--theme-text-secondary)] font-medium">{t('warehouse.inTransitLabel')}:</span>
+                    <span className="font-bold font-mono tabular-nums text-[var(--theme-text-primary)]">
+                        {filteredJobs.filter(j => {
+                            if (j.type !== 'TRANSFER') return false;
+                            let status = j.transferStatus || '';
+                            const child = filteredJobs.find(d => d.type === 'DISPATCH' && (d.orderRef === j.id || d.orderRef === j.jobNumber) && d.status !== 'Cancelled');
+                            if (child && ['Shipped', 'In-Transit'].includes(child.transferStatus || '')) status = child.transferStatus!;
+                            return status === 'In-Transit' || status === 'Shipped';
+                        }).length}
+                    </span>
                 </div>
                 <div className="flex items-center gap-2">
-                    <span className="w-2 h-2 rounded-full bg-green-400"></span>
-                    <span className="text-stone-500 dark:text-stone-400">{t('warehouse.completed')}:</span>
-                    <span className="font-bold text-stone-900 dark:text-white tabular-nums">{filteredJobs.filter(j => j.type === 'TRANSFER' && j.transferStatus === 'Received').length}</span>
+                    <span className="w-2 h-2 rounded-full bg-green-400" />
+                    <span className="text-[var(--theme-text-secondary)] font-medium">{t('warehouse.completed')}:</span>
+                    <span className="font-bold font-mono tabular-nums text-[var(--theme-text-primary)]">
+                        {filteredJobs.filter(j => j.type === 'TRANSFER' && j.transferStatus === 'Received').length}
+                    </span>
                 </div>
                 {filteredJobs.filter(j => j.type === 'TRANSFER' && ['Received', 'Delivered', 'Completed'].some(s => s === j.transferStatus || s === j.status) && (j.lineItems || []).some((item: any) => item.receivedQty !== undefined && item.receivedQty !== (item.requestedMeasureQty !== undefined ? item.requestedMeasureQty : item.expectedQty) && !['Resolved', 'Completed'].includes(item.status))).length > 0 && (
-                    <div className="flex items-center gap-2 text-red-500">
-                        <span className="w-2 h-2 rounded-full bg-red-400 animate-pulse"></span>
+                    <div className="flex items-center gap-1.5 text-red-500 font-medium">
+                        <AlertTriangle size={14} className="text-red-500 shrink-0" />
                         <span>{t('warehouse.discrepancyCount')}:</span>
-                        <span className="font-bold tabular-nums">{filteredJobs.filter(j => j.type === 'TRANSFER' && ['Received', 'Delivered', 'Completed'].some(s => s === j.transferStatus || s === j.status) && (j.lineItems || []).some((item: any) => item.receivedQty !== undefined && item.receivedQty !== (item.requestedMeasureQty !== undefined ? item.requestedMeasureQty : item.expectedQty) && !['Resolved', 'Completed'].includes(item.status))).length}</span>
+                        <span className="font-bold font-mono tabular-nums">
+                            {filteredJobs.filter(j => j.type === 'TRANSFER' && ['Received', 'Delivered', 'Completed'].some(s => s === j.transferStatus || s === j.status) && (j.lineItems || []).some((item: any) => item.receivedQty !== undefined && item.receivedQty !== (item.requestedMeasureQty !== undefined ? item.requestedMeasureQty : item.expectedQty) && !['Resolved', 'Completed'].includes(item.status))).length}
+                        </span>
                     </div>
                 )}
             </div>
         </div>
     );
 };
+
+export default TransferHeader;

@@ -1,12 +1,15 @@
 import { useState, useMemo } from 'react';
 import { useData } from '../../contexts/DataContext';
-import { MOCK_PRICING_RULES, CURRENCY_SYMBOL } from '../../constants';
+import { CURRENCY_SYMBOL } from '../../constants';
 import type { Product, Promotion, PricingRule } from '../../types';
 import type { MerchandisingContextType, MerchandisingTab } from './MerchandisingContext';
 import { useMerchandisingFilters } from './hooks/useMerchandisingFilters';
 import { matchRuleProduct, calculateRulePrice } from './utils/ruleEvaluator';
 import { logger } from '../../utils/logger';
 import { getCountryProfile, Country } from '../../utils/localization';
+import { usePricingRules } from '../../hooks/usePricingRules';
+import { useSubmitPriceChanges, type PriceChangeInput } from '../../hooks/useSubmitPriceChanges';
+import { buildCatalogSalesMetricsIndex } from '../../utils/merchandisingAnalytics';
 
 const getMargin = (price: number, cost: number) => {
    if (!price || !cost) return 0;
@@ -23,6 +26,7 @@ export const useMerchandisingState = (): MerchandisingContextType => {
       addPromotion,
       sites,
       allOrders,
+      sales,
       refreshData,
       effectiveCountry,
       settings
@@ -40,7 +44,9 @@ export const useMerchandisingState = (): MerchandisingContextType => {
    }, [promotions, activeCountry]);
 
    const [activeTab, setActiveTab] = useState<MerchandisingTab>('pricing');
-   const [pricingRules, setPricingRules] = useState<PricingRule[]>(MOCK_PRICING_RULES);
+   const { rules: pricingRules, createRule, toggleRule, deleteRule } = usePricingRules(activeCountry);
+   const { submit: submitPriceChanges } = useSubmitPriceChanges(activeCountry);
+   const salesMetricsIndex = useMemo(() => buildCatalogSalesMetricsIndex(products || [], sales || []), [products, sales]);
 
    // Filtering and Sorting custom hook
    const {
@@ -158,31 +164,24 @@ export const useMerchandisingState = (): MerchandisingContextType => {
       try {
          const product = products.find(p => p.id === id);
          if (product) {
-            await updateProduct({
-               ...product,
+            const proposal = {
                price: editForm.price,
                costPrice: editForm.cost,
                salePrice: editForm.salePrice,
                isOnSale: editForm.isOnSale
-            });
-
-            addNotification('success', `Updated pricing for ${product.name}`);
-
-            if (editForm.applyToAll && product.sku) {
-               await updatePricesBySKU(product.sku, {
-                  price: editForm.price,
-                  costPrice: editForm.cost,
-                  salePrice: editForm.salePrice,
-                  isOnSale: editForm.isOnSale
-               });
-
-               await refreshData();
-            }
+            };
+            const targets = editForm.applyToAll && product.sku
+               ? products.filter(p => p.sku === product.sku)
+               : [product];
+            const { submitted } = await submitPriceChanges(
+               targets.map(p => ({ product: p, proposal })),
+               'Manual price edit'
+            );
+            if (submitted > 0) setEditingId(null);
          }
-         setEditingId(null);
       } catch (error) {
          logger.error('useMerchandisingState', "Error saving price:", error);
-         addNotification('alert', 'Failed to save price');
+         addNotification('alert', 'Failed to submit price change');
       } finally {
          setIsSubmitting(false);
       }
@@ -207,15 +206,19 @@ export const useMerchandisingState = (): MerchandisingContextType => {
       setIsSubmitting(true);
       try {
          const pct = parseFloat(bulkDiscountValue) / 100;
-         const productsToUpdate = products.filter(p => selectedIds.has(p.id));
-         await Promise.all(productsToUpdate.map(p => updateProduct({ ...p, isOnSale: true, salePrice: Math.round(p.price * (1 - pct)) })));
-         setSelectedIds(new Set());
-         addNotification('success', `Applied ${bulkDiscountValue}% discount to ${productsToUpdate.length} items.`);
+         const changes: PriceChangeInput[] = products
+            .filter(p => selectedIds.has(p.id))
+            .map(p => ({
+               product: p,
+               proposal: { price: p.price, costPrice: p.costPrice, isOnSale: true, salePrice: Math.round(p.price * (1 - pct)) }
+            }));
+         const { submitted } = await submitPriceChanges(changes, `Bulk ${bulkDiscountValue}% discount`);
+         if (submitted > 0) setSelectedIds(new Set());
          setIsBulkDiscountModalOpen(false);
          setBulkDiscountValue('');
       } catch (e) {
          logger.error('useMerchandisingState', 'caught error', e as Error);
-         addNotification('alert', 'Failed to apply bulk discount');
+         addNotification('alert', 'Failed to submit bulk discount');
       } finally {
          setIsSubmitting(false);
       }
@@ -225,30 +228,24 @@ export const useMerchandisingState = (): MerchandisingContextType => {
    const applyPsychologicalPricing = async (target: '5' | '0') => {
       setIsSubmitting(true);
       try {
-         let count = 0;
-         const updates: Promise<any>[] = [];
+         const changes: PriceChangeInput[] = [];
          const targetList = selectedIds.size > 0 ? products.filter(p => selectedIds.has(p.id)) : filteredProducts;
 
          targetList.forEach(p => {
             const current = Math.round(p.price);
-            let nextPrice = current;
-            if (target === '5') {
-               nextPrice = current % 10 === 5 ? current : Math.floor((current - 1) / 10) * 10 + 5;
-            } else {
-               nextPrice = Math.floor((current - 1) / 10) * 10;
-            }
+            const nextPrice = target === '5'
+               ? (current % 10 === 5 ? current : Math.floor((current - 1) / 10) * 10 + 5)
+               : Math.floor((current - 1) / 10) * 10;
             if (nextPrice !== current && nextPrice > 0) {
-               count++;
-               updates.push(updateProduct({ ...p, price: nextPrice }));
+               changes.push({ product: p, proposal: { price: nextPrice, costPrice: p.costPrice, salePrice: p.salePrice, isOnSale: p.isOnSale } });
             }
          });
 
-         await Promise.all(updates);
-         addNotification('success', `Optimized ${count} prices to end in ${target}.`);
-         if (selectedIds.size > 0) setSelectedIds(new Set());
+         const { submitted } = await submitPriceChanges(changes, `Psychological pricing (.${target})`);
+         if (submitted > 0 && selectedIds.size > 0) setSelectedIds(new Set());
       } catch (e) {
          logger.error('useMerchandisingState', 'caught error', e as Error);
-         addNotification('alert', 'Failed to update prices');
+         addNotification('alert', 'Failed to submit price changes');
       } finally {
          setIsSubmitting(false);
       }
@@ -256,8 +253,7 @@ export const useMerchandisingState = (): MerchandisingContextType => {
 
    const handleCreateRule = () => {
       if (!newRule.name || !newRule.value || !newRule.threshold) return;
-      const rule: PricingRule = {
-         id: crypto.randomUUID(),
+      createRule.mutate({
          name: newRule.name,
          targetCategory: newRule.targetCategory || 'Fresh Produce',
          condition: newRule.condition || 'Stock > X',
@@ -265,9 +261,7 @@ export const useMerchandisingState = (): MerchandisingContextType => {
          action: newRule.action || 'Decrease Price %',
          value: newRule.value,
          isActive: true
-      };
-      setPricingRules(prev => [...prev, rule]);
-      addNotification('success', `Automation Rule '${rule.name}' created and activated.`);
+      });
       setIsRuleModalOpen(false);
       setNewRule({ targetCategory: 'Fresh Produce', condition: 'Stock > X', action: 'Decrease Price %', isActive: true });
    };
@@ -275,17 +269,17 @@ export const useMerchandisingState = (): MerchandisingContextType => {
    const runPricingRule = async (rule: PricingRule) => {
       setIsSubmitting(true);
       try {
-         let updatedCount = 0;
-         const updates: Promise<any>[] = [];
+         const changes: PriceChangeInput[] = [];
          products.forEach(p => {
             if (matchRuleProduct(p, rule)) {
-               updatedCount++;
-               const newPrice = calculateRulePrice(p, rule);
-               updates.push(updateProduct({ ...p, price: parseFloat(newPrice.toFixed(2)) }));
+               const newPrice = parseFloat(calculateRulePrice(p, rule).toFixed(2));
+               if (newPrice > 0 && newPrice !== p.price) {
+                  changes.push({ product: p, proposal: { price: newPrice, costPrice: p.costPrice, salePrice: p.salePrice, isOnSale: p.isOnSale } });
+               }
             }
          });
-         await Promise.all(updates);
-         addNotification('info', `Rule Executed: Updated ${updatedCount} products in category '${rule.targetCategory}'`);
+         const { submitted } = await submitPriceChanges(changes, `Rule '${rule.name}'`);
+         if (submitted === 0) addNotification('info', `Rule '${rule.name}' matched no products needing a price change.`);
       } catch (e) {
          logger.error('useMerchandisingState', 'caught error', e as Error);
          addNotification('alert', 'Failed to run pricing rule');
@@ -294,11 +288,11 @@ export const useMerchandisingState = (): MerchandisingContextType => {
       }
    };
 
-   const toggleRuleStatus = (id: string) => setPricingRules(p => p.map(r => r.id === id ? { ...r, isActive: !r.isActive } : r));
-   const deleteRule = (id: string) => {
-      setPricingRules(p => p.filter(r => r.id !== id));
-      addNotification('info', 'Automation Rule deleted');
+   const toggleRuleStatus = (id: string) => {
+      const rule = pricingRules.find(r => r.id === id);
+      if (rule) toggleRule.mutate({ id, isActive: !rule.isActive });
    };
+   const deleteRuleById = (id: string) => deleteRule.mutate(id);
 
    const handleRunSimulation = async () => {
       setIsSimulating(true);
@@ -379,7 +373,7 @@ export const useMerchandisingState = (): MerchandisingContextType => {
       products,
       promotions: countryPromotions,
       sites,
-      allOrders,
+      allOrders: sales || [],
       refreshData,
       addNotification,
       updateProduct,
@@ -393,7 +387,6 @@ export const useMerchandisingState = (): MerchandisingContextType => {
       activeTab,
       setActiveTab,
       pricingRules,
-      setPricingRules,
       searchTerm,
       setSearchTerm,
 
@@ -465,7 +458,7 @@ export const useMerchandisingState = (): MerchandisingContextType => {
 
       runPricingRule,
       toggleRuleStatus,
-      deleteRule,
+      deleteRule: deleteRuleById,
       calculateMarkdown,
 
       applyPsychologicalPricing,
@@ -480,6 +473,7 @@ export const useMerchandisingState = (): MerchandisingContextType => {
       setFilters,
       isFilterPanelOpen,
       setIsFilterPanelOpen,
-      filteredProducts
+      filteredProducts,
+      salesMetricsIndex
    };
 };

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ArrowDown, Box } from 'lucide-react';
+import { ArrowDown, Box, ShieldCheck } from 'lucide-react';
 import { WMSJob, Site, ReceivingItem, Product } from '../../../types';
 import { formatJobId } from '../../../utils/jobIdFormatter';
 import { getSellUnit } from '../../../utils/units';
@@ -232,18 +232,18 @@ export const TransferReceiving: React.FC<TransferReceivingProps> = ({
     return (
         <div className="flex flex-col h-full">
             {/* Header */}
-            <div className="bg-white/85 dark:bg-[#18201B]/80 border border-[#E2DCCE] dark:border-emerald-950/20 rounded-2xl p-6 mb-6 shadow-xs">
+            <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-5 mb-5 shadow-xs">
                 <div className="flex items-center justify-between gap-4">
                     <div>
-                        <h3 className="font-black text-stone-900 dark:text-white flex items-center gap-2 text-lg uppercase tracking-tight">
-                            <ArrowDown className="text-[#2C5E3B] dark:text-[#A9CBA2]" size={22} />
+                        <h3 className="font-bold text-[var(--theme-text-primary)] flex items-center gap-2 text-lg tracking-tight">
+                            <ArrowDown className="text-primary" size={20} />
                             {t('warehouse.shipmentReceiving')}
                         </h3>
                         {activeTransferJob && (
                             <div className="flex items-center gap-2 mt-1">
-                                <span className="text-[#2C5E3B] dark:text-[#A9CBA2] font-mono text-xs font-bold">{formatJobId(activeTransferJob)}</span>
-                                <span className="text-stone-400 text-xs">•</span>
-                                <span className="text-stone-500 dark:text-stone-400 text-xs font-bold">{activeTransferJob.items} {t('warehouse.itemPlural')}</span>
+                                <span className="text-primary font-mono text-xs font-semibold">{formatJobId(activeTransferJob)}</span>
+                                <span className="text-[var(--theme-text-secondary)] text-xs">•</span>
+                                <span className="text-[var(--theme-text-secondary)] text-xs font-medium">{activeTransferJob.items} {t('warehouse.itemPlural')}</span>
                             </div>
                         )}
                     </div>
@@ -253,7 +253,7 @@ export const TransferReceiving: React.FC<TransferReceivingProps> = ({
                             setActiveTransferJob(null);
                             setTransferReceiveItems([]);
                         }}
-                        className="px-4 py-2 bg-stone-100 dark:bg-white/5 text-stone-600 hover:text-stone-900 dark:text-gray-400 dark:hover:text-white rounded-xl font-bold transition-all text-xs"
+                        className="min-h-[44px] px-4 py-2 bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] rounded-xl font-semibold transition-all text-xs touch-manipulation"
                     >
                         {t('warehouse.dismiss')}
                     </button>
@@ -261,46 +261,46 @@ export const TransferReceiving: React.FC<TransferReceivingProps> = ({
             </div>
 
             {/* Receive List */}
-            <div className="flex-1 bg-white/85 dark:bg-[#18201B]/80 border border-[#E2DCCE] dark:border-emerald-950/20 rounded-2xl p-6 overflow-hidden flex flex-col shadow-xs">
-                <div className="overflow-y-auto space-y-4 custom-scrollbar flex-1 pb-4">
+            <div className="flex-1 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-5 overflow-hidden flex flex-col shadow-xs">
+                <div className="overflow-y-auto space-y-3.5 custom-scrollbar flex-1 pb-4">
                     {transferReceiveItems.map((item, idx) => {
                         const product = allProducts.find(p => p.id === item.productId);
                         return (
-                            <div key={idx} className="bg-stone-50 dark:bg-white/[0.02] border border-[#E2DCCE]/60 dark:border-white/5 rounded-xl p-4 flex gap-4">
-                                <div className="w-16 h-16 bg-stone-100 dark:bg-black/40 rounded-lg flex items-center justify-center shrink-0 border border-[#E2DCCE]/60 dark:border-white/5">
+                            <div key={idx} className="bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl p-4 flex gap-4">
+                                <div className="w-16 h-16 bg-[var(--theme-bg-card)] rounded-lg flex items-center justify-center shrink-0 border border-[var(--theme-border)]">
                                     {product?.image ? (
-                                        <img src={product.image} alt={product.name} className="w-full h-full object-cover rounded-lg opacity-80" />
+                                        <img src={product.image} alt={product.name} className="w-full h-full object-cover rounded-lg" />
                                     ) : (
-                                        <Box className="text-stone-400 dark:text-stone-600" size={24} />
+                                        <Box className="text-[var(--theme-text-secondary)]" size={24} />
                                     )}
                                 </div>
                                 <div className="flex-1 min-w-0">
                                     <div className="flex justify-between items-start mb-2">
                                         <div>
-                                            <h4 className="font-black text-stone-900 dark:text-white truncate text-sm">{product?.name || 'Unknown Item'}</h4>
-                                            <p className="text-[10px] text-stone-500 font-mono">{product?.sku}</p>
+                                            <h4 className="font-bold text-[var(--theme-text-primary)] truncate text-sm">{product?.name || 'Unknown Item'}</h4>
+                                            <p className="text-[11px] text-[var(--theme-text-secondary)] font-mono">{product?.sku}</p>
                                         </div>
                                         <div className="text-right">
-                                            <span className="text-[10px] text-stone-400 dark:text-stone-500 uppercase font-black tracking-widest">
+                                            <span className="text-[11px] text-[var(--theme-text-secondary)] uppercase font-semibold tracking-wider">
                                                 {t('warehouse.expected')}{isBlindReceiving ? ' (Blind)' : ''}
                                             </span>
-                                            <p className="font-mono text-stone-900 dark:text-white font-bold">
+                                            <p className="font-mono text-[var(--theme-text-primary)] font-bold tabular-nums">
                                                 {isBlindReceiving ? (
-                                                    <span className="text-amber-600 dark:text-amber-400 font-mono tracking-widest font-black">***</span>
+                                                    <span className="text-amber-500 font-mono tracking-widest font-bold">***</span>
                                                 ) : (
                                                     <>
                                                         {item.expectedQty}
                                                         {product?.unit && getSellUnit(product.unit).code !== 'UNIT' && (
-                                                            <span className="text-[10px] text-stone-500 font-bold ml-1 uppercase">{getSellUnit(product.unit).shortLabel}</span>
+                                                            <span className="text-[11px] text-[var(--theme-text-secondary)] font-medium ml-1 uppercase">{getSellUnit(product.unit).shortLabel}</span>
                                                         )}
                                                     </>
                                                 )}
                                             </p>
                                         </div>
                                     </div>
-                                    <div className="grid grid-cols-2 gap-4 mt-3">
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-3">
                                         <div>
-                                            <label htmlFor={`received-qty-${idx}`} className="text-[10px] text-stone-500 uppercase font-black mb-1 block">
+                                            <label htmlFor={`received-qty-${idx}`} className="text-[11px] text-[var(--theme-text-secondary)] uppercase font-semibold mb-1 block">
                                                 {t('warehouse.received')}{product?.unit && getSellUnit(product.unit).code !== 'UNIT' ? ` (${getSellUnit(product.unit).shortLabel})` : ''}
                                             </label>
                                             <input
@@ -314,12 +314,12 @@ export const TransferReceiving: React.FC<TransferReceivingProps> = ({
                                                     newItems[idx].receivedQty = unitDef.allowDecimal ? parseFloat(e.target.value) || 0 : parseInt(e.target.value) || 0;
                                                     setTransferReceiveItems(newItems);
                                                 }}
-                                                className="w-full bg-white dark:bg-black/40 border border-[#E2DCCE] dark:border-white/10 rounded-lg px-3 py-2 text-sm text-stone-900 dark:text-white focus:border-[#2C5E3B] dark:focus:border-[#A9CBA2] focus:outline-none"
+                                                className="w-full min-h-[44px] bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl px-3 py-2 text-sm text-[var(--theme-text-primary)] focus:border-primary focus:outline-none touch-manipulation font-mono tabular-nums"
                                                 aria-label={`Received quantity for ${product?.name || 'item'}`}
                                             />
                                         </div>
                                         <div>
-                                            <label htmlFor={`condition-${idx}`} className="text-[10px] text-stone-500 uppercase font-black mb-1 block">{t('warehouse.returnCondition')}</label>
+                                            <label htmlFor={`condition-${idx}`} className="text-[11px] text-[var(--theme-text-secondary)] uppercase font-semibold mb-1 block">{t('warehouse.returnCondition')}</label>
                                             <select
                                                 id={`condition-${idx}`}
                                                 value={item.condition}
@@ -328,7 +328,7 @@ export const TransferReceiving: React.FC<TransferReceivingProps> = ({
                                                     newItems[idx].condition = e.target.value as any;
                                                     setTransferReceiveItems(newItems);
                                                 }}
-                                                className="w-full bg-white dark:bg-black/40 border border-[#E2DCCE] dark:border-white/10 rounded-lg px-3 py-2 text-sm text-stone-900 dark:text-white focus:border-[#2C5E3B] dark:focus:border-[#A9CBA2] focus:outline-none"
+                                                className="w-full min-h-[44px] bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl px-3 py-2 text-sm text-[var(--theme-text-primary)] focus:border-primary focus:outline-none touch-manipulation"
                                                 aria-label={`Condition for ${product?.name || 'item'}`}
                                             >
                                                 <option value="Good">{t('warehouse.good')}</option>
@@ -342,11 +342,12 @@ export const TransferReceiving: React.FC<TransferReceivingProps> = ({
                         );
                     })}
                 </div>
-                <div className="pt-4 border-t border-white/10 mt-2">
+                <div className="pt-4 border-t border-[var(--theme-border)] mt-2">
                     <button
                         onClick={() => setIsHandshakeModalOpen(true)}
-                        className="woody-btn-primary w-full py-3.5 text-xs font-black uppercase tracking-wider flex items-center justify-center gap-2 shadow-lg"
+                        className="w-full min-h-[44px] py-3.5 bg-primary text-white hover:opacity-90 rounded-xl text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 shadow-sm transition-all touch-manipulation active:scale-[0.99]"
                     >
+                        <ShieldCheck size={16} />
                         Review & Sign Digital Handshake (Chain of Custody)
                     </button>
                 </div>

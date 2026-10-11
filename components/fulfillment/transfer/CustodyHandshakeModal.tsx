@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ShieldCheck, AlertTriangle, CheckCircle, Truck, UserCheck, X, FileText } from 'lucide-react';
+import { ShieldCheck, AlertTriangle, CheckCircle, Truck, UserCheck, X } from 'lucide-react';
 import { WMSJob, ReceivingItem, Product, User } from '../../../types';
 import { formatJobId } from '../../../utils/jobIdFormatter';
 
@@ -58,20 +58,20 @@ export const CustodyHandshakeModal: React.FC<CustodyHandshakeModalProps> = ({
     };
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/65 backdrop-blur-sm animate-in fade-in duration-200">
-            <div className="bg-white dark:bg-[#151D18] border border-[#E2DCCE] dark:border-[#2C5E3B]/30 rounded-3xl max-w-xl w-full overflow-hidden shadow-2xl flex flex-col max-h-[90vh]">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 animate-in fade-in duration-200">
+            <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl max-w-xl w-full overflow-hidden shadow-2xl flex flex-col max-h-[90vh]">
                 
                 {/* Header */}
-                <div className="px-6 py-5 border-b border-[#E2DCCE]/60 dark:border-white/10 flex items-center justify-between bg-stone-50/80 dark:bg-black/20">
+                <div className="px-6 py-4 border-b border-[var(--theme-border)] flex items-center justify-between bg-[var(--theme-bg-subtle)]">
                     <div className="flex items-center gap-3">
-                        <div className={`p-2.5 rounded-2xl ${hasDiscrepancy ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400' : 'bg-[#2C5E3B]/10 text-[#2C5E3B] dark:text-[#A9CBA2]'}`}>
-                            {hasDiscrepancy ? <AlertTriangle size={24} /> : <ShieldCheck size={24} />}
+                        <div className={`p-2.5 rounded-xl ${hasDiscrepancy ? 'bg-amber-500/10 text-amber-500' : 'bg-primary/10 text-primary'}`}>
+                            {hasDiscrepancy ? <AlertTriangle size={22} /> : <ShieldCheck size={22} />}
                         </div>
                         <div>
-                            <h3 className="text-base font-black text-stone-900 dark:text-white uppercase tracking-tight">
+                            <h3 className="text-base font-bold text-[var(--theme-text-primary)] tracking-tight">
                                 Digital Dual-Handshake
                             </h3>
-                            <p className="text-[11px] text-stone-500 dark:text-stone-400 font-bold uppercase tracking-wider">
+                            <p className="text-[11px] text-[var(--theme-text-secondary)] font-semibold uppercase tracking-wider">
                                 Chain of Custody & Acceptance Responsibility
                             </p>
                         </div>
@@ -79,65 +79,66 @@ export const CustodyHandshakeModal: React.FC<CustodyHandshakeModalProps> = ({
                     <button
                         onClick={onClose}
                         disabled={isSubmitting}
-                        className="p-2 text-stone-400 hover:text-stone-700 dark:hover:text-white rounded-xl hover:bg-stone-100 dark:hover:bg-white/5 transition-colors"
+                        className="min-h-[44px] min-w-[44px] flex items-center justify-center text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] rounded-xl hover:bg-[var(--theme-bg-card)] transition-colors touch-manipulation"
+                        aria-label="Close modal"
                     >
                         <X size={18} />
                     </button>
                 </div>
 
                 {/* Body Content */}
-                <div className="p-6 overflow-y-auto space-y-5 custom-scrollbar text-xs">
+                <div className="p-6 overflow-y-auto space-y-4 custom-scrollbar text-xs">
                     
                     {/* Legal Custody Notice */}
-                    <div className="p-3.5 rounded-2xl bg-stone-100/70 dark:bg-white/[0.03] border border-[#E2DCCE]/70 dark:border-white/5 text-stone-600 dark:text-stone-300 leading-relaxed font-medium">
-                        <span className="font-black text-stone-900 dark:text-white uppercase mr-1">Custody Principle:</span>
+                    <div className="p-3.5 rounded-xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-[var(--theme-text-secondary)] leading-relaxed font-normal">
+                        <span className="font-bold text-[var(--theme-text-primary)] uppercase mr-1">Custody Principle:</span>
                         You inspect before you accept. By certifying receipt, custody of this cargo is legally transferred to you. Any unrecorded shortage or damage becomes the accepting receiver's administrative liability.
                     </div>
 
                     {/* Parties Handshake Card */}
-                    <div className="grid grid-cols-2 gap-3">
-                        <div className="p-3 rounded-2xl border border-stone-200 dark:border-white/5 bg-stone-50/50 dark:bg-black/20">
-                            <div className="flex items-center gap-2 mb-1 text-[10px] font-black text-stone-400 uppercase tracking-widest">
-                                <Truck size={12} className="text-amber-600 dark:text-amber-400" /> Relinquishing Custody
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div className="p-3.5 rounded-xl border border-[var(--theme-border)] bg-[var(--theme-bg-subtle)]">
+                            <div className="flex items-center gap-1.5 mb-1 text-[11px] font-semibold text-amber-500 uppercase tracking-wider">
+                                <Truck size={14} /> Relinquishing Custody
                             </div>
-                            <p className="font-black text-stone-850 dark:text-stone-100 truncate">{driverName}</p>
-                            <p className="text-[10px] text-stone-400 font-mono">Transit Driver / Courier</p>
+                            <p className="font-bold text-[var(--theme-text-primary)] truncate text-sm">{driverName}</p>
+                            <p className="text-[11px] text-[var(--theme-text-secondary)] font-mono">Transit Driver / Courier</p>
                         </div>
 
-                        <div className="p-3 rounded-2xl border border-[#2C5E3B]/20 bg-[#2C5E3B]/5 dark:bg-[#A9CBA2]/5">
-                            <div className="flex items-center gap-2 mb-1 text-[10px] font-black text-[#2C5E3B] dark:text-[#A9CBA2] uppercase tracking-widest">
-                                <UserCheck size={12} /> Assuming Custody
+                        <div className="p-3.5 rounded-xl border border-primary/20 bg-primary/5">
+                            <div className="flex items-center gap-1.5 mb-1 text-[11px] font-semibold text-primary uppercase tracking-wider">
+                                <UserCheck size={14} /> Assuming Custody
                             </div>
-                            <p className="font-black text-stone-850 dark:text-stone-100 truncate">{currentUser?.name || 'Receiver Staff'}</p>
-                            <p className="text-[10px] text-[#2C5E3B] dark:text-[#A9CBA2] font-mono">Store Receiving Custodian</p>
+                            <p className="font-bold text-[var(--theme-text-primary)] truncate text-sm">{currentUser?.name || 'Receiver Staff'}</p>
+                            <p className="text-[11px] text-primary font-mono">Store Receiving Custodian</p>
                         </div>
                     </div>
 
                     {/* Clean Receipt vs Discrepancy Alert */}
                     {!hasDiscrepancy ? (
-                        <div className="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-800 dark:text-emerald-300 flex items-center gap-3">
+                        <div className="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-800 dark:text-emerald-300 flex items-center gap-3">
                             <CheckCircle size={20} className="text-emerald-600 dark:text-emerald-400 shrink-0" />
                             <div>
-                                <p className="font-black text-sm uppercase tracking-tight">100% Count Match — Zero Discrepancies</p>
-                                <p className="text-[11px] text-emerald-700/80 dark:text-emerald-300/70 mt-0.5">
+                                <p className="font-bold text-sm tracking-tight">100% Count Match — Zero Discrepancies</p>
+                                <p className="text-[11px] text-emerald-700/80 dark:text-emerald-300/80 mt-0.5">
                                     All units received in Good Condition matching manifest ({formatJobId(activeTransferJob)}).
                                 </p>
                             </div>
                         </div>
                     ) : (
                         <div className="space-y-3">
-                            <div className="p-3.5 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-900 dark:text-amber-300 flex items-start gap-3">
+                            <div className="p-3.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-900 dark:text-amber-300 flex items-start gap-3">
                                 <AlertTriangle size={18} className="text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
                                 <div>
-                                    <p className="font-black uppercase tracking-tight">Discrepancy Detected ({totalDiscrepantUnits} Units Affected)</p>
-                                    <p className="text-[11px] text-amber-800/80 dark:text-amber-300/75 mt-0.5">
+                                    <p className="font-bold tracking-tight">Discrepancy Detected ({totalDiscrepantUnits} Units Affected)</p>
+                                    <p className="text-[11px] text-amber-800/80 dark:text-amber-300/80 mt-0.5">
                                         This variance will be permanently recorded in enterprise audit logs. Transit driver's accuracy score on the national gamification leaderboard will be penalized.
                                     </p>
                                 </div>
                             </div>
 
                             {/* Discrepant Items List */}
-                            <div className="border border-stone-200 dark:border-white/5 rounded-2xl overflow-hidden divide-y divide-stone-100 dark:divide-white/5">
+                            <div className="border border-[var(--theme-border)] rounded-xl overflow-hidden divide-y divide-[var(--theme-border)]">
                                 {discrepantItems.map((item, idx) => {
                                     const product = allProducts.find(p => p.id === item.productId);
                                     const expected = item.expectedQty || 0;
@@ -145,13 +146,13 @@ export const CustodyHandshakeModal: React.FC<CustodyHandshakeModalProps> = ({
                                     const variance = received - expected;
 
                                     return (
-                                        <div key={idx} className="p-3 flex items-center justify-between bg-stone-50/40 dark:bg-white/[0.01]">
+                                        <div key={idx} className="p-3 flex items-center justify-between bg-[var(--theme-bg-subtle)]">
                                             <div className="min-w-0 flex-1 mr-3">
-                                                <p className="font-black text-stone-850 dark:text-stone-200 truncate">{product?.name || 'Item'}</p>
-                                                <p className="text-[10px] text-stone-400 font-mono">{product?.sku} · Condition: <span className="font-bold text-amber-600 dark:text-amber-400">{item.condition}</span></p>
+                                                <p className="font-bold text-[var(--theme-text-primary)] truncate">{product?.name || 'Item'}</p>
+                                                <p className="text-[11px] text-[var(--theme-text-secondary)] font-mono">{product?.sku} · Condition: <span className="font-semibold text-amber-500">{item.condition}</span></p>
                                             </div>
                                             <div className="text-right shrink-0">
-                                                <span className={`font-mono font-black text-xs px-2 py-0.5 rounded-full ${variance < 0 ? 'bg-red-500/10 text-red-600 dark:text-red-400 border border-red-500/20' : 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20'}`}>
+                                                <span className={`font-mono font-bold text-xs px-2 py-0.5 rounded-full ${variance < 0 ? 'bg-red-500/10 text-red-600 dark:text-red-400 border border-red-500/20' : 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20'}`}>
                                                     {variance > 0 ? `+${variance}` : variance} ({received}/{expected})
                                                 </span>
                                             </div>
@@ -163,30 +164,30 @@ export const CustodyHandshakeModal: React.FC<CustodyHandshakeModalProps> = ({
                     )}
 
                     {/* Dual-Signoff Checkboxes */}
-                    <div className="space-y-3 pt-2 border-t border-stone-200 dark:border-white/10">
-                        <label className="flex items-start gap-3 p-3 rounded-2xl bg-stone-50 dark:bg-white/[0.02] border border-[#E2DCCE]/60 dark:border-white/5 cursor-pointer hover:border-[#2C5E3B]/40 transition-colors">
+                    <div className="space-y-3 pt-2 border-t border-[var(--theme-border)]">
+                        <label className="flex items-start gap-3 p-3.5 rounded-xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] cursor-pointer hover:border-primary/40 transition-colors touch-manipulation">
                             <input
                                 type="checkbox"
                                 checked={receiverCertified}
                                 onChange={(e) => setReceiverCertified(e.target.checked)}
-                                className="mt-0.5 h-4 w-4 rounded text-[#2C5E3B] focus:ring-[#2C5E3B] border-stone-300 dark:border-stone-700"
+                                className="mt-0.5 h-4 w-4 rounded text-primary focus:ring-primary border-[var(--theme-border)]"
                             />
-                            <span className="text-[11px] text-stone-700 dark:text-stone-300 font-medium">
-                                <strong className="text-stone-900 dark:text-white font-black block mb-0.5">Receiver Certification</strong>
+                            <span className="text-[11px] text-[var(--theme-text-secondary)] font-normal leading-relaxed">
+                                <strong className="text-[var(--theme-text-primary)] font-bold block mb-0.5">Receiver Certification</strong>
                                 I certify that I have physically counted and inspected this load. I assume 100% custody and responsibility for the accepted items.
                             </span>
                         </label>
 
                         {hasDiscrepancy && (
-                            <label className="flex items-start gap-3 p-3 rounded-2xl bg-amber-500/[0.04] border border-amber-500/20 cursor-pointer hover:border-amber-500/40 transition-colors">
+                            <label className="flex items-start gap-3 p-3.5 rounded-xl bg-amber-500/5 border border-amber-500/20 cursor-pointer hover:border-amber-500/40 transition-colors touch-manipulation">
                                 <input
                                     type="checkbox"
                                     checked={driverAcknowledged}
                                     onChange={(e) => setDriverAcknowledged(e.target.checked)}
                                     className="mt-0.5 h-4 w-4 rounded text-amber-600 focus:ring-amber-500 border-amber-300 dark:border-amber-700"
                                 />
-                                <span className="text-[11px] text-amber-900 dark:text-amber-200 font-medium">
-                                    <strong className="text-stone-900 dark:text-white font-black block mb-0.5">Driver Discrepancy Acknowledgement</strong>
+                                <span className="text-[11px] text-amber-900 dark:text-amber-200 font-normal leading-relaxed">
+                                    <strong className="text-[var(--theme-text-primary)] font-bold block mb-0.5">Driver Discrepancy Acknowledgement</strong>
                                     Delivering driver co-signs and acknowledges the recorded cargo variance before departing dock.
                                 </span>
                             </label>
@@ -195,22 +196,22 @@ export const CustodyHandshakeModal: React.FC<CustodyHandshakeModalProps> = ({
                 </div>
 
                 {/* Footer Actions */}
-                <div className="p-4 px-6 border-t border-[#E2DCCE]/60 dark:border-white/10 flex items-center justify-between gap-3 bg-stone-50/80 dark:bg-black/20">
+                <div className="p-4 px-6 border-t border-[var(--theme-border)] flex items-center justify-between gap-3 bg-[var(--theme-bg-subtle)]">
                     <button
                         onClick={onClose}
                         disabled={isSubmitting}
-                        className="px-4 py-2.5 rounded-xl border border-stone-200 dark:border-white/10 text-stone-600 dark:text-stone-300 font-bold hover:bg-stone-100 dark:hover:bg-white/5 transition-all text-xs"
+                        className="min-h-[44px] px-4 py-2.5 rounded-xl border border-[var(--theme-border)] text-[var(--theme-text-secondary)] font-semibold hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-card)] transition-all text-xs touch-manipulation"
                     >
                         Revise Counts
                     </button>
                     <button
                         onClick={handleExecute}
                         disabled={!canSubmit || isSubmitting}
-                        className={`flex-1 py-2.5 px-4 rounded-xl text-xs font-black uppercase tracking-wider transition-all flex items-center justify-center gap-2 shadow-md ${canSubmit && !isSubmitting
+                        className={`min-h-[44px] flex-1 py-2.5 px-4 rounded-xl text-xs font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-2 shadow-sm touch-manipulation ${canSubmit && !isSubmitting
                             ? hasDiscrepancy 
-                                ? 'bg-amber-600 hover:bg-amber-500 text-white active:scale-98'
-                                : 'woody-btn-primary hover:scale-[1.01] active:scale-98'
-                            : 'bg-stone-200 dark:bg-white/10 text-stone-400 dark:text-stone-500 cursor-not-allowed'
+                                ? 'bg-amber-600 hover:bg-amber-500 text-white active:scale-[0.99]'
+                                : 'bg-primary hover:opacity-90 text-white active:scale-[0.99]'
+                            : 'bg-[var(--theme-bg-card)] text-[var(--theme-text-secondary)] opacity-50 cursor-not-allowed border border-[var(--theme-border)]'
                         }`}
                     >
                         <ShieldCheck size={16} />

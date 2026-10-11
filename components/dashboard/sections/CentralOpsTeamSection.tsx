@@ -63,19 +63,19 @@ export const CentralOpsTeamSection: React.FC<CentralOpsTeamSectionProps> = ({
     return (
         <div className="space-y-8 animate-fadeIn">
             {/* Header & Command Charter */}
-            <div className="p-6 bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)] rounded-3xl border border-[var(--theme-border)] shadow-sm relative overflow-hidden">
+            <div className="p-6 bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)] rounded-2xl border border-[var(--theme-border)] shadow-sm relative overflow-hidden">
                 <div className="absolute top-0 right-0 p-8 opacity-5 pointer-events-none">
                     <Users size={160} />
                 </div>
                 <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
                     <div>
                         <div className="flex items-center gap-2 mb-2">
-                            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-[var(--theme-bg-subtle)] text-[var(--theme-text-primary)] border border-[var(--theme-border)]">
+                            <span className="px-2.5 py-0.5 rounded-full text-[11px] font-semibold uppercase tracking-wider bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] border border-[var(--theme-accent)]/20">
                                 Operations Directorate • Level 2 (Rank 90)
                             </span>
                             <span className="text-xs text-[var(--theme-text-muted)] font-mono">SOP-MGT-021</span>
                         </div>
-                        <h2 className="text-2xl font-black tracking-tight flex items-center gap-2 text-[var(--theme-text-primary)]">
+                        <h2 className="text-2xl font-bold tracking-tight flex items-center gap-2 text-[var(--theme-text-primary)]">
                             Central Operations Team
                         </h2>
                         <p className="text-xs text-[var(--theme-text-secondary)] max-w-2xl mt-1 leading-relaxed">
@@ -86,7 +86,7 @@ export const CentralOpsTeamSection: React.FC<CentralOpsTeamSectionProps> = ({
                     <div className="flex items-center gap-3">
                         <button
                             onClick={() => setIsAuditModalOpen(true)}
-                            className="flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-[var(--theme-primary)] text-[var(--theme-primary-text)] hover:opacity-90 text-xs font-bold transition-all shadow-sm active:scale-95 shrink-0 cursor-pointer"
+                            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[var(--theme-accent)] text-white hover:opacity-90 text-xs font-semibold transition-all shadow-sm active:scale-[0.98] shrink-0 cursor-pointer"
                         >
                             <Plus size={16} />
                             <span>New Walkthrough / Spot Audit</span>
@@ -96,29 +96,29 @@ export const CentralOpsTeamSection: React.FC<CentralOpsTeamSectionProps> = ({
 
                 {/* Operations Manager In-Charge Card */}
                 <div className="mt-6 pt-6 border-t border-[var(--theme-border)] grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                    <div className="p-3 bg-[var(--theme-bg-subtle)] rounded-2xl border border-[var(--theme-border)]">
-                        <span className="text-[10px] font-bold text-[var(--theme-text-muted)] uppercase tracking-wider">Commanding Officer</span>
+                    <div className="p-3 bg-[var(--theme-bg-subtle)] rounded-xl border border-[var(--theme-border)]">
+                        <span className="text-[11px] font-semibold text-[var(--theme-text-muted)] uppercase tracking-wider">Commanding Officer</span>
                         <p className="text-sm font-bold text-[var(--theme-text-primary)] mt-0.5">
                             {opsManager ? opsManager.name : 'Operations Manager (HQ)'}
                         </p>
                         <p className="text-[11px] text-[var(--theme-text-secondary)] font-medium">Head of Central Operations</p>
                     </div>
-                    <div className="p-3 bg-[var(--theme-bg-subtle)] rounded-2xl border border-[var(--theme-border)]">
-                        <span className="text-[10px] font-bold text-[var(--theme-text-muted)] uppercase tracking-wider">Field Leadership</span>
+                    <div className="p-3 bg-[var(--theme-bg-subtle)] rounded-xl border border-[var(--theme-border)]">
+                        <span className="text-[11px] font-semibold text-[var(--theme-text-muted)] uppercase tracking-wider">Field Leadership</span>
                         <p className="text-sm font-bold text-[var(--theme-text-primary)] mt-0.5">
                             {storeManagers.length} Stores • {whManagers.length} Hubs
                         </p>
                         <p className="text-[11px] text-[var(--theme-text-secondary)] font-medium">Direct Supervisory Line</p>
                     </div>
-                    <div className="p-3 bg-[var(--theme-bg-subtle)] rounded-2xl border border-[var(--theme-border)]">
-                        <span className="text-[10px] font-bold text-[var(--theme-text-muted)] uppercase tracking-wider">Field Audit Force</span>
+                    <div className="p-3 bg-[var(--theme-bg-subtle)] rounded-xl border border-[var(--theme-border)]">
+                        <span className="text-[11px] font-semibold text-[var(--theme-text-muted)] uppercase tracking-wider">Field Audit Force</span>
                         <p className="text-sm font-bold text-[var(--theme-text-primary)] mt-0.5">
                             {auditors.length} Store Operations Auditors
                         </p>
                         <p className="text-[11px] text-[var(--theme-text-secondary)] font-medium">Unannounced Inspections</p>
                     </div>
-                    <div className="p-3 bg-[var(--theme-bg-subtle)] rounded-2xl border border-[var(--theme-border)]">
-                        <span className="text-[10px] font-bold text-[var(--theme-text-muted)] uppercase tracking-wider">Central Desk Force</span>
+                    <div className="p-3 bg-[var(--theme-bg-subtle)] rounded-xl border border-[var(--theme-border)]">
+                        <span className="text-[11px] font-semibold text-[var(--theme-text-muted)] uppercase tracking-wider">Central Desk Force</span>
                         <p className="text-sm font-bold text-[var(--theme-text-primary)] mt-0.5">
                             {dataAnalysts.length} Analysts • {securityTeam.length} LP • {csTeam.length} CS
                         </p>
@@ -130,13 +130,13 @@ export const CentralOpsTeamSection: React.FC<CentralOpsTeamSectionProps> = ({
             {/* The 4 Functional Pods Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                 {/* 1. Analytics & Telemetry Pod */}
-                <div className="p-5 bg-[var(--theme-bg-card)] rounded-3xl border border-[var(--theme-border)] shadow-sm flex flex-col justify-between">
+                <div className="p-5 bg-[var(--theme-bg-card)] rounded-2xl border border-[var(--theme-border)] shadow-sm flex flex-col justify-between">
                     <div>
                         <div className="flex items-center justify-between mb-3">
-                            <div className="w-10 h-10 rounded-2xl bg-[var(--theme-bg-subtle)] text-[var(--theme-text-primary)] border border-[var(--theme-border)] flex items-center justify-center">
+                            <div className="w-10 h-10 rounded-xl bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20 flex items-center justify-center">
                                 <BarChart3 size={20} />
                             </div>
-                            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] border border-[var(--theme-border)]">
+                            <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20">
                                 telemetry
                             </span>
                         </div>
@@ -157,13 +157,13 @@ export const CentralOpsTeamSection: React.FC<CentralOpsTeamSectionProps> = ({
                 </div>
 
                 {/* 2. Loss Prevention & Security Pod */}
-                <div className="p-5 bg-[var(--theme-bg-card)] rounded-3xl border border-[var(--theme-border)] shadow-sm flex flex-col justify-between">
+                <div className="p-5 bg-[var(--theme-bg-card)] rounded-2xl border border-[var(--theme-border)] shadow-sm flex flex-col justify-between">
                     <div>
                         <div className="flex items-center justify-between mb-3">
-                            <div className="w-10 h-10 rounded-2xl bg-[var(--theme-bg-subtle)] text-[var(--theme-text-primary)] border border-[var(--theme-border)] flex items-center justify-center">
+                            <div className="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 flex items-center justify-center">
                                 <ShieldCheck size={20} />
                             </div>
-                            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] border border-[var(--theme-border)]">
+                            <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
                                 security
                             </span>
                         </div>
@@ -184,13 +184,13 @@ export const CentralOpsTeamSection: React.FC<CentralOpsTeamSectionProps> = ({
                 </div>
 
                 {/* 3. Customer Care & Advocacy Pod */}
-                <div className="p-5 bg-[var(--theme-bg-card)] rounded-3xl border border-[var(--theme-border)] shadow-sm flex flex-col justify-between">
+                <div className="p-5 bg-[var(--theme-bg-card)] rounded-2xl border border-[var(--theme-border)] shadow-sm flex flex-col justify-between">
                     <div>
                         <div className="flex items-center justify-between mb-3">
-                            <div className="w-10 h-10 rounded-2xl bg-[var(--theme-bg-subtle)] text-[var(--theme-text-primary)] border border-[var(--theme-border)] flex items-center justify-center">
+                            <div className="w-10 h-10 rounded-xl bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20 flex items-center justify-center">
                                 <Headphones size={20} />
                             </div>
-                            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] border border-[var(--theme-border)]">
+                            <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20">
                                 cs_desk
                             </span>
                         </div>
@@ -211,14 +211,14 @@ export const CentralOpsTeamSection: React.FC<CentralOpsTeamSectionProps> = ({
                 </div>
 
                 {/* 4. Store Operations Auditor Pod */}
-                <div className="p-5 bg-[var(--theme-bg-card)] rounded-3xl border border-[var(--theme-border)] shadow-sm flex flex-col justify-between relative overflow-hidden">
-                    <div className="absolute top-0 right-0 w-1.5 h-full bg-[var(--theme-primary)]" />
+                <div className="p-5 bg-[var(--theme-bg-card)] rounded-2xl border border-[var(--theme-border)] shadow-sm flex flex-col justify-between relative overflow-hidden">
+                    <div className="absolute top-0 right-0 w-1.5 h-full bg-amber-500" />
                     <div>
                         <div className="flex items-center justify-between mb-3">
-                            <div className="w-10 h-10 rounded-2xl bg-[var(--theme-bg-subtle)] text-[var(--theme-text-primary)] border border-[var(--theme-border)] flex items-center justify-center">
+                            <div className="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 flex items-center justify-center">
                                 <ClipboardCheck size={20} />
                             </div>
-                            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] border border-[var(--theme-border)]">
+                            <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">
                                 audit force
                             </span>
                         </div>
@@ -242,7 +242,7 @@ export const CentralOpsTeamSection: React.FC<CentralOpsTeamSectionProps> = ({
             {/* Direct Reporting Lines Bar */}
             <div className="p-4 bg-[var(--theme-bg-subtle)] rounded-2xl border border-[var(--theme-border)] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-xl bg-[var(--theme-bg-card)] border border-[var(--theme-border)] flex items-center justify-center text-[var(--theme-text-primary)]">
+                    <div className="w-8 h-8 rounded-xl bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] border border-[var(--theme-accent)]/20 flex items-center justify-center">
                         <Store size={16} />
                     </div>
                     <div>
@@ -258,8 +258,8 @@ export const CentralOpsTeamSection: React.FC<CentralOpsTeamSectionProps> = ({
                     <span className="text-[11px] font-bold text-[var(--theme-text-secondary)]">
                         Zero-Trust Compliance:
                     </span>
-                    <span className="inline-flex items-center gap-1 text-[11px] font-bold text-[var(--theme-text-primary)]">
-                        <CheckCircle2 size={13} /> Active
+                    <span className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-600 dark:text-emerald-400">
+                        <CheckCircle2 size={13} className="text-emerald-500" /> Active
                     </span>
                 </div>
             </div>
@@ -269,7 +269,7 @@ export const CentralOpsTeamSection: React.FC<CentralOpsTeamSectionProps> = ({
                 <div className="p-5 border-b border-[var(--theme-border)] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
                     <div>
                         <h3 className="text-sm font-bold text-[var(--theme-text-primary)] flex items-center gap-2">
-                            <ClipboardCheck size={18} className="text-[var(--theme-text-primary)]" />
+                            <ClipboardCheck size={18} className="text-[var(--theme-accent)]" />
                             Recent Field Inspections & Cash Spot Audits
                         </h3>
                         <p className="text-xs text-[var(--theme-text-muted)] mt-0.5">
@@ -278,7 +278,7 @@ export const CentralOpsTeamSection: React.FC<CentralOpsTeamSectionProps> = ({
                     </div>
                     <button
                         onClick={() => setIsAuditModalOpen(true)}
-                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[var(--theme-primary)] text-[var(--theme-primary-text)] hover:opacity-90 text-xs font-bold transition-all cursor-pointer shadow-xs"
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[var(--theme-accent)] text-white hover:opacity-90 text-xs font-bold transition-all cursor-pointer shadow-xs"
                     >
                         <Plus size={14} />
                         <span>Perform Walkthrough</span>
@@ -298,7 +298,7 @@ export const CentralOpsTeamSection: React.FC<CentralOpsTeamSectionProps> = ({
                         </p>
                         <button
                             onClick={() => setIsAuditModalOpen(true)}
-                            className="mt-4 px-4 py-2 rounded-xl bg-[var(--theme-primary)] text-[var(--theme-primary-text)] text-xs font-bold cursor-pointer"
+                            className="mt-4 px-4 py-2 rounded-xl bg-[var(--theme-accent)] text-white text-xs font-bold cursor-pointer"
                         >
                             Launch First Walkthrough
                         </button>
@@ -329,7 +329,7 @@ export const CentralOpsTeamSection: React.FC<CentralOpsTeamSectionProps> = ({
                                         <td className="py-3 px-4">
                                             <div className="text-[var(--theme-text-primary)]">{audit.auditor_name}</div>
                                             {audit.manager_on_duty_name && (
-                                                <div className="text-[10px] text-[var(--theme-text-muted)]">
+                                                <div className="text-[11px] text-[var(--theme-text-muted)]">
                                                     Co-Signed: {audit.manager_on_duty_name}
                                                 </div>
                                             )}
@@ -337,16 +337,16 @@ export const CentralOpsTeamSection: React.FC<CentralOpsTeamSectionProps> = ({
                                         <td className="py-3 px-4 font-mono">
                                             <span className={`px-2 py-0.5 rounded-full text-[11px] font-bold ${
                                                 audit.planogram_score >= 90
-                                                    ? 'bg-[var(--theme-bg-subtle)] text-[var(--theme-text-primary)] border border-[var(--theme-border)]'
+                                                    ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20'
                                                     : audit.planogram_score >= 75
-                                                    ? 'bg-amber-100 dark:bg-amber-950/60 text-amber-700 dark:text-amber-400'
-                                                    : 'bg-rose-100 dark:bg-rose-950/60 text-rose-700 dark:text-rose-400'
+                                                    ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20'
+                                                    : 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20'
                                             }`}>
                                                 {audit.planogram_score}%
                                             </span>
                                         </td>
                                         <td className="py-3 px-4 font-mono text-[11px]">
-                                            {audit.cash_variance !== undefined && audit.cash_variance !== null ? (
+                                             {audit.cash_variance !== undefined && audit.cash_variance !== null ? (
                                                 <span className={`font-bold ${
                                                     audit.cash_variance === 0
                                                         ? 'text-[var(--theme-text-primary)]'
@@ -362,22 +362,22 @@ export const CentralOpsTeamSection: React.FC<CentralOpsTeamSectionProps> = ({
                                         </td>
                                         <td className="py-3 px-4">
                                             {audit.halal_catalog_compliant ? (
-                                                <span className="inline-flex items-center gap-1 text-[11px] text-[var(--theme-text-primary)]">
-                                                    <CheckCircle2 size={12} /> Compliant
+                                                <span className="inline-flex items-center gap-1 text-[11px] text-emerald-600 dark:text-emerald-400 font-medium">
+                                                    <CheckCircle2 size={12} className="text-emerald-500" /> Compliant
                                                 </span>
                                             ) : (
-                                                <span className="inline-flex items-center gap-1 text-[11px] text-rose-500">
-                                                    <AlertTriangle size={12} /> Violation
+                                                <span className="inline-flex items-center gap-1 text-[11px] text-rose-600 dark:text-rose-400 font-medium">
+                                                    <AlertTriangle size={12} className="text-rose-500" /> Violation
                                                 </span>
                                             )}
                                         </td>
                                         <td className="py-3 px-4">
-                                            <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${
+                                            <span className={`px-2 py-0.5 rounded-full text-[11px] font-semibold uppercase tracking-wider ${
                                                 audit.status === 'passed'
-                                                    ? 'bg-[var(--theme-bg-subtle)] text-[var(--theme-text-primary)] border border-[var(--theme-border)]'
+                                                    ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20'
                                                     : audit.status === 'action_required'
-                                                    ? 'bg-amber-100 dark:bg-amber-950/60 text-amber-700 dark:text-amber-400'
-                                                    : 'bg-rose-100 dark:bg-rose-950/60 text-rose-700 dark:text-rose-400'
+                                                    ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20'
+                                                    : 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20'
                                             }`}>
                                                 {audit.status.replace(/_/g, ' ')}
                                             </span>

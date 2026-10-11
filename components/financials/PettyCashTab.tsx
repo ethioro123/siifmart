@@ -1,8 +1,23 @@
-import React, { useState, useEffect } from 'react';
-import { DollarSign, Plus, RefreshCw, Loader2 } from 'lucide-react';
+import React, { useState, useEffect, useMemo } from 'react';
+import {
+    Coins,
+    Plus,
+    RefreshCw,
+    Loader2,
+    ShieldCheck,
+    CheckCircle2,
+    Search,
+    Filter,
+    UserCheck,
+    Building2,
+    Calendar,
+    Receipt
+} from 'lucide-react';
 import { useFinance } from './FinanceContext';
 import { pettyCashService } from '../../services/petty-cash.service';
 import type { PettyCashAccount, PettyCashVoucher } from '../../types';
+import { PettyCashVoucherModal } from './PettyCashVoucherModal';
+import { PettyCashReplenishModal } from './PettyCashReplenishModal';
 
 export const PettyCashTab: React.FC = () => {
     const { user, currencySymbol, effectiveCountry, activeSite, addNotification } = useFinance();
@@ -11,14 +26,8 @@ export const PettyCashTab: React.FC = () => {
     const [loading, setLoading] = useState(true);
     const [isVoucherModalOpen, setIsVoucherModalOpen] = useState(false);
     const [isReplenishModalOpen, setIsReplenishModalOpen] = useState(false);
-    const [newVoucher, setNewVoucher] = useState({
-        category: 'Local_Transit' as any,
-        description: '',
-        amount: '',
-        paidTo: '',
-        receiptAttached: true
-    });
-    const [replenishAmount, setReplenishAmount] = useState('');
+    const [searchQuery, setSearchQuery] = useState('');
+    const [categoryFilter, setCategoryFilter] = useState('All');
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     const siteId = activeSite?.id || 'ST-001';
@@ -52,8 +61,13 @@ export const PettyCashTab: React.FC = () => {
         loadData();
     }, [siteId, effectiveCountry]);
 
-    const handleCreateVoucher = async () => {
-        if (!newVoucher.description || !newVoucher.amount || !newVoucher.paidTo) return;
+    const handleCreateVoucher = async (voucherData: {
+        category: 'Local_Transit' | 'Cleaning_Supplies' | 'Emergency_Repairs' | 'Water_Tea' | 'Other';
+        description: string;
+        amount: string;
+        paidTo: string;
+        receiptAttached: boolean;
+    }) => {
         setIsSubmitting(true);
         try {
             await pettyCashService.recordVoucher(
@@ -61,11 +75,11 @@ export const PettyCashTab: React.FC = () => {
                     siteId,
                     countryCode: effectiveCountry,
                     voucherDate: new Date().toISOString().split('T')[0],
-                    category: newVoucher.category,
-                    description: newVoucher.description,
-                    amount: Number(newVoucher.amount),
-                    receiptAttached: newVoucher.receiptAttached,
-                    paidTo: newVoucher.paidTo,
+                    category: voucherData.category,
+                    description: voucherData.description,
+                    amount: Number(voucherData.amount),
+                    receiptAttached: voucherData.receiptAttached,
+                    paidTo: voucherData.paidTo,
                     createdById: user?.id || 'EMP-01',
                     createdByName: user?.name || 'Staff'
                 },
@@ -73,7 +87,6 @@ export const PettyCashTab: React.FC = () => {
             );
             addNotification('success', 'Petty cash voucher issued.');
             setIsVoucherModalOpen(false);
-            setNewVoucher({ category: 'Local_Transit', description: '', amount: '', paidTo: '', receiptAttached: true });
             loadData();
         } catch {
             addNotification('alert', 'Failed to issue petty cash voucher');
@@ -82,20 +95,18 @@ export const PettyCashTab: React.FC = () => {
         }
     };
 
-    const handleRequestReplenish = async () => {
-        if (!replenishAmount || Number(replenishAmount) <= 0) return;
+    const handleRequestReplenish = async (amount: string) => {
         setIsSubmitting(true);
         try {
             await pettyCashService.requestReplenishment(
                 siteId,
-                Number(replenishAmount),
+                Number(amount),
                 account?.currentBalance || 0,
                 effectiveCountry,
                 { id: user?.id || 'EMP-01', name: user?.name || 'Branch Custodian' }
             );
             addNotification('success', 'Float replenishment requested from Treasury.');
             setIsReplenishModalOpen(false);
-            setReplenishAmount('');
         } catch {
             addNotification('alert', 'Failed to request float replenishment');
         } finally {
@@ -103,201 +114,273 @@ export const PettyCashTab: React.FC = () => {
         }
     };
 
+    const filteredVouchers = useMemo(() => {
+        return vouchers.filter(v => {
+            const matchesCategory = categoryFilter === 'All' || v.category === categoryFilter;
+            const query = searchQuery.trim().toLowerCase();
+            const matchesSearch = !query ||
+                (v.voucherNumber && v.voucherNumber.toLowerCase().includes(query)) ||
+                (v.description && v.description.toLowerCase().includes(query)) ||
+                (v.paidTo && v.paidTo.toLowerCase().includes(query));
+
+            return matchesCategory && matchesSearch;
+        });
+    }, [vouchers, categoryFilter, searchQuery]);
+
+    const currentBalance = account?.currentBalance || 0;
+    const authorizedFloat = account?.authorizedFloat || 10000;
+    const floatReservePct = Math.min(100, Math.max(0, Math.round((currentBalance / authorizedFloat) * 100)));
+
     return (
-        <div className="space-y-6 animate-in fade-in">
-            {/* Header & Balance Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="bg-white/90 dark:bg-stone-900/60 border border-[#E2DCCE] dark:border-white/5 rounded-2xl p-5 flex flex-col justify-between">
+        <div className="space-y-4">
+            {/* Executive Float Health Ribbon */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                {/* Balance Card */}
+                <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-4 shadow-xs flex flex-col justify-between">
                     <div>
-                        <span className="text-xs text-stone-500 dark:text-gray-400 uppercase font-bold block">Current Petty Cash Balance</span>
-                        <span className="text-2xl font-bold font-mono text-emerald-600 dark:text-emerald-400 mt-1 block">
-                            {currencySymbol} {(account?.currentBalance || 0).toLocaleString()}
+                        <span className="text-xs text-[var(--theme-text-secondary)] font-medium">
+                            Physical Vault Balance
+                        </span>
+                        <h4 className="text-2xl font-semibold tracking-tight text-emerald-600 dark:text-emerald-400 font-mono tabular-nums mt-1">
+                            {currencySymbol} {currentBalance.toLocaleString()}
+                        </h4>
+                    </div>
+                    <div className="mt-3 pt-2 border-t border-[var(--theme-border)] text-[11px] text-[var(--theme-text-secondary)] flex justify-between">
+                        <span>Authorized Target:</span>
+                        <span className="font-mono font-medium text-[var(--theme-text-primary)]">
+                            {currencySymbol} {authorizedFloat.toLocaleString()}
                         </span>
                     </div>
-                    <div className="mt-3 text-xs text-stone-500 dark:text-gray-400 flex justify-between">
-                        <span>Authorized Float:</span>
-                        <span className="font-mono text-[#1E3F27] dark:text-white font-bold">{currencySymbol} {(account?.authorizedFloat || 10000).toLocaleString()}</span>
-                    </div>
                 </div>
 
-                <div className="bg-white/90 dark:bg-stone-900/60 border border-[#E2DCCE] dark:border-white/5 rounded-2xl p-5 flex flex-col justify-between">
+                {/* Float Utilization & Progress */}
+                <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-4 shadow-xs flex flex-col justify-between">
                     <div>
-                        <span className="text-xs text-stone-500 dark:text-gray-400 uppercase font-bold block">Designated Float Custodian</span>
-                        <span className="text-base font-bold text-[#1E3F27] dark:text-white mt-1 block">{account?.custodianName || 'Branch Manager'}</span>
+                        <div className="flex justify-between items-center">
+                            <span className="text-xs text-[var(--theme-text-secondary)] font-medium">
+                                Float Reserve Level
+                            </span>
+                            <span className="text-xs font-mono font-semibold text-[var(--theme-text-primary)] tabular-nums">
+                                {floatReservePct}%
+                            </span>
+                        </div>
+                        <div className="h-2 bg-[var(--theme-bg-subtle)] rounded-full overflow-hidden mt-2.5">
+                            <div
+                                className={`h-full rounded-full transition-all duration-500 ${
+                                    floatReservePct < 25
+                                        ? 'bg-rose-500'
+                                        : floatReservePct < 50
+                                            ? 'bg-amber-500'
+                                            : 'bg-emerald-500'
+                                }`}
+                                style={{ width: `${floatReservePct}%` }}
+                            />
+                        </div>
                     </div>
-                    <div className="mt-3 text-xs text-stone-500 dark:text-gray-400 flex justify-between">
-                        <span>Branch Site:</span>
-                        <span className="text-stone-700 dark:text-gray-200 font-mono">{siteId}</span>
+                    <div className="mt-3 pt-2 border-t border-[var(--theme-border)] text-[11px] text-[var(--theme-text-secondary)] flex justify-between">
+                        <span>Deficit to replenish:</span>
+                        <span className="font-mono font-medium text-rose-600 dark:text-rose-400">
+                            {currencySymbol} {Math.max(0, authorizedFloat - currentBalance).toLocaleString()}
+                        </span>
                     </div>
                 </div>
 
-                <div className="bg-white/90 dark:bg-stone-900/60 border border-[#E2DCCE] dark:border-white/5 rounded-2xl p-5 flex items-center justify-between gap-3">
-                    <div className="space-y-2 w-full">
-                        <button
-                            onClick={() => setIsVoucherModalOpen(true)}
-                            className="woody-btn-primary w-full py-2.5 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5"
-                        >
-                            <Plus size={14} /> Issue Cash Voucher
-                        </button>
-                        <button
-                            onClick={() => setIsReplenishModalOpen(true)}
-                            className="woody-btn-secondary w-full py-2 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5"
-                        >
-                            <RefreshCw size={14} /> Request Float Top-Up
-                        </button>
+                {/* Custodian Card */}
+                <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-4 shadow-xs flex flex-col justify-between">
+                    <div className="flex items-start justify-between">
+                        <div>
+                            <span className="text-xs text-[var(--theme-text-secondary)] font-medium">
+                                Designated Custodian
+                            </span>
+                            <h4 className="text-base font-semibold text-[var(--theme-text-primary)] mt-1 truncate">
+                                {account?.custodianName || 'Branch Manager'}
+                            </h4>
+                        </div>
+                        <div className="w-8 h-8 rounded-xl bg-blue-500/10 text-[#0071E3] dark:text-[#2997FF] flex items-center justify-center shrink-0">
+                            <UserCheck size={16} />
+                        </div>
                     </div>
+                    <div className="mt-3 pt-2 border-t border-[var(--theme-border)] text-[11px] text-[var(--theme-text-secondary)] flex justify-between">
+                        <span>Branch Site:</span>
+                        <span className="font-mono font-medium text-[var(--theme-text-primary)]">{siteId}</span>
+                    </div>
+                </div>
+
+                {/* Quick Actions Card */}
+                <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-4 shadow-xs flex flex-col justify-center gap-2">
+                    <button
+                        onClick={() => setIsVoucherModalOpen(true)}
+                        className="w-full py-2 bg-[#0071E3] dark:bg-[#2997FF] hover:opacity-95 text-white rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 transition-all shadow-xs"
+                    >
+                        <Plus size={14} />
+                        <span>Issue Cash Voucher</span>
+                    </button>
+                    <button
+                        onClick={() => setIsReplenishModalOpen(true)}
+                        className="w-full py-2 bg-[var(--theme-bg-card)] hover:bg-[var(--theme-bg-subtle)] text-[var(--theme-text-primary)] border border-[var(--theme-border)] rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors shadow-xs"
+                    >
+                        <RefreshCw size={14} />
+                        <span>Request Float Top-Up</span>
+                    </button>
                 </div>
             </div>
 
-            {/* Vouchers Table */}
-            <div className="bg-white/90 dark:bg-stone-900/60 border border-[#E2DCCE] dark:border-white/5 rounded-2xl overflow-x-auto">
-                <div className="p-4 border-b border-[#E2DCCE] dark:border-white/5 flex justify-between items-center">
-                    <h3 className="text-sm font-bold text-[#1E3F27] dark:text-white">Recent Branch Petty Cash Vouchers</h3>
-                    <span className="text-xs text-stone-400 dark:text-gray-400 font-mono">{vouchers.length} Recorded</span>
+            {/* Vouchers Table Card */}
+            <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl overflow-hidden shadow-xs">
+                {/* Header & Filter Toolbar */}
+                <div className="p-4 border-b border-[var(--theme-border)] flex flex-col md:flex-row md:items-center justify-between gap-3 bg-[var(--theme-bg-card)]">
+                    <div className="flex flex-wrap items-center gap-2.5">
+                        <div className="flex items-center gap-2">
+                            <h3 className="text-sm font-semibold text-[var(--theme-text-primary)]">
+                                Branch Petty Cash Vouchers
+                            </h3>
+                            <div className="flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 text-xs font-medium">
+                                <ShieldCheck size={12} />
+                                <span>Zero-Trust Vault Audit</span>
+                            </div>
+                        </div>
+
+                        {/* Search Input */}
+                        <div className="flex items-center bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-2.5 py-1.5 h-9 w-52">
+                            <Search size={14} className="text-[var(--theme-text-secondary)] mr-2 shrink-0" />
+                            <input
+                                type="text"
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                                placeholder="Search voucher, payee..."
+                                className="bg-transparent text-xs text-[var(--theme-text-primary)] outline-none w-full placeholder:text-[var(--theme-text-secondary)]/60"
+                                aria-label="Search petty cash vouchers"
+                            />
+                        </div>
+
+                        {/* Category Filter */}
+                        <div className="flex items-center bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-2.5 py-1.5 h-9">
+                            <Filter size={13} className="text-[var(--theme-text-secondary)] mr-2 shrink-0" />
+                            <select
+                                value={categoryFilter}
+                                onChange={(e) => setCategoryFilter(e.target.value)}
+                                className="bg-transparent text-xs text-[var(--theme-text-primary)] outline-none cursor-pointer pr-1"
+                                aria-label="Filter vouchers by category"
+                            >
+                                <option value="All">All Categories</option>
+                                <option value="Local_Transit">Local Transit / Dispatch</option>
+                                <option value="Cleaning_Supplies">Cleaning Supplies</option>
+                                <option value="Emergency_Repairs">Emergency Repairs</option>
+                                <option value="Water_Tea">Water &amp; Refreshments</option>
+                                <option value="Other">Other Operational</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div className="text-xs text-[var(--theme-text-secondary)] font-mono">
+                        Site: <span className="font-semibold text-[var(--theme-text-primary)]">{siteId}</span> | Currency: <span className="font-semibold text-[var(--theme-text-primary)]">{currencySymbol}</span>
+                    </div>
                 </div>
-                <table className="w-full text-left text-xs">
-                    <thead className="bg-stone-100/80 dark:bg-black/20 border-b border-[#E2DCCE] dark:border-white/5 uppercase text-stone-500 dark:text-gray-500 font-mono">
-                        <tr>
-                            <th className="p-4">Voucher #</th>
-                            <th className="p-4">Date</th>
-                            <th className="p-4">Category</th>
-                            <th className="p-4">Description</th>
-                            <th className="p-4">Paid To</th>
-                            <th className="p-4 text-right">Amount</th>
-                            <th className="p-4 text-center">Receipt</th>
-                        </tr>
-                    </thead>
-                    <tbody className="divide-y divide-[#E2DCCE] dark:divide-white/5">
-                        {vouchers.length === 0 ? (
+
+                {/* Table */}
+                <div className="overflow-x-auto">
+                    <table className="w-full text-left">
+                        <thead className="bg-[var(--theme-bg-subtle)]/75 border-b border-[var(--theme-border)]">
                             <tr>
-                                <td colSpan={7} className="p-12 text-center text-stone-400 dark:text-gray-500">
-                                    No petty cash vouchers logged for this site yet.
-                                </td>
+                                <th className="py-3 px-4 text-[11px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider font-mono">Voucher #</th>
+                                <th className="py-3 px-4 text-[11px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider font-mono">Date</th>
+                                <th className="py-3 px-4 text-[11px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider">Category</th>
+                                <th className="py-3 px-4 text-[11px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider">Purpose / Description</th>
+                                <th className="py-3 px-4 text-[11px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider">Paid To</th>
+                                <th className="py-3 px-4 text-[11px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider text-right">Amount</th>
+                                <th className="py-3 px-4 text-[11px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider text-center">Receipt</th>
                             </tr>
-                        ) : (
-                            vouchers.map((v) => (
-                                <tr key={v.id} className="hover:bg-stone-50 dark:hover:bg-white/5">
-                                    <td className="p-4 font-mono font-bold text-emerald-600 dark:text-emerald-400">{v.voucherNumber}</td>
-                                    <td className="p-4 text-stone-500 dark:text-gray-400 font-mono">{v.voucherDate}</td>
-                                    <td className="p-4 text-stone-600 dark:text-gray-300 uppercase text-[10px] font-bold">{v.category.replace('_', ' ')}</td>
-                                    <td className="p-4 text-[#1E3F27] dark:text-white">{v.description}</td>
-                                    <td className="p-4 text-stone-600 dark:text-gray-300 font-medium">{v.paidTo}</td>
-                                    <td className="p-4 text-right font-mono font-bold text-[#1E3F27] dark:text-white">
-                                        {currencySymbol} {v.amount.toLocaleString()}
-                                    </td>
-                                    <td className="p-4 text-center">
-                                        <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-bold">Attached</span>
+                        </thead>
+                        <tbody className="divide-y divide-[var(--theme-border)]">
+                            {loading ? (
+                                <tr>
+                                    <td colSpan={7} className="py-16 text-center text-[var(--theme-text-secondary)]">
+                                        <Loader2 className="animate-spin inline mr-2 text-[#0071E3] dark:text-[#2997FF]" size={18} />
+                                        <span className="text-xs">Loading petty cash vouchers...</span>
                                     </td>
                                 </tr>
-                            ))
-                        )}
-                    </tbody>
-                </table>
+                            ) : filteredVouchers.length === 0 ? (
+                                <tr>
+                                    <td colSpan={7} className="py-16 text-center">
+                                        <div className="flex flex-col items-center justify-center text-[var(--theme-text-secondary)]">
+                                            <div className="w-12 h-12 rounded-2xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] flex items-center justify-center mb-3">
+                                                <Coins size={22} />
+                                            </div>
+                                            <p className="text-xs font-semibold text-[var(--theme-text-primary)]">
+                                                No petty cash vouchers recorded
+                                            </p>
+                                            <p className="text-[11px] mt-0.5">
+                                                No vouchers logged for this site or search query.
+                                            </p>
+                                        </div>
+                                    </td>
+                                </tr>
+                            ) : (
+                                filteredVouchers.map((v) => (
+                                    <tr key={v.id} className="hover:bg-[var(--theme-bg-subtle)]/40 transition-colors">
+                                        <td className="py-3.5 px-4 font-mono font-semibold text-xs text-[#0071E3] dark:text-[#2997FF] whitespace-nowrap">
+                                            {v.voucherNumber}
+                                        </td>
+                                        <td className="py-3.5 px-4 text-xs font-mono text-[var(--theme-text-secondary)] whitespace-nowrap tabular-nums">
+                                            {v.voucherDate}
+                                        </td>
+                                        <td className="py-3.5 px-4 whitespace-nowrap">
+                                            <span className="px-2.5 py-1 rounded-lg text-xs font-medium border border-[var(--theme-border)] bg-[var(--theme-bg-subtle)] text-[var(--theme-text-primary)]">
+                                                {v.category.replace(/_/g, ' ')}
+                                            </span>
+                                        </td>
+                                        <td className="py-3.5 px-4 text-xs font-medium text-[var(--theme-text-primary)]">
+                                            {v.description}
+                                        </td>
+                                        <td className="py-3.5 px-4 text-xs text-[var(--theme-text-secondary)] font-medium whitespace-nowrap">
+                                            {v.paidTo}
+                                        </td>
+                                        <td className="py-3.5 px-4 text-xs text-right font-mono font-semibold text-[var(--theme-text-primary)] tabular-nums whitespace-nowrap">
+                                            {currencySymbol} {v.amount.toLocaleString()}
+                                        </td>
+                                        <td className="py-3.5 px-4 text-center whitespace-nowrap">
+                                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+                                                <CheckCircle2 size={11} />
+                                                <span>Attached</span>
+                                            </span>
+                                        </td>
+                                    </tr>
+                                ))
+                            )}
+                        </tbody>
+                    </table>
+                </div>
+
+                {/* Footer Count */}
+                <div className="p-3.5 border-t border-[var(--theme-border)] bg-[var(--theme-bg-subtle)]/40 text-xs text-[var(--theme-text-secondary)] flex justify-between items-center">
+                    <span>
+                        Loaded <span className="font-mono tabular-nums font-semibold text-[var(--theme-text-primary)]">{filteredVouchers.length}</span> petty cash vouchers
+                    </span>
+                    <span className="text-[11px]">
+                        Zero-Trust Physical Vault Imprest Audit Trail
+                    </span>
+                </div>
             </div>
 
-            {/* Issue Voucher Modal */}
-            {isVoucherModalOpen && (
-                <div className="fixed inset-0 bg-black/60 dark:bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-                    <div className="bg-white dark:bg-stone-900 border border-[#E2DCCE] dark:border-white/10 rounded-2xl max-w-md w-full p-6 space-y-4 shadow-xl">
-                        <h4 className="text-base font-bold text-[#1E3F27] dark:text-white flex items-center gap-2">
-                            <Plus className="text-emerald-600 dark:text-emerald-400" size={18} />
-                            Issue Petty Cash Voucher
-                        </h4>
-                        <div>
-                            <label className="text-xs text-stone-500 dark:text-gray-400 uppercase font-bold mb-1 block">Paid To</label>
-                            <input
-                                type="text"
-                                value={newVoucher.paidTo}
-                                onChange={(e) => setNewVoucher({ ...newVoucher, paidTo: e.target.value })}
-                                placeholder="Vendor or staff recipient..."
-                                className="woody-input"
-                            />
-                        </div>
-                        <div className="grid grid-cols-2 gap-3">
-                            <div>
-                                <label className="text-xs text-stone-500 dark:text-gray-400 uppercase font-bold mb-1 block">Category</label>
-                                <select
-                                    value={newVoucher.category}
-                                    onChange={(e) => setNewVoucher({ ...newVoucher, category: e.target.value as any })}
-                                    className="woody-input"
-                                >
-                                    <option value="Local_Transit">Local Transit / Dispatch</option>
-                                    <option value="Cleaning_Supplies">Cleaning Supplies</option>
-                                    <option value="Emergency_Repairs">Emergency Repairs</option>
-                                    <option value="Water_Tea">Water &amp; Staff Refreshments</option>
-                                    <option value="Other">Other Operational</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label className="text-xs text-stone-500 dark:text-gray-400 uppercase font-bold mb-1 block">Amount ({currencySymbol})</label>
-                                <input
-                                    type="number"
-                                    value={newVoucher.amount}
-                                    onChange={(e) => setNewVoucher({ ...newVoucher, amount: e.target.value })}
-                                    placeholder="0.00"
-                                    className="woody-input font-mono"
-                                />
-                            </div>
-                        </div>
-                        <div>
-                            <label className="text-xs text-stone-500 dark:text-gray-400 uppercase font-bold mb-1 block">Purpose / Description</label>
-                            <input
-                                type="text"
-                                value={newVoucher.description}
-                                onChange={(e) => setNewVoucher({ ...newVoucher, description: e.target.value })}
-                                placeholder="e.g. Fuel for delivery tricycle emergency run"
-                                className="woody-input"
-                            />
-                        </div>
-                        <div className="flex justify-end gap-2 pt-2">
-                            <button onClick={() => setIsVoucherModalOpen(false)} className="px-4 py-2 text-xs text-stone-500 dark:text-gray-400 hover:text-[#1E3F27] dark:hover:text-white transition-colors">
-                                Cancel
-                            </button>
-                            <button
-                                onClick={handleCreateVoucher}
-                                disabled={isSubmitting || !newVoucher.description || !newVoucher.amount || !newVoucher.paidTo}
-                                className="woody-btn-primary px-5 py-2 rounded-xl text-xs font-bold"
-                            >
-                                {isSubmitting ? 'Recording...' : 'Disburse Cash'}
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
+            {/* Modular Issue Voucher Modal */}
+            <PettyCashVoucherModal
+                isOpen={isVoucherModalOpen}
+                onClose={() => setIsVoucherModalOpen(false)}
+                onSubmit={handleCreateVoucher}
+                isSubmitting={isSubmitting}
+                currencySymbol={currencySymbol}
+            />
 
-            {/* Replenish Modal */}
-            {isReplenishModalOpen && (
-                <div className="fixed inset-0 bg-black/60 dark:bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-                    <div className="bg-white dark:bg-stone-900 border border-[#E2DCCE] dark:border-white/10 rounded-2xl max-w-md w-full p-6 space-y-4 shadow-xl">
-                        <h4 className="text-base font-bold text-[#1E3F27] dark:text-white flex items-center gap-2">
-                            <RefreshCw className="text-blue-600 dark:text-blue-400" size={18} />
-                            Request Float Replenishment
-                        </h4>
-                        <div>
-                            <label className="text-xs text-stone-500 dark:text-gray-400 uppercase font-bold mb-1 block">Top-Up Amount ({currencySymbol})</label>
-                            <input
-                                type="number"
-                                value={replenishAmount}
-                                onChange={(e) => setReplenishAmount(e.target.value)}
-                                placeholder="e.g. 5000"
-                                className="woody-input font-mono"
-                            />
-                        </div>
-                        <div className="flex justify-end gap-2 pt-2">
-                            <button onClick={() => setIsReplenishModalOpen(false)} className="px-4 py-2 text-xs text-stone-500 dark:text-gray-400 hover:text-[#1E3F27] dark:hover:text-white transition-colors">
-                                Cancel
-                            </button>
-                            <button
-                                onClick={handleRequestReplenish}
-                                disabled={isSubmitting || !replenishAmount}
-                                className="woody-btn-primary px-5 py-2 rounded-xl text-xs font-bold"
-                            >
-                                {isSubmitting ? 'Submitting...' : 'Submit Request to Treasury'}
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
+            {/* Modular Replenish Modal */}
+            <PettyCashReplenishModal
+                isOpen={isReplenishModalOpen}
+                onClose={() => setIsReplenishModalOpen(false)}
+                onSubmit={handleRequestReplenish}
+                isSubmitting={isSubmitting}
+                currencySymbol={currencySymbol}
+                currentBalance={currentBalance}
+                authorizedFloat={authorizedFloat}
+            />
         </div>
     );
 };

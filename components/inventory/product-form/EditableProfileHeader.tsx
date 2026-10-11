@@ -78,7 +78,7 @@ export const EditableProfileHeader: React.FC<EditableProfileHeaderProps> = ({
                         <span className="absolute bottom-1 right-1 w-2.5 h-2.5 rounded-full border-2 border-[var(--theme-bg-panel)] shadow-xs shrink-0" style={{ backgroundColor: stock > 0 ? '#10b981' : '#ef4444' }} />
                         <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex flex-col items-center justify-center text-white transition-opacity">
                             <Camera size={18} />
-                            <span className="text-[9px] font-bold uppercase tracking-tighter mt-0.5">Edit</span>
+                            <span className="text-[11px] font-bold uppercase tracking-tighter mt-0.5">Edit</span>
                         </div>
                     </button>
 
@@ -86,13 +86,13 @@ export const EditableProfileHeader: React.FC<EditableProfileHeaderProps> = ({
                     <div className="space-y-2 min-w-0 flex-1">
                         {/* Meta Tags Row */}
                         <div className="flex flex-wrap items-center gap-2">
-                            <span className="px-2.5 py-0.5 rounded-lg text-[9px] font-bold uppercase tracking-wider bg-[var(--theme-pill-bg)] text-[var(--theme-text-primary)] border border-[var(--theme-pill-border)]">
+                            <span className="px-2.5 py-0.5 rounded-lg text-[11px] font-bold uppercase tracking-wider bg-[var(--theme-pill-bg)] text-[var(--theme-text-primary)] border border-[var(--theme-pill-border)]">
                                 {formData.category || 'General Catalog'}
                             </span>
-                            <span className="px-2.5 py-0.5 rounded-lg text-[9px] font-mono font-bold uppercase tracking-wider bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] border border-[var(--theme-border)]">
+                            <span className="px-2.5 py-0.5 rounded-lg text-[11px] font-mono font-bold uppercase tracking-wider bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] border border-[var(--theme-border)]">
                                 SKU: {formData.sku || 'PENDING'}
                             </span>
-                            <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg text-[9px] font-bold uppercase tracking-wider border ${statusConfig.badgeClass}`}>
+                            <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg text-[11px] font-bold uppercase tracking-wider border ${statusConfig.badgeClass}`}>
                                 <span className={`w-1.5 h-1.5 rounded-full ${statusConfig.dotClass} animate-pulse`} />
                                 {statusConfig.label}
                             </span>
@@ -139,8 +139,8 @@ export const EditableProfileHeader: React.FC<EditableProfileHeaderProps> = ({
             {/* Executive KPI Grid */}
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 pt-1">
                 {/* 1. Retail Selling Price */}
-                <div className="bg-[var(--theme-bg-card)] p-3.5 sm:p-4 rounded-2xl border border-[var(--theme-border)]">
-                    <span className="text-[9px] font-bold uppercase tracking-wider text-[var(--theme-text-muted)] block mb-1">
+                <div className="bg-[var(--theme-bg-card)] p-3.5 sm:p-4 rounded-2xl border border-[var(--theme-border)] shadow-xs">
+                    <span className="text-[11px] font-bold uppercase tracking-wider text-[var(--theme-text-muted)] block mb-1">
                         Retail Selling Price
                     </span>
                     <div className="flex items-baseline gap-1.5">
@@ -151,20 +151,20 @@ export const EditableProfileHeader: React.FC<EditableProfileHeaderProps> = ({
                             {...register('price', { valueAsNumber: true })}
                             className="w-full text-lg sm:text-xl font-mono font-bold text-[var(--theme-text-primary)] bg-transparent border-b border-transparent hover:border-[var(--theme-border)] focus:border-[var(--theme-primary)] focus:outline-none transition-colors"
                         />
-                        <span className="text-[10px] font-medium text-[var(--theme-text-muted)] uppercase font-mono">
+                        <span className="text-[11px] font-medium text-[var(--theme-text-muted)] uppercase font-mono">
                             /{sellUnit?.shortLabel || formData.unit || 'unit'}
                         </span>
                     </div>
                     {salePrice > 0 && (
-                        <span className="inline-block mt-1 text-[9px] font-bold text-amber-600 dark:text-amber-400 font-mono">
+                        <span className="inline-block mt-1 text-[11px] font-bold text-amber-600 dark:text-amber-400 font-mono">
                             Promo: {currencySymbol} {formatPriceValue(salePrice)}
                         </span>
                     )}
                 </div>
 
                 {/* 2. Stock Level */}
-                <div className="bg-[var(--theme-bg-card)] p-3.5 sm:p-4 rounded-2xl border border-[var(--theme-border)]">
-                    <span className="text-[9px] font-bold uppercase tracking-wider text-[var(--theme-text-muted)] block mb-1">
+                <div className="bg-[var(--theme-bg-card)] p-3.5 sm:p-4 rounded-2xl border border-[var(--theme-border)] shadow-xs">
+                    <span className="text-[11px] font-bold uppercase tracking-wider text-[var(--theme-text-muted)] block mb-1">
                         Available On-Hand
                     </span>
                     <div className="flex items-baseline gap-1.5">
@@ -174,14 +174,14 @@ export const EditableProfileHeader: React.FC<EditableProfileHeaderProps> = ({
                             className={`w-full text-lg sm:text-xl font-mono font-bold bg-transparent border-b border-transparent hover:border-[var(--theme-border)] focus:border-[var(--theme-primary)] focus:outline-none transition-colors ${statusConfig.stockTextClass}`}
                         />
                     </div>
-                    <span className="text-[9px] font-medium text-[var(--theme-text-muted)] uppercase block mt-1">
+                    <span className="text-[11px] font-medium text-[var(--theme-text-muted)] uppercase block mt-1">
                         {packQuantity > 1 ? `Pack of ${packQuantity}` : 'Single Unit'}
                     </span>
                 </div>
 
                 {/* 3. Total Asset Value */}
-                <div className="bg-[var(--theme-bg-card)] p-3.5 sm:p-4 rounded-2xl border border-[var(--theme-border)]">
-                    <span className="text-[9px] font-bold uppercase tracking-wider text-[var(--theme-text-muted)] block mb-1">
+                <div className="bg-[var(--theme-bg-card)] p-3.5 sm:p-4 rounded-2xl border border-[var(--theme-border)] shadow-xs">
+                    <span className="text-[11px] font-bold uppercase tracking-wider text-[var(--theme-text-muted)] block mb-1">
                         Total Stock Value
                     </span>
                     <div className="flex items-baseline gap-1.5">
@@ -189,15 +189,15 @@ export const EditableProfileHeader: React.FC<EditableProfileHeaderProps> = ({
                             {currencySymbol} {totalAssetValue.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
                         </span>
                     </div>
-                    <span className="text-[9px] font-medium text-[var(--theme-text-muted)] uppercase block mt-1 font-mono">
+                    <span className="text-[11px] font-medium text-[var(--theme-text-muted)] uppercase block mt-1 font-mono">
                         {stock} × {formatPriceValue(price)}
                     </span>
                 </div>
 
                 {/* 4. Margin & Profit or Min Safety Threshold */}
                 {showCostPrice ? (
-                    <div className="bg-[var(--theme-bg-card)] p-3.5 sm:p-4 rounded-2xl border border-[var(--theme-border)]">
-                        <span className="text-[9px] font-bold uppercase tracking-wider text-[var(--theme-text-muted)] block mb-1">
+                    <div className="bg-[var(--theme-bg-card)] p-3.5 sm:p-4 rounded-2xl border border-[var(--theme-border)] shadow-xs">
+                        <span className="text-[11px] font-bold uppercase tracking-wider text-[var(--theme-text-muted)] block mb-1">
                             Gross Margin
                         </span>
                         <div className="flex items-baseline gap-1.5">
@@ -205,13 +205,13 @@ export const EditableProfileHeader: React.FC<EditableProfileHeaderProps> = ({
                                 {marginPct > 0 ? `${marginPct.toFixed(1)}%` : '0%'}
                             </span>
                         </div>
-                        <span className="text-[9px] font-medium text-[var(--theme-text-muted)] uppercase block mt-1 font-mono">
+                        <span className="text-[11px] font-medium text-[var(--theme-text-muted)] uppercase block mt-1 font-mono">
                             Cost: {currencySymbol}{formatPriceValue(cost)}
                         </span>
                     </div>
                 ) : (
-                    <div className="bg-[var(--theme-bg-card)] p-3.5 sm:p-4 rounded-2xl border border-[var(--theme-border)]">
-                        <span className="text-[9px] font-bold uppercase tracking-wider text-[var(--theme-text-muted)] block mb-1">
+                    <div className="bg-[var(--theme-bg-card)] p-3.5 sm:p-4 rounded-2xl border border-[var(--theme-border)] shadow-xs">
+                        <span className="text-[11px] font-bold uppercase tracking-wider text-[var(--theme-text-muted)] block mb-1">
                             Min Safety Threshold
                         </span>
                         <div className="flex items-baseline gap-1.5">
@@ -219,7 +219,7 @@ export const EditableProfileHeader: React.FC<EditableProfileHeaderProps> = ({
                                 {minStock !== undefined ? `${minStock} units` : 'Not Set'}
                             </span>
                         </div>
-                        <span className="text-[9px] font-medium text-[var(--theme-text-muted)] uppercase block mt-1">
+                        <span className="text-[11px] font-medium text-[var(--theme-text-muted)] uppercase block mt-1">
                             Safety Buffer
                         </span>
                     </div>

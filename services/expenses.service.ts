@@ -53,7 +53,7 @@ function mapExpenseRow(e: any): ExpenseRecord {
 export const expensesService = {
     async getAll(
         siteId?: string,
-        limit: number = 50,
+        limit: number = 25,
         offset: number = 0,
         filters?: {
             startDate?: string;

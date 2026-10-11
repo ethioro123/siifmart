@@ -28,9 +28,9 @@ const AttrBadge = ({ label, value, color }: { label: string; value?: string | nu
     const colorClasses = color && colorMap[color] ? colorMap[color] : 'bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] text-[var(--theme-text-secondary)]';
 
     return (
-        <div className={`flex items-center gap-1.5 ${colorClasses} border rounded px-2 py-1 min-w-0`}>
-            {displayLabel && <span className="text-[9px] opacity-70 uppercase tracking-tighter font-bold">{displayLabel}</span>}
-            <span className="text-[10px] font-black leading-none truncate">{displayValue}</span>
+        <div className={`flex items-center gap-1.5 ${colorClasses} border rounded-lg px-2.5 py-1 min-w-0 font-medium`}>
+            {displayLabel && <span className="text-[11px] opacity-75 uppercase tracking-tight font-semibold">{displayLabel}</span>}
+            <span className="text-[11px] font-bold leading-none truncate font-mono">{displayValue}</span>
         </div>
     );
 };
@@ -63,7 +63,7 @@ export const EditableAttributesPanel: React.FC<EditableAttributesPanelProps> = (
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[var(--theme-border)] pb-3">
                 <div className="flex items-center gap-2">
                     <Box size={14} className="text-[var(--theme-text-secondary)]" />
-                    <h3 className="text-[10px] font-bold uppercase tracking-wider text-[var(--theme-text-primary)]">
+                    <h3 className="text-xs font-semibold uppercase tracking-wider text-[var(--theme-text-primary)]">
                         Product Attributes & Specifications
                     </h3>
                 </div>
@@ -80,10 +80,10 @@ export const EditableAttributesPanel: React.FC<EditableAttributesPanelProps> = (
                             key={tab.id}
                             type="button"
                             onClick={() => setActiveTab(tab.id as any)}
-                            className={`px-2.5 py-1 text-[10px] font-bold uppercase rounded-lg flex items-center gap-1.5 transition-all cursor-pointer ${
+                            className={`px-2.5 py-1 text-xs font-semibold uppercase rounded-lg flex items-center gap-1.5 transition-all cursor-pointer ${
                                 activeTab === tab.id
                                     ? 'bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)] shadow-xs border border-[var(--theme-border)]'
-                                    : 'text-[var(--theme-text-muted)] hover:text-[var(--theme-text-primary)]'
+                                    : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)]'
                             }`}
                         >
                             <tab.icon size={11} />
@@ -98,7 +98,7 @@ export const EditableAttributesPanel: React.FC<EditableAttributesPanelProps> = (
                 {activeTab === 'physical' && (
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                         <div className="p-3 bg-[var(--theme-bg-subtle)] rounded-xl border border-[var(--theme-border)] space-y-1">
-                            <label className="text-[9px] text-[var(--theme-text-muted)] font-medium uppercase block">Net Weight / Vol</label>
+                            <label className="text-[11px] text-[var(--theme-text-secondary)] font-medium uppercase block">Net Weight / Vol</label>
                             <input
                                 value={physical.netWeight || ''}
                                 onChange={(e) => updateDomain('physical', 'netWeight', e.target.value)}
@@ -107,7 +107,7 @@ export const EditableAttributesPanel: React.FC<EditableAttributesPanelProps> = (
                             />
                         </div>
                         <div className="p-3 bg-[var(--theme-bg-subtle)] rounded-xl border border-[var(--theme-border)] space-y-1">
-                            <label className="text-[9px] text-[var(--theme-text-muted)] font-medium uppercase block">Gross Weight</label>
+                            <label className="text-[11px] text-[var(--theme-text-secondary)] font-medium uppercase block">Gross Weight</label>
                             <input
                                 value={physical.grossWeight || ''}
                                 onChange={(e) => updateDomain('physical', 'grossWeight', e.target.value)}
@@ -116,7 +116,7 @@ export const EditableAttributesPanel: React.FC<EditableAttributesPanelProps> = (
                             />
                         </div>
                         <div className="p-3 bg-[var(--theme-bg-subtle)] rounded-xl border border-[var(--theme-border)] space-y-1">
-                            <label className="text-[9px] text-[var(--theme-text-muted)] font-medium uppercase block">Form / State</label>
+                            <label className="text-[11px] text-[var(--theme-text-secondary)] font-medium uppercase block">Form / State</label>
                             <input
                                 value={physical.form || ''}
                                 onChange={(e) => updateDomain('physical', 'form', e.target.value)}
@@ -125,7 +125,7 @@ export const EditableAttributesPanel: React.FC<EditableAttributesPanelProps> = (
                             />
                         </div>
                         <div className="p-3 bg-[var(--theme-bg-subtle)] rounded-xl border border-[var(--theme-border)] space-y-1">
-                            <label className="text-[9px] text-[var(--theme-text-muted)] font-medium uppercase block">Dimensions (L×W×H)</label>
+                            <label className="text-[11px] text-[var(--theme-text-secondary)] font-medium uppercase block">Dimensions (L×W×H)</label>
                             <input
                                 value={physical.dims || ''}
                                 onChange={(e) => updateDomain('physical', 'dims', e.target.value)}
@@ -139,7 +139,7 @@ export const EditableAttributesPanel: React.FC<EditableAttributesPanelProps> = (
                 {activeTab === 'packaging' && (
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                         <div className="p-3 bg-[var(--theme-bg-subtle)] rounded-xl border border-[var(--theme-border)] space-y-1">
-                            <label className="text-[9px] text-[var(--theme-text-muted)] font-medium uppercase block">Case Pack Size</label>
+                            <label className="text-[11px] text-[var(--theme-text-secondary)] font-medium uppercase block">Case Pack Size</label>
                             <input
                                 type="number"
                                 value={packaging.caseSize || ''}
@@ -149,7 +149,7 @@ export const EditableAttributesPanel: React.FC<EditableAttributesPanelProps> = (
                             />
                         </div>
                         <div className="p-3 bg-[var(--theme-bg-subtle)] rounded-xl border border-[var(--theme-border)] space-y-1">
-                            <label className="text-[9px] text-[var(--theme-text-muted)] font-medium uppercase block">Package Type</label>
+                            <label className="text-[11px] text-[var(--theme-text-secondary)] font-medium uppercase block">Package Type</label>
                             <input
                                 value={packaging.packageType || ''}
                                 onChange={(e) => updateDomain('packaging', 'packageType', e.target.value)}
@@ -158,7 +158,7 @@ export const EditableAttributesPanel: React.FC<EditableAttributesPanelProps> = (
                             />
                         </div>
                         <div className="p-3 bg-[var(--theme-bg-subtle)] rounded-xl border border-[var(--theme-border)] space-y-1">
-                            <label className="text-[9px] text-[var(--theme-text-muted)] font-medium uppercase block">Material</label>
+                            <label className="text-[11px] text-[var(--theme-text-secondary)] font-medium uppercase block">Material</label>
                             <input
                                 value={packaging.material || ''}
                                 onChange={(e) => updateDomain('packaging', 'material', e.target.value)}
@@ -168,7 +168,7 @@ export const EditableAttributesPanel: React.FC<EditableAttributesPanelProps> = (
                         </div>
                         <div className="p-3 bg-[var(--theme-bg-subtle)] rounded-xl border border-[var(--theme-border)] flex items-center justify-between">
                             <div>
-                                <span className="text-[9px] text-[var(--theme-text-muted)] font-medium uppercase block">Breakable / Fragile</span>
+                                <span className="text-[11px] text-[var(--theme-text-secondary)] font-medium uppercase block">Breakable / Fragile</span>
                                 <span className="text-xs font-bold text-[var(--theme-text-primary)]">{packaging.isBreakable ? 'Yes' : 'No'}</span>
                             </div>
                             <input
@@ -184,7 +184,7 @@ export const EditableAttributesPanel: React.FC<EditableAttributesPanelProps> = (
                 {activeTab === 'storage' && (
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                         <div className="p-3 bg-[var(--theme-bg-subtle)] rounded-xl border border-[var(--theme-border)] space-y-1">
-                            <label className="text-[9px] text-[var(--theme-text-muted)] font-medium uppercase block">Storage Temperature</label>
+                            <label className="text-[11px] text-[var(--theme-text-secondary)] font-medium uppercase block">Storage Temperature</label>
                             <select
                                 value={storage.type || 'Ambient'}
                                 onChange={(e) => updateDomain('storage', 'type', e.target.value)}
@@ -197,7 +197,7 @@ export const EditableAttributesPanel: React.FC<EditableAttributesPanelProps> = (
                         </div>
                         <div className="p-3 bg-[var(--theme-bg-subtle)] rounded-xl border border-[var(--theme-border)] flex items-center justify-between">
                             <div>
-                                <span className="text-[9px] text-[var(--theme-text-muted)] font-medium uppercase block">Perishable</span>
+                                <span className="text-[11px] text-[var(--theme-text-secondary)] font-medium uppercase block">Perishable</span>
                                 <span className="text-xs font-bold text-[var(--theme-text-primary)]">{storage.isPerishable ? 'Yes' : 'No'}</span>
                             </div>
                             <input
@@ -209,7 +209,7 @@ export const EditableAttributesPanel: React.FC<EditableAttributesPanelProps> = (
                         </div>
                         <div className="p-3 bg-[var(--theme-bg-subtle)] rounded-xl border border-[var(--theme-border)] flex items-center justify-between">
                             <div>
-                                <span className="text-[9px] text-[var(--theme-text-muted)] font-medium uppercase block">Hazardous</span>
+                                <span className="text-[11px] text-[var(--theme-text-secondary)] font-medium uppercase block">Hazardous</span>
                                 <span className="text-xs font-bold text-[var(--theme-text-primary)]">{storage.isHazardous ? 'Yes' : 'No'}</span>
                             </div>
                             <input
@@ -220,7 +220,7 @@ export const EditableAttributesPanel: React.FC<EditableAttributesPanelProps> = (
                             />
                         </div>
                         <div className="p-3 bg-[var(--theme-bg-subtle)] rounded-xl border border-[var(--theme-border)] space-y-1">
-                            <label className="text-[9px] text-[var(--theme-text-muted)] font-medium uppercase block">Max Stack Limit</label>
+                            <label className="text-[11px] text-[var(--theme-text-secondary)] font-medium uppercase block">Max Stack Limit</label>
                             <input
                                 type="number"
                                 value={storage.stackLimit || ''}
@@ -235,7 +235,7 @@ export const EditableAttributesPanel: React.FC<EditableAttributesPanelProps> = (
                 {activeTab === 'commercial' && (
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                         <div className="p-3 bg-[var(--theme-bg-subtle)] rounded-xl border border-[var(--theme-border)] space-y-1">
-                            <label className="text-[9px] text-[var(--theme-text-muted)] font-medium uppercase block">Pricing Model</label>
+                            <label className="text-[11px] text-[var(--theme-text-secondary)] font-medium uppercase block">Pricing Model</label>
                             <select
                                 value={commercial.priceType || 'Fixed'}
                                 onChange={(e) => updateDomain('commercial', 'priceType', e.target.value)}
@@ -248,7 +248,7 @@ export const EditableAttributesPanel: React.FC<EditableAttributesPanelProps> = (
                         </div>
                         <div className="p-3 bg-[var(--theme-bg-subtle)] rounded-xl border border-[var(--theme-border)] flex items-center justify-between">
                             <div>
-                                <span className="text-[9px] text-[var(--theme-text-muted)] font-medium uppercase block">Weighted at POS</span>
+                                <span className="text-[11px] text-[var(--theme-text-secondary)] font-medium uppercase block">Weighted at POS</span>
                                 <span className="text-xs font-bold text-[var(--theme-text-primary)]">{commercial.isWeighted ? 'Yes' : 'No'}</span>
                             </div>
                             <input
@@ -260,7 +260,7 @@ export const EditableAttributesPanel: React.FC<EditableAttributesPanelProps> = (
                         </div>
                         <div className="p-3 bg-[var(--theme-bg-subtle)] rounded-xl border border-[var(--theme-border)] flex items-center justify-between">
                             <div>
-                                <span className="text-[9px] text-[var(--theme-text-muted)] font-medium uppercase block">Customer Returnable</span>
+                                <span className="text-[11px] text-[var(--theme-text-muted)] font-medium uppercase block">Customer Returnable</span>
                                 <span className="text-xs font-bold text-[var(--theme-text-primary)]">{commercial.isReturnable !== false ? 'Yes' : 'No'}</span>
                             </div>
                             <input
@@ -272,7 +272,7 @@ export const EditableAttributesPanel: React.FC<EditableAttributesPanelProps> = (
                         </div>
                         <div className="p-3 bg-[var(--theme-bg-subtle)] rounded-xl border border-[var(--theme-border)] flex items-center justify-between">
                             <div>
-                                <span className="text-[9px] text-[var(--theme-text-muted)] font-medium uppercase block">Bundle / Promo Eligible</span>
+                                <span className="text-[11px] text-[var(--theme-text-muted)] font-medium uppercase block">Bundle / Promo Eligible</span>
                                 <span className="text-xs font-bold text-[var(--theme-text-primary)]">{commercial.isBundleEligible !== false ? 'Yes' : 'No'}</span>
                             </div>
                             <input
@@ -288,7 +288,7 @@ export const EditableAttributesPanel: React.FC<EditableAttributesPanelProps> = (
 
             {/* Live Active Attributes Badge Strip */}
             <div className="pt-3 border-t border-[var(--theme-border)] space-y-2">
-                <span className="text-[9px] text-[var(--theme-text-muted)] font-bold uppercase tracking-wider block">
+                <span className="text-[11px] text-[var(--theme-text-muted)] font-bold uppercase tracking-wider block">
                     Active Master Attribute Badges (Live Preview):
                 </span>
                 <div className="flex flex-wrap gap-1.5 min-h-[28px] items-center">
@@ -317,7 +317,7 @@ export const EditableAttributesPanel: React.FC<EditableAttributesPanelProps> = (
                     <AttrBadge label="Bundle" value={commercial.isBundleEligible} color="blue" />
 
                     {!physical.netWeight && !physical.form && !packaging.packageType && !storage.isPerishable && !commercial.isWeighted && (
-                        <span className="text-[10px] text-[var(--theme-text-muted)] font-medium italic">
+                        <span className="text-[11px] text-[var(--theme-text-muted)] font-medium italic">
                             No attributes configured yet — select options above to assign specifications
                         </span>
                     )}

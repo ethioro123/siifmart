@@ -16,36 +16,36 @@ export const ZoneStats: React.FC<ZoneStatsProps> = ({
 }) => {
     return (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="p-4 sm:p-5 bg-[var(--theme-bg-card)] rounded-3xl border border-[var(--theme-border)] shadow-sm flex items-center justify-between">
-                <div>
-                    <p className="text-[10px] text-[var(--theme-text-muted)] font-medium uppercase tracking-wider">Active Storage Zones</p>
-                    <p className="text-2xl font-bold font-mono mt-1 text-[var(--theme-text-primary)]">{zonesCount}</p>
+            <div className="p-4 sm:p-5 bg-[var(--theme-bg-card)] rounded-2xl border border-[var(--theme-border)] shadow-xs flex items-center justify-between text-left">
+                <div className="space-y-1">
+                    <p className="text-[11px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider">Active Storage Zones</p>
+                    <p className="text-2xl font-bold font-mono tabular-nums text-[var(--theme-text-primary)]">{zonesCount}</p>
                 </div>
-                <div className="p-2.5 rounded-2xl bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] border border-[var(--theme-border)]">
-                    <Layers size={20} />
+                <div className="w-10 h-10 rounded-xl bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] border border-[var(--theme-accent)]/20 flex items-center justify-center shrink-0">
+                    <Layers size={18} />
                 </div>
             </div>
 
-            <div className="p-4 sm:p-5 bg-[var(--theme-bg-card)] rounded-3xl border border-[var(--theme-border)] shadow-sm flex items-center justify-between">
-                <div>
-                    <p className="text-[10px] text-[var(--theme-text-muted)] font-medium uppercase tracking-wider">Storage Capacity Occupancy</p>
-                    <p className="text-xl font-bold font-mono mt-1 text-[var(--theme-text-primary)]">
-                        {totalOccupied.toLocaleString()} <span className="text-xs text-[var(--theme-text-muted)] font-normal">/ {totalCapacity.toLocaleString()} items</span>
+            <div className="p-4 sm:p-5 bg-[var(--theme-bg-card)] rounded-2xl border border-[var(--theme-border)] shadow-xs flex items-center justify-between text-left">
+                <div className="space-y-1">
+                    <p className="text-[11px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider">Capacity Occupancy</p>
+                    <p className="text-xl font-bold font-mono tabular-nums text-[var(--theme-text-primary)]">
+                        {totalOccupied.toLocaleString()} <span className="text-xs text-[var(--theme-text-secondary)] font-normal">/ {totalCapacity.toLocaleString()} items</span>
                     </p>
                 </div>
-                <div className="p-2.5 rounded-2xl bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">
-                    <Box size={20} />
+                <div className="w-10 h-10 rounded-xl bg-[#FF9F0A]/10 text-[#FF9F0A] border border-[#FF9F0A]/20 flex items-center justify-center shrink-0">
+                    <Box size={18} />
                 </div>
             </div>
 
-            <div className="p-4 sm:p-5 bg-[var(--theme-bg-card)] rounded-3xl border border-[var(--theme-border)] shadow-sm flex flex-col justify-between">
+            <div className="p-4 sm:p-5 bg-[var(--theme-bg-card)] rounded-2xl border border-[var(--theme-border)] shadow-xs flex flex-col justify-between text-left">
                 <div className="flex items-center justify-between">
-                    <p className="text-[10px] text-[var(--theme-text-muted)] font-medium uppercase tracking-wider">Global Space Utilization</p>
-                    <span className="text-sm font-bold font-mono text-[var(--theme-text-primary)]">{totalUtilization.toFixed(1)}%</span>
+                    <p className="text-[11px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider">Space Utilization</p>
+                    <span className="text-sm font-bold font-mono tabular-nums text-[var(--theme-text-primary)]">{totalUtilization.toFixed(1)}%</span>
                 </div>
-                <div className="w-full bg-[var(--theme-bg-subtle)] h-2 rounded-full mt-2.5 overflow-hidden border border-[var(--theme-border)] relative">
+                <div className="w-full bg-[var(--theme-bg-subtle)] h-2 rounded-full mt-3 overflow-hidden border border-[var(--theme-border)] relative">
                     <div 
-                        className={`h-full transition-all duration-1000 ${totalUtilization > 90 ? 'bg-red-500' : totalUtilization > 70 ? 'bg-amber-500' : 'bg-emerald-500'}`}
+                        className={`h-full transition-all duration-700 ${totalUtilization > 90 ? 'bg-[#FF3B30]' : totalUtilization > 70 ? 'bg-[#FF9F0A]' : 'bg-[#34C759]'}`}
                         style={{ width: `${Math.min(100, totalUtilization)}%` }}
                     />
                 </div>

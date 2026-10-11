@@ -37,29 +37,29 @@ export const CriticalNeedsPanel: React.FC<CriticalNeedsPanelProps> = ({
     sites
 }) => {
     return (
-        <div className="lg:w-[55%] xl:w-[58%] bg-white/70 dark:bg-[#161F1A]/80 border-r border-[#E2DCCE] dark:border-white/10 flex flex-col h-full overflow-hidden">
+        <div className="lg:w-[55%] xl:w-[58%] bg-[var(--theme-bg-card)] border-r border-[var(--theme-border)] flex flex-col h-full overflow-hidden">
             {/* Header & Controls */}
-            <div className="p-4 md:p-6 border-b border-[#E2DCCE] dark:border-white/10 flex flex-col gap-4 bg-[#FAF8F5]/60 dark:bg-[#1A231E]/60 backdrop-blur-md">
+            <div className="p-4 md:p-5 border-b border-[var(--theme-border)] flex flex-col gap-3.5 bg-[var(--theme-bg-subtle)] shrink-0">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                    <div className="flex items-center gap-3">
-                        <div className="w-2 h-7 bg-[#2C5E3B] dark:bg-[#A9CBA2] rounded-full shadow-sm" />
+                    <div className="flex items-center gap-2.5">
+                        <div className="w-1.5 h-6 bg-primary rounded-full" />
                         <div>
-                            <h3 className="text-sm md:text-base font-black text-stone-900 dark:text-white uppercase tracking-tight">Store Stock Gaps</h3>
-                            <p className="text-[10px] text-stone-500 dark:text-stone-400 uppercase tracking-widest font-bold">Select a store gap to stage replenishment</p>
+                            <h3 className="text-sm md:text-base font-bold text-[var(--theme-text-primary)] tracking-tight">Store Stock Gaps</h3>
+                            <p className="text-[11px] text-[var(--theme-text-secondary)] uppercase tracking-wider font-semibold">Select a store gap to stage replenishment</p>
                         </div>
                     </div>
                     <div className="flex items-center gap-2 self-end sm:self-auto">
-                        <div className="px-3 py-1 bg-[#2C5E3B]/10 dark:bg-[#A9CBA2]/15 text-[#2C5E3B] dark:text-[#A9CBA2] rounded-xl text-[10px] font-black border border-[#2C5E3B]/20 dark:border-[#A9CBA2]/30 shadow-xs">
+                        <div className="px-3 py-1 bg-primary/10 text-primary rounded-xl text-[11px] font-semibold border border-primary/20 shadow-xs tabular-nums">
                             {distHubLowStockItems.length} Needs Found
                         </div>
                         <button
                             onClick={fetchDistHubData}
                             disabled={distHubLoading}
-                            className="p-2 bg-white dark:bg-white/5 hover:bg-stone-100 dark:hover:bg-white/10 rounded-xl text-stone-600 dark:text-stone-300 transition-all active:scale-95 border border-[#E2DCCE] dark:border-white/10 shadow-xs"
+                            className="min-h-[44px] min-w-[44px] flex items-center justify-center bg-[var(--theme-bg-card)] hover:bg-[var(--theme-bg-subtle)] rounded-xl text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] transition-all active:scale-95 border border-[var(--theme-border)] shadow-xs touch-manipulation"
                             title="Rescan Network Gaps"
                             aria-label="Rescan Network Gaps"
                         >
-                            <RefreshCw size={14} className={`${distHubLoading ? 'animate-spin text-[#2C5E3B] dark:text-[#A9CBA2]' : ''}`} />
+                            <RefreshCw size={15} className={`${distHubLoading ? 'animate-spin text-primary' : ''}`} />
                         </button>
                     </div>
                 </div>
@@ -67,23 +67,23 @@ export const CriticalNeedsPanel: React.FC<CriticalNeedsPanelProps> = ({
                 {/* Search & Store Filters */}
                 <div className="flex flex-col sm:flex-row gap-2.5">
                     <div className="flex-1 relative">
-                        <Search size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-stone-400 dark:text-stone-500" />
+                        <Search size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--theme-text-secondary)]" />
                         <input
                             type="text"
                             placeholder="Search by product, SKU, or store..."
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
                             aria-label="Search needs"
-                            className="w-full bg-white dark:bg-black/30 border border-[#E2DCCE] dark:border-white/10 rounded-xl pl-9 pr-8 py-2 text-xs text-stone-900 dark:text-white placeholder:text-stone-400 focus:outline-none focus:border-[#2C5E3B] dark:focus:border-[#A9CBA2] transition-all font-sans shadow-xs"
+                            className="w-full min-h-[44px] bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl pl-10 pr-9 py-2 text-xs text-[var(--theme-text-primary)] placeholder:text-[var(--theme-text-secondary)] focus:outline-none focus:border-primary transition-all font-sans shadow-xs touch-manipulation"
                         />
                         {searchQuery && (
                             <button
                                 onClick={() => setSearchQuery('')}
                                 title="Clear search"
                                 aria-label="Clear search"
-                                className="absolute right-3 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-700 dark:hover:text-white"
+                                className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)]"
                             >
-                                <X size={12} />
+                                <X size={14} />
                             </button>
                         )}
                     </div>
@@ -93,7 +93,7 @@ export const CriticalNeedsPanel: React.FC<CriticalNeedsPanelProps> = ({
                             onChange={(e) => setFilterStoreId(e.target.value)}
                             title="Filter by destination store"
                             aria-label="Filter by destination store"
-                            className="bg-white dark:bg-black/30 border border-[#E2DCCE] dark:border-white/10 rounded-xl px-3 py-2 text-xs text-stone-800 dark:text-stone-200 focus:outline-none focus:border-[#2C5E3B] dark:focus:border-[#A9CBA2] transition-all font-bold shadow-xs cursor-pointer"
+                            className="min-h-[44px] bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl px-3 py-2 text-xs text-[var(--theme-text-primary)] focus:outline-none focus:border-primary transition-all font-semibold shadow-xs cursor-pointer touch-manipulation"
                         >
                             <option value="ALL">All Stores ({Array.from(new Set(distHubLowStockItems.map(item => item.siteId || item.site_id))).length})</option>
                             {Array.from(new Set(distHubLowStockItems.map(item => item.siteId || item.site_id))).map(storeId => {
@@ -105,49 +105,49 @@ export const CriticalNeedsPanel: React.FC<CriticalNeedsPanelProps> = ({
                 </div>
 
                 {/* Severity Filters */}
-                <div className="flex items-center gap-1 bg-stone-200/60 dark:bg-black/40 border border-[#E2DCCE] dark:border-white/5 rounded-xl p-1 self-start">
+                <div className="flex items-center gap-1 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl p-1 self-start">
                     <button
                         onClick={() => setFilterStatus('ALL')}
-                        className={`px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider transition-all ${
+                        className={`min-h-[36px] px-3 py-1 rounded-lg text-[11px] font-semibold uppercase tracking-wider transition-all touch-manipulation ${
                             filterStatus === 'ALL'
-                                ? 'bg-white dark:bg-[#2C5E3B] text-stone-900 dark:text-white shadow-xs'
-                                : 'text-stone-500 hover:text-stone-800 dark:hover:text-stone-300'
+                                ? 'bg-primary text-white shadow-xs'
+                                : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)]'
                         }`}
                     >
                         All ({distHubLowStockItems.length})
                     </button>
                     <button
                         onClick={() => setFilterStatus('CRITICAL')}
-                        className={`px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider transition-all flex items-center gap-1 ${
+                        className={`min-h-[36px] px-3 py-1 rounded-lg text-[11px] font-semibold uppercase tracking-wider transition-all flex items-center gap-1 touch-manipulation ${
                             filterStatus === 'CRITICAL'
                                 ? 'bg-red-500 text-white shadow-xs'
-                                : 'text-stone-500 hover:text-red-500'
+                                : 'text-[var(--theme-text-secondary)] hover:text-red-500'
                         }`}
                     >
-                        <AlertCircle size={10} />
+                        <AlertCircle size={12} />
                         Critical ({distHubLowStockItems.filter(item => (item.stock / (item.minStock || 1)) <= 0.3).length})
                     </button>
                     <button
                         onClick={() => setFilterStatus('LOW')}
-                        className={`px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider transition-all flex items-center gap-1 ${
+                        className={`min-h-[36px] px-3 py-1 rounded-lg text-[11px] font-semibold uppercase tracking-wider transition-all flex items-center gap-1 touch-manipulation ${
                             filterStatus === 'LOW'
                                 ? 'bg-amber-600 text-white shadow-xs'
-                                : 'text-stone-500 hover:text-amber-600'
+                                : 'text-[var(--theme-text-secondary)] hover:text-amber-600'
                         }`}
                     >
-                        <AlertTriangle size={10} />
+                        <AlertTriangle size={12} />
                         Low Stock ({distHubLowStockItems.filter(item => (item.stock / (item.minStock || 1)) > 0.3).length})
                     </button>
                 </div>
             </div>
 
             {/* List of Store Needs */}
-            <div className="flex-1 overflow-y-auto p-4 md:p-6 custom-scrollbar relative">
+            <div className="flex-1 overflow-y-auto p-4 md:p-5 custom-scrollbar relative">
                 {filteredItems.length === 0 ? (
                     <div className="flex flex-col items-center justify-center py-24 text-center">
-                        <Store size={36} className="text-stone-300 dark:text-stone-600 mb-3" />
-                        <p className="text-xs uppercase font-black tracking-widest text-stone-400 dark:text-stone-500">No matching store gaps</p>
-                        <p className="text-[10px] text-stone-400 dark:text-stone-600 mt-1">All stores are within healthy safety stock levels.</p>
+                        <Store size={36} className="text-[var(--theme-text-secondary)] opacity-40 mb-3" />
+                        <p className="text-xs uppercase font-semibold tracking-wider text-[var(--theme-text-secondary)]">No matching store gaps</p>
+                        <p className="text-[11px] text-[var(--theme-text-secondary)] opacity-80 mt-1">All stores are within healthy safety stock levels.</p>
                     </div>
                 ) : (
                     <div className="space-y-2.5">
@@ -163,24 +163,24 @@ export const CriticalNeedsPanel: React.FC<CriticalNeedsPanelProps> = ({
                                     key={`${item.id}-${item.sku}`}
                                     onClick={() => handleSelectLowStockProduct(item)}
                                     title={`Select ${item.name} for distribution`}
-                                    className={`w-full text-left p-4 rounded-2xl border transition-all duration-200 relative group active:scale-[0.99] ${
+                                    className={`w-full text-left p-4 rounded-2xl border transition-all duration-200 relative group active:scale-[0.99] touch-manipulation ${
                                         isSelected
-                                            ? 'bg-[#2C5E3B]/10 dark:bg-[#A9CBA2]/10 border-[#2C5E3B] dark:border-[#A9CBA2] shadow-md ring-2 ring-[#2C5E3B]/20 dark:ring-[#A9CBA2]/20'
-                                            : 'bg-white dark:bg-[#1C2620] border-[#E2DCCE] dark:border-white/5 hover:border-[#2C5E3B]/40 dark:hover:border-[#A9CBA2]/30 shadow-xs'
+                                            ? 'bg-primary/10 border-primary shadow-sm ring-1 ring-primary/30'
+                                            : 'bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] hover:border-primary/40 shadow-xs'
                                     }`}
                                 >
                                     <div className="flex items-start justify-between gap-3">
                                         {/* Product Details */}
                                         <div className="min-w-0 flex-1">
-                                            <div className="flex items-center gap-2 mb-1 flex-wrap">
-                                                <span className="text-[10px] font-mono font-black text-stone-700 dark:text-stone-300 bg-stone-100 dark:bg-white/10 px-2 py-0.5 rounded-md">
+                                            <div className="flex items-center gap-2 mb-1.5 flex-wrap">
+                                                <span className="text-[11px] font-mono font-semibold text-[var(--theme-text-primary)] bg-[var(--theme-bg-card)] border border-[var(--theme-border)] px-2 py-0.5 rounded-md">
                                                     {item.sku}
                                                 </span>
-                                                <span className="text-[10px] font-black text-[#2C5E3B] dark:text-[#A9CBA2] uppercase tracking-wide flex items-center gap-1">
-                                                    <Store size={10} />
+                                                <span className="text-[11px] font-semibold text-primary uppercase tracking-wide flex items-center gap-1">
+                                                    <Store size={12} />
                                                     {siteName}
                                                 </span>
-                                                <span className={`px-2 py-0.5 rounded-md text-[8px] font-black uppercase tracking-wider border ${
+                                                <span className={`px-2 py-0.5 rounded-md text-[11px] font-semibold uppercase tracking-wider border ${
                                                     isCritical
                                                         ? 'bg-red-50 dark:bg-red-500/10 text-red-700 dark:text-red-400 border-red-200 dark:border-red-500/20'
                                                         : 'bg-amber-50 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-200 dark:border-amber-500/20'
@@ -188,36 +188,36 @@ export const CriticalNeedsPanel: React.FC<CriticalNeedsPanelProps> = ({
                                                     {isCritical ? 'CRITICAL (≤30%)' : 'LOW STOCK'}
                                                 </span>
                                             </div>
-                                            <p className="text-xs md:text-sm font-black text-stone-900 dark:text-white uppercase tracking-tight truncate leading-snug">
+                                            <p className="text-xs md:text-sm font-bold text-[var(--theme-text-primary)] truncate leading-snug">
                                                 {item.name}
                                             </p>
                                         </div>
 
                                         {/* Deficit Badge & Action Arrow */}
                                         <div className="flex flex-col items-end shrink-0">
-                                            <span className="text-[9px] font-mono font-bold text-stone-400 dark:text-stone-500 uppercase tracking-widest leading-none mb-1">
+                                            <span className="text-[11px] font-mono font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider leading-none mb-1">
                                                 Deficit Gap
                                             </span>
-                                            <div className="px-2 py-1 bg-amber-50 dark:bg-amber-500/15 border border-amber-200 dark:border-amber-500/30 text-amber-800 dark:text-amber-300 rounded-lg text-xs font-mono font-black tabular-nums">
+                                            <div className="px-2.5 py-1 bg-amber-50 dark:bg-amber-500/15 border border-amber-200 dark:border-amber-500/30 text-amber-800 dark:text-amber-300 rounded-lg text-xs font-mono font-bold tabular-nums">
                                                 +{deficit} units
                                             </div>
                                         </div>
                                     </div>
 
                                     {/* Stock Progress Bar */}
-                                    <div className="mt-3 pt-3 border-t border-[#E2DCCE]/60 dark:border-white/5 flex items-center justify-between gap-4">
-                                        <div className="flex items-center gap-2 text-xs font-mono font-bold text-stone-600 dark:text-stone-300">
-                                            <span className="text-[10px] text-stone-400 dark:text-stone-500 uppercase tracking-wider">Current:</span>
-                                            <span className={isCritical ? 'text-red-600 dark:text-red-400 font-black' : 'text-amber-600 dark:text-amber-400 font-black'}>
+                                    <div className="mt-3 pt-3 border-t border-[var(--theme-border)] flex items-center justify-between gap-4">
+                                        <div className="flex items-center gap-2 text-xs font-mono font-semibold text-[var(--theme-text-secondary)] tabular-nums">
+                                            <span className="text-[11px] text-[var(--theme-text-secondary)] uppercase tracking-wider">Current:</span>
+                                            <span className={isCritical ? 'text-red-500 font-bold' : 'text-amber-500 font-bold'}>
                                                 {item.stock}
                                             </span>
-                                            <span className="text-stone-300 dark:text-stone-600">/</span>
-                                            <span className="text-stone-500 dark:text-stone-400 text-[11px]">
+                                            <span className="text-[var(--theme-text-secondary)] opacity-50">/</span>
+                                            <span className="text-[var(--theme-text-secondary)] text-[11px]">
                                                 {item.minStock} min
                                             </span>
                                         </div>
 
-                                        <div className="flex-1 max-w-[140px] h-2 rounded-full bg-stone-100 dark:bg-black/40 overflow-hidden border border-[#E2DCCE] dark:border-white/5">
+                                        <div className="flex-1 max-w-[140px] h-2 rounded-full bg-[var(--theme-bg-card)] overflow-hidden border border-[var(--theme-border)]">
                                             <ProgressBar
                                                 progress={Math.min(100, (item.stock / (item.minStock || 1)) * 100)}
                                                 containerClassName="h-full w-full bg-transparent"
@@ -225,11 +225,11 @@ export const CriticalNeedsPanel: React.FC<CriticalNeedsPanelProps> = ({
                                             />
                                         </div>
 
-                                        <div className={`flex items-center gap-1 text-[10px] font-black uppercase tracking-wider ${
-                                            isSelected ? 'text-[#2C5E3B] dark:text-[#A9CBA2]' : 'text-stone-400 group-hover:text-stone-700 dark:group-hover:text-stone-200'
+                                        <div className={`flex items-center gap-1 text-[11px] font-semibold uppercase tracking-wider ${
+                                            isSelected ? 'text-primary' : 'text-[var(--theme-text-secondary)] group-hover:text-[var(--theme-text-primary)]'
                                         }`}>
                                             <span>{isSelected ? 'Configuring' : 'Allocate'}</span>
-                                            <ArrowUpRight size={12} className={isSelected ? 'rotate-45 transition-transform' : ''} />
+                                            <ArrowUpRight size={14} className={isSelected ? 'rotate-45 transition-transform' : ''} />
                                         </div>
                                     </div>
                                 </button>
@@ -241,4 +241,3 @@ export const CriticalNeedsPanel: React.FC<CriticalNeedsPanelProps> = ({
         </div>
     );
 };
-

@@ -3,8 +3,9 @@ import type { PendingInventoryChange } from '../types';
 import { logger } from '../utils/logger';
 
 export const inventoryRequestsService = {
-    async getAll(siteId?: string, countryCode?: string): Promise<PendingInventoryChange[]> {
-        let query = supabase.from('inventory_requests').select('*');
+    async getAll(siteId?: string, countryCode?: string, limit: number = 25): Promise<PendingInventoryChange[]> {
+        // RULE 10: 25-record shelf limit
+        let query = supabase.from('inventory_requests').select('*').limit(limit);
         if (siteId) query = query.eq('site_id', siteId);
         if (countryCode) query = query.eq('country_code', countryCode.toUpperCase());
 

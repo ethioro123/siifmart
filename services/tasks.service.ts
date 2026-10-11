@@ -2,7 +2,7 @@ import { supabase } from '../lib/supabase';
 import type { EmployeeTask } from '../types';
 
 export const tasksService = {
-    async getAll(siteId?: string, limit?: number): Promise<EmployeeTask[]> {
+    async getAll(siteId?: string, limit: number = 25): Promise<EmployeeTask[]> {
         try {
             let query = supabase
                 .from('employee_tasks')

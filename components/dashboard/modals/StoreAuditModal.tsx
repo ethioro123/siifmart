@@ -112,26 +112,26 @@ export const StoreAuditModal: React.FC<StoreAuditModalProps> = ({
     };
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 overflow-y-auto">
-            <div className="relative w-full max-w-2xl bg-white dark:bg-stone-900 rounded-3xl border border-stone-200 dark:border-stone-800 shadow-2xl p-6 overflow-hidden">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-md p-4 overflow-y-auto">
+            <div className="relative w-full max-w-2xl bg-[var(--theme-bg-card)] rounded-2xl border border-[var(--theme-border)] shadow-2xl p-6 overflow-hidden">
                 {/* Header */}
-                <div className="flex items-center justify-between pb-4 border-b border-stone-200 dark:border-stone-800">
+                <div className="flex items-center justify-between pb-4 border-b border-[var(--theme-border)]">
                     <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-2xl bg-[#2C5E3B]/10 dark:bg-emerald-500/20 text-[#2C5E3B] dark:text-emerald-400 flex items-center justify-center shrink-0">
-                            <ClipboardCheck size={22} />
+                        <div className="w-10 h-10 rounded-xl bg-[var(--theme-primary)]/10 text-[var(--theme-primary)] flex items-center justify-center shrink-0">
+                            <ClipboardCheck size={20} />
                         </div>
                         <div>
-                            <h3 className="text-lg font-bold text-stone-900 dark:text-white">
+                            <h3 className="text-base font-semibold text-[var(--theme-text-primary)]">
                                 Unannounced Store Walkthrough & Cash Spot Audit
                             </h3>
-                            <p className="text-xs text-stone-500 dark:text-stone-400">
+                            <p className="text-xs text-[var(--theme-text-muted)]">
                                 Central Operations Zero-Trust Field Inspection Suite • Sovereign Instance ({activeCountry})
                             </p>
                         </div>
                     </div>
                     <button
                         onClick={onClose}
-                        className="p-2 rounded-xl text-stone-400 hover:text-stone-600 dark:hover:text-stone-200 hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors"
+                        className="p-2 rounded-xl text-[var(--theme-text-muted)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-subtle)] transition-colors active:scale-95"
                     >
                         <X size={18} />
                     </button>
@@ -142,18 +142,18 @@ export const StoreAuditModal: React.FC<StoreAuditModalProps> = ({
                     {/* Facility & Auditor Line */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         <div>
-                            <label className="block text-xs font-bold text-stone-700 dark:text-stone-300 mb-1">
+                            <label className="block text-xs font-semibold text-[var(--theme-text-secondary)] mb-1">
                                 Target Retail Facility
                             </label>
                             <div className="relative">
-                                <Building2 size={16} className="absolute left-3 top-2.5 text-stone-400" />
+                                <Building2 size={16} className="absolute left-3 top-2.5 text-[var(--theme-text-muted)]" />
                                 <select
                                     value={selectedSiteId}
                                     onChange={(e) => {
                                         setSelectedSiteId(e.target.value);
                                         setManagerOnDutyId('');
                                     }}
-                                    className="w-full pl-9 pr-3 py-2 text-xs rounded-xl bg-stone-50 dark:bg-stone-800 border border-stone-300 dark:border-stone-700 text-stone-900 dark:text-white font-medium focus:ring-2 focus:ring-[#2C5E3B] focus:outline-none"
+                                    className="w-full pl-9 pr-3 py-2 text-xs rounded-xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-[var(--theme-text-primary)] font-medium focus:ring-1 focus:ring-[var(--theme-primary)] focus:outline-none"
                                     required
                                 >
                                     {retailStores.map(s => (
@@ -166,15 +166,15 @@ export const StoreAuditModal: React.FC<StoreAuditModalProps> = ({
                         </div>
 
                         <div>
-                            <label className="block text-xs font-bold text-stone-700 dark:text-stone-300 mb-1">
+                            <label className="block text-xs font-semibold text-[var(--theme-text-secondary)] mb-1">
                                 Manager On Duty (Supervisory Co-Signer)
                             </label>
                             <div className="relative">
-                                <UserCheck size={16} className="absolute left-3 top-2.5 text-stone-400" />
+                                <UserCheck size={16} className="absolute left-3 top-2.5 text-[var(--theme-text-muted)]" />
                                 <select
                                     value={managerOnDutyId}
                                     onChange={(e) => setManagerOnDutyId(e.target.value)}
-                                    className="w-full pl-9 pr-3 py-2 text-xs rounded-xl bg-stone-50 dark:bg-stone-800 border border-stone-300 dark:border-stone-700 text-stone-900 dark:text-white font-medium focus:ring-2 focus:ring-[#2C5E3B] focus:outline-none"
+                                    className="w-full pl-9 pr-3 py-2 text-xs rounded-xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-[var(--theme-text-primary)] font-medium focus:ring-1 focus:ring-[var(--theme-primary)] focus:outline-none"
                                 >
                                     <option value="">Select On-Duty Lead / Manager</option>
                                     {siteManagers.map(m => (
@@ -189,7 +189,7 @@ export const StoreAuditModal: React.FC<StoreAuditModalProps> = ({
 
                     {/* Inspection Type Selector */}
                     <div>
-                        <label className="block text-xs font-bold text-stone-700 dark:text-stone-300 mb-1">
+                        <label className="block text-xs font-semibold text-[var(--theme-text-secondary)] mb-1">
                             Inspection Protocol
                         </label>
                         <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
@@ -203,10 +203,10 @@ export const StoreAuditModal: React.FC<StoreAuditModalProps> = ({
                                     key={t.id}
                                     type="button"
                                     onClick={() => setAuditType(t.id as StoreAuditType)}
-                                    className={`px-3 py-2 text-xs rounded-xl font-bold border transition-all text-center ${
+                                    className={`px-3 py-2 text-xs rounded-xl font-semibold border transition-all text-center active:scale-[0.98] ${
                                         auditType === t.id
-                                            ? 'bg-[#2C5E3B] text-white border-[#2C5E3B] shadow-sm'
-                                            : 'bg-stone-50 dark:bg-stone-800/80 text-stone-600 dark:text-stone-400 border-stone-200 dark:border-stone-700 hover:border-stone-400'
+                                            ? 'bg-[var(--theme-primary)] text-white border-transparent shadow-sm'
+                                            : 'bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] border-[var(--theme-border)] hover:border-[var(--theme-border-strong)]'
                                     }`}
                                 >
                                     {t.label}
@@ -216,20 +216,20 @@ export const StoreAuditModal: React.FC<StoreAuditModalProps> = ({
                     </div>
 
                     {/* Planogram & Hygiene Scores */}
-                    <div className="p-4 bg-stone-50 dark:bg-stone-800/40 rounded-2xl border border-stone-200 dark:border-stone-800 space-y-3">
+                    <div className="p-4 bg-[var(--theme-bg-subtle)] rounded-xl border border-[var(--theme-border)] space-y-3">
                         <div className="flex items-center justify-between">
-                            <span className="text-xs font-bold text-stone-900 dark:text-white flex items-center gap-1.5">
-                                <ClipboardCheck size={14} className="text-[#2C5E3B] dark:text-emerald-400" />
+                            <span className="text-xs font-semibold text-[var(--theme-text-primary)] flex items-center gap-1.5">
+                                <ClipboardCheck size={14} className="text-[var(--theme-primary)]" />
                                 Planogram & Shelf Hygiene Standards
                             </span>
-                            <span className="text-xs font-mono font-bold text-emerald-600 dark:text-emerald-400">
+                            <span className="text-xs font-mono tabular-nums font-semibold text-[var(--theme-primary)]">
                                 Score: {planogramScore}%
                             </span>
                         </div>
 
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
-                                <label className="block text-[11px] font-semibold text-stone-600 dark:text-stone-400 mb-1">
+                                <label className="block text-[11px] font-semibold text-[var(--theme-text-secondary)] mb-1">
                                     Planogram Compliance ({planogramScore}%)
                                 </label>
                                 <input
@@ -238,11 +238,11 @@ export const StoreAuditModal: React.FC<StoreAuditModalProps> = ({
                                     max="100"
                                     value={planogramScore}
                                     onChange={(e) => setPlanogramScore(Number(e.target.value))}
-                                    className="w-full accent-[#2C5E3B]"
+                                    className="w-full accent-[var(--theme-primary)]"
                                 />
                             </div>
                             <div>
-                                <label className="block text-[11px] font-semibold text-stone-600 dark:text-stone-400 mb-1">
+                                <label className="block text-[11px] font-semibold text-[var(--theme-text-secondary)] mb-1">
                                     Shelf Hygiene & Tagging ({shelfHygieneScore}%)
                                 </label>
                                 <input
@@ -251,7 +251,7 @@ export const StoreAuditModal: React.FC<StoreAuditModalProps> = ({
                                     max="100"
                                     value={shelfHygieneScore}
                                     onChange={(e) => setShelfHygieneScore(Number(e.target.value))}
-                                    className="w-full accent-[#2C5E3B]"
+                                    className="w-full accent-[var(--theme-primary)]"
                                 />
                             </div>
                         </div>
@@ -262,27 +262,27 @@ export const StoreAuditModal: React.FC<StoreAuditModalProps> = ({
                                 type="checkbox"
                                 checked={halalCompliant}
                                 onChange={(e) => setHalalCompliant(e.target.checked)}
-                                className="rounded text-[#2C5E3B] focus:ring-[#2C5E3B]"
+                                className="rounded text-[var(--theme-primary)] focus:ring-[var(--theme-primary)]"
                             />
-                            <span className="text-xs text-stone-700 dark:text-stone-300 font-medium">
+                            <span className="text-xs text-[var(--theme-text-secondary)] font-medium">
                                 Verified Zero-Alcohol & Halal Catalog Compliance (Rule 17 passed)
                             </span>
                         </label>
                     </div>
 
                     {/* Cash Drawer Spot Audit */}
-                    <div className="p-4 bg-stone-50 dark:bg-stone-800/40 rounded-2xl border border-stone-200 dark:border-stone-800 space-y-3">
+                    <div className="p-4 bg-[var(--theme-bg-subtle)] rounded-xl border border-[var(--theme-border)] space-y-3">
                         <div className="flex items-center justify-between">
-                            <span className="text-xs font-bold text-stone-900 dark:text-white flex items-center gap-1.5">
-                                <DollarSign size={14} className="text-[#2C5E3B] dark:text-emerald-400" />
+                            <span className="text-xs font-semibold text-[var(--theme-text-primary)] flex items-center gap-1.5">
+                                <DollarSign size={14} className="text-[var(--theme-primary)]" />
                                 Cash Register Drawer Spot Count
                             </span>
-                            <span className={`text-xs font-mono font-bold px-2 py-0.5 rounded-full ${
+                            <span className={`text-xs font-mono tabular-nums font-semibold px-2 py-0.5 rounded-full ${
                                 cashVariance === 0
-                                    ? 'bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400'
+                                    ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20'
                                     : cashVariance > 0
-                                    ? 'bg-blue-100 dark:bg-blue-950/60 text-blue-700 dark:text-blue-400'
-                                    : 'bg-rose-100 dark:bg-rose-950/60 text-rose-700 dark:text-rose-400'
+                                    ? 'bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20'
+                                    : 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20'
                             }`}>
                                 Variance: {cashVariance >= 0 ? `+${cashVariance.toFixed(2)}` : cashVariance.toFixed(2)} {activeCountry === 'KE' ? 'KSh' : 'ETB'}
                             </span>
@@ -290,7 +290,7 @@ export const StoreAuditModal: React.FC<StoreAuditModalProps> = ({
 
                         <div className="grid grid-cols-3 gap-3">
                             <div>
-                                <label className="block text-[11px] font-semibold text-stone-600 dark:text-stone-400 mb-1">
+                                <label className="block text-[11px] font-semibold text-[var(--theme-text-secondary)] mb-1">
                                     Register ID
                                 </label>
                                 <input
@@ -298,11 +298,11 @@ export const StoreAuditModal: React.FC<StoreAuditModalProps> = ({
                                     value={registerId}
                                     onChange={(e) => setRegisterId(e.target.value)}
                                     placeholder="POS-REG-01"
-                                    className="w-full px-2.5 py-1.5 text-xs rounded-xl bg-white dark:bg-stone-800 border border-stone-300 dark:border-stone-700 text-stone-900 dark:text-white font-mono"
+                                    className="w-full px-2.5 py-1.5 text-xs rounded-xl bg-[var(--theme-bg-card)] border border-[var(--theme-border)] text-[var(--theme-text-primary)] font-mono tabular-nums focus:outline-none focus:ring-1 focus:ring-[var(--theme-primary)]"
                                 />
                             </div>
                             <div>
-                                <label className="block text-[11px] font-semibold text-stone-600 dark:text-stone-400 mb-1">
+                                <label className="block text-[11px] font-semibold text-[var(--theme-text-secondary)] mb-1">
                                     Cash Counted
                                 </label>
                                 <input
@@ -310,11 +310,11 @@ export const StoreAuditModal: React.FC<StoreAuditModalProps> = ({
                                     step="0.01"
                                     value={cashCounted}
                                     onChange={(e) => setCashCounted(e.target.value)}
-                                    className="w-full px-2.5 py-1.5 text-xs rounded-xl bg-white dark:bg-stone-800 border border-stone-300 dark:border-stone-700 text-stone-900 dark:text-white font-mono"
+                                    className="w-full px-2.5 py-1.5 text-xs rounded-xl bg-[var(--theme-bg-card)] border border-[var(--theme-border)] text-[var(--theme-text-primary)] font-mono tabular-nums focus:outline-none focus:ring-1 focus:ring-[var(--theme-primary)]"
                                 />
                             </div>
                             <div>
-                                <label className="block text-[11px] font-semibold text-stone-600 dark:text-stone-400 mb-1">
+                                <label className="block text-[11px] font-semibold text-[var(--theme-text-secondary)] mb-1">
                                     Expected Balance
                                 </label>
                                 <input
@@ -322,7 +322,7 @@ export const StoreAuditModal: React.FC<StoreAuditModalProps> = ({
                                     step="0.01"
                                     value={cashExpected}
                                     onChange={(e) => setCashExpected(e.target.value)}
-                                    className="w-full px-2.5 py-1.5 text-xs rounded-xl bg-white dark:bg-stone-800 border border-stone-300 dark:border-stone-700 text-stone-900 dark:text-white font-mono"
+                                    className="w-full px-2.5 py-1.5 text-xs rounded-xl bg-[var(--theme-bg-card)] border border-[var(--theme-border)] text-[var(--theme-text-primary)] font-mono tabular-nums focus:outline-none focus:ring-1 focus:ring-[var(--theme-primary)]"
                                 />
                             </div>
                         </div>
@@ -331,7 +331,7 @@ export const StoreAuditModal: React.FC<StoreAuditModalProps> = ({
                     {/* Findings & Notes */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         <div>
-                            <label className="block text-xs font-bold text-stone-700 dark:text-stone-300 mb-1">
+                            <label className="block text-xs font-semibold text-[var(--theme-text-secondary)] mb-1">
                                 Key Audit Findings
                             </label>
                             <textarea
@@ -339,11 +339,11 @@ export const StoreAuditModal: React.FC<StoreAuditModalProps> = ({
                                 onChange={(e) => setFindings(e.target.value)}
                                 rows={2}
                                 placeholder="Shelf facing, stock alignment, price tag accuracy..."
-                                className="w-full px-3 py-2 text-xs rounded-xl bg-stone-50 dark:bg-stone-800 border border-stone-300 dark:border-stone-700 text-stone-900 dark:text-white placeholder-stone-400 focus:outline-none"
+                                className="w-full px-3 py-2 text-xs rounded-xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-[var(--theme-text-primary)] placeholder-[var(--theme-text-muted)] focus:outline-none focus:ring-1 focus:ring-[var(--theme-primary)]"
                             />
                         </div>
                         <div>
-                            <label className="block text-xs font-bold text-stone-700 dark:text-stone-300 mb-1">
+                            <label className="block text-xs font-semibold text-[var(--theme-text-secondary)] mb-1">
                                 Required Corrective Actions
                             </label>
                             <textarea
@@ -351,7 +351,7 @@ export const StoreAuditModal: React.FC<StoreAuditModalProps> = ({
                                 onChange={(e) => setCorrectiveActions(e.target.value)}
                                 rows={2}
                                 placeholder="Actions required within 24 hours..."
-                                className="w-full px-3 py-2 text-xs rounded-xl bg-stone-50 dark:bg-stone-800 border border-stone-300 dark:border-stone-700 text-stone-900 dark:text-white placeholder-stone-400 focus:outline-none"
+                                className="w-full px-3 py-2 text-xs rounded-xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-[var(--theme-text-primary)] placeholder-[var(--theme-text-muted)] focus:outline-none focus:ring-1 focus:ring-[var(--theme-primary)]"
                             />
                         </div>
                     </div>
@@ -359,7 +359,7 @@ export const StoreAuditModal: React.FC<StoreAuditModalProps> = ({
                     {/* Status & Co-Sign */}
                     <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pt-2">
                         <div className="flex items-center gap-2">
-                            <span className="text-xs font-bold text-stone-700 dark:text-stone-300">
+                            <span className="text-xs font-semibold text-[var(--theme-text-secondary)]">
                                 Audit Result:
                             </span>
                             <div className="flex items-center gap-1">
@@ -372,10 +372,10 @@ export const StoreAuditModal: React.FC<StoreAuditModalProps> = ({
                                         key={s.id}
                                         type="button"
                                         onClick={() => setStatus(s.id as StoreAuditStatus)}
-                                        className={`px-2.5 py-1 text-xs rounded-lg font-bold transition-all ${
+                                        className={`px-2.5 py-1 text-xs rounded-lg font-semibold transition-all active:scale-[0.98] ${
                                             status === s.id
                                                 ? s.id === 'passed' ? 'bg-emerald-600 text-white' : s.id === 'action_required' ? 'bg-amber-600 text-white' : 'bg-rose-600 text-white'
-                                                : 'bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-400'
+                                                : 'bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] border border-[var(--theme-border)]'
                                         }`}
                                     >
                                         {s.label}
@@ -389,28 +389,28 @@ export const StoreAuditModal: React.FC<StoreAuditModalProps> = ({
                                 type="checkbox"
                                 checked={managerCoSigned}
                                 onChange={(e) => setManagerCoSigned(e.target.checked)}
-                                className="rounded text-[#2C5E3B] focus:ring-[#2C5E3B]"
+                                className="rounded text-[var(--theme-primary)] focus:ring-[var(--theme-primary)]"
                                 required
                             />
-                            <span className="text-xs text-stone-600 dark:text-stone-400 font-semibold">
+                            <span className="text-xs text-[var(--theme-text-secondary)] font-semibold">
                                 Manager on duty acknowledges findings
                             </span>
                         </label>
                     </div>
 
                     {/* Actions */}
-                    <div className="flex items-center justify-end gap-3 pt-4 border-t border-stone-200 dark:border-stone-800">
+                    <div className="flex items-center justify-end gap-3 pt-4 border-t border-[var(--theme-border)]">
                         <button
                             type="button"
                             onClick={onClose}
-                            className="px-4 py-2 text-xs font-bold text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-white"
+                            className="px-4 py-2 text-xs font-semibold text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] rounded-xl hover:bg-[var(--theme-bg-subtle)] active:scale-98 transition-colors"
                         >
                             Cancel
                         </button>
                         <button
                             type="submit"
                             disabled={isSubmitting || !managerCoSigned}
-                            className="flex items-center gap-2 px-5 py-2.5 rounded-2xl bg-[#2C5E3B] hover:bg-[#234b2f] disabled:opacity-50 text-white text-xs font-bold transition-all shadow-md active:scale-95"
+                            className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[var(--theme-primary)] hover:opacity-90 disabled:opacity-50 text-white text-xs font-semibold transition-all shadow-sm active:scale-98"
                         >
                             <ClipboardCheck size={16} />
                             <span>{isSubmitting ? 'Recording Audit...' : 'Submit & Sign Off Audit'}</span>

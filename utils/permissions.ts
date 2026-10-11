@@ -67,17 +67,17 @@ export const PERMISSIONS = {
     ADD_EMPLOYEE: ['super_admin', 'admin', 'hr', 'hr_manager', 'talent_recruiter', 'operations_manager', 'regional_manager'],
     EDIT_EMPLOYEE: ['super_admin', 'admin', 'hr', 'hr_manager', 'it_support', 'payroll_specialist', 'talent_recruiter'],
     DELETE_EMPLOYEE: ['super_admin'],
-    TERMINATE_EMPLOYEE: ['super_admin', 'hr'],
+    TERMINATE_EMPLOYEE: ['super_admin', 'hr', 'hr_manager'],
     MANAGE_SHIFTS: ['super_admin', 'regional_manager', 'operations_manager', 'hr', 'store_manager', 'assistant_manager', 'shift_lead', 'warehouse_manager', 'dispatcher', 'store_supervisor'],
     VIEW_SALARY: ['super_admin', 'CEO', 'ceo', 'hr', 'hr_manager', 'finance_manager', 'payroll_specialist'],
-    PROPOSE_SALARY: ['super_admin', 'CEO', 'ceo', 'hr', 'hr_manager'],
+    PROPOSE_SALARY: ['super_admin', 'CEO', 'ceo', 'hr', 'hr_manager', 'payroll_specialist'],
     APPROVE_SALARY: ['super_admin', 'CEO', 'ceo', 'finance_manager'],
     RESET_PASSWORD: ['super_admin', 'admin', 'it_support'],
     CREATE_LOGIN_ACCOUNT: ['super_admin', 'admin', 'it_support'],
-    APPROVE_EMPLOYEE: ['super_admin', 'admin', 'hr', 'regional_manager', 'operations_manager'],
+    APPROVE_EMPLOYEE: ['super_admin', 'admin', 'hr', 'hr_manager', 'regional_manager', 'operations_manager'],
 
     // Procurement
-    ACCESS_PROCUREMENT: ['super_admin', 'admin', 'regional_manager', 'operations_manager', 'procurement_manager', 'finance_manager', 'supply_chain_manager', 'buyer', 'demand_planner', 'credit_control_officer', 'vendor_relations_manager', 'customs_import_specialist', 'replenishment_planner'],
+    ACCESS_PROCUREMENT: ['super_admin', 'admin', 'regional_manager', 'operations_manager', 'procurement_manager', 'finance_manager', 'supply_chain_manager', 'buyer', 'demand_planner', 'credit_control_officer', 'vendor_relations_manager', 'customs_import_specialist', 'replenishment_planner', 'inbound_qc_inspector'],
     CREATE_PO: ['super_admin', 'admin', 'procurement_manager', 'buyer', 'supply_chain_manager'],
     APPROVE_PO: ['super_admin', 'admin', 'regional_manager', 'operations_manager', 'procurement_manager', 'finance_manager'],
     RECEIVE_PO: ['super_admin', 'warehouse_manager', 'dispatcher', 'inventory_specialist'],
@@ -94,10 +94,10 @@ export const PERMISSIONS = {
     EXPORT_FINANCIAL_DATA: ['super_admin', 'auditor', 'finance_manager', 'tax_compliance_officer'],
 
     // Pricing
-    ACCESS_PRICING: ['super_admin', 'regional_manager', 'operations_manager', 'finance_manager', 'procurement_manager', 'vendor_relations_manager', 'store_operations_auditor'],
-    EDIT_PRICE: ['super_admin', 'regional_manager', 'finance_manager'],
-    CREATE_PROMOTION: ['super_admin', 'regional_manager'],
-    APPROVE_PRICE_CHANGE: ['super_admin', 'regional_manager', 'finance_manager'],
+    ACCESS_PRICING: ['super_admin', 'merchandising_manager', 'merchandiser', 'regional_manager', 'operations_manager', 'finance_manager', 'procurement_manager', 'vendor_relations_manager', 'store_operations_auditor'],
+    EDIT_PRICE: ['super_admin', 'merchandising_manager', 'regional_manager', 'finance_manager'],
+    CREATE_PROMOTION: ['super_admin', 'merchandising_manager', 'merchandiser', 'regional_manager'],
+    APPROVE_PRICE_CHANGE: ['super_admin', 'merchandising_manager', 'regional_manager', 'finance_manager'],
 
     // Warehouse
     ACCESS_WAREHOUSE: ['super_admin', 'regional_manager', 'operations_manager', 'warehouse_manager', 'dispatcher', 'picker', 'driver', 'inventory_specialist', 'packer', 'receiver', 'logistics_manager', 'inventory_manager', 'inbound_qc_inspector', 'fleet_maintenance_supervisor', 'replenishment_planner'],
@@ -153,7 +153,7 @@ const PERMISSION_MAP: Record<string, Permission> = {
     'ADD_EMPLOYEE': 'employees.create',
     'EDIT_EMPLOYEE': 'employees.edit',
     'DELETE_EMPLOYEE': 'employees.delete',
-    'TERMINATE_EMPLOYEE': 'employees.delete',
+    'TERMINATE_EMPLOYEE': 'employees.edit',
     'MANAGE_SHIFTS': 'employees.manage_attendance',
     'VIEW_SALARY': 'employees.view_salary',
     'PROPOSE_SALARY': 'employees.propose_salary',

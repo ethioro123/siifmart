@@ -63,14 +63,14 @@ export const EditableSpecificationsCard: React.FC<EditableSpecificationsCardProp
             <div className="flex items-center justify-between border-b border-[var(--theme-border)] pb-2">
                 <div className="flex items-center gap-2">
                     <Info size={14} className="text-[var(--theme-text-secondary)]" />
-                    <h3 className="text-[10px] font-bold uppercase tracking-wider text-[var(--theme-text-primary)]">
+                    <h3 className="text-xs font-semibold uppercase tracking-wider text-[var(--theme-text-primary)]">
                         Product Specifications
                     </h3>
                 </div>
                 <button
                     type="button"
                     onClick={onOpenSmartUnitModal}
-                    className="px-2.5 py-1 text-[10px] font-bold uppercase bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card-hover)] text-[var(--theme-text-primary)] rounded-lg border border-[var(--theme-border)] flex items-center gap-1 transition-all cursor-pointer active:scale-[0.98]"
+                    className="px-2.5 py-1 text-xs font-medium uppercase bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card-hover)] text-[var(--theme-text-primary)] rounded-lg border border-[var(--theme-border)] flex items-center gap-1.5 transition-all cursor-pointer active:scale-[0.98]"
                 >
                     <Sparkles size={12} className="text-amber-500" />
                     <span>Smart Unit Spec</span>
@@ -84,7 +84,7 @@ export const EditableSpecificationsCard: React.FC<EditableSpecificationsCardProp
                     <Hash size={14} className="mt-1 flex-shrink-0 text-[var(--theme-text-primary)]" />
                     <div className="space-y-1 min-w-0 flex-1">
                         <div className="flex items-center justify-between">
-                            <label className="text-[9px] text-[var(--theme-text-muted)] font-medium uppercase tracking-wider block">
+                            <label className="text-[11px] text-[var(--theme-text-secondary)] font-medium uppercase tracking-wider block">
                                 SKU Code *
                             </label>
                             {onGenerateSKU && (
@@ -92,7 +92,7 @@ export const EditableSpecificationsCard: React.FC<EditableSpecificationsCardProp
                                     type="button"
                                     onClick={onGenerateSKU}
                                     title="Auto-generate sovereign SKU"
-                                    className="text-[9px] text-[var(--theme-accent)] hover:underline font-bold flex items-center gap-0.5 cursor-pointer"
+                                    className="text-[11px] text-[var(--theme-accent)] hover:underline font-semibold flex items-center gap-0.5 cursor-pointer"
                                 >
                                     <Wand2 size={10} /> Gen
                                 </button>
@@ -111,7 +111,7 @@ export const EditableSpecificationsCard: React.FC<EditableSpecificationsCardProp
                     <ScanBarcode size={14} className="mt-1 flex-shrink-0 text-[var(--theme-text-primary)]" />
                     <div className="space-y-1 min-w-0 flex-1">
                         <div className="flex items-center justify-between">
-                            <label className="text-[9px] text-[var(--theme-text-muted)] font-medium uppercase tracking-wider block">
+                            <label className="text-[11px] text-[var(--theme-text-secondary)] font-medium uppercase tracking-wider block">
                                 Primary Barcode
                             </label>
                             {onGenerateBarcode && (
@@ -119,7 +119,7 @@ export const EditableSpecificationsCard: React.FC<EditableSpecificationsCardProp
                                     type="button"
                                     onClick={onGenerateBarcode}
                                     title="Auto-generate internal EAN-13"
-                                    className="text-[9px] text-[var(--theme-accent)] hover:underline font-bold flex items-center gap-0.5 cursor-pointer"
+                                    className="text-[11px] text-[var(--theme-accent)] hover:underline font-semibold flex items-center gap-0.5 cursor-pointer"
                                 >
                                     <Wand2 size={10} /> EAN-13
                                 </button>
@@ -137,7 +137,7 @@ export const EditableSpecificationsCard: React.FC<EditableSpecificationsCardProp
                 <div className="p-3 rounded-xl flex items-start gap-3 border bg-[var(--theme-bg-subtle)] border-[var(--theme-border)]">
                     <Tag size={14} className="mt-1 flex-shrink-0 text-[var(--theme-text-primary)]" />
                     <div className="space-y-1 min-w-0 flex-1">
-                        <label className="text-[9px] text-[var(--theme-text-muted)] font-medium uppercase tracking-wider block">
+                        <label className="text-[11px] text-[var(--theme-text-secondary)] font-medium uppercase tracking-wider block">
                             Category *
                         </label>
                         <select
@@ -162,7 +162,7 @@ export const EditableSpecificationsCard: React.FC<EditableSpecificationsCardProp
                 <div className="p-3 rounded-xl flex items-start gap-3 border bg-[var(--theme-bg-subtle)] border-[var(--theme-border)]">
                     <Package size={14} className="mt-1 flex-shrink-0 text-[var(--theme-text-primary)]" />
                     <div className="space-y-1 min-w-0 flex-1">
-                        <label className="text-[9px] text-[var(--theme-text-muted)] font-medium uppercase tracking-wider block">
+                        <label className="text-[11px] text-[var(--theme-text-secondary)] font-medium uppercase tracking-wider block">
                             Sell Unit
                         </label>
                         <select
@@ -182,7 +182,7 @@ export const EditableSpecificationsCard: React.FC<EditableSpecificationsCardProp
                 <div className="p-3 rounded-xl flex items-start gap-3 border bg-[var(--theme-bg-subtle)] border-[var(--theme-border)]">
                     <Box size={14} className="mt-1 flex-shrink-0 text-[var(--theme-text-primary)]" />
                     <div className="space-y-1 min-w-0 flex-1">
-                        <label className="text-[9px] text-[var(--theme-text-muted)] font-medium uppercase tracking-wider block">
+                        <label className="text-[11px] text-[var(--theme-text-secondary)] font-medium uppercase tracking-wider block">
                             Size / Weight
                         </label>
                         <input
@@ -197,7 +197,7 @@ export const EditableSpecificationsCard: React.FC<EditableSpecificationsCardProp
                 <div className="p-3 rounded-xl flex items-start gap-3 border bg-[var(--theme-bg-subtle)] border-[var(--theme-border)]">
                     <Tag size={14} className="mt-1 flex-shrink-0 text-[var(--theme-text-primary)]" />
                     <div className="space-y-1 min-w-0 flex-1">
-                        <label className="text-[9px] text-[var(--theme-text-muted)] font-medium uppercase tracking-wider block">
+                        <label className="text-[11px] text-[var(--theme-text-secondary)] font-medium uppercase tracking-wider block">
                             Variant
                         </label>
                         <input
@@ -212,7 +212,7 @@ export const EditableSpecificationsCard: React.FC<EditableSpecificationsCardProp
                 <div className="p-3 rounded-xl flex items-start gap-3 border bg-[var(--theme-bg-subtle)] border-[var(--theme-border)]">
                     <Layers size={14} className="mt-1 flex-shrink-0 text-[var(--theme-text-primary)]" />
                     <div className="space-y-1 min-w-0 flex-1">
-                        <label className="text-[9px] text-[var(--theme-text-muted)] font-medium uppercase tracking-wider block">
+                        <label className="text-[11px] text-[var(--theme-text-secondary)] font-medium uppercase tracking-wider block">
                             Batch / Lot No
                         </label>
                         <input
@@ -221,7 +221,7 @@ export const EditableSpecificationsCard: React.FC<EditableSpecificationsCardProp
                             className="w-full bg-transparent border-0 p-0 text-xs font-mono font-bold text-[var(--theme-text-primary)] focus:outline-none focus:ring-0"
                         />
                         {parsedBatch?.isStandard && parsedBatch.formattedDate && (
-                            <span className="text-[9px] text-[var(--theme-text-secondary)] font-semibold block pt-0.5">
+                            <span className="text-[11px] text-[var(--theme-text-secondary)] font-medium block pt-0.5">
                                 Rcvd {parsedBatch.formattedDate}
                             </span>
                         )}
@@ -232,7 +232,7 @@ export const EditableSpecificationsCard: React.FC<EditableSpecificationsCardProp
                 <div className="p-3 rounded-xl flex items-start gap-3 border bg-[var(--theme-bg-subtle)] border-[var(--theme-border)]">
                     <Calendar size={14} className={`mt-1 flex-shrink-0 ${expiryColor || 'text-[var(--theme-text-primary)]'}`} />
                     <div className="space-y-1 min-w-0 flex-1">
-                        <label className="text-[9px] text-[var(--theme-text-muted)] font-medium uppercase tracking-wider block">
+                        <label className="text-[11px] text-[var(--theme-text-secondary)] font-medium uppercase tracking-wider block">
                             Expiry Date
                         </label>
                         <input
@@ -241,7 +241,7 @@ export const EditableSpecificationsCard: React.FC<EditableSpecificationsCardProp
                             className="w-full bg-transparent border-0 p-0 text-xs font-semibold text-[var(--theme-text-primary)] focus:outline-none focus:ring-0"
                         />
                         {expiryAlert && (
-                            <span className={`text-[9px] font-bold block pt-0.5 ${expiryColor}`}>
+                            <span className={`text-[11px] font-semibold block pt-0.5 ${expiryColor}`}>
                                 {expiryAlert}
                             </span>
                         )}
@@ -252,7 +252,7 @@ export const EditableSpecificationsCard: React.FC<EditableSpecificationsCardProp
                 <div className="p-3 rounded-xl flex items-start gap-3 border bg-[var(--theme-bg-subtle)] border-[var(--theme-border)]">
                     <Layers size={14} className="mt-1 flex-shrink-0 text-[var(--theme-text-primary)]" />
                     <div className="space-y-1 min-w-0 flex-1">
-                        <label className="text-[9px] text-[var(--theme-text-muted)] font-medium uppercase tracking-wider block">
+                        <label className="text-[11px] text-[var(--theme-text-secondary)] font-medium uppercase tracking-wider block">
                             Shelf Position
                         </label>
                         <select
@@ -275,7 +275,7 @@ export const EditableSpecificationsCard: React.FC<EditableSpecificationsCardProp
                 <div className="p-3 rounded-xl flex items-start gap-3 border bg-[var(--theme-bg-subtle)] border-[var(--theme-border)]">
                     <Building2 size={14} className="mt-1 flex-shrink-0 text-[var(--theme-text-primary)]" />
                     <div className="space-y-1 min-w-0 flex-1">
-                        <label className="text-[9px] text-[var(--theme-text-muted)] font-medium uppercase tracking-wider block">
+                        <label className="text-[11px] text-[var(--theme-text-secondary)] font-medium uppercase tracking-wider block">
                             Storage Location
                         </label>
                         <input
@@ -290,7 +290,7 @@ export const EditableSpecificationsCard: React.FC<EditableSpecificationsCardProp
                 <div className="p-3 rounded-xl flex items-start gap-3 border bg-[var(--theme-bg-subtle)] border-[var(--theme-border)]">
                     <Archive size={14} className="mt-1 flex-shrink-0 text-[var(--theme-text-primary)]" />
                     <div className="space-y-1 min-w-0 flex-1">
-                        <label className="text-[9px] text-[var(--theme-text-muted)] font-medium uppercase tracking-wider block">
+                        <label className="text-[11px] text-[var(--theme-text-secondary)] font-medium uppercase tracking-wider block">
                             Pack Quantity
                         </label>
                         <input
@@ -307,7 +307,7 @@ export const EditableSpecificationsCard: React.FC<EditableSpecificationsCardProp
                 <div className="p-3 rounded-xl flex items-start gap-3 border bg-[var(--theme-bg-subtle)] border-[var(--theme-border)]">
                     <TrendingUp size={14} className="mt-1 flex-shrink-0 text-[var(--theme-text-primary)]" />
                     <div className="space-y-1 min-w-0 flex-1">
-                        <label className="text-[9px] text-[var(--theme-text-muted)] font-medium uppercase tracking-wider block">
+                        <label className="text-[11px] text-[var(--theme-text-secondary)] font-medium uppercase tracking-wider block">
                             Sales Velocity
                         </label>
                         <select
@@ -328,7 +328,7 @@ export const EditableSpecificationsCard: React.FC<EditableSpecificationsCardProp
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-1.5">
                             <ScanBarcode size={12} className="text-[var(--theme-text-secondary)]" />
-                            <span className="text-[9px] font-bold uppercase tracking-wider text-[var(--theme-text-muted)]">
+                            <span className="text-[11px] font-semibold uppercase tracking-wider text-[var(--theme-text-secondary)]">
                                 Barcode Aliases & Secondary Codes (Case / Unit Aliases)
                             </span>
                         </div>
@@ -337,13 +337,13 @@ export const EditableSpecificationsCard: React.FC<EditableSpecificationsCardProp
                         {barcodes && barcodes.map((bc, idx) => (
                             <span
                                 key={idx}
-                                className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[10px] font-mono font-bold bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-[var(--theme-text-primary)]"
+                                className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-mono font-semibold bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-[var(--theme-text-primary)]"
                             >
                                 <span>{bc}</span>
                                 <button
                                     type="button"
                                     onClick={() => onUpdateBarcodes(barcodes.filter((_, i) => i !== idx))}
-                                    className="text-[var(--theme-text-muted)] hover:text-red-500 cursor-pointer ml-0.5"
+                                    className="text-[var(--theme-text-secondary)] hover:text-red-500 cursor-pointer ml-0.5"
                                 >
                                     <X size={10} />
                                 </button>
@@ -360,13 +360,13 @@ export const EditableSpecificationsCard: React.FC<EditableSpecificationsCardProp
                                     }
                                 }}
                                 placeholder="+ Add Alias"
-                                className="px-2.5 py-1 rounded-lg text-[10px] font-mono bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-[var(--theme-text-primary)] w-28 focus:outline-none focus:border-[var(--theme-primary)]"
+                                className="px-2.5 py-1 rounded-lg text-xs font-mono bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-[var(--theme-text-primary)] w-28 focus:outline-none focus:border-[var(--theme-accent)]"
                             />
                             {newBarcode.trim() && (
                                 <button
                                     type="button"
                                     onClick={handleAddBarcode}
-                                    className="p-1 rounded-lg bg-[var(--theme-primary)] text-[var(--theme-primary-text)] hover:opacity-90 cursor-pointer transition-all"
+                                    className="p-1 rounded-lg bg-[var(--theme-accent)] text-white hover:opacity-90 cursor-pointer transition-all"
                                 >
                                     <Plus size={11} />
                                 </button>

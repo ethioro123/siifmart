@@ -1,7 +1,6 @@
 import React from 'react';
-import { Truck, MapPin, RefreshCw } from 'lucide-react';
+import { Truck, RefreshCw } from 'lucide-react';
 import { User, Site } from '../../../types';
-import { formatDateTime } from '../../../utils/formatting';
 
 interface DriverHeaderProps {
     t: (key: string) => string;
@@ -17,7 +16,6 @@ interface DriverHeaderProps {
 export const DriverHeader: React.FC<DriverHeaderProps> = ({
     t,
     user,
-    employees,
     activeSite,
     viewMode,
     setViewMode,
@@ -25,35 +23,43 @@ export const DriverHeader: React.FC<DriverHeaderProps> = ({
     refreshData
 }) => {
     return (
-        <div className="bg-white dark:bg-[#121214] border border-gray-200 dark:border-white/10 rounded-2xl p-2.5 sm:p-3 shadow-xl flex items-center justify-between sticky top-0 z-50 gap-2 overflow-hidden">
-            <div className="flex items-center gap-2 sm:gap-3 overflow-hidden min-w-0">
-                <div className="p-2 bg-[#2C5E3B]/10 dark:bg-[#A9CBA2]/10 rounded-xl border border-[#2C5E3B]/20 dark:border-[#A9CBA2]/20 shrink-0">
-                    <Truck className="text-[#2C5E3B] dark:text-[#A9CBA2]" size={18} />
+        <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-3 sm:p-4 shadow-xs flex items-center justify-between sticky top-0 z-40 gap-3">
+            <div className="flex items-center gap-3 min-w-0">
+                <div className="p-2.5 bg-primary/10 rounded-xl border border-primary/20 shrink-0 text-primary">
+                    <Truck size={20} />
                 </div>
                 <div className="min-w-0">
                     <div className="flex items-center gap-2">
-                        <h2 className="text-sm font-black text-gray-900 dark:text-white uppercase leading-none">
+                        <h2 className="text-sm sm:text-base font-bold text-[var(--theme-text-primary)] tracking-tight leading-tight">
                             {t('warehouse.driverHub.driverTitle')} {t('warehouse.driverHub.hubTitle')}
                         </h2>
-                        <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse shrink-0" />
+                        <div className="w-2 h-2 rounded-full bg-emerald-500 shrink-0" />
                     </div>
-                    <p className="text-[8px] sm:text-[9px] text-gray-550 dark:text-gray-400 font-bold uppercase tracking-widest mt-0.5 truncate leading-tight max-w-[180px] sm:max-w-none">
+                    <p className="text-[11px] text-[var(--theme-text-secondary)] font-medium uppercase tracking-wider mt-0.5 truncate max-w-[200px] sm:max-w-none">
                         {user?.name || t('warehouse.driverFallback')} • {activeSite?.name || t('warehouse.centralOpsArea')}
                     </p>
                 </div>
             </div>
- 
-            <div className="flex items-center gap-2">
-                <div className="bg-gray-100 dark:bg-black/40 p-0.5 sm:p-1 rounded-xl border border-gray-200 dark:border-white/5 flex gap-0.5 sm:gap-1 shadow-inner">
+
+            <div className="flex items-center gap-2 shrink-0">
+                <div className="bg-[var(--theme-bg-subtle)] p-1 rounded-xl border border-[var(--theme-border)] flex gap-1">
                     <button
                         onClick={() => setViewMode('Active')}
-                        className={`px-2.5 sm:px-3 py-2 sm:py-1.5 rounded-lg text-[8px] sm:text-[9px] font-bold uppercase tracking-wider transition-colors min-h-[36px] flex items-center ${viewMode === 'Active' ? 'bg-[#2C5E3B] text-white shadow-md shadow-[#2C5E3B]/20' : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'}`}
+                        className={`min-h-[44px] px-3.5 py-1.5 rounded-lg text-xs font-semibold uppercase tracking-wider transition-all touch-manipulation flex items-center ${
+                            viewMode === 'Active'
+                                ? 'bg-primary text-white shadow-xs'
+                                : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-card)]'
+                        }`}
                     >
                         {t('warehouse.driverHub.activeDeliveries')}
                     </button>
                     <button
                         onClick={() => setViewMode('History')}
-                        className={`px-2.5 sm:px-3 py-2 sm:py-1.5 rounded-lg text-[8px] sm:text-[9px] font-bold uppercase tracking-wider transition-colors min-h-[36px] flex items-center ${viewMode === 'History' ? 'bg-[#2C5E3B]/80 text-white shadow-md shadow-[#2C5E3B]/20' : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'}`}
+                        className={`min-h-[44px] px-3.5 py-1.5 rounded-lg text-xs font-semibold uppercase tracking-wider transition-all touch-manipulation flex items-center ${
+                            viewMode === 'History'
+                                ? 'bg-primary text-white shadow-xs'
+                                : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-card)]'
+                        }`}
                     >
                         {t('warehouse.driverHub.history')}
                     </button>
@@ -63,9 +69,9 @@ export const DriverHeader: React.FC<DriverHeaderProps> = ({
                     disabled={isSubmitting}
                     aria-label="Refresh Data"
                     title="Refresh Data"
-                    className="p-2.5 min-w-[40px] min-h-[40px] bg-gray-100 dark:bg-white/5 hover:bg-[#2C5E3B] hover:text-white rounded-lg text-[#2C5E3B] dark:text-[#A9CBA2] transition-colors border border-gray-200 dark:border-white/5 shadow-sm flex items-center justify-center shrink-0"
+                    className="min-h-[44px] min-w-[44px] bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card)] rounded-xl text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] transition-colors border border-[var(--theme-border)] shadow-xs flex items-center justify-center shrink-0 touch-manipulation"
                 >
-                    <RefreshCw size={14} className={isSubmitting ? 'animate-spin' : ''} />
+                    <RefreshCw size={16} className={isSubmitting ? 'animate-spin text-primary' : ''} />
                 </button>
             </div>
         </div>

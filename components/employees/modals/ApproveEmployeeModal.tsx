@@ -1,7 +1,9 @@
 import React from 'react';
-import { UserCheck, CheckCircle } from 'lucide-react';
+import { UserCheck, CheckCircle2, ShieldCheck, AlertCircle } from 'lucide-react';
 import Modal from '../../Modal';
 import { Employee } from '../../../types';
+import { useStore } from '../../../contexts/CentralStore';
+import { canEmployRole } from '../../../utils/roles';
 
 interface ApproveEmployeeModalProps {
     isOpen: boolean;
@@ -18,43 +20,86 @@ export default function ApproveEmployeeModal({
     sites,
     handleConfirmApprove
 }: ApproveEmployeeModalProps) {
+    const { user } = useStore();
+
+    if (!isOpen || !employee) return null;
+
+    const isAuthorized = canEmployRole(user?.role, employee.role);
+    const locationName = sites.find(s => s.id === employee.siteId)?.name || 'Unassigned';
+
     return (
-        <Modal isOpen={isOpen} onClose={onClose} title="Approve Employee" size="md">
-            <div className="p-6 space-y-6">
-                <div className="text-center space-y-3">
-                    <div className="w-20 h-20 bg-green-500/10 rounded-full flex items-center justify-center mx-auto border border-green-500/20 animate-pulse">
-                        <UserCheck className="text-green-400" size={40} />
+        <Modal isOpen={isOpen} onClose={onClose} title="Approve Employee Onboarding" size="md">
+            <div className="p-5 sm:p-6 space-y-5 bg-[var(--theme-bg-card)]">
+                {/* Header Icon & Title */}
+                <div className="text-center space-y-2.5">
+                    <div className="w-16 h-16 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center mx-auto text-emerald-600 dark:text-emerald-400">
+                        <UserCheck size={32} />
                     </div>
                     <div>
-                        <h3 className="text-xl font-bold text-white">Activate Talent</h3>
-                        <p className="text-sm text-gray-400">Approving {employee?.name} will grant them system access based on the assigned role: <span className="text-cyber-primary font-bold">{employee?.role}</span></p>
+                        <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 mb-1.5">
+                            <ShieldCheck size={11} />
+                            <span>Checker Sign-Off • Onboarding Authorization</span>
+                        </div>
+                        <h3 className="text-lg font-bold tracking-tight text-[var(--theme-text-primary)]">
+                            Authorize & Activate Talent
+                        </h3>
+                        <p className="text-xs text-[var(--theme-text-secondary)] mt-1 max-w-sm mx-auto">
+                            Ratifying <strong className="text-[var(--theme-text-primary)] font-semibold">{employee.name}</strong> will activate system access for role <span className="font-mono font-semibold text-[#0071E3] dark:text-[#2997FF]">{employee.role}</span>.
+                        </p>
                     </div>
                 </div>
 
+                {/* Role Details Cards */}
                 <div className="grid grid-cols-2 gap-3">
-                    <div className="p-3 bg-white/5 border border-white/10 rounded-xl">
-                        <p className="text-[10px] text-gray-500 uppercase font-bold mb-1">Department</p>
-                        <p className="text-sm text-white font-medium">{employee?.department || 'Unassigned'}</p>
+                    <div className="p-3 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl">
+                        <p className="text-[10px] text-[var(--theme-text-muted)] uppercase tracking-wider font-semibold mb-1">Department</p>
+                        <p className="text-xs font-semibold text-[var(--theme-text-primary)] truncate">{employee.department || 'Operations'}</p>
                     </div>
-                    <div className="p-3 bg-white/5 border border-white/10 rounded-xl">
-                        <p className="text-[10px] text-gray-500 uppercase font-bold mb-1">Location</p>
-                        <p className="text-sm text-white font-medium">{sites.find(s => s.id === employee?.siteId)?.name || 'Unassigned'}</p>
+                    <div className="p-3 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl">
+                        <p className="text-[10px] text-[var(--theme-text-muted)] uppercase tracking-wider font-semibold mb-1">Site Assignment</p>
+                        <p className="text-xs font-semibold text-[var(--theme-text-primary)] truncate">{locationName}</p>
                     </div>
                 </div>
 
-                <div className="flex gap-3">
+                {/* Anti-Self-Approval / Hierarchy Guard */}
+                {!isAuthorized ? (
+                    <div className="p-3 bg-rose-500/10 border border-rose-500/20 rounded-xl flex items-start gap-2.5 text-xs text-rose-600 dark:text-rose-400">
+                        <AlertCircle size={16} className="shrink-0 mt-0.5" />
+                        <div>
+                            <p className="font-semibold">Dual-Control Constraint</p>
+                            <p className="text-[11px] opacity-90 mt-0.5">
+                                You cannot approve onboarding for a role equal to or above your level ({employee.role}). Approval must be executed by a higher managerial checker.
+                            </p>
+                        </div>
+                    </div>
+                ) : (
+                    <div className="p-3 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl flex items-center gap-2 text-xs text-[var(--theme-text-secondary)]">
+                        <ShieldCheck size={14} className="text-emerald-600 dark:text-emerald-400 shrink-0" />
+                        <span>Sign-off identity audit will be permanently recorded in tamper-evident system logs.</span>
+                    </div>
+                )}
+
+                {/* Actions */}
+                <div className="flex items-center gap-3 pt-1">
                     <button
+                        type="button"
                         onClick={onClose}
-                        className="flex-1 py-3 px-4 bg-white/5 hover:bg-white/10 text-gray-400 rounded-xl font-bold transition-all"
+                        className="flex-1 h-11 px-4 rounded-xl bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-panel-hover)] border border-[var(--theme-border)] text-xs font-semibold text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] transition-all cursor-pointer active:scale-[0.98]"
                     >
-                        Decline
+                        Cancel
                     </button>
                     <button
+                        type="button"
                         onClick={handleConfirmApprove}
-                        className="flex-1 py-4 px-4 bg-cyber-primary text-black hover:bg-cyber-primary/90 rounded-xl font-bold transition-all flex items-center justify-center gap-2 shadow-lg shadow-cyber-primary/20"
+                        disabled={!isAuthorized}
+                        className={`flex-1 h-11 px-4 rounded-xl font-semibold text-xs transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-[0.98] ${
+                            isAuthorized
+                                ? 'bg-[#0071E3] dark:bg-[#2997FF] hover:opacity-95 text-white shadow-[0_2px_8px_rgba(0,113,227,0.25)]'
+                                : 'bg-[var(--theme-bg-subtle)] text-[var(--theme-text-muted)] border border-[var(--theme-border)] cursor-not-allowed opacity-50'
+                        }`}
                     >
-                        <CheckCircle size={18} />
-                        Approve & Activate
+                        <CheckCircle2 size={16} />
+                        <span>Sign Off & Activate</span>
                     </button>
                 </div>
             </div>

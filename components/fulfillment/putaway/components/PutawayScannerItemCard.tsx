@@ -15,29 +15,29 @@ export const PutawayScannerItemCard: React.FC<PutawayScannerItemCardProps> = ({
 }) => {
     return (
         <div className="text-center mb-6 w-full max-w-md">
-            <p className="text-stone-400 dark:text-stone-500 text-[10px] font-black uppercase tracking-[0.2em] mb-3">
+            <p className="text-[var(--theme-text-secondary)] text-[11px] font-semibold uppercase tracking-wider mb-2">
                 {t('warehouse.putaway.itemVerification')}
             </p>
-            <div className="bg-emerald-50/80 dark:bg-emerald-950/20 border-2 border-emerald-400/40 rounded-3xl p-6 shadow-lg">
-                <p className="text-2xl text-stone-900 dark:text-white font-black uppercase tracking-tight leading-snug mb-3">
+            <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-5 shadow-sm">
+                <p className="text-xl sm:text-2xl text-[var(--theme-text-primary)] font-bold uppercase tracking-tight leading-snug mb-3">
                     {currentItem?.name || currentItem?.productName}
                 </p>
-                <div className="inline-block px-4 py-2 bg-emerald-600 text-white font-black font-mono text-base rounded-xl shadow-md shadow-emerald-600/20 tracking-widest mb-3">
+                <div className="inline-block px-3.5 py-1.5 bg-[var(--theme-accent)] text-white font-semibold font-mono text-sm rounded-xl tracking-wider mb-2">
                     {currentItem?.sku}
                 </div>
 
                 {currentOccupants.length > 0 && (
-                    <div className="mt-4 space-y-4 pt-6 border-t-2 border-emerald-400/20 text-left">
-                        <span className="text-[10px] font-black uppercase text-emerald-600 dark:text-emerald-400/60 tracking-widest block mb-1">
+                    <div className="mt-4 space-y-2.5 pt-4 border-t border-[var(--theme-border)] text-left">
+                        <span className="text-[11px] font-semibold uppercase text-[var(--theme-text-secondary)] tracking-wider block mb-1">
                             {t('warehouse.putaway.locationOccupants')} ({currentOccupants.length})
                         </span>
                         {currentOccupants.slice(0, 3).map((occ: Product) => (
-                            <div key={occ.id} className="flex items-center gap-3">
-                                <div className="w-7 h-7 rounded-lg bg-emerald-100 dark:bg-white/5 border border-emerald-200 dark:border-white/10 flex items-center justify-center shrink-0">
-                                    <Box size={14} className="text-emerald-600 dark:text-emerald-400" />
+                            <div key={occ.id} className="flex items-center gap-2.5 bg-[var(--theme-bg-subtle)] p-2 rounded-xl border border-[var(--theme-border)]">
+                                <div className="w-6 h-6 rounded-lg bg-[var(--theme-accent)]/10 border border-[var(--theme-accent)]/20 flex items-center justify-center shrink-0">
+                                    <Box size={13} className="text-[var(--theme-accent)]" />
                                 </div>
                                 <div className="min-w-0">
-                                    <p className="text-[11px] font-black text-gray-900 dark:text-white truncate uppercase tracking-tight">
+                                    <p className="text-xs font-semibold text-[var(--theme-text-primary)] truncate uppercase tracking-tight">
                                         {occ.name}
                                     </p>
                                 </div>

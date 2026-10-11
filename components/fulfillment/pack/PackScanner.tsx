@@ -248,22 +248,22 @@ export const PackScanner: React.FC<PackScannerProps> = ({
     const matchedProduct = matchedItem ? getProduct(matchedItem) : null;
 
     return (
-        <div className="fixed inset-0 z-[200] bg-[#FAF8F5] dark:bg-[#1C2620] flex flex-col transition-colors duration-500">
+        <div className="fixed inset-0 z-[200] bg-[var(--theme-bg-app)] flex flex-col transition-colors duration-200">
             {/* Top Bar */}
-            <div className="p-3 sm:p-4 bg-[#EAE5D9] dark:bg-[#1C2620]/80 border-b border-[#E2DCCE] dark:border-[#A9CBA2]/10 flex justify-between items-center text-gray-900 dark:text-[#EAE5D9]">
+            <div className="p-3 sm:p-4 bg-[var(--theme-bg-card)] border-b border-[var(--theme-border)] flex justify-between items-center text-[var(--theme-text-primary)]">
                 <div className="flex items-center gap-2 sm:gap-3 min-w-0">
-                    <button onClick={onClose} className="p-2 -ml-1 text-gray-500 dark:text-[#A9CBA2]/70 hover:text-gray-900 dark:hover:text-[#EAE5D9] transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center shrink-0" aria-label={t('warehouse.dismiss')}>
+                    <button onClick={onClose} className="p-2 -ml-1 text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center shrink-0" aria-label={t('warehouse.dismiss')}>
                         <X size={24} />
                     </button>
                     <div className="min-w-0">
-                        <h3 className="font-bold text-base sm:text-lg uppercase tracking-wider truncate">
+                        <h3 className="font-semibold text-base sm:text-lg uppercase tracking-wider truncate">
                             {step === 'SCAN' ? t('warehouse.scanProductBarcode') : t('warehouse.putaway.progress')}
                         </h3>
-                        <p className="text-xs text-[#2C5E3B] dark:text-[#A9CBA2] font-mono truncate">JOB: {formatJobId(job)}</p>
+                        <p className="text-xs text-[var(--theme-accent)] font-mono tabular-nums font-medium truncate">JOB: {formatJobId(job)}</p>
                     </div>
                 </div>
                 <div className="flex items-center gap-2">
-                    <span className="text-xs font-bold bg-[#E2DCCE] dark:bg-[#2C5E3B]/20 px-2 py-1 rounded text-gray-700 dark:text-[#A9CBA2]">
+                    <span className="text-xs font-mono tabular-nums font-semibold bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] px-2.5 py-1 rounded-full text-[var(--theme-text-primary)]">
                         {packedItems.length}/{totalItems}
                     </span>
                     <button
@@ -273,7 +273,7 @@ export const PackScanner: React.FC<PackScannerProps> = ({
                         }}
                         title="Toggle Fullscreen"
                         aria-label="Toggle Fullscreen"
-                        className="p-2 bg-gray-200 dark:bg-white/5 hover:bg-gray-300 dark:hover:bg-white/10 rounded-xl text-gray-550 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center"
+                        className="p-2 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] hover:bg-[var(--theme-bg-card)] rounded-xl text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center"
                     >
                         <Maximize2 size={20} />
                     </button>
@@ -281,9 +281,7 @@ export const PackScanner: React.FC<PackScannerProps> = ({
             </div>
 
             {/* Main View */}
-            <div className="flex-1 relative w-full overflow-hidden flex flex-col">
-                <div className={`absolute inset-0 opacity-20 blur-3xl transition-colors duration-700 pointer-events-none ${step === 'CONFIRM_QTY' ? 'bg-[#A9CBA2]' : 'bg-[#2C5E3B]'}`} />
-
+            <div className="flex-1 relative w-full overflow-hidden flex flex-col bg-[var(--theme-bg-app)]">
                 <div className="absolute inset-0 overflow-y-auto custom-scrollbar flex flex-col items-center p-3 md:p-6 pb-6">
 
                     {/* Status / content area */}
@@ -304,12 +302,10 @@ export const PackScanner: React.FC<PackScannerProps> = ({
 
                     {/* Input Area */}
                     <form onSubmit={handleScan} className="w-full max-w-md relative z-20 group">
-                        <div className="absolute inset-0 bg-gradient-to-r from-[#2C5E3B] to-[#A9CBA2] rounded-xl blur opacity-20 group-focus-within:opacity-40 transition-opacity" />
-
                         {!isFullyPacked && (
                             <>
                                 {step === 'CONFIRM_QTY' ? (
-                                    <div className="relative flex items-stretch w-full bg-[#FAF8F5] dark:bg-[#1C2620]/90 border-2 border-[#2C5E3B] dark:border-[#A9CBA2]/40 rounded-xl overflow-hidden shadow-md focus-within:border-[#2C5E3B] dark:focus-within:border-[#A9CBA2] z-10">
+                                    <div className="relative flex items-stretch w-full bg-[var(--theme-bg-card)] border-2 border-[var(--theme-accent)] rounded-xl overflow-hidden shadow-sm focus-within:border-[var(--theme-accent)] z-10">
                                         <input
                                             ref={qtyRef}
                                             type="number"
@@ -319,12 +315,12 @@ export const PackScanner: React.FC<PackScannerProps> = ({
                                             title="Confirm quantity"
                                             value={qtyVal}
                                             onChange={(e) => setQtyVal(e.target.value)}
-                                            className="flex-1 bg-transparent py-2.5 px-3 text-center text-2xl md:text-3xl font-mono font-bold text-gray-900 dark:text-[#EAE5D9] placeholder:text-gray-300 dark:placeholder:text-[#A9CBA2]/30 outline-none"
+                                            className="flex-1 bg-transparent py-2.5 px-3 text-center text-2xl md:text-3xl font-mono tabular-nums font-bold text-[var(--theme-text-primary)] placeholder:text-[var(--theme-text-secondary)]/30 outline-none"
                                             placeholder="QTY"
                                             autoFocus
                                             onFocus={(e) => e.target.select()}
                                         />
-                                        <div className="bg-[#2C5E3B]/10 dark:bg-[#A9CBA2]/15 text-[#2C5E3B] dark:text-[#A9CBA2] border-l border-[#2C5E3B]/20 dark:border-[#A9CBA2]/20 px-3.5 py-2.5 text-xs font-mono font-black uppercase flex items-center justify-center shrink-0">
+                                        <div className="bg-[var(--theme-bg-subtle)] text-[var(--theme-accent)] border-l border-[var(--theme-border)] px-3.5 py-2.5 text-xs font-mono font-bold uppercase flex items-center justify-center shrink-0">
                                             {(() => {
                                                 const unitDef = getSellUnit(selectedUnit);
                                                 const sizeStr = matchedProduct?.size || matchedItem?.size;
@@ -343,7 +339,7 @@ export const PackScanner: React.FC<PackScannerProps> = ({
                                         onChange={(e) => setInputVal(e.target.value)}
                                         onKeyDown={scanOnlyHandlers.onKeyDown}
                                         onPaste={scanOnlyHandlers.onPaste}
-                                        className="w-full bg-[#FAF8F5] dark:bg-[#1C2620]/90 border-2 rounded-xl py-3 px-4 text-center text-lg md:text-xl font-mono text-gray-900 dark:text-[#EAE5D9] placeholder:text-gray-300 dark:placeholder:text-[#A9CBA2]/30 focus:outline-none relative z-10 shadow-md transition-colors border-[#E2DCCE] dark:border-[#A9CBA2]/10 focus:border-[#2C5E3B] dark:focus:border-[#A9CBA2]/40 min-h-[48px]"
+                                        className="w-full bg-[var(--theme-bg-card)] border-2 rounded-xl py-3 px-4 text-center text-lg md:text-xl font-mono tabular-nums text-[var(--theme-text-primary)] placeholder:text-[var(--theme-text-secondary)]/30 focus:outline-none relative z-10 shadow-sm transition-colors border-[var(--theme-border)] focus:border-[var(--theme-accent)] min-h-[48px]"
                                         placeholder="SCAN BARCODE"
                                         autoFocus
                                         disabled={isProcessing}
@@ -354,7 +350,7 @@ export const PackScanner: React.FC<PackScannerProps> = ({
 
                         {isProcessing && (
                             <div className="absolute right-3 top-1/2 -translate-y-1/2 z-30">
-                                <RotateCcw className="animate-spin text-gray-900 dark:text-white opacity-50" size={18} />
+                                <RotateCcw className="animate-spin text-[var(--theme-text-primary)] opacity-50" size={18} />
                             </div>
                         )}
 
@@ -363,16 +359,16 @@ export const PackScanner: React.FC<PackScannerProps> = ({
                             type={isFullyPacked ? 'button' : 'submit'}
                             onClick={isFullyPacked ? onCompleteJob : undefined}
                             disabled={(!isFullyPacked && step === 'SCAN' && !inputVal.trim()) || isProcessing || isSubmitting}
-                            className={`mt-3 w-full py-3.5 md:py-4 px-3 min-h-[50px] rounded-xl flex items-center justify-center gap-2 transition-colors active:scale-95 shadow-md border relative z-30 font-black text-xs md:text-sm uppercase tracking-widest ${
+                            className={`mt-3 w-full py-3.5 md:py-4 px-3 min-h-[50px] rounded-xl flex items-center justify-center gap-2 transition-transform active:scale-[0.98] shadow-sm border relative z-30 font-semibold text-xs md:text-sm uppercase tracking-wider ${
                                 isProcessing || isSubmitting
-                                    ? 'bg-gray-100 dark:bg-[#1C2620]/50 border-gray-200 dark:border-white/5 text-gray-400 dark:text-gray-600 opacity-50 cursor-not-allowed'
+                                    ? 'bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] text-[var(--theme-text-secondary)]/60 cursor-not-allowed'
                                     : isFullyPacked
-                                        ? 'bg-gradient-to-r from-green-500 to-emerald-600 border-green-400 text-white shadow-green-500/25'
+                                        ? 'bg-green-600 hover:bg-green-700 border-green-500 text-white shadow-sm'
                                         : step === 'CONFIRM_QTY'
-                                            ? 'bg-[#2C5E3B] border-[#A9CBA2]/40 text-white shadow-[#2C5E3B]/30'
+                                            ? 'bg-[var(--theme-accent)] hover:opacity-90 border-[var(--theme-accent)] text-white shadow-sm'
                                             : !inputVal.trim()
-                                                ? 'bg-gray-200 dark:bg-[#1C2620]/50 border-gray-100 dark:border-white/5 text-gray-400 dark:text-gray-600 grayscale opacity-50 cursor-not-allowed'
-                                                : 'bg-[#2C5E3B] hover:bg-[#1B3520] border-[#2C5E3B]/20 text-white'
+                                                ? 'bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] text-[var(--theme-text-secondary)]/40 cursor-not-allowed'
+                                                : 'bg-[var(--theme-accent)] hover:opacity-90 border-[var(--theme-accent)] text-white shadow-sm'
                             }`}
                         >
                             {isProcessing || isSubmitting ? (

@@ -21,14 +21,14 @@ export const PutawayScannerWarnings: React.FC<PutawayScannerWarningsProps> = ({
         <>
             {/* Occupancy Warning */}
             {awaitingOccupancyConfirmation && !isPlacementBlocked && (
-                <div className="p-4 rounded-2xl bg-amber-50 dark:bg-amber-500/10 border border-amber-400/50 animate-in zoom-in-95 duration-300 shadow-sm text-left">
-                    <div className="flex items-center gap-2 text-amber-700 dark:text-amber-400 mb-1">
-                        <AlertTriangle size={18} className="shrink-0 stroke-[2.5]" />
-                        <span className="font-black uppercase tracking-wider text-xs">
+                <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-left">
+                    <div className="flex items-center gap-2 text-amber-600 dark:text-amber-400 mb-1">
+                        <AlertTriangle size={16} className="shrink-0" />
+                        <span className="font-semibold uppercase tracking-wider text-xs">
                             {t('warehouse.putaway.stockMergeRequired')}
                         </span>
                     </div>
-                    <p className="text-[11px] text-stone-700 dark:text-stone-300 leading-relaxed">
+                    <p className="text-xs text-[var(--theme-text-secondary)] leading-relaxed">
                         {t('warehouse.putaway.stockMergeInstruction')}
                     </p>
                 </div>
@@ -36,14 +36,14 @@ export const PutawayScannerWarnings: React.FC<PutawayScannerWarningsProps> = ({
 
             {/* Mismatch Warning */}
             {awaitingMismatchConfirmation && (
-                <div className="p-4 rounded-2xl bg-amber-50 dark:bg-amber-500/10 border border-amber-400/50 animate-in zoom-in-95 duration-300 shadow-sm text-left">
-                    <div className="flex items-center gap-2 text-amber-700 dark:text-amber-400 mb-1">
-                        <AlertTriangle size={18} className="shrink-0 stroke-[2.5]" />
-                        <span className="font-black uppercase tracking-wider text-xs">
+                <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-left">
+                    <div className="flex items-center gap-2 text-amber-600 dark:text-amber-400 mb-1">
+                        <AlertTriangle size={16} className="shrink-0" />
+                        <span className="font-semibold uppercase tracking-wider text-xs">
                             {t('warehouse.putaway.alternateLocationScanned')}
                         </span>
                     </div>
-                    <p className="text-[11px] text-stone-700 dark:text-stone-300 leading-relaxed">
+                    <p className="text-xs text-[var(--theme-text-secondary)] leading-relaxed">
                         {t('warehouse.putaway.alternateLocationInstruction')}
                     </p>
                 </div>
@@ -51,20 +51,20 @@ export const PutawayScannerWarnings: React.FC<PutawayScannerWarningsProps> = ({
 
             {/* Strict Block Warning */}
             {isPlacementBlocked && (
-                <div className="p-5 rounded-2xl bg-rose-50 dark:bg-rose-950/40 border-2 border-rose-500 animate-in zoom-in-95 duration-300 shadow-md text-left">
-                    <div className="flex items-center gap-2 text-rose-600 dark:text-rose-400 mb-2">
-                        <X size={20} className="shrink-0 stroke-[3]" />
-                        <span className="font-black uppercase tracking-wider text-sm">
+                <div className="p-4 rounded-2xl bg-rose-500/10 border border-rose-500/30 text-left">
+                    <div className="flex items-center gap-2 text-rose-500 mb-1.5">
+                        <X size={18} className="shrink-0" />
+                        <span className="font-semibold uppercase tracking-wider text-xs">
                             {t('warehouse.putaway.placementBlocked')}
                         </span>
                     </div>
-                    <p className="text-xs font-black text-rose-900 dark:text-rose-200 leading-relaxed mb-2">
+                    <p className="text-xs font-medium text-[var(--theme-text-primary)] leading-relaxed mb-1.5">
                         Incompatible inventory detected:{' '}
-                        <span className="bg-rose-600 text-white px-2 py-0.5 rounded-lg font-mono">
+                        <span className="bg-rose-500/20 text-rose-500 px-2 py-0.5 rounded-md font-mono font-semibold">
                             {conflictingOccupants[0]?.sku}
                         </span>
                     </p>
-                    <p className="text-[10px] text-rose-700 dark:text-rose-300 uppercase font-bold tracking-wider">
+                    <p className="text-[11px] text-rose-500/80 uppercase font-semibold tracking-wider">
                         {t('warehouse.putaway.mixedSkuNotAllowed')}
                     </p>
                 </div>

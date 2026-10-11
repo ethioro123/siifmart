@@ -13,15 +13,15 @@ export const SystemTicker = () => {
     ];
 
     return (
-        <div className="w-full bg-white dark:bg-[#252525] border-y border-[#545454]/30 dark:border-[#545454]/50 backdrop-blur-md h-8 flex items-center overflow-hidden relative mb-6 rounded-xl">
-            <div className="absolute left-0 bg-[#545454]/15 dark:bg-[#1E1E1E] px-3 h-full flex items-center z-10 border-r border-[#545454]/40">
-                <Terminal size={12} className="text-[#252525] dark:text-[#CFCFCF] mr-1.5" />
-                <span className="text-[10px] font-bold text-[#252525] dark:text-[#CFCFCF] font-mono tracking-wider">SYS.TELEMETRY</span>
+        <div className="w-full bg-[var(--theme-bg-card)] border border-[var(--theme-border)] h-8 flex items-center overflow-hidden relative mb-6 rounded-xl shadow-xs">
+            <div className="absolute left-0 bg-[var(--theme-bg-subtle)] px-3 h-full flex items-center z-10 border-r border-[var(--theme-border)]">
+                <Terminal size={12} className="text-[var(--theme-accent)] mr-1.5" />
+                <span className="text-[11px] font-bold text-[var(--theme-text-primary)] font-mono tracking-wider">SYS.TELEMETRY</span>
             </div>
-            <div className="animate-marquee whitespace-nowrap flex gap-12 items-center pl-36">
+            <div className="animate-marquee whitespace-nowrap flex gap-12 items-center pl-40">
                 {messages.concat(messages).map((msg, i) => (
-                    <span key={i} className="text-[10px] font-mono font-medium text-[#7D7D7D] dark:text-[#7D7D7D] flex items-center">
-                        <span className="w-1.5 h-1.5 bg-[#CFCFCF] rounded-full mr-2 animate-pulse"></span>
+                    <span key={i} className="text-[11px] font-mono font-medium text-[var(--theme-text-secondary)] flex items-center">
+                        <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full mr-2 animate-pulse"></span>
                         {msg}
                     </span>
                 ))}

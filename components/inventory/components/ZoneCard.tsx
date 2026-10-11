@@ -23,74 +23,74 @@ export const ZoneCard: React.FC<ZoneCardProps> = ({
     onDelete
 }) => {
     const usagePercent = zone.capacity > 0 ? (zone.occupied / zone.capacity) * 100 : 0;
-    let progressColorClass = "bg-emerald-500";
-    if (usagePercent > 90) progressColorClass = "bg-red-500";
-    else if (usagePercent > 70) progressColorClass = "bg-amber-500";
+    let progressColorClass = "bg-[#34C759]";
+    if (usagePercent > 90) progressColorClass = "bg-[#FF3B30]";
+    else if (usagePercent > 70) progressColorClass = "bg-[#FF9F0A]";
 
     const isLockedState = zone.isLocked;
 
     return (
         <div 
-            className={`p-6 relative overflow-hidden group border transition-all duration-300 rounded-3xl shadow-sm ${
+            className={`p-5 sm:p-6 relative overflow-hidden group border transition-all duration-200 rounded-2xl shadow-xs ${
                 isLockedState 
-                    ? 'border-red-500/20 bg-red-500/5 hover:border-red-500/35' 
-                    : 'bg-[var(--theme-bg-card)] border-[var(--theme-border)] hover:border-[var(--theme-border-focus)] hover:shadow-md'
+                    ? 'border-[#FF3B30]/20 bg-[#FF3B30]/5 hover:border-[#FF3B30]/35' 
+                    : 'bg-[var(--theme-bg-card)] border-[var(--theme-border)] hover:border-[var(--theme-accent)]/40 hover:shadow-sm'
             }`}
         >
             <div className="flex justify-between items-start mb-5 relative z-10">
-                <div className="flex items-start gap-4">
-                    <div className={`p-3.5 rounded-2xl border ${
+                <div className="flex items-start gap-3.5 text-left">
+                    <div className={`w-12 h-12 rounded-xl border flex items-center justify-center shrink-0 ${
                         isLockedState
-                            ? 'bg-red-500/10 text-red-500 border-red-500/25'
+                            ? 'bg-[#FF3B30]/10 text-[#FF3B30] border-[#FF3B30]/25'
                             : zone.type === 'Cold' 
-                                ? 'bg-blue-500/10 text-blue-500 border-blue-500/20' 
+                                ? 'bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] border-[var(--theme-accent)]/20' 
                                 : zone.type === 'Secure' 
-                                    ? 'bg-purple-500/10 text-purple-500 border-purple-500/20' 
+                                    ? 'bg-[#AF52DE]/10 text-[#AF52DE] border-[#AF52DE]/20' 
                                     : 'bg-[var(--theme-bg-subtle)] text-[var(--theme-text-primary)] border-[var(--theme-border)]'
                     }`}>
-                        {isLockedState ? <Lock size={22} /> : zone.type === 'Cold' ? <Thermometer size={22} /> : zone.type === 'Secure' ? <Shield size={22} /> : <Box size={22} />}
+                        {isLockedState ? <Lock size={20} /> : zone.type === 'Cold' ? <Thermometer size={20} /> : zone.type === 'Secure' ? <Shield size={20} /> : <Box size={20} />}
                     </div>
                     <div>
                         <h3 className="font-bold text-[var(--theme-text-primary)] text-base flex items-center gap-1.5">
                             {zone.name}
                             {isLockedState && (
-                                <span className="inline-flex items-center gap-0.5 px-2 py-0.5 rounded-full text-[8px] font-bold uppercase bg-red-500 text-white animate-pulse">
+                                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold uppercase bg-[#FF3B30] text-white">
                                     LOCKED
                                 </span>
                             )}
                         </h3>
-                        <p className="text-[10px] text-[var(--theme-text-muted)] font-medium uppercase tracking-wider mt-0.5">
+                        <p className="text-[11px] text-[var(--theme-text-secondary)] font-medium uppercase tracking-wider mt-0.5">
                             {zone.type} Storage • Type: {zone.zoneType || 'STANDARD'}
                         </p>
                     </div>
                 </div>
                 <div className="text-right">
-                    <span className={`text-xl font-bold font-mono ${usagePercent > 90 ? 'text-red-500' : 'text-[var(--theme-text-primary)]'}`}>
+                    <span className={`text-xl font-bold font-mono tabular-nums ${usagePercent > 90 ? 'text-[#FF3B30]' : 'text-[var(--theme-text-primary)]'}`}>
                         {usagePercent.toFixed(1)}%
                     </span>
-                    <p className="text-[9px] text-[var(--theme-text-muted)] font-medium uppercase mt-0.5">Space Utilized</p>
+                    <p className="text-[11px] text-[var(--theme-text-muted)] font-medium uppercase mt-0.5">Space Utilized</p>
                 </div>
             </div>
 
             {/* Rules and Restrictions Badges */}
             <div className="flex flex-wrap gap-1.5 mb-4 relative z-10 text-left">
                 {zone.pickingPriority !== undefined && (
-                    <span className="px-2 py-0.5 rounded text-[8px] font-bold uppercase tracking-wider bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-[var(--theme-text-muted)]">
+                    <span className="px-2.5 py-1 rounded-lg text-[11px] font-semibold uppercase tracking-wider bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-[var(--theme-text-secondary)]">
                         Priority {zone.pickingPriority}
                     </span>
                 )}
                 {zone.allowPicking === false && (
-                    <span className="px-2 py-0.5 rounded text-[8px] font-bold uppercase tracking-wider bg-rose-500/10 text-rose-500 border border-rose-500/25">
+                    <span className="px-2.5 py-1 rounded-lg text-[11px] font-semibold uppercase tracking-wider bg-[#FF3B30]/10 text-[#FF3B30] border border-[#FF3B30]/25">
                         No Picking
                     </span>
                 )}
                 {zone.allowPutaway === false && (
-                    <span className="px-2 py-0.5 rounded text-[8px] font-bold uppercase tracking-wider bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/25">
+                    <span className="px-2.5 py-1 rounded-lg text-[11px] font-semibold uppercase tracking-wider bg-[#FF9F0A]/10 text-[#FF9F0A] border border-[#FF9F0A]/25">
                         No Putaway
                     </span>
                 )}
                 {zone.assignedProducts.length > 0 && (
-                    <span className="px-2 py-0.5 rounded text-[8px] font-bold uppercase tracking-wider bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/25">
+                    <span className="px-2.5 py-1 rounded-lg text-[11px] font-semibold uppercase tracking-wider bg-[#34C759]/10 text-[#34C759] border border-[#34C759]/25">
                         {zone.assignedProducts.length} Products
                     </span>
                 )}
@@ -98,13 +98,13 @@ export const ZoneCard: React.FC<ZoneCardProps> = ({
 
             {/* Capacity Bar */}
             <div className="space-y-1.5 relative z-10 text-left">
-                <div className="w-full bg-[var(--theme-bg-subtle)] h-3 rounded-full overflow-hidden border border-[var(--theme-border)] relative">
+                <div className="w-full bg-[var(--theme-bg-subtle)] h-2.5 rounded-full overflow-hidden border border-[var(--theme-border)] relative">
                     <div
-                        className={`h-full transition-all duration-1000 ${progressColorClass}`}
+                        className={`h-full transition-all duration-700 ${progressColorClass}`}
                         ref={(el) => { if (el) el.style.width = `${Math.min(100, usagePercent)}%`; }}
                     />
                 </div>
-                <div className="flex justify-between text-[10px] text-[var(--theme-text-muted)] font-mono font-bold">
+                <div className="flex justify-between text-[11px] text-[var(--theme-text-secondary)] font-mono tabular-nums font-medium">
                     <span>Occupied: {zone.occupied.toLocaleString()} items</span>
                     <span>Capacity: {zone.capacity.toLocaleString()} items</span>
                 </div>
@@ -112,44 +112,44 @@ export const ZoneCard: React.FC<ZoneCardProps> = ({
 
             {/* Temperature Gauge if applicable */}
             {zone.temperature && (
-                <div className="mt-3 flex items-center gap-1.5 text-blue-500 dark:text-blue-400 text-[10px] font-bold bg-blue-500/5 px-2.5 py-1.5 rounded-lg border border-blue-500/10 w-fit relative z-10">
-                    <Thermometer size={12} />
+                <div className="mt-3 flex items-center gap-1.5 text-[var(--theme-accent)] text-[11px] font-semibold bg-[var(--theme-accent)]/10 px-2.5 py-1.5 rounded-lg border border-[var(--theme-accent)]/20 w-fit relative z-10">
+                    <Thermometer size={14} />
                     <span>TARGET TEMP: {zone.temperature}</span>
                 </div>
             )}
 
             {/* Lock Reason Display */}
             {isLockedState && zone.lockReason && (
-                <div className="mt-3 p-3 bg-red-500/10 border border-red-500/20 text-red-700 dark:text-red-400 text-[11px] rounded-xl flex items-start gap-2 relative z-10 text-left">
+                <div className="mt-3 p-3 bg-[#FF3B30]/10 border border-[#FF3B30]/20 text-[#FF3B30] text-[11px] rounded-xl flex items-start gap-2 relative z-10 text-left">
                     <ShieldAlert size={14} className="flex-shrink-0 mt-0.5" />
                     <div>
-                        <p className="font-bold uppercase text-[9px] tracking-wide">Lock Reason</p>
-                        <p className="mt-0.5 leading-relaxed font-bold">{zone.lockReason}</p>
-                        <p className="mt-1 text-[8px] opacity-75 uppercase">Locked by {zone.lockedBy} at {new Date(zone.lockedAt || '').toLocaleDateString()}</p>
+                        <p className="font-semibold uppercase text-[11px] tracking-wider">Lock Reason</p>
+                        <p className="mt-0.5 leading-relaxed font-medium">{zone.lockReason}</p>
+                        <p className="mt-1 text-[11px] opacity-80 uppercase">Locked by {zone.lockedBy} at {new Date(zone.lockedAt || '').toLocaleDateString()}</p>
                     </div>
                 </div>
             )}
 
             {/* Actions Footer */}
             {['super_admin', 'warehouse_manager', 'store_manager', 'operations_manager', 'regional_manager'].includes(userRole || '') && (
-                <div className="mt-5 pt-4 border-t border-[var(--theme-border)] flex items-center justify-between relative z-10 opacity-60 group-hover:opacity-100 transition-opacity">
+                <div className="mt-5 pt-4 border-t border-[var(--theme-border)] flex items-center justify-between relative z-10 opacity-70 group-hover:opacity-100 transition-opacity">
                     <button
                         onClick={() => onConfigure(zone)}
-                        className="p-2 text-[var(--theme-text-primary)] bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card-hover)] rounded-xl border border-[var(--theme-border)] transition-all flex items-center gap-1 text-[10px] font-bold uppercase cursor-pointer active:scale-[0.98]"
+                        className="px-3 py-1.5 text-[var(--theme-text-primary)] bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card-hover)] rounded-xl border border-[var(--theme-border)] transition-all flex items-center gap-1.5 text-[11px] font-semibold uppercase cursor-pointer active:scale-[0.98]"
                     >
-                        <Settings2 size={12} /> Configure
+                        <Settings2 size={14} /> Configure
                     </button>
                     <button
                         onClick={() => onDelete(zone)}
                         disabled={zone.assignedProducts.length > 0}
-                        className={`p-2 rounded-xl transition-all flex items-center gap-1 text-[10px] font-bold uppercase cursor-pointer active:scale-[0.98] ${
+                        className={`px-3 py-1.5 rounded-xl transition-all flex items-center gap-1.5 text-[11px] font-semibold uppercase cursor-pointer active:scale-[0.98] ${
                             zone.assignedProducts.length > 0
-                                ? 'text-[var(--theme-text-muted)] bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] cursor-not-allowed opacity-30'
-                                : 'text-rose-600 bg-rose-500/5 hover:bg-rose-500/15 border border-rose-500/10 hover:border-rose-500/25'
+                                ? 'text-[var(--theme-text-muted)] bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] cursor-not-allowed opacity-40'
+                                : 'text-[#FF3B30] bg-[#FF3B30]/10 hover:bg-[#FF3B30]/20 border border-[#FF3B30]/20'
                         }`}
                         title={zone.assignedProducts.length > 0 ? "Cannot delete zone containing products" : "Delete Zone"}
                     >
-                        <Trash2 size={12} /> Delete
+                        <Trash2 size={14} /> Delete
                     </button>
                 </div>
             )}

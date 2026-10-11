@@ -7,46 +7,34 @@ import {
 import { WMSJob, User, Site, Product, Employee } from '../../../types';
 import { formatJobId } from '../../../utils/jobIdFormatter';
 import { useLanguage } from '../../../contexts/LanguageContext';
-import Button from '../../shared/Button';
 import { getSellUnit } from '../../../utils/units';
 
 export const formatBeautifulLocation = (loc: string | undefined, theme: 'purple' | 'cyan' | 'woody' = 'woody') => {
     if (!loc || loc === 'PENDING' || loc === 'Unassigned') {
-        return <span className="text-base font-black font-mono text-gray-900 dark:text-white tracking-widest">{loc || 'PENDING'}</span>;
+        return <span className="text-sm font-semibold font-mono text-[var(--theme-text-primary)] tracking-wider">{loc || 'PENDING'}</span>;
     }
 
     const parts = loc.split('-').map(p => p.trim());
 
     if (parts.length >= 3) {
-        const themeClass = theme === 'woody'
-            ? 'bg-[#2C5E3B]/10 dark:bg-[#A9CBA2]/25 text-[#2C5E3B] dark:text-[#A9CBA2] border-[#2C5E3B]/20 dark:border-[#A9CBA2]/20 shadow-sm'
-            : theme === 'purple'
-                ? 'bg-[#2C5E3B]/10 dark:bg-[#2C5E3B]/20 text-[#2C5E3B] dark:text-[#A9CBA2] border-[#2C5E3B]/20 dark:border-[#A9CBA2]/30'
-                : 'bg-amber-100 dark:bg-amber-500/20 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-500/30';
-        const dimThemeClass = theme === 'woody'
-            ? 'bg-[#FAF8F5] dark:bg-[#A9CBA2]/10 border-[#E2DCCE]/60 dark:border-[#A9CBA2]/15 text-[#2C5E3B] dark:text-[#A9CBA2]'
-            : theme === 'purple'
-                ? 'bg-[#2C5E3B]/5 dark:bg-[#2C5E3B]/10 text-[#2C5E3B]/80 dark:text-[#A9CBA2]/80 border-[#2C5E3B]/10 dark:border-[#A9CBA2]/20'
-                : 'bg-amber-50 dark:bg-amber-500/10 text-amber-600/80 dark:text-amber-300/80 border-amber-100 dark:border-amber-500/20';
-
         return (
-            <div className="flex items-center gap-2 mt-0.5">
-                <span className={`px-2.5 py-1 rounded-xl text-[10px] font-black border whitespace-nowrap ${themeClass}`}>
+            <div className="flex items-center gap-1.5 mt-0.5">
+                <span className="px-2.5 py-1 rounded-lg text-[11px] font-mono font-semibold border border-[var(--theme-accent)]/20 bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] whitespace-nowrap">
                     {parts[0]}
                 </span>
-                <span className="text-gray-300 dark:text-white/10 font-black text-[10px] select-none">/</span>
-                <span className={`px-2.5 py-1 rounded-xl text-[10px] font-black border whitespace-nowrap ${dimThemeClass}`}>
+                <span className="text-[var(--theme-text-secondary)] opacity-40 font-semibold text-[11px] select-none">/</span>
+                <span className="px-2.5 py-1 rounded-lg text-[11px] font-mono font-semibold border border-[var(--theme-border)] bg-[var(--theme-bg-subtle)] text-[var(--theme-text-primary)] whitespace-nowrap">
                     {parts[1]}
                 </span>
-                <span className="text-gray-300 dark:text-white/10 font-black text-[10px] select-none">/</span>
-                <span className={`px-2.5 py-1 rounded-xl text-[10px] font-black border whitespace-nowrap ${dimThemeClass}`}>
+                <span className="text-[var(--theme-text-secondary)] opacity-40 font-semibold text-[11px] select-none">/</span>
+                <span className="px-2.5 py-1 rounded-lg text-[11px] font-mono font-semibold border border-[var(--theme-border)] bg-[var(--theme-bg-subtle)] text-[var(--theme-text-primary)] whitespace-nowrap">
                     {parts[2]}
                 </span>
             </div>
         );
     }
 
-    return <span className="text-base font-black font-mono text-gray-900 dark:text-white tracking-widest uppercase">{loc}</span>;
+    return <span className="text-sm font-semibold font-mono text-[var(--theme-text-primary)] tracking-wider uppercase">{loc}</span>;
 };
 
 interface PutawayJobModalProps {
@@ -93,119 +81,120 @@ export const PutawayJobModal: React.FC<PutawayJobModalProps> = ({
     const progressPercent = totalItems > 0 ? (completedItems / totalItems) * 100 : 0;
 
     return (
-        <div className="fixed inset-0 z-[160] flex items-center justify-center p-2 sm:p-4 bg-black/80 overflow-y-auto animate-in fade-in duration-300">
-            <div className="bg-[#FAF8F5] dark:bg-[#1C2620] w-full max-w-5xl h-full max-h-[92dvh] rounded-2xl md:rounded-3xl border border-[#E2DCCE] dark:border-emerald-950/20 shadow-2xl flex flex-col overflow-hidden animate-in zoom-in-95 duration-500 relative">
-                {/* Visual Flair */}
-                <div className="hidden md:block absolute -top-32 -right-32 w-96 h-96 bg-[#2C5E3B]/10 dark:bg-[#2C5E3B]/20 blur-[100px] rounded-full pointer-events-none" />
-                <div className="hidden md:block absolute -bottom-32 -left-32 w-96 h-96 bg-[#A9CBA2]/10 dark:bg-[#A9CBA2]/25 blur-[100px] rounded-full pointer-events-none" />
-
+        <div className="fixed inset-0 z-[160] flex items-center justify-center p-2 sm:p-4 bg-black/60 overflow-y-auto animate-in fade-in duration-200">
+            <div className="bg-[var(--theme-bg-card)] w-full max-w-5xl h-full max-h-[92dvh] rounded-3xl border border-[var(--theme-border)] shadow-2xl flex flex-col overflow-hidden animate-in zoom-in-95 duration-200 relative">
                 {/* Header Section */}
-                <div className="relative p-4 sm:p-6 md:p-8 border-b border-[#E2DCCE]/60 dark:border-[#2C5E3B]/10 bg-[#FAF8F5] dark:bg-[#1C2620] overflow-hidden shrink-0 z-10">
-                    <div className="relative flex justify-between items-start">
-                        <div className="flex items-center gap-6">
-                            <div className="hidden md:flex w-20 h-20 rounded-[2rem] bg-[#2C5E3B]/10 dark:bg-[#A9CBA2]/25 border-2 border-[#2C5E3B]/20 dark:border-[#A9CBA2]/20 items-center justify-center text-[#2C5E3B] dark:text-[#A9CBA2] shadow-sm transition-all duration-700 active:scale-95">
-                                <Box size={32} strokeWidth={1.5} />
+                <div className="p-4 sm:p-6 md:p-8 border-b border-[var(--theme-border)] bg-[var(--theme-bg-card)] shrink-0 z-10">
+                    <div className="flex justify-between items-start">
+                        <div className="flex items-center gap-4 sm:gap-6">
+                            <div className="hidden md:flex w-16 h-16 rounded-2xl bg-[var(--theme-accent)]/10 border border-[var(--theme-accent)]/20 items-center justify-center text-[var(--theme-accent)] shrink-0">
+                                <Box size={28} strokeWidth={1.75} />
                             </div>
                             <div>
                                 <div className="flex items-center gap-3 mb-2 flex-wrap">
-                                    <h2 className="text-xl md:text-3xl font-black text-gray-900 dark:text-white uppercase tracking-tight">{formatJobId(job)}</h2>
+                                    <h2 className="text-xl md:text-2xl font-bold text-[var(--theme-text-primary)] uppercase tracking-tight font-mono">{formatJobId(job)}</h2>
                                     {job.priority === 'Critical' && (
-                                        <span className="bg-red-500 text-white text-[9px] font-black px-3 py-1 rounded-xl uppercase tracking-widest animate-pulse shadow-lg shadow-red-500/20 flex items-center gap-1">
-                                            <Zap size={10} className="fill-current" /> {t('warehouse.priority')}
+                                        <span className="bg-red-500/10 text-red-500 border border-red-500/20 text-[11px] font-semibold px-2.5 py-1 rounded-full uppercase tracking-wider flex items-center gap-1">
+                                            <Zap size={11} className="fill-current" /> {t('warehouse.priority')}
                                         </span>
                                     )}
                                 </div>
-                                <div className="flex items-center gap-5 text-[10px] font-black text-gray-400 dark:text-gray-500 flex-wrap uppercase tracking-[0.15em]">
+                                <div className="flex items-center gap-3 text-[11px] font-medium text-[var(--theme-text-secondary)] flex-wrap uppercase tracking-wider">
                                     {job.orderRef && (
                                         <span className="font-mono">
                                             Ref: {resolveOrderRef(job.orderRef)}
                                         </span>
                                     )}
-                                    <span className="flex items-center gap-2.5 font-mono bg-gray-100 dark:bg-white/5 px-3 py-1.5 rounded-xl border border-gray-200 dark:border-white/10">
-                                        <MapPin size={12} className="text-[#2C5E3B] dark:text-[#A9CBA2]" />
+                                    <span className="flex items-center gap-1.5 font-mono bg-[var(--theme-bg-subtle)] px-2.5 py-1 rounded-lg border border-[var(--theme-border)] text-[var(--theme-text-primary)]">
+                                        <MapPin size={12} className="text-[var(--theme-accent)]" />
                                         {sourceSite?.name || t('warehouse.thisWarehouse')}
                                     </span>
                                 </div>
                             </div>
                         </div>
 
-                        <div className="flex items-center justify-center gap-4">
-                            <div className="text-center bg-[#2C5E3B]/5 dark:bg-[#A9CBA2]/5 border-2 border-[#2C5E3B]/10 dark:border-[#A9CBA2]/10 p-3 rounded-2xl min-w-[70px] hidden xs:block">
-                                <span className="text-2xl font-black text-gray-900 dark:text-white tabular-nums block tracking-tighter">{totalItems}</span>
-                                <span className="text-[9px] text-gray-400 font-black uppercase tracking-widest">{t('warehouse.items')}</span>
+                        <div className="flex items-center justify-center gap-3">
+                            <div className="text-center bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] p-2.5 sm:p-3 rounded-xl min-w-[64px] hidden xs:block">
+                                <span className="text-xl sm:text-2xl font-bold text-[var(--theme-text-primary)] tabular-nums block font-mono">{totalItems}</span>
+                                <span className="text-[11px] text-[var(--theme-text-secondary)] font-semibold uppercase tracking-wider">{t('warehouse.items')}</span>
                             </div>
-                            <div className="text-center bg-[#2C5E3B]/5 dark:bg-[#A9CBA2]/5 border-2 border-[#2C5E3B]/10 dark:border-[#A9CBA2]/10 p-3 rounded-2xl min-w-[70px] hidden xs:block">
-                                <span className="text-2xl font-black text-gray-900 dark:text-white tabular-nums block tracking-tighter">
+                            <div className="text-center bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] p-2.5 sm:p-3 rounded-xl min-w-[64px] hidden xs:block">
+                                <span className="text-xl sm:text-2xl font-bold text-[var(--theme-text-primary)] tabular-nums block font-mono">
                                     {job.lineItems?.reduce((acc, curr) => acc + (curr.expectedQty || 0), 0)}
                                 </span>
-                                <span className="text-[9px] text-gray-400 font-black uppercase tracking-widest">{t('warehouse.qty')}</span>
+                                <span className="text-[11px] text-[var(--theme-text-secondary)] font-semibold uppercase tracking-wider">{t('warehouse.qty')}</span>
                             </div>
                             <button
                                 onClick={onClose}
-                                className="min-w-[44px] min-h-[44px] rounded-xl bg-stone-200/50 hover:bg-stone-200 dark:bg-white/5 dark:hover:bg-white/10 flex items-center justify-center text-slate-700 dark:text-white/80 transition-colors shrink-0"
+                                className="w-10 h-10 rounded-xl bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-border)] flex items-center justify-center text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] transition-colors shrink-0"
                                 aria-label={t('warehouse.dismiss')}
                             >
-                                <X size={20} />
+                                <X size={18} />
                             </button>
                         </div>
                     </div>
 
                     {/* Progress tracking */}
-                    <div className="mt-8">
-                        <div className="flex justify-between items-center px-1">
-                            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 dark:text-gray-500">{t('warehouse.putaway.progress')}</p>
-                            <span className="text-[9px] text-[#2C5E3B] dark:text-[#A9CBA2] font-black uppercase tracking-widest bg-[#2C5E3B]/10 dark:bg-white/5 px-2 py-1 rounded-lg border border-[#2C5E3B]/20 dark:border-white/10 whitespace-nowrap">{completedItems} / {totalItems}</span>
+                    <div className="mt-6">
+                        <div className="flex justify-between items-center px-0.5">
+                            <p className="text-[11px] font-semibold uppercase tracking-wider text-[var(--theme-text-secondary)]">{t('warehouse.putaway.progress')}</p>
+                            <span className="text-[11px] text-[var(--theme-accent)] font-semibold uppercase tracking-wider bg-[var(--theme-accent)]/10 px-2 py-0.5 rounded-md border border-[var(--theme-accent)]/20 tabular-nums font-mono whitespace-nowrap">
+                                {completedItems} / {totalItems}
+                            </span>
                         </div>
-                        <div className="w-full h-3 bg-stone-150 dark:bg-white/5 rounded-full overflow-hidden border border-stone-200 dark:border-white/10 mt-3 shadow-inner">
+                        <div className="w-full h-2 bg-[var(--theme-bg-subtle)] rounded-full overflow-hidden border border-[var(--theme-border)] mt-2">
                             <div
-                                className={`h-full transition-all duration-1000 ease-out relative ${progressPercent >= 100 ? 'bg-emerald-500 shadow-[0_0_15px_rgba(16,185,129,0.4)]' : 'bg-[#2C5E3B] dark:bg-[#A9CBA2] shadow-[0_0_15px_rgba(44,94,59,0.4)]'}`}
-                                ref={(el) => { if (el) el.style.width = `${progressPercent}%`; }}
+                                className={`h-full transition-all duration-500 ease-out ${progressPercent >= 100 ? 'bg-emerald-500' : 'bg-[var(--theme-accent)]'}`}
+                                style={{ width: `${progressPercent}%` }}
                             />
                         </div>
                     </div>
                 </div>
 
                 {/* Body Content */}
-                <div className="flex-1 overflow-y-auto p-4 sm:p-6 md:p-8 custom-scrollbar space-y-5 md:space-y-6 bg-[#FAF8F5]/30 dark:bg-black/10">
-                    {/* Interactive Payload Manifest */}
-                    <div className="space-y-6 relative z-10">
-                        <div className="flex items-center justify-between px-4">
-                            <h3 className="font-black text-gray-900 dark:text-white flex items-center gap-4 text-xs uppercase tracking-[0.4em]">
-                                <span className="w-8 h-8 rounded-xl bg-[#2C5E3B] flex items-center justify-center text-white shadow-md">
-                                    <Package size={18} strokeWidth={2.5} />
+                <div className="flex-1 overflow-y-auto p-4 sm:p-6 md:p-8 custom-scrollbar space-y-5 bg-[var(--theme-bg-subtle)]">
+                    {/* Items Manifest */}
+                    <div className="space-y-4">
+                        <div className="flex items-center justify-between px-1">
+                            <h3 className="font-semibold text-[var(--theme-text-primary)] flex items-center gap-2.5 text-xs uppercase tracking-wider">
+                                <span className="w-6 h-6 rounded-lg bg-[var(--theme-accent)]/10 border border-[var(--theme-accent)]/20 flex items-center justify-center text-[var(--theme-accent)]">
+                                    <Package size={14} />
                                 </span>
                                 {t('warehouse.putaway.jobDetails')}
                             </h3>
-                            <div className="flex items-center gap-3 bg-[#FAF8F5] dark:bg-white/5 px-4 py-2 rounded-2xl border-2 border-[#E2DCCE]/60 dark:border-white/10 shadow-lg">
-                                <span className="text-[10px] font-black text-gray-900 dark:text-[#A9CBA2] uppercase tracking-widest tabular-nums">
+                            <div className="flex items-center gap-2 bg-[var(--theme-bg-card)] px-3 py-1.5 rounded-xl border border-[var(--theme-border)]">
+                                <span className="text-[11px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider tabular-nums font-mono">
                                     {totalItems} {t('warehouse.inboundVerified')}
                                 </span>
                             </div>
                         </div>
 
-                        <div className="grid grid-cols-1 gap-5">
+                        <div className="grid grid-cols-1 gap-3 sm:gap-4">
                             {job.lineItems?.map((item, idx) => {
                                 const product = getProduct(item);
                                 const isDone = item.status === 'Completed' || item.status === 'Picked';
 
                                 return (
-                                    <div key={idx} className={`group relative bg-white dark:bg-white/[0.03] border-2 ${isDone ? 'border-emerald-200 dark:border-emerald-500/30 bg-emerald-50/20 dark:bg-emerald-500/5' : 'border-[#E2DCCE]/65 dark:border-white/10 shadow-xl'
-                                        } rounded-[2rem] p-5 md:p-8 flex flex-col md:flex-row md:items-center justify-between hover:border-[#2C5E3B]/30 dark:hover:border-[#A9CBA2]/30 hover:shadow-2xl transition-all duration-700 gap-6 animate-in slide-in-from-bottom-4 duration-500 opacity-100`}>
-
-                                        <div className="flex items-center gap-6">
+                                    <div
+                                        key={idx}
+                                        className={`bg-[var(--theme-bg-card)] border rounded-2xl p-4 sm:p-5 flex flex-col md:flex-row md:items-center justify-between gap-4 transition-colors ${
+                                            isDone ? 'border-emerald-500/30' : 'border-[var(--theme-border)]'
+                                        }`}
+                                    >
+                                        <div className="flex items-center gap-4">
                                             {/* Specimen Visual */}
-                                            <div className="relative w-20 h-20 md:w-24 md:h-24 rounded-3xl bg-gray-50 dark:bg-black/60 border-2 border-gray-100 dark:border-white/10 flex items-center justify-center overflow-hidden shadow-inner flex-shrink-0 group-hover:scale-105 transition-transform duration-700">
+                                            <div className="relative w-16 h-16 sm:w-20 sm:h-20 rounded-xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] flex items-center justify-center overflow-hidden shrink-0">
                                                 {product?.image ? (
-                                                    <img src={product.image} alt={item.name} className="w-full h-full object-cover group-hover:scale-125 transition-transform duration-1000" />
+                                                    <img src={product.image} alt={item.name} className="w-full h-full object-cover" />
                                                 ) : (
-                                                    <div className="w-full h-full flex items-center justify-center text-gray-200 dark:text-white/10">
-                                                        <Package size={40} className="stroke-[1]" />
+                                                    <div className="w-full h-full flex items-center justify-center text-[var(--theme-text-secondary)] opacity-40">
+                                                        <Package size={30} strokeWidth={1.5} />
                                                     </div>
                                                 )}
                                                 {isDone && (
-                                                    <div className="absolute inset-0 bg-emerald-500/30 flex items-center justify-center">
-                                                        <div className="p-2.5 bg-white dark:bg-black/80 rounded-full shadow-2xl border-2 border-emerald-500/50 scale-110">
-                                                            <CheckCircle size={32} className="text-emerald-500 dark:text-emerald-400 stroke-[3]" />
+                                                    <div className="absolute inset-0 bg-emerald-500/20 flex items-center justify-center">
+                                                        <div className="p-1.5 bg-[var(--theme-bg-card)] rounded-full border border-emerald-500/40">
+                                                            <CheckCircle size={22} className="text-emerald-500" />
                                                         </div>
                                                     </div>
                                                 )}
@@ -213,16 +202,16 @@ export const PutawayJobModal: React.FC<PutawayJobModalProps> = ({
 
                                             {/* Specimen Analytics */}
                                             <div className="min-w-0 flex-1">
-                                                <h4 className="text-sm md:text-base text-gray-900 dark:text-white font-black tracking-tight mb-2 group-hover:text-[#2C5E3B] dark:group-hover:text-[#A9CBA2] transition-colors uppercase truncate drop-shadow-sm leading-tight leading-normal whitespace-pre-wrap sm:whitespace-nowrap">
+                                                <h4 className="text-sm font-semibold text-[var(--theme-text-primary)] tracking-tight mb-1 truncate">
                                                     {item.name || product?.name || 'Unknown Item'}
                                                 </h4>
-                                                <div className="flex items-center gap-3 flex-wrap">
-                                                    <span className="text-[10px] font-mono font-black text-gray-950 dark:text-[#A9CBA2] bg-[#FAF8F5] dark:bg-[#2C5E3B]/10 px-3 py-1.5 rounded-xl border border-[#E2DCCE]/60 dark:border-[#2C5E3B]/20 uppercase tracking-widest shadow-inner">
+                                                <div className="flex items-center gap-2 flex-wrap">
+                                                    <span className="text-[11px] font-mono font-semibold text-[var(--theme-text-secondary)] bg-[var(--theme-bg-subtle)] px-2 py-0.5 rounded-md border border-[var(--theme-border)] uppercase tracking-wider">
                                                         SKU: {item.sku || product?.sku || 'NULL-ID'}
                                                     </span>
                                                     {product?.barcode && (
-                                                        <div className="flex items-center gap-2.5 text-[10px] text-gray-400 dark:text-gray-555 font-black uppercase tracking-widest font-mono group-hover:text-gray-950 dark:group-hover:text-gray-300 transition-colors">
-                                                            <Barcode size={14} className="opacity-50" />
+                                                        <div className="flex items-center gap-1.5 text-[11px] text-[var(--theme-text-secondary)] font-mono">
+                                                            <Barcode size={13} className="opacity-50" />
                                                             {product.barcode}
                                                         </div>
                                                     )}
@@ -230,31 +219,28 @@ export const PutawayJobModal: React.FC<PutawayJobModalProps> = ({
                                             </div>
                                         </div>
 
-                                         {/* Deployment Logic */}
-                                        <div className="flex flex-col xl:flex-row items-stretch xl:items-center justify-between xl:justify-end gap-4 xl:gap-8 pl-0 xl:pl-4 border-t xl:border-t-0 border-gray-50 dark:border-white/5 pt-4 xl:pt-0 w-full xl:w-auto shrink-0">
-                                            <div className="text-left xl:text-right flex flex-col items-start xl:items-end flex-1 xl:flex-none">
-                                                <span className="text-[9px] text-gray-400 dark:text-gray-500 font-black uppercase tracking-[0.2em] block mb-1 sm:mb-2">{t('warehouse.location')}</span>
-                                                <div className="relative group/loc">
-                                                    <div className="absolute inset-0 bg-[#2C5E3B]/10 rounded-2xl blur-lg transition-all opacity-0 group-hover/loc:opacity-100" />
-                                                    <div className="relative">
-                                                        {item.suggestedLocation ? (
-                                                            <div className="flex flex-col items-start xl:items-end gap-0.5">
-                                                                <span className="text-[8px] text-emerald-500 font-black uppercase tracking-widest bg-emerald-500/10 px-1.5 py-0.5 rounded flex items-center gap-1">
-                                                                    <Zap size={8} /> Smart Suggestion
-                                                                </span>
-                                                                {formatBeautifulLocation(item.suggestedLocation, 'purple')}
-                                                            </div>
-                                                        ) : (
-                                                            formatBeautifulLocation(product?.location, 'woody')
-                                                        )}
-                                                    </div>
+                                        {/* Deployment Logic */}
+                                        <div className="flex flex-col xl:flex-row items-stretch xl:items-center justify-between xl:justify-end gap-3 xl:gap-6 pt-3 xl:pt-0 border-t xl:border-t-0 border-[var(--theme-border)] w-full xl:w-auto shrink-0">
+                                            <div className="text-left xl:text-right flex flex-col items-start xl:items-end">
+                                                <span className="text-[11px] text-[var(--theme-text-secondary)] font-semibold uppercase tracking-wider block mb-1">{t('warehouse.location')}</span>
+                                                <div>
+                                                    {item.suggestedLocation ? (
+                                                        <div className="flex flex-col items-start xl:items-end gap-0.5">
+                                                            <span className="text-[11px] text-emerald-500 font-semibold uppercase tracking-wider bg-emerald-500/10 px-1.5 py-0.5 rounded flex items-center gap-1">
+                                                                <Zap size={10} /> Smart Suggestion
+                                                            </span>
+                                                            {formatBeautifulLocation(item.suggestedLocation, 'purple')}
+                                                        </div>
+                                                    ) : (
+                                                        formatBeautifulLocation(product?.location, 'woody')
+                                                    )}
                                                 </div>
                                             </div>
 
-                                            <div className="flex items-center gap-4 sm:gap-8 justify-between xl:justify-end">
+                                            <div className="flex items-center gap-4 sm:gap-6 justify-between xl:justify-end">
                                                 <div className="text-left xl:text-right">
-                                                    <span className="text-[9px] text-gray-400 dark:text-gray-500 font-black uppercase tracking-[0.2em] block mb-1 sm:mb-2">{t('warehouse.expectedAbbr')} {t('warehouse.qty')}</span>
-                                                    <span className="text-base sm:text-lg font-mono font-black text-gray-900 dark:text-white tabular-nums tracking-tighter">
+                                                    <span className="text-[11px] text-[var(--theme-text-secondary)] font-semibold uppercase tracking-wider block mb-1">{t('warehouse.expectedAbbr')} {t('warehouse.qty')}</span>
+                                                    <span className="text-base font-mono font-bold text-[var(--theme-text-primary)] tabular-nums">
                                                         {(() => {
                                                             const baseQty = item.expectedQty || (item as any).quantity || 0;
                                                             const unitDef = getSellUnit(item.unit);
@@ -264,8 +250,8 @@ export const PutawayJobModal: React.FC<PutawayJobModalProps> = ({
                                                 </div>
                                                 {isDone ? (
                                                     <div className="text-right">
-                                                        <span className="text-[9px] text-emerald-500 dark:text-emerald-800 font-black uppercase tracking-[0.3em] block mb-2 sm:mb-3">{t('warehouse.completed')}</span>
-                                                        <span className="text-lg sm:text-xl font-mono font-black text-emerald-600 dark:text-emerald-400 tabular-nums tracking-tighter">
+                                                        <span className="text-[11px] text-emerald-500 font-semibold uppercase tracking-wider block mb-1">{t('warehouse.completed')}</span>
+                                                        <span className="text-base font-mono font-bold text-emerald-500 tabular-nums">
                                                             {(() => {
                                                                 const baseQty = item.pickedQty ?? item.expectedQty ?? 0;
                                                                 const unitDef = getSellUnit(item.unit);
@@ -280,7 +266,7 @@ export const PutawayJobModal: React.FC<PutawayJobModalProps> = ({
                                                             onStartPutaway(job);
                                                         }}
                                                         disabled={isSubmitting}
-                                                        className="woody-btn-primary h-10 sm:h-12 px-4 sm:px-6 text-[10px] sm:text-[11px] flex items-center justify-center gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed"
+                                                        className="h-10 px-4 rounded-xl bg-[var(--theme-accent)] hover:opacity-90 text-white text-[11px] font-semibold uppercase tracking-wider flex items-center justify-center gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed min-h-[40px] transition-all"
                                                     >
                                                         {isSubmitting ? (
                                                             <Loader2 size={14} className="animate-spin" />
@@ -298,11 +284,11 @@ export const PutawayJobModal: React.FC<PutawayJobModalProps> = ({
                     </div>
                 </div>
 
-                {/* Secure Footer Interface */}
-                <div className="p-3 sm:p-5 md:p-8 border-t border-[#E2DCCE]/60 dark:border-emerald-950/20 bg-[#FAF8F5]/95 dark:bg-zinc-950/90 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 shrink-0 relative z-20">
-                    <div className="hidden md:flex items-center gap-5">
-                        <div className="w-12 h-12 rounded-2xl bg-white dark:bg-white/5 border-2 border-gray-100 dark:border-white/10 flex items-center justify-center text-gray-300 dark:text-gray-755 shadow-inner group transition-all">
-                            <UserIcon size={24} className="group-hover:text-[#2C5E3B] dark:group-hover:text-[#A9CBA2] transition-colors" />
+                {/* Footer Interface */}
+                <div className="p-4 sm:p-5 md:p-6 border-t border-[var(--theme-border)] bg-[var(--theme-bg-card)] flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 shrink-0 z-20">
+                    <div className="hidden md:flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] flex items-center justify-center text-[var(--theme-text-secondary)]">
+                            <UserIcon size={20} />
                         </div>
                         <div className="flex flex-col">
                             {(() => {
@@ -317,44 +303,44 @@ export const PutawayJobModal: React.FC<PutawayJobModalProps> = ({
                                 const displayName = emp?.name || (targetUserId ? targetUserId : (isCompleted ? 'System' : t('warehouse.putaway.unassigned')));
                                 return (
                                     <>
-                                        <span className="text-[10px] text-gray-400 dark:text-gray-650 font-black uppercase tracking-[0.4em] mb-0.5">{workerLabel}</span>
-                                        <span className="text-xs sm:text-sm font-black text-gray-950 dark:text-gray-300 uppercase tracking-[0.1em]">{displayName}</span>
+                                        <span className="text-[11px] text-[var(--theme-text-secondary)] font-semibold uppercase tracking-wider">{workerLabel}</span>
+                                        <span className="text-xs font-semibold text-[var(--theme-text-primary)] uppercase tracking-wide">{displayName}</span>
                                     </>
                                 );
                             })()}
                         </div>
                     </div>
 
-                    <div className="flex flex-col sm:flex-row items-stretch gap-2.5 sm:gap-4">
+                    <div className="flex flex-col sm:flex-row items-stretch gap-3">
                         <button
                             onClick={onClose}
-                            className="woody-btn-secondary px-5 md:px-8 py-3.5 sm:py-4 text-[11px] min-h-[44px]"
+                            className="px-6 py-3 rounded-xl border border-[var(--theme-border)] bg-[var(--theme-bg-card)] hover:bg-[var(--theme-bg-subtle)] text-[var(--theme-text-primary)] text-xs font-semibold uppercase tracking-wider min-h-[44px] transition-colors"
                         >
                             {t('warehouse.dismiss')}
                         </button>
 
                         {job.status !== 'Completed' && (
-                            <div className="flex-1 flex flex-col sm:flex-row items-stretch gap-2.5 sm:gap-4">
+                            <div className="flex-1 flex flex-col sm:flex-row items-stretch gap-3">
                                 {progressPercent >= 100 ? (
                                     <button
                                         onClick={() => onCompleteJob(job)}
                                         disabled={isSubmitting}
-                                        className="w-full px-6 md:px-12 py-3.5 sm:py-4 bg-emerald-600 hover:bg-emerald-500 text-white rounded-2xl font-black text-[11px] uppercase tracking-[0.3em] shadow-md transition-all flex items-center justify-center gap-3 active:scale-95 disabled:opacity-40 border border-emerald-400/50 min-h-[48px]"
+                                        className="w-full px-8 py-3 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl font-semibold text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-2 disabled:opacity-40 min-h-[44px]"
                                     >
-                                        {isSubmitting ? <Loader2 size={20} className="animate-spin" /> : <><CheckCircle size={20} strokeWidth={3} /> {t('warehouse.completeJob')}</>}
+                                        {isSubmitting ? <Loader2 size={18} className="animate-spin" /> : <><CheckCircle size={18} /> {t('warehouse.completeJob')}</>}
                                     </button>
                                 ) : (
                                     <button
                                         onClick={() => onStartPutaway(job)}
                                         disabled={isSubmitting}
-                                        className="woody-btn-primary px-6 md:px-12 py-3.5 sm:py-4 text-[11px] flex items-center justify-center gap-3 min-h-[48px]"
+                                        className="px-8 py-3 rounded-xl bg-[var(--theme-accent)] hover:opacity-90 text-white text-xs font-semibold uppercase tracking-wider flex items-center justify-center gap-2 min-h-[44px] transition-all"
                                     >
                                         {isSubmitting ? (
-                                            <Loader2 size={20} className="animate-spin" />
+                                            <Loader2 size={18} className="animate-spin" />
                                         ) : (
                                             <>
                                                 <span className="whitespace-nowrap">{job.status === 'In-Progress' ? `${t('warehouse.continue')} ${t('warehouse.jobId')}` : t('warehouse.startJob')}</span>
-                                                <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform duration-300" />
+                                                <ArrowRight size={18} />
                                             </>
                                         )}
                                     </button>
@@ -363,7 +349,6 @@ export const PutawayJobModal: React.FC<PutawayJobModalProps> = ({
                         )}
                     </div>
                 </div>
-
             </div>
         </div>
     );

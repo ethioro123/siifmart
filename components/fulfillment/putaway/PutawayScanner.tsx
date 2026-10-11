@@ -322,24 +322,28 @@ export const PutawayScanner: React.FC<PutawayScannerProps> = ({
     };
 
     return (
-        <div className="fixed inset-0 z-[200] bg-stone-50 dark:bg-black flex flex-col transition-colors duration-500 overflow-hidden">
+        <div className="fixed inset-0 z-[200] bg-[var(--theme-bg-app)] flex flex-col transition-colors overflow-hidden">
             {/* Top Navigation Bar */}
-            <div className="p-3.5 sm:p-4 bg-[#FAF8F5]/90 dark:bg-[#1C2620]/90 border-b border-[#E2DCCE]/60 dark:border-white/10 flex justify-between items-center shrink-0">
+            <div className="p-3.5 sm:p-4 bg-[var(--theme-bg-card)] border-b border-[var(--theme-border)] flex justify-between items-center shrink-0">
                 <div className="flex items-center gap-2 sm:gap-3 min-w-0">
-                    <button onClick={onClose} className="p-2 -ml-1 text-stone-500 hover:text-stone-900 dark:text-stone-400 dark:hover:text-white transition-colors rounded-xl hover:bg-stone-100 dark:hover:bg-white/10 active:scale-95 min-h-[44px] min-w-[44px] flex items-center justify-center shrink-0" aria-label={t('warehouse.dismiss')}>
-                        <X size={22} />
+                    <button
+                        onClick={onClose}
+                        className="p-2 -ml-1 text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] transition-colors rounded-xl hover:bg-[var(--theme-bg-subtle)] min-h-[44px] min-w-[44px] flex items-center justify-center shrink-0"
+                        aria-label={t('warehouse.dismiss')}
+                    >
+                        <X size={20} />
                     </button>
                     <div className="min-w-0">
-                        <h3 className="font-black text-stone-900 dark:text-white text-base sm:text-lg uppercase tracking-tight truncate">
+                        <h3 className="font-bold text-[var(--theme-text-primary)] text-base sm:text-lg uppercase tracking-tight truncate">
                             {step === 'LOCATION' ? t('warehouse.scanLocation') : step === 'ITEM' ? t('warehouse.scanSkuToConfirm') : 'Enter Shelved Quantity'}
                         </h3>
-                        <p className="text-[10px] text-[#2C5E3B] dark:text-[#A9CBA2] font-black uppercase tracking-widest">
+                        <p className="text-[11px] text-[var(--theme-accent)] font-semibold uppercase tracking-wider font-mono">
                             JOB: {formatJobId(job)}
                         </p>
                     </div>
                 </div>
                 <div className="flex items-center gap-2">
-                    <span className="text-[10px] font-black uppercase tracking-widest bg-stone-200/70 dark:bg-white/10 px-3 py-1.5 rounded-full text-stone-700 dark:text-stone-300 border border-stone-300/40 dark:border-white/10">
+                    <span className="text-[11px] font-semibold uppercase tracking-wider bg-[var(--theme-bg-subtle)] px-3 py-1 rounded-full text-[var(--theme-text-secondary)] border border-[var(--theme-border)]">
                         STEP {step === 'LOCATION' ? '1' : step === 'ITEM' ? '2' : '3'} OF {scanningPolicy.requirePutawayQuantityEntry ? '3' : '2'}
                     </span>
                 </div>
@@ -347,8 +351,6 @@ export const PutawayScanner: React.FC<PutawayScannerProps> = ({
 
             {/* Main View Area */}
             <div className="flex-1 relative w-full overflow-y-auto custom-scrollbar">
-                <div className={`absolute inset-0 opacity-10 blur-[100px] transition-colors duration-1000 pointer-events-none ${step === 'LOCATION' ? 'bg-[#2C5E3B]' : 'bg-emerald-600'} `} />
-
                 <div className="relative min-h-full flex flex-col items-center justify-start p-4 sm:p-6 pb-32 max-w-lg mx-auto">
                     {/* Status Orb */}
                     <PutawayScannerStatusOrb
@@ -357,17 +359,17 @@ export const PutawayScanner: React.FC<PutawayScannerProps> = ({
                         step={step}
                     />
 
-                    <h1 className={`text-xl sm:text-2xl md:text-3xl font-black text-stone-900 dark:text-white text-center uppercase tracking-tight mb-3 sm:mb-4 transition-all duration-300 ${isStrictlyValid ? 'text-[#2C5E3B] dark:text-[#A9CBA2]' : showError ? 'text-rose-500' : ''}`}>
+                    <h1 className={`text-xl sm:text-2xl md:text-3xl font-bold text-[var(--theme-text-primary)] text-center uppercase tracking-tight mb-3 sm:mb-4 transition-colors ${isStrictlyValid ? 'text-[var(--theme-accent)]' : showError ? 'text-rose-500' : ''}`}>
                         {showSuccess ? 'Success!' : showError ? 'Scan Error' : step === 'LOCATION' ? (isStrictlyValid ? t('warehouse.putaway.confirmLocation') : t('warehouse.scanLocation')) : step === 'ITEM' ? t('warehouse.scanSkuToConfirm') : 'Enter Shelved Quantity'}
                     </h1>
 
                     {showSuccess ? (
-                        <div className="text-center mb-6 animate-in fade-in zoom-in duration-300">
-                            <p className="text-emerald-500 text-lg font-black uppercase tracking-widest drop-shadow-sm">{successMsg}</p>
+                        <div className="text-center mb-6 animate-in fade-in duration-200">
+                            <p className="text-emerald-500 text-lg font-bold uppercase tracking-wider">{successMsg}</p>
                         </div>
                     ) : showError ? (
-                        <div className="text-center mb-6 animate-in fade-in zoom-in duration-300">
-                            <p className="text-rose-500 text-lg font-black uppercase tracking-widest drop-shadow-sm">{errorMsg}</p>
+                        <div className="text-center mb-6 animate-in fade-in duration-200">
+                            <p className="text-rose-500 text-lg font-bold uppercase tracking-wider">{errorMsg}</p>
                         </div>
                     ) : step === 'LOCATION' ? (
                         <div className="w-full mb-6">
@@ -400,7 +402,7 @@ export const PutawayScanner: React.FC<PutawayScannerProps> = ({
                     )}
 
                     {/* Input Area */}
-                    <form onSubmit={handleScan} className="w-full max-w-md relative z-20 group space-y-4">
+                    <form onSubmit={handleScan} className="w-full max-w-md relative z-20 space-y-4">
                         <div className="relative">
                             <input
                                 ref={inputRef}
@@ -413,10 +415,10 @@ export const PutawayScanner: React.FC<PutawayScannerProps> = ({
                                 onChange={(e) => setInputVal(e.target.value)}
                                 onKeyDown={step !== 'QUANTITY' ? scanOnlyHandlers.onKeyDown : undefined}
                                 onPaste={step !== 'QUANTITY' ? scanOnlyHandlers.onPaste : undefined}
-                                className={`w-full bg-white dark:bg-[#1C2620] border-2 sm:border-3 rounded-2xl py-4 sm:py-5 px-4 text-center text-2xl sm:text-3xl font-black font-mono text-stone-900 dark:text-white placeholder:text-stone-300 dark:placeholder:text-stone-700 focus:outline-none shadow-xl transition-all duration-300 ${
+                                className={`w-full bg-[var(--theme-bg-card)] border-2 rounded-2xl py-3.5 sm:py-4 px-4 text-center text-2xl sm:text-3xl font-bold font-mono text-[var(--theme-text-primary)] placeholder:text-[var(--theme-text-secondary)] focus:outline-none transition-colors ${
                                     awaitingOccupancyConfirmation || awaitingMismatchConfirmation 
-                                        ? 'border-amber-400 shadow-amber-500/25 ring-2 ring-amber-400/30' 
-                                        : 'border-[#E2DCCE] dark:border-white/10 focus:border-[#2C5E3B] dark:focus:border-[#A9CBA2]'
+                                        ? 'border-amber-400' 
+                                        : 'border-[var(--theme-border)] focus:border-[var(--theme-accent)]'
                                 }`}
                                 placeholder={
                                     step === 'LOCATION'
@@ -431,8 +433,8 @@ export const PutawayScanner: React.FC<PutawayScannerProps> = ({
                         </div>
 
                         {step === 'LOCATION' && inputVal.trim() && (
-                            <div className="text-center animate-in fade-in slide-in-from-bottom-1 duration-200">
-                                <p className="text-[10px] font-black uppercase tracking-wider text-[#2C5E3B] dark:text-[#A9CBA2] flex items-center justify-center gap-2">
+                            <div className="text-center animate-in fade-in duration-200">
+                                <p className="text-[11px] font-semibold uppercase tracking-wider text-[var(--theme-accent)] flex items-center justify-center gap-2">
                                     {isStrictlyValid ? `DETECTED: ${decodeLocation(inputVal.trim().toUpperCase())}` : 'Scan a location barcode'}
                                 </p>
                             </div>
@@ -450,39 +452,29 @@ export const PutawayScanner: React.FC<PutawayScannerProps> = ({
                         <button
                             type="submit"
                             disabled={!inputVal.trim() || isProcessing || isPlacementBlocked}
-                            className={`w-full py-4 sm:py-5 rounded-2xl flex items-center justify-center gap-3 transition-all duration-300 min-h-[52px] active:scale-[0.98] shadow-lg border-2 ${
+                            className={`w-full py-3.5 sm:py-4 rounded-xl flex items-center justify-center gap-2 transition-colors min-h-[48px] border ${
                                 !inputVal.trim() || isProcessing
-                                    ? 'bg-stone-200 dark:bg-stone-800 border-stone-300/40 dark:border-white/5 text-stone-400 dark:text-stone-600 cursor-not-allowed opacity-70'
+                                    ? 'bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] text-[var(--theme-text-secondary)] cursor-not-allowed opacity-60'
                                     : isPlacementBlocked
-                                        ? 'bg-rose-500 border-rose-400 text-white cursor-not-allowed'
+                                        ? 'bg-rose-600 border-rose-500 text-white cursor-not-allowed'
                                         : awaitingOccupancyConfirmation || awaitingMismatchConfirmation
-                                            ? 'bg-amber-600 hover:bg-amber-700 border-amber-500 text-white font-black uppercase tracking-wider shadow-amber-500/30 animate-pulse'
-                                            : 'bg-[#2C5E3B] hover:bg-[#1E3B24] border-[#2C5E3B] text-white font-black uppercase tracking-wider shadow-[#2C5E3B]/20'
+                                            ? 'bg-amber-600 hover:bg-amber-500 border-amber-500 text-white font-semibold uppercase tracking-wider'
+                                            : 'bg-[var(--theme-accent)] hover:opacity-90 border-[var(--theme-accent)] text-white font-semibold uppercase tracking-wider'
                             }`}
                         >
                             {isProcessing ? (
-                                <RotateCcw size={22} className="animate-spin" />
+                                <RotateCcw size={20} className="animate-spin" />
                             ) : (
-                                <CheckCircle size={22} className="stroke-[2.5]" />
+                                <CheckCircle size={20} />
                             )}
-                            <span className="text-xs sm:text-sm font-black uppercase tracking-wider">
-                                {isProcessing 
-                                    ? 'Processing...' 
-                                    : isPlacementBlocked 
-                                        ? 'BLOCKED' 
-                                        : awaitingOccupancyConfirmation 
-                                            ? 'CONFIRM MERGE' 
-                                            : awaitingMismatchConfirmation 
-                                                ? 'CONFIRM LOCATION' 
-                                                : step === 'QUANTITY'
-                                                    ? 'CONFIRM QUANTITY'
-                                                    : 'SUBMIT'}
+                            <span className="text-xs sm:text-sm font-semibold uppercase tracking-wider">
+                                {isProcessing ? 'Processing...' : isPlacementBlocked ? 'BLOCKED' : awaitingOccupancyConfirmation ? 'CONFIRM MERGE' : awaitingMismatchConfirmation ? 'CONFIRM LOCATION' : step === 'QUANTITY' ? 'CONFIRM QUANTITY' : 'SUBMIT'}
                             </span>
                         </button>
                     </form>
 
-                    <p className="mt-8 text-stone-400 dark:text-stone-600 text-[10px] font-black font-mono uppercase tracking-[0.3em] text-center opacity-60">
-                        Warehouse Scanner • Active Mode
+                    <p className="mt-8 text-[var(--theme-text-secondary)] text-[11px] font-medium font-mono uppercase tracking-widest text-center">
+                        Warehouse Scanner / Active Mode
                     </p>
                 </div>
             </div>

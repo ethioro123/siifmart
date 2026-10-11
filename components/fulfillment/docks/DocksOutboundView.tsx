@@ -1,5 +1,5 @@
-import React from 'react';
-import { Upload, Truck, X, User as UserIcon, Printer, Package, Box, Plus, Clock, Navigation, Trash2 } from 'lucide-react';
+import React, { useState } from 'react';
+import { Upload, Truck, X, User as UserIcon, Package, Navigation, Trash2 } from 'lucide-react';
 import { WMSJob, Site, User, Product } from '../../../types';
 import { DocksOutboundHistory } from './DocksOutboundHistory';
 import { useFulfillment } from '../FulfillmentContext';
@@ -7,9 +7,7 @@ import { DocksOutboundDepartures } from './components/DocksOutboundDepartures';
 import { DocksOutboundStaging } from './components/DocksOutboundStaging';
 import { DockAssignModal } from './components/DockAssignModal';
 
-// ────────────────────────────────────────────────────────────────
-//  CONSTANTS — single source of truth for dock bay identifiers
-// ────────────────────────────────────────────────────────────────
+// CONSTANTS — single source of truth for dock bay identifiers
 const OUTBOUND_DOCKS = ['D1', 'D2', 'D3', 'D4', 'D5', 'D6'] as const;
 
 interface DocksOutboundViewProps {
@@ -24,16 +22,12 @@ interface DocksOutboundViewProps {
     wmsJobsService: any;
     refreshData: () => Promise<void>;
     addNotification: (type: 'success' | 'alert' | 'info', message: string) => void;
-    generatePackLabelHTML: (data: any, options: any) => Promise<string>;
-    completeJob: (jobId: string, employeeName: string) => Promise<any>;
+    generatePackLabelHTML?: (data: any, options: any) => Promise<string>;
+    completeJob?: (jobId: string, employeeName: string) => Promise<any>;
     viewMode: 'Process' | 'History';
     t: (key: string) => string;
-    products: Product[];
+    products?: Product[];
 }
-
-// ────────────────────────────────────────────────────────────────
-//  HELPERS — derive dock state from the jobs array
-// ────────────────────────────────────────────────────────────────
 
 /** A DISPATCH job sitting at a specific dock bay (active, not completed/cancelled) */
 const findDockJob = (jobs: WMSJob[], dock: string): WMSJob | undefined =>
@@ -63,10 +57,6 @@ const getShippedJobs = (jobs: WMSJob[]): WMSJob[] =>
         j.status !== 'Cancelled'
     );
 
-// ────────────────────────────────────────────────────────────────
-//  COMPONENT
-// ────────────────────────────────────────────────────────────────
-
 export const DocksOutboundView: React.FC<DocksOutboundViewProps> = ({
     jobs,
     sites,
@@ -79,11 +69,8 @@ export const DocksOutboundView: React.FC<DocksOutboundViewProps> = ({
     user,
     refreshData,
     addNotification,
-    generatePackLabelHTML,
-    completeJob,
     viewMode,
     t,
-    products
 }) => {
     const stagingJobs = getStagingJobs(jobs);
     const shippedJobs = getShippedJobs(jobs);
@@ -91,8 +78,8 @@ export const DocksOutboundView: React.FC<DocksOutboundViewProps> = ({
     const isMgr = ['super_admin', 'admin', 'regional_manager', 'operations_manager', 'warehouse_manager'].includes((user?.role || '').toLowerCase());
     const isOpStaff = isMgr || (user?.role || '').toLowerCase() === 'dispatcher';
 
-    const [selectedEmptyDock, setSelectedEmptyDock] = React.useState<string | null>(null);
-    const [isAssigning, setIsAssigning] = React.useState(false);
+    const [selectedEmptyDock, setSelectedEmptyDock] = useState<string | null>(null);
+    const [isAssigning, setIsAssigning] = useState(false);
 
     const checkControlAccess = (actionName = 'Control actions') => {
         if (!isOpStaff) { addNotification('alert', `${actionName} requires Dispatcher or Warehouse Manager role.`); return false; }
@@ -124,24 +111,21 @@ export const DocksOutboundView: React.FC<DocksOutboundViewProps> = ({
     };
 
     return (
-        <div className="flex flex-col lg:flex-row gap-6 flex-1 min-h-0 overflow-y-auto lg:overflow-hidden custom-scrollbar pr-2">
+        <div className="flex flex-col lg:flex-row gap-4 sm:gap-6 flex-1 min-h-0 overflow-y-auto lg:overflow-hidden custom-scrollbar pr-1">
             {viewMode === 'Process' ? (
                 <>
-                    <div className="flex-1 flex flex-col gap-6 lg:overflow-y-auto custom-scrollbar pr-2">
-                        {/* ─── DOCK BAYS ─── */}
-                        <div className="glass-panel p-6 lg:p-8 relative overflow-hidden group shrink-0">
-                            <div className="absolute -top-24 -right-24 w-64 h-64 bg-[#2C5E3B]/10 blur-[100px] rounded-full pointer-events-none" />
-
-                            <h3 className="text-xl font-black text-slate-900 dark:text-white tracking-tight uppercase flex items-center gap-3 mb-8">
-                                <div className="p-2 bg-[#2C5E3B]/20 rounded-xl">
-                                    <Upload className="text-[#2C5E3B] dark:text-[#A9CBA2]" size={20} />
+                    <div className="flex-1 flex flex-col gap-4 sm:gap-6 lg:overflow-y-auto pr-1">
+                        {/* DOCK BAYS */}
+                        <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-4 sm:p-6 shrink-0 shadow-sm">
+                            <h3 className="text-base sm:text-lg font-bold text-[var(--theme-text-primary)] tracking-tight uppercase flex items-center gap-2.5 mb-6">
+                                <div className="p-2 bg-primary/10 rounded-xl border border-primary/20">
+                                    <Upload className="text-primary" size={18} />
                                 </div>
                                 {t('warehouse.docks.outboundTitle')}
                             </h3>
 
-                            <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-6 mb-12 relative z-10">
+                            <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-3 sm:gap-4 mb-8">
                                 {OUTBOUND_DOCKS.map(dock => {
-                                    // ✅ Single source of truth: derived from the jobs array
                                     const assignedJob = findDockJob(jobs, dock);
                                     const isOccupied = !!assignedJob;
                                     const destSite = sites.find(s => s.id === assignedJob?.destSiteId);
@@ -158,27 +142,30 @@ export const DocksOutboundView: React.FC<DocksOutboundViewProps> = ({
                                                     setSelectedEmptyDock(dock);
                                                 }
                                             }}
-                                            className={`relative flex flex-col rounded-[2.5rem] border-2 transition-all duration-500 overflow-hidden shadow-sm dark:shadow-2xl group cursor-pointer ${!isOccupied ? 'border-dashed border-[#E2DCCE]/60 dark:border-[#A9CBA2]/10 bg-[#FAF8F5]/30 dark:bg-[#18201B]/20 hover:border-[#2C5E3B]/40 hover:bg-[#FAF8F5]/60' : 'border-[#2C5E3B]/30 bg-[#2C5E3B]/5 dark:bg-[#A9CBA2]/5 hover:bg-[#2C5E3B]/10 dark:hover:bg-[#A9CBA2]/10'}`}
+                                            className={`relative flex flex-col rounded-2xl border transition-colors overflow-hidden shadow-sm cursor-pointer touch-manipulation ${
+                                                !isOccupied
+                                                    ? 'border-dashed border-[var(--theme-border)] bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card)]'
+                                                    : 'border-primary/30 bg-primary/5 hover:bg-primary/10'
+                                            }`}
                                         >
-                                            <span className="absolute top-4 left-5 font-black text-slate-200 dark:text-white/10 text-xl tracking-tighter z-0">{dock}</span>
+                                            <span className="absolute top-3 left-3.5 font-bold font-mono text-[var(--theme-text-muted)] text-sm tracking-tight z-0">{dock}</span>
 
                                             {!isOccupied ? (
-                                                <div className="flex-1 flex flex-col items-center justify-center p-8 gap-4 opacity-40 group-hover:opacity-100 transition-opacity">
-                                                    <div className="w-16 h-16 rounded-3xl border-2 border-dashed border-[#E2DCCE]/60 dark:border-[#A9CBA2]/10 flex items-center justify-center group-hover:border-[#2C5E3B]/40 group-hover:bg-[#2C5E3B]/10 transition-all">
-                                                        <Upload size={24} className="text-gray-600 group-hover:text-[#2C5E3B] dark:group-hover:text-[#A9CBA2]" />
+                                                <div className="flex-1 flex flex-col items-center justify-center p-6 gap-3 opacity-60 hover:opacity-100 transition-opacity">
+                                                    <div className="w-14 h-14 rounded-2xl border border-dashed border-[var(--theme-border)] flex items-center justify-center bg-[var(--theme-bg-card)]">
+                                                        <Upload size={22} className="text-[var(--theme-text-muted)]" />
                                                     </div>
                                                     <div className="text-center">
-                                                        <span className="text-[10px] font-black uppercase tracking-widest text-gray-500 block">{t('warehouse.docks.empty')}</span>
-                                                        <span className="text-[8px] font-bold text-[#2C5E3B] dark:text-[#A9CBA2] uppercase tracking-wider block mt-1">+ Click to Load</span>
+                                                        <span className="text-[11px] font-semibold uppercase tracking-wider text-[var(--theme-text-muted)] block">{t('warehouse.docks.empty')}</span>
+                                                        <span className="text-[11px] font-semibold text-primary uppercase tracking-wider block mt-1">+ Load</span>
                                                     </div>
                                                 </div>
                                             ) : (
-                                                <div className="flex-1 flex flex-col p-6 z-10">
-                                                    <div className="flex justify-between items-start mb-4">
-                                                        <div className="p-2 bg-[#2C5E3B]/20 rounded-xl">
-                                                            <Truck size={24} className="text-[#2C5E3B] dark:text-[#A9CBA2]" />
+                                                <div className="flex-1 flex flex-col p-4 z-10">
+                                                    <div className="flex justify-between items-start mb-3">
+                                                        <div className="p-2 bg-primary/10 rounded-xl border border-primary/20">
+                                                            <Truck size={20} className="text-primary" />
                                                         </div>
-                                                        {/* 🔧 FIX: Release Dock now persists the job back to staging in DB */}
                                                         <button
                                                             onClick={async (e) => {
                                                                 e.stopPropagation();
@@ -196,28 +183,24 @@ export const DocksOutboundView: React.FC<DocksOutboundViewProps> = ({
                                                                     addNotification('alert', 'Failed to release dock');
                                                                 }
                                                             }}
-                                                            className="p-1.5 hover:bg-stone-100 dark:hover:bg-[#18201B]/50 rounded-lg text-stone-500 hover:text-stone-900 dark:text-stone-400 dark:hover:text-white transition-colors"
+                                                            className="w-7 h-7 flex items-center justify-center rounded-lg bg-[var(--theme-bg-card)] hover:bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-[var(--theme-text-muted)] hover:text-[var(--theme-text-primary)] transition-colors touch-manipulation"
                                                             title="Return to Staging"
                                                         >
                                                             <X size={14} />
                                                         </button>
                                                     </div>
 
-                                                    <div className="mb-4 flex justify-between items-start">
-                                                        <div>
-                                                            <p className="text-[10px] text-[#2C5E3B] dark:text-[#A9CBA2] font-black tracking-widest uppercase mb-1">{formatJobId(assignedJob)}</p>
-                                                            <p className="text-sm font-black text-slate-900 dark:text-white uppercase break-words leading-tight">
-                                                                {destSite ? (
-                                                                    <>
-                                                                        {destSite.name} <span className="text-zinc-500 dark:text-zinc-600 font-normal lowercase">({destSite.code || destSite.id})</span>
-                                                                    </>
-                                                                ) : 'In-Transport'}
+                                                    <div className="mb-3 flex justify-between items-start gap-1">
+                                                        <div className="min-w-0">
+                                                            <p className="text-[11px] text-primary font-mono font-medium tracking-wider uppercase mb-0.5 truncate">{formatJobId(assignedJob)}</p>
+                                                            <p className="text-xs font-semibold text-[var(--theme-text-primary)] uppercase truncate">
+                                                                {destSite ? destSite.name : 'In-Transport'}
                                                             </p>
                                                         </div>
                                                         {['super_admin', 'warehouse_manager'].includes(user?.role as string) && (
                                                             <button
                                                                 onClick={(e) => handleDelete(e, assignedJob.id)}
-                                                                className="w-6 h-6 rounded border bg-slate-100 dark:bg-white/5 border-slate-200 dark:border-white/10 text-red-500 hover:text-white hover:bg-red-500 hover:border-red-500 transition-all flex items-center justify-center shrink-0"
+                                                                className="w-7 h-7 rounded-lg bg-[var(--theme-bg-card)] border border-[var(--theme-border)] text-red-500 hover:text-white hover:bg-red-500 hover:border-red-500 transition-colors flex items-center justify-center shrink-0 touch-manipulation"
                                                                 title="Delete Job"
                                                             >
                                                                 <Trash2 size={12} />
@@ -225,24 +208,24 @@ export const DocksOutboundView: React.FC<DocksOutboundViewProps> = ({
                                                         )}
                                                     </div>
 
-                                                    <div className="grid grid-cols-2 gap-3 mb-6">
-                                                        <div className="glass-panel-pushed p-2.5">
-                                                            <p className="text-[8px] text-gray-500 font-black uppercase tracking-wider mb-1">Payload</p>
-                                                            <p className="text-xs font-mono font-bold text-slate-900 dark:text-white">
+                                                    <div className="grid grid-cols-2 gap-2 mb-4">
+                                                        <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl p-2 text-center">
+                                                            <p className="text-[11px] text-[var(--theme-text-muted)] uppercase tracking-wider mb-0.5">Payload</p>
+                                                            <p className="text-xs font-mono font-bold tabular-nums text-[var(--theme-text-primary)]">
                                                                 {(assignedJob.lineItems?.length || 0) > 0
                                                                     ? assignedJob.lineItems.length
                                                                     : (assignedJob.items || 0)} Units
                                                             </p>
                                                         </div>
-                                                        <div className="glass-panel-pushed p-2.5">
-                                                            <p className="text-[8px] text-gray-500 font-black uppercase tracking-wider mb-1">Status</p>
-                                                            <p className="text-[10px] font-black text-[#2C5E3B] dark:text-[#A9CBA2] uppercase tracking-widest">DOCK LOADED</p>
+                                                        <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl p-2 text-center">
+                                                            <p className="text-[11px] text-[var(--theme-text-muted)] uppercase tracking-wider mb-0.5">Status</p>
+                                                            <p className="text-[11px] font-semibold text-primary uppercase tracking-wider">LOADED</p>
                                                         </div>
                                                     </div>
 
-                                                    <div className="mt-auto space-y-3" onClick={e => e.stopPropagation()}>
+                                                    <div className="mt-auto space-y-2.5" onClick={e => e.stopPropagation()}>
                                                         {/* Driver Assignment Type Toggle */}
-                                                        <div className="flex glass-panel-pushed p-1">
+                                                        <div className="flex bg-[var(--theme-bg-card)] border border-[var(--theme-border)] p-1 rounded-xl gap-1">
                                                             <button
                                                                 onClick={async () => {
                                                                     if (!checkControlAccess('Delivery mode toggle')) return;
@@ -263,7 +246,7 @@ export const DocksOutboundView: React.FC<DocksOutboundViewProps> = ({
                                                                         addNotification('alert', 'Toggle Failed');
                                                                     }
                                                                 }}
-                                                                className={`flex-1 py-1 text-[8px] font-bold rounded-md transition-all ${assignedJob.deliveryMethod !== 'External' ? 'bg-[#2C5E3B] dark:bg-[#EAE5D9] text-[#FAF8F5] dark:text-[#1E3B24] shadow-sm' : 'text-stone-500 hover:text-[#2C5E3B] dark:text-gray-500 dark:hover:text-white'}`}
+                                                                className={`flex-1 py-1 text-[11px] font-semibold rounded-lg transition-colors min-h-[32px] touch-manipulation ${assignedJob.deliveryMethod !== 'External' ? 'bg-primary text-white shadow-xs' : 'text-[var(--theme-text-muted)] hover:text-[var(--theme-text-primary)]'}`}
                                                             >
                                                                 INTERNAL
                                                             </button>
@@ -287,27 +270,27 @@ export const DocksOutboundView: React.FC<DocksOutboundViewProps> = ({
                                                                         addNotification('alert', 'Toggle Failed');
                                                                     }
                                                                 }}
-                                                                className={`flex-1 py-1 text-[8px] font-bold rounded-md transition-all ${assignedJob.deliveryMethod === 'External' ? 'bg-[#2C5E3B] dark:bg-[#EAE5D9] text-[#FAF8F5] dark:text-[#1E3B24] shadow-sm' : 'text-stone-500 hover:text-[#2C5E3B] dark:text-gray-500 dark:hover:text-white'}`}
+                                                                className={`flex-1 py-1 text-[11px] font-semibold rounded-lg transition-colors min-h-[32px] touch-manipulation ${assignedJob.deliveryMethod === 'External' ? 'bg-primary text-white shadow-xs' : 'text-[var(--theme-text-muted)] hover:text-[var(--theme-text-primary)]'}`}
                                                             >
                                                                 EXTERNAL
                                                             </button>
                                                         </div>
 
                                                         {/* Driver Assignment Input/Select */}
-                                                        <div className="relative">
-                                                            <div className="flex items-center gap-2 mb-2">
-                                                                <UserIcon size={12} className="text-gray-500" />
-                                                                <span className="text-[9px] text-gray-500 font-black uppercase tracking-widest">
-                                                                    {assignedJob.deliveryMethod === 'External' ? 'External Courier / Carrier' : 'Warehouse Driver'}
+                                                        <div>
+                                                            <div className="flex items-center gap-1.5 mb-1.5">
+                                                                <UserIcon size={12} className="text-[var(--theme-text-muted)]" />
+                                                                <span className="text-[11px] text-[var(--theme-text-muted)] font-medium uppercase tracking-wider">
+                                                                    {assignedJob.deliveryMethod === 'External' ? 'Courier / 3PL' : 'Driver'}
                                                                 </span>
                                                             </div>
                                                             
                                                             {assignedJob.deliveryMethod === 'External' ? (
-                                                                <div className="space-y-1.5">
+                                                                <div>
                                                                     <input
                                                                         type="text"
                                                                         list={`couriers-${assignedJob.id}`}
-                                                                        placeholder="Courier name or 3PL (e.g. DHL, EMS)..."
+                                                                        placeholder="Courier name..."
                                                                         aria-label="External Courier Name"
                                                                         title="External Courier Name"
                                                                         defaultValue={assignedJob.externalCarrierName || ''}
@@ -325,7 +308,7 @@ export const DocksOutboundView: React.FC<DocksOutboundViewProps> = ({
                                                                                 addNotification('alert', 'Save Failed');
                                                                             }
                                                                         }}
-                                                                        className="woody-input w-full px-3 py-2 text-[10px]"
+                                                                        className="w-full bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl px-2.5 py-1.5 text-xs text-[var(--theme-text-primary)] placeholder:text-[var(--theme-text-muted)] focus:outline-none focus:border-primary transition-colors min-h-[38px]"
                                                                     />
                                                                     <datalist id={`couriers-${assignedJob.id}`}>
                                                                         <option value="DHL Express" />
@@ -365,14 +348,14 @@ export const DocksOutboundView: React.FC<DocksOutboundViewProps> = ({
                                                                                     addNotification('alert', 'Assignment Failed');
                                                                                 }
                                                                             }}
-                                                                            className="woody-input w-full px-3 py-2 text-[10px] appearance-none cursor-pointer"
+                                                                            className="w-full bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl px-2.5 py-1.5 text-xs text-[var(--theme-text-primary)] focus:outline-none focus:border-primary transition-colors min-h-[38px] cursor-pointer touch-manipulation"
                                                                         >
-                                                                            <option value="">Select Warehouse Driver...</option>
+                                                                            <option value="" className="bg-[var(--theme-bg-card)]">Select Driver...</option>
                                                                             {siteDrivers.length === 0 ? (
-                                                                                <option value="" disabled>No drivers registered for this warehouse</option>
+                                                                                <option value="" disabled className="bg-[var(--theme-bg-card)]">No drivers found</option>
                                                                             ) : (
                                                                                 siteDrivers.map(e => (
-                                                                                    <option key={e.id} value={e.id}>{e.name} ({e.role.toUpperCase()})</option>
+                                                                                    <option key={e.id} value={e.id} className="bg-[var(--theme-bg-card)]">{e.name} ({e.role.toUpperCase()})</option>
                                                                                 ))
                                                                             )}
                                                                         </select>
@@ -381,40 +364,37 @@ export const DocksOutboundView: React.FC<DocksOutboundViewProps> = ({
                                                             )}
                                                         </div>
 
-                                                        <div className="flex flex-col gap-2">
-                                                            {/* 🏁 Mark Departure — moves job out of dock bay into shipped state */}
-                                                            {['Packed', 'Staged'].includes(assignedJob.transferStatus || '') && (
-                                                                <button
-                                                                    onClick={async (e) => {
-                                                                        e.stopPropagation();
-                                                                        if (!checkControlAccess('Departure controls')) return;
-                                                                        try {
-                                                                            await wmsJobsService.update(assignedJob.id, {
-                                                                                status: 'In-Progress',
+                                                        {['Packed', 'Staged'].includes(assignedJob.transferStatus || '') && (
+                                                            <button
+                                                                onClick={async (e) => {
+                                                                    e.stopPropagation();
+                                                                    if (!checkControlAccess('Departure controls')) return;
+                                                                    try {
+                                                                        await wmsJobsService.update(assignedJob.id, {
+                                                                            status: 'In-Progress',
+                                                                            transferStatus: 'Shipped',
+                                                                            location: 'In-Transit',
+                                                                            shippedAt: new Date().toISOString(),
+                                                                            assignedBy: user?.name || 'System'
+                                                                        } as any);
+                                                                        if (assignedJob.orderRef) {
+                                                                            const parentJob = jobs.find(j => (j.id === assignedJob.orderRef || j.jobNumber === assignedJob.orderRef) && j.type === 'TRANSFER');
+                                                                            await wmsJobsService.update(parentJob ? parentJob.id : assignedJob.orderRef, { 
                                                                                 transferStatus: 'Shipped',
-                                                                                location: 'In-Transit',
-                                                                                shippedAt: new Date().toISOString(),
                                                                                 assignedBy: user?.name || 'System'
                                                                             } as any);
-                                                                            if (assignedJob.orderRef) {
-                                                                                const parentJob = jobs.find(j => (j.id === assignedJob.orderRef || j.jobNumber === assignedJob.orderRef) && j.type === 'TRANSFER');
-                                                                                await wmsJobsService.update(parentJob ? parentJob.id : assignedJob.orderRef, { 
-                                                                                    transferStatus: 'Shipped',
-                                                                                    assignedBy: user?.name || 'System'
-                                                                                } as any);
-                                                                            }
-                                                                            await refreshData();
-                                                                            addNotification('success', 'Shipment Departed');
-                                                                        } catch (err) {
-                                                                            addNotification('alert', 'Status Update Failed');
                                                                         }
-                                                                    }}
-                                                                    className="woody-btn-primary w-full text-[9px] font-black uppercase tracking-[0.2em] py-2.5 rounded-xl flex items-center justify-center gap-2 active:scale-95"
-                                                                >
-                                                                    <Navigation size={14} /> Mark Departure
-                                                                </button>
-                                                            )}
-                                                        </div>
+                                                                        await refreshData();
+                                                                        addNotification('success', 'Shipment Departed');
+                                                                    } catch (err) {
+                                                                        addNotification('alert', 'Status Update Failed');
+                                                                    }
+                                                                }}
+                                                                className="w-full min-h-[44px] bg-primary hover:bg-primary/90 text-white text-xs font-semibold uppercase tracking-wider py-2 rounded-xl flex items-center justify-center gap-2 transition-colors active:scale-[0.98] shadow-sm touch-manipulation"
+                                                            >
+                                                                <Navigation size={14} /> Mark Departure
+                                                            </button>
+                                                        )}
                                                     </div>
                                                 </div>
                                             )}
@@ -423,7 +403,7 @@ export const DocksOutboundView: React.FC<DocksOutboundViewProps> = ({
                                 })}
                             </div>
 
-                            {/* ─── STAGING AREA ─── */}
+                            {/* STAGING AREA */}
                             <DocksOutboundStaging
                                 stagingJobs={stagingJobs}
                                 sites={sites}
@@ -444,7 +424,7 @@ export const DocksOutboundView: React.FC<DocksOutboundViewProps> = ({
                             />
                         </div>
 
-                        {/* ─── OUTBOUND SCHEDULE (Shipped / In-Transit) ─── */}
+                        {/* OUTBOUND SCHEDULE (Shipped / In-Transit) */}
                         <DocksOutboundDepartures
                             shippedJobs={shippedJobs}
                             sites={sites}
@@ -458,7 +438,7 @@ export const DocksOutboundView: React.FC<DocksOutboundViewProps> = ({
                     </div>
                 </>
             ) : (
-                <div className="w-full mt-6">
+                <div className="w-full mt-4">
                     <DocksOutboundHistory
                         jobs={jobs}
                         sites={sites}

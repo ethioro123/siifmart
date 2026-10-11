@@ -8,6 +8,7 @@ import { useData } from '../../contexts/DataContext';
 import { useStore } from '../../contexts/CentralStore';
 import { usePurchaseOrderMutations } from '../../hooks/usePurchaseOrderMutations';
 import { logger } from '../../utils/logger';
+import { purchaseOrdersService } from '../../services/purchase-orders.service';
 import { PurchaseOrdersMobileList } from './components/PurchaseOrdersMobileList';
 
 interface PurchaseOrdersListProps {
@@ -65,6 +66,19 @@ export const PurchaseOrdersList: React.FC<PurchaseOrdersListProps> = ({
         }
     };
 
+    // RULE 10: Lazy loading — load line items on-demand only when a PO is opened
+    const handleOpenPODetails = async (po: PurchaseOrder) => {
+        setSelectedPO(po);
+        if (!po.lineItems || po.lineItems.length === 0) {
+            try {
+                const fullPO = await purchaseOrdersService.getById(po.id);
+                if (fullPO) setSelectedPO(fullPO);
+            } catch (err) {
+                logger.warn('PurchaseOrdersList', 'Failed to lazy-fetch PO line items', { id: po.id, err });
+            }
+        }
+    };
+
     const handleDeletePO = async (e: React.MouseEvent, po: PurchaseOrder) => {
         e.stopPropagation();
         try {
@@ -87,79 +101,31 @@ export const PurchaseOrdersList: React.FC<PurchaseOrdersListProps> = ({
 
     const renderPriorityBadge = (priority?: string) => {
         const p = (priority || 'Normal').toLowerCase();
-        if (p === 'urgent' || p === 'high') {
-            return (
-                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold tracking-wide uppercase bg-red-500/10 text-red-500 border border-red-500/20">
-                    {priority || 'Normal'}
-                </span>
-            );
-        }
-        if (p === 'low') {
-            return (
-                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold tracking-wide uppercase bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] border border-[var(--theme-border)]">
-                    {priority || 'Normal'}
-                </span>
-            );
-        }
+        const isUrgent = p === 'urgent' || p === 'high';
         return (
-            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold tracking-wide uppercase bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] border border-[var(--theme-border)]">
+            <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold tracking-wide uppercase ${isUrgent ? 'bg-red-500/10 text-red-500 border border-red-500/20' : 'bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] border border-[var(--theme-border)]'}`}>
                 {priority || 'Normal'}
             </span>
         );
     };
 
     const renderStatusBadge = (status: string) => {
-        switch (status) {
-            case 'Received':
-                return (
-                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wider bg-emerald-500/10 text-emerald-500 border border-emerald-500/20">
-                        Received
-                    </span>
-                );
-            case 'Partially Received':
-                return (
-                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wider bg-amber-500/10 text-amber-500 border border-amber-500/20">
-                        Partially Received
-                    </span>
-                );
-            case 'Approved':
-                return (
-                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wider bg-blue-500/10 text-blue-500 border border-blue-500/20">
-                        Approved
-                    </span>
-                );
-            case 'Ordered':
-                return (
-                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wider bg-indigo-500/10 text-indigo-500 border border-indigo-500/20">
-                        Ordered
-                    </span>
-                );
-            case 'Draft':
-                return (
-                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wider bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] border border-[var(--theme-border)]">
-                        Draft
-                    </span>
-                );
-            case 'Pending':
-                return (
-                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wider bg-amber-500/10 text-amber-500 border border-amber-500/20">
-                        Pending
-                    </span>
-                );
-            case 'Cancelled':
-            case 'Rejected':
-                return (
-                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wider bg-red-500/10 text-red-500 border border-red-500/20">
-                        {status}
-                    </span>
-                );
-            default:
-                return (
-                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wider bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] border border-[var(--theme-border)]">
-                        {status}
-                    </span>
-                );
-        }
+        const config: Record<string, { bg: string; text: string; border: string }> = {
+            Received: { bg: 'bg-emerald-500/10', text: 'text-emerald-500', border: 'border-emerald-500/20' },
+            'Partially Received': { bg: 'bg-amber-500/10', text: 'text-amber-500', border: 'border-amber-500/20' },
+            Approved: { bg: 'bg-blue-500/10', text: 'text-blue-500', border: 'border-blue-500/20' },
+            Ordered: { bg: 'bg-indigo-500/10', text: 'text-indigo-500', border: 'border-indigo-500/20' },
+            Draft: { bg: 'bg-[var(--theme-bg-subtle)]', text: 'text-[var(--theme-text-secondary)]', border: 'border-[var(--theme-border)]' },
+            Pending: { bg: 'bg-amber-500/10', text: 'text-amber-500', border: 'border-amber-500/20' },
+            Cancelled: { bg: 'bg-red-500/10', text: 'text-red-500', border: 'border-red-500/20' },
+            Rejected: { bg: 'bg-red-500/10', text: 'text-red-500', border: 'border-red-500/20' },
+        };
+        const c = config[status] || config.Draft;
+        return (
+            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wider ${c.bg} ${c.text} border ${c.border}`}>
+                {status}
+            </span>
+        );
     };
 
     return (
@@ -347,20 +313,49 @@ export const PurchaseOrdersList: React.FC<PurchaseOrdersListProps> = ({
                                     <td className="px-5 py-4 align-middle text-right whitespace-nowrap">
                                         <div className="flex items-center justify-end gap-1.5">
                                             <button
-                                                onClick={(e) => { e.stopPropagation(); setSelectedPO(po); }}
+                                                onClick={(e) => { e.stopPropagation(); handleOpenPODetails(po); }}
                                                 className="h-8 px-3.5 rounded-full border border-[var(--theme-border)] bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card-hover)] text-[var(--theme-text-primary)] text-xs font-medium transition-all active:scale-[0.98]"
                                             >
                                                 Details
                                             </button>
-                                            {isDraft && canApprove && (
-                                                <button
-                                                    onClick={(e) => handleSingleApprove(e, po)}
-                                                    className="h-8 px-3.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-500 text-xs font-medium transition-all active:scale-[0.98] flex items-center gap-1.5"
-                                                    title="Approve"
-                                                >
-                                                    <CheckCircle size={13} /> Approve
-                                                </button>
-                                            )}
+                                            {isDraft && (() => {
+                                                const isCreator = Boolean(
+                                                    user?.name && ((po.createdBy && po.createdBy.toLowerCase().trim() === user.name.toLowerCase().trim()) ||
+                                                                   (po.requestedBy && po.requestedBy.toLowerCase().trim() === user.name.toLowerCase().trim()))
+                                                );
+
+                                                if (canApprove && (!isCreator || isCEO)) {
+                                                    return (
+                                                        <button
+                                                            onClick={(e) => handleSingleApprove(e, po)}
+                                                            className="h-8 px-3.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-xs font-medium transition-all active:scale-[0.98] flex items-center gap-1.5 cursor-pointer"
+                                                            title="Authorize & Sign Off PO"
+                                                        >
+                                                            <CheckCircle size={13} /> Sign Off
+                                                        </button>
+                                                    );
+                                                }
+
+                                                if (canApprove && isCreator && !isCEO) {
+                                                    return (
+                                                        <span
+                                                            className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-semibold bg-purple-500/10 text-purple-600 dark:text-purple-400 border border-purple-500/20"
+                                                            title="Zero-Trust: Cannot self-approve your own PO. Dual sign-off required."
+                                                        >
+                                                            <Clock size={11} /> Dual-Control
+                                                        </span>
+                                                    );
+                                                }
+
+                                                return (
+                                                    <span
+                                                        className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-semibold bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20"
+                                                        title="Awaiting Procurement Manager Sign-Off"
+                                                    >
+                                                        <Clock size={11} /> In Review
+                                                    </span>
+                                                );
+                                            })()}
                                             {((isCEO && po.status !== 'Received') || 
                                               (isOperationalDirector && po.status !== 'Received') ||
                                               (user?.role === 'warehouse_manager' && po.status !== 'Received') ||
@@ -411,7 +406,7 @@ export const PurchaseOrdersList: React.FC<PurchaseOrdersListProps> = ({
                     isCEO={isCEO}
                     selectedPOIds={selectedPOIds}
                     setSelectedPOIds={setSelectedPOIds}
-                    setSelectedPO={setSelectedPO}
+                    setSelectedPO={handleOpenPODetails}
                     handleSingleApprove={handleSingleApprove}
                     onEdit={onEdit}
                     handleDeletePO={handleDeletePO}

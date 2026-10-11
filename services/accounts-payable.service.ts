@@ -89,12 +89,15 @@ export const accountsPayableService = {
     /**
      * Get vendor invoices with optional filters
      */
-    async getInvoices(filters?: { countryCode?: string; siteId?: string; status?: string }): Promise<VendorInvoice[]> {
+    async getInvoices(filters?: { countryCode?: string; siteId?: string; status?: string; includeItems?: boolean }, limit: number = 25, offset: number = 0): Promise<VendorInvoice[]> {
         try {
+            // RULE 10: Lazy loading and 25-item shelf limit
+            const selectFields = filters?.includeItems ? '*, invoice_items(*)' : '*';
             let query = supabase
                 .from('vendor_invoices')
-                .select('*, invoice_items(*)')
-                .order('due_date', { ascending: true });
+                .select(selectFields)
+                .order('due_date', { ascending: true })
+                .range(offset, offset + limit - 1);
 
             if (filters?.countryCode) {
                 query = query.eq('country_code', filters.countryCode);

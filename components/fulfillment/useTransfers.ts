@@ -36,7 +36,7 @@ export const useTransfers = (deps: UseTransfersDeps) => {
 
         try {
             const created = await transfersService.create(transfer);
-            logger.debug('useTransfers', '✅ Transfer created in DB');
+            logger.debug('useTransfers', '[SUCCESS] Transfer created in DB');
 
             const enriched = {
                 ...created,

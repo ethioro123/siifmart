@@ -20,32 +20,44 @@ export const CountHeader: React.FC<CountHeaderProps> = ({
     const { t } = useLanguage();
 
     return (
-        <div className="glass-panel rounded-2xl p-6">
-            <div className="flex justify-between items-center mb-6">
-                <div>
-                    <h3 className="font-bold text-stone-900 dark:text-stone-100 flex items-center gap-2 text-lg">
-                        <ClipboardCheck className="text-[#2C5E3B] dark:text-[#A9CBA2]" size={24} />
-                        {t('warehouse.inventoryAuditTitle')}
-                    </h3>
-                    <p className="text-xs text-stone-500 dark:text-stone-400 mt-1">
-                        {countViewMode === 'Operations'
-                            ? (countSessionStatus === 'Idle' ? t('warehouse.startCountSession') : countSessionStatus === 'Active' ? t('warehouse.blindCountInProgress') : t('warehouse.reviewApproveVariances'))
-                            : t('warehouse.historicalAccuracyReports')}
-                    </p>
+        <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-4 sm:p-5 shadow-sm">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] flex items-center justify-center text-[var(--theme-accent)] shrink-0">
+                        <ClipboardCheck size={20} />
+                    </div>
+                    <div>
+                        <h3 className="font-bold text-[var(--theme-text-primary)] text-lg tracking-tight uppercase">
+                            {t('warehouse.inventoryAuditTitle')}
+                        </h3>
+                        <p className="text-xs text-[var(--theme-text-secondary)] font-medium mt-0.5">
+                            {countViewMode === 'Operations'
+                                ? (countSessionStatus === 'Idle' ? t('warehouse.startCountSession') : countSessionStatus === 'Active' ? t('warehouse.blindCountInProgress') : t('warehouse.reviewApproveVariances'))
+                                : t('warehouse.historicalAccuracyReports')}
+                        </p>
+                    </div>
                 </div>
 
-                <div className="flex items-center gap-4">
-                    {/* View Toggle */}
-                    <div className="flex bg-stone-50/50 dark:bg-[#1C2620]/30 rounded-xl p-1 border border-[#E2DCCE]/30 dark:border-[#A9CBA2]/[0.04]">
+                <div className="flex items-center gap-3 w-full md:w-auto justify-between md:justify-end">
+                    {/* View Toggle Segmented Control */}
+                    <div className="bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] p-1 rounded-xl flex items-center">
                         <button
                             onClick={() => setCountViewMode('Operations')}
-                            className={`px-4 py-2 rounded-lg text-xs font-bold transition-all ${countViewMode === 'Operations' ? 'bg-[#2C5E3B] text-white dark:bg-[#A9CBA2] dark:text-stone-900 shadow-sm' : 'text-stone-500 dark:text-stone-400 hover:text-stone-955 dark:hover:text-stone-100'} `}
+                            className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold uppercase tracking-wider transition-colors min-h-[36px] ${
+                                countViewMode === 'Operations'
+                                    ? 'bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)] shadow-sm'
+                                    : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)]'
+                            }`}
                         >
                             {t('warehouse.operations')}
                         </button>
                         <button
                             onClick={() => setCountViewMode('Reports')}
-                            className={`px-4 py-2 rounded-lg text-xs font-bold transition-all ${countViewMode === 'Reports' ? 'bg-[#2C5E3B] text-white dark:bg-[#A9CBA2] dark:text-stone-900 shadow-sm' : 'text-stone-500 dark:text-stone-400 hover:text-stone-955 dark:hover:text-stone-100'} `}
+                            className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold uppercase tracking-wider transition-colors min-h-[36px] ${
+                                countViewMode === 'Reports'
+                                    ? 'bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)] shadow-sm'
+                                    : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)]'
+                            }`}
                         >
                             {t('warehouse.reports')}
                         </button>
@@ -59,7 +71,7 @@ export const CountHeader: React.FC<CountHeaderProps> = ({
                                     setCountSessionItems([]);
                                 }
                             }}
-                            className="text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 text-xs font-bold border border-red-500/20 px-3 py-2 rounded-lg hover:bg-red-500/10"
+                            className="text-red-600 dark:text-red-400 hover:bg-red-500/10 text-xs font-semibold border border-red-500/20 px-3.5 py-2 rounded-xl transition-colors min-h-[44px]"
                         >
                             {t('warehouse.cancelSession')}
                         </button>
@@ -69,3 +81,5 @@ export const CountHeader: React.FC<CountHeaderProps> = ({
         </div>
     );
 };
+
+export default CountHeader;

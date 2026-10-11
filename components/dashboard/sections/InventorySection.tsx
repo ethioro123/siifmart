@@ -74,10 +74,10 @@ export const InventorySection = ({
 
             <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 h-[400px]">
                 {/* Stock Health */}
-                <div className="lg:col-span-1 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-3xl p-6 relative flex flex-col shadow-sm">
+                <div className="lg:col-span-1 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-6 relative flex flex-col shadow-sm">
                     <WidgetErrorBoundary title="Stock Health">
                         <h3 className="font-bold text-[var(--theme-text-primary)] mb-2 flex items-center gap-2 text-sm">
-                            <PieChartIcon className="text-[var(--theme-text-secondary)]" size={16} />
+                            <PieChartIcon className="text-emerald-600 dark:text-emerald-400" size={16} />
                             Stock Health
                         </h3>
                         <div className="flex-1 w-full min-h-0 relative">
@@ -97,17 +97,17 @@ export const InventorySection = ({
                 </div>
 
                 {/* Critical Alerts */}
-                <div className="lg:col-span-1 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-3xl p-6 relative flex flex-col justify-between group shadow-sm">
+                <div className="lg:col-span-1 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-6 relative flex flex-col justify-between group shadow-sm">
                     <h3 className="font-bold text-[var(--theme-text-primary)] flex items-center gap-2 text-sm">
-                        <AlertTriangle className="text-[var(--theme-text-secondary)]" size={16} />
+                        <AlertTriangle className="text-rose-500" size={16} />
                         Critical Alerts
                     </h3>
                     <div>
-                        <p className="text-4xl font-mono font-bold text-[var(--theme-text-primary)]">{activeAlerts}</p>
-                        <p className="text-xs text-[var(--theme-text-secondary)] mt-1">{metrics.lowStockCount} Low Stock Items</p>
-                        <p className="text-xs text-rose-500 dark:text-rose-400">{metrics.outOfStockCount} Out of Stock</p>
+                        <p className="text-4xl font-mono font-bold text-rose-600 dark:text-rose-400 tabular-nums">{activeAlerts}</p>
+                        <p className="text-xs text-amber-600 dark:text-amber-400 mt-1 font-medium">{metrics.lowStockCount} Low Stock Items</p>
+                        <p className="text-xs text-rose-600 dark:text-rose-400 font-semibold">{metrics.outOfStockCount} Out of Stock</p>
                     </div>
-                    <button onClick={() => navigate(METRIC_ROUTES.lowStock)} className="w-full py-2 bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-primary)] hover:text-[var(--theme-primary-text)] text-[var(--theme-text-primary)] text-xs font-bold rounded-xl border border-[var(--theme-border)] transition-colors cursor-pointer">
+                    <button onClick={() => navigate(METRIC_ROUTES.lowStock)} className="w-full py-2 bg-[var(--theme-bg-subtle)] hover:bg-rose-500 hover:text-white text-[var(--theme-text-primary)] text-xs font-semibold rounded-xl border border-[var(--theme-border)] transition-colors active:scale-[0.98] cursor-pointer">
                         View Alerts
                     </button>
                 </div>

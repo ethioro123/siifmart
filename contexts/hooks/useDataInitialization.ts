@@ -205,12 +205,13 @@ export function useDataInitialization({
       // Branch workers only require local activeSite data (fetched via useDataQueries).
       const canSwitchSites = ['super_admin', 'CEO', 'Super Admin', 'Admin', 'Auditor'].includes(user?.role || '');
 
+      // RULE 10: Lists/history default to 25 records on boot
       const [allProds, allSls, allOrds, allEmps, allSupps] = await Promise.all([
-        canSwitchSites ? productsService.getAll(undefined, 100).then(res => res.data) : Promise.resolve([]),
-        canSwitchSites ? salesService.getAll(undefined, 50).then(res => res.data) : Promise.resolve([]),
-        canSwitchSites ? purchaseOrdersService.getAll(undefined, 50).then(res => res.data) : Promise.resolve([]),
+        canSwitchSites ? productsService.getAll(undefined, 25).then(res => res.data) : Promise.resolve([]),
+        canSwitchSites ? salesService.getAll(undefined, 25).then(res => res.data) : Promise.resolve([]),
+        canSwitchSites ? purchaseOrdersService.getAll(undefined, 25).then(res => res.data) : Promise.resolve([]),
         employeesService.getAll(undefined, true),
-        suppliersService.getAll(100).then(res => res.data)
+        suppliersService.getAll(25).then(res => res.data)
       ]);
 
       setAllProducts(allProds);

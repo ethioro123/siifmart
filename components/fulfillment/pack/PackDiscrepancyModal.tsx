@@ -216,37 +216,38 @@ export const PackDiscrepancyModal: React.FC<PackDiscrepancyModalProps> = ({
 
     return (
         <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-[300] p-2 sm:p-4 overflow-x-hidden animate-in fade-in duration-200">
-            <div className="bg-white dark:bg-zinc-950 border-2 border-orange-500/30 rounded-3xl w-full max-w-xl shadow-2xl flex flex-col max-h-[90vh] overflow-hidden relative">
-
-                {/* Ambient glow */}
-                <div className="absolute -top-20 -left-20 w-60 h-60 bg-orange-500/5 blur-[80px] rounded-full pointer-events-none" />
+            <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-3xl w-full max-w-xl shadow-2xl flex flex-col max-h-[90vh] overflow-hidden relative">
 
                 {/* Header */}
-                <div className="p-5 border-b border-zinc-200 dark:border-white/10 bg-orange-50/60 dark:bg-orange-900/5 flex justify-between items-center shrink-0">
+                <div className="p-4 sm:p-5 border-b border-[var(--theme-border)] bg-[var(--theme-bg-card)] flex justify-between items-center shrink-0">
                     <div className="flex items-center gap-3">
-                        <div className="p-2.5 bg-orange-500/15 rounded-xl border border-orange-500/30">
-                            <ClipboardList size={18} className="text-orange-600 dark:text-orange-400" />
+                        <div className="p-2.5 bg-orange-500/10 rounded-2xl border border-orange-500/20 text-orange-500">
+                            <ClipboardList size={20} />
                         </div>
                         <div>
-                            <h3 className="text-sm font-black text-zinc-900 dark:text-zinc-100 uppercase tracking-widest">{t('warehouse.packing.flagDiscrepancy')}</h3>
-                            <p className="text-[10px] text-zinc-500 font-mono uppercase tracking-widest mt-0.5">{formatJobId(job)} · {t('warehouse.packing.packerCountVsManifest')}</p>
+                            <h3 className="text-sm font-semibold text-[var(--theme-text-primary)] uppercase tracking-wider">{t('warehouse.packing.flagDiscrepancy')}</h3>
+                            <p className="text-[11px] text-[var(--theme-text-secondary)] font-mono uppercase tracking-wider mt-0.5">{formatJobId(job)} · {t('warehouse.packing.packerCountVsManifest')}</p>
                         </div>
                     </div>
-                    <button onClick={onClose} className="p-2 hover:bg-zinc-100 dark:hover:bg-white/10 rounded-lg transition-colors" aria-label={t('warehouse.dismiss')}>
-                        <X size={18} className="text-zinc-500" />
+                    <button
+                        onClick={onClose}
+                        className="p-2.5 min-w-[44px] min-h-[44px] hover:bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] rounded-xl transition-colors flex items-center justify-center"
+                        aria-label={t('warehouse.dismiss')}
+                    >
+                        <X size={18} />
                     </button>
                 </div>
 
                 {step === 'DONE' ? (
-                    <div className="flex-1 flex flex-col items-center justify-center p-12 text-center">
-                        <div className="w-16 h-16 bg-green-500/15 rounded-full flex items-center justify-center border border-green-500/20 mb-4">
-                            <CheckCircle size={32} className="text-green-500" />
+                    <div className="flex-1 flex flex-col items-center justify-center p-10 text-center">
+                        <div className="w-16 h-16 bg-green-500/10 rounded-full flex items-center justify-center border border-green-500/20 mb-4 text-green-500">
+                            <CheckCircle size={32} />
                         </div>
-                        <h4 className="text-sm font-black text-zinc-900 dark:text-zinc-100 uppercase tracking-widest mb-2">{t('warehouse.packing.discrepancyLogged')}</h4>
-                        <p className="text-xs text-zinc-500 max-w-xs">{t('warehouse.packing.discrepancySuccessDesc')}</p>
+                        <h4 className="text-sm font-semibold text-[var(--theme-text-primary)] uppercase tracking-wider mb-2">{t('warehouse.packing.discrepancyLogged')}</h4>
+                        <p className="text-xs text-[var(--theme-text-secondary)] max-w-xs">{t('warehouse.packing.discrepancySuccessDesc')}</p>
                         <button
                             onClick={onClose}
-                            className="mt-8 px-8 py-3 bg-zinc-900 dark:bg-white text-white dark:text-black font-black text-xs uppercase tracking-widest rounded-xl transition-all hover:opacity-80"
+                            className="mt-6 px-8 py-3 min-h-[44px] bg-[var(--theme-text-primary)] text-[var(--theme-bg-app)] font-semibold text-xs uppercase tracking-wider rounded-xl transition-opacity hover:opacity-90 cursor-pointer"
                         >
                             {t('warehouse.dismiss')}
                         </button>
@@ -254,50 +255,55 @@ export const PackDiscrepancyModal: React.FC<PackDiscrepancyModalProps> = ({
                 ) : step === 'COUNT' ? (
                     <>
                         {/* Instructions */}
-                        <div className="mx-5 mt-4 p-3 bg-orange-50 dark:bg-orange-900/10 border border-orange-200 dark:border-orange-500/20 rounded-xl flex items-start gap-2 shrink-0">
-                            <AlertTriangle size={13} className="text-orange-500 mt-0.5 shrink-0" />
-                            <p className="text-[10px] text-orange-700 dark:text-orange-400 font-bold leading-relaxed">
+                        <div className="mx-4 sm:mx-5 mt-4 p-3 bg-orange-500/10 border border-orange-500/20 rounded-2xl flex items-start gap-2.5 shrink-0">
+                            <AlertTriangle size={15} className="text-orange-500 mt-0.5 shrink-0" />
+                            <p className="text-[11px] text-orange-700 dark:text-orange-400 font-medium leading-relaxed">
                                 {t('warehouse.packing.discrepancyInstructions')}
                             </p>
                         </div>
                         {/* Line items count */}
-                        <div className="flex-1 overflow-y-auto p-5 space-y-3 custom-scrollbar">
-                            <p className="text-[9px] font-black text-zinc-400 uppercase tracking-[0.2em] mb-2">{t('warehouse.packing.physicalCount')}</p>
+                        <div className="flex-1 overflow-y-auto p-4 sm:p-5 space-y-3 custom-scrollbar">
+                            <p className="text-[11px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider mb-2">{t('warehouse.packing.physicalCount')}</p>
                             {lines.map((line, i) => {
                                 const actual = parseInt(line.actualCount);
                                 const isDiff = !isNaN(actual) && actual !== line.expected;
                                 const isShort = isDiff && actual < line.expected;
-                                const isOver = isDiff && actual > line.expected;
                                 return (
-                                    <div key={i} className={`p-4 rounded-2xl border transition-all ${isDiff ? (isShort ? 'bg-red-50 dark:bg-red-900/10 border-red-300 dark:border-red-500/30' : 'bg-blue-50 dark:bg-blue-900/10 border-blue-300 dark:border-blue-500/30') : 'bg-zinc-50 dark:bg-white/5 border-zinc-200 dark:border-white/10'}`}>
+                                    <div key={i} className={`p-4 rounded-2xl border transition-colors ${
+                                        isDiff
+                                            ? isShort
+                                                ? 'bg-red-500/5 border-red-500/30'
+                                                : 'bg-blue-500/5 border-blue-500/30'
+                                            : 'bg-[var(--theme-bg-subtle)] border-[var(--theme-border)]'
+                                    }`}>
                                         <div className="flex items-center justify-between gap-3">
                                             <div className="flex items-center gap-3 flex-1 min-w-0">
-                                                <div className="w-8 h-8 bg-zinc-100 dark:bg-black/40 rounded-lg flex items-center justify-center shrink-0">
-                                                    <Package size={14} className="text-zinc-505" />
+                                                <div className="w-9 h-9 bg-[var(--theme-bg-card)] rounded-xl border border-[var(--theme-border)] flex items-center justify-center shrink-0 text-[var(--theme-text-secondary)]">
+                                                    <Package size={16} />
                                                 </div>
                                                 <div className="min-w-0">
-                                                    <p className="text-xs font-black text-zinc-900 dark:text-zinc-100 uppercase truncate">{line.name}</p>
-                                                    <p className="text-[9px] font-mono text-zinc-400">{line.sku}</p>
+                                                    <p className="text-xs font-semibold text-[var(--theme-text-primary)] uppercase truncate">{line.name}</p>
+                                                    <p className="text-[11px] font-mono text-[var(--theme-text-secondary)]">{line.sku}</p>
                                                 </div>
                                             </div>
                                             <div className="flex items-center gap-3 shrink-0">
                                                 {/* Manifest count */}
                                                 <div className="text-center">
-                                                    <p className="text-[8px] font-black text-zinc-400 uppercase tracking-widest">{t('warehouse.expected')}</p>
-                                                    <p className="text-sm font-black font-mono text-zinc-500">{line.expected}</p>
+                                                    <p className="text-[11px] font-semibold text-[var(--theme-text-secondary)] uppercase">{t('warehouse.expected')}</p>
+                                                    <p className="text-sm font-semibold font-mono text-[var(--theme-text-secondary)]">{line.expected}</p>
                                                 </div>
-                                                {isDiff && <ArrowRight size={13} className={isShort ? 'text-red-400' : 'text-blue-400'} />}
+                                                {isDiff && <ArrowRight size={14} className={isShort ? 'text-red-500' : 'text-blue-500'} />}
                                                 {/* Actual count stepper */}
                                                 <div className="text-center">
-                                                    <p className="text-[8px] font-black text-zinc-400 uppercase tracking-widest">{t('warehouse.picking')}</p>
+                                                    <p className="text-[11px] font-semibold text-[var(--theme-text-secondary)] uppercase">{t('warehouse.picking')}</p>
                                                     <div className="flex items-center gap-1 mt-0.5">
                                                         <button
                                                             onClick={() => adjustLine(i, -1)}
-                                                            className="w-6 h-6 rounded-md bg-zinc-200 dark:bg-white/10 flex items-center justify-center hover:bg-zinc-300 dark:hover:bg-white/20 transition-colors"
+                                                            className="w-8 h-8 rounded-xl bg-[var(--theme-bg-card)] border border-[var(--theme-border)] flex items-center justify-center hover:bg-[var(--theme-bg-subtle)] text-[var(--theme-text-primary)] transition-colors"
                                                             aria-label={t('warehouse.packing.decreaseQuantity')}
                                                             title={t('warehouse.packing.decreaseQuantity')}
                                                         >
-                                                            <Minus size={10} />
+                                                            <Minus size={12} />
                                                         </button>
                                                         <input
                                                             type="number"
@@ -309,27 +315,28 @@ export const PackDiscrepancyModal: React.FC<PackDiscrepancyModalProps> = ({
                                                             aria-label="Counted quantity"
                                                             title="Counted quantity"
                                                             placeholder="0"
-                                                            className={`w-12 text-center text-sm font-black font-mono border rounded-lg px-1 py-0.5 focus:outline-none transition-all ${isDiff
-                                                                ? isShort
-                                                                    ? 'border-red-400 bg-red-50 dark:bg-red-900/10 text-red-600 dark:text-red-300'
-                                                                    : 'border-blue-400 bg-blue-50 dark:bg-blue-900/10 text-blue-600 dark:text-blue-300'
-                                                                : 'border-zinc-200 dark:border-white/10 bg-white dark:bg-black/40 text-zinc-800 dark:text-zinc-200'
+                                                            className={`w-12 text-center text-sm font-semibold font-mono border rounded-xl px-1 py-1 focus:outline-none transition-colors ${
+                                                                isDiff
+                                                                    ? isShort
+                                                                        ? 'border-red-400 bg-red-500/10 text-red-600 dark:text-red-400'
+                                                                        : 'border-blue-400 bg-blue-500/10 text-blue-600 dark:text-blue-400'
+                                                                    : 'border-[var(--theme-border)] bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)]'
                                                             }`}
                                                         />
                                                         <button
                                                             onClick={() => adjustLine(i, 1)}
-                                                            className="w-6 h-6 rounded-md bg-zinc-200 dark:bg-white/10 flex items-center justify-center hover:bg-zinc-300 dark:hover:bg-white/20 transition-colors"
+                                                            className="w-8 h-8 rounded-xl bg-[var(--theme-bg-card)] border border-[var(--theme-border)] flex items-center justify-center hover:bg-[var(--theme-bg-subtle)] text-[var(--theme-text-primary)] transition-colors"
                                                             aria-label={t('warehouse.packing.increaseQuantity')}
                                                             title={t('warehouse.packing.increaseQuantity')}
                                                         >
-                                                            <Plus size={10} />
+                                                            <Plus size={12} />
                                                         </button>
                                                     </div>
                                                 </div>
                                             </div>
                                         </div>
                                         {isDiff && (
-                                            <div className={`mt-2 text-[9px] font-black text-right ${isShort ? 'text-red-500' : 'text-blue-500'}`}>
+                                            <div className={`mt-2 text-[11px] font-semibold text-right ${isShort ? 'text-red-500' : 'text-blue-500'}`}>
                                                 {isShort ? `▼ ${line.expected - (actual || 0)} ${t('warehouse.packing.missing')}` : `▲ ${(actual || 0) - line.expected} ${t('warehouse.packing.extra')}`}
                                             </div>
                                         )}
@@ -338,78 +345,82 @@ export const PackDiscrepancyModal: React.FC<PackDiscrepancyModalProps> = ({
                             })}
                         </div>
 
-                        <div className="p-5 border-t border-zinc-200 dark:border-white/10 bg-zinc-50/50 dark:bg-zinc-950/50 flex justify-between items-center shrink-0">
-                            <button onClick={onClose} className="px-5 py-2.5 text-xs font-black uppercase tracking-widest text-zinc-500 hover:text-zinc-800 dark:hover:text-white transition-colors">
+                        <div className="p-4 sm:p-5 border-t border-[var(--theme-border)] bg-[var(--theme-bg-card)] flex justify-between items-center shrink-0">
+                            <button
+                                onClick={onClose}
+                                className="px-5 py-2.5 min-h-[44px] text-xs font-semibold uppercase tracking-wider text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] transition-colors"
+                            >
                                 {t('warehouse.dismiss')}
                             </button>
                             <button
                                 disabled={!hasDiscrepancy}
                                 onClick={() => setStep('REASON')}
-                                className="px-8 py-2.5 bg-orange-500 hover:bg-orange-400 disabled:opacity-40 disabled:grayscale text-white font-black text-xs uppercase tracking-widest rounded-xl transition-all shadow-md shadow-orange-500/20 flex items-center gap-2"
+                                className="px-6 py-2.5 min-h-[44px] bg-orange-500 hover:bg-orange-600 disabled:opacity-40 disabled:grayscale text-white font-semibold text-xs uppercase tracking-wider rounded-xl transition-colors shadow-sm flex items-center gap-2 cursor-pointer"
                             >
-                                <AlertTriangle size={13} /> {t('warehouse.packing.logDiscrepancy')}
+                                <AlertTriangle size={15} /> {t('warehouse.packing.logDiscrepancy')}
                             </button>
                         </div>
                     </>
                 ) : (
                     /* REASON STEP */
                     <>
-                        <div className="flex-1 overflow-y-auto p-5 space-y-4 custom-scrollbar">
-                            <p className="text-[9px] font-black text-zinc-405 uppercase tracking-[0.2em]">{t('warehouse.packing.selectReasonCode')}</p>
+                        <div className="flex-1 overflow-y-auto p-4 sm:p-5 space-y-4 custom-scrollbar">
+                            <p className="text-[11px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider">{t('warehouse.packing.selectReasonCode')}</p>
                             <div className="space-y-2">
                                 {reasonOptions.map(r => (
                                     <button
                                         key={r.id}
                                         onClick={() => setReasonCode(r.id)}
-                                        className={`w-full flex items-center gap-3 p-3.5 rounded-xl border text-left transition-all ${reasonCode === r.id
-                                            ? 'bg-orange-50 dark:bg-orange-900/15 border-orange-300 dark:border-orange-500/30'
-                                            : 'bg-zinc-55 dark:bg-white/5 border-zinc-200 dark:border-white/10 opacity-60 hover:opacity-100'
+                                        className={`w-full flex items-center gap-3 p-3.5 rounded-2xl border text-left transition-colors cursor-pointer ${
+                                            reasonCode === r.id
+                                                ? 'bg-orange-500/10 border-orange-500/30'
+                                                : 'bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] opacity-70 hover:opacity-100'
                                         }`}
                                     >
-                                        <div className={`w-3 h-3 rounded-full border-2 shrink-0 ${reasonCode === r.id ? 'border-orange-500 bg-orange-500' : 'border-zinc-400'}`} />
+                                        <div className={`w-4 h-4 rounded-full border-2 shrink-0 ${reasonCode === r.id ? 'border-orange-500 bg-orange-500' : 'border-[var(--theme-border)]'}`} />
                                         <div>
-                                            <p className={`text-xs font-black uppercase tracking-wide ${r.color}`}>{r.label}</p>
-                                            <p className="text-[10px] text-zinc-405 mt-0.5">{r.desc}</p>
+                                            <p className={`text-xs font-semibold uppercase tracking-wide ${r.color}`}>{r.label}</p>
+                                            <p className="text-[11px] text-[var(--theme-text-secondary)] mt-0.5">{r.desc}</p>
                                         </div>
                                     </button>
                                 ))}
                             </div>
                             <div>
-                                <label className="text-[9px] font-black text-zinc-400 uppercase tracking-widest block mb-1.5">{t('warehouse.packing.additionalNotes')}</label>
+                                <label className="text-[11px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider block mb-1.5">{t('warehouse.packing.additionalNotes')}</label>
                                 <textarea
                                     value={notes}
                                     onChange={e => setNotes(e.target.value)}
                                     placeholder={t('warehouse.packing.additionalNotesPlaceholder')}
                                     rows={2}
-                                    className="w-full text-xs border border-zinc-200 dark:border-white/10 bg-zinc-50 dark:bg-black/40 rounded-xl px-4 py-3 text-zinc-800 dark:text-zinc-200 placeholder:text-zinc-450 dark:placeholder:text-zinc-700 focus:outline-none focus:border-orange-400 transition-all resize-none"
+                                    className="w-full text-xs border border-[var(--theme-border)] bg-[var(--theme-bg-subtle)] rounded-xl px-4 py-3 text-[var(--theme-text-primary)] placeholder:text-[var(--theme-text-secondary)] focus:outline-none focus:border-orange-400 transition-colors resize-none"
                                 />
                             </div>
 
                             {/* Linked Order Picker Card */}
-                            <div className="p-3 bg-zinc-50 dark:bg-white/5 border border-zinc-200 dark:border-white/10 rounded-xl flex items-center justify-between">
-                                <div className="flex items-center gap-2.5">
-                                    <div className="w-8 h-8 rounded-lg bg-blue-500/10 border border-blue-500/20 flex items-center justify-center">
-                                        <UserCheck size={15} className="text-blue-600 dark:text-blue-400" />
+                            <div className="p-3.5 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-2xl flex items-center justify-between">
+                                <div className="flex items-center gap-3">
+                                    <div className="w-8 h-8 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-600 dark:text-blue-400">
+                                        <UserCheck size={16} />
                                     </div>
                                     <div>
-                                        <p className="text-[9px] font-black text-zinc-400 uppercase tracking-widest">{t('warehouse.packing.linkedPicker') || 'Linked Order Picker'}</p>
-                                        <p className="text-xs font-black text-zinc-900 dark:text-zinc-100">{linkedPickerName}</p>
+                                        <p className="text-[11px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider">{t('warehouse.packing.linkedPicker') || 'Linked Order Picker'}</p>
+                                        <p className="text-xs font-semibold text-[var(--theme-text-primary)]">{linkedPickerName}</p>
                                     </div>
                                 </div>
-                                <span className="text-[10px] font-mono font-bold text-zinc-500 bg-zinc-100 dark:bg-white/10 px-2 py-0.5 rounded">
+                                <span className="text-[11px] font-mono font-medium text-[var(--theme-text-secondary)] bg-[var(--theme-bg-card)] px-2.5 py-1 rounded-lg border border-[var(--theme-border)]">
                                     {job.assignedTo || 'Unassigned'}
                                 </span>
                             </div>
 
                             {/* Mandatory Supervisor Co-Attribution Card */}
-                            <div className="p-4 bg-orange-50/50 dark:bg-orange-950/20 border border-orange-500/30 rounded-2xl space-y-3">
-                                <div className="flex items-center gap-2">
-                                    <ShieldCheck size={16} className="text-orange-600 dark:text-orange-400 shrink-0" />
+                            <div className="p-4 bg-orange-500/5 border border-orange-500/20 rounded-2xl space-y-3">
+                                <div className="flex items-center gap-2.5">
+                                    <ShieldCheck size={18} className="text-orange-600 dark:text-orange-400 shrink-0" />
                                     <div>
-                                        <p className="text-[10px] font-black text-orange-900 dark:text-orange-200 uppercase tracking-wider">
+                                        <p className="text-[11px] font-semibold text-orange-900 dark:text-orange-200 uppercase tracking-wider">
                                             {t('warehouse.packing.supervisorSignOff') || 'Supervisor Co-Attribution (Dual Control)'}
                                         </p>
-                                        <p className="text-[9px] text-zinc-500">
+                                        <p className="text-[11px] text-[var(--theme-text-secondary)] mt-0.5">
                                             {t('warehouse.packing.supervisorPinDesc') || 'A supervisor PIN or Employee ID is required to authorize and attribute this variance.'}
                                         </p>
                                     </div>
@@ -417,7 +428,7 @@ export const PackDiscrepancyModal: React.FC<PackDiscrepancyModalProps> = ({
 
                                 <div>
                                     <div className="relative">
-                                        <KeyRound size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-400" />
+                                        <KeyRound size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--theme-text-secondary)] pointer-events-none" />
                                         <input
                                             type="password"
                                             value={supervisorPin}
@@ -426,29 +437,32 @@ export const PackDiscrepancyModal: React.FC<PackDiscrepancyModalProps> = ({
                                                 if (authError) setAuthError('');
                                             }}
                                             placeholder="Enter Supervisor PIN / Employee ID..."
-                                            className="w-full text-xs font-mono pl-10 pr-4 py-2.5 bg-white dark:bg-black/50 border border-zinc-300 dark:border-white/10 rounded-xl focus:outline-none focus:border-orange-500 text-zinc-900 dark:text-white"
+                                            className="w-full text-xs font-mono pl-10 pr-4 py-2.5 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl focus:outline-none focus:border-orange-500 text-[var(--theme-text-primary)] min-h-[44px]"
                                         />
                                     </div>
                                     {authError && (
-                                        <p className="text-[10px] text-red-500 font-bold mt-1.5 flex items-center gap-1">
-                                            <AlertTriangle size={11} className="shrink-0" /> {authError}
+                                        <p className="text-[11px] text-red-500 font-semibold mt-1.5 flex items-center gap-1">
+                                            <AlertTriangle size={12} className="shrink-0" /> {authError}
                                         </p>
                                     )}
                                 </div>
                             </div>
                         </div>
-                        <div className="p-5 border-t border-zinc-200 dark:border-white/10 bg-zinc-50/50 dark:bg-zinc-950/50 flex justify-between items-center shrink-0">
-                            <button onClick={() => setStep('COUNT')} className="px-5 py-2.5 text-xs font-black uppercase tracking-widest text-zinc-500 hover:text-zinc-800 dark:hover:text-white transition-colors">
+                        <div className="p-4 sm:p-5 border-t border-[var(--theme-border)] bg-[var(--theme-bg-card)] flex justify-between items-center shrink-0">
+                            <button
+                                onClick={() => setStep('COUNT')}
+                                className="px-5 py-2.5 min-h-[44px] text-xs font-semibold uppercase tracking-wider text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] transition-colors"
+                            >
                                 &larr; {t('warehouse.driverHub.back')}
                             </button>
                             <button
                                 disabled={isSubmitting}
                                 onClick={handleSubmit}
-                                className="px-8 py-2.5 bg-orange-500 hover:bg-orange-400 disabled:opacity-50 text-white font-black text-xs uppercase tracking-widest rounded-xl transition-all shadow-md shadow-orange-500/20 flex items-center gap-2"
+                                className="px-6 py-2.5 min-h-[44px] bg-orange-500 hover:bg-orange-600 disabled:opacity-50 text-white font-semibold text-xs uppercase tracking-wider rounded-xl transition-colors shadow-sm flex items-center gap-2 cursor-pointer"
                             >
                                 {isSubmitting
-                                    ? <><Loader2 size={13} className="animate-spin" /> {t('warehouse.driverHub.saving')}</>
-                                    : <><CheckCircle size={13} /> {t('warehouse.packing.confirmAndLog')}</>
+                                    ? <><Loader2 size={15} className="animate-spin" /> {t('warehouse.driverHub.saving')}</>
+                                    : <><CheckCircle size={15} /> {t('warehouse.packing.confirmAndLog')}</>
                                 }
                             </button>
                         </div>

@@ -24,11 +24,11 @@ interface InventoryOverviewProps {
     currencySymbol?: string;
 }
 
-const getCOLORS = (_theme: string) => [
-    '#10b981', // Class A (Emerald)
-    '#3b82f6', // Class B (Blue)
-    '#f59e0b', // Class C (Amber)
-    '#ef4444'  // Fallback
+const getCOLORS = (theme: string) => [
+    theme === 'dark' ? '#2997FF' : '#0071E3', // Class A (Apple Accent)
+    theme === 'dark' ? '#30D158' : '#34C759', // Class B (Apple Emerald)
+    theme === 'dark' ? '#FF9F0A' : '#FF9500', // Class C (Apple Amber)
+    theme === 'dark' ? '#FF453A' : '#FF3B30'  // Fallback (Apple Coral)
 ];
 
 interface MetricCardProps {
@@ -36,29 +36,32 @@ interface MetricCardProps {
     value: string | number;
     sub: string;
     icon: React.ElementType;
-    color?: 'emerald' | 'amber' | 'red';
+    color?: 'emerald' | 'sky' | 'amber' | 'red';
 }
 
 const MetricCard = ({ title, value, sub, icon: Icon, color = 'emerald' }: MetricCardProps) => {
     const isAmber = color === 'amber';
     const isRed = color === 'red';
+    const isSky = color === 'sky';
 
     return (
-        <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-5 shadow-sm transition-all duration-150 hover:bg-[var(--theme-bg-card-hover)] group">
+        <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-5 shadow-xs transition-colors group">
             <div className="flex justify-between items-start mb-3">
-                <div className={`p-2.5 rounded-xl border ${
+                <div className={`w-10 h-10 rounded-xl flex items-center justify-center border shrink-0 ${
                     isRed
                         ? 'bg-rose-500/10 text-rose-500 border-rose-500/20'
                         : isAmber
                             ? 'bg-amber-500/10 text-amber-500 border-amber-500/20'
-                            : 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20'
+                            : isSky
+                                ? 'bg-sky-500/10 text-sky-500 border-sky-500/20'
+                                : 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20'
                 }`}>
                     <Icon size={18} />
                 </div>
             </div>
             <div>
-                <p className="text-[10px] text-[var(--theme-text-secondary)] font-bold uppercase tracking-wider">{title}</p>
-                <h3 className="text-2xl font-black font-mono text-[var(--theme-text-primary)] mt-0.5">{value}</h3>
+                <p className="text-[11px] text-[var(--theme-text-secondary)] font-semibold uppercase tracking-wider">{title}</p>
+                <h3 className="text-2xl sm:text-3xl font-bold font-mono tabular-nums text-[var(--theme-text-primary)] mt-0.5 tracking-tight">{value}</h3>
                 <p className="text-[11px] text-[var(--theme-text-muted)] font-medium mt-0.5">{sub}</p>
             </div>
         </div>
@@ -98,7 +101,7 @@ export const InventoryOverview: React.FC<InventoryOverviewProps> = ({
                     value={displayTurnRate}
                     sub="Annualized Velocity"
                     icon={RefreshCw}
-                    color="emerald"
+                    color="sky"
                 />
                 <MetricCard
                     title="Low Stock SKUs"
@@ -121,7 +124,7 @@ export const InventoryOverview: React.FC<InventoryOverviewProps> = ({
                 {/* Value by Category */}
                 <div className="lg:col-span-2 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-6 shadow-xs">
                     <div className="flex items-center gap-2 mb-5">
-                        <BarChart3 size={16} className="text-[var(--theme-text-primary)]" />
+                        <BarChart3 size={16} className="text-[var(--theme-accent)]" />
                         <h3 className="text-xs font-bold text-[var(--theme-text-primary)] uppercase tracking-wider">
                             Inventory Valuation by Category
                         </h3>
@@ -135,12 +138,12 @@ export const InventoryOverview: React.FC<InventoryOverviewProps> = ({
                                         dataKey="name"
                                         axisLine={false}
                                         tickLine={false}
-                                        tick={{ fill: 'var(--theme-text-secondary)', fontSize: 10, fontWeight: 700 }}
+                                        tick={{ fill: 'var(--theme-text-secondary)', fontSize: 11, fontWeight: 600 }}
                                     />
                                     <YAxis
                                         axisLine={false}
                                         tickLine={false}
-                                        tick={{ fill: 'var(--theme-text-secondary)', fontSize: 10, fontWeight: 700 }}
+                                        tick={{ fill: 'var(--theme-text-secondary)', fontSize: 11, fontWeight: 600 }}
                                     />
                                     <Tooltip
                                         contentStyle={{
@@ -148,30 +151,30 @@ export const InventoryOverview: React.FC<InventoryOverviewProps> = ({
                                             border: '1px solid var(--theme-border)',
                                             borderRadius: '12px',
                                             fontSize: '12px',
-                                            fontWeight: 'bold',
+                                            fontWeight: 600,
                                             color: 'var(--theme-text-primary)',
-                                            boxShadow: '0 4px 16px rgba(0,0,0,0.1)'
+                                            boxShadow: '0 8px 24px rgba(0,0,0,0.2)'
                                         }}
                                         cursor={{ fill: 'rgba(128,128,128,0.05)' }}
                                     />
-                                    <Bar dataKey="value" fill="var(--theme-text-primary)" radius={[4, 4, 0, 0]} barSize={36} />
+                                    <Bar dataKey="value" fill="var(--theme-accent)" radius={[6, 6, 0, 0]} barSize={32} />
                                 </BarChart>
                             </ResponsiveContainer>
                         </div>
                     ) : (
-                        <div className="h-[280px] flex flex-col items-center justify-center text-center p-6 border border-dashed border-[var(--theme-border)] rounded-2xl">
+                        <div className="h-[280px] flex flex-col items-center justify-center text-center p-6 border border-dashed border-[var(--theme-border)] rounded-2xl bg-[var(--theme-bg-subtle)]">
                             <BarChart3 size={36} className="text-[var(--theme-text-muted)] mb-2" />
-                            <p className="text-xs font-bold text-[var(--theme-text-secondary)]">No Category Valuation</p>
-                            <p className="text-[11px] text-[var(--theme-text-muted)] mt-0.5">Stock is currently empty for this facility</p>
+                            <p className="text-xs font-semibold text-[var(--theme-text-primary)]">No Category Valuation</p>
+                            <p className="text-[11px] text-[var(--theme-text-secondary)] mt-0.5">Stock is currently empty for this facility</p>
                         </div>
                     )}
                 </div>
 
                 {/* ABC Analysis */}
-                <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-6 shadow-sm flex flex-col justify-between">
+                <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-6 shadow-xs flex flex-col justify-between">
                     <div>
                         <div className="flex items-center gap-2 mb-4">
-                            <PieIcon size={16} className="text-emerald-500" />
+                            <PieIcon size={16} className="text-[var(--theme-accent)]" />
                             <h3 className="text-xs font-bold text-[var(--theme-text-primary)] uppercase tracking-wider">
                                 ABC Classification (Pareto)
                             </h3>
@@ -198,22 +201,23 @@ export const InventoryOverview: React.FC<InventoryOverviewProps> = ({
                                         </Pie>
                                         <Tooltip
                                             contentStyle={{
-                                                backgroundColor: theme === 'dark' ? '#000000' : '#ffffff',
-                                                border: `1px solid ${theme === 'dark' ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)'}`,
+                                                backgroundColor: 'var(--theme-bg-panel)',
+                                                border: '1px solid var(--theme-border)',
                                                 borderRadius: '12px',
                                                 fontSize: '12px',
-                                                fontWeight: 'bold',
-                                                color: theme === 'dark' ? '#F5F5F7' : '#1D1D1F'
+                                                fontWeight: 600,
+                                                color: 'var(--theme-text-primary)',
+                                                boxShadow: '0 8px 24px rgba(0,0,0,0.2)'
                                             }}
                                         />
                                     </PieChart>
                                 </ResponsiveContainer>
                             </div>
                         ) : (
-                            <div className="h-[180px] flex flex-col items-center justify-center text-center p-4 border border-dashed border-[var(--theme-border)] rounded-2xl">
+                            <div className="h-[180px] flex flex-col items-center justify-center text-center p-4 border border-dashed border-[var(--theme-border)] rounded-2xl bg-[var(--theme-bg-subtle)]">
                                 <PieIcon size={32} className="text-[var(--theme-text-muted)] mb-2" />
-                                <p className="text-xs font-bold text-[var(--theme-text-secondary)]">No SKUs to Classify</p>
-                                <p className="text-[11px] text-[var(--theme-text-muted)] mt-0.5">Add products to populate ABC Pareto</p>
+                                <p className="text-xs font-semibold text-[var(--theme-text-primary)]">No SKUs to Classify</p>
+                                <p className="text-[11px] text-[var(--theme-text-secondary)] mt-0.5">Add products to populate ABC Pareto</p>
                             </div>
                         )}
                     </div>
@@ -226,11 +230,11 @@ export const InventoryOverview: React.FC<InventoryOverviewProps> = ({
                                     <div className="flex items-center gap-2">
                                         <span
                                             style={{ backgroundColor: markerColor }}
-                                            className="w-2.5 h-2.5 rounded-full inline-block shrink-0"
+                                            className="w-2 h-2 rounded-full inline-block shrink-0"
                                         />
-                                        <span className="text-[var(--theme-text-secondary)] font-bold">{item.name}</span>
+                                        <span className="text-[11px] text-[var(--theme-text-secondary)] font-semibold">{item.name}</span>
                                     </div>
-                                    <span className="font-mono text-[var(--theme-text-primary)] font-bold">{item.value} SKUs</span>
+                                    <span className="font-mono tabular-nums text-xs font-semibold text-[var(--theme-text-primary)]">{item.value} SKUs</span>
                                 </div>
                             );
                         })}

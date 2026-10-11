@@ -73,32 +73,36 @@ export const RecountAuthModal: React.FC<RecountAuthModalProps> = ({
     };
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm animate-in fade-in duration-200">
-            <div className="bg-[#FAF8F5] dark:bg-[#1C2620] border border-[#E2DCCE] dark:border-white/10 rounded-3xl max-w-md w-full p-6 shadow-2xl space-y-4">
-                <div className="flex items-center justify-between pb-3 border-b border-[#E2DCCE]/60 dark:border-white/10">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 animate-in fade-in duration-200">
+            <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-3xl max-w-md w-full p-6 shadow-xl space-y-4">
+                <div className="flex items-center justify-between pb-3 border-b border-[var(--theme-border)]">
                     <div className="flex items-center gap-3">
-                        <div className="p-2.5 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">
+                        <div className="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 flex items-center justify-center shrink-0">
                             <ShieldCheck size={20} />
                         </div>
                         <div>
-                            <h3 className="font-bold text-stone-900 dark:text-stone-100 text-sm">Dual-Control Recount Authorization</h3>
-                            <p className="text-[10px] text-stone-500 uppercase tracking-wider font-mono">4-Eyes Verification Required</p>
+                            <h3 className="font-bold text-[var(--theme-text-primary)] text-sm">Dual-Control Recount Authorization</h3>
+                            <p className="text-[11px] text-[var(--theme-text-secondary)] uppercase tracking-wider font-mono">4-Eyes Verification Required</p>
                         </div>
                     </div>
-                    <button onClick={onClose} className="text-stone-400 hover:text-stone-600 dark:hover:text-white" aria-label="Close">
-                        <X size={18} />
+                    <button
+                        onClick={onClose}
+                        className="text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] min-h-[44px] min-w-[44px] flex items-center justify-center transition-colors"
+                        aria-label="Close"
+                    >
+                        <X size={20} />
                     </button>
                 </div>
 
-                <div className="p-3 bg-stone-100 dark:bg-black/20 rounded-xl border border-stone-200 dark:border-white/5 text-xs text-stone-600 dark:text-stone-300">
-                    <p className="font-semibold text-stone-900 dark:text-white">{productName}</p>
-                    <p className="text-[10px] font-mono text-stone-500">SKU: {productSku}</p>
+                <div className="p-3.5 bg-[var(--theme-bg-subtle)] rounded-xl border border-[var(--theme-border)] text-xs">
+                    <p className="font-semibold text-[var(--theme-text-primary)]">{productName}</p>
+                    <p className="text-[11px] font-mono tabular-nums text-[var(--theme-text-secondary)] mt-0.5">SKU: {productSku}</p>
                 </div>
 
                 <form onSubmit={handleVerify} className="space-y-4">
                     <div>
-                        <label className="block text-xs font-bold text-stone-700 dark:text-stone-300 mb-1 flex items-center gap-1.5">
-                            <KeyRound size={14} /> Supervisor / Second-Counter PIN or ID
+                        <label className="block text-xs font-semibold text-[var(--theme-text-primary)] mb-1.5 flex items-center gap-1.5">
+                            <KeyRound size={14} className="text-[var(--theme-accent)]" /> Supervisor / Second-Counter PIN or ID
                         </label>
                         <input
                             type="password"
@@ -106,30 +110,31 @@ export const RecountAuthModal: React.FC<RecountAuthModalProps> = ({
                             placeholder="Enter 4-digit PIN or Employee ID..."
                             value={pin}
                             onChange={(e) => setPin(e.target.value)}
-                            className="woody-input w-full text-center font-mono tracking-widest text-lg py-2.5"
+                            className="w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] focus:border-[var(--theme-accent)] rounded-xl text-center font-mono tabular-nums tracking-widest text-lg py-3 px-4 text-[var(--theme-text-primary)] outline-none min-h-[48px] transition-colors"
                         />
                     </div>
 
                     {error && (
-                        <div className="p-2.5 bg-red-500/10 border border-red-500/20 rounded-xl text-xs text-red-600 dark:text-red-400 flex items-center gap-2">
+                        <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-xl text-xs text-red-600 dark:text-red-400 flex items-center gap-2">
                             <AlertTriangle size={14} className="shrink-0" />
                             <span>{error}</span>
                         </div>
                     )}
 
-                    <div className="flex gap-2 pt-2">
+                    <div className="flex gap-2.5 pt-2">
                         <button
                             type="button"
                             onClick={onClose}
-                            className="woody-btn-secondary flex-1 py-2.5 text-xs"
+                            className="flex-1 py-3 px-4 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] hover:bg-[var(--theme-bg-card)] rounded-xl text-xs font-semibold text-[var(--theme-text-primary)] min-h-[44px] transition-colors"
                         >
                             Cancel
                         </button>
                         <button
                             type="submit"
-                            className="woody-btn-primary flex-1 py-2.5 text-xs font-bold flex items-center justify-center gap-2"
+                            className="flex-1 py-3 px-4 bg-[var(--theme-accent)] hover:opacity-90 text-white rounded-xl text-xs font-semibold flex items-center justify-center gap-2 min-h-[44px] shadow-sm transition-opacity"
                         >
-                            <ShieldCheck size={16} /> Authorize Recount
+                            <ShieldCheck size={16} />
+                            <span>Authorize Recount</span>
                         </button>
                     </div>
                 </form>
@@ -137,3 +142,5 @@ export const RecountAuthModal: React.FC<RecountAuthModalProps> = ({
         </div>
     );
 };
+
+export default RecountAuthModal;

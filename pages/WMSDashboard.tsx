@@ -1,7 +1,7 @@
 import React from 'react';
 import {
   Package, Truck, Activity, AlertTriangle, Thermometer,
-  ClipboardList, Clock, ArrowRight, CheckCircle, Box, ChevronRight, Target, UserPlus
+  ClipboardList, Clock, ArrowRight, CheckCircle, Box, Target, UserPlus
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { MOCK_ZONES } from '../constants';
@@ -11,14 +11,13 @@ import { useGamification } from '../contexts/GamificationContext';
 import OnboardTalentModal from '../components/employees/OnboardTalentModal';
 import NewHireHandoverBanner from '../components/employees/NewHireHandoverBanner';
 import { isManagerialRole } from '../utils/roles';
-
-import ClickableKPICard from '../components/ClickableKPICard';
 import { METRIC_ROUTES } from '../utils/metrics';
 import { native } from '../utils/native';
 import { useDateFilter } from '../hooks/useDateFilter';
 import DateRangeSelector from '../components/DateRangeSelector';
 import SiteRoster from '../components/SiteRoster';
 import RosterManager from '../components/RosterManager';
+import { Country, getCountryProfile } from '../utils/localization';
 
 // Subcomponents
 import DashboardFlowDynamics from '../components/wms-dashboard/DashboardFlowDynamics';
@@ -30,16 +29,20 @@ import { logger } from '../utils/logger';
 export default function WMSDashboard() {
   const navigate = useNavigate();
   const { user, theme } = useStore();
-  const { movements, addNotification, activeSite, employees } = useData();
-  const { getWorkerPoints, getLeaderboard } = useGamification();
+  const { movements, addNotification, activeSite, employees, settings, effectiveCountry } = useData();
+  const { getLeaderboard } = useGamification();
 
-  // Theme-aware colors for Charts
-  const chartStroke = theme === 'dark' ? 'rgba(169, 203, 162, 0.1)' : 'rgba(44, 94, 59, 0.1)';
-  const chartText = theme === 'dark' ? 'rgba(169, 203, 162, 0.5)' : 'rgba(44, 94, 59, 0.6)';
-  const inboundColor = theme === 'dark' ? '#A9CBA2' : '#2C5E3B';
-  const outboundColor = theme === 'dark' ? '#E2C899' : '#8C6239';
+  // Sovereign country scoping
+  const activeCountry: Country = (activeSite?.country || effectiveCountry || settings?.country || 'ET') as Country;
+  const countryProfile = getCountryProfile(activeCountry);
 
-  // --- DATE FILTER ---
+  // Apple HIG Theme-aware colors for Charts
+  const chartStroke = theme === 'dark' ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.06)';
+  const chartText = theme === 'dark' ? 'rgba(255, 255, 255, 0.45)' : 'rgba(0, 0, 0, 0.45)';
+  const inboundColor = theme === 'dark' ? '#2997FF' : '#0071E3';
+  const outboundColor = theme === 'dark' ? '#FF9F0A' : '#FF9500';
+
+  // Date Filter
   const { dateRange, setDateRange, startDate, endDate } = useDateFilter('This Quarter');
 
   // Server metrics state
@@ -50,7 +53,7 @@ export default function WMSDashboard() {
   const [isOnboardModalOpen, setIsOnboardModalOpen] = React.useState(false);
   const canOnboard = isManagerialRole(user?.role) && ['warehouse_manager', 'logistics_manager', 'inventory_manager', 'dispatch_manager', 'shift_lead', 'super_admin', 'admin', 'operations_manager', 'regional_manager'].includes(user?.role || '');
 
-  // Translate helper (in case page translations aren't globally bound, fallback to clean keys)
+  // Translate helper
   const t = (key: string) => {
     if (key === 'pos.cashSales') return 'Cash';
     if (key === 'pos.cardSales') return 'Card';
@@ -111,7 +114,7 @@ export default function WMSDashboard() {
     };
   }, [warehouseMetrics, inventoryMetrics, financialMetrics]);
 
-  // --- SITE-SPECIFIC GAMIFICATION DATA ---
+  // Site-Specific Gamification Data
   const siteLeaderboard = React.useMemo(() => {
     if (!activeSite?.id) return [];
     const siteStaff = employees.filter(emp => emp.siteId === activeSite.id);
@@ -174,34 +177,41 @@ export default function WMSDashboard() {
   };
 
   return (
-    <div className="space-y-6 md:space-y-8 bg-transparent relative transition-colors duration-300 w-full max-w-full overflow-hidden">
-      <div className="relative z-10 space-y-8">
+    <div className="space-y-6 md:space-y-8 bg-transparent relative transition-colors duration-200 w-full max-w-full overflow-hidden">
+      <div className="space-y-6">
 
         {/* Header with Date Filter & Alerts */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-[var(--theme-border)]">
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 pb-6 border-b border-[var(--theme-border)]">
           <div>
-            <div className="flex items-center gap-4 mb-2">
-              <div className="p-3 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-[var(--theme-text-primary)] rounded-2xl shadow-xs">
-                <Box size={24} />
+            <div className="flex items-center gap-3 mb-2">
+              <div className="w-10 h-10 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-[#0071E3] dark:text-[#2997FF] rounded-xl flex items-center justify-center shrink-0 shadow-xs">
+                <Box size={20} />
               </div>
               <div>
-                <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-[var(--theme-text-primary)] tracking-tight uppercase">Warehouse Operations Center</h1>
-                <div className="flex items-center gap-2 text-[var(--theme-text-secondary)] text-[10px] font-bold uppercase tracking-[0.3em] mt-2">
-                  <span className={`w-1.5 h-1.5 rounded-full ${refreshing ? 'bg-amber-500 animate-ping' : 'bg-emerald-500'}`}></span>
-                  {refreshing ? 'Synchronizing Operational Data...' : 'Operational Command Node'}
+                <div className="flex items-center gap-2">
+                  <h1 className="text-xl sm:text-2xl font-bold text-[var(--theme-text-primary)] tracking-tight">
+                    Warehouse Operations Center
+                  </h1>
+                  <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-[#0071E3]/10 text-[#0071E3] dark:text-[#2997FF]">
+                    {countryProfile.name} ({activeCountry})
+                  </span>
+                </div>
+                <div className="flex items-center gap-2 text-[var(--theme-text-secondary)] text-xs font-medium mt-1">
+                  <span className={`w-2 h-2 rounded-full ${refreshing ? 'bg-[#FF9500] animate-pulse' : 'bg-[#34C759]'}`} />
+                  <span>{refreshing ? 'Synchronizing Operational Data...' : `Operational Command Node • ${activeSite?.name || 'Central Facility'}`}</span>
                 </div>
               </div>
             </div>
           </div>
 
-          <div className="flex flex-wrap items-center gap-4">
-            <div className="flex items-center gap-3 p-1.5 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-2xl shadow-xs">
-              <div className="px-4 py-2 bg-red-500/10 border border-red-500/20 text-red-600 dark:text-red-400 text-[10px] font-bold uppercase tracking-widest rounded-xl flex items-center">
-                <AlertTriangle size={14} className="mr-2" />
+          <div className="flex flex-wrap items-center gap-3">
+            <div className="flex items-center gap-2">
+              <div className="px-3 py-1.5 bg-[#FF3B30]/10 border border-[#FF3B30]/20 text-[#FF3B30] dark:text-[#FF453A] text-xs font-medium rounded-xl flex items-center">
+                <AlertTriangle size={13} className="mr-1.5" />
                 {metrics.active_alerts} Alerts Active
               </div>
-              <div className="px-4 py-2 bg-amber-500/10 border border-amber-500/20 text-amber-700 dark:text-amber-400 text-[10px] font-bold uppercase tracking-widest rounded-xl flex items-center">
-                <Thermometer size={14} className="mr-2" />
+              <div className="px-3 py-1.5 bg-[#0071E3]/10 border border-[#0071E3]/20 text-[#0071E3] dark:text-[#2997FF] text-xs font-medium rounded-xl flex items-center">
+                <Thermometer size={13} className="mr-1.5" />
                 Zone C: -4°C
               </div>
             </div>
@@ -210,10 +220,10 @@ export default function WMSDashboard() {
               <button
                 type="button"
                 onClick={() => setIsOnboardModalOpen(true)}
-                className="px-4 py-2.5 bg-[#0071E3] dark:bg-[#2997FF] hover:opacity-95 text-white rounded-2xl text-xs font-semibold transition-all flex items-center gap-2 active:scale-95 shadow-xs cursor-pointer shrink-0"
+                className="h-9 px-3.5 bg-[#0071E3] dark:bg-[#2997FF] hover:opacity-90 active:scale-95 text-white rounded-xl text-xs font-semibold transition-all flex items-center gap-2 shadow-xs cursor-pointer shrink-0"
                 title="Onboard warehouse pickers, packers, receivers, drivers & operators"
               >
-                <UserPlus size={15} />
+                <UserPlus size={14} />
                 <span>Onboard Talent</span>
               </button>
             )}
@@ -225,34 +235,34 @@ export default function WMSDashboard() {
           </div>
         </div>
 
-        {/* ===== NEW RECRUIT CREDENTIAL HANDOVER ALERT ===== */}
+        {/* New Recruit Handover Alert */}
         <NewHireHandoverBanner />
 
         {/* KPI Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {[
-            { title: 'Pending Picks', value: metrics.pendingPicks, sub: `${metrics.criticalPicks} Priority`, icon: ClipboardList, color: 'text-amber-500', bg: 'bg-amber-500/10', route: METRIC_ROUTES.picks },
-            { title: 'Inbound POs', value: metrics.inboundPOs, sub: 'Dock Schedule', icon: Truck, color: 'text-emerald-500', bg: 'bg-emerald-500/10', route: METRIC_ROUTES.procurement },
-            { title: 'Cycle Time', value: metrics.avgCycleTime, sub: 'Efficiency', icon: Clock, color: 'text-blue-500', bg: 'bg-blue-500/10', route: METRIC_ROUTES.wms },
-            { title: 'Pick Accuracy', value: metrics.pickAccuracy, sub: 'Quality Score', icon: CheckCircle, color: 'text-purple-500', bg: 'bg-purple-500/10', route: METRIC_ROUTES.picks },
+            { title: 'Pending Picks', value: metrics.pendingPicks, sub: `${metrics.criticalPicks} Priority`, icon: ClipboardList, color: 'text-[#FF9500] dark:text-[#FF9F0A]', bg: 'bg-[#FF9500]/10', route: METRIC_ROUTES.picks },
+            { title: 'Inbound POs', value: metrics.inboundPOs, sub: 'Dock Schedule', icon: Truck, color: 'text-[#34C759] dark:text-[#30D158]', bg: 'bg-[#34C759]/10', route: METRIC_ROUTES.procurement },
+            { title: 'Cycle Time', value: metrics.avgCycleTime, sub: 'Efficiency', icon: Clock, color: 'text-[#0071E3] dark:text-[#2997FF]', bg: 'bg-[#0071E3]/10', route: METRIC_ROUTES.wms },
+            { title: 'Pick Accuracy', value: metrics.pickAccuracy, sub: 'Quality Score', icon: CheckCircle, color: 'text-purple-600 dark:text-purple-400', bg: 'bg-purple-500/10', route: METRIC_ROUTES.picks },
           ].map((kpi, idx) => (
             <div key={idx} onClick={() => navigate(kpi.route)} className="group relative cursor-pointer">
-              <div className="h-full bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-5 sm:p-6 transition-all duration-300 hover:translate-y-[-2px] shadow-xs hover:shadow-sm">
-                <div className="flex items-start justify-between mb-5">
-                  <div className={`p-3.5 rounded-xl ${kpi.bg} border border-[var(--theme-border)] shadow-xs transition-transform duration-300 group-hover:scale-105`}>
-                    <kpi.icon size={20} className={kpi.color} />
+              <div className="h-full bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-5 transition-all hover:border-[#0071E3]/30 shadow-xs">
+                <div className="flex items-start justify-between mb-4">
+                  <div className={`w-10 h-10 rounded-xl ${kpi.bg} flex items-center justify-center transition-transform group-hover:scale-105`}>
+                    <kpi.icon size={18} className={kpi.color} />
                   </div>
                 </div>
                 <div>
-                  <h3 className="text-[var(--theme-text-secondary)] text-[10px] font-bold uppercase tracking-[0.2em] mb-2">{kpi.title}</h3>
+                  <h3 className="text-xs font-medium text-[var(--theme-text-secondary)] mb-1">{kpi.title}</h3>
                   <div className="flex items-baseline gap-2">
-                    <span className="text-3xl font-bold text-[var(--theme-text-primary)] tracking-tight leading-none">{kpi.value}</span>
-                    <span className={`text-[11px] font-bold ${kpi.color}`}>{kpi.sub}</span>
+                    <span className="text-2xl font-bold font-mono text-[var(--theme-text-primary)] leading-none">{kpi.value}</span>
+                    <span className={`text-xs font-semibold ${kpi.color}`}>{kpi.sub}</span>
                   </div>
                 </div>
-                <div className="mt-4 pt-4 border-t border-[#E2DCCE]/40 dark:border-white/[0.04] flex items-center justify-between opacity-0 group-hover:opacity-100 transition-opacity">
-                  <span className="text-[9px] text-[#4D6E56] dark:text-[#7A9E83] font-bold uppercase tracking-widest">View Module</span>
-                  <ArrowRight size={14} className="text-[#4D6E56] dark:text-[#A9CBA2] group-hover:translate-x-1 transition-transform" />
+                <div className="mt-4 pt-3 border-t border-[var(--theme-border)] flex items-center justify-between opacity-0 group-hover:opacity-100 transition-opacity">
+                  <span className="text-[11px] text-[#0071E3] dark:text-[#2997FF] font-semibold">View Module</span>
+                  <ArrowRight size={14} className="text-[#0071E3] dark:text-[#2997FF] group-hover:translate-x-1 transition-transform" />
                 </div>
               </div>
             </div>
@@ -278,61 +288,63 @@ export default function WMSDashboard() {
           />
         </div>
 
-        {/* Operational Pipeline */}
-        <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-6 sm:p-8 relative overflow-hidden shadow-xs">
-          <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-6 relative">
-            <div>
-              <h3 className="text-lg font-bold text-[var(--theme-text-primary)] flex items-center gap-3 uppercase tracking-tight">
-                <div className="p-2.5 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-[var(--theme-text-primary)] rounded-xl shadow-xs">
-                  <Activity size={20} />
-                </div>
-                Operational Throughput
-              </h3>
-              <p className="text-[var(--theme-text-secondary)] text-xs mt-1 font-bold uppercase tracking-widest">Real-time throughput analysis</p>
+        {/* Operational Throughput */}
+        <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-5 sm:p-6 relative overflow-hidden shadow-xs">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 gap-4 relative">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-[#0071E3]/10 dark:bg-[#2997FF]/10 text-[#0071E3] dark:text-[#2997FF] flex items-center justify-center shrink-0">
+                <Activity size={20} />
+              </div>
+              <div>
+                <h3 className="text-base font-semibold text-[var(--theme-text-primary)]">
+                  Operational Throughput
+                </h3>
+                <p className="text-xs text-[var(--theme-text-secondary)] mt-0.5">Real-time throughput analysis</p>
+              </div>
             </div>
-            <div className="flex items-center gap-2 px-4 py-2 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl shrink-0 shadow-xs">
-              <span className="w-2 h-2 rounded-full bg-emerald-500" />
-              <span className="text-[10px] font-bold text-[var(--theme-text-secondary)] uppercase tracking-widest">System Online</span>
+            <div className="flex items-center gap-2 px-3 py-1.5 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-full shrink-0 self-start sm:self-auto">
+              <span className="w-2 h-2 rounded-full bg-[#34C759] dark:bg-[#30D158]" />
+              <span className="text-xs font-medium text-[var(--theme-text-secondary)]">System Online</span>
             </div>
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-5 relative">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3.5 relative">
             {[
-              { label: 'Putaway', key: 'PUTAWAY', sub: 'Inbound Ingest', icon: Package, color: 'text-emerald-700 dark:text-[#A9CBA2]', bg: 'bg-[#2C5E3B]/10 dark:bg-[#A9CBA2]/10' },
-              { label: 'Picking', key: 'PICK', sub: 'Outbound Flow', icon: Target, color: 'text-amber-600 dark:text-amber-500', bg: 'bg-amber-500/10' },
-              { label: 'Packing', key: 'PACK', sub: 'QA Validated', icon: Box, color: 'text-yellow-600 dark:text-[#E2C899]', bg: 'bg-yellow-500/10' },
-              { label: 'Dispatch', key: 'DISPATCH', sub: 'Postal Ready', icon: Truck, color: 'text-emerald-600 dark:text-[#7A9E83]', bg: 'bg-emerald-500/10' },
-              { label: 'Internal', key: 'TRANSFER', sub: 'Cross-Network', icon: ArrowRight, iconColor: 'text-stone-500', bg: 'bg-stone-500/10' },
-              { label: 'Audits', key: 'COUNT', sub: 'Purity Check', icon: ClipboardList, color: 'text-orange-600 dark:text-orange-400', bg: 'bg-orange-500/10' },
-              { label: 'Compliance', key: 'WASTE', sub: 'Resolution', icon: AlertTriangle, color: 'text-red-600 dark:text-red-400', bg: 'bg-red-500/10' },
-              { label: 'Returns', key: 'RETURNS', sub: 'Reverse Log', icon: ArrowRight, color: 'text-amber-700 dark:text-amber-600', bg: 'bg-amber-600/10' },
-              { label: 'Resupply', key: 'REPLENISH', sub: 'Buffer Sync', icon: Activity, color: 'text-emerald-600 dark:text-emerald-500', bg: 'bg-emerald-500/10' },
+              { label: 'Putaway', key: 'PUTAWAY', sub: 'Inbound Ingest', icon: Package, color: 'text-[#0071E3] dark:text-[#2997FF]', bg: 'bg-[#0071E3]/10 dark:bg-[#2997FF]/10' },
+              { label: 'Picking', key: 'PICK', sub: 'Outbound Flow', icon: Target, color: 'text-[#FF9500] dark:text-[#FF9F0A]', bg: 'bg-[#FF9500]/10' },
+              { label: 'Packing', key: 'PACK', sub: 'QA Validated', icon: Box, color: 'text-purple-600 dark:text-purple-400', bg: 'bg-purple-500/10' },
+              { label: 'Dispatch', key: 'DISPATCH', sub: 'Postal Ready', icon: Truck, color: 'text-[#34C759] dark:text-[#30D158]', bg: 'bg-[#34C759]/10' },
+              { label: 'Internal', key: 'TRANSFER', sub: 'Cross-Network', icon: ArrowRight, color: 'text-indigo-600 dark:text-indigo-400', bg: 'bg-indigo-500/10' },
+              { label: 'Audits', key: 'COUNT', sub: 'Purity Check', icon: ClipboardList, color: 'text-teal-600 dark:text-teal-400', bg: 'bg-teal-500/10' },
+              { label: 'Compliance', key: 'WASTE', sub: 'Resolution', icon: AlertTriangle, color: 'text-[#FF3B30] dark:text-[#FF453A]', bg: 'bg-[#FF3B30]/10' },
+              { label: 'Returns', key: 'RETURNS', sub: 'Reverse Log', icon: ArrowRight, color: 'text-amber-600 dark:text-amber-400', bg: 'bg-amber-500/10' },
+              { label: 'Resupply', key: 'REPLENISH', sub: 'Buffer Sync', icon: Activity, color: 'text-[#0071E3] dark:text-[#2997FF]', bg: 'bg-[#0071E3]/10' },
             ].map((cluster) => (
               <div
                 key={cluster.key}
-                className="bg-[#FAF8F5]/80 dark:bg-black/20 backdrop-blur-md p-4 sm:p-6 rounded-2xl md:rounded-[2rem] border border-[#E2DCCE] dark:border-emerald-950/20 hover:border-[#CFC6B4] dark:hover:border-emerald-800/30 hover:bg-[#FAF8F5] dark:hover:bg-[#1C2620]/65 transition-all duration-500 hover:translate-y-[-4px] group relative cursor-pointer shadow-sm hover:shadow-md overflow-hidden"
+                className="bg-[var(--theme-bg-subtle)] p-4 rounded-xl border border-[var(--theme-border)] hover:bg-[var(--theme-bg-card)] hover:border-[#0071E3]/30 transition-all group relative cursor-pointer shadow-xs"
               >
-                <div className="flex items-center justify-between mb-6 relative">
-                  <div className={`p-3 rounded-2xl ${cluster.bg} border border-[#E2DCCE]/40 dark:border-emerald-950/10 transition-transform duration-500 group-hover:scale-110`}>
-                    <cluster.icon size={18} className={cluster.color || cluster.iconColor} />
+                <div className="flex items-center justify-between mb-4">
+                  <div className={`w-8 h-8 rounded-lg ${cluster.bg} flex items-center justify-center transition-transform group-hover:scale-105`}>
+                    <cluster.icon size={16} className={cluster.color} />
                   </div>
                   <div className="flex flex-col items-end">
-                    <span className="text-2xl font-extrabold text-[#1E3F27] dark:text-[#EAE5D9] group-hover:text-[#2C5E3B] group-hover:dark:text-[#A9CBA2] transition-colors">
+                    <span className="text-xl font-bold font-mono text-[var(--theme-text-primary)]">
                       {warehouseMetrics?.queue_breakdown?.[cluster.key] || 0}
                     </span>
-                    <span className="text-[8px] font-bold text-[#4D6E56] dark:text-[#7A9E83] uppercase tracking-widest">Jobs</span>
+                    <span className="text-[10px] text-[var(--theme-text-secondary)] font-medium">Jobs</span>
                   </div>
                 </div>
-                <div className="relative">
-                  <p className="text-xs font-bold text-[#1E3F27] dark:text-[#EAE5D9] uppercase tracking-wider">{cluster.label}</p>
-                  <p className="text-[9px] text-[#4D6E56] dark:text-[#7A9E83] font-bold uppercase tracking-tight mt-1 truncate opacity-60">{cluster.sub}</p>
+                <div>
+                  <p className="text-xs font-semibold text-[var(--theme-text-primary)]">{cluster.label}</p>
+                  <p className="text-[11px] text-[var(--theme-text-secondary)] mt-0.5 truncate">{cluster.sub}</p>
                 </div>
               </div>
             ))}
           </div>
         </div>
 
-        {/* Site Performance elite Hub */}
+        {/* Site Performance Hub */}
         <DashboardLeaderboard
           siteLeaderboard={siteLeaderboard}
           activeSite={activeSite}
@@ -341,15 +353,15 @@ export default function WMSDashboard() {
 
         {/* Site Personnel & Scheduling Section */}
         <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 mt-6">
-          <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-6 sm:p-8 relative overflow-hidden shadow-xs">
-            <SiteRoster layout="grid" limit={8} className="relative z-10" />
+          <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-5 sm:p-6 shadow-xs">
+            <SiteRoster layout="grid" limit={8} />
 
             {canOnboard && (
-              <div className="mt-8 flex justify-center">
+              <div className="mt-6 flex justify-center">
                 <button
                   type="button"
                   onClick={() => setIsOnboardModalOpen(true)}
-                  className="px-6 py-2.5 bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card-hover)] border border-[var(--theme-border)] rounded-xl text-xs font-semibold text-[var(--theme-text-primary)] transition-all flex items-center gap-2 cursor-pointer shadow-xs active:scale-95"
+                  className="h-10 px-4 bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card-hover)] border border-[var(--theme-border)] rounded-xl text-xs font-semibold text-[var(--theme-text-primary)] transition-all flex items-center gap-2 cursor-pointer shadow-xs active:scale-95"
                 >
                   <UserPlus size={14} className="text-[#0071E3] dark:text-[#2997FF]" />
                   <span>Onboard Facility Staff</span>
@@ -358,8 +370,8 @@ export default function WMSDashboard() {
             )}
           </div>
 
-          <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-6 sm:p-8 relative overflow-visible shadow-xs">
-            <RosterManager className="relative z-10" />
+          <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-5 sm:p-6 shadow-xs">
+            <RosterManager />
           </div>
         </div>
 
@@ -372,33 +384,35 @@ export default function WMSDashboard() {
 
           {/* Global Performance Pulse */}
           <div className="lg:col-span-1 flex flex-col gap-6">
-            <div className="bg-white/80 dark:bg-[#18201B]/70 border border-[#E2DCCE] dark:border-emerald-950/20 lg:backdrop-blur-2xl rounded-3xl p-5 sm:p-6 lg:p-8 flex-1 flex flex-col justify-between group overflow-hidden relative shadow-sm transition-colors duration-500">
+            <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-5 sm:p-6 shadow-xs flex-1 flex flex-col justify-between">
               <div>
-                <h4 className="text-[10px] font-bold text-[#4D6E56] dark:text-[#7A9E83] uppercase tracking-widest mb-6">Network Load</h4>
-                <div className="relative h-40 w-full flex items-center justify-center">
-                  <div className="absolute inset-0 rounded-full border-4 border-stone-200 dark:border-white/5 shadow-inner" />
-                  <div className="absolute inset-0 rounded-full border-4 border-[#2C5E3B] dark:border-[#A9CBA2] border-t-transparent border-r-transparent opacity-60" />
+                <h4 className="text-xs font-semibold text-[var(--theme-text-secondary)] mb-6">Network Load</h4>
+                <div className="relative h-36 w-full flex items-center justify-center">
+                  <div className="absolute inset-0 rounded-full border-4 border-[var(--theme-border)]" />
+                  <div className="absolute inset-0 rounded-full border-4 border-[#0071E3] dark:border-[#2997FF] border-t-transparent border-r-transparent" />
                   <div className="text-center relative z-10">
-                    <span className="block text-4xl font-extrabold text-[#1E3F27] dark:text-[#EAE5D9] leading-none tracking-tight">84%</span>
-                    <span className="text-[9px] font-bold text-[#2C5E3B] dark:text-[#A9CBA2] uppercase tracking-widest mt-2 block">Optimal</span>
+                    <span className="block text-3xl font-bold font-mono text-[var(--theme-text-primary)] leading-none">84%</span>
+                    <span className="text-xs font-semibold text-[#34C759] dark:text-[#30D158] mt-1.5 block">Optimal</span>
                   </div>
                 </div>
               </div>
 
-              <div className="space-y-3 mt-8">
+              <div className="space-y-2.5 mt-6">
                 <button
+                  type="button"
                   onClick={() => handleQuickAction('receive')}
-                  className="w-full flex items-center justify-between p-4 bg-[#224429] dark:bg-[#EAE5D9] hover:bg-[#1B3520] dark:hover:bg-[#DFD9CA] text-[#FAF8F5] dark:text-[#1E3B24] rounded-2xl font-bold text-[10px] uppercase tracking-widest transition-all active:scale-95 shadow-sm cursor-pointer"
+                  className="w-full h-10 flex items-center justify-between px-4 bg-[#0071E3] dark:bg-[#2997FF] hover:opacity-90 active:scale-95 text-white rounded-xl text-xs font-semibold transition-all shadow-xs cursor-pointer"
                 >
-                  Launch Receive
-                  <ArrowRight size={16} />
+                  <span>Launch Receive</span>
+                  <ArrowRight size={15} />
                 </button>
                 <button
+                  type="button"
                   onClick={() => handleQuickAction('cycle')}
-                  className="w-full flex items-center justify-between p-4 bg-white/80 dark:bg-black/25 border border-[#E2DCCE] dark:border-emerald-950/20 text-[#2C4D35] dark:text-[#A9CBA2] hover:text-[#1E3F27] dark:hover:text-white rounded-2xl font-bold text-[10px] uppercase tracking-widest transition-all shadow-sm cursor-pointer"
+                  className="w-full h-10 flex items-center justify-between px-4 bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card-hover)] border border-[var(--theme-border)] text-[var(--theme-text-primary)] rounded-xl text-xs font-semibold transition-all cursor-pointer shadow-xs active:scale-95"
                 >
-                  Audit Systems
-                  <Package size={16} className="text-[#4D6E56] dark:text-[#7A9E83]" />
+                  <span>Audit Systems</span>
+                  <Package size={15} className="text-[var(--theme-text-secondary)]" />
                 </button>
               </div>
             </div>

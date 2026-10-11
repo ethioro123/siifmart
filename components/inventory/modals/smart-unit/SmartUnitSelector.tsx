@@ -23,8 +23,8 @@ export const SmartUnitSelector: React.FC<SmartUnitSelectorProps> = ({
         <div className="space-y-4">
             {/* Step 1: Charged at POS by */}
             <div className="space-y-2">
-                <label className="text-[11px] font-bold uppercase tracking-wider text-[var(--theme-text-muted)] flex items-center gap-1.5">
-                    <span className="w-4 h-4 rounded-full bg-[var(--theme-primary)] text-[var(--theme-primary-text)] text-[10px] flex items-center justify-center font-bold">1</span>
+                <label className="text-[11px] font-bold uppercase tracking-wider text-[var(--theme-text-secondary)] flex items-center gap-1.5">
+                    <span className="w-4 h-4 rounded-full bg-[var(--theme-accent)] text-white text-[11px] flex items-center justify-center font-bold">1</span>
                     Charged at POS by…
                 </label>
 
@@ -34,17 +34,17 @@ export const SmartUnitSelector: React.FC<SmartUnitSelectorProps> = ({
                         onClick={() => onCategoryChange('count')}
                         className={`p-3 rounded-xl border text-left transition-all cursor-pointer flex flex-col justify-between ${
                             category === 'count'
-                                ? 'bg-[var(--theme-primary)] text-[var(--theme-primary-text)] border-[var(--theme-primary)] shadow-sm'
-                                : 'bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] hover:bg-[var(--theme-bg-card-hover)]'
+                                ? 'bg-[var(--theme-accent)]/10 text-[var(--theme-text-primary)] border-[var(--theme-accent)] shadow-xs ring-1 ring-[var(--theme-accent)]/30'
+                                : 'bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] hover:bg-[var(--theme-bg-card-hover)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)]'
                         }`}
                     >
-                        <div className="flex items-center justify-between w-full mb-1">
-                            <Box size={16} />
-                            {category === 'count' && <Check size={14} />}
+                        <div className="flex items-center justify-between w-full mb-1.5">
+                            <Box size={16} className={category === 'count' ? 'text-[var(--theme-accent)]' : 'text-[var(--theme-text-secondary)]'} />
+                            {category === 'count' && <Check size={14} className="text-[var(--theme-accent)]" />}
                         </div>
                         <div>
-                            <p className="text-xs font-bold">By Count</p>
-                            <p className="text-[9px] opacity-80 leading-tight mt-0.5">Units, packs, bottles</p>
+                            <p className="text-xs font-bold text-[var(--theme-text-primary)]">By Count</p>
+                            <p className="text-[11px] text-[var(--theme-text-muted)] leading-tight mt-0.5">Units, packs, bottles</p>
                         </div>
                     </button>
 
@@ -53,17 +53,17 @@ export const SmartUnitSelector: React.FC<SmartUnitSelectorProps> = ({
                         onClick={() => onCategoryChange('weight')}
                         className={`p-3 rounded-xl border text-left transition-all cursor-pointer flex flex-col justify-between ${
                             category === 'weight'
-                                ? 'bg-amber-600 text-white border-amber-600 shadow-sm'
-                                : 'bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] hover:bg-[var(--theme-bg-card-hover)]'
+                                ? 'bg-amber-500/10 text-[var(--theme-text-primary)] border-amber-500 shadow-xs ring-1 ring-amber-500/30'
+                                : 'bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] hover:bg-[var(--theme-bg-card-hover)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)]'
                         }`}
                     >
-                        <div className="flex items-center justify-between w-full mb-1">
-                            <Scale size={16} />
-                            {category === 'weight' && <Check size={14} />}
+                        <div className="flex items-center justify-between w-full mb-1.5">
+                            <Scale size={16} className={category === 'weight' ? 'text-amber-500' : 'text-[var(--theme-text-secondary)]'} />
+                            {category === 'weight' && <Check size={14} className="text-amber-500" />}
                         </div>
                         <div>
-                            <p className="text-xs font-bold">By Weight</p>
-                            <p className="text-[9px] opacity-80 leading-tight mt-0.5">Kg, grams — weighed</p>
+                            <p className="text-xs font-bold text-[var(--theme-text-primary)]">By Weight</p>
+                            <p className="text-[11px] text-[var(--theme-text-muted)] leading-tight mt-0.5">Kg, grams — weighed</p>
                         </div>
                     </button>
 
@@ -72,17 +72,17 @@ export const SmartUnitSelector: React.FC<SmartUnitSelectorProps> = ({
                         onClick={() => onCategoryChange('volume')}
                         className={`p-3 rounded-xl border text-left transition-all cursor-pointer flex flex-col justify-between ${
                             category === 'volume'
-                                ? 'bg-blue-600 text-white border-blue-600 shadow-sm'
-                                : 'bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] hover:bg-[var(--theme-bg-card-hover)]'
+                                ? 'bg-blue-500/10 text-[var(--theme-text-primary)] border-blue-500 shadow-xs ring-1 ring-blue-500/30'
+                                : 'bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] hover:bg-[var(--theme-bg-card-hover)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)]'
                         }`}
                     >
-                        <div className="flex items-center justify-between w-full mb-1">
-                            <Sparkles size={16} />
-                            {category === 'volume' && <Check size={14} />}
+                        <div className="flex items-center justify-between w-full mb-1.5">
+                            <Sparkles size={16} className={category === 'volume' ? 'text-blue-500' : 'text-[var(--theme-text-secondary)]'} />
+                            {category === 'volume' && <Check size={14} className="text-blue-500" />}
                         </div>
                         <div>
-                            <p className="text-xs font-bold">By Volume</p>
-                            <p className="text-[9px] opacity-80 leading-tight mt-0.5">Litres, ml — measured</p>
+                            <p className="text-xs font-bold text-[var(--theme-text-primary)]">By Volume</p>
+                            <p className="text-[11px] text-[var(--theme-text-muted)] leading-tight mt-0.5">Litres, ml — measured</p>
                         </div>
                     </button>
                 </div>
@@ -90,8 +90,8 @@ export const SmartUnitSelector: React.FC<SmartUnitSelectorProps> = ({
 
             {/* Step 2: Selling Unit */}
             <div className="space-y-2">
-                <label className="text-[11px] font-bold uppercase tracking-wider text-[var(--theme-text-muted)] flex items-center gap-1.5">
-                    <span className="w-4 h-4 rounded-full bg-[var(--theme-primary)] text-[var(--theme-primary-text)] text-[10px] flex items-center justify-center font-bold">2</span>
+                <label className="text-[11px] font-bold uppercase tracking-wider text-[var(--theme-text-secondary)] flex items-center gap-1.5">
+                    <span className="w-4 h-4 rounded-full bg-[var(--theme-accent)] text-white text-[11px] flex items-center justify-center font-bold">2</span>
                     Selling unit — what is "1" at checkout?
                 </label>
 
@@ -105,15 +105,15 @@ export const SmartUnitSelector: React.FC<SmartUnitSelectorProps> = ({
                                 onClick={() => onSelectUnit(unit.code)}
                                 className={`p-2.5 rounded-xl border text-left transition-all cursor-pointer flex items-center justify-between ${
                                     isSelected
-                                        ? 'bg-[var(--theme-pill-bg)] border-[var(--theme-primary)] text-[var(--theme-text-primary)] font-bold shadow-sm'
-                                        : 'bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] hover:bg-[var(--theme-bg-card-hover)]'
+                                        ? 'bg-[var(--theme-accent)]/10 border-[var(--theme-accent)] text-[var(--theme-text-primary)] font-bold shadow-xs ring-1 ring-[var(--theme-accent)]/30'
+                                        : 'bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] hover:bg-[var(--theme-bg-card-hover)] text-[var(--theme-text-primary)]'
                                 }`}
                             >
                                 <div>
                                     <p className="text-xs font-bold">{unit.label}</p>
-                                    <p className="text-[10px] font-mono opacity-75">{unit.shortLabel}</p>
+                                    <p className="text-[11px] font-mono text-[var(--theme-text-secondary)]">{unit.shortLabel}</p>
                                 </div>
-                                {isSelected && <Check size={14} className="text-[var(--theme-text-primary)]" />}
+                                {isSelected && <Check size={14} className="text-[var(--theme-accent)]" />}
                             </button>
                         );
                     })}

@@ -60,50 +60,43 @@ export const PutawayHeader: React.FC<PutawayHeaderProps> = ({
 }) => {
     const isMobile = useIsMobile();
     return (
-        <div className="glass-panel p-2 md:p-6 relative overflow-hidden group">
-            <div className="hidden md:block absolute -top-24 -right-24 w-64 h-64 bg-[#2C5E3B]/5 dark:bg-[#2C5E3B]/10 blur-[120px] rounded-full pointer-events-none" />
-
-            {/* ── DESKTOP: Full header with title + stats ── */}
+        <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-4 md:p-6 relative overflow-hidden shadow-[var(--shadow-sm)]">
+            {/* DESKTOP: Full header with title + stats */}
             <div className="hidden md:flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6 relative z-10">
                 <div className="flex items-center gap-4">
-                    <div className="p-3.5 bg-[#2C5E3B]/10 dark:bg-[#A9CBA2]/25 rounded-2xl border border-[#2C5E3B]/20 dark:border-[#A9CBA2]/20 transition-all">
-                        <Layers className="text-[#2C5E3B] dark:text-[#A9CBA2]" size={24} />
+                    <div className="w-11 h-11 rounded-xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-[var(--theme-text-primary)] flex items-center justify-center shrink-0">
+                        <Layers size={22} />
                     </div>
                     <div>
-                        <h3 className="text-xl font-black text-gray-900 dark:text-white tracking-tight uppercase">{t('warehouse.putaway.putaway')}</h3>
-                        <div className="flex items-center gap-2 mt-1.5 font-mono">
-                            <span className="flex h-2 w-2 rounded-full bg-[#2C5E3B] dark:bg-[#A9CBA2] animate-pulse shadow-[0_0_8px_rgba(44,94,59,0.4)]" />
-                            <p className="text-[10px] text-gray-555 dark:text-gray-400 font-black uppercase tracking-widest">{t('warehouse.putaway.active')}</p>
+                        <h3 className="text-xl font-bold text-[var(--theme-text-primary)] tracking-tight">{t('warehouse.putaway.putaway')}</h3>
+                        <div className="flex items-center gap-2 mt-1 font-mono">
+                            <span className="flex h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+                            <p className="text-[11px] text-[var(--theme-text-secondary)] font-semibold uppercase tracking-wider">{t('warehouse.putaway.active')}</p>
                         </div>
                     </div>
                 </div>
 
-                <div className="grid grid-cols-4 gap-3 md:gap-4 w-auto">
+                <div className="grid grid-cols-4 gap-2.5 md:gap-3 w-auto">
                     {[
-                        { label: t('warehouse.putaway.pending'), value: filteredJobsCount.pending, theme: 'blue' },
-                        { label: t('warehouse.putaway.active'), value: filteredJobsCount.active, theme: 'amber' },
-                        { label: t('warehouse.putaway.totalItems'), value: filteredJobsCount.inboundItems, theme: 'emerald' },
-                        { label: t('warehouse.putaway.system'), value: 'ONLINE', theme: 'violet' }
+                        { label: t('warehouse.putaway.pending'), value: filteredJobsCount.pending },
+                        { label: t('warehouse.putaway.active'), value: filteredJobsCount.active },
+                        { label: t('warehouse.putaway.totalItems'), value: filteredJobsCount.inboundItems },
+                        { label: t('warehouse.putaway.system'), value: 'ONLINE' }
                     ].map((stat, i) => (
-                        <div key={i} className="px-4 md:px-5 py-2.5 bg-stone-50 dark:bg-white/5 border border-stone-200/50 dark:border-white/10 rounded-2xl transition-all shadow-inner hover:bg-stone-100 dark:hover:bg-white/10 group">
-                            <p className="text-[8px] md:text-[9px] font-black text-slate-400 dark:text-gray-555 uppercase tracking-[0.2em] mb-1">{stat.label}</p>
-                            <p className={`text-sm md:text-lg font-mono font-black tabular-nums transition-colors ${
-                                stat.theme === 'blue' ? 'text-[#2C5E3B] dark:text-[#A9CBA2] group-hover:text-[#1B3520]' :
-                                stat.theme === 'amber' ? 'text-amber-600 dark:text-amber-400 group-hover:text-amber-700' :
-                                stat.theme === 'emerald' ? 'text-emerald-600 dark:text-emerald-400 group-hover:text-emerald-700' :
-                                'text-stone-600 dark:text-stone-400'
-                            }`}>{stat.value}</p>
+                        <div key={i} className="px-4 py-2 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl transition-colors">
+                            <p className="text-[11px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider mb-0.5">{stat.label}</p>
+                            <p className="text-sm md:text-base font-mono font-bold tabular-nums text-[var(--theme-text-primary)]">{stat.value}</p>
                         </div>
                     ))}
                 </div>
             </div>
 
             {isMobile ? (
-                /* ── MOBILE: Compact bar ── */
-                <div className="flex flex-col gap-3 relative z-10 p-1 mt-4">
+                /* MOBILE: Compact bar */
+                <div className="flex flex-col gap-3 relative z-10 mt-2">
                     <div className="flex items-center gap-2">
                         <div className="flex-1 relative">
-                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-gray-500" size={16} />
+                            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--theme-text-secondary)]" size={16} />
                             <input
                                 type="text"
                                 placeholder={`${t('warehouse.putaway.search')}`}
@@ -111,20 +104,20 @@ export const PutawayHeader: React.FC<PutawayHeaderProps> = ({
                                 title={t('warehouse.putaway.search')}
                                 value={putawaySearch}
                                 onChange={(e) => setPutawaySearch(e.target.value)}
-                                className="woody-input w-full !pl-10 pr-4 text-sm"
+                                className="w-full pl-10 pr-4 py-2.5 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl text-xs md:text-sm font-mono text-[var(--theme-text-primary)] min-h-[44px] focus:outline-none focus:ring-2 focus:ring-blue-500/20"
                             />
                         </div>
                         
-                        <div className="glass-panel-pushed p-1 flex shrink-0">
+                        <div className="p-1 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl flex items-center shrink-0">
                             <button
                                 onClick={() => setViewMode('Process')}
-                                className={`px-3 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-wider transition-all ${viewMode === 'Process' ? 'bg-[#2C5E3B] dark:bg-[#EAE5D9] text-[#FAF8F5] dark:text-[#1E3B24] shadow-sm' : 'text-slate-500 dark:text-gray-400'}`}
+                                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all min-h-[36px] ${viewMode === 'Process' ? 'bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)] shadow-sm' : 'text-[var(--theme-text-secondary)]'}`}
                             >
                                 {t('warehouse.putaway.process')}
                             </button>
                             <button
                                 onClick={() => setViewMode('History')}
-                                className={`px-3 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-wider transition-all ${viewMode === 'History' ? 'bg-[#2C5E3B] dark:bg-[#EAE5D9] text-[#FAF8F5] dark:text-[#1E3B24] shadow-sm' : 'text-slate-500 dark:text-gray-400'}`}
+                                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all min-h-[36px] ${viewMode === 'History' ? 'bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)] shadow-sm' : 'text-[var(--theme-text-secondary)]'}`}
                             >
                                 {t('warehouse.putaway.history')}
                             </button>
@@ -133,7 +126,7 @@ export const PutawayHeader: React.FC<PutawayHeaderProps> = ({
                         <button
                             onClick={() => refreshData()}
                             disabled={isSubmitting}
-                            className="woody-btn-secondary p-2.5 text-stone-600 hover:text-[#2C5E3B]"
+                            className="p-2.5 rounded-xl border border-[var(--theme-border)] bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)] min-h-[44px] min-w-[44px] flex items-center justify-center transition-colors"
                             title={t('warehouse.putaway.syncOperations')}
                         >
                             <RefreshCw size={18} className={isSubmitting ? 'animate-spin' : ''} />
@@ -144,17 +137,17 @@ export const PutawayHeader: React.FC<PutawayHeaderProps> = ({
                         <button
                             onClick={onStartScanning}
                             disabled={isSubmitting}
-                            className="woody-btn-primary w-full h-12 text-[10px] uppercase tracking-widest flex items-center justify-center gap-2"
+                            className="w-full h-12 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs uppercase tracking-wider flex items-center justify-center gap-2 active:scale-95 transition-all shadow-sm"
                         >
                             <Smartphone size={16} /> {t('warehouse.scanBarcode')}
                         </button>
                     )}
                 </div>
             ) : (
-                /* ── DESKTOP: Full filters row ── */
-                <div className="flex flex-row gap-4 mt-8 pt-6 border-t border-slate-100 dark:border-white/5 relative z-10">
-                    <div className="flex-1 relative group/search">
-                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 dark:text-gray-500 group-focus-within/search:text-[#2C5E3B] dark:group-focus-within/search:text-[#A9CBA2] transition-colors" size={18} />
+                /* DESKTOP: Full filters row */
+                <div className="flex flex-row gap-3 mt-6 pt-5 border-t border-[var(--theme-border)] relative z-10 items-center">
+                    <div className="flex-1 relative">
+                        <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--theme-text-secondary)]" size={16} />
                         <input
                             type="text"
                             placeholder={`${t('warehouse.putaway.search')}`}
@@ -162,21 +155,21 @@ export const PutawayHeader: React.FC<PutawayHeaderProps> = ({
                             title={t('warehouse.putaway.search')}
                             value={putawaySearch}
                             onChange={(e) => setPutawaySearch(e.target.value)}
-                            className="woody-input w-full py-3.5 !pl-12 pr-4 font-mono"
+                            className="w-full pl-10 pr-4 py-2.5 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl font-mono text-xs md:text-sm text-[var(--theme-text-primary)] min-h-[44px] focus:outline-none focus:ring-2 focus:ring-blue-500/20"
                         />
                     </div>
 
-                    <div className="flex gap-2">
-                        <div className="glass-panel-pushed p-1.5 flex mr-2 shadow-inner">
+                    <div className="flex items-center gap-2">
+                        <div className="p-1 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl flex items-center shrink-0">
                             <button
                                 onClick={() => setViewMode('Process')}
-                                className={`px-5 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all ${viewMode === 'Process' ? 'bg-[#2C5E3B] dark:bg-[#EAE5D9] text-[#FAF8F5] dark:text-[#1E3B24] shadow-md' : 'text-gray-555 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'}`}
+                                className={`px-4 py-2 rounded-lg text-xs font-semibold transition-all min-h-[36px] ${viewMode === 'Process' ? 'bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)] shadow-sm' : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)]'}`}
                             >
                                 {t('warehouse.putaway.process')}
                             </button>
                             <button
                                 onClick={() => setViewMode('History')}
-                                className={`px-5 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all ${viewMode === 'History' ? 'bg-[#2C5E3B] dark:bg-[#EAE5D9] text-[#FAF8F5] dark:text-[#1E3B24] shadow-md' : 'text-gray-555 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'}`}
+                                className={`px-4 py-2 rounded-lg text-xs font-semibold transition-all min-h-[36px] ${viewMode === 'History' ? 'bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)] shadow-sm' : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)]'}`}
                             >
                                 {t('warehouse.putaway.history')}
                             </button>
@@ -184,12 +177,12 @@ export const PutawayHeader: React.FC<PutawayHeaderProps> = ({
 
                         {viewMode === 'Process' && (
                             <>
-                                <div className="flex glass-panel-pushed p-1.5 shrink-0 shadow-inner">
+                                <div className="p-1 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl flex items-center shrink-0">
                                     {(['All', 'Pending', 'In-Progress'] as const).map(status => (
                                         <button
                                             key={status}
                                             onClick={() => setPutawayStatusFilter(status)}
-                                            className={`px-6 py-2.5 text-[10px] font-black uppercase tracking-widest rounded-xl transition-all ${putawayStatusFilter === status ? 'bg-[#2C5E3B] dark:bg-[#EAE5D9] text-[#FAF8F5] dark:text-[#1E3B24] shadow-md' : 'text-slate-500 dark:text-gray-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/5'}`}
+                                            className={`px-4 py-2 text-xs font-semibold transition-all rounded-lg min-h-[36px] ${putawayStatusFilter === status ? 'bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)] shadow-sm' : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)]'}`}
                                         >
                                             {status === 'All' ? t('warehouse.allStatus') : status === 'Pending' ? t('warehouse.pending') : t('warehouse.inProgress')}
                                         </button>
@@ -215,13 +208,13 @@ export const PutawayHeader: React.FC<PutawayHeaderProps> = ({
                             <button
                                 onClick={onCompleteJob}
                                 disabled={isSubmitting}
-                                className="woody-btn-primary px-6 text-[10px] uppercase tracking-[0.2em] flex items-center justify-center gap-3 active:scale-[0.98]"
+                                className="px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold uppercase tracking-wider min-h-[44px] flex items-center justify-center gap-2 shadow-sm transition-all active:scale-95"
                             >
                                 {isSubmitting ? (
-                                    <Loader2 size={20} className="animate-spin" />
+                                    <Loader2 size={18} className="animate-spin" />
                                 ) : (
                                     <>
-                                        <CheckCircle size={18} className="stroke-[3]" /> {t('warehouse.completeJob')}
+                                        <CheckCircle size={18} /> {t('warehouse.completeJob')}
                                     </>
                                 )}
                             </button>
@@ -230,10 +223,10 @@ export const PutawayHeader: React.FC<PutawayHeaderProps> = ({
                         <button
                             onClick={() => refreshData()}
                             disabled={isSubmitting}
-                            className="woody-btn-secondary p-3.5 text-stone-600 dark:text-stone-400 hover:text-[#2C5E3B] dark:hover:text-[#A9CBA2] active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed group"
+                            className="p-2.5 rounded-xl border border-[var(--theme-border)] bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)] min-h-[44px] min-w-[44px] flex items-center justify-center active:scale-95 transition-all group"
                             title={t('warehouse.putaway.syncOperations')}
                         >
-                            <RefreshCw size={20} className={`transform group-hover:rotate-180 transition-transform duration-700 ${isSubmitting ? 'animate-spin' : ''}`} />
+                            <RefreshCw size={18} className={`transform group-hover:rotate-180 transition-transform duration-700 ${isSubmitting ? 'animate-spin' : ''}`} />
                         </button>
                     </div>
                 </div>

@@ -37,11 +37,11 @@ export const PricingProductsTable: React.FC = () => {
         <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse min-w-[750px]">
                 <thead>
-                    <tr className="bg-[#FAF8F5] dark:bg-black/30 border-b border-[#E2DCCE]/60 dark:border-white/5 text-[10px] text-stone-500 dark:text-gray-400 uppercase font-black tracking-widest">
+                    <tr className="bg-[var(--theme-bg-subtle)] border-b border-[var(--theme-border)] text-[11px] text-[var(--theme-text-secondary)] uppercase font-semibold tracking-wider">
                         <th className="p-4 text-center w-12">
                             <input
                                 type="checkbox"
-                                className="accent-[#2C5E3B] dark:accent-[#A9CBA2] w-4 h-4 cursor-pointer"
+                                className="accent-[var(--theme-accent)] w-4 h-4 cursor-pointer rounded"
                                 aria-label="Select all products"
                                 checked={selectedIds.size === filteredProducts.length && filteredProducts.length > 0}
                                 onChange={toggleSelectAll}
@@ -49,61 +49,61 @@ export const PricingProductsTable: React.FC = () => {
                         </th>
                         {/* Product Name */}
                         <th
-                            className="p-4 cursor-pointer hover:text-[#1E3F27] dark:hover:text-white transition-colors"
+                            className="p-4 cursor-pointer hover:text-[var(--theme-text-primary)] transition-colors"
                             onClick={() => handleSort('name')}
                         >
                             <div className="flex items-center gap-1.5">
-                                <span className={sortConfig.key === 'name' ? 'text-[#2C5E3B] dark:text-[#A9CBA2]' : ''}>Product</span>
+                                <span className={sortConfig.key === 'name' ? 'text-[var(--theme-accent)]' : ''}>Product</span>
                                 {sortConfig.key === 'name' && (
-                                    sortConfig.direction === 'asc' ? <ChevronUp size={13} className="text-[#2C5E3B] dark:text-[#A9CBA2]" /> : <ChevronDown size={13} className="text-[#2C5E3B] dark:text-[#A9CBA2]" />
+                                    sortConfig.direction === 'asc' ? <ChevronUp size={13} className="text-[var(--theme-accent)]" /> : <ChevronDown size={13} className="text-[var(--theme-accent)]" />
                                 )}
                             </div>
                         </th>
                         {/* Site/Location */}
                         <th
-                            className="p-4 cursor-pointer hover:text-[#1E3F27] dark:hover:text-white transition-colors"
+                            className="p-4 cursor-pointer hover:text-[var(--theme-text-primary)] transition-colors"
                             onClick={() => handleSort('siteId')}
                         >
                             <div className="flex items-center gap-1.5">
-                                <span className={sortConfig.key === 'siteId' ? 'text-[#2C5E3B] dark:text-[#A9CBA2]' : ''}>Location</span>
+                                <span className={sortConfig.key === 'siteId' ? 'text-[var(--theme-accent)]' : ''}>Location</span>
                                 {sortConfig.key === 'siteId' && (
-                                    sortConfig.direction === 'asc' ? <ChevronUp size={13} className="text-[#2C5E3B] dark:text-[#A9CBA2]" /> : <ChevronDown size={13} className="text-[#2C5E3B] dark:text-[#A9CBA2]" />
+                                    sortConfig.direction === 'asc' ? <ChevronUp size={13} className="text-[var(--theme-accent)]" /> : <ChevronDown size={13} className="text-[var(--theme-accent)]" />
                                 )}
                             </div>
                         </th>
                         {/* Price */}
                         <th
-                            className="p-4 cursor-pointer hover:text-[#1E3F27] dark:hover:text-white transition-colors text-right"
+                            className="p-4 cursor-pointer hover:text-[var(--theme-text-primary)] transition-colors text-right"
                             onClick={() => handleSort('price')}
                         >
                             <div className="flex items-center justify-end gap-1.5">
-                                <span className={sortConfig.key === 'price' ? 'text-[#2C5E3B] dark:text-[#A9CBA2]' : ''}>Retail Price</span>
+                                <span className={sortConfig.key === 'price' ? 'text-[var(--theme-accent)]' : ''}>Retail Price</span>
                                 {sortConfig.key === 'price' && (
-                                    sortConfig.direction === 'asc' ? <ChevronUp size={13} className="text-[#2C5E3B] dark:text-[#A9CBA2]" /> : <ChevronDown size={13} className="text-[#2C5E3B] dark:text-[#A9CBA2]" />
+                                    sortConfig.direction === 'asc' ? <ChevronUp size={13} className="text-[var(--theme-accent)]" /> : <ChevronDown size={13} className="text-[var(--theme-accent)]" />
                                 )}
                             </div>
                         </th>
                         {/* Competitor Price */}
                         <th
-                            className="p-4 cursor-pointer hover:text-[#1E3F27] dark:hover:text-white transition-colors text-right"
+                            className="p-4 cursor-pointer hover:text-[var(--theme-text-primary)] transition-colors text-right"
                             onClick={() => handleSort('competitorPrice')}
                         >
                             <div className="flex items-center justify-end gap-1.5">
-                                <span className={sortConfig.key === 'competitorPrice' ? 'text-[#2C5E3B] dark:text-[#A9CBA2]' : ''}>Competitor</span>
+                                <span className={sortConfig.key === 'competitorPrice' ? 'text-[var(--theme-accent)]' : ''}>Competitor</span>
                                 {sortConfig.key === 'competitorPrice' && (
-                                    sortConfig.direction === 'asc' ? <ChevronUp size={13} className="text-[#2C5E3B] dark:text-[#A9CBA2]" /> : <ChevronDown size={13} className="text-[#2C5E3B] dark:text-[#A9CBA2]" />
+                                    sortConfig.direction === 'asc' ? <ChevronUp size={13} className="text-[var(--theme-accent)]" /> : <ChevronDown size={13} className="text-[var(--theme-accent)]" />
                                 )}
                             </div>
                         </th>
                         {/* Margin */}
                         <th
-                            className="p-4 cursor-pointer hover:text-[#1E3F27] dark:hover:text-white transition-colors text-right"
+                            className="p-4 cursor-pointer hover:text-[var(--theme-text-primary)] transition-colors text-right"
                             onClick={() => handleSort('margin')}
                         >
                             <div className="flex items-center justify-end gap-1.5">
-                                <span className={sortConfig.key === 'margin' ? 'text-[#2C5E3B] dark:text-[#A9CBA2]' : ''}>Margin</span>
+                                <span className={sortConfig.key === 'margin' ? 'text-[var(--theme-accent)]' : ''}>Margin</span>
                                 {sortConfig.key === 'margin' && (
-                                    sortConfig.direction === 'asc' ? <ChevronUp size={13} className="text-[#2C5E3B] dark:text-[#A9CBA2]" /> : <ChevronDown size={13} className="text-[#2C5E3B] dark:text-[#A9CBA2]" />
+                                    sortConfig.direction === 'asc' ? <ChevronUp size={13} className="text-[var(--theme-accent)]" /> : <ChevronDown size={13} className="text-[var(--theme-accent)]" />
                                 )}
                             </div>
                         </th>
@@ -114,7 +114,7 @@ export const PricingProductsTable: React.FC = () => {
                         <th className="p-4 text-right pr-6">Action</th>
                     </tr>
                 </thead>
-                <tbody className="divide-y divide-[#E2DCCE]/40 dark:divide-white/5">
+                <tbody className="divide-y divide-[var(--theme-border-subtle)]">
                     {paginatedProducts.map(p => {
                         const isEditing = editingId === p.id;
                         const cost = isEditing ? editForm.cost : (p.costPrice || p.price * 0.7);
@@ -125,8 +125,8 @@ export const PricingProductsTable: React.FC = () => {
                         return (
                             <tr
                                 key={p.id}
-                                className={`hover:bg-[#FAF8F5] dark:hover:bg-white/5 transition-colors ${
-                                    selectedIds.has(p.id) ? 'bg-emerald-50/50 dark:bg-[#2C5E3B]/10' : ''
+                                className={`hover:bg-[var(--theme-bg-subtle)] transition-colors ${
+                                    selectedIds.has(p.id) ? 'bg-[var(--theme-accent)]/5' : ''
                                 }`}
                             >
                                 <td className="p-4 text-center">
@@ -134,13 +134,13 @@ export const PricingProductsTable: React.FC = () => {
                                         type="checkbox"
                                         checked={selectedIds.has(p.id)}
                                         onChange={() => toggleSelection(p.id)}
-                                        className="accent-[#2C5E3B] dark:accent-[#A9CBA2] w-4 h-4 cursor-pointer"
+                                        className="accent-[var(--theme-accent)] w-4 h-4 cursor-pointer rounded"
                                         aria-label={`Select ${p.name}`}
                                     />
                                 </td>
                                 <td className="p-4">
                                     <div className="flex items-center gap-3">
-                                        <div className="w-10 h-10 rounded-xl bg-emerald-50 dark:bg-[#2C5E3B]/20 border border-emerald-200 dark:border-emerald-950/30 flex items-center justify-center shrink-0 overflow-hidden">
+                                        <div className="w-10 h-10 rounded-xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] flex items-center justify-center shrink-0 overflow-hidden">
                                             {p.image && !p.image.includes('placeholder.com') ? (
                                                 <img
                                                     src={p.image}
@@ -151,7 +151,7 @@ export const PricingProductsTable: React.FC = () => {
                                                     }}
                                                 />
                                             ) : (
-                                                <Package size={17} className="text-[#2C5E3B] dark:text-[#A9CBA2]" />
+                                                <Package size={16} className="text-[var(--theme-text-secondary)]" />
                                             )}
                                         </div>
                                         <div className="flex flex-col">
@@ -159,20 +159,20 @@ export const PricingProductsTable: React.FC = () => {
                                                 <button
                                                     type="button"
                                                     onClick={() => openProductControl(p)}
-                                                    className="text-xs font-black text-[#1E3F27] dark:text-white leading-none hover:text-[#2C5E3B] dark:hover:text-[#A9CBA2] hover:underline transition-colors text-left cursor-pointer"
+                                                    className="text-xs font-semibold text-[var(--theme-text-primary)] leading-tight hover:text-[var(--theme-accent)] transition-colors text-left cursor-pointer"
                                                 >
                                                     {p.name}
                                                 </button>
                                                 {p.sku && (
-                                                    <span className="text-[10px] bg-stone-100 dark:bg-black/40 border border-stone-200 dark:border-white/10 px-1.5 py-0.5 rounded text-stone-600 dark:text-stone-300 font-mono font-bold">
+                                                    <span className="text-[10px] bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] px-1.5 py-0.5 rounded font-mono font-medium text-[var(--theme-text-secondary)]">
                                                         {p.sku}
                                                     </span>
                                                 )}
                                             </div>
                                             <div className="flex items-center gap-2 mt-1">
-                                                <p className="text-[11px] text-stone-500 dark:text-stone-400">{p.category}</p>
+                                                <p className="text-[11px] text-[var(--theme-text-secondary)]">{p.category}</p>
                                                 {p.sku && products.filter(pi => pi.sku === p.sku).length > 1 && (
-                                                    <span className="text-[10px] text-stone-500 dark:text-stone-400 bg-stone-100 dark:bg-white/5 px-1.5 py-0.5 rounded-md flex items-center gap-1 font-bold">
+                                                    <span className="text-[10px] text-[var(--theme-text-secondary)] bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] px-1.5 py-0.5 rounded-md flex items-center gap-1 font-medium">
                                                         <Map size={10} /> {products.filter(pi => pi.sku === p.sku).length} Locations
                                                     </span>
                                                 )}
@@ -182,7 +182,7 @@ export const PricingProductsTable: React.FC = () => {
                                 </td>
 
                                 {/* Location */}
-                                <td className="p-4 text-xs font-bold text-stone-600 dark:text-stone-300">
+                                <td className="p-4 text-xs font-medium text-[var(--theme-text-primary)]">
                                     {sites.find(s => s.id === p.siteId)?.name || 'Unknown Site'}
                                 </td>
 
@@ -191,21 +191,21 @@ export const PricingProductsTable: React.FC = () => {
                                     {isEditing ? (
                                         <div className="flex flex-col items-end gap-1.5">
                                             <div className="flex items-center gap-1.5">
-                                                <span className="text-[10px] text-stone-400 font-bold uppercase">Cost:</span>
+                                                <span className="text-[10px] text-[var(--theme-text-secondary)] font-medium uppercase">Cost:</span>
                                                 <input
                                                     type="number"
                                                     readOnly
                                                     disabled
-                                                    className="w-24 bg-stone-100 dark:bg-black/40 border border-[#E2DCCE] dark:border-white/10 rounded-xl px-2 py-1 text-right text-stone-400 font-mono text-xs outline-none cursor-not-allowed"
+                                                    className="w-24 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-2 py-1 text-right text-[var(--theme-text-secondary)] font-mono text-xs outline-none cursor-not-allowed tabular-nums"
                                                     value={editForm.cost}
                                                     aria-label="Cost Price - Read-only from PO"
                                                 />
                                             </div>
                                             <div className="flex items-center gap-1.5">
-                                                <span className="text-[10px] text-stone-500 font-bold uppercase">Price:</span>
+                                                <span className="text-[10px] text-[var(--theme-text-primary)] font-medium uppercase">Price:</span>
                                                 <input
                                                     type="number"
-                                                    className="w-24 bg-[#FAF8F5] dark:bg-black/30 border border-[#2C5E3B] rounded-xl px-2 py-1 text-right text-[#1E3F27] dark:text-white outline-none font-mono text-xs font-bold"
+                                                    className="w-24 bg-[var(--theme-bg-card)] border border-[var(--theme-accent)] rounded-xl px-2 py-1 text-right text-[var(--theme-text-primary)] outline-none font-mono text-xs font-semibold tabular-nums focus:ring-1 focus:ring-[var(--theme-accent)]"
                                                     value={editForm.price}
                                                     onChange={(e) => setEditForm({ ...editForm, price: parseFloat(e.target.value) || 0 })}
                                                     aria-label="Retail Price"
@@ -214,10 +214,10 @@ export const PricingProductsTable: React.FC = () => {
                                         </div>
                                     ) : (
                                         <div className="flex flex-col items-end">
-                                            <span className="text-[#1E3F27] dark:text-white font-mono font-black text-xs">
+                                            <span className="text-[var(--theme-text-primary)] font-mono font-semibold text-xs tabular-nums">
                                                 {currencySymbol} {retail.toLocaleString()}
                                             </span>
-                                            <span className="text-[10px] text-stone-400 font-mono">Cost: {cost.toLocaleString()}</span>
+                                            <span className="text-[10px] text-[var(--theme-text-secondary)] font-mono tabular-nums">Cost: {cost.toLocaleString()}</span>
                                         </div>
                                     )}
                                 </td>
@@ -226,12 +226,12 @@ export const PricingProductsTable: React.FC = () => {
                                 <td className="p-4 text-right">
                                     {p.competitorPrice ? (
                                         <div className="flex flex-col items-end">
-                                            <span className="text-stone-500 dark:text-stone-400 font-mono text-xs">
+                                            <span className="text-[var(--theme-text-primary)] font-mono text-xs tabular-nums">
                                                 {currencySymbol} {p.competitorPrice.toLocaleString()}
                                             </span>
                                             <span
-                                                className={`text-[10px] font-bold ${
-                                                    compVariance > 0 ? 'text-red-600 dark:text-red-400' : 'text-emerald-700 dark:text-[#A9CBA2]'
+                                                className={`text-[10px] font-mono font-medium tabular-nums ${
+                                                    compVariance > 0 ? 'text-rose-600 dark:text-rose-400' : 'text-emerald-600 dark:text-emerald-400'
                                                 }`}
                                             >
                                                 {compVariance > 0 ? '+' : ''}
@@ -239,19 +239,19 @@ export const PricingProductsTable: React.FC = () => {
                                             </span>
                                         </div>
                                     ) : (
-                                        <span className="text-stone-400 text-xs">-</span>
+                                        <span className="text-[var(--theme-text-tertiary)] text-xs">-</span>
                                     )}
                                 </td>
 
                                 {/* Margin */}
                                 <td className="p-4 text-right">
                                     <span
-                                        className={`text-xs font-bold px-2 py-0.5 rounded-lg ${
+                                        className={`text-xs font-mono font-medium tabular-nums px-2 py-0.5 rounded-lg border ${
                                             margin < 15
-                                                ? 'bg-red-50 text-red-600 dark:bg-red-950/20 dark:text-red-400 border border-red-200 dark:border-red-900/30'
+                                                ? 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/20'
                                                 : margin > 40
-                                                ? 'bg-emerald-50 text-[#2C5E3B] dark:bg-[#2C5E3B]/20 dark:text-[#A9CBA2] border border-emerald-200 dark:border-emerald-950/30'
-                                                : 'bg-amber-50 text-amber-700 dark:bg-amber-950/20 dark:text-amber-300 border border-amber-200 dark:border-amber-900/30'
+                                                ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20'
+                                                : 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20'
                                         }`}
                                     >
                                         {margin.toFixed(1)}%
@@ -261,13 +261,13 @@ export const PricingProductsTable: React.FC = () => {
                                 {/* Sales Velocity */}
                                 <td className="p-4 text-center">
                                     {p.salesVelocity === 'High' && (
-                                        <span className="text-[#2C5E3B] dark:text-[#A9CBA2] text-xs font-bold flex justify-center items-center">
-                                            <ChevronUp size={13} className="mr-0.5" /> High
+                                        <span className="text-emerald-600 dark:text-emerald-400 text-xs font-medium flex justify-center items-center gap-0.5">
+                                            <ChevronUp size={13} /> High
                                         </span>
                                     )}
-                                    {p.salesVelocity === 'Medium' && <span className="text-amber-700 dark:text-amber-300 text-xs font-bold">Medium</span>}
-                                    {p.salesVelocity === 'Low' && <span className="text-red-600 dark:text-red-400 text-xs font-bold">Low</span>}
-                                    {!p.salesVelocity && <span className="text-stone-400 text-xs">-</span>}
+                                    {p.salesVelocity === 'Medium' && <span className="text-amber-600 dark:text-amber-400 text-xs font-medium">Medium</span>}
+                                    {p.salesVelocity === 'Low' && <span className="text-rose-600 dark:text-rose-400 text-xs font-medium">Low</span>}
+                                    {!p.salesVelocity && <span className="text-[var(--theme-text-tertiary)] text-xs">-</span>}
                                 </td>
 
                                 {/* Is On Sale Toggle */}
@@ -278,13 +278,13 @@ export const PricingProductsTable: React.FC = () => {
                                                 type="checkbox"
                                                 checked={editForm.isOnSale}
                                                 onChange={(e) => setEditForm({ ...editForm, isOnSale: e.target.checked })}
-                                                className="w-4 h-4 accent-[#2C5E3B] dark:accent-[#A9CBA2] cursor-pointer"
+                                                className="w-4 h-4 accent-[var(--theme-accent)] cursor-pointer rounded"
                                                 aria-label="Toggle Sale Status"
                                             />
                                             {editForm.isOnSale && (
                                                 <input
                                                     type="number"
-                                                    className="w-16 text-[10px] bg-[#FAF8F5] dark:bg-black/30 border border-[#E2DCCE] dark:border-white/10 rounded-lg text-center text-[#1E3F27] dark:text-white outline-none font-mono"
+                                                    className="w-16 text-xs bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-lg text-center text-[var(--theme-text-primary)] outline-none font-mono tabular-nums py-0.5"
                                                     value={editForm.salePrice}
                                                     onChange={(e) => setEditForm({ ...editForm, salePrice: parseFloat(e.target.value) || 0 })}
                                                     placeholder="Promo"
@@ -295,11 +295,11 @@ export const PricingProductsTable: React.FC = () => {
                                     ) : (
                                         <div className="flex justify-center">
                                             {p.isOnSale ? (
-                                                <span className="px-2 py-0.5 rounded-md text-[10px] bg-amber-50 text-amber-800 dark:bg-amber-950/30 dark:text-amber-300 font-bold border border-amber-200 dark:border-amber-900/30">
+                                                <span className="px-2 py-0.5 rounded-lg text-xs font-mono font-medium tabular-nums bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">
                                                     {currencySymbol} {p.salePrice}
                                                 </span>
                                             ) : (
-                                                <span className="text-stone-400 text-xs">-</span>
+                                                <span className="text-[var(--theme-text-tertiary)] text-xs">-</span>
                                             )}
                                         </div>
                                     )}
@@ -311,7 +311,7 @@ export const PricingProductsTable: React.FC = () => {
                                         <div className="flex justify-end gap-1.5">
                                             <button
                                                 onClick={() => handleSavePrice(p.id)}
-                                                className="p-1.5 bg-emerald-50 text-[#2C5E3B] hover:bg-emerald-100 dark:bg-[#2C5E3B]/20 dark:text-[#A9CBA2] rounded-xl border border-emerald-200 dark:border-emerald-950/30 transition-colors cursor-pointer"
+                                                className="p-1.5 bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] hover:bg-[var(--theme-accent)]/20 rounded-xl border border-[var(--theme-accent)]/20 transition-colors cursor-pointer"
                                                 title="Save Changes"
                                                 aria-label="Save Changes"
                                             >
@@ -319,7 +319,7 @@ export const PricingProductsTable: React.FC = () => {
                                             </button>
                                             <button
                                                 onClick={() => setEditingId(null)}
-                                                className="p-1.5 bg-stone-100 text-stone-600 hover:bg-stone-200 dark:bg-white/5 dark:text-stone-300 rounded-xl transition-colors cursor-pointer"
+                                                className="p-1.5 bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] hover:bg-[var(--theme-border)] rounded-xl transition-colors cursor-pointer"
                                                 title="Cancel"
                                                 aria-label="Cancel"
                                             >
@@ -330,7 +330,7 @@ export const PricingProductsTable: React.FC = () => {
                                         <div className="flex justify-end gap-1.5">
                                             <button
                                                 onClick={() => openProductControl(p)}
-                                                className="p-1.5 hover:bg-emerald-50 dark:hover:bg-[#2C5E3B]/20 text-stone-500 hover:text-[#2C5E3B] dark:hover:text-[#A9CBA2] rounded-xl transition-colors cursor-pointer"
+                                                className="p-1.5 hover:bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-accent)] rounded-xl transition-colors cursor-pointer"
                                                 title="Edit Product & Pricing"
                                                 aria-label={`Edit pricing for ${p.name}`}
                                             >
@@ -341,7 +341,7 @@ export const PricingProductsTable: React.FC = () => {
                                                     setSelectedLocationProduct(p);
                                                     setIsLocationModalOpen(true);
                                                 }}
-                                                className="p-1.5 hover:bg-amber-50 dark:hover:bg-amber-950/20 text-stone-500 hover:text-amber-700 dark:hover:text-amber-300 rounded-xl transition-colors cursor-pointer"
+                                                className="p-1.5 hover:bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] rounded-xl transition-colors cursor-pointer"
                                                 title="View/Distribute Stock across locations"
                                                 aria-label="View stock distribution"
                                             >

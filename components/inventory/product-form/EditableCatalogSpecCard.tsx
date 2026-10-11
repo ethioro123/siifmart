@@ -42,7 +42,7 @@ export const EditableCatalogSpecCard: React.FC<EditableCatalogSpecCardProps> = (
             </div>
 
             <div className="pt-2 border-t border-[var(--theme-border)]">
-                <label className="text-[9px] text-[var(--theme-text-muted)] font-bold uppercase block mb-1 font-sans">
+                <label className="text-[11px] text-[var(--theme-text-muted)] font-bold uppercase block mb-1.5 font-sans">
                     Key Features / Merchandising Highlights:
                 </label>
                 <textarea
@@ -50,7 +50,7 @@ export const EditableCatalogSpecCard: React.FC<EditableCatalogSpecCardProps> = (
                     onChange={(e) => onUpdateKeyFeatures(e.target.value)}
                     placeholder="e.g. Non-GMO stoneground flour, fortified with vitamins, shelf-stable seal..."
                     rows={2}
-                    className="w-full bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl p-2.5 text-xs font-sans text-[var(--theme-text-primary)] placeholder:opacity-40 focus:outline-none focus:border-[var(--theme-primary)] transition-all resize-none"
+                    className="w-full bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl p-3 text-xs font-sans text-[var(--theme-text-primary)] placeholder:text-[var(--theme-text-muted)] focus:outline-none focus:border-[var(--theme-accent)] focus:ring-1 focus:ring-[var(--theme-accent)]/30 transition-all resize-none shadow-xs"
                 />
             </div>
         </div>

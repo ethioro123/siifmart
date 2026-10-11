@@ -181,10 +181,7 @@ export const PackJobModal: React.FC<PackJobModalProps> = ({
 
     return (
         <div className="fixed inset-0 z-[150] flex items-center justify-center p-2 md:p-4 bg-black/80 overflow-x-hidden">
-            <div className="bg-[#FAF8F5] dark:bg-[#1C2620] w-full max-w-5xl min-h-[70dvh] max-h-[95dvh] md:min-h-0 md:max-h-[90vh] rounded-3xl border border-[#E2DCCE] dark:border-emerald-950/20 shadow-2xl flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-200 relative">
-                {/* Visual Flair */}
-                <div className="hidden md:block absolute -top-32 -right-32 w-96 h-96 bg-[#2C5E3B]/10 dark:bg-[#2C5E3B]/20 blur-[100px] rounded-full pointer-events-none" />
-                <div className="hidden md:block absolute -bottom-32 -left-32 w-96 h-96 bg-[#A9CBA2]/10 dark:bg-[#A9CBA2]/25 blur-[100px] rounded-full pointer-events-none" />
+            <div className="bg-[var(--theme-bg-card)] w-full max-w-5xl min-h-[70dvh] max-h-[95dvh] md:min-h-0 md:max-h-[90vh] rounded-3xl border border-[var(--theme-border)] shadow-2xl flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-200 relative">
 
                 {/* Header */}
                 <PackJobHeader
@@ -196,41 +193,41 @@ export const PackJobModal: React.FC<PackJobModalProps> = ({
                 />
 
                 {/* Content */}
-                <div className="flex-1 min-h-0 flex flex-col dark:bg-[radial-gradient(circle_at_50%_0%,rgba(44,94,59,0.03),transparent)] bg-stone-50 dark:bg-black/10">
+                <div className="flex-1 min-h-0 flex flex-col bg-[var(--theme-bg-app)]">
                     
                     {/* Top Row / Stats */}
-                    <div className="p-3 md:p-4 shrink-0 border-b border-[#E2DCCE]/60 dark:border-white/10 bg-[#FAF8F5]/50 dark:bg-black/40">
+                    <div className="p-3 md:p-4 shrink-0 border-b border-[var(--theme-border)] bg-[var(--theme-bg-card)]">
                         <div className="flex items-center justify-between gap-3 shrink-0">
                             {/* Job Progress Pill */}
-                            <div className="flex items-center gap-3 shrink-0 bg-white dark:bg-white/[0.02] border border-[#E2DCCE]/65 dark:border-white/5 px-3 py-1.5 rounded-xl">
-                                <span className="text-xs font-mono font-black text-gray-900 dark:text-white uppercase tracking-wider">
-                                    <span className="text-gray-900 dark:text-white">{completedItems}</span> / {totalItems} {t('warehouse.packed') || 'Packed'}
+                            <div className="flex items-center gap-3 shrink-0 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] px-3.5 py-2 rounded-xl">
+                                <span className="text-xs font-mono font-semibold text-[var(--theme-text-primary)] uppercase tracking-wider">
+                                    <span>{completedItems}</span> / {totalItems} {t('warehouse.packed') || 'Packed'}
                                 </span>
-                                <div className="w-20 md:w-24 h-2 bg-gray-200 dark:bg-white/5 rounded-full overflow-hidden shrink-0">
+                                <div className="w-20 md:w-28 h-2 bg-[var(--theme-bg-app)] rounded-full overflow-hidden shrink-0">
                                     <ProgressBar
                                         progress={progressPercent}
                                         containerClassName="h-full bg-transparent"
-                                        fillClassName={`h-full transition-all duration-300 ${isFullyPacked ? 'bg-green-500' : 'bg-[#2C5E3B] dark:bg-[#A9CBA2]'}`}
+                                        fillClassName={`h-full transition-all duration-300 ${isFullyPacked ? 'bg-green-500' : 'bg-[var(--theme-accent)]'}`}
                                     />
                                 </div>
                             </div>
                             
                             {/* Tracking Number (Compact) */}
                             {job.trackingNumber && (
-                                <div className="flex items-center gap-2 bg-[#2C5E3B]/10 dark:bg-[#A9CBA2]/25 border border-[#2C5E3B]/20 dark:border-[#A9CBA2]/20 px-3 py-1.5 rounded-xl shrink-0 text-[#2C5E3B] dark:text-[#A9CBA2]">
-                                    <Hash size={14} className="text-[#2C5E3B] dark:text-[#A9CBA2]" />
-                                    <span className="text-xs font-mono font-black text-[#2C5E3B] dark:text-[#A9CBA2]">{job.trackingNumber}</span>
+                                <div className="flex items-center gap-2 bg-[var(--theme-accent)]/10 border border-[var(--theme-accent)]/20 px-3.5 py-2 rounded-xl shrink-0 text-[var(--theme-accent)]">
+                                    <Hash size={14} />
+                                    <span className="text-xs font-mono font-semibold">{job.trackingNumber}</span>
                                 </div>
                             )}
                         </div>
                     </div>
 
                     {/* Columns Wrapper */}
-                    <div className="flex-1 min-h-0 flex flex-col lg:flex-row overflow-y-auto lg:overflow-hidden custom-scrollbar bg-stone-50 dark:bg-black/10">
+                    <div className="flex-1 min-h-0 flex flex-col lg:flex-row overflow-y-auto lg:overflow-hidden custom-scrollbar bg-[var(--theme-bg-app)]">
                         
                         {/* Left Col: Items List */}
-                        <div className="flex-1 p-3 md:p-5 lg:border-r border-[#E2DCCE]/60 dark:border-white/10 lg:overflow-y-auto lg:custom-scrollbar">
-                            <div className="space-y-2">
+                        <div className="flex-1 p-3 md:p-5 lg:border-r border-[var(--theme-border)] lg:overflow-y-auto lg:custom-scrollbar">
+                            <div className="space-y-2.5">
                                 {job.lineItems?.map((item, idx) => (
                                     <PackJobItemCard
                                         key={idx}
@@ -278,22 +275,22 @@ export const PackJobModal: React.FC<PackJobModalProps> = ({
                     </div>
                 </div>
 
-                <div className="p-3 sm:p-4 md:p-6 border-t border-[#E2DCCE]/60 dark:border-emerald-950/20 bg-[#FAF8F5]/50 dark:bg-zinc-950/40 flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-between gap-2.5 sm:gap-3 shrink-0 relative z-20">
-                    <div className="flex items-center gap-2 md:gap-4 shrink-0">
+                <div className="p-3 sm:p-4 md:p-6 border-t border-[var(--theme-border)] bg-[var(--theme-bg-card)] flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-between gap-2.5 sm:gap-3 shrink-0 relative z-20">
+                    <div className="flex items-center gap-2 md:gap-3 shrink-0">
                         <button
                             onClick={() => onPrintLabel(boxDetails)}
                             disabled={isSubmitting}
-                            className="flex-1 sm:flex-none min-h-[44px] px-3.5 md:px-6 py-2.5 md:py-3.5 bg-white/80 dark:bg-[#18201B]/70 border border-[#E2DCCE] dark:border-[#EAE5D9]/25 text-[#2C4D35] dark:text-[#A9CBA2] hover:text-[#1E3F27] dark:hover:text-white active:scale-95 transition-colors rounded-xl md:rounded-2xl font-black text-xs md:text-sm uppercase tracking-widest flex items-center justify-center gap-2 disabled:opacity-50"
+                            className="flex-1 sm:flex-none min-h-[44px] px-4 md:px-6 py-2.5 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-[var(--theme-text-primary)] hover:border-[var(--theme-accent)]/30 active:scale-95 transition-colors rounded-xl font-semibold text-xs md:text-sm uppercase tracking-wider flex items-center justify-center gap-2 disabled:opacity-50 cursor-pointer"
                         >
-                            <Printer size={16} className="md:w-4 md:h-4" /> <span>{t('warehouse.printLabel')}</span>
+                            <Printer size={16} /> <span>{t('warehouse.printLabel')}</span>
                         </button>
                         {/* Flag Discrepancy — packer count doesn't match manifest */}
                         {onFlagDiscrepancy && job.status !== 'Completed' && (
                             <button
                                 onClick={onFlagDiscrepancy}
-                                className="flex-1 sm:flex-none min-h-[44px] px-3.5 md:px-6 py-2.5 md:py-3.5 bg-orange-500/10 hover:bg-orange-500/20 border border-orange-500/20 text-orange-600 dark:text-orange-400 active:scale-95 transition-colors rounded-xl md:rounded-2xl font-black text-xs md:text-sm uppercase tracking-widest flex items-center justify-center gap-2"
+                                className="flex-1 sm:flex-none min-h-[44px] px-4 md:px-6 py-2.5 bg-orange-500/10 hover:bg-orange-500/20 border border-orange-500/20 text-orange-600 dark:text-orange-400 active:scale-95 transition-colors rounded-xl font-semibold text-xs md:text-sm uppercase tracking-wider flex items-center justify-center gap-2 cursor-pointer"
                             >
-                                <AlertTriangle size={16} className="md:w-4 md:h-4" /> <span>{t('warehouse.packing.flagCountIssue')}</span>
+                                <AlertTriangle size={16} /> <span>{t('warehouse.packing.flagCountIssue')}</span>
                             </button>
                         )}
                     </div>
@@ -301,7 +298,7 @@ export const PackJobModal: React.FC<PackJobModalProps> = ({
                     <div className="flex items-center gap-2 md:gap-3 sm:flex-1 justify-end">
                         <button
                             onClick={onClose}
-                            className="flex-1 sm:flex-none min-h-[44px] px-4 py-2.5 md:px-7 md:py-3.5 rounded-xl md:rounded-2xl bg-white/80 dark:bg-[#18201B]/70 border border-[#E2DCCE] dark:border-emerald-950/20 text-gray-700 dark:text-[#A9CBA2] hover:text-[#1E3F27] dark:hover:text-white font-black text-xs uppercase tracking-widest transition-colors active:scale-95 cursor-pointer flex items-center justify-center"
+                            className="flex-1 sm:flex-none min-h-[44px] px-5 py-2.5 md:px-7 rounded-xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] font-semibold text-xs uppercase tracking-wider transition-colors active:scale-95 cursor-pointer flex items-center justify-center"
                         >
                             {t('warehouse.dismiss')}
                         </button>
@@ -314,7 +311,7 @@ export const PackJobModal: React.FC<PackJobModalProps> = ({
                                         else onStartPack(job);
                                     }}
                                     disabled={isSubmitting}
-                                    className="flex-1 sm:flex-none min-h-[44px] px-4 py-2.5 md:px-8 md:py-3.5 rounded-xl md:rounded-2xl font-black text-xs md:text-sm uppercase tracking-widest shadow-md transition-colors flex items-center justify-center gap-2 active:scale-95 bg-[#2C5E3B] hover:bg-[#1B3520] text-white border border-[#2C5E3B]/20 shadow-[#2C5E3B]/20 cursor-pointer"
+                                    className="flex-1 sm:flex-none min-h-[44px] px-5 py-2.5 md:px-8 rounded-xl font-semibold text-xs md:text-sm uppercase tracking-wider shadow-sm transition-opacity flex items-center justify-center gap-2 active:scale-95 bg-[var(--theme-accent)] hover:opacity-90 text-white cursor-pointer"
                                 >
                                     <span>Start Packing</span>
                                     <ArrowRight size={16} />
@@ -346,7 +343,7 @@ export const PackJobModal: React.FC<PackJobModalProps> = ({
                                         onCompleteJob(boxDetails);
                                     }}
                                     disabled={isSubmitting}
-                                    className="flex-1 sm:flex-none min-h-[44px] px-4 py-2.5 md:px-8 md:py-3.5 rounded-xl md:rounded-2xl font-black text-xs md:text-sm uppercase tracking-widest shadow-md transition-colors flex items-center justify-center gap-2 active:scale-95 bg-green-600 hover:bg-green-500 border border-green-400/50 text-white shadow-green-500/25 cursor-pointer"
+                                    className="flex-1 sm:flex-none min-h-[44px] px-5 py-2.5 md:px-8 rounded-xl font-semibold text-xs md:text-sm uppercase tracking-wider shadow-sm transition-colors flex items-center justify-center gap-2 active:scale-95 bg-green-600 hover:bg-green-500 text-white cursor-pointer"
                                 >
                                     {isSubmitting ? <Loader2 size={16} className="animate-spin md:w-[18px] md:h-[18px]" /> : (
                                         <>

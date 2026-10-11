@@ -62,9 +62,10 @@ const mapDBToChangeRequest = (row: any): EmployeeProfileChangeRequest => ({
 });
 
 export const employeeChangesService = {
-    async getAll(siteId?: string, countryCode?: string): Promise<EmployeeProfileChangeRequest[]> {
+    async getAll(siteId?: string, countryCode?: string, limit: number = 25): Promise<EmployeeProfileChangeRequest[]> {
         try {
-            let query = supabase.from('employee_change_requests').select('*');
+            // RULE 10: 25-record shelf limit
+            let query = supabase.from('employee_change_requests').select('*').limit(limit);
             if (siteId) query = query.eq('site_id', siteId);
             if (countryCode) query = query.eq('country_code', countryCode.toUpperCase());
 

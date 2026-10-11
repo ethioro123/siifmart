@@ -24,10 +24,21 @@ export const PackList: React.FC<PackListProps> = ({
     const handleDelete = async (e: React.MouseEvent, jobId: string) => { e.stopPropagation(); if (window.confirm(t('warehouse.packing.deleteConfirm'))) await deleteJob(jobId); };
 
     return (
-        <div className="flex flex-col h-full bg-[#FAF8F5] dark:bg-[#1C2620] text-gray-900 dark:text-[#EAE5D9] transition-colors duration-500">
+        <div className="flex flex-col h-full bg-[var(--theme-bg-app)] text-[var(--theme-text-primary)] transition-colors duration-200">
             {/* Mobile sort bar */}
-            <div className="flex justify-end mb-3 px-1">
-                <SortDropdown label={t('warehouse.sortByLabel')} options={[{ id: 'priority' as const, label: t('warehouse.prioritySort'), icon: <AlertTriangle size={12} /> }, { id: 'date' as const, label: t('warehouse.timeSort'), icon: <Clock size={12} /> }, { id: 'items' as const, label: t('warehouse.sizeSort'), icon: <List size={12} /> }]} value={packSortBy} onChange={setPackSortBy} isOpen={isPackSortDropdownOpen} setIsOpen={setIsPackSortDropdownOpen} />
+            <div className="flex justify-end mb-3 px-1 md:hidden">
+                <SortDropdown
+                    label={t('warehouse.sortByLabel')}
+                    options={[
+                        { id: 'priority' as const, label: t('warehouse.prioritySort'), icon: <AlertTriangle size={12} /> },
+                        { id: 'date' as const, label: t('warehouse.timeSort'), icon: <Clock size={12} /> },
+                        { id: 'items' as const, label: t('warehouse.sizeSort'), icon: <List size={12} /> }
+                    ]}
+                    value={packSortBy}
+                    onChange={setPackSortBy}
+                    isOpen={isPackSortDropdownOpen}
+                    setIsOpen={setIsPackSortDropdownOpen}
+                />
             </div>
 
             <div className="flex-1 overflow-y-auto custom-scrollbar">
@@ -43,89 +54,96 @@ export const PackList: React.FC<PackListProps> = ({
                             const isCritical = job.priority === 'Critical';
 
                             return (
-                                    <div
-                                        key={job.id}
-                                        onClick={() => setSelectedPackJob(job)}
-                                        className={`relative bg-white dark:bg-[#1C2620]/60 border rounded-2xl overflow-hidden cursor-pointer active:scale-[0.98] transition-transform duration-150 shadow-sm min-h-[52px] ${
-                                            isCritical ? 'border-red-400/40 dark:border-red-500/30' :
-                                            isActive ? 'border-[#2C5E3B]/50 dark:border-[#A9CBA2]/30 shadow-[#2C5E3B]/10 shadow-md' :
-                                            'border-[#E2DCCE] dark:border-[#A9CBA2]/10'
-                                        }`}
-                                    >
-                                        {/* Priority accent stripe */}
-                                        {isCritical && <div className="absolute left-0 top-0 bottom-0 w-1 bg-red-500" />}
-                                        {isActive && !isCritical && <div className="absolute left-0 top-0 bottom-0 w-1 bg-[#2C5E3B]" />}
+                                <div
+                                    key={job.id}
+                                    onClick={() => setSelectedPackJob(job)}
+                                    className={`relative bg-[var(--theme-bg-card)] border rounded-2xl overflow-hidden cursor-pointer active:scale-[0.99] transition-all duration-150 shadow-sm min-h-[56px] touch-manipulation ${
+                                        isCritical ? 'border-red-500/40' :
+                                        isActive ? 'border-[var(--theme-accent)] shadow-[var(--theme-accent)]/10 shadow-md' :
+                                        'border-[var(--theme-border)] hover:border-[var(--theme-accent)]/40'
+                                    }`}
+                                >
+                                    {/* Priority accent stripe */}
+                                    {isCritical && <div className="absolute left-0 top-0 bottom-0 w-1 bg-red-500" />}
+                                    {isActive && !isCritical && <div className="absolute left-0 top-0 bottom-0 w-1 bg-[var(--theme-accent)]" />}
 
-                                        <div className={`flex items-center gap-3 px-3.5 sm:px-4 py-3 sm:py-3.5 ${isCritical || isActive ? 'pl-4 sm:pl-5' : ''}`}>
-                                            {/* Icon */}
-                                            <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${
-                                                isActive ? 'bg-[#2C5E3B]/10 dark:bg-[#A9CBA2]/10' :
-                                                'bg-stone-100 dark:bg-white/5'
-                                            }`}>
-                                                <Package size={18} className={isActive ? 'text-[#2C5E3B] dark:text-[#A9CBA2]' : 'text-gray-400'} />
-                                            </div>
+                                    <div className={`flex items-center gap-3.5 px-3.5 sm:px-4 py-3.5 ${isCritical || isActive ? 'pl-4 sm:pl-5' : ''}`}>
+                                        {/* Icon */}
+                                        <div className={`w-11 h-11 rounded-xl flex items-center justify-center shrink-0 ${
+                                            isActive ? 'bg-[var(--theme-accent)]/10 text-[var(--theme-accent)]' :
+                                            'bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)]'
+                                        }`}>
+                                            <Package size={20} />
+                                        </div>
 
-                                            {/* Main content */}
-                                            <div className="flex-1 min-w-0">
-                                                <div className="flex items-center gap-2 mb-0.5">
-                                                    <span className="text-sm font-black text-gray-900 dark:text-white uppercase tracking-wider truncate">{formatJobId(job)}</span>
-                                                    {isCritical && (
-                                                        <span className="flex items-center gap-0.5 bg-red-500/10 text-red-500 text-[8px] font-black px-1.5 py-0.5 rounded-full uppercase border border-red-500/20 shrink-0">
-                                                            <Zap size={8} /> Urgent
-                                                        </span>
-                                                    )}
-                                                    {isActive && !isCritical && (
-                                                        <span className="bg-[#2C5E3B]/10 text-[#2C5E3B] dark:text-[#A9CBA2] text-[8px] font-black px-1.5 py-0.5 rounded-full uppercase border border-[#2C5E3B]/20 shrink-0">
-                                                            Active
-                                                        </span>
-                                                    )}
-                                                </div>
-                                                <div className="flex items-center gap-2 text-[10px] text-gray-500 dark:text-gray-400 font-bold truncate">
-                                                    <span>{totalItems} items</span>
-                                                    {destSite?.name && <><span className="w-0.5 h-0.5 rounded-full bg-gray-300 dark:bg-gray-600 shrink-0" /><span className="truncate">{destSite.name}</span></>}
-                                                </div>
-
-                                                {/* Compact progress bar */}
-                                                <div className="mt-2 flex items-center gap-2">
-                                                    <div className="flex-1 h-1.5 bg-gray-200 dark:bg-white/10 rounded-full overflow-hidden">
-                                                        <div
-                                                            ref={el => { if (el) el.style.width = `${progress}%`; }}
-                                                            className={`h-full rounded-full transition-colors duration-300 ${progress === 100 ? 'bg-green-500' : 'bg-[#2C5E3B]'}`}
-                                                        />
-                                                    </div>
-                                                    <span className={`text-[9px] font-mono font-black shrink-0 ${progress === 100 ? 'text-green-500' : 'text-[#2C5E3B] dark:text-[#A9CBA2]'}`}>
-                                                        {packedItems}/{totalItems}
+                                        {/* Main content */}
+                                        <div className="flex-1 min-w-0">
+                                            <div className="flex items-center gap-2 mb-1">
+                                                <span className="text-sm font-semibold text-[var(--theme-text-primary)] font-mono uppercase tracking-wider truncate">
+                                                    {formatJobId(job)}
+                                                </span>
+                                                {isCritical && (
+                                                    <span className="flex items-center gap-1 bg-red-500/10 text-red-500 text-[11px] font-semibold px-2 py-0.5 rounded-full uppercase border border-red-500/20 shrink-0">
+                                                        <Zap size={10} /> Urgent
                                                     </span>
-                                                </div>
+                                                )}
+                                                {isActive && !isCritical && (
+                                                    <span className="bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] text-[11px] font-semibold px-2 py-0.5 rounded-full uppercase border border-[var(--theme-accent)]/20 shrink-0">
+                                                        Active
+                                                    </span>
+                                                )}
+                                            </div>
+                                            <div className="flex items-center gap-2 text-[11px] text-[var(--theme-text-secondary)] font-medium truncate">
+                                                <span className="font-mono tabular-nums">{totalItems} {totalItems === 1 ? t('warehouse.itemSingular') : t('warehouse.itemPlural')}</span>
+                                                {destSite?.name && (
+                                                    <>
+                                                        <span className="w-1 h-1 rounded-full bg-[var(--theme-text-secondary)]/40 shrink-0" />
+                                                        <span className="truncate">{destSite.name}</span>
+                                                    </>
+                                                )}
                                             </div>
 
-                                            {/* Right actions */}
-                                            <div className="flex items-center gap-1.5 shrink-0">
-                                                {['super_admin', 'warehouse_manager'].includes(user?.role as string) && (
-                                                    <button
-                                                        aria-label={t('warehouse.driverHub.cancel')}
-                                                        title={t('warehouse.driverHub.cancel')}
-                                                        onClick={(e) => handleDelete(e, job.id)}
-                                                        className="w-9 h-9 min-h-[36px] min-w-[36px] rounded-xl bg-stone-100 dark:bg-white/5 border border-stone-200 dark:border-white/10 text-red-500 flex items-center justify-center active:scale-90 transition-transform"
-                                                    >
-                                                        <Trash2 size={13} />
-                                                    </button>
-                                                )}
-                                                <ChevronRight size={16} className="text-gray-400 dark:text-gray-500" />
+                                            {/* Compact progress bar */}
+                                            <div className="mt-2.5 flex items-center gap-2.5">
+                                                <div className="flex-1 h-1.5 bg-[var(--theme-bg-subtle)] rounded-full overflow-hidden">
+                                                    <div
+                                                        ref={el => { if (el) el.style.width = `${progress}%`; }}
+                                                        className={`h-full rounded-full transition-colors duration-300 ${progress === 100 ? 'bg-green-500' : 'bg-[var(--theme-accent)]'}`}
+                                                    />
+                                                </div>
+                                                <span className={`text-[11px] font-mono tabular-nums font-semibold shrink-0 ${progress === 100 ? 'text-green-500' : 'text-[var(--theme-accent)]'}`}>
+                                                    {packedItems}/{totalItems}
+                                                </span>
                                             </div>
                                         </div>
+
+                                        {/* Right actions */}
+                                        <div className="flex items-center gap-2 shrink-0">
+                                            {['super_admin', 'warehouse_manager'].includes(user?.role as string) && (
+                                                <button
+                                                    aria-label={t('warehouse.driverHub.cancel')}
+                                                    title={t('warehouse.driverHub.cancel')}
+                                                    onClick={(e) => handleDelete(e, job.id)}
+                                                    className="w-11 h-11 min-h-[44px] min-w-[44px] rounded-xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-red-500 hover:text-red-600 flex items-center justify-center active:scale-95 transition-transform touch-manipulation"
+                                                >
+                                                    <Trash2 size={15} />
+                                                </button>
+                                            )}
+                                            <ChevronRight size={18} className="text-[var(--theme-text-secondary)]" />
+                                        </div>
                                     </div>
+                                </div>
                             );
                         })}
                     </div>
                 ) : (
                     <div className="flex flex-col items-center justify-center h-[50vh] text-center p-8 space-y-4">
-                        <div className="w-20 h-20 rounded-full bg-stone-100 dark:bg-[#1C2620]/40 border-2 border-dashed border-stone-300 dark:border-[#A9CBA2]/10 flex items-center justify-center shadow-inner">
-                            <Box size={32} className="text-gray-300 dark:text-[#A9CBA2]/20" />
+                        <div className="w-20 h-20 rounded-full bg-[var(--theme-bg-subtle)] border-2 border-dashed border-[var(--theme-border)] flex items-center justify-center">
+                            <Box size={32} className="text-[var(--theme-text-secondary)] opacity-40" />
                         </div>
                         <div>
-                            <p className="text-lg font-black text-gray-300 dark:text-white tracking-widest uppercase italic">{t('warehouse.noRecords')}</p>
-                            <p className="text-xs font-bold tracking-widest uppercase text-gray-400 mt-2 max-w-[200px] mx-auto leading-relaxed">{t('warehouse.packing.noMatchingPackingMissions')}</p>
+                            <p className="text-base font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider">{t('warehouse.noRecords')}</p>
+                            <p className="text-[11px] font-medium text-[var(--theme-text-secondary)] mt-1.5 max-w-[240px] mx-auto leading-relaxed">{t('warehouse.packing.noMatchingPackingMissions')}</p>
                         </div>
                     </div>
                 )}

@@ -25,10 +25,10 @@ export const ProductRestockLogCard: React.FC<ProductRestockLogCardProps> = ({
         : [];
 
     return (
-        <div className="bg-[var(--theme-bg-card)] p-5 rounded-2xl border border-[var(--theme-border)] space-y-4 shadow-sm">
-            <div className="flex items-center gap-2 border-b border-[var(--theme-border)] pb-2">
+        <div className="bg-[var(--theme-bg-card)] p-5 rounded-2xl border border-[var(--theme-border)] space-y-4 shadow-xs">
+            <div className="flex items-center gap-2 border-b border-[var(--theme-border)] pb-2.5">
                 <TrendingUp size={14} className="text-[var(--theme-text-secondary)]" />
-                <h3 className="text-[10px] font-bold uppercase tracking-wider text-[var(--theme-text-primary)]">
+                <h3 className="text-xs font-bold uppercase tracking-wider text-[var(--theme-text-primary)]">
                     Restock Log & Audits
                 </h3>
             </div>
@@ -46,7 +46,7 @@ export const ProductRestockLogCard: React.FC<ProductRestockLogCardProps> = ({
                                     +{m.quantity}
                                 </span>
                             </div>
-                            <span className="text-[9px] text-[var(--theme-text-muted)] font-mono">
+                            <span className="text-[11px] text-[var(--theme-text-muted)] font-mono">
                                 {new Date(m.date).toLocaleDateString([], { month: 'short', day: 'numeric', year: 'numeric' })}
                             </span>
                         </div>
@@ -58,7 +58,7 @@ export const ProductRestockLogCard: React.FC<ProductRestockLogCardProps> = ({
                 </p>
             )}
 
-            <div className="pt-3 border-t border-[var(--theme-border)] text-[10px] space-y-1.5">
+            <div className="pt-3 border-t border-[var(--theme-border)] text-[11px] space-y-1.5">
                 <div className="flex justify-between">
                     <span className="text-[var(--theme-text-muted)] font-medium uppercase">Created By:</span>
                     <span className="font-semibold text-[var(--theme-text-primary)]">{createdBy || 'System'}</span>

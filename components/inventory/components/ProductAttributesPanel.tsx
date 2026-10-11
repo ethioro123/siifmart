@@ -1,6 +1,7 @@
 import React from 'react';
 import { Package, Layers, ShieldCheck, Tag, Info, Sparkles } from 'lucide-react';
 import { Product } from '../../../types';
+import { getCategorySpecGroup } from '../../procurement/categoryAttributes';
 
 // ── Compact Attribute Badge ──
 const AttrBadge = ({ label, value, color }: { label: string; value?: string | number | boolean | null; color?: string }) => {
@@ -23,9 +24,9 @@ const AttrBadge = ({ label, value, color }: { label: string; value?: string | nu
     const colorClasses = color && colorMap[color] ? colorMap[color] : 'bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] text-[var(--theme-text-secondary)]';
 
     return (
-        <div className={`flex items-center gap-1.5 ${colorClasses} border rounded-lg px-2 py-1 min-w-0 font-medium`}>
-            {displayLabel && <span className="text-[9px] opacity-70 uppercase tracking-tighter font-semibold">{displayLabel}</span>}
-            <span className="text-[10px] font-bold leading-none truncate font-mono">{displayValue}</span>
+        <div className={`flex items-center gap-1.5 ${colorClasses} border rounded-lg px-2.5 py-1 min-w-0 font-medium`}>
+            {displayLabel && <span className="text-[11px] opacity-75 uppercase tracking-tight font-semibold">{displayLabel}</span>}
+            <span className="text-[11px] font-bold leading-none truncate font-mono">{displayValue}</span>
         </div>
     );
 };
@@ -56,8 +57,8 @@ export const ProductAttributesPanel: React.FC<ProductAttributesPanelProps> = ({ 
         <div className="space-y-3">
             {/* 1. Identity & Variant Domain */}
             {hasIdentity && (
-                <div className="p-3.5 bg-[var(--theme-bg-panel)] rounded-2xl border border-[var(--theme-border)] space-y-2">
-                    <div className="flex items-center gap-1.5 text-[10px] font-bold text-[var(--theme-text-secondary)] uppercase tracking-wider">
+                <div className="p-3.5 bg-[var(--theme-bg-subtle)] rounded-2xl border border-[var(--theme-border)] space-y-2">
+                    <div className="flex items-center gap-1.5 text-[11px] font-bold text-[var(--theme-text-secondary)] uppercase tracking-wider">
                         <Tag size={12} className="text-indigo-500 shrink-0" />
                         <span>Identity & Variant Specs</span>
                     </div>
@@ -71,8 +72,8 @@ export const ProductAttributesPanel: React.FC<ProductAttributesPanelProps> = ({ 
 
             {/* 2. Packaging Domain */}
             {hasPackaging && (
-                <div className="p-3.5 bg-[var(--theme-bg-panel)] rounded-2xl border border-[var(--theme-border)] space-y-2">
-                    <div className="flex items-center gap-1.5 text-[10px] font-bold text-[var(--theme-text-secondary)] uppercase tracking-wider">
+                <div className="p-3.5 bg-[var(--theme-bg-subtle)] rounded-2xl border border-[var(--theme-border)] space-y-2">
+                    <div className="flex items-center gap-1.5 text-[11px] font-bold text-[var(--theme-text-secondary)] uppercase tracking-wider">
                         <Package size={12} className="text-blue-500 shrink-0" />
                         <span>Packaging & Outer Casing</span>
                     </div>
@@ -89,8 +90,8 @@ export const ProductAttributesPanel: React.FC<ProductAttributesPanelProps> = ({ 
 
             {/* 3. Physical Specs Domain */}
             {hasPhysical && (
-                <div className="p-3.5 bg-[var(--theme-bg-panel)] rounded-2xl border border-[var(--theme-border)] space-y-2">
-                    <div className="flex items-center gap-1.5 text-[10px] font-bold text-[var(--theme-text-secondary)] uppercase tracking-wider">
+                <div className="p-3.5 bg-[var(--theme-bg-subtle)] rounded-2xl border border-[var(--theme-border)] space-y-2">
+                    <div className="flex items-center gap-1.5 text-[11px] font-bold text-[var(--theme-text-secondary)] uppercase tracking-wider">
                         <Layers size={12} className="text-amber-500 shrink-0" />
                         <span>Physical Specifications</span>
                     </div>
@@ -107,8 +108,8 @@ export const ProductAttributesPanel: React.FC<ProductAttributesPanelProps> = ({ 
 
             {/* 4. Storage & Care Domain */}
             {hasStorage && (
-                <div className="p-3.5 bg-[var(--theme-bg-panel)] rounded-2xl border border-[var(--theme-border)] space-y-2">
-                    <div className="flex items-center gap-1.5 text-[10px] font-bold text-[var(--theme-text-secondary)] uppercase tracking-wider">
+                <div className="p-3.5 bg-[var(--theme-bg-subtle)] rounded-2xl border border-[var(--theme-border)] space-y-2">
+                    <div className="flex items-center gap-1.5 text-[11px] font-bold text-[var(--theme-text-secondary)] uppercase tracking-wider">
                         <ShieldCheck size={12} className="text-emerald-500 shrink-0" />
                         <span>Storage & Care Conditions</span>
                     </div>
@@ -125,8 +126,8 @@ export const ProductAttributesPanel: React.FC<ProductAttributesPanelProps> = ({ 
 
             {/* 5. Commercial & POS Domain */}
             {hasCommercial && (
-                <div className="p-3.5 bg-[var(--theme-bg-panel)] rounded-2xl border border-[var(--theme-border)] space-y-2">
-                    <div className="flex items-center gap-1.5 text-[10px] font-bold text-[var(--theme-text-secondary)] uppercase tracking-wider">
+                <div className="p-3.5 bg-[var(--theme-bg-subtle)] rounded-2xl border border-[var(--theme-border)] space-y-2">
+                    <div className="flex items-center gap-1.5 text-[11px] font-bold text-[var(--theme-text-secondary)] uppercase tracking-wider">
                         <Tag size={12} className="text-purple-500 shrink-0" />
                         <span>Commercial & POS Policies</span>
                     </div>
@@ -142,8 +143,8 @@ export const ProductAttributesPanel: React.FC<ProductAttributesPanelProps> = ({ 
 
             {/* 6. Sensory & Usage Domain */}
             {hasDescriptive && (
-                <div className="p-3.5 bg-[var(--theme-bg-panel)] rounded-2xl border border-[var(--theme-border)] space-y-2">
-                    <div className="flex items-center gap-1.5 text-[10px] font-bold text-[var(--theme-text-secondary)] uppercase tracking-wider">
+                <div className="p-3.5 bg-[var(--theme-bg-subtle)] rounded-2xl border border-[var(--theme-border)] space-y-2">
+                    <div className="flex items-center gap-1.5 text-[11px] font-bold text-[var(--theme-text-secondary)] uppercase tracking-wider">
                         <Info size={12} className="text-slate-500 shrink-0" />
                         <span>Usage & Sensory Attributes</span>
                     </div>
@@ -158,23 +159,56 @@ export const ProductAttributesPanel: React.FC<ProductAttributesPanelProps> = ({ 
             )}
 
             {/* 7. Category-Specific Specifications */}
-            {hasCategorySpecific && (
-                <div className="p-3.5 bg-[var(--theme-bg-panel)] rounded-2xl border border-[var(--theme-border)] space-y-2">
-                    <div className="flex items-center gap-1.5 text-[10px] font-bold text-[var(--theme-text-secondary)] uppercase tracking-wider">
-                        <Sparkles size={12} className="text-amber-500 shrink-0" />
-                        <span>Category Specifications</span>
+            {hasCategorySpecific && (() => {
+                const specGroup = getCategorySpecGroup(product.category, customAttrs?.identity?.subcategory);
+                const renderedKeys = new Set<string>();
+                const specsList: { key: string; label: string; value: string }[] = [];
+
+                for (const field of specGroup.fields) {
+                    const val = categorySpecific[field.key];
+                    if (val !== undefined && val !== null && val !== '') {
+                        renderedKeys.add(field.key);
+                        specsList.push({
+                            key: field.key,
+                            label: field.label.replace(/\s*\(.*\)/, '').replace(/\s*\/.*$/, '').trim(),
+                            value: String(val)
+                        });
+                    }
+                }
+
+                for (const key of categorySpecificKeys) {
+                    if (!renderedKeys.has(key)) {
+                        specsList.push({
+                            key,
+                            label: key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase()),
+                            value: String(categorySpecific[key])
+                        });
+                    }
+                }
+
+                return (
+                    <div className="p-3.5 bg-[var(--theme-bg-subtle)] rounded-2xl border border-[var(--theme-border)] space-y-2">
+                        <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-1.5 text-[11px] font-bold text-[var(--theme-text-primary)] uppercase tracking-wider">
+                                <Sparkles size={12} className="text-[var(--theme-accent)] shrink-0" />
+                                <span>{specGroup.domainTitle}</span>
+                            </div>
+                            <span className="text-[10px] font-semibold text-[var(--theme-text-secondary)] bg-[var(--theme-bg-app)] border border-[var(--theme-border)] px-2 py-0.5 rounded-full">
+                                {specGroup.badgeLabel}
+                            </span>
+                        </div>
+                        <div className="flex flex-wrap gap-1.5 pt-1">
+                            {specsList.map(spec => (
+                                <AttrBadge
+                                    key={spec.key}
+                                    label={spec.label}
+                                    value={spec.value}
+                                />
+                            ))}
+                        </div>
                     </div>
-                    <div className="flex flex-wrap gap-1.5">
-                        {categorySpecificKeys.map(key => (
-                            <AttrBadge
-                                key={key}
-                                label={key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}
-                                value={String(categorySpecific[key])}
-                            />
-                        ))}
-                    </div>
-                </div>
-            )}
+                );
+            })()}
         </div>
     );
 };

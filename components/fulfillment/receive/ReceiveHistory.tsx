@@ -283,7 +283,7 @@ export const ReceiveHistory: React.FC<ReceiveHistoryProps> = ({
         <div className="mt-4 md:mt-6 relative">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 md:gap-4 p-4 md:p-5 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl shadow-[var(--shadow-sm)] mb-4 md:mb-6">
                 <div className="flex items-center gap-3">
-                    <div className="w-9 h-9 rounded-xl bg-[#0071E3]/10 dark:bg-[#2997FF]/10 text-[#0071E3] dark:text-[#2997FF] border border-[#0071E3]/20 dark:border-[#2997FF]/20 flex items-center justify-center shrink-0">
+                    <div className="w-9 h-9 rounded-xl bg-[var(--theme-accent-muted)] text-[var(--theme-accent)] border border-[var(--theme-accent)]/20 flex items-center justify-center shrink-0">
                         <HistoryIcon size={18} />
                     </div>
                     <h4 className="text-base md:text-lg font-semibold text-[var(--theme-text-primary)] tracking-tight">
@@ -301,7 +301,7 @@ export const ReceiveHistory: React.FC<ReceiveHistoryProps> = ({
                         title={t('warehouse.searchHistoryPlaceholder')}
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
-                        className="w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] hover:border-[var(--theme-border-strong)] rounded-xl py-2 pl-9 pr-4 text-xs text-[var(--theme-text-primary)] placeholder:[var(--theme-text-secondary)]/60 focus:outline-none focus:border-[#0071E3] focus:ring-2 focus:ring-[#0071E3]/20 transition-colors"
+                        className="w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] hover:border-[var(--theme-border-strong)] rounded-xl py-2 pl-9 pr-4 text-xs text-[var(--theme-text-primary)] placeholder:[var(--theme-text-secondary)]/60 focus:outline-none focus:border-[var(--theme-accent)] focus:ring-2 focus:ring-[var(--theme-accent-muted)] transition-colors"
                     />
                 </div>
             </div>

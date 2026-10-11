@@ -208,27 +208,29 @@ export const InventoryZones: React.FC = () => {
 
             {/* Zones Grid List */}
             {isLoading && zones.length === 0 ? (
-                <div className="flex flex-col items-center justify-center p-12 text-center bg-[var(--theme-bg-panel)] rounded-3xl border border-[var(--theme-border)] shadow-sm">
-                    <RefreshCw className="animate-spin text-[var(--theme-accent)] mb-3" size={32} />
-                    <p className="text-sm text-[var(--theme-text-muted)] font-medium uppercase tracking-wider">Loading storage zones from database...</p>
+                <div className="flex flex-col items-center justify-center p-12 text-center bg-[var(--theme-bg-card)] rounded-2xl border border-[var(--theme-border)] shadow-xs">
+                    <div className="w-10 h-10 rounded-xl bg-[var(--theme-accent)]/10 border border-[var(--theme-accent)]/20 flex items-center justify-center text-[var(--theme-accent)] mb-3">
+                        <RefreshCw className="animate-spin" size={18} />
+                    </div>
+                    <p className="text-[13px] text-[var(--theme-text-secondary)] font-medium">Loading storage zones...</p>
                 </div>
             ) : zones.length === 0 ? (
-                <div className="flex flex-col items-center justify-center p-12 sm:p-16 text-center bg-[var(--theme-bg-panel)] rounded-3xl border border-[var(--theme-border)] shadow-sm space-y-4">
-                    <div className="w-14 h-14 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-600 dark:text-amber-400">
-                        <AlertCircle size={28} />
+                <div className="flex flex-col items-center justify-center p-12 sm:p-16 text-center bg-[var(--theme-bg-card)] rounded-2xl border border-[var(--theme-border)] shadow-xs space-y-4">
+                    <div className="w-12 h-12 rounded-xl bg-[#FF9F0A]/10 border border-[#FF9F0A]/20 flex items-center justify-center text-[#FF9F0A]">
+                        <AlertCircle size={22} />
                     </div>
                     <div>
-                        <h3 className="text-base font-bold text-[var(--theme-text-primary)] uppercase tracking-wide">No Zones Configured</h3>
-                        <p className="text-xs text-[var(--theme-text-muted)] mt-1 max-w-md mx-auto">
+                        <h3 className="text-sm font-semibold text-[var(--theme-text-primary)] tracking-tight">No Zones Configured</h3>
+                        <p className="text-[13px] text-[var(--theme-text-secondary)] mt-1 max-w-md mx-auto leading-relaxed">
                             There are currently no storage zones defined for {activeSite?.name || 'this facility'}. Initialize standard zones or define a custom layout.
                         </p>
                     </div>
-                    <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
+                    <div className="flex flex-wrap items-center justify-center gap-2.5 pt-2">
                         <button
                             type="button"
                             onClick={handleInitializeDefaults}
                             disabled={isLoading}
-                            className="px-5 py-2.5 rounded-2xl text-xs font-bold flex items-center gap-2 cursor-pointer shadow-sm disabled:opacity-50 bg-[var(--theme-primary)] text-[var(--theme-primary-text)] hover:opacity-90 active:scale-[0.98] transition-all"
+                            className="h-9 px-4 rounded-xl text-[13px] font-semibold flex items-center gap-2 cursor-pointer shadow-xs disabled:opacity-50 bg-[var(--theme-accent)] text-white hover:opacity-95 active:scale-[0.98] transition-all"
                         >
                             <RefreshCw size={14} className={isLoading ? 'animate-spin' : ''} />
                             <span>Initialize Default Zones</span>
@@ -237,7 +239,7 @@ export const InventoryZones: React.FC = () => {
                             <button
                                 type="button"
                                 onClick={() => setIsCreateOpen(true)}
-                                className="px-5 py-2.5 bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card-hover)] text-[var(--theme-text-primary)] border border-[var(--theme-border)] rounded-2xl text-xs font-bold flex items-center gap-2 transition-all cursor-pointer active:scale-[0.98]"
+                                className="h-9 px-4 bg-[var(--theme-bg-card)] hover:bg-[var(--theme-bg-hover)] text-[var(--theme-text-primary)] border border-[var(--theme-border)] rounded-xl text-[13px] font-semibold flex items-center gap-2 shadow-xs transition-all cursor-pointer active:scale-[0.98]"
                             >
                                 <span>Add Custom Zone</span>
                             </button>

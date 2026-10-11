@@ -34,7 +34,6 @@ export const TransferActiveList: React.FC<TransferActiveListProps> = ({
         return filteredJobs
             .filter(j => j.type === 'TRANSFER' && j.status !== 'Cancelled' && j.transferStatus !== 'Received' && (j.status !== 'Completed' || j.transferStatus === 'Delivered' || j.transferStatus === 'Partially Delivered'))
             .filter(j => {
-                // Derive effective status from child DISPATCH if it has progressed further
                 let effStatus = j.transferStatus || 'Requested';
                 const child = filteredJobs.find(d => d.type === 'DISPATCH' && (d.orderRef === j.id || d.orderRef === j.jobNumber) && d.status !== 'Cancelled');
                 if (child) {
@@ -80,7 +79,6 @@ export const TransferActiveList: React.FC<TransferActiveListProps> = ({
                 !['Resolved', 'Completed'].includes(item.status)
             );
 
-        // Derive effective status: if a child DISPATCH job has progressed further, use that
         const childDispatch = filteredJobs.find(j =>
             j.type === 'DISPATCH' &&
             (j.orderRef === transfer.id || j.orderRef === transfer.jobNumber) &&
@@ -97,17 +95,17 @@ export const TransferActiveList: React.FC<TransferActiveListProps> = ({
             return (STATUS_RANK[childStatus] || 0) > (STATUS_RANK[parentStatus] || 0) ? childStatus : parentStatus;
         })();
 
-        const statusColors: Record<string, string> = {
-            'Draft': 'bg-gray-550/20 text-gray-400 dark:text-gray-500',
-            'Requested': 'bg-yellow-500/20 text-yellow-400',
-            'Approved': 'bg-[#2C5E3B]/20 text-[#A9CBA2]',
-            'Picking': 'bg-orange-500/20 text-orange-400',
-            'Picked': 'bg-amber-500/20 text-amber-400',
-            'Packed': 'bg-[#2C5E3B]/30 text-[#A9CBA2]',
-            'Shipped': 'bg-amber-500/20 text-amber-400',
-            'In-Transit': 'bg-amber-500/20 text-amber-400',
-            'Delivered': 'bg-[#A9CBA2]/20 text-[#A9CBA2]',
-            'Received': 'bg-green-500/20 text-green-400',
+        const statusBadges: Record<string, string> = {
+            'Draft': 'bg-stone-500/10 text-[var(--theme-text-secondary)] border-stone-500/20',
+            'Requested': 'bg-yellow-500/10 text-yellow-600 dark:text-yellow-400 border-yellow-500/20',
+            'Approved': 'bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20',
+            'Picking': 'bg-orange-500/10 text-orange-600 dark:text-orange-400 border-orange-500/20',
+            'Picked': 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20',
+            'Packed': 'bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border-indigo-500/20',
+            'Shipped': 'bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 border-cyan-500/20',
+            'In-Transit': 'bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 border-cyan-500/20',
+            'Delivered': 'bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-500/20',
+            'Received': 'bg-green-500/10 text-green-600 dark:text-green-400 border-green-500/20',
         };
 
         const getLocalizedStatus = (status: string) => {
@@ -133,34 +131,39 @@ export const TransferActiveList: React.FC<TransferActiveListProps> = ({
                     setSelectedJob(transfer);
                     setIsDetailsOpen(true);
                 }}
-                className={`flex items-center justify-between p-3 rounded-lg border cursor-pointer transition-all hover:bg-stone-50 dark:hover:bg-white/5 ${hasDisc ? 'border-red-500/40 bg-red-500/5' : 'border-stone-200 dark:border-white/5 hover:border-stone-300 dark:hover:border-white/10'
-                    }`}
+                className={`flex items-center justify-between p-3.5 rounded-xl border cursor-pointer transition-colors shadow-sm ${
+                    hasDisc
+                        ? 'bg-red-500/5 border-red-500/40 hover:border-red-500'
+                        : 'bg-[var(--theme-bg-card)] border-[var(--theme-border)] hover:border-[var(--theme-accent)]/50'
+                }`}
             >
-                {/* Left: ID only */}
-                <div className="flex items-center gap-2">
-                    {hasDisc && <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />}
-                    <span className="font-mono font-bold text-stone-900 dark:text-white text-sm">{formatJobId(transfer)}</span>
+                {/* Left: ID + Discrepancy indicator */}
+                <div className="flex items-center gap-2.5 min-w-0">
+                    {hasDisc && <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse shrink-0" />}
+                    <span className="font-mono tabular-nums font-semibold text-[var(--theme-text-primary)] text-sm truncate">
+                        {formatJobId(transfer)}
+                    </span>
                 </div>
-                {/* Right: Status + Chevron */}
-                <div className="flex items-center gap-3">
-                    <span className={`text-[10px] px-2 py-0.5 rounded font-bold uppercase ${statusColors[effectiveStatus]}`}>
+                {/* Right: Status badge + Chevron */}
+                <div className="flex items-center gap-3 shrink-0">
+                    <span className={`text-[11px] px-2.5 py-0.5 rounded-full font-semibold uppercase border ${statusBadges[effectiveStatus] || statusBadges['Draft']}`}>
                         {getLocalizedStatus(effectiveStatus)}
                     </span>
-                    <ChevronRight size={16} className="text-stone-400 dark:text-gray-555" />
+                    <ChevronRight size={16} className="text-[var(--theme-text-secondary)]" />
                 </div>
             </div>
         );
     };
 
     return (
-        <div className="bg-transparent space-y-4">
-            <div className="flex items-center justify-between mb-4 gap-2">
+        <div className="space-y-4">
+            <div className="flex items-center justify-between mb-2 gap-2 flex-wrap">
                 <div className="flex items-center gap-2 flex-wrap">
                     <select
                         aria-label={t('warehouse.putaway.search')}
                         value={transferStatusFilter}
                         onChange={(e) => setTransferStatusFilter(e.target.value as any)}
-                        className="bg-white dark:bg-black/60 border border-[#E2DCCE] dark:border-white/10 rounded-xl px-3 py-2 text-xs font-bold text-stone-900 dark:text-white focus:border-[#2C5E3B] dark:focus:border-[#A9CBA2] focus:outline-none shadow-xs"
+                        className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl px-3 py-2 text-xs font-semibold text-[var(--theme-text-primary)] focus:border-[var(--theme-accent)] outline-none min-h-[44px] transition-colors shadow-sm"
                     >
                         <option value="ALL">{t('warehouse.allTransfers')}</option>
                         <option value="Requested">{t('warehouse.requested')}</option>
@@ -185,28 +188,35 @@ export const TransferActiveList: React.FC<TransferActiveListProps> = ({
                         setIsOpen={setIsTransferSortDropdownOpen}
                     />
                 </div>
-                <button
-                    onClick={() => setShowTransferArchive && setShowTransferArchive(true)}
-                    className="px-3 py-2 bg-stone-100 dark:bg-white/5 text-stone-600 dark:text-gray-400 hover:text-stone-900 dark:hover:text-white rounded-lg text-xs font-bold hover:bg-stone-200 dark:hover:bg-white/10 border border-stone-200 dark:border-white/10 flex items-center gap-1.5 transition-colors"
-                >
-                    <FileText size={14} /> {t('warehouse.archive')}
-                </button>
+                {setShowTransferArchive && (
+                    <button
+                        onClick={() => setShowTransferArchive(true)}
+                        className="px-3.5 py-2 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] hover:bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)] rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-colors min-h-[44px]"
+                    >
+                        <FileText size={14} />
+                        <span>{t('warehouse.archive')}</span>
+                    </button>
+                )}
             </div>
 
-            <div className="space-y-6">
+            <div className="space-y-4">
                 {/* ONGOING Section */}
                 <div>
                     <div className="flex items-center gap-2 mb-3">
-                        <div className="w-2 h-2 rounded-full bg-yellow-400 animate-pulse" />
-                        <h4 className="text-sm font-bold text-stone-900 dark:text-white uppercase tracking-wide">{t('warehouse.ongoing')}</h4>
-                        <span className="text-xs text-stone-500 dark:text-gray-500">({filteredOngoingTransfers.length})</span>
+                        <div className="w-2 h-2 rounded-full bg-amber-400" />
+                        <h4 className="text-sm font-bold text-[var(--theme-text-primary)] uppercase tracking-wide">
+                            {t('warehouse.ongoing')}
+                        </h4>
+                        <span className="text-xs font-mono tabular-nums text-[var(--theme-text-secondary)]">
+                            ({filteredOngoingTransfers.length})
+                        </span>
                     </div>
                     {filteredOngoingTransfers.length > 0 ? (
                         <>
                             <div className="space-y-2">
                                 {paginatedOngoingTransfers.map(renderRow)}
                             </div>
-                            <div className="mt-4">
+                            <div className="pt-2">
                                 <Pagination
                                     currentPage={transferCurrentPage}
                                     totalPages={transferTotalPages}
@@ -219,9 +229,9 @@ export const TransferActiveList: React.FC<TransferActiveListProps> = ({
                             </div>
                         </>
                     ) : (
-                        <div className="text-center py-8 text-stone-500 dark:text-gray-500 bg-stone-50 dark:bg-white/[0.02] rounded-lg border border-stone-200 dark:border-white/5">
-                            <Truck size={32} className="mx-auto mb-2 opacity-30" />
-                            <p className="text-sm">{t('warehouse.noOngoingTransfers')}</p>
+                        <div className="text-center py-12 px-4 bg-[var(--theme-bg-card)] rounded-2xl border border-[var(--theme-border)] shadow-sm">
+                            <Truck size={32} className="mx-auto mb-2 text-[var(--theme-text-secondary)]/40" />
+                            <p className="text-xs text-[var(--theme-text-secondary)] font-medium">{t('warehouse.noOngoingTransfers')}</p>
                         </div>
                     )}
                 </div>
@@ -229,3 +239,5 @@ export const TransferActiveList: React.FC<TransferActiveListProps> = ({
         </div>
     );
 };
+
+export default TransferActiveList;

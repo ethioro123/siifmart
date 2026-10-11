@@ -16,35 +16,43 @@ export const ZoneOccupancyCard: React.FC<ZoneOccupancyCardProps> = ({
 }) => {
     return (
         <div className="flex flex-col gap-6">
-            <div className="bg-white/80 dark:bg-[#18201B]/70 border border-[#E2DCCE] dark:border-emerald-950/20 lg:backdrop-blur-2xl rounded-3xl p-5 sm:p-8 lg:p-10 flex-1 shadow-sm transition-colors duration-500">
-                <h3 className="text-lg font-bold text-[#1E3F27] dark:text-[#EAE5D9] mb-8 flex items-center gap-4">
-                    <Thermometer className="text-[#2C5E3B] dark:text-[#A9CBA2] opacity-80" size={20} />
-                    Spatial Density
-                </h3>
-                <div className="space-y-7">
+            {/* Spatial Density Card */}
+            <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-5 sm:p-6 shadow-xs flex-1">
+                <div className="flex items-center gap-3 mb-6">
+                    <div className="w-8 h-8 rounded-xl bg-[#0071E3]/10 dark:bg-[#2997FF]/10 text-[#0071E3] dark:text-[#2997FF] flex items-center justify-center shrink-0">
+                        <Thermometer size={16} />
+                    </div>
+                    <div>
+                        <h3 className="text-sm font-semibold text-[var(--theme-text-primary)]">Spatial Density</h3>
+                        <p className="text-xs text-[var(--theme-text-secondary)]">Zone capacity & automated racking</p>
+                    </div>
+                </div>
+
+                <div className="space-y-5">
                     {(warehouseMetrics?.zone_data?.length > 0 ? warehouseMetrics.zone_data : mockZones).slice(0, 4).map((zone: any) => {
-                        const percent = (zone.occupied / zone.capacity) * 100;
-                        let colorClass = 'from-[#2C5E3B] to-emerald-500 dark:from-[#A9CBA2] dark:to-emerald-400';
-                        if (percent > 90) colorClass = 'from-red-600 to-orange-500';
-                        else if (percent > 75) colorClass = 'from-amber-600 to-yellow-500';
+                        const percent = Math.min(100, Math.max(0, (zone.occupied / zone.capacity) * 100));
+                        let barColor = 'bg-[#0071E3] dark:bg-[#2997FF]';
+                        let textColor = 'text-[#0071E3] dark:text-[#2997FF]';
+                        if (percent > 90) {
+                            barColor = 'bg-[#FF3B30] dark:bg-[#FF453A]';
+                            textColor = 'text-[#FF3B30] dark:text-[#FF453A]';
+                        } else if (percent > 75) {
+                            barColor = 'bg-[#FF9500] dark:bg-[#FF9F0A]';
+                            textColor = 'text-[#FF9500] dark:text-[#FF9F0A]';
+                        }
 
                         return (
-                            <div key={zone.id} className="group cursor-help">
-                                <div className="flex justify-between items-end mb-2.5 px-0.5">
-                                    <div>
-                                        <span className="text-xs font-bold text-[#1E3F27] dark:text-[#EAE5D9] uppercase tracking-wider">{zone.name}</span>
-                                        <p className="text-[9px] text-[#4D6E56] dark:text-[#7A9E83] font-bold uppercase tracking-widest mt-0.5 opacity-60">Automated Racking</p>
-                                    </div>
-                                    <div className="text-right">
-                                        <span className={`text-[11px] font-bold ${percent > 90 ? 'text-red-600 dark:text-red-400' : 'text-[#2C5E3B] dark:text-[#A9CBA2]'}`}>{percent.toFixed(0)}%</span>
-                                    </div>
+                            <div key={zone.id} className="group">
+                                <div className="flex justify-between items-baseline mb-1.5 px-0.5">
+                                    <span className="text-xs font-medium text-[var(--theme-text-primary)]">{zone.name}</span>
+                                    <span className={`text-xs font-semibold font-mono ${textColor}`}>
+                                        {percent.toFixed(0)}%
+                                    </span>
                                 </div>
-                                <div className="w-full bg-[#FAF8F5] dark:bg-black/35 border border-[#E2DCCE]/40 dark:border-white/[0.04] rounded-full h-2 overflow-hidden p-0.5">
+                                <div className="w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-full h-2 overflow-hidden p-0.5">
                                     <div
-                                        className={`h-full rounded-full bg-gradient-to-r ${colorClass} transition-all duration-1000 ease-out shadow-[0_0_10px_rgba(44,94,59,0.15)]`}
-                                        ref={(el) => {
-                                            if (el) el.style.width = `${percent}%`;
-                                        }}
+                                        className={`h-full rounded-full ${barColor} transition-all duration-500 ease-out`}
+                                        style={{ width: `${percent}%` }}
                                     />
                                 </div>
                             </div>
@@ -53,29 +61,33 @@ export const ZoneOccupancyCard: React.FC<ZoneOccupancyCardProps> = ({
                 </div>
             </div>
 
-            <div className="bg-white/80 dark:bg-[#18201B]/70 border border-[#E2DCCE] dark:border-emerald-950/20 lg:backdrop-blur-2xl rounded-3xl p-5 sm:p-8 lg:p-10 shadow-sm transition-colors duration-500">
-                <h4 className="text-[10px] font-bold text-[#4D6E56] dark:text-[#7A9E83] uppercase tracking-[0.3em] mb-6">Velocity Ranking</h4>
-                <div className="space-y-4">
+            {/* Velocity Ranking Card */}
+            <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-5 sm:p-6 shadow-xs">
+                <div className="mb-4">
+                    <h4 className="text-xs font-semibold text-[var(--theme-text-primary)]">Velocity Ranking</h4>
+                    <p className="text-[11px] text-[var(--theme-text-secondary)]">Fastest moving SKUs</p>
+                </div>
+                <div className="space-y-2.5">
                     {fastMovers.length > 0 ? fastMovers.slice(0, 3).map((item: any, i: number) => (
-                        <div key={i} className="flex items-center justify-between p-4 bg-[#FAF8F5]/80 dark:bg-[#1C2620]/45 rounded-2xl border border-[#E2DCCE]/50 dark:border-emerald-950/15 group hover:bg-[#FAF8F5] hover:dark:bg-[#1C2620]/80 transition-all cursor-pointer">
-                            <div className="flex items-center gap-5 min-w-0">
-                                <div className="w-12 h-12 rounded-2xl bg-white dark:bg-black/25 flex items-center justify-center font-bold text-[#4D6E56] dark:text-[#7A9E83] text-[10px] border border-[#E2DCCE] dark:border-emerald-950/25 group-hover:text-[#2C5E3B] group-hover:dark:text-[#A9CBA2] group-hover:border-[#2C5E3B]/25 group-hover:dark:border-[#A9CBA2]/25 transition-colors">
+                        <div key={i} className="flex items-center justify-between p-3 bg-[var(--theme-bg-subtle)] rounded-xl border border-[var(--theme-border)] transition-colors hover:bg-[var(--theme-bg-card)]">
+                            <div className="flex items-center gap-3 min-w-0">
+                                <div className="w-8 h-8 rounded-lg bg-[var(--theme-bg-card)] flex items-center justify-center font-semibold text-xs text-[var(--theme-text-secondary)] border border-[var(--theme-border)] shrink-0 font-mono">
                                     0{i + 1}
                                 </div>
                                 <div className="truncate">
-                                    <span className="text-xs font-bold text-[#1E3F27] dark:text-[#EAE5D9] truncate block group-hover:text-[#2C5E3B] group-hover:dark:text-[#A9CBA2] transition-colors">{item.name}</span>
-                                    <p className="text-[9px] text-[#4D6E56] dark:text-[#7A9E83] font-bold uppercase tracking-tighter mt-0.5 opacity-60">SKU Fast-Tracked</p>
+                                    <span className="text-xs font-medium text-[var(--theme-text-primary)] truncate block">{item.name}</span>
+                                    <p className="text-[11px] text-[var(--theme-text-secondary)] font-mono">SKU Fast-Tracked</p>
                                 </div>
                             </div>
-                            <div className="flex items-center gap-3 text-right shrink-0">
-                                <div className="text-right">
-                                    <span className="block text-xs font-black text-[#1E3F27] dark:text-[#EAE5D9]">{item.moved}</span>
-                                    {item.trend && <span className="text-[9px] font-bold text-[#2C5E3B] dark:text-[#A9CBA2]">{item.trend}</span>}
+                            <div className="flex items-center gap-2 text-right shrink-0">
+                                <div>
+                                    <span className="block text-xs font-semibold font-mono text-[var(--theme-text-primary)]">{item.moved}</span>
+                                    {item.trend && <span className="text-[10px] font-medium text-[#34C759] dark:text-[#30D158]">{item.trend}</span>}
                                 </div>
                             </div>
                         </div>
                     )) : (
-                        <p className="text-[10px] text-stone-500 font-bold uppercase tracking-widest text-center py-4">Scanning Network...</p>
+                        <p className="text-xs text-[var(--theme-text-secondary)] text-center py-4">Scanning Network...</p>
                     )}
                 </div>
             </div>

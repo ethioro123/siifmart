@@ -9,6 +9,7 @@ import { useData } from '../contexts/DataContext';
 import { useStore } from '../contexts/CentralStore';
 import { PendingInventoryChange, Product } from '../types';
 import { logger } from '../utils/logger';
+import { requiresFinanceCoApproval, canApproveBelowFloor, MARGIN_FLOOR_PCT } from '../utils/pricingGovernance';
 
 // For putaway job - we need to see where it comes from. 
 // In Inventory.tsx it seems it's available in scope (maybe from DataContext or defined in Inventory.tsx)
@@ -28,6 +29,11 @@ export function useApproveInventoryRequestMutation(createPutawayJob?: Function) 
                 change.requestedBy.toLowerCase() === (user?.email || '').toLowerCase()
             )) {
                 throw new Error('4-Eyes Principle Violation: Requesters cannot approve their own inventory adjustments.');
+            }
+
+            // SOP-MER-037: price changes below the margin floor need Finance Manager / CEO sign-off
+            if (requiresFinanceCoApproval(change) && !canApproveBelowFloor(user?.role)) {
+                throw new Error(`Price change is below the ${MARGIN_FLOOR_PCT}% margin floor: Finance Manager or CEO approval is required.`);
             }
 
             let success = false;

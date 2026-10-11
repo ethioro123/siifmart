@@ -42,7 +42,8 @@ const LABEL_SIZES = {
 };
 
 export default function LabelPrintModal({ isOpen, onClose, labels, onPrint }: LabelPrintModalProps) {
-    const { products } = useData();
+    const { products, activeSite, effectiveCountry, settings } = useData();
+    const activeCurrency = (activeSite as any)?.currency || (effectiveCountry === 'KE' || settings?.country === 'KE' ? 'KSh' : 'ETB');
     const [labelSize, setLabelSize] = useState<LabelSize>('medium');
     const [activeLabels, setActiveLabels] = useState<LabelData[]>(labels || []);
     const [searchQuery, setSearchQuery] = useState('');
@@ -195,32 +196,32 @@ export default function LabelPrintModal({ isOpen, onClose, labels, onPrint }: La
     return (
         <>
             {/* Modal Overlay */}
-            <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[9999] flex items-center justify-center p-4">
-                <div className="bg-cyber-gray border border-white/10 rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col">
+            <div className="fixed inset-0 bg-black/40 backdrop-blur-md z-[9999] flex items-center justify-center p-4">
+                <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col shadow-2xl">
                     {/* Header */}
-                    <div className="p-6 border-b border-white/5 flex justify-between items-center bg-black/20">
+                    <div className="p-5 border-b border-[var(--theme-border)] flex justify-between items-center bg-[var(--theme-bg-card)]">
                         <div>
-                            <h2 className="text-2xl font-bold text-white flex items-center gap-3">
-                                <Package className="text-cyber-primary" size={28} />
+                            <h2 className="text-xl font-bold text-[var(--theme-text-primary)] flex items-center gap-2.5">
+                                <Package className="text-[var(--theme-accent)]" size={24} />
                                 Print Product Labels
                             </h2>
-                            <p className="text-sm text-gray-400 mt-1">
+                            <p className="text-xs text-[var(--theme-text-secondary)] mt-0.5">
                                 {totalLabels} label{totalLabels !== 1 ? 's' : ''} ready to print
                             </p>
                         </div>
-                        <div className="flex items-center gap-4">
+                        <div className="flex items-center gap-3">
                             {/* Size Selector */}
-                            <div className="flex items-center gap-2 bg-black/30 p-1.5 rounded-lg border border-white/10">
-                                <Settings size={16} className="text-cyber-primary ml-2" />
-                                <span className="text-xs text-gray-400 font-bold uppercase mr-2">Size</span>
-                                <div className="flex bg-black/40 rounded p-0.5">
+                            <div className="flex items-center gap-2 bg-[var(--theme-bg-subtle)] p-1 rounded-xl border border-[var(--theme-border)]">
+                                <Settings size={14} className="text-[var(--theme-text-secondary)] ml-1.5" />
+                                <span className="text-[11px] text-[var(--theme-text-muted)] font-bold uppercase tracking-wider mr-1">Size</span>
+                                <div className="flex bg-[var(--theme-bg-app)] rounded-lg p-0.5">
                                     {(['small', 'medium', 'large'] as LabelSize[]).map((size) => (
                                         <button
                                             key={size}
                                             onClick={() => setLabelSize(size)}
-                                            className={`px-3 py-1.5 rounded text-xs font-bold transition-all ${labelSize === size
-                                                ? 'bg-cyber-primary text-black shadow-lg shadow-cyber-primary/20'
-                                                : 'text-gray-400 hover:text-white hover:bg-white/5'
+                                            className={`px-3 py-1 rounded-md text-xs font-semibold transition-all cursor-pointer ${labelSize === size
+                                                ? 'bg-[var(--theme-accent)] text-white shadow-xs'
+                                                : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-card-hover)]'
                                                 }`}
                                         >
                                             {size.charAt(0).toUpperCase() + size.slice(1)}
@@ -231,33 +232,33 @@ export default function LabelPrintModal({ isOpen, onClose, labels, onPrint }: La
 
                             <button
                                 onClick={onClose}
-                                className="text-gray-400 hover:text-white transition-colors p-2 hover:bg-white/10 rounded-full"
+                                className="text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] transition-colors p-2 hover:bg-[var(--theme-bg-card-hover)] rounded-xl cursor-pointer"
                                 aria-label="Close Modal"
                                 title="Close"
                             >
-                                <X size={24} />
+                                <X size={20} />
                             </button>
                         </div>
                     </div>
 
                     {/* Label Preview Area */}
-                    <div className="flex-1 overflow-y-auto p-6 bg-black/40 space-y-4">
+                    <div className="flex-1 overflow-y-auto p-6 bg-[var(--theme-bg-app)] space-y-4">
                         {/* Product Search & Add Bar */}
                         <div className="relative">
-                            <div className="flex items-center bg-white/5 border border-white/10 rounded-xl px-3 py-2.5 focus-within:border-cyber-primary/50 transition-colors">
-                                <Search size={18} className="text-gray-400 mr-2 shrink-0" />
+                            <div className="flex items-center bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl px-3.5 py-2.5 focus-within:border-[var(--theme-accent)] focus-within:ring-1 focus-within:ring-[var(--theme-accent)]/30 transition-all">
+                                <Search size={16} className="text-[var(--theme-text-secondary)] mr-2.5 shrink-0" />
                                 <input
                                     type="text"
                                     value={searchQuery}
                                     onChange={(e) => setSearchQuery(e.target.value)}
                                     placeholder="Search products by Name, SKU or Barcode to add to print queue..."
-                                    className="w-full bg-transparent text-white placeholder-gray-500 text-sm focus:outline-none"
+                                    className="w-full bg-transparent text-[var(--theme-text-primary)] placeholder-[var(--theme-text-muted)] text-xs focus:outline-none"
                                 />
                                 {searchQuery && (
                                     <button
                                         type="button"
                                         onClick={() => setSearchQuery('')}
-                                        className="text-gray-400 hover:text-white p-1"
+                                        className="text-[var(--theme-text-muted)] hover:text-[var(--theme-text-primary)] p-1 cursor-pointer"
                                         aria-label="Clear search"
                                         title="Clear search"
                                     >
@@ -268,28 +269,28 @@ export default function LabelPrintModal({ isOpen, onClose, labels, onPrint }: La
 
                             {/* Dropdown Results */}
                             {searchResults.length > 0 && (
-                                <div className="absolute top-full left-0 right-0 mt-1 bg-[#18201B] border border-white/10 rounded-xl shadow-2xl z-50 overflow-hidden divide-y divide-white/5 max-h-60 overflow-y-auto">
+                                <div className="absolute top-full left-0 right-0 mt-1.5 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl shadow-2xl z-50 overflow-hidden divide-y divide-[var(--theme-border)] max-h-60 overflow-y-auto">
                                     {searchResults.map((product) => (
                                         <button
                                             key={product.id}
                                             type="button"
                                             onClick={() => handleAddProduct(product)}
-                                            className="w-full p-3 flex items-center justify-between text-left hover:bg-white/5 transition-colors group cursor-pointer"
+                                            className="w-full p-3 flex items-center justify-between text-left hover:bg-[var(--theme-bg-card-hover)] transition-colors group cursor-pointer"
                                         >
                                             <div className="flex items-center gap-3">
-                                                <div className="w-9 h-9 rounded-lg bg-black/40 border border-white/10 overflow-hidden flex items-center justify-center shrink-0">
+                                                <div className="w-9 h-9 rounded-lg bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] overflow-hidden flex items-center justify-center shrink-0">
                                                     {product.image ? (
                                                         <img src={product.image} alt={product.name} className="w-full h-full object-cover" />
                                                     ) : (
-                                                        <Package className="text-gray-500" size={18} />
+                                                        <Package className="text-[var(--theme-text-muted)]" size={16} />
                                                     )}
                                                 </div>
                                                 <div>
-                                                    <p className="font-bold text-white text-xs truncate max-w-xs">{product.name}</p>
-                                                    <p className="text-[10px] font-mono text-gray-400">SKU: {product.sku} {product.barcode ? `| ${product.barcode}` : ''}</p>
+                                                    <p className="font-semibold text-[var(--theme-text-primary)] text-xs truncate max-w-xs">{product.name}</p>
+                                                    <p className="text-[11px] font-mono text-[var(--theme-text-secondary)]">SKU: {product.sku} {product.barcode ? `| ${product.barcode}` : ''}</p>
                                                 </div>
                                             </div>
-                                            <span className="text-xs font-bold text-cyber-primary bg-cyber-primary/10 border border-cyber-primary/20 px-2.5 py-1 rounded-lg group-hover:bg-cyber-primary group-hover:text-black transition-all flex items-center gap-1">
+                                            <span className="text-xs font-semibold text-[var(--theme-accent)] bg-[var(--theme-accent)]/10 border border-[var(--theme-accent)]/20 px-2.5 py-1 rounded-lg group-hover:bg-[var(--theme-accent)] group-hover:text-white transition-all flex items-center gap-1">
                                                 <Plus size={12} /> Add
                                             </span>
                                         </button>
@@ -298,17 +299,17 @@ export default function LabelPrintModal({ isOpen, onClose, labels, onPrint }: La
                             )}
                         </div>
 
-                        <div className="p-3 bg-blue-500/10 border border-blue-500/20 rounded-lg text-sm text-blue-400">
-                            <strong>Tip:</strong> Label size: {config.width}mm × {config.height}mm ({labelSize === 'small' ? '2" × 1"' : labelSize === 'medium' ? '4" × 2"' : '4" × 3"'})
+                        <div className="p-3 bg-[var(--theme-accent)]/10 border border-[var(--theme-accent)]/20 rounded-xl text-xs text-[var(--theme-text-primary)] flex items-center gap-2 font-medium">
+                            <strong className="text-[var(--theme-accent)]">Tip:</strong> Label size: {config.width}mm × {config.height}mm ({labelSize === 'small' ? '2" × 1"' : labelSize === 'medium' ? '4" × 2"' : '4" × 3"'})
                         </div>
 
-                        <div className="space-y-4">
+                        <div className="space-y-3">
                             {activeLabels.map((labelData, index) => (
-                                <div key={index} className="bg-white/5 border border-white/10 rounded-xl p-4 flex gap-4 hover:border-cyber-primary/30 transition-colors items-center">
+                                <div key={index} className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-4 flex gap-4 hover:border-[var(--theme-accent)]/40 transition-colors items-center shadow-xs">
                                     {/* Product Info */}
                                     <div className="flex-1 min-w-0">
-                                        <div className="flex items-center gap-4">
-                                            <div className="w-16 h-16 rounded-lg bg-black/40 border border-white/10 overflow-hidden flex items-center justify-center shrink-0">
+                                        <div className="flex items-center gap-3.5">
+                                            <div className="w-14 h-14 rounded-xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] overflow-hidden flex items-center justify-center shrink-0">
                                                 {labelData.product.image ? (
                                                     <img
                                                         src={labelData.product.image}
@@ -316,16 +317,16 @@ export default function LabelPrintModal({ isOpen, onClose, labels, onPrint }: La
                                                         className="w-full h-full object-cover"
                                                     />
                                                 ) : (
-                                                    <Package className="text-gray-600" size={32} />
+                                                    <Package className="text-[var(--theme-text-muted)]" size={24} />
                                                 )}
                                             </div>
                                             <div className="min-w-0">
-                                                <h4 className="font-bold text-white text-base truncate">{labelData.product.name}</h4>
-                                                <div className="flex items-center gap-3 mt-1 flex-wrap">
-                                                    <span className="text-xs font-mono text-cyan-400 bg-cyan-950/30 px-2 py-0.5 rounded border border-cyan-500/20">
+                                                <h4 className="font-bold text-[var(--theme-text-primary)] text-sm truncate">{labelData.product.name}</h4>
+                                                <div className="flex items-center gap-2 mt-1 flex-wrap">
+                                                    <span className="text-[11px] font-mono text-[var(--theme-accent)] bg-[var(--theme-accent)]/10 px-2 py-0.5 rounded-md border border-[var(--theme-accent)]/20">
                                                         {labelData.product.sku || 'NO SKU'}
                                                     </span>
-                                                    <span className="text-xs text-gray-400">
+                                                    <span className="text-[11px] text-[var(--theme-text-secondary)] font-mono">
                                                         {labelData.product.barcode || 'No Barcode'}
                                                     </span>
                                                 </div>
@@ -334,8 +335,8 @@ export default function LabelPrintModal({ isOpen, onClose, labels, onPrint }: La
                                     </div>
 
                                     {/* Preview of Label Layout */}
-                                    <div className="bg-white p-2.5 rounded-xl w-52 shrink-0 text-black border-2 border-slate-900 font-sans shadow-lg transform scale-90">
-                                        <div className="bg-slate-100 p-1 border-b-2 border-dashed border-slate-300 text-[10px] font-black uppercase tracking-wider truncate text-center text-slate-900 rounded-t-sm">
+                                    <div className="bg-white p-2.5 rounded-xl w-52 shrink-0 text-slate-900 border border-slate-300 font-sans shadow-xs">
+                                        <div className="bg-slate-100 p-1 border-b border-dashed border-slate-300 text-[11px] font-bold uppercase tracking-wider truncate text-center text-slate-900 rounded-t-sm">
                                             {labelData.product.name}
                                         </div>
                                         <div className="py-2 flex flex-col items-center justify-center">
@@ -348,39 +349,39 @@ export default function LabelPrintModal({ isOpen, onClose, labels, onPrint }: La
                                                     width={1.2}
                                                     margin={0}
                                                 />
-                                            ) : <span className="text-red-500 font-bold text-[8px]">NO DATA</span>}
-                                            <div className="font-mono font-black text-[9px] mt-1 text-slate-800 tracking-wider">
+                                            ) : <span className="text-red-500 font-bold text-[11px]">NO DATA</span>}
+                                            <div className="font-mono font-bold text-[11px] mt-1 text-slate-800 tracking-wider">
                                                 {labelData.product.sku}
                                             </div>
                                         </div>
-                                        <div className="grid grid-cols-2 gap-1 border-t-2 border-dashed border-slate-300 pt-1.5 text-[8px]">
+                                        <div className="grid grid-cols-2 gap-1 border-t border-dashed border-slate-300 pt-1.5 text-[11px]">
                                             <div className="text-center bg-slate-50 p-1 rounded border border-slate-200">
-                                                <span className="block font-extrabold text-slate-500 text-[7px] uppercase tracking-wider">PRICE</span>
-                                                <span className="block font-black text-slate-900 text-[9px]">ETB {labelData.product.price}</span>
+                                                <span className="block font-bold text-slate-500 text-[11px] uppercase tracking-wider">PRICE</span>
+                                                <span className="block font-extrabold text-slate-900 text-xs">{activeCurrency} {labelData.product.price}</span>
                                             </div>
                                             <div className="text-center bg-slate-50 p-1 rounded border border-slate-200">
-                                                <span className="block font-extrabold text-slate-500 text-[7px] uppercase tracking-wider">CAT</span>
-                                                <span className="block font-black text-slate-900 text-[9px] truncate">{(labelData.product.category || 'General').toUpperCase()}</span>
+                                                <span className="block font-bold text-slate-500 text-[11px] uppercase tracking-wider">CAT</span>
+                                                <span className="block font-extrabold text-slate-900 text-xs truncate">{(labelData.product.category || 'General').toUpperCase()}</span>
                                             </div>
                                         </div>
                                     </div>
 
                                     {/* Quantity Controls */}
-                                    <div className="flex items-center gap-2 px-4 border-l border-white/10 shrink-0">
-                                        <div className="flex items-center bg-black/40 border border-white/10 rounded-xl p-1">
+                                    <div className="flex items-center gap-2 px-3 border-l border-[var(--theme-border)] shrink-0">
+                                        <div className="flex items-center bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl p-1">
                                             <button
                                                 type="button"
                                                 onClick={() => handleUpdateQuantity(index, -1)}
-                                                className="p-1.5 rounded-lg text-gray-400 hover:text-white hover:bg-white/10 transition-colors"
+                                                className="p-1.5 rounded-lg text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-card-hover)] transition-colors cursor-pointer"
                                                 title="Decrease copies"
                                             >
                                                 <Minus size={14} />
                                             </button>
-                                            <span className="w-8 text-center text-sm font-extrabold text-cyber-primary font-mono">{labelData.quantity}</span>
+                                            <span className="w-8 text-center text-xs font-bold text-[var(--theme-text-primary)] font-mono">{labelData.quantity}</span>
                                             <button
                                                 type="button"
                                                 onClick={() => handleUpdateQuantity(index, 1)}
-                                                className="p-1.5 rounded-lg text-gray-400 hover:text-white hover:bg-white/10 transition-colors"
+                                                className="p-1.5 rounded-lg text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-card-hover)] transition-colors cursor-pointer"
                                                 title="Increase copies"
                                             >
                                                 <Plus size={14} />
@@ -389,7 +390,7 @@ export default function LabelPrintModal({ isOpen, onClose, labels, onPrint }: La
                                         <button
                                             type="button"
                                             onClick={() => handleRemoveLabel(index)}
-                                            className="p-2 text-red-400 hover:text-red-300 hover:bg-red-500/10 rounded-xl transition-colors"
+                                            className="p-2 text-red-500 hover:text-red-600 hover:bg-red-500/10 rounded-xl transition-colors cursor-pointer"
                                             title="Remove label"
                                         >
                                             <Trash2 size={16} />
@@ -399,29 +400,29 @@ export default function LabelPrintModal({ isOpen, onClose, labels, onPrint }: La
                             ))}
 
                             {activeLabels.length === 0 && (
-                                <div className="p-12 text-center border-2 border-dashed border-white/10 rounded-2xl bg-white/[0.02]">
-                                    <Package size={40} className="mx-auto text-gray-600 mb-3 opacity-60" />
-                                    <p className="text-white font-bold text-base">No labels in print queue</p>
-                                    <p className="text-gray-400 text-xs mt-1">Use the search bar above to find and add products to print.</p>
+                                <div className="p-12 text-center border-2 border-dashed border-[var(--theme-border)] rounded-2xl bg-[var(--theme-bg-card)]">
+                                    <Package size={36} className="mx-auto text-[var(--theme-text-muted)] mb-3 opacity-60" />
+                                    <p className="text-[var(--theme-text-primary)] font-bold text-sm">No labels in print queue</p>
+                                    <p className="text-[var(--theme-text-secondary)] text-xs mt-1">Use the search bar above to find and add products to print.</p>
                                 </div>
                             )}
                         </div>
                     </div>
 
                     {/* Footer */}
-                    <div className="p-6 border-t border-white/5 flex gap-3 bg-black/20">
+                    <div className="p-5 border-t border-[var(--theme-border)] flex gap-3 bg-[var(--theme-bg-card)]">
                         <button
                             onClick={onClose}
-                            className="flex-1 py-4 bg-white/5 hover:bg-white/10 rounded-xl text-white font-bold transition-colors"
+                            className="flex-1 py-2.5 bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card-hover)] rounded-xl text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] border border-[var(--theme-border)] font-semibold text-xs transition-colors cursor-pointer"
                         >
                             Cancel
                         </button>
                         <button
                             onClick={handlePrint}
                             disabled={totalLabels === 0}
-                            className="flex-[2] py-4 bg-cyber-primary hover:bg-cyber-accent disabled:opacity-40 disabled:cursor-not-allowed text-black font-bold rounded-xl transition-all flex items-center justify-center gap-3 shadow-[0_0_20px_rgba(0,255,157,0.3)] hover:shadow-[0_0_30px_rgba(0,255,157,0.5)] transform hover:scale-[1.01]"
+                            className="flex-[2] py-2.5 bg-[var(--theme-accent)] hover:opacity-95 disabled:opacity-40 disabled:cursor-not-allowed text-white font-bold text-xs uppercase tracking-wider rounded-xl transition-all flex items-center justify-center gap-2 shadow-xs cursor-pointer active:scale-[0.98]"
                         >
-                            <Printer size={20} />
+                            <Printer size={16} />
                             <span>Print {totalLabels} Label{totalLabels !== 1 ? 's' : ''} ({labelSize.toUpperCase()})</span>
                         </button>
                     </div>

@@ -384,10 +384,10 @@ export const ScannerInterface: React.FC = () => {
     // If no pending items, but job not null -> All Done Screen
     if (!currentItem) {
         return (
-            <div className="fixed inset-0 z-50 bg-[#18201B] flex flex-col items-center justify-center text-white p-6">
-                <CheckCircle size={64} className="text-[#A9CBA2] mb-4" />
+            <div className="fixed inset-0 z-50 bg-[var(--theme-bg-app)] flex flex-col items-center justify-center text-[var(--theme-text-primary)] p-6">
+                <CheckCircle size={64} className="text-primary mb-4" />
                 <h2 className="text-2xl font-bold mb-2">{t('warehouse.jobComplete')}</h2>
-                <button onClick={() => setSelectedJob(null)} className="woody-btn-secondary px-6 py-3 mt-6">
+                <button onClick={() => setSelectedJob(null)} className="woody-btn-secondary px-6 py-3 mt-6 min-h-[44px] touch-manipulation">
                     {t('warehouse.backToJobs')}
                 </button>
             </div>
@@ -395,22 +395,22 @@ export const ScannerInterface: React.FC = () => {
     }
 
     return (
-        <div className="fixed inset-0 z-50 bg-[#18201B] flex flex-col">
+        <div className="fixed inset-0 z-50 bg-[var(--theme-bg-app)] flex flex-col">
             {/* Header */}
-            <div className="p-4 pt-[calc(1rem+env(safe-area-inset-top))] bg-[#1E2822] flex flex-col md:flex-row justify-between items-stretch md:items-center gap-4 border-b border-[#E2DCCE]/10 dark:border-emerald-950/20">
-                <div className="text-white w-full md:w-auto">
+            <div className="p-4 pt-[calc(1rem+env(safe-area-inset-top))] bg-[var(--theme-bg-subtle)] flex flex-col md:flex-row justify-between items-stretch md:items-center gap-4 border-b border-[var(--theme-border)]">
+                <div className="text-[var(--theme-text-primary)] w-full md:w-auto">
                     <div className="flex justify-between items-start">
                         <div>
-                            <h2 className="font-bold text-lg text-[#EAE5D9]">{selectedJob.type} {formatJobId(selectedJob)}</h2>
-                            <p className="text-xs text-stone-400">{selectedJob.lineItems.length} {t('warehouse.items')} • {selectedJob.lineItems.filter(i => i.status === 'Pending').length} {t('warehouse.remaining')}</p>
+                            <h2 className="font-bold text-lg text-[var(--theme-text-primary)]">{selectedJob.type} {formatJobId(selectedJob)}</h2>
+                            <p className="text-xs text-[var(--theme-text-muted)] font-mono tabular-nums">{selectedJob.lineItems.length} {t('warehouse.items')} • {selectedJob.lineItems.filter(i => i.status === 'Pending').length} {t('warehouse.remaining')}</p>
                         </div>
-                        <button onClick={() => setSelectedJob(null)} aria-label="Back to Jobs" className="md:hidden text-stone-450 p-2">
+                        <button onClick={() => setSelectedJob(null)} aria-label="Back to Jobs" className="md:hidden text-[var(--theme-text-secondary)] p-2 min-h-[44px] min-w-[44px] flex items-center justify-center touch-manipulation">
                             <ArrowLeft size={20} />
                         </button>
                     </div>
                 </div>
                 <div className="flex gap-2">
-                    <button onClick={() => setSelectedJob(null)} className="hidden md:block text-stone-400 hover:text-white text-sm font-bold">
+                    <button onClick={() => setSelectedJob(null)} className="hidden md:flex items-center text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] text-sm font-semibold min-h-[44px] touch-manipulation">
                         {t('warehouse.backToJobs')}
                     </button>
                 </div>
@@ -421,13 +421,13 @@ export const ScannerInterface: React.FC = () => {
 
                 {/* Item Completion Overlay */}
                 {lastCompletedItem && (
-                    <div className="absolute inset-0 z-20 flex items-center justify-center bg-black/90 animate-in fade-in duration-300">
+                    <div className="absolute inset-0 z-20 flex items-center justify-center bg-black/80 animate-in fade-in duration-300">
                         <div className="text-center animate-in zoom-in-95 duration-300">
-                            <div className="w-24 h-24 mx-auto mb-4 rounded-full bg-gradient-to-br from-[#2C5E3B] to-[#1E3F27] flex items-center justify-center animate-pulse border border-[#A9CBA2]/30">
-                                <CheckCircle size={48} className="text-[#A9CBA2]" />
+                            <div className="w-24 h-24 mx-auto mb-4 rounded-full bg-primary/20 flex items-center justify-center animate-pulse border border-primary/30">
+                                <CheckCircle size={48} className="text-primary" />
                             </div>
                             <h3 className="text-2xl font-bold mb-2 text-white">Picked</h3>
-                            <p className="text-[#A9CBA2] font-bold text-lg mb-1">{lastCompletedItem.qty}x {lastCompletedItem.name}</p>
+                            <p className="text-primary font-bold text-lg mb-1">{lastCompletedItem.qty}x {lastCompletedItem.name}</p>
                         </div>
                     </div>
                 )}

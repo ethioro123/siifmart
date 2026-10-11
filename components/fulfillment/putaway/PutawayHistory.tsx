@@ -1,12 +1,10 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { History as HistoryIcon, Search, ChevronRight, User, Calendar, Clock, PackageCheck, Box, ArrowRight, MapPin } from 'lucide-react';
+import { History as HistoryIcon, Search, Box, MapPin, PackageCheck } from 'lucide-react';
 import Pagination from '../../shared/Pagination';
 import { WMSJob } from '../../../types';
 import { formatJobId } from '../../../utils/jobIdFormatter';
 import { formatDisplayEmployeeId } from '../../../utils/employeeIdGenerator';
-
 import { getSellUnit } from '../../../utils/units';
-
 import { useStore } from '../../../contexts/CentralStore';
 
 interface PutawayHistoryProps {
@@ -141,7 +139,7 @@ export const PutawayHistory: React.FC<PutawayHistoryProps> = ({
                 matchesItems
             );
         });
-    }, [historicalJobs, search, employees, t]);
+    }, [historicalJobs, search, employees, t, user]);
 
     const totalPages = Math.ceil(filteredHistory.length / perPage);
     const paginatedHistory = useMemo(() => {
@@ -172,19 +170,18 @@ export const PutawayHistory: React.FC<PutawayHistoryProps> = ({
             hour12: true
         });
     };
-    return (
-        <div className="border-t-2 border-[#E2DCCE]/60 dark:border-white/10 mt-8 pt-8 relative overflow-hidden group/history">
 
-            
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
-                <h4 className="text-xl font-black text-gray-900 dark:text-white flex items-center gap-3 uppercase tracking-tight">
-                    <div className="p-2.5 bg-[#2C5E3B]/10 dark:bg-[#A9CBA2]/10 rounded-2xl border border-[#2C5E3B]/20 dark:border-[#A9CBA2]/20 group-hover/history:bg-[#2C5E3B]/20 dark:group-hover:bg-[#A9CBA2]/25 transition-all shadow-sm">
-                        <HistoryIcon size={20} className="text-[#2C5E3B] dark:text-[#A9CBA2]" />
+    return (
+        <div className="border-t border-[var(--theme-border)] mt-8 pt-8">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+                <h4 className="text-lg font-bold text-[var(--theme-text-primary)] flex items-center gap-2.5 uppercase tracking-wide">
+                    <div className="w-8 h-8 rounded-xl bg-[var(--theme-accent)]/10 border border-[var(--theme-accent)]/20 flex items-center justify-center text-[var(--theme-accent)]">
+                        <HistoryIcon size={16} />
                     </div>
                     {t('warehouse.putaway.history')}
                 </h4>
-                <div className="relative w-full sm:w-80 group">
-                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-stone-500 group-focus-within:text-[#2C5E3B] dark:group-focus-within:text-[#A9CBA2] transition-colors z-10" size={18} />
+                <div className="relative w-full sm:w-80">
+                    <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--theme-text-secondary)] pointer-events-none" size={16} />
                     <input
                         type="text"
                         placeholder={`${t('warehouse.searchHistoryPlaceholder')}`}
@@ -192,7 +189,7 @@ export const PutawayHistory: React.FC<PutawayHistoryProps> = ({
                         title={t('warehouse.searchHistoryPlaceholder')}
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
-                        className="woody-input w-full !pl-12 pr-4 py-3.5 text-[10px] uppercase tracking-[0.2em] font-black"
+                        className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-[var(--theme-border)] bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)] placeholder:text-[var(--theme-text-secondary)] text-xs font-medium focus:outline-none focus:border-[var(--theme-accent)] transition-colors min-h-[44px]"
                     />
                 </div>
             </div>
@@ -200,78 +197,88 @@ export const PutawayHistory: React.FC<PutawayHistoryProps> = ({
             {paginatedHistory.length > 0 ? (
                 <>
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                        <>
-                            {paginatedHistory.map((item, index) => (
-                                <div
-                                    key={item.id}
-                                    onClick={() => {
-                                        setSelectedJob(item.rawData);
-                                        setIsDetailsOpen(true);
-                                    }}
-                                    className="group relative bg-[#FAF8F5]/80 dark:bg-[#1C2620]/60 hover:bg-[#FAF8F5] dark:hover:bg-[#1C2620] border border-[#E2DCCE]/60 dark:border-[#A9CBA2]/[0.06] hover:border-[#2C5E3B]/30 dark:hover:border-[#A9CBA2]/30 rounded-[2rem] p-5 transition-colors cursor-pointer overflow-hidden shadow-sm hover:shadow-xl active:scale-[0.98]"
-                                >
-                                    <div className="relative flex justify-between items-start mb-4">
-                                        <div className="flex items-center gap-2.5">
-                                            <div className={`p-2 rounded-xl transition-colors shadow-sm ${item.type === 'REPLENISH' ? 'bg-amber-100 dark:bg-amber-500/20 text-amber-600 dark:text-amber-400 border border-amber-200/50 dark:border-amber-500/30' : 'bg-[#2C5E3B]/10 dark:bg-[#A9CBA2]/20 text-[#2C5E3B] dark:text-[#A9CBA2] border border-[#2C5E3B]/20 dark:border-[#A9CBA2]/30'}`}>
-                                                <PackageCheck size={16} />
+                        {paginatedHistory.map((item) => (
+                            <div
+                                key={item.id}
+                                onClick={() => {
+                                    setSelectedJob(item.rawData);
+                                    setIsDetailsOpen(true);
+                                }}
+                                className="bg-[var(--theme-bg-card)] hover:bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-2xl p-4 sm:p-5 transition-colors cursor-pointer flex flex-col justify-between"
+                            >
+                                <div>
+                                    <div className="flex justify-between items-start mb-3">
+                                        <div className="flex items-center gap-2">
+                                            <div className={`p-1.5 rounded-lg ${item.type === 'REPLENISH' ? 'bg-amber-500/10 text-amber-500 border border-amber-500/20' : 'bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] border border-[var(--theme-accent)]/20'}`}>
+                                                <PackageCheck size={14} />
                                             </div>
-                                            <span className="text-[9px] uppercase tracking-widest font-black text-gray-400 dark:text-gray-555">
+                                            <span className="text-[11px] uppercase tracking-wider font-semibold text-[var(--theme-text-secondary)]">
                                                 {item.actionType}
                                             </span>
                                         </div>
-                                        <span className="text-[9px] font-black text-gray-400 dark:text-gray-555 group-hover:text-[#2C5E3B] dark:group-hover:text-[#A9CBA2] transition-colors uppercase tracking-widest font-mono italic">
+                                        <span className="text-[11px] font-mono text-[var(--theme-text-secondary)] tabular-nums">
                                             {getRelativeTime(item.date)}
                                         </span>
                                     </div>
 
-                                    <div className="relative mb-5">
-                                        <h5 className="text-gray-900 dark:text-white font-black text-sm truncate pr-2 group-hover:text-[#2C5E3B] dark:group-hover:text-[#A9CBA2] transition-colors uppercase tracking-tight leading-tight">
+                                    <div className="mb-4">
+                                        <h5 className="text-[var(--theme-text-primary)] font-semibold text-sm truncate mb-1">
                                             {item.subtitle}
                                         </h5>
-                                        <div className="flex items-center gap-2.5 mt-2.5 font-mono">
-                                            <span className="bg-[#FAF8F5]/50 dark:bg-white/5 px-2 py-0.5 rounded text-[10px] font-black text-gray-500 dark:text-gray-400 border border-stone-200 dark:border-white/5 transition-all group-hover:bg-[#2C5E3B]/10 group-hover:text-[#2C5E3B] dark:group-hover:text-[#A9CBA2]">
+                                        <div className="flex items-center gap-2 font-mono">
+                                            <span className="bg-[var(--theme-bg-subtle)] px-2 py-0.5 rounded text-[11px] font-semibold text-[var(--theme-text-secondary)] border border-[var(--theme-border)]">
                                                 #{item.reference}
                                             </span>
-                                            {item.sku && <span className="text-[10px] font-black text-gray-300 dark:text-gray-800">/ <span className="text-gray-400 dark:text-gray-600 group-hover:text-[#2C5E3B] dark:group-hover:text-[#A9CBA2]">{item.sku}</span></span>}
+                                            {item.sku && (
+                                                <span className="text-[11px] text-[var(--theme-text-secondary)]">
+                                                    / {item.sku}
+                                                </span>
+                                            )}
                                         </div>
-                                        <div className="flex items-center gap-2 mt-3.5 pt-3.5 border-t-2 border-[#E2DCCE]/60 dark:border-white/5 transition-colors">
-                                            <MapPin size={12} className="text-[#2C5E3B]/50 dark:text-[#A9CBA2]/50" />
-                                            <span className="text-[10px] font-black font-mono text-[#2C5E3B] dark:text-[#A9CBA2] bg-[#2C5E3B]/10 dark:bg-[#A9CBA2]/10 px-2.5 py-1 rounded-lg tracking-widest uppercase transition-all group-hover:bg-[#2C5E3B] dark:group-hover:bg-[#EAE5D9] group-hover:text-white dark:group-hover:text-[#1E3B24] shadow-sm">
+                                        <div className="flex items-center gap-1.5 mt-3 pt-3 border-t border-[var(--theme-border)]">
+                                            <MapPin size={12} className="text-[var(--theme-accent)]" />
+                                            <span className="text-[11px] font-mono font-semibold text-[var(--theme-accent)] bg-[var(--theme-accent)]/10 px-2 py-0.5 rounded-md border border-[var(--theme-accent)]/20 uppercase">
                                                 {item.location}
                                             </span>
                                         </div>
                                     </div>
+                                </div>
 
-                                    <div className="relative flex items-center justify-between border-t-2 border-[#E2DCCE]/60 dark:border-white/5 pt-4 mt-auto">
-                                        <div className="flex items-center gap-2.5">
-                                            <div className="w-8 h-8 rounded-xl bg-stone-150 dark:bg-white/5 flex items-center justify-center border border-stone-200 dark:border-white/10 shadow-inner group-hover/history:scale-110 transition-transform">
-                                                <span className="text-[10px] font-black text-gray-900 dark:text-[#A9CBA2]">{(item.resolvedUser?.name || 'S').charAt(0).toUpperCase()}</span>
-                                            </div>
-                                            <div className="flex flex-col">
-                                                <span className="text-[8px] font-black text-gray-400 dark:text-gray-555 uppercase tracking-widest leading-none mb-0.5">{t('warehouse.completedBy') || 'Completed By'}</span>
-                                                <span className="text-[10px] font-black text-gray-900 dark:text-gray-300 uppercase tracking-tight leading-none">
-                                                    {item.resolvedUser?.name} <span className="text-gray-400 dark:text-gray-555 font-bold">({item.resolvedUser?.displayId})</span>
-                                                </span>
-                                            </div>
+                                <div className="flex items-center justify-between border-t border-[var(--theme-border)] pt-3 mt-auto">
+                                    <div className="flex items-center gap-2 min-w-0">
+                                        <div className="w-7 h-7 rounded-lg bg-[var(--theme-bg-subtle)] flex items-center justify-center border border-[var(--theme-border)] shrink-0">
+                                            <span className="text-[11px] font-semibold text-[var(--theme-text-primary)] font-mono">
+                                                {(item.resolvedUser?.name || 'S').charAt(0).toUpperCase()}
+                                            </span>
                                         </div>
-
-                                        <div className="flex items-center gap-2 bg-stone-50 dark:bg-white/5 px-3 py-1.5 rounded-xl border border-stone-200 dark:border-white/10 group-hover:border-[#2C5E3B]/20 transition-all shadow-inner">
-                                            <Box size={14} className="text-[#2C5E3B] dark:text-[#A9CBA2]" />
-                                            <span className="text-[11px] font-black text-gray-900 dark:text-[#EAE5D9] tabular-nums font-mono">{item.displayQty}</span>
+                                        <div className="flex flex-col min-w-0">
+                                            <span className="text-[11px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider leading-none mb-0.5">
+                                                {t('warehouse.completedBy') || 'Completed By'}
+                                            </span>
+                                            <span className="text-xs font-semibold text-[var(--theme-text-primary)] uppercase tracking-tight leading-none truncate">
+                                                {item.resolvedUser?.name} {item.resolvedUser?.displayId && <span className="text-[var(--theme-text-secondary)] font-normal font-mono">({item.resolvedUser.displayId})</span>}
+                                            </span>
                                         </div>
                                     </div>
+
+                                    <div className="flex items-center gap-1.5 bg-[var(--theme-bg-subtle)] px-2.5 py-1 rounded-lg border border-[var(--theme-border)] shrink-0">
+                                        <Box size={12} className="text-[var(--theme-accent)]" />
+                                        <span className="text-[11px] font-mono font-semibold text-[var(--theme-text-primary)] tabular-nums">{item.displayQty}</span>
+                                    </div>
                                 </div>
-                            ))}
-                        </>
+                            </div>
+                        ))}
                     </div>
-                    <div className="mt-8"><Pagination currentPage={currentPage} totalPages={totalPages} totalItems={filteredHistory.length} itemsPerPage={perPage} onPageChange={setCurrentPage} itemName="records" /></div>
+                    <div className="mt-6">
+                        <Pagination currentPage={currentPage} totalPages={totalPages} totalItems={filteredHistory.length} itemsPerPage={perPage} onPageChange={setCurrentPage} itemName="records" />
+                    </div>
                 </>
             ) : (
-                <div className="flex flex-col items-center justify-center py-20 glass-panel-pushed rounded-[3rem] border border-dashed border-[#E2DCCE]/60 dark:border-[#A9CBA2]/10 shadow-inner">
-                    <div className="p-6 bg-white dark:bg-gray-900 rounded-3xl mb-4 border border-gray-100 dark:border-white/10 shadow-xl">
-                        <HistoryIcon size={40} className="text-gray-200 dark:text-gray-800" />
+                <div className="flex flex-col items-center justify-center py-16 bg-[var(--theme-bg-card)] rounded-2xl border border-dashed border-[var(--theme-border)] text-center">
+                    <div className="w-12 h-12 rounded-xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] flex items-center justify-center mb-3 text-[var(--theme-text-secondary)]">
+                        <HistoryIcon size={24} />
                     </div>
-                    <h3 className="text-lg font-black text-gray-900 dark:text-white mb-1 uppercase tracking-widest">{t('warehouse.noHistoryFound')}</h3>
+                    <h3 className="text-sm font-semibold text-[var(--theme-text-primary)] uppercase tracking-wider">{t('warehouse.noHistoryFound')}</h3>
                 </div>
             )}
         </div>

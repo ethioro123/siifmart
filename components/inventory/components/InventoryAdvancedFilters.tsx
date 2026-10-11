@@ -56,15 +56,15 @@ export const InventoryAdvancedFilters: React.FC<InventoryAdvancedFiltersProps> =
     };
 
     return (
-        <div className="p-6 border-b border-[var(--theme-border)] bg-[var(--theme-bg-subtle)] animate-in slide-in-from-top-3 duration-200">
-            <div className="flex items-center justify-between pb-4 mb-4 border-b border-[var(--theme-border)]">
+        <div className="p-4 sm:p-5 border-b border-[var(--theme-border)] bg-[var(--theme-bg-subtle)] animate-in slide-in-from-top-3 duration-200">
+            <div className="flex items-center justify-between pb-3.5 mb-4 border-b border-[var(--theme-border)]">
                 <div className="flex items-center gap-2">
-                    <span className="w-2 h-2 rounded-full bg-[var(--theme-primary)]" />
-                    <h4 className="text-xs font-bold text-[var(--theme-text-primary)] uppercase tracking-wider">
+                    <span className="w-2 h-2 rounded-full bg-[var(--theme-accent)]" />
+                    <h4 className="text-xs font-semibold text-[var(--theme-text-primary)] uppercase tracking-wider">
                         Advanced Filter Suite
                     </h4>
                     {activeCount > 0 && (
-                        <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+                        <span className="px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-[#34C759]/10 text-[#34C759] border border-[#34C759]/20 tabular-nums">
                             {activeCount} Active
                         </span>
                     )}
@@ -75,15 +75,15 @@ export const InventoryAdvancedFilters: React.FC<InventoryAdvancedFiltersProps> =
                         <button
                             type="button"
                             onClick={onReset}
-                            className="text-[10px] font-bold uppercase text-amber-500 hover:underline flex items-center gap-1 cursor-pointer"
+                            className="text-[11px] font-semibold uppercase text-[#FF9F0A] hover:opacity-80 flex items-center gap-1.5 cursor-pointer transition-opacity"
                         >
-                            <RotateCcw size={11} /> Reset All
+                            <RotateCcw size={12} /> Reset All
                         </button>
                     )}
                     <button
                         type="button"
                         onClick={onClose}
-                        className="p-1 rounded-lg text-[var(--theme-text-muted)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-card)] transition-colors cursor-pointer"
+                        className="p-1.5 rounded-lg text-[var(--theme-text-muted)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-card)] transition-colors cursor-pointer"
                         aria-label="Close advanced filters"
                     >
                         <X size={16} />
@@ -91,25 +91,25 @@ export const InventoryAdvancedFilters: React.FC<InventoryAdvancedFiltersProps> =
                 </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
                 {/* 1. Brand / Manufacturer */}
                 <div className="space-y-2">
-                    <label className="text-[10px] font-bold text-[var(--theme-text-secondary)] uppercase tracking-wider flex items-center gap-1.5">
-                        <Tag size={12} className="text-emerald-500" /> Brand / Manufacturer
+                    <label className="text-[11px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider flex items-center gap-1.5">
+                        <Tag size={14} className="text-[#34C759]" /> Brand / Manufacturer
                     </label>
                     <input
                         type="text"
                         placeholder="e.g. Coca-Cola, Nike..."
                         value={filters.brand || ''}
                         onChange={(e) => setFilters(prev => ({ ...prev, brand: e.target.value }))}
-                        className="w-full bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl px-3.5 py-2 text-xs text-[var(--theme-text-primary)] placeholder:text-[var(--theme-text-muted)] focus:outline-none focus:border-[var(--theme-border-focus)] font-medium transition-all"
+                        className="w-full bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl px-3.5 py-2 text-xs text-[var(--theme-text-primary)] placeholder:text-[var(--theme-text-muted)] focus:outline-none focus:border-[var(--theme-accent)] focus:ring-1 focus:ring-[var(--theme-accent)]/20 font-medium transition-all"
                     />
                 </div>
 
                 {/* 2. Price Range (Min & Max) + Quick Presets */}
                 <div className="space-y-2">
-                    <label className="text-[10px] font-bold text-[var(--theme-text-secondary)] uppercase tracking-wider flex items-center gap-1.5">
-                        <DollarSign size={12} className="text-emerald-500" /> Price Range ({currencySymbol.trim()})
+                    <label className="text-[11px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider flex items-center gap-1.5">
+                        <DollarSign size={14} className="text-[#34C759]" /> Price Range ({currencySymbol.trim()})
                     </label>
                     <div className="grid grid-cols-2 gap-2">
                         <input
@@ -118,7 +118,7 @@ export const InventoryAdvancedFilters: React.FC<InventoryAdvancedFiltersProps> =
                             min="0"
                             value={filters.minPrice ?? ''}
                             onChange={(e) => setFilters(prev => ({ ...prev, minPrice: e.target.value }))}
-                            className="w-full bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl px-3 py-2 text-xs font-mono text-[var(--theme-text-primary)] placeholder:text-[var(--theme-text-muted)] focus:outline-none focus:border-[var(--theme-border-focus)] font-medium"
+                            className="w-full bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl px-3 py-2 text-xs font-mono tabular-nums text-[var(--theme-text-primary)] placeholder:text-[var(--theme-text-muted)] focus:outline-none focus:border-[var(--theme-accent)] focus:ring-1 focus:ring-[var(--theme-accent)]/20 font-medium"
                         />
                         <input
                             type="number"
@@ -126,7 +126,7 @@ export const InventoryAdvancedFilters: React.FC<InventoryAdvancedFiltersProps> =
                             min="0"
                             value={filters.maxPrice ?? ''}
                             onChange={(e) => setFilters(prev => ({ ...prev, maxPrice: e.target.value }))}
-                            className="w-full bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl px-3 py-2 text-xs font-mono text-[var(--theme-text-primary)] placeholder:text-[var(--theme-text-muted)] focus:outline-none focus:border-[var(--theme-border-focus)] font-medium"
+                            className="w-full bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl px-3 py-2 text-xs font-mono tabular-nums text-[var(--theme-text-primary)] placeholder:text-[var(--theme-text-muted)] focus:outline-none focus:border-[var(--theme-accent)] focus:ring-1 focus:ring-[var(--theme-accent)]/20 font-medium"
                         />
                     </div>
                     <div className="flex items-center gap-1.5 flex-wrap pt-1">
@@ -135,10 +135,10 @@ export const InventoryAdvancedFilters: React.FC<InventoryAdvancedFiltersProps> =
                                 key={preset.label}
                                 type="button"
                                 onClick={() => handlePricePreset(preset.min, preset.max)}
-                                className={`px-2 py-0.5 rounded text-[9px] font-mono font-bold transition-all cursor-pointer ${
+                                className={`px-2.5 py-1 rounded-lg text-[11px] font-mono tabular-nums transition-all cursor-pointer ${
                                     String(filters.minPrice) === String(preset.min) && String(filters.maxPrice) === String(preset.max)
-                                        ? 'bg-[var(--theme-primary)] text-[var(--theme-primary-text)]'
-                                        : 'bg-[var(--theme-bg-card)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] border border-[var(--theme-border)]'
+                                        ? 'bg-[var(--theme-accent)] text-white shadow-xs font-semibold'
+                                        : 'bg-[var(--theme-bg-card)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] border border-[var(--theme-border)] font-medium'
                                 }`}
                             >
                                 {preset.label}
@@ -149,8 +149,8 @@ export const InventoryAdvancedFilters: React.FC<InventoryAdvancedFiltersProps> =
 
                 {/* 3. Stock Level Range */}
                 <div className="space-y-2">
-                    <label className="text-[10px] font-bold text-[var(--theme-text-secondary)] uppercase tracking-wider flex items-center gap-1.5">
-                        <Box size={12} className="text-blue-500" /> Quantity on Hand
+                    <label className="text-[11px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider flex items-center gap-1.5">
+                        <Box size={14} className="text-[var(--theme-accent)]" /> Quantity on Hand
                     </label>
                     <div className="grid grid-cols-2 gap-2">
                         <input
@@ -159,7 +159,7 @@ export const InventoryAdvancedFilters: React.FC<InventoryAdvancedFiltersProps> =
                             min="0"
                             value={filters.minStock ?? ''}
                             onChange={(e) => setFilters(prev => ({ ...prev, minStock: e.target.value }))}
-                            className="w-full bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl px-3 py-2 text-xs font-mono text-[var(--theme-text-primary)] placeholder:text-[var(--theme-text-muted)] focus:outline-none focus:border-blue-500/60 font-medium"
+                            className="w-full bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl px-3 py-2 text-xs font-mono tabular-nums text-[var(--theme-text-primary)] placeholder:text-[var(--theme-text-muted)] focus:outline-none focus:border-[var(--theme-accent)] focus:ring-1 focus:ring-[var(--theme-accent)]/20 font-medium"
                         />
                         <input
                             type="number"
@@ -167,22 +167,22 @@ export const InventoryAdvancedFilters: React.FC<InventoryAdvancedFiltersProps> =
                             min="0"
                             value={filters.maxStock ?? ''}
                             onChange={(e) => setFilters(prev => ({ ...prev, maxStock: e.target.value }))}
-                            className="w-full bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl px-3 py-2 text-xs font-mono text-[var(--theme-text-primary)] placeholder:text-[var(--theme-text-muted)] focus:outline-none focus:border-blue-500/60 font-medium"
+                            className="w-full bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl px-3 py-2 text-xs font-mono tabular-nums text-[var(--theme-text-primary)] placeholder:text-[var(--theme-text-muted)] focus:outline-none focus:border-[var(--theme-accent)] focus:ring-1 focus:ring-[var(--theme-accent)]/20 font-medium"
                         />
                     </div>
                 </div>
 
                 {/* 4. Warehouse & Logistics Statuses */}
                 <div className="space-y-2">
-                    <label className="text-[10px] font-bold text-[var(--theme-text-secondary)] uppercase tracking-wider flex items-center gap-1.5">
-                        <MapPin size={12} className="text-orange-500" /> Bay & Logistics
+                    <label className="text-[11px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider flex items-center gap-1.5">
+                        <MapPin size={14} className="text-[#FF9F0A]" /> Bay & Logistics
                     </label>
                     <div className="grid grid-cols-2 gap-2">
                         <select
                             value={filters.locationStatus || 'All'}
                             aria-label="Filter by Location Status"
                             onChange={(e) => setFilters(prev => ({ ...prev, locationStatus: e.target.value }))}
-                            className="w-full bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl px-2 py-2 text-xs font-semibold text-[var(--theme-text-primary)] outline-none cursor-pointer"
+                            className="w-full bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl px-2.5 py-2 text-xs font-semibold text-[var(--theme-text-primary)] outline-none cursor-pointer hover:bg-[var(--theme-bg-card-hover)] transition-all"
                         >
                             <option value="All">All Locations</option>
                             <option value="assigned">Located</option>
@@ -192,7 +192,7 @@ export const InventoryAdvancedFilters: React.FC<InventoryAdvancedFiltersProps> =
                             value={filters.hasBarcode || 'All'}
                             aria-label="Filter by Barcode Status"
                             onChange={(e) => setFilters(prev => ({ ...prev, hasBarcode: e.target.value }))}
-                            className="w-full bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl px-2 py-2 text-xs font-semibold text-[var(--theme-text-primary)] outline-none cursor-pointer"
+                            className="w-full bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl px-2.5 py-2 text-xs font-semibold text-[var(--theme-text-primary)] outline-none cursor-pointer hover:bg-[var(--theme-bg-card-hover)] transition-all"
                         >
                             <option value="All">All Barcodes</option>
                             <option value="with_barcode">Barcoded</option>

@@ -263,8 +263,14 @@ export const recruitmentService = {
     canManageHiring(userRole: string): boolean {
         const found = SYSTEM_ROLES.find(r => r.id === userRole);
         if (!found) return false;
-        // Level 1 (CEO), Level 2 (Directors), Level 3 (Site/Unit Managers) can initiate hiring
+        // Level 1 (CEO), Level 2 (Directors), Level 3 (Site/Unit Managers) can initiate headcount requisitions
         return found.level <= 3;
+    },
+
+    canManageCandidates(userRole: string): boolean {
+        // Talent Recruiters and HR staff can source and manage candidate pipelines
+        if (userRole === 'talent_recruiter' || userRole === 'hr') return true;
+        return this.canManageHiring(userRole);
     },
 
     getUserRoleLevel(userRole: string): number {

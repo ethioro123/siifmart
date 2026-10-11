@@ -1,9 +1,10 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { 
     Upload, FileText, CheckCircle2, Trash2, IdCard, 
-    FileUp, Sparkles, AlertCircle, Loader2, Plus, Award, ShieldCheck 
+    FileUp, Sparkles, Loader2, ShieldCheck 
 } from 'lucide-react';
 import { compressImageFile, readDocumentFile, validateFileSize, MAX_DOCUMENT_FILE_SIZE_MB } from '../../../utils/imageCompression';
+import { StepDocumentsCertificates } from './StepDocumentsCertificates';
 
 interface StepDocumentsProps {
     newEmpData: any;
@@ -18,16 +19,30 @@ export default function StepDocuments({
 }: StepDocumentsProps) {
     const [isCompressingId, setIsCompressingId] = useState(false);
     const [isUploadingResume, setIsUploadingResume] = useState(false);
-    const [isUploadingCert, setIsUploadingCert] = useState(false);
-    const [certCategory, setCertCategory] = useState('Certificate');
+
+    // Drag-and-drop active visual states
+    const [isDraggingId, setIsDraggingId] = useState(false);
+    const [isDraggingResume, setIsDraggingResume] = useState(false);
 
     const idInputRef = useRef<HTMLInputElement>(null);
     const resumeInputRef = useRef<HTMLInputElement>(null);
-    const certInputRef = useRef<HTMLInputElement>(null);
 
-    // Handle National ID Upload with Automatic High-Efficiency Compression
-    const handleIdFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
+    // Global drag-and-drop shield: prevents the browser from navigating away
+    // if a file is dropped anywhere on the window outside of specific dropzones
+    useEffect(() => {
+        const preventDefaultDrop = (e: DragEvent) => {
+            e.preventDefault();
+        };
+        window.addEventListener('dragover', preventDefaultDrop);
+        window.addEventListener('drop', preventDefaultDrop);
+        return () => {
+            window.removeEventListener('dragover', preventDefaultDrop);
+            window.removeEventListener('drop', preventDefaultDrop);
+        };
+    }, []);
+
+    // Reusable National ID Processing Pipeline
+    const processIdFile = async (file: File) => {
         if (!file) return;
 
         const check = validateFileSize(file);
@@ -52,16 +67,15 @@ export default function StepDocuments({
             }));
             addNotification('success', `National ID uploaded & compressed (${compressed.originalSizeFormatted} → ${compressed.compressedSizeFormatted}, ${compressed.compressionRatioPercent}% reduced).`);
         } catch (err: any) {
-            addNotification('alert', `Failed to compress ID photo: ${err?.message || 'Unknown error'}`);
+            addNotification('alert', `Failed to process ID photo: ${err?.message || 'Please upload a valid JPG or PNG image.'}`);
         } finally {
             setIsCompressingId(false);
             if (idInputRef.current) idInputRef.current.value = '';
         }
     };
 
-    // Handle Resume Upload
-    const handleResumeSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
+    // Reusable Resume Processing Pipeline
+    const processResumeFile = async (file: File) => {
         if (!file) return;
 
         const check = validateFileSize(file);
@@ -79,7 +93,7 @@ export default function StepDocuments({
                 resume: {
                     name: doc.name,
                     size: doc.size,
-                    type: doc.type,
+                    type: doc.type || 'pdf',
                     dataUrl: doc.dataUrl
                 }
             }));
@@ -92,63 +106,19 @@ export default function StepDocuments({
         }
     };
 
-    // Handle Additional Certificates Upload
-    const handleCertSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    // File Input change handlers
+    const handleIdFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
-        if (!file) return;
-
-        const check = validateFileSize(file);
-        if (!check.valid) {
-            addNotification('alert', check.error || `Certificate file exceeds ${MAX_DOCUMENT_FILE_SIZE_MB}MB limit.`);
-            if (certInputRef.current) certInputRef.current.value = '';
-            return;
-        }
-
-        setIsUploadingCert(true);
-        try {
-            let docData: { name: string; size: string; type: string; dataUrl: string };
-
-            if (file.type.startsWith('image/')) {
-                const compressed = await compressImageFile(file, 1280, 1280, 0.8);
-                docData = {
-                    name: file.name,
-                    size: compressed.compressedSizeFormatted,
-                    type: 'jpg',
-                    dataUrl: compressed.dataUrl
-                };
-            } else {
-                const doc = await readDocumentFile(file);
-                docData = {
-                    name: doc.name,
-                    size: doc.size,
-                    type: doc.type,
-                    dataUrl: doc.dataUrl
-                };
-            }
-
-            const newCertItem = {
-                id: `cert_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
-                name: docData.name,
-                size: docData.size,
-                type: docData.type,
-                category: certCategory,
-                dataUrl: docData.dataUrl
-            };
-
-            setNewEmpData((prev: any) => ({
-                ...prev,
-                certificates: [...(prev.certificates || []), newCertItem]
-            }));
-            addNotification('success', `Certificate attached: "${docData.name}"`);
-        } catch (err: any) {
-            addNotification('alert', `Failed to upload document: ${err?.message || 'Unknown error'}`);
-        } finally {
-            setIsUploadingCert(false);
-            if (certInputRef.current) certInputRef.current.value = '';
-        }
+        if (file) processIdFile(file);
     };
 
-    const removeNationalId = () => {
+    const handleResumeSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (file) processResumeFile(file);
+    };
+
+    const removeNationalId = (e: React.MouseEvent) => {
+        e.stopPropagation();
         setNewEmpData((prev: any) => ({
             ...prev,
             nationalIdPhoto: null,
@@ -156,17 +126,11 @@ export default function StepDocuments({
         }));
     };
 
-    const removeResume = () => {
+    const removeResume = (e: React.MouseEvent) => {
+        e.stopPropagation();
         setNewEmpData((prev: any) => ({
             ...prev,
             resume: null
-        }));
-    };
-
-    const removeCertificate = (id: string) => {
-        setNewEmpData((prev: any) => ({
-            ...prev,
-            certificates: (prev.certificates || []).filter((c: any) => c.id !== id)
         }));
     };
 
@@ -180,7 +144,7 @@ export default function StepDocuments({
                         <span>Personnel Credentials & Documents</span>
                     </h4>
                     <p className="text-xs text-stone-500 dark:text-stone-400">
-                        Upload official identification (up to 5MB max with automatic compression), CV, and certifications.
+                        Upload or drag & drop official ID, resume/CV, and certifications (up to 5MB with auto-compression).
                     </p>
                 </div>
                 <span className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20">
@@ -188,7 +152,7 @@ export default function StepDocuments({
                 </span>
             </div>
 
-            {/* SECTION 1: NATIONAL ID PHOTO WITH COMPRESSION */}
+            {/* SECTION 1: NATIONAL ID PHOTO WITH COMPRESSION & DRAG-AND-DROP */}
             <div className="p-4 rounded-2xl bg-white dark:bg-[#18201B] border border-[#E2DCCE] dark:border-white/10 shadow-xs">
                 <div className="flex items-center justify-between mb-3">
                     <label className="text-xs text-[#1E3F27] dark:text-[#EAE5D9] font-bold uppercase tracking-wide flex items-center gap-2">
@@ -198,7 +162,7 @@ export default function StepDocuments({
                     {newEmpData.nationalIdInfo && (
                         <span className="text-[10px] font-bold text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-500/10 px-2 py-0.5 rounded-full flex items-center gap-1 border border-emerald-200 dark:border-emerald-500/20">
                             <Sparkles size={11} />
-                            <span>{newEmpData.nationalIdInfo.reductionPercent}% size reduction</span>
+                            <span>{newEmpData.nationalIdInfo.reductionPercent ?? 0}% size reduction</span>
                         </span>
                     )}
                 </div>
@@ -216,7 +180,7 @@ export default function StepDocuments({
                                 <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
                                     <button
                                         type="button"
-                                        onClick={() => idInputRef.current?.click()}
+                                        onClick={(e) => { e.stopPropagation(); idInputRef.current?.click(); }}
                                         className="p-1.5 rounded-lg bg-white/20 text-white hover:bg-white/40 text-xs font-bold transition-colors cursor-pointer"
                                         title="Change ID Photo"
                                     >
@@ -234,8 +198,22 @@ export default function StepDocuments({
                             </div>
                         ) : (
                             <div
-                                onClick={() => idInputRef.current?.click()}
-                                className="border-2 border-dashed border-[#E2DCCE] dark:border-white/10 hover:border-[#2C5E3B] dark:hover:border-emerald-500/50 rounded-xl p-4 flex flex-col items-center justify-center text-center cursor-pointer transition-all aspect-[4/3] bg-stone-50/50 dark:bg-white/[0.01] group"
+                                onClick={(e) => { e.stopPropagation(); idInputRef.current?.click(); }}
+                                onDragOver={(e) => { e.preventDefault(); e.stopPropagation(); setIsDraggingId(true); }}
+                                onDragEnter={(e) => { e.preventDefault(); e.stopPropagation(); setIsDraggingId(true); }}
+                                onDragLeave={(e) => { e.preventDefault(); e.stopPropagation(); setIsDraggingId(false); }}
+                                onDrop={(e) => {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    setIsDraggingId(false);
+                                    const file = e.dataTransfer.files?.[0];
+                                    if (file) processIdFile(file);
+                                }}
+                                className={`border-2 border-dashed rounded-xl p-4 flex flex-col items-center justify-center text-center cursor-pointer transition-all aspect-[4/3] group ${
+                                    isDraggingId 
+                                        ? 'border-[#2C5E3B] dark:border-emerald-400 bg-emerald-50/40 dark:bg-emerald-500/10 scale-[1.02]' 
+                                        : 'border-[#E2DCCE] dark:border-white/10 hover:border-[#2C5E3B] dark:hover:border-emerald-500/50 bg-stone-50/50 dark:bg-white/[0.01]'
+                                }`}
                             >
                                 {isCompressingId ? (
                                     <div className="flex flex-col items-center">
@@ -244,9 +222,11 @@ export default function StepDocuments({
                                     </div>
                                 ) : (
                                     <>
-                                        <FileUp size={24} className="text-stone-400 group-hover:text-[#2C5E3B] dark:group-hover:text-[#A9CBA2] mb-1.5 group-hover:scale-110 transition-transform" />
-                                        <span className="text-xs font-bold text-stone-700 dark:text-stone-200">Upload ID Card</span>
-                                        <span className="text-[10px] text-stone-400 mt-0.5">JPG / PNG up to 5MB</span>
+                                        <FileUp size={24} className={`mb-1.5 transition-transform ${isDraggingId ? 'scale-125 text-[#2C5E3B] dark:text-[#A9CBA2]' : 'text-stone-400 group-hover:text-[#2C5E3B] dark:group-hover:text-[#A9CBA2] group-hover:scale-110'}`} />
+                                        <span className="text-xs font-bold text-stone-700 dark:text-stone-200">
+                                            {isDraggingId ? 'Drop ID Card Photo Here' : 'Upload or Drop ID Card'}
+                                        </span>
+                                        <span className="text-[10px] text-stone-400 mt-0.5">JPG / PNG / WEBP up to 5MB</span>
                                     </>
                                 )}
                             </div>
@@ -271,7 +251,7 @@ export default function StepDocuments({
                                 className="w-full bg-white dark:bg-black/30 border border-[#E2DCCE] dark:border-white/10 rounded-xl px-3 py-2 text-stone-900 dark:text-white focus:border-[#2C5E3B] dark:focus:border-emerald-500 outline-none text-sm font-mono"
                                 placeholder="e.g. ET-10492819 or KE-3891024"
                                 value={newEmpData.nationalIdNumber || ''}
-                                onChange={e => setNewEmpData({ ...newEmpData, nationalIdNumber: e.target.value })}
+                                onChange={e => setNewEmpData((prev: any) => ({ ...prev, nationalIdNumber: e.target.value }))}
                                 aria-label="National ID Number"
                             />
                         </div>
@@ -283,19 +263,19 @@ export default function StepDocuments({
                                     <span>High-Efficiency Compression Applied</span>
                                 </p>
                                 <p className="text-[11px] text-stone-600 dark:text-stone-300 font-mono">
-                                    Original: <span className="line-through text-stone-400">{newEmpData.nationalIdInfo.originalSize}</span> → Compressed: <strong className="text-emerald-700 dark:text-emerald-400">{newEmpData.nationalIdInfo.compressedSize}</strong>
+                                    Original: <span className="line-through text-stone-400">{newEmpData.nationalIdInfo.originalSize || 'N/A'}</span> → Compressed: <strong className="text-emerald-700 dark:text-emerald-400">{newEmpData.nationalIdInfo.compressedSize || 'N/A'}</strong>
                                 </p>
                             </div>
                         ) : (
                             <p className="text-[11px] text-stone-500 dark:text-stone-400 leading-relaxed">
-                                Upload a clear phone photo or scanner image (up to 5MB). The system automatically compresses the file by ~90%+ to save database bandwidth while keeping the text and photo sharp.
+                                Upload a clear photo or scan of employee ID card. The system automatically optimizes image resolution and applies ~90% compression to protect server bandwidth.
                             </p>
                         )}
                     </div>
                 </div>
             </div>
 
-            {/* SECTION 2: RESUME / CV */}
+            {/* SECTION 2: RESUME / CV WITH DRAG-AND-DROP */}
             <div className="p-4 rounded-2xl bg-white dark:bg-[#18201B] border border-[#E2DCCE] dark:border-white/10 shadow-xs">
                 <div className="flex items-center justify-between mb-3">
                     <label className="text-xs text-[#1E3F27] dark:text-[#EAE5D9] font-bold uppercase tracking-wide flex items-center gap-2">
@@ -313,13 +293,15 @@ export default function StepDocuments({
                             </div>
                             <div className="min-w-0">
                                 <p className="text-xs font-bold text-stone-800 dark:text-stone-200 truncate">{newEmpData.resume.name}</p>
-                                <p className="text-[10px] text-stone-400 font-mono">{newEmpData.resume.size} • {newEmpData.resume.type.toUpperCase()}</p>
+                                <p className="text-[10px] text-stone-400 font-mono">
+                                    {newEmpData.resume.size} • {(newEmpData.resume.type || 'FILE').toUpperCase()}
+                                </p>
                             </div>
                         </div>
                         <div className="flex items-center gap-2">
                             <button
                                 type="button"
-                                onClick={() => resumeInputRef.current?.click()}
+                                onClick={(e) => { e.stopPropagation(); resumeInputRef.current?.click(); }}
                                 className="px-2.5 py-1 text-xs font-semibold text-stone-600 dark:text-stone-300 hover:text-[#2C5E3B] hover:bg-stone-200/50 dark:hover:bg-white/5 rounded-lg transition-colors cursor-pointer"
                             >
                                 Replace
@@ -336,16 +318,30 @@ export default function StepDocuments({
                     </div>
                 ) : (
                     <div
-                        onClick={() => resumeInputRef.current?.click()}
-                        className="border-2 border-dashed border-[#E2DCCE] dark:border-white/10 hover:border-[#2C5E3B] dark:hover:border-emerald-500/50 rounded-xl p-4 flex items-center justify-between cursor-pointer transition-all bg-stone-50/50 dark:bg-white/[0.01] group"
+                        onClick={(e) => { e.stopPropagation(); resumeInputRef.current?.click(); }}
+                        onDragOver={(e) => { e.preventDefault(); e.stopPropagation(); setIsDraggingResume(true); }}
+                        onDragEnter={(e) => { e.preventDefault(); e.stopPropagation(); setIsDraggingResume(true); }}
+                        onDragLeave={(e) => { e.preventDefault(); e.stopPropagation(); setIsDraggingResume(false); }}
+                        onDrop={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            setIsDraggingResume(false);
+                            const file = e.dataTransfer.files?.[0];
+                            if (file) processResumeFile(file);
+                        }}
+                        className={`border-2 border-dashed rounded-xl p-4 flex items-center justify-between cursor-pointer transition-all group ${
+                            isDraggingResume 
+                                ? 'border-[#2C5E3B] dark:border-emerald-400 bg-emerald-50/40 dark:bg-emerald-500/10 scale-[1.01]' 
+                                : 'border-[#E2DCCE] dark:border-white/10 hover:border-[#2C5E3B] dark:hover:border-emerald-500/50 bg-stone-50/50 dark:bg-white/[0.01]'
+                        }`}
                     >
                         <div className="flex items-center gap-3">
-                            <div className="w-9 h-9 rounded-lg bg-stone-200/60 dark:bg-white/5 text-stone-500 dark:text-stone-400 flex items-center justify-center group-hover:text-[#2C5E3B] dark:group-hover:text-[#A9CBA2] transition-colors">
+                            <div className={`w-9 h-9 rounded-lg flex items-center justify-center transition-colors ${isDraggingResume ? 'bg-[#2C5E3B] text-white' : 'bg-stone-200/60 dark:bg-white/5 text-stone-500 dark:text-stone-400 group-hover:text-[#2C5E3B] dark:group-hover:text-[#A9CBA2]'}`}>
                                 {isUploadingResume ? <Loader2 size={18} className="animate-spin" /> : <Upload size={18} />}
                             </div>
                             <div>
                                 <p className="text-xs font-bold text-stone-700 dark:text-stone-200 group-hover:text-[#2C5E3B] dark:group-hover:text-[#A9CBA2] transition-colors">
-                                    Upload Candidate Resume
+                                    {isDraggingResume ? 'Drop Resume File Here' : 'Upload or Drop Candidate Resume'}
                                 </p>
                                 <p className="text-[10px] text-stone-400">PDF, DOC, DOCX up to 5MB</p>
                             </div>
@@ -366,84 +362,11 @@ export default function StepDocuments({
             </div>
 
             {/* SECTION 3: OTHER DOCUMENTS & CERTIFICATES */}
-            <div className="p-4 rounded-2xl bg-white dark:bg-[#18201B] border border-[#E2DCCE] dark:border-white/10 shadow-xs">
-                <div className="flex items-center justify-between mb-3">
-                    <label className="text-xs text-[#1E3F27] dark:text-[#EAE5D9] font-bold uppercase tracking-wide flex items-center gap-2">
-                        <Award size={15} className="text-[#2C5E3B] dark:text-[#A9CBA2]" />
-                        <span>Certificates & Verification Credentials</span>
-                    </label>
-                    <span className="text-[10px] text-stone-400 font-mono">
-                        {(newEmpData.certificates || []).length} Attached
-                    </span>
-                </div>
-
-                <div className="flex flex-col sm:flex-row gap-2 mb-3">
-                    <select
-                        value={certCategory}
-                        onChange={e => setCertCategory(e.target.value)}
-                        className="bg-stone-50 dark:bg-black/30 border border-[#E2DCCE] dark:border-white/10 rounded-xl px-3 py-2 text-xs font-semibold text-stone-800 dark:text-stone-200 outline-none"
-                    >
-                        <option value="Degree / Diploma">Academic Degree / Diploma</option>
-                        <option value="Certificate">Professional Certificate</option>
-                        <option value="Good Conduct">Certificate of Good Conduct</option>
-                        <option value="Driver License">Driver's License</option>
-                        <option value="Medical Clearance">Medical Clearance Form</option>
-                        <option value="Other">Other Compliance Document</option>
-                    </select>
-
-                    <button
-                        type="button"
-                        onClick={() => certInputRef.current?.click()}
-                        disabled={isUploadingCert}
-                        className="px-4 py-2 rounded-xl bg-stone-100 dark:bg-white/5 hover:bg-stone-200 dark:hover:bg-white/10 text-stone-700 dark:text-stone-200 font-bold text-xs flex items-center justify-center gap-2 transition-colors cursor-pointer border border-[#E2DCCE] dark:border-white/10"
-                    >
-                        {isUploadingCert ? <Loader2 size={14} className="animate-spin" /> : <Plus size={14} />}
-                        <span>Add Document</span>
-                    </button>
-                    <input
-                        type="file"
-                        ref={certInputRef}
-                        onChange={handleCertSelect}
-                        accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,application/pdf"
-                        className="hidden"
-                        title="Add Certificate Document"
-                    />
-                </div>
-
-                {/* List of uploaded certificates */}
-                {(newEmpData.certificates || []).length > 0 ? (
-                    <div className="space-y-2 mt-2">
-                        {(newEmpData.certificates || []).map((cert: any) => (
-                            <div
-                                key={cert.id}
-                                className="p-2.5 rounded-xl bg-stone-50 dark:bg-white/[0.02] border border-[#E2DCCE]/60 dark:border-white/5 flex items-center justify-between gap-3 text-xs"
-                            >
-                                <div className="flex items-center gap-2.5 min-w-0">
-                                    <div className="p-1.5 rounded-lg bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400 shrink-0">
-                                        <Award size={14} />
-                                    </div>
-                                    <div className="min-w-0">
-                                        <p className="font-bold text-stone-800 dark:text-stone-200 truncate">{cert.name}</p>
-                                        <p className="text-[10px] text-stone-400 font-mono">
-                                            {cert.category} • {cert.size}
-                                        </p>
-                                    </div>
-                                </div>
-                                <button
-                                    type="button"
-                                    onClick={() => removeCertificate(cert.id)}
-                                    className="p-1 text-stone-400 hover:text-rose-600 transition-colors cursor-pointer"
-                                    title="Delete Document"
-                                >
-                                    <Trash2 size={14} />
-                                </button>
-                            </div>
-                        ))}
-                    </div>
-                ) : (
-                    <p className="text-[11px] text-stone-400 italic">No additional certificates attached yet.</p>
-                )}
-            </div>
+            <StepDocumentsCertificates
+                newEmpData={newEmpData}
+                setNewEmpData={setNewEmpData}
+                addNotification={addNotification}
+            />
         </div>
     );
 }

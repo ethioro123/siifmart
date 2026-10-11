@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { RotateCcw, Search, AlertTriangle, Package, CheckCircle, ArrowRight, RefreshCw, ShieldAlert } from 'lucide-react';
+import { RotateCcw, Search, AlertTriangle, Package, CheckCircle, ArrowRight, RefreshCw } from 'lucide-react';
 import { Product, PendingInventoryChange, User } from '../../../types';
 import { useLanguage } from '../../../contexts/LanguageContext';
 import { useData } from '../../../contexts/DataContext';
@@ -71,15 +71,15 @@ export const CountOperations: React.FC<CountOperationsProps> = ({
                             setCountSessionType('Cycle');
                             setCountSessionStatus('Active');
                         }}
-                        className="glass-panel p-6 rounded-2xl hover:bg-stone-100/50 dark:hover:bg-[#EAE5D9]/10 transition-colors text-left group"
+                        className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-5 hover:border-[var(--theme-accent)]/40 transition-colors shadow-sm text-left group"
                     >
-                        <div className="flex items-center gap-3 mb-2">
-                            <div className="p-3 rounded-full bg-[#2C5E3B]/10 text-[#2C5E3B] dark:text-[#A9CBA2]">
-                                <RotateCcw size={24} />
+                        <div className="flex items-center gap-3.5 mb-2">
+                            <div className="w-12 h-12 rounded-xl bg-[var(--theme-bg-subtle)] text-[var(--theme-accent)] border border-[var(--theme-border)] flex items-center justify-center shrink-0">
+                                <RotateCcw size={22} />
                             </div>
                             <div>
-                                <h4 className="font-bold text-stone-900 dark:text-stone-100">{t('warehouse.dailyCycleCount')}</h4>
-                                <p className="text-xs text-stone-500 dark:text-stone-400">{t('warehouse.routineCountAisleA')}</p>
+                                <h4 className="font-bold text-[var(--theme-text-primary)] text-base">{t('warehouse.dailyCycleCount')}</h4>
+                                <p className="text-xs text-[var(--theme-text-secondary)] font-medium mt-0.5">{t('warehouse.routineCountAisleA')}</p>
                             </div>
                         </div>
                     </button>
@@ -99,15 +99,15 @@ export const CountOperations: React.FC<CountOperationsProps> = ({
                             setCountSessionType('Spot');
                             setCountSessionStatus('Active');
                         }}
-                        className="glass-panel p-6 rounded-2xl hover:bg-stone-100/50 dark:hover:bg-[#EAE5D9]/10 transition-colors text-left group"
+                        className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-5 hover:border-[var(--theme-accent)]/40 transition-colors shadow-sm text-left group"
                     >
-                        <div className="flex items-center gap-3 mb-2">
-                            <div className="p-3 rounded-full bg-[#A9CBA2]/20 dark:bg-[#A9CBA2]/10 text-[#2C5E3B] dark:text-[#A9CBA2]">
-                                <Search size={24} />
+                        <div className="flex items-center gap-3.5 mb-2">
+                            <div className="w-12 h-12 rounded-xl bg-[var(--theme-bg-subtle)] text-[var(--theme-accent)] border border-[var(--theme-border)] flex items-center justify-center shrink-0">
+                                <Search size={22} />
                             </div>
                             <div>
-                                <h4 className="font-bold text-stone-900 dark:text-stone-100">{t('warehouse.spotCheck')}</h4>
-                                <p className="text-xs text-stone-500 dark:text-stone-400">{t('warehouse.randomAuditFiveItems')}</p>
+                                <h4 className="font-bold text-[var(--theme-text-primary)] text-base">{t('warehouse.spotCheck')}</h4>
+                                <p className="text-xs text-[var(--theme-text-secondary)] font-medium mt-0.5">{t('warehouse.randomAuditFiveItems')}</p>
                             </div>
                         </div>
                     </button>
@@ -117,20 +117,28 @@ export const CountOperations: React.FC<CountOperationsProps> = ({
             {/* ACTIVE STATE: Blind Counting */}
             {countSessionStatus === 'Active' && (
                 <div className="space-y-4">
-                    <div className="bg-amber-500/10 border border-amber-500/20 p-3 rounded-xl flex items-center gap-3">
-                        <AlertTriangle className="text-amber-600 dark:text-amber-400" size={20} />
-                        <p className="text-sm text-stone-800 dark:text-amber-200">
+                    <div className="bg-amber-500/10 border border-amber-500/20 p-3.5 rounded-xl flex items-center gap-3">
+                        <AlertTriangle className="text-amber-600 dark:text-amber-400 shrink-0" size={20} />
+                        <p className="text-xs text-stone-800 dark:text-amber-200 font-medium">
                             {t('warehouse.blindCountModeInfo')}
                         </p>
                     </div>
 
-                    <div className="space-y-2">
+                    <div className="space-y-2.5">
                         {countSessionItems.map((item, idx) => {
                             const product = products.find(p => p.id === item.productId);
+                            const isCounted = item.status === 'Counted';
                             return (
-                                <div key={item.productId} className={`p-4 rounded-2xl border ${item.status === 'Counted' ? 'bg-[#2C5E3B]/10 dark:bg-[#A9CBA2]/10 border-[#2C5E3B]/30 dark:border-[#A9CBA2]/30' : 'glass-panel'} flex items-center justify-between`}>
-                                    <div className="flex items-center gap-4">
-                                        <div className="w-12 h-12 rounded-xl bg-stone-50/50 dark:bg-[#1C2620]/30 border border-[#E2DCCE]/30 dark:border-[#A9CBA2]/[0.04] flex items-center justify-center overflow-hidden">
+                                <div
+                                    key={item.productId}
+                                    className={`p-4 rounded-2xl border transition-colors flex items-center justify-between gap-3 shadow-sm ${
+                                        isCounted
+                                            ? 'bg-green-500/5 border-green-500/30'
+                                            : 'bg-[var(--theme-bg-card)] border-[var(--theme-border)]'
+                                    }`}
+                                >
+                                    <div className="flex items-center gap-3.5 min-w-0">
+                                        <div className="w-12 h-12 rounded-xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] flex items-center justify-center overflow-hidden shrink-0">
                                             {product?.image && !product.image.includes('placeholder.com') ? (
                                                 <img
                                                     src={product.image}
@@ -138,26 +146,27 @@ export const CountOperations: React.FC<CountOperationsProps> = ({
                                                     className="w-full h-full object-cover"
                                                     onError={(e) => {
                                                         e.currentTarget.style.display = 'none';
-                                                        (e.currentTarget.parentElement as HTMLElement).innerHTML = '<div class="w-full h-full flex items-center justify-center"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-package text-stone-500"><path d="m7.5 4.27 9 5.15"/><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg></div>';
                                                     }}
                                                 />
                                             ) : (
-                                                <Package size={20} className="text-stone-500" />
+                                                <Package size={20} className="text-[var(--theme-text-secondary)]/50" />
                                             )}
                                         </div>
-                                        <div>
-                                            <p className="font-bold text-stone-900 dark:text-stone-100">{product?.name}</p>
-                                            <p className="text-xs text-stone-500 dark:text-stone-400">{t('warehouse.location')}: {product?.location || t('warehouse.nA')} • {t('warehouse.sku')}: {product?.sku}</p>
+                                        <div className="min-w-0">
+                                            <p className="font-semibold text-sm text-[var(--theme-text-primary)] truncate">{product?.name}</p>
+                                            <p className="text-[11px] text-[var(--theme-text-secondary)] font-mono tabular-nums mt-0.5">
+                                                {t('warehouse.location')}: {product?.location || t('warehouse.nA')} • {t('warehouse.sku')}: {product?.sku}
+                                            </p>
                                         </div>
                                     </div>
-                                    <div className="flex items-center gap-3">
+                                    <div className="flex items-center gap-2.5 shrink-0">
                                         <input
                                             type="number"
                                             min="0"
                                             placeholder={t('warehouse.qty')}
                                             aria-label={t('warehouse.qty')}
                                             title={t('warehouse.qty')}
-                                            className="woody-input w-24 text-center font-mono text-lg"
+                                            className="w-24 text-center font-mono tabular-nums text-lg py-2 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] focus:border-[var(--theme-accent)] rounded-xl outline-none min-h-[44px] text-[var(--theme-text-primary)] transition-colors"
                                             value={item.countedQty === undefined ? '' : item.countedQty}
                                             onChange={(e) => {
                                                 const val = parseInt(e.target.value);
@@ -167,14 +176,14 @@ export const CountOperations: React.FC<CountOperationsProps> = ({
                                                 setCountSessionItems(newItems);
                                             }}
                                         />
-                                        {item.status === 'Counted' && <CheckCircle className="text-[#2C5E3B] dark:text-[#A9CBA2]" size={20} />}
+                                        {isCounted && <CheckCircle className="text-green-500" size={20} />}
                                     </div>
                                 </div>
                             );
                         })}
                     </div>
 
-                    <div className="pt-4 border-t border-[#E2DCCE]/30 dark:border-[#A9CBA2]/[0.04] flex justify-end">
+                    <div className="pt-4 border-t border-[var(--theme-border)] flex justify-end">
                         <button
                             onClick={() => {
                                 if (countSessionItems.some(i => i.status === 'Pending')) {
@@ -189,9 +198,10 @@ export const CountOperations: React.FC<CountOperationsProps> = ({
                                 setCountSessionItems(reviewedItems);
                                 setCountSessionStatus('Review');
                             }}
-                            className="woody-btn-primary px-6 py-3 flex items-center gap-2"
+                            className="bg-[var(--theme-accent)] hover:opacity-90 text-white font-semibold rounded-xl px-6 py-2.5 min-h-[44px] flex items-center gap-2 shadow-sm transition-opacity"
                         >
-                            {t('warehouse.finishReview')} <ArrowRight size={18} />
+                            <span>{t('warehouse.finishReview')}</span>
+                            <ArrowRight size={18} />
                         </button>
                     </div>
                 </div>
@@ -200,30 +210,37 @@ export const CountOperations: React.FC<CountOperationsProps> = ({
             {/* REVIEW STATE: Manager Approval */}
             {countSessionStatus === 'Review' && (
                 <div className="space-y-4">
-                    <div className="grid grid-cols-3 gap-4 mb-4">
-                        <div className="glass-panel p-3 rounded-xl text-center">
-                            <p className="text-xs text-stone-500 dark:text-stone-400 uppercase">{t('warehouse.totalItems')}</p>
-                            <p className="text-xl font-bold text-stone-900 dark:text-stone-100">{countSessionItems.length}</p>
+                    <div className="grid grid-cols-3 gap-3.5 mb-4">
+                        <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] p-3.5 rounded-xl text-center shadow-sm">
+                            <p className="text-[11px] text-[var(--theme-text-secondary)] font-semibold uppercase tracking-wider">{t('warehouse.totalItems')}</p>
+                            <p className="text-xl font-bold font-mono tabular-nums text-[var(--theme-text-primary)] mt-0.5">{countSessionItems.length}</p>
                         </div>
-                        <div className="bg-[#2C5E3B]/10 dark:bg-[#A9CBA2]/10 p-3 rounded-xl text-center border border-[#2C5E3B]/20 dark:border-[#A9CBA2]/20">
-                            <p className="text-xs text-[#2C5E3B] dark:text-[#A9CBA2] uppercase">{t('warehouse.accurate')}</p>
-                            <p className="text-xl font-bold text-[#2C5E3B] dark:text-[#A9CBA2]">{countSessionItems.filter(i => i.variance === 0).length}</p>
+                        <div className="bg-green-500/10 border border-green-500/20 text-green-600 dark:text-green-400 p-3.5 rounded-xl text-center shadow-sm">
+                            <p className="text-[11px] font-semibold uppercase tracking-wider">{t('warehouse.accurate')}</p>
+                            <p className="text-xl font-bold font-mono tabular-nums mt-0.5">{countSessionItems.filter(i => i.variance === 0).length}</p>
                         </div>
-                        <div className="bg-red-500/10 p-3 rounded-xl text-center border border-red-500/20">
-                            <p className="text-xs text-red-600 dark:text-red-400 uppercase">{t('warehouse.variance')}</p>
-                            <p className="text-xl font-bold text-red-600 dark:text-red-400">{countSessionItems.filter(i => i.variance !== 0).length}</p>
+                        <div className="bg-red-500/10 border border-red-500/20 text-red-600 dark:text-red-400 p-3.5 rounded-xl text-center shadow-sm">
+                            <p className="text-[11px] font-semibold uppercase tracking-wider">{t('warehouse.variance')}</p>
+                            <p className="text-xl font-bold font-mono tabular-nums mt-0.5">{countSessionItems.filter(i => i.variance !== 0).length}</p>
                         </div>
                     </div>
 
-                    <div className="space-y-2">
+                    <div className="space-y-2.5">
                         {countSessionItems.map((item, idx) => {
                             const product = products.find(p => p.id === item.productId);
                             const hasVariance = item.variance !== 0;
 
                             return (
-                                <div key={item.productId} className={`p-4 rounded-xl border ${hasVariance ? 'bg-red-500/5 border-red-500/20' : 'bg-[#2C5E3B]/5 dark:bg-[#A9CBA2]/5 border-[#2C5E3B]/20 dark:border-[#A9CBA2]/20'} flex flex-col md:flex-row items-center justify-between gap-4`}>
-                                    <div className="flex items-center gap-4 flex-1">
-                                        <div className="w-10 h-10 rounded-xl bg-stone-50/50 dark:bg-[#1C2620]/30 border border-[#E2DCCE]/30 dark:border-[#A9CBA2]/[0.04] flex items-center justify-center overflow-hidden">
+                                <div
+                                    key={item.productId}
+                                    className={`p-4 rounded-2xl border shadow-sm flex flex-col md:flex-row items-center justify-between gap-4 transition-colors ${
+                                        hasVariance
+                                            ? 'bg-[var(--theme-bg-card)] border-red-500/30'
+                                            : 'bg-[var(--theme-bg-card)] border-green-500/30'
+                                    }`}
+                                >
+                                    <div className="flex items-center gap-3.5 flex-1 min-w-0">
+                                        <div className="w-12 h-12 rounded-xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] flex items-center justify-center overflow-hidden shrink-0">
                                             {product?.image && !product.image.includes('placeholder.com') ? (
                                                 <img
                                                     src={product.image}
@@ -231,25 +248,24 @@ export const CountOperations: React.FC<CountOperationsProps> = ({
                                                     className="w-full h-full object-cover"
                                                     onError={(e) => {
                                                         e.currentTarget.style.display = 'none';
-                                                        (e.currentTarget.parentElement as HTMLElement).innerHTML = '<div class="w-full h-full flex items-center justify-center"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-package text-stone-500"><path d="m7.5 4.27 9 5.15"/><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg></div>';
                                                     }}
                                                 />
                                             ) : (
-                                                <Package size={16} className="text-stone-500" />
+                                                <Package size={20} className="text-[var(--theme-text-secondary)]/50" />
                                             )}
                                         </div>
-                                        <div>
-                                            <p className="font-bold text-stone-900 dark:text-stone-100">{product?.name}</p>
-                                            <div className="flex gap-4 text-xs mt-1">
-                                                <span className="text-stone-500 dark:text-stone-400">
-                                                    {t('warehouse.expected')}: <strong className="text-stone-900 dark:text-stone-100">
+                                        <div className="min-w-0 flex-1">
+                                            <p className="font-semibold text-sm text-[var(--theme-text-primary)] truncate">{product?.name}</p>
+                                            <div className="flex gap-4 text-xs mt-1 flex-wrap font-mono tabular-nums">
+                                                <span className="text-[var(--theme-text-secondary)]">
+                                                    {t('warehouse.expected')}: <strong className="text-[var(--theme-text-primary)]">
                                                         {receivingPolicy.blind && !isManagerOrHQ ? '*** (Blind)' : item.systemQty}
                                                     </strong>
                                                 </span>
-                                                <span className="text-[#2C5E3B] dark:text-[#A9CBA2]">
-                                                    {t('warehouse.picking')}: <strong className="text-stone-900 dark:text-stone-100">{item.countedQty}</strong>
+                                                <span className="text-[var(--theme-accent)]">
+                                                    {t('warehouse.picking')}: <strong className="text-[var(--theme-text-primary)]">{item.countedQty}</strong>
                                                 </span>
-                                                <span className={hasVariance ? 'text-red-600 dark:text-red-400 font-bold' : 'text-[#2C5E3B] dark:text-[#A9CBA2] font-bold'}>
+                                                <span className={hasVariance ? 'text-red-600 dark:text-red-400 font-semibold' : 'text-green-600 dark:text-green-400 font-semibold'}>
                                                     {receivingPolicy.blind && !isManagerOrHQ
                                                         ? (hasVariance ? 'Variance Detected' : 'Matched')
                                                         : `${t('warehouse.variance').slice(0, 3)}: ${item.variance && item.variance > 0 ? '+' : ''}${item.variance}`}
@@ -286,7 +302,7 @@ export const CountOperations: React.FC<CountOperationsProps> = ({
                                         };
 
                                         return (
-                                            <div className="flex gap-2">
+                                            <div className="flex gap-2 shrink-0">
                                                 <button
                                                     disabled={isRecountCapReached}
                                                     onClick={() => {
@@ -297,10 +313,10 @@ export const CountOperations: React.FC<CountOperationsProps> = ({
                                                             triggerRecount();
                                                         }
                                                     }}
-                                                    className={`px-3 py-1.5 text-xs font-semibold rounded-xl border transition-colors ${
+                                                    className={`px-3.5 py-2 text-xs font-semibold rounded-xl border transition-colors min-h-[38px] ${
                                                         isRecountCapReached
-                                                            ? 'opacity-40 cursor-not-allowed bg-stone-100 dark:bg-white/5 border-stone-200 dark:border-white/10 text-stone-400'
-                                                            : 'woody-btn-secondary'
+                                                            ? 'opacity-40 cursor-not-allowed bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] text-[var(--theme-text-secondary)]'
+                                                            : 'bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] hover:bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)]'
                                                     }`}
                                                     title={isRecountCapReached ? `Recount limit (${policy.maxCycleCountRecounts}) reached.` : undefined}
                                                 >
@@ -309,62 +325,62 @@ export const CountOperations: React.FC<CountOperationsProps> = ({
                                                 <button
                                                     disabled={approvingVariance === idx}
                                                     onClick={async () => {
-                                                    setApprovingVariance(idx);
-                                                    try {
-                                                        // Approve Variance - NOW CREATES REQUEST
-                                                        const varianceQty = Math.abs(item.variance || 0);
-                                                        const adjustType = (item.variance || 0) > 0 ? 'IN' : 'OUT';
+                                                        setApprovingVariance(idx);
+                                                        try {
+                                                            const varianceQty = Math.abs(item.variance || 0);
+                                                            const adjustType = (item.variance || 0) > 0 ? 'IN' : 'OUT';
 
-                                                        const request: Omit<PendingInventoryChange, 'id'> = {
-                                                            productId: item.productId,
-                                                            productName: product?.name || 'Unknown',
-                                                            productSku: product?.sku || 'Unknown',
-                                                            siteId: product?.siteId || user?.siteId || '',
-                                                            countryCode: (product as any)?.countryCode || (product as any)?.country_code || (user as any)?.country || 'ET',
-                                                            changeType: 'stock_adjustment',
-                                                            requestedBy: user?.name || 'Manager',
-                                                            requestedAt: new Date().toISOString(),
-                                                            status: 'pending',
-                                                            adjustmentType: adjustType,
-                                                            adjustmentQty: varianceQty,
-                                                            adjustmentReason: `Cycle Count Variance Approval`
-                                                        };
+                                                            const request: Omit<PendingInventoryChange, 'id'> = {
+                                                                productId: item.productId,
+                                                                productName: product?.name || 'Unknown',
+                                                                productSku: product?.sku || 'Unknown',
+                                                                siteId: product?.siteId || user?.siteId || '',
+                                                                countryCode: (product as any)?.countryCode || (product as any)?.country_code || (user as any)?.country || 'ET',
+                                                                changeType: 'stock_adjustment',
+                                                                requestedBy: user?.name || 'Manager',
+                                                                requestedAt: new Date().toISOString(),
+                                                                status: 'pending',
+                                                                adjustmentType: adjustType,
+                                                                adjustmentQty: varianceQty,
+                                                                adjustmentReason: `Cycle Count Variance Approval`
+                                                            };
 
-                                                        await createRequestMutation.mutateAsync(request);
+                                                            await createRequestMutation.mutateAsync(request);
 
-                                                        const newItems = [...countSessionItems];
-                                                        newItems[idx].status = 'Approved';
-                                                        setCountSessionItems(newItems);
-                                                        addNotification('success', t('warehouse.varianceRequestSubmitted'));
-                                                    } catch (e) {
-                                                        logger.error('CountOperations', 'Failed to approve variance:', e);
-                                                        addNotification('alert', t('warehouse.failedVarianceSubmit'));
-                                                    } finally {
-                                                        setApprovingVariance(null);
-                                                    }
-                                                }}
-                                                className={`px-3 py-1.5 text-xs font-bold rounded-lg border flex items-center gap-1 ${approvingVariance === idx
-                                                    ? 'bg-red-500/10 text-red-400/50 border-red-500/20 cursor-not-allowed'
-                                                    : 'bg-red-500/10 text-red-600 dark:text-red-400 border-red-500/20 dark:border-red-500/20 hover:bg-red-500/20'
+                                                            const newItems = [...countSessionItems];
+                                                            newItems[idx].status = 'Approved';
+                                                            setCountSessionItems(newItems);
+                                                            addNotification('success', t('warehouse.varianceRequestSubmitted'));
+                                                        } catch (e) {
+                                                            logger.error('CountOperations', 'Failed to approve variance:', e);
+                                                            addNotification('alert', t('warehouse.failedVarianceSubmit'));
+                                                        } finally {
+                                                            setApprovingVariance(null);
+                                                        }
+                                                    }}
+                                                    className={`px-3.5 py-2 text-xs font-semibold rounded-xl border flex items-center gap-1.5 min-h-[38px] transition-colors ${
+                                                        approvingVariance === idx
+                                                            ? 'bg-red-500/10 text-red-400/50 border-red-500/20 cursor-not-allowed'
+                                                            : 'bg-red-500/10 text-red-600 dark:text-red-400 border-red-500/20 hover:bg-red-500/20'
                                                     }`}
-                                            >
-                                                {approvingVariance === idx ? (
-                                                    <>
-                                                        <RefreshCw size={12} className="animate-spin" />
-                                                        {t('warehouse.processing')}
-                                                    </>
-                                                ) : (
-                                                    t('warehouse.approveVariance')
-                                                )}
-                                            </button>
+                                                >
+                                                    {approvingVariance === idx ? (
+                                                        <>
+                                                            <RefreshCw size={12} className="animate-spin" />
+                                                            <span>{t('warehouse.processing')}</span>
+                                                        </>
+                                                    ) : (
+                                                        t('warehouse.approveVariance')
+                                                    )}
+                                                </button>
                                             </div>
                                         );
                                     })()}
 
                                     {(!hasVariance || item.status === 'Approved') && (
-                                        <div className="flex items-center gap-2 text-[#2C5E3B] dark:text-[#A9CBA2] text-xs font-bold px-3 py-1.5 bg-[#2C5E3B]/10 dark:bg-[#A9CBA2]/10 rounded-lg">
+                                        <div className="flex items-center gap-1.5 text-green-600 dark:text-green-400 text-xs font-semibold px-3 py-1.5 bg-green-500/10 border border-green-500/20 rounded-xl shrink-0">
                                             <CheckCircle size={14} />
-                                            {item.status === 'Approved' ? t('warehouse.adjusted') : t('warehouse.matched')}
+                                            <span>{item.status === 'Approved' ? t('warehouse.adjusted') : t('warehouse.matched')}</span>
                                         </div>
                                     )}
                                 </div>
@@ -372,7 +388,7 @@ export const CountOperations: React.FC<CountOperationsProps> = ({
                         })}
                     </div>
 
-                    <div className="pt-4 border-t border-[#E2DCCE]/30 dark:border-[#A9CBA2]/[0.04] flex justify-end">
+                    <div className="pt-4 border-t border-[var(--theme-border)] flex justify-end">
                         <button
                             onClick={() => {
                                 if (countSessionItems.some(i => i.status !== 'Approved' && i.variance !== 0)) {
@@ -382,7 +398,7 @@ export const CountOperations: React.FC<CountOperationsProps> = ({
                                 setCountSessionItems([]);
                                 addNotification('success', t('warehouse.countSessionCompleted'));
                             }}
-                            className="woody-btn-primary px-6 py-3"
+                            className="bg-[var(--theme-accent)] hover:opacity-90 text-white font-semibold rounded-xl px-6 py-2.5 min-h-[44px] shadow-sm transition-opacity"
                         >
                             {t('warehouse.completeSession')}
                         </button>
@@ -427,3 +443,5 @@ export const CountOperations: React.FC<CountOperationsProps> = ({
         </>
     );
 };
+
+export default CountOperations;

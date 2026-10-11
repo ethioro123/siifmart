@@ -1,4 +1,5 @@
 import React from 'react';
+import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from 'lucide-react';
 import { useMerchandising } from '../MerchandisingContext';
 
 export const PricingPagination: React.FC = () => {
@@ -40,19 +41,19 @@ export const PricingPagination: React.FC = () => {
     if (filteredProducts.length === 0) return null;
 
     return (
-        <div className="p-6 border-t border-[#E2DCCE]/60 dark:border-[#A9CBA2]/[0.06] bg-stone-50/50 dark:bg-[#1E2822]/30 flex flex-wrap gap-4 items-center justify-between">
+        <div className="p-4 sm:p-5 border-t border-[var(--theme-border)] bg-[var(--theme-bg-subtle)] flex flex-wrap gap-4 items-center justify-between">
             {/* Record count info */}
-            <div className="text-xs text-stone-500 dark:text-stone-400 font-medium">
+            <div className="text-xs text-[var(--theme-text-secondary)] font-medium">
                 Showing{' '}
-                <span className="font-mono font-bold text-[#1E3F27] dark:text-white">
+                <span className="font-mono font-semibold text-[var(--theme-text-primary)] tabular-nums">
                     {filteredProducts.length === 0 ? 0 : startIndex + 1}
                 </span>{' '}
                 to{' '}
-                <span className="font-mono font-bold text-[#1E3F27] dark:text-white">
+                <span className="font-mono font-semibold text-[var(--theme-text-primary)] tabular-nums">
                     {endIndex}
                 </span>{' '}
                 of{' '}
-                <span className="font-mono font-bold text-[#1E3F27] dark:text-white">
+                <span className="font-mono font-semibold text-[var(--theme-text-primary)] tabular-nums">
                     {filteredProducts.length}
                 </span>{' '}
                 products
@@ -61,10 +62,10 @@ export const PricingPagination: React.FC = () => {
             <div className="flex items-center gap-6 flex-wrap sm:flex-nowrap">
                 {/* Page limit selector */}
                 <div className="flex items-center gap-2">
-                    <span className="text-xs text-stone-400 dark:text-stone-500 font-bold uppercase tracking-wider">Show</span>
+                    <span className="text-xs text-[var(--theme-text-secondary)] font-medium">Show</span>
                     <div className="relative">
                         <select
-                            className="woody-input py-1.5 pl-3 pr-8 text-xs font-semibold"
+                            className="h-8 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl px-2.5 pr-8 text-xs font-medium text-[var(--theme-text-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--theme-accent)] transition-colors cursor-pointer"
                             value={itemsPerPage}
                             onChange={(e) => {
                                 setItemsPerPage(parseInt(e.target.value));
@@ -74,7 +75,7 @@ export const PricingPagination: React.FC = () => {
                             aria-label="Items per page selection"
                         >
                             {ITEMS_PER_PAGE_OPTIONS.map(n => (
-                                <option key={n} value={n} className="bg-white dark:bg-[#1E2822]">
+                                <option key={n} value={n} className="bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)]">
                                     {n}
                                 </option>
                             ))}
@@ -88,42 +89,47 @@ export const PricingPagination: React.FC = () => {
                     <button
                         onClick={() => setCurrentPage(1)}
                         disabled={currentPage === 1}
-                        className={`px-2 py-1.5 rounded-lg text-xs font-semibold transition-all duration-300 ${
-                            currentPage === 1 ? 'text-stone-400 dark:text-stone-600 cursor-not-allowed' : 'text-[#2C4D35] dark:text-[#A9CBA2] hover:bg-[#2C5E3B]/10 dark:hover:bg-[#A9CBA2]/10'
+                        className={`h-8 w-8 flex items-center justify-center rounded-xl transition-colors ${
+                            currentPage === 1 ? 'text-[var(--theme-text-tertiary)] opacity-40 cursor-not-allowed' : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-card)] cursor-pointer'
                         }`}
                         title="First page"
+                        aria-label="First page"
                     >
-                        ««
+                        <ChevronsLeft size={14} />
                     </button>
 
                     {/* Previous */}
                     <button
                         onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
                         disabled={currentPage === 1}
-                        className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all duration-300 ${
-                            currentPage === 1 ? 'text-stone-400 dark:text-stone-600 cursor-not-allowed' : 'text-[#2C4D35] dark:text-[#A9CBA2] hover:bg-[#2C5E3B]/10 dark:hover:bg-[#A9CBA2]/10'
+                        className={`h-8 px-2.5 flex items-center gap-1 rounded-xl text-xs font-medium transition-colors ${
+                            currentPage === 1 ? 'text-[var(--theme-text-tertiary)] opacity-40 cursor-not-allowed' : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-card)] cursor-pointer'
                         }`}
+                        aria-label="Previous page"
                     >
-                        Prev
+                        <ChevronLeft size={14} />
+                        <span>Prev</span>
                     </button>
 
                     {/* Page Numbers */}
-                    <div className="flex items-center gap-1 mx-2">
+                    <div className="flex items-center gap-1 mx-1">
                         {getPageNumbers().map((page, idx) =>
                             typeof page === 'number' ? (
                                 <button
                                     key={idx}
                                     onClick={() => setCurrentPage(page)}
-                                    className={`w-8 h-8 rounded-lg text-xs font-bold transition-all duration-300 ${
+                                    className={`w-8 h-8 rounded-xl text-xs font-mono font-medium transition-all ${
                                         currentPage === page
-                                            ? 'bg-[#224429] dark:bg-[#EAE5D9] text-[#FAF8F5] dark:text-[#1E3B24] scale-105 shadow-sm'
-                                            : 'text-stone-500 dark:text-[#7A9E83] hover:bg-[#2C5E3B]/10 dark:hover:bg-[#A9CBA2]/10'
+                                            ? 'bg-[var(--theme-primary)] text-[var(--theme-primary-text)] font-semibold shadow-sm'
+                                            : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-card)] cursor-pointer'
                                     }`}
+                                    aria-label={`Page ${page}`}
+                                    aria-current={currentPage === page ? 'page' : undefined}
                                 >
                                     {page}
                                 </button>
                             ) : (
-                                <span key={idx} className="text-stone-400 dark:text-stone-600 px-1">
+                                <span key={idx} className="text-[var(--theme-text-tertiary)] px-1 font-mono text-xs">
                                     ...
                                 </span>
                             )
@@ -134,27 +140,30 @@ export const PricingPagination: React.FC = () => {
                     <button
                         onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
                         disabled={currentPage === totalPages}
-                        className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all duration-300 ${
+                        className={`h-8 px-2.5 flex items-center gap-1 rounded-xl text-xs font-medium transition-colors ${
                             currentPage === totalPages
-                                ? 'text-stone-400 dark:text-stone-600 cursor-not-allowed'
-                                : 'text-[#2C4D35] dark:text-[#A9CBA2] hover:bg-[#2C5E3B]/10 dark:hover:bg-[#A9CBA2]/10'
+                                ? 'text-[var(--theme-text-tertiary)] opacity-40 cursor-not-allowed'
+                                : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-card)] cursor-pointer'
                         }`}
+                        aria-label="Next page"
                     >
-                        Next
+                        <span>Next</span>
+                        <ChevronRight size={14} />
                     </button>
 
                     {/* Last Page */}
                     <button
                         onClick={() => setCurrentPage(totalPages)}
                         disabled={currentPage === totalPages}
-                        className={`px-2 py-1.5 rounded-lg text-xs font-semibold transition-all duration-300 ${
+                        className={`h-8 w-8 flex items-center justify-center rounded-xl transition-colors ${
                             currentPage === totalPages
-                                ? 'text-stone-400 dark:text-stone-600 cursor-not-allowed'
-                                : 'text-[#2C4D35] dark:text-[#A9CBA2] hover:bg-[#2C5E3B]/10 dark:hover:bg-[#A9CBA2]/10'
+                                ? 'text-[var(--theme-text-tertiary)] opacity-40 cursor-not-allowed'
+                                : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-card)] cursor-pointer'
                         }`}
                         title="Last page"
+                        aria-label="Last page"
                     >
-                        »»
+                        <ChevronsRight size={14} />
                     </button>
                 </div>
             </div>

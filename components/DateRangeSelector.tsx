@@ -42,32 +42,34 @@ export default function DateRangeSelector({
     return (
         <div className={`relative ${className}`} ref={containerRef}>
             <button
+                type="button"
                 onClick={() => setIsOpen(!isOpen)}
-                className="flex items-center gap-3 px-4 py-2 dark:bg-[#18201B]/70 bg-white border dark:border-emerald-950/20 border-[#E2DCCE] rounded-xl hover:border-[#2C5E3B]/50 dark:hover:border-[#A9CBA2]/50 transition-all cursor-pointer dark:hover:bg-[#18201B] hover:bg-slate-50 shadow-sm group h-[42px]"
+                className="flex items-center gap-2.5 px-3.5 py-2 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl hover:border-[#0071E3]/40 dark:hover:border-[#2997FF]/40 transition-all cursor-pointer shadow-xs group h-9"
             >
-                <Calendar size={16} className={`${isOpen ? 'text-[#8C6239] dark:text-[#E2C899]' : 'text-[#2C5E3B] dark:text-[#A9CBA2]'} transition-colors`} />
-                <span className="text-sm font-bold text-gray-900 dark:text-[#EAE5D9] tracking-tight">{value}</span>
+                <Calendar size={15} className={`${isOpen ? 'text-[#0071E3] dark:text-[#2997FF]' : 'text-[var(--theme-text-secondary)] group-hover:text-[var(--theme-text-primary)]'} transition-colors`} />
+                <span className="text-xs font-semibold text-[var(--theme-text-primary)] tracking-tight">{value}</span>
             </button>
 
             {isOpen && (
                 <div
-                    className={`absolute ${align === 'right' ? 'right-0' : 'left-0'} mt-2 w-56 dark:bg-[#18201B] bg-white backdrop-blur-2xl border dark:border-emerald-950/20 border-[#E2DCCE] rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.1)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.5)] overflow-hidden z-[100] animate-in fade-in slide-in-from-top-2 duration-200`}
+                    className={`absolute ${align === 'right' ? 'right-0' : 'left-0'} mt-1.5 w-52 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl shadow-xl overflow-hidden z-[100] animate-in fade-in slide-in-from-top-1 duration-150`}
                 >
-                    <div className="p-2 space-y-1 max-h-[400px] overflow-y-auto custom-scrollbar">
+                    <div className="p-1.5 space-y-0.5 max-h-[360px] overflow-y-auto custom-scrollbar">
                         {options.map((option) => (
                             <button
                                 key={option}
+                                type="button"
                                 onClick={() => {
                                     onChange(option);
                                     setIsOpen(false);
                                 }}
-                                className={`w-full flex items-center justify-between px-4 py-3 text-xs font-bold uppercase tracking-widest rounded-xl transition-all ${value === option
-                                    ? 'text-[#2C5E3B] dark:text-[#A9CBA2] bg-[#2C5E3B]/10 dark:bg-[#A9CBA2]/10 border border-[#2C5E3B]/20 dark:border-[#A9CBA2]/20'
-                                    : 'text-gray-500 dark:text-gray-400 hover:text-[#2C5E3B] dark:hover:text-[#A9CBA2] hover:bg-[#2C5E3B]/5 dark:hover:bg-[#A9CBA2]/5 border border-transparent'
+                                className={`w-full flex items-center justify-between px-3 py-2 text-xs font-medium rounded-xl transition-all cursor-pointer ${value === option
+                                    ? 'text-[#0071E3] dark:text-[#2997FF] bg-[#0071E3]/10 dark:bg-[#2997FF]/10 font-semibold'
+                                    : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-subtle)]'
                                     }`}
                             >
                                 <span>{option}</span>
-                                {value === option && <Check size={14} className="text-[#2C5E3B] dark:text-[#A9CBA2]" />}
+                                {value === option && <Check size={14} className="text-[#0071E3] dark:text-[#2997FF]" />}
                             </button>
                         ))}
                     </div>

@@ -11,6 +11,11 @@ import { CURRENCY_SYMBOL } from '../../constants';
 import { InventoryRequestDetailsModal } from './components/InventoryRequestDetailsModal';
 import { InventoryRejectionModal } from './components/InventoryRejectionModal';
 import { renderChangeDiff, DetailedComparison } from './components/InventoryChangeDiff';
+import {
+    isPriceChangeRequest,
+    requiresFinanceCoApproval,
+    canApproveBelowFloor
+} from '../../utils/pricingGovernance';
 
 interface InventoryPendingProps {
     pendingProducts: Product[];
@@ -54,6 +59,9 @@ export const InventoryPending: React.FC<InventoryPendingProps> = ({
     const canApproveThisChange = (change: PendingInventoryChange): boolean => {
         if (!canApprove) return false;
         const role = userRole?.toLowerCase() || '';
+        if (requiresFinanceCoApproval(change)) {
+            return canApproveBelowFloor(role);
+        }
         // Super admin, admin, warehouse_manager, procurement_manager, store_manager can approve changes
         if (['super_admin', 'admin', 'warehouse_manager', 'procurement_manager', 'store_manager', 'operations_manager', 'regional_manager'].includes(role)) return true;
         const requiredRole = change.approvalRole || (change as any).approval_role;
@@ -67,6 +75,7 @@ export const InventoryPending: React.FC<InventoryPendingProps> = ({
     };
 
     const getAwaitingLabel = (change: PendingInventoryChange): string => {
+        if (requiresFinanceCoApproval(change)) return 'Awaiting Finance Co-Approval (< 15% Margin)';
         const requiredRole = change.approvalRole || (change as any).approval_role;
         if (requiredRole === 'procurement_manager') return 'Awaiting Procurement Manager';
         if (requiredRole === 'warehouse_manager') return 'Awaiting Warehouse Manager';
@@ -79,38 +88,49 @@ export const InventoryPending: React.FC<InventoryPendingProps> = ({
         <div className="space-y-6 animate-in fade-in">
             {/* Pending Products Section */}
             <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl overflow-hidden shadow-xs">
-                <div className="p-6 border-b border-[var(--theme-border)] flex items-center justify-between">
-                    <div>
-                        <h3 className="font-bold text-amber-600 dark:text-amber-500 flex items-center gap-2">
-                            <Package size={18} /> New Products Awaiting Approval
-                        </h3>
-                        <p className="text-xs text-[var(--theme-text-secondary)] mt-1">{pendingProducts.length} products pending review</p>
+                <div className="px-5 py-4 border-b border-[var(--theme-border)] flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-lg bg-[#FF9F0A]/10 border border-[#FF9F0A]/20 flex items-center justify-center text-[#FF9F0A]">
+                            <Package size={16} />
+                        </div>
+                        <div>
+                            <h3 className="text-sm font-semibold text-[var(--theme-text-primary)] tracking-tight">New Products Awaiting Approval</h3>
+                            <p className="text-[12px] text-[var(--theme-text-secondary)]">Catalogue additions pending manager review</p>
+                        </div>
                     </div>
+                    <span className="text-[11px] font-mono tabular-nums px-2.5 py-1 rounded-full bg-[var(--theme-bg-hover)] text-[var(--theme-text-secondary)] border border-[var(--theme-border)]">
+                        {pendingProducts.length} pending
+                    </span>
                 </div>
 
                 {pendingProducts.length === 0 ? (
-                    <div className="p-12 text-center text-[var(--theme-text-muted)]">
-                        <CheckCircle size={48} className="mx-auto opacity-30 mb-4" />
-                        <p>No pending products awaiting approval.</p>
+                    <div className="p-12 text-center">
+                        <div className="w-12 h-12 rounded-xl bg-[#34C759]/10 border border-[#34C759]/20 flex items-center justify-center text-[#34C759] mx-auto mb-3">
+                            <CheckCircle size={22} />
+                        </div>
+                        <p className="text-[13px] font-semibold text-[var(--theme-text-primary)]">No products awaiting approval</p>
+                        <p className="text-[12px] text-[var(--theme-text-secondary)] mt-0.5">All new catalog submissions have been reviewed.</p>
                     </div>
                 ) : (
                     <div className="overflow-x-auto">
                         <table className="w-full text-left">
-                            <thead><tr className="bg-[var(--theme-bg-panel)] border-b border-[var(--theme-border)]">
-                                <th className="p-4 text-xs text-[var(--theme-text-secondary)] uppercase font-bold">Product</th>
-                                <th className="p-4 text-xs text-[var(--theme-text-secondary)] uppercase font-bold">SKU</th>
-                                <th className="p-4 text-xs text-[var(--theme-text-secondary)] uppercase font-bold">Category</th>
-                                <th className="p-4 text-xs text-[var(--theme-text-secondary)] uppercase font-bold text-right">Price</th>
-                                <th className="p-4 text-xs text-[var(--theme-text-secondary)] uppercase font-bold">Created By</th>
-                                <th className="p-4 text-xs text-[var(--theme-text-secondary)] uppercase font-bold">Created At</th>
-                                <th className="p-4 text-xs text-[var(--theme-text-secondary)] uppercase font-bold text-center">Actions</th>
-                            </tr></thead>
+                            <thead className="bg-[var(--theme-bg-hover)]/40 border-b border-[var(--theme-border)]">
+                                <tr>
+                                    <th className="px-4 py-3 text-[11px] text-[var(--theme-text-secondary)] uppercase font-semibold tracking-wider">Product</th>
+                                    <th className="px-4 py-3 text-[11px] text-[var(--theme-text-secondary)] uppercase font-semibold tracking-wider">SKU</th>
+                                    <th className="px-4 py-3 text-[11px] text-[var(--theme-text-secondary)] uppercase font-semibold tracking-wider">Category</th>
+                                    <th className="px-4 py-3 text-[11px] text-[var(--theme-text-secondary)] uppercase font-semibold tracking-wider text-right">Price</th>
+                                    <th className="px-4 py-3 text-[11px] text-[var(--theme-text-secondary)] uppercase font-semibold tracking-wider">Created By</th>
+                                    <th className="px-4 py-3 text-[11px] text-[var(--theme-text-secondary)] uppercase font-semibold tracking-wider">Created At</th>
+                                    <th className="px-4 py-3 text-[11px] text-[var(--theme-text-secondary)] uppercase font-semibold tracking-wider text-center">Actions</th>
+                                </tr>
+                            </thead>
                             <tbody className="divide-y divide-[var(--theme-border)]">
                                 {pendingProducts.map((prod) => (
-                                    <tr key={prod.id} className="hover:bg-[var(--theme-bg-panel-hover)]">
-                                        <td className="p-4">
+                                    <tr key={prod.id} className="hover:bg-[var(--theme-bg-hover)]/40 transition-colors">
+                                        <td className="px-4 py-3">
                                             <div className="flex items-center gap-3">
-                                                <div className="w-10 h-10 rounded-lg bg-[var(--theme-bg-panel)] border border-[var(--theme-border)] flex items-center justify-center flex-shrink-0 overflow-hidden">
+                                                <div className="w-9 h-9 rounded-lg bg-[var(--theme-bg-hover)] border border-[var(--theme-border)] flex items-center justify-center shrink-0 overflow-hidden">
                                                     {prod.image && !prod.image.includes('placeholder.com') ? (
                                                         <img
                                                             src={prod.image}
@@ -118,44 +138,45 @@ export const InventoryPending: React.FC<InventoryPendingProps> = ({
                                                             className="w-full h-full object-cover"
                                                             onError={(e) => {
                                                                 e.currentTarget.style.display = 'none';
-                                                                (e.currentTarget.parentElement as HTMLElement).innerHTML = '<div class="text-[var(--theme-text-muted)]"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-package"><path d="m7.5 4.27 9 5.15"/><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg></div>';
                                                             }}
                                                         />
                                                     ) : (
-                                                        <Package size={16} className="text-[var(--theme-text-muted)] animate-pulse" />
+                                                        <Package size={15} className="text-[var(--theme-text-secondary)]" />
                                                     )}
                                                 </div>
                                                 <div>
-                                                    <p className="font-semibold text-[var(--theme-text-primary)] text-sm">{prod.name}</p>
-                                                    <p className="text-[10px] text-[var(--theme-text-secondary)]">{prod.brand}</p>
+                                                    <p className="font-medium text-[var(--theme-text-primary)] text-[13px]">{prod.name}</p>
+                                                    <p className="text-[11px] text-[var(--theme-text-secondary)] font-medium">{prod.brand}</p>
                                                 </div>
                                             </div>
                                         </td>
-                                        <td className="p-4 font-mono text-xs text-[var(--theme-text-secondary)]">{prod.sku}</td>
-                                        <td className="p-4 text-xs text-[var(--theme-text-secondary)]">{prod.category}</td>
-                                        <td className="p-4 text-sm font-bold text-[var(--theme-text-primary)] text-right">{currencySymbol} {prod.price?.toLocaleString()}</td>
-                                        <td className="p-4 text-xs text-[var(--theme-text-primary)] flex items-center gap-1 font-bold">
-                                            <User size={12} className="text-[var(--theme-text-secondary)]" /> {prod.createdBy || prod.created_by || 'Unknown'}
+                                        <td className="px-4 py-3 font-mono tabular-nums text-[12px] text-[var(--theme-text-secondary)]">{prod.sku}</td>
+                                        <td className="px-4 py-3 text-[12px] text-[var(--theme-text-secondary)]">{prod.category}</td>
+                                        <td className="px-4 py-3 text-[13px] font-mono tabular-nums font-semibold text-[var(--theme-text-primary)] text-right">{currencySymbol} {prod.price?.toLocaleString()}</td>
+                                        <td className="px-4 py-3 text-[12px] text-[var(--theme-text-secondary)] font-medium">
+                                            <div className="flex items-center gap-1.5">
+                                                <User size={13} className="text-[var(--theme-text-secondary)]" />
+                                                <span>{prod.createdBy || prod.created_by || 'Unknown'}</span>
+                                            </div>
                                         </td>
-                                        <td className="p-4 text-xs text-[var(--theme-text-secondary)]">
-                                            {prod.createdAt || prod.created_at ? formatDateTime(prod.createdAt || prod.created_at || '') : '-'}
+                                        <td className="px-4 py-3 text-[12px] tabular-nums text-[var(--theme-text-secondary)]">
+                                            {prod.createdAt || prod.created_at ? formatDateTime(prod.createdAt || prod.created_at || '') : '—'}
                                         </td>
-                                        <td className="p-4">
-                                            <div className="flex items-center justify-center gap-2">
+                                        <td className="px-4 py-3">
+                                            <div className="flex items-center justify-center gap-1.5">
                                                 {canApprove ? (
                                                     <>
-                                                        <Button
+                                                        <button
+                                                            type="button"
                                                             onClick={() => onApproveProduct(prod)}
                                                             disabled={isSubmitting}
-                                                            loading={isSubmitting}
-                                                            variant="success"
-                                                            size="sm"
-                                                            icon={<CheckCircle size={14} />}
-                                                            className="px-3 py-1.5 font-bold"
+                                                            className="h-7 px-2.5 rounded-lg text-[11px] font-semibold bg-[#34C759] text-white hover:opacity-95 shadow-xs transition-all active:scale-[0.98] flex items-center gap-1 cursor-pointer disabled:opacity-50"
                                                         >
-                                                            Approve
-                                                        </Button>
-                                                        <Button
+                                                            <CheckCircle size={12} />
+                                                            <span>Approve</span>
+                                                        </button>
+                                                        <button
+                                                            type="button"
                                                             onClick={() => {
                                                                 const pseudoRequest: PendingInventoryChange = {
                                                                     id: 'view-only',
@@ -172,27 +193,24 @@ export const InventoryPending: React.FC<InventoryPendingProps> = ({
                                                                 setRequestForDetails(pseudoRequest);
                                                                 setIsRequestDetailsModalOpen(true);
                                                             }}
-                                                            variant="ghost"
-                                                            size="sm"
-                                                            icon={<Search size={14} />}
-                                                            className="px-3 py-1.5 bg-[var(--theme-bg-panel)] text-[var(--theme-text-primary)] border border-[var(--theme-border)] font-bold hover:bg-[var(--theme-bg-panel-hover)]"
+                                                            className="h-7 px-2.5 rounded-lg text-[11px] font-semibold bg-[var(--theme-bg-card)] hover:bg-[var(--theme-bg-hover)] text-[var(--theme-text-primary)] border border-[var(--theme-border)] shadow-xs transition-all active:scale-[0.98] flex items-center gap-1 cursor-pointer"
                                                         >
-                                                            Details
-                                                        </Button>
-                                                        <Button
+                                                            <Search size={12} />
+                                                            <span>Details</span>
+                                                        </button>
+                                                        <button
+                                                            type="button"
                                                             onClick={() => { setSelectedPendingProduct(prod); setIsApprovalModalOpen(true); }}
-                                                            variant="danger"
-                                                            size="sm"
-                                                            icon={<XCircle size={14} />}
-                                                            className="px-3 py-1.5 font-bold"
+                                                            className="h-7 px-2.5 rounded-lg text-[11px] font-semibold bg-[#FF3B30]/10 hover:bg-[#FF3B30]/15 text-[#FF3B30] border border-[#FF3B30]/20 shadow-xs transition-all active:scale-[0.98] flex items-center gap-1 cursor-pointer"
                                                         >
-                                                            Reject
-                                                        </Button>
+                                                            <XCircle size={12} />
+                                                            <span>Reject</span>
+                                                        </button>
                                                     </>
                                                 ) : (
                                                     <div className="flex items-center justify-center">
-                                                        <span className="text-xs text-amber-600 dark:text-amber-500/80 italic border border-amber-500/20 px-3 py-1 bg-amber-500/10 rounded-lg flex items-center gap-1">
-                                                            <Clock size={12} /> Awaiting CEO
+                                                        <span className="text-[11px] text-[#FF9F0A] border border-[#FF9F0A]/20 px-2.5 py-1 bg-[#FF9F0A]/10 rounded-full flex items-center gap-1 font-semibold">
+                                                            <Clock size={11} /> Awaiting Approval
                                                         </span>
                                                     </div>
                                                 )}
@@ -208,125 +226,161 @@ export const InventoryPending: React.FC<InventoryPendingProps> = ({
 
             {/* Pending Changes Section */}
             <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl overflow-hidden shadow-xs">
-                <div className="p-6 border-b border-[var(--theme-border)] flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                    <div>
-                        <h3 className="font-bold text-orange-600 dark:text-orange-500 flex items-center gap-2">
-                            <Edit size={18} /> Change Requests Awaiting Approval
-                        </h3>
-                        <p className="text-xs text-[var(--theme-text-secondary)] mt-1">{pendingChanges.length} change requests pending review</p>
+                <div className="px-5 py-4 border-b border-[var(--theme-border)] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-lg bg-[var(--theme-accent)]/10 border border-[var(--theme-accent)]/20 flex items-center justify-center text-[var(--theme-accent)]">
+                            <Edit size={16} />
+                        </div>
+                        <div>
+                            <h3 className="text-sm font-semibold text-[var(--theme-text-primary)] tracking-tight">Change Requests Awaiting Approval</h3>
+                            <p className="text-[12px] text-[var(--theme-text-secondary)]">Field edits, stock adjustments, and deletion proposals</p>
+                        </div>
                     </div>
-                    {canApprove && pendingChanges.length > 0 && (
-                        <Button
-                            onClick={onBulkCleanup}
-                            variant="danger"
-                            size="sm"
-                            icon={<Trash2 size={14} />}
-                            className="px-4 py-2 bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20 font-bold active:scale-[0.98]"
-                        >
-                            Clear Ghost Requests
-                        </Button>
-                    )}
+                    <div className="flex items-center gap-2">
+                        <span className="text-[11px] font-mono tabular-nums px-2.5 py-1 rounded-full bg-[var(--theme-bg-hover)] text-[var(--theme-text-secondary)] border border-[var(--theme-border)]">
+                            {pendingChanges.length} pending
+                        </span>
+                        {canApprove && pendingChanges.length > 0 && (
+                            <button
+                                type="button"
+                                onClick={onBulkCleanup}
+                                className="h-8 px-3 rounded-lg text-[12px] font-semibold bg-[#FF3B30]/10 text-[#FF3B30] hover:bg-[#FF3B30]/15 border border-[#FF3B30]/20 shadow-xs active:scale-[0.98] transition-all flex items-center gap-1.5 cursor-pointer"
+                            >
+                                <Trash2 size={13} />
+                                <span>Clear Ghost Requests</span>
+                            </button>
+                        )}
+                    </div>
                 </div>
                 {pendingChanges.length === 0 ? (
-                    <div className="p-12 text-center text-[var(--theme-text-muted)]">
-                        <CheckCircle size={48} className="mx-auto opacity-30 mb-4" />
-                        <p>No pending change requests.</p>
+                    <div className="p-12 text-center">
+                        <div className="w-12 h-12 rounded-xl bg-[#34C759]/10 border border-[#34C759]/20 flex items-center justify-center text-[#34C759] mx-auto mb-3">
+                            <CheckCircle size={22} />
+                        </div>
+                        <p className="text-[13px] font-semibold text-[var(--theme-text-primary)]">No pending change requests</p>
+                        <p className="text-[12px] text-[var(--theme-text-secondary)] mt-0.5">All operational change proposals have been reviewed.</p>
                     </div>
                 ) : (
                     <div className="overflow-x-auto">
                         <table className="w-full text-left">
-                            <thead><tr className="bg-[var(--theme-bg-panel)] border-b border-[var(--theme-border)]">
-                                <th className="p-4 text-xs text-[var(--theme-text-secondary)] uppercase font-bold">Request Type</th>
-                                <th className="p-4 text-xs text-[var(--theme-text-secondary)] uppercase font-bold">Product</th>
-                                <th className="p-4 text-xs text-[var(--theme-text-secondary)] uppercase font-bold">SKU</th>
-                                <th className="p-4 text-xs text-[var(--theme-text-secondary)] uppercase font-bold">Details</th>
-                                <th className="p-4 text-xs text-[var(--theme-text-secondary)] uppercase font-bold">Requested By</th>
-                                <th className="p-4 text-xs text-[var(--theme-text-secondary)] uppercase font-bold">Requested At</th>
-                                <th className="p-4 text-xs text-[var(--theme-text-secondary)] uppercase font-bold text-center">Actions</th>
-                            </tr></thead>
+                            <thead className="bg-[var(--theme-bg-hover)]/40 border-b border-[var(--theme-border)]">
+                                <tr>
+                                    <th className="px-4 py-3 text-[11px] text-[var(--theme-text-secondary)] uppercase font-semibold tracking-wider">Request Type</th>
+                                    <th className="px-4 py-3 text-[11px] text-[var(--theme-text-secondary)] uppercase font-semibold tracking-wider">Product</th>
+                                    <th className="px-4 py-3 text-[11px] text-[var(--theme-text-secondary)] uppercase font-semibold tracking-wider">SKU</th>
+                                    <th className="px-4 py-3 text-[11px] text-[var(--theme-text-secondary)] uppercase font-semibold tracking-wider">Details</th>
+                                    <th className="px-4 py-3 text-[11px] text-[var(--theme-text-secondary)] uppercase font-semibold tracking-wider">Requested By</th>
+                                    <th className="px-4 py-3 text-[11px] text-[var(--theme-text-secondary)] uppercase font-semibold tracking-wider">Requested At</th>
+                                    <th className="px-4 py-3 text-[11px] text-[var(--theme-text-secondary)] uppercase font-semibold tracking-wider text-center">Actions</th>
+                                </tr>
+                            </thead>
                             <tbody className="divide-y divide-[var(--theme-border)]">
                                 {pendingChanges.map((change) => (
-                                    <tr key={change.id} className="hover:bg-[var(--theme-bg-panel-hover)]">
-                                        <td className="p-4">
-                                            <span className={`text-[10px] font-bold px-2 py-1 rounded uppercase border ${change.changeType === 'edit' ? 'text-blue-500 border-blue-500/20 bg-blue-500/10' :
-                                                change.changeType === 'delete' ? 'text-rose-500 border-rose-500/20 bg-rose-500/10' :
-                                                    'text-amber-600 dark:text-amber-400 border-amber-500/20 bg-amber-500/10'
+                                    <tr key={change.id} className="hover:bg-[var(--theme-bg-hover)]/40 transition-colors">
+                                        <td className="px-4 py-3">
+                                            {isPriceChangeRequest(change) ? (
+                                                <div className="flex flex-col gap-1">
+                                                    <span className="text-[11px] font-semibold px-2.5 py-0.5 rounded-full border text-[var(--theme-accent)] border-[var(--theme-accent)]/20 bg-[var(--theme-accent)]/10 inline-block w-fit">
+                                                        Price Change
+                                                    </span>
+                                                    {requiresFinanceCoApproval(change) && (
+                                                        <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full border text-[#FF3B30] border-[#FF3B30]/20 bg-[#FF3B30]/10 inline-block w-fit">
+                                                            &lt; 15% Margin
+                                                        </span>
+                                                    )}
+                                                </div>
+                                            ) : (
+                                                <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold border ${
+                                                    change.changeType === 'edit'
+                                                        ? 'text-[var(--theme-accent)] border-[var(--theme-accent)]/20 bg-[var(--theme-accent)]/10'
+                                                        : change.changeType === 'delete'
+                                                        ? 'text-[#FF3B30] border-[#FF3B30]/20 bg-[#FF3B30]/10'
+                                                        : 'text-[#FF9F0A] border-[#FF9F0A]/20 bg-[#FF9F0A]/10'
                                                 }`}>
-                                                {change.changeType === 'stock_adjustment' ? 'Stock Adj.' : change.changeType}
-                                            </span>
+                                                    {change.changeType === 'stock_adjustment' ? 'Stock Adj.' : change.changeType}
+                                                </span>
+                                            )}
                                         </td>
-                                        <td className="p-4 font-semibold text-[var(--theme-text-primary)] text-sm">{change.productName}</td>
-                                        <td className="p-4 font-mono text-xs text-[var(--theme-text-secondary)]">{change.productSku}</td>
-                                        <td className="p-4 text-xs text-[var(--theme-text-secondary)]">
+                                        <td className="px-4 py-3 font-medium text-[var(--theme-text-primary)] text-[13px]">{change.productName}</td>
+                                        <td className="px-4 py-3 font-mono tabular-nums text-[12px] text-[var(--theme-text-secondary)]">{change.productSku}</td>
+                                        <td className="px-4 py-3 text-[12px] text-[var(--theme-text-secondary)]">
                                             {change.changeType === 'delete' && (
-                                                <span className="flex items-center gap-2 text-rose-500 font-medium">
-                                                    <Trash2 size={12} /> Permanently delete this product
+                                                <span className="flex items-center gap-1.5 text-[#FF3B30] font-semibold text-[12px]">
+                                                    <Trash2 size={12} /> Permanently delete product
                                                 </span>
                                             )}
                                             {change.changeType === 'edit' && (
                                                 <div className="space-y-1">
-                                                    <span className="text-blue-500 font-medium flex items-center gap-1">
-                                                        <Edit size={12} /> Field Updates Requested:
-                                                    </span>
+                                                    <div className="flex items-center gap-2 flex-wrap">
+                                                        <span className="text-[var(--theme-accent)] font-semibold text-[11px] flex items-center gap-1">
+                                                            <Edit size={11} /> Field Updates Requested:
+                                                        </span>
+                                                        {requiresFinanceCoApproval(change) && (
+                                                            <span className="text-[11px] font-semibold text-[#FF3B30] bg-[#FF3B30]/10 border border-[#FF3B30]/20 px-2 py-0.5 rounded-full">
+                                                                Finance Co-Approval Required
+                                                            </span>
+                                                        )}
+                                                    </div>
                                                     {renderChangeDiff(change, allProducts)}
                                                 </div>
                                             )}
                                             {change.changeType === 'stock_adjustment' && (
                                                 <div className="space-y-1">
-                                                    <span className="text-amber-600 dark:text-amber-400 font-medium flex items-center gap-1">
-                                                        <RefreshCw size={12} /> Stock Adjustment:
+                                                    <span className="text-[#FF9F0A] font-semibold text-[11px] flex items-center gap-1">
+                                                        <RefreshCw size={11} /> Stock Adjustment:
                                                     </span>
-                                                    <span className={change.adjustmentType === 'IN' ? 'text-emerald-500 font-bold' : 'text-rose-500 font-bold'}>
+                                                    <span className={`font-mono tabular-nums font-semibold text-[12px] ${change.adjustmentType === 'IN' ? 'text-[#34C759]' : 'text-[#FF3B30]'}`}>
                                                         {change.adjustmentType === 'IN' ? '+' : '-'}{change.adjustmentQty} units
                                                     </span>
-                                                    <p className="text-[10px] text-[var(--theme-text-secondary)] italic mt-0.5">Reason: {change.adjustmentReason}</p>
+                                                    <p className="text-[11px] text-[var(--theme-text-secondary)] mt-0.5">Reason: {change.adjustmentReason}</p>
                                                 </div>
                                             )}
                                         </td>
-                                        <td className="p-4 text-xs text-[var(--theme-text-primary)] flex items-center gap-1 font-bold">
-                                            <User size={12} className="text-[var(--theme-text-secondary)]" /> {change.requestedBy}
+                                        <td className="px-4 py-3 text-[12px] text-[var(--theme-text-secondary)] font-medium">
+                                            <div className="flex items-center gap-1.5">
+                                                <User size={13} className="text-[var(--theme-text-secondary)]" />
+                                                <span>{change.requestedBy}</span>
+                                            </div>
                                         </td>
-                                        <td className="p-4 text-xs text-[var(--theme-text-secondary)]">
+                                        <td className="px-4 py-3 text-[12px] tabular-nums text-[var(--theme-text-secondary)]">
                                             {formatDateTime(change.requestedAt || (change as any).requested_at || '', { showTime: true })}
                                         </td>
-                                        <td className="p-4 text-center">
+                                        <td className="px-4 py-3 text-center">
                                             {canApproveThisChange(change) ? (
-                                                <div className="flex items-center justify-center gap-2">
-                                                    <Button
+                                                <div className="flex items-center justify-center gap-1.5">
+                                                    <button
+                                                        type="button"
                                                         onClick={() => onApproveChange(change)}
                                                         disabled={isSubmitting}
-                                                        loading={isSubmitting}
-                                                        variant="success"
-                                                        size="sm"
-                                                        icon={<CheckCircle size={14} />}
-                                                        className="px-3 py-1.5 font-bold"
+                                                        className="h-7 px-2.5 rounded-lg text-[11px] font-semibold bg-[#34C759] text-white hover:opacity-95 shadow-xs transition-all active:scale-[0.98] flex items-center gap-1 cursor-pointer disabled:opacity-50"
                                                     >
-                                                        Approve
-                                                    </Button>
-                                                    <Button
+                                                        <CheckCircle size={12} />
+                                                        <span>Approve</span>
+                                                    </button>
+                                                    <button
+                                                        type="button"
                                                         onClick={() => {
                                                             setRequestForDetails(change);
                                                             setIsRequestDetailsModalOpen(true);
                                                         }}
-                                                        variant="ghost"
-                                                        size="sm"
-                                                        icon={<Search size={14} />}
-                                                        className="px-3 py-1.5 bg-[var(--theme-bg-panel)] text-[var(--theme-text-primary)] border border-[var(--theme-border)] font-bold hover:bg-[var(--theme-bg-panel-hover)]"
+                                                        className="h-7 px-2.5 rounded-lg text-[11px] font-semibold bg-[var(--theme-bg-card)] hover:bg-[var(--theme-bg-hover)] text-[var(--theme-text-primary)] border border-[var(--theme-border)] shadow-xs transition-all active:scale-[0.98] flex items-center gap-1 cursor-pointer"
                                                     >
-                                                        Details
-                                                    </Button>
-                                                    <Button
+                                                        <Search size={12} />
+                                                        <span>Details</span>
+                                                    </button>
+                                                    <button
+                                                        type="button"
                                                         onClick={() => { setSelectedPendingChange(change); setIsApprovalModalOpen(true); }}
-                                                        variant="danger"
-                                                        size="sm"
-                                                        icon={<XCircle size={14} />}
-                                                        className="px-3 py-1.5 font-bold"
+                                                        className="h-7 px-2.5 rounded-lg text-[11px] font-semibold bg-[#FF3B30]/10 hover:bg-[#FF3B30]/15 text-[#FF3B30] border border-[#FF3B30]/20 shadow-xs transition-all active:scale-[0.98] flex items-center gap-1 cursor-pointer"
                                                     >
-                                                        Reject
-                                                    </Button>
+                                                        <XCircle size={12} />
+                                                        <span>Reject</span>
+                                                    </button>
                                                 </div>
                                             ) : (
-                                                <span className="text-xs text-amber-500/50 italic">{getAwaitingLabel(change)}</span>
+                                                <span className="text-[11px] text-[#FF9F0A] border border-[#FF9F0A]/20 px-2.5 py-1 bg-[#FF9F0A]/10 rounded-full inline-flex items-center gap-1 font-semibold">
+                                                    <Clock size={11} /> {getAwaitingLabel(change)}
+                                                </span>
                                             )}
                                         </td>
                                     </tr>

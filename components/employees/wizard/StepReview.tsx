@@ -57,7 +57,7 @@ export default function StepReview({
                     <div className="space-y-2 text-xs">
                         <div className="flex justify-between">
                             <span className="text-stone-500">Assigned Role:</span>
-                            <span className="text-[#2C5E3B] dark:text-[#A9CBA2] font-bold uppercase">{newEmpData.role.replace('_', ' ')}</span>
+                            <span className="text-[#2C5E3B] dark:text-[#A9CBA2] font-bold uppercase">{String(newEmpData.role || 'Staff').replace(/_/g, ' ')}</span>
                         </div>
                         <div className="flex justify-between">
                             <span className="text-stone-500">Department:</span>
@@ -154,7 +154,7 @@ export default function StepReview({
                             {newEmpData.firstName} {newEmpData.lastName}
                         </h4>
                         <p className="text-xs text-stone-500 dark:text-stone-400 font-medium">
-                            {newEmpData.role.replace('_', ' ')} • {assignedSite?.name || 'HQ'}
+                            {String(newEmpData.role || 'Staff').replace(/_/g, ' ')} • {assignedSite?.name || 'HQ'}
                         </p>
                     </div>
                 </div>

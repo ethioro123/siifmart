@@ -52,21 +52,21 @@ export const CentralOperationsHeader: React.FC<CentralOperationsHeaderProps> = (
             <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4">
                 {/* Brand & National Identity */}
                 <div className="flex flex-wrap items-center gap-3">
-                    <div className="p-2.5 bg-[var(--theme-bg-subtle)] rounded-2xl border border-[var(--theme-border)] text-[var(--theme-text-primary)]">
-                        <Activity size={22} />
+                    <div className="p-2.5 bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] rounded-xl border border-[var(--theme-accent)]/20">
+                        <Activity size={20} />
                     </div>
                     <div>
                         <div className="flex items-center gap-2">
-                            <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-[var(--theme-text-primary)]">
+                            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-[var(--theme-text-primary)]">
                                 CENTRAL<span className="text-[var(--theme-text-secondary)]">OPS</span>
                             </h1>
-                            <span className="text-xs px-2.5 py-0.5 rounded-full font-bold uppercase tracking-wider bg-[var(--theme-bg-subtle)] text-[var(--theme-text-primary)] border border-[var(--theme-border)]">
-                                {activeCountry === 'KE' ? '🇰🇪 Kenya Hub' : '🇪🇹 Ethiopia HQ'}
+                            <span className="text-xs px-2.5 py-0.5 rounded-full font-semibold uppercase tracking-wider bg-[var(--theme-bg-subtle)] text-[var(--theme-text-primary)] border border-[var(--theme-border)]">
+                                {activeCountry === 'KE' ? 'KE · Kenya Hub' : 'ET · Ethiopia HQ'}
                             </span>
                         </div>
                         <p className="text-xs text-[var(--theme-text-secondary)] font-medium flex items-center gap-2 mt-0.5">
-                            <span className="w-2 h-2 rounded-full bg-[var(--theme-text-secondary)] animate-pulse" />
-                            <span className="font-mono font-semibold tracking-wider text-[11px] text-[var(--theme-text-muted)]">LIVE NETWORK TELEMETRY</span>
+                            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse ring-2 ring-emerald-500/20" />
+                            <span className="font-mono font-semibold tracking-wider text-[11px] text-emerald-600 dark:text-emerald-400">LIVE NETWORK TELEMETRY</span>
                             <span className="text-[var(--theme-border)]">•</span>
                             <span className="text-[var(--theme-text-primary)] font-semibold">{filteredSitesCount} of {totalSitesCount} Facilities Active</span>
                         </p>
@@ -99,9 +99,9 @@ export const CentralOperationsHeader: React.FC<CentralOperationsHeaderProps> = (
                             <button
                                 key={tab.id}
                                 onClick={() => onViewModeChange(tab.id)}
-                                className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all duration-200 cursor-pointer ${
+                                className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-all duration-200 active:scale-[0.98] cursor-pointer ${
                                     isActive
-                                        ? 'bg-[var(--theme-primary)] text-[var(--theme-primary-text)] font-black shadow-xs'
+                                        ? 'bg-[var(--theme-accent)] text-white font-bold shadow-xs'
                                         : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-subtle)]'
                                 }`}
                             >
@@ -116,10 +116,10 @@ export const CentralOperationsHeader: React.FC<CentralOperationsHeaderProps> = (
                 <div className="flex items-center gap-1 bg-[var(--theme-bg-subtle)] p-1 rounded-xl self-end lg:self-center shrink-0 border border-[var(--theme-border)]">
                     <button
                         onClick={() => onFacilityScopeChange('all')}
-                        className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs transition-all cursor-pointer ${
+                        className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs transition-all active:scale-[0.98] cursor-pointer ${
                             facilityScope === 'all'
-                                ? 'bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)] shadow-xs font-bold border border-[var(--theme-border)]'
-                                : 'text-[var(--theme-text-muted)] hover:text-[var(--theme-text-primary)]'
+                                ? 'bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)] shadow-xs font-semibold border border-[var(--theme-border)]'
+                                : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)]'
                         }`}
                         title="Show all network facilities"
                     >
@@ -128,10 +128,10 @@ export const CentralOperationsHeader: React.FC<CentralOperationsHeaderProps> = (
                     </button>
                     <button
                         onClick={() => onFacilityScopeChange('store')}
-                        className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs transition-all cursor-pointer ${
+                        className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs transition-all active:scale-[0.98] cursor-pointer ${
                             facilityScope === 'store'
-                                ? 'bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)] shadow-xs font-bold border border-[var(--theme-border)]'
-                                : 'text-[var(--theme-text-muted)] hover:text-[var(--theme-text-primary)]'
+                                ? 'bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)] shadow-xs font-semibold border border-[var(--theme-border)]'
+                                : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)]'
                         }`}
                         title="Filter retail stores only"
                     >
@@ -140,10 +140,10 @@ export const CentralOperationsHeader: React.FC<CentralOperationsHeaderProps> = (
                     </button>
                     <button
                         onClick={() => onFacilityScopeChange('warehouse')}
-                        className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs transition-all cursor-pointer ${
+                        className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs transition-all active:scale-[0.98] cursor-pointer ${
                             facilityScope === 'warehouse'
-                                ? 'bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)] shadow-xs font-bold border border-[var(--theme-border)]'
-                                : 'text-[var(--theme-text-muted)] hover:text-[var(--theme-text-primary)]'
+                                ? 'bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)] shadow-xs font-semibold border border-[var(--theme-border)]'
+                                : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)]'
                         }`}
                         title="Filter warehouses and distribution hubs only"
                     >

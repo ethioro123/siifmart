@@ -158,16 +158,16 @@ export const InventoryToolbar: React.FC<InventoryToolbarProps> = ({
     return (
         <div className="space-y-0">
             {/* Main Toolbar */}
-            <div className="p-6 border-b border-[var(--theme-border)] space-y-4 bg-[var(--theme-bg-subtle)]">
+            <div className="p-4 sm:p-5 border-b border-[var(--theme-border)] space-y-4 bg-[var(--theme-bg-subtle)]">
                 {/* Top Search & Records Count Row */}
                 <div className="flex items-center gap-3">
-                    <div className="flex items-center bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl px-5 py-2.5 flex-1 focus-within:border-[var(--theme-border-focus)] focus-within:ring-2 focus-within:ring-[var(--theme-border-focus)]/20 transition-all shadow-inner group">
-                        <Search className="w-5 h-5 text-[var(--theme-text-muted)] group-focus-within:text-[var(--theme-text-primary)] transition-colors shrink-0" />
+                    <div className="h-10 flex items-center bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl px-3.5 flex-1 focus-within:border-[var(--theme-accent)] focus-within:ring-2 focus-within:ring-[var(--theme-accent)]/20 transition-all shadow-xs group">
+                        <Search className="w-4 h-4 text-[var(--theme-text-muted)] group-focus-within:text-[var(--theme-accent)] transition-colors shrink-0" />
                         <input
                             type="text"
                             aria-label="Search products"
                             placeholder="Search SKU, Name, Brand, Location, Barcode..."
-                            className="bg-transparent border-none ml-3 flex-1 text-[var(--theme-text-primary)] outline-none placeholder:text-[var(--theme-text-muted)] font-medium text-sm"
+                            className="bg-transparent border-none ml-2.5 flex-1 text-[var(--theme-text-primary)] outline-none placeholder:text-[var(--theme-text-muted)] font-medium text-[13px]"
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
                         />
@@ -182,7 +182,7 @@ export const InventoryToolbar: React.FC<InventoryToolbarProps> = ({
                         )}
                     </div>
 
-                    <div className="text-[11px] text-[var(--theme-text-secondary)] font-bold uppercase tracking-wider bg-[var(--theme-bg-card)] px-3.5 py-3 rounded-2xl border border-[var(--theme-border)] whitespace-nowrap">
+                    <div className="h-10 flex items-center text-[11px] text-[var(--theme-text-secondary)] font-semibold uppercase tracking-wider bg-[var(--theme-bg-card)] px-3.5 rounded-xl border border-[var(--theme-border)] whitespace-nowrap tabular-nums">
                         {products.length} Records
                     </div>
                 </div>
@@ -196,9 +196,9 @@ export const InventoryToolbar: React.FC<InventoryToolbarProps> = ({
                                 key={preset.id}
                                 type="button"
                                 onClick={preset.onClick}
-                                className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all duration-150 cursor-pointer flex items-center gap-1.5 whitespace-nowrap active:scale-[0.98] ${
+                                className={`px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all duration-150 cursor-pointer flex items-center gap-1.5 whitespace-nowrap active:scale-[0.98] ${
                                     preset.isActive
-                                        ? 'bg-[var(--theme-primary)] text-[var(--theme-primary-text)] shadow-sm font-bold'
+                                        ? 'bg-[var(--theme-accent)] text-white shadow-xs'
                                         : 'bg-[var(--theme-bg-card)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] border border-[var(--theme-border)] hover:bg-[var(--theme-bg-card-hover)]'
                                 }`}
                             >
@@ -213,27 +213,27 @@ export const InventoryToolbar: React.FC<InventoryToolbarProps> = ({
                         {(!activeSite || isReadOnly) && (
                             <div className="relative group">
                                 <div className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none">
-                                    <Map size={12} className="text-blue-400 opacity-70 group-hover:opacity-100 transition-opacity" />
+                                    <Map size={14} className="text-[var(--theme-accent)] opacity-70 group-hover:opacity-100 transition-opacity" />
                                 </div>
                                 <select
                                     value={filters.siteId || 'All'}
                                     aria-label="Filter by Site"
                                     onChange={(e) => setFilters((prev: any) => ({ ...prev, siteId: e.target.value }))}
-                                    className="appearance-none bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl pl-8 pr-8 py-2 text-xs font-bold text-gray-700 dark:text-gray-300 outline-none cursor-pointer hover:bg-gray-50 dark:hover:bg-white/10 hover:border-blue-500/30 transition-all max-w-[150px]"
+                                    className="appearance-none bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl pl-8 pr-8 py-2 text-xs font-semibold text-[var(--theme-text-primary)] outline-none cursor-pointer hover:bg-[var(--theme-bg-card-hover)] transition-all max-w-[150px]"
                                 >
                                     <option value="All">All Sites</option>
                                     {sites.filter(s => s.type !== 'Store' && s.type !== 'Administration' && s.type !== 'Administrative').map(s => (
                                         <option key={s.id} value={s.id}>{s.name}</option>
                                     ))}
                                 </select>
-                                <ChevronDown size={13} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+                                <ChevronDown size={14} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[var(--theme-text-muted)] pointer-events-none" />
                             </div>
                         )}
 
                         {/* Category Dropdown */}
                         <div className="relative group">
                             <div className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none">
-                                <Package size={12} className="text-emerald-500 opacity-70 group-hover:opacity-100 transition-opacity" />
+                                <Package size={14} className="text-[#34C759] opacity-70 group-hover:opacity-100 transition-opacity" />
                             </div>
                             <select
                                 value={filters.category || 'All'}
@@ -246,13 +246,13 @@ export const InventoryToolbar: React.FC<InventoryToolbarProps> = ({
                                     <option key={cat} value={cat}>{cat}</option>
                                 ))}
                             </select>
-                            <ChevronDown size={13} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[var(--theme-text-muted)] pointer-events-none" />
+                            <ChevronDown size={14} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[var(--theme-text-muted)] pointer-events-none" />
                         </div>
 
                         {/* Sort Selector Dropdown */}
                         <div className="relative group">
                             <div className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none">
-                                <ArrowUpDown size={12} className="text-amber-500 opacity-70 group-hover:opacity-100 transition-opacity" />
+                                <ArrowUpDown size={14} className="text-[#FF9F0A] opacity-70 group-hover:opacity-100 transition-opacity" />
                             </div>
                             <select
                                 value={currentSortValue}
@@ -267,23 +267,23 @@ export const InventoryToolbar: React.FC<InventoryToolbarProps> = ({
                                     <option key={opt.value} value={opt.value}>{opt.label}</option>
                                 ))}
                             </select>
-                            <ChevronDown size={13} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[var(--theme-text-muted)] pointer-events-none" />
+                            <ChevronDown size={14} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[var(--theme-text-muted)] pointer-events-none" />
                         </div>
 
                         {/* Advanced Filters Button Toggle */}
                         <button
                             type="button"
                             onClick={() => setIsAdvancedOpen(!isAdvancedOpen)}
-                            className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all duration-150 border cursor-pointer active:scale-[0.98] ${
+                            className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold uppercase tracking-wider transition-all duration-150 border cursor-pointer active:scale-[0.98] ${
                                 isAdvancedOpen || activeFiltersCount > 0
-                                    ? 'bg-[var(--theme-primary)] text-[var(--theme-primary-text)] border-[var(--theme-primary)] shadow-sm'
+                                    ? 'bg-[var(--theme-accent)] text-white border-[var(--theme-accent)] shadow-xs'
                                     : 'bg-[var(--theme-bg-card)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] border-[var(--theme-border)] hover:bg-[var(--theme-bg-card-hover)]'
                             }`}
                         >
-                            <SlidersHorizontal size={13} />
+                            <SlidersHorizontal size={14} />
                             <span>Filters</span>
                             {activeFiltersCount > 0 && (
-                                <span className="w-4 h-4 rounded-full bg-[var(--theme-bg-app)] text-[var(--theme-text-primary)] flex items-center justify-center text-[9px] font-bold">
+                                <span className={`w-4 h-4 rounded-full flex items-center justify-center text-[11px] font-bold ${isAdvancedOpen || activeFiltersCount > 0 ? 'bg-white/20 text-white' : 'bg-[var(--theme-accent)] text-white'}`}>
                                     {activeFiltersCount}
                                 </span>
                             )}
@@ -293,61 +293,61 @@ export const InventoryToolbar: React.FC<InventoryToolbarProps> = ({
 
                 {/* Active Filter Badges Bar */}
                 {activeFiltersCount > 0 && (
-                    <div className="flex items-center gap-2 flex-wrap pt-2 border-t border-gray-200/60 dark:border-white/5">
-                        <span className="text-[10px] font-black text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                    <div className="flex items-center gap-2 flex-wrap pt-2 border-t border-[var(--theme-border)]">
+                        <span className="text-[11px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider">
                             Active:
                         </span>
 
                         {filters.category && filters.category !== 'All' && (
-                            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[10px] font-bold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
-                                <Package size={10} /> {filters.category}
+                            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-medium bg-[#34C759]/10 text-[#34C759] border border-[#34C759]/20">
+                                <Package size={12} /> {filters.category}
                                 <button type="button" onClick={() => setFilters((p: any) => ({ ...p, category: 'All' }))} className="hover:text-red-500 ml-1 cursor-pointer">
-                                    <X size={10} />
+                                    <X size={12} />
                                 </button>
                             </span>
                         )}
 
                         {filters.brand && filters.brand.trim() !== '' && (
-                            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[10px] font-bold bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">
-                                <Tag size={10} /> Brand: {filters.brand}
+                            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-medium bg-[#FF9F0A]/10 text-[#FF9F0A] border border-[#FF9F0A]/20">
+                                <Tag size={12} /> Brand: {filters.brand}
                                 <button type="button" onClick={() => setFilters((p: any) => ({ ...p, brand: '' }))} className="hover:text-red-500 ml-1 cursor-pointer">
-                                    <X size={10} />
+                                    <X size={12} />
                                 </button>
                             </span>
                         )}
 
                         {(filters.minPrice || filters.maxPrice) && (
-                            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[10px] font-bold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
-                                <DollarSign size={10} /> {filters.minPrice || 0} - {filters.maxPrice || '∞'} {currencySymbol}
+                            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-medium bg-[#34C759]/10 text-[#34C759] border border-[#34C759]/20">
+                                <DollarSign size={12} /> {filters.minPrice || 0} - {filters.maxPrice || '∞'} {currencySymbol}
                                 <button type="button" onClick={() => setFilters((p: any) => ({ ...p, minPrice: '', maxPrice: '' }))} className="hover:text-red-500 ml-1 cursor-pointer">
-                                    <X size={10} />
+                                    <X size={12} />
                                 </button>
                             </span>
                         )}
 
                         {(filters.minStock || filters.maxStock) && (
-                            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[10px] font-bold bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20">
-                                <Box size={10} /> Stock: {filters.minStock || 0} - {filters.maxStock || '∞'}
+                            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-medium bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] border border-[var(--theme-accent)]/20">
+                                <Box size={12} /> Stock: {filters.minStock || 0} - {filters.maxStock || '∞'}
                                 <button type="button" onClick={() => setFilters((p: any) => ({ ...p, minStock: '', maxStock: '' }))} className="hover:text-red-500 ml-1 cursor-pointer">
-                                    <X size={10} />
+                                    <X size={12} />
                                 </button>
                             </span>
                         )}
 
                         {filters.locationStatus && filters.locationStatus !== 'All' && (
-                            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[10px] font-bold bg-orange-500/10 text-orange-600 dark:text-orange-400 border border-orange-500/20">
-                                <MapPin size={10} /> {filters.locationStatus === 'assigned' ? 'Located' : 'No Bay'}
+                            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-medium bg-[#FF9F0A]/10 text-[#FF9F0A] border border-[#FF9F0A]/20">
+                                <MapPin size={12} /> {filters.locationStatus === 'assigned' ? 'Located' : 'No Bay'}
                                 <button type="button" onClick={() => setFilters((p: any) => ({ ...p, locationStatus: 'All' }))} className="hover:text-red-500 ml-1 cursor-pointer">
-                                    <X size={10} />
+                                    <X size={12} />
                                 </button>
                             </span>
                         )}
 
                         {filters.hasBarcode && filters.hasBarcode !== 'All' && (
-                            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[10px] font-bold bg-stone-500/10 text-stone-600 dark:text-stone-300 border border-stone-500/20">
+                            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-medium bg-[var(--theme-bg-card)] text-[var(--theme-text-secondary)] border border-[var(--theme-border)]">
                                 {filters.hasBarcode === 'with_barcode' ? 'Has Barcode' : 'No Barcode'}
                                 <button type="button" onClick={() => setFilters((p: any) => ({ ...p, hasBarcode: 'All' }))} className="hover:text-red-500 ml-1 cursor-pointer">
-                                    <X size={10} />
+                                    <X size={12} />
                                 </button>
                             </span>
                         )}
@@ -355,7 +355,7 @@ export const InventoryToolbar: React.FC<InventoryToolbarProps> = ({
                         <button
                             type="button"
                             onClick={handleResetAll}
-                            className="text-[10px] font-bold uppercase text-rose-500 hover:underline ml-auto cursor-pointer"
+                            className="text-[11px] font-semibold uppercase text-rose-500 hover:text-rose-600 transition-colors ml-auto cursor-pointer"
                         >
                             Reset All
                         </button>
@@ -376,15 +376,15 @@ export const InventoryToolbar: React.FC<InventoryToolbarProps> = ({
 
             {/* Bulk Selection Toolbar */}
             {selectedIds.size > 0 && (
-                <div className="bg-[var(--theme-bg-subtle)] border-b border-[var(--theme-border)] p-2.5 flex items-center justify-between px-6 animate-in slide-in-from-top-2">
+                <div className="bg-[var(--theme-bg-subtle)] border-b border-[var(--theme-border)] p-3 flex items-center justify-between px-6 animate-in slide-in-from-top-2">
                     <div className="flex items-center gap-3">
-                        <span className="text-xs text-[var(--theme-text-primary)] font-bold uppercase tracking-wider">
+                        <span className="text-xs text-[var(--theme-text-primary)] font-semibold uppercase tracking-wider">
                             {selectedIds.size} Selected
                         </span>
-                        <Button onClick={() => handleBulkAction('Print Labels')} size="sm" variant="secondary" className="px-3.5 py-1.5 rounded-full bg-[var(--theme-primary)] text-[var(--theme-primary-text)] font-bold text-[10px] uppercase tracking-wider hover:opacity-90">
+                        <Button onClick={() => handleBulkAction('Print Labels')} size="sm" variant="secondary" className="px-3.5 py-1.5 rounded-xl bg-[var(--theme-accent)] text-white font-semibold text-[11px] uppercase tracking-wider hover:opacity-90">
                             Print Labels
                         </Button>
-                        <Button onClick={() => setSelectedIds(new Set())} size="sm" variant="ghost" className="px-3 py-1.5 text-[10px] font-bold text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)]">
+                        <Button onClick={() => setSelectedIds(new Set())} size="sm" variant="ghost" className="px-3 py-1.5 text-[11px] font-semibold text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)]">
                             Clear Selection
                         </Button>
                     </div>

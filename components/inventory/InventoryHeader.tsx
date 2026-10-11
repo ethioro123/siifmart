@@ -34,13 +34,19 @@ export const InventoryHeader: React.FC<InventoryHeaderProps> = ({
         <div className="flex-none p-4 sm:p-6 md:p-8 space-y-6">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
-                    <h1 className="text-3xl font-black uppercase tracking-tight text-[var(--theme-text-primary)]">
+                    <h1 className="text-2xl sm:text-3xl font-bold text-[var(--theme-text-primary)] tracking-tight">
                         Inventory Command
                     </h1>
-                    <p className="text-[var(--theme-text-secondary)] font-medium mt-1 flex items-center gap-2 text-sm">
-                        <Shield size={14} className={isReadOnly ? "text-amber-500" : "text-emerald-500"} />
-                        {isReadOnly ? 'Read-Only Mode' : 'Live Management Mode'}
-                    </p>
+                    <div className="flex items-center gap-2 mt-2">
+                        <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold border ${
+                            isReadOnly
+                                ? "bg-amber-500/10 text-amber-500 border-amber-500/20"
+                                : "bg-emerald-500/10 text-emerald-500 border-emerald-500/20"
+                        }`}>
+                            <span className={`w-1.5 h-1.5 rounded-full ${isReadOnly ? "bg-amber-500" : "bg-emerald-500"}`} />
+                            {isReadOnly ? 'Read-Only Mode' : 'Live Management Mode'}
+                        </span>
+                    </div>
                 </div>
 
                 <div className="flex items-center gap-3">
@@ -48,24 +54,24 @@ export const InventoryHeader: React.FC<InventoryHeaderProps> = ({
                         permission="ADD_PRODUCT"
                         onClick={handleOpenAddProduct}
                         disabled={isReadOnly}
-                        className="px-5 py-2.5 rounded-full bg-[var(--theme-primary)] text-[var(--theme-primary-text)] font-semibold text-sm hover:opacity-90 active:scale-[0.98] transition-all duration-150 flex items-center gap-2 shadow-sm cursor-pointer disabled:opacity-50"
+                        className="h-10 px-4 rounded-xl bg-[var(--theme-accent)] text-white hover:bg-[var(--theme-accent)]/90 font-semibold text-xs transition-colors flex items-center gap-2 shadow-xs cursor-pointer disabled:opacity-50 active:scale-[0.98]"
                     >
-                        <Plus size={18} />
+                        <Plus size={16} />
                         Add Product
                     </ProtectedButton>
                     <Button
                         onClick={() => { setLabelsToPrint([]); setIsPrintHubOpen(true); }}
                         variant="secondary"
-                        icon={<Printer size={18} />}
-                        className="px-5 py-2.5 rounded-full bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)] border border-[var(--theme-border)] font-semibold text-sm hover:bg-[var(--theme-bg-card-hover)] active:scale-[0.98] transition-all duration-150 flex items-center gap-2 shadow-sm cursor-pointer"
+                        icon={<Printer size={16} />}
+                        className="h-10 px-4 rounded-xl bg-[var(--theme-bg-subtle)] text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-panel-hover)] border border-[var(--theme-border)] font-semibold text-xs transition-colors flex items-center gap-2 shadow-xs cursor-pointer active:scale-[0.98]"
                     >
                         Print Hub
                     </Button>
                 </div>
             </div>
 
-            {/* --- TABS --- */}
-            <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-hide">
+            {/* --- TABS (Apple Segmented Control Dock) --- */}
+            <div className="p-1 rounded-xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] inline-flex items-center gap-1 overflow-x-auto max-w-full scrollbar-hide">
                 {[
                     { id: 'overview', label: 'Overview', icon: Layout },
                     { id: 'stock', label: 'Stock List', icon: ClipboardList },
@@ -73,27 +79,35 @@ export const InventoryHeader: React.FC<InventoryHeaderProps> = ({
                     { id: 'movements', label: 'Movements', icon: TrendingUp },
                     { id: 'barcode_audit', label: 'Barcode Audit', icon: Barcode, count: hasViewedBarcodeAudit ? 0 : barcodeApprovalsCount },
                     { id: 'pending', label: 'Pending', icon: Clock, count: pendingCount }
-                ].map((tab) => (
-                    <button
-                        key={tab.id}
-                        onClick={() => setActiveTab(tab.id as InventoryTab)}
-                        className={`flex items-center gap-2 px-5 py-2.5 rounded-full text-xs font-bold uppercase tracking-wider transition-all duration-150 relative cursor-pointer active:scale-[0.98] ${activeTab === tab.id
-                            ? 'bg-[var(--theme-primary)] text-[var(--theme-primary-text)] shadow-sm'
-                            : 'bg-[var(--theme-bg-card)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] border border-[var(--theme-border)] hover:bg-[var(--theme-bg-card-hover)]'
+                ].map((tab) => {
+                    const isSelected = activeTab === tab.id;
+                    return (
+                        <button
+                            key={tab.id}
+                            type="button"
+                            role="tab"
+                            aria-selected={isSelected}
+                            onClick={() => setActiveTab(tab.id as InventoryTab)}
+                            className={`flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs transition-all relative cursor-pointer whitespace-nowrap active:scale-[0.98] ${
+                                isSelected
+                                    ? 'bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)] shadow-[0_1px_3px_rgba(0,0,0,0.12)] font-semibold'
+                                    : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] font-medium'
                             }`}
-                    >
-                        <tab.icon size={14} />
-                        {tab.label}
-                        {tab.count !== undefined && tab.count > 0 && (
-                            <span className={`absolute -top-1 -right-1 flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full text-[10px] font-bold ${activeTab === tab.id
-                                ? 'bg-[var(--theme-bg-app)] text-[var(--theme-text-primary)] border border-[var(--theme-border)]'
-                                : 'bg-rose-500 text-white'
+                        >
+                            <tab.icon size={14} className={isSelected ? 'text-[var(--theme-accent)]' : 'text-[var(--theme-text-muted)]'} />
+                            <span>{tab.label}</span>
+                            {tab.count !== undefined && tab.count > 0 && (
+                                <span className={`ml-1 flex items-center justify-center min-w-[18px] h-[18px] px-1.5 rounded-full text-[11px] font-semibold font-mono tabular-nums ${
+                                    isSelected
+                                        ? 'bg-rose-500/15 text-rose-500 border border-rose-500/25'
+                                        : 'bg-rose-500 text-white'
                                 }`}>
-                                {tab.count}
-                            </span>
-                        )}
-                    </button>
-                ))}
+                                    {tab.count}
+                                </span>
+                            )}
+                        </button>
+                    );
+                })}
             </div>
         </div>
     );

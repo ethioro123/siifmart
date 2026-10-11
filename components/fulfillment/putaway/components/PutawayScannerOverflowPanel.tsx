@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Box, AlertTriangle, Info, ArrowLeftRight, Check, Users, Loader2 } from 'lucide-react';
+import { Box, AlertTriangle, ArrowLeftRight, Users, Loader2, Undo2, PackagePlus } from 'lucide-react';
 import { Product } from '../../../../types';
 
 interface PutawayScannerOverflowPanelProps {
@@ -35,33 +35,42 @@ export const PutawayScannerOverflowPanel: React.FC<PutawayScannerOverflowPanelPr
                         setIsOverflowMode(!isOverflowMode);
                         setAwaitingMismatchConfirmation(false);
                     }}
-                    className={`w-full sm:w-auto px-5 py-3 rounded-2xl text-xs font-black uppercase tracking-wider transition-colors duration-300 flex items-center justify-center gap-2.5 border shadow-sm min-h-[44px] active:scale-[0.98] ${
+                    className={`w-full sm:w-auto px-4 py-2.5 rounded-xl text-xs font-semibold uppercase tracking-wider transition-colors flex items-center justify-center gap-2 border min-h-[44px] ${
                         isOverflowMode 
-                            ? 'bg-amber-600 dark:bg-amber-500 text-white border-amber-500 shadow-amber-500/25 ring-2 ring-amber-400/40 animate-pulse' 
-                            : 'bg-white/80 dark:bg-[#1C2620]/80 text-stone-700 dark:text-stone-300 border-[#E2DCCE]/80 dark:border-[#A9CBA2]/15 hover:bg-[#2C5E3B]/10 hover:text-[#2C5E3B] dark:hover:text-[#A9CBA2] hover:border-[#2C5E3B]/30'
+                            ? 'bg-amber-600 text-white border-amber-500 shadow-sm' 
+                            : 'bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)] border-[var(--theme-border)] hover:bg-[var(--theme-bg-subtle)]'
                     }`}
                 >
-                    <ArrowLeftRight size={15} className={isOverflowMode ? 'rotate-180 transition-transform' : ''} />
-                    <span>{isOverflowMode ? `↩️ ${t('warehouse.putaway.revertToPrimaryBay')}` : `📦 ${t('warehouse.putaway.bayFullAssignNew')}`}</span>
+                    {isOverflowMode ? (
+                        <>
+                            <Undo2 size={15} />
+                            <span>{t('warehouse.putaway.revertToPrimaryBay')}</span>
+                        </>
+                    ) : (
+                        <>
+                            <PackagePlus size={15} />
+                            <span>{t('warehouse.putaway.bayFullAssignNew')}</span>
+                        </>
+                    )}
                 </button>
             </div>
 
             {/* Overflow Mode Active Panel */}
             {isOverflowMode && (
-                <div className="p-4 sm:p-5 rounded-3xl bg-amber-50/90 dark:bg-amber-950/40 border-2 border-amber-400/60 dark:border-amber-500/40 text-center animate-in fade-in zoom-in-95 duration-200 shadow-lg shadow-amber-500/5">
-                    <div className="flex items-center justify-center gap-2 text-amber-700 dark:text-amber-300 mb-2">
-                        <AlertTriangle size={16} className="shrink-0" />
-                        <p className="text-[11px] font-black uppercase tracking-wider">
+                <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-center animate-in fade-in duration-200">
+                    <div className="flex items-center justify-center gap-1.5 text-amber-600 dark:text-amber-400 mb-1.5">
+                        <AlertTriangle size={15} className="shrink-0" />
+                        <p className="text-xs font-semibold uppercase tracking-wider">
                             {t('warehouse.putaway.overflowModeActive')}
                         </p>
                     </div>
-                    <p className="text-[11px] text-stone-600 dark:text-stone-300 leading-relaxed max-w-xs mx-auto">
+                    <p className="text-xs text-[var(--theme-text-secondary)] leading-relaxed max-w-xs mx-auto">
                         {t('warehouse.putaway.overflowInstruction')}
                     </p>
 
                     {existingSkuLocations.length > 0 && (
-                        <div className="mt-4 pt-3.5 border-t border-amber-500/20">
-                            <p className="text-[10px] font-black uppercase tracking-widest text-amber-800 dark:text-amber-300/80 mb-2.5">
+                        <div className="mt-3 pt-3 border-t border-amber-500/20">
+                            <p className="text-[11px] font-semibold uppercase tracking-wider text-amber-700 dark:text-amber-400 mb-2">
                                 {t('warehouse.putaway.existingBaysForSku')}:
                             </p>
                             <div className="flex flex-wrap gap-2 justify-center">
@@ -83,13 +92,13 @@ export const PutawayScannerOverflowPanel: React.FC<PutawayScannerOverflowPanelPr
                                                     setSelectingLoc(null);
                                                 }
                                             }}
-                                            className={`px-3.5 py-2 rounded-xl bg-white dark:bg-black/50 border border-amber-500/40 text-xs font-mono font-black text-amber-800 dark:text-amber-200 hover:bg-amber-600 hover:text-white dark:hover:bg-amber-500 dark:hover:text-black transition-colors shadow-xs flex items-center gap-1.5 active:scale-95 min-h-[40px] ${
-                                                isAnySelecting ? 'opacity-60 cursor-not-allowed' : ''
+                                            className={`px-3 py-1.5 rounded-xl bg-[var(--theme-bg-card)] border border-amber-500/30 text-xs font-mono font-semibold text-amber-700 dark:text-amber-300 hover:bg-amber-600 hover:text-white transition-colors flex items-center gap-1.5 min-h-[38px] ${
+                                                isAnySelecting ? 'opacity-50 cursor-not-allowed' : ''
                                             }`}
                                         >
-                                            {isThisLocSelected && <Loader2 size={12} className="animate-spin text-amber-600 dark:text-amber-300" />}
+                                            {isThisLocSelected && <Loader2 size={12} className="animate-spin text-amber-600" />}
                                             <span>{p.location}</span>
-                                            <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-amber-100 dark:bg-white/10 text-amber-800 dark:text-amber-300 font-sans font-bold">
+                                            <span className="text-[11px] px-1.5 py-0.2 rounded-full bg-amber-500/10 text-amber-700 dark:text-amber-400 font-sans font-medium">
                                                 {p.stock || 0} pcs
                                             </span>
                                         </button>
@@ -103,25 +112,25 @@ export const PutawayScannerOverflowPanel: React.FC<PutawayScannerOverflowPanelPr
 
             {/* Occupants Warning */}
             {currentOccupants.length > 0 && (
-                <div className="p-4 sm:p-5 rounded-3xl bg-amber-50/70 dark:bg-amber-950/20 border border-amber-300/60 dark:border-amber-500/20 text-left animate-in slide-in-from-top-2 duration-300 shadow-sm">
-                    <div className="flex items-center gap-2 mb-3 border-b border-amber-200 dark:border-amber-500/10 pb-2">
-                        <Users size={14} className="text-amber-600 dark:text-amber-400" />
-                        <span className="text-[10px] font-black uppercase text-amber-700 dark:text-amber-400 tracking-widest">
+                <div className="p-4 rounded-2xl bg-[var(--theme-bg-card)] border border-[var(--theme-border)] text-left">
+                    <div className="flex items-center gap-2 mb-2.5 border-b border-[var(--theme-border)] pb-2">
+                        <Users size={14} className="text-amber-500" />
+                        <span className="text-[11px] font-semibold uppercase text-amber-600 dark:text-amber-400 tracking-wider">
                             {t('warehouse.putaway.locationOccupants')} ({currentOccupants.length})
                         </span>
                     </div>
-                    <div className="space-y-2.5">
+                    <div className="space-y-2">
                         {currentOccupants.slice(0, 2).map((occ: Product) => (
-                            <div key={occ.id} className="flex items-center gap-3 bg-white/60 dark:bg-black/30 p-2.5 rounded-2xl border border-amber-200/50 dark:border-white/5">
-                                <div className="w-7 h-7 rounded-xl bg-amber-100 dark:bg-amber-500/10 flex items-center justify-center shrink-0 text-amber-700 dark:text-amber-400">
-                                    <Box size={14} />
+                            <div key={occ.id} className="flex items-center gap-2.5 bg-[var(--theme-bg-subtle)] p-2 rounded-xl border border-[var(--theme-border)]">
+                                <div className="w-6 h-6 rounded-lg bg-amber-500/10 flex items-center justify-center shrink-0 text-amber-600 dark:text-amber-400">
+                                    <Box size={13} />
                                 </div>
                                 <div className="min-w-0 flex-1">
-                                    <p className="text-xs font-black text-stone-900 dark:text-stone-100 truncate uppercase tracking-tight">
+                                    <p className="text-xs font-semibold text-[var(--theme-text-primary)] truncate uppercase tracking-tight">
                                         {occ.name}
                                     </p>
-                                    <p className="text-[10px] font-mono font-bold text-stone-500 dark:text-stone-400">
-                                        {occ.sku} {occ.stock ? `• ${occ.stock} in stock` : ''}
+                                    <p className="text-[11px] font-mono text-[var(--theme-text-secondary)]">
+                                        {occ.sku} {occ.stock ? `/ ${occ.stock} in stock` : ''}
                                     </p>
                                 </div>
                             </div>

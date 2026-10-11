@@ -1,17 +1,31 @@
-import React, { useState, useEffect } from 'react';
-import { FileText, CheckCircle, AlertTriangle, DollarSign, Loader2, ShieldAlert } from 'lucide-react';
+import React, { useState, useEffect, useMemo } from 'react';
+import {
+    FileText,
+    CheckCircle2,
+    AlertTriangle,
+    DollarSign,
+    Loader2,
+    ShieldAlert,
+    Search,
+    Filter,
+    ShieldCheck,
+    CreditCard,
+    ArrowUpRight
+} from 'lucide-react';
 import { useFinance } from './FinanceContext';
 import { accountsPayableService } from '../../services/accounts-payable.service';
-import type { VendorInvoice, InvoiceMatchStatus } from '../../types';
+import type { VendorInvoice } from '../../types';
+import { InvoiceDetailsModal } from './InvoiceDetailsModal';
+import { InvoiceOverrideModal } from './InvoiceOverrideModal';
 
 export const AccountsPayableTab: React.FC = () => {
     const { user, currencySymbol, effectiveCountry, activeSite, addNotification } = useFinance();
     const [invoices, setInvoices] = useState<VendorInvoice[]>([]);
     const [loading, setLoading] = useState(true);
     const [statusFilter, setStatusFilter] = useState<string>('All');
+    const [searchQuery, setSearchQuery] = useState('');
     const [selectedInvoice, setSelectedInvoice] = useState<VendorInvoice | null>(null);
     const [overrideModalOpen, setOverrideModalOpen] = useState(false);
-    const [overrideReason, setOverrideReason] = useState('');
     const [isActionLoading, setIsActionLoading] = useState(false);
     const [selectedInvoiceIds, setSelectedInvoiceIds] = useState<string[]>([]);
 
@@ -38,19 +52,18 @@ export const AccountsPayableTab: React.FC = () => {
         loadInvoices();
     }, [effectiveCountry, activeSite?.id, statusFilter]);
 
-    const handleOverride = async () => {
-        if (!selectedInvoice || overrideReason.trim().length < 10) return;
+    const handleOverride = async (reason: string) => {
+        if (!selectedInvoice) return;
         setIsActionLoading(true);
         try {
             const updated = await accountsPayableService.overrideDiscrepancy(
                 selectedInvoice.id,
                 { id: user?.id || user?.employeeId || 'FIN-001', name: user?.name || 'Finance Staff', role: user?.role || 'finance_manager' },
-                overrideReason
+                reason
             );
             setInvoices(prev => prev.map(i => i.id === updated.id ? updated : i));
             setSelectedInvoice(updated);
             setOverrideModalOpen(false);
-            setOverrideReason('');
             addNotification('success', `Discrepancy overridden for invoice ${updated.invoiceNumber}`);
         } catch (err: any) {
             addNotification('alert', err?.message || 'Failed to override discrepancy');
@@ -85,234 +98,311 @@ export const AccountsPayableTab: React.FC = () => {
         setSelectedInvoiceIds(prev => prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]);
     };
 
+    // Executive Metrics
+    const stats = useMemo(() => {
+        let totalOutstanding = 0;
+        let matchedCount = 0;
+        let matchedAmount = 0;
+        let discrepancyCount = 0;
+        let selectedAmount = 0;
+
+        for (const inv of invoices) {
+            if (inv.status !== 'Paid') {
+                totalOutstanding += inv.totalAmount || 0;
+            }
+            if (inv.matchStatus === 'Matched' || inv.matchStatus === 'Manual_Override') {
+                matchedCount++;
+                if (inv.status !== 'Paid') matchedAmount += inv.totalAmount || 0;
+            } else if (inv.matchStatus.startsWith('Discrepancy')) {
+                discrepancyCount++;
+            }
+            if (selectedInvoiceIds.includes(inv.id)) {
+                selectedAmount += inv.totalAmount || 0;
+            }
+        }
+
+        return { totalOutstanding, matchedCount, matchedAmount, discrepancyCount, selectedAmount };
+    }, [invoices, selectedInvoiceIds]);
+
+    const filteredInvoices = useMemo(() => {
+        const query = searchQuery.trim().toLowerCase();
+        if (!query) return invoices;
+        return invoices.filter(inv =>
+            (inv.invoiceNumber && inv.invoiceNumber.toLowerCase().includes(query)) ||
+            (inv.vendorName && inv.vendorName.toLowerCase().includes(query)) ||
+            (inv.poNumber && inv.poNumber.toLowerCase().includes(query)) ||
+            (inv.receivingManifestNumber && inv.receivingManifestNumber.toLowerCase().includes(query))
+        );
+    }, [invoices, searchQuery]);
+
     return (
-        <div className="space-y-6 animate-in fade-in">
-            {/* Header */}
-            <div className="bg-white/90 dark:bg-stone-900/60 border border-[#E2DCCE] dark:border-white/5 rounded-2xl p-4 flex flex-wrap justify-between items-center gap-4">
-                <div>
-                    <h3 className="text-base font-bold text-[#1E3F27] dark:text-white flex items-center gap-2">
-                        <FileText className="text-[#2C5E3B] dark:text-[#A9CBA2]" size={18} />
-                        Accounts Payable (AP) &amp; 3-Way Match Verification
-                    </h3>
-                    <p className="text-xs text-stone-500 dark:text-gray-400 mt-0.5">
-                        Guaranteed Zero-Trust vendor payment governance: PO ↔ Warehouse Receiving Manifest ↔ Invoiced Bill.
+        <div className="space-y-4">
+            {/* Executive KPI Ribbon */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-4 shadow-xs">
+                    <span className="text-xs text-[var(--theme-text-secondary)] font-medium">
+                        Total AP Outstanding
+                    </span>
+                    <h4 className="text-xl font-semibold tracking-tight text-[var(--theme-text-primary)] font-mono tabular-nums mt-1">
+                        {currencySymbol} {stats.totalOutstanding.toLocaleString()}
+                    </h4>
+                    <p className="text-[11px] text-[var(--theme-text-secondary)] mt-1">
+                        Unsettled commercial payables
                     </p>
                 </div>
 
-                <div className="flex items-center gap-2">
-                    {selectedInvoiceIds.length > 0 && canManageAP && (
-                        <button
-                            onClick={handleCreatePaymentRun}
-                            disabled={isActionLoading}
-                            className="woody-btn-primary px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5"
-                        >
-                            <DollarSign size={14} /> Create Payment Run ({selectedInvoiceIds.length})
-                        </button>
-                    )}
+                <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-4 shadow-xs">
+                    <div className="flex items-center justify-between">
+                        <span className="text-xs text-[var(--theme-text-secondary)] font-medium">
+                            3-Way Matched &amp; Ready
+                        </span>
+                        <div className="w-6 h-6 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
+                            <CheckCircle2 size={13} />
+                        </div>
+                    </div>
+                    <h4 className="text-xl font-semibold tracking-tight text-emerald-600 dark:text-emerald-400 font-mono tabular-nums mt-1">
+                        {stats.matchedCount} bills
+                    </h4>
+                    <p className="text-[11px] text-[var(--theme-text-secondary)] mt-1">
+                        Verified PO + GRN alignment
+                    </p>
+                </div>
+
+                <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-4 shadow-xs">
+                    <div className="flex items-center justify-between">
+                        <span className="text-xs text-[var(--theme-text-secondary)] font-medium">
+                            Match Discrepancies
+                        </span>
+                        <div className="w-6 h-6 rounded-lg bg-rose-500/10 text-rose-600 dark:text-rose-400 flex items-center justify-center">
+                            <AlertTriangle size={13} />
+                        </div>
+                    </div>
+                    <h4 className="text-xl font-semibold tracking-tight text-rose-600 dark:text-rose-400 font-mono tabular-nums mt-1">
+                        {stats.discrepancyCount} bills
+                    </h4>
+                    <p className="text-[11px] text-[var(--theme-text-secondary)] mt-1">
+                        Requires supervisor override
+                    </p>
+                </div>
+
+                <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-4 shadow-xs">
+                    <div className="flex items-center justify-between">
+                        <span className="text-xs text-[var(--theme-text-secondary)] font-medium">
+                            Payment Batch Staged
+                        </span>
+                        <div className="w-6 h-6 rounded-lg bg-blue-500/10 text-[#0071E3] dark:text-[#2997FF] flex items-center justify-center">
+                            <CreditCard size={13} />
+                        </div>
+                    </div>
+                    <h4 className="text-xl font-semibold tracking-tight text-[#0071E3] dark:text-[#2997FF] font-mono tabular-nums mt-1">
+                        {selectedInvoiceIds.length > 0 ? `${currencySymbol} ${stats.selectedAmount.toLocaleString()}` : '0 staged'}
+                    </h4>
+                    <p className="text-[11px] text-[var(--theme-text-secondary)] mt-1">
+                        {selectedInvoiceIds.length} bills selected for run
+                    </p>
                 </div>
             </div>
 
-            {/* Invoices Table */}
-            <div className="bg-white/90 dark:bg-stone-900/60 border border-[#E2DCCE] dark:border-white/5 rounded-2xl overflow-x-auto">
-                <table className="w-full text-left">
-                    <thead className="bg-stone-100/80 dark:bg-black/20 border-b border-[#E2DCCE] dark:border-white/5">
-                        <tr>
-                            <th className="p-4 w-10"></th>
-                            <th className="p-4 text-xs text-stone-500 dark:text-gray-500 uppercase">Invoice #</th>
-                            <th className="p-4 text-xs text-stone-500 dark:text-gray-500 uppercase">Vendor</th>
-                            <th className="p-4 text-xs text-stone-500 dark:text-gray-500 uppercase">PO Ref</th>
-                            <th className="p-4 text-xs text-stone-500 dark:text-gray-500 uppercase">Receiving Ref</th>
-                            <th className="p-4 text-xs text-stone-500 dark:text-gray-500 uppercase text-right">Amount</th>
-                            <th className="p-4 text-xs text-stone-500 dark:text-gray-500 uppercase text-center">3-Way Match</th>
-                            <th className="p-4 text-xs text-stone-500 dark:text-gray-500 uppercase text-center">Payment Status</th>
-                            <th className="p-4 text-xs text-stone-500 dark:text-gray-500 uppercase text-right">Action</th>
-                        </tr>
-                    </thead>
-                    <tbody className="divide-y divide-[#E2DCCE] dark:divide-white/5">
-                        {loading ? (
-                            <tr>
-                                <td colSpan={9} className="p-12 text-center text-stone-400 dark:text-gray-400">
-                                    <Loader2 className="animate-spin inline mr-2" size={18} /> Loading AP records...
-                                </td>
-                            </tr>
-                        ) : invoices.length === 0 ? (
-                            <tr>
-                                <td colSpan={9} className="p-16 text-center text-stone-400 dark:text-gray-400">
-                                    <FileText size={40} className="mx-auto mb-2 text-stone-300 dark:text-gray-600" />
-                                    <p className="text-sm">No vendor invoices recorded yet.</p>
-                                </td>
-                            </tr>
-                        ) : (
-                            invoices.map((inv) => {
-                                const isMatched = inv.matchStatus === 'Matched' || inv.matchStatus === 'Manual_Override';
-                                const isDiscrepant = inv.matchStatus.startsWith('Discrepancy');
+            {/* Invoices Table Card */}
+            <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl overflow-hidden shadow-xs">
+                {/* Header & Filter Toolbar */}
+                <div className="p-4 border-b border-[var(--theme-border)] flex flex-col md:flex-row md:items-center justify-between gap-3 bg-[var(--theme-bg-card)]">
+                    <div className="flex flex-wrap items-center gap-2.5">
+                        <div className="flex items-center gap-2">
+                            <h3 className="text-sm font-semibold text-[var(--theme-text-primary)]">
+                                Accounts Payable (AP) Ledger
+                            </h3>
+                            <div className="flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 text-xs font-medium">
+                                <ShieldCheck size={12} />
+                                <span>3-Way Match Hardened</span>
+                            </div>
+                        </div>
 
-                                return (
-                                    <tr key={inv.id} className="hover:bg-stone-50 dark:hover:bg-white/5 transition-colors">
-                                        <td className="p-4">
-                                            <input
-                                                type="checkbox"
-                                                checked={selectedInvoiceIds.includes(inv.id)}
-                                                onChange={() => toggleSelect(inv.id)}
-                                                disabled={!isMatched || inv.status === 'Paid'}
-                                                className="rounded text-emerald-600 dark:text-emerald-500 disabled:opacity-30"
-                                            />
-                                        </td>
-                                        <td className="p-4 font-mono text-xs font-bold text-[#1E3F27] dark:text-white whitespace-nowrap">
-                                            {inv.invoiceNumber}
-                                        </td>
-                                        <td className="p-4 text-xs text-stone-600 dark:text-gray-300 font-medium">{inv.vendorName}</td>
-                                        <td className="p-4 text-xs font-mono text-stone-500 dark:text-gray-400">{inv.poNumber || 'N/A'}</td>
-                                        <td className="p-4 text-xs font-mono text-stone-500 dark:text-gray-400">{inv.receivingManifestNumber || 'N/A'}</td>
-                                        <td className="p-4 text-xs text-right font-mono font-bold text-[#1E3F27] dark:text-white whitespace-nowrap">
-                                            {currencySymbol} {inv.totalAmount.toLocaleString()}
-                                        </td>
-                                        <td className="p-4 text-center">
-                                            <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold uppercase border ${
-                                                inv.matchStatus === 'Matched'
-                                                    ? 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-500/20'
-                                                    : inv.matchStatus === 'Manual_Override'
-                                                        ? 'bg-blue-50 dark:bg-blue-500/10 text-blue-700 dark:text-blue-400 border-blue-200 dark:border-blue-500/20'
-                                                        : 'bg-rose-50 dark:bg-rose-500/10 text-rose-700 dark:text-rose-400 border-rose-200 dark:border-rose-500/20'
-                                            }`}>
-                                                {inv.matchStatus === 'Matched' && <CheckCircle size={10} />}
-                                                {inv.matchStatus === 'Manual_Override' && <ShieldAlert size={10} />}
-                                                {isDiscrepant && <AlertTriangle size={10} />}
-                                                {inv.matchStatus.replace('_', ' ')}
-                                            </span>
-                                        </td>
-                                        <td className="p-4 text-center">
-                                            <span className="text-[10px] uppercase font-bold text-stone-500 dark:text-gray-400">
-                                                {inv.status.replace('_', ' ')}
-                                            </span>
-                                        </td>
-                                        <td className="p-4 text-right">
-                                            <button
-                                                onClick={() => setSelectedInvoice(inv)}
-                                                className="woody-btn-secondary px-3 py-1 text-xs rounded-lg"
-                                            >
-                                                Details
-                                            </button>
-                                        </td>
-                                    </tr>
-                                );
-                            })
+                        {/* Search Input */}
+                        <div className="flex items-center bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-2.5 py-1.5 h-9 w-56">
+                            <Search size={14} className="text-[var(--theme-text-secondary)] mr-2 shrink-0" />
+                            <input
+                                type="text"
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                                placeholder="Search invoice, vendor..."
+                                className="bg-transparent text-xs text-[var(--theme-text-primary)] outline-none w-full placeholder:text-[var(--theme-text-secondary)]/60"
+                                aria-label="Search invoices"
+                            />
+                        </div>
+
+                        {/* Status Filter Dropdown */}
+                        <div className="flex items-center bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-2.5 py-1.5 h-9">
+                            <Filter size={13} className="text-[var(--theme-text-secondary)] mr-2 shrink-0" />
+                            <select
+                                value={statusFilter}
+                                onChange={(e) => setStatusFilter(e.target.value)}
+                                className="bg-transparent text-xs text-[var(--theme-text-primary)] outline-none cursor-pointer pr-1"
+                                aria-label="Filter invoices by status"
+                            >
+                                <option value="All">All Invoices</option>
+                                <option value="Matched">3-Way Matched</option>
+                                <option value="Manual_Override">Manual Override</option>
+                                <option value="Discrepancy_Quantity">Qty Discrepancy</option>
+                                <option value="Discrepancy_Price">Price Discrepancy</option>
+                                <option value="Paid">Settled / Paid</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                        {selectedInvoiceIds.length > 0 && canManageAP && (
+                            <button
+                                onClick={handleCreatePaymentRun}
+                                disabled={isActionLoading}
+                                className="bg-[#0071E3] dark:bg-[#2997FF] hover:opacity-95 text-white px-3.5 py-2 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all shadow-xs shrink-0"
+                            >
+                                {isActionLoading ? <Loader2 className="animate-spin" size={14} /> : <DollarSign size={14} />}
+                                <span>Create Payment Run ({selectedInvoiceIds.length})</span>
+                            </button>
                         )}
-                    </tbody>
-                </table>
+                    </div>
+                </div>
+
+                {/* Table */}
+                <div className="overflow-x-auto">
+                    <table className="w-full text-left">
+                        <thead className="bg-[var(--theme-bg-subtle)]/75 border-b border-[var(--theme-border)]">
+                            <tr>
+                                <th className="py-3 px-4 w-10"></th>
+                                <th className="py-3 px-4 text-[11px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider">Invoice #</th>
+                                <th className="py-3 px-4 text-[11px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider">Vendor</th>
+                                <th className="py-3 px-4 text-[11px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider">PO Ref</th>
+                                <th className="py-3 px-4 text-[11px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider">Receiving Ref</th>
+                                <th className="py-3 px-4 text-[11px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider text-right">Amount</th>
+                                <th className="py-3 px-4 text-[11px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider text-center">3-Way Match</th>
+                                <th className="py-3 px-4 text-[11px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider text-center">Status</th>
+                                <th className="py-3 px-4 text-[11px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider text-right">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody className="divide-y divide-[var(--theme-border)]">
+                            {loading ? (
+                                <tr>
+                                    <td colSpan={9} className="py-16 text-center text-[var(--theme-text-secondary)]">
+                                        <Loader2 className="animate-spin inline mr-2 text-[#0071E3] dark:text-[#2997FF]" size={18} />
+                                        <span className="text-xs">Loading Accounts Payable invoices...</span>
+                                    </td>
+                                </tr>
+                            ) : filteredInvoices.length === 0 ? (
+                                <tr>
+                                    <td colSpan={9} className="py-16 text-center">
+                                        <div className="flex flex-col items-center justify-center text-[var(--theme-text-secondary)]">
+                                            <div className="w-12 h-12 rounded-2xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] flex items-center justify-center mb-3">
+                                                <FileText size={22} />
+                                            </div>
+                                            <p className="text-xs font-semibold text-[var(--theme-text-primary)]">
+                                                No vendor invoices recorded
+                                            </p>
+                                            <p className="text-[11px] mt-0.5">
+                                                No invoices match the active filters or search terms.
+                                            </p>
+                                        </div>
+                                    </td>
+                                </tr>
+                            ) : (
+                                filteredInvoices.map((inv) => {
+                                    const isMatched = inv.matchStatus === 'Matched' || inv.matchStatus === 'Manual_Override';
+                                    const isDiscrepant = inv.matchStatus.startsWith('Discrepancy');
+
+                                    return (
+                                        <tr key={inv.id} className="hover:bg-[var(--theme-bg-subtle)]/40 transition-colors">
+                                            <td className="py-3.5 px-4">
+                                                <input
+                                                    type="checkbox"
+                                                    checked={selectedInvoiceIds.includes(inv.id)}
+                                                    onChange={() => toggleSelect(inv.id)}
+                                                    disabled={!isMatched || inv.status === 'Paid'}
+                                                    className="rounded text-[#0071E3] dark:text-[#2997FF] focus:ring-0 disabled:opacity-30 cursor-pointer"
+                                                />
+                                            </td>
+                                            <td className="py-3.5 px-4 font-mono text-xs font-semibold text-[var(--theme-text-primary)] whitespace-nowrap">
+                                                {inv.invoiceNumber}
+                                            </td>
+                                            <td className="py-3.5 px-4 text-xs font-medium text-[var(--theme-text-primary)] whitespace-nowrap">
+                                                {inv.vendorName}
+                                            </td>
+                                            <td className="py-3.5 px-4 text-xs font-mono text-[var(--theme-text-secondary)] whitespace-nowrap">
+                                                {inv.poNumber || 'N/A'}
+                                            </td>
+                                            <td className="py-3.5 px-4 text-xs font-mono text-[var(--theme-text-secondary)] whitespace-nowrap">
+                                                {inv.receivingManifestNumber || 'N/A'}
+                                            </td>
+                                            <td className="py-3.5 px-4 text-xs text-right font-mono font-semibold text-[var(--theme-text-primary)] tabular-nums whitespace-nowrap">
+                                                {currencySymbol} {inv.totalAmount.toLocaleString()}
+                                            </td>
+                                            <td className="py-3.5 px-4 text-center whitespace-nowrap">
+                                                <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-medium border ${
+                                                    inv.matchStatus === 'Matched'
+                                                        ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20'
+                                                        : inv.matchStatus === 'Manual_Override'
+                                                            ? 'bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20'
+                                                            : 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/20'
+                                                }`}>
+                                                    {inv.matchStatus === 'Matched' && <CheckCircle2 size={11} />}
+                                                    {inv.matchStatus === 'Manual_Override' && <ShieldAlert size={11} />}
+                                                    {isDiscrepant && <AlertTriangle size={11} />}
+                                                    <span>{inv.matchStatus.replace(/_/g, ' ')}</span>
+                                                </span>
+                                            </td>
+                                            <td className="py-3.5 px-4 text-center whitespace-nowrap">
+                                                <span className={`text-[11px] font-medium uppercase font-mono ${
+                                                    inv.status === 'Paid'
+                                                        ? 'text-emerald-600 dark:text-emerald-400'
+                                                        : 'text-[var(--theme-text-secondary)]'
+                                                }`}>
+                                                    {inv.status.replace(/_/g, ' ')}
+                                                </span>
+                                            </td>
+                                            <td className="py-3.5 px-4 text-right whitespace-nowrap">
+                                                <button
+                                                    onClick={() => setSelectedInvoice(inv)}
+                                                    className="px-3 py-1.5 bg-[var(--theme-bg-card)] hover:bg-[var(--theme-bg-subtle)] text-[var(--theme-text-primary)] border border-[var(--theme-border)] text-xs font-semibold rounded-lg transition-colors shadow-xs"
+                                                >
+                                                    Details
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    );
+                                })
+                            )}
+                        </tbody>
+                    </table>
+                </div>
+
+                {/* Footer Count */}
+                <div className="p-3.5 border-t border-[var(--theme-border)] bg-[var(--theme-bg-subtle)]/40 text-xs text-[var(--theme-text-secondary)] flex justify-between items-center">
+                    <span>
+                        Loaded <span className="font-mono tabular-nums font-semibold text-[var(--theme-text-primary)]">{filteredInvoices.length}</span> invoices in ledger
+                    </span>
+                    <span className="text-[11px]">
+                        Zero-Trust Procurement Alignment (PO ↔ Receiving Manifest ↔ Invoiced Bill)
+                    </span>
+                </div>
             </div>
 
             {/* Line Item Match Details Modal */}
-            {selectedInvoice && (
-                <div className="fixed inset-0 bg-black/60 dark:bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-                    <div className="bg-white dark:bg-stone-900 border border-[#E2DCCE] dark:border-white/10 rounded-2xl max-w-2xl w-full p-6 space-y-4 shadow-2xl">
-                        <div className="flex justify-between items-center border-b border-[#E2DCCE] dark:border-white/5 pb-3">
-                            <div>
-                                <h4 className="text-base font-bold text-[#1E3F27] dark:text-white flex items-center gap-2">
-                                    3-Way Match Verification: {selectedInvoice.invoiceNumber}
-                                </h4>
-                                <span className="text-xs text-stone-500 dark:text-gray-400">{selectedInvoice.vendorName}</span>
-                            </div>
-                            <button onClick={() => setSelectedInvoice(null)} className="text-stone-400 dark:text-gray-400 hover:text-[#1E3F27] dark:hover:text-white text-lg leading-none">✕</button>
-                        </div>
-
-                        {selectedInvoice.matchDiscrepancyNotes && (
-                            <div className="p-3 bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20 rounded-xl text-xs text-amber-700 dark:text-amber-300 flex items-start gap-2">
-                                <AlertTriangle size={16} className="text-amber-500 dark:text-amber-400 shrink-0 mt-0.5" />
-                                <div>
-                                    <span className="font-bold block mb-0.5">Discrepancy Diagnostics:</span>
-                                    <span>{selectedInvoice.matchDiscrepancyNotes}</span>
-                                </div>
-                            </div>
-                        )}
-
-                        <div className="overflow-x-auto max-h-60 border border-[#E2DCCE] dark:border-white/5 rounded-xl">
-                            <table className="w-full text-left text-xs">
-                                <thead className="bg-stone-100/80 dark:bg-black/40 text-stone-500 dark:text-gray-400 uppercase">
-                                    <tr>
-                                        <th className="p-3">SKU / Item</th>
-                                        <th className="p-3 text-right">PO Qty</th>
-                                        <th className="p-3 text-right">Dock Recv</th>
-                                        <th className="p-3 text-right">Invoiced</th>
-                                        <th className="p-3 text-right">Unit Price</th>
-                                        <th className="p-3 text-right">Variance %</th>
-                                    </tr>
-                                </thead>
-                                <tbody className="divide-y divide-[#E2DCCE] dark:divide-white/5 font-mono">
-                                    {(selectedInvoice.items || []).map((item) => (
-                                        <tr key={item.id} className="hover:bg-stone-50 dark:hover:bg-white/5">
-                                            <td className="p-3 text-[#1E3F27] dark:text-white font-sans">{item.itemName}</td>
-                                            <td className="p-3 text-right text-stone-500 dark:text-gray-400">{item.poQuantity}</td>
-                                            <td className="p-3 text-right text-emerald-600 dark:text-emerald-400">{item.receivedQuantity}</td>
-                                            <td className="p-3 text-right text-[#1E3F27] dark:text-white font-bold">{item.invoicedQuantity}</td>
-                                            <td className="p-3 text-right text-stone-600 dark:text-gray-300">{currencySymbol} {item.invoicedUnitPrice}</td>
-                                            <td className={`p-3 text-right font-bold ${item.matchVariancePct > 0 ? 'text-rose-600 dark:text-rose-400' : 'text-emerald-600 dark:text-emerald-400'}`}>
-                                                {item.matchVariancePct > 0 ? `+${item.matchVariancePct}%` : '0%'}
-                                            </td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
-                        </div>
-
-                        <div className="flex justify-between items-center pt-2">
-                            {selectedInvoice.matchStatus.startsWith('Discrepancy') && canOverride && (
-                                <button
-                                    onClick={() => setOverrideModalOpen(true)}
-                                    className="px-4 py-2 bg-amber-50 dark:bg-amber-500/10 hover:bg-amber-100 dark:hover:bg-amber-500/20 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-500/30 rounded-xl text-xs font-bold transition-colors"
-                                >
-                                    Supervisory Override (Rule 18)
-                                </button>
-                            )}
-                            <div className="ml-auto">
-                                <button
-                                    onClick={() => setSelectedInvoice(null)}
-                                    className="px-4 py-2 text-xs text-stone-500 dark:text-gray-400 hover:text-[#1E3F27] dark:hover:text-white transition-colors"
-                                >
-                                    Close
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            )}
+            <InvoiceDetailsModal
+                invoice={selectedInvoice}
+                isOpen={Boolean(selectedInvoice)}
+                onClose={() => setSelectedInvoice(null)}
+                onOpenOverride={() => setOverrideModalOpen(true)}
+                canOverride={canOverride}
+                currencySymbol={currencySymbol}
+            />
 
             {/* Supervisory Override Modal */}
-            {overrideModalOpen && (
-                <div className="fixed inset-0 bg-black/60 dark:bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-                    <div className="bg-white dark:bg-stone-900 border border-[#E2DCCE] dark:border-white/10 rounded-2xl max-w-md w-full p-6 space-y-4 shadow-xl">
-                        <h4 className="text-base font-bold text-[#1E3F27] dark:text-white flex items-center gap-2">
-                            <ShieldAlert className="text-amber-600 dark:text-amber-400" size={18} />
-                            Mandatory Override Reason (Rule 18)
-                        </h4>
-                        <p className="text-xs text-stone-600 dark:text-gray-300">
-                            You are overriding an Accounts Payable match discrepancy. This action will be permanently co-signed with your manager credentials.
-                        </p>
-                        <textarea
-                            value={overrideReason}
-                            onChange={(e) => setOverrideReason(e.target.value)}
-                            className="woody-input resize-none h-24"
-                            placeholder="State supplier contract clause, approved adjustment, or shipment justification..."
-                        />
-                        <div className="flex justify-end gap-2">
-                            <button
-                                onClick={() => setOverrideModalOpen(false)}
-                                className="px-4 py-2 text-xs text-stone-500 dark:text-gray-400 hover:text-[#1E3F27] dark:hover:text-white transition-colors"
-                            >
-                                Cancel
-                            </button>
-                            <button
-                                onClick={handleOverride}
-                                disabled={overrideReason.trim().length < 10 || isActionLoading}
-                                className="woody-btn-primary px-5 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5"
-                            >
-                                {isActionLoading && <Loader2 className="animate-spin" size={14} />}
-                                Confirm Override
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
+            <InvoiceOverrideModal
+                isOpen={overrideModalOpen}
+                onClose={() => setOverrideModalOpen(false)}
+                onConfirm={handleOverride}
+                isActionLoading={isActionLoading}
+                invoiceNumber={selectedInvoice?.invoiceNumber || ''}
+            />
         </div>
     );
 };

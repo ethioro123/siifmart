@@ -200,14 +200,98 @@ describe('Category-Driven Product Attributes System', () => {
             expect(summary.summaryText).toContain('Halal Certification: 100% Certified Halal (Mandatory)');
         });
 
-        it('returns empty specs and null summaryText when item has no category-specific attributes', () => {
+        it('resolves Confectionery & Snack specs for Snacks & Confectionery', () => {
+            const group = getCategorySpecGroup('Pantry & Groceries', 'Snacks & Confectionery');
+            expect(group.id).toBe('confectionery_snacks');
+            expect(group.badgeLabel).toBe('Confectionery Master');
+
+            const keys = group.fields.map(f => f.key);
+            expect(keys).toContain('confectioneryType');
+            expect(keys).toContain('cocoaPercentage');
+            expect(keys).toContain('gelatinSource');
+            expect(keys).toContain('halalCompliance');
+            expect(keys).toContain('primaryAllergens');
+            expect(keys).toContain('storageTemp');
+
+            const gelatinField = group.fields.find(f => f.key === 'gelatinSource');
+            expect(gelatinField?.options).toContain('100% Halal Bovine Gelatin');
+            expect(gelatinField?.options).toContain('Pectin / Plant-Based (Gelatin-Free)');
+        });
+
+        it('resolves Deep Frozen specs for Ice Cream & Desserts instead of misidentifying as dairy', () => {
+            const group = getCategorySpecGroup('Frozen Food', 'Ice Cream & Desserts');
+            expect(group.id).toBe('frozen_food');
+            expect(group.badgeLabel).toBe('Deep Frozen Chain');
+
+            const keys = group.fields.map(f => f.key);
+            expect(keys).toContain('frozenCategory');
+            expect(keys).toContain('storageTemp');
+            expect(keys).toContain('defrostDirective');
+            expect(keys).toContain('refreezeWarning');
+        });
+
+        it('resolves Bakery & Deli specs for fresh baked goods and deli meals', () => {
+            const groupBakery = getCategorySpecGroup('Fresh Food & Deli', 'Bakery & Bread');
+            expect(groupBakery.id).toBe('bakery_deli');
+            expect(groupBakery.badgeLabel).toBe('Fresh Baked & Deli');
+
+            const groupDeli = getCategorySpecGroup('Fresh Food & Deli', 'Deli & Prepared Meals');
+            expect(groupDeli.id).toBe('bakery_deli');
+
+            const keys = groupBakery.fields.map(f => f.key);
+            expect(keys).toContain('bakedState');
+            expect(keys).toContain('dietaryCert');
+            expect(keys).toContain('primaryAllergens');
+            expect(keys).toContain('shelfLifeDays');
+        });
+
+        it('resolves Pet Supplies specs for pet nutrition', () => {
+            const group = getCategorySpecGroup('Pet Supplies', 'Dog Food & Accessories');
+            expect(group.id).toBe('pet_supplies');
+            expect(group.badgeLabel).toBe('Pet Care Standard');
+
+            const keys = group.fields.map(f => f.key);
+            expect(keys).toContain('targetAnimal');
+            expect(keys).toContain('lifeStage');
+            expect(keys).toContain('feedForm');
+            expect(keys).toContain('primaryProtein');
+        });
+
+        it('resolves Stationery & Toy specs for toys, games and books', () => {
+            const group = getCategorySpecGroup('General Merchandise & Apparel', 'Toys & Recreation');
+            expect(group.id).toBe('stationery_toys');
+            expect(group.badgeLabel).toBe('General Goods Master');
+
+            const keys = group.fields.map(f => f.key);
+            expect(keys).toContain('goodsCategory');
+            expect(keys).toContain('ageGrade');
+            expect(keys).toContain('safetyCompliance');
+        });
+
+        it('formats Dark Chocolate Confectionery specs cleanly in getPOItemCategorySpecsSummary', () => {
             const item = {
-                productName: 'Generic Box',
-                category: 'General Merchandise'
+                productName: 'Artisan Dark Chocolate 70%',
+                brand: 'Lindt',
+                category: 'Pantry & Groceries',
+                subcategory: 'Snacks & Confectionery',
+                customAttributes: {
+                    categorySpecific: {
+                        confectioneryType: 'Chocolate Bar / Slab',
+                        cocoaPercentage: '70% Dark Cocoa',
+                        gelatinSource: 'No Gelatin / Gelatin-Free',
+                        halalCompliance: '100% Certified Halal (Mandatory)',
+                        primaryAllergens: 'Soy Lecithin, May Contain Tree Nuts',
+                        storageTemp: 'Cool Dry Ambient (< 20°C / Melt-Sensitive)'
+                    }
+                }
             };
+
             const summary = getPOItemCategorySpecsSummary(item);
-            expect(summary.specs).toEqual([]);
-            expect(summary.summaryText).toBeNull();
+            expect(summary.domainTitle).toBe('Confectionery, Sweets & Snack Foods');
+            expect(summary.badgeLabel).toBe('Confectionery Master');
+            expect(summary.summaryText).toContain('Confectionery Type: Chocolate Bar / Slab');
+            expect(summary.summaryText).toContain('Cocoa Solids: 70% Dark Cocoa');
+            expect(summary.summaryText).toContain('Halal Certification: 100% Certified Halal (Mandatory)');
         });
     });
 });

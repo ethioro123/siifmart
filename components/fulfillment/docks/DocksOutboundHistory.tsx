@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { History as HistoryIcon, Search, Clock, User as UserIcon, Upload, ArrowRight } from 'lucide-react';
+import { History as HistoryIcon, Search, Clock, User as UserIcon } from 'lucide-react';
 import Pagination from '../../shared/Pagination';
 import { WMSJob, Site, User } from '../../../types';
 import { useLanguage } from '../../../contexts/LanguageContext';
@@ -102,50 +102,46 @@ export const DocksOutboundHistory: React.FC<DocksOutboundHistoryProps> = ({
     }, [filteredHistory, currentPage]);
 
     return (
-        <div className="glass-panel p-8 relative overflow-hidden group">
-            <div className="absolute -top-24 -right-24 w-64 h-64 bg-[#2C5E3B]/10 blur-[100px] rounded-full pointer-events-none" />
-
-            <div className="flex justify-between items-center mb-8 relative z-10">
-                <h3 className="text-xl font-black text-slate-900 dark:text-white tracking-tight uppercase flex items-center gap-3">
-                    <div className="p-2 bg-[#2C5E3B]/20 rounded-xl">
-                        <HistoryIcon className="text-[#2C5E3B] dark:text-[#A9CBA2]" size={20} />
+        <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-4 sm:p-6 relative overflow-hidden shadow-sm">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+                <h3 className="text-base sm:text-lg font-bold text-[var(--theme-text-primary)] tracking-tight uppercase flex items-center gap-3">
+                    <div className="p-2 bg-primary/10 rounded-xl border border-primary/20">
+                        <HistoryIcon className="text-primary" size={18} />
                     </div>
                     {t('warehouse.docks.outboundSchedule')}
                 </h3>
 
-                <div className="flex items-center gap-4">
-                    <div className="relative group">
-                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-stone-500 group-focus-within:text-[#2C5E3B] dark:group-focus-within:text-[#A9CBA2] transition-colors" size={16} />
-                        <input
-                            type="text"
-                            value={search}
-                            onChange={(e) => setSearch(e.target.value)}
-                            placeholder="Search Shipment, Site..."
-                            aria-label="Search Shipment or Site"
-                            title="Search Shipment or Site"
-                            className="woody-input w-64 !pl-11 pr-4 text-xs"
-                        />
-                    </div>
+                <div className="relative w-full sm:w-64">
+                    <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--theme-text-muted)] pointer-events-none" size={16} />
+                    <input
+                        type="text"
+                        value={search}
+                        onChange={(e) => { setSearch(e.target.value); setCurrentPage(1); }}
+                        placeholder="Search Shipment, Site..."
+                        aria-label="Search Shipment or Site"
+                        title="Search Shipment or Site"
+                        className="w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl pl-10 pr-3.5 py-2 text-xs text-[var(--theme-text-primary)] placeholder:text-[var(--theme-text-muted)] focus:outline-none focus:border-primary transition-colors min-h-[44px]"
+                    />
                 </div>
             </div>
 
-            <div className="overflow-x-auto">
-                <table className="w-full">
+            <div className="overflow-x-auto -mx-4 sm:mx-0">
+                <table className="w-full min-w-[700px]">
                     <thead>
-                        <tr className="border-b border-[#E2DCCE]/60 dark:border-white/5">
-                            <th className="px-6 py-4 text-left text-[10px] font-black text-gray-500 uppercase tracking-widest">Shipped At</th>
-                            <th className="px-6 py-4 text-left text-[10px] font-black text-gray-500 uppercase tracking-widest">Job ID</th>
-                            <th className="px-6 py-4 text-left text-[10px] font-black text-gray-500 uppercase tracking-widest">Destination</th>
-                            <th className="px-6 py-4 text-left text-[10px] font-black text-gray-500 uppercase tracking-widest">Driver</th>
-                            <th className="px-6 py-4 text-left text-[10px] font-black text-gray-500 uppercase tracking-widest">Dispatcher</th>
-                            <th className="px-6 py-4 text-left text-[10px] font-black text-gray-500 uppercase tracking-widest">Items</th>
-                            <th className="px-6 py-4 text-right text-[10px] font-black text-gray-500 uppercase tracking-widest">Status</th>
+                        <tr className="border-b border-[var(--theme-border)]">
+                            <th className="px-4 py-3 text-left text-[11px] font-semibold text-[var(--theme-text-muted)] uppercase tracking-wider">Shipped At</th>
+                            <th className="px-4 py-3 text-left text-[11px] font-semibold text-[var(--theme-text-muted)] uppercase tracking-wider">Job ID</th>
+                            <th className="px-4 py-3 text-left text-[11px] font-semibold text-[var(--theme-text-muted)] uppercase tracking-wider">Destination</th>
+                            <th className="px-4 py-3 text-left text-[11px] font-semibold text-[var(--theme-text-muted)] uppercase tracking-wider">Driver</th>
+                            <th className="px-4 py-3 text-left text-[11px] font-semibold text-[var(--theme-text-muted)] uppercase tracking-wider">Dispatcher</th>
+                            <th className="px-4 py-3 text-left text-[11px] font-semibold text-[var(--theme-text-muted)] uppercase tracking-wider">Items</th>
+                            <th className="px-4 py-3 text-right text-[11px] font-semibold text-[var(--theme-text-muted)] uppercase tracking-wider">Status</th>
                         </tr>
                     </thead>
-                    <tbody className="divide-y divide-[#E2DCCE]/30 dark:divide-white/5">
+                    <tbody className="divide-y divide-[var(--theme-border)]">
                         {paginatedHistory.length === 0 ? (
                             <tr>
-                                <td colSpan={6} className="px-6 py-8 text-center text-gray-500 text-xs font-bold">
+                                <td colSpan={7} className="px-4 py-10 text-center text-[var(--theme-text-muted)] text-xs font-semibold">
                                     {t('warehouse.noHistoryFound')}
                                 </td>
                             </tr>
@@ -157,50 +153,45 @@ export const DocksOutboundHistory: React.FC<DocksOutboundHistoryProps> = ({
                                 return (
                                     <tr
                                         key={job.id}
-                                        className="hover:bg-[#FAF8F5]/50 dark:hover:bg-white/5 transition-colors group cursor-pointer"
+                                        className="hover:bg-[var(--theme-bg-subtle)] transition-colors group cursor-pointer touch-manipulation"
                                         onClick={() => {
                                             setSelectedJob(job);
                                             setIsDetailsOpen(true);
                                         }}
                                     >
-                                        <td className="px-6 py-4">
-                                            <div className="flex items-center gap-2">
-                                                <Clock size={12} className="text-gray-600" />
-                                                <span className="text-xs font-mono font-bold text-gray-400">
+                                        <td className="px-4 py-3.5">
+                                            <div className="flex items-center gap-1.5 text-[var(--theme-text-muted)]">
+                                                <Clock size={12} />
+                                                <span className="text-[11px] font-mono tabular-nums">
                                                     {job.updatedAt ? new Date(job.updatedAt).toLocaleString() : '-'}
                                                 </span>
                                             </div>
                                         </td>
-                                        <td className="px-6 py-4">
-                                            <span className="text-xs font-black text-slate-900 dark:text-white">{formatJobId(job)}</span>
+                                        <td className="px-4 py-3.5">
+                                            <span className="text-xs font-mono font-semibold text-[var(--theme-text-primary)]">{formatJobId(job)}</span>
                                         </td>
-                                        <td className="px-6 py-4">
-                                            <div className="flex items-center gap-2">
-                                                <span className="text-xs font-bold text-gray-400">{destSite ? `${destSite.name} (${destSite.code || destSite.id})` : 'Unknown'}</span>
-                                            </div>
+                                        <td className="px-4 py-3.5">
+                                            <span className="text-xs font-medium text-[var(--theme-text-secondary)]">{destSite ? `${destSite.name} (${destSite.code || destSite.id})` : 'Unknown'}</span>
                                         </td>
-                                        <td className="px-6 py-4">
-                                            <div className="flex items-center gap-2">
-                                                <span className="text-xs font-bold text-gray-400">
-                                                    {job.deliveryMethod === 'External' ? (job.externalCarrierName || 'Unlabeled External') : (carrier?.name || 'Unassigned')}
-                                                </span>
-                                            </div>
+                                        <td className="px-4 py-3.5">
+                                            <span className="text-xs font-medium text-[var(--theme-text-secondary)]">
+                                                {job.deliveryMethod === 'External' ? (job.externalCarrierName || 'Unlabeled External') : (carrier?.name || 'Unassigned')}
+                                            </span>
                                         </td>
-                                        <td className="px-6 py-4">
-                                            <div className="flex items-center gap-2">
-                                                <span className="text-xs font-bold text-[#2C5E3B] dark:text-[#A9CBA2] uppercase tracking-tight">
-                                                    {job.assignedBy || 'System'}
-                                                </span>
-                                            </div>
+                                        <td className="px-4 py-3.5">
+                                            <span className="text-xs font-semibold text-primary uppercase tracking-tight">
+                                                {job.assignedBy || 'System'}
+                                            </span>
                                         </td>
-                                        <td className="px-6 py-4">
-                                            <span className="text-xs font-mono font-bold text-gray-400">{job.items || job.lineItems?.length || 0} items</span>
+                                        <td className="px-4 py-3.5">
+                                            <span className="text-xs font-mono tabular-nums text-[var(--theme-text-muted)]">{job.items || job.lineItems?.length || 0} items</span>
                                         </td>
-                                        <td className="px-6 py-4 text-right">
-                                            <span className={`inline-flex px-2 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest ${job.status === 'Completed' || job.transferStatus === 'Shipped' ? 'bg-[#2C5E3B]/10 text-[#2C5E3B] dark:text-[#A9CBA2] border border-[#2C5E3B]/20 dark:border-[#A9CBA2]/20' :
-                                                job.status === 'Cancelled' ? 'bg-red-500/10 text-red-400 border border-red-500/20' :
-                                                    'bg-gray-500/10 text-gray-400 border border-gray-500/20'
-                                                }`}>
+                                        <td className="px-4 py-3.5 text-right">
+                                            <span className={`inline-flex px-2 py-0.5 rounded-full text-[11px] font-semibold uppercase tracking-wider ${
+                                                job.status === 'Completed' || job.transferStatus === 'Shipped' ? 'bg-primary/10 text-primary border border-primary/20' :
+                                                job.status === 'Cancelled' ? 'bg-red-500/10 text-red-500 border border-red-500/20' :
+                                                'bg-[var(--theme-bg-subtle)] text-[var(--theme-text-muted)] border border-[var(--theme-border)]'
+                                            }`}>
                                                 {job.transferStatus || job.status}
                                             </span>
                                         </td>
@@ -214,7 +205,7 @@ export const DocksOutboundHistory: React.FC<DocksOutboundHistoryProps> = ({
 
             {/* Pagination */}
             {totalPages > 1 && (
-                <div className="mt-6 flex justify-center">
+                <div className="mt-4 flex justify-center">
                     <Pagination
                         currentPage={currentPage}
                         totalPages={totalPages}

@@ -214,18 +214,19 @@ export const SmartUnitConfigModal: React.FC<SmartUnitConfigModalProps> = ({
                     />
 
                     {/* Right Column: How You Sell It Form */}
-                    <div className="bg-[var(--theme-bg-card)] p-5 rounded-2xl border border-[var(--theme-border)] space-y-5 shadow-sm">
+                    {/* Right Column: How You Sell It Form */}
+                    <div className="bg-[var(--theme-bg-card)] p-5 rounded-2xl border border-[var(--theme-border)] space-y-5 shadow-xs">
                         <div className="flex items-center justify-between border-b border-[var(--theme-border)] pb-3">
                             <h4 className="text-xs font-bold uppercase tracking-wider text-[var(--theme-text-primary)]">How You Sell It</h4>
-                            <span className="px-2 py-0.5 rounded-full text-[9px] font-bold uppercase bg-[var(--theme-pill-bg)] text-[var(--theme-text-primary)] border border-[var(--theme-pill-border)]">
+                            <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold uppercase bg-[var(--theme-pill-bg)] text-[var(--theme-text-primary)] border border-[var(--theme-pill-border)]">
                                 {isCEO ? 'Direct Edit' : 'Requires Approval'}
                             </span>
                         </div>
 
                         {/* Step 0: Location Scope */}
                         <div className="space-y-2">
-                            <label className="text-[11px] font-bold uppercase tracking-wider text-[var(--theme-text-muted)] flex items-center gap-1.5">
-                                <span className="w-4 h-4 rounded-full bg-[var(--theme-primary)] text-[var(--theme-primary-text)] text-[10px] flex items-center justify-center font-bold">0</span>
+                            <label className="text-[11px] font-bold uppercase tracking-wider text-[var(--theme-text-secondary)] flex items-center gap-1.5">
+                                <span className="w-4 h-4 rounded-full bg-[var(--theme-accent)] text-white text-[11px] flex items-center justify-center font-bold">0</span>
                                 Apply to which location(s)?
                             </label>
                             <div className="grid grid-cols-1 gap-2">
@@ -235,15 +236,15 @@ export const SmartUnitConfigModal: React.FC<SmartUnitConfigModalProps> = ({
                                         onClick={() => setScope('THIS_SITE')}
                                         className={`p-2.5 rounded-xl border text-left transition-all cursor-pointer flex items-center justify-between ${
                                             scope === 'THIS_SITE'
-                                                ? 'bg-[var(--theme-pill-bg)] border-[var(--theme-primary)] text-[var(--theme-text-primary)]'
-                                                : 'bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] hover:bg-[var(--theme-bg-card-hover)]'
+                                                ? 'bg-[var(--theme-accent)]/10 border-[var(--theme-accent)] text-[var(--theme-text-primary)] shadow-xs ring-1 ring-[var(--theme-accent)]/30'
+                                                : 'bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] hover:bg-[var(--theme-bg-card-hover)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)]'
                                         }`}
                                     >
                                         <div>
-                                            <p className="text-[10px] font-bold">This Site</p>
-                                            <p className="text-[9px] opacity-70 font-mono truncate">{activeSite?.name || 'Current'}</p>
+                                            <p className="text-xs font-bold text-[var(--theme-text-primary)]">This Site</p>
+                                            <p className="text-[11px] text-[var(--theme-text-muted)] font-mono truncate">{activeSite?.name || 'Current'}</p>
                                         </div>
-                                        {scope === 'THIS_SITE' && <CheckCircle2 size={14} className="text-[var(--theme-text-primary)] shrink-0" />}
+                                        {scope === 'THIS_SITE' && <CheckCircle2 size={14} className="text-[var(--theme-accent)] shrink-0" />}
                                     </button>
 
                                     <button
@@ -251,15 +252,15 @@ export const SmartUnitConfigModal: React.FC<SmartUnitConfigModalProps> = ({
                                         onClick={() => setScope('SELECTED_SITES')}
                                         className={`p-2.5 rounded-xl border text-left transition-all cursor-pointer flex items-center justify-between ${
                                             scope === 'SELECTED_SITES'
-                                                ? 'bg-amber-500/10 border-amber-500 text-amber-700 dark:text-amber-300'
-                                                : 'bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] hover:bg-[var(--theme-bg-card-hover)]'
+                                                ? 'bg-amber-500/10 border-amber-500 text-[var(--theme-text-primary)] shadow-xs ring-1 ring-amber-500/30'
+                                                : 'bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] hover:bg-[var(--theme-bg-card-hover)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)]'
                                         }`}
                                     >
                                         <div>
-                                            <p className="text-[10px] font-bold">Several Places</p>
-                                            <p className="text-[9px] opacity-70 font-mono">{selectedSiteIds.length} selected</p>
+                                            <p className="text-xs font-bold text-[var(--theme-text-primary)]">Several Places</p>
+                                            <p className="text-[11px] text-[var(--theme-text-muted)] font-mono">{selectedSiteIds.length} selected</p>
                                         </div>
-                                        {scope === 'SELECTED_SITES' && <CheckCircle2 size={14} className="text-amber-600 dark:text-amber-400 shrink-0" />}
+                                        {scope === 'SELECTED_SITES' && <CheckCircle2 size={14} className="text-amber-500 shrink-0" />}
                                     </button>
 
                                     <button
@@ -267,22 +268,22 @@ export const SmartUnitConfigModal: React.FC<SmartUnitConfigModalProps> = ({
                                         onClick={() => setScope('ALL_SITES')}
                                         className={`p-2.5 rounded-xl border text-left transition-all cursor-pointer flex items-center justify-between ${
                                             scope === 'ALL_SITES'
-                                                ? 'bg-blue-500/10 border-blue-500 text-blue-700 dark:text-blue-300'
-                                                : 'bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] hover:bg-[var(--theme-bg-card-hover)]'
+                                                ? 'bg-blue-500/10 border-blue-500 text-[var(--theme-text-primary)] shadow-xs ring-1 ring-blue-500/30'
+                                                : 'bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] hover:bg-[var(--theme-bg-card-hover)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)]'
                                         }`}
                                     >
                                         <div>
-                                            <p className="text-[10px] font-bold">All Locations</p>
-                                            <p className="text-[9px] opacity-70 font-mono">{sites.length} sites</p>
+                                            <p className="text-xs font-bold text-[var(--theme-text-primary)]">All Locations</p>
+                                            <p className="text-[11px] text-[var(--theme-text-muted)] font-mono">{sites.length} sites</p>
                                         </div>
-                                        {scope === 'ALL_SITES' && <CheckCircle2 size={14} className="text-blue-600 dark:text-blue-400 shrink-0" />}
+                                        {scope === 'ALL_SITES' && <CheckCircle2 size={14} className="text-blue-500 shrink-0" />}
                                     </button>
                                 </div>
 
                                 {scope === 'SELECTED_SITES' && (
                                     <div className="bg-[var(--theme-bg-subtle)] rounded-xl border border-[var(--theme-border)] p-3 grid grid-cols-2 gap-1.5 max-h-[130px] overflow-y-auto">
                                         {sites.map(site => (
-                                            <label key={site.id} className="flex items-center gap-2 text-[10px] font-medium cursor-pointer p-1 hover:bg-[var(--theme-bg-card-hover)] rounded-lg">
+                                            <label key={site.id} className="flex items-center gap-2 text-[11px] font-medium cursor-pointer p-1.5 hover:bg-[var(--theme-bg-card-hover)] rounded-lg transition-colors">
                                                 <input
                                                     type="checkbox"
                                                     checked={selectedSiteIds.includes(site.id)}
@@ -295,7 +296,7 @@ export const SmartUnitConfigModal: React.FC<SmartUnitConfigModalProps> = ({
                                                     }}
                                                     className="rounded border-[var(--theme-border)] text-[var(--theme-accent)] focus:ring-[var(--theme-accent)]"
                                                 />
-                                                <span className="truncate">{site.name}</span>
+                                                <span className="truncate text-[var(--theme-text-primary)]">{site.name}</span>
                                             </label>
                                         ))}
                                     </div>
@@ -314,15 +315,15 @@ export const SmartUnitConfigModal: React.FC<SmartUnitConfigModalProps> = ({
 
                         {/* Smart Conversion Summary Box */}
                         <div className="p-3.5 rounded-xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] space-y-1.5 text-xs">
-                            <div className="flex items-center gap-1.5 text-[var(--theme-text-secondary)] font-bold uppercase text-[10px]">
-                                <Info size={13} />
+                            <div className="flex items-center gap-1.5 text-[var(--theme-text-secondary)] font-bold uppercase text-[11px]">
+                                <Info size={13} className="text-[var(--theme-accent)]" />
                                 <span>Smart Conversion Summary</span>
                             </div>
                             <p className="font-medium text-[var(--theme-text-secondary)]">
                                 Checkout quantity entry is configured for <span className="font-bold uppercase text-[var(--theme-text-primary)]">{smartIntelligence?.sellUnit.label} ({smartIntelligence?.sellUnit.shortLabel})</span>.
                             </p>
                             {smartIntelligence?.sellUnit.allowDecimal && (
-                                <p className="text-[10px] text-amber-700 dark:text-amber-400 font-semibold">
+                                <p className="text-[11px] text-amber-700 dark:text-amber-400 font-semibold">
                                     Decimal entry enabled (step: {smartIntelligence.sellUnit.step}). Cashiers can weigh/measure fractional quantities at POS checkout.
                                 </p>
                             )}
@@ -342,7 +343,7 @@ export const SmartUnitConfigModal: React.FC<SmartUnitConfigModalProps> = ({
                     <button
                         type="button"
                         onClick={onClose}
-                        className="px-5 py-2.5 bg-[var(--theme-bg-subtle)] text-[var(--theme-text-muted)] border border-[var(--theme-border)] rounded-xl font-medium text-xs hover:bg-[var(--theme-bg-card-hover)] transition-all cursor-pointer"
+                        className="px-5 py-2.5 bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card-hover)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] border border-[var(--theme-border)] rounded-xl font-semibold text-xs transition-all cursor-pointer"
                     >
                         {t('common.cancel')}
                     </button>
@@ -350,7 +351,7 @@ export const SmartUnitConfigModal: React.FC<SmartUnitConfigModalProps> = ({
                         type="button"
                         onClick={handleSave}
                         disabled={isSaving}
-                        className="px-6 py-2.5 bg-[var(--theme-primary)] text-[var(--theme-primary-text)] rounded-xl font-bold text-xs uppercase tracking-wider hover:opacity-90 transition-all shadow-sm active:scale-95 disabled:opacity-50 cursor-pointer flex items-center gap-2"
+                        className="px-6 py-2.5 bg-[var(--theme-accent)] text-white rounded-xl font-bold text-xs uppercase tracking-wider hover:opacity-95 transition-all shadow-xs active:scale-95 disabled:opacity-50 cursor-pointer flex items-center gap-2"
                     >
                         {isSaving ? (
                             <>

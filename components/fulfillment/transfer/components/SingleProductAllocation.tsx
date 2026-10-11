@@ -1,5 +1,5 @@
 import React from 'react';
-import { Search } from 'lucide-react';
+import { Search, ArrowRight, AlertTriangle } from 'lucide-react';
 import { Product, Site, User } from '../../../../types';
 import { ProductSelector } from '../ProductSelector';
 import { getSellUnit } from '../../../../utils/units';
@@ -38,9 +38,9 @@ export const SingleProductAllocation: React.FC<SingleProductAllocationProps> = (
     setBulkDistributionAllocations,
 }) => {
     return (
-        <div className="space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-300">
+        <div className="space-y-4 animate-in fade-in duration-200">
             <div>
-                <label className="block text-xs font-bold text-gray-400 uppercase mb-2">Select Product to Distribute</label>
+                <label className="block text-xs font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider mb-2">Select Product to Distribute</label>
                 {isSearchingProduct ? (
                     <div className="mt-2">
                         <ProductSelector
@@ -66,21 +66,21 @@ export const SingleProductAllocation: React.FC<SingleProductAllocationProps> = (
                     </div>
                 ) : (
                     <div onClick={() => setIsSearchingProduct(true)} className="cursor-pointer">
-                        <div className="w-full bg-black/40 border border-white/10 rounded-lg px-3 py-2 text-sm text-white flex justify-between items-center hover:border-blue-500/50 transition-colors">
+                        <div className="w-full min-h-[44px] bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-4 py-2.5 text-sm text-[var(--theme-text-primary)] flex justify-between items-center hover:border-primary transition-colors touch-manipulation">
                             <span>
                                 {bulkDistributionProductId
                                     ? products.find(p => p.id === bulkDistributionProductId)?.name
                                     : "Select Product to Distribute..."}
                             </span>
-                            <Search size={14} className="text-gray-500" />
+                            <Search size={16} className="text-[var(--theme-text-secondary)]" />
                         </div>
                     </div>
                 )}
             </div>
 
             {bulkDistributionProductId && (
-                <div className="bg-black/20 rounded-xl border border-white/5 overflow-hidden">
-                    <div className="p-3 bg-white/5 border-b border-white/5 font-bold text-xs text-white uppercase tracking-wider flex justify-between items-center">
+                <div className="bg-[var(--theme-bg-subtle)] rounded-2xl border border-[var(--theme-border)] overflow-hidden shadow-xs">
+                    <div className="p-3.5 bg-[var(--theme-bg-card)] border-b border-[var(--theme-border)] font-semibold text-xs text-[var(--theme-text-primary)] uppercase tracking-wider flex justify-between items-center">
                         <span>Store Allocation</span>
                         <div className="flex items-center gap-3">
                             {(() => {
@@ -96,25 +96,26 @@ export const SingleProductAllocation: React.FC<SingleProductAllocationProps> = (
                                 const unitLabel = unitDef.code !== 'UNIT' ? ` ${unitDef.shortLabel}` : '';
                                 const isWarning = displayRemaining < 0;
                                 return (
-                                    <span className={`text-[10px] px-2 py-0.5 rounded flex items-center gap-1 ${isWarning ? 'bg-red-500/10 text-red-400' : 'bg-green-500/10 text-green-400'}`}>
-                                        Stock: {displayStock.toLocaleString()}{unitLabel} ➔ Rem: {displayRemaining.toLocaleString()}{unitLabel}
+                                    <span className={`text-[11px] font-mono font-semibold px-2 py-0.5 rounded-lg flex items-center gap-1 tabular-nums ${isWarning ? 'bg-red-500/10 text-red-500 border border-red-500/20' : 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20'}`}>
+                                        Stock: {displayStock.toLocaleString()}{unitLabel} <ArrowRight size={10} /> Rem: {displayRemaining.toLocaleString()}{unitLabel}
                                     </span>
                                 );
                             })()}
-                            <span className="text-gray-400">Total: {bulkDistributionAllocations.reduce((acc, curr) => acc + curr.quantity, 0)} Units</span>
+                            <span className="text-[var(--theme-text-secondary)] font-mono text-[11px]">Total: {bulkDistributionAllocations.reduce((acc, curr) => acc + curr.quantity, 0)} Units</span>
                         </div>
                     </div>
-                    <div className="divide-y divide-white/5 max-h-[300px] overflow-y-auto custom-scrollbar">
+                    <div className="divide-y divide-[var(--theme-border)] max-h-[300px] overflow-y-auto custom-scrollbar">
                         {bulkDistributionAllocations.length === 0 ? (
-                            <div className="p-6 text-center text-red-400 font-bold text-xs uppercase tracking-wider">
-                                ⚠️ No stores have this warehouse configured as a replenishment source.
+                            <div className="p-6 text-center text-red-500 font-semibold text-xs tracking-wider flex items-center justify-center gap-2">
+                                <AlertTriangle size={16} />
+                                No stores have this warehouse configured as a replenishment source.
                             </div>
                         ) : (
                             bulkDistributionAllocations.map(alloc => {
                                 const site = sites.find(s => s.id === alloc.storeId);
                                 return (
-                                    <div key={alloc.storeId} className="p-3 flex items-center justify-between hover:bg-white/[0.02]">
-                                        <span className="text-sm text-gray-300">{site?.name}</span>
+                                    <div key={alloc.storeId} className="p-3.5 flex items-center justify-between hover:bg-[var(--theme-bg-card)] transition-colors">
+                                        <span className="text-sm font-medium text-[var(--theme-text-primary)]">{site?.name}</span>
                                         <input
                                             type="number"
                                             min="0"
@@ -125,7 +126,7 @@ export const SingleProductAllocation: React.FC<SingleProductAllocationProps> = (
                                                 if (target) target.quantity = parseInt(e.target.value) || 0;
                                                 setBulkDistributionAllocations(newAllocs);
                                             }}
-                                            className="w-20 bg-black/40 border border-white/10 rounded px-2 py-1 text-right text-white focus:border-blue-500 focus:outline-none"
+                                            className="w-24 min-h-[44px] bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl px-3 py-1.5 text-right font-mono font-bold text-sm text-[var(--theme-text-primary)] focus:border-primary focus:outline-none touch-manipulation tabular-nums"
                                             aria-label={`Quantity for ${site?.name}`}
                                         />
                                     </div>

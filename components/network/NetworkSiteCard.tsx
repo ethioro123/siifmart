@@ -7,6 +7,7 @@ import { CURRENCY_SYMBOL } from '../../constants';
 import { formatCompactNumber } from '../../utils/formatting';
 import { useStore } from '../../contexts/CentralStore';
 import { hasPermission } from '../../utils/permissions';
+import { productsService } from '../../services/products.service';
 
 const PRODUCTS_PER_PAGE = 9;
 
@@ -46,8 +47,20 @@ export const NetworkSiteCard: React.FC<NetworkSiteCardProps> = ({
     const { user } = useStore();
     const canViewCost = hasPermission(user?.role, 'VIEW_COST_PRICE');
     const isWarehouse = site.type === 'Warehouse' || site.type === 'Distribution Center';
+    const [fetchedSiteProducts, setFetchedSiteProducts] = React.useState<Product[]>([]);
+
+    // RULE 10: On-demand lazy load site products only when card is expanded
+    React.useEffect(() => {
+        if (!isExpanded) return;
+        productsService.getAll(site.id, 25, 0).then(res => {
+            if (res.data && res.data.length > 0) {
+                setFetchedSiteProducts(res.data);
+            }
+        }).catch(() => {});
+    }, [isExpanded, site.id]);
+
     const displayedProducts = React.useMemo(() => {
-        let prods = siteProducts;
+        let prods = fetchedSiteProducts.length > 0 ? fetchedSiteProducts : siteProducts;
         if (isLowStockFilterActive) {
             prods = prods.filter(p => p.stock <= (p.minStock || 10));
         }
@@ -60,13 +73,13 @@ export const NetworkSiteCard: React.FC<NetworkSiteCardProps> = ({
             );
         }
         return prods;
-    }, [siteProducts, isLowStockFilterActive, searchTerm]);
+    }, [siteProducts, fetchedSiteProducts, isLowStockFilterActive, searchTerm]);
 
     const getStockStatusColor = (stock: number, minStock: number = 10) => {
-        if (stock <= 0) return 'text-red-700 bg-red-50 dark:bg-red-950/30 dark:text-red-400 border-red-200 dark:border-red-900/30';
-        if (stock <= minStock) return 'text-amber-800 bg-amber-50 dark:bg-amber-950/30 dark:text-amber-300 border-amber-200 dark:border-amber-900/30';
-        if (stock < 50) return 'text-blue-700 bg-blue-50 dark:bg-blue-950/30 dark:text-blue-300 border-blue-200 dark:border-blue-900/30';
-        return 'text-[#2C5E3B] bg-emerald-50 dark:bg-[#2C5E3B]/20 dark:text-[#A9CBA2] border-emerald-200 dark:border-emerald-950/30';
+        if (stock <= 0) return 'text-rose-600 dark:text-rose-400 bg-rose-500/10 border-rose-500/20';
+        if (stock <= minStock) return 'text-amber-600 dark:text-amber-400 bg-amber-500/10 border-amber-500/20';
+        if (stock < 50) return 'text-blue-600 dark:text-blue-400 bg-blue-500/10 border-blue-500/20';
+        return 'text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 border-emerald-500/20';
     };
 
     const totalPages = Math.max(1, Math.ceil(displayedProducts.length / PRODUCTS_PER_PAGE));
@@ -74,38 +87,38 @@ export const NetworkSiteCard: React.FC<NetworkSiteCardProps> = ({
     const paginatedProducts = displayedProducts.slice(startIdx, startIdx + PRODUCTS_PER_PAGE);
 
     return (
-        <div className="bg-white/85 dark:bg-[#18201B]/60 border border-[#E2DCCE] dark:border-emerald-950/20 rounded-3xl overflow-hidden shadow-sm transition-all hover:border-[#2C5E3B]/40">
+        <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl overflow-hidden shadow-sm transition-all hover:border-[var(--theme-accent)]">
             <div className="p-5 sm:p-6">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                     <div className="flex items-start sm:items-center gap-3.5 flex-1">
                         <div
                             className={`p-3 rounded-2xl border shrink-0 ${
                                 isWarehouse
-                                    ? 'bg-blue-50 text-blue-700 dark:bg-blue-950/30 dark:text-blue-300 border-blue-200 dark:border-blue-900/30'
-                                    : 'bg-emerald-50 text-[#2C5E3B] dark:bg-[#2C5E3B]/20 dark:text-[#A9CBA2] border-emerald-200 dark:border-emerald-950/30'
+                                    ? 'bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20'
+                                    : 'bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border-indigo-500/20'
                             }`}
                         >
                             {isWarehouse ? <Building size={22} /> : <Store size={22} />}
                         </div>
                         <div>
                             <div className="flex items-center gap-2 flex-wrap">
-                                <h3 className="text-base font-black text-[#1E3F27] dark:text-white">{site.name}</h3>
-                                <span className="text-[10px] font-mono bg-stone-100 dark:bg-black/40 text-stone-500 border border-[#E2DCCE] dark:border-white/10 px-1.5 py-0.5 rounded">
+                                <h3 className="text-base font-bold text-[var(--theme-text-primary)] tracking-tight">{site.name}</h3>
+                                <span className="text-[10px] font-mono bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] border border-[var(--theme-border)] px-1.5 py-0.5 rounded">
                                     {site.code || site.type}
                                 </span>
                                 {(metrics.lowStockItems > 0 || metrics.outOfStockItems > 0) && (
-                                    <span className="text-[9px] bg-amber-50 dark:bg-amber-950/30 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-900/30 px-2 py-0.5 rounded-full font-bold flex items-center gap-1">
+                                    <span className="text-[9px] bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 px-2 py-0.5 rounded-full font-semibold flex items-center gap-1">
                                         <AlertTriangle size={10} />
                                         {metrics.lowStockItems + metrics.outOfStockItems} Low Stock
                                     </span>
                                 )}
                             </div>
-                            <p className="text-xs text-stone-500 dark:text-stone-400 flex flex-wrap items-center gap-2 mt-1 font-medium">
+                            <p className="text-xs text-[var(--theme-text-secondary)] flex flex-wrap items-center gap-2 mt-1 font-medium">
                                 <span className="flex items-center gap-1"><MapPin size={12} /> {site.address || 'Regional Node'}</span>
                                 {site.manager && (
                                     <>
-                                        <span className="text-stone-300 dark:text-stone-700">•</span>
-                                        <span className="flex items-center gap-1 text-[#2C5E3B] dark:text-[#A9CBA2] font-bold">
+                                        <span className="opacity-40">•</span>
+                                        <span className="flex items-center gap-1 text-[var(--theme-text-primary)] font-semibold">
                                             <Users size={12} /> {site.manager}
                                         </span>
                                     </>
@@ -115,29 +128,29 @@ export const NetworkSiteCard: React.FC<NetworkSiteCardProps> = ({
                     </div>
 
                     {/* Metrics Bar */}
-                    <div className="flex items-center justify-between sm:justify-end gap-5 pt-3 sm:pt-0 border-t sm:border-t-0 border-[#E2DCCE]/60 dark:border-white/5">
+                    <div className="flex items-center justify-between sm:justify-end gap-5 pt-3 sm:pt-0 border-t sm:border-t-0 border-[var(--theme-border)]">
                         <div className="text-left sm:text-right">
-                            <p className="text-[10px] text-stone-400 uppercase font-bold tracking-wider">Products</p>
-                            <p className="text-base sm:text-lg font-black text-[#2C5E3B] dark:text-[#A9CBA2] font-mono">
+                            <p className="text-[10px] text-[var(--theme-text-secondary)] uppercase font-semibold tracking-wider">Products</p>
+                            <p className="text-base sm:text-lg font-bold text-[var(--theme-text-primary)] font-mono tabular-nums">
                                 {metrics.uniqueProducts}
                             </p>
                         </div>
                         <div className="text-left sm:text-right">
-                            <p className="text-[10px] text-stone-400 uppercase font-bold tracking-wider">Total Items</p>
-                            <p className="text-base sm:text-lg font-black text-[#1E3F27] dark:text-white font-mono">
+                            <p className="text-[10px] text-[var(--theme-text-secondary)] uppercase font-semibold tracking-wider">Total Items</p>
+                            <p className="text-base sm:text-lg font-bold text-[var(--theme-text-primary)] font-mono tabular-nums">
                                 {metrics.totalItems.toLocaleString()}
                             </p>
                         </div>
                         <div className="text-left sm:text-right">
-                            <p className="text-[10px] text-stone-400 uppercase font-bold tracking-wider">Asset Value</p>
-                            <p className="text-base sm:text-lg font-black text-[#1E3F27] dark:text-white font-mono">
+                            <p className="text-[10px] text-[var(--theme-text-secondary)] uppercase font-semibold tracking-wider">Asset Value</p>
+                            <p className="text-base sm:text-lg font-bold text-emerald-600 dark:text-emerald-400 font-mono tabular-nums">
                                 {canViewCost ? formatCompactNumber(metrics.totalValue, { currency: CURRENCY_SYMBOL }) : '••••••'}
                             </p>
                         </div>
                         <button
                             type="button"
                             onClick={onToggleExpand}
-                            className="p-2 bg-[#FAF8F5] hover:bg-[#2C5E3B] text-stone-500 hover:text-white dark:bg-black/30 dark:text-stone-400 dark:hover:bg-[#A9CBA2] dark:hover:text-[#18201B] border border-[#E2DCCE] dark:border-white/10 rounded-2xl transition-all cursor-pointer ml-1"
+                            className="p-2 bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-accent)] text-[var(--theme-text-secondary)] hover:text-white border border-[var(--theme-border)] rounded-xl transition-all cursor-pointer ml-1"
                             title={isExpanded ? 'Collapse products list' : 'View products stationed at this location'}
                         >
                             {isExpanded ? <ChevronDown size={18} /> : <ChevronRight size={18} />}
@@ -147,7 +160,7 @@ export const NetworkSiteCard: React.FC<NetworkSiteCardProps> = ({
 
                 {/* Accordion: Stocked Catalog at this Location */}
                 {isExpanded && (
-                    <div className="mt-5 pt-5 border-t border-[#E2DCCE]/60 dark:border-white/5 animate-in fade-in">
+                    <div className="mt-5 pt-5 border-t border-[var(--theme-border)] animate-in fade-in">
                         {displayedProducts.length > 0 ? (
                             <>
                                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
@@ -155,22 +168,22 @@ export const NetworkSiteCard: React.FC<NetworkSiteCardProps> = ({
                                         <div
                                             key={product.id}
                                             onClick={() => onSelectProduct(product)}
-                                            className="bg-[#FAF8F5] dark:bg-black/30 border border-[#E2DCCE] dark:border-white/10 hover:border-[#2C5E3B] rounded-2xl p-3.5 flex flex-col justify-between cursor-pointer transition-all group"
+                                            className="bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] hover:border-[var(--theme-accent)] rounded-xl p-3.5 flex flex-col justify-between cursor-pointer transition-all group"
                                         >
                                             <div className="flex items-start justify-between gap-2 mb-2">
                                                 <div className="overflow-hidden flex-1">
-                                                    <p className="text-xs font-bold text-[#1E3F27] dark:text-white group-hover:text-[#2C5E3B] dark:group-hover:text-[#A9CBA2] truncate transition-colors">
+                                                    <p className="text-xs font-bold text-[var(--theme-text-primary)] group-hover:text-[var(--theme-accent)] truncate transition-colors">
                                                         {product.name}
                                                     </p>
-                                                    <p className="text-[10px] text-stone-400 font-mono mt-0.5">{product.sku || 'No SKU'}</p>
+                                                    <p className="text-[10px] text-[var(--theme-text-secondary)] font-mono mt-0.5">{product.sku || 'No SKU'}</p>
                                                 </div>
-                                                <span className={`text-[10px] font-black px-2 py-0.5 rounded-lg border font-mono shrink-0 ${getStockStatusColor(product.stock, product.minStock)}`}>
+                                                <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-lg border font-mono shrink-0 ${getStockStatusColor(product.stock, product.minStock)}`}>
                                                     {product.stock} units
                                                 </span>
                                             </div>
-                                            <div className="flex items-center justify-between mt-2 pt-2 border-t border-[#E2DCCE]/60 dark:border-white/5 text-[11px]">
-                                                <span className="text-stone-400 font-medium">{product.category}</span>
-                                                <span className="font-mono font-bold text-[#1E3F27] dark:text-white">
+                                            <div className="flex items-center justify-between mt-2 pt-2 border-t border-[var(--theme-border)] text-[11px]">
+                                                <span className="text-[var(--theme-text-secondary)] font-medium">{product.category}</span>
+                                                <span className="font-mono font-bold text-[var(--theme-text-primary)] tabular-nums">
                                                     {formatCompactNumber(product.price, { currency: CURRENCY_SYMBOL })}
                                                 </span>
                                             </div>
@@ -180,8 +193,8 @@ export const NetworkSiteCard: React.FC<NetworkSiteCardProps> = ({
 
                                 {/* Pagination Bar */}
                                 {totalPages > 1 && (
-                                    <div className="flex items-center justify-between pt-4 mt-3 border-t border-[#E2DCCE]/60 dark:border-white/5 text-xs">
-                                        <span className="text-stone-500 dark:text-stone-400 font-medium">
+                                    <div className="flex items-center justify-between pt-4 mt-3 border-t border-[var(--theme-border)] text-xs">
+                                        <span className="text-[var(--theme-text-secondary)] font-medium">
                                             Showing {startIdx + 1}-{Math.min(startIdx + PRODUCTS_PER_PAGE, displayedProducts.length)} of {displayedProducts.length} products
                                         </span>
                                         <div className="flex items-center gap-1.5">
@@ -189,18 +202,18 @@ export const NetworkSiteCard: React.FC<NetworkSiteCardProps> = ({
                                                 type="button"
                                                 onClick={() => onPageChange(currentPage - 1)}
                                                 disabled={currentPage === 1}
-                                                className="px-3 py-1 bg-[#FAF8F5] dark:bg-black/30 border border-[#E2DCCE] dark:border-white/10 rounded-xl font-bold disabled:opacity-40 cursor-pointer"
+                                                className="px-3 py-1 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl font-semibold text-[var(--theme-text-primary)] disabled:opacity-40 cursor-pointer hover:bg-[var(--theme-bg-card)] transition-colors"
                                             >
                                                 Prev
                                             </button>
-                                            <span className="font-mono font-bold text-stone-600 dark:text-stone-300 px-1">
+                                            <span className="font-mono font-bold text-[var(--theme-text-primary)] px-1">
                                                 {currentPage} / {totalPages}
                                             </span>
                                             <button
                                                 type="button"
                                                 onClick={() => onPageChange(currentPage + 1)}
                                                 disabled={currentPage === totalPages}
-                                                className="px-3 py-1 bg-[#FAF8F5] dark:bg-black/30 border border-[#E2DCCE] dark:border-white/10 rounded-xl font-bold disabled:opacity-40 cursor-pointer"
+                                                className="px-3 py-1 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl font-semibold text-[var(--theme-text-primary)] disabled:opacity-40 cursor-pointer hover:bg-[var(--theme-bg-card)] transition-colors"
                                             >
                                                 Next
                                             </button>
@@ -209,9 +222,9 @@ export const NetworkSiteCard: React.FC<NetworkSiteCardProps> = ({
                                 )}
                             </>
                         ) : (
-                            <div className="p-8 text-center bg-[#FAF8F5] dark:bg-black/30 rounded-2xl border border-dashed border-[#E2DCCE] dark:border-white/10">
-                                <Package size={24} className="text-stone-300 dark:text-stone-600 mx-auto mb-1.5" />
-                                <p className="text-xs font-bold text-stone-500">No matching products at this facility</p>
+                            <div className="p-8 text-center bg-[var(--theme-bg-subtle)] rounded-xl border border-dashed border-[var(--theme-border)]">
+                                <Package size={24} className="text-[var(--theme-text-secondary)] opacity-40 mx-auto mb-1.5" />
+                                <p className="text-xs font-semibold text-[var(--theme-text-secondary)]">No matching products at this facility</p>
                             </div>
                         )}
                     </div>

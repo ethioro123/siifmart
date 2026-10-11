@@ -37,9 +37,9 @@ export default function CentralOperations() {
     const { loading, theme } = useStore();
     const navigate = useNavigate();
 
-    // Apple Minimalist Aesthetic Accents: Off-White (#F5F5F7) in Dark, Deep Black (#1D1D1F) in Light
+    // Apple System Blue Accent (#0071E3 in light, #2997FF in dark)
     const isDark = theme === 'dark';
-    const accentColor = isDark ? '#F5F5F7' : '#1D1D1F';
+    const accentColor = isDark ? '#2997FF' : '#0071E3';
 
 
     const activeCountry = (effectiveCountry || settings?.country || 'ET') as Country;
@@ -153,9 +153,9 @@ export default function CentralOperations() {
         const outStock = scopedProducts.filter(p => p.stock === 0 || p.status === 'out_of_stock').length;
 
         return [
-            { name: 'Optimal', value: goodStock, color: isDark ? '#CFCFCF' : '#252525' },
-            { name: 'Low Stock', value: lowStock, color: '#7D7D7D' },
-            { name: 'Out of Stock', value: outStock, color: '#545454' },
+            { name: 'Optimal', value: goodStock, color: isDark ? '#30D158' : '#34C759' },
+            { name: 'Low Stock', value: lowStock, color: isDark ? '#FF9F0A' : '#FF9500' },
+            { name: 'Out of Stock', value: outStock, color: isDark ? '#FF453A' : '#FF3B30' },
         ].filter(d => d.value > 0);
 
     }, [scopedProducts]);
@@ -415,16 +415,16 @@ export default function CentralOperations() {
             )}
 
             {/* --- BOTTOM UTILITIES & ACTIONS (Get App & Executive Report) --- */}
-            <div className="mt-12 p-5 sm:p-6 bg-white dark:bg-[#1A1410] rounded-3xl border border-[#CCBEB1]/40 dark:border-[#CCBEB1]/20 backdrop-blur-md shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div className="mt-12 p-5 sm:p-6 bg-[var(--theme-bg-card)] rounded-2xl border border-[var(--theme-border)] shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4">
                 <div className="flex items-center gap-3 w-full sm:w-auto">
-                    <div className="w-10 h-10 rounded-2xl bg-[#FFDBBB]/15 dark:bg-[#FFDBBB]/15 text-[#664930] dark:text-[#FFDBBB] border border-[#997E67]/40 flex items-center justify-center shrink-0">
+                    <div className="w-10 h-10 rounded-xl bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] border border-[var(--theme-accent)]/20 flex items-center justify-center shrink-0">
                         <Activity size={20} />
                     </div>
                     <div>
-                        <h4 className="text-sm font-bold text-[#24180E] dark:text-[#FAF7F2]">
+                        <h4 className="text-sm font-bold text-[var(--theme-text-primary)]">
                             SIIFMART Central Operations Suite
                         </h4>
-                        <p className="text-xs text-[#997E67] dark:text-[#CCBEB1]">
+                        <p className="text-xs text-[var(--theme-text-secondary)]">
                             Download native desktop workstation or generate periodic operational intelligence reports
                         </p>
                     </div>
@@ -435,7 +435,7 @@ export default function CentralOperations() {
 
                     <button
                         onClick={handleGenerateReport}
-                        className="flex items-center gap-2 px-5 py-2.5 h-[46px] rounded-2xl bg-[#664930] hover:bg-[#523a25] dark:bg-[#FFDBBB] dark:hover:bg-[#FFE6CE] text-[#FFDBBB] dark:text-[#664930] text-xs font-bold transition-all shadow-md active:scale-95 cursor-pointer"
+                        className="flex items-center gap-2 px-4 py-2.5 h-[42px] rounded-xl bg-[var(--theme-accent)] hover:opacity-90 text-white text-xs font-semibold transition-all shadow-sm active:scale-[0.98] cursor-pointer"
                         title="Generate Operational Performance Report"
                     >
                         <Download size={16} />

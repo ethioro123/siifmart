@@ -1,5 +1,5 @@
 import React, { useMemo, useState, useEffect } from 'react';
-import { Shield, RefreshCw, Zap } from 'lucide-react';
+import { Shield, RefreshCw, Zap, ArrowRight } from 'lucide-react';
 import { WMSJob, Site, User } from '../../../types';
 import Pagination from '../../shared/Pagination';
 import { formatJobId } from '../../../utils/jobIdFormatter';
@@ -33,7 +33,7 @@ export const DriverJobBoard: React.FC<DriverJobBoardProps> = ({
         });
         if (globalSearch) { const query = globalSearch.toLowerCase().trim(); baseJobs = baseJobs.filter(j => formatJobId(j).toLowerCase().includes(query) || sites.find(s => s.id === j.destSiteId)?.name?.toLowerCase().includes(query) || sites.find(s => s.id === j.sourceSiteId || s.id === j.siteId)?.name?.toLowerCase().includes(query) || j.trackingNumber?.toLowerCase().includes(query)); }
         return baseJobs;
-    }, [filteredJobs, globalSearch, sites]);
+    }, [filteredJobs, globalSearch, sites, employees, user]);
 
     const dispatchTotalPages = Math.ceil(filteredDispatchJobs.length / DISPATCH_ITEMS_PER_PAGE);
     const paginatedDispatchJobs = useMemo(() => filteredDispatchJobs.slice((dispatchCurrentPage - 1) * DISPATCH_ITEMS_PER_PAGE, dispatchCurrentPage * DISPATCH_ITEMS_PER_PAGE), [filteredDispatchJobs, dispatchCurrentPage]);
@@ -44,33 +44,32 @@ export const DriverJobBoard: React.FC<DriverJobBoardProps> = ({
 
     return (
         <div className="space-y-4 pt-4">
-            <button onClick={() => setIsExpanded(!isExpanded)} className="w-full flex items-center justify-between p-3 sm:p-4 bg-gray-50 dark:bg-white/5 border-2 border-gray-100 dark:border-white/10 rounded-2xl hover:bg-gray-100 dark:hover:bg-white/10 transition-colors shadow-sm active:scale-[0.98] min-h-[52px] gap-2">
-                <div className="flex items-center gap-3"><div className="w-2.5 h-2.5 rounded-full bg-[#A9CBA2] shadow-[0_0_10px_rgba(169,203,162,0.4)] animate-pulse" /><span className="text-[11px] font-black text-gray-900 dark:text-white uppercase tracking-widest italic">{finalT('warehouse.docks.availableMissions') || 'Available Missions'}</span></div>
-                <span className="text-[9px] sm:text-[10px] font-black text-[#2C5E3B] dark:text-[#A9CBA2] bg-[#2C5E3B]/10 dark:bg-[#A9CBA2]/10 px-2.5 sm:px-3 py-1 rounded-full uppercase border border-[#2C5E3B]/20 dark:border-[#A9CBA2]/20 shrink-0 whitespace-nowrap">{finalT('warehouse.driverHub.availableCount').replace('{count}', String(filteredDispatchJobs.length))}</span>
+            <button onClick={() => setIsExpanded(!isExpanded)} className="w-full flex items-center justify-between p-3 sm:p-4 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-2xl hover:bg-[var(--theme-bg-card)] transition-colors shadow-sm active:scale-[0.99] touch-manipulation min-h-[52px] gap-2">
+                <div className="flex items-center gap-3"><div className="w-2.5 h-2.5 rounded-full bg-primary" /><span className="text-xs font-semibold text-[var(--theme-text-primary)] uppercase tracking-wider">{finalT('warehouse.docks.availableMissions') || 'Available Missions'}</span></div>
+                <span className="text-[11px] font-semibold text-primary bg-primary/10 px-2.5 sm:px-3 py-1 rounded-full uppercase border border-primary/20 shrink-0 whitespace-nowrap">{finalT('warehouse.driverHub.availableCount').replace('{count}', String(filteredDispatchJobs.length))}</span>
             </button>
             {isExpanded && (
-                <div className="space-y-5">
+                <div className="space-y-4">
                     {paginatedDispatchJobs.length === 0 ? (
-                        <div className="bg-gray-50 dark:bg-black/20 rounded-2xl p-8 border-2 border-dashed border-gray-200 dark:border-white/10 text-center shadow-inner">
-                            <Shield size={28} className="text-gray-300 dark:text-gray-700 mx-auto mb-3" />
-                            <h3 className="text-[10px] font-black text-gray-400 dark:text-white uppercase tracking-widest italic">{finalT('warehouse.driverHub.noJobsAvailable')}</h3>
+                        <div className="bg-[var(--theme-bg-subtle)] rounded-2xl p-8 border border-dashed border-[var(--theme-border)] text-center">
+                            <Shield size={28} className="text-[var(--theme-text-muted)] mx-auto mb-3" />
+                            <h3 className="text-xs font-semibold text-[var(--theme-text-muted)] uppercase tracking-wider">{finalT('warehouse.driverHub.noJobsAvailable')}</h3>
                         </div>
                     ) : (
                         paginatedDispatchJobs.map(job => {
                             const dest = sites.find(s => s.id === job.destSiteId); const source = sites.find(s => s.id === job.sourceSiteId || s.id === job.siteId); const isCritical = job.priority === 'Critical';
-                            const progress = 0;
                             return (
-                                <div key={job.id} onClick={() => { setSelectedJob(job); setIsDetailsOpen(true); }} className={`group border ${isCritical ? 'border-red-500/20 shadow-red-500/5' : 'border-gray-200 dark:border-white/10'} rounded-2xl sm:rounded-3xl p-3.5 sm:p-5 bg-white dark:bg-white/5 cursor-pointer relative overflow-hidden shadow-sm active:scale-[0.98] transition-colors`}>
+                                <div key={job.id} onClick={() => { setSelectedJob(job); setIsDetailsOpen(true); }} className={`group border ${isCritical ? 'border-red-500/30' : 'border-[var(--theme-border)]'} rounded-2xl p-3.5 sm:p-5 bg-[var(--theme-bg-card)] cursor-pointer relative overflow-hidden shadow-sm active:scale-[0.99] transition-colors touch-manipulation`}>
                                     <div className="flex justify-between items-start mb-3">
-                                        <div className="flex items-center gap-2"><div className={`w-2 h-2 rounded-full ${isCritical ? 'bg-red-500 animate-ping' : 'bg-[#A9CBA2]'}`} /><p className="text-[10px] font-black text-gray-500 dark:text-gray-400 tracking-widest uppercase">{formatJobId(job)}</p></div>
-                                        <div className={`px-2 py-0.5 rounded-full text-[8px] font-black uppercase tracking-[0.2em] border ${isCritical ? 'bg-red-500/10 text-red-600 dark:text-red-500 border-red-500/20' : 'bg-[#2C5E3B]/10 dark:bg-[#A9CBA2]/10 text-[#2C5E3B] dark:text-[#A9CBA2] border-[#2C5E3B]/20 dark:border-[#A9CBA2]/20'}`}>{job.priority}</div>
+                                        <div className="flex items-center gap-2"><div className={`w-2 h-2 rounded-full ${isCritical ? 'bg-red-500 animate-ping' : 'bg-primary'}`} /><p className="text-[11px] font-mono font-medium text-[var(--theme-text-secondary)] tracking-wider uppercase">{formatJobId(job)}</p></div>
+                                        <div className={`px-2 py-0.5 rounded-full text-[11px] font-semibold uppercase tracking-wider border ${isCritical ? 'bg-red-500/10 text-red-500 border-red-500/20' : 'bg-primary/10 text-primary border-primary/20'}`}>{job.priority}</div>
                                     </div>
                                     <div className="mb-4">
-                                        <p className="text-[9px] text-gray-400 dark:text-gray-500 font-bold uppercase tracking-wider mb-1">{finalT('warehouse.driverHub.route')}</p>
-                                        <div className="flex items-center gap-2 text-xs font-bold text-gray-900 dark:text-white uppercase leading-none min-w-0"><span className="truncate">{source?.name || finalT('warehouse.centralOpsArea')}</span><span className="text-[#A9CBA2] font-normal shrink-0">➤</span><span className="truncate">{dest?.name || finalT('warehouse.driverHub.customer')}</span></div>
+                                        <p className="text-[11px] text-[var(--theme-text-muted)] font-medium uppercase tracking-wider mb-1">{finalT('warehouse.driverHub.route')}</p>
+                                        <div className="flex items-center gap-2 text-xs font-semibold text-[var(--theme-text-primary)] uppercase leading-none min-w-0"><span className="truncate">{source?.name || finalT('warehouse.centralOpsArea')}</span><ArrowRight size={12} className="text-primary shrink-0" /><span className="truncate">{dest?.name || finalT('warehouse.driverHub.customer')}</span></div>
                                     </div>
-                                    <div className="flex flex-wrap items-center justify-between gap-2 sm:gap-4 pt-3 sm:pt-4 border-t border-gray-100 dark:border-white/5">
-                                        <div className="bg-gray-100 dark:bg-black/40 px-3 py-1.5 rounded-xl border border-gray-200 dark:border-white/5 shadow-inner"><span className="text-[10px] font-black text-gray-900 dark:text-white">{job.items || 0}</span><span className="text-[8px] text-gray-400 dark:text-gray-500 ml-1.5 uppercase font-bold tracking-widest">{finalT('warehouse.driverHub.units')}</span></div>
+                                    <div className="flex flex-wrap items-center justify-between gap-2 sm:gap-4 pt-3 sm:pt-4 border-t border-[var(--theme-border)]">
+                                        <div className="bg-[var(--theme-bg-subtle)] px-3 py-1.5 rounded-xl border border-[var(--theme-border)]"><span className="text-xs font-bold font-mono tabular-nums text-[var(--theme-text-primary)]">{job.items || 0}</span><span className="text-[11px] text-[var(--theme-text-muted)] ml-1.5 uppercase font-medium tracking-wider">{finalT('warehouse.driverHub.units')}</span></div>
                                         {job.assignedTo ? (
                                             <button disabled={processingJobIds.has(job.id)} onClick={async (e) => {
                                                 e.stopPropagation(); const currentEmployee = employees.find(emp => (user?.email && emp.email === user.email) || (user?.name && emp.name?.toLowerCase() === user.name.toLowerCase()) || ((user as any)?.employeeId && emp.id === (user as any).employeeId) || emp.id === user?.id); const employeeId = currentEmployee?.id || user?.id;
@@ -81,7 +80,7 @@ export const DriverJobBoard: React.FC<DriverJobBoardProps> = ({
                                                     if (job.orderRef) { const parentTransfer = jobs.find(j => j.id === job.orderRef && j.type === 'TRANSFER'); if (parentTransfer) await wmsJobsService.update(parentTransfer.id, { transferStatus: 'In-Transit' } as any); }
                                                     await refreshData(); addNotification('success', finalT('warehouse.driverHub.payloadSecure'));
                                                 } catch (err) { addNotification('alert', finalT('warehouse.driverHub.cloudSyncFailed')); } finally { setProcessingJobIds(prev => { const next = new Set(prev); next.delete(job.id); return next; }); }
-                                            }} className="flex-1 min-h-[44px] py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest flex items-center justify-center gap-2 disabled:opacity-50 transition-colors shadow-md bg-[#2C5E3B] text-white active:scale-95">{processingJobIds.has(job.id) ? <RefreshCw className="animate-spin" size={13} /> : <Zap size={13} />} {finalT('warehouse.driverHub.pickup')}</button>
+                                            }} className="flex-1 min-h-[44px] py-2.5 px-4 rounded-xl text-xs font-semibold uppercase tracking-wider flex items-center justify-center gap-2 disabled:opacity-50 transition-colors bg-primary text-white hover:bg-primary/90 active:scale-[0.98] touch-manipulation">{processingJobIds.has(job.id) ? <RefreshCw className="animate-spin" size={14} /> : <Zap size={14} />} {finalT('warehouse.driverHub.pickup')}</button>
                                         ) : (
                                             <button onClick={async (e) => {
                                                 e.stopPropagation(); const currentEmployee = employees.find(emp => (user?.email && emp.email === user.email) || (user?.name && emp.name?.toLowerCase() === user.name.toLowerCase()) || ((user as any)?.employeeId && emp.id === (user as any).employeeId) || emp.id === user?.id);
@@ -89,7 +88,7 @@ export const DriverJobBoard: React.FC<DriverJobBoardProps> = ({
                                                 if (!canWorkerPerformJob(currentEmployee.role, job.type)) { addNotification('alert', 'Floor workers cannot accept delivery missions. Only verified drivers can perform deliveries.'); return; }
                                                 const isInternal = !currentEmployee?.driverType || currentEmployee?.driverType === 'internal'; setProcessingJobIds(prev => new Set(prev).add(job.id));
                                                 try { await wmsJobsService.update(job.id, { assignedTo: currentEmployee.id, status: isInternal ? 'In-Progress' : 'Pending' }); await refreshData(); addNotification('success', finalT('warehouse.driverHub.jobAccepted')); } catch (err) { addNotification('alert', finalT('warehouse.driverHub.jobAcceptFailed')); } finally { setProcessingJobIds(prev => { const next = new Set(prev); next.delete(job.id); return next; }); }
-                                            }} className={`flex-1 min-h-[44px] py-2.5 rounded-xl text-[10px] font-black uppercase tracking-[0.15em] flex items-center justify-center gap-2 disabled:opacity-50 transition-colors shadow-md active:scale-95 ${isCritical ? 'bg-red-600 text-white' : 'bg-[#224429] dark:bg-[#EAE5D9] hover:bg-[#1B3520] dark:hover:bg-[#DFD9CA] text-[#FAF8F5] dark:text-[#1E3B24]'}`}>{processingJobIds.has(job.id) ? <RefreshCw className="animate-spin" size={13} /> : <Zap size={13} />} {finalT('warehouse.driverHub.acceptJob')}</button>
+                                            }} className={`flex-1 min-h-[44px] py-2.5 px-4 rounded-xl text-xs font-semibold uppercase tracking-wider flex items-center justify-center gap-2 disabled:opacity-50 transition-colors active:scale-[0.98] touch-manipulation ${isCritical ? 'bg-red-600 text-white hover:bg-red-700' : 'bg-primary text-white hover:bg-primary/90'}`}>{processingJobIds.has(job.id) ? <RefreshCw className="animate-spin" size={14} /> : <Zap size={14} />} {finalT('warehouse.driverHub.acceptJob')}</button>
                                         )}
                                     </div>
                                 </div>

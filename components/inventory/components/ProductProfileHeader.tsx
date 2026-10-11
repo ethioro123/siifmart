@@ -69,13 +69,13 @@ export const ProductProfileHeader: React.FC<ProductProfileHeaderProps> = ({
                     <div className="space-y-1.5 min-w-0 flex-1">
                         {/* Meta Tags Row */}
                         <div className="flex flex-wrap items-center gap-2">
-                            <span className="px-2.5 py-0.5 rounded-lg text-[9px] font-bold uppercase tracking-wider bg-[var(--theme-pill-bg)] text-[var(--theme-text-primary)] border border-[var(--theme-pill-border)]">
+                            <span className="px-2.5 py-0.5 rounded-lg text-[11px] font-bold uppercase tracking-wider bg-[var(--theme-pill-bg)] text-[var(--theme-text-primary)] border border-[var(--theme-pill-border)]">
                                 {product.category || 'General Catalog'}
                             </span>
-                            <span className="px-2.5 py-0.5 rounded-lg text-[9px] font-mono font-bold uppercase tracking-wider bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] border border-[var(--theme-border)]">
+                            <span className="px-2.5 py-0.5 rounded-lg text-[11px] font-mono font-bold uppercase tracking-wider bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] border border-[var(--theme-border)]">
                                 SKU: {product.sku}
                             </span>
-                            <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg text-[9px] font-bold uppercase tracking-wider border ${statusConfig.badgeClass}`}>
+                            <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg text-[11px] font-bold uppercase tracking-wider border ${statusConfig.badgeClass}`}>
                                 <span className={`w-1.5 h-1.5 rounded-full ${statusConfig.dotClass} animate-pulse`} />
                                 {statusConfig.label}
                             </span>
@@ -102,19 +102,19 @@ export const ProductProfileHeader: React.FC<ProductProfileHeaderProps> = ({
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 pt-1">
                 {/* 1. Retail Price */}
                 <div className="bg-[var(--theme-bg-card)] p-3.5 sm:p-4 rounded-2xl border border-[var(--theme-border)] shadow-xs">
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--theme-text-secondary)] block mb-1">
+                    <span className="text-[11px] font-bold uppercase tracking-wider text-[var(--theme-text-secondary)] block mb-1">
                         Retail Selling Price
                     </span>
                     <div className="flex items-baseline gap-1.5">
                         <span className="text-lg sm:text-xl font-mono font-bold text-[var(--theme-text-primary)] tracking-tight">
                             {currencySymbol} {formatPriceValue(product.price)}
                         </span>
-                        <span className="text-[10px] font-semibold text-[var(--theme-text-secondary)] uppercase font-mono">
+                        <span className="text-[11px] font-semibold text-[var(--theme-text-secondary)] uppercase font-mono">
                             /{sellUnit?.shortLabel || 'unit'}
                         </span>
                     </div>
                     {product.salePrice && product.salePrice > 0 && (
-                        <span className="inline-block mt-1 text-[9px] font-bold text-amber-600 dark:text-amber-300 font-mono">
+                        <span className="inline-block mt-1 text-[11px] font-bold text-amber-600 dark:text-amber-300 font-mono">
                             Promo: {currencySymbol} {formatPriceValue(product.salePrice)}
                         </span>
                     )}
@@ -122,7 +122,7 @@ export const ProductProfileHeader: React.FC<ProductProfileHeaderProps> = ({
 
                 {/* 2. Stock Level */}
                 <div className="bg-[var(--theme-bg-card)] p-3.5 sm:p-4 rounded-2xl border border-[var(--theme-border)] shadow-xs">
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--theme-text-secondary)] block mb-1">
+                    <span className="text-[11px] font-bold uppercase tracking-wider text-[var(--theme-text-secondary)] block mb-1">
                         Available On-Hand
                     </span>
                     <div className="flex items-baseline gap-1.5">
@@ -130,14 +130,14 @@ export const ProductProfileHeader: React.FC<ProductProfileHeaderProps> = ({
                             {formatStockDisplay(product.stock, product)}
                         </span>
                     </div>
-                    <span className="text-[10px] font-semibold text-[var(--theme-text-primary)] uppercase block mt-1 tracking-wide">
+                    <span className="text-[11px] font-semibold text-[var(--theme-text-primary)] uppercase block mt-1 tracking-wide">
                         {product.packQuantity && product.packQuantity > 1 ? `Pack of ${product.packQuantity}` : 'Single Unit'}
                     </span>
                 </div>
 
                 {/* 3. Total Asset Value */}
                 <div className="bg-[var(--theme-bg-card)] p-3.5 sm:p-4 rounded-2xl border border-[var(--theme-border)] shadow-xs">
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--theme-text-secondary)] block mb-1">
+                    <span className="text-[11px] font-bold uppercase tracking-wider text-[var(--theme-text-secondary)] block mb-1">
                         Total Stock Value
                     </span>
                     <div className="flex items-baseline gap-1.5">
@@ -145,7 +145,7 @@ export const ProductProfileHeader: React.FC<ProductProfileHeaderProps> = ({
                             {currencySymbol} {totalAssetValue.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
                         </span>
                     </div>
-                    <span className="text-[10px] font-semibold text-[var(--theme-text-secondary)] uppercase block mt-1 font-mono">
+                    <span className="text-[11px] font-semibold text-[var(--theme-text-secondary)] uppercase block mt-1 font-mono">
                         {product.stock} × {formatPriceValue(product.price)}
                     </span>
                 </div>
@@ -153,7 +153,7 @@ export const ProductProfileHeader: React.FC<ProductProfileHeaderProps> = ({
                 {/* 4. Margin & Profit (If privileged role) or Reorder Level */}
                 {showCostPrice ? (
                     <div className="bg-[var(--theme-bg-card)] p-3.5 sm:p-4 rounded-2xl border border-[var(--theme-border)] shadow-xs">
-                        <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--theme-text-secondary)] block mb-1">
+                        <span className="text-[11px] font-bold uppercase tracking-wider text-[var(--theme-text-secondary)] block mb-1">
                             Gross Margin
                         </span>
                         <div className="flex items-baseline gap-1.5">
@@ -161,13 +161,13 @@ export const ProductProfileHeader: React.FC<ProductProfileHeaderProps> = ({
                                 {marginPct > 0 ? `${marginPct.toFixed(1)}%` : '0%'}
                             </span>
                         </div>
-                        <span className="text-[10px] font-semibold text-[var(--theme-text-secondary)] uppercase block mt-1 font-mono">
+                        <span className="text-[11px] font-semibold text-[var(--theme-text-secondary)] uppercase block mt-1 font-mono">
                             Cost: {currencySymbol}{formatPriceValue(cost)}
                         </span>
                     </div>
                 ) : (
                     <div className="bg-[var(--theme-bg-card)] p-3.5 sm:p-4 rounded-2xl border border-[var(--theme-border)] shadow-xs">
-                        <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--theme-text-secondary)] block mb-1">
+                        <span className="text-[11px] font-bold uppercase tracking-wider text-[var(--theme-text-secondary)] block mb-1">
                             Min Safety Threshold
                         </span>
                         <div className="flex items-baseline gap-1.5">
@@ -175,7 +175,7 @@ export const ProductProfileHeader: React.FC<ProductProfileHeaderProps> = ({
                                 {product.minStock !== undefined && product.minStock !== null ? `${product.minStock} units` : 'Not Set'}
                             </span>
                         </div>
-                        <span className="text-[10px] font-semibold text-[var(--theme-text-secondary)] uppercase block mt-1">
+                        <span className="text-[11px] font-semibold text-[var(--theme-text-secondary)] uppercase block mt-1">
                             Safety Buffer
                         </span>
                     </div>

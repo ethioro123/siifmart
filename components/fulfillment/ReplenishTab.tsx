@@ -1,9 +1,9 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { useLanguage } from '../../contexts/LanguageContext';
 import { Product, WMSJob } from '../../types';
 import { ReplenishHeader } from './replenish/ReplenishHeader';
 import { ReplenishList } from './replenish/ReplenishList';
 import { ReplenishHistory } from './replenish/ReplenishHistory';
+import { useFulfillment } from './FulfillmentContext';
 
 interface ReplenishTabProps {
     filteredProducts: Product[];
@@ -23,10 +23,36 @@ const REPLENISH_ITEMS_PER_PAGE = 25;
 const REPLENISH_HISTORY_PER_PAGE = 25;
 
 export const ReplenishTab: React.FC<ReplenishTabProps> = ({
-    filteredProducts, products, historicalJobs, sales,
-    isSubmitting, setIsSubmitting, setSelectedJob, setIsDetailsOpen,
-    wmsJobsService, addNotification, activeSite
+    filteredProducts,
+    products,
+    historicalJobs,
+    sales,
+    isSubmitting,
+    setIsSubmitting,
+    setSelectedJob,
+    setIsDetailsOpen,
+    wmsJobsService,
+    addNotification,
+    activeSite
 }) => {
+    let fulfillmentContext: any = null;
+    try {
+        fulfillmentContext = useFulfillment();
+    } catch {
+        // Fallback when rendered outside context
+    }
+
+    const [viewMode, setViewMode] = useState<'Process' | 'History'>('Process');
+
+    // RULE 10: Fetch history on demand when user switches to History view
+    useEffect(() => {
+        if (viewMode === 'History') {
+            if (fulfillmentContext?.loadHistoricalJobs) {
+                fulfillmentContext.loadHistoricalJobs();
+            }
+        }
+    }, [viewMode]);
+
     // --- REPLENISH-SPECIFIC STATE ---
     const [replenishSearch, setReplenishSearch] = useState('');
     const [replenishCurrentPage, setReplenishCurrentPage] = useState(1);
@@ -74,8 +100,10 @@ export const ReplenishTab: React.FC<ReplenishTabProps> = ({
     }, [replenishSearch, replenishFilter, replenishSortBy]);
 
     return (
-        <div className="flex-1 overflow-hidden flex flex-col space-y-6">
+        <div className="flex-1 overflow-hidden flex flex-col space-y-4">
             <ReplenishHeader
+                viewMode={viewMode}
+                setViewMode={setViewMode}
                 filteredProducts={filteredProducts}
                 products={products}
                 replenishSearch={replenishSearch}
@@ -97,31 +125,38 @@ export const ReplenishTab: React.FC<ReplenishTabProps> = ({
                 activeSite={activeSite}
             />
 
-            <ReplenishList
-                sortedReplenishItems={sortedReplenishItems}
-                paginatedReplenishItems={paginatedReplenishItems}
-                replenishCurrentPage={safeReplenishCurrentPage}
-                replenishTotalPages={replenishTotalPages}
-                REPLENISH_ITEMS_PER_PAGE={REPLENISH_ITEMS_PER_PAGE}
-                setReplenishCurrentPage={setReplenishCurrentPage}
-                selectedReplenishItems={selectedReplenishItems}
-                setSelectedReplenishItems={setSelectedReplenishItems}
-                expandedReplenishItem={expandedReplenishItem}
-                setExpandedReplenishItem={setExpandedReplenishItem}
-                creatingReplenishTask={creatingReplenishTask}
-                setCreatingReplenishTask={setCreatingReplenishTask}
-                sales={sales}
-                wmsJobsService={wmsJobsService}
-                addNotification={addNotification}
-                activeSite={activeSite}
-            />
-
-            <ReplenishHistory
-                historicalJobs={historicalJobs}
-                REPLENISH_HISTORY_PER_PAGE={REPLENISH_HISTORY_PER_PAGE}
-                setSelectedJob={setSelectedJob}
-                setIsDetailsOpen={setIsDetailsOpen}
-            />
+            <div className="flex-1 overflow-hidden flex flex-col">
+                {viewMode === 'Process' ? (
+                    <ReplenishList
+                        sortedReplenishItems={sortedReplenishItems}
+                        paginatedReplenishItems={paginatedReplenishItems}
+                        replenishCurrentPage={safeReplenishCurrentPage}
+                        replenishTotalPages={replenishTotalPages}
+                        REPLENISH_ITEMS_PER_PAGE={REPLENISH_ITEMS_PER_PAGE}
+                        setReplenishCurrentPage={setReplenishCurrentPage}
+                        selectedReplenishItems={selectedReplenishItems}
+                        setSelectedReplenishItems={setSelectedReplenishItems}
+                        expandedReplenishItem={expandedReplenishItem}
+                        setExpandedReplenishItem={setExpandedReplenishItem}
+                        creatingReplenishTask={creatingReplenishTask}
+                        setCreatingReplenishTask={setCreatingReplenishTask}
+                        sales={sales}
+                        wmsJobsService={wmsJobsService}
+                        addNotification={addNotification}
+                        activeSite={activeSite}
+                    />
+                ) : (
+                    <ReplenishHistory
+                        historicalJobs={fulfillmentContext?.historicalJobs || historicalJobs}
+                        REPLENISH_HISTORY_PER_PAGE={REPLENISH_HISTORY_PER_PAGE}
+                        setSelectedJob={setSelectedJob}
+                        setIsDetailsOpen={setIsDetailsOpen}
+                        employees={fulfillmentContext?.employees}
+                    />
+                )}
+            </div>
         </div>
     );
 };
+
+export default ReplenishTab;

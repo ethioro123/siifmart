@@ -26,30 +26,30 @@ export const LocationDropdown: React.FC<LocationDropdownProps> = ({ count, detai
         <div className="relative">
             <button
                 onClick={(e) => { e.stopPropagation(); setIsOpen(!isOpen); }}
-                className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-purple-500/10 border border-purple-500/20 hover:bg-purple-500/20 hover:border-purple-500/40 transition-all cursor-pointer max-w-fit"
+                className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[var(--theme-accent)]/10 border border-[var(--theme-accent)]/20 hover:bg-[var(--theme-accent)]/15 transition-all cursor-pointer max-w-fit"
             >
-                <span className="text-[8px] font-bold text-purple-400">+{count} other {count === 1 ? 'location' : 'locations'}</span>
-                <ChevronDown size={10} className={`text-purple-400 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+                <span className="text-[11px] font-semibold text-[var(--theme-accent)]">+{count} other {count === 1 ? 'location' : 'locations'}</span>
+                <ChevronDown size={12} className={`text-[var(--theme-accent)] transition-transform ${isOpen ? 'rotate-180' : ''}`} />
             </button>
 
             {isOpen && (
                 <>
                     <div className="fixed inset-0 z-40" onClick={() => setIsOpen(false)} />
-                    <div className="absolute left-0 top-full mt-1 z-50 min-w-[200px] bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl shadow-2xl overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
-                        <div className="px-3 py-2 bg-[var(--theme-bg-subtle)] border-b border-[var(--theme-border)]">
-                            <span className="text-[9px] font-bold text-[var(--theme-text-muted)] uppercase tracking-wider">Also stocked at</span>
+                    <div className="absolute left-0 top-full mt-1 z-50 min-w-[220px] bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl shadow-xl overflow-hidden animate-in fade-in slide-in-from-top-2 duration-150">
+                        <div className="px-3.5 py-2 bg-[var(--theme-bg-subtle)] border-b border-[var(--theme-border)]">
+                            <span className="text-[11px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider">Also stocked at</span>
                         </div>
                         <div className="max-h-[180px] overflow-y-auto custom-scrollbar">
                             {details.map((loc, idx) => (
                                 <div
                                     key={idx}
-                                    className="px-3 py-2 flex items-center justify-between gap-3 hover:bg-[var(--theme-bg-subtle)] transition-colors border-b border-[var(--theme-border)] last:border-0"
+                                    className="px-3.5 py-2.5 flex items-center justify-between gap-3 hover:bg-[var(--theme-bg-subtle)] transition-colors border-b border-[var(--theme-border)] last:border-0"
                                 >
                                     <div className="flex flex-col min-w-0">
-                                        <span className="text-[10px] font-semibold text-[var(--theme-text-primary)] truncate">{loc.location}</span>
-                                        <span className="text-[8px] text-[var(--theme-text-muted)] truncate">{getSiteName(loc.siteId)}</span>
+                                        <span className="text-xs font-semibold text-[var(--theme-text-primary)] truncate">{loc.location}</span>
+                                        <span className="text-[11px] text-[var(--theme-text-muted)] truncate">{getSiteName(loc.siteId)}</span>
                                     </div>
-                                    <div className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded-lg ${loc.stock > 10 ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400' : loc.stock > 0 ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400' : 'bg-red-500/10 text-red-500'}`}>
+                                    <div className={`text-[11px] font-mono font-bold tabular-nums px-2 py-0.5 rounded-md ${loc.stock > 10 ? 'bg-[#34C759]/10 text-[#34C759]' : loc.stock > 0 ? 'bg-[#FF9F0A]/10 text-[#FF9F0A]' : 'bg-[#FF3B30]/10 text-[#FF3B30]'}`}>
                                         {loc.stock}
                                     </div>
                                 </div>

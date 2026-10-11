@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { Upload, Download, Truck } from 'lucide-react';
+import { Upload, Download } from 'lucide-react';
 import { WMSJob, User, Site, PurchaseOrder, Product } from '../../types';
 import { DocksOutboundView } from './docks/DocksOutboundView';
 import { DocksInboundView } from './docks/DocksInboundView';
@@ -16,16 +16,16 @@ interface DocksTabProps {
     refreshData: () => Promise<void>;
     setActiveTab: (tab: any) => void;
     setReceivingPO: (po: PurchaseOrder) => void;
-    purchaseOrdersService: any;
+    purchaseOrdersService?: any;
     wmsJobsService: any;
-    logSystemEvent: (action: string, details: string, user: string, category: string) => void;
-    generatePackLabelHTML: (data: any, options: any) => Promise<string>;
+    logSystemEvent?: (action: string, details: string, user: string, category: string) => void;
+    generatePackLabelHTML?: (data: any, options: any) => Promise<string>;
     formatJobId: (job: WMSJob) => string;
-    formatDateTime: (date: string) => string;
-    formatRelativeTime: (date: string) => string;
+    formatDateTime?: (date: string) => string;
+    formatRelativeTime?: (date: string) => string;
     setSelectedJob: (job: WMSJob | null) => void;
     setIsDetailsOpen: (isOpen: boolean) => void;
-    completeJob: (jobId: string, employeeName: string) => Promise<any>;
+    completeJob?: (jobId: string, employeeName: string) => Promise<any>;
     products: Product[];
 }
 
@@ -41,13 +41,9 @@ export const DocksTab: React.FC<DocksTabProps> = ({
     refreshData,
     setActiveTab,
     setReceivingPO,
-    purchaseOrdersService,
     wmsJobsService,
-    logSystemEvent,
     generatePackLabelHTML,
     formatJobId,
-    formatDateTime,
-    formatRelativeTime,
     setSelectedJob,
     setIsDetailsOpen,
     completeJob,
@@ -129,16 +125,16 @@ export const DocksTab: React.FC<DocksTabProps> = ({
     };
 
     return (
-        <div className="flex flex-col h-full gap-6">
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mx-4 md:mx-0">
+        <div className="flex flex-col h-full gap-4 sm:gap-6">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
                 {/* DOCK CATEGORY SWITCHER (INBOUND / OUTBOUND) */}
-                <div className="flex items-center gap-2 bg-stone-200/60 dark:bg-black/40 p-1 rounded-2xl border border-[#E2DCCE]/60 dark:border-white/5 shadow-xs">
+                <div className="flex items-center gap-1.5 bg-[var(--theme-bg-subtle)] p-1 rounded-2xl border border-[var(--theme-border)] shadow-xs">
                     <button
                         onClick={() => setDockCategory('INBOUND')}
-                        className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all ${
+                        className={`flex items-center gap-2 px-3.5 sm:px-4 py-2 min-h-[44px] rounded-xl text-xs font-semibold uppercase tracking-wider transition-colors touch-manipulation ${
                             dockCategory === 'INBOUND'
-                                ? 'bg-[#2C5E3B] text-white shadow-xs'
-                                : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-white'
+                                ? 'bg-primary text-white shadow-xs'
+                                : 'text-[var(--theme-text-muted)] hover:text-[var(--theme-text-primary)]'
                         }`}
                     >
                         <Download size={14} />
@@ -146,10 +142,10 @@ export const DocksTab: React.FC<DocksTabProps> = ({
                     </button>
                     <button
                         onClick={() => setDockCategory('OUTBOUND')}
-                        className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all ${
+                        className={`flex items-center gap-2 px-3.5 sm:px-4 py-2 min-h-[44px] rounded-xl text-xs font-semibold uppercase tracking-wider transition-colors touch-manipulation ${
                             dockCategory === 'OUTBOUND'
-                                ? 'bg-[#2C5E3B] text-white shadow-xs'
-                                : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-white'
+                                ? 'bg-primary text-white shadow-xs'
+                                : 'text-[var(--theme-text-muted)] hover:text-[var(--theme-text-primary)]'
                         }`}
                     >
                         <Upload size={14} />
@@ -158,16 +154,16 @@ export const DocksTab: React.FC<DocksTabProps> = ({
                 </div>
 
                 {/* VIEW MODE TOGGLE */}
-                <div className="bg-stone-200/60 dark:bg-white/5 backdrop-blur-xl p-1 rounded-xl border border-[#E2DCCE]/60 dark:border-white/10 flex shadow-xs">
+                <div className="bg-[var(--theme-bg-subtle)] p-1 rounded-xl border border-[var(--theme-border)] flex shadow-xs">
                     <button
                         onClick={() => setViewMode('Process')}
-                        className={`px-4 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wider transition-all ${viewMode === 'Process' ? 'bg-[#2C5E3B] text-white shadow-xs' : 'text-stone-600 hover:text-stone-900 dark:text-gray-400 dark:hover:text-white'}`}
+                        className={`px-3.5 py-1.5 min-h-[38px] rounded-lg text-xs font-semibold uppercase tracking-wider transition-colors touch-manipulation ${viewMode === 'Process' ? 'bg-primary text-white shadow-xs' : 'text-[var(--theme-text-muted)] hover:text-[var(--theme-text-primary)]'}`}
                     >
                         Process
                     </button>
                     <button
                         onClick={() => setViewMode('History')}
-                        className={`px-4 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wider transition-all ${viewMode === 'History' ? 'bg-[#2C5E3B] text-white shadow-xs' : 'text-stone-600 hover:text-stone-900 dark:text-gray-400 dark:hover:text-white'}`}
+                        className={`px-3.5 py-1.5 min-h-[38px] rounded-lg text-xs font-semibold uppercase tracking-wider transition-colors touch-manipulation ${viewMode === 'History' ? 'bg-primary text-white shadow-xs' : 'text-[var(--theme-text-muted)] hover:text-[var(--theme-text-primary)]'}`}
                     >
                         History
                     </button>
@@ -215,4 +211,3 @@ export const DocksTab: React.FC<DocksTabProps> = ({
         </div>
     );
 };
-

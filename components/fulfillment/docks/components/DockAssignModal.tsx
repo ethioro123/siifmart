@@ -1,5 +1,5 @@
 import React from 'react';
-import { Package, X, ArrowRight, Truck, Box } from 'lucide-react';
+import { Package, X, ArrowRight, Box } from 'lucide-react';
 import { WMSJob, Site, User } from '../../../../types';
 
 interface DockAssignModalProps {
@@ -20,7 +20,6 @@ export const DockAssignModal: React.FC<DockAssignModalProps> = ({
     targetDock,
     stagingJobs,
     sites,
-    employees,
     formatJobId,
     onAssignJobToDock,
     isSubmitting = false,
@@ -28,40 +27,41 @@ export const DockAssignModal: React.FC<DockAssignModalProps> = ({
     if (!isOpen || !targetDock) return null;
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-xs animate-in fade-in duration-200">
-            <div className="bg-white dark:bg-[#1C2620] border border-[#E2DCCE] dark:border-[#2C5E3B]/30 rounded-3xl w-full max-w-lg shadow-2xl overflow-hidden flex flex-col max-h-[85vh]">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/60 animate-in fade-in duration-200">
+            <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl w-full max-w-lg shadow-xl overflow-hidden flex flex-col max-h-[85vh]">
                 {/* Header */}
-                <div className="p-6 border-b border-[#E2DCCE]/60 dark:border-white/10 flex justify-between items-center bg-stone-50/50 dark:bg-black/20">
+                <div className="p-4 sm:p-5 border-b border-[var(--theme-border)] flex justify-between items-center bg-[var(--theme-bg-subtle)]">
                     <div>
                         <div className="flex items-center gap-2 mb-1">
-                            <span className="text-[10px] font-black uppercase tracking-widest text-[#2C5E3B] dark:text-[#A9CBA2] bg-[#2C5E3B]/10 px-2 py-0.5 rounded">
+                            <span className="text-[11px] font-semibold uppercase tracking-wider text-primary bg-primary/10 px-2 py-0.5 rounded-full border border-primary/20">
                                 Dock Loading Bay
                             </span>
-                            <span className="text-xs font-black font-mono text-slate-700 dark:text-slate-200">
+                            <span className="text-xs font-mono font-medium text-[var(--theme-text-primary)]">
                                 {targetDock}
                             </span>
                         </div>
-                        <h3 className="text-base font-black text-slate-900 dark:text-white uppercase tracking-tight">
+                        <h3 className="text-sm font-semibold text-[var(--theme-text-primary)] uppercase tracking-tight">
                             Select Shipment for {targetDock}
                         </h3>
                     </div>
                     <button
                         onClick={onClose}
-                        className="w-8 h-8 rounded-full bg-stone-200/60 dark:bg-white/10 flex items-center justify-center text-stone-600 dark:text-stone-300 hover:bg-stone-300 dark:hover:bg-white/20 transition-colors"
+                        aria-label="Close"
+                        className="w-9 h-9 rounded-xl bg-[var(--theme-bg-card)] border border-[var(--theme-border)] flex items-center justify-center text-[var(--theme-text-muted)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-subtle)] transition-colors touch-manipulation"
                     >
                         <X size={16} />
                     </button>
                 </div>
 
                 {/* Content */}
-                <div className="p-6 overflow-y-auto custom-scrollbar flex-1 space-y-3">
+                <div className="p-4 sm:p-5 overflow-y-auto flex-1 space-y-3">
                     {stagingJobs.length === 0 ? (
                         <div className="py-12 text-center">
-                            <Box size={40} className="text-stone-400 dark:text-stone-600 mx-auto mb-3" />
-                            <p className="text-xs text-stone-600 dark:text-stone-400 font-bold uppercase tracking-widest">
+                            <Box size={36} className="text-[var(--theme-text-muted)] mx-auto mb-2.5" />
+                            <p className="text-xs text-[var(--theme-text-secondary)] font-semibold uppercase tracking-wider">
                                 No Shipments Currently in Staging
                             </p>
-                            <p className="text-[10px] text-stone-400 mt-1">
+                            <p className="text-[11px] text-[var(--theme-text-muted)] mt-1">
                                 Pack jobs first to send them to outbound staging.
                             </p>
                         </div>
@@ -73,22 +73,22 @@ export const DockAssignModal: React.FC<DockAssignModalProps> = ({
                             return (
                                 <div
                                     key={job.id}
-                                    className="p-4 rounded-2xl border border-[#E2DCCE] dark:border-white/10 bg-stone-50/50 dark:bg-white/[0.02] hover:bg-stone-100/80 dark:hover:bg-white/[0.06] transition-all flex items-center justify-between gap-4 group"
+                                    className="p-3.5 rounded-xl border border-[var(--theme-border)] bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card)] transition-colors flex items-center justify-between gap-3 group"
                                 >
                                     <div className="flex items-center gap-3 min-w-0">
-                                        <div className="w-10 h-10 rounded-xl bg-[#2C5E3B]/10 dark:bg-[#A9CBA2]/10 text-[#2C5E3B] dark:text-[#A9CBA2] flex items-center justify-center shrink-0">
-                                            <Package size={20} />
+                                        <div className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0 border border-primary/20">
+                                            <Package size={18} />
                                         </div>
                                         <div className="min-w-0">
                                             <div className="flex items-center gap-2">
-                                                <p className="text-xs font-black text-slate-900 dark:text-white uppercase tracking-wider truncate">
+                                                <p className="text-xs font-mono font-medium text-[var(--theme-text-primary)] uppercase tracking-wider truncate">
                                                     {formatJobId(job)}
                                                 </p>
-                                                <span className="text-[9px] font-mono font-bold text-stone-500 bg-stone-200/60 dark:bg-white/10 px-1.5 py-0.2 rounded">
+                                                <span className="text-[11px] font-mono font-medium text-[var(--theme-text-muted)] bg-[var(--theme-bg-card)] border border-[var(--theme-border)] px-1.5 py-0.5 rounded-full tabular-nums">
                                                     {unitsCount} Units
                                                 </span>
                                             </div>
-                                            <p className="text-[10px] text-stone-500 dark:text-stone-400 font-bold uppercase truncate mt-0.5">
+                                            <p className="text-[11px] text-[var(--theme-text-secondary)] font-medium uppercase truncate mt-0.5">
                                                 To: {destSite ? destSite.name : 'Unknown Destination'}
                                             </p>
                                         </div>
@@ -101,10 +101,10 @@ export const DockAssignModal: React.FC<DockAssignModalProps> = ({
                                             await onAssignJobToDock(job.id, targetDock);
                                             onClose();
                                         }}
-                                        className="px-3.5 py-2 rounded-xl bg-[#2C5E3B] hover:bg-[#1E3B24] dark:bg-[#A9CBA2] dark:hover:bg-[#8eb886] text-white dark:text-[#18201B] text-[10px] font-black uppercase tracking-wider flex items-center gap-1.5 transition-all shrink-0 cursor-pointer shadow-sm disabled:opacity-50"
+                                        className="min-h-[44px] px-3.5 py-2 rounded-xl bg-primary hover:bg-primary/90 text-white text-[11px] font-semibold uppercase tracking-wider flex items-center gap-1.5 transition-colors shrink-0 shadow-sm disabled:opacity-50 active:scale-[0.98] touch-manipulation"
                                     >
                                         <span>Load {targetDock}</span>
-                                        <ArrowRight size={12} />
+                                        <ArrowRight size={13} />
                                     </button>
                                 </div>
                             );

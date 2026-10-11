@@ -62,21 +62,27 @@ export const TenderReconciliationModal: React.FC<TenderReconciliationModalProps>
         }
     };
 
+    const inputBase = "w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-[var(--theme-text-primary)] rounded-xl px-3.5 py-2.5 text-xs focus:outline-none focus:border-[#0071E3] dark:focus:border-[#2997FF] transition-colors placeholder:text-[var(--theme-text-secondary)]/50";
+    const labelBase = "text-xs font-medium text-[var(--theme-text-secondary)] mb-1.5 block";
+
     return (
         <Modal isOpen={isOpen} onClose={onClose} title="Mobile Money & Bank Settlement Reconciliation" size="md">
-            <div className="space-y-4 p-2">
-                <div className="p-3 bg-blue-50 dark:bg-blue-500/10 border border-blue-200 dark:border-blue-500/20 rounded-xl text-xs text-blue-700 dark:text-blue-200 flex items-center gap-2">
-                    <ShieldCheck size={18} className="text-blue-600 dark:text-blue-400 shrink-0" />
-                    <span>Reconcile POS-cleared mobile wallet balances against official bank / telco statements.</span>
+            <div className="space-y-4 p-1">
+                <div className="p-3.5 bg-blue-500/10 border border-blue-500/20 rounded-xl text-xs flex items-center gap-2.5">
+                    <ShieldCheck size={18} className="text-[#0071E3] dark:text-[#2997FF] shrink-0" />
+                    <span className="text-[var(--theme-text-secondary)] leading-relaxed">
+                        Reconcile POS-cleared mobile wallet balances against official bank / telco statements.
+                    </span>
                 </div>
 
                 <div className="grid grid-cols-2 gap-3">
                     <div>
-                        <label className="text-xs text-stone-500 dark:text-gray-400 uppercase font-bold mb-1 block">Tender Gateway</label>
+                        <label className={labelBase}>Tender Gateway</label>
                         <select
                             value={tenderType}
                             onChange={(e) => setTenderType(e.target.value as any)}
-                            className="woody-input"
+                            className={`${inputBase} cursor-pointer`}
+                            aria-label="Tender Gateway"
                         >
                             {effectiveCountry === 'ET' ? (
                                 <>
@@ -96,45 +102,49 @@ export const TenderReconciliationModal: React.FC<TenderReconciliationModalProps>
                     </div>
 
                     <div>
-                        <label className="text-xs text-stone-500 dark:text-gray-400 uppercase font-bold mb-1 block">Date</label>
+                        <label className={labelBase}>Reconciliation Date</label>
                         <input
                             type="date"
                             value={reconciliationDate}
                             onChange={(e) => setReconciliationDate(e.target.value)}
-                            className="woody-input"
+                            className={`${inputBase} font-mono`}
+                            aria-label="Reconciliation Date"
                         />
                     </div>
                 </div>
 
-                <div className="grid grid-cols-3 gap-3">
+                <div className="grid grid-cols-3 gap-2.5">
                     <div>
-                        <label className="text-xs text-stone-500 dark:text-gray-400 uppercase font-bold mb-1 block">POS Reported ({currencySymbol})</label>
+                        <label className={labelBase}>POS Reported</label>
                         <input
                             type="number"
                             value={posReportedAmount}
                             onChange={(e) => setPosReportedAmount(e.target.value ? parseFloat(e.target.value) : '')}
                             placeholder="0.00"
-                            className="woody-input font-mono"
+                            className={`${inputBase} font-mono tabular-nums`}
+                            aria-label="POS Reported Amount"
                         />
                     </div>
                     <div>
-                        <label className="text-xs text-stone-500 dark:text-gray-400 uppercase font-bold mb-1 block">Statement Amount ({currencySymbol})</label>
+                        <label className={labelBase}>Statement Total</label>
                         <input
                             type="number"
                             value={statementAmount}
                             onChange={(e) => setStatementAmount(e.target.value ? parseFloat(e.target.value) : '')}
                             placeholder="0.00"
-                            className="woody-input font-mono"
+                            className={`${inputBase} font-mono tabular-nums`}
+                            aria-label="Statement Amount"
                         />
                     </div>
                     <div>
-                        <label className="text-xs text-stone-500 dark:text-gray-400 uppercase font-bold mb-1 block">Fees Deducted ({currencySymbol})</label>
+                        <label className={labelBase}>Fee Deductions</label>
                         <input
                             type="number"
                             value={feeDeductions}
                             onChange={(e) => setFeeDeductions(e.target.value ? parseFloat(e.target.value) : '')}
                             placeholder="0.00"
-                            className="woody-input font-mono"
+                            className={`${inputBase} font-mono tabular-nums`}
+                            aria-label="Fee Deductions"
                         />
                     </div>
                 </div>
@@ -142,47 +152,52 @@ export const TenderReconciliationModal: React.FC<TenderReconciliationModalProps>
                 {posReportedAmount !== '' && statementAmount !== '' && (
                     <div className={`p-3 rounded-xl border flex justify-between items-center text-xs ${
                         Math.abs(calculatedVariance) < 0.01
-                            ? 'bg-emerald-50 dark:bg-emerald-500/10 border-emerald-200 dark:border-emerald-500/20 text-emerald-700 dark:text-emerald-400'
-                            : 'bg-rose-50 dark:bg-rose-500/10 border-rose-200 dark:border-rose-500/30 text-rose-700 dark:text-rose-300'
+                            ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-600 dark:text-emerald-400'
+                            : 'bg-rose-500/10 border-rose-500/30 text-rose-600 dark:text-rose-400'
                     }`}>
-                        <div className="flex items-center gap-1.5 font-bold">
+                        <div className="flex items-center gap-1.5 font-semibold">
                             {Math.abs(calculatedVariance) < 0.01 ? (
-                                <span>Perfect Zero-Variance Match</span>
+                                <span>Zero-Variance Perfect Match</span>
                             ) : (
                                 <>
-                                    <AlertCircle size={14} className="text-rose-600 dark:text-rose-400" />
+                                    <AlertCircle size={14} />
                                     <span>Variance Detected</span>
                                 </>
                             )}
                         </div>
-                        <span className="font-mono font-bold">
+                        <span className="font-mono font-semibold tabular-nums">
                             {calculatedVariance > 0 ? '+' : ''}{currencySymbol} {calculatedVariance.toLocaleString()}
                         </span>
                     </div>
                 )}
 
                 <div>
-                    <label className="text-xs text-stone-500 dark:text-gray-400 uppercase font-bold mb-1 block">Statement Reference / Batch ID</label>
+                    <label className={labelBase}>Statement Reference / Batch ID</label>
                     <input
                         type="text"
                         value={statementReference}
                         onChange={(e) => setStatementReference(e.target.value)}
                         placeholder="e.g. STMT-202610-TB0921"
-                        className="woody-input"
+                        className={inputBase}
+                        aria-label="Statement Reference"
                     />
                 </div>
 
-                <div className="flex justify-end gap-2 pt-2 border-t border-[#E2DCCE] dark:border-white/5">
-                    <button onClick={onClose} className="px-4 py-2 text-xs text-stone-500 dark:text-gray-400 hover:text-[#1E3F27] dark:hover:text-white transition-colors">
+                <div className="flex justify-end items-center gap-2 pt-2 border-t border-[var(--theme-border)]">
+                    <button
+                        onClick={onClose}
+                        disabled={isSubmitting}
+                        className="px-3.5 py-2 text-xs font-medium text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] transition-colors"
+                    >
                         Cancel
                     </button>
                     <button
                         onClick={handleSubmit}
                         disabled={isSubmitting || posReportedAmount === '' || statementAmount === ''}
-                        className="woody-btn-primary px-5 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5"
+                        className="px-4 py-2 bg-[#0071E3] dark:bg-[#2997FF] hover:opacity-95 text-white rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all shadow-xs disabled:opacity-40 disabled:cursor-not-allowed"
                     >
                         {isSubmitting && <Loader2 className="animate-spin" size={14} />}
-                        Save Reconciliation
+                        <span>Save Reconciliation</span>
                     </button>
                 </div>
             </div>

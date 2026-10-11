@@ -217,7 +217,7 @@ export const ReceiveSplitCard: React.FC<ReceiveSplitCardProps> = ({
                         {variant.barcode && (
                             <Badge variant="neutral" className="bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] text-[var(--theme-text-primary)] font-mono text-[11px] px-2.5 py-1 rounded-full flex items-center gap-1.5">
                                 <span>{variant.barcode}</span>
-                                <span className="opacity-60 text-[10px] uppercase tracking-wider">{t('warehouse.primary')}</span>
+                                <span className="opacity-60 text-[11px] uppercase tracking-wider">{t('warehouse.primary')}</span>
                             </Badge>
                         )}
                         {(variant.barcodes || []).map(code => (

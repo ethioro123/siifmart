@@ -49,7 +49,7 @@ export const shiftsService = {
     /**
      * Get all shifts (optionally scoped by siteId)
      */
-    async getAll(siteId?: string, limit: number = 200): Promise<ShiftRecord[]> {
+    async getAll(siteId?: string, limit: number = 25): Promise<ShiftRecord[]> {
         try {
             let query = supabase
                 .from('shifts')

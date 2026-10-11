@@ -1,6 +1,6 @@
 import React from 'react';
 import { Download, Plus, Check, Truck, AlertTriangle } from 'lucide-react';
-import { PurchaseOrder, User } from '../../../types';
+import { PurchaseOrder } from '../../../types';
 import Modal from '../../Modal';
 import { DocksHistory } from './DocksHistory';
 
@@ -48,29 +48,27 @@ export const DocksInboundView: React.FC<DocksInboundViewProps> = ({
     t
 }) => {
     return (
-        <div className="flex flex-col lg:flex-row gap-6 flex-1 min-h-0 overflow-y-auto lg:overflow-hidden pr-2 custom-scrollbar">
+        <div className="flex flex-col lg:flex-row gap-4 sm:gap-6 flex-1 min-h-0 overflow-y-auto lg:overflow-hidden pr-1">
             {viewMode === 'Process' ? (
                 <>
                     {/* DOCK TERMINAL MAP */}
-                    <div className="flex-1 glass-panel p-6 lg:p-8 relative overflow-hidden group lg:overflow-y-auto custom-scrollbar">
-                        <div className="absolute -top-24 -right-24 w-64 h-64 bg-[#2C5E3B]/10 blur-[100px] rounded-full pointer-events-none" />
-
-                        <div className="flex justify-between items-center mb-8 relative z-10">
+                    <div className="flex-1 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-4 sm:p-6 relative overflow-hidden lg:overflow-y-auto shadow-sm">
+                        <div className="flex justify-between items-center mb-6">
                             <div>
-                                <h3 className="text-xl font-black text-slate-900 dark:text-white tracking-tight uppercase flex items-center gap-3">
-                                    <div className="p-2 bg-[#2C5E3B]/20 rounded-xl">
-                                        <Download className="text-[#2C5E3B] dark:text-[#A9CBA2]" size={20} />
+                                <h3 className="text-base sm:text-lg font-bold text-[var(--theme-text-primary)] tracking-tight uppercase flex items-center gap-2.5">
+                                    <div className="p-2 bg-primary/10 rounded-xl border border-primary/20">
+                                        <Download className="text-primary" size={18} />
                                     </div>
                                     {t('warehouse.docks.inboundTitle')}
                                 </h3>
-                                <p className="text-[10px] text-gray-555 font-bold uppercase tracking-widest mt-2 flex items-center gap-2">
+                                <p className="text-[11px] text-[var(--theme-text-muted)] font-medium uppercase tracking-wider mt-1.5 flex items-center gap-2">
                                     <span className="h-1.5 w-1.5 rounded-full bg-green-500 animate-pulse" />
                                     Live Terminal Telemetry Active
                                 </p>
                             </div>
                         </div>
 
-                        <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 relative z-10">
+                        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
                             {Object.entries(dockStatus).filter(([k]) => k.startsWith('D')).map(([dock, data]) => {
                                 const status = data.status;
                                 const isSelectedForAssignment = selectedQueueVessel && status === 'Empty';
@@ -85,62 +83,64 @@ export const DocksInboundView: React.FC<DocksInboundViewProps> = ({
                                                 setSelectedDockId(dock);
                                             }
                                         }}
-                                        className={`aspect-square rounded-3xl border-2 flex flex-col items-center justify-center gap-4 relative group cursor-pointer transition-all duration-500 hover:scale-[1.02] active:scale-95 shadow-2xl ${status === 'Empty' ? (isSelectedForAssignment ? 'border-[#2C5E3B] dark:border-[#A9CBA2] animate-pulse bg-[#2C5E3B]/10 dark:bg-[#A9CBA2]/10' : 'border-[#E2DCCE]/60 dark:border-[#A9CBA2]/10 bg-[#FAF8F5]/30 dark:bg-[#18201B]/20') :
-                                            status === 'Occupied' ? 'border-red-500/20 bg-red-500/5 shadow-red-500/5' :
-                                                'border-orange-500/20 bg-orange-500/5 shadow-orange-500/5'
-                                            } `}
+                                        className={`aspect-square rounded-2xl border flex flex-col items-center justify-center p-3 sm:p-4 gap-3 relative cursor-pointer transition-colors shadow-sm touch-manipulation ${
+                                            status === 'Empty'
+                                                ? isSelectedForAssignment
+                                                    ? 'border-primary bg-primary/10'
+                                                    : 'border-[var(--theme-border)] bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card)]'
+                                                : status === 'Occupied'
+                                                    ? 'border-red-500/30 bg-red-500/5'
+                                                    : 'border-amber-500/30 bg-amber-500/5'
+                                        }`}
                                     >
-                                        {/* Ambient Status Glow */}
-                                        <div className={`absolute inset-0 blur-2xl opacity-0 group-hover:opacity-20 transition-opacity rounded-full ${status === 'Empty' ? 'bg-[#2C5E3B] dark:bg-[#A9CBA2]' :
-                                            status === 'Occupied' ? 'bg-red-500' :
-                                                'bg-orange-555'
-                                            } `} />
-
-                                        <span className="absolute top-4 left-5 font-black text-slate-900/10 dark:text-white/20 text-xl tracking-tighter">{dock}</span>
+                                        <span className="absolute top-3 left-3.5 font-bold font-mono text-[var(--theme-text-muted)] text-sm tracking-tight">{dock}</span>
 
                                         <div className="relative">
                                             {status === 'Occupied' ? (
                                                 <div className="relative">
-                                                    <Truck size={48} className="text-red-400 drop-shadow-[0_0_15px_rgba(248,113,113,0.4)]" />
-                                                    <div className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full border-2 border-black animate-ping" />
+                                                    <Truck size={40} className="text-red-500" />
+                                                    <div className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-red-500 rounded-full animate-ping" />
                                                 </div>
                                             ) : status === 'Empty' ? (
-                                                <div className={`w-16 h-16 rounded-3xl border-2 border-dashed flex items-center justify-center transition-all ${isSelectedForAssignment ? 'border-[#2C5E3B]/50 bg-[#2C5E3B]/10 dark:border-[#A9CBA2]/50 dark:bg-[#A9CBA2]/10 rotate-45 scale-110' : 'border-stone-200 dark:border-stone-800'} `}>
-                                                    {isSelectedForAssignment && <Plus size={24} className="text-[#2C5E3B] dark:text-[#A9CBA2] -rotate-45" />}
+                                                <div className={`w-14 h-14 rounded-2xl border border-dashed flex items-center justify-center transition-colors ${isSelectedForAssignment ? 'border-primary bg-primary/20' : 'border-[var(--theme-border)] bg-[var(--theme-bg-card)]'}`}>
+                                                    {isSelectedForAssignment && <Plus size={22} className="text-primary" />}
                                                 </div>
                                             ) : (
-                                                <AlertTriangle size={48} className="text-orange-400" />
+                                                <AlertTriangle size={40} className="text-amber-500" />
                                             )}
                                         </div>
 
-                                        <div className="text-center">
-                                            <span className={`text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full border ${status === 'Empty' ? (isSelectedForAssignment ? 'text-[#2C5E3B] dark:text-[#A9CBA2] bg-[#2C5E3B]/10 dark:bg-[#A9CBA2]/10 border-[#2C5E3B]/20 dark:border-[#A9CBA2]/20' : 'text-[#2C5E3B] dark:text-[#A9CBA2] bg-[#2C5E3B]/10 dark:bg-[#A9CBA2]/10 border-[#2C5E3B]/20 dark:border-[#A9CBA2]/20') :
-                                                status === 'Occupied' ? 'text-red-400 bg-red-500/10 border-red-500/20' :
-                                                    'text-orange-400 bg-orange-500/10 border-orange-500/20'
-                                                } `}>
+                                        <div className="text-center w-full">
+                                            <span className={`inline-block text-[11px] font-semibold uppercase tracking-wider px-2.5 py-0.5 rounded-full border ${
+                                                status === 'Empty'
+                                                    ? 'text-primary bg-primary/10 border-primary/20'
+                                                    : status === 'Occupied'
+                                                        ? 'text-red-500 bg-red-500/10 border-red-500/20'
+                                                        : 'text-amber-500 bg-amber-500/10 border-amber-500/20'
+                                            }`}>
                                                 {isSelectedForAssignment ? 'Select Dock' : status === 'Empty' ? t('warehouse.docks.empty') : status === 'Occupied' ? t('warehouse.docks.occupied') : t('warehouse.docks.maintenance')}
                                             </span>
                                             {status === 'Occupied' && data.vesselName && (
-                                                <div className="flex flex-col items-center gap-2 mt-2">
-                                                    <p className="text-[8px] text-gray-500 font-bold uppercase tracking-tighter break-words leading-tight">{data.vesselName}</p>
-                                                    {/* [NEW] Quick Confirm Unload - One-click, stays on DOCKS */}
+                                                <div className="flex flex-col items-center gap-1.5 mt-2 w-full">
+                                                    <p className="text-[11px] text-[var(--theme-text-muted)] font-medium uppercase truncate max-w-full">{data.vesselName}</p>
+                                                    {/* Quick Confirm Unload */}
                                                     <button
                                                         onClick={(e) => {
                                                             e.stopPropagation();
                                                             quickConfirmUnload(dock);
                                                         }}
-                                                        className="px-3 py-1.5 bg-[#2C5E3B] hover:bg-[#1E3B24] dark:bg-[#EAE5D9] dark:hover:bg-[#DFD9CA] text-[#FAF8F5] dark:text-[#1E3B24] text-[8px] font-black uppercase tracking-widest rounded-lg shadow-lg shadow-[#2C5E3B]/20 transition-all active:scale-95 whitespace-nowrap flex items-center gap-1"
+                                                        className="w-full min-h-[44px] px-3 py-2 bg-primary hover:bg-primary/90 text-white text-[11px] font-semibold uppercase tracking-wider rounded-xl shadow-sm transition-colors active:scale-[0.98] whitespace-nowrap flex items-center justify-center gap-1.5 touch-manipulation"
                                                     >
-                                                        <Check size={12} />
+                                                        <Check size={13} />
                                                         Confirm Unload
                                                     </button>
-                                                    {/* View Manifest - Optional detail view */}
+                                                    {/* View Manifest */}
                                                     <button
                                                         onClick={(e) => {
                                                             e.stopPropagation();
                                                             handleOpenManifest(dock);
                                                         }}
-                                                        className="px-3 py-1 bg-stone-100 dark:bg-white/5 hover:bg-stone-200 dark:hover:bg-white/10 text-stone-500 dark:text-stone-400 text-[7px] font-bold uppercase tracking-widest rounded-lg border border-stone-200 dark:border-white/10 transition-all active:scale-95 whitespace-nowrap"
+                                                        className="w-full min-h-[44px] px-3 py-1.5 bg-[var(--theme-bg-card)] hover:bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] text-[11px] font-semibold uppercase tracking-wider rounded-xl border border-[var(--theme-border)] transition-colors active:scale-[0.98] whitespace-nowrap touch-manipulation"
                                                     >
                                                         View Manifest
                                                     </button>
@@ -151,11 +151,11 @@ export const DocksInboundView: React.FC<DocksInboundViewProps> = ({
                                 );
                             })}
 
-                            <button className="aspect-square rounded-3xl border-2 border-dashed border-[#E2DCCE]/60 dark:border-[#A9CBA2]/10 bg-[#FAF8F5]/30 dark:bg-[#18201B]/20 flex flex-col items-center justify-center gap-3 group hover:border-[#2C5E3B]/30 hover:bg-[#2C5E3B]/5 dark:hover:bg-[#A9CBA2]/5 transition-all">
-                                <div className="p-3 bg-white/5 rounded-2xl group-hover:bg-[#2C5E3B]/20 transition-all">
-                                    <Plus size={24} className="text-gray-600 group-hover:text-[#2C5E3B] dark:group-hover:text-[#A9CBA2]" />
+                            <button className="aspect-square rounded-2xl border border-dashed border-[var(--theme-border)] bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card)] flex flex-col items-center justify-center gap-2 group transition-colors touch-manipulation">
+                                <div className="p-2.5 bg-[var(--theme-bg-card)] rounded-xl border border-[var(--theme-border)] group-hover:bg-primary/10 group-hover:border-primary/20 transition-colors">
+                                    <Plus size={20} className="text-[var(--theme-text-muted)] group-hover:text-primary" />
                                 </div>
-                                <span className="text-[10px] text-gray-500 font-black uppercase tracking-widest">{t('warehouse.docks.newShipment') || 'Expand Bay'}</span>
+                                <span className="text-[11px] text-[var(--theme-text-muted)] group-hover:text-[var(--theme-text-primary)] font-semibold uppercase tracking-wider">{t('warehouse.docks.newShipment') || 'Expand Bay'}</span>
                             </button>
                         </div>
                     </div>
@@ -166,34 +166,34 @@ export const DocksInboundView: React.FC<DocksInboundViewProps> = ({
                         onClose={() => setManifestModalOpen(false)}
                         title={`MANIFEST: ${selectedManifestPO?.poNumber || 'Unknown PO'}`}
                     >
-                        <div className="p-6">
-                            <div className="flex justify-between items-center mb-6">
+                        <div className="p-4 sm:p-6">
+                            <div className="flex justify-between items-center mb-4">
                                 <div>
-                                    <p className="text-sm text-gray-400 font-bold uppercase tracking-widest">Expected Goods</p>
-                                    <p className="text-xs text-gray-600">Please confirm the unload manifest.</p>
+                                    <p className="text-xs text-[var(--theme-text-secondary)] font-semibold uppercase tracking-wider">Expected Goods</p>
+                                    <p className="text-[11px] text-[var(--theme-text-muted)]">Please confirm the unload manifest.</p>
                                 </div>
                                 <div className="text-right">
-                                    <p className="text-xl font-black text-slate-900 dark:text-white">{selectedManifestPO?.lineItems?.length || 0}</p>
-                                    <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Line Items</p>
+                                    <p className="text-lg font-bold font-mono tabular-nums text-[var(--theme-text-primary)]">{selectedManifestPO?.lineItems?.length || 0}</p>
+                                    <p className="text-[11px] text-[var(--theme-text-muted)] font-medium uppercase tracking-wider">Line Items</p>
                                 </div>
                             </div>
 
-                            <div className="bg-slate-50 dark:bg-black/40 rounded-xl border border-slate-200 dark:border-white/10 overflow-hidden mb-8 max-h-[300px] overflow-y-auto custom-scrollbar">
+                            <div className="bg-[var(--theme-bg-subtle)] rounded-xl border border-[var(--theme-border)] overflow-hidden mb-6 max-h-[300px] overflow-y-auto">
                                 <table className="w-full text-left">
-                                    <thead className="bg-slate-100 dark:bg-white/5">
+                                    <thead className="bg-[var(--theme-bg-card)] border-b border-[var(--theme-border)]">
                                         <tr>
-                                            <th className="px-4 py-2 text-[10px] text-gray-500 font-black uppercase tracking-widest">Item / SKU</th>
-                                            <th className="px-4 py-2 text-[10px] text-gray-500 font-black uppercase tracking-widest text-right">Qty</th>
+                                            <th className="px-4 py-2.5 text-[11px] text-[var(--theme-text-muted)] font-semibold uppercase tracking-wider">Item / SKU</th>
+                                            <th className="px-4 py-2.5 text-[11px] text-[var(--theme-text-muted)] font-semibold uppercase tracking-wider text-right">Qty</th>
                                         </tr>
                                     </thead>
-                                    <tbody className="divide-y divide-slate-100 dark:divide-white/5">
+                                    <tbody className="divide-y divide-[var(--theme-border)]">
                                         {selectedManifestPO?.lineItems?.map((item: any, idx: number) => (
-                                            <tr key={idx} className="hover:bg-white/5 transition-colors">
-                                                <td className="px-4 py-2">
-                                                    <p className="text-xs font-bold text-slate-900 dark:text-white">{item.productName}</p>
-                                                    <p className="text-[10px] text-gray-500 font-mono">{item.sku || 'NO SKU'}</p>
+                                            <tr key={idx} className="hover:bg-[var(--theme-bg-card)] transition-colors">
+                                                <td className="px-4 py-2.5">
+                                                    <p className="text-xs font-semibold text-[var(--theme-text-primary)]">{item.productName}</p>
+                                                    <p className="text-[11px] text-[var(--theme-text-muted)] font-mono">{item.sku || 'NO SKU'}</p>
                                                 </td>
-                                                <td className="px-4 py-2 text-right text-xs font-mono font-bold text-[#2C5E3B] dark:text-[#A9CBA2]">
+                                                <td className="px-4 py-2.5 text-right text-xs font-mono font-bold tabular-nums text-primary">
                                                     {item.quantity}
                                                 </td>
                                             </tr>
@@ -205,15 +205,15 @@ export const DocksInboundView: React.FC<DocksInboundViewProps> = ({
                             <div className="flex gap-3">
                                 <button
                                     onClick={() => setManifestModalOpen(false)}
-                                    className="flex-1 py-3 rounded-xl border border-[#E2DCCE] dark:border-[#A9CBA2]/10 text-stone-500 dark:text-stone-400 text-xs font-bold uppercase tracking-widest hover:bg-stone-100 dark:hover:bg-white/5 transition-all"
+                                    className="flex-1 min-h-[44px] py-2.5 rounded-xl border border-[var(--theme-border)] text-[var(--theme-text-secondary)] hover:bg-[var(--theme-bg-subtle)] text-xs font-semibold uppercase tracking-wider transition-colors touch-manipulation"
                                 >
                                     Cancel
                                 </button>
                                 <button
                                     onClick={confirmUnloadAndReceive}
-                                    className="flex-1 py-3 rounded-xl bg-[#224429] dark:bg-[#EAE5D9] hover:bg-[#1B3520] dark:hover:bg-[#DFD9CA] text-[#FAF8F5] dark:text-[#1E3B24] text-xs font-black uppercase tracking-widest shadow-lg shadow-[#2C5E3B]/20 transition-all active:scale-95 flex items-center justify-center gap-2"
+                                    className="flex-1 min-h-[44px] py-2.5 rounded-xl bg-primary hover:bg-primary/90 text-white text-xs font-semibold uppercase tracking-wider transition-colors active:scale-[0.98] flex items-center justify-center gap-2 shadow-sm touch-manipulation"
                                 >
-                                    <Download size={16} />
+                                    <Download size={15} />
                                     Confirm Unload & Receive
                                 </button>
                             </div>
@@ -221,40 +221,36 @@ export const DocksInboundView: React.FC<DocksInboundViewProps> = ({
                     </Modal>
 
                     {/* INBOUND LOGISTICS QUEUE */}
-                    <div className="w-full lg:w-80 xl:w-96 shrink-0 glass-panel p-6 flex flex-col relative overflow-hidden lg:h-full">
-                        <div className="absolute -bottom-24 -left-24 w-48 h-48 bg-[#2C5E3B]/5 blur-[80px] rounded-full" />
-
-                        <div className="flex justify-between items-center mb-6 relative z-10 shrink-0">
-                            <h3 className="text-sm font-black text-slate-900 dark:text-white tracking-widest uppercase flex items-center gap-2">
+                    <div className="w-full lg:w-80 xl:w-96 shrink-0 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-4 sm:p-5 flex flex-col relative overflow-hidden lg:h-full shadow-sm">
+                        <div className="flex justify-between items-center mb-4 shrink-0">
+                            <h3 className="text-xs sm:text-sm font-semibold text-[var(--theme-text-primary)] tracking-wider uppercase flex items-center gap-2">
                                 {t('warehouse.docks.inboundQueue')}
-                                <span className="h-1 w-1 rounded-full bg-gray-600" />
-                                <span className="text-[#2C5E3B] dark:text-[#A9CBA2] font-mono">{inboundQueue.length.toString().padStart(2, '0')}</span>
+                                <span className="h-1 w-1 rounded-full bg-[var(--theme-text-muted)]" />
+                                <span className="text-primary font-mono font-bold tabular-nums">{inboundQueue.length.toString().padStart(2, '0')}</span>
                             </h3>
-                            <div className="px-2 py-1 bg-[#2C5E3B]/10 border border-[#2C5E3B]/20 rounded-lg">
-                                <span className="text-[9px] font-black text-[#2C5E3B] dark:text-[#A9CBA2] uppercase tracking-widest">{t('warehouse.sortingHigh')}</span>
+                            <div className="px-2 py-0.5 bg-primary/10 border border-primary/20 rounded-full">
+                                <span className="text-[11px] font-semibold text-primary uppercase tracking-wider">{t('warehouse.sortingHigh')}</span>
                             </div>
                         </div>
 
-                        <div className="flex-1 overflow-y-auto space-y-4 relative z-10 custom-scrollbar pr-2">
+                        <div className="flex-1 overflow-y-auto space-y-3 pr-1">
                             {inboundQueue.map(vessel => (
-                                <div key={vessel.id} className={`group p-5 bg-[#FAF8F5]/50 dark:bg-[#1C2620]/30 rounded-3xl border transition-all duration-500 relative overflow-hidden shadow-sm dark:shadow-lg ${selectedQueueVessel?.id === vessel.id ? 'border-[#2C5E3B] dark:border-[#A9CBA2] shadow-[#2C5E3B]/20 bg-[#2C5E3B]/5 dark:bg-[#A9CBA2]/5' : 'border-[#E2DCCE]/60 dark:border-white/5 hover:border-[#2C5E3B]/30'} `}>
-                                    <div className="absolute top-0 right-0 w-24 h-24 bg-[#2C5E3B]/5 blur-2xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity" />
-
-                                    <div className="flex justify-between items-start mb-4">
+                                <div key={vessel.id} className={`p-4 bg-[var(--theme-bg-subtle)] rounded-xl border transition-colors shadow-sm ${selectedQueueVessel?.id === vessel.id ? 'border-primary bg-primary/5' : 'border-[var(--theme-border)] hover:border-primary/30'} `}>
+                                    <div className="flex justify-between items-start mb-3">
                                         <div>
                                             <div className="flex items-center gap-2">
-                                                <p className="text-xs font-black text-slate-900 dark:text-white uppercase tracking-widest">{vessel.vesselName}</p>
-                                                {vessel.priority === 'High' && <div className="px-1.5 py-0.5 bg-yellow-500/20 text-yellow-500 text-[8px] font-black rounded border border-yellow-500/20">{t('warehouse.priority')}</div>}
+                                                <p className="text-xs font-semibold text-[var(--theme-text-primary)] uppercase tracking-wider truncate">{vessel.vesselName}</p>
+                                                {vessel.priority === 'High' && <div className="px-1.5 py-0.5 bg-amber-500/10 text-amber-600 dark:text-amber-400 text-[11px] font-semibold rounded-full border border-amber-500/20">{t('warehouse.priority')}</div>}
                                             </div>
                                         </div>
                                         <div className="text-right">
-                                            <span className="text-[10px] font-mono font-black text-[#2C5E3B] dark:text-[#A9CBA2] bg-[#2C5E3B]/10 dark:bg-[#A9CBA2]/10 px-2 py-1 rounded-lg">ETA {vessel.eta}</span>
+                                            <span className="text-[11px] font-mono font-semibold text-primary bg-primary/10 px-2 py-0.5 rounded-full border border-primary/20 tabular-nums">ETA {vessel.eta}</span>
                                         </div>
                                     </div>
 
                                     <button
                                         onClick={() => setSelectedQueueVessel(selectedQueueVessel?.id === vessel.id ? null : vessel)}
-                                        className={`w-full py-2.5 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all active:scale-[0.98] border ${selectedQueueVessel?.id === vessel.id ? 'bg-[#224429] dark:bg-[#EAE5D9] text-[#FAF8F5] dark:text-[#1E3B24] border-[#224429] dark:border-[#EAE5D9] shadow-lg shadow-[#2C5E3B]/20' : 'bg-[#2C5E3B]/10 hover:bg-[#2C5E3B] text-[#2C5E3B] dark:text-[#A9CBA2] hover:text-white border-[#2C5E3B]/20'} `}
+                                        className={`w-full min-h-[44px] py-2.5 rounded-xl text-[11px] font-semibold uppercase tracking-wider transition-colors active:scale-[0.98] border touch-manipulation ${selectedQueueVessel?.id === vessel.id ? 'bg-primary text-white border-primary hover:bg-primary/90' : 'bg-[var(--theme-bg-card)] border-[var(--theme-border)] text-primary hover:bg-primary/10'} `}
                                     >
                                         {selectedQueueVessel?.id === vessel.id ? 'Cancel Selection' : t('warehouse.docks.assignDock')}
                                     </button>

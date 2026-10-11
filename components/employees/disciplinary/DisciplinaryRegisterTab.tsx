@@ -116,9 +116,20 @@ export default function DisciplinaryRegisterTab() {
                         <Scale size={20} />
                     </div>
                     <div>
-                        <h3 className="text-base font-semibold tracking-tight text-[var(--theme-text-primary)]">
-                            Disciplinary & Grievance Register
-                        </h3>
+                        <div className="flex items-center gap-2 flex-wrap">
+                            <h3 className="text-base font-semibold tracking-tight text-[var(--theme-text-primary)]">
+                                Disciplinary & Grievance Register
+                            </h3>
+                            {canAdjudicate ? (
+                                <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+                                    Checker • Appeal Adjudication
+                                </span>
+                            ) : (
+                                <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-blue-500/10 text-[#0071E3] dark:text-[#2997FF] border border-blue-500/20">
+                                    Maker • Incident Filing
+                                </span>
+                            )}
+                        </div>
                         <p className="text-xs text-[var(--theme-text-secondary)] mt-0.5">
                             Dual-control compliance, formal misconduct hearings, and independent 4-Eyes appeals ({country})
                         </p>

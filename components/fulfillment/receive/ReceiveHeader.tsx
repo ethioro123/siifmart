@@ -72,7 +72,7 @@ export const ReceiveHeader: React.FC<ReceiveHeaderProps> = ({
                             aria-label={t('warehouse.scanBarcodeOrSku')}
                             title={t('warehouse.scanBarcodeOrSku')}
                             placeholder={t('warehouse.scanBarcodeOrSku')}
-                            className="w-full h-12 pl-12 pr-4 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] hover:border-[var(--theme-border-strong)] rounded-xl text-[var(--theme-text-primary)] font-mono text-sm focus:border-[#0071E3] dark:focus:border-[#2997FF] focus:ring-2 focus:ring-[#0071E3]/20 focus:outline-none transition-colors placeholder:text-[var(--theme-text-secondary)]/60"
+                            className="w-full h-12 pl-12 pr-4 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] hover:border-[var(--theme-border-strong)] rounded-xl text-[var(--theme-text-primary)] font-mono text-sm focus:border-[var(--theme-accent)] focus:ring-2 focus:ring-[var(--theme-accent-muted)] focus:outline-none transition-colors placeholder:text-[var(--theme-text-secondary)]/60"
                         />
                     </div>
                     <button
@@ -86,7 +86,7 @@ export const ReceiveHeader: React.FC<ReceiveHeaderProps> = ({
                             }
                         }}
                         disabled={isSubmitting}
-                        className="h-12 px-6 sm:px-8 bg-[#0071E3] dark:bg-[#2997FF] hover:opacity-90 text-white font-semibold text-xs tracking-wide rounded-xl transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shrink-0 min-w-[100px] touch-manipulation cursor-pointer"
+                        className="h-12 px-6 sm:px-8 bg-[var(--theme-accent)] hover:opacity-90 text-white font-semibold text-xs tracking-wide rounded-xl transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shrink-0 min-w-[100px] touch-manipulation cursor-pointer"
                     >
                         {isSubmitting ? (
                             <Loader2 size={16} className="animate-spin" />
@@ -181,7 +181,7 @@ export const ReceiveHeader: React.FC<ReceiveHeaderProps> = ({
             <div className="p-4 md:p-5 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl shadow-[var(--shadow-sm)] relative overflow-hidden">
                 <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 relative z-10">
                     <div className="hidden md:flex items-center gap-3.5">
-                        <div className="w-10 h-10 rounded-xl bg-[#0071E3]/10 dark:bg-[#2997FF]/10 text-[#0071E3] dark:text-[#2997FF] border border-[#0071E3]/20 dark:border-[#2997FF]/20 flex items-center justify-center shrink-0">
+                        <div className="w-10 h-10 rounded-xl bg-[var(--theme-accent-muted)] text-[var(--theme-accent)] border border-[var(--theme-accent)]/20 flex items-center justify-center shrink-0">
                             <Truck size={20} />
                         </div>
                         <div>
@@ -233,7 +233,7 @@ export const ReceiveHeader: React.FC<ReceiveHeaderProps> = ({
                                         title={t('warehouse.searchManifestSupplier')}
                                         value={receiveSearch}
                                         onChange={(e) => setReceiveSearch(e.target.value)}
-                                        className="w-full sm:w-64 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] hover:border-[var(--theme-border-strong)] rounded-xl py-2 pl-9 pr-8 text-xs text-[var(--theme-text-primary)] placeholder:[var(--theme-text-secondary)]/60 focus:outline-none focus:border-[#0071E3] focus:ring-2 focus:ring-[#0071E3]/20 transition-colors"
+                                        className="w-full sm:w-64 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] hover:border-[var(--theme-border-strong)] rounded-xl py-2 pl-9 pr-8 text-xs text-[var(--theme-text-primary)] placeholder:[var(--theme-text-secondary)]/60 focus:outline-none focus:border-[var(--theme-accent)] focus:ring-2 focus:ring-[var(--theme-accent-muted)] transition-colors"
                                     />
                                     {receiveSearch && (
                                         <button

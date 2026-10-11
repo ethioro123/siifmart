@@ -1,51 +1,40 @@
 import React from 'react';
 import {
     X, Package, Box, MapPin, CheckCircle, ArrowRight,
-    Clock, Info, Barcode, Loader2
+    Info, Barcode, Loader2
 } from 'lucide-react';
 import { WMSJob, User, Site, Product, Employee } from '../../../types';
 import { formatJobId } from '../../../utils/jobIdFormatter';
 import { useLanguage } from '../../../contexts/LanguageContext';
-import { formatProductSize, formatPackagingDescription, getSellUnit, isWeightBased, isVolumeBased } from '../../../utils/units';
+import { formatProductSize, formatPackagingDescription, getSellUnit } from '../../../utils/units';
 import { sortPickItemsByOptimalRoute } from '../../../utils/fulfillmentRoute';
 
 export const formatBeautifulLocation = (loc: string | undefined, theme: 'purple' | 'cyan' | 'woody' = 'woody', t?: (key: string) => string) => {
     if (!loc || loc === 'PENDING') {
-        return <span className="text-base font-mono font-black text-gray-900 dark:text-white tracking-widest">{loc || 'PENDING'}</span>;
+        return <span className="text-sm font-mono font-semibold text-[var(--theme-text-primary)] tracking-wider">{loc || 'PENDING'}</span>;
     }
 
     const parts = loc.split('-').map(p => p.trim());
 
     if (parts.length >= 3) {
-        const themeClass = theme === 'woody'
-            ? 'bg-[#2C5E3B]/10 dark:bg-[#A9CBA2]/25 text-[#2C5E3B] dark:text-[#A9CBA2] border-[#2C5E3B]/20 dark:border-[#A9CBA2]/20 shadow-sm'
-            : theme === 'purple'
-                ? 'bg-[#2C5E3B]/10 dark:bg-[#2C5E3B]/20 text-[#2C5E3B] dark:text-[#A9CBA2] border-[#2C5E3B]/20 dark:border-[#A9CBA2]/30'
-                : 'bg-amber-100 dark:bg-amber-500/20 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-500/30';
-        const dimThemeClass = theme === 'woody'
-            ? 'bg-[#FAF8F5] dark:bg-[#A9CBA2]/10 border-[#E2DCCE]/65 dark:border-[#A9CBA2]/15 text-[#2C5E3B] dark:text-[#A9CBA2]'
-            : theme === 'purple'
-                ? 'bg-[#2C5E3B]/5 dark:bg-[#2C5E3B]/10 text-[#2C5E3B]/80 dark:text-[#A9CBA2]/80 border-[#2C5E3B]/10 dark:border-[#A9CBA2]/20'
-                : 'bg-amber-50 dark:bg-amber-500/10 text-amber-600/80 dark:text-amber-300/80 border-amber-100 dark:border-amber-500/20';
-
         return (
-            <div className="flex items-center gap-1 sm:gap-1.5 mt-0.5 flex-wrap">
-                <span className={`px-2 py-0.5 rounded text-[10px] sm:text-xs font-bold border whitespace-nowrap ${themeClass}`}>
+            <div className="flex items-center gap-1.5 mt-0.5 flex-wrap">
+                <span className="px-2 py-0.5 rounded-lg text-[11px] font-mono font-semibold border border-[var(--theme-accent)]/20 bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] whitespace-nowrap">
                     {t ? t('warehouse.zone') : 'Zone'} {parts[0]}
                 </span>
-                <span className="text-gray-400 dark:text-gray-600/50 font-black text-[10px]">-</span>
-                <span className={`px-2 py-0.5 rounded text-[10px] sm:text-xs font-bold border whitespace-nowrap ${dimThemeClass}`}>
+                <span className="text-[var(--theme-text-secondary)] opacity-40 font-semibold text-[11px] select-none">/</span>
+                <span className="px-2 py-0.5 rounded-lg text-[11px] font-mono font-semibold border border-[var(--theme-border)] bg-[var(--theme-bg-subtle)] text-[var(--theme-text-primary)] whitespace-nowrap">
                     {t ? t('warehouse.aisle') : 'Aisle'} {parts[1]}
                 </span>
-                <span className="text-gray-400 dark:text-gray-600/50 font-black text-[10px]">-</span>
-                <span className={`px-2 py-0.5 rounded text-[10px] sm:text-xs font-bold border whitespace-nowrap ${dimThemeClass}`}>
+                <span className="text-[var(--theme-text-secondary)] opacity-40 font-semibold text-[11px] select-none">/</span>
+                <span className="px-2 py-0.5 rounded-lg text-[11px] font-mono font-semibold border border-[var(--theme-border)] bg-[var(--theme-bg-subtle)] text-[var(--theme-text-primary)] whitespace-nowrap">
                     {t ? t('warehouse.bay') : 'Bay'} {parts[2]}
                 </span>
             </div>
         );
     }
 
-    return <span className="text-base font-mono font-black text-gray-900 dark:text-white tracking-widest">{loc}</span>;
+    return <span className="text-sm font-mono font-semibold text-[var(--theme-text-primary)] tracking-wider">{loc}</span>;
 };
 
 interface PickJobModalProps {
@@ -110,6 +99,7 @@ export const PickJobModal: React.FC<PickJobModalProps> = ({
         return isDone || (i.pickedQty || 0) >= requiredAmount;
     }).length || 0;
     const progressPercent = totalItems > 0 ? (completedItems / totalItems) * 100 : 0;
+    const isCompleted = job.status === 'Completed';
 
     const sortedLineItems = React.useMemo(() => {
         if (!job.lineItems) return [];
@@ -120,38 +110,28 @@ export const PickJobModal: React.FC<PickJobModalProps> = ({
     }, [job.lineItems, products]);
 
     return (
-        <div className="fixed inset-0 z-[150] flex items-center justify-center p-2 md:p-4 bg-black/80 overflow-x-hidden">
-            <div className="bg-[#FAF8F5] dark:bg-[#1C2620] w-full max-w-4xl max-h-[95vh] md:max-h-[90vh] rounded-3xl border border-[#E2DCCE] dark:border-emerald-950/20 shadow-2xl flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-200 relative">
-                {/* Visual Flair */}
-                <div className="hidden md:block absolute -top-32 -right-32 w-96 h-96 bg-[#2C5E3B]/10 dark:bg-[#2C5E3B]/20 blur-[100px] rounded-full pointer-events-none" />
-                <div className="hidden md:block absolute -bottom-32 -left-32 w-96 h-96 bg-[#A9CBA2]/10 dark:bg-[#A9CBA2]/25 blur-[100px] rounded-full pointer-events-none" />
-
+        <div className="fixed inset-0 z-[150] flex items-center justify-center p-2 sm:p-4 bg-black/60 overflow-y-auto animate-in fade-in duration-200">
+            <div className="bg-[var(--theme-bg-card)] w-full max-w-4xl max-h-[92dvh] rounded-3xl border border-[var(--theme-border)] shadow-2xl flex flex-col overflow-hidden animate-in zoom-in-95 duration-200 relative">
                 {/* Header */}
-                <div className="relative p-3 md:p-6 border-b border-[#E2DCCE]/60 dark:border-[#2C5E3B]/10 bg-[#FAF8F5] dark:bg-[#1C2620] overflow-hidden shrink-0 z-10">
-                    <div className="absolute -top-10 -right-10 w-40 h-40 bg-[#2C5E3B]/10 blur-[80px] rounded-full pointer-events-none" />
-                    <div className="absolute -bottom-10 -left-10 w-40 h-40 bg-[#A9CBA2]/10 blur-[80px] rounded-full pointer-events-none" />
-
-                    <div className="relative flex justify-between items-start">
-                        <div className="flex items-center gap-2 md:gap-4">
-                            <div className="w-10 h-10 md:w-14 md:h-14 rounded-xl md:rounded-2xl bg-[#2C5E3B]/10 dark:bg-[#A9CBA2]/25 border border-[#2C5E3B]/20 dark:border-[#A9CBA2]/20 flex items-center justify-center text-[#2C5E3B] dark:text-[#A9CBA2] shadow-sm shrink-0">
-                                <Package size={20} className="md:w-7 md:h-7" />
+                <div className="p-4 sm:p-6 border-b border-[var(--theme-border)] bg-[var(--theme-bg-card)] shrink-0 z-10">
+                    <div className="flex justify-between items-start">
+                        <div className="flex items-center gap-3 sm:gap-4 min-w-0">
+                            <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-[var(--theme-accent)]/10 border border-[var(--theme-accent)]/20 flex items-center justify-center text-[var(--theme-accent)] shrink-0">
+                                <Package size={24} strokeWidth={1.75} />
                             </div>
                             <div className="min-w-0">
-                                <div className="flex items-center gap-2 md:gap-3 mb-0.5 md:mb-1">
-                                    <h2 className="text-sm md:text-2xl font-black text-gray-900 dark:text-white tracking-tight uppercase truncate">
-                                        {t('warehouse.pickJobs')}
+                                <div className="flex items-center gap-2 sm:gap-3 mb-1 flex-wrap">
+                                    <h2 className="text-lg sm:text-2xl font-bold text-[var(--theme-text-primary)] tracking-tight uppercase truncate font-mono">
+                                        {formatJobId(job)}
                                     </h2>
-                                    <span className="px-1.5 md:px-2 py-0.5 rounded-lg bg-gray-200 dark:bg-white/5 border border-gray-300 dark:border-white/10 text-[10px] md:text-xs font-mono text-gray-655 dark:text-gray-500 shrink-0">
-                                        #{formatJobId(job)}
-                                    </span>
                                 </div>
-                                <div className="flex items-center gap-2 md:gap-3 text-[10px] md:text-xs text-gray-500 flex-wrap">
-                                    <span className="flex items-center gap-1 font-mono text-[9px] md:text-[10px] uppercase tracking-wider bg-gray-100 dark:bg-white/5 px-2 py-0.5 rounded border border-gray-200 dark:border-white/10">
-                                        <MapPin size={10} className="text-[#2C5E3B] dark:text-[#A9CBA2]" />
+                                <div className="flex items-center gap-2 sm:gap-3 text-[11px] text-[var(--theme-text-secondary)] font-medium uppercase tracking-wider flex-wrap">
+                                    <span className="flex items-center gap-1.5 font-mono bg-[var(--theme-bg-subtle)] px-2.5 py-0.5 rounded-lg border border-[var(--theme-border)] text-[var(--theme-text-primary)]">
+                                        <MapPin size={11} className="text-[var(--theme-accent)]" />
                                         {sourceSite?.name || t('warehouse.thisWarehouse')}
                                     </span>
                                     {job.orderRef && (
-                                        <span className="font-mono text-[9px] md:text-[10px] text-gray-655 dark:text-gray-500 uppercase tracking-widest hidden xs:inline">
+                                        <span className="font-mono">
                                             Ref: {resolveOrderRef(job.orderRef)}
                                         </span>
                                     )}
@@ -160,110 +140,125 @@ export const PickJobModal: React.FC<PickJobModalProps> = ({
                         </div>
 
                         <div className="flex items-center gap-2">
-                            <span className={`px-2 py-1 rounded-xl text-[9px] font-black uppercase tracking-wider border ${
-                                job.priority === 'Critical' ? 'bg-red-500/10 text-red-600 border-red-500/30' :
-                                job.priority === 'High' ? 'bg-amber-500/10 text-amber-600 border-amber-500/30' :
-                                'bg-[#2C5E3B]/10 text-[#2C5E3B] dark:text-[#A9CBA2] border-[#2C5E3B]/20'
+                            <span className={`px-2.5 py-1 rounded-full text-[11px] font-semibold uppercase tracking-wider border ${
+                                job.priority === 'Critical' ? 'bg-red-500/10 text-red-500 border-red-500/20' :
+                                job.priority === 'High' ? 'bg-amber-500/10 text-amber-500 border-amber-500/20' :
+                                'bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] border-[var(--theme-accent)]/20'
                             }`}>
-                                {job.priority || 'Normal'} Priority
+                                {job.priority || 'Normal'}
                             </span>
-                            <button onClick={onClose} className="p-2 text-gray-400 hover:text-gray-900 dark:hover:text-white rounded-xl hover:bg-gray-100 dark:hover:bg-white/5 transition-colors">
-                                <X size={20} />
+                            <button
+                                onClick={onClose}
+                                className="w-10 h-10 rounded-xl bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-border)] flex items-center justify-center text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] transition-colors shrink-0"
+                                aria-label={t('warehouse.dismiss')}
+                            >
+                                <X size={18} />
                             </button>
                         </div>
                     </div>
                 </div>
 
                 {/* Content */}
-                <div className="p-3 md:p-6 overflow-y-auto space-y-4 md:space-y-6 flex-1 custom-scrollbar">
+                <div className="p-4 sm:p-6 overflow-y-auto space-y-4 sm:space-y-6 flex-1 custom-scrollbar bg-[var(--theme-bg-subtle)]">
                     {/* Metrics Strip */}
-                    <div className="grid grid-cols-3 gap-2 sm:gap-4">
-                        <div className="bg-[#FAF8F5]/50 dark:bg-white/[0.02] border border-[#E2DCCE]/65 dark:border-white/5 p-2.5 sm:p-4 rounded-xl sm:rounded-2xl min-w-0">
-                            <span className="text-[9px] sm:text-[10px] text-gray-550 dark:text-gray-500 font-black uppercase tracking-wider block mb-1 sm:mb-2 truncate">{t('warehouse.progress')}</span>
-                            <div className="flex items-center justify-between text-xs sm:text-sm font-bold text-gray-900 dark:text-white mb-1.5">
+                    <div className="grid grid-cols-3 gap-2 sm:gap-3">
+                        <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] p-3 rounded-2xl min-w-0">
+                            <span className="text-[11px] text-[var(--theme-text-secondary)] font-semibold uppercase tracking-wider block mb-1 truncate">{t('warehouse.progress')}</span>
+                            <div className="flex items-center justify-between text-xs sm:text-sm font-bold text-[var(--theme-text-primary)] mb-1.5">
                                 <span className="font-mono">{Math.round(progressPercent)}%</span>
-                                <span className="text-[8px] sm:text-[10px] font-black text-gray-500 uppercase truncate">{completedItems}/{totalItems}</span>
+                                <span className="text-[11px] font-mono text-[var(--theme-text-secondary)]">{completedItems}/{totalItems}</span>
                             </div>
-                            <div className="w-full h-1.5 bg-gray-200 dark:bg-white/10 rounded-full overflow-hidden">
-                                <div ref={(el) => { if (el) el.style.width = `${progressPercent}%`; }} className="h-full bg-[#2C5E3B] dark:bg-[#A9CBA2] transition-colors duration-500 ease-out" />
+                            <div className="w-full h-1.5 bg-[var(--theme-bg-subtle)] rounded-full overflow-hidden border border-[var(--theme-border)]">
+                                <div
+                                    className={`h-full transition-all duration-500 ${progressPercent >= 100 ? 'bg-emerald-500' : 'bg-[var(--theme-accent)]'}`}
+                                    style={{ width: `${progressPercent}%` }}
+                                />
                             </div>
                         </div>
-                        <div className="bg-[#FAF8F5]/50 dark:bg-white/[0.02] border border-[#E2DCCE]/65 dark:border-white/5 p-2.5 sm:p-4 rounded-xl sm:rounded-2xl min-w-0">
-                            <span className="text-[9px] sm:text-[10px] text-gray-550 dark:text-gray-500 font-black uppercase tracking-wider block mb-1 sm:mb-2 truncate">{t('warehouse.status')}</span>
-                            <div className="flex items-center gap-1.5 sm:gap-2 mt-0.5 sm:mt-1">
-                                <div className={`w-2 h-2 rounded-full animate-pulse shrink-0 ${job.status === 'Completed' ? 'bg-green-500' : 'bg-[#2C5E3B] dark:bg-[#A9CBA2]'}`} />
-                                <span className={`text-xs sm:text-lg font-bold uppercase tracking-tight truncate ${job.status === 'Completed' ? 'text-green-600 dark:text-green-400' : 'text-[#2C5E3B] dark:text-[#A9CBA2]'}`}>
+
+                        <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] p-3 rounded-2xl min-w-0">
+                            <span className="text-[11px] text-[var(--theme-text-secondary)] font-semibold uppercase tracking-wider block mb-1 truncate">{t('warehouse.status')}</span>
+                            <div className="flex items-center gap-1.5 mt-1">
+                                <div className={`w-2 h-2 rounded-full shrink-0 ${isCompleted ? 'bg-emerald-500' : 'bg-[var(--theme-accent)]'}`} />
+                                <span className={`text-xs sm:text-base font-bold uppercase tracking-tight truncate ${isCompleted ? 'text-emerald-500' : 'text-[var(--theme-text-primary)]'}`}>
                                     {job.status}
                                 </span>
                             </div>
                         </div>
-                        <div className="bg-[#FAF8F5]/50 dark:bg-white/[0.02] border border-[#E2DCCE]/65 dark:border-white/5 p-2.5 sm:p-4 rounded-xl sm:rounded-2xl min-w-0">
-                            <span className="text-[9px] sm:text-[10px] text-gray-550 dark:text-gray-500 font-black uppercase tracking-wider block mb-1 sm:mb-2 truncate">{t('warehouse.jobId')}</span>
-                            <div className="flex items-center gap-1.5 sm:gap-2 mt-0.5 sm:mt-1 min-w-0">
-                                <Info size={14} className="text-[#2C5E3B] dark:text-[#A9CBA2] shrink-0" />
-                                <span className="text-xs sm:text-lg font-mono font-bold text-gray-900 dark:text-white truncate">
-                                    {formatJobId(job)}
+
+                        <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] p-3 rounded-2xl min-w-0">
+                            <span className="text-[11px] text-[var(--theme-text-secondary)] font-semibold uppercase tracking-wider block mb-1 truncate">{t('warehouse.items')}</span>
+                            <div className="flex items-center gap-1.5 mt-1 min-w-0">
+                                <Box size={14} className="text-[var(--theme-accent)] shrink-0" />
+                                <span className="text-xs sm:text-base font-mono font-bold text-[var(--theme-text-primary)] truncate">
+                                    {totalItems} {totalItems === 1 ? t('warehouse.itemSingular') : t('warehouse.itemPlural')}
                                 </span>
                             </div>
                         </div>
                     </div>
 
                     <div>
-                        <div className="flex items-center justify-between mb-2 md:mb-4 shrink-0">
-                            <h3 className="font-bold text-gray-900 dark:text-white flex items-center gap-1.5 md:gap-2 text-[10px] md:text-sm uppercase tracking-widest">
-                                <Box size={14} className="text-[#2C5E3B] dark:text-[#A9CBA2] md:w-4 md:h-4" />
+                        <div className="flex items-center justify-between mb-3 shrink-0">
+                            <h3 className="font-semibold text-[var(--theme-text-primary)] flex items-center gap-2 text-xs uppercase tracking-wider">
+                                <Box size={14} className="text-[var(--theme-accent)]" />
                                 <span>{t('warehouse.pickJobs')} (Smart Route Sequence)</span>
                             </h3>
-                            <span className="text-[8px] md:text-[10px] font-black text-gray-500 bg-[#FAF8F5] dark:bg-white/5 px-1.5 md:px-2 py-0.5 md:py-1 rounded border border-[#E2DCCE]/60 dark:border-white/5 uppercase">
+                            <span className="text-[11px] font-semibold text-[var(--theme-text-secondary)] bg-[var(--theme-bg-card)] px-2.5 py-1 rounded-xl border border-[var(--theme-border)] uppercase font-mono">
                                 {totalItems} {t('warehouse.itemPlural')}
                             </span>
                         </div>
 
-                        <div className="space-y-2 md:space-y-3">
+                        <div className="space-y-3">
                             {sortedLineItems.map((item, idx) => {
                                 const product = getProduct(item);
                                 const isDone = item.status === 'Completed' || item.status === 'Picked';
 
                                 return (
-                                    <div key={idx} className={`group relative bg-white dark:bg-white/[0.02] border ${isDone ? 'border-green-200 dark:border-green-500/20 bg-green-50 dark:bg-green-500/[0.01]' : 'border-[#E2DCCE]/60 dark:border-white/5'} rounded-xl md:rounded-2xl p-2.5 md:p-4 flex flex-col md:flex-row items-start md:items-center justify-between hover:bg-[#FAF8F5] dark:hover:bg-white/[0.04] transition-colors duration-150 gap-2 md:gap-0 shadow-sm dark:shadow-none`}>
-
-                                        <div className="flex items-center gap-2 md:gap-4 w-full md:w-auto">
+                                    <div
+                                        key={idx}
+                                        className={`bg-[var(--theme-bg-card)] border rounded-2xl p-4 sm:p-5 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 transition-colors ${
+                                            isDone ? 'border-emerald-500/30' : 'border-[var(--theme-border)]'
+                                        }`}
+                                    >
+                                        <div className="flex items-center gap-3 sm:gap-4 w-full md:w-auto">
                                             {/* Stop sequence badge */}
-                                            <div className="flex flex-col items-center justify-center shrink-0 w-8 h-8 rounded-lg bg-[#2C5E3B]/10 dark:bg-[#A9CBA2]/10 border border-[#2C5E3B]/20 text-[#2C5E3B] dark:text-[#A9CBA2] font-mono text-[10px] font-black">
+                                            <div className="flex items-center justify-center shrink-0 w-8 h-8 rounded-xl bg-[var(--theme-accent)]/10 border border-[var(--theme-accent)]/20 text-[var(--theme-accent)] font-mono text-[11px] font-bold">
                                                 #{idx + 1}
                                             </div>
 
-                                            <div className="hidden md:flex relative w-14 h-14 rounded-xl bg-gray-100 dark:bg-black/40 border border-gray-200 dark:border-white/10 items-center justify-center overflow-hidden shrink-0">
+                                            <div className="relative w-14 h-14 rounded-xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] flex items-center justify-center overflow-hidden shrink-0">
                                                 {product?.image ? (
-                                                    <img src={product.image} alt={item.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300" />
+                                                    <img src={product.image} alt={item.name} className="w-full h-full object-cover" />
                                                 ) : (
-                                                    <div className="w-full h-full flex items-center justify-center text-gray-400 dark:text-white/20">
-                                                        <Package size={24} strokeWidth={1.5} />
+                                                    <div className="w-full h-full flex items-center justify-center text-[var(--theme-text-secondary)] opacity-40">
+                                                        <Package size={22} strokeWidth={1.5} />
                                                     </div>
                                                 )}
                                                 {isDone && (
-                                                    <div className="absolute inset-0 bg-green-100/90 dark:bg-green-950/90 flex items-center justify-center">
-                                                        <CheckCircle size={18} className="text-green-600 dark:text-green-400" />
+                                                    <div className="absolute inset-0 bg-emerald-500/20 flex items-center justify-center">
+                                                        <div className="p-1 bg-[var(--theme-bg-card)] rounded-full border border-emerald-500/40">
+                                                            <CheckCircle size={16} className="text-emerald-500" />
+                                                        </div>
                                                     </div>
                                                 )}
                                             </div>
 
                                             <div className="min-w-0">
-                                                <h4 className={`text-xs md:text-sm font-bold tracking-tight mb-0.5 group-hover:text-[#2C5E3B] dark:group-hover:text-[#A9CBA2] transition-colors truncate ${isDone ? 'line-through text-gray-500' : 'text-gray-900 dark:text-white'}`}>
+                                                <h4 className={`text-sm font-semibold tracking-tight mb-1 truncate ${isDone ? 'line-through text-[var(--theme-text-secondary)]' : 'text-[var(--theme-text-primary)]'}`}>
                                                     {item.name || product?.name || t('warehouse.picking.unknownSKU')}
                                                 </h4>
-                                                <div className="flex flex-col md:flex-row md:items-center gap-1 md:gap-3">
-                                                    <span className="text-[8px] md:text-[9px] font-mono font-black text-gray-955 dark:text-[#A9CBA2] bg-stone-50 dark:bg-black/40 px-1.5 md:px-2 py-0.5 rounded border border-[#E2DCCE]/60 dark:border-white/5 uppercase tracking-tighter w-fit">
+                                                <div className="flex flex-col md:flex-row md:items-center gap-1.5 md:gap-2">
+                                                    <span className="text-[11px] font-mono font-semibold text-[var(--theme-text-secondary)] bg-[var(--theme-bg-subtle)] px-2 py-0.5 rounded-md border border-[var(--theme-border)] uppercase tracking-wider w-fit">
                                                         {item.sku || product?.sku || t('warehouse.picking.noSKUCaps')}
                                                     </span>
                                                     {formatProductSize(product || item) && (
-                                                        <span className="text-[8px] md:text-[9px] font-mono font-bold text-emerald-700 bg-emerald-500/10 dark:text-emerald-400 dark:bg-emerald-500/20 px-1.5 md:px-2 py-0.5 rounded border border-emerald-500/20 uppercase tracking-wider w-fit">
+                                                        <span className="text-[11px] font-mono font-semibold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-md border border-emerald-500/20 uppercase tracking-wider w-fit">
                                                             {formatProductSize(product || item)}
                                                         </span>
                                                     )}
                                                     {product?.barcode && (
-                                                        <div className="flex items-center gap-1 md:gap-1.5 text-[8px] md:text-[9px] text-[#2C5E3B] dark:text-[#A9CBA2] font-bold uppercase tracking-widest w-fit font-mono">
-                                                            <Barcode size={8} className="md:w-[10px] md:h-[10px]" />
+                                                        <div className="flex items-center gap-1 text-[11px] text-[var(--theme-text-secondary)] font-mono">
+                                                            <Barcode size={12} className="opacity-50" />
                                                             {product.barcode}
                                                         </div>
                                                     )}
@@ -271,18 +266,18 @@ export const PickJobModal: React.FC<PickJobModalProps> = ({
                                             </div>
                                         </div>
 
-                                        <div className="flex flex-col xl:flex-row items-stretch xl:items-center justify-between xl:justify-end gap-4 xl:gap-8 pl-0 xl:pl-4 border-t xl:border-t-0 border-gray-50 dark:border-white/5 pt-4 xl:pt-0 w-full xl:w-auto shrink-0">
-                                            <div className="text-left md:text-right flex flex-col items-start md:items-end w-full md:w-auto">
-                                                <span className="text-[8px] md:text-[9px] text-gray-500 dark:text-gray-600 font-black uppercase tracking-[0.2em] block mb-0.5 md:mb-1">{t('warehouse.selectedStorageLocation')}</span>
-                                                <div className="flex items-center gap-1.5 md:gap-2">
-                                                    <div className="w-1.5 h-1.5 md:w-2 md:h-2 rounded-full bg-[#2C5E3B] dark:bg-[#A9CBA2] shadow-sm mt-0.5" />
+                                        <div className="flex flex-col xl:flex-row items-stretch xl:items-center justify-between xl:justify-end gap-3 xl:gap-6 pt-3 xl:pt-0 border-t xl:border-t-0 border-[var(--theme-border)] w-full xl:w-auto shrink-0">
+                                            <div className="text-left md:text-right flex flex-col items-start md:items-end">
+                                                <span className="text-[11px] text-[var(--theme-text-secondary)] font-semibold uppercase tracking-wider block mb-1">{t('warehouse.selectedStorageLocation')}</span>
+                                                <div className="flex items-center gap-1.5">
+                                                    <span className="w-1.5 h-1.5 rounded-full bg-[var(--theme-accent)]" />
                                                     {formatBeautifulLocation(product?.location, 'woody', t)}
                                                 </div>
                                             </div>
 
-                                            <div className="flex items-center justify-between md:justify-end gap-3 md:gap-6 w-full md:w-auto md:min-w-[180px]">
+                                            <div className="flex items-center justify-between md:justify-end gap-4 md:gap-6 w-full md:w-auto md:min-w-[160px]">
                                                 <div className="text-left md:text-right">
-                                                    <span className="text-[8px] md:text-[9px] text-gray-550 dark:text-gray-600 font-black uppercase tracking-[0.2em] block mb-0.5 md:mb-1">{t('warehouse.expected')}</span>
+                                                    <span className="text-[11px] text-[var(--theme-text-secondary)] font-semibold uppercase tracking-wider block mb-1">{t('warehouse.expected')}</span>
                                                     {(() => {
                                                         const expected = item.expectedQty || (item as any).quantity || 0;
                                                         const packDesc = formatPackagingDescription(product, expected);
@@ -291,11 +286,11 @@ export const PickJobModal: React.FC<PickJobModalProps> = ({
 
                                                         return (
                                                             <div className="flex flex-col items-start md:items-end">
-                                                                <span className="text-sm md:text-lg font-mono font-black text-gray-900 dark:text-white">
-                                                                    {expected} <span className="text-[8px] md:text-[10px] text-gray-555 font-bold uppercase tracking-widest">{unitLabel}</span>
+                                                                <span className="text-base font-mono font-bold text-[var(--theme-text-primary)] tabular-nums">
+                                                                    {expected} <span className="text-[11px] text-[var(--theme-text-secondary)] font-semibold uppercase">{unitLabel}</span>
                                                                 </span>
                                                                 {packDesc && (
-                                                                    <span className="text-[8px] md:text-[9px] font-mono font-bold text-gray-500 dark:text-gray-400 uppercase">
+                                                                    <span className="text-[11px] font-mono text-[var(--theme-text-secondary)]">
                                                                         ({packDesc})
                                                                     </span>
                                                                 )}
@@ -303,11 +298,11 @@ export const PickJobModal: React.FC<PickJobModalProps> = ({
                                                         );
                                                     })()}
                                                 </div>
+
                                                 {isDone ? (
-                                                    <div className="text-right border-l border-gray-200 dark:border-white/10 pl-4">
-                                                        <span className="text-[8px] md:text-[9px] text-green-600 dark:text-green-600/60 font-black uppercase tracking-[0.2em] block mb-0.5 md:mb-1">{t('warehouse.picking')}</span>
+                                                    <div className="text-right border-l border-[var(--theme-border)] pl-4">
+                                                        <span className="text-[11px] text-emerald-500 font-semibold uppercase tracking-wider block mb-1">{t('warehouse.picking')}</span>
                                                         {(() => {
-                                                            const expected = item.expectedQty || (item as any).quantity || 0;
                                                             const picked = item.pickedQty !== undefined && item.pickedQty !== null ? item.pickedQty : 0;
                                                             const packDesc = formatPackagingDescription(product, picked);
                                                             const unitDef = getSellUnit(product?.unit || item.unit);
@@ -315,11 +310,11 @@ export const PickJobModal: React.FC<PickJobModalProps> = ({
 
                                                             return (
                                                                 <div className="flex flex-col items-end">
-                                                                    <span className="text-sm md:text-lg font-mono font-black text-green-600 dark:text-green-400">
-                                                                        {picked} <span className="text-[8px] md:text-[10px] text-green-600/60 dark:text-green-500/60 font-bold uppercase tracking-widest">{unitLabel}</span>
+                                                                    <span className="text-base font-mono font-bold text-emerald-500 tabular-nums">
+                                                                        {picked} <span className="text-[11px] text-emerald-500/80 font-semibold uppercase">{unitLabel}</span>
                                                                     </span>
                                                                     {packDesc && (
-                                                                        <span className="text-[8px] md:text-[9px] font-mono font-bold text-teal-600 dark:text-teal-400 uppercase">
+                                                                        <span className="text-[11px] font-mono text-emerald-500/80">
                                                                             ({packDesc})
                                                                         </span>
                                                                     )}
@@ -328,77 +323,81 @@ export const PickJobModal: React.FC<PickJobModalProps> = ({
                                                         })()}
                                                     </div>
                                                 ) : (
-                                                     <button
-                                                         onClick={(e) => { e.stopPropagation(); onStartPick(job); }}
-                                                         disabled={isSubmitting}
-                                                         className="woody-btn-primary min-h-[38px] sm:min-h-[44px] px-3 md:px-4 text-[10px] md:text-xs"
-                                                     >
-                                                         {t('warehouse.pickJobs').split(' ')[0]}
-                                                     </button>
-                                                 )}
-                                             </div>
-                                         </div>
-                                     </div>
-                                 );
-                             })}
-                         </div>
-                     </div>
-                 </div>
+                                                    <button
+                                                        onClick={(e) => { e.stopPropagation(); onStartPick(job); }}
+                                                        disabled={isSubmitting}
+                                                        className="px-4 py-2 rounded-xl bg-[var(--theme-accent)] hover:opacity-90 text-white font-semibold text-xs uppercase tracking-wider transition-colors min-h-[40px]"
+                                                    >
+                                                        {t('warehouse.pickJobs').split(' ')[0]}
+                                                    </button>
+                                                )}
+                                            </div>
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    </div>
+                </div>
 
-                 {/* Footer */}
-                 <div className="p-3 md:p-6 border-t border-[#E2DCCE]/60 dark:border-emerald-950/20 bg-[#FAF8F5]/50 dark:bg-zinc-950/40 flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3 md:gap-4 shrink-0 relative z-20">
-                     <div className="hidden md:flex items-center gap-4">
-                         <div className="flex flex-col">
-                             <span className="text-[10px] text-gray-550 font-black uppercase tracking-widest">{t('warehouse.putaway.jobDetails').split(' ')[0]} {t('warehouse.assignedTo') || 'Assigned'}</span>
-                             <span className="text-sm font-bold text-gray-900 dark:text-gray-300">
-                                 {(() => {
-                                     if (!job.assignedTo) return t('warehouse.putaway.unassigned') || 'Unassigned / Available';
-                                     const emp = employees.find(e => e.id === job.assignedTo || e.name === job.assignedTo || (e as any).email === job.assignedTo);
-                                     return emp?.name || job.assignedTo.slice(-8).toUpperCase();
-                                 })()}
-                             </span>
-                         </div>
-                     </div>
+                {/* Footer */}
+                <div className="p-4 sm:p-5 border-t border-[var(--theme-border)] bg-[var(--theme-bg-card)] flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3 shrink-0 z-20">
+                    <div className="hidden md:flex items-center gap-3">
+                        <div className="flex flex-col">
+                            <span className="text-[11px] text-[var(--theme-text-secondary)] font-semibold uppercase tracking-wider mb-0.5">
+                                {isCompleted ? (t('warehouse.completedBy') || 'Completed By') : (t('warehouse.assignedTo') || 'Assigned To')}
+                            </span>
+                            <span className="text-xs font-semibold text-[var(--theme-text-primary)] uppercase tracking-wide">
+                                {(() => {
+                                    const targetUserId = (isCompleted && (job.completedBy || (job as any).completed_by))
+                                        ? (job.completedBy || (job as any).completed_by)
+                                        : job.assignedTo;
+                                    if (!targetUserId) return isCompleted ? 'System' : (t('warehouse.putaway.unassigned') || 'Unassigned');
+                                    const emp = employees.find(e => e.id === targetUserId || e.name === targetUserId || (e as any).email === targetUserId || e.code === targetUserId);
+                                    return emp?.name || targetUserId;
+                                })()}
+                            </span>
+                        </div>
+                    </div>
 
-                     <div className="flex flex-col-reverse md:flex-row items-stretch md:items-center gap-2 md:gap-3">
-                         <button
-                             onClick={onClose}
-                             className="woody-btn-secondary px-4 md:px-6 py-3 min-h-[44px] text-[10px] md:text-xs flex items-center justify-center"
-                         >
-                             {t('warehouse.dismiss')}
-                         </button>
+                    <div className="flex flex-col-reverse md:flex-row items-stretch md:items-center gap-3">
+                        <button
+                            onClick={onClose}
+                            className="px-6 py-3 rounded-xl border border-[var(--theme-border)] bg-[var(--theme-bg-card)] hover:bg-[var(--theme-bg-subtle)] text-[var(--theme-text-primary)] text-xs font-semibold uppercase tracking-wider min-h-[44px] transition-colors"
+                        >
+                            {t('warehouse.dismiss')}
+                        </button>
 
-                         {job.status !== 'Completed' && (
-                             <>
-                                 {progressPercent >= 100 ? (
-                                     <button
-                                         onClick={() => onCompleteJob(job)}
-                                         disabled={isSubmitting}
-                                         className="justify-center px-4 md:px-8 py-3 min-h-[44px] bg-emerald-600 hover:bg-emerald-700 dark:hover:bg-emerald-500 text-white rounded-xl md:rounded-2xl font-black text-[10px] md:text-sm uppercase tracking-widest shadow-md border border-emerald-400/50 transition-colors flex items-center gap-2 md:gap-3 active:scale-95 disabled:opacity-50"
-                                     >
-                                         {isSubmitting ? <Loader2 size={16} className="animate-spin md:w-[18px] md:h-[18px]" /> : <><CheckCircle size={16} className="md:w-[18px] md:h-[18px]" /> {t('warehouse.completed')}</>}
-                                     </button>
-                                 ) : (
-                                     <button
-                                         onClick={() => onStartPick(job)}
-                                         disabled={isSubmitting}
-                                         className="woody-btn-primary px-4 md:px-8 py-3 min-h-[44px] text-[10px] md:text-sm flex items-center justify-center gap-2"
-                                     >
-                                         {isSubmitting ? (
-                                             <Loader2 size={16} className="animate-spin md:w-[18px] md:h-[18px]" />
-                                         ) : (
-                                             <>
-                                                 {job.status === 'In-Progress' ? t('warehouse.continueArrow') : t('warehouse.startArrow')}
-                                                 <ArrowRight size={16} className="md:w-[18px] md:h-[18px] group-hover:translate-x-1 transition-transform" />
-                                             </>
-                                         )}
-                                     </button>
-                                 )}
-                             </>
-                         )}
-                     </div>
-                 </div>
-
+                        {job.status !== 'Completed' && (
+                            <>
+                                {progressPercent >= 100 ? (
+                                    <button
+                                        onClick={() => onCompleteJob(job)}
+                                        disabled={isSubmitting}
+                                        className="px-8 py-3 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl font-semibold text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-2 disabled:opacity-40 min-h-[44px]"
+                                    >
+                                        {isSubmitting ? <Loader2 size={16} className="animate-spin" /> : <><CheckCircle size={16} /> {t('warehouse.completed')}</>}
+                                    </button>
+                                ) : (
+                                    <button
+                                        onClick={() => onStartPick(job)}
+                                        disabled={isSubmitting}
+                                        className="px-8 py-3 rounded-xl bg-[var(--theme-accent)] hover:opacity-90 text-white text-xs font-semibold uppercase tracking-wider flex items-center justify-center gap-2 min-h-[44px] transition-all"
+                                    >
+                                        {isSubmitting ? (
+                                            <Loader2 size={16} className="animate-spin" />
+                                        ) : (
+                                            <>
+                                                <span>{job.status === 'In-Progress' ? t('warehouse.continueArrow') : t('warehouse.startArrow')}</span>
+                                                <ArrowRight size={16} />
+                                            </>
+                                        )}
+                                    </button>
+                                )}
+                            </>
+                        )}
+                    </div>
+                </div>
             </div>
         </div>
     );

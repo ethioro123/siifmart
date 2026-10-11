@@ -13,6 +13,7 @@ import { PricingTab, PricingConfig } from './product-control/PricingTab';
 import { StockTab, StockConfig } from './product-control/StockTab';
 import { getSellUnit } from '../../utils/units';
 import { getCountryProfile } from '../../utils/localization';
+import { buildPriceChangeRequest } from '../../utils/pricingGovernance';
 
 type ModalTab = 'profile' | 'unit' | 'pricing' | 'stock';
 
@@ -209,18 +210,21 @@ export const ProductControlModal: React.FC<Props> = ({ product, isOpen, onClose,
 
             if (!canDirectEdit) {
                 // Zero Autonomous Price Changes: Branch staff submit for CEO approval
-                await inventoryRequestsService.create({
-                    productId: product.id,
-                    productName: product.name,
-                    productSku: product.sku,
-                    siteId: product.siteId || (product as any).site_id || '',
-                    countryCode: activeCountry,
-                    changeType: 'edit',
+                const priceRequest = buildPriceChangeRequest({
+                    product,
+                    proposal: {
+                        price: pricingCfg.price,
+                        costPrice: pricingCfg.costPrice,
+                        salePrice: pricingCfg.salePrice,
+                        isOnSale: pricingCfg.isOnSale,
+                    },
                     requestedBy: user?.name || 'Unknown',
-                    requestedAt: new Date().toISOString(),
-                    status: 'pending',
-                    proposedChanges: { ...product, ...updates },
-                    adjustmentReason: `Pricing update: Price ${pricingCfg.price}, Cost ${pricingCfg.costPrice}`,
+                    countryCode: activeCountry,
+                    source: 'Product control pricing update',
+                });
+                await inventoryRequestsService.create({
+                    ...priceRequest,
+                    proposedChanges: { ...priceRequest.proposedChanges, competitorPrice: pricingCfg.competitorPrice },
                 });
 
                 try {
@@ -364,47 +368,47 @@ export const ProductControlModal: React.FC<Props> = ({ product, isOpen, onClose,
         { id: 'stock', label: 'Stock Policy', icon: Layers },
     ];
 
-    const inputCls = 'w-full bg-stone-50 dark:bg-black/30 border border-stone-200 dark:border-white/10 rounded-xl px-3 py-2 text-sm font-mono font-bold text-gray-900 dark:text-white focus:outline-none focus:border-[#2C5E3B] dark:focus:border-[#A9CBA2] transition-colors';
+    const inputCls = 'w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3 py-2 text-sm font-mono font-medium text-[var(--theme-text-primary)] focus:outline-none focus:border-[var(--theme-accent)] focus:ring-1 focus:ring-[var(--theme-accent)] transition-colors';
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4" role="dialog" aria-modal="true">
-            <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
-            <div className="relative bg-white dark:bg-[#0f1710] rounded-2xl shadow-2xl w-full max-w-6xl max-h-[92vh] flex flex-col border border-stone-200 dark:border-white/10 overflow-hidden">
+            <div className="absolute inset-0 bg-black/40 backdrop-blur-md" onClick={onClose} />
+            <div className="relative bg-[var(--theme-bg-card)] rounded-3xl shadow-2xl w-full max-w-6xl max-h-[92vh] flex flex-col border border-[var(--theme-border)] overflow-hidden">
 
                 {/* Header */}
-                <div className="flex items-start gap-4 p-5 border-b border-stone-200 dark:border-white/10 flex-shrink-0 bg-stone-50 dark:bg-black/20">
-                    <div className="w-12 h-12 rounded-xl bg-white dark:bg-black/40 border border-stone-200 dark:border-white/10 flex items-center justify-center flex-shrink-0 overflow-hidden">
+                <div className="flex items-start gap-4 p-5 border-b border-[var(--theme-border)] flex-shrink-0 bg-[var(--theme-bg-subtle)]">
+                    <div className="w-12 h-12 rounded-xl bg-[var(--theme-bg-card)] border border-[var(--theme-border)] flex items-center justify-center flex-shrink-0 overflow-hidden">
                         {product.image && !product.image.includes('placeholder.com') ? (
                             <img src={product.image} alt={product.name} className="w-full h-full object-cover" />
                         ) : (
-                            <Package size={20} className="text-[#2C5E3B]/40 dark:text-[#A9CBA2]/40" />
+                            <Package size={20} className="text-[var(--theme-text-secondary)]" />
                         )}
                     </div>
                     <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 flex-wrap">
-                            <span className="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded bg-[#2C5E3B]/10 dark:bg-[#A9CBA2]/10 text-[#2C5E3B] dark:text-[#A9CBA2] border border-[#2C5E3B]/20">
+                            <span className="text-[10px] font-mono font-semibold tracking-wider px-2 py-0.5 rounded-md bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)] border border-[var(--theme-border)]">
                                 {product.sku}
                             </span>
-                            <span className="text-[10px] font-bold text-stone-400 dark:text-stone-500 uppercase">{product.category}</span>
+                            <span className="text-[11px] font-medium text-[var(--theme-text-secondary)] uppercase">{product.category}</span>
                         </div>
-                        <h3 className="text-lg font-black text-gray-900 dark:text-white truncate mt-0.5">{product.name}</h3>
-                        <p className="text-[10px] text-stone-400 dark:text-stone-500 truncate">Location: {product.location || 'Default Shelf'}</p>
+                        <h3 className="text-lg font-semibold text-[var(--theme-text-primary)] truncate mt-0.5">{product.name}</h3>
+                        <p className="text-xs text-[var(--theme-text-secondary)] truncate">Location: {product.location || 'Default Shelf'}</p>
                     </div>
-                    <button onClick={onClose} title="Close" aria-label="Close" className="p-2 text-stone-400 hover:text-stone-600 dark:hover:text-white rounded-xl hover:bg-stone-100 dark:hover:bg-white/10 transition-colors cursor-pointer">
+                    <button onClick={onClose} title="Close" aria-label="Close" className="p-2 text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] rounded-xl hover:bg-[var(--theme-bg-card)] transition-colors cursor-pointer">
                         <X size={18} />
                     </button>
                 </div>
 
                 {/* Tabs */}
-                <div className="flex border-b border-stone-200 dark:border-white/10 bg-stone-50/50 dark:bg-black/10 px-5 flex-shrink-0">
+                <div className="flex border-b border-[var(--theme-border)] bg-[var(--theme-bg-subtle)]/50 px-5 flex-shrink-0 gap-1 pt-2">
                     {tabs.map(tab => (
                         <button
                             key={tab.id}
                             onClick={() => setActiveTab(tab.id)}
-                            className={`flex items-center gap-2 px-4 py-3 text-xs font-black uppercase tracking-wider border-b-2 transition-all cursor-pointer ${
+                            className={`flex items-center gap-2 px-4 py-2.5 text-xs font-semibold rounded-t-xl transition-all cursor-pointer ${
                                 activeTab === tab.id
-                                    ? 'border-[#2C5E3B] text-[#2C5E3B] dark:border-[#A9CBA2] dark:text-[#A9CBA2]'
-                                    : 'border-transparent text-stone-400 hover:text-stone-600 dark:hover:text-stone-300'
+                                    ? 'bg-[var(--theme-bg-card)] text-[var(--theme-accent)] shadow-xs border-t border-x border-[var(--theme-border)] -mb-px'
+                                    : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-card)]/50'
                             }`}
                         >
                             <tab.icon size={14} />

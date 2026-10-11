@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { History as HistoryIcon, Search } from 'lucide-react';
+import { History as HistoryIcon, Search, User } from 'lucide-react';
 import Pagination from '../../shared/Pagination';
 import { WMSJob } from '../../../types';
 import { formatJobId } from '../../../utils/jobIdFormatter';
@@ -10,16 +10,32 @@ interface ReplenishHistoryProps {
     REPLENISH_HISTORY_PER_PAGE: number;
     setSelectedJob: (job: WMSJob) => void;
     setIsDetailsOpen: (open: boolean) => void;
+    employees?: any[];
 }
 
 export const ReplenishHistory: React.FC<ReplenishHistoryProps> = ({
     historicalJobs,
     REPLENISH_HISTORY_PER_PAGE,
     setSelectedJob,
-    setIsDetailsOpen
+    setIsDetailsOpen,
+    employees
 }) => {
     const [replenishHistorySearch, setReplenishHistorySearch] = useState('');
     const [replenishHistoryPage, setReplenishHistoryPage] = useState(1);
+
+    const getWorkerDisplay = (job: WMSJob) => {
+        const workerId = job.completedBy || job.assignedTo;
+        if (!workerId) return 'Unassigned';
+        const emp = employees?.find(e =>
+            e.id === workerId ||
+            e.name === workerId ||
+            (e.name && workerId && e.name.toLowerCase() === workerId.toLowerCase()) ||
+            (e.email && workerId && e.email.toLowerCase() === workerId.toLowerCase()) ||
+            (e.code && workerId && e.code.toLowerCase() === workerId.toLowerCase())
+        );
+        if (!emp) return workerId;
+        return emp.code ? `${emp.name} (${emp.code})` : emp.name;
+    };
 
     const filteredReplenishHistory = useMemo(() => {
         return historicalJobs.filter((j: WMSJob) => {
@@ -32,10 +48,11 @@ export const ReplenishHistory: React.FC<ReplenishHistoryProps> = ({
             const noteStr = (j.notes || '').toLowerCase();
             const statusStr = (j.status || '').toLowerCase();
             const jobNum = (j.jobNumber || (j as any).job_number || '').toLowerCase();
+            const worker = getWorkerDisplay(j).toLowerCase();
 
             // Search product names and SKUs
             const items = j.lineItems || (j as any).line_items || [];
-            const matchesItems = items.some((item: any) => 
+            const matchesItems = items.some((item: any) =>
                 (item.name || '').toLowerCase().includes(q) ||
                 (item.productName || '').toLowerCase().includes(q) ||
                 (item.sku || '').toLowerCase().includes(q)
@@ -48,10 +65,11 @@ export const ReplenishHistory: React.FC<ReplenishHistoryProps> = ({
                 noteStr.includes(q) ||
                 statusStr.includes(q) ||
                 jobNum.includes(q) ||
+                worker.includes(q) ||
                 matchesItems
             );
         });
-    }, [historicalJobs, replenishHistorySearch]);
+    }, [historicalJobs, replenishHistorySearch, employees]);
 
     const replenishHistoryTotalPages = Math.ceil(filteredReplenishHistory.length / REPLENISH_HISTORY_PER_PAGE);
 
@@ -61,34 +79,34 @@ export const ReplenishHistory: React.FC<ReplenishHistoryProps> = ({
     }, [filteredReplenishHistory, replenishHistoryPage]);
 
     return (
-        <div className="border-t border-[#E2DCCE]/30 dark:border-[#A9CBA2]/[0.04] mt-10 pt-8 pb-10">
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
+        <div className="space-y-4">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <div>
-                    <h4 className="text-sm font-bold text-stone-900 dark:text-stone-100 flex items-center gap-2 uppercase tracking-wide">
-                        <HistoryIcon size={18} className="text-stone-500 dark:text-stone-400" />
+                    <h4 className="text-sm font-bold text-[var(--theme-text-primary)] flex items-center gap-2 uppercase tracking-wide">
+                        <HistoryIcon size={18} className="text-[var(--theme-text-secondary)]" />
                         Replenishment History
                     </h4>
-                    <p className="text-stone-500 dark:text-stone-400 text-[10px]">Recent completed refurbishment and restock jobs</p>
+                    <p className="text-[11px] text-[var(--theme-text-secondary)] font-medium">Completed replenishment and forward-pick restock records</p>
                 </div>
 
                 {/* History Search */}
                 <div className="relative w-full md:w-72">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-500" size={14} />
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--theme-text-secondary)]" size={14} />
                     <input
                         type="text"
-                        placeholder="Search history..."
+                        placeholder="Search history, worker, SKU..."
                         aria-label="Search replenishment history"
                         title="Search replenishment history"
                         value={replenishHistorySearch}
                         onChange={(e) => setReplenishHistorySearch(e.target.value)}
-                        className="woody-input !pl-9 text-xs py-2"
+                        className="w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] focus:border-[var(--theme-accent)] rounded-xl py-2 pl-9 pr-3 text-xs text-[var(--theme-text-primary)] placeholder:text-[var(--theme-text-secondary)]/50 outline-none transition-colors min-h-[44px]"
                     />
                 </div>
             </div>
 
             {paginatedReplenishHistory.length > 0 ? (
                 <>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
                         {paginatedReplenishHistory.map((job: WMSJob) => (
                             <div
                                 key={job.id}
@@ -96,41 +114,56 @@ export const ReplenishHistory: React.FC<ReplenishHistoryProps> = ({
                                     setSelectedJob(job);
                                     setIsDetailsOpen(true);
                                 }}
-                                className="glass-panel rounded-2xl p-3 hover:bg-stone-100/50 dark:hover:bg-[#EAE5D9]/10 transition-all group cursor-pointer"
+                                className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-4 hover:border-[var(--theme-accent)]/40 transition-colors shadow-sm cursor-pointer flex flex-col justify-between gap-3"
                             >
-                                <div className="flex justify-between items-start mb-2">
-                                    <span className="text-[10px] font-mono text-[#2C5E3B] dark:text-[#A9CBA2] font-bold">{formatJobId(job)}</span>
-                                    <span className="text-[9px] px-1.5 py-0.5 rounded uppercase font-black bg-[#2C5E3B]/10 text-[#2C5E3B] dark:bg-[#A9CBA2]/10 dark:text-[#A9CBA2]">
+                                <div className="flex justify-between items-start gap-2">
+                                    <div>
+                                        <span className="text-xs font-mono tabular-nums text-[var(--theme-accent)] font-semibold block">
+                                            {formatJobId(job)}
+                                        </span>
+                                        <p className="text-[11px] text-[var(--theme-text-secondary)] font-medium truncate mt-0.5">
+                                            {job.orderRef || 'Internal'}
+                                            {job.jobNumber && <span className="text-[var(--theme-text-primary)] ml-1 font-mono">• {job.jobNumber}</span>}
+                                        </p>
+                                    </div>
+                                    <span className="text-[11px] font-semibold px-2.5 py-0.5 rounded-full border bg-green-500/10 text-green-600 dark:text-green-400 border-green-500/20 uppercase shrink-0">
                                         {job.status}
                                     </span>
                                 </div>
-                                <div className="flex justify-between items-end">
-                                    <div>
-                                        <p className="text-[10px] text-stone-500 dark:text-stone-400 truncate max-w-[100px]">
-                                            {job.orderRef || 'Internal'}
-                                            {job.jobNumber && <span className="text-[#2C5E3B] dark:text-[#A9CBA2] ml-1">• {job.jobNumber}</span>}
-                                        </p>
-                                        <p className="text-[9px] text-stone-400 dark:text-stone-500 mt-0.5">{formatDateTime(job.updatedAt || job.createdAt || '')}</p>
+
+                                <div className="pt-2 border-t border-[var(--theme-border)] flex flex-col gap-1.5">
+                                    {/* Completed By Attribution */}
+                                    <div className="flex items-center gap-1.5 text-[11px] text-[var(--theme-text-secondary)] font-medium">
+                                        <User size={13} className="text-[var(--theme-accent)] shrink-0" />
+                                        <span className="font-semibold text-[var(--theme-text-primary)]">Completed By:</span>
+                                        <span className="truncate">{getWorkerDisplay(job)}</span>
                                     </div>
-                                    <div className="text-right text-stone-900 dark:text-stone-100 font-bold text-xs">
-                                        {job.items} <span className="text-[9px] text-stone-500 dark:text-stone-400 font-normal">units</span>
+
+                                    <div className="flex justify-between items-center text-[11px] text-[var(--theme-text-secondary)] font-mono tabular-nums">
+                                        <span>{formatDateTime(job.updatedAt || job.createdAt || '')}</span>
+                                        <span className="text-xs font-semibold text-[var(--theme-text-primary)]">
+                                            {job.items || 1} <span className="text-[11px] text-[var(--theme-text-secondary)] font-normal">units</span>
+                                        </span>
                                     </div>
                                 </div>
                             </div>
                         ))}
                     </div>
-                    <Pagination
-                        currentPage={replenishHistoryPage}
-                        totalPages={replenishHistoryTotalPages}
-                        totalItems={filteredReplenishHistory.length}
-                        itemsPerPage={REPLENISH_HISTORY_PER_PAGE}
-                        onPageChange={setReplenishHistoryPage}
-                        itemName="history"
-                    />
+
+                    <div className="pt-2">
+                        <Pagination
+                            currentPage={replenishHistoryPage}
+                            totalPages={replenishHistoryTotalPages}
+                            totalItems={filteredReplenishHistory.length}
+                            itemsPerPage={REPLENISH_HISTORY_PER_PAGE}
+                            onPageChange={setReplenishHistoryPage}
+                            itemName="history records"
+                        />
+                    </div>
                 </>
             ) : (
-                <div className="text-center py-10 bg-stone-50/10 dark:bg-[#1C2620]/10 rounded-2xl border border-dashed border-[#E2DCCE]/30 dark:border-[#A9CBA2]/[0.04]">
-                    <p className="text-stone-500 dark:text-stone-400 text-xs">No matching history found</p>
+                <div className="text-center py-12 px-4 bg-[var(--theme-bg-card)] rounded-2xl border border-[var(--theme-border)] shadow-sm">
+                    <p className="text-xs text-[var(--theme-text-secondary)] font-medium">No matching replenishment history records found</p>
                 </div>
             )}
         </div>

@@ -3,7 +3,7 @@ import type { StockMovement } from '../types';
 import { logger } from '../utils/logger';
 
 export const stockMovementsService = {
-    async getAll(siteId?: string, productId?: string, limit: number = 50, offset: number = 0, filters?: { search?: string; type?: string }, sort?: { key: string; direction: 'asc' | 'desc' }) {
+    async getAll(siteId?: string, productId?: string, limit: number = 25, offset: number = 0, filters?: { search?: string; type?: string }, sort?: { key: string; direction: 'asc' | 'desc' }) {
         let query = supabase
             .from('stock_movements')
             .select('*', { count: 'exact' });

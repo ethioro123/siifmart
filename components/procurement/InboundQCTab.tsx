@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { ShieldCheck, Thermometer, Plus, Box } from 'lucide-react';
+import { ShieldCheck, Thermometer, Plus, Box, Clock, Check } from 'lucide-react';
 import { procurementGovernanceService } from '../../services/procurement-governance.service';
 import type { InboundQCInspection } from '../../types/procurement-zero-trust';
 import { useStore } from '../../contexts/CentralStore';
@@ -11,7 +11,10 @@ interface InboundQCTabProps {
 
 export const InboundQCTab: React.FC<InboundQCTabProps> = ({ countryCode }) => {
   const { user, showToast } = useStore();
+  const isManager = Boolean(user?.role && ['procurement_manager', 'regional_manager', 'operations_manager', 'super_admin', 'CEO', 'ceo'].includes(user.role));
+
   const [inspections, setInspections] = useState<InboundQCInspection[]>([]);
+  const [waivedInspectionIds, setWaivedInspectionIds] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
 
@@ -86,9 +89,22 @@ export const InboundQCTab: React.FC<InboundQCTabProps> = ({ countryCode }) => {
             <ShieldCheck size={22} strokeWidth={1.5} />
           </div>
           <div>
-            <h2 className="text-xl font-bold tracking-tight text-[var(--theme-text-primary)] flex items-center gap-2">
-              Inbound Dock QC & Food Safety ({countryCode})
-            </h2>
+            <div className="flex items-center gap-2.5 flex-wrap">
+              <h2 className="text-xl font-bold tracking-tight text-[var(--theme-text-primary)]">
+                Inbound Dock QC & Food Safety ({countryCode})
+              </h2>
+              {isManager ? (
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-purple-500/10 text-purple-600 dark:text-purple-400 border border-purple-500/20 text-[11px] font-semibold">
+                  <ShieldCheck size={12} />
+                  <span>Checker • Disposition Sign-Off</span>
+                </span>
+              ) : (
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-blue-500/10 text-[#0071E3] dark:text-[#2997FF] border border-[#0071E3]/20 text-[11px] font-semibold">
+                  <Clock size={12} />
+                  <span>Maker • Dock QC Inspector</span>
+                </span>
+              )}
+            </div>
             <p className="text-xs text-[var(--theme-text-secondary)] font-medium mt-0.5">
               Dockside receiving inspections enforcing cold-chain temperature limits, packaging integrity, and food safety standards.
             </p>
@@ -112,52 +128,71 @@ export const InboundQCTab: React.FC<InboundQCTabProps> = ({ countryCode }) => {
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-          {inspections.map(qc => (
-            <div key={qc.id} className="p-6 rounded-3xl bg-[var(--theme-bg-panel)] border border-[var(--theme-border)] shadow-sm space-y-4 hover:border-[var(--theme-accent)]/50 transition-all">
-              <div className="flex items-start justify-between gap-2">
-                <div>
-                  <h3 className="font-bold text-sm tracking-tight text-[var(--theme-text-primary)]">PO {qc.poNumber || 'Inbound Dock'}</h3>
-                  <p className="text-[11px] font-mono text-[var(--theme-text-secondary)] mt-0.5">{formatDateTime(qc.inspectionDate)}</p>
-                </div>
-                <span className={`px-2.5 py-0.5 rounded-full text-xs font-semibold border ${
-                  qc.disposition === 'Accepted'
-                    ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20'
-                    : qc.disposition === 'Rejected'
-                    ? 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/20'
-                    : 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20'
-                }`}>
-                  {qc.disposition}
-                </span>
-              </div>
-
-              <div className="grid grid-cols-2 gap-2.5 text-xs">
-                <div className="p-3 rounded-2xl bg-[var(--theme-bg-subtle)]/60 border border-[var(--theme-border)] flex items-center gap-2.5">
-                  <Thermometer size={16} className={qc.tempComplianceStatus === 'Breach' ? 'text-rose-500 shrink-0' : 'text-emerald-500 shrink-0'} />
+          {inspections.map(qc => {
+            const isWaived = waivedInspectionIds.includes(qc.id);
+            const effectiveDisposition = isWaived ? 'Conditionally Accepted' : qc.disposition;
+            const hasIssue = qc.discrepancyFound || qc.disposition !== 'Accepted';
+            return (
+              <div key={qc.id} className="p-6 rounded-3xl bg-[var(--theme-bg-panel)] border border-[var(--theme-border)] shadow-sm space-y-4 hover:border-[var(--theme-accent)]/50 transition-all">
+                <div className="flex items-start justify-between gap-2">
                   <div>
-                    <p className="text-[10px] text-[var(--theme-text-secondary)] font-semibold uppercase tracking-wider">Temp</p>
-                    <p className="font-bold font-mono text-[var(--theme-text-primary)]">{qc.coldChainTempCelsius !== undefined ? `${qc.coldChainTempCelsius}°C` : 'Dry'}</p>
+                    <h3 className="font-bold text-sm tracking-tight text-[var(--theme-text-primary)]">PO {qc.poNumber || 'Inbound Dock'}</h3>
+                    <p className="text-[11px] font-mono text-[var(--theme-text-secondary)] mt-0.5">{formatDateTime(qc.inspectionDate)}</p>
+                  </div>
+                  <span className={`px-2.5 py-0.5 rounded-full text-xs font-semibold border ${
+                    effectiveDisposition === 'Accepted' || isWaived
+                      ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20'
+                      : effectiveDisposition === 'Rejected'
+                      ? 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/20'
+                      : 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20'
+                  }`}>
+                    {isWaived ? 'Supervisory Waiver Signed' : effectiveDisposition}
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-2 gap-2.5 text-xs">
+                  <div className="p-3 rounded-2xl bg-[var(--theme-bg-subtle)]/60 border border-[var(--theme-border)] flex items-center gap-2.5">
+                    <Thermometer size={16} className={qc.tempComplianceStatus === 'Breach' ? 'text-rose-500 shrink-0' : 'text-emerald-500 shrink-0'} />
+                    <div>
+                      <p className="text-[10px] text-[var(--theme-text-secondary)] font-semibold uppercase tracking-wider">Temp</p>
+                      <p className="font-bold font-mono text-[var(--theme-text-primary)]">{qc.coldChainTempCelsius !== undefined ? `${qc.coldChainTempCelsius}°C` : 'Dry'}</p>
+                    </div>
+                  </div>
+                  <div className="p-3 rounded-2xl bg-[var(--theme-bg-subtle)]/60 border border-[var(--theme-border)] flex items-center gap-2.5">
+                    <Box size={16} className="text-[var(--theme-text-secondary)] shrink-0" />
+                    <div>
+                      <p className="text-[10px] text-[var(--theme-text-secondary)] font-semibold uppercase tracking-wider">Packaging</p>
+                      <p className="font-bold text-[var(--theme-text-primary)]">{qc.packagingIntegrity}</p>
+                    </div>
                   </div>
                 </div>
-                <div className="p-3 rounded-2xl bg-[var(--theme-bg-subtle)]/60 border border-[var(--theme-border)] flex items-center gap-2.5">
-                  <Box size={16} className="text-[var(--theme-text-secondary)] shrink-0" />
-                  <div>
-                    <p className="text-[10px] text-[var(--theme-text-secondary)] font-semibold uppercase tracking-wider">Packaging</p>
-                    <p className="font-bold text-[var(--theme-text-primary)]">{qc.packagingIntegrity}</p>
+
+                {qc.discrepancyDetails && (
+                  <div className="p-3 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-rose-600 dark:text-rose-400 text-xs font-mono font-medium">
+                    {qc.discrepancyDetails}
                   </div>
+                )}
+
+                <div className="flex items-center justify-between pt-1">
+                  <p className="text-[10px] text-[var(--theme-text-secondary)] font-mono font-medium">
+                    Inspector: {qc.inspectorName}
+                  </p>
+                  {isManager && hasIssue && !isWaived && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setWaivedInspectionIds(prev => [...prev, qc.id]);
+                        showToast(`Supervisory disposition sign-off recorded for PO ${qc.poNumber}.`, 'success');
+                      }}
+                      className="h-8 px-3 rounded-full bg-[#0071E3] hover:bg-[#0077ED] text-white font-semibold text-xs transition-all flex items-center gap-1 active:scale-[0.98] cursor-pointer shadow-sm shrink-0"
+                    >
+                      <Check size={13} /> Sign Off Waiver
+                    </button>
+                  )}
                 </div>
               </div>
-
-              {qc.discrepancyDetails && (
-                <div className="p-3 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-rose-600 dark:text-rose-400 text-xs font-mono font-medium">
-                  {qc.discrepancyDetails}
-                </div>
-              )}
-
-              <p className="text-[10px] text-[var(--theme-text-secondary)] font-mono font-medium pt-1">
-                Inspector: {qc.inspectorName}
-              </p>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
 

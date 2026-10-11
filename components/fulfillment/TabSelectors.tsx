@@ -33,20 +33,20 @@ export const MobileTabSelector: React.FC<TabSelectorProps> = ({
         <div className="md:hidden relative z-[60] mb-2">
             <button
                 onClick={() => setIsMobileTabMenuOpen(!isMobileTabMenuOpen)}
-                className="w-full glass-panel p-3.5 min-h-[48px] flex items-center justify-between active:scale-[0.98] transition-transform group"
+                className="w-full bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-3.5 min-h-[48px] flex items-center justify-between active:scale-[0.98] transition-transform group touch-manipulation"
             >
                 <div className="flex items-center gap-3 sm:gap-4 min-w-0 flex-1">
-                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#2C5E3B] to-[#1E3F27] dark:from-[#A9CBA2]/20 dark:to-[#A9CBA2]/5 flex items-center justify-center text-white dark:text-[#A9CBA2] border border-[#E2DCCE]/30 dark:border-[#A9CBA2]/10 shrink-0">
+                    <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary border border-primary/20 shrink-0">
                         <Layout size={20} />
                     </div>
                     <div className="text-left min-w-0 flex-1">
-                        <p className="text-[9px] text-stone-400 dark:text-stone-500 font-bold uppercase tracking-[0.2em]">Current Section</p>
-                        <p className="text-base sm:text-lg font-black text-stone-900 dark:text-[#EAE5D9] uppercase tracking-tighter truncate">
+                        <p className="text-[11px] text-[var(--theme-text-muted)] font-semibold uppercase tracking-wider">Current Section</p>
+                        <p className="text-base font-bold text-[var(--theme-text-primary)] uppercase tracking-tight truncate">
                             {t(`warehouse.tabs.${activeTab.toLowerCase()}`)}
                         </p>
                     </div>
                 </div>
-                <div className={`w-8 h-8 rounded-full bg-stone-100/60 dark:bg-[#1C2620]/30 border border-[#E2DCCE]/30 dark:border-[#A9CBA2]/10 flex items-center justify-center transition-transform duration-300 shrink-0 ml-2 ${isMobileTabMenuOpen ? 'rotate-180 bg-[#2C5E3B]/20 text-[#2C5E3B] dark:text-[#A9CBA2] border-[#2C5E3B]/30' : 'text-stone-400'}`}>
+                <div className={`w-8 h-8 rounded-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] flex items-center justify-center transition-transform duration-300 shrink-0 ml-2 ${isMobileTabMenuOpen ? 'rotate-180 bg-primary/10 text-primary border-primary/30' : 'text-[var(--theme-text-muted)]'}`}>
                     <ChevronDown size={16} />
                 </div>
             </button>
@@ -60,10 +60,10 @@ export const MobileTabSelector: React.FC<TabSelectorProps> = ({
                             key={tab}
                             type="button"
                             onClick={() => setActiveTab(tab)}
-                            className={`px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-wider whitespace-nowrap min-h-[36px] transition-all shrink-0 ${
+                            className={`px-3.5 py-2 rounded-xl text-xs font-semibold uppercase tracking-wider whitespace-nowrap min-h-[44px] transition-colors shrink-0 touch-manipulation ${
                                 isActive
-                                    ? 'bg-[#2C5E3B] dark:bg-[#EAE5D9] text-[#FAF8F5] dark:text-[#1E3B24] shadow-sm'
-                                    : 'bg-[#FAF8F5]/80 dark:bg-[#1C2620]/80 text-stone-600 dark:text-stone-400 border border-[#E2DCCE]/60 dark:border-white/5 active:bg-stone-100 dark:active:bg-white/10'
+                                    ? 'bg-primary text-white shadow-sm'
+                                    : 'bg-[var(--theme-bg-card)] text-[var(--theme-text-secondary)] border border-[var(--theme-border)] active:bg-[var(--theme-bg-subtle)]'
                             }`}
                         >
                             {t(`warehouse.tabs.${tab.toLowerCase()}`)}
@@ -75,11 +75,10 @@ export const MobileTabSelector: React.FC<TabSelectorProps> = ({
             {/* Mobile Dropdown Grid */}
             {isMobileTabMenuOpen && (
                 <>
-                    <div className="fixed inset-0 bg-black/60 dark:bg-black/85 z-[65]" onClick={() => setIsMobileTabMenuOpen(false)} />
-                    <div className="absolute top-full left-0 right-0 mt-2 glass-panel p-3 sm:p-4 grid grid-cols-2 gap-2 sm:gap-3 z-[70] animate-in fade-in zoom-in-95 duration-200 max-h-[70vh] overflow-y-auto custom-scrollbar">
+                    <div className="fixed inset-0 bg-black/60 z-[65]" onClick={() => setIsMobileTabMenuOpen(false)} />
+                    <div className="absolute top-full left-0 right-0 mt-2 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-3 sm:p-4 grid grid-cols-2 gap-2 sm:gap-3 z-[70] animate-in fade-in zoom-in-95 duration-200 max-h-[70vh] overflow-y-auto custom-scrollbar shadow-2xl">
                         {visibleTabs.map((tab) => {
                             const isActive = activeTab === tab;
-                            // Discrepancy Logic
                             const hasTransferDiscrepancies = tab === 'TRANSFER' && filteredJobs
                                 .filter(j => j.type === 'TRANSFER' && ['Received', 'Delivered', 'Completed'].some(s => s === j.transferStatus || s === j.status))
                                 .some(j => (j.lineItems || []).some((item: any) =>
@@ -95,12 +94,12 @@ export const MobileTabSelector: React.FC<TabSelectorProps> = ({
                                         setActiveTab(tab);
                                         setIsMobileTabMenuOpen(false);
                                     }}
-                                    className={`p-3.5 min-h-[48px] rounded-2xl flex flex-col items-center justify-center gap-1.5 transition-colors active:scale-95 border relative ${isActive
-                                        ? 'bg-[#2C5E3B] dark:bg-[#EAE5D9] text-[#FAF8F5] dark:text-[#1E3B24] border-[#2C5E3B] dark:border-[#EAE5D9] shadow-sm'
-                                        : 'bg-stone-50/50 dark:bg-[#18201B]/50 text-stone-700 dark:text-stone-400 border-[#E2DCCE]/50 dark:border-[#A9CBA2]/[0.04] hover:bg-stone-100/50 dark:hover:bg-[#EAE5D9]/10 hover:text-[#1E3F27] dark:hover:text-white'
+                                    className={`p-3.5 min-h-[48px] rounded-xl flex flex-col items-center justify-center gap-1.5 transition-colors active:scale-95 border relative touch-manipulation ${isActive
+                                        ? 'bg-primary text-white border-primary shadow-sm'
+                                        : 'bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] border-[var(--theme-border)] hover:bg-[var(--theme-bg-card)] hover:text-[var(--theme-text-primary)]'
                                         }`}
                                  >
-                                    <span className="text-[10px] font-black uppercase tracking-widest leading-tight text-center truncate max-w-full px-1">{t(`warehouse.tabs.${tab.toLowerCase()}`)}</span>
+                                    <span className="text-xs font-semibold uppercase tracking-wider leading-tight text-center truncate max-w-full px-1">{t(`warehouse.tabs.${tab.toLowerCase()}`)}</span>
                                     {hasTransferDiscrepancies && (
                                         <div className="absolute top-2 right-2 w-2 h-2 rounded-full bg-red-500 animate-pulse" />
                                     )}
@@ -132,7 +131,6 @@ export const DesktopTabSelector: React.FC<DesktopTabSelectorProps> = ({
         <div className="hidden md:flex items-center gap-2 overflow-x-auto pb-0 -mx-0 px-0 bg-transparent rounded-xl shrink-0 no-scrollbar touch-pan-x">
             <div className="flex gap-2 min-w-max">
                 {visibleTabs.map((tab) => {
-                    // Check for discrepancies in TRANSFER tab
                     const hasTransferDiscrepancies = tab === 'TRANSFER' && filteredJobs
                         .filter(j => j.type === 'TRANSFER' && ['Received', 'Delivered', 'Completed'].some(s => s === j.transferStatus || s === j.status))
                         .some(j => (j.lineItems || []).some((item: any) =>
@@ -154,16 +152,16 @@ export const DesktopTabSelector: React.FC<DesktopTabSelectorProps> = ({
                         <button
                             key={tab}
                             onClick={() => setActiveTab(tab as OpTab)}
-                            className={`px-4 py-2.5 rounded-2xl text-xs font-semibold transition-all whitespace-nowrap min-h-[40px] md:min-h-0 select-none relative ${activeTab === tab
-                                ? 'bg-[#2C5E3B] dark:bg-[#EAE5D9] text-[#FAF8F5] dark:text-[#1E3B24] shadow-sm'
+                            className={`px-4 py-2.5 rounded-xl text-xs font-semibold transition-colors whitespace-nowrap min-h-[44px] select-none relative touch-manipulation ${activeTab === tab
+                                ? 'bg-primary text-white shadow-sm'
                                 : hasTransferDiscrepancies
-                                    ? 'bg-red-600 text-white animate-pulse shadow-[0_0_15px_rgba(239,68,68,0.5)] border border-red-400'
-                                    : 'text-stone-500 dark:text-stone-400 hover:bg-[#2C5E3B]/10 dark:hover:bg-[#EAE5D9]/10 hover:text-[#2C5E3B] dark:hover:text-[#EAE5D9]'
+                                    ? 'bg-red-600 text-white animate-pulse border border-red-500'
+                                    : 'text-[var(--theme-text-secondary)] hover:bg-[var(--theme-bg-subtle)] hover:text-[var(--theme-text-primary)]'
                                 } `}
                         >
                             {t(`warehouse.tabs.${tab.toLowerCase()}`)}
                             {hasTransferDiscrepancies && (
-                                <span className="absolute -top-1 -right-1 px-1.5 py-0.5 bg-white text-[10px] text-red-600 rounded-full font-black min-w-[18px] text-center border border-red-500">
+                                <span className="absolute -top-1 -right-1 px-1.5 py-0.5 bg-white text-[11px] text-red-600 rounded-full font-bold min-w-[18px] text-center border border-red-500 font-mono tabular-nums">
                                     {discrepancyCount}
                                 </span>
                             )}
@@ -188,7 +186,6 @@ export const DesktopTabSelector: React.FC<DesktopTabSelectorProps> = ({
                     onClose={() => setShowPointsPopup(false)}
                 />
             )}
-
         </div>
     );
 };

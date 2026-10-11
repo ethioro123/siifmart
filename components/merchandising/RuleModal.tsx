@@ -22,9 +22,9 @@ export const RuleModal: React.FC<RuleModalProps> = ({
       <Modal isOpen={isOpen} onClose={onClose} title="New Pricing Automation Rule">
          <div className="space-y-4">
             <div className="space-y-1">
-               <label className="text-[10px] text-stone-500 dark:text-gray-400 uppercase font-bold tracking-wider block">Rule Name</label>
+               <label className="text-xs font-medium text-[var(--theme-text-secondary)] block mb-1">Rule Name</label>
                <input
-                  className="w-full bg-[#FAF8F5] dark:bg-black/30 border border-[#E2DCCE] dark:border-white/10 rounded-2xl px-4 py-2.5 text-xs text-[#1E3F27] dark:text-white focus:border-[#2C5E3B] outline-none font-bold"
+                  className="w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 py-2.5 text-xs text-[var(--theme-text-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--theme-accent)] font-medium transition-colors"
                   placeholder="e.g. Low Stock Dynamic Clearance"
                   value={newRule.name || ''}
                   onChange={(e) => setNewRule({ ...newRule, name: e.target.value })}
@@ -32,17 +32,17 @@ export const RuleModal: React.FC<RuleModalProps> = ({
                />
             </div>
             <div className="space-y-1">
-               <label className="text-[10px] text-stone-500 dark:text-gray-400 uppercase font-bold tracking-wider block">Target Category</label>
+               <label className="text-xs font-medium text-[var(--theme-text-secondary)] block mb-1">Target Category</label>
                <select
-                  className="w-full bg-[#FAF8F5] dark:bg-black/30 border border-[#E2DCCE] dark:border-white/10 rounded-2xl px-4 py-2.5 text-xs text-[#1E3F27] dark:text-white focus:border-[#2C5E3B] outline-none font-bold cursor-pointer"
+                  className="w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 py-2.5 text-xs text-[var(--theme-text-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--theme-accent)] font-medium cursor-pointer transition-colors"
                   value={newRule.targetCategory}
                   onChange={(e) => setNewRule({ ...newRule, targetCategory: e.target.value })}
                   aria-label="Target Category"
                >
                   {Object.entries(GROCERY_CATEGORIES).map(([group, items]) => (
-                     <optgroup key={group} label={group} className="bg-stone-100 dark:bg-[#18201B] text-stone-900 dark:text-stone-300">
+                     <optgroup key={group} label={group} className="bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)]">
                         {items.map(c => (
-                           <option key={c} value={c} className="bg-white dark:bg-[#18201B] text-stone-900 dark:text-stone-100">{c}</option>
+                           <option key={c} value={c} className="bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)]">{c}</option>
                         ))}
                      </optgroup>
                   ))}
@@ -50,9 +50,9 @@ export const RuleModal: React.FC<RuleModalProps> = ({
             </div>
             <div className="grid grid-cols-2 gap-4">
                <div className="space-y-1">
-                  <label className="text-[10px] text-stone-500 dark:text-gray-400 uppercase font-bold tracking-wider block">Trigger Condition</label>
+                  <label className="text-xs font-medium text-[var(--theme-text-secondary)] block mb-1">Trigger Condition</label>
                   <select
-                     className="w-full bg-[#FAF8F5] dark:bg-black/30 border border-[#E2DCCE] dark:border-white/10 rounded-2xl px-4 py-2.5 text-xs text-[#1E3F27] dark:text-white focus:border-[#2C5E3B] outline-none font-bold cursor-pointer"
+                     className="w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 py-2.5 text-xs text-[var(--theme-text-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--theme-accent)] font-medium cursor-pointer transition-colors"
                      value={newRule.condition}
                      onChange={(e) => setNewRule({ ...newRule, condition: e.target.value as any })}
                      aria-label="Trigger Condition"
@@ -63,10 +63,10 @@ export const RuleModal: React.FC<RuleModalProps> = ({
                   </select>
                </div>
                <div className="space-y-1">
-                  <label className="text-[10px] text-stone-500 dark:text-gray-400 uppercase font-bold tracking-wider block">Threshold Value (X)</label>
+                  <label className="text-xs font-medium text-[var(--theme-text-secondary)] block mb-1">Threshold Value (X)</label>
                   <input
                      type="number"
-                     className="w-full bg-[#FAF8F5] dark:bg-black/30 border border-[#E2DCCE] dark:border-white/10 rounded-2xl px-4 py-2.5 text-xs text-[#1E3F27] dark:text-white focus:border-[#2C5E3B] outline-none font-bold"
+                     className="w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 py-2.5 text-xs text-[var(--theme-text-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--theme-accent)] font-mono font-medium tabular-nums transition-colors"
                      value={newRule.threshold || ''}
                      onChange={(e) => setNewRule({ ...newRule, threshold: parseFloat(e.target.value) })}
                      placeholder="0"
@@ -76,9 +76,9 @@ export const RuleModal: React.FC<RuleModalProps> = ({
             </div>
             <div className="grid grid-cols-2 gap-4">
                <div className="space-y-1">
-                  <label className="text-[10px] text-stone-500 dark:text-gray-400 uppercase font-bold tracking-wider block">Action</label>
+                  <label className="text-xs font-medium text-[var(--theme-text-secondary)] block mb-1">Action</label>
                   <select
-                     className="w-full bg-[#FAF8F5] dark:bg-black/30 border border-[#E2DCCE] dark:border-white/10 rounded-2xl px-4 py-2.5 text-xs text-[#1E3F27] dark:text-white focus:border-[#2C5E3B] outline-none font-bold cursor-pointer"
+                     className="w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 py-2.5 text-xs text-[var(--theme-text-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--theme-accent)] font-medium cursor-pointer transition-colors"
                      value={newRule.action}
                      onChange={(e) => setNewRule({ ...newRule, action: e.target.value as any })}
                      aria-label="Action"
@@ -89,10 +89,10 @@ export const RuleModal: React.FC<RuleModalProps> = ({
                   </select>
                </div>
                <div className="space-y-1">
-                  <label className="text-[10px] text-stone-500 dark:text-gray-400 uppercase font-bold tracking-wider block">Value (%)</label>
+                  <label className="text-xs font-medium text-[var(--theme-text-secondary)] block mb-1">Value (%)</label>
                   <input
                      type="number"
-                     className="w-full bg-[#FAF8F5] dark:bg-black/30 border border-[#E2DCCE] dark:border-white/10 rounded-2xl px-4 py-2.5 text-xs text-[#1E3F27] dark:text-white focus:border-[#2C5E3B] outline-none font-bold"
+                     className="w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 py-2.5 text-xs text-[var(--theme-text-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--theme-accent)] font-mono font-medium tabular-nums transition-colors"
                      value={newRule.value || ''}
                      onChange={(e) => setNewRule({ ...newRule, value: parseFloat(e.target.value) })}
                      placeholder="0"
@@ -104,7 +104,7 @@ export const RuleModal: React.FC<RuleModalProps> = ({
                <button
                   type="button"
                   onClick={handleCreateRule}
-                  className="woody-btn-primary w-full py-2.5 rounded-2xl text-xs font-black cursor-pointer shadow-sm"
+                  className="w-full py-2.5 rounded-xl bg-[var(--theme-accent)] hover:opacity-90 text-white text-xs font-semibold cursor-pointer shadow-sm transition-colors"
                >
                   Activate Automation Rule
                </button>

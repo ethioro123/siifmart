@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { Search, X } from 'lucide-react';
+import { Search, X, ArrowLeftRight, RefreshCw } from 'lucide-react';
 import { formatCompactNumber, formatDateTime } from '../../utils/formatting';
 import { stockMovementsService } from '../../services/supabase.service';
 import { useStore } from '../../contexts/CentralStore';
@@ -92,29 +92,41 @@ export const InventoryMovements: React.FC<InventoryMovementsProps> = ({
         setCurrentMovementsPage(1);
     }, [movementsSearch, movementsTypeFilter, movementsSiteFilter, movementsSort]);
 
+    const hasActiveFilters = Boolean(movementsSearch || movementsTypeFilter !== 'All' || (isHQView && movementsSiteFilter !== 'All'));
+
     return (
         <div className="space-y-4 animate-in fade-in">
-            {/* Controls */}
-            <div className="p-4 bg-[var(--theme-bg-panel)] rounded-2xl border border-[var(--theme-border)] flex flex-wrap items-center gap-4">
-                <div className="flex-1 min-w-[300px] relative group">
-                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--theme-text-muted)] group-focus-within:text-[var(--theme-accent)] transition-colors" size={16} />
+            {/* Controls Toolbar */}
+            <div className="p-3.5 bg-[var(--theme-bg-card)] rounded-2xl border border-[var(--theme-border)] shadow-xs flex flex-wrap items-center gap-3">
+                <div className="flex-1 min-w-[280px] relative group">
+                    <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--theme-text-secondary)] group-focus-within:text-[var(--theme-accent)] transition-colors pointer-events-none" size={15} />
                     <input
                         type="text"
                         value={movementsSearch}
                         onChange={(e) => setMovementsSearch(e.target.value)}
-                        placeholder="Search by Product name or Reference ID..."
-                        className="w-full bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl py-3 pl-12 pr-4 text-sm text-[var(--theme-text-primary)] focus:outline-none focus:border-[var(--theme-accent)] transition-all"
+                        placeholder="Search product or ref ID..."
+                        className="w-full h-10 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl py-2 pl-10 pr-9 text-[13px] text-[var(--theme-text-primary)] placeholder:text-[var(--theme-text-secondary)]/60 focus:outline-none focus:ring-2 focus:ring-[var(--theme-accent)]/20 focus:border-[var(--theme-accent)] transition-all shadow-xs"
                     />
+                    {movementsSearch && (
+                        <button
+                            type="button"
+                            onClick={() => setMovementsSearch('')}
+                            className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] p-0.5 rounded-full transition-colors"
+                            aria-label="Clear search"
+                        >
+                            <X size={14} />
+                        </button>
+                    )}
                 </div>
 
-                <div className="flex items-center gap-3 flex-wrap">
+                <div className="flex items-center gap-2.5 flex-wrap">
                     {/* Site Filter (HQ/SuperAdmin Only) */}
                     {(isHQView && isSuperAdmin) ? (
                         <select
                             aria-label="Filter Movement Site"
                             value={movementsSiteFilter}
                             onChange={(e) => setMovementsSiteFilter(e.target.value)}
-                            className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl px-4 py-3 text-sm text-[var(--theme-text-primary)] focus:outline-none focus:border-[var(--theme-accent)]"
+                            className="h-10 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl px-3 text-[13px] font-medium text-[var(--theme-text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--theme-accent)]/20 focus:border-[var(--theme-accent)] shadow-xs cursor-pointer transition-all"
                         >
                             <option value="All">All Sites</option>
                             {sites.filter(s => s.type !== 'Store' && s.type !== 'Administration').map(s => (
@@ -122,9 +134,8 @@ export const InventoryMovements: React.FC<InventoryMovementsProps> = ({
                             ))}
                         </select>
                     ) : (
-                        // Show current site as read-only badge if in warehouse view
                         !isHQView && (
-                            <div className="bg-[var(--theme-pill-bg)] border border-[var(--theme-pill-border)] rounded-xl px-4 py-3 text-sm text-[var(--theme-text-primary)] font-bold">
+                            <div className="h-10 px-3.5 bg-[var(--theme-bg-hover)] border border-[var(--theme-border)] rounded-xl text-[13px] text-[var(--theme-text-secondary)] font-medium flex items-center shadow-xs">
                                 {activeSite?.name || 'Current Site'}
                             </div>
                         )
@@ -135,7 +146,7 @@ export const InventoryMovements: React.FC<InventoryMovementsProps> = ({
                         aria-label="Filter Movement Type"
                         value={movementsTypeFilter}
                         onChange={(e) => setMovementsTypeFilter(e.target.value)}
-                        className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl px-4 py-3 text-sm text-[var(--theme-text-primary)] focus:outline-none focus:border-[var(--theme-accent)]"
+                        className="h-10 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl px-3 text-[13px] font-medium text-[var(--theme-text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--theme-accent)]/20 focus:border-[var(--theme-accent)] shadow-xs cursor-pointer transition-all"
                     >
                         <option value="All">All Types</option>
                         <option value="IN">Inbound (Stock In)</option>
@@ -152,7 +163,7 @@ export const InventoryMovements: React.FC<InventoryMovementsProps> = ({
                             const [key, direction] = e.target.value.split('-');
                             setMovementsSort({ key, direction: direction as 'asc' | 'desc' });
                         }}
-                        className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl px-4 py-3 text-sm text-[var(--theme-text-primary)] focus:outline-none focus:border-[var(--theme-accent)]"
+                        className="h-10 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl px-3 text-[13px] font-medium text-[var(--theme-text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--theme-accent)]/20 focus:border-[var(--theme-accent)] shadow-xs cursor-pointer transition-all"
                     >
                         <option value="date-desc">Newest First</option>
                         <option value="date-asc">Oldest First</option>
@@ -160,101 +171,163 @@ export const InventoryMovements: React.FC<InventoryMovementsProps> = ({
                         <option value="quantity-asc">Lowest Qty</option>
                     </select>
 
-                    {(movementsSearch || movementsTypeFilter !== 'All' || (isHQView && movementsSiteFilter !== 'All')) && (
+                    {hasActiveFilters && (
                         <button
+                            type="button"
                             onClick={() => {
                                 setMovementsSearch('');
                                 setMovementsTypeFilter('All');
                                 if (isHQView) setMovementsSiteFilter('All');
                             }}
-                            className="p-3 text-red-400 hover:bg-red-400/10 rounded-xl transition-colors shrink-0"
+                            className="h-10 px-3 text-[#FF3B30] hover:bg-[#FF3B30]/10 border border-[#FF3B30]/20 rounded-xl transition-colors shrink-0 flex items-center gap-1.5 text-[12px] font-semibold cursor-pointer active:scale-[0.98]"
                             title="Clear All Filters"
                         >
-                            <X size={20} />
+                            <X size={14} />
+                            <span>Reset</span>
                         </button>
                     )}
                 </div>
             </div>
 
-            <div className="bg-[var(--theme-bg-panel)] rounded-2xl border border-[var(--theme-border)] overflow-hidden">
-                <div className="p-6 border-b border-[var(--theme-border)]"><h3 className="font-bold text-[var(--theme-text-primary)]">Stock Movements</h3><p className="text-xs text-[var(--theme-text-muted)] mt-1">Immutable history of inventory changes.</p></div>
-                <div className="overflow-x-auto relative min-h-[400px]">
+            {/* Table Container */}
+            <div className="bg-[var(--theme-bg-card)] rounded-2xl border border-[var(--theme-border)] shadow-xs isolate overflow-hidden">
+                <div className="px-5 py-4 border-b border-[var(--theme-border)] flex flex-wrap items-center justify-between gap-3">
+                    <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-lg bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] border border-[var(--theme-accent)]/20 flex items-center justify-center">
+                            <ArrowLeftRight size={15} />
+                        </div>
+                        <div>
+                            <h3 className="text-sm font-semibold text-[var(--theme-text-primary)] tracking-tight">Stock Movements</h3>
+                            <p className="text-[12px] text-[var(--theme-text-secondary)]">Immutable ledger of physical inventory movements</p>
+                        </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <span className="text-[11px] font-mono tabular-nums px-2.5 py-1 rounded-full bg-[var(--theme-bg-hover)] text-[var(--theme-text-secondary)] border border-[var(--theme-border)]">
+                            {formatCompactNumber(totalMovementsCount)} total records
+                        </span>
+                    </div>
+                </div>
+
+                <div className="overflow-x-auto relative min-h-[360px]">
                     {movementsLoading && (
-                        <div className="absolute inset-0 bg-black/20 flex items-center justify-center z-10 transition-all">
-                            <div className="w-10 h-10 border-4 border-[var(--theme-border)] border-t-[var(--theme-accent)] rounded-full animate-spin" />
+                        <div className="absolute inset-0 bg-[var(--theme-bg-card)]/60 backdrop-blur-xs flex items-center justify-center z-10 transition-all">
+                            <div className="w-9 h-9 rounded-xl bg-[var(--theme-accent)]/10 border border-[var(--theme-accent)]/20 flex items-center justify-center text-[var(--theme-accent)]">
+                                <RefreshCw className="animate-spin" size={18} />
+                            </div>
                         </div>
                     )}
                     <table className="w-full text-left">
-                        <thead><tr className="bg-[var(--theme-bg-subtle)] border-b border-[var(--theme-border)]"><th className="p-4 text-[11px] text-[var(--theme-text-muted)] uppercase tracking-wider font-semibold">Ref ID</th><th className="p-4 text-[11px] text-[var(--theme-text-muted)] uppercase tracking-wider font-semibold">Time</th><th className="p-4 text-[11px] text-[var(--theme-text-muted)] uppercase tracking-wider font-semibold">Type</th><th className="p-4 text-[11px] text-[var(--theme-text-muted)] uppercase tracking-wider font-semibold">Product</th><th className="p-4 text-[11px] text-[var(--theme-text-muted)] uppercase tracking-wider font-semibold text-right">Qty</th><th className="p-4 text-[11px] text-[var(--theme-text-muted)] uppercase tracking-wider font-semibold">User</th><th className="p-4 text-[11px] text-[var(--theme-text-muted)] uppercase tracking-wider font-semibold">Reason</th></tr></thead>
+                        <thead className="bg-[var(--theme-bg-hover)]/40 border-b border-[var(--theme-border)]">
+                            <tr>
+                                <th className="px-4 py-3 text-[11px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider">Ref ID</th>
+                                <th className="px-4 py-3 text-[11px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider">Time</th>
+                                <th className="px-4 py-3 text-[11px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider">Type</th>
+                                <th className="px-4 py-3 text-[11px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider">Product</th>
+                                <th className="px-4 py-3 text-[11px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider text-right">Qty</th>
+                                <th className="px-4 py-3 text-[11px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider">User</th>
+                                <th className="px-4 py-3 text-[11px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider">Reason</th>
+                            </tr>
+                        </thead>
                         <tbody className="divide-y divide-[var(--theme-border)]">
-                            {localMovements.map((move) => (
-                                <tr key={move.id} className="hover:bg-[var(--theme-bg-subtle)] transition-colors">
-                                    <td className="p-4 text-xs font-mono text-[var(--theme-text-muted)]">{move.id?.slice(0, 8).toUpperCase()}</td>
-                                    <td className="p-4 text-xs text-[var(--theme-text-primary)]">{formatDateTime(move.date, { showTime: true })}</td>
-                                    <td className="p-4"><span className={`text-[10px] font-bold px-2 py-1 rounded uppercase border ${move.type === 'IN' ? 'text-emerald-600 dark:text-emerald-400 border-emerald-500/20 bg-emerald-500/10' : move.type === 'OUT' ? 'text-blue-600 dark:text-blue-400 border-blue-500/20 bg-blue-500/10' : 'text-amber-600 dark:text-amber-400 border-amber-500/20 bg-amber-500/10'} `}>{move.type}</span></td>
-                                    <td className="p-4 text-sm text-[var(--theme-text-primary)]">{move.productName}</td>
-                                    <td className={`p-4 text-sm font-mono text-right font-bold ${move.type === 'IN' ? 'text-emerald-600 dark:text-emerald-400' : move.type === 'OUT' ? 'text-red-500' : 'text-[var(--theme-text-primary)]'} `}>
-                                        {(() => {
-                                            const prod = allProducts.find(p => p.id === move.productId) || products.find(p => p.id === move.productId);
-                                            const unitCode = prod?.unit;
-                                            const unitDef = unitCode ? getSellUnit(unitCode) : null;
-                                            // Convert raw quantity to sellable units for weight/volume products
-                                            let displayQty = Math.abs(move.quantity);
-                                            let perUnitLabel = '';
-                                            if (prod && unitDef && (unitDef.category === 'weight' || unitDef.category === 'volume')) {
-                                                const sizeNum = parseFloat(prod.size || '0');
-                                                if (sizeNum > 0) {
-                                                    perUnitLabel = ` × ${sizeNum}${unitDef.shortLabel.toLowerCase()}`;
-                                                }
-                                            }
-                                            const prefix = move.type === 'IN' ? '+' : move.type === 'OUT' ? '-' : '';
-                                            const unitLabel = (!perUnitLabel && unitDef) ? unitDef.shortLabel : 'units';
-                                            return (
-                                                <>
-                                                    {prefix}{displayQty.toLocaleString()}
-                                                    {perUnitLabel ? (
-                                                        <span className="text-[9px] font-bold ml-1 opacity-60">{perUnitLabel}</span>
-                                                    ) : (
-                                                        <span className="text-[9px] font-bold ml-1 opacity-60 uppercase">{unitLabel}</span>
-                                                    )}
-                                                </>
-                                            );
-                                        })()}
-                                    </td>
-                                    <td className="p-4 text-xs text-[var(--theme-text-secondary)]">{move.performedBy}</td>
-                                    <td className="p-4 text-xs text-[var(--theme-text-muted)] italic">{move.reason}</td>
-                                </tr>
-                            ))}
+                            {localMovements.map((move) => {
+                                const prod = allProducts.find(p => p.id === move.productId) || products.find(p => p.id === move.productId);
+                                const unitCode = prod?.unit;
+                                const unitDef = unitCode ? getSellUnit(unitCode) : null;
+                                let displayQty = Math.abs(move.quantity);
+                                let perUnitLabel = '';
+                                if (prod && unitDef && (unitDef.category === 'weight' || unitDef.category === 'volume')) {
+                                    const sizeNum = parseFloat(prod.size || '0');
+                                    if (sizeNum > 0) {
+                                        perUnitLabel = ` × ${sizeNum}${unitDef.shortLabel.toLowerCase()}`;
+                                    }
+                                }
+                                const prefix = move.type === 'IN' ? '+' : move.type === 'OUT' ? '-' : '';
+                                const unitLabel = (!perUnitLabel && unitDef) ? unitDef.shortLabel : 'units';
+
+                                return (
+                                    <tr key={move.id} className="hover:bg-[var(--theme-bg-hover)]/40 transition-colors">
+                                        <td className="px-4 py-3 text-[12px] font-mono tabular-nums text-[var(--theme-text-secondary)]">
+                                            {move.id?.slice(0, 8).toUpperCase()}
+                                        </td>
+                                        <td className="px-4 py-3 text-[12px] tabular-nums text-[var(--theme-text-secondary)] whitespace-nowrap">
+                                            {formatDateTime(move.date, { showTime: true })}
+                                        </td>
+                                        <td className="px-4 py-3">
+                                            <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold border ${
+                                                move.type === 'IN'
+                                                    ? 'text-[#34C759] border-[#34C759]/20 bg-[#34C759]/10'
+                                                    : move.type === 'OUT'
+                                                    ? 'text-[#0071E3] dark:text-[#2997FF] border-[#0071E3]/20 bg-[#0071E3]/10'
+                                                    : move.type === 'TRANSFER'
+                                                    ? 'text-[#AF52DE] border-[#AF52DE]/20 bg-[#AF52DE]/10'
+                                                    : 'text-[#FF9F0A] border-[#FF9F0A]/20 bg-[#FF9F0A]/10'
+                                            }`}>
+                                                {move.type}
+                                            </span>
+                                        </td>
+                                        <td className="px-4 py-3 text-[13px] font-medium text-[var(--theme-text-primary)]">
+                                            {move.productName}
+                                        </td>
+                                        <td className={`px-4 py-3 text-[13px] font-mono tabular-nums text-right font-semibold ${
+                                            move.type === 'IN' ? 'text-[#34C759]' : move.type === 'OUT' ? 'text-[#FF3B30]' : 'text-[var(--theme-text-primary)]'
+                                        }`}>
+                                            {prefix}{displayQty.toLocaleString()}
+                                            {perUnitLabel ? (
+                                                <span className="text-[11px] font-medium ml-1 text-[var(--theme-text-secondary)]">{perUnitLabel}</span>
+                                            ) : (
+                                                <span className="text-[11px] font-medium ml-1 text-[var(--theme-text-secondary)] uppercase">{unitLabel}</span>
+                                            )}
+                                        </td>
+                                        <td className="px-4 py-3 text-[12px] text-[var(--theme-text-secondary)] whitespace-nowrap">
+                                            {move.performedBy || 'System'}
+                                        </td>
+                                        <td className="px-4 py-3 text-[12px] text-[var(--theme-text-secondary)] max-w-[220px] truncate" title={move.reason || ''}>
+                                            {move.reason || <span className="text-[var(--theme-text-secondary)]/50">—</span>}
+                                        </td>
+                                    </tr>
+                                );
+                            })}
                             {!movementsLoading && localMovements.length === 0 && (
                                 <tr>
-                                    <td colSpan={7} className="p-10 text-center text-[var(--theme-text-muted)] italic text-sm">
-                                        No stock movements found matching your criteria.
+                                    <td colSpan={7} className="px-4 py-16 text-center">
+                                        <div className="flex flex-col items-center justify-center">
+                                            <div className="w-12 h-12 rounded-xl bg-[var(--theme-bg-hover)] border border-[var(--theme-border)] flex items-center justify-center text-[var(--theme-text-secondary)] mb-3">
+                                                <ArrowLeftRight size={20} />
+                                            </div>
+                                            <p className="text-[13px] font-semibold text-[var(--theme-text-primary)]">No stock movements found</p>
+                                            <p className="text-[12px] text-[var(--theme-text-secondary)] mt-1 max-w-sm">
+                                                No transactions match the selected filters. Adjust your search or clear filters to view ledger records.
+                                            </p>
+                                        </div>
                                     </td>
                                 </tr>
                             )}
                         </tbody>
                     </table>
                 </div>
+
                 {/* Pagination Controls */}
-                <div className="flex justify-between items-center p-4 border-t border-[var(--theme-border)] bg-[var(--theme-bg-subtle)]">
-                    <div className="text-xs text-[var(--theme-text-muted)]">
-                        Showing {localMovements.length} of {formatCompactNumber(totalMovementsCount)} records
+                <div className="flex flex-wrap gap-3 justify-between items-center px-5 py-3.5 border-t border-[var(--theme-border)] bg-[var(--theme-bg-hover)]/30">
+                    <div className="text-[12px] font-medium text-[var(--theme-text-secondary)]">
+                        Showing <span className="font-mono tabular-nums font-semibold text-[var(--theme-text-primary)]">{localMovements.length}</span> of <span className="font-mono tabular-nums font-semibold text-[var(--theme-text-primary)]">{formatCompactNumber(totalMovementsCount)}</span> records
                     </div>
-                    <div className="flex gap-2">
+                    <div className="flex items-center gap-2">
                         <button
+                            type="button"
                             onClick={() => setCurrentMovementsPage(prev => Math.max(1, prev - 1))}
                             disabled={currentMovementsPage === 1 || movementsLoading}
-                            className="px-3 py-1 bg-[var(--theme-bg-card)] hover:bg-[var(--theme-bg-card-hover)] disabled:opacity-40 disabled:cursor-not-allowed rounded-lg text-xs text-[var(--theme-text-primary)] transition-colors border border-[var(--theme-border)]"
+                            className="h-8 px-3 rounded-lg text-[12px] font-semibold bg-[var(--theme-bg-card)] hover:bg-[var(--theme-bg-hover)] disabled:opacity-40 disabled:cursor-not-allowed text-[var(--theme-text-primary)] transition-colors border border-[var(--theme-border)] shadow-xs active:scale-[0.98] cursor-pointer"
                         >
                             Previous
                         </button>
-                        <span className="flex items-center px-2 text-xs text-[var(--theme-text-muted)] font-mono">
+                        <span className="flex items-center px-2 text-[12px] font-mono tabular-nums text-[var(--theme-text-secondary)]">
                             Page {currentMovementsPage}
                         </span>
                         <button
+                            type="button"
                             onClick={() => setCurrentMovementsPage(prev => (localMovements.length === MOVEMENTS_PER_PAGE ? prev + 1 : prev))}
                             disabled={localMovements.length < MOVEMENTS_PER_PAGE || movementsLoading}
-                            className="px-3 py-1 bg-[var(--theme-bg-card)] hover:bg-[var(--theme-bg-card-hover)] disabled:opacity-40 disabled:cursor-not-allowed rounded-lg text-xs text-[var(--theme-text-primary)] transition-colors border border-[var(--theme-border)]"
+                            className="h-8 px-3 rounded-lg text-[12px] font-semibold bg-[var(--theme-bg-card)] hover:bg-[var(--theme-bg-hover)] disabled:opacity-40 disabled:cursor-not-allowed text-[var(--theme-text-primary)] transition-colors border border-[var(--theme-border)] shadow-xs active:scale-[0.98] cursor-pointer"
                         >
                             Next
                         </button>

@@ -41,11 +41,11 @@ export const ImageUploadModal: React.FC<ImageUploadModalProps> = ({
                     </div>
                     <div className="min-w-0 flex-1">
                         <p className="text-xs font-bold uppercase tracking-wider text-[var(--theme-text-primary)]">High-Fidelity Photo</p>
-                        <p className="text-[10px] text-[var(--theme-text-muted)] font-medium">Upload, capture via camera, or enter asset URL</p>
+                        <p className="text-[11px] text-[var(--theme-text-secondary)] font-medium">Upload, capture via camera, or enter asset URL</p>
                     </div>
                 </div>
 
-                <div className="flex justify-center p-4 rounded-2xl bg-[var(--theme-bg-panel)] border border-[var(--theme-border)]">
+                <div className="flex justify-center p-4 rounded-2xl bg-[var(--theme-bg-card)] border border-[var(--theme-border)] shadow-xs">
                     <ImageUpload
                         value={selectedImage}
                         onChange={(val) => setSelectedImage(val)}
@@ -58,14 +58,14 @@ export const ImageUploadModal: React.FC<ImageUploadModalProps> = ({
                     <button
                         type="button"
                         onClick={onClose}
-                        className="px-4 py-2 text-xs font-bold uppercase rounded-xl border border-[var(--theme-border)] bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] transition-all cursor-pointer"
+                        className="px-4 py-2.5 text-xs font-semibold rounded-xl border border-[var(--theme-border)] bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-card-hover)] transition-all cursor-pointer"
                     >
                         Cancel
                     </button>
                     <button
                         type="button"
                         onClick={handleApply}
-                        className="px-5 py-2 text-xs font-black uppercase rounded-xl bg-[var(--theme-primary)] text-[var(--theme-primary-text)] hover:opacity-90 active:scale-[0.98] transition-all cursor-pointer"
+                        className="px-5 py-2.5 text-xs font-bold uppercase tracking-wider rounded-xl bg-[var(--theme-accent)] text-white hover:opacity-95 active:scale-[0.98] shadow-xs transition-all cursor-pointer"
                     >
                         Apply Photo
                     </button>

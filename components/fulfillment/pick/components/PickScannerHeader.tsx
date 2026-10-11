@@ -53,38 +53,41 @@ export const PickScannerHeader: React.FC<PickScannerHeaderProps> = ({
 
     return (
         <>
-            {/* Icon Circle */}
-            <div className={`w-20 h-20 sm:w-28 sm:h-28 md:w-32 md:h-32 rounded-full border-4 flex items-center justify-center mb-4 sm:mb-6 md:mb-8 shadow-xl sm:shadow-2xl z-10 transition-colors duration-300 ${showSuccess
-                ? 'border-green-400 bg-green-500/20 shadow-green-500/40 scale-105 sm:scale-110'
-                : showError
-                    ? 'border-red-500 bg-red-500/20 shadow-red-500/40 scale-105 sm:scale-110 animate-shake'
+            {/* Status Icon */}
+            <div className={`w-16 h-16 sm:w-20 sm:h-20 rounded-2xl border-2 flex items-center justify-center mb-4 transition-all duration-300 z-10 shrink-0 ${
+                showSuccess
+                    ? 'border-emerald-500 bg-emerald-500/10'
+                    : showError
+                    ? 'border-rose-500 bg-rose-500/10 animate-shake'
                     : step === 'LOCATION'
-                        ? 'border-[#2C5E3B] bg-[#2C5E3B]/10 shadow-[#2C5E3B]/20'
-                        : 'border-[#A9CBA2] bg-[#A9CBA2]/10 shadow-[#A9CBA2]/40'
-                }`}>
+                    ? 'border-[var(--theme-accent)] bg-[var(--theme-accent)]/10'
+                    : 'border-emerald-500 bg-emerald-500/10'
+            }`}>
                 {showSuccess ? (
-                    <CheckCircle className="w-10 h-10 sm:w-14 sm:h-14 md:w-16 md:h-16 text-green-500 dark:text-green-400 animate-bounce" />
+                    <CheckCircle size={32} className="text-emerald-500" />
                 ) : showError ? (
-                    <AlertTriangle className="w-10 h-10 sm:w-14 sm:h-14 md:w-16 md:h-16 text-red-500" />
+                    <AlertTriangle size={32} className="text-rose-500" />
                 ) : step === 'LOCATION' ? (
-                    <MapIcon className="w-10 h-10 sm:w-14 sm:h-14 md:w-16 md:h-16 text-[#2C5E3B] dark:text-[#A9CBA2] drop-shadow-[0_0_10px_rgba(44,94,59,0.5)]" />
+                    <MapIcon size={32} className="text-[var(--theme-accent)]" />
                 ) : (
-                    <Package className="w-10 h-10 sm:w-14 sm:h-14 md:w-16 md:h-16 text-[#2C5E3B] dark:text-[#A9CBA2] drop-shadow-[0_0_15px_rgba(169,203,162,0.6)]" />
+                    <Package size={32} className="text-emerald-500" />
                 )}
             </div>
 
             {/* Instruction Header */}
-            <h1 className={`text-xl sm:text-3xl md:text-5xl font-black text-gray-900 dark:text-[#EAE5D9] text-center uppercase italic tracking-tight mb-2 z-10 transition-colors duration-200 px-2 break-words max-w-full ${isLocationBarcode(inputVal.trim().toUpperCase()) ? 'text-[#2C5E3B] dark:text-[#A9CBA2]' : showError ? 'text-red-600 dark:text-red-500 animate-pulse' : ''}`}>
+            <h1 className={`text-xl sm:text-2xl md:text-3xl font-bold text-[var(--theme-text-primary)] text-center uppercase tracking-tight mb-2 z-10 transition-colors px-2 max-w-full ${
+                isLocationBarcode(inputVal.trim().toUpperCase()) ? 'text-[var(--theme-accent)]' : showError ? 'text-rose-500' : ''
+            }`}>
                 {showSuccess ? t('warehouse.picking.successCaps') : showError ? t('warehouse.picking.errorCaps') : step === 'LOCATION' ? (isLocationBarcode(inputVal.trim().toUpperCase()) ? t('warehouse.picking.locationIdentified') : t('warehouse.scanLocation')) : step === 'QUANTITY' ? t('warehouse.confirmQty') : t('warehouse.scanSkuToConfirm')}
             </h1>
 
             {showSuccess ? (
-                <div className="text-center z-10 mb-8 animate-in fade-in zoom-in duration-300">
-                    <p className="text-green-600 dark:text-green-400 text-xl font-bold uppercase tracking-widest">{successMsg}</p>
+                <div className="text-center z-10 mb-6 animate-in fade-in duration-200">
+                    <p className="text-emerald-500 text-lg font-bold uppercase tracking-wider">{successMsg}</p>
                 </div>
             ) : showError ? (
-                <div className="text-center z-10 mb-8 animate-in fade-in zoom-in duration-300">
-                    <p className="text-red-600 dark:text-red-500 text-xl font-bold uppercase tracking-widest">{errorMsg}</p>
+                <div className="text-center z-10 mb-6 animate-in fade-in duration-200">
+                    <p className="text-rose-500 text-lg font-bold uppercase tracking-wider">{errorMsg}</p>
                 </div>
             ) : (
                 <PickScannerInstructionPanel

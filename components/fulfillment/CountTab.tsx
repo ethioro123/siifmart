@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { WMSJob, Product, StockMovement, User } from '../../types';
+import { Product, StockMovement, User } from '../../types';
 import { CountHeader } from './count/CountHeader';
 import { CountOperations } from './count/CountOperations';
 import { CountHistory } from './count/CountHistory';
@@ -17,9 +17,13 @@ interface CountTabProps {
 }
 
 export const CountTab: React.FC<CountTabProps> = ({
-    products, movements, user,
-    isSubmitting, setIsSubmitting, setSelectedJob, setIsDetailsOpen,
-    inventoryRequestsService, addNotification
+    products,
+    movements,
+    user,
+    setSelectedJob,
+    setIsDetailsOpen,
+    inventoryRequestsService,
+    addNotification
 }) => {
     // --- COUNT TAB STATE ---
     const [countViewMode, setCountViewMode] = useState<'Operations' | 'Reports'>('Operations');
@@ -34,7 +38,7 @@ export const CountTab: React.FC<CountTabProps> = ({
     }[]>([]);
 
     return (
-        <div className="flex-1 overflow-y-auto space-y-6">
+        <div className="flex-1 overflow-y-auto space-y-4">
             {/* Header */}
             <CountHeader
                 countViewMode={countViewMode}
@@ -72,3 +76,5 @@ export const CountTab: React.FC<CountTabProps> = ({
         </div>
     );
 };
+
+export default CountTab;

@@ -40,11 +40,14 @@ export function OnboardTalentModal({ isOpen, onClose, onSuccess }: OnboardTalent
     const [pendingOnboardingImageSrc, setPendingOnboardingImageSrc] = useState<string | null>(null);
     const [isOnboardingEditorOpen, setIsOnboardingEditorOpen] = useState(false);
 
-    // Sync open state with wizard
+    const wasOpenRef = useRef(false);
+
+    // Sync open state and initialize wizard with manager's permissible roles & facility
     useEffect(() => {
-        if (isOpen && isManager) {
-            wizard.setIsAddModalOpen(true);
+        if (isOpen && !wasOpenRef.current && isManager) {
+            wizard.handleOpenWizard();
         }
+        wasOpenRef.current = isOpen;
     }, [isOpen, isManager]);
 
     const handlePhotoClick = () => {

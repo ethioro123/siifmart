@@ -11,6 +11,11 @@ import {
     Baby, 
     Car, 
     Tag, 
+    Cookie,
+    UtensilsCrossed,
+    Snowflake,
+    PawPrint,
+    BookOpen,
     ChevronDown, 
     SlidersHorizontal,
     Info
@@ -37,6 +42,11 @@ const getDomainIcon = (iconType: string) => {
         case 'sparkles': return Sparkles;
         case 'baby': return Baby;
         case 'car': return Car;
+        case 'cookie': return Cookie;
+        case 'sandwich': return UtensilsCrossed;
+        case 'snowflake': return Snowflake;
+        case 'dog': return PawPrint;
+        case 'book-open': return BookOpen;
         case 'tag':
         default: return Tag;
     }

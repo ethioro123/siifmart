@@ -326,33 +326,37 @@ export const PickScanner: React.FC<PickScannerProps> = ({
     };
 
     return (
-        <div className="fixed inset-0 z-[200] bg-[#FAF8F5] dark:bg-[#1C2620] flex flex-col overflow-hidden max-w-full">
+        <div className="fixed inset-0 z-[200] bg-[var(--theme-bg-app)] flex flex-col overflow-hidden max-w-full">
             {/* Top Bar */}
-            <div className="p-3 sm:p-4 bg-[#EAE5D9] dark:bg-[#1C2620]/80 border-b border-[#E2DCCE] dark:border-[#A9CBA2]/10 flex justify-between items-center text-gray-900 dark:text-[#EAE5D9] transition-colors">
+            <div className="p-3.5 sm:p-4 bg-[var(--theme-bg-card)] border-b border-[var(--theme-border)] flex justify-between items-center text-[var(--theme-text-primary)] shrink-0">
                 <div className="flex items-center gap-2 sm:gap-3 min-w-0">
-                    <button onClick={onClose} className="p-2 -ml-1 text-gray-500 dark:text-[#A9CBA2]/70 hover:text-gray-900 dark:hover:text-[#EAE5D9] transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center shrink-0" aria-label={t('warehouse.dismiss')}>
-                        <X size={24} />
+                    <button
+                        onClick={onClose}
+                        className="p-2 -ml-1 text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center shrink-0"
+                        aria-label={t('warehouse.dismiss')}
+                    >
+                        <X size={20} />
                     </button>
                     <div className="min-w-0">
-                        <h3 className="font-bold text-base sm:text-lg uppercase tracking-wider truncate">{step === 'LOCATION' ? t('warehouse.putaway.confirmLocation') : t('warehouse.scanProductBarcode')}</h3>
-                        <p className="text-xs text-[#2C5E3B] dark:text-[#A9CBA2] font-mono font-black truncate">JOB: {formatJobId(job)}</p>
+                        <h3 className="font-bold text-base sm:text-lg uppercase tracking-tight truncate">
+                            {step === 'LOCATION' ? t('warehouse.putaway.confirmLocation') : t('warehouse.scanProductBarcode')}
+                        </h3>
+                        <p className="text-[11px] text-[var(--theme-accent)] font-mono font-semibold truncate">
+                            JOB: {formatJobId(job)}
+                        </p>
                     </div>
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
-                    <span className="text-xs font-bold bg-[#E2DCCE] dark:bg-[#2C5E3B]/20 px-2.5 py-1 rounded text-gray-600 dark:text-[#A9CBA2]">
-                        {step === 'LOCATION' ? '1/3' : step === 'ITEM' ? '2/3' : '3/3'}
+                    <span className="text-[11px] font-semibold bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] px-3 py-1 rounded-full text-[var(--theme-text-secondary)]">
+                        {step === 'LOCATION' ? 'STEP 1/3' : step === 'ITEM' ? 'STEP 2/3' : 'STEP 3/3'}
                     </span>
                 </div>
             </div>
 
             {/* Main View */}
-            <div className="flex-1 relative w-full overflow-hidden flex flex-col transition-colors">
-                {/* Background Decoration */}
-                <div className={`absolute inset-0 opacity-[0.03] dark:opacity-10 pointer-events-none transition-colors duration-500 ${step === 'LOCATION' ? 'bg-[#2C5E3B]' : 'bg-[#A9CBA2]'}`} />
-
+            <div className="flex-1 relative w-full overflow-hidden flex flex-col">
                 {/* Scrollable Content Container */}
-                <div className="absolute inset-0 overflow-y-auto overflow-x-hidden flex flex-col items-center p-3 sm:p-6 pb-32 w-full max-w-full">
-
+                <div className="absolute inset-0 overflow-y-auto overflow-x-hidden flex flex-col items-center p-4 sm:p-6 pb-32 w-full max-w-full custom-scrollbar">
                     {/* Header & Status Instruction View */}
                     <PickScannerHeader
                         showSuccess={showSuccess}
@@ -371,7 +375,6 @@ export const PickScanner: React.FC<PickScannerProps> = ({
                         getItemMeasureQty={getItemMeasureQty}
                         t={t}
                     />
-
 
                     {/* Input & Action Form */}
                     <PickScannerForm
@@ -409,7 +412,7 @@ export const PickScanner: React.FC<PickScannerProps> = ({
                         />
                     )}
 
-                    <p className="mt-8 text-gray-550 text-[10px] font-mono font-bold uppercase tracking-widest z-10 text-center opacity-60">
+                    <p className="mt-8 text-[var(--theme-text-secondary)] text-[11px] font-mono font-medium uppercase tracking-widest z-10 text-center opacity-60">
                         {t('warehouse.picking.checksumVerifiedInfo')}
                     </p>
                 </div>

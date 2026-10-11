@@ -160,18 +160,18 @@ export function calculateStreakUpdate(
 }
 
 const ACHIEVEMENT_DEFINITIONS: Record<AchievementType, { name: string; description: string; points: number; icon: string }> = {
-    first_job: { name: 'First Mission', description: 'Completed your very first warehouse job', points: 25, icon: '🚀' },
-    speed_demon: { name: 'Speed Demon', description: 'Completed a job with lightning speed', points: 50, icon: '⚡' },
-    perfect_accuracy: { name: 'Eagle Eye', description: 'Maintained 100% accuracy on job verification', points: 75, icon: '🎯' },
-    streak_3: { name: 'On Fire', description: 'Worked 3 consecutive days without missing a beat', points: 25, icon: '🔥' },
-    streak_7: { name: 'Unstoppable', description: 'Worked 7 consecutive days active streak', points: 75, icon: '🛡️' },
-    streak_30: { name: 'Warehouse Legend', description: '30 consecutive days of operational excellence', points: 300, icon: '👑' },
-    centurion: { name: 'Centurion', description: 'Completed 100 fulfillment jobs', points: 150, icon: '💯' },
-    veteran: { name: 'Warehouse Veteran', description: 'Completed 500 fulfillment jobs', points: 500, icon: '🎖️' },
-    legend: { name: 'Mythic Operator', description: 'Completed 1,000 fulfillment jobs', points: 1000, icon: '🌟' },
-    early_bird: { name: 'Early Bird', description: 'Completed a shift before 8 AM', points: 30, icon: '🌅' },
-    night_owl: { name: 'Night Owl', description: 'Completed operations during evening shift', points: 30, icon: '🦉' },
-    team_player: { name: 'Team Dynamo', description: 'Assisted in multi-department warehouse transfers', points: 40, icon: '🤝' }
+    first_job: { name: 'First Mission', description: 'Completed your very first warehouse job', points: 25, icon: 'Rocket' },
+    speed_demon: { name: 'Speed Demon', description: 'Completed a job with lightning speed', points: 50, icon: 'Zap' },
+    perfect_accuracy: { name: 'Eagle Eye', description: 'Maintained 100% accuracy on job verification', points: 75, icon: 'Target' },
+    streak_3: { name: 'On Fire', description: 'Worked 3 consecutive days without missing a beat', points: 25, icon: 'Flame' },
+    streak_7: { name: 'Unstoppable', description: 'Worked 7 consecutive days active streak', points: 75, icon: 'Shield' },
+    streak_30: { name: 'Warehouse Legend', description: '30 consecutive days of operational excellence', points: 300, icon: 'Crown' },
+    centurion: { name: 'Centurion', description: 'Completed 100 fulfillment jobs', points: 150, icon: 'Award' },
+    veteran: { name: 'Warehouse Veteran', description: 'Completed 500 fulfillment jobs', points: 500, icon: 'Medal' },
+    legend: { name: 'Mythic Operator', description: 'Completed 1,000 fulfillment jobs', points: 1000, icon: 'Star' },
+    early_bird: { name: 'Early Bird', description: 'Completed a shift before 8 AM', points: 30, icon: 'Sun' },
+    night_owl: { name: 'Night Owl', description: 'Completed operations during evening shift', points: 30, icon: 'Moon' },
+    team_player: { name: 'Team Dynamo', description: 'Assisted in multi-department warehouse transfers', points: 40, icon: 'Users' }
 };
 
 /**

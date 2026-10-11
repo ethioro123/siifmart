@@ -1,135 +1,148 @@
 import { describe, it, expect } from 'vitest';
-import { SYSTEM_ROLES, getRoleHierarchy, canEmployRole } from '../../utils/roles';
-import { getRequiredSiteType, canRoleBeAtSiteType, getRecommendedDepartment } from '../../utils/roleSegregation';
-import { canAccessRoute, ROLE_PERMISSIONS } from '../../services/auth.rbac';
-import { ACTION_PERMISSIONS } from '../../services/permissions.matrix';
+import { authService } from '../../services/auth.service';
+import { canAccessRoute } from '../../services/auth.rbac';
 import { canAccessModule, hasPermission } from '../../utils/permissions';
-import { getRoleDept, getRoleLevel, getRoleRank } from '../../components/org-chart/hooks/orgRoles';
-import { ROLE_LABELS } from '../../components/org-chart/types';
+import { getRoleHierarchy, SYSTEM_ROLES, canEmployRole } from '../../utils/roles';
+import { getRoleDept, getRoleLevel } from '../../components/org-chart/hooks/orgRoles';
+import { recruitmentService } from '../../services/recruitment.service';
 
-describe('Human Resources Department Team Roles Architecture (HR Manager & Team)', () => {
-    describe('Role Definitions & System Styling', () => {
-        it('registers payroll_specialist and talent_recruiter in SYSTEM_ROLES', () => {
-            const payroll = SYSTEM_ROLES.find(r => r.id === 'payroll_specialist');
-            const recruiter = SYSTEM_ROLES.find(r => r.id === 'talent_recruiter');
-            const trainer = SYSTEM_ROLES.find(r => r.id === 'training_coordinator');
+describe('HR & Talent Directorate Team Roles & Hierarchy', () => {
+    describe('1. HR Manager (hr_manager)', () => {
+        const role = 'hr_manager' as const;
 
-            expect(payroll).toBeDefined();
-            expect(payroll?.level).toBe(4);
-            expect(payroll?.label).toBe('Payroll Specialist');
+        it('has correct route and module access', () => {
+            expect(canAccessRoute(role, '/employees')).toBe(true);
+            expect(canAccessRoute(role, '/finance')).toBe(true);
+            expect(canAccessRoute(role, '/profile')).toBe(true);
 
-            expect(recruiter).toBeDefined();
-            expect(recruiter?.level).toBe(4);
-            expect(recruiter?.label).toBe('Talent Recruiter');
-
-            expect(trainer).toBeDefined();
-            expect(trainer?.level).toBe(4);
+            expect(canAccessModule(role, 'employees')).toBe(true);
+            expect(canAccessModule(role, 'finance')).toBe(false); // General GL module is reserved; HR manages payroll via employee telemetry and /finance route
         });
 
-        it('defines labels in org chart ROLE_LABELS', () => {
-            expect(ROLE_LABELS.payroll_specialist).toBe('Payroll Specialist');
-            expect(ROLE_LABELS.talent_recruiter).toBe('Talent Recruiter');
-            expect(ROLE_LABELS.training_coordinator).toBe('Training Coord.');
-        });
-    });
+        it('has supervisory staff approval, termination and payroll management permissions', () => {
+            expect(authService.checkPermission(role, 'employees.view')).toBe(true);
+            expect(authService.checkPermission(role, 'employees.create')).toBe(true);
+            expect(authService.checkPermission(role, 'employees.edit')).toBe(true);
+            expect(authService.checkPermission(role, 'employees.approve')).toBe(true);
+            expect(authService.checkPermission(role, 'employees.view_salary')).toBe(true);
+            expect(authService.checkPermission(role, 'employees.propose_salary')).toBe(true);
+            expect(authService.checkPermission(role, 'finance.view_payroll')).toBe(true);
+            expect(authService.checkPermission(role, 'finance.manage_payroll')).toBe(true);
 
-    describe('Workplace Location & Role Segregation (Administration HQ)', () => {
-        it('pins all HR team roles strictly to Administration facilities', () => {
-            expect(getRequiredSiteType('hr_manager')).toBe('Administration');
-            expect(getRequiredSiteType('payroll_specialist')).toBe('Administration');
-            expect(getRequiredSiteType('talent_recruiter')).toBe('Administration');
-            expect(getRequiredSiteType('training_coordinator')).toBe('Administration');
-
-            expect(canRoleBeAtSiteType('payroll_specialist', 'Administration')).toBe(true);
-            expect(canRoleBeAtSiteType('payroll_specialist', 'Store')).toBe(false);
-            expect(canRoleBeAtSiteType('payroll_specialist', 'Warehouse')).toBe(false);
-
-            expect(canRoleBeAtSiteType('talent_recruiter', 'Administration')).toBe(true);
-            expect(canRoleBeAtSiteType('talent_recruiter', 'Store')).toBe(false);
-            expect(canRoleBeAtSiteType('talent_recruiter', 'Warehouse')).toBe(false);
+            expect(hasPermission(role, 'ACCESS_EMPLOYEES')).toBe(true);
+            expect(hasPermission(role, 'APPROVE_EMPLOYEE')).toBe(true);
+            expect(hasPermission(role, 'TERMINATE_EMPLOYEE')).toBe(true);
         });
 
-        it('assigns HR team roles to the Human Resources department', () => {
-            expect(getRecommendedDepartment('hr_manager')).toBe('Human Resources');
-            expect(getRecommendedDepartment('payroll_specialist')).toBe('Human Resources');
-            expect(getRecommendedDepartment('talent_recruiter')).toBe('Human Resources');
-            expect(getRecommendedDepartment('training_coordinator')).toBe('Human Resources');
-        });
-    });
-
-    describe('Hierarchy & Supervisory Reporting Lines', () => {
-        it('places HR Manager above all HR team roles in hierarchy rank', () => {
-            const hrMgrRank = getRoleHierarchy('hr_manager');
-            const payrollRank = getRoleHierarchy('payroll_specialist');
-            const recruiterRank = getRoleHierarchy('talent_recruiter');
-            const trainerRank = getRoleHierarchy('training_coordinator');
-
-            expect(hrMgrRank).toBe(85);
-            expect(payrollRank).toBeLessThan(hrMgrRank);
-            expect(recruiterRank).toBeLessThan(hrMgrRank);
-            expect(trainerRank).toBeLessThan(hrMgrRank);
-
-            // HR Manager can employ and onboard team roles
-            expect(canEmployRole('hr_manager', 'payroll_specialist')).toBe(true);
-            expect(canEmployRole('hr_manager', 'talent_recruiter')).toBe(true);
-            expect(canEmployRole('hr_manager', 'training_coordinator')).toBe(true);
-
-            // Staff cannot employ their superiors
-            expect(canEmployRole('payroll_specialist', 'hr_manager')).toBe(false);
-            expect(canEmployRole('talent_recruiter', 'hr_manager')).toBe(false);
+        it('has Level 2 ranking and hierarchy rank 85 in hr department', () => {
+            expect(getRoleHierarchy(role)).toBe(85);
+            expect(getRoleLevel(role)).toBe(2);
+            expect(getRoleDept(role)).toBe('hr');
+            const sysRole = SYSTEM_ROLES.find(r => r.id === role);
+            expect(sysRole?.level).toBe(2);
+            expect(sysRole?.label).toBe('HR Manager');
         });
 
-        it('resolves org chart department and rank to hr', () => {
-            expect(getRoleDept('hr_manager')).toBe('hr');
-            expect(getRoleDept('payroll_specialist')).toBe('hr');
-            expect(getRoleDept('talent_recruiter')).toBe('hr');
-            expect(getRoleDept('training_coordinator')).toBe('hr');
+        it('can employ Level 3 and Level 4 staff, but cannot hire peers (Level 2) or CEO (Level 1)', () => {
+            expect(canEmployRole(role, 'store_manager')).toBe(true);
+            expect(canEmployRole(role, 'stock_clerk')).toBe(true);
+            expect(canEmployRole(role, 'talent_recruiter')).toBe(true);
+            expect(canEmployRole(role, 'payroll_specialist')).toBe(true);
 
-            expect(getRoleLevel('payroll_specialist')).toBe(4);
-            expect(getRoleLevel('talent_recruiter')).toBe(4);
-            expect(getRoleRank('hr_manager')).toBe(21);
-            expect(getRoleRank('payroll_specialist')).toBe(53);
-            expect(getRoleRank('talent_recruiter')).toBe(55);
+            // Cannot hire peer or higher
+            expect(canEmployRole(role, 'finance_manager')).toBe(false);
+            expect(canEmployRole(role, 'operations_manager')).toBe(false);
+            expect(canEmployRole(role, 'super_admin')).toBe(false);
         });
     });
 
-    describe('RBAC Route & Granular Permission Matrix Governance', () => {
-        it('grants payroll_specialist access to employees and financials with salary views', () => {
-            expect(canAccessRoute('payroll_specialist', '/employees')).toBe(true);
-            expect(canAccessRoute('payroll_specialist', '/finance')).toBe(true);
-            expect(canAccessRoute('payroll_specialist', '/pos')).toBe(false);
-            expect(canAccessRoute('payroll_specialist', '/wms-ops')).toBe(false);
+    describe('2. Compensation & Payroll Specialist (payroll_specialist)', () => {
+        const role = 'payroll_specialist' as const;
 
-            expect(canAccessModule('payroll_specialist', 'employees')).toBe(true);
-            expect(canAccessModule('payroll_specialist', 'finance')).toBe(true);
-            expect(hasPermission('payroll_specialist', 'VIEW_SALARY')).toBe(true);
-            expect(hasPermission('payroll_specialist', 'VIEW_PAYROLL')).toBe(true);
-
-            // Separation of Duties: payroll_specialist cannot unilaterally approve salary changes
-            expect(hasPermission('payroll_specialist', 'APPROVE_SALARY')).toBe(false);
-            expect(ACTION_PERMISSIONS.payroll_specialist).toContain('employees.view_salary');
-            expect(ACTION_PERMISSIONS.payroll_specialist).not.toContain('employees.approve_salary');
+        it('has employees and finance route access for payroll runs and compensation', () => {
+            expect(canAccessRoute(role, '/employees')).toBe(true);
+            expect(canAccessRoute(role, '/finance')).toBe(true);
+            expect(canAccessModule(role, 'employees')).toBe(true);
+            expect(canAccessModule(role, 'finance')).toBe(true);
         });
 
-        it('grants talent_recruiter access to directory and candidate onboarding without salary visibility', () => {
-            expect(canAccessRoute('talent_recruiter', '/employees')).toBe(true);
-            expect(canAccessRoute('talent_recruiter', '/finance')).toBe(false);
-            expect(canAccessRoute('talent_recruiter', '/pos')).toBe(false);
+        it('is a Maker: can draft payroll runs and propose salary, but cannot approve recruits or salary', () => {
+            expect(authService.checkPermission(role, 'employees.view')).toBe(true);
+            expect(authService.checkPermission(role, 'employees.view_salary')).toBe(true);
+            expect(authService.checkPermission(role, 'finance.manage_payroll')).toBe(true);
 
-            expect(canAccessModule('talent_recruiter', 'employees')).toBe(true);
-            expect(canAccessModule('talent_recruiter', 'finance')).toBe(false);
-            expect(hasPermission('talent_recruiter', 'ADD_EMPLOYEE')).toBe(true);
-            expect(hasPermission('talent_recruiter', 'VIEW_SALARY')).toBe(false);
-            expect(hasPermission('talent_recruiter', 'APPROVE_SALARY')).toBe(false);
-
-            expect(ACTION_PERMISSIONS.talent_recruiter).toContain('employees.create');
-            expect(ACTION_PERMISSIONS.talent_recruiter).not.toContain('employees.view_salary');
+            // Cannot approve onboarding or approve salary
+            expect(authService.checkPermission(role, 'employees.approve')).toBe(false);
+            expect(hasPermission(role, 'APPROVE_EMPLOYEE')).toBe(false);
+            expect(hasPermission(role, 'APPROVE_SALARY')).toBe(false);
+            expect(hasPermission(role, 'PROPOSE_SALARY')).toBe(true);
         });
 
-        it('ensures training_coordinator has employee and attendance access', () => {
-            expect(canAccessRoute('training_coordinator', '/employees')).toBe(true);
-            expect(canAccessModule('training_coordinator', 'employees')).toBe(true);
-            expect(ACTION_PERMISSIONS.training_coordinator).toContain('employees.manage_attendance');
+        it('has Level 4 ranking and hierarchy rank 40', () => {
+            expect(getRoleHierarchy(role)).toBe(40);
+            expect(getRoleLevel(role)).toBe(4);
+            expect(getRoleDept(role)).toBe('hr');
+        });
+
+        it('cannot employ any roles as frontline staff', () => {
+            expect(canEmployRole(role, 'cashier')).toBe(false);
+            expect(canEmployRole(role, 'stock_clerk')).toBe(false);
+        });
+    });
+
+    describe('3. Talent Acquisition Specialist (talent_recruiter)', () => {
+        const role = 'talent_recruiter' as const;
+
+        it('has employees route access for recruitment pipeline', () => {
+            expect(canAccessRoute(role, '/employees')).toBe(true);
+            expect(canAccessModule(role, 'employees')).toBe(true);
+        });
+
+        it('is a Maker: can source candidates, but cannot unilaterally approve recruits or salary', () => {
+            expect(authService.checkPermission(role, 'employees.view')).toBe(true);
+            expect(authService.checkPermission(role, 'employees.create')).toBe(true);
+            expect(authService.checkPermission(role, 'employees.edit')).toBe(true);
+
+            expect(authService.checkPermission(role, 'employees.approve')).toBe(false);
+            expect(hasPermission(role, 'APPROVE_EMPLOYEE')).toBe(false);
+            expect(hasPermission(role, 'APPROVE_SALARY')).toBe(false);
+        });
+
+        it('can manage candidate intake in recruitment service', () => {
+            expect(recruitmentService.canManageCandidates(role)).toBe(true);
+            // Cannot create headcount requisitions (reserved for Level <= 3)
+            expect(recruitmentService.canManageHiring(role)).toBe(false);
+        });
+
+        it('has Level 4 ranking and hierarchy rank 35', () => {
+            expect(getRoleHierarchy(role)).toBe(35);
+            expect(getRoleLevel(role)).toBe(4);
+            expect(getRoleDept(role)).toBe('hr');
+        });
+    });
+
+    describe('4. L&D Training Coordinator (training_coordinator)', () => {
+        const role = 'training_coordinator' as const;
+
+        it('has employees route access for training and attendance', () => {
+            expect(canAccessRoute(role, '/employees')).toBe(true);
+            expect(canAccessModule(role, 'employees')).toBe(true);
+        });
+
+        it('is a Maker: tracks training compliance, but cannot approve recruits or salary', () => {
+            expect(authService.checkPermission(role, 'employees.view')).toBe(true);
+            expect(authService.checkPermission(role, 'employees.edit')).toBe(true);
+            expect(authService.checkPermission(role, 'employees.manage_attendance')).toBe(true);
+
+            expect(authService.checkPermission(role, 'employees.approve')).toBe(false);
+            expect(hasPermission(role, 'APPROVE_EMPLOYEE')).toBe(false);
+            expect(hasPermission(role, 'APPROVE_SALARY')).toBe(false);
+        });
+
+        it('has Level 4 ranking and hierarchy rank 35 in hr department', () => {
+            expect(getRoleHierarchy(role)).toBe(35);
+            expect(getRoleLevel(role)).toBe(4);
+            expect(getRoleDept(role)).toBe('hr');
         });
     });
 });

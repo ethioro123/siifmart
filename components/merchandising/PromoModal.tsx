@@ -26,9 +26,9 @@ export const PromoModal: React.FC<PromoModalProps> = ({
       <Modal isOpen={isOpen} onClose={onClose} title="Create Promotional Campaign">
          <div className="space-y-4">
             <div className="space-y-1">
-               <label className="text-[10px] text-stone-500 dark:text-gray-400 uppercase font-bold tracking-wider block">Promo Code</label>
+               <label className="text-xs font-medium text-[var(--theme-text-secondary)] block mb-1">Promo Code</label>
                <input
-                  className="w-full bg-[#FAF8F5] dark:bg-black/30 border border-[#E2DCCE] dark:border-white/10 rounded-2xl px-4 py-2.5 text-xs text-[#1E3F27] dark:text-white uppercase font-mono font-bold focus:border-[#2C5E3B] outline-none"
+                  className="w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 py-2.5 text-xs text-[var(--theme-text-primary)] uppercase font-mono font-semibold focus:outline-none focus:ring-1 focus:ring-[var(--theme-accent)] transition-colors"
                   placeholder="e.g. FLASH50, SUMMER20"
                   value={newPromo.code || ''}
                   onChange={(e) => setNewPromo({ ...newPromo, code: e.target.value })}
@@ -37,9 +37,9 @@ export const PromoModal: React.FC<PromoModalProps> = ({
             </div>
             <div className="grid grid-cols-2 gap-4">
                <div className="space-y-1">
-                  <label className="text-[10px] text-stone-500 dark:text-gray-400 uppercase font-bold tracking-wider block">Discount Type</label>
+                  <label className="text-xs font-medium text-[var(--theme-text-secondary)] block mb-1">Discount Type</label>
                   <select
-                     className="w-full bg-[#FAF8F5] dark:bg-black/30 border border-[#E2DCCE] dark:border-white/10 rounded-2xl px-4 py-2.5 text-xs text-[#1E3F27] dark:text-white focus:border-[#2C5E3B] outline-none font-bold cursor-pointer"
+                     className="w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 py-2.5 text-xs text-[var(--theme-text-primary)] font-medium cursor-pointer focus:outline-none focus:ring-1 focus:ring-[var(--theme-accent)] transition-colors"
                      value={newPromo.type}
                      onChange={(e) => setNewPromo({ ...newPromo, type: e.target.value as any })}
                      aria-label="Promo Type"
@@ -49,10 +49,10 @@ export const PromoModal: React.FC<PromoModalProps> = ({
                   </select>
                </div>
                <div className="space-y-1">
-                  <label className="text-[10px] text-stone-500 dark:text-gray-400 uppercase font-bold tracking-wider block">Discount Value</label>
+                  <label className="text-xs font-medium text-[var(--theme-text-secondary)] block mb-1">Discount Value</label>
                   <input
                      type="number"
-                     className="w-full bg-[#FAF8F5] dark:bg-black/30 border border-[#E2DCCE] dark:border-white/10 rounded-2xl px-4 py-2.5 text-xs text-[#1E3F27] dark:text-white focus:border-[#2C5E3B] outline-none font-bold"
+                     className="w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 py-2.5 text-xs text-[var(--theme-text-primary)] font-mono font-medium tabular-nums focus:outline-none focus:ring-1 focus:ring-[var(--theme-accent)] transition-colors"
                      value={newPromo.value || ''}
                      onChange={(e) => setNewPromo({ ...newPromo, value: parseFloat(e.target.value) })}
                      placeholder="0"
@@ -61,10 +61,10 @@ export const PromoModal: React.FC<PromoModalProps> = ({
                </div>
             </div>
             <div className="space-y-1">
-               <label className="text-[10px] text-stone-500 dark:text-gray-400 uppercase font-bold tracking-wider block">Expiration Date</label>
+               <label className="text-xs font-medium text-[var(--theme-text-secondary)] block mb-1">Expiration Date</label>
                <input
                   type="date"
-                  className="w-full bg-[#FAF8F5] dark:bg-black/30 border border-[#E2DCCE] dark:border-white/10 rounded-2xl px-4 py-2 text-xs text-[#1E3F27] dark:text-white focus:border-[#2C5E3B] outline-none font-bold"
+                  className="w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 py-2.5 text-xs text-[var(--theme-text-primary)] font-medium focus:outline-none focus:ring-1 focus:ring-[var(--theme-accent)] transition-colors"
                   value={newPromo.expiryDate || ''}
                   onChange={(e) => setNewPromo({ ...newPromo, expiryDate: e.target.value })}
                   aria-label="Promo Expiry"
@@ -75,7 +75,7 @@ export const PromoModal: React.FC<PromoModalProps> = ({
                   type="button"
                   onClick={handleCreatePromo}
                   disabled={isSubmitting}
-                  className="woody-btn-primary w-full py-2.5 rounded-2xl text-xs font-black flex items-center justify-center gap-2 cursor-pointer shadow-sm disabled:opacity-50"
+                  className="w-full py-2.5 rounded-xl bg-[var(--theme-accent)] hover:opacity-90 text-white text-xs font-semibold flex items-center justify-center gap-2 cursor-pointer shadow-sm transition-opacity disabled:opacity-50"
                >
                   {isSubmitting ? (
                      <>
@@ -94,3 +94,4 @@ export const PromoModal: React.FC<PromoModalProps> = ({
       </Modal>
    );
 };
+

@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { History as HistoryIcon, Search } from 'lucide-react';
+import { History as HistoryIcon, Search, UserCheck } from 'lucide-react';
 import Pagination from '../../shared/Pagination';
 import { Product, StockMovement } from '../../../types';
 import { formatDateTime } from '../../../utils/formatting';
@@ -46,34 +46,36 @@ export const WasteHistory: React.FC<WasteHistoryProps> = ({
     }, [filteredHistory, currentPage]);
 
     return (
-        <div className="border-t border-[#E2DCCE]/30 dark:border-[#A9CBA2]/[0.04] mt-6 pt-8 pb-10">
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
+        <div className="border-t border-[var(--theme-border)] mt-4 pt-6 pb-8">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-5">
                 <div>
-                    <h4 className="text-sm font-bold text-stone-900 dark:text-stone-100 flex items-center gap-2 uppercase tracking-wide">
-                        <HistoryIcon size={18} className="text-stone-500 dark:text-stone-400" />
+                    <h4 className="text-sm font-bold text-[var(--theme-text-primary)] flex items-center gap-2 uppercase tracking-wide">
+                        <HistoryIcon size={18} className="text-[var(--theme-text-secondary)]" />
                         Waste Logs
                     </h4>
-                    <p className="text-stone-500 dark:text-stone-400 text-[10px]">Recent spoilage and damage records</p>
+                    <p className="text-[var(--theme-text-secondary)] text-[11px]">Recent spoilage and damage records</p>
                 </div>
 
                 {/* History Search */}
                 <div className="relative w-full md:w-72">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-500" size={14} />
+                    <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--theme-text-secondary)]" size={15} />
                     <input
                         type="text"
                         placeholder="Search history..."
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
-                        className="woody-input !pl-9 text-xs py-2"
+                        className="w-full min-h-[44px] bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl pl-10 pr-4 py-2 text-xs text-[var(--theme-text-primary)] placeholder:text-[var(--theme-text-secondary)] focus:outline-none focus:border-primary transition-all touch-manipulation"
                     />
                 </div>
             </div>
 
             {paginatedHistory.length > 0 ? (
                 <>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3.5">
                         {paginatedHistory.map((m: any) => {
                             const product = products.find(p => p.id === m.productId);
+                            const workerName = m.userName || m.user || m.userId || 'Floor Custodian';
+
                             return (
                                 <div
                                     key={m.id}
@@ -81,23 +83,28 @@ export const WasteHistory: React.FC<WasteHistoryProps> = ({
                                         setSelectedJob(m);
                                         setIsDetailsOpen(true);
                                     }}
-                                    className="glass-panel rounded-2xl p-3 hover:bg-stone-100/50 dark:hover:bg-[#EAE5D9]/10 transition-all group cursor-pointer"
+                                    className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-4 hover:border-primary/40 transition-all group cursor-pointer shadow-xs touch-manipulation"
                                 >
-                                    <div className="flex justify-between items-start mb-2">
-                                        <span className="text-[10px] font-mono text-[#2C5E3B] dark:text-[#A9CBA2] font-bold">{m.id.slice(0, 8)}</span>
-                                        <span className="text-[9px] px-1.5 py-0.5 rounded uppercase font-black bg-red-500/10 text-red-600 dark:text-red-400">
+                                    <div className="flex justify-between items-start mb-2.5">
+                                        <span className="text-[11px] font-mono text-primary font-bold">{m.id.slice(0, 8)}</span>
+                                        <span className="text-[11px] px-2 py-0.5 rounded-lg uppercase font-semibold bg-red-500/10 text-red-500 border border-red-500/20">
                                             {m.reason.replace('Waste: ', '')}
                                         </span>
                                     </div>
-                                    <div className="flex justify-between items-end">
-                                        <div>
-                                            <p className="text-[10px] text-stone-500 dark:text-stone-400 truncate max-w-[100px]">{product?.name || 'Unknown Item'}</p>
-                                            <p className="text-[9px] text-stone-400 dark:text-stone-500 mt-0.5">{formatDateTime(m.date)}</p>
+                                    <div className="space-y-1 mb-2.5">
+                                        <p className="text-sm font-bold text-[var(--theme-text-primary)] truncate">{product?.name || m.productName || 'Unknown Item'}</p>
+                                        <p className="text-[11px] text-[var(--theme-text-secondary)] font-mono">{product?.sku || 'SKU N/A'}</p>
+                                    </div>
+                                    <div className="flex items-center justify-between text-[11px] pt-2 border-t border-[var(--theme-border)]">
+                                        <div className="flex items-center gap-1 text-[var(--theme-text-secondary)] truncate max-w-[130px]">
+                                            <UserCheck size={12} className="shrink-0 text-primary" />
+                                            <span className="truncate">By: {workerName}</span>
                                         </div>
-                                        <div className="text-right text-stone-900 dark:text-stone-100 font-bold text-xs">
-                                            {m.quantity} <span className="text-[9px] text-stone-500 dark:text-stone-400 font-normal">units</span>
+                                        <div className="text-right text-[var(--theme-text-primary)] font-mono font-bold text-xs tabular-nums shrink-0">
+                                            {m.quantity} <span className="text-[11px] text-[var(--theme-text-secondary)] font-normal">units</span>
                                         </div>
                                     </div>
+                                    <p className="text-[11px] text-[var(--theme-text-secondary)] font-mono mt-1 text-right">{formatDateTime(m.date)}</p>
                                 </div>
                             );
                         })}
@@ -112,8 +119,8 @@ export const WasteHistory: React.FC<WasteHistoryProps> = ({
                     />
                 </>
             ) : (
-                <div className="text-center py-10 bg-stone-50/10 dark:bg-[#1C2620]/10 rounded-2xl border border-dashed border-[#E2DCCE]/30 dark:border-[#A9CBA2]/[0.04]">
-                    <p className="text-stone-500 dark:text-stone-400 text-xs">No matching history found</p>
+                <div className="text-center py-12 bg-[var(--theme-bg-subtle)] rounded-2xl border border-dashed border-[var(--theme-border)]">
+                    <p className="text-[var(--theme-text-secondary)] text-xs">No matching waste history found</p>
                 </div>
             )}
         </div>

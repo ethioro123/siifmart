@@ -1,9 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Truck, RotateCcw, X, Layers, AlertOctagon, Search, AlertTriangle } from 'lucide-react';
-import { WMSJob, Product, Site, User } from '../../../types';
-import { ProductSelector } from './ProductSelector';
-import { formatJobId } from '../../../utils/jobIdFormatter';
-import { getSellUnit } from '../../../utils/units';
+import { Truck, RotateCcw, X, Layers, AlertTriangle } from 'lucide-react';
+import { Product, Site, User } from '../../../types';
 import { useData } from '../../../contexts/DataContext';
 import { logisticsZonesService } from '../../../services/supabase.service';
 import { logger } from '../../../utils/logger';
@@ -280,53 +277,57 @@ export const BulkDistributionModal: React.FC<BulkDistributionModalProps> = ({
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-stone-950/80 backdrop-blur-md animate-in fade-in duration-200">
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/80 animate-in fade-in duration-200">
             <div className="w-full h-full md:p-6 lg:p-8 flex flex-col max-w-[1700px] max-h-[1000px]">
-                <div className="flex-1 bg-stone-50 dark:bg-[#151D18] md:rounded-3xl border border-[#E2DCCE] dark:border-white/10 shadow-2xl flex flex-col overflow-hidden relative">
-                    <div className="p-4 md:p-6 border-b border-[#E2DCCE] dark:border-white/10 flex justify-between items-center bg-[#FAF8F5] dark:bg-[#1A231E]/80 shrink-0">
+                <div className="flex-1 bg-[var(--theme-bg-card)] md:rounded-3xl border border-[var(--theme-border)] shadow-2xl flex flex-col overflow-hidden relative">
+                    <div className="p-4 md:p-5 border-b border-[var(--theme-border)] flex justify-between items-center bg-[var(--theme-bg-subtle)] shrink-0">
                         <div>
-                            <h2 className="text-lg md:text-xl font-black text-stone-900 dark:text-white flex items-center gap-2 uppercase tracking-tight">
-                                <Layers className="text-[#2C5E3B] dark:text-[#A9CBA2]" />
-                                Bulk Distribution <span className="text-[#2C5E3B] dark:text-[#A9CBA2]">Push</span>
+                            <h2 className="text-lg md:text-xl font-bold text-[var(--theme-text-primary)] flex items-center gap-2 tracking-tight">
+                                <Layers className="text-primary" />
+                                Bulk Distribution <span className="text-primary">Push</span>
                             </h2>
-                            <p className="text-stone-500 dark:text-stone-400 text-xs font-bold uppercase tracking-wider mt-0.5">Push stock from warehouse to multiple stores simultaneously</p>
+                            <p className="text-[var(--theme-text-secondary)] text-xs font-semibold uppercase tracking-wider mt-0.5">Push stock from warehouse to multiple stores simultaneously</p>
                         </div>
                         <div className="flex items-center gap-3">
                             {renderTabs()}
-                            <button onClick={onClose} aria-label="Close Modal" className="w-9 h-9 flex items-center justify-center bg-white/80 dark:bg-white/5 hover:bg-stone-200 dark:hover:bg-white/10 rounded-xl text-stone-500 dark:text-stone-400 hover:text-stone-900 dark:hover:text-white transition-colors border border-[#E2DCCE] dark:border-white/10 shadow-xs">
+                            <button
+                                onClick={onClose}
+                                aria-label="Close Modal"
+                                className="min-h-[44px] min-w-[44px] flex items-center justify-center bg-[var(--theme-bg-card)] hover:bg-[var(--theme-bg-subtle)] rounded-xl text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] transition-colors border border-[var(--theme-border)] shadow-xs touch-manipulation"
+                            >
                                 <X size={16} />
                             </button>
                         </div>
                     </div>
 
-                    <div className="p-6 space-y-6 overflow-y-auto flex-1 custom-scrollbar">
+                    <div className="p-6 space-y-5 overflow-y-auto flex-1 custom-scrollbar">
                         {/* Mode Selection */}
-                        <div className="flex gap-4 mb-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-2">
                             <button
                                 onClick={() => setBulkDistributionMode('single')}
-                                className={`flex-1 p-4 rounded-xl border transition-all ${bulkDistributionMode === 'single'
-                                    ? 'bg-[#2C5E3B]/10 border-[#2C5E3B]/50 shadow-[0_0_20px_rgba(44,94,59,0.2)]'
-                                    : 'bg-black/20 border-white/5 hover:bg-white/5'
+                                className={`min-h-[44px] p-4 rounded-xl border transition-all text-left touch-manipulation ${bulkDistributionMode === 'single'
+                                    ? 'bg-primary/10 border-primary text-[var(--theme-text-primary)] shadow-xs'
+                                    : 'bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] hover:bg-[var(--theme-bg-card)]'
                                     }`}
                             >
-                                <div className="text-sm font-bold text-white mb-1">Single Product Push</div>
-                                <div className="text-xs text-gray-400">Distribute one SKU across all stores</div>
+                                <div className="text-sm font-bold text-[var(--theme-text-primary)] mb-1">Single Product Push</div>
+                                <div className="text-xs text-[var(--theme-text-secondary)]">Distribute one SKU across all stores</div>
                             </button>
                             <button
                                 onClick={() => setBulkDistributionMode('wave')}
-                                className={`flex-1 p-4 rounded-xl border transition-all ${bulkDistributionMode === 'wave'
-                                    ? 'bg-[#2C5E3B]/10 border-[#2C5E3B]/50 shadow-[0_0_20px_rgba(44,94,59,0.2)]'
-                                    : 'bg-black/20 border-white/5 hover:bg-white/5'
+                                className={`min-h-[44px] p-4 rounded-xl border transition-all text-left touch-manipulation ${bulkDistributionMode === 'wave'
+                                    ? 'bg-primary/10 border-primary text-[var(--theme-text-primary)] shadow-xs'
+                                    : 'bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] hover:bg-[var(--theme-bg-card)]'
                                     }`}
                             >
-                                <div className="text-sm font-bold text-white mb-1">Multi-SKU Wave</div>
-                                <div className="text-xs text-gray-400">Create complex distribution waves for multiple items</div>
+                                <div className="text-sm font-bold text-[var(--theme-text-primary)] mb-1">Multi-SKU Wave</div>
+                                <div className="text-xs text-[var(--theme-text-secondary)]">Create complex distribution waves for multiple items</div>
                             </button>
                         </div>
 
                         {/* Source Selection */}
-                        <div className="bg-white/5 p-4 rounded-xl border border-white/10">
-                            <label htmlFor="source-warehouse-select" className="block text-xs font-bold text-gray-400 uppercase mb-2">Distribution Source</label>
+                        <div className="bg-[var(--theme-bg-subtle)] p-4 rounded-xl border border-[var(--theme-border)]">
+                            <label htmlFor="source-warehouse-select" className="block text-xs font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider mb-2">Distribution Source</label>
                             <select
                                 id="source-warehouse-select"
                                 value={bulkDistributionSourceSite}
@@ -336,10 +337,10 @@ export const BulkDistributionModal: React.FC<BulkDistributionModalProps> = ({
                                     setBulkDistributionAllocations([]);
                                     setWaveProducts([]);
                                 }}
-                                className={`w-full bg-black/40 border border-white/10 rounded-lg px-3 py-2 text-sm focus:outline-none ${
+                                className={`w-full min-h-[44px] bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl px-3 py-2 text-sm focus:outline-none touch-manipulation ${
                                     isRestricted 
-                                        ? 'text-white/55 cursor-not-allowed' 
-                                        : 'text-white focus:border-[#2C5E3B]'
+                                        ? 'text-[var(--theme-text-secondary)] opacity-60 cursor-not-allowed' 
+                                        : 'text-[var(--theme-text-primary)] focus:border-primary'
                                 }`}
                                 aria-label="Select Distribution Source"
                                 disabled={isRestricted}
@@ -358,12 +359,12 @@ export const BulkDistributionModal: React.FC<BulkDistributionModalProps> = ({
                         </div>
 
                         {isCrossZone && settings?.enforceRegionalZoning && ['super_admin', 'CEO', 'ceo', 'regional_manager', 'operations_manager'].includes(user?.role || '') && (
-                             <div className="bg-yellow-500/10 border border-yellow-500/30 text-yellow-400 p-4 rounded-xl flex items-start gap-3 animate-pulse">
-                                 <AlertTriangle className="shrink-0 mt-0.5 text-yellow-400" size={18} />
+                             <div className="bg-amber-500/10 border border-amber-500/30 text-amber-600 dark:text-amber-400 p-4 rounded-xl flex items-start gap-3">
+                                 <AlertTriangle className="shrink-0 mt-0.5 text-amber-500" size={18} />
                                  <div>
-                                     <h4 className="font-bold text-sm text-yellow-400">⚠️ Cross-Zone Allocation Override</h4>
-                                     <p className="text-xs mt-1 text-yellow-500/90 leading-relaxed">
-                                         You are distributing stock from <span className="font-bold text-white">{getZoneName(sourceSiteObj?.logisticsZoneId)}</span> to stores in different Logistics Zones: {crossZoneStores.map(s => `${s.name} (${getZoneName(s.logisticsZoneId)})`).join(', ')}. As Operations/Regional Leadership, you are authorized to override this restriction for emergency reallocations.
+                                     <h4 className="font-bold text-sm text-amber-700 dark:text-amber-400">Cross-Zone Allocation Override</h4>
+                                     <p className="text-xs mt-1 text-amber-800/90 dark:text-amber-300/90 leading-relaxed">
+                                         You are distributing stock from <span className="font-bold text-[var(--theme-text-primary)]">{getZoneName(sourceSiteObj?.logisticsZoneId)}</span> to stores in different Logistics Zones: {crossZoneStores.map(s => `${s.name} (${getZoneName(s.logisticsZoneId)})`).join(', ')}. Emergency leadership authorization active.
                                      </p>
                                  </div>
                              </div>
@@ -407,8 +408,8 @@ export const BulkDistributionModal: React.FC<BulkDistributionModalProps> = ({
                         )}
                     </div>
 
-                    <div className="p-6 border-t border-white/10 bg-black/20 flex gap-3 justify-end items-center">
-                        <div className="mr-auto text-xs text-gray-500">
+                    <div className="p-4 md:p-5 border-t border-[var(--theme-border)] bg-[var(--theme-bg-subtle)] flex gap-3 justify-end items-center">
+                        <div className="mr-auto text-xs text-[var(--theme-text-secondary)] font-mono font-medium">
                             {bulkDistributionMode === 'single'
                                 ? `${bulkDistributionAllocations.filter(a => a.quantity > 0).length} stores targeted`
                                 : `${waveProducts.length} items in wave`
@@ -419,10 +420,10 @@ export const BulkDistributionModal: React.FC<BulkDistributionModalProps> = ({
                                 setBulkDistributionAllocations([]);
                                 setWaveProducts([]);
                             }}
-                            className="p-2 text-gray-500 hover:text-white hover:bg-white/10 rounded-lg transition-colors"
+                            className="min-h-[44px] min-w-[44px] flex items-center justify-center text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-card)] rounded-xl transition-colors border border-[var(--theme-border)] touch-manipulation"
                             title="Reset Form"
                         >
-                            <RotateCcw size={20} />
+                            <RotateCcw size={18} />
                         </button>
                         <button
                             onClick={handleCreateDistribution}
@@ -430,10 +431,10 @@ export const BulkDistributionModal: React.FC<BulkDistributionModalProps> = ({
                                 ? (!bulkDistributionProductId || bulkDistributionAllocations.filter(a => a.quantity > 0).length === 0)
                                 : (waveProducts.length === 0 || !waveProducts.some(wp => wp.allocations.some(a => a.quantity > 0)))
                             }
-                            className={`px-6 py-2 rounded-lg font-bold transition-colors flex items-center gap-2 ${((bulkDistributionMode === 'single' && bulkDistributionProductId && bulkDistributionAllocations.filter(a => a.quantity > 0).length > 0) ||
+                            className={`min-h-[44px] px-6 py-2.5 rounded-xl font-bold uppercase tracking-wider transition-all flex items-center gap-2 text-xs shadow-xs touch-manipulation ${((bulkDistributionMode === 'single' && bulkDistributionProductId && bulkDistributionAllocations.filter(a => a.quantity > 0).length > 0) ||
                                 (bulkDistributionMode === 'wave' && waveProducts.length > 0 && waveProducts.some(wp => wp.allocations.some(a => a.quantity > 0))))
-                                ? 'bg-[#2C5E3B] text-white hover:bg-[#3a7a4d] shadow-lg shadow-[#2C5E3B]/20'
-                                : 'bg-white/5 text-gray-500 cursor-not-allowed'
+                                ? 'bg-primary text-white hover:opacity-90 active:scale-95 cursor-pointer'
+                                : 'bg-[var(--theme-bg-card)] text-[var(--theme-text-secondary)] opacity-50 cursor-not-allowed border border-[var(--theme-border)]'
                                 }`}
                         >
                             <Truck size={16} />

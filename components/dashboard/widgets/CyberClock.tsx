@@ -137,13 +137,13 @@ export const CyberClock: React.FC<CyberClockProps> = ({ country, compact = false
                     raw = raw.replace('pagume', 'Qaammee');
 
                     return {
-                        title: '🇪🇹 Kalandara Itoophiyaa',
+                        title: 'ET · Kalandara Itoophiyaa',
                         date: raw
                     };
                 } else if (language === 'en') {
                     // English Ethiopic
                     return {
-                        title: '🇪🇹 Ethiopian Solar Calendar',
+                        title: 'ET · Ethiopian Solar Calendar',
                         date: raw.charAt(0).toUpperCase() + raw.slice(1)
                     };
                 } else {
@@ -171,13 +171,13 @@ export const CyberClock: React.FC<CyberClockProps> = ({ country, compact = false
                     raw = raw.replace('pagume', 'ጳጉሜ');
 
                     return {
-                        title: '🇪🇹 የኢትዮጵያ ዘመን አቆጣጠር',
+                        title: 'ET · የኢትዮጵያ ዘመን አቆጣጠር',
                         date: `${raw} ዓ.ም`
                     };
                 }
             } catch {
                 return {
-                    title: '🇪🇹 Ethiopian Calendar',
+                    title: 'ET · Ethiopian Calendar',
                     date: 'ETHIOPIAN CALENDAR'
                 };
             }
@@ -189,7 +189,7 @@ export const CyberClock: React.FC<CyberClockProps> = ({ country, compact = false
                         timeZone: timezone
                     }).format(time);
                     return {
-                        title: '🇰🇪 Kenyan National Calendar',
+                        title: 'KE · Kenyan National Calendar',
                         date: en
                     };
                 } else {
@@ -198,13 +198,13 @@ export const CyberClock: React.FC<CyberClockProps> = ({ country, compact = false
                         timeZone: timezone
                     }).format(time);
                     return {
-                        title: '🇰🇪 Kalenda ya Kitaifa',
+                        title: 'KE · Kalenda ya Kitaifa',
                         date: sw
                     };
                 }
             } catch {
                 return {
-                    title: '🇰🇪 Kenyan Calendar',
+                    title: 'KE · Kenyan Calendar',
                     date: time.toDateString()
                 };
             }
@@ -215,7 +215,7 @@ export const CyberClock: React.FC<CyberClockProps> = ({ country, compact = false
                     timeZone: timezone
                 }).format(time);
                 return {
-                    title: `${profile.flag} ${profile.name} Calendar`,
+                    title: `${profile.name} Calendar`,
                     date: standard
                 };
             } catch {
@@ -225,7 +225,7 @@ export const CyberClock: React.FC<CyberClockProps> = ({ country, compact = false
                 };
             }
         }
-    }, [activeCountry, time, timezone, language, profile.flag, profile.name]);
+    }, [activeCountry, time, timezone, language, profile.name]);
 
     const tzAbbr = useMemo(() => {
         if (activeCountry === 'ET' || activeCountry === 'KE' || activeCountry === 'UG' || activeCountry === 'TZ') return 'EAT';
@@ -237,12 +237,12 @@ export const CyberClock: React.FC<CyberClockProps> = ({ country, compact = false
         return (
             <div className="flex flex-col items-end font-mono px-3 py-1.5 rounded-xl bg-[var(--theme-bg-card)] border border-[var(--theme-border)] shadow-xs shrink-0 select-none whitespace-nowrap">
                 <div className="flex items-center gap-1.5 text-xs font-bold text-[var(--theme-text-primary)] shrink-0 whitespace-nowrap">
-                    <span className="text-sm shrink-0">{profile.flag}</span>
+                    <span className="text-[11px] font-semibold text-[var(--theme-text-muted)] shrink-0">{activeCountry}</span>
                     <span className="tracking-wider shrink-0 text-[var(--theme-text-primary)]">{timeString}</span>
-                    <span className="text-[9px] text-[var(--theme-text-muted)] font-semibold shrink-0">{tzAbbr}</span>
+                    <span className="text-[11px] text-[var(--theme-text-muted)] font-semibold shrink-0">{tzAbbr}</span>
                 </div>
                 {showCalendar && (
-                    <span className="text-[9px] text-[var(--theme-text-secondary)] font-bold whitespace-nowrap shrink-0 mt-0.5 max-w-[200px] truncate">
+                    <span className="text-[11px] text-[var(--theme-text-secondary)] font-semibold whitespace-nowrap shrink-0 mt-0.5 max-w-[200px] truncate">
                         {calendarData.date}
                     </span>
                 )}
@@ -255,7 +255,7 @@ export const CyberClock: React.FC<CyberClockProps> = ({ country, compact = false
             {/* Left: Sovereign Calendar Details (Zero Duplication) */}
             {showCalendar && (
                 <div className="text-right border-r border-[var(--theme-border)] pr-3.5 hidden sm:block shrink-0">
-                    <p className="text-[9px] text-[var(--theme-text-secondary)] font-bold uppercase tracking-wider leading-none mb-1 whitespace-nowrap">
+                    <p className="text-[11px] text-[var(--theme-text-secondary)] font-semibold uppercase tracking-wider leading-none mb-1 whitespace-nowrap">
                         {calendarData.title}
                     </p>
                     <p className="text-xs font-mono font-bold text-[var(--theme-text-primary)] leading-none whitespace-nowrap">
@@ -273,7 +273,7 @@ export const CyberClock: React.FC<CyberClockProps> = ({ country, compact = false
                         </span>
                     ))}
                 </div>
-                <div className="text-[9px] text-[var(--theme-text-muted)] font-bold tracking-wider mt-1 whitespace-nowrap shrink-0">
+                <div className="text-[11px] text-[var(--theme-text-muted)] font-semibold tracking-wider mt-1 whitespace-nowrap shrink-0">
                     {clockSubtitle}
                 </div>
             </div>

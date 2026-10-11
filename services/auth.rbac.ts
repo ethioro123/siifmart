@@ -98,7 +98,7 @@ export const ROLE_PERMISSIONS: Record<string, string[]> = {
     cs_manager: ['dashboard', 'customers', 'sales', 'profile'],
     store_supervisor: ['dashboard', 'pos', 'inventory', 'sales', 'customers', 'profile'],
     returns_clerk: ['dashboard', 'warehouse', 'inventory', 'customers', 'profile'],
-    merchandiser: ['dashboard', 'inventory', 'profile'],
+    merchandiser: ['dashboard', 'inventory', 'pricing', 'profile'],
     loss_prevention: ['dashboard', 'inventory', 'sales', 'profile'],
     accountant: ['dashboard', 'finance', 'sales', 'procurement', 'profile'],
     data_analyst: ['dashboard', 'sales', 'inventory', 'finance', 'profile'],

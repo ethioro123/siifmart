@@ -29,6 +29,7 @@ export default function RecruitmentPipelineTab() {
     const userRoleLevel = recruitmentService.getUserRoleLevel(user?.role || '');
     const isSiteManager = userRoleLevel === 3;
     const canManageHiring = recruitmentService.canManageHiring(user?.role || '');
+    const canManageCandidates = recruitmentService.canManageCandidates(user?.role || '');
     const isHQ = userRoleLevel <= 2;
 
     const loadData = async () => {
@@ -103,10 +104,19 @@ export default function RecruitmentPipelineTab() {
                         <Briefcase size={20} />
                     </div>
                     <div>
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2 flex-wrap">
                             <h3 className="text-base font-semibold tracking-tight text-[var(--theme-text-primary)]">
                                 Delegated Recruitment & 4-Eyes Onboarding
                             </h3>
+                            {['hr_manager', 'operations_manager', 'regional_manager', 'super_admin', 'CEO'].includes(user?.role || '') ? (
+                                <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+                                    Checker • HR Compliance Sign-Off
+                                </span>
+                            ) : (
+                                <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-blue-500/10 text-[#0071E3] dark:text-[#2997FF] border border-blue-500/20">
+                                    Maker • Talent Sourcing
+                                </span>
+                            )}
                             {isSiteManager && (
                                 <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-blue-500/10 text-[#0071E3] dark:text-[#2997FF] border border-blue-500/20">
                                     Branch Scope
@@ -116,30 +126,34 @@ export default function RecruitmentPipelineTab() {
                         <p className="text-xs text-[var(--theme-text-secondary)] mt-0.5">
                             {isSiteManager
                                 ? `Location-locked to ${activeSite?.name || user?.siteId || 'your branch'}. You can recruit floor staff below your level.`
-                                : 'Dual-control sign-offs: Manager sourcing ➔ HR compliance vetting ➔ Finance salary authorization ➔ Synaptic activation.'
+                                : 'Dual-control sign-offs: Recruiter sourcing -> HR compliance vetting -> Finance salary authorization -> Synaptic activation.'
                             }
                         </p>
                     </div>
                 </div>
 
-                {canManageHiring && (
+                {(canManageHiring || canManageCandidates) && (
                     <div className="flex items-center gap-2.5">
-                        <button
-                            type="button"
-                            onClick={() => setIsCandModalOpen(true)}
-                            className="h-10 px-3.5 rounded-xl bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-panel-hover)] border border-[var(--theme-border)] text-xs font-semibold text-[var(--theme-text-primary)] transition-all active:scale-[0.98] cursor-pointer flex items-center gap-1.5"
-                        >
-                            <UserPlus size={14} />
-                            <span>+ Candidate</span>
-                        </button>
-                        <button
-                            type="button"
-                            onClick={() => setIsReqModalOpen(true)}
-                            className="h-10 px-4 rounded-xl bg-[#0071E3] dark:bg-[#2997FF] hover:opacity-95 text-white text-xs sm:text-sm font-semibold flex items-center gap-1.5 shadow-[0_2px_8px_rgba(0,113,227,0.25)] active:scale-[0.98] transition-all cursor-pointer"
-                        >
-                            <Plus size={15} />
-                            <span>New Requisition</span>
-                        </button>
+                        {canManageCandidates && (
+                            <button
+                                type="button"
+                                onClick={() => setIsCandModalOpen(true)}
+                                className="h-10 px-3.5 rounded-xl bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-panel-hover)] border border-[var(--theme-border)] text-xs font-semibold text-[var(--theme-text-primary)] transition-all active:scale-[0.98] cursor-pointer flex items-center gap-1.5"
+                            >
+                                <UserPlus size={14} />
+                                <span>+ Candidate</span>
+                            </button>
+                        )}
+                        {canManageHiring && (
+                            <button
+                                type="button"
+                                onClick={() => setIsReqModalOpen(true)}
+                                className="h-10 px-4 rounded-xl bg-[#0071E3] dark:bg-[#2997FF] hover:opacity-95 text-white text-xs sm:text-sm font-semibold flex items-center gap-1.5 shadow-[0_2px_8px_rgba(0,113,227,0.25)] active:scale-[0.98] transition-all cursor-pointer"
+                            >
+                                <Plus size={15} />
+                                <span>New Requisition</span>
+                            </button>
+                        )}
                     </div>
                 )}
             </div>
@@ -276,13 +290,13 @@ export default function RecruitmentPipelineTab() {
                                                             hasHR ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20' : 'bg-stone-500/10 text-stone-500 border-stone-500/20'
                                                         }`}>
                                                             <ShieldCheck size={10} />
-                                                            <span>HR {hasHR ? '✓' : 'Pending'}</span>
+                                                            <span>HR {hasHR ? 'Verified' : 'Pending'}</span>
                                                         </span>
                                                         <span className={`px-1.5 py-0.5 rounded-md border flex items-center gap-1 ${
                                                             hasFin ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20' : 'bg-stone-500/10 text-stone-500 border-stone-500/20'
                                                         }`}>
                                                             <Banknote size={10} />
-                                                            <span>Fin {hasFin ? '✓' : 'Pending'}</span>
+                                                            <span>Fin {hasFin ? 'Approved' : 'Pending'}</span>
                                                         </span>
                                                     </div>
 

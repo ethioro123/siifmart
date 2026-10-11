@@ -3,6 +3,7 @@ import { Package, Loader2, Calculator, TrendingDown, Percent, CheckCircle2, Arro
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Line } from 'recharts';
 import { useMerchandising } from './MerchandisingContext';
 import { formatCompactNumber } from '../../utils/formatting';
+import { useSubmitPriceChanges } from '../../hooks/useSubmitPriceChanges';
 
 export const MarkdownTab: React.FC = () => {
    const {
@@ -12,9 +13,11 @@ export const MarkdownTab: React.FC = () => {
       isMarkdownSimulating,
       calculateMarkdown,
       addNotification,
-      updateProduct,
-      currencySymbol
+      activeCountry,
+      currencySymbol,
+      salesMetricsIndex
    } = useMerchandising();
+   const { submit } = useSubmitPriceChanges(activeCountry);
 
    const [targetExitDate, setTargetExitDate] = useState('');
    const [hasSimulated, setHasSimulated] = useState(false);
@@ -66,14 +69,20 @@ export const MarkdownTab: React.FC = () => {
       if (!selectedMarkdownProduct || glidePathData.length < 2) return;
       const stage2Price = glidePathData[1].price;
       try {
-         await updateProduct({
-            ...selectedMarkdownProduct,
-            isOnSale: true,
-            salePrice: stage2Price
-         });
-         addNotification('success', `Activated 10% clearance promotion (${currencySymbol} ${stage2Price}) for "${selectedMarkdownProduct.name}".`);
+         await submit(
+            [{
+               product: selectedMarkdownProduct,
+               proposal: {
+                  price: selectedMarkdownProduct.price,
+                  costPrice: selectedMarkdownProduct.costPrice,
+                  isOnSale: true,
+                  salePrice: stage2Price
+               }
+            }],
+            `Markdown clearance stage 2 (${currencySymbol} ${stage2Price})`
+         );
       } catch (err: any) {
-         addNotification('alert', `Failed to apply markdown: ${err.message || 'Unknown error'}`);
+         addNotification('alert', `Failed to submit markdown: ${err.message || 'Unknown error'}`);
       }
    };
 
@@ -84,23 +93,26 @@ export const MarkdownTab: React.FC = () => {
    return (
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 animate-in fade-in">
          {/* Left: Clearance Parameters Card */}
-         <div className="bg-white/85 dark:bg-[#18201B]/60 border border-[#E2DCCE] dark:border-emerald-950/20 rounded-3xl p-6 shadow-sm flex flex-col justify-between">
+         <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-3xl p-5 sm:p-6 shadow-sm flex flex-col justify-between">
             <div>
-               <div className="flex items-center gap-2 pb-3 mb-4 border-b border-[#E2DCCE]/60 dark:border-white/5">
-                  <div className="p-1.5 bg-emerald-50 text-[#2C5E3B] dark:bg-[#2C5E3B]/20 dark:text-[#A9CBA2] rounded-xl border border-emerald-200 dark:border-emerald-950/30">
-                     <TrendingDown size={16} />
+               <div className="flex items-center gap-3 pb-3 mb-4 border-b border-[var(--theme-border)]">
+                  <div className="w-9 h-9 rounded-xl bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] flex items-center justify-center shrink-0">
+                     <TrendingDown size={18} />
                   </div>
-                  <h3 className="text-xs font-black text-[#1E3F27] dark:text-[#EAE5D9] uppercase tracking-wider">Clearance Strategy</h3>
+                  <div>
+                     <h3 className="text-sm font-semibold text-[var(--theme-text-primary)]">Clearance Strategy</h3>
+                     <p className="text-xs text-[var(--theme-text-secondary)] mt-0.5">Automated markdown decay</p>
+                  </div>
                </div>
-               <p className="text-xs text-stone-500 dark:text-stone-400 mb-5 leading-relaxed">
+               <p className="text-xs text-[var(--theme-text-secondary)] mb-5 leading-relaxed">
                   Calculate optimal discount schedules to clear slow-moving inventory by a target date without sacrificing unnecessary margin.
                </p>
 
                <div className="space-y-4">
                   <div>
-                     <label className="text-[10px] text-stone-500 dark:text-gray-400 uppercase font-bold tracking-wider mb-1.5 block">Select Product</label>
+                     <label className="text-xs font-medium text-[var(--theme-text-secondary)] mb-1.5 block">Select Product</label>
                      <select
-                        className="w-full bg-[#FAF8F5] dark:bg-black/30 border border-[#E2DCCE] dark:border-white/10 rounded-2xl px-3.5 py-2.5 text-xs text-[#1E3F27] dark:text-white focus:border-[#2C5E3B] outline-none font-bold cursor-pointer"
+                        className="w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 py-2.5 text-xs text-[var(--theme-text-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--theme-accent)] font-medium cursor-pointer transition-colors"
                         value={selectedMarkdownProduct?.id || ''}
                         onChange={(e) => {
                            setSelectedMarkdownProduct(products.find(p => p.id === e.target.value) || null);
@@ -109,13 +121,19 @@ export const MarkdownTab: React.FC = () => {
                         aria-label="Select Product for Markdown"
                      >
                         <option value="">Choose SKU to Simulate...</option>
-                        <optgroup label="Recommended for Clearance (Low Velocity)">
-                           {products.filter(p => p.salesVelocity === 'Low' || (p.stock || 0) > 30).map(p => (
+                        <optgroup label="Recommended for Clearance (High Days of Supply / Low Run-Rate)">
+                           {products.filter(p => {
+                              const m = salesMetricsIndex?.get(p.id);
+                              return m?.needsMarkdown ?? (p.salesVelocity === 'Low' || (p.stock || 0) > 30);
+                           }).map(p => (
                               <option key={p.id} value={p.id}>{p.name} ({p.stock} units)</option>
                            ))}
                         </optgroup>
-                        <optgroup label="Other Products">
-                           {products.filter(p => p.salesVelocity !== 'Low' && (p.stock || 0) <= 30).map(p => (
+                        <optgroup label="Other Catalog Products">
+                           {products.filter(p => {
+                              const m = salesMetricsIndex?.get(p.id);
+                              return !(m?.needsMarkdown ?? (p.salesVelocity === 'Low' || (p.stock || 0) > 30));
+                           }).map(p => (
                               <option key={p.id} value={p.id}>{p.name} ({p.stock} units)</option>
                            ))}
                         </optgroup>
@@ -123,9 +141,9 @@ export const MarkdownTab: React.FC = () => {
                   </div>
 
                   {selectedMarkdownProduct && (
-                     <div className="p-4 bg-[#FAF8F5] dark:bg-black/30 rounded-2xl border border-[#E2DCCE] dark:border-white/10 space-y-2.5">
-                        <div className="flex items-center gap-3 pb-2.5 border-b border-[#E2DCCE]/60 dark:border-white/5">
-                           <div className="w-9 h-9 rounded-xl bg-emerald-50 dark:bg-[#2C5E3B]/20 border border-emerald-200 dark:border-emerald-950/30 flex items-center justify-center shrink-0 overflow-hidden">
+                     <div className="p-4 bg-[var(--theme-bg-subtle)] rounded-2xl border border-[var(--theme-border)] space-y-2.5">
+                        <div className="flex items-center gap-3 pb-2.5 border-b border-[var(--theme-border)]">
+                           <div className="w-10 h-10 rounded-xl bg-[var(--theme-bg-card)] border border-[var(--theme-border)] flex items-center justify-center shrink-0 overflow-hidden">
                               {selectedMarkdownProduct.image && !selectedMarkdownProduct.image.includes('placeholder.com') ? (
                                  <img
                                     src={selectedMarkdownProduct.image}
@@ -136,34 +154,50 @@ export const MarkdownTab: React.FC = () => {
                                     }}
                                  />
                               ) : (
-                                 <Package size={16} className="text-[#2C5E3B] dark:text-[#A9CBA2]" />
+                                 <Package size={16} className="text-[var(--theme-text-secondary)]" />
                               )}
                            </div>
                            <div className="overflow-hidden">
-                              <p className="font-bold text-[#1E3F27] dark:text-white text-xs truncate">{selectedMarkdownProduct.name}</p>
-                              <p className="text-[10px] text-stone-400 font-mono">{selectedMarkdownProduct.sku || 'No SKU'}</p>
+                              <p className="font-semibold text-xs text-[var(--theme-text-primary)] truncate leading-tight">{selectedMarkdownProduct.name}</p>
+                              <p className="text-[10px] text-[var(--theme-text-secondary)] font-mono">{selectedMarkdownProduct.sku || 'No SKU'}</p>
                            </div>
                         </div>
                         <div className="flex justify-between text-xs">
-                           <span className="text-stone-500 dark:text-stone-400">Current Stock</span>
-                           <span className="text-[#1E3F27] dark:text-white font-mono font-bold">{selectedMarkdownProduct.stock} units</span>
+                           <span className="text-[var(--theme-text-secondary)]">Current Stock</span>
+                           <span className="text-[var(--theme-text-primary)] font-mono font-semibold tabular-nums">{selectedMarkdownProduct.stock} units</span>
+                        </div>
+                        {selectedMarkdownProduct && salesMetricsIndex?.get(selectedMarkdownProduct.id) && (
+                           <>
+                              <div className="flex justify-between text-xs">
+                                 <span className="text-[var(--theme-text-secondary)]">30-Day POS Sales</span>
+                                 <span className="text-[var(--theme-text-primary)] font-mono font-semibold tabular-nums">
+                                    {salesMetricsIndex.get(selectedMarkdownProduct.id)?.unitsSold30d || 0} units ({salesMetricsIndex.get(selectedMarkdownProduct.id)?.dailyRunRate || 0}/day)
+                                 </span>
+                              </div>
+                              <div className="flex justify-between text-xs">
+                                 <span className="text-[var(--theme-text-secondary)]">Days of Supply</span>
+                                 <span className="text-[var(--theme-text-primary)] font-mono font-semibold tabular-nums">
+                                    {salesMetricsIndex.get(selectedMarkdownProduct.id)?.daysOfSupply || 0} days
+                                 </span>
+                              </div>
+                           </>
+                        )}
+                        <div className="flex justify-between text-xs">
+                           <span className="text-[var(--theme-text-secondary)]">Current Price</span>
+                           <span className="text-[var(--theme-text-primary)] font-mono font-semibold tabular-nums">{formatCompactNumber(selectedMarkdownProduct.price, { currency: currencySymbol })}</span>
                         </div>
                         <div className="flex justify-between text-xs">
-                           <span className="text-stone-500 dark:text-stone-400">Current Price</span>
-                           <span className="text-[#1E3F27] dark:text-white font-mono font-bold">{formatCompactNumber(selectedMarkdownProduct.price, { currency: currencySymbol })}</span>
-                        </div>
-                        <div className="flex justify-between text-xs">
-                           <span className="text-stone-500 dark:text-stone-400">Break-Even Cost</span>
-                           <span className="text-stone-600 dark:text-stone-300 font-mono">{formatCompactNumber(selectedMarkdownProduct.costPrice || selectedMarkdownProduct.price * 0.7, { currency: currencySymbol })}</span>
+                           <span className="text-[var(--theme-text-secondary)]">Break-Even Cost</span>
+                           <span className="text-[var(--theme-text-secondary)] font-mono tabular-nums">{formatCompactNumber(selectedMarkdownProduct.costPrice || selectedMarkdownProduct.price * 0.7, { currency: currencySymbol })}</span>
                         </div>
                      </div>
                   )}
 
                   <div>
-                     <label className="text-[10px] text-stone-500 dark:text-gray-400 uppercase font-bold tracking-wider mb-1.5 block">Target Exit Date</label>
+                     <label className="text-xs font-medium text-[var(--theme-text-secondary)] mb-1.5 block">Target Exit Date</label>
                      <input
                         type="date"
-                        className="w-full bg-[#FAF8F5] dark:bg-black/30 border border-[#E2DCCE] dark:border-white/10 rounded-2xl px-3.5 py-2 text-xs text-[#1E3F27] dark:text-white focus:border-[#2C5E3B] outline-none font-bold"
+                        className="w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 py-2 text-xs text-[var(--theme-text-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--theme-accent)] font-mono font-medium transition-colors"
                         value={targetExitDate}
                         onChange={(e) => setTargetExitDate(e.target.value)}
                         aria-label="Target Exit Date"
@@ -172,12 +206,12 @@ export const MarkdownTab: React.FC = () => {
                </div>
             </div>
 
-            <div className="pt-5 border-t border-[#E2DCCE]/60 dark:border-white/5 space-y-2">
+            <div className="pt-5 border-t border-[var(--theme-border)] space-y-2 mt-4">
                <button
                   type="button"
                   onClick={handleGenerate}
                   disabled={!selectedMarkdownProduct || isMarkdownSimulating}
-                  className="woody-btn-primary w-full py-2.5 rounded-2xl flex items-center justify-center gap-2 text-xs font-black disabled:opacity-40 cursor-pointer shadow-sm"
+                  className="w-full py-2.5 bg-[var(--theme-accent)] hover:opacity-90 text-white rounded-xl flex items-center justify-center gap-2 text-xs font-semibold disabled:opacity-40 cursor-pointer shadow-sm transition-colors"
                >
                   {isMarkdownSimulating ? <Loader2 size={15} className="animate-spin" /> : <Calculator size={15} />}
                   <span>{isMarkdownSimulating ? 'Computing Elasticity...' : 'Generate Glide Path'}</span>
@@ -187,7 +221,7 @@ export const MarkdownTab: React.FC = () => {
                   <button
                      type="button"
                      onClick={handleApplyPromo}
-                     className="w-full py-2.5 bg-amber-50 hover:bg-amber-100 dark:bg-amber-950/30 dark:hover:bg-amber-900/40 text-amber-800 dark:text-amber-300 border border-amber-200 dark:border-amber-900/30 rounded-2xl flex items-center justify-center gap-2 text-xs font-black transition-colors cursor-pointer"
+                     className="w-full py-2.5 bg-amber-500/10 hover:bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/20 rounded-xl flex items-center justify-center gap-2 text-xs font-semibold transition-colors cursor-pointer"
                   >
                      <Percent size={14} />
                      <span>Activate 10% Clearance Stage</span>
@@ -197,20 +231,20 @@ export const MarkdownTab: React.FC = () => {
          </div>
 
          {/* Right: Projected Depletion Chart & Metrics Card */}
-         <div className="lg:col-span-2 bg-white/85 dark:bg-[#18201B]/60 border border-[#E2DCCE] dark:border-emerald-950/20 rounded-3xl p-6 shadow-sm flex flex-col justify-between">
+         <div className="lg:col-span-2 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-3xl p-5 sm:p-6 shadow-sm flex flex-col justify-between">
             <div>
-               <div className="flex flex-wrap items-center justify-between gap-3 mb-4 pb-3 border-b border-[#E2DCCE]/60 dark:border-white/5">
+               <div className="flex flex-wrap items-center justify-between gap-3 mb-4 pb-3 border-b border-[var(--theme-border)]">
                   <div>
-                     <h3 className="text-xs font-black text-[#1E3F27] dark:text-[#EAE5D9] uppercase tracking-wider">Projected Depletion Path</h3>
-                     <p className="text-[11px] text-stone-500 dark:text-stone-400 mt-0.5">
+                     <h3 className="text-sm font-semibold text-[var(--theme-text-primary)]">Projected Depletion Path</h3>
+                     <p className="text-xs text-[var(--theme-text-secondary)] mt-0.5">
                         Inventory drawdown velocity vs dynamic price concessions
                      </p>
                   </div>
                   {selectedMarkdownProduct && (
-                     <div className="flex items-center gap-3 text-xs">
-                        <span className="flex items-center gap-1.5 text-stone-600 dark:text-stone-300 font-bold"><span className="w-2.5 h-2.5 bg-[#2C5E3B] rounded-full"></span> Revenue</span>
-                        <span className="flex items-center gap-1.5 text-amber-700 dark:text-amber-400 font-bold"><span className="w-2.5 h-2.5 bg-amber-600 rounded-full"></span> Price</span>
-                        <span className="flex items-center gap-1.5 text-red-600 dark:text-red-400 font-bold"><span className="w-2.5 h-2.5 bg-red-500 rounded-full"></span> Stock</span>
+                     <div className="flex items-center gap-3 text-xs bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] px-3 py-1.5 rounded-full font-medium">
+                        <span className="flex items-center gap-1.5 text-[var(--theme-text-secondary)]"><span className="w-2 h-2 bg-[var(--theme-accent)] rounded-full"></span> Revenue</span>
+                        <span className="flex items-center gap-1.5 text-[var(--theme-text-secondary)]"><span className="w-2 h-2 bg-amber-500 rounded-full"></span> Price</span>
+                        <span className="flex items-center gap-1.5 text-[var(--theme-text-secondary)]"><span className="w-2 h-2 bg-rose-500 rounded-full"></span> Stock</span>
                      </div>
                   )}
                </div>
@@ -219,53 +253,54 @@ export const MarkdownTab: React.FC = () => {
                   <div className="h-[280px]">
                      <ResponsiveContainer width="100%" height="100%" minHeight={0}>
                         <AreaChart data={glidePathData}>
-                           <CartesianGrid strokeDasharray="3 3" stroke="#E2DCCE" vertical={false} opacity={0.6} />
-                           <XAxis dataKey="week" stroke="#8C827A" fontSize={11} tickLine={false} />
-                           <YAxis yAxisId="left" stroke="#8C827A" fontSize={11} tickLine={false} />
-                           <YAxis yAxisId="right" orientation="right" stroke="#8C827A" fontSize={11} tickLine={false} />
+                           <CartesianGrid strokeDasharray="3 3" stroke="var(--theme-border)" vertical={false} opacity={0.6} />
+                           <XAxis dataKey="week" stroke="var(--theme-text-secondary)" fontSize={11} tickLine={false} />
+                           <YAxis yAxisId="left" stroke="var(--theme-text-secondary)" fontSize={11} tickLine={false} />
+                           <YAxis yAxisId="right" orientation="right" stroke="var(--theme-text-secondary)" fontSize={11} tickLine={false} />
                            <Tooltip
                               contentStyle={{
-                                 backgroundColor: '#FAF8F5',
-                                 border: '1px solid #E2DCCE',
-                                 borderRadius: '16px',
+                                 backgroundColor: 'var(--theme-bg-card)',
+                                 border: '1px solid var(--theme-border)',
+                                 borderRadius: '14px',
                                  fontSize: '12px',
-                                 fontWeight: 'bold',
-                                 color: '#1E3F27'
+                                 fontWeight: 500,
+                                 color: 'var(--theme-text-primary)',
+                                 boxShadow: '0 4px 20px rgba(0,0,0,0.12)'
                               }}
                            />
-                           <Area yAxisId="left" type="monotone" dataKey="revenue" stroke="#2C5E3B" strokeWidth={2.5} fillOpacity={0.08} fill="#2C5E3B" name="Cumulative Revenue" />
-                           <Line yAxisId="right" type="monotone" dataKey="price" stroke="#D97706" strokeWidth={2} dot={{ r: 3, fill: '#D97706' }} name="Price Point" />
-                           <Line yAxisId="right" type="monotone" dataKey="stock" stroke="#DC2626" strokeDasharray="4 4" strokeWidth={2} dot={{ r: 3, fill: '#DC2626' }} name="Stock Level" />
+                           <Area yAxisId="left" type="monotone" dataKey="revenue" stroke="var(--theme-accent)" strokeWidth={2.5} fillOpacity={0.08} fill="var(--theme-accent)" name="Cumulative Revenue" />
+                           <Line yAxisId="right" type="monotone" dataKey="price" stroke="#F59E0B" strokeWidth={2} dot={{ r: 3, fill: '#F59E0B' }} name="Price Point" />
+                           <Line yAxisId="right" type="monotone" dataKey="stock" stroke="#EF4444" strokeDasharray="4 4" strokeWidth={2} dot={{ r: 3, fill: '#EF4444' }} name="Stock Level" />
                         </AreaChart>
                      </ResponsiveContainer>
                   </div>
                ) : (
-                  <div className="h-[280px] flex flex-col items-center justify-center text-stone-400 border-2 border-dashed border-[#E2DCCE] dark:border-emerald-950/20 rounded-2xl">
-                     <Package size={32} className="text-stone-300 dark:text-stone-600 mb-2" />
-                     <p className="text-xs font-bold text-stone-500">Select a product on the left to simulate markdown glide path</p>
+                  <div className="h-[280px] flex flex-col items-center justify-center text-[var(--theme-text-secondary)] border border-dashed border-[var(--theme-border)] rounded-2xl p-6">
+                     <Package size={32} className="text-[var(--theme-text-tertiary)] mb-2" />
+                     <p className="text-xs font-medium text-[var(--theme-text-secondary)]">Select a product on the left to simulate markdown glide path</p>
                   </div>
                )}
             </div>
 
             {/* Bottom Summary KPI Cards */}
             {selectedMarkdownProduct && (
-               <div className="grid grid-cols-3 gap-3 pt-4 border-t border-[#E2DCCE]/60 dark:border-white/5">
-                  <div className="p-3 bg-[#FAF8F5] dark:bg-black/30 rounded-2xl border border-[#E2DCCE] dark:border-white/10">
-                     <span className="text-[10px] text-stone-500 font-bold uppercase tracking-wider block">Est. Clearance Rev</span>
-                     <span className="text-xs font-black font-mono text-[#2C5E3B] dark:text-[#A9CBA2] mt-0.5 block">
+               <div className="grid grid-cols-3 gap-3 pt-4 border-t border-[var(--theme-border)] mt-4">
+                  <div className="p-3.5 bg-[var(--theme-bg-subtle)] rounded-2xl border border-[var(--theme-border)]">
+                     <span className="text-[10px] text-[var(--theme-text-secondary)] font-semibold uppercase tracking-wider block">Est. Clearance Rev</span>
+                     <span className="text-xs font-bold font-mono tabular-nums text-[var(--theme-text-primary)] mt-0.5 block">
                         {currencySymbol} {formatCompactNumber(projectedTotalRevenue)}
                      </span>
                   </div>
-                  <div className="p-3 bg-[#FAF8F5] dark:bg-black/30 rounded-2xl border border-[#E2DCCE] dark:border-white/10">
-                     <span className="text-[10px] text-stone-500 font-bold uppercase tracking-wider block">Retained Margin</span>
-                     <span className="text-xs font-black font-mono text-amber-700 dark:text-amber-400 mt-0.5 block">
+                  <div className="p-3.5 bg-[var(--theme-bg-subtle)] rounded-2xl border border-[var(--theme-border)]">
+                     <span className="text-[10px] text-[var(--theme-text-secondary)] font-semibold uppercase tracking-wider block">Retained Margin</span>
+                     <span className="text-xs font-bold font-mono tabular-nums text-amber-600 dark:text-amber-400 mt-0.5 block">
                         {projectedMargin.toFixed(1)}%
                      </span>
                   </div>
-                  <div className="p-3 bg-[#FAF8F5] dark:bg-black/30 rounded-2xl border border-[#E2DCCE] dark:border-white/10">
-                     <span className="text-[10px] text-stone-500 font-bold uppercase tracking-wider block">Target Depletion</span>
-                     <span className="text-xs font-black text-emerald-700 dark:text-emerald-400 mt-0.5 block flex items-center gap-1">
-                        <CheckCircle2 size={12} /> 100% Exit
+                  <div className="p-3.5 bg-[var(--theme-bg-subtle)] rounded-2xl border border-[var(--theme-border)]">
+                     <span className="text-[10px] text-[var(--theme-text-secondary)] font-semibold uppercase tracking-wider block">Target Depletion</span>
+                     <span className="text-xs font-bold font-mono tabular-nums text-emerald-600 dark:text-emerald-400 mt-0.5 block flex items-center gap-1">
+                        <CheckCircle2 size={13} /> 100% Exit
                      </span>
                   </div>
                </div>

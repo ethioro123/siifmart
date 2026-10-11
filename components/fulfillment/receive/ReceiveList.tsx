@@ -240,7 +240,7 @@ export const ReceiveList: React.FC<ReceiveListProps> = ({
                                                             progress={expectedSellable > 0 ? Math.min(100, (receivedQty / expectedSellable) * 100) : 0}
                                                             containerClassName="h-1.5 bg-[var(--theme-bg-subtle)] rounded-full overflow-hidden"
                                                             fillClassName={`h-full transition-all duration-500 rounded-full ${
-                                                                isComplete ? 'bg-emerald-500' : 'bg-[#0071E3] dark:bg-[#2997FF]'
+                                                                isComplete ? 'bg-emerald-500' : 'bg-[var(--theme-accent)]'
                                                             }`}
                                                         />
                                                     </div>
@@ -302,7 +302,7 @@ export const ReceiveList: React.FC<ReceiveListProps> = ({
                                                                 setIsSplitReceiving(true);
                                                             }}
                                                             disabled={isSubmitting}
-                                                            className="w-full h-11 bg-[#0071E3] dark:bg-[#2997FF] hover:opacity-90 text-white text-xs font-semibold rounded-xl flex items-center justify-center gap-2 shadow-[var(--shadow-sm)] active:scale-[0.98] transition-all cursor-pointer touch-manipulation disabled:opacity-50 disabled:cursor-not-allowed"
+                                                            className="w-full h-11 bg-[var(--theme-accent)] hover:opacity-90 text-white text-xs font-semibold rounded-xl flex items-center justify-center gap-2 shadow-[var(--shadow-sm)] active:scale-[0.98] transition-all cursor-pointer touch-manipulation disabled:opacity-50 disabled:cursor-not-allowed"
                                                         >
                                                             {isSubmitting ? (
                                                                 <Loader2 size={16} className="animate-spin" />

@@ -1,5 +1,5 @@
 import React from 'react';
-import { AlertOctagon, X } from 'lucide-react';
+import { AlertOctagon, ArrowRight, AlertTriangle, Plus, X } from 'lucide-react';
 import { Product, Site, User } from '../../../../types';
 import { ProductSelector } from '../ProductSelector';
 import { getSellUnit } from '../../../../utils/units';
@@ -32,12 +32,12 @@ export const WaveDistributionAllocations: React.FC<WaveDistributionAllocationsPr
     setWaveProducts,
 }) => {
     return (
-        <div className="space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-300">
-            <div className="bg-[#2C5E3B]/10 border border-[#2C5E3B]/20 rounded-xl p-4 flex items-start gap-3">
-                <AlertOctagon className="text-[#A9CBA2] shrink-0" size={20} />
+        <div className="space-y-4 animate-in fade-in duration-200">
+            <div className="bg-primary/10 border border-primary/20 rounded-2xl p-4 flex items-start gap-3">
+                <AlertOctagon className="text-primary shrink-0 mt-0.5" size={20} />
                 <div>
-                    <h4 className="font-bold text-[#A9CBA2] text-sm">Wave Distribution Mode</h4>
-                    <p className="text-xs text-[#A9CBA2]/80 mt-1">Add multiple products to build a distribution wave. Each product can have unique store allocations.</p>
+                    <h4 className="font-bold text-primary text-sm">Wave Distribution Mode</h4>
+                    <p className="text-xs text-[var(--theme-text-secondary)] mt-0.5">Add multiple products to build a distribution wave. Each product can have unique store allocations.</p>
                 </div>
             </div>
 
@@ -69,20 +69,21 @@ export const WaveDistributionAllocations: React.FC<WaveDistributionAllocationsPr
             ) : (
                 <button
                     onClick={() => setIsSearchingProduct(true)}
-                    className="w-full py-3 border border-dashed border-white/20 rounded-xl hover:bg-white/5 hover:border-white/40 text-gray-400 hover:text-white transition-all text-sm font-bold"
+                    className="w-full min-h-[44px] py-3 border border-dashed border-[var(--theme-border)] rounded-2xl hover:bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] transition-all text-xs font-semibold uppercase tracking-wider flex items-center justify-center gap-2 touch-manipulation"
                 >
-                    + Add Product to Wave
+                    <Plus size={16} />
+                    Add Product to Wave
                 </button>
             )}
 
-            <div className="space-y-4">
+            <div className="space-y-3.5">
                 {waveProducts.map((wp, idx) => {
                     const prod = allProducts.find(p => p.id === wp.productId);
                     return (
-                        <div key={idx} className="bg-black/20 border border-white/10 rounded-xl overflow-hidden">
-                            <div className="p-3 bg-white/5 flex justify-between items-center">
+                        <div key={idx} className="bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-2xl overflow-hidden shadow-xs">
+                            <div className="p-3.5 bg-[var(--theme-bg-card)] border-b border-[var(--theme-border)] flex justify-between items-center">
                                 <div className="flex items-center gap-3">
-                                    <div className="font-bold text-white text-sm">{prod?.name}</div>
+                                    <div className="font-bold text-[var(--theme-text-primary)] text-sm">{prod?.name}</div>
                                     {(() => {
                                         const sourceStockItem = allProducts.find(p => p.sku === prod?.sku && p.siteId === bulkDistributionSourceSite);
                                         const rawStock = sourceStockItem?.stock || 0;
@@ -95,32 +96,40 @@ export const WaveDistributionAllocations: React.FC<WaveDistributionAllocationsPr
                                         const unitLabel = unitDef.code !== 'UNIT' ? ` ${unitDef.shortLabel}` : '';
                                         const isWarning = displayRemaining < 0;
                                         return (
-                                            <span className={`text-[10px] font-bold px-2 py-0.5 rounded flex items-center gap-1 ${isWarning ? 'bg-red-500/10 text-red-400' : 'bg-green-500/10 text-green-400'}`}>
-                                                Stock: {displayStock.toLocaleString()}{unitLabel} ➔ Rem: {displayRemaining.toLocaleString()}{unitLabel}
+                                            <span className={`text-[11px] font-mono font-semibold px-2 py-0.5 rounded-lg flex items-center gap-1 tabular-nums ${isWarning ? 'bg-red-500/10 text-red-500 border border-red-500/20' : 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20'}`}>
+                                                Stock: {displayStock.toLocaleString()}{unitLabel} <ArrowRight size={10} /> Rem: {displayRemaining.toLocaleString()}{unitLabel}
                                             </span>
                                         );
                                     })()}
                                 </div>
-                                <button onClick={() => {
-                                    const newWp = [...waveProducts];
-                                    newWp.splice(idx, 1);
-                                    setWaveProducts(newWp);
-                                }} className="text-red-400 hover:text-red-300" aria-label={`Remove ${prod?.name} from wave`}><X size={16} /></button>
+                                <button
+                                    onClick={() => {
+                                        const newWp = [...waveProducts];
+                                        newWp.splice(idx, 1);
+                                        setWaveProducts(newWp);
+                                    }}
+                                    className="min-h-[44px] min-w-[44px] flex items-center justify-center text-[var(--theme-text-secondary)] hover:text-red-500 rounded-xl transition-colors touch-manipulation"
+                                    aria-label={`Remove ${prod?.name} from wave`}
+                                >
+                                    <X size={16} />
+                                </button>
                             </div>
-                            <div className="p-3 grid grid-cols-2 sm:grid-cols-3 gap-2">
+                            <div className="p-3.5 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2.5">
                                 {wp.allocations.length === 0 ? (
-                                    <div className="col-span-full p-4 text-center text-red-400 font-bold text-[10px] uppercase tracking-wider">
-                                        ⚠️ No stores have this warehouse configured as a replenishment source.
+                                    <div className="col-span-full p-4 text-center text-red-500 font-semibold text-xs tracking-wider flex items-center justify-center gap-2">
+                                        <AlertTriangle size={16} />
+                                        No stores have this warehouse configured as a replenishment source.
                                     </div>
                                 ) : (
                                     wp.allocations.map(alloc => {
                                         const site = sites.find(s => s.id === alloc.storeId);
                                         return (
-                                            <div key={alloc.storeId} className="flex items-center justify-between text-xs bg-black/40 p-2 rounded">
-                                                <span className="text-gray-400 truncate max-w-[80px]">{site?.name}</span>
+                                            <div key={alloc.storeId} className="flex items-center justify-between text-xs bg-[var(--theme-bg-card)] p-2.5 rounded-xl border border-[var(--theme-border)]">
+                                                <span className="text-[var(--theme-text-secondary)] truncate max-w-[90px] font-medium">{site?.name}</span>
                                                 <input
                                                     type="number"
-                                                    className="w-12 bg-transparent border-b border-white/20 text-right text-white focus:outline-none focus:border-blue-500"
+                                                    min="0"
+                                                    className="w-16 min-h-[36px] bg-transparent border-b border-[var(--theme-border)] text-right font-mono font-bold text-sm text-[var(--theme-text-primary)] focus:outline-none focus:border-primary touch-manipulation tabular-nums"
                                                     value={alloc.quantity}
                                                     onChange={(e) => {
                                                         const newWp = [...waveProducts];

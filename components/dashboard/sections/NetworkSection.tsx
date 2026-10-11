@@ -24,18 +24,18 @@ export const NetworkSection = ({
         <DashboardSection title="Network & Resource Management" icon={MapIcon} className="col-span-1 md:col-span-4">
             <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
                 {/* Site Matrix */}
-                <div className="lg:col-span-2 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-3xl p-6 overflow-hidden flex flex-col relative h-[400px] shadow-sm">
+                <div className="lg:col-span-2 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-6 overflow-hidden flex flex-col relative h-[400px] shadow-sm">
                     <WidgetErrorBoundary title="Network Performance">
                         <h3 className="font-bold text-[var(--theme-text-primary)] mb-6 flex items-center gap-2">
-                            <MapIcon className="text-[var(--theme-text-primary)]" size={20} />
+                            <MapIcon className="text-[var(--theme-accent)]" size={20} />
                             Network Performance
                         </h3>
                         <div className="overflow-y-auto custom-scrollbar pr-2">
                             <div className="space-y-3">
                                 {sitePerformance.map((site) => (
-                                    <div key={site.id} className="flex items-center justify-between p-4 bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card-hover)] rounded-2xl transition-all duration-200 border border-[var(--theme-border)] group hover:border-[var(--theme-border-focus)] cursor-pointer">
+                                    <div key={site.id} className="flex items-center justify-between p-4 bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card-hover)] rounded-xl transition-all duration-200 border border-[var(--theme-border)] group hover:border-[var(--theme-border-focus)] active:scale-[0.99] cursor-pointer">
                                         <div className="flex items-center gap-4">
-                                            <div className="p-2 rounded-xl bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)] border border-[var(--theme-border)]">
+                                            <div className="p-2 rounded-lg bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] border border-[var(--theme-accent)]/20">
                                                 <Package size={16} />
                                             </div>
                                             <div>
@@ -44,7 +44,7 @@ export const NetworkSection = ({
                                             </div>
                                         </div>
                                         <div className="text-right">
-                                            <p className="font-mono font-bold text-[var(--theme-text-primary)] text-sm">{formatCompactNumber(site.revenue, { currency: currencySymbol })}</p>
+                                            <p className="font-mono font-bold text-[var(--theme-text-primary)] text-sm tabular-nums">{formatCompactNumber(site.revenue, { currency: currencySymbol })}</p>
                                         </div>
                                     </div>
                                 ))}

@@ -249,7 +249,7 @@ export const PutawayTab: React.FC<PutawayTabProps> = ({
                 if (sortedFreq.length > 0) {
                     const [zone, aisle] = sortedFreq[0][0].split('-');
                     return {
-                        location: `ZONE ${zone} • AISLE ${aisle}`,
+                        location: `ZONE ${zone} / AISLE ${aisle}`,
                         type: 'SUGGESTED' as const,
                         label: 'Local Category Hub'
                     };

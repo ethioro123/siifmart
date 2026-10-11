@@ -65,7 +65,8 @@ export const useDataQueries = ({ siteId, enabled, onProgress }: UseDataQueriesPr
         queries: [
             {
                 queryKey: DATA_KEYS.products(siteId),
-                queryFn: trackProgress('products', () => productsService.getAll(siteId, 500).then(res => res.data)),
+                // RULE 10: Shelf limit of 25 items on initial load; subsequent items loaded via pagination/search
+                queryFn: trackProgress('products', () => productsService.getAll(siteId, 25).then(res => res.data)),
                 enabled: enabled && !!siteId,
                 staleTime: 1000 * 60 * 10, // 10 mins
             },
@@ -95,13 +96,13 @@ export const useDataQueries = ({ siteId, enabled, onProgress }: UseDataQueriesPr
             },
             {
                 queryKey: DATA_KEYS.customers(),
-                queryFn: trackProgress('customers', () => customersService.getAll(50)),
+                queryFn: trackProgress('customers', () => customersService.getAll(25)),
                 enabled: enabled,
                 staleTime: 1000 * 60 * 30, // 30 mins
             },
             {
                 queryKey: DATA_KEYS.suppliers(),
-                queryFn: trackProgress('suppliers', () => suppliersService.getAll(50).then(res => res.data)),
+                queryFn: trackProgress('suppliers', () => suppliersService.getAll(25).then(res => res.data)),
                 enabled: enabled,
                 staleTime: 1000 * 60 * 60, // 60 mins
             }

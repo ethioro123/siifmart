@@ -1,5 +1,5 @@
 import React from 'react';
-import { WMSJob, Product, Site, User } from '../../../types';
+import { Product, Site, User } from '../../../types';
 import { useData } from '../../../contexts/DataContext';
 
 // --- Hook and Sub-Components ---
@@ -78,9 +78,9 @@ export const SmartReplenishModal: React.FC<SmartReplenishModalProps> = ({
     const stagedCount = state.dbDraftJobs.length;
 
     return (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-stone-950/80 backdrop-blur-md animate-in fade-in duration-200">
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/80 animate-in fade-in duration-200">
             <div className="w-full h-full md:p-6 lg:p-8 flex flex-col max-w-[1700px] max-h-[1000px]">
-                <div className="flex-1 bg-stone-50 dark:bg-[#151D18] md:rounded-3xl border border-[#E2DCCE] dark:border-white/10 shadow-2xl flex flex-col overflow-hidden relative">
+                <div className="flex-1 bg-[var(--theme-bg-card)] md:rounded-3xl border border-[var(--theme-border)] shadow-2xl flex flex-col overflow-hidden relative">
                     
                     {/* Header bar */}
                     <SmartReplenishHeader
@@ -142,4 +142,3 @@ export const SmartReplenishModal: React.FC<SmartReplenishModalProps> = ({
         </div>
     );
 };
-

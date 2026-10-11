@@ -12,9 +12,15 @@ import { getEffectiveCountry, getCountryProfile } from '../utils/localization';
 // ============================================================================
 
 export async function getAll(siteId?: string, limit: number = 25, offset: number = 0, filters?: any) {
+    // RULE 10: Lazy loading — list views default to PO header columns only.
+    // Line items and product joins are loaded on-demand via getById().
+    const selectFields = filters?.includeItems
+        ? '*, po_items(*, products(sku))'
+        : 'id, po_number, site_id, supplier_id, supplier_name, status, total_amount, items_count, order_date, expected_delivery, shipping_cost, tax_amount, discount, payment_terms, requested_by, created_by, approved_by, approver_role, approved_at, notes, currency, country_code, created_at, updated_at';
+
     let query = supabase
         .from('purchase_orders')
-        .select('*, po_items(*, products(sku))', { count: 'exact' });
+        .select(selectFields, { count: 'exact' });
 
     if (filters?.siteIds && Array.isArray(filters.siteIds)) {
         if (filters.siteIds.length === 0) return { data: [], count: 0 };

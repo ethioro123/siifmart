@@ -1,7 +1,8 @@
 import React, { createContext, useContext } from 'react';
 import type { Product, Promotion, PricingRule } from '../../types';
+import type { ProductSalesMetrics } from '../../utils/merchandisingAnalytics';
 
-export type MerchandisingTab = 'pricing' | 'rules' | 'promos' | 'planogram' | 'markdown' | 'forecast';
+export type MerchandisingTab = 'pricing' | 'rules' | 'promos' | 'planogram' | 'markdown' | 'forecast' | 'shelf-tags';
 
 export interface MerchandisingFilters {
    categories: string[];
@@ -20,6 +21,7 @@ export interface MerchandisingContextType {
    promotions: Promotion[];
    sites: any[];
    allOrders: any[];
+   salesMetricsIndex: Map<string, ProductSalesMetrics>;
    refreshData: () => Promise<void>;
    addNotification: (type: any, message: string) => void;
    updateProduct: (p: Product) => Promise<any>;
@@ -32,7 +34,6 @@ export interface MerchandisingContextType {
    activeTab: MerchandisingTab;
    setActiveTab: (tab: MerchandisingTab) => void;
    pricingRules: PricingRule[];
-   setPricingRules: React.Dispatch<React.SetStateAction<PricingRule[]>>;
    searchTerm: string;
    setSearchTerm: (term: string) => void;
 

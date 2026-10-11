@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import {
     Building, Store, Package, AlertTriangle, Search
 } from 'lucide-react';
@@ -9,6 +9,7 @@ import { formatCompactNumber } from '../utils/formatting';
 import { NetworkKPIDeck } from '../components/network/NetworkKPIDeck';
 import { NetworkSiteCard } from '../components/network/NetworkSiteCard';
 import { ProductNetworkStockModal } from '../components/network/ProductNetworkStockModal';
+import { productsService } from '../services/products.service';
 
 export default function NetworkInventory() {
     const { sites, allProducts } = useData();
@@ -17,6 +18,24 @@ export default function NetworkInventory() {
     const [expandedSiteId, setExpandedSiteId] = useState<string | null>(null);
     const [siteProductPages, setSiteProductPages] = useState<Record<string, number>>({});
     const [selectedProductForModal, setSelectedProductForModal] = useState<Product | null>(null);
+    const [serverSearchResults, setServerSearchResults] = useState<Product[]>([]);
+
+    // RULE 10: On-demand cross-network search capped at 25 records
+    useEffect(() => {
+        if (!searchTerm || searchTerm.trim().length < 2) {
+            setServerSearchResults([]);
+            return;
+        }
+        const timer = setTimeout(async () => {
+            try {
+                const res = await productsService.getAll(undefined, 25, 0, { search: searchTerm.trim() });
+                setServerSearchResults(res.data || []);
+            } catch {
+                // Fall back to local cache
+            }
+        }, 350);
+        return () => clearTimeout(timer);
+    }, [searchTerm]);
 
     const getPageForSite = (siteId: string) => siteProductPages[siteId] || 1;
     const setPageForSite = (siteId: string, page: number) => {
@@ -111,10 +130,10 @@ export default function NetworkInventory() {
     };
 
     const getStockStatusColor = (stock: number, minStock: number = 10) => {
-        if (stock <= 0) return 'text-red-700 bg-red-50 dark:bg-red-950/30 dark:text-red-400 border-red-200 dark:border-red-900/30';
-        if (stock <= minStock) return 'text-amber-800 bg-amber-50 dark:bg-amber-950/30 dark:text-amber-300 border-amber-200 dark:border-amber-900/30';
-        if (stock < 50) return 'text-blue-700 bg-blue-50 dark:bg-blue-950/30 dark:text-blue-300 border-blue-200 dark:border-blue-900/30';
-        return 'text-[#2C5E3B] bg-emerald-50 dark:bg-[#2C5E3B]/20 dark:text-[#A9CBA2] border-emerald-200 dark:border-emerald-950/30';
+        if (stock <= 0) return 'text-rose-600 dark:text-rose-400 bg-rose-500/10 border-rose-500/20';
+        if (stock <= minStock) return 'text-amber-600 dark:text-amber-400 bg-amber-500/10 border-amber-500/20';
+        if (stock < 50) return 'text-blue-600 dark:text-blue-400 bg-blue-500/10 border-blue-500/20';
+        return 'text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 border-emerald-500/20';
     };
 
     return (
@@ -122,8 +141,8 @@ export default function NetworkInventory() {
             {/* Top Page Header */}
             <div className="flex flex-wrap justify-between items-start gap-4">
                 <div>
-                    <h1 className="text-xl sm:text-2xl font-black text-[#1E3F27] dark:text-white tracking-tight">Network Inventory</h1>
-                    <p className="text-xs text-stone-500 dark:text-stone-400 mt-0.5 font-medium">
+                    <h1 className="text-xl sm:text-2xl font-bold text-[var(--theme-text-primary)] tracking-tight">Network Inventory</h1>
+                    <p className="text-xs text-[var(--theme-text-secondary)] mt-0.5 font-normal">
                         Real-time stock visibility and valuation across regional distribution centers and stores
                     </p>
                 </div>
@@ -141,14 +160,14 @@ export default function NetworkInventory() {
             />
 
             {/* Search & Location Filter Bar */}
-            <div className="bg-white/85 dark:bg-[#18201B]/60 border border-[#E2DCCE] dark:border-emerald-950/20 rounded-3xl p-4 sm:p-5 shadow-sm space-y-3">
+            <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-4 sm:p-5 shadow-sm space-y-3">
                 <div className="flex flex-wrap items-center gap-3 justify-between">
                     <div className="relative flex-1 min-w-[260px] max-w-lg">
-                        <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-stone-400" size={16} />
+                        <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--theme-text-secondary)] opacity-60" size={16} />
                         <input
                             type="text"
                             placeholder="Search any SKU, product name, store, or warehouse..."
-                            className="w-full bg-[#FAF8F5] dark:bg-black/30 border border-[#E2DCCE] dark:border-white/10 rounded-2xl pl-10 pr-4 py-2.5 text-xs text-[#1E3F27] dark:text-white font-bold outline-none focus:border-[#2C5E3B]"
+                            className="w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl pl-10 pr-4 py-2.5 text-xs text-[var(--theme-text-primary)] placeholder-[var(--theme-text-secondary)] font-medium outline-none focus:border-[var(--theme-accent)] transition-colors"
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
                         />
@@ -158,10 +177,10 @@ export default function NetworkInventory() {
                         <button
                             type="button"
                             onClick={() => setTypeFilter('ALL')}
-                            className={`px-3.5 py-2 rounded-2xl text-xs font-bold transition-all cursor-pointer ${
+                            className={`px-3.5 py-2 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
                                 typeFilter === 'ALL'
-                                    ? 'bg-[#2C5E3B] text-white shadow-sm'
-                                    : 'bg-[#FAF8F5] dark:bg-black/30 text-stone-600 dark:text-stone-300 border border-[#E2DCCE] dark:border-white/10 hover:border-[#2C5E3B]'
+                                    ? 'bg-[var(--theme-accent)] text-white shadow-xs'
+                                    : 'bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] border border-[var(--theme-border)]'
                             }`}
                         >
                             All ({siteInventory.length})
@@ -169,10 +188,10 @@ export default function NetworkInventory() {
                         <button
                             type="button"
                             onClick={() => setTypeFilter('WAREHOUSE')}
-                            className={`px-3.5 py-2 rounded-2xl text-xs font-bold transition-all cursor-pointer ${
+                            className={`px-3.5 py-2 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
                                 typeFilter === 'WAREHOUSE'
-                                    ? 'bg-[#2C5E3B] text-white shadow-sm'
-                                    : 'bg-[#FAF8F5] dark:bg-black/30 text-stone-600 dark:text-stone-300 border border-[#E2DCCE] dark:border-white/10 hover:border-[#2C5E3B]'
+                                    ? 'bg-[var(--theme-accent)] text-white shadow-xs'
+                                    : 'bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] border border-[var(--theme-border)]'
                             }`}
                         >
                             Warehouses ({totalWarehouses})
@@ -180,10 +199,10 @@ export default function NetworkInventory() {
                         <button
                             type="button"
                             onClick={() => setTypeFilter('STORE')}
-                            className={`px-3.5 py-2 rounded-2xl text-xs font-bold transition-all cursor-pointer ${
+                            className={`px-3.5 py-2 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
                                 typeFilter === 'STORE'
-                                    ? 'bg-[#2C5E3B] text-white shadow-sm'
-                                    : 'bg-[#FAF8F5] dark:bg-black/30 text-stone-600 dark:text-stone-300 border border-[#E2DCCE] dark:border-white/10 hover:border-[#2C5E3B]'
+                                    ? 'bg-[var(--theme-accent)] text-white shadow-xs'
+                                    : 'bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] border border-[var(--theme-border)]'
                             }`}
                         >
                             Stores ({totalStores})
@@ -191,10 +210,10 @@ export default function NetworkInventory() {
                         <button
                             type="button"
                             onClick={() => setTypeFilter(prev => prev === 'LOW_STOCK' ? 'ALL' : 'LOW_STOCK')}
-                            className={`px-3.5 py-2 rounded-2xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
+                            className={`px-3.5 py-2 rounded-xl text-xs font-semibold transition-all cursor-pointer flex items-center gap-1.5 ${
                                 typeFilter === 'LOW_STOCK'
-                                    ? 'bg-amber-600 text-white shadow-sm'
-                                    : 'bg-amber-50/60 dark:bg-amber-950/20 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-900/30 hover:border-amber-500'
+                                    ? 'bg-amber-600 text-white shadow-xs'
+                                    : 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 hover:bg-amber-500/15'
                             }`}
                         >
                             <AlertTriangle size={13} />
@@ -205,16 +224,17 @@ export default function NetworkInventory() {
 
                 {/* Instant Cross-Network SKU Lookup View */}
                 {searchTerm && searchTerm.length >= 2 && (
-                    <div className="mt-4 bg-[#FAF8F5] dark:bg-black/30 border border-emerald-200 dark:border-emerald-950/30 rounded-2xl p-4 sm:p-5 animate-in fade-in">
+                    <div className="mt-4 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-2xl p-4 sm:p-5 animate-in fade-in">
                         <div className="flex items-center justify-between mb-3">
-                            <h4 className="text-xs font-black text-[#2C5E3B] dark:text-[#A9CBA2] uppercase tracking-wider flex items-center gap-2">
-                                <Package size={15} />
+                            <h4 className="text-xs font-bold text-[var(--theme-text-primary)] uppercase tracking-wider flex items-center gap-2">
+                                <Package size={15} className="text-blue-600 dark:text-blue-400" />
                                 Multi-Site Stock Distribution for "{searchTerm}"
                             </h4>
-                            <span className="text-[10px] text-stone-400 font-medium">Click any product to inspect full network breakdown</span>
+                            <span className="text-[10px] text-[var(--theme-text-secondary)] font-normal">Click any product to inspect full network breakdown</span>
                         </div>
                         {(() => {
-                            const matchingProducts = allProducts.filter(p =>
+                            const searchPool = serverSearchResults.length > 0 ? serverSearchResults : allProducts;
+                            const matchingProducts = searchPool.filter(p =>
                                 (p.status || (p as any).status) !== 'archived' && (
                                     p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                                     (p.sku && p.sku.toLowerCase().includes(searchTerm.toLowerCase()))
@@ -251,7 +271,7 @@ export default function NetworkInventory() {
                             const productList = Object.values(productGroups);
 
                             if (productList.length === 0) {
-                                return <p className="text-xs text-stone-400 font-medium">No active SKUs found matching "{searchTerm}"</p>;
+                                return <p className="text-xs text-[var(--theme-text-secondary)] font-medium">No active SKUs found matching "{searchTerm}"</p>;
                             }
 
                             return (
@@ -260,41 +280,41 @@ export default function NetworkInventory() {
                                         <div
                                             key={idx}
                                             onClick={() => setSelectedProductForModal(product.productRef)}
-                                            className="bg-white dark:bg-[#18201B] border border-[#E2DCCE] dark:border-white/10 hover:border-[#2C5E3B] rounded-2xl p-4 transition-all cursor-pointer group"
+                                            className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] hover:border-[var(--theme-accent)] rounded-xl p-4 transition-all cursor-pointer group"
                                         >
                                             <div className="flex items-start justify-between mb-2.5">
                                                 <div>
                                                     <div className="flex items-center gap-2">
-                                                        <h5 className="font-bold text-xs text-[#1E3F27] dark:text-white group-hover:text-[#2C5E3B] dark:group-hover:text-[#A9CBA2] transition-colors">{product.name}</h5>
-                                                        <span className="text-[9px] bg-emerald-50 dark:bg-[#2C5E3B]/20 text-[#2C5E3B] dark:text-[#A9CBA2] px-1.5 py-0.5 rounded font-black font-mono">
+                                                        <h5 className="font-bold text-xs text-[var(--theme-text-primary)] group-hover:text-[var(--theme-accent)] transition-colors">{product.name}</h5>
+                                                        <span className="text-[9px] bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20 px-1.5 py-0.5 rounded font-semibold font-mono">
                                                             View Stock Map
                                                         </span>
                                                     </div>
-                                                    <p className="text-[10px] text-stone-400 font-mono mt-0.5">{product.sku} • {product.category} • {product.unit}</p>
+                                                    <p className="text-[10px] text-[var(--theme-text-secondary)] font-mono mt-0.5">{product.sku} • {product.category} • {product.unit}</p>
                                                 </div>
-                                                <span className="text-xs font-black font-mono text-[#2C5E3B] dark:text-[#A9CBA2]">
+                                                <span className="text-xs font-bold font-mono tabular-nums text-[var(--theme-text-primary)]">
                                                     {formatCompactNumber(product.price, { currency: CURRENCY_SYMBOL })}
                                                 </span>
                                             </div>
                                             <div className="space-y-1.5">
                                                 {product.locations.map((loc: any, locIdx: number) => (
-                                                    <div key={locIdx} className="flex items-center justify-between bg-[#FAF8F5] dark:bg-black/30 rounded-xl px-3 py-1.5 border border-[#E2DCCE]/60 dark:border-white/5">
+                                                    <div key={locIdx} className="flex items-center justify-between bg-[var(--theme-bg-subtle)] rounded-xl px-3 py-1.5 border border-[var(--theme-border)]">
                                                         <div className="flex items-center gap-2">
                                                             {loc.siteType === 'Warehouse' || loc.siteType === 'Distribution Center' ? (
-                                                                <Building size={13} className="text-blue-600 shrink-0" />
+                                                                <Building size={13} className="text-blue-600 dark:text-blue-400 shrink-0" />
                                                             ) : (
-                                                                <Store size={13} className="text-emerald-600 shrink-0" />
+                                                                <Store size={13} className="text-indigo-600 dark:text-indigo-400 shrink-0" />
                                                             )}
-                                                            <span className="text-xs text-[#1E3F27] dark:text-white font-bold truncate">{loc.site}</span>
+                                                            <span className="text-xs text-[var(--theme-text-primary)] font-semibold truncate">{loc.site}</span>
                                                         </div>
-                                                        <span className={`text-[10px] font-black px-2 py-0.5 rounded-lg border font-mono shrink-0 ${getStockStatusColor(loc.stock, loc.minStock)}`}>
-                                                            {loc.stock} units {loc.stock <= loc.minStock ? '⚠️ Low' : ''}
+                                                        <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-lg border font-mono shrink-0 ${getStockStatusColor(loc.stock, loc.minStock)}`}>
+                                                            {loc.stock} units{loc.stock <= loc.minStock ? ' (Low Stock)' : ''}
                                                         </span>
                                                     </div>
                                                 ))}
-                                                <div className="pt-2 border-t border-[#E2DCCE]/60 dark:border-white/5 flex justify-between items-center text-xs">
-                                                    <span className="text-stone-400 font-bold text-[10px] uppercase">Network Aggregate:</span>
-                                                    <span className="font-black font-mono text-[#2C5E3B] dark:text-[#A9CBA2]">
+                                                <div className="pt-2 border-t border-[var(--theme-border)] flex justify-between items-center text-xs">
+                                                    <span className="text-[var(--theme-text-secondary)] font-semibold text-[10px] uppercase">Network Aggregate:</span>
+                                                    <span className="font-bold font-mono text-[var(--theme-accent)] tabular-nums">
                                                         {product.locations.reduce((sum: number, loc: any) => sum + loc.stock, 0)} total units
                                                     </span>
                                                 </div>
@@ -328,10 +348,10 @@ export default function NetworkInventory() {
             </div>
 
             {filteredInventory.length === 0 && (
-                <div className="bg-white/85 dark:bg-[#18201B]/60 border border-[#E2DCCE] dark:border-emerald-950/20 rounded-3xl p-12 text-center shadow-sm">
-                    <Package className="w-12 h-12 text-stone-300 dark:text-stone-600 mx-auto mb-3" />
-                    <h3 className="text-sm font-bold text-[#1E3F27] dark:text-white mb-1">No Locations Found</h3>
-                    <p className="text-xs text-stone-500 dark:text-stone-400">Try adjusting your search criteria or type filter</p>
+                <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-12 text-center shadow-sm">
+                    <Package className="w-12 h-12 text-[var(--theme-text-secondary)] opacity-40 mx-auto mb-3" />
+                    <h3 className="text-sm font-bold text-[var(--theme-text-primary)] mb-1">No Locations Found</h3>
+                    <p className="text-xs text-[var(--theme-text-secondary)]">Try adjusting your search criteria or type filter</p>
                 </div>
             )}
 

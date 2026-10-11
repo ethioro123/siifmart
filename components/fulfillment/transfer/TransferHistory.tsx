@@ -1,10 +1,9 @@
 import React, { useState, useMemo } from 'react';
-import { History as HistoryIcon, Search, Package, Box, Calendar, ChevronRight } from 'lucide-react';
+import { History as HistoryIcon, Search, Package, Box, Calendar, ChevronRight, User } from 'lucide-react';
 import Pagination from '../../shared/Pagination';
 import { WMSJob, Site, TransferRecord } from '../../../types';
 import { formatJobId } from '../../../utils/jobIdFormatter';
 import { formatDateTime } from '../../../utils/formatting';
-
 
 interface TransferHistoryProps {
     transfers: TransferRecord[];
@@ -13,6 +12,7 @@ interface TransferHistoryProps {
     setSelectedJob: (job: any) => void;
     setIsDetailsOpen: (isOpen: boolean) => void;
     t: (key: string) => string;
+    employees?: any[];
 }
 
 const HISTORY_ITEMS_PER_PAGE = 12;
@@ -23,17 +23,31 @@ export const TransferHistory: React.FC<TransferHistoryProps> = ({
     sites,
     setSelectedJob,
     setIsDetailsOpen,
-    t
+    t,
+    employees
 }) => {
     const [search, setSearch] = useState('');
     const [currentPage, setCurrentPage] = useState(1);
+
+    const getWorkerDisplay = (job: any) => {
+        const workerId = job.completedBy || job.receiverName || job.assignedTo;
+        if (!workerId) return 'Unassigned';
+        const emp = employees?.find(e =>
+            e.id === workerId ||
+            e.name === workerId ||
+            (e.name && workerId && e.name.toLowerCase() === workerId.toLowerCase()) ||
+            (e.email && workerId && e.email.toLowerCase() === workerId.toLowerCase()) ||
+            (e.code && workerId && e.code.toLowerCase() === workerId.toLowerCase())
+        );
+        if (!emp) return workerId;
+        return emp.code ? `${emp.name} (${emp.code})` : emp.name;
+    };
 
     const filteredHistory = useMemo(() => {
         // 1. Get completed transfers from wms_jobs (parent job)
         const completedJobs = jobs.filter(t => {
             if (t.type !== 'TRANSFER') return false;
 
-            // Also check effective status from child dispatch
             const childDispatch = jobs.find(d =>
                 d.type === 'DISPATCH' &&
                 (d.orderRef === t.id || d.orderRef === t.jobNumber) &&
@@ -60,8 +74,8 @@ export const TransferHistory: React.FC<TransferHistoryProps> = ({
         // 3. Merge them, avoiding duplicates
         const mergedTransfers = [...completedJobs];
         completedTransfersTable.forEach(ct => {
-            const hasDuplicate = mergedTransfers.some(mj => 
-                mj.id === ct.id || 
+            const hasDuplicate = mergedTransfers.some(mj =>
+                mj.id === ct.id ||
                 (mj.jobNumber && ct.jobNumber && mj.jobNumber === ct.jobNumber) ||
                 (mj.orderRef && ct.id && mj.orderRef === ct.id)
             );
@@ -83,12 +97,13 @@ export const TransferHistory: React.FC<TransferHistoryProps> = ({
             const noteStr = (t.notes || '').toLowerCase();
             const statusStr = (t.status || '').toLowerCase();
             const transferStatusStr = (t.transferStatus || '').toLowerCase();
+            const worker = getWorkerDisplay(t).toLowerCase();
 
             // Search product names and SKUs
             let itemsArr = t.lineItems || t.line_items || [];
             if (typeof itemsArr === 'string') { try { itemsArr = JSON.parse(itemsArr); } catch { itemsArr = []; } }
             const productsList = Array.isArray(itemsArr) ? itemsArr : [];
-            const matchesItems = productsList.some((item: any) => 
+            const matchesItems = productsList.some((item: any) =>
                 (item.name || '').toLowerCase().includes(q) ||
                 (item.productName || '').toLowerCase().includes(q) ||
                 (item.sku || '').toLowerCase().includes(q)
@@ -103,10 +118,11 @@ export const TransferHistory: React.FC<TransferHistoryProps> = ({
                 noteStr.includes(q) ||
                 statusStr.includes(q) ||
                 transferStatusStr.includes(q) ||
+                worker.includes(q) ||
                 matchesItems
             );
         });
-    }, [transfers, jobs, search, sites]);
+    }, [transfers, jobs, search, sites, employees]);
 
     const sortedHistory = useMemo(() => {
         return [...filteredHistory].sort((a: any, b: any) =>
@@ -121,145 +137,146 @@ export const TransferHistory: React.FC<TransferHistoryProps> = ({
     }, [sortedHistory, currentPage]);
 
     return (
-        <div className="border-t border-white/10 mt-10 pt-8 relative overflow-hidden group/history">
-            {/* Mesh Accent */}
-
-
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-8">
+        <div className="pt-2 space-y-4">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <div>
-                    <h4 className="text-xl font-black text-stone-900 dark:text-white flex items-center gap-3 uppercase tracking-tight">
-                        <div className="p-2 bg-[#2C5E3B]/10 rounded-xl border border-[#2C5E3B]/20 group-hover/history:bg-[#2C5E3B]/20 transition-colors">
-                            <HistoryIcon size={20} className="text-[#2C5E3B] dark:text-[#A9CBA2]" />
+                    <h4 className="text-lg font-bold text-[var(--theme-text-primary)] flex items-center gap-2.5 uppercase tracking-tight">
+                        <div className="w-9 h-9 rounded-xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] flex items-center justify-center text-[var(--theme-accent)]">
+                            <HistoryIcon size={18} />
                         </div>
-                        {t('warehouse.putaway.history')}
+                        <span>{t('warehouse.putaway.history')}</span>
                     </h4>
-                    <p className="text-stone-500 dark:text-gray-555 text-[10px] mt-1 uppercase tracking-widest font-black">{t('warehouse.completedAndFinalizedShipments')}</p>
+                    <p className="text-[11px] text-[var(--theme-text-secondary)] font-medium mt-0.5">{t('warehouse.completedAndFinalizedShipments')}</p>
                 </div>
 
-                <div className="relative w-full md:w-80 group">
-                    <div className="absolute -inset-0.5 bg-[#2C5E3B]/20 rounded-xl blur opacity-0 group-hover:opacity-100 transition duration-500"></div>
-                    <div className="relative flex items-center bg-stone-50 dark:bg-black/40 border border-[#E2DCCE] dark:border-white/10 rounded-xl focus-within:border-[#2C5E3B] transition-all shadow-xs">
-                        <Search className="absolute left-3 text-stone-400 dark:text-gray-600 group-focus-within:text-[#2C5E3B] dark:group-focus-within:text-[#A9CBA2]" size={16} />
-                        <input
-                            type="text"
-                            placeholder={`${t('warehouse.searchHistoryPlaceholder')}`}
-                            aria-label={t('warehouse.searchHistoryPlaceholder')}
-                            title={t('warehouse.searchHistoryPlaceholder')}
-                            value={search}
-                            onChange={(e) => setSearch(e.target.value)}
-                            className="w-full bg-transparent border-none rounded-xl pl-10 pr-4 py-3 text-xs text-stone-900 dark:text-white focus:outline-none placeholder:text-stone-400 dark:placeholder:text-gray-600 font-bold uppercase tracking-wider"
-                        />
-                    </div>
+                <div className="relative w-full md:w-80">
+                    <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--theme-text-secondary)]" size={16} />
+                    <input
+                        type="text"
+                        placeholder={`${t('warehouse.searchHistoryPlaceholder')}`}
+                        aria-label={t('warehouse.searchHistoryPlaceholder')}
+                        title={t('warehouse.searchHistoryPlaceholder')}
+                        value={search}
+                        onChange={(e) => setSearch(e.target.value)}
+                        className="w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] focus:border-[var(--theme-accent)] rounded-xl pl-10 pr-4 py-2.5 text-xs text-[var(--theme-text-primary)] placeholder:text-[var(--theme-text-secondary)]/50 outline-none transition-colors min-h-[44px]"
+                    />
                 </div>
             </div>
 
             {paginatedHistory.length > 0 ? (
                 <>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 pb-12">
-                        <>
-                            {paginatedHistory.map((transfer: any, index) => {
-                                const formattedId = formatJobId(transfer);
-                                const totalItems = Array.isArray(transfer.items) ? transfer.items.length : (transfer.lineItems?.length || 0);
-                                
-                                // Product names preview
-                                let itemsArr = transfer.lineItems || [];
-                                if (typeof itemsArr === 'string') { try { itemsArr = JSON.parse(itemsArr); } catch { itemsArr = []; } }
-                                const products = Array.isArray(itemsArr) ? itemsArr : [];
-                                const productNames = products.map((p: any) => p.name || p.productName || p.sku).filter(Boolean);
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3.5">
+                        {paginatedHistory.map((transfer: any) => {
+                            const formattedId = formatJobId(transfer);
+                            const totalItems = Array.isArray(transfer.items) ? transfer.items.length : (transfer.lineItems?.length || 0);
 
-                                return (
-                                    <div
-                                        key={transfer.id}
-                                        onClick={() => {
-                                            setSelectedJob(transfer);
-                                            setIsDetailsOpen(true);
-                                        }}
-                                        className="group relative bg-white/85 dark:bg-black/40 hover:bg-stone-50 dark:hover:bg-black/60 border border-[#E2DCCE] dark:border-white/5 hover:border-[#2C5E3B]/50 rounded-2xl p-5 transition-colors cursor-pointer overflow-hidden shadow-xs"
-                                    >
-                                        <div className="absolute inset-0 bg-gradient-to-br from-[#2C5E3B]/[0.02] to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                            let itemsArr = transfer.lineItems || [];
+                            if (typeof itemsArr === 'string') { try { itemsArr = JSON.parse(itemsArr); } catch { itemsArr = []; } }
+                            const products = Array.isArray(itemsArr) ? itemsArr : [];
+                            const productNames = products.map((p: any) => p.name || p.productName || p.sku).filter(Boolean);
 
-                                        <div className="relative flex justify-between items-start mb-4">
-                                            <div className="flex items-center gap-2">
-                                                <div className="p-1.5 rounded-lg bg-[#2C5E3B]/10 text-[#2C5E3B] dark:text-[#A9CBA2]">
-                                                    <Package size={14} />
-                                                </div>
-                                                <span className="text-[10px] uppercase font-black tracking-widest text-stone-500">
+                            const isCancelled = transfer.status === 'Cancelled';
+                            const isReceived = transfer.status === 'Completed' || transfer.transferStatus === 'Received';
+
+                            return (
+                                <div
+                                    key={transfer.id}
+                                    onClick={() => {
+                                        setSelectedJob(transfer);
+                                        setIsDetailsOpen(true);
+                                    }}
+                                    className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] hover:border-[var(--theme-accent)]/50 rounded-2xl p-4 transition-colors cursor-pointer shadow-sm flex flex-col justify-between gap-3"
+                                >
+                                    <div>
+                                        <div className="flex justify-between items-start mb-3 gap-2">
+                                            <div className="flex items-center gap-1.5">
+                                                <Package size={14} className="text-[var(--theme-accent)] shrink-0" />
+                                                <span className="text-[11px] uppercase font-semibold text-[var(--theme-text-secondary)]">
                                                     {t('warehouse.interSiteTransfers').split(' ')[0]}
                                                 </span>
                                             </div>
-                                            <span className={`text-[9px] px-2 py-0.5 rounded-full uppercase font-black tracking-widest border transition-all ${
-                                                transfer.status === 'Cancelled' 
-                                                ? 'bg-red-500/10 text-red-500 dark:text-red-400 border-red-500/20' 
-                                                : transfer.status === 'Completed' || transfer.transferStatus === 'Received'
-                                                ? 'bg-green-500/10 text-green-600 dark:text-green-400 border-green-500/20'
-                                                : 'bg-[#2C5E3B]/10 text-[#2C5E3B] dark:text-[#A9CBA2] border-[#2C5E3B]/20'
+                                            <span className={`text-[11px] px-2.5 py-0.5 rounded-full uppercase font-semibold border ${
+                                                isCancelled
+                                                    ? 'bg-red-500/10 text-red-500 border-red-500/20'
+                                                    : isReceived
+                                                        ? 'bg-green-500/10 text-green-600 dark:text-green-400 border-green-500/20'
+                                                        : 'bg-[var(--theme-bg-subtle)] text-[var(--theme-accent)] border-[var(--theme-border)]'
                                             }`}>
-                                                {transfer.transferStatus === 'Received' ? t('warehouse.received') : transfer.status === 'Cancelled' ? 'Cancelled' : (transfer.transferStatus || transfer.status)}
+                                                {transfer.transferStatus === 'Received' ? t('warehouse.received') : isCancelled ? 'Cancelled' : (transfer.transferStatus || transfer.status)}
                                             </span>
                                         </div>
 
-                                        <div className="relative mb-4">
-                                            <h5 className="text-stone-900 dark:text-white font-black text-sm truncate group-hover:text-[#2C5E3B] dark:group-hover:text-[#A9CBA2] transition-colors uppercase tracking-tight">
+                                        <div>
+                                            <h5 className="text-[var(--theme-text-primary)] font-semibold text-sm truncate uppercase tracking-tight">
                                                 {formattedId}
                                             </h5>
-                                            <div className="flex flex-col gap-1.5 mt-2">
-                                                <div className="flex items-center gap-1.5">
-                                                    <span className="text-[10px] font-black text-stone-400 uppercase tracking-widest">REF:</span>
-                                                    <span className="text-[10px] font-black text-stone-700 dark:text-gray-300 uppercase tracking-tight">
+                                            <div className="flex flex-col gap-1 mt-1.5">
+                                                <div className="flex items-center gap-1.5 text-[11px]">
+                                                    <span className="text-[var(--theme-text-secondary)] font-medium">REF:</span>
+                                                    <span className="font-mono tabular-nums text-[var(--theme-text-primary)] font-medium">
                                                         {formattedId}
                                                         {transfer.jobNumber && transfer.jobNumber !== formattedId && (
-                                                             <> <span className="text-[#2C5E3B]/50 dark:text-[#A9CBA2]/50 mr-1">•</span> {transfer.jobNumber}</>
+                                                            <span className="text-[var(--theme-text-secondary)]"> • {transfer.jobNumber}</span>
                                                         )}
                                                     </span>
                                                 </div>
-                                                <div className="flex items-center gap-1.5">
-                                                    <Calendar size={10} className="text-stone-400 dark:text-gray-600" />
-                                                    <span className="text-[10px] font-bold text-stone-500">
-                                                        {formatDateTime((transfer as any).date || (transfer as any).createdAt)}
-                                                    </span>
+                                                <div className="flex items-center gap-1.5 text-[11px] text-[var(--theme-text-secondary)] font-mono tabular-nums">
+                                                    <Calendar size={12} className="shrink-0" />
+                                                    <span>{formatDateTime((transfer as any).date || (transfer as any).createdAt)}</span>
+                                                </div>
+                                                {/* Completed By Attribution */}
+                                                <div className="flex items-center gap-1.5 text-[11px] text-[var(--theme-text-secondary)] font-medium">
+                                                    <User size={12} className="text-[var(--theme-accent)] shrink-0" />
+                                                    <span className="font-semibold text-[var(--theme-text-primary)]">Completed By:</span>
+                                                    <span className="truncate">{getWorkerDisplay(transfer)}</span>
                                                 </div>
                                             </div>
                                         </div>
 
-                                        {/* Preview items */}
                                         {productNames.length > 0 && (
-                                            <div className="relative mb-4">
-                                                <p className="text-[10px] text-stone-500 dark:text-gray-400 truncate">
-                                                    {productNames.slice(0, 2).join(', ')}
-                                                    {productNames.length > 2 && <span className="text-[#2C5E3B] dark:text-[#A9CBA2] font-bold ml-1">+{productNames.length - 2} {t('warehouse.remaining')}</span>}
-                                                </p>
+                                            <div className="mt-2 text-[11px] text-[var(--theme-text-secondary)] truncate">
+                                                <span>{productNames.slice(0, 2).join(', ')}</span>
+                                                {productNames.length > 2 && (
+                                                    <span className="text-[var(--theme-accent)] font-medium ml-1">
+                                                        +{productNames.length - 2} {t('warehouse.remaining')}
+                                                    </span>
+                                                )}
                                             </div>
                                         )}
+                                    </div>
 
-                                        <div className="relative flex items-center justify-between border-t border-stone-200/60 dark:border-white/5 pt-3 mt-auto">
-                                            <div className="flex items-center gap-2 bg-stone-100 dark:bg-white/[0.03] px-2 py-1 rounded-lg border border-stone-200 dark:border-white/5">
-                                                <Box size={12} className="text-stone-400 dark:text-gray-500" />
-                                                <span className="text-[10px] font-black text-stone-700 dark:text-gray-400">{totalItems} {totalItems === 1 ? t('warehouse.itemSingular') : t('warehouse.itemPlural')}</span>
-                                            </div>
-                                            <div className="w-6 h-6 rounded-full bg-stone-100 dark:bg-white/5 flex items-center justify-center group-hover:bg-[#2C5E3B]/20 transition-colors border border-stone-200 dark:border-white/10 group-hover:border-[#2C5E3B]/30">
-                                                <ChevronRight size={14} className="text-stone-500 group-hover:text-[#2C5E3B] dark:group-hover:text-[#A9CBA2] transition-colors" />
-                                            </div>
+                                    <div className="flex items-center justify-between border-t border-[var(--theme-border)] pt-2.5 mt-auto">
+                                        <div className="flex items-center gap-1.5 bg-[var(--theme-bg-subtle)] px-2 py-0.5 rounded-lg border border-[var(--theme-border)] text-[11px] font-mono tabular-nums text-[var(--theme-text-secondary)]">
+                                            <Box size={12} />
+                                            <span>{totalItems} {totalItems === 1 ? t('warehouse.itemSingular') : t('warehouse.itemPlural')}</span>
+                                        </div>
+                                        <div className="w-6 h-6 rounded-full bg-[var(--theme-bg-subtle)] flex items-center justify-center border border-[var(--theme-border)] text-[var(--theme-text-secondary)]">
+                                            <ChevronRight size={14} />
                                         </div>
                                     </div>
-                                );
-                            })}
-                        </>
+                                </div>
+                            );
+                        })}
                     </div>
-                    <Pagination
-                        currentPage={currentPage}
-                        totalPages={totalPages}
-                        totalItems={filteredHistory.length}
-                        itemsPerPage={HISTORY_ITEMS_PER_PAGE}
-                        onPageChange={setCurrentPage}
-                        itemName="history"
-                    />
+                    <div className="pt-2">
+                        <Pagination
+                            currentPage={currentPage}
+                            totalPages={totalPages}
+                            totalItems={filteredHistory.length}
+                            itemsPerPage={HISTORY_ITEMS_PER_PAGE}
+                            onPageChange={setCurrentPage}
+                            itemName="history records"
+                        />
+                    </div>
                 </>
             ) : (
-                <div className="flex flex-col items-center justify-center py-20 bg-stone-50/50 dark:bg-black/20 rounded-3xl border border-dashed border-stone-200 dark:border-white/5">
-                    <HistoryIcon size={32} className="text-stone-300 dark:text-gray-700 mb-4" />
-                    <p className="text-stone-500 dark:text-gray-600 font-bold uppercase tracking-widest text-xs">{t('warehouse.noHistoryFound')}</p>
+                <div className="flex flex-col items-center justify-center py-16 bg-[var(--theme-bg-card)] rounded-2xl border border-[var(--theme-border)] shadow-sm">
+                    <HistoryIcon size={32} className="text-[var(--theme-text-secondary)]/40 mb-3" />
+                    <p className="text-[var(--theme-text-secondary)] font-medium text-xs uppercase tracking-wider">{t('warehouse.noHistoryFound')}</p>
                 </div>
             )}
         </div>
     );
 };
+
+export default TransferHistory;

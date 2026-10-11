@@ -189,7 +189,8 @@ export const ACTION_PERMISSIONS: Record<UserRole, Permission[]> = {
 
     merchandiser: [
         'dashboard.view',
-        'inventory.view'
+        'inventory.view', 'inventory.count',
+        'pricing.view', 'pricing.create_promo'
     ],
 
     loss_prevention: [
@@ -360,7 +361,7 @@ export const ACTION_PERMISSIONS: Record<UserRole, Permission[]> = {
     payroll_specialist: [
         'dashboard.view',
         'finance.view', 'finance.view_reports', 'finance.view_payroll', 'finance.manage_payroll',
-        'employees.view', 'employees.view_salary'
+        'employees.view', 'employees.view_salary', 'employees.propose_salary'
     ],
 
     talent_recruiter: [

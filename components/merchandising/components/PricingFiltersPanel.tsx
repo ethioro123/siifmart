@@ -24,36 +24,30 @@ export const PricingFiltersPanel: React.FC = () => {
     }
 
     return (
-        <div className="mt-4 p-6 bg-white/95 dark:bg-[#18201B]/80 border border-[#E2DCCE] dark:border-emerald-950/20 rounded-3xl grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 shadow-md animate-in slide-in-from-top-3 duration-300">
+        <div className="mt-4 p-6 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 shadow-sm animate-in slide-in-from-top-3 duration-200">
             {/* Categories Section */}
-            <div className="space-y-4">
-                <div className="flex items-center gap-2 pb-2 border-b border-[#E2DCCE]/50 dark:border-emerald-950/20">
-                    <Tags size={14} className="text-[#2C5E3B] dark:text-[#A9CBA2]" />
-                    <label className="text-[11px] uppercase text-[#1E3F27] dark:text-[#EAE5D9] font-black tracking-[0.1em]">Categories</label>
+            <div className="space-y-3.5">
+                <div className="flex items-center gap-2 pb-2 border-b border-[var(--theme-border)]">
+                    <Tags size={15} className="text-[var(--theme-accent)]" />
+                    <label className="text-xs uppercase text-[var(--theme-text-primary)] font-semibold tracking-wider">Categories</label>
                 </div>
-                <div className="grid grid-cols-1 gap-2 max-h-48 overflow-y-auto pr-3 custom-scrollbar">
+                <div className="grid grid-cols-1 gap-2 max-h-48 overflow-y-auto pr-2 custom-scrollbar">
                     {ALL_CATEGORY_OPTIONS.map(cat => (
                         <label
                             key={cat}
-                            className="flex items-center gap-3 text-xs text-stone-500 dark:text-stone-400 hover:text-[#1E3F27] dark:hover:text-white cursor-pointer group transition-colors"
+                            className="flex items-center gap-2.5 text-xs text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] cursor-pointer group transition-colors"
                         >
-                            <div className="relative flex items-center justify-center">
-                                <input
-                                    type="checkbox"
-                                    checked={filters.categories.includes(cat)}
-                                    onChange={(e) => {
-                                        const next = e.target.checked
-                                            ? [...filters.categories, cat]
-                                            : filters.categories.filter(c => c !== cat);
-                                        setFilters({ ...filters, categories: next });
-                                    }}
-                                    className="peer appearance-none w-4 h-4 border border-[#E2DCCE] dark:border-emerald-950/40 rounded-lg bg-white dark:bg-black/25 checked:bg-[#2C5E3B] dark:checked:bg-[#A9CBA2] checked:border-transparent transition-all cursor-pointer"
-                                />
-                                <CheckCircle
-                                    size={10}
-                                    className="absolute text-white dark:text-[#1E3B24] opacity-0 peer-checked:opacity-100 transition-opacity pointer-events-none"
-                                />
-                            </div>
+                            <input
+                                type="checkbox"
+                                checked={filters.categories.includes(cat)}
+                                onChange={(e) => {
+                                    const next = e.target.checked
+                                        ? [...filters.categories, cat]
+                                        : filters.categories.filter(c => c !== cat);
+                                    setFilters({ ...filters, categories: next });
+                                }}
+                                className="accent-[var(--theme-accent)] w-4 h-4 rounded cursor-pointer"
+                            />
                             <span className="font-medium group-hover:translate-x-0.5 transition-transform">{cat}</span>
                         </label>
                     ))}
@@ -61,32 +55,26 @@ export const PricingFiltersPanel: React.FC = () => {
             </div>
 
             {/* Sites Section */}
-            <div className="space-y-4">
-                <div className="flex items-center gap-2 pb-2 border-b border-[#E2DCCE]/50 dark:border-emerald-950/20">
-                    <Map size={14} className="text-blue-500 dark:text-blue-400" />
-                    <label className="text-[11px] uppercase text-[#1E3F27] dark:text-[#EAE5D9] font-black tracking-[0.1em]">Store Locations</label>
+            <div className="space-y-3.5">
+                <div className="flex items-center gap-2 pb-2 border-b border-[var(--theme-border)]">
+                    <Map size={15} className="text-[var(--theme-accent)]" />
+                    <label className="text-xs uppercase text-[var(--theme-text-primary)] font-semibold tracking-wider">Store Locations</label>
                 </div>
-                <div className="grid grid-cols-1 gap-2 max-h-48 overflow-y-auto pr-3 custom-scrollbar">
+                <div className="grid grid-cols-1 gap-2 max-h-48 overflow-y-auto pr-2 custom-scrollbar">
                     {sites.map(site => (
                         <label
                             key={site.id}
-                            className="flex items-center gap-3 text-xs text-stone-500 dark:text-stone-400 hover:text-[#1E3F27] dark:hover:text-white cursor-pointer group transition-colors"
+                            className="flex items-center gap-2.5 text-xs text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] cursor-pointer group transition-colors"
                         >
-                            <div className="relative flex items-center justify-center">
-                                <input
-                                    type="checkbox"
-                                    checked={filters.sites.includes(site.id)}
-                                    onChange={(e) => {
-                                        const next = e.target.checked ? [...filters.sites, site.id] : filters.sites.filter(s => s !== site.id);
-                                        setFilters({ ...filters, sites: next });
-                                    }}
-                                    className="peer appearance-none w-4 h-4 border border-[#E2DCCE] dark:border-emerald-950/40 rounded-lg bg-white dark:bg-black/25 checked:bg-[#2C5E3B] dark:checked:bg-[#A9CBA2] checked:border-transparent transition-all cursor-pointer"
-                                />
-                                <CheckCircle
-                                    size={10}
-                                    className="absolute text-white dark:text-[#1E3B24] opacity-0 peer-checked:opacity-100 transition-opacity pointer-events-none"
-                                />
-                            </div>
+                            <input
+                                type="checkbox"
+                                checked={filters.sites.includes(site.id)}
+                                onChange={(e) => {
+                                    const next = e.target.checked ? [...filters.sites, site.id] : filters.sites.filter(s => s !== site.id);
+                                    setFilters({ ...filters, sites: next });
+                                }}
+                                className="accent-[var(--theme-accent)] w-4 h-4 rounded cursor-pointer"
+                            />
                             <span className="font-medium group-hover:translate-x-0.5 transition-transform">{site.name}</span>
                         </label>
                     ))}
@@ -94,123 +82,118 @@ export const PricingFiltersPanel: React.FC = () => {
             </div>
 
             {/* Price & Margin Range Section */}
-            <div className="space-y-6">
-                <div className="space-y-4">
-                    <div className="flex items-center gap-2 pb-2 border-b border-[#E2DCCE]/50 dark:border-emerald-950/20">
-                        <Calculator size={14} className="text-green-600 dark:text-green-400" />
-                        <label className="text-[11px] uppercase text-[#1E3F27] dark:text-[#EAE5D9] font-black tracking-[0.1em]">Market Position</label>
-                    </div>
-                    <div className="space-y-3">
-                        <div className="flex flex-col gap-1.5">
-                            <span className="text-[10px] text-stone-400 dark:text-stone-500 font-bold uppercase">Price Range ({currencySymbol})</span>
-                            <div className="flex gap-2">
-                                <div className="relative flex-1">
-                                    <input
-                                        type="number"
-                                        placeholder="Min"
-                                        className="w-full bg-white/95 dark:bg-black/25 border border-[#E2DCCE] dark:border-emerald-950/20 hover:border-[#CFC6B4] dark:hover:border-emerald-900/15 rounded-xl px-3 py-2 text-xs text-[#1E3F27] dark:text-[#EAE5D9] placeholder-stone-400 dark:placeholder-stone-500 outline-none focus:border-[#2C5E3B] dark:focus:border-[#A9CBA2] focus:ring-2 focus:ring-[#2C5E3B]/10 dark:focus:ring-[#A9CBA2]/10 transition-all"
-                                        value={filters.minPrice}
-                                        onChange={(e) => setFilters({ ...filters, minPrice: e.target.value })}
-                                    />
-                                </div>
-                                <div className="relative flex-1">
-                                    <input
-                                        type="number"
-                                        placeholder="Max"
-                                        className="w-full bg-white/95 dark:bg-black/25 border border-[#E2DCCE] dark:border-emerald-950/20 hover:border-[#CFC6B4] dark:hover:border-emerald-900/15 rounded-xl px-3 py-2 text-xs text-[#1E3F27] dark:text-[#EAE5D9] placeholder-stone-400 dark:placeholder-stone-500 outline-none focus:border-[#2C5E3B] dark:focus:border-[#A9CBA2] focus:ring-2 focus:ring-[#2C5E3B]/10 dark:focus:ring-[#A9CBA2]/10 transition-all"
-                                        value={filters.maxPrice}
-                                        onChange={(e) => setFilters({ ...filters, maxPrice: e.target.value })}
-                                    />
-                                </div>
-                            </div>
+            <div className="space-y-4">
+                <div className="flex items-center gap-2 pb-2 border-b border-[var(--theme-border)]">
+                    <Calculator size={15} className="text-[var(--theme-accent)]" />
+                    <label className="text-xs uppercase text-[var(--theme-text-primary)] font-semibold tracking-wider">Market Position</label>
+                </div>
+                <div className="space-y-3">
+                    <div className="flex flex-col gap-1.5">
+                        <span className="text-xs text-[var(--theme-text-secondary)] font-medium">Price Range ({currencySymbol})</span>
+                        <div className="flex gap-2">
+                            <input
+                                type="number"
+                                placeholder="Min"
+                                className="w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3 py-1.5 text-xs text-[var(--theme-text-primary)] placeholder-[var(--theme-text-muted)] outline-none focus:border-[var(--theme-accent)] focus:ring-2 focus:ring-[var(--theme-accent)]/20 transition-all font-mono tabular-nums"
+                                value={filters.minPrice}
+                                onChange={(e) => setFilters({ ...filters, minPrice: e.target.value })}
+                            />
+                            <input
+                                type="number"
+                                placeholder="Max"
+                                className="w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3 py-1.5 text-xs text-[var(--theme-text-primary)] placeholder-[var(--theme-text-muted)] outline-none focus:border-[var(--theme-accent)] focus:ring-2 focus:ring-[var(--theme-accent)]/20 transition-all font-mono tabular-nums"
+                                value={filters.maxPrice}
+                                onChange={(e) => setFilters({ ...filters, maxPrice: e.target.value })}
+                            />
                         </div>
-                        <div className="flex flex-col gap-1.5">
-                            <span className="text-[10px] text-stone-400 dark:text-stone-500 font-bold uppercase">Target Margin (%)</span>
-                            <div className="flex gap-2">
-                                <input
-                                    type="number"
-                                    placeholder="Min %"
-                                    className="w-full bg-white/95 dark:bg-black/25 border border-[#E2DCCE] dark:border-emerald-950/20 hover:border-[#CFC6B4] dark:hover:border-emerald-900/15 rounded-xl px-3 py-2 text-xs text-[#1E3F27] dark:text-[#EAE5D9] placeholder-stone-400 dark:placeholder-stone-500 outline-none focus:border-[#2C5E3B] dark:focus:border-[#A9CBA2] focus:ring-2 focus:ring-[#2C5E3B]/10 dark:focus:ring-[#A9CBA2]/10 transition-all"
-                                    value={filters.minMargin}
-                                    onChange={(e) => setFilters({ ...filters, minMargin: e.target.value })}
-                                />
-                                <input
-                                    type="number"
-                                    placeholder="Max %"
-                                    className="w-full bg-white/95 dark:bg-black/25 border border-[#E2DCCE] dark:border-emerald-950/20 hover:border-[#CFC6B4] dark:hover:border-emerald-900/15 rounded-xl px-3 py-2 text-xs text-[#1E3F27] dark:text-[#EAE5D9] placeholder-stone-400 dark:placeholder-stone-500 outline-none focus:border-[#2C5E3B] dark:focus:border-[#A9CBA2] focus:ring-2 focus:ring-[#2C5E3B]/10 dark:focus:ring-[#A9CBA2]/10 transition-all"
-                                    value={filters.maxMargin}
-                                    onChange={(e) => setFilters({ ...filters, maxMargin: e.target.value })}
-                                />
-                            </div>
+                    </div>
+                    <div className="flex flex-col gap-1.5">
+                        <span className="text-xs text-[var(--theme-text-secondary)] font-medium">Target Margin (%)</span>
+                        <div className="flex gap-2">
+                            <input
+                                type="number"
+                                placeholder="Min %"
+                                className="w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3 py-1.5 text-xs text-[var(--theme-text-primary)] placeholder-[var(--theme-text-muted)] outline-none focus:border-[var(--theme-accent)] focus:ring-2 focus:ring-[var(--theme-accent)]/20 transition-all font-mono tabular-nums"
+                                value={filters.minMargin}
+                                onChange={(e) => setFilters({ ...filters, minMargin: e.target.value })}
+                            />
+                            <input
+                                type="number"
+                                placeholder="Max %"
+                                className="w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3 py-1.5 text-xs text-[var(--theme-text-primary)] placeholder-[var(--theme-text-muted)] outline-none focus:border-[var(--theme-accent)] focus:ring-2 focus:ring-[var(--theme-accent)]/20 transition-all font-mono tabular-nums"
+                                value={filters.maxMargin}
+                                onChange={(e) => setFilters({ ...filters, maxMargin: e.target.value })}
+                            />
                         </div>
                     </div>
                 </div>
             </div>
 
             {/* Velocity & Automation Section */}
-            <div className="space-y-6">
-                <div className="space-y-4">
-                    <div className="flex items-center gap-2 pb-2 border-b border-[#E2DCCE]/50 dark:border-emerald-950/20">
-                        <Zap size={14} className="text-yellow-600 dark:text-yellow-400" />
-                        <label className="text-[11px] uppercase text-[#1E3F27] dark:text-[#EAE5D9] font-black tracking-[0.1em]">Performance</label>
-                    </div>
-                    <div className="space-y-4">
-                        <div className="flex flex-col gap-1.5">
-                            <span className="text-[10px] text-stone-400 dark:text-stone-500 font-bold uppercase">Sales Velocity</span>
-                            <div className="flex flex-wrap gap-2">
-                                {['High', 'Medium', 'Low'].map(v => (
-                                    <button
-                                        key={v}
-                                        onClick={() => {
-                                            const next = filters.velocities.includes(v)
-                                                ? filters.velocities.filter(item => item !== v)
-                                                : [...filters.velocities, v];
-                                            setFilters({ ...filters, velocities: next });
-                                        }}
-                                        className={`px-4 py-1.5 rounded-full text-[10px] font-bold border transition-all ${
-                                            filters.velocities.includes(v)
-                                                ? 'bg-[#2C5E3B] text-white dark:bg-[#A9CBA2] dark:text-[#1E3B24] border-transparent shadow-sm'
-                                                : 'bg-white/80 dark:bg-[#18201B]/70 border border-[#E2DCCE] dark:border-emerald-950/20 text-[#2C4D35] dark:text-[#A9CBA2] hover:text-[#1E3F27] dark:hover:text-white'
-                                        }`}
-                                    >
-                                        {v}
-                                    </button>
-                                ))}
-                            </div>
-                        </div>
-                        <div className="flex flex-col gap-1.5">
-                            <span className="text-[10px] text-stone-400 dark:text-stone-500 font-bold uppercase">Campaign Status</span>
-                            <button
-                                onClick={() => setFilters({ ...filters, onSale: filters.onSale === true ? null : true })}
-                                className={`group flex items-center justify-between px-4 py-3 rounded-xl text-xs font-bold border transition-all ${
-                                    filters.onSale === true
-                                        ? 'bg-[#2C5E3B]/10 dark:bg-[#A9CBA2]/10 text-[#2C5E3B] dark:text-[#A9CBA2] border-[#2C5E3B]/30 dark:border-[#A9CBA2]/30 shadow-sm'
-                                        : 'bg-white/80 dark:bg-[#18201B]/70 border border-[#E2DCCE] dark:border-emerald-950/20 text-[#2C4D35] dark:text-[#A9CBA2] hover:border-[#CFC6B4] dark:hover:border-emerald-900/15'
-                                }`}
-                            >
-                                <div className="flex items-center gap-2">
-                                    <Percent
-                                        size={14}
-                                        className={filters.onSale === true ? 'text-[#2C5E3B] dark:text-[#A9CBA2]' : 'text-stone-400 dark:text-stone-500'}
-                                    />
-                                    <span>On Sale / Active Promo</span>
-                                </div>
-                                <div
-                                    className={`w-8 h-4 rounded-full relative transition-colors ${
-                                        filters.onSale === true ? 'bg-[#2C5E3B] dark:bg-[#A9CBA2]' : 'bg-stone-300 dark:bg-stone-700'
+            <div className="space-y-4">
+                <div className="flex items-center gap-2 pb-2 border-b border-[var(--theme-border)]">
+                    <Zap size={15} className="text-[var(--theme-accent)]" />
+                    <label className="text-xs uppercase text-[var(--theme-text-primary)] font-semibold tracking-wider">Performance</label>
+                </div>
+                <div className="space-y-3">
+                    <div className="flex flex-col gap-1.5">
+                        <span className="text-xs text-[var(--theme-text-secondary)] font-medium">Sales Velocity</span>
+                        <div className="flex flex-wrap gap-1.5">
+                            {['High', 'Medium', 'Low'].map(v => (
+                                <button
+                                    key={v}
+                                    type="button"
+                                    onClick={() => {
+                                        const next = filters.velocities.includes(v)
+                                            ? filters.velocities.filter(item => item !== v)
+                                            : [...filters.velocities, v];
+                                        setFilters({ ...filters, velocities: next });
+                                    }}
+                                    className={`h-7 px-3 rounded-full text-xs font-semibold transition-all cursor-pointer ${
+                                        filters.velocities.includes(v)
+                                            ? 'bg-[var(--theme-primary)] text-[var(--theme-primary-text)] shadow-xs'
+                                            : 'bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-card-hover)]'
                                     }`}
                                 >
-                                    <div
-                                        className={`absolute top-1 w-2 h-2 rounded-full bg-white dark:bg-[#1E3B24] transition-all ${
-                                            filters.onSale === true ? 'left-5' : 'left-1'
-                                        }`}
-                                    />
-                                </div>
-                            </button>
+                                    {v}
+                                </button>
+                            ))}
                         </div>
+                    </div>
+                    <div className="flex flex-col gap-1.5">
+                        <span className="text-xs text-[var(--theme-text-secondary)] font-medium">Campaign Status</span>
+                        <button
+                            type="button"
+                            onClick={() => setFilters({ ...filters, onSale: filters.onSale === true ? null : true })}
+                            className={`group flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-semibold border transition-all cursor-pointer ${
+                                filters.onSale === true
+                                    ? 'bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] border-[var(--theme-accent)]/30'
+                                    : 'bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-card-hover)]'
+                            }`}
+                        >
+                            <div className="flex items-center gap-2">
+                                <Percent
+                                    size={14}
+                                    className={filters.onSale === true ? 'text-[var(--theme-accent)]' : 'text-[var(--theme-text-secondary)]'}
+                                />
+                                <span>On Sale / Active Promo</span>
+                            </div>
+                            <div
+                                className={`w-8 h-4.5 rounded-full relative transition-colors ${
+                                    filters.onSale === true ? 'bg-[var(--theme-accent)]' : 'bg-[var(--theme-border)]'
+                                }`}
+                            >
+                                <div
+                                    className={`absolute top-0.5 w-3.5 h-3.5 rounded-full bg-white transition-all ${
+                                        filters.onSale === true ? 'left-4' : 'left-0.5'
+                                    }`}
+                                />
+                            </div>
+                        </button>
                     </div>
                 </div>
                 <button
+                    type="button"
                     onClick={() => {
                         setFilters({
                             categories: [],
@@ -224,9 +207,10 @@ export const PricingFiltersPanel: React.FC = () => {
                         });
                         setSearchTerm('');
                     }}
-                    className="w-full py-2.5 text-[10px] uppercase font-bold text-stone-500 hover:text-[#1E3F27] dark:hover:text-white transition-all flex items-center justify-center gap-2 hover:bg-[#2C5E3B]/5 dark:hover:bg-[#A9CBA2]/5 rounded-xl border border-transparent"
+                    className="w-full h-9 text-xs font-semibold text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-card-hover)] transition-all flex items-center justify-center gap-1.5 rounded-xl border border-[var(--theme-border)] cursor-pointer active:scale-[0.98]"
                 >
-                    <RefreshCw size={12} className="group-hover:rotate-180 transition-transform duration-500" /> Reset All Studio Filters
+                    <RefreshCw size={13} className="group-hover:rotate-180 transition-transform duration-500" />
+                    <span>Reset All Filters</span>
                 </button>
             </div>
         </div>
@@ -248,79 +232,79 @@ export const ActiveFilterChips: React.FC = () => {
     if (!hasActiveFilters) return null;
 
     return (
-        <div className="flex flex-wrap gap-2 mt-6 animate-in fade-in duration-700">
+        <div className="flex flex-wrap gap-2 mt-4 animate-in fade-in duration-300">
             {searchTerm && (
-                <div className="flex items-center gap-2 bg-[#2C5E3B]/10 dark:bg-[#A9CBA2]/10 border border-[#2C5E3B]/20 dark:border-[#A9CBA2]/20 px-3 py-1.5 rounded-full text-[10px] text-[#2C5E3B] dark:text-[#A9CBA2] font-bold">
-                    <Search size={10} />
+                <div className="flex items-center gap-2 bg-[var(--theme-accent)]/10 border border-[var(--theme-accent)]/20 px-3 py-1 rounded-full text-xs text-[var(--theme-accent)] font-medium">
+                    <Search size={12} />
                     <span>"{searchTerm}"</span>
                     <button
                         onClick={() => setSearchTerm('')}
                         aria-label="Clear search"
-                        className="hover:text-[#1E3F27] dark:hover:text-white transition-colors"
+                        className="hover:text-rose-500 transition-colors opacity-70 hover:opacity-100"
                     >
-                        <XCircle size={12} />
+                        <XCircle size={13} />
                     </button>
                 </div>
             )}
             {filters.categories.map(cat => (
                 <div
                     key={cat}
-                    className="flex items-center gap-2 bg-white/80 dark:bg-[#18201B]/70 border border-[#E2DCCE] dark:border-emerald-950/20 px-3 py-1.5 rounded-full text-[10px] text-stone-600 dark:text-stone-300 font-medium"
+                    className="flex items-center gap-2 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] px-3 py-1 rounded-full text-xs text-[var(--theme-text-primary)] font-medium"
                 >
-                    <Tags size={10} className="text-[#2C5E3B] dark:text-[#A9CBA2]" />
+                    <Tags size={12} className="text-[var(--theme-text-secondary)]" />
                     <span>{cat}</span>
                     <button
                         onClick={() => setFilters({ ...filters, categories: filters.categories.filter(c => c !== cat) })}
                         aria-label={`Remove category filter ${cat}`}
-                        className="hover:text-red-500 transition-colors"
+                        className="hover:text-rose-500 transition-colors text-[var(--theme-text-secondary)] hover:opacity-100"
                     >
-                        <XCircle size={12} className="opacity-60 hover:opacity-100" />
+                        <XCircle size={13} />
                     </button>
                 </div>
             ))}
             {filters.sites.map(sid => (
                 <div
                     key={sid}
-                    className="flex items-center gap-2 bg-white/80 dark:bg-[#18201B]/70 border border-[#E2DCCE] dark:border-emerald-950/20 px-3 py-1.5 rounded-full text-[10px] text-stone-600 dark:text-stone-300 font-medium"
+                    className="flex items-center gap-2 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] px-3 py-1 rounded-full text-xs text-[var(--theme-text-primary)] font-medium"
                 >
-                    <Map size={10} className="text-blue-500 dark:text-blue-400" />
+                    <Map size={12} className="text-[var(--theme-accent)]" />
                     <span>{sites.find(s => s.id === sid)?.name}</span>
                     <button
                         onClick={() => setFilters({ ...filters, sites: filters.sites.filter(s => s !== sid) })}
                         aria-label="Remove site filter"
-                        className="hover:text-red-500 transition-colors"
+                        className="hover:text-rose-500 transition-colors text-[var(--theme-text-secondary)] hover:opacity-100"
                     >
-                        <XCircle size={12} className="opacity-60 hover:opacity-100" />
+                        <XCircle size={13} />
                     </button>
                 </div>
             ))}
             {(filters.minPrice || filters.maxPrice) && (
                 <div
-                    className="flex items-center gap-2 bg-white/80 dark:bg-[#18201B]/70 border border-[#E2DCCE] dark:border-emerald-950/20 px-3 py-1.5 rounded-full text-[10px] text-stone-600 dark:text-stone-300 font-medium"
+                    className="flex items-center gap-2 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] px-3 py-1 rounded-full text-xs text-[var(--theme-text-primary)] font-medium"
                 >
-                    <Calculator size={10} className="text-green-600 dark:text-green-400" />
-                    <span>
+                    <Calculator size={12} className="text-emerald-500" />
+                    <span className="font-mono tabular-nums">
                         {currencySymbol} {filters.minPrice || '0'} - {currencySymbol} {filters.maxPrice || '∞'}
                     </span>
                     <button
                         onClick={() => setFilters({ ...filters, minPrice: '', maxPrice: '' })}
                         aria-label="Clear price range filter"
-                        className="hover:text-red-500 transition-colors"
+                        className="hover:text-rose-500 transition-colors text-[var(--theme-text-secondary)] hover:opacity-100"
                     >
-                        <XCircle size={12} className="opacity-60 hover:opacity-100" />
+                        <XCircle size={13} />
                     </button>
                 </div>
             )}
             {filters.onSale && (
-                <div className="flex items-center gap-2 bg-orange-500/10 border border-orange-500/20 px-3 py-1.5 rounded-full text-[10px] text-orange-600 dark:text-orange-400 font-bold">
-                    <Percent size={10} />
+                <div className="flex items-center gap-2 bg-amber-500/10 border border-amber-500/20 px-3 py-1 rounded-full text-xs text-amber-600 dark:text-amber-400 font-medium">
+                    <Percent size={12} />
                     <span>On Sale</span>
                     <button
                         onClick={() => setFilters({ ...filters, onSale: null })}
                         aria-label="Remove sale filter"
-                        className="hover:text-red-500 transition-colors"
+                        className="hover:text-rose-500 transition-colors opacity-70 hover:opacity-100"
                     >
-                        <XCircle size={12} className="opacity-60 hover:opacity-100" />
+                        <XCircle size={13} />
                     </button>
                 </div>
             )}

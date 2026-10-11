@@ -41,7 +41,6 @@ export const AssignAvailableWorkers: React.FC<AssignAvailableWorkersProps> = ({
     setIsSubmitting,
     refreshData,
     addNotification,
-    wmsJobsService,
     assignCurrentPage,
     setAssignCurrentPage,
     ASSIGN_ITEMS_PER_PAGE,
@@ -50,12 +49,12 @@ export const AssignAvailableWorkers: React.FC<AssignAvailableWorkersProps> = ({
     const { assignJob } = useFulfillment();
 
     return (
-        <div className="glass-panel flex flex-col overflow-hidden">
-            <div className="p-4 border-b border-[#E2DCCE]/30 dark:border-[#A9CBA2]/[0.04] bg-stone-50/50 dark:bg-black/20 font-black text-[10px] text-stone-550 dark:text-stone-400 uppercase tracking-widest flex justify-between items-center relative z-10 transition-colors">
+        <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl flex flex-col overflow-hidden">
+            <div className="p-4 border-b border-[var(--theme-border)] bg-[var(--theme-bg-subtle)] font-semibold text-xs text-[var(--theme-text-secondary)] uppercase tracking-wider flex justify-between items-center relative z-10">
                 <div className="flex items-center gap-2">
-                    <UsersIcon size={12} className="text-[#2C5E3B] dark:text-[#A9CBA2]" />
+                    <UsersIcon size={16} className="text-primary" />
                     <span>{t('warehouse.availableStaff')}</span>
-                    <span className="bg-[#2C5E3B]/10 dark:bg-[#A9CBA2]/10 text-[#2C5E3B] dark:text-[#A9CBA2] px-2 py-0.5 rounded-full border border-[#2C5E3B]/20 dark:border-[#A9CBA2]/20 ml-1">
+                    <span className="bg-primary/10 text-primary font-mono tabular-nums px-2 py-0.5 rounded-full border border-primary/20 ml-1 text-xs">
                         {(() => {
                             let filtered = filteredEmployees.filter(e =>
                                 ['admin', 'manager', 'regional_manager', 'operations_manager', 'warehouse_manager', 'dispatcher', 'picker', 'packer', 'driver', 'receiver', 'inventory_specialist', 'forklift_operator', 'auditor'].includes(e.role?.toLowerCase()) &&
@@ -71,13 +70,13 @@ export const AssignAvailableWorkers: React.FC<AssignAvailableWorkersProps> = ({
                 <div className="flex items-center gap-3">
                     {/* Staff Search */}
                     <div className="relative group">
-                        <Search size={10} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-stone-400 dark:text-stone-500 group-focus-within:text-[#2C5E3B] dark:group-focus-within:text-[#A9CBA2] transition-colors" />
+                        <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--theme-text-muted)] group-focus-within:text-primary transition-colors" />
                         <input
                             type="text"
                             placeholder="Search staff..."
                             value={dispatchEmployeeSearch}
                             onChange={(e) => setDispatchEmployeeSearch(e.target.value)}
-                            className="woody-input !pl-7 pr-3 py-1 text-[10px] w-32"
+                            className="woody-input !pl-8 pr-3 py-1.5 text-xs w-36 rounded-xl border border-[var(--theme-border)] bg-[var(--theme-bg-app)] text-[var(--theme-text-primary)] min-h-[38px]"
                         />
                     </div>
 
@@ -85,27 +84,27 @@ export const AssignAvailableWorkers: React.FC<AssignAvailableWorkersProps> = ({
                     <div className="relative">
                         <button
                             onClick={() => setIsEmployeeRoleDropdownOpen(!isEmployeeRoleDropdownOpen)}
-                            className="flex items-center gap-2 px-3 py-1.5 bg-stone-100/45 dark:bg-black/20 rounded-xl border border-[#E2DCCE]/30 dark:border-[#A9CBA2]/[0.04] text-[10px] font-black text-stone-550 dark:text-stone-400 hover:text-[#1E3F27] dark:hover:text-white transition-all whitespace-nowrap"
+                            className="flex items-center gap-2 px-3 py-1.5 bg-[var(--theme-bg-subtle)] rounded-xl border border-[var(--theme-border)] text-xs font-semibold text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] transition-colors min-h-[38px] touch-manipulation whitespace-nowrap"
                         >
-                            <UserIcon size={12} className={dispatchEmployeeFilter !== 'ALL' ? 'text-[#2C5E3B] dark:text-[#A9CBA2]' : ''} />
+                            <UserIcon size={14} className={dispatchEmployeeFilter !== 'ALL' ? 'text-primary' : ''} />
                             <span>ROLE: {dispatchEmployeeFilter.toUpperCase()}</span>
-                            <ChevronDown size={12} className={`transition-transform duration-300 ${isEmployeeRoleDropdownOpen ? 'rotate-180' : ''}`} />
+                            <ChevronDown size={14} className={`transition-transform duration-300 ${isEmployeeRoleDropdownOpen ? 'rotate-180' : ''}`} />
                         </button>
 
                         {isEmployeeRoleDropdownOpen && (
                             <>
                                 <div className="fixed inset-0 z-[50]" onClick={() => setIsEmployeeRoleDropdownOpen(false)} />
-                                <div className="absolute top-full right-0 mt-2 w-32 glass-panel p-2 shadow-2xl z-[51] animate-in fade-in slide-in-from-top-2 duration-200">
+                                <div className="absolute top-full right-0 mt-2 w-44 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-2 shadow-2xl z-[51] animate-in fade-in slide-in-from-top-2 duration-200">
                                     {['ALL', 'picker', 'packer', 'dispatcher', 'driver', 'receiver', 'warehouse_manager', 'inventory_specialist'].map(role => (
                                         <button
                                             key={role}
                                             onClick={() => {
-                                                setDispatchEmployeeFilter(role as any);
+                                                setDispatchEmployeeFilter(role);
                                                 setIsEmployeeRoleDropdownOpen(false);
                                             }}
-                                            className={`w-full text-left px-3 py-1.5 rounded-lg text-[9px] font-black transition-all ${dispatchEmployeeFilter === role
-                                                ? 'bg-[#2C5E3B] dark:bg-[#A9CBA2] text-white dark:text-black shadow-sm'
-                                                : 'text-stone-600 dark:text-stone-400 hover:bg-stone-50/50 dark:hover:bg-[#EAE5D9]/10 hover:text-[#1E3F27] dark:hover:text-white'
+                                            className={`w-full text-left px-3 py-2 rounded-xl text-xs font-semibold min-h-[38px] flex items-center touch-manipulation transition-colors ${dispatchEmployeeFilter === role
+                                                ? 'bg-primary text-white shadow-sm'
+                                                : 'text-[var(--theme-text-secondary)] hover:bg-[var(--theme-bg-subtle)] hover:text-[var(--theme-text-primary)]'
                                                 }`}
                                         >
                                             {role.toUpperCase()}
@@ -132,7 +131,7 @@ export const AssignAvailableWorkers: React.FC<AssignAvailableWorkersProps> = ({
                         return canWorkerPerformJob(employee.role, job.type);
                     };
 
-                    // Sort by:role match first, then by workload
+                    // Sort by: role match first, then by workload
                     filtered.sort((a, b) => {
                         const aMatch = getRoleMatch(a, selectedJob);
                         const bMatch = getRoleMatch(b, selectedJob);
@@ -158,143 +157,144 @@ export const AssignAvailableWorkers: React.FC<AssignAvailableWorkersProps> = ({
                                 const activeAssignments = jobAssignments.filter(
                                     a => a.employeeId === employee.id &&
                                         ['Assigned', 'Accepted', 'In-Progress'].includes(a.status)
-                                  );
-                                  const workloadCount = activeAssignments.length;
-                                  const roleMatch = getRoleMatch(employee, selectedJob);
-                                  const eligibility = selectedJob ? getJobAssignmentEligibility(employee.role, selectedJob.type) : { eligible: true };
-                                  const isDeliveryLockout = selectedJob ? (isDeliveryJob(selectedJob.type) && isFloorWorkerRole(employee.role)) : false;
-  
-                                  return (
-                                      <div key={employee.id} className={`p-4 rounded-2xl border transition-all duration-300 ${roleMatch && selectedJob
-                                          ? 'bg-[#2C5E3B]/5 dark:bg-[#A9CBA2]/10 border-[#2C5E3B]/30'
-                                          : isDeliveryLockout && selectedJob
-                                              ? 'bg-amber-500/[0.03] dark:bg-amber-500/[0.06] border-amber-500/20 opacity-80'
-                                              : 'bg-stone-50/50 dark:bg-[#1C2620]/30 border-[#E2DCCE]/30 dark:border-[#A9CBA2]/[0.04] hover:border-[#CFC6B4]/60 dark:hover:border-[#A9CBA2]/10 hover:bg-stone-100/50 dark:hover:bg-[#EAE5D9]/10'
-                                          } `}>
-                                          <div className="flex items-center gap-4">
-                                              <div className="relative">
-                                                  <div className="w-10 h-10 rounded-2xl bg-stone-100 dark:bg-black/35 border border-[#E2DCCE]/60 dark:border-[#A9CBA2]/10 flex items-center justify-center text-sm font-black text-stone-700 dark:text-[#EAE5D9] shadow-sm">
-                                                      {employee.name?.charAt(0) || '?'}
-                                                  </div>
-                                                  <div className={`absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-white dark:border-black ${employee.status?.toLowerCase() === 'active' ? 'bg-[#2C5E3B] dark:bg-[#A9CBA2]' : 'bg-stone-400 dark:bg-gray-500'}`} />
-                                              </div>
-  
-                                              <div className="flex-1 min-w-0">
-                                                  <div className="flex items-center gap-2 mb-1">
-                                                      <div className="text-sm text-stone-850 dark:text-[#EAE5D9] font-black truncate">{employee.name}</div>
-                                                      {roleMatch && selectedJob && (
-                                                          <span className="bg-[#2C5E3B]/10 dark:bg-[#A9CBA2]/20 text-[#2C5E3B] dark:text-[#A9CBA2] px-1.5 py-0.5 rounded-full border border-[#2C5E3B]/20 dark:border-[#A9CBA2]/30 font-black uppercase tracking-tighter text-[9px] shadow-sm">
-                                                              Match
-                                                          </span>
-                                                      )}
-                                                      {isDeliveryLockout && selectedJob && (
-                                                          <span className="bg-amber-500/10 text-amber-700 dark:text-amber-400 px-1.5 py-0.5 rounded-full border border-amber-500/20 font-black uppercase tracking-tighter text-[9px]">
-                                                              Driver Only
-                                                          </span>
-                                                      )}
-                                                  </div>
-  
-                                                  {/* Workload Progress Bar */}
-                                                  <div className="space-y-1.5">
-                                                      <div className="flex justify-between items-center text-[9px] uppercase font-black tracking-widest">
-                                                          <span className="text-stone-400 dark:text-stone-500">{employee.role}</span>
-                                                          <span className="text-stone-500 dark:text-stone-400">
-                                                              {workloadCount} {t('warehouse.active')}
-                                                          </span>
-                                                      </div>
-                                                      <div className="w-full h-1 bg-stone-100 dark:bg-black/45 rounded-full overflow-hidden border border-[#E2DCCE]/20 dark:border-[#A9CBA2]/[0.04]">
-                                                          <div
-                                                              className="h-full transition-all duration-500 bg-[#2C5E3B] dark:bg-[#A9CBA2]"
-                                                              ref={(el) => { if (el) el.style.width = `${Math.min(100, (workloadCount / 5) * 100)}%`; }}
-                                                          />
-                                                      </div>
-                                                  </div>
-                                              </div>
-  
-                                              <Protected permission="ASSIGN_TASKS">
-                                                  <button
-                                                      disabled={!selectedJob || !eligibility.eligible}
-                                                      onClick={async () => {
-                                                          if (!selectedJob) return;
-                                                          if (!eligibility.eligible) {
-                                                              addNotification('alert', eligibility.reason || 'Worker is not eligible for this job type');
-                                                              return;
-                                                          }
-                                                          try {
-                                                              setIsSubmitting(true);
-                                                              await assignJob(selectedJob.id, employee.id);
-                                                              addNotification('success', `Job assigned to ${employee.name}`);
-                                                              setSelectedJob(null);
-                                                              await refreshData();
-                                                          } catch (error) {
-                                                              logger.error('AssignAvailableWorkers', 'Failed to assign job:', error);
-                                                              addNotification('alert', 'Failed to assign job');
-                                                          } finally {
-                                                              setIsSubmitting(false);
-                                                          }
-                                                      }}
-                                                      className={`p-2.5 rounded-xl border transition-all duration-300 flex items-center justify-center ${!selectedJob || !eligibility.eligible
-                                                          ? 'bg-stone-50/50 dark:bg-[#18201B]/50 text-stone-400 dark:text-stone-600 border-[#E2DCCE]/30 dark:border-emerald-950/20 cursor-not-allowed opacity-50'
-                                                          : roleMatch
-                                                              ? 'woody-btn-primary py-2 px-3 hover:scale-105 active:scale-95'
-                                                              : 'woody-btn-secondary py-2 px-3 hover:scale-105 active:scale-95 shadow-sm'
-                                                          }`}
-                                                      title={
-                                                          !selectedJob
-                                                              ? t('warehouse.selectJobFirst')
-                                                              : !eligibility.eligible
-                                                                  ? (eligibility.reason || 'Ineligible for this job')
-                                                                  : 'Assign Task'
-                                                      }
-                                                  >
-                                                      <Plus size={16} />
-                                                  </button>
-                                              </Protected>
-                                          </div>
-                                      </div>
-                                  );
-                              })}
-  
-                              {/* Assign Pagination Controls */}
-                              {assignTotalPages > 1 && (
-                                  <div className="flex items-center justify-center gap-4 py-4 border-t border-[#E2DCCE]/30 dark:border-[#A9CBA2]/[0.04]">
-                                      <div className="flex items-center gap-2 bg-stone-50/50 dark:bg-black/20 p-1.5 rounded-full border border-[#E2DCCE]/30 dark:border-[#A9CBA2]/[0.04]">
-                                          <button
-                                              onClick={() => setAssignCurrentPage(prev => Math.max(1, prev - 1))}
-                                              disabled={safeAssignPage === 1}
-                                              title="Previous Page"
-                                              aria-label="Previous Page"
-                                              className="w-8 h-8 rounded-full flex items-center justify-center disabled:opacity-30 hover:bg-slate-200 dark:hover:bg-white/10 transition-all text-slate-500 dark:text-gray-400"
-                                          >
-                                              <ChevronDown className="rotate-90" size={14} />
-                                          </button>
-                                          <span className="text-[10px] font-black text-slate-500 dark:text-gray-400 uppercase tracking-widest px-2">
-                                              Page <span className="text-slate-900 dark:text-white">{safeAssignPage}</span> of {assignTotalPages}
-                                          </span>
-                                          <button
-                                              onClick={() => setAssignCurrentPage(prev => Math.min(assignTotalPages, prev + 1))}
-                                              disabled={safeAssignPage === assignTotalPages}
-                                              title="Next Page"
-                                              aria-label="Next Page"
-                                              className="w-8 h-8 rounded-full flex items-center justify-center disabled:opacity-30 hover:bg-slate-200 dark:hover:bg-white/10 transition-all text-slate-500 dark:text-gray-400"
-                                          >
-                                              <ChevronDown className="-rotate-90" size={14} />
-                                          </button>
-                                      </div>
-                                  </div>
-                              )}
-                          </>
-                      );
-                  })()}
-                  {filteredEmployees.filter(e =>
-                      ['admin', 'manager', 'regional_manager', 'operations_manager', 'warehouse_manager', 'dispatcher', 'picker', 'packer', 'driver', 'receiver', 'inventory_specialist', 'forklift_operator', 'auditor'].includes(e.role?.toLowerCase()) &&
-                      e.status?.toLowerCase() === 'active'
-                  ).length === 0 && (
-                          <div className="text-center py-8 text-slate-400 dark:text-gray-500 text-sm">
-                              No warehouse staff available
-                          </div>
-                      )}
-              </div>
-          </div>
+                                );
+                                const workloadCount = activeAssignments.length;
+                                const roleMatch = getRoleMatch(employee, selectedJob);
+                                const eligibility = selectedJob ? getJobAssignmentEligibility(employee.role, selectedJob.type) : { eligible: true };
+                                const isDeliveryLockout = selectedJob ? (isDeliveryJob(selectedJob.type) && isFloorWorkerRole(employee.role)) : false;
+
+                                return (
+                                    <div key={employee.id} className={`p-4 rounded-2xl border transition-colors ${roleMatch && selectedJob
+                                        ? 'bg-primary/5 border-primary/30'
+                                        : isDeliveryLockout && selectedJob
+                                            ? 'bg-amber-500/5 border-amber-500/20 opacity-80'
+                                            : 'bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] hover:bg-[var(--theme-bg-card)]'
+                                        }`}>
+                                        <div className="flex items-center gap-4">
+                                            <div className="relative">
+                                                <div className="w-10 h-10 rounded-2xl bg-[var(--theme-bg-card)] border border-[var(--theme-border)] flex items-center justify-center text-sm font-semibold text-[var(--theme-text-primary)] shadow-sm">
+                                                    {employee.name?.charAt(0) || '?'}
+                                                </div>
+                                                <div className={`absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-[var(--theme-bg-card)] ${employee.status?.toLowerCase() === 'active' ? 'bg-emerald-500' : 'bg-[var(--theme-text-muted)]'}`} />
+                                            </div>
+
+                                            <div className="flex-1 min-w-0">
+                                                <div className="flex items-center gap-2 mb-1">
+                                                    <div className="text-sm text-[var(--theme-text-primary)] font-semibold truncate">{employee.name}</div>
+                                                    {roleMatch && selectedJob && (
+                                                        <span className="bg-primary/10 text-primary px-2 py-0.5 rounded-full border border-primary/20 font-semibold uppercase tracking-wider text-[11px]">
+                                                            Match
+                                                        </span>
+                                                    )}
+                                                    {isDeliveryLockout && selectedJob && (
+                                                        <span className="bg-amber-500/10 text-amber-700 dark:text-amber-400 px-2 py-0.5 rounded-full border border-amber-500/20 font-semibold uppercase tracking-wider text-[11px]">
+                                                            Driver Only
+                                                        </span>
+                                                    )}
+                                                </div>
+
+                                                {/* Workload Progress Bar */}
+                                                <div className="space-y-1.5">
+                                                    <div className="flex justify-between items-center text-[11px] font-mono tabular-nums uppercase font-semibold tracking-wider">
+                                                        <span className="text-[var(--theme-text-muted)]">{employee.role}</span>
+                                                        <span className="text-[var(--theme-text-secondary)]">
+                                                            {workloadCount} {t('warehouse.active')}
+                                                        </span>
+                                                    </div>
+                                                    <div className="w-full h-1.5 bg-[var(--theme-bg-app)] rounded-full overflow-hidden border border-[var(--theme-border)]">
+                                                        <div
+                                                            className="h-full transition-all duration-500 bg-primary"
+                                                            ref={(el) => { if (el) el.style.width = `${Math.min(100, (workloadCount / 5) * 100)}%`; }}
+                                                        />
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <Protected permission="ASSIGN_TASKS">
+                                                <button
+                                                    disabled={!selectedJob || !eligibility.eligible}
+                                                    onClick={async () => {
+                                                        if (!selectedJob) return;
+                                                        if (!eligibility.eligible) {
+                                                            addNotification('alert', eligibility.reason || 'Worker is not eligible for this job type');
+                                                            return;
+                                                        }
+                                                        try {
+                                                            setIsSubmitting(true);
+                                                            await assignJob(selectedJob.id, employee.id);
+                                                            addNotification('success', `Job assigned to ${employee.name}`);
+                                                            setSelectedJob(null);
+                                                            await refreshData();
+                                                        } catch (error) {
+                                                            logger.error('AssignAvailableWorkers', 'Failed to assign job:', error);
+                                                            addNotification('alert', 'Failed to assign job');
+                                                        } finally {
+                                                            setIsSubmitting(false);
+                                                        }
+                                                    }}
+                                                    className={`min-h-[44px] min-w-[44px] px-3 py-2 rounded-xl border transition-colors flex items-center justify-center touch-manipulation ${!selectedJob || !eligibility.eligible
+                                                        ? 'bg-[var(--theme-bg-subtle)] text-[var(--theme-text-muted)] border-[var(--theme-border)] cursor-not-allowed opacity-50'
+                                                        : roleMatch
+                                                            ? 'bg-primary text-white border-primary shadow-sm hover:opacity-90 active:scale-95'
+                                                            : 'bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)] border-[var(--theme-border)] hover:bg-[var(--theme-bg-subtle)] active:scale-95'
+                                                        }`}
+                                                    title={
+                                                        !selectedJob
+                                                            ? t('warehouse.selectJobFirst')
+                                                            : !eligibility.eligible
+                                                                ? (eligibility.reason || 'Ineligible for this job')
+                                                                : 'Assign Task'
+                                                    }
+                                                    aria-label="Assign Task"
+                                                >
+                                                    <Plus size={16} />
+                                                </button>
+                                            </Protected>
+                                        </div>
+                                    </div>
+                                );
+                            })}
+
+                            {/* Assign Pagination Controls */}
+                            {assignTotalPages > 1 && (
+                                <div className="flex items-center justify-center gap-4 py-4 border-t border-[var(--theme-border)]">
+                                    <div className="flex items-center gap-2 bg-[var(--theme-bg-subtle)] p-1.5 rounded-full border border-[var(--theme-border)]">
+                                        <button
+                                            onClick={() => setAssignCurrentPage(prev => Math.max(1, prev - 1))}
+                                            disabled={safeAssignPage === 1}
+                                            title="Previous Page"
+                                            aria-label="Previous Page"
+                                            className="min-h-[44px] min-w-[44px] rounded-full flex items-center justify-center disabled:opacity-30 hover:bg-[var(--theme-bg-card)] transition-colors text-[var(--theme-text-secondary)] touch-manipulation"
+                                        >
+                                            <ChevronDown className="rotate-90" size={14} />
+                                        </button>
+                                        <span className="text-xs font-mono tabular-nums font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider px-2">
+                                            Page <span className="text-[var(--theme-text-primary)]">{safeAssignPage}</span> of {assignTotalPages}
+                                        </span>
+                                        <button
+                                            onClick={() => setAssignCurrentPage(prev => Math.min(assignTotalPages, prev + 1))}
+                                            disabled={safeAssignPage === assignTotalPages}
+                                            title="Next Page"
+                                            aria-label="Next Page"
+                                            className="min-h-[44px] min-w-[44px] rounded-full flex items-center justify-center disabled:opacity-30 hover:bg-[var(--theme-bg-card)] transition-colors text-[var(--theme-text-secondary)] touch-manipulation"
+                                        >
+                                            <ChevronDown className="-rotate-90" size={14} />
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
+                        </>
+                    );
+                })()}
+                {filteredEmployees.filter(e =>
+                    ['admin', 'manager', 'regional_manager', 'operations_manager', 'warehouse_manager', 'dispatcher', 'picker', 'packer', 'driver', 'receiver', 'inventory_specialist', 'forklift_operator', 'auditor'].includes(e.role?.toLowerCase()) &&
+                    e.status?.toLowerCase() === 'active'
+                ).length === 0 && (
+                    <div className="text-center py-8 text-[var(--theme-text-muted)] text-sm">
+                        No warehouse staff available
+                    </div>
+                )}
+            </div>
+        </div>
     );
 };

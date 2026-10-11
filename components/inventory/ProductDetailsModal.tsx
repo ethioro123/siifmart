@@ -36,7 +36,7 @@ const DetailField = ({ label, value, icon: Icon, colorClass, highlight }: { labe
         }`}>
             {Icon && <Icon size={14} className={`mt-0.5 flex-shrink-0 ${colorClass || 'text-[var(--theme-text-primary)]'}`} />}
             <div className="space-y-0.5 min-w-0 flex-1">
-                <span className="text-[10px] text-[var(--theme-text-secondary)] font-bold uppercase tracking-wider block">{label}</span>
+                <span className="text-[11px] text-[var(--theme-text-secondary)] font-bold uppercase tracking-wider block">{label}</span>
                 <div className="text-xs font-semibold text-[var(--theme-text-primary)] leading-tight">
                     {value !== undefined && value !== null && value !== '' ? value : <span className="text-[var(--theme-text-muted)] font-medium">—</span>}
                 </div>
@@ -200,13 +200,13 @@ export const ProductDetailsModal: React.FC<ProductDetailsModalProps> = ({ produc
                 <button
                     onClick={handleDelete}
                     disabled={isDeleteDisabled}
-                    className={`px-4 py-2 text-xs font-black uppercase rounded-xl border ${isDeleteDisabled ? 'bg-[var(--theme-bg-subtle)] text-[var(--theme-text-muted)] cursor-not-allowed opacity-50' : 'bg-red-500/10 text-red-600 border-red-500/20 hover:bg-red-500/20'}`}
+                    className={`px-4 py-2.5 text-xs font-bold uppercase rounded-xl border transition-all cursor-pointer ${isDeleteDisabled ? 'bg-[var(--theme-bg-subtle)] text-[var(--theme-text-muted)] cursor-not-allowed opacity-50 border-[var(--theme-border)]' : 'bg-red-500/10 text-red-600 dark:text-red-400 border-red-500/20 hover:bg-red-500/20'}`}
                 >
                     Delete Product
                 </button>
             )}
-            <div className="flex items-center gap-2">
-                <button onClick={onClose} className="px-4 py-2 bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card-hover)] text-[var(--theme-text-primary)] border border-[var(--theme-border)] font-bold text-xs rounded-xl transition-all cursor-pointer">Close</button>
+            <div className="flex items-center gap-2.5 ml-auto">
+                <button onClick={onClose} className="px-4 py-2.5 bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card-hover)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] border border-[var(--theme-border)] font-semibold text-xs rounded-xl transition-all cursor-pointer">Close</button>
                 {onEdit && (
                     <button
                         type="button"
@@ -214,7 +214,7 @@ export const ProductDetailsModal: React.FC<ProductDetailsModalProps> = ({ produc
                             onClose();
                             onEdit(product);
                         }}
-                        className="px-4 py-2 bg-[var(--theme-primary)] hover:opacity-90 text-[var(--theme-primary-text)] font-black uppercase text-xs rounded-xl flex items-center gap-1.5 transition-all active:scale-[0.98] cursor-pointer"
+                        className="px-5 py-2.5 bg-[var(--theme-accent)] hover:opacity-95 text-white font-bold text-xs uppercase tracking-wider rounded-xl flex items-center gap-1.5 transition-all active:scale-[0.98] cursor-pointer shadow-xs"
                     >
                         <Edit2 size={13} />
                         <span>Edit Product</span>
@@ -233,18 +233,18 @@ export const ProductDetailsModal: React.FC<ProductDetailsModalProps> = ({ produc
                 {/* Multi-Site & Store Stock Locations */}
                 <ProductLocationBreakdown product={product} locationBreakdown={locationBreakdown} />
 
-                <div className="bg-[var(--theme-bg-card)] p-5 rounded-2xl border border-[var(--theme-border)] space-y-4 shadow-sm">
-                    <div className="flex items-center justify-between border-b border-[var(--theme-border)] pb-2">
+                <div className="bg-[var(--theme-bg-card)] p-5 rounded-2xl border border-[var(--theme-border)] space-y-4 shadow-xs">
+                    <div className="flex items-center justify-between border-b border-[var(--theme-border)] pb-2.5">
                         <div className="flex items-center gap-2">
                             <Info size={14} className="text-[var(--theme-text-secondary)]" />
-                            <h3 className="text-[10px] font-bold uppercase tracking-wider">Product Specifications</h3>
+                            <h3 className="text-xs font-bold uppercase tracking-wider text-[var(--theme-text-primary)]">Product Specifications</h3>
                         </div>
                         <button
                             type="button"
                             onClick={() => setIsSmartUnitModalOpen(true)}
-                            className="px-2.5 py-1 text-[10px] font-bold uppercase bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card-hover)] text-[var(--theme-text-primary)] rounded-lg border border-[var(--theme-border)] flex items-center gap-1 transition-all cursor-pointer"
+                            className="px-2.5 py-1 text-[11px] font-bold uppercase bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card-hover)] text-[var(--theme-text-primary)] rounded-lg border border-[var(--theme-border)] flex items-center gap-1.5 transition-all cursor-pointer"
                         >
-                            <Sparkles size={12} className="text-amber-500" />
+                            <Sparkles size={13} className="text-amber-500" />
                             <span>Smart Unit Spec</span>
                         </button>
                     </div>
@@ -264,7 +264,7 @@ export const ProductDetailsModal: React.FC<ProductDetailsModalProps> = ({ produc
                                     {(() => {
                                         const parsed = parseBatchNumber(product.batchNumber);
                                         if (parsed.isStandard && parsed.formattedDate) {
-                                            return <span className="text-[9px] text-[var(--theme-text-primary)] font-semibold">Rcvd {parsed.formattedDate}</span>;
+                                            return <span className="text-[11px] text-[var(--theme-text-secondary)] font-semibold">Rcvd {parsed.formattedDate}</span>;
                                         }
                                         return null;
                                     })()}
@@ -280,16 +280,16 @@ export const ProductDetailsModal: React.FC<ProductDetailsModalProps> = ({ produc
                     </div>
                 </div>
 
-                <div className="bg-[var(--theme-bg-card)] p-5 rounded-2xl border border-[var(--theme-border)] space-y-4 shadow-sm">
-                    <div className="flex items-center gap-2 border-b border-[var(--theme-border)] pb-2">
+                <div className="bg-[var(--theme-bg-card)] p-5 rounded-2xl border border-[var(--theme-border)] space-y-4 shadow-xs">
+                    <div className="flex items-center gap-2 border-b border-[var(--theme-border)] pb-2.5">
                         <DollarSign size={14} className="text-[var(--theme-text-secondary)]" />
-                        <h3 className="text-[10px] font-bold uppercase tracking-wider">Financial & Pricing Details</h3>
+                        <h3 className="text-xs font-bold uppercase tracking-wider text-[var(--theme-text-primary)]">Financial & Pricing Details</h3>
                     </div>
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                         <DetailField label="Retail Price" value={`${activeCurrency} ${formatPriceValue(product.price)}`} icon={DollarSign} />
                         <DetailField label="Promo Price" value={salePrice > 0 ? `${activeCurrency} ${formatPriceValue(salePrice)}` : null} icon={Tag} highlight />
                         <DetailField label="Discount" value={salePrice > 0 && discountPct > 0 ? `${discountPct.toFixed(1)}%` : null} icon={Percent} highlight />
-                        {compPrice > 0 && <DetailField label="Competitor Price" value={`${activeCurrency} ${formatPriceValue(compPrice)}`} icon={compDiff > 0 ? TrendingDown : TrendingUp} colorClass={compDiff > 0 ? 'text-red-500' : 'text-green-500'} />}
+                        {compPrice > 0 && <DetailField label="Competitor Price" value={`${activeCurrency} ${formatPriceValue(compPrice)}`} icon={compDiff > 0 ? TrendingDown : TrendingUp} colorClass={compDiff > 0 ? 'text-red-500' : 'text-emerald-500'} />}
                         {showCostPrice && (
                             <>
                                 <DetailField label="Cost Price (COGS)" value={cost > 0 ? `${activeCurrency} ${formatPriceValue(cost)}` : null} icon={Lock} colorClass="text-[var(--theme-text-muted)]" />
@@ -304,19 +304,26 @@ export const ProductDetailsModal: React.FC<ProductDetailsModalProps> = ({ produc
                 <ProductAttributesPanel product={product} />
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="bg-[var(--theme-bg-card)] p-5 rounded-2xl border border-[var(--theme-border)] space-y-4 shadow-sm">
-                        <div className="flex items-center justify-between border-b border-[var(--theme-border)] pb-2">
-                            <div className="flex items-center gap-2"><Layers size={14} className="text-[var(--theme-text-secondary)]"/><h3 className="text-[10px] font-bold uppercase tracking-wider">Stock Policies</h3></div>
-                            {canEditThresholds && !isEditingThresholds && <button onClick={() => setIsEditingThresholds(true)} className="px-2 py-0.5 text-[9px] font-bold uppercase bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card-hover)] text-[var(--theme-text-primary)] rounded-lg border border-[var(--theme-border)]">Edit</button>}
+                    <div className="bg-[var(--theme-bg-card)] p-5 rounded-2xl border border-[var(--theme-border)] space-y-4 shadow-xs">
+                        <div className="flex items-center justify-between border-b border-[var(--theme-border)] pb-2.5">
+                            <div className="flex items-center gap-2">
+                                <Layers size={14} className="text-[var(--theme-text-secondary)]" />
+                                <h3 className="text-xs font-bold uppercase tracking-wider text-[var(--theme-text-primary)]">Stock Policies</h3>
+                            </div>
+                            {canEditThresholds && !isEditingThresholds && (
+                                <button onClick={() => setIsEditingThresholds(true)} className="px-2.5 py-1 text-[11px] font-bold uppercase bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card-hover)] text-[var(--theme-text-primary)] rounded-lg border border-[var(--theme-border)] transition-colors cursor-pointer">
+                                    Edit
+                                </button>
+                            )}
                         </div>
                         {!isEditingThresholds ? (
                             <div className="grid grid-cols-2 gap-3">
                                 <div className="p-3 bg-[var(--theme-bg-subtle)] rounded-xl border border-[var(--theme-border)] text-center">
-                                    <span className="text-[9px] text-[var(--theme-text-muted)] font-medium uppercase block">Min Stock</span>
+                                    <span className="text-[11px] text-[var(--theme-text-muted)] font-medium uppercase block">Min Stock</span>
                                     <span className="text-sm font-mono font-bold text-amber-600 dark:text-amber-400 block mt-1">{product.minStock !== undefined && product.minStock !== null ? `${product.minStock} units` : '—'}</span>
                                 </div>
                                 <div className="p-3 bg-[var(--theme-bg-subtle)] rounded-xl border border-[var(--theme-border)] text-center">
-                                    <span className="text-[9px] text-[var(--theme-text-muted)] font-medium uppercase block">Max Stock</span>
+                                    <span className="text-[11px] text-[var(--theme-text-muted)] font-medium uppercase block">Max Stock</span>
                                     <span className="text-sm font-mono font-bold text-emerald-600 dark:text-emerald-400 block mt-1">{product.maxStock !== undefined && product.maxStock !== null ? `${product.maxStock} units` : '—'}</span>
                                 </div>
                             </div>
@@ -324,16 +331,16 @@ export const ProductDetailsModal: React.FC<ProductDetailsModalProps> = ({ produc
                             <div className="space-y-3">
                                 <div className="grid grid-cols-2 gap-2">
                                     <div>
-                                        <label htmlFor="min-stock-input" className="text-[8px] text-[var(--theme-text-muted)] font-medium uppercase block mb-1">Min Stock</label>
-                                        <input id="min-stock-input" type="number" min="0" value={minVal} onChange={(e) => setMinVal(e.target.value === '' ? '' : Math.max(0, parseInt(e.target.value) || 0))} placeholder="e.g. 10" className="w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-lg px-2.5 py-1.5 text-xs font-mono focus:border-[var(--theme-accent)] focus:outline-none" />
+                                        <label htmlFor="min-stock-input" className="text-[11px] text-[var(--theme-text-muted)] font-medium uppercase block mb-1">Min Stock</label>
+                                        <input id="min-stock-input" type="number" min="0" value={minVal} onChange={(e) => setMinVal(e.target.value === '' ? '' : Math.max(0, parseInt(e.target.value) || 0))} placeholder="e.g. 10" className="w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3 py-2 text-xs font-mono focus:border-[var(--theme-accent)] focus:outline-none" />
                                     </div>
                                     <div>
-                                        <label htmlFor="max-stock-input" className="text-[8px] text-[var(--theme-text-muted)] font-medium uppercase block mb-1">Max Stock</label>
-                                        <input id="max-stock-input" type="number" min="0" value={maxVal} onChange={(e) => setMaxVal(e.target.value === '' ? '' : Math.max(0, parseInt(e.target.value) || 0))} placeholder="e.g. 100" className="w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-lg px-2.5 py-1.5 text-xs font-mono focus:border-[var(--theme-accent)] focus:outline-none" />
+                                        <label htmlFor="max-stock-input" className="text-[11px] text-[var(--theme-text-muted)] font-medium uppercase block mb-1">Max Stock</label>
+                                        <input id="max-stock-input" type="number" min="0" value={maxVal} onChange={(e) => setMaxVal(e.target.value === '' ? '' : Math.max(0, parseInt(e.target.value) || 0))} placeholder="e.g. 100" className="w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3 py-2 text-xs font-mono focus:border-[var(--theme-accent)] focus:outline-none" />
                                     </div>
                                 </div>
-                                <div className="flex gap-1.5 justify-end pt-1">
-                                    <button onClick={() => setIsEditingThresholds(false)} className="px-2 py-1 text-[9px] font-bold uppercase bg-[var(--theme-bg-subtle)] text-[var(--theme-text-muted)] rounded-lg">Cancel</button>
+                                <div className="flex gap-2 justify-end pt-1">
+                                    <button onClick={() => setIsEditingThresholds(false)} className="px-3 py-1.5 text-[11px] font-semibold uppercase bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card-hover)] text-[var(--theme-text-secondary)] rounded-xl border border-[var(--theme-border)] transition-colors cursor-pointer">Cancel</button>
                                     <button onClick={async () => {
                                         setIsSaving(true);
                                         try {
@@ -394,17 +401,17 @@ export const ProductDetailsModal: React.FC<ProductDetailsModalProps> = ({ produc
                                         } finally {
                                             setIsSaving(false);
                                         }
-                                    }} disabled={isSaving} className="px-2 py-1 text-[9px] font-bold uppercase bg-[var(--theme-primary)] text-[var(--theme-primary-text)] rounded-lg disabled:opacity-50 hover:opacity-90 active:scale-[0.98] transition-all cursor-pointer">
+                                    }} disabled={isSaving} className="px-3.5 py-1.5 text-[11px] font-bold uppercase bg-[var(--theme-accent)] text-white rounded-xl disabled:opacity-50 hover:opacity-95 active:scale-[0.98] transition-all cursor-pointer shadow-xs">
                                         {isSaving ? 'Saving…' : canDirectEdit ? 'Save' : 'Submit for Approval'}
                                     </button>
                                 </div>
                             </div>
                         )}
                     </div>
-                    <div className="bg-[var(--theme-bg-card)] p-5 rounded-2xl border border-[var(--theme-border)] space-y-4 shadow-sm">
-                        <div className="flex items-center gap-2 border-b border-[var(--theme-border)] pb-2">
+                    <div className="bg-[var(--theme-bg-card)] p-5 rounded-2xl border border-[var(--theme-border)] space-y-4 shadow-xs">
+                        <div className="flex items-center gap-2 border-b border-[var(--theme-border)] pb-2.5">
                             <TrendingUp size={14} className="text-[var(--theme-text-secondary)]" />
-                            <h3 className="text-[10px] font-bold uppercase tracking-wider">Restock Log & Audits</h3>
+                            <h3 className="text-xs font-bold uppercase tracking-wider text-[var(--theme-text-primary)]">Restock Log & Audits</h3>
                         </div>
                         {recentReceives.length > 0 ? (
                             <div className="space-y-3 pl-2 border-l border-[var(--theme-border)] ml-2 max-h-[140px] overflow-y-auto">
@@ -412,12 +419,12 @@ export const ProductDetailsModal: React.FC<ProductDetailsModalProps> = ({ produc
                                     <div key={m.id} className="relative flex flex-col gap-0.5">
                                         <div className="absolute -left-[14px] top-1.5 w-1.5 h-1.5 rounded-full bg-emerald-500 border border-[var(--theme-bg-card)]" />
                                         <div className="flex items-center justify-between text-[11px]"><span className="font-semibold text-[var(--theme-text-primary)] uppercase">{employees?.find(e => e.id === m.performedBy)?.name || m.performedBy || 'System'}</span><span className="font-mono text-emerald-600 dark:text-emerald-400 font-bold">+{m.quantity}</span></div>
-                                        <span className="text-[9px] text-[var(--theme-text-muted)] font-mono">{new Date(m.date).toLocaleDateString([], { month: 'short', day: 'numeric' })}</span>
+                                        <span className="text-[11px] text-[var(--theme-text-muted)] font-mono">{new Date(m.date).toLocaleDateString([], { month: 'short', day: 'numeric' })}</span>
                                     </div>
                                 ))}
                             </div>
                         ) : <p className="text-xs font-medium text-[var(--theme-text-muted)] text-center py-2">No recent restocks</p>}
-                        <div className="pt-3 border-t border-[var(--theme-border)] text-[10px] space-y-1.5">
+                        <div className="pt-3 border-t border-[var(--theme-border)] text-[11px] space-y-1.5">
                             <div className="flex justify-between"><span className="text-[var(--theme-text-muted)] font-medium uppercase">Created:</span><span className="font-semibold text-[var(--theme-text-primary)]">{product.createdBy || 'System'}</span></div>
                         </div>
                     </div>
