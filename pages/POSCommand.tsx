@@ -269,18 +269,18 @@ const POSCommandContent: React.FC = () => {
               <button
                 onClick={handleReprint}
                 className="px-3 py-1.5 hover:bg-[var(--theme-bg-subtle)] text-[var(--theme-text-primary)] text-xs font-semibold rounded-xl transition-all flex items-center gap-2 cursor-pointer group"
-                title="Reprint Last Sale"
+                title="Reprint Last Customer Sale Receipt"
               >
                 <div className="w-5 h-5 rounded-md bg-purple-500/10 text-purple-500 flex items-center justify-center shrink-0">
-                  <Printer size={13} />
+                  <ReceiptText size={13} />
                 </div>
-                <span>Reprint</span>
+                <span>{t('posCommand.reprintReceipt') || 'Reprint Receipt'}</span>
               </button>
 
               <button
                 onClick={() => setIsPrintHubOpen(true)}
                 className="px-3 py-1.5 hover:bg-[var(--theme-bg-subtle)] text-[var(--theme-text-primary)] text-xs font-semibold rounded-xl transition-all flex items-center gap-2 cursor-pointer group"
-                title="Print Hub"
+                title="Thermal Label Hub (Barcodes &amp; Shelf Price Tags)"
               >
                 <div className="w-5 h-5 rounded-md bg-indigo-500/10 text-indigo-500 flex items-center justify-center shrink-0">
                   <Printer size={13} />

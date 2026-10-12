@@ -11,6 +11,7 @@ interface CustodyHandshakeModalProps {
     activeTransferJob: WMSJob;
     transferReceiveItems: ReceivingItem[];
     allProducts: Product[];
+    products?: Product[];
     currentUser: User | null;
     driverName?: string;
     isSubmitting: boolean;
@@ -23,6 +24,7 @@ export const CustodyHandshakeModal: React.FC<CustodyHandshakeModalProps> = ({
     activeTransferJob,
     transferReceiveItems,
     allProducts,
+    products = [],
     currentUser,
     driverName = 'Assigned Driver / Logistics Courier',
     isSubmitting
@@ -141,7 +143,7 @@ export const CustodyHandshakeModal: React.FC<CustodyHandshakeModalProps> = ({
                             {/* Discrepant Items List */}
                             <div className="border border-[var(--theme-border)] rounded-xl overflow-hidden divide-y divide-[var(--theme-border)]">
                                 {discrepantItems.map((item, idx) => {
-                                    const product = allProducts.find(p => p.id === item.productId);
+                                    const product = allProducts.find(p => p.id === item.productId) || products.find(p => p.id === item.productId);
                                     const expected = item.expectedQty || 0;
                                     const received = item.receivedQty || 0;
                                     const variance = received - expected;

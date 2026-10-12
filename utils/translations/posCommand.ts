@@ -170,8 +170,9 @@ export const posCommand: TranslationBlock = {
     receiveStock: { en: 'Receive Stock', am: 'ክምችት ተቀበል', or: 'Meeshaa Fudhadhu' },
     stockList: { en: 'Stock List', am: 'የክምችት ዝርዝር', or: 'Tarree Meeshaa' },
     lockScreen: { en: 'Lock Screen', am: 'ስክሪን ቆልፍ', or: 'Iskiriinii Cufi' },
-    employees: { en: 'Employees', am: 'ሰራተኞች', or: 'Hojjettoota' },
     reprintLast: { en: 'Reprint Last', am: 'መጨረሻውን እንደገና አትም', or: 'Isa Dhumaa Irra Deebi\'ii Maxxansi' },
+    reprintReceipt: { en: 'Reprint Receipt', am: 'ደረሰኝ እንደገና አትም', or: 'Nagahee Irra Deebi\'ii Maxxansi' },
+    printShelfLabels: { en: 'Print Shelf Labels', am: 'የመደርደሪያ መለያዎችን አትም', or: 'Mallattoolee Saamuu Maxxansi' },
     endShift: { en: 'End Shift', am: 'ፈረቃ ጨርስ', or: 'Shift Cufi' },
 
     // Performance

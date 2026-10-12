@@ -322,7 +322,6 @@ export const ACTION_PERMISSIONS: Record<UserRole, Permission[]> = {
     store_manager: [
         'dashboard.view',
         'pos.view', 'pos.create_sale', 'pos.refund', 'pos.hold_order', 'pos.void_sale',
-        'inventory.view', 'inventory.edit', 'inventory.count',
         'procurement.view',
         'sales.view', 'sales.view_reports', 'sales.create', 'sales.refund',
         'customers.view', 'customers.create', 'customers.edit', 'customers.view_history', 'customers.manage_loyalty',
@@ -332,7 +331,6 @@ export const ACTION_PERMISSIONS: Record<UserRole, Permission[]> = {
     assistant_manager: [
         'dashboard.view',
         'pos.view', 'pos.create_sale', 'pos.refund', 'pos.hold_order',
-        'inventory.view', 'inventory.count',
         'sales.view', 'sales.view_reports',
         'customers.view', 'customers.create', 'customers.edit', 'customers.view_history',
         'employees.view', 'employees.manage_attendance'
@@ -345,7 +343,6 @@ export const ACTION_PERMISSIONS: Record<UserRole, Permission[]> = {
     sales_associate: [
         'dashboard.view',
         'pos.view', 'pos.create_sale',
-        'inventory.view',
         'customers.view', 'customers.create'
     ],
 

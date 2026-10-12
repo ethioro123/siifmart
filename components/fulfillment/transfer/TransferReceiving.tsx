@@ -270,7 +270,7 @@ export const TransferReceiving: React.FC<TransferReceivingProps> = ({
             <div className="flex-1 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-5 overflow-hidden flex flex-col shadow-xs">
                 <div className="overflow-y-auto space-y-3.5 custom-scrollbar flex-1 pb-4">
                     {transferReceiveItems.map((item, idx) => {
-                        const product = allProducts.find(p => p.id === item.productId);
+                        const product = allProducts.find(p => p.id === item.productId) || products.find(p => p.id === item.productId);
                         return (
                             <div key={idx} className="bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl p-4 flex gap-4">
                                 <div className="w-16 h-16 bg-[var(--theme-bg-card)] rounded-lg flex items-center justify-center shrink-0 border border-[var(--theme-border)]">
