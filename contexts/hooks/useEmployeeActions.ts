@@ -8,6 +8,7 @@ interface UseEmployeeActionsDeps {
     activeSite: Site | undefined;
     activeSiteId: string;
     employees: Employee[];
+    shifts?: ShiftRecord[];
     setEmployees: React.Dispatch<React.SetStateAction<Employee[]>>;
     setShifts: React.Dispatch<React.SetStateAction<ShiftRecord[]>>;
     addNotification: (type: 'alert' | 'success' | 'info', message: string) => void;
@@ -15,7 +16,7 @@ interface UseEmployeeActionsDeps {
 }
 
 export function useEmployeeActions(deps: UseEmployeeActionsDeps) {
-    const { activeSite, activeSiteId, employees, setEmployees, setShifts, addNotification, logSystemEvent } = deps;
+    const { activeSite, activeSiteId, employees, shifts = [], setEmployees, setShifts, addNotification, logSystemEvent } = deps;
 
     const addEmployee = useCallback(async (employee: Employee, user?: string) => {
         try {
@@ -65,8 +66,22 @@ export function useEmployeeActions(deps: UseEmployeeActionsDeps) {
             const cashier = employees.find(e => e.id === cashierId);
             const staffName = cashier?.name || 'Staff Member';
             const shiftId = crypto.randomUUID();
+
+            // Calculate sequential human-readable shift number (e.g. SHF-0001, SHF-0002)
+            const existingNums = (shifts || [])
+                .map(s => {
+                    const cleanNum = String(s.shiftNumber || s.shift_number || '').replace(/^[^\d]*/, '');
+                    return parseInt(cleanNum, 10);
+                })
+                .filter(n => !isNaN(n) && n > 0);
+            const maxNum = existingNums.length > 0 ? Math.max(...existingNums) : (shifts || []).length;
+            const nextSeq = maxNum + 1;
+            const formattedShiftNumber = `SHF-${String(nextSeq).padStart(4, '0')}`;
+
             const shift: ShiftRecord = {
                 id: shiftId,
+                shiftNumber: formattedShiftNumber,
+                shift_number: formattedShiftNumber,
                 siteId: activeSiteId || activeSite?.id || '',
                 cashierId,
                 cashierName: staffName,
@@ -91,13 +106,13 @@ export function useEmployeeActions(deps: UseEmployeeActionsDeps) {
                 logger.warn('useEmployeeActions', `Supabase shift insert error (operating optimistically): ${dbErr}`);
             }
 
-            addNotification('success', `Shift started with ${openingFloat.toLocaleString()} float`);
-            logSystemEvent('Start Shift', `Started shift for ${staffName} with float ${openingFloat}`, staffName, 'HR');
+            addNotification('success', `Shift ${formattedShiftNumber} started with ${openingFloat.toLocaleString()} float`);
+            logSystemEvent('Start Shift', `Started shift ${formattedShiftNumber} for ${staffName} with float ${openingFloat}`, staffName, 'HR');
         } catch (error) {
             logger.error('useEmployeeActions', 'Failed to start shift:', error as Error);
             addNotification('alert', 'Failed to start shift');
         }
-    }, [activeSiteId, activeSite?.id, employees, addNotification, logSystemEvent, setShifts]);
+    }, [activeSiteId, activeSite?.id, employees, shifts, addNotification, logSystemEvent, setShifts]);
 
     const closeShift = useCallback(async (shift: ShiftRecord) => {
         try {

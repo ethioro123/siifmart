@@ -40,13 +40,13 @@ export const MobileTabSelector: React.FC<TabSelectorProps> = ({
                         <Layout size={20} />
                     </div>
                     <div className="text-left min-w-0 flex-1">
-                        <p className="text-[11px] text-[var(--theme-text-muted)] font-semibold uppercase tracking-wider">Current Section</p>
-                        <p className="text-base font-bold text-[var(--theme-text-primary)] uppercase tracking-tight truncate">
+                        <p className="text-[11px] text-[var(--theme-text-secondary)] font-medium">Current Section</p>
+                        <p className="text-base font-semibold text-[var(--theme-text-primary)] tracking-tight truncate">
                             {t(`warehouse.tabs.${activeTab.toLowerCase()}`)}
                         </p>
                     </div>
                 </div>
-                <div className={`w-8 h-8 rounded-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] flex items-center justify-center transition-transform duration-300 shrink-0 ml-2 ${isMobileTabMenuOpen ? 'rotate-180 bg-primary/10 text-primary border-primary/30' : 'text-[var(--theme-text-muted)]'}`}>
+                <div className={`w-8 h-8 rounded-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] flex items-center justify-center transition-transform duration-300 shrink-0 ml-2 ${isMobileTabMenuOpen ? 'rotate-180 bg-[var(--theme-accent-muted)] text-[var(--theme-accent)] border-[var(--theme-accent)]/30' : 'text-[var(--theme-text-secondary)]'}`}>
                     <ChevronDown size={16} />
                 </div>
             </button>
@@ -60,10 +60,10 @@ export const MobileTabSelector: React.FC<TabSelectorProps> = ({
                             key={tab}
                             type="button"
                             onClick={() => setActiveTab(tab)}
-                            className={`px-3.5 py-2 rounded-xl text-xs font-semibold uppercase tracking-wider whitespace-nowrap min-h-[44px] transition-colors shrink-0 touch-manipulation ${
+                            className={`px-3.5 py-2 rounded-xl text-xs font-medium whitespace-nowrap min-h-[44px] transition-all shrink-0 touch-manipulation active:scale-[0.98] ${
                                 isActive
-                                    ? 'bg-primary text-white shadow-sm'
-                                    : 'bg-[var(--theme-bg-card)] text-[var(--theme-text-secondary)] border border-[var(--theme-border)] active:bg-[var(--theme-bg-subtle)]'
+                                    ? 'bg-[var(--theme-accent)] text-white font-semibold shadow-xs'
+                                    : 'bg-[var(--theme-bg-card)] text-[var(--theme-text-secondary)] border border-[var(--theme-border)] hover:text-[var(--theme-text-primary)] active:bg-[var(--theme-bg-subtle)]'
                             }`}
                         >
                             {t(`warehouse.tabs.${tab.toLowerCase()}`)}
@@ -95,11 +95,11 @@ export const MobileTabSelector: React.FC<TabSelectorProps> = ({
                                         setIsMobileTabMenuOpen(false);
                                     }}
                                     className={`p-3.5 min-h-[48px] rounded-xl flex flex-col items-center justify-center gap-1.5 transition-colors active:scale-95 border relative touch-manipulation ${isActive
-                                        ? 'bg-primary text-white border-primary shadow-sm'
+                                        ? 'bg-[var(--theme-accent)] text-white border-[var(--theme-accent)] shadow-xs'
                                         : 'bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] border-[var(--theme-border)] hover:bg-[var(--theme-bg-card)] hover:text-[var(--theme-text-primary)]'
                                         }`}
                                  >
-                                    <span className="text-xs font-semibold uppercase tracking-wider leading-tight text-center truncate max-w-full px-1">{t(`warehouse.tabs.${tab.toLowerCase()}`)}</span>
+                                    <span className="text-xs font-medium leading-tight text-center truncate max-w-full px-1">{t(`warehouse.tabs.${tab.toLowerCase()}`)}</span>
                                     {hasTransferDiscrepancies && (
                                         <div className="absolute top-2 right-2 w-2 h-2 rounded-full bg-red-500 animate-pulse" />
                                     )}
@@ -128,8 +128,8 @@ export const DesktopTabSelector: React.FC<DesktopTabSelectorProps> = ({
     const userPoints = user ? getWorkerPoints(user.id) : undefined;
 
     return (
-        <div className="hidden md:flex items-center gap-2 overflow-x-auto pb-0 -mx-0 px-0 bg-transparent rounded-xl shrink-0 no-scrollbar touch-pan-x">
-            <div className="flex gap-2 min-w-max">
+        <div className="hidden md:flex items-center gap-2 overflow-x-auto pb-0 -mx-0 px-0 bg-[var(--theme-bg-subtle)] p-1 rounded-2xl border border-[var(--theme-border)] shrink-0 no-scrollbar touch-pan-x">
+            <div className="flex gap-1 min-w-max">
                 {visibleTabs.map((tab) => {
                     const hasTransferDiscrepancies = tab === 'TRANSFER' && filteredJobs
                         .filter(j => j.type === 'TRANSFER' && ['Received', 'Delivered', 'Completed'].some(s => s === j.transferStatus || s === j.status))
@@ -148,15 +148,17 @@ export const DesktopTabSelector: React.FC<DesktopTabSelectorProps> = ({
                             )).length
                         : 0;
 
+                    const isActive = activeTab === tab;
+
                     return (
                         <button
                             key={tab}
                             onClick={() => setActiveTab(tab as OpTab)}
-                            className={`px-4 py-2.5 rounded-xl text-xs font-semibold transition-colors whitespace-nowrap min-h-[44px] select-none relative touch-manipulation ${activeTab === tab
-                                ? 'bg-primary text-white shadow-sm'
+                            className={`px-3.5 py-2 rounded-xl text-xs transition-all whitespace-nowrap min-h-[40px] select-none relative touch-manipulation active:scale-[0.98] cursor-pointer ${isActive
+                                ? 'bg-[var(--theme-accent)] text-white font-semibold shadow-xs'
                                 : hasTransferDiscrepancies
-                                    ? 'bg-red-600 text-white animate-pulse border border-red-500'
-                                    : 'text-[var(--theme-text-secondary)] hover:bg-[var(--theme-bg-subtle)] hover:text-[var(--theme-text-primary)]'
+                                    ? 'bg-red-600 text-white animate-pulse border border-red-500 font-semibold'
+                                    : 'text-[var(--theme-text-secondary)] hover:bg-[var(--theme-bg-card)] hover:text-[var(--theme-text-primary)] font-medium'
                                 } `}
                         >
                             {t(`warehouse.tabs.${tab.toLowerCase()}`)}

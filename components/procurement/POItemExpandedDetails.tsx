@@ -23,6 +23,7 @@ import {
     SlidersHorizontal
 } from 'lucide-react';
 import { getPOItemCategorySpecsSummary } from './categoryAttributes';
+import { getPOItemPhysicalSummary } from './physicalUtils';
 
 interface POItemExpandedDetailsProps {
     item: any;
@@ -61,7 +62,79 @@ export const POItemExpandedDetails: React.FC<POItemExpandedDetailsProps> = ({ it
     const commercial = attrs.commercial || {};
     const descriptive = attrs.descriptive || {};
 
-    const hasPhysical = !!(physical.netWeight || physical.grossWeight || physical.form || physical.dims || physical.color);
+    const physSummary = getPOItemPhysicalSummary(item);
+    const domainId = physSummary.domainId;
+
+    const getPhysicalSpecsRows = () => {
+        if (domainId === 'apparel') {
+            return {
+                title: 'Garment & Fitment',
+                icon: Shirt,
+                colorClass: 'text-indigo-500',
+                rows: [
+                    { label: 'Size / Fitment:', value: physSummary.sizeOrVolume || (attrs.categorySpecific?.apparelSize) },
+                    { label: 'Colorway:', value: physical.color || physSummary.colorOrFinish },
+                    { label: 'Material / Fiber:', value: physSummary.materialOrContainer || physical.form },
+                    { label: 'Garment Wt:', value: physical.netWeight ? `${physical.netWeight} ${physical.sizeType || 'g'}` : null },
+                    { label: 'Dimensions:', value: physical.dims }
+                ].filter(r => r.value)
+            };
+        }
+        if (domainId === 'beverages') {
+            return {
+                title: 'Liquid & Container',
+                icon: Coffee,
+                colorClass: 'text-cyan-500',
+                rows: [
+                    { label: 'Net Volume:', value: physical.netWeight ? `${physical.netWeight} ${physical.sizeType || 'ml'}` : null },
+                    { label: 'Container:', value: physSummary.materialOrContainer || physical.form },
+                    { label: 'Gross Wt:', value: physical.grossWeight ? (/[a-zA-Z]/.test(physical.grossWeight) ? physical.grossWeight : `${physical.grossWeight} kg`) : null },
+                    { label: 'Bottle Height:', value: physical.dims }
+                ].filter(r => r.value)
+            };
+        }
+        if (domainId === 'electronics') {
+            return {
+                title: 'Hardware & Dimensions',
+                icon: Cpu,
+                colorClass: 'text-sky-500',
+                rows: [
+                    { label: 'Dimensions:', value: physical.dims },
+                    { label: 'Device Wt:', value: physical.netWeight ? `${physical.netWeight} ${physical.sizeType || 'g'}` : null },
+                    { label: 'Color / Finish:', value: physical.color },
+                    { label: 'Gross Wt:', value: physical.grossWeight ? (/[a-zA-Z]/.test(physical.grossWeight) ? physical.grossWeight : `${physical.grossWeight} kg`) : null }
+                ].filter(r => r.value)
+            };
+        }
+        if (domainId === 'homewares_kitchen') {
+            return {
+                title: 'Dimensions & Material',
+                icon: UtensilsCrossed,
+                colorClass: 'text-amber-500',
+                rows: [
+                    { label: 'Dimensions:', value: physical.dims },
+                    { label: 'Capacity:', value: physSummary.sizeOrVolume || physical.capacity },
+                    { label: 'Material:', value: physSummary.materialOrContainer || physical.material || physical.form },
+                    { label: 'Item Weight:', value: physical.netWeight ? `${physical.netWeight} ${physical.sizeType || 'g'}` : null }
+                ].filter(r => r.value)
+            };
+        }
+        return {
+            title: 'Physical Specifications',
+            icon: Scale,
+            colorClass: 'text-emerald-500',
+            rows: [
+                { label: 'Net Weight:', value: physical.netWeight ? `${physical.netWeight} ${physical.sizeType || physical.unit || ''}` : null },
+                { label: 'Gross Weight:', value: physical.grossWeight ? (/[a-zA-Z]/.test(physical.grossWeight) ? physical.grossWeight : `${physical.grossWeight} kg`) : null },
+                { label: 'Form:', value: physical.form },
+                { label: 'Dimensions:', value: physical.dims },
+                { label: 'Color:', value: physical.color }
+            ].filter(r => r.value)
+        };
+    };
+
+    const physicalGroup = getPhysicalSpecsRows();
+    const hasPhysical = physicalGroup.rows.length > 0;
     const hasStorage = !!(storage.type || storage.isPerishable || storage.isHazardous || storage.isFragile || storage.stackLimit || storage.isLightSensitive);
     const hasPackaging = !!(packaging.packageType || packaging.packQty || packaging.caseSize || packaging.material);
     const hasCommercial = !!(commercial.sellBy || commercial.priceType || commercial.isWeighted || commercial.isReturnable !== undefined);
@@ -111,40 +184,16 @@ export const POItemExpandedDetails: React.FC<POItemExpandedDetailsProps> = ({ it
                 {hasPhysical && (
                     <div className="p-3 bg-[var(--theme-bg-subtle)] rounded-xl border border-[var(--theme-border)] space-y-1.5">
                         <div className="flex items-center gap-1.5 text-[10px] font-bold text-[var(--theme-text-secondary)] uppercase tracking-wider">
-                            <Scale size={11} className="text-emerald-500" />
-                            <span>Physical Specifications</span>
+                            <physicalGroup.icon size={11} className={physicalGroup.colorClass} />
+                            <span>{physicalGroup.title}</span>
                         </div>
                         <div className="space-y-1 text-xs">
-                            {physical.netWeight && (
-                                <div className="flex justify-between border-b border-[var(--theme-border-subtle)] pb-0.5">
-                                    <span className="text-[var(--theme-text-secondary)]">Net Weight:</span>
-                                    <span className="font-semibold text-[var(--theme-text-primary)]">{physical.netWeight} {physical.sizeType || physical.unit || ''}</span>
+                            {physicalGroup.rows.map((row, idx) => (
+                                <div key={idx} className={`flex justify-between ${idx < physicalGroup.rows.length - 1 ? 'border-b border-[var(--theme-border-subtle)] pb-0.5' : ''}`}>
+                                    <span className="text-[var(--theme-text-secondary)]">{row.label}</span>
+                                    <span className="font-semibold text-[var(--theme-text-primary)]">{row.value}</span>
                                 </div>
-                            )}
-                            {physical.grossWeight && (
-                                <div className="flex justify-between border-b border-[var(--theme-border-subtle)] pb-0.5">
-                                    <span className="text-[var(--theme-text-secondary)]">Gross Weight:</span>
-                                    <span className="font-semibold text-[var(--theme-text-primary)]">{physical.grossWeight}</span>
-                                </div>
-                            )}
-                            {physical.form && (
-                                <div className="flex justify-between border-b border-[var(--theme-border-subtle)] pb-0.5">
-                                    <span className="text-[var(--theme-text-secondary)]">Form:</span>
-                                    <span className="font-semibold text-[var(--theme-text-primary)]">{physical.form}</span>
-                                </div>
-                            )}
-                            {physical.dims && (
-                                <div className="flex justify-between border-b border-[var(--theme-border-subtle)] pb-0.5">
-                                    <span className="text-[var(--theme-text-secondary)]">Dimensions:</span>
-                                    <span className="font-semibold text-[var(--theme-text-primary)]">{physical.dims}</span>
-                                </div>
-                            )}
-                            {physical.color && (
-                                <div className="flex justify-between">
-                                    <span className="text-[var(--theme-text-secondary)]">Color:</span>
-                                    <span className="font-semibold text-[var(--theme-text-primary)]">{physical.color}</span>
-                                </div>
-                            )}
+                            ))}
                         </div>
                     </div>
                 )}
@@ -157,6 +206,14 @@ export const POItemExpandedDetails: React.FC<POItemExpandedDetailsProps> = ({ it
                             <span>Storage & Handling</span>
                         </div>
                         <div className="space-y-1 text-xs">
+                            {storage.inboundQcDirective && (
+                                <div className="flex justify-between border-b border-[var(--theme-border-subtle)] pb-0.5">
+                                    <span className="text-[var(--theme-text-secondary)]">Inbound QC:</span>
+                                    <span className="font-semibold text-emerald-600 dark:text-emerald-400 truncate max-w-[150px]" title={storage.inboundQcDirective}>
+                                        {storage.inboundQcDirective}
+                                    </span>
+                                </div>
+                            )}
                             {storage.type && (
                                 <div className="flex justify-between border-b border-[var(--theme-border-subtle)] pb-0.5">
                                     <span className="text-[var(--theme-text-secondary)]">Storage Mode:</span>

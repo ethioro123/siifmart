@@ -11,15 +11,20 @@ import { generateZReportReceiptHtml } from '../utils/receiptTemplate';
 import { matchStaffPin } from '../../../utils/employeeIdGenerator';
 
 export const ShiftClosureModal: React.FC = () => {
-    const { t } = useLanguage();
+    const { t, currencySymbol } = useLanguage();
     const { user } = useStore();
-    const { settings, employees, activeSite } = useData();
+    const { settings, employees, activeSite, effectiveCountry } = useData();
     const {
         isClosingShift, setIsClosingShift, closingStep, setClosingStep,
         cashDenominations, handleUpdateDenomination,
         getShiftSummary, isSubmittingShift, handleSubmitShift,
         discrepancyReason, setDiscrepancyReason, activeShift
     } = usePOSCommand();
+
+    const currency = currencySymbol || (effectiveCountry === 'KE' ? 'KSh' : 'ETB');
+    const denominations = effectiveCountry === 'KE'
+        ? [1000, 500, 200, 100, 50, 20, 10, 5, 1]
+        : [200, 100, 50, 20, 10, 5, 1];
 
     const [isManagerPinStep, setIsManagerPinStep] = useState(false);
     const [managerPin, setManagerPin] = useState('');
@@ -118,7 +123,7 @@ export const ShiftClosureModal: React.FC = () => {
                                     Cash Discrepancy — Supervisor PIN Required
                                 </h4>
                                 <p className="text-xs text-amber-700 dark:text-amber-400 leading-relaxed">
-                                    The drawer has a cash discrepancy of <b>{CURRENCY_SYMBOL} {Math.abs(variance).toLocaleString()} ({variance > 0 ? 'Surplus' : 'Shortage'})</b>. A Store Manager or Shift Lead PIN is required to authorize drawer closure.
+                                    The drawer has a cash discrepancy of <b>{currency} {Math.abs(variance).toLocaleString()} ({variance > 0 ? 'Surplus' : 'Shortage'})</b>. A Store Manager or Shift Lead PIN is required to authorize drawer closure.
                                 </p>
                             </div>
                         </div>
@@ -156,7 +161,7 @@ export const ShiftClosureModal: React.FC = () => {
                                 type="button"
                                 onClick={handleVerifyManagerPin}
                                 disabled={managerPin.length < 4 || isSubmittingShift}
-                                className="px-6 py-2.5 bg-rose-600 hover:bg-rose-700 text-white font-bold rounded-xl disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-2 transition-all shadow-xs cursor-pointer text-xs uppercase tracking-wider"
+                                className="px-6 py-2.5 bg-rose-600 hover:bg-rose-700 text-white font-semibold rounded-xl disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-2 transition-all shadow-xs cursor-pointer text-xs"
                             >
                                 {isSubmittingShift ? <Loader2 className="animate-spin" size={16} /> : <CheckCircle2 size={16} />}
                                 Sign Off & Finalize
@@ -166,14 +171,14 @@ export const ShiftClosureModal: React.FC = () => {
                 ) : closingStep === 1 ? (
                     <div className="space-y-4 animate-in fade-in slide-in-from-right-4">
                         {/* Denomination grid */}
-                        <div className="grid grid-cols-2 gap-3">
-                            {[200, 100, 50, 20, 10, 5].map((den) => (
+                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                            {denominations.map((den) => (
                                 <div key={den} className="flex items-center justify-between p-3 bg-[var(--theme-bg-card)] rounded-2xl border border-[var(--theme-border)] shadow-xs transition-all">
-                                    <div className="flex items-center gap-2.5">
-                                        <div className="w-9 h-9 rounded-xl flex items-center justify-center font-bold text-xs select-none bg-[var(--theme-pill-bg)] text-[var(--theme-primary)]">
+                                    <div className="flex items-center gap-2">
+                                        <div className="w-9 h-9 rounded-xl flex items-center justify-center font-mono font-bold text-xs select-none bg-[var(--theme-pill-bg)] text-[var(--theme-primary)]">
                                             {den}
                                         </div>
-                                        <span className="text-xs text-[var(--theme-text-secondary)] font-medium select-none">{t('posCommand.billLabel')}</span>
+                                        <span className="text-[11px] text-[var(--theme-text-secondary)] font-medium select-none">{currency}</span>
                                     </div>
                                     <input
                                         type="number"
@@ -189,16 +194,16 @@ export const ShiftClosureModal: React.FC = () => {
 
                         {/* Total counted */}
                         <div className="p-4 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-2xl flex justify-between items-center shadow-xs">
-                            <span className="text-xs font-bold text-[var(--theme-text-secondary)] uppercase tracking-wider select-none">{t('pos.totalCounted')}</span>
+                            <span className="text-xs font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider select-none">{t('pos.totalCounted')}</span>
                             <span className="text-2xl font-mono font-bold text-[var(--theme-text-primary)]">
-                                {CURRENCY_SYMBOL} {actualCashCounted.toLocaleString()}
+                                {currency} {actualCashCounted.toLocaleString()}
                             </span>
                         </div>
 
                         {/* Continue button */}
                         <button
                             onClick={() => setClosingStep(2)}
-                            className="w-full py-3.5 text-[var(--theme-primary-text)] font-semibold rounded-2xl transition-all active:scale-[0.98] hover:opacity-90 select-none bg-[var(--theme-primary)] shadow-xs cursor-pointer text-xs uppercase tracking-wider"
+                            className="w-full py-3 text-[var(--theme-primary-text)] font-semibold rounded-2xl transition-all active:scale-[0.98] hover:opacity-90 select-none bg-[var(--theme-primary)] shadow-xs cursor-pointer text-sm"
                         >
                             {t('common.continue')}
                         </button>
@@ -230,12 +235,12 @@ export const ShiftClosureModal: React.FC = () => {
                         <div className="p-4 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-2xl space-y-2.5">
                             <div className="flex justify-between text-sm">
                                 <span className="text-[var(--theme-text-secondary)] font-medium">{t('posCommand.expectedFloatCash')}</span>
-                                <span className="text-[var(--theme-text-primary)] font-mono font-bold">{CURRENCY_SYMBOL} {summary.expected?.toLocaleString()}</span>
+                                <span className="text-[var(--theme-text-primary)] font-mono font-bold">{currency} {summary.expected?.toLocaleString()}</span>
                             </div>
                             <div className="h-px bg-[var(--theme-border)]" />
                             <div className="flex justify-between text-sm">
                                 <span className="text-[var(--theme-text-secondary)] font-medium">{t('posCommand.actualCounted')}</span>
-                                <span className="text-[var(--theme-text-primary)] font-mono font-bold">{CURRENCY_SYMBOL} {actualCashCounted.toLocaleString()}</span>
+                                <span className="text-[var(--theme-text-primary)] font-mono font-bold">{currency} {actualCashCounted.toLocaleString()}</span>
                             </div>
                         </div>
 
@@ -245,7 +250,7 @@ export const ShiftClosureModal: React.FC = () => {
                                 <div className="flex justify-between items-center p-4 bg-rose-500/10 border border-rose-500/20 rounded-2xl">
                                     <span className="text-sm font-bold text-rose-600 dark:text-rose-400">{t('pos.variance')}</span>
                                     <span className="text-lg font-mono font-bold text-rose-600 dark:text-rose-400">
-                                        {variance > 0 ? '+' : ''}{CURRENCY_SYMBOL} {variance.toLocaleString()}
+                                        {variance > 0 ? '+' : ''}{currency} {variance.toLocaleString()}
                                     </span>
                                 </div>
                                 <label className="block text-[10px] font-bold text-[var(--theme-text-secondary)] uppercase tracking-wider select-none">{t('posCommand.varianceReasonText')}</label>
@@ -264,7 +269,7 @@ export const ShiftClosureModal: React.FC = () => {
                             <button
                                 type="button"
                                 onClick={() => setClosingStep(1)}
-                                className="flex-1 py-3 bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card-hover)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] font-semibold rounded-2xl border border-[var(--theme-border)] transition-all flex items-center justify-center gap-2 select-none cursor-pointer text-xs uppercase tracking-wider shadow-2xs"
+                                className="flex-1 py-3 bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card-hover)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] font-semibold rounded-2xl border border-[var(--theme-border)] transition-all flex items-center justify-center gap-2 select-none cursor-pointer text-xs shadow-2xs"
                             >
                                 <ArrowLeft size={14} className="text-blue-500" />
                                 {t('posCommand.recount')}
@@ -272,7 +277,7 @@ export const ShiftClosureModal: React.FC = () => {
                             <button
                                 type="button"
                                 onClick={handlePrintZReport}
-                                className="px-4 py-3 bg-[var(--theme-bg-card)] hover:bg-[var(--theme-bg-subtle)] text-[var(--theme-text-primary)] font-semibold rounded-2xl border border-[var(--theme-border)] transition-all flex items-center justify-center gap-1.5 select-none cursor-pointer text-xs uppercase tracking-wider shadow-2xs"
+                                className="px-4 py-3 bg-[var(--theme-bg-card)] hover:bg-[var(--theme-bg-subtle)] text-[var(--theme-text-primary)] font-semibold rounded-2xl border border-[var(--theme-border)] transition-all flex items-center justify-center gap-1.5 select-none cursor-pointer text-xs shadow-2xs"
                                 title="Print Physical Z-Report Slip"
                             >
                                 <Printer size={14} className="text-purple-500" />
@@ -282,7 +287,7 @@ export const ShiftClosureModal: React.FC = () => {
                                 type="button"
                                 onClick={handleFinalizeClick}
                                 disabled={isSubmittingShift || (isVariance && !discrepancyReason)}
-                                className="flex-1 py-3 disabled:opacity-40 border border-transparent disabled:cursor-not-allowed text-[var(--theme-primary-text)] font-semibold rounded-2xl transition-all active:scale-[0.98] flex items-center justify-center gap-2 hover:opacity-90 bg-[var(--theme-primary)] shadow-xs select-none cursor-pointer text-xs uppercase tracking-wider"
+                                className="flex-1 py-3 disabled:opacity-40 border border-transparent disabled:cursor-not-allowed text-[var(--theme-primary-text)] font-semibold rounded-2xl transition-all active:scale-[0.98] flex items-center justify-center gap-2 hover:opacity-90 bg-[var(--theme-primary)] shadow-xs select-none cursor-pointer text-xs"
                             >
                                 {isSubmittingShift ? (
                                     <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />

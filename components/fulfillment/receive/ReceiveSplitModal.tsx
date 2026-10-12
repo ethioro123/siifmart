@@ -11,6 +11,7 @@ import { convertToSellableUnits } from '../useReceiving';
 import { formatPackBadge, formatPOItemDescription, getPOItemPackagingSummary } from '../../procurement/utils';
 import { useData } from '../../../contexts/DataContext';
 import { resolveReceivingPolicy } from '../../../utils/receivingPolicy';
+import { ItemAttributeBadges } from '../ItemAttributeBadges';
 
 interface ReceiveSplitModalProps {
     splitReceivingItem: any;
@@ -171,6 +172,7 @@ export const ReceiveSplitModal: React.FC<ReceiveSplitModalProps> = ({
                                     )}
                                 </p>
                             </div>
+                            <ItemAttributeBadges item={splitReceivingItem} allProducts={allProducts} className="mt-2" />
                         </div>
                     </div>
 

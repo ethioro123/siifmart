@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import Modal from '../../components/Modal';
-import { PurchaseOrder, POItem, Supplier } from '../../types';
+import { PurchaseOrder, POItem, Supplier, Product } from '../../types';
 import { getCountryProfile, type Country } from '../../utils/localization';
 import { useData } from '../../contexts/DataContext';
 import { useStore } from '../../contexts/CentralStore';
-import { suppliersService } from '../../services/supabase.service';
+import { suppliersService, productsService } from '../../services/supabase.service';
 import { usePurchaseOrderMutations } from '../../hooks/usePurchaseOrderMutations';
 import { POItemForm } from './POItemForm';
 import { POSupplierLogistics } from './POSupplierLogistics';
@@ -55,7 +55,17 @@ export const CreatePOModal: React.FC<CreatePOModalProps> = ({
         }
     }, [isOpen, contextSuppliers.length, activeCountry]);
 
+    const [localProducts, setLocalProducts] = useState<Product[]>([]);
+    useEffect(() => {
+        if (isOpen && (!allProducts || allProducts.length === 0) && localProducts.length === 0) {
+            productsService.getAll(undefined, 50).then(res => {
+                setLocalProducts((res.data || []) as Product[]);
+            }).catch(err => logger.error('CreatePOModal', 'Direct products fetch failed', err as Error));
+        }
+    }, [isOpen, allProducts?.length, localProducts.length]);
+
     const allSuppliers = contextSuppliers.length > 0 ? contextSuppliers : localSuppliers;
+    const effectiveProducts = (allProducts && allProducts.length > 0) ? allProducts : localProducts;
 
     const countryWarehouses = useMemo(() => {
         return sites.filter(s =>
@@ -346,6 +356,7 @@ export const CreatePOModal: React.FC<CreatePOModalProps> = ({
                 expectedDate,
                 poNotes,
                 paymentTerms,
+                incoterms,
                 poPriority,
                 userName: user?.name,
                 poRequestedBy
@@ -433,7 +444,7 @@ export const CreatePOModal: React.FC<CreatePOModalProps> = ({
 
                 {/* 2. Add Item Form */}
                 <POItemForm
-                    products={allProducts}
+                    products={effectiveProducts}
                     country={activeCountry}
                     currencySymbol={currencySymbol}
                     onAdd={handleAddItem}

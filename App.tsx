@@ -201,7 +201,7 @@ export default function App() {
             <Routes>
             {/* Dashboard - Accessible by all authenticated users, content strictly scoped by role & active site */}
             <Route path="/" element={
-              <ProtectedRoute module="dashboard">
+              <ProtectedRoute>
                 <Navigate to={getRoleDashboardRoute(user?.role, activeSite?.type)} replace />
               </ProtectedRoute>
             } />

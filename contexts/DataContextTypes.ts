@@ -5,7 +5,7 @@ import {
   ReturnItem, ShiftRecord, HeldOrder, SystemConfig, Site, TransferRecord,
   Notification, SystemLog, JobAssignment, Promotion, DiscountCode, WorkerPoints, PointsTransaction,
   StorePoints, WorkerBonusShare, BonusTier, WarehouseZone, FulfillmentPlan,
-  StaffSchedule, PendingInventoryChange, BarcodeApproval
+  StaffSchedule, PendingInventoryChange, BarcodeApproval, Region
 } from '../types';
 import type { Country } from '../utils/localization';
 
@@ -31,6 +31,13 @@ export interface DataContextType {
   promotions: Promotion[];
   tasks: EmployeeTask[];
   setTasks: (tasks: EmployeeTask[]) => void;
+
+  // Regional Governance Lens
+  regions: Region[];
+  activeRegionCode: string | null;
+  setActiveRegionCode: (code: string | null) => void;
+  canSwitchRegion: boolean;
+  isRegionalUser: boolean;
 
   // Global Raw Data
   allProducts: Product[];

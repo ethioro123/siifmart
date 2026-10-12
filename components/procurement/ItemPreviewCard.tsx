@@ -1,6 +1,6 @@
 import React from 'react';
 import { formatPriceValue } from '../../utils/formatting';
-import { Info, Package, Scale, Thermometer, Tag, AlertTriangle, SlidersHorizontal } from 'lucide-react';
+import { Info, Package, Scale, Thermometer, Tag, AlertTriangle, SlidersHorizontal, Shirt, Droplets, Cpu, UtensilsCrossed } from 'lucide-react';
 import { formatPackBadge, formatPOItemDescription } from './utils';
 import { getSellUnit } from '../../utils/units';
 import { getCategorySpecGroup } from './categoryAttributes';
@@ -107,23 +107,90 @@ export const ItemPreviewCard: React.FC<ItemPreviewCardProps> = ({
         { label: 'Breakable', value: customAttributes?.packaging?.isBreakable, isAlert: true, icon: AlertTriangle }
     ].filter(a => a.value !== null && a.value !== undefined && a.value !== '' && a.value !== false);
 
-    const physicalAttrs = [
-        { label: 'Net Content', value: customAttributes?.physical?.netWeight ? `${customAttributes.physical.netWeight} ${customAttributes?.physical?.sizeType || unit || ''}`.trim() : null },
-        { label: 'Gross Wt', value: customAttributes?.physical?.grossWeight ? (/[a-zA-Z]/.test(customAttributes.physical.grossWeight) ? customAttributes.physical.grossWeight : `${customAttributes.physical.grossWeight} kg`) : null },
-        { label: 'Form', value: customAttributes?.physical?.form },
-        { label: 'Dimensions', value: customAttributes?.physical?.dims },
-        { label: 'Color', value: customAttributes?.physical?.color }
-    ].filter(a => a.value !== null && a.value !== undefined && a.value !== '' && a.value !== false);
-
     // Dynamic category-specific specifications
     const specGroup = getCategorySpecGroup(category, customAttributes?.identity?.subcategory);
-    const categorySpecific = customAttributes?.categorySpecific || {};
+    const domainId = specGroup.id;
+    const phys = customAttributes?.physical || {};
+    const catSpec = customAttributes?.categorySpecific || {};
+    const ident = customAttributes?.identity || {};
+
+    // Dynamic physical specs tailored to category archetype
+    const getPhysicalSectionConfig = () => {
+        if (domainId === 'apparel') {
+            return {
+                title: 'Garment & Fitment Specs',
+                icon: Shirt,
+                colorClass: 'text-indigo-500',
+                attrs: [
+                    { label: 'Size', value: catSpec.apparelSize || ident.variant || (phys.sizeType && !['g', 'kg', 'ml', 'L'].includes(phys.sizeType) ? phys.sizeType : null) },
+                    { label: 'Colorway', value: phys.color },
+                    { label: 'Material', value: catSpec.fabricMaterial || (phys.form && !['Solid', 'Liquid'].includes(phys.form) ? phys.form : null) },
+                    { label: 'Net Weight', value: phys.netWeight ? `${phys.netWeight} ${phys.sizeType || 'g'}`.trim() : null }
+                ]
+            };
+        }
+        if (domainId === 'beverages') {
+            return {
+                title: 'Liquid & Container Specs',
+                icon: Droplets,
+                colorClass: 'text-cyan-500',
+                attrs: [
+                    { label: 'Volume', value: phys.netWeight ? `${phys.netWeight} ${phys.sizeType || 'ml'}`.trim() : null },
+                    { label: 'Container', value: catSpec.containerType || (phys.form && !['Liquid', 'Solid'].includes(phys.form) ? phys.form : null) },
+                    { label: 'Gross Wt', value: phys.grossWeight ? (/[a-zA-Z]/.test(phys.grossWeight) ? phys.grossWeight : `${phys.grossWeight} kg`) : null },
+                    { label: 'Height', value: phys.dims }
+                ]
+            };
+        }
+        if (domainId === 'electronics') {
+            return {
+                title: 'Hardware & Form Factor',
+                icon: Cpu,
+                colorClass: 'text-sky-500',
+                attrs: [
+                    { label: 'Dimensions', value: phys.dims },
+                    { label: 'Device Wt', value: phys.netWeight ? `${phys.netWeight} ${phys.sizeType || 'g'}`.trim() : null },
+                    { label: 'Finish', value: phys.color },
+                    { label: 'Gross Wt', value: phys.grossWeight ? (/[a-zA-Z]/.test(phys.grossWeight) ? phys.grossWeight : `${phys.grossWeight} kg`) : null }
+                ]
+            };
+        }
+        if (domainId === 'homewares_kitchen') {
+            return {
+                title: 'Dimensions & Material Specs',
+                icon: UtensilsCrossed,
+                colorClass: 'text-amber-500',
+                attrs: [
+                    { label: 'Dimensions', value: phys.dims },
+                    { label: 'Capacity', value: catSpec.capacity || phys.capacity },
+                    { label: 'Material', value: catSpec.material || (phys.form && !['Solid', 'Liquid'].includes(phys.form) ? phys.form : null) },
+                    { label: 'Weight', value: phys.netWeight ? `${phys.netWeight} ${phys.sizeType || 'g'}`.trim() : null }
+                ]
+            };
+        }
+        return {
+            title: 'Physical Specs',
+            icon: Scale,
+            colorClass: 'text-emerald-500',
+            attrs: [
+                { label: 'Net Content', value: phys.netWeight ? `${phys.netWeight} ${phys.sizeType || unit || ''}`.trim() : null },
+                { label: 'Gross Wt', value: phys.grossWeight ? (/[a-zA-Z]/.test(phys.grossWeight) ? phys.grossWeight : `${phys.grossWeight} kg`) : null },
+                { label: 'Form', value: phys.form },
+                { label: 'Dimensions', value: phys.dims },
+                { label: 'Color', value: phys.color }
+            ]
+        };
+    };
+
+    const physicalSection = getPhysicalSectionConfig();
+    const physicalAttrs = physicalSection.attrs.filter(a => a.value !== null && a.value !== undefined && a.value !== '' && a.value !== false);
+
     const categoryAttrs = specGroup.fields
         .map(f => {
-            let val = categorySpecific[f.key];
+            let val = catSpec[f.key];
             if (val === undefined || val === null || val === '') {
-                if (f.key === 'modelNumber') val = customAttributes?.identity?.modelNumber;
-                if (f.key === 'variantStyle') val = customAttributes?.identity?.variant;
+                if (f.key === 'modelNumber') val = ident.modelNumber;
+                if (f.key === 'variantStyle') val = ident.variant;
                 if (f.key === 'shelfLifeDays') val = customAttributes?.storage?.shelfLifeDays;
                 if (f.key === 'scentFragrance') val = customAttributes?.descriptive?.scent;
             }
@@ -132,10 +199,17 @@ export const ItemPreviewCard: React.FC<ItemPreviewCardProps> = ({
                 value: val
             };
         })
-        .filter(a => a.value !== null && a.value !== undefined && a.value !== '' && a.value !== false);
+        .filter(a => {
+            if (a.value === null || a.value === undefined || a.value === '' || a.value === false) return false;
+            // Prevent redundant duplicates already displayed in the physical section
+            const isDup = physicalAttrs.some(p => p.label.toLowerCase() === a.label.toLowerCase() || (a.label.toLowerCase() === 'size' && p.label.toLowerCase() === 'size'));
+            return !isDup;
+        });
 
     const storageAttrs = [
         { label: 'Condition', value: customAttributes?.storage?.type },
+        { label: 'Inbound QC', value: customAttributes?.storage?.inboundQcDirective },
+        { label: 'Perishable', value: customAttributes?.storage?.isPerishable ? 'Perishable' : null, isAlert: true, icon: AlertTriangle },
         { label: 'Hazard', value: customAttributes?.storage?.isHazardous ? 'Hazardous Material' : null, isAlert: true, icon: AlertTriangle },
         { label: 'Fragile', value: customAttributes?.storage?.isFragile ? 'Fragile' : null, isAlert: true, icon: AlertTriangle },
         { label: 'Light Sensitive', value: customAttributes?.storage?.isLightSensitive ? 'Light Sensitive' : null },
@@ -155,7 +229,7 @@ export const ItemPreviewCard: React.FC<ItemPreviewCardProps> = ({
             {/* ─── Header: Brand, Name & Normalized Pricing ─── */}
             <div className="flex flex-col sm:flex-row justify-between items-start gap-3 border-b border-[var(--theme-border-subtle)] pb-3.5">
                 <div>
-                    <h3 className="text-base font-black text-[var(--theme-text-primary)] leading-tight tracking-tight">
+                    <h3 className="text-base font-bold text-[var(--theme-text-primary)] leading-tight tracking-tight">
                         {brand && <span className="text-[var(--theme-accent)] font-semibold">{brand} </span>}
                         {name || 'Item Name'}
                     </h3>
@@ -178,7 +252,7 @@ export const ItemPreviewCard: React.FC<ItemPreviewCardProps> = ({
                         {effectiveRetail > 0 && (
                             <div className="flex items-center gap-1.5">
                                 <span className="text-[10px] uppercase font-bold text-[var(--theme-text-secondary)]">Retail:</span>
-                                <span className="text-sm font-black text-[var(--theme-text-primary)] tabular-nums">
+                                <span className="text-sm font-bold text-[var(--theme-text-primary)] tabular-nums">
                                     {currencySymbol} {formatPriceValue(effectiveRetail)}{' '}
                                     <span className="text-[10px] font-semibold text-[var(--theme-text-secondary)] font-sans">
                                         /{sellUnitLabel}
@@ -258,8 +332,8 @@ export const ItemPreviewCard: React.FC<ItemPreviewCardProps> = ({
                 {physicalAttrs.length > 0 && (
                     <div className="p-2.5 rounded-xl bg-[var(--theme-bg-panel)] border border-[var(--theme-border)] space-y-2">
                         <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-[var(--theme-text-secondary)]">
-                            <Scale size={12} className="text-blue-500 shrink-0" />
-                            <span>Physical Specs</span>
+                            <physicalSection.icon size={12} className={`${physicalSection.colorClass} shrink-0`} />
+                            <span>{physicalSection.title}</span>
                         </div>
                         <div className="flex flex-wrap gap-1.5">
                             {physicalAttrs.map((attr, idx) => (

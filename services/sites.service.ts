@@ -3,7 +3,7 @@ import type { Site } from '../types';
 import type { Country } from '../utils/localization';
 import { getEffectiveCountry, getCountryProfile } from '../utils/localization';
 import { getCountryAdminDefaults } from '../utils/countryAdmin';
-import { generateNextSiteCode, formatDisplaySiteId } from '../utils/siteIdGenerator';
+import { generateNextSiteCode, formatDisplaySiteId, isPlaceSpecificCode, generatePlaceSpecificSiteCode } from '../utils/siteIdGenerator';
 
 // Helper: fetch all replenishment source IDs for a list of site IDs
 async function fetchReplenishmentSourceIds(siteIds: string[]): Promise<Record<string, string[]>> {
@@ -56,9 +56,13 @@ function mapSiteRow(s: any, replenishmentSourceIds: string[]): any {
         taxJurisdictionId: s.tax_jurisdiction_id,
         fulfillmentStrategy: s.fulfillment_strategy,
         isFulfillmentNode: s.is_fulfillment_node,
-        code: formatDisplaySiteId({ ...s, country, currency }) || s.code || s.id.substring(0, 8).toUpperCase(),
+        code: (s.code && isPlaceSpecificCode(s.code))
+            ? s.code
+            : formatDisplaySiteId({ ...s, country, currency }) || s.code || s.id.substring(0, 8).toUpperCase(),
         siteNumber: s.site_number,
         barcodePrefix: s.barcode_prefix,
+        regionCode: s.region_code,
+        region_code: s.region_code,
         // Legacy single-source field kept for backward compatibility
         replenishmentSourceId: ids[0] ?? s.replenishment_source_id ?? undefined,
         // New many-to-many field
@@ -143,9 +147,16 @@ export const sitesService = {
             nextSiteNum = maxId + 1;
         }
 
-        // Generate country-scoped human-readable site ID (e.g. KE-01, KE-02, UG-01, TZ-01, RW-01, ET-01)
-        const nextCountryCode = generateNextSiteCode(allSites || [], countryCode);
-        const resolvedCode = site.code && site.code !== 'GENERATED_BY_DB' ? site.code : nextCountryCode;
+        // Generate clean operational site ID: [COUNTRY]-[ZONE]-[TYPE]-[UNIQUE_NUMBER]
+        const placeSpecificCode = generatePlaceSpecificSiteCode({
+            country: countryCode,
+            regionCode: site.region_code || site.regionCode,
+            type: site.type,
+            name: site.name,
+            siteNumber: nextSiteNum,
+            existingSites: allSites || []
+        });
+        const resolvedCode = site.code && site.code !== 'GENERATED_BY_DB' ? site.code : placeSpecificCode;
 
         // Resolve legacy single-source field from new multi-source array
         const sourceIds: string[] = site.replenishmentSourceIds ?? (site.replenishmentSourceId ? [site.replenishmentSourceId] : []);
@@ -169,6 +180,7 @@ export const sitesService = {
             // Keep legacy field in sync with first source
             replenishment_source_id: sourceIds[0] ?? null,
             logistics_zone_id: site.logisticsZoneId ?? null,
+            region_code: site.region_code || site.regionCode || null,
             site_number: nextSiteNum,
             country: siteCountry,
             currency: siteCurrency
@@ -225,6 +237,7 @@ export const sitesService = {
             ['fulfillmentStrategy', 'fulfillment_strategy'],
             ['isFulfillmentNode', 'is_fulfillment_node'],
             ['logisticsZoneId', 'logistics_zone_id'],
+            ['regionCode', 'region_code'],
             ['zoneCount', 'zone_count'],
             ['aisleCount', 'aisle_count'],
             ['binCount', 'bin_count'],

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Box, Plus, Package } from 'lucide-react';
+import { Box, Plus, Package, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { usePOS } from '../POSContext';
 import { useLanguage } from '../../../contexts/LanguageContext';
@@ -247,7 +247,7 @@ export const POSCatalog: React.FC<POSCatalogProps> = ({
                                     }}
                                     className="hidden sm:flex min-w-[36px] min-h-[36px] h-9 w-9 rounded-xl items-center justify-center border border-[var(--theme-border)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-card-hover)] disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-inherit transition-colors font-bold text-sm cursor-pointer active:scale-95"
                                 >
-                                    &laquo;
+                                    <ChevronsLeft size={16} />
                                 </button>
                                 
                                 <button
@@ -260,7 +260,7 @@ export const POSCatalog: React.FC<POSCatalogProps> = ({
                                     }}
                                     className="min-w-[36px] min-h-[36px] h-9 w-9 rounded-xl flex items-center justify-center border border-[var(--theme-border)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-card-hover)] disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-inherit transition-colors font-bold text-base cursor-pointer active:scale-95"
                                 >
-                                    &lsaquo;
+                                    <ChevronLeft size={16} />
                                 </button>
 
                                 {(() => {
@@ -306,7 +306,7 @@ export const POSCatalog: React.FC<POSCatalogProps> = ({
                                     }}
                                     className="min-w-[36px] min-h-[36px] h-9 w-9 rounded-xl flex items-center justify-center border border-[var(--theme-border)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-card-hover)] disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-inherit transition-colors font-bold text-base cursor-pointer active:scale-95"
                                 >
-                                    &rsaquo;
+                                    <ChevronRight size={16} />
                                 </button>
                                 
                                 <button
@@ -319,7 +319,7 @@ export const POSCatalog: React.FC<POSCatalogProps> = ({
                                     }}
                                     className="hidden sm:flex min-w-[36px] min-h-[36px] h-9 w-9 rounded-xl items-center justify-center border border-[var(--theme-border)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-card-hover)] disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-inherit transition-colors font-bold text-sm cursor-pointer active:scale-95"
                                 >
-                                    &raquo;
+                                    <ChevronsRight size={16} />
                                 </button>
                             </div>
                         </div>

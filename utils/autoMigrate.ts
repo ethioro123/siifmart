@@ -39,23 +39,26 @@ export async function runAutoMigration() {
 
     try {
         // 1. Migrate Purchase Orders
-        const { data: orders } = await supabase
-            .from('purchase_orders')
-            .select('id, poNumber, po_number')
-            .or('poNumber.is.null,po_number.is.null');
+        try {
+            const { data: orders, error: poError } = await supabase
+                .from('purchase_orders')
+                .select('id, po_number')
+                .is('po_number', null);
 
-        if (orders && orders.length > 0) {
-            for (const order of orders) {
-                const friendlyId = generatePOId();
-                await supabase
-                    .from('purchase_orders')
-                    .update({
-                        poNumber: friendlyId,
-                        po_number: friendlyId
-                    })
-                    .eq('id', order.id);
+            if (!poError && orders && orders.length > 0) {
+                for (const order of orders) {
+                    const friendlyId = generatePOId();
+                    await supabase
+                        .from('purchase_orders')
+                        .update({
+                            po_number: friendlyId
+                        })
+                        .eq('id', order.id);
+                }
+                totalUpdated += orders.length;
             }
-            totalUpdated += orders.length;
+        } catch {
+            console.warn('⚠️ Skipping PO migration.');
         }
 
         // 2. Migrate Sales

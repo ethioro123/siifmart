@@ -40,7 +40,7 @@ const LOCATION_CATEGORIES: CategoryConfig[] = [
         shadowColor: 'shadow-[0_0_8px_rgba(44,94,59,0.3)]',
     },
     {
-        types: ['Dark Store'],
+        types: ['Dark Store', 'Online Store'],
         label: 'Online Store',
         desc: 'Online Fulfillment',
         dotColor: 'bg-amber-600',

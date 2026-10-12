@@ -16,11 +16,20 @@ export function canSwitchCountry(user: { role?: string; title?: string } | null 
  * Defaults all existing/unassigned data to 'ET' (Ethiopia).
  */
 export function getUserCountry(
-    user: { role?: string; title?: string; siteId?: string; id?: string; employeeId?: string } | null | undefined,
+    user: { role?: string; title?: string; siteId?: string; id?: string; employeeId?: string; code?: string; email?: string } | null | undefined,
     sites: Array<{ id: string; country?: string; currency?: string }>,
-    employees?: Array<{ id: string; siteId?: string; site_id?: string; country?: string }>
+    employees?: Array<{ id: string; siteId?: string; site_id?: string; country?: string; code?: string; email?: string }>
 ): Country {
     if (!user) return 'ET';
+
+    // 0. Sovereign country prefix detection (immune to asynchronous site fetch latency)
+    const userCode = user.code?.toUpperCase();
+    const userEmail = (user as any).email?.toLowerCase();
+    if (userCode?.startsWith('KE-') || userEmail?.startsWith('ke-')) return 'KE';
+    if (userCode?.startsWith('ET-') || userEmail?.startsWith('et-')) return 'ET';
+    if (userCode?.startsWith('UG-') || userEmail?.startsWith('ug-')) return 'UG';
+    if (userCode?.startsWith('RW-') || userEmail?.startsWith('rw-')) return 'RW';
+    if (userCode?.startsWith('TZ-') || userEmail?.startsWith('tz-')) return 'TZ';
     
     // 1. Look up site and country from employee profile
     let targetSiteId = user.siteId;
@@ -28,6 +37,10 @@ export function getUserCountry(
         const emp = employees.find(e => e.id === user.employeeId || e.id === user.id);
         if (emp) {
             if (emp.country) return emp.country as Country;
+            const empCode = emp.code?.toUpperCase();
+            const empEmail = emp.email?.toLowerCase();
+            if (empCode?.startsWith('KE-') || empEmail?.startsWith('ke-')) return 'KE';
+            if (empCode?.startsWith('ET-') || empEmail?.startsWith('et-')) return 'ET';
             targetSiteId = targetSiteId || emp.siteId || emp.site_id;
         }
     }
@@ -47,3 +60,58 @@ export function getUserCountry(
     // Baseline rule: All existing/unassigned employees and sites belong to Ethiopia
     return 'ET';
 }
+
+/**
+ * Check if user is an HQ Executive / Administrator who can switch regional lenses.
+ * Regional managers and regional staff are locked to their own region.
+ */
+export function canSwitchRegion(user: { role?: string; title?: string } | null | undefined): boolean {
+    if (!user) return false;
+    const role = (user.role || '').toLowerCase();
+    const title = (user.title || '').toLowerCase();
+    return (
+        role === 'ceo' ||
+        role === 'super_admin' ||
+        role === 'admin' ||
+        role === 'operations_manager' ||
+        role === 'finance_manager' ||
+        role === 'auditor' ||
+        title.includes('ceo') ||
+        title.includes('chief executive')
+    );
+}
+
+/**
+ * Resolve user's assigned region code if they are regional or branch staff.
+ */
+export function getUserRegion(
+    user: { role?: string; regionCode?: string; region_code?: string; siteId?: string; id?: string; employeeId?: string } | null | undefined,
+    sites?: Array<{ id: string; regionCode?: string; region_code?: string; code?: string }>,
+    employees?: Array<{ id: string; regionCode?: string; region_code?: string; siteId?: string; site_id?: string }>
+): string | null {
+    if (!user) return null;
+
+    // 1. Employee profile region_code
+    if (employees && employees.length > 0) {
+        const emp = employees.find(e => e.id === user.employeeId || e.id === user.id);
+        if (emp && (emp.regionCode || (emp as any).region_code)) {
+            return emp.regionCode || (emp as any).region_code;
+        }
+    }
+
+    // 2. Direct property on user object
+    if (user.regionCode || (user as any).region_code) {
+        return user.regionCode || (user as any).region_code;
+    }
+
+    // 3. Fallback to user's assigned site's region
+    if (user.siteId && sites && sites.length > 0) {
+        const site = sites.find(s => s.id === user.siteId || s.code === user.siteId);
+        if (site && (site.regionCode || (site as any).region_code)) {
+            return site.regionCode || (site as any).region_code;
+        }
+    }
+
+    return null;
+}
+

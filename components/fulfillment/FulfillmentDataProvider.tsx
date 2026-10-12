@@ -134,9 +134,9 @@ export const FulfillmentDataProvider = ({ children }: { children: ReactNode }) =
     /**
      * RULE 10 — Zero Eager History: on-demand history loader.
      * Called ONLY when the user explicitly switches to the History view in any tab.
-     * Clears stale cache and fetches the 25 most recent completed/cancelled jobs.
+     * Clears stale cache and fetches completed/cancelled jobs on demand.
      */
-    const loadHistoricalJobs = useCallback(async (limit: number = 25) => {
+    const loadHistoricalJobs = useCallback(async (limit: number = 200) => {
         if (!activeSiteId) return;
         try {
             const activeCountryCode = effectiveCountry || settings?.country || 'ET';

@@ -122,22 +122,22 @@ export const APPROVAL_WORKFLOWS: Record<string, ApprovalWorkflow> = {
     purchase_order: {
         name: 'Purchase Order Approval',
         levels: [
-            { roles: ['procurement_manager'], threshold: 10000 },
-            { roles: ['procurement_manager', 'finance_manager'], threshold: 50000 },
+            { roles: ['procurement_manager', 'regional_procurement_lead'], threshold: 10000 },
+            { roles: ['procurement_manager', 'regional_procurement_lead', 'finance_manager', 'regional_finance_officer'], threshold: 50000 },
             { roles: ['procurement_manager', 'finance_manager', 'regional_manager', 'operations_manager', 'super_admin'], threshold: Infinity }
         ]
     },
     expense: {
         name: 'Expense Approval',
         levels: [
-            { roles: ['store_manager', 'warehouse_manager', 'regional_manager', 'operations_manager'], threshold: 1000 },
-            { roles: ['finance_manager'], threshold: 5000 },
+            { roles: ['store_manager', 'warehouse_manager', 'regional_manager', 'operations_manager', 'regional_finance_officer'], threshold: 1000 },
+            { roles: ['finance_manager', 'regional_finance_officer'], threshold: 5000 },
             { roles: ['finance_manager', 'super_admin'], threshold: Infinity }
         ]
     },
     employee_hire: {
         name: 'Employee Hiring Approval',
-        levels: [{ roles: ['hr', 'hr_manager', 'regional_manager', 'operations_manager', 'super_admin'] }]
+        levels: [{ roles: ['hr', 'hr_manager', 'regional_hr_officer', 'regional_manager', 'operations_manager', 'super_admin'] }]
     },
     inventory_adjustment: {
         name: 'Inventory Adjustment Approval',
@@ -167,7 +167,8 @@ export const APPROVAL_WORKFLOWS: Record<string, ApprovalWorkflow> = {
 // ============================================================================
 
 export function hasPermission(userRole: UserRole, permission: Permission): boolean {
-    const rolePermissions = ACTION_PERMISSIONS[userRole];
+    const normalizedRole = ((userRole as string) || '').toLowerCase().trim().replace(/[\s-]/g, '_') as UserRole;
+    const rolePermissions = ACTION_PERMISSIONS[normalizedRole] || ACTION_PERMISSIONS[userRole];
     if (!rolePermissions) {
         console.warn(`User role "${userRole}" not found in permissions matrix.`);
         return false;
@@ -184,7 +185,8 @@ export function hasAnyPermission(userRole: UserRole, permissions: Permission[]):
 }
 
 export function getRolePermissions(userRole: UserRole): Permission[] {
-    return ACTION_PERMISSIONS[userRole];
+    const normalizedRole = ((userRole as string) || '').toLowerCase().trim().replace(/[\s-]/g, '_') as UserRole;
+    return ACTION_PERMISSIONS[normalizedRole] || ACTION_PERMISSIONS[userRole] || [];
 }
 
 export function checkSoDViolations(userRole: UserRole): Permission[] {
@@ -208,7 +210,19 @@ export function getRequiredApprovers(workflowName: string, amount?: number): Use
     return workflow.levels[workflow.levels.length - 1].roles;
 }
 
-export function canApprove(userRole: UserRole, workflowName: string, amount?: number): boolean {
+export function canApprove(
+    userRole: UserRole,
+    workflowName: string,
+    amount?: number,
+    customThreshold?: number
+): boolean {
+    // Dynamic budget threshold support: if caller provides custom threshold from region/site budget settings,
+    // and amount is within that threshold, regional approver can approve directly
+    if (customThreshold !== undefined && amount !== undefined && amount <= customThreshold) {
+        if (['regional_manager', 'regional_procurement_lead', 'regional_finance_officer'].includes(userRole)) {
+            return true;
+        }
+    }
     const requiredApprovers = getRequiredApprovers(workflowName, amount);
     return requiredApprovers.includes(userRole);
 }

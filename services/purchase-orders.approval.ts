@@ -4,6 +4,7 @@ import { systemLogsService } from './system-logs.service';
 import type { POApprovalPayload, PORejectionPayload } from '../types/procurement-zero-trust';
 import { getById } from './purchase-orders.read';
 import { wmsJobsService } from './wms-jobs.service';
+import { regionsService } from './regions.service';
 
 export const purchaseOrdersApprovalService = {
   /**
@@ -42,6 +43,26 @@ export const purchaseOrdersApprovalService = {
       throw new Error('Managerial Accountability Violation: Structured reason code is mandatory for PO approval.');
     }
 
+    // Dynamic Regional Autonomous PO Limit Check
+    const poRegionCode = currentPO.regionCode || (currentPO as any).region_code;
+    let isEscalatedToHq = Boolean(currentPO.requiresHqApproval || (currentPO as any).requires_hq_approval);
+
+    if (poRegionCode) {
+      const region = await regionsService.getRegionByCode(poRegionCode);
+      const autonomousLimit = region?.autonomous_po_limit ?? 150000;
+      if (currentPO.totalAmount > autonomousLimit) {
+        isEscalatedToHq = true;
+        const isRegionalRole = ['regional_manager', 'regional_procurement_lead', 'regional_finance_officer'].includes(approverRole);
+        const isHqRole = ['super_admin', 'CEO', 'ceo', 'admin', 'procurement_manager', 'finance_manager', 'operations_manager'].includes(approverRole);
+
+        if (isRegionalRole && !isHqRole) {
+          throw new Error(
+            `Autonomous Cap Exceeded: Order total (${currentPO.totalAmount.toLocaleString()} ${currentPO.currency || ''}) exceeds your region's autonomous limit of ${autonomousLimit.toLocaleString()} ${currentPO.currency || ''}. This order requires National HQ sign-off.`
+          );
+        }
+      }
+    }
+
     // 2. Execute via Server-Side RPC
     const { data: rpcResult, error: rpcError } = await supabase.rpc('approve_purchase_order', {
       p_po_id: poId,
@@ -58,12 +79,12 @@ export const purchaseOrdersApprovalService = {
       if (rpcError.code === '42883' || rpcError.message?.includes('function public.approve_purchase_order') || rpcError.message?.includes('does not exist')) {
         logger.warn('PurchaseOrdersApproval', 'approve_purchase_order RPC not found, falling back to direct update', { error: String(rpcError.message) });
         
-        const approvalTag = `\n[APPROVED_BY:${approverName} (${approverRole}):${new Date().toISOString()} REASON:${reasonCode}]`;
+        const approvalTag = isEscalatedToHq
+          ? `\n[APPROVED_BY:${approverName} (${approverRole}):${new Date().toISOString()} REASON:${reasonCode} (NATIONAL_HQ_ESCALATION)]`
+          : `\n[APPROVED_BY:${approverName} (${approverRole}):${new Date().toISOString()} REASON:${reasonCode}]`;
         const updatedNotes = (currentPO.notes || '') + approvalTag + (notes ? `\n[APPROVAL_NOTE: ${notes}]` : '');
 
-        const { error: updateError } = await supabase
-          .from('purchase_orders')
-          .update({
+        const updatePayload: any = {
             status: 'Approved',
             approved_by: approverName,
             approved_at: new Date().toISOString(),
@@ -73,8 +94,18 @@ export const purchaseOrdersApprovalService = {
             approval_reason_code: reasonCode,
             approval_notes: notes,
             notes: updatedNotes,
-            updated_at: new Date().toISOString()
-          })
+            updated_at: new Date().toISOString(),
+            requires_hq_approval: false
+        };
+
+        if (isEscalatedToHq) {
+            updatePayload.hq_approved_by = approverName;
+            updatePayload.hq_approved_at = new Date().toISOString();
+        }
+
+        const { error: updateError } = await supabase
+          .from('purchase_orders')
+          .update(updatePayload)
           .eq('id', poId);
 
         if (updateError) throw updateError;

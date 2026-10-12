@@ -143,6 +143,11 @@ export const TransferActiveList: React.FC<TransferActiveListProps> = ({
                     <span className="font-mono tabular-nums font-semibold text-[var(--theme-text-primary)] text-sm truncate">
                         {formatJobId(transfer)}
                     </span>
+                    {(transfer.isInterRegion || (transfer.sourceRegionCode && transfer.destRegionCode && transfer.sourceRegionCode !== transfer.destRegionCode)) && (
+                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] border border-[var(--theme-accent)]/20 shrink-0">
+                            Inter-Region
+                        </span>
+                    )}
                 </div>
                 {/* Right: Status badge + Chevron */}
                 <div className="flex items-center gap-3 shrink-0">

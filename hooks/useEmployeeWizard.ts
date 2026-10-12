@@ -119,7 +119,11 @@ export function useEmployeeWizard({
 
    const getAvailableDepartments = () => {
       if (!user?.role) return [];
-      if (['super_admin', 'admin', 'hr', 'hr_manager', 'regional_manager', 'operations_manager', 'finance_manager', 'supply_chain_manager', 'procurement_manager'].includes(user.role)) return DEPARTMENTS;
+      if (['super_admin', 'admin', 'hr', 'hr_manager', 'regional_manager', 'regional_hr_officer', 'operations_manager', 'finance_manager', 'supply_chain_manager', 'procurement_manager'].includes(user.role)) return DEPARTMENTS;
+      if (user.role === 'regional_procurement_lead') return ['Procurement', 'Logistics & Warehouse'];
+      if (user.role === 'regional_finance_officer') return ['Management'];
+      if (user.role === 'regional_logistics_lead') return ['Transport', 'Logistics & Warehouse'];
+      if (user.role === 'regional_security_supervisor') return ['Security'];
       if (user.role === 'store_manager') return ['Retail Operations', 'Logistics & Warehouse', 'Transport'];
       if (user.role === 'warehouse_manager') return ['Logistics & Warehouse', 'Transport'];
       if (user.role === 'logistics_manager') return ['Transport', 'Logistics & Warehouse'];
@@ -381,6 +385,8 @@ export function useEmployeeWizard({
             id: employeeId,
             code: employeeCode,
             siteId: validatedSiteId,
+            regionCode: assignedSite?.region_code || (assignedSite as any)?.regionCode || undefined,
+            region_code: assignedSite?.region_code || (assignedSite as any)?.regionCode || undefined,
             name: `${newEmpData.firstName} ${newEmpData.lastName}`,
             role: newEmpData.role,
             email: signupEmail,
@@ -433,7 +439,7 @@ export function useEmployeeWizard({
          }
 
          resetWizard();
-         addNotification('success', `✅ Employee Profile Created!\n\n${newEmpData.firstName} has been onboarded successfully.`);
+         addNotification('success', `Employee Profile Created!\n\n${newEmpData.firstName} has been onboarded successfully.`);
          return null;
       } catch (error: any) {
          logger.error('useEmployeeWizard', 'Failed to create employee:', error);

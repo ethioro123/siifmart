@@ -42,7 +42,7 @@ const LABEL_SIZES = {
 };
 
 export default function LabelPrintModal({ isOpen, onClose, labels, onPrint }: LabelPrintModalProps) {
-    const { products, activeSite, effectiveCountry, settings } = useData();
+    const { products, activeSite, effectiveCountry, settings, allProducts } = useData();
     const activeCurrency = (activeSite as any)?.currency || (effectiveCountry === 'KE' || settings?.country === 'KE' ? 'KSh' : 'ETB');
     const [labelSize, setLabelSize] = useState<LabelSize>('medium');
     const [activeLabels, setActiveLabels] = useState<LabelData[]>(labels || []);
@@ -58,8 +58,9 @@ export default function LabelPrintModal({ isOpen, onClose, labels, onPrint }: La
 
     if (!isOpen) return null;
 
+    const availableProducts: Product[] = (products && products.length > 0) ? products : (allProducts || []);
     const searchResults = searchQuery.trim()
-        ? products.filter(p =>
+        ? availableProducts.filter((p: Product) =>
             p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
             p.sku.toLowerCase().includes(searchQuery.toLowerCase()) ||
             (p.barcode && p.barcode.toLowerCase().includes(searchQuery.toLowerCase()))
@@ -197,7 +198,7 @@ export default function LabelPrintModal({ isOpen, onClose, labels, onPrint }: La
         <>
             {/* Modal Overlay */}
             <div className="fixed inset-0 bg-black/40 backdrop-blur-md z-[9999] flex items-center justify-center p-4">
-                <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col shadow-2xl">
+                <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-3xl max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col shadow-2xl">
                     {/* Header */}
                     <div className="p-5 border-b border-[var(--theme-border)] flex justify-between items-center bg-[var(--theme-bg-card)]">
                         <div>
@@ -270,7 +271,7 @@ export default function LabelPrintModal({ isOpen, onClose, labels, onPrint }: La
                             {/* Dropdown Results */}
                             {searchResults.length > 0 && (
                                 <div className="absolute top-full left-0 right-0 mt-1.5 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl shadow-2xl z-50 overflow-hidden divide-y divide-[var(--theme-border)] max-h-60 overflow-y-auto">
-                                    {searchResults.map((product) => (
+                                    {searchResults.map((product: Product) => (
                                         <button
                                             key={product.id}
                                             type="button"

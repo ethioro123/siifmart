@@ -14,6 +14,7 @@ function mapSaleRow(s: any): any {
         customerId: s.customer_id,
         receiptNumber: s.receipt_number,
         customerName: s.customers?.name,
+        type: s.type || 'In-Store',
         items: Array.isArray(s.sale_items)
             ? s.sale_items.map((i: any) => ({
                 ...i,
@@ -32,7 +33,7 @@ export const salesService = {
         // Nested sale_items and deep product joins are loaded on-demand via getById().
         const selectFields = filters?.includeItems
             ? '*, sale_items(*, products(category)), customers!left(*)'
-            : 'id, site_id, customer_id, sale_date, subtotal, tax, total, payment_method, status, amount_tendered, change, cashier_name, receipt_number, type, fulfillment_status, created_at';
+            : 'id, site_id, customer_id, sale_date, subtotal, tax, total, payment_method, status, amount_tendered, change, cashier_name, receipt_number, fulfillment_status, release_status, country_code, currency, created_at';
 
         let query = supabase
             .from('sales')

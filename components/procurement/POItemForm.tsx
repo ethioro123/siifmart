@@ -1,14 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { POItem, Product } from '../../types';
-import { Plus, Package, Save, Info, ChevronDown, ChevronRight } from 'lucide-react';
+import { Package, Plus } from 'lucide-react';
 import { useStore } from '../../contexts/CentralStore';
 import { generateSequentialSKU } from '../../utils/skuGenerator';
 import { getSellUnit } from '../../utils/units';
 import { ItemPreviewCard } from './ItemPreviewCard';
 import { BuyingAttributes } from './BuyingAttributes';
 import { SellingAttributes } from './SellingAttributes';
-import { CatalogSearch } from './CatalogSearch';
 import { POItemOrderDetails } from './POItemOrderDetails';
+import { CatalogItemSection } from './CatalogItemSection';
+import { POItemFormActions } from './POItemFormActions';
 import { isConsumableCategory, getPOItemCategorySpecsSummary } from './utils';
 import type { Country } from '../../utils/localization';
 
@@ -16,7 +17,7 @@ const createDefaultCustomAttributes = () => ({
     identity: { variant: '', type: '', subcategory: '', modelNumber: '' },
     physical: { netWeight: '', grossWeight: '', volume: '', unit: '', sizeType: '', dims: '', color: '', form: '', texture: '' },
     packaging: { unitSize: '', packQty: '', caseSize: '', packagingLevel: '', material: '', isBreakable: false, packageType: '' },
-    storage: { type: 'Ambient', isPerishable: false, stackLimit: '', isHazardous: false, isFragile: false, isLightSensitive: false },
+    storage: { type: 'Ambient', isPerishable: false, stackLimit: '', isHazardous: false, isFragile: false, isLightSensitive: false, inboundQcDirective: '' },
     commercial: { isWeighted: false, sellBy: 'Unit', priceType: 'Fixed', isBundleEligible: false, isReturnable: true },
     descriptive: { usage: '', audience: '', ingredients: '', keyFeatures: '', scent: '', flavor: '', strength: '' },
     categorySpecific: {} as Record<string, any>
@@ -33,25 +34,16 @@ interface POItemFormProps {
 }
 
 export const POItemForm: React.FC<POItemFormProps> = ({
-    products,
-    country,
-    currencySymbol = 'ETB',
-    onAdd,
-    onUpdate,
-    onCancelEdit,
-    editingItem
+    products, country, currencySymbol = 'ETB',
+    onAdd, onUpdate, onCancelEdit, editingItem
 }) => {
     const { showToast } = useStore();
 
-    // Form State
+    // Form & Search State
     const [productType, setProductType] = useState<'catalog' | 'new'>('catalog');
     const [currentProductToAdd, setCurrentProductToAdd] = useState('');
-
-    // Search State
     const [searchTerm, setSearchTerm] = useState('');
     const [isSearchOpen, setIsSearchOpen] = useState(false);
-
-    // Filter products for catalog search — handled inside CatalogSearch component
 
     // Custom Item Fields
     const [customItemName, setCustomItemName] = useState('');
@@ -64,13 +56,10 @@ export const POItemForm: React.FC<POItemFormProps> = ({
     // Enterprise Attributes State (6-Layer Model)
     const [customAttributes, setCustomAttributes] = useState(createDefaultCustomAttributes);
 
-    // Buying: Order Qty + Unit Cost
+    // Quantity, Cost & Retail Price
     const [currentQty, setCurrentQty] = useState(0);
     const [currentCost, setCurrentCost] = useState(0);
-    // Selling: Retail Price
     const [currentRetailPrice, setCurrentRetailPrice] = useState(0);
-
-    // Validation State
     const [errors, setErrors] = useState<Record<string, string>>({});
 
     const selectedCatalogProduct = productType === 'catalog' ? products.find(p => p.id === currentProductToAdd) : null;
@@ -155,6 +144,29 @@ export const POItemForm: React.FC<POItemFormProps> = ({
         setCurrentCost(0);
         setCurrentRetailPrice(0);
         setCustomAttributes(createDefaultCustomAttributes());
+    };
+
+    const handleSelectCatalogProduct = (p: Product) => {
+        setSelectedMainCategory(p.category || '');
+        setCustomItemBrand(p.brand || '');
+        setCustomItemName(p.name);
+        setCustomItemSize(p.size || '');
+        setCustomItemUnit(p.unit || '');
+        setCustomItemImage(p.image || '');
+
+        const pAttrs = p.customAttributes || (p as any).custom_attributes;
+        if (pAttrs) {
+            setCustomAttributes((prev: any) => ({
+                ...prev,
+                identity: { ...prev.identity, ...(pAttrs.identity || {}) },
+                physical: { ...prev.physical, ...(pAttrs.physical || {}) },
+                packaging: { ...prev.packaging, ...(pAttrs.packaging || {}) },
+                storage: { ...prev.storage, ...(pAttrs.storage || {}) },
+                commercial: { ...prev.commercial, ...(pAttrs.commercial || {}) },
+                descriptive: { ...prev.descriptive, ...(pAttrs.descriptive || {}) },
+                categorySpecific: { ...prev.categorySpecific, ...(pAttrs.categorySpecific || {}) },
+            }));
+        }
     };
 
     const handleAddItem = async () => {
@@ -251,9 +263,25 @@ export const POItemForm: React.FC<POItemFormProps> = ({
             finalUnit = product.unit || undefined;
             finalCategory = product.category || undefined;
             finalImage = product.image || undefined;
-            finalCustomAttributes = product.customAttributes || (product as Record<string, any>)['custom_attributes'] || customAttributes;
+            const baseAttrs = product.customAttributes || (product as Record<string, any>)['custom_attributes'] || {};
+            finalCustomAttributes = {
+                ...baseAttrs,
+                ...customAttributes,
+                identity: { ...(baseAttrs.identity || {}), ...(customAttributes.identity || {}) },
+                physical: { ...(baseAttrs.physical || {}), ...(customAttributes.physical || {}) },
+                packaging: { ...(baseAttrs.packaging || {}), ...(customAttributes.packaging || {}) },
+                storage: { ...(baseAttrs.storage || {}), ...(customAttributes.storage || {}) },
+                commercial: { ...(baseAttrs.commercial || {}), ...(customAttributes.commercial || {}) },
+                descriptive: { ...(baseAttrs.descriptive || {}), ...(customAttributes.descriptive || {}) },
+                categorySpecific: { ...(baseAttrs.categorySpecific || {}), ...(customAttributes.categorySpecific || {}) },
+            };
             finalPackQty = product.packQuantity || (product as Record<string, any>)['pack_quantity'] || parseInt(finalCustomAttributes?.packaging?.packQty) || 1;
-            finalDescription = product.description || undefined;
+            const catSpecs = getPOItemCategorySpecsSummary({
+                category: finalCategory || '',
+                subcategory: finalCustomAttributes.identity?.subcategory,
+                customAttributes: finalCustomAttributes
+            });
+            finalDescription = product.description || catSpecs.summaryText || undefined;
         }
 
         const isSingleLevel = (finalCustomAttributes?.packaging?.packagingLevel === 'single') || (finalPackQty <= 1 && (!caseSize || caseSize <= 0));
@@ -302,7 +330,7 @@ export const POItemForm: React.FC<POItemFormProps> = ({
 
     return (
         <div id="po-item-form-container" className="bg-[var(--theme-bg-panel)] border border-[var(--theme-border)] rounded-2xl p-6 shadow-sm relative overflow-hidden group">
-            <h3 className="text-xs font-black text-[var(--theme-text-primary)] uppercase tracking-wider mb-4 flex items-center gap-2 relative z-10">
+            <h3 className="text-xs font-bold text-[var(--theme-text-primary)] uppercase tracking-wider mb-4 flex items-center gap-2 relative z-10">
                 <div className="p-1.5 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 rounded-xl border border-emerald-500/20">
                     <Plus size={15} />
                 </div>
@@ -351,41 +379,36 @@ export const POItemForm: React.FC<POItemFormProps> = ({
             {/* ─── Form Body ────────────────────────────── */}
             <div className="relative z-10 space-y-6">
                 {productType === 'catalog' ? (
-                    /* ═══ CATALOG SEARCH ═════════════════════ */
-                    <div className="space-y-6">
-                        <CatalogSearch
-                            products={products}
-                            searchTerm={searchTerm}
-                            setSearchTerm={setSearchTerm}
-                            isSearchOpen={isSearchOpen}
-                            setIsSearchOpen={setIsSearchOpen}
-                            currentProductToAdd={currentProductToAdd}
-                            setCurrentProductToAdd={setCurrentProductToAdd}
-                            setCurrentCost={setCurrentCost}
-                            setCurrentRetailPrice={setCurrentRetailPrice}
-                            setCustomItemUnit={setCustomItemUnit}
-                            errors={errors}
-                            setErrors={setErrors}
-                        />
-                        <POItemOrderDetails
-                            currentQty={currentQty}
-                            setCurrentQty={setCurrentQty}
-                            currentCost={currentCost}
-                            setCurrentCost={setCurrentCost}
-                            currentRetailPrice={currentRetailPrice}
-                            setCurrentRetailPrice={setCurrentRetailPrice}
-                            unitsPerOrderUnit={unitsPerOrderUnit}
-                            totalUnits={totalUnits}
-                            showConversion={showConversion}
-                            unitSuffix={unitSuffix}
-                            orderUnitName={orderUnitName}
-                            sellUnit={customItemUnit ? getSellUnit(customItemUnit).shortLabel : 'unit'}
-                            currencySymbol={currencySymbol}
-                            showRetailInput={true}
-                            errors={errors}
-                            setErrors={setErrors}
-                        />
-                    </div>
+                    <CatalogItemSection
+                        products={products}
+                        searchTerm={searchTerm}
+                        setSearchTerm={setSearchTerm}
+                        isSearchOpen={isSearchOpen}
+                        setIsSearchOpen={setIsSearchOpen}
+                        currentProductToAdd={currentProductToAdd}
+                        setCurrentProductToAdd={setCurrentProductToAdd}
+                        selectedCatalogProduct={selectedCatalogProduct}
+                        selectedMainCategory={selectedMainCategory}
+                        customAttributes={customAttributes}
+                        setCustomAttributes={setCustomAttributes}
+                        currentQty={currentQty}
+                        setCurrentQty={setCurrentQty}
+                        currentCost={currentCost}
+                        setCurrentCost={setCurrentCost}
+                        currentRetailPrice={currentRetailPrice}
+                        setCurrentRetailPrice={setCurrentRetailPrice}
+                        setCustomItemUnit={setCustomItemUnit}
+                        onSelectProduct={handleSelectCatalogProduct}
+                        unitsPerOrderUnit={unitsPerOrderUnit}
+                        totalUnits={totalUnits}
+                        showConversion={showConversion}
+                        unitSuffix={unitSuffix}
+                        orderUnitName={orderUnitName}
+                        sellUnit={customItemUnit ? getSellUnit(customItemUnit).shortLabel : 'unit'}
+                        currencySymbol={currencySymbol}
+                        errors={errors}
+                        setErrors={setErrors}
+                    />
                 ) : (
                     /* ═══ CUSTOM: STRUCTURED SPEC & PRICING ═════ */
                     <div className="space-y-6">
@@ -405,7 +428,7 @@ export const POItemForm: React.FC<POItemFormProps> = ({
                             setErrors={setErrors}
                         />
 
-                        {/* 2. Order Quantity & Wholesale Cost (Enables accurate margin calculation) */}
+                        {/* 2. Order Quantity & Wholesale Cost */}
                         <POItemOrderDetails
                             currentQty={currentQty}
                             setCurrentQty={setCurrentQty}
@@ -423,6 +446,8 @@ export const POItemForm: React.FC<POItemFormProps> = ({
                             showRetailInput={false}
                             errors={errors}
                             setErrors={setErrors}
+                            selectedMainCategory={selectedMainCategory}
+                            customAttributes={customAttributes}
                         />
 
                         {/* 3. Selling & Retail Panel (Margin % & Shelf Price) */}
@@ -437,6 +462,7 @@ export const POItemForm: React.FC<POItemFormProps> = ({
                             customAttributes={customAttributes}
                             setCustomAttributes={setCustomAttributes}
                             currencySymbol={currencySymbol}
+                            selectedMainCategory={selectedMainCategory}
                             errors={errors}
                             setErrors={setErrors}
                         />
@@ -444,34 +470,11 @@ export const POItemForm: React.FC<POItemFormProps> = ({
                 )}
 
                 {/* ─── ACTION BUTTON ─── */}
-                <div className="pt-2 border-t border-[var(--theme-border-subtle)]">
-                    {editingItem ? (
-                        <div className="flex w-full gap-2 font-black">
-                            <button
-                                type="button"
-                                onClick={onCancelEdit}
-                                className="w-1/3 py-2.5 bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-border-subtle)] text-[var(--theme-text-secondary)] rounded-xl transition-colors cursor-pointer text-xs font-semibold border border-[var(--theme-border)] active:scale-[0.98]"
-                            >
-                                Cancel
-                            </button>
-                            <button
-                                type="button"
-                                onClick={handleAddItem}
-                                className="w-2/3 py-2.5 bg-[var(--theme-primary)] text-[var(--theme-primary-text)] hover:opacity-95 active:scale-[0.98] rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer text-xs font-semibold shadow-sm"
-                            >
-                                <Save size={15} /> Update Item
-                            </button>
-                        </div>
-                    ) : (
-                        <button
-                            type="button"
-                            onClick={handleAddItem}
-                            className="w-full py-2.5 bg-[var(--theme-primary)] text-[var(--theme-primary-text)] hover:opacity-95 active:scale-[0.98] rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer text-xs font-semibold shadow-sm"
-                        >
-                            <Plus size={15} /> Add Item to Order
-                        </button>
-                    )}
-                </div>
+                <POItemFormActions
+                    editingItem={editingItem}
+                    onCancelEdit={onCancelEdit}
+                    onSubmit={handleAddItem}
+                />
             </div>
         </div>
     );

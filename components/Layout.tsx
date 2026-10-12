@@ -15,14 +15,13 @@ export default function Layout({ children }: { children?: React.ReactNode }) {
   const prevSiteIdRef = useRef<string | undefined>(activeSite?.id);
 
   useEffect(() => {
-    // Skip on initial mount — just record the starting site id
-    if (!hasMounted.current) {
-      hasMounted.current = true;
+    // Initial hydration: record initial site once it resolves, do not redirect
+    if (!prevSiteIdRef.current) {
       prevSiteIdRef.current = activeSite?.id;
       return;
     }
 
-    // After mount, any real site selection (even from empty state) triggers redirect
+    // Only redirect when switching from an existing site to a DIFFERENT site
     if (activeSite?.id && activeSite.id !== prevSiteIdRef.current) {
       prevSiteIdRef.current = activeSite.id;
       const siteType = activeSite.type || '';
@@ -37,9 +36,6 @@ export default function Layout({ children }: { children?: React.ReactNode }) {
         // HQ / Administration site selected
         navigate(native.isCleanMobileMode() ? '/wms-ops' : '/admin');
       }
-    } else {
-      // Site was cleared (setActiveSite('')) — just update ref, no redirect
-      prevSiteIdRef.current = activeSite?.id;
     }
   }, [activeSite, navigate]);
 

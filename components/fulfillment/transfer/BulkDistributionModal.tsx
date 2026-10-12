@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { Truck, RotateCcw, X, Layers, AlertTriangle } from 'lucide-react';
 import { Product, Site, User } from '../../../types';
 import { useData } from '../../../contexts/DataContext';
@@ -118,7 +119,7 @@ export const BulkDistributionModal: React.FC<BulkDistributionModalProps> = ({
         try {
             let createdJobs = 0;
             if (bulkDistributionMode === 'single') {
-                const product = allProducts.find(p => p.id === bulkDistributionProductId);
+                const product = allProducts.find(p => p.id === bulkDistributionProductId) || products.find(p => p.id === bulkDistributionProductId);
                 for (const allocation of bulkDistributionAllocations) {
                     if (allocation.quantity > 0) {
                         const transferJob: any = {
@@ -208,7 +209,7 @@ export const BulkDistributionModal: React.FC<BulkDistributionModalProps> = ({
                         country_code: siteCountry,
                         items: items.length,
                         lineItems: items.map(item => {
-                            const product = allProducts.find(p => p.id === item.productId);
+                            const product = allProducts.find(p => p.id === item.productId) || products.find(p => p.id === item.productId);
                             return {
                                 productId: item.productId,
                                 sku: product?.sku || '',
@@ -239,7 +240,7 @@ export const BulkDistributionModal: React.FC<BulkDistributionModalProps> = ({
                         orderRef: createdWaveJob.id,
                         items: items.length,
                         lineItems: items.map(item => {
-                            const prod = allProducts.find(p => p.id === item.productId);
+                            const prod = allProducts.find(p => p.id === item.productId) || products.find(p => p.id === item.productId);
                             return {
                                 productId: item.productId,
                                 sku: prod?.sku || '',
@@ -274,12 +275,21 @@ export const BulkDistributionModal: React.FC<BulkDistributionModalProps> = ({
         }
     };
 
+    useEffect(() => {
+        if (!isOpen) return;
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (e.key === 'Escape') onClose();
+        };
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    }, [isOpen, onClose]);
+
     if (!isOpen) return null;
 
-    return (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/80 animate-in fade-in duration-200">
-            <div className="w-full h-full md:p-6 lg:p-8 flex flex-col max-w-[1700px] max-h-[1000px]">
-                <div className="flex-1 bg-[var(--theme-bg-card)] md:rounded-3xl border border-[var(--theme-border)] shadow-2xl flex flex-col overflow-hidden relative">
+    return createPortal(
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/80 p-3 sm:p-4 md:p-6 lg:p-8 animate-in fade-in duration-200">
+            <div className="w-full h-full max-w-[1700px] max-h-[96vh] md:max-h-[92vh] flex flex-col">
+                <div className="flex-1 bg-[var(--theme-bg-card)] rounded-2xl md:rounded-3xl border border-[var(--theme-border)] shadow-2xl flex flex-col overflow-hidden relative">
                     <div className="p-4 md:p-5 border-b border-[var(--theme-border)] flex justify-between items-center bg-[var(--theme-bg-subtle)] shrink-0">
                         <div>
                             <h2 className="text-lg md:text-xl font-bold text-[var(--theme-text-primary)] flex items-center gap-2 tracking-tight">
@@ -396,6 +406,7 @@ export const BulkDistributionModal: React.FC<BulkDistributionModalProps> = ({
                                 isSearchingProduct={isSearchingProduct}
                                 setIsSearchingProduct={setIsSearchingProduct}
                                 allProducts={allProducts}
+                                products={products}
                                 bulkDistributionSourceSite={bulkDistributionSourceSite}
                                 activeSite={activeSite}
                                 sites={sites}
@@ -443,6 +454,7 @@ export const BulkDistributionModal: React.FC<BulkDistributionModalProps> = ({
                     </div>
                 </div>
             </div>
-        </div>
+        </div>,
+        document.body
     );
 };

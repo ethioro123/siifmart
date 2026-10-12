@@ -151,7 +151,7 @@ export const PickHistory: React.FC<PickHistoryProps> = ({
                     <div className="w-8 h-8 rounded-xl bg-[var(--theme-accent)]/10 border border-[var(--theme-accent)]/20 flex items-center justify-center text-[var(--theme-accent)]">
                         <HistoryIcon size={16} />
                     </div>
-                    {t('warehouse.putaway.history')}
+                    {t('warehouse.pickHistory')}
                 </h4>
 
                 {/* History Search */}

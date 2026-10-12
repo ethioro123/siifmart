@@ -76,7 +76,10 @@ export const pettyCashService = {
      * Record a petty cash voucher spend
      */
     async recordVoucher(
-        voucher: Omit<PettyCashVoucher, 'id' | 'voucherNumber' | 'status'>,
+        voucher: Omit<PettyCashVoucher, 'id' | 'voucherNumber' | 'status' | 'createdById' | 'createdByName'> & {
+            createdById?: string;
+            createdByName?: string;
+        },
         user: { id: string; name: string }
     ): Promise<PettyCashVoucher> {
         const voucherNumber = `PCV-${Date.now().toString().slice(-6)}`;

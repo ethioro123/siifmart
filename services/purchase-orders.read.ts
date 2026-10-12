@@ -16,7 +16,7 @@ export async function getAll(siteId?: string, limit: number = 25, offset: number
     // Line items and product joins are loaded on-demand via getById().
     const selectFields = filters?.includeItems
         ? '*, po_items(*, products(sku))'
-        : 'id, po_number, site_id, supplier_id, supplier_name, status, total_amount, items_count, order_date, expected_delivery, shipping_cost, tax_amount, discount, payment_terms, requested_by, created_by, approved_by, approver_role, approved_at, notes, currency, country_code, created_at, updated_at';
+        : 'id, po_number, site_id, supplier_id, supplier_name, status, total_amount, items_count, order_date, expected_delivery, shipping_cost, tax_amount, discount, payment_terms, requested_by, created_by, approved_by, approver_role, approved_at, notes, currency, country_code, created_at, updated_at, region_code, requires_hq_approval, hq_approved_by, hq_approved_at';
 
     let query = supabase
         .from('purchase_orders')
@@ -161,6 +161,14 @@ export async function getAll(siteId?: string, limit: number = 25, offset: number
             shelfLife: p.shelf_life,
             dockSlot: p.dock_slot,
             poNumber: p.po_number,
+            regionCode: p.region_code,
+            region_code: p.region_code,
+            requiresHqApproval: Boolean(p.requires_hq_approval),
+            requires_hq_approval: Boolean(p.requires_hq_approval),
+            hqApprovedBy: p.hq_approved_by,
+            hq_approved_by: p.hq_approved_by,
+            hqApprovedAt: p.hq_approved_at,
+            hq_approved_at: p.hq_approved_at,
             lineItems: (p.po_items || []).map((i: any) => {
                 let deepAttrs: any = {};
                 try { if (i.description && i.description.startsWith('{')) deepAttrs = JSON.parse(i.description); } catch { }
@@ -290,6 +298,14 @@ export async function getById(id: string) {
         shelfLife: data.shelf_life,
         dockSlot: data.dock_slot,
         poNumber: data.po_number,
+        regionCode: data.region_code,
+        region_code: data.region_code,
+        requiresHqApproval: Boolean(data.requires_hq_approval),
+        requires_hq_approval: Boolean(data.requires_hq_approval),
+        hqApprovedBy: data.hq_approved_by,
+        hq_approved_by: data.hq_approved_by,
+        hqApprovedAt: data.hq_approved_at,
+        hq_approved_at: data.hq_approved_at,
         createdAt: data.created_at,
         updatedAt: data.updated_at,
         lineItems: data.po_items.map((i: any) => {

@@ -38,3 +38,6 @@ docs/*_API_KEY.md
 
 # Backups
 .backups/
+
+# Playwright MCP artifacts
+.playwright-mcp/

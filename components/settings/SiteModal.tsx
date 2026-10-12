@@ -3,9 +3,9 @@ import {
   Building, Box, Truck, Store, ShoppingCart, Loader2, Save, Lock, Globe, Hash, Briefcase, Package
 } from 'lucide-react';
 import Modal from '../Modal';
-import { Site, SiteType, LogisticsZone } from '../../types';
+import { Site, SiteType, LogisticsZone, Region } from '../../types';
 import { getRegisteredCountries, getCountryProfile, Country } from '../../utils/localization';
-import { generateNextSiteCode, formatDisplaySiteId } from '../../utils/siteIdGenerator';
+import { generateNextSiteCode, formatDisplaySiteId, generatePlaceSpecificSiteCode } from '../../utils/siteIdGenerator';
 import { SiteBarcodeConfigSection } from './locations/SiteBarcodeConfigSection';
 
 interface SiteModalProps {
@@ -21,6 +21,7 @@ interface SiteModalProps {
   generateBarcodes: (site: Partial<Site> & { barcodePrefix?: string }) => void;
   handleSaveSite: () => void;
   existingSites?: Site[];
+  regions?: Region[];
 }
 
 export function SiteModal({
@@ -35,13 +36,20 @@ export function SiteModal({
   isGenerating,
   generateBarcodes,
   handleSaveSite,
-  existingSites = []
+  existingSites = [],
+  regions = []
 }: SiteModalProps) {
   const selectedCountry = (newSite.country || 'ET') as Country;
   const selectedCountryProfile = getCountryProfile(selectedCountry);
   const displaySiteCode = newSite.id
     ? formatDisplaySiteId(newSite)
-    : generateNextSiteCode(existingSites, selectedCountry);
+    : generatePlaceSpecificSiteCode({
+        country: selectedCountry,
+        regionCode: newSite.region_code || newSite.regionCode,
+        type: newSite.type || 'Store',
+        name: newSite.name || 'New Facility',
+        existingSites
+      });
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} title={newSite.id ? "Edit Location" : "Add New Location"} size="lg">
@@ -213,6 +221,25 @@ export function SiteModal({
                 <option value="Active">Active</option>
                 <option value="Maintenance">Under Maintenance</option>
                 <option value="Closed">Closed</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="text-[11px] text-[var(--theme-text-secondary)] uppercase font-semibold tracking-wider mb-1 block">Operational Region</label>
+              <select
+                className="w-full h-11 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3.5 text-xs text-[var(--theme-text-primary)] focus:outline-hidden focus:ring-2 focus:ring-[#0071E3]/40 dark:focus:ring-[#2997FF]/40 focus:border-[#0071E3] dark:focus:border-[#2997FF] transition-all"
+                value={newSite.region_code || newSite.regionCode || ''}
+                onChange={(e) => setNewSite({ ...newSite, region_code: e.target.value || undefined, regionCode: e.target.value || undefined })}
+                aria-label="Operational Region"
+              >
+                <option value="">Select Region...</option>
+                {regions
+                  .filter(r => !r.country || r.country.toUpperCase() === (newSite.country || 'ET').toUpperCase())
+                  .map(r => (
+                    <option key={r.code} value={r.code}>
+                      {r.name} ({r.city || r.code})
+                    </option>
+                  ))}
               </select>
             </div>
 

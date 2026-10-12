@@ -5,6 +5,7 @@ import { CURRENCY_SYMBOL } from '../../../constants';
 import { formatPriceValue } from '../../../utils/formatting';
 import { formatStockDisplay, getSellUnit } from '../../../utils/units';
 import { formatProductDisplayName } from '../../procurement/utils';
+import { ItemAttributeBadges } from '../../fulfillment/ItemAttributeBadges';
 
 interface ProductProfileHeaderProps {
     product: Product;
@@ -94,6 +95,9 @@ export const ProductProfileHeader: React.FC<ProductProfileHeaderProps> = ({
                                 <span className="text-[var(--theme-text-muted)]">· Shelf {product.shelfPosition}</span>
                             )}
                         </div>
+
+                        {/* Category Logistics & Physical Badges */}
+                        <ItemAttributeBadges item={product} className="pt-1" />
                     </div>
                 </div>
             </div>

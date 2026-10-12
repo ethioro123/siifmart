@@ -129,7 +129,7 @@ export const shiftsService = {
         const dbShift = {
             id,
             site_id: rawSiteId,
-            shift_number: shift.shiftNumber ? String(shift.shiftNumber) : undefined,
+            shift_number: shift.shiftNumber ? String(shift.shiftNumber) : (shift.shift_number ? String(shift.shift_number) : undefined),
             cashier_id: shift.cashierId ? String(shift.cashierId) : null,
             cashier_name: shift.cashierName || 'Staff Member',
             start_time: startTime,

@@ -43,7 +43,7 @@ type Tab = 'overview' | 'stock' | 'zones' | 'movements' | 'pending' | 'barcode_a
 
 export default function Inventory() {
     const { user, theme } = useStore();
-    const { products, allProducts, sites, employees, activeSite, effectiveCountry, settings, addNotification, refreshData } = useData();
+    const { products, allProducts, sites, employees, activeSite, effectiveCountry, settings, addNotification, refreshData, activeRegionCode } = useData();
     const { createPutawayJob, barcodeApprovals } = useFulfillmentData();
 
     // --- MUTATIONS ---
@@ -69,7 +69,7 @@ export default function Inventory() {
     }, [activeTab]);
 
     // --- READ-ONLY & PERMISSIONS ---
-    const canApprove = user?.role === 'super_admin' || (user?.role as string)?.toLowerCase() === 'ceo' || user?.role === 'regional_manager' || user?.role === 'operations_manager';
+    const canApprove = user?.role === 'super_admin' || (user?.role as string)?.toLowerCase() === 'ceo' || user?.role === 'regional_manager' || user?.role === 'regional_procurement_lead' || user?.role === 'operations_manager';
     const isReadOnly = useMemo(() => {
         if (!activeSite) return true; // HQ View is Read-Only
         const type = activeSite.type;
@@ -112,12 +112,13 @@ export default function Inventory() {
         try {
             const isHqOrApprover = isAdminSite(activeSite) || canApprove;
             const targetSiteId = isHqOrApprover ? undefined : activeSite?.id;
-            const requests = await inventoryRequestsService.getAll(targetSiteId, activeCountry);
+            const targetRegion = activeRegionCode || user?.regionCode;
+            const requests = await inventoryRequestsService.getAll(targetSiteId, activeCountry, 25, targetRegion);
             setPendingChanges(requests.filter(r => r.status === 'pending'));
         } catch (err) {
             logger.error('Inventory', 'Failed to load pending requests:', err);
         }
-    }, [activeSite, canApprove, activeCountry]);
+    }, [activeSite, canApprove, activeCountry, activeRegionCode, user?.regionCode]);
 
     useEffect(() => {
         loadPendingRequests();

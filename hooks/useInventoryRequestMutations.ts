@@ -31,6 +31,22 @@ export function useApproveInventoryRequestMutation(createPutawayJob?: Function) 
                 throw new Error('4-Eyes Principle Violation: Requesters cannot approve their own inventory adjustments.');
             }
 
+            // Sovereign Cross-Border Protection
+            const userCountry = (user?.country || '').toUpperCase();
+            const requestCountry = (change.countryCode || (change as any).country_code || '').toUpperCase();
+            if (userCountry && requestCountry && userCountry !== requestCountry && user?.role !== 'super_admin' && user?.role !== 'CEO') {
+                throw new Error('Multi-country sovereignty violation: You cannot approve inventory requests outside your sovereign country.');
+            }
+
+            // Regional Governance Scoping
+            const isNationalHq = user?.role === 'super_admin' || user?.role === 'CEO' || user?.role === 'ceo' || user?.role === 'admin' || user?.role === 'auditor';
+            const userRegion = user?.regionCode || (user as any)?.region_code;
+            const requestRegion = change.regionCode || (change as any)?.region_code;
+
+            if (!isNationalHq && userRegion && requestRegion && userRegion !== requestRegion) {
+                throw new Error('Regional Governance Violation: You can only approve inventory adjustments within your assigned region.');
+            }
+
             // SOP-MER-037: price changes below the margin floor need Finance Manager / CEO sign-off
             if (requiresFinanceCoApproval(change) && !canApproveBelowFloor(user?.role)) {
                 throw new Error(`Price change is below the ${MARGIN_FLOOR_PCT}% margin floor: Finance Manager or CEO approval is required.`);

@@ -62,7 +62,7 @@ export const ZoneCreateModal: React.FC<ZoneCreateModalProps> = ({
 
     return (
         <div className="fixed inset-0 z-[10000] flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
-            <form onSubmit={handleSubmit} className="relative w-full max-w-lg rounded-2xl bg-[var(--theme-bg-card)] border border-[var(--theme-border)] shadow-xl p-6 space-y-4">
+            <form onSubmit={handleSubmit} className="relative w-full max-w-lg rounded-3xl bg-[var(--theme-bg-card)] border border-[var(--theme-border)] shadow-xl p-6 space-y-4">
                 <div className="flex items-center justify-between border-b border-[var(--theme-border)] pb-3">
                     <h3 className="text-base font-bold text-[var(--theme-text-primary)] uppercase tracking-wider flex items-center gap-2">
                         <div className="w-7 h-7 rounded-lg bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] border border-[var(--theme-accent)]/20 flex items-center justify-center shrink-0">

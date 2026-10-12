@@ -69,18 +69,19 @@ export const posCommand: TranslationBlock = {
 
     // Receiving Modal Specific
     receivingModalTitle: { en: 'Receive Inventory', am: 'ዕቃዎችን ተቀበል', or: 'Meeshaa Fudhadhu' },
+    receivingHistory: { en: 'Receiving History', am: 'የደረሰኝ ታሪክ', or: 'Seenaa Fudhannaa' },
     pendingTab: { en: 'Pending', am: 'በመጠባበቅ ላይ', or: 'Eeggataa' },
     historyTab: { en: 'History', am: 'ታሪክ', or: 'Seenaa' },
     quickScanHandover: { en: 'Quick Scan Handover', or: 'Dabarsa Iskaanii Saffisaa' },
     scanPackingLabel: { en: 'Scan Packing Label/Order Ref to start', or: 'Label Qopheessaa yookaan Lakkoofsa Ajajaa Iskaanii godhi jalqabuuf' },
     scanOrderRefPlaceholder: { en: 'Scan Order Ref (e.g. ORD-123456)...', or: 'Lakkoofsa Ajajaa Iskaanii godhi (fakkeenyaaf: ORD-123456)' },
-    awaitingScan: { en: 'Awaiting Scan', or: '⏳ Iskaanii Eeggataa' },
+    awaitingScan: { en: 'Awaiting Scan', or: 'Iskaanii Eeggataa' },
     manualOrder: { en: 'MANUAL ORDER', or: 'AJAJAA HARKAAN' },
     pickingStatus: { en: 'Picking', or: 'Qopheessuu (Picking)' },
     requestedStatus: { en: 'Requested', or: 'Gaafatame' },
     fromLabel: { en: 'From', or: 'Irraa:' },
     driverLabel: { en: 'Driver', or: 'Konkolaachisaa:' },
-    notAssigned: { en: 'Awaiting Driver Assignment', or: '⏳ Amma Hin Ramadamne' },
+    notAssigned: { en: 'Awaiting Driver Assignment', or: 'Amma Hin Ramadamne' },
     itemLabel: { en: 'Items', or: 'Meeshaa:' },
     totalQtyLabel: { en: 'Total Qty', or: 'Baay’ina Waliigalaa:' },
     awaitingDelivery: { en: 'Awaiting Driver Delivery', or: 'Ergaa Qopheessaa Jira' },
@@ -104,7 +105,7 @@ export const posCommand: TranslationBlock = {
     warehouseReviewFlag: { en: 'These will be flagged for warehouse review.', or: 'Kunniin to\'annoo kuusaatiif ni ergamu.' },
     discrepanciesReported: { en: 'Discrepancies Reported', or: 'Garaagarummaan Gabaafameera' },
     notifiedAlert: { en: 'The driver and warehouse have been notified of the missing/damaged items.', or: 'Konkolaachisaafi kuusaan meeshaa hir\'ate/miidhame irratti beeksisni ergameera.' },
-    showingHistory: { en: 'Showing last 10 shipments received at', or: 'Meeshaalee 10 dhiyeenya fudhataman agarsiisaa jira', am: 'የመጨረሻዎቹን 10 የተቀበሏቸውን ዕቃዎች በማሳየት ላይ' },
+    showingHistory: { en: 'Showing shipments received at', or: 'Meeshaalee fudhataman agarsiisaa jira', am: 'የተቀበሏቸውን ዕቃዎች በማሳየት ላይ' },
     noHistory: { en: 'No receiving history found.', or: 'Seenaan fudhannaa hin argamne.', am: 'ምንም የደረሰኝ ታሪክ አልተገኘም።' },
     noPendingTransfers: { en: 'No pending transfers found', or: 'Meeshaan dabarsaa eeggachaa jiru hin jiru.' },
     allIncomingReceived: { en: 'All incoming shipments have been received', or: 'Ergaawwan dhufan hundi fudhatamaniiru.' },
@@ -187,7 +188,7 @@ export const posCommand: TranslationBlock = {
     currentSession: { en: 'Current Session', am: 'የአሁኑ ክፍለ ጊዜ', or: 'Kutaalee Amma Jiru' },
     avgValue: { en: 'Avg Value', am: 'አማካይ ዋጋ', or: 'Gatii Giddugaleessaa' },
     mgrApprovalRequired: { en: 'Requires Mgr Approval', am: 'የአስተዳዳሪ ማረጋገጫ ያስፈልገዋል', or: 'Eeyyama Bulchaa Barbaachisa' },
-    viewDetails: { en: 'Click to view details →', am: 'ዝርዝሮችን ለማየት ጠቅ ያድርጉ →', or: 'Click to view details →' },
+    viewDetails: { en: 'Click to view details', am: 'ዝርዝሮችን ለማየት ጠቅ ያድርጉ', or: 'Odeeffannoo ilaaluuf cuqaasi' },
 
     // Charts
     hourlyPerformance: { en: 'Hourly Performance (Est)', am: 'የሰዓት አፈጻጸም (ግምት)', or: 'Gurgurtaa Sa\'aatii Sa\'aatiin' },
@@ -202,7 +203,7 @@ export const posCommand: TranslationBlock = {
 
     // Bonus/Points
     noBonusInfo: { en: 'Store Bonus Info Currently Unavailable', am: 'የሱቅ ቦነስ መረጃ በአሁኑ ጊዜ የለም', or: 'Odeeffannoo Bonasi Suuqii Amma Hin Jiru' },
-    completeTxToEarn: { en: 'Complete transactions to earn team points', am: 'የቡድን ነጥቦችን ለማግኘት ሽያጭ ያጠናቅቁ', or: 'Gurgurtaa Xumuri → Qabxii Garee Argatta!' },
+    completeTxToEarn: { en: 'Complete transactions to earn team points', am: 'የቡድን ነጥቦችን ለማግኘት ሽያጭ ያጠናቅቁ', or: 'Gurgurtaa Xumuri - Qabxii Garee Argatta!' },
     topPerformers: { en: 'Top Performers', am: 'ከፍተኛ አፈጻጸም ያላቸው', or: 'Hojjettoota Caalaa' },
     thisWeek: { en: 'This Week', am: 'በዚህ ሳምንት', or: 'Torbee Kana' },
     noTasks: { en: 'No Tasks Scheduled Today', am: 'ዛሬ ምንም የታቀደ ስራ የለም', or: 'Hojiin Har\'aa Karoorfame Hin Jiru' },
@@ -217,4 +218,5 @@ export const posCommand: TranslationBlock = {
     pending: { en: 'Pending', am: 'በመጠባበቅ ላይ', or: 'Eeggataan Jira' },
     manifestItems: { en: 'Manifest Items', am: 'የማኒፌስት ዕቃዎች', or: 'Meeshalee Manifeestii' },
     varianceReasonPlaceholder: { en: 'Please document the cause of this variance...', am: 'እባክዎ የዚህን ልዩነት ምክንያት ይመዝግቡ...', or: 'Maaloo sababa herregni itti garagara ta\'e ibsi...' },
+    noTransactionsFound: { en: 'No transactions found in this period.', am: 'በዚህ ወቅት ምንም ግብይቶች አልተገኙም።', or: 'Yeroo kana keessatti gurgurtaan hin argamne.' },
 };

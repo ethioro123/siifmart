@@ -81,13 +81,13 @@ export const POItemsTable: React.FC<POItemsTableProps> = ({
                                                 <Package size={18} />
                                             </div>
                                             <div>
-                                                <div className="text-[var(--theme-text-primary)] text-sm font-black tracking-tight">
+                                                <div className="text-[var(--theme-text-primary)] text-sm font-bold tracking-tight">
                                                     {formatPOItemDescription(item)}
                                                 </div>
                                                 <div className="text-xs text-[var(--theme-text-secondary)] font-mono mt-0.5 flex items-center gap-2 flex-wrap">
                                                     <span className="bg-[var(--theme-bg-subtle)] px-2 py-0.5 rounded-md text-[10px] border border-[var(--theme-border)] font-bold">{item.sku}</span>
                                                     {item.identityType === 'new' && (
-                                                        <span className="text-[9px] px-2 py-0.5 border border-amber-500/30 rounded-md bg-amber-500/10 text-amber-700 dark:text-amber-400 font-black tracking-widest">
+                                                        <span className="text-[9px] px-2 py-0.5 border border-amber-500/30 rounded-md bg-amber-500/10 text-amber-700 dark:text-amber-400 font-semibold tracking-widest">
                                                             CUSTOM
                                                         </span>
                                                     )}
@@ -170,7 +170,7 @@ export const POItemsTable: React.FC<POItemsTableProps> = ({
                                         )}
                                     </td>
                                     <td className="p-4 text-right font-mono">
-                                        <div className="text-[var(--theme-text-primary)] font-black tabular-nums">
+                                        <div className="text-[var(--theme-text-primary)] font-bold tabular-nums">
                                             {formatCompactNumber(editingIndex === i && editValues ? editValues.qty * editValues.price : item.totalCost, { currency: currencySymbol })}
                                         </div>
                                     </td>
@@ -210,7 +210,7 @@ export const POItemsTable: React.FC<POItemsTableProps> = ({
                                         <div className="w-14 h-14 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center mb-3 text-emerald-600 dark:text-emerald-400">
                                             <Package size={26} />
                                         </div>
-                                        <h3 className="text-sm font-black text-[var(--theme-text-primary)]">No Products Added Yet</h3>
+                                        <h3 className="text-sm font-bold text-[var(--theme-text-primary)]">No Products Added Yet</h3>
                                         <p className="text-xs text-[var(--theme-text-secondary)] font-medium mt-1 max-w-sm mx-auto">Select a product from the catalog or generate custom line items above to build this purchase order.</p>
                                     </div>
                                 </td>

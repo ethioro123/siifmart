@@ -49,7 +49,10 @@ export const marginApprovalService = {
     },
 
     async createRequest(
-        request: Omit<MarginApprovalRequest, 'id' | 'requestNumber' | 'status' | 'createdAt'>,
+        request: Omit<MarginApprovalRequest, 'id' | 'requestNumber' | 'status' | 'createdAt' | 'requestedById' | 'requestedByName'> & {
+            requestedById?: string;
+            requestedByName?: string;
+        },
         user: { id: string; name: string }
     ): Promise<MarginApprovalRequest> {
         const requestNumber = `MAR-${Date.now().toString().slice(-6)}`;

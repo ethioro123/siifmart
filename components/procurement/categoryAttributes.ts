@@ -72,33 +72,107 @@ const SUBCATEGORY_TO_GROUP: Record<string, string> = {
     'cat food & accessories': 'pet_supplies',
     'small pet supplies': 'pet_supplies',
 
+    // Consumer Electronics & Tech Hardware
+    'tech': 'electronics',
+    'technology': 'electronics',
+    'electronics': 'electronics',
+    'consumer electronics': 'electronics',
+    'consumer electronics & tech': 'electronics',
+    'smartphones & mobile devices': 'electronics',
+    'smartphones & tablets': 'electronics',
+    'smartphones': 'electronics',
+    'mobile phones': 'electronics',
+    'phones': 'electronics',
+    'computers & laptops': 'electronics',
+    'laptops & computers': 'electronics',
+    'computers': 'electronics',
+    'laptops': 'electronics',
+    'tablets & e-readers': 'electronics',
+    'tablets': 'electronics',
+    'wearables & smartwatches': 'electronics',
+    'wearables': 'electronics',
+    'smartwatches': 'electronics',
+    'audio, headphones & speakers': 'electronics',
+    'audio & headphones': 'electronics',
+    'audio': 'electronics',
+    'headphones': 'electronics',
+    'batteries, chargers & power banks': 'electronics',
+    'power banks & chargers': 'electronics',
+    'batteries': 'electronics',
+    'chargers & cables': 'electronics',
+    'power banks': 'electronics',
+    'displays, tvs & monitors': 'electronics',
+    'displays & tvs': 'electronics',
+    'tvs & displays': 'electronics',
+
+    // Homewares & Kitchen Dining
+    'homewares, kitchen & dining': 'homewares_kitchen',
+    'homewares': 'homewares_kitchen',
+    'kitchen & dining': 'homewares_kitchen',
+    'kitchen': 'homewares_kitchen',
+    'cookware': 'homewares_kitchen',
+    'tableware': 'homewares_kitchen',
+
     // General Merchandise & Tech
     'stationery, office & books': 'stationery_toys',
     'toys & recreation': 'stationery_toys',
     'electronics & batteries': 'electronics',
     'clothing & accessories': 'apparel',
-    'homewares, kitchen & dining': 'general_merchandise',
 
-    // Pantry Dry Goods
+    // Pantry Dry Goods & Spices
     'baking & dessert needs': 'pantry_groceries',
     'grains, pasta & rice': 'pantry_groceries',
     'sauces, oils & condiments': 'pantry_groceries',
     'canned food & soups': 'pantry_groceries',
     'breakfast & cereals': 'pantry_groceries',
-    'tea, coffee & cocoa': 'pantry_groceries'
+    'tea, coffee & cocoa': 'pantry_groceries',
+    'spices & seasonings': 'pantry_groceries',
+    'spices': 'pantry_groceries',
+    'seasonings': 'pantry_groceries',
+    'pantry & dry goods': 'pantry_groceries',
+    'dry goods': 'pantry_groceries',
+    'food': 'pantry_groceries',
+    'international foods': 'pantry_groceries',
+    'snacks & sweets': 'confectionery_snacks',
+    'sweets': 'confectionery_snacks',
+    'frozen foods': 'frozen_food',
+    'beauty & personal care': 'health_beauty',
+    'personal care': 'health_beauty',
+    'household': 'household_cleaning'
 };
 
 const PARENT_CATEGORY_TO_GROUP: Record<string, string> = {
+    'consumer electronics & tech': 'electronics',
+    'consumer electronics': 'electronics',
+    'electronics': 'electronics',
+    'electronics & batteries': 'electronics',
+    'fresh food & deli': 'fresh_produce',
+    'fresh produce': 'fresh_produce',
+    'pantry & groceries': 'pantry_groceries',
+    'pantry & dry goods': 'pantry_groceries',
+    'spices & seasonings': 'pantry_groceries',
+    'food': 'pantry_groceries',
+    'international foods': 'pantry_groceries',
     'frozen food': 'frozen_food',
-    'pet supplies': 'pet_supplies',
+    'frozen foods': 'frozen_food',
     'baby & toddler': 'baby_toddler',
     'health & beauty': 'health_beauty',
+    'beauty & personal care': 'health_beauty',
     'household & cleaning': 'household_cleaning',
+    'household': 'household_cleaning',
+    'pet supplies': 'pet_supplies',
+    'general merchandise & apparel': 'general_merchandise',
+    'homewares, kitchen & dining': 'homewares_kitchen',
+    'homewares': 'homewares_kitchen',
+    'kitchen & dining': 'homewares_kitchen',
+    'kitchen': 'homewares_kitchen',
     'beverages': 'beverages',
-    'fresh produce': 'fresh_produce',
     'dairy & eggs': 'dairy_eggs',
     'meat & poultry': 'meat_poultry',
-    'electronics': 'electronics',
+    'bakery & deli': 'bakery_deli',
+    'bakery': 'bakery_deli',
+    'snacks & confectionery': 'confectionery_snacks',
+    'snacks & sweets': 'confectionery_snacks',
     'apparel': 'apparel',
     'clothing': 'apparel',
     'automotive': 'automotive_industrial',
@@ -156,7 +230,7 @@ export const getCategorySpecGroup = (category?: string, subcategory?: string): C
     if (/\b(beverage|drink|juice|soda|water|soft drink|syrup)\b/i.test(combined)) {
         return CATEGORY_SPEC_GROUPS.beverages;
     }
-    if (/\b(electronics?|batter|gadget|computer|phone|kindle|e-reader|display|audio|hardware|screen)\b/i.test(combined)) {
+    if (/\b(electronics?|tech|technology|batter(y|ies)?|gadgets?|computers?|laptops?|phones?|smartphones?|tablets?|kindle|e-readers?|displays?|tvs?|monitors?|audios?|headphones?|speakers?|hardware|screens?)\b/i.test(combined)) {
         return CATEGORY_SPEC_GROUPS.electronics;
     }
     if (/\b(cloth|apparel|\bwear\b|shirt|trouser|\bpants?\b|dress|shoe|footwear|sock|jacket|uniform|fashion)\b/i.test(combined)) {
@@ -165,25 +239,28 @@ export const getCategorySpecGroup = (category?: string, subcategory?: string): C
     if (/\b(produce|fruit|vegetable|greens|herb)\b/i.test(combined)) {
         return CATEGORY_SPEC_GROUPS.fresh_produce;
     }
-    if (/\b(meat|poultry|beef|chicken|mutton|lamb|seafood|fish|abattoir)\b/i.test(combined)) {
+    if (/\b(kitchen|cookware|tableware|pan|pot|cutlery|dish|mug|cup|plate|dining|homeware|utensil)\b/i.test(combined)) {
+        return CATEGORY_SPEC_GROUPS.homewares_kitchen;
+    }
+    if (/\b(meat|poultry|beef|chicken|mutton|lamb|seafood|fish|abattoir|goat)\b/i.test(combined)) {
         return CATEGORY_SPEC_GROUPS.meat_poultry;
     }
     if (/\b(dairy|egg|milk|cheese|butter|yogurt|cream)\b/i.test(combined)) {
         return CATEGORY_SPEC_GROUPS.dairy_eggs;
     }
-    if (/\b(baby|toddler|napp|diaper|infant|formula)\b/i.test(combined)) {
+    if (/\b(baby|toddler|napp|diaper|infant|formula|wipe|wipes)\b/i.test(combined)) {
         return CATEGORY_SPEC_GROUPS.baby_toddler;
     }
     if (/\b(beauty|cosmetic|skin|hair|oral|dental|vitamin|pharmacy|lotion|shampoo)\b/i.test(combined)) {
         return CATEGORY_SPEC_GROUPS.health_beauty;
     }
-    if (/\b(cleaning|laundry|household|detergent|tissue|pest|dishwash)\b/i.test(combined)) {
+    if (/\b(cleaning|laundry|household|detergent|tissue|pest|dishwash|foil|paper towel)\b/i.test(combined)) {
         return CATEGORY_SPEC_GROUPS.household_cleaning;
     }
     if (/\b(auto|vehicle|\bcar\b|motor|industrial|hardware|tool|spare)\b/i.test(combined)) {
         return CATEGORY_SPEC_GROUPS.automotive_industrial;
     }
-    if (/\b(pantry|grain|rice|pasta|cereal|baking|sauce|\boil\b|tea|coffee|condiment|canned|flour|sugar)\b/i.test(combined)) {
+    if (/\b(pantry|grain|rice|pasta|cereal|baking|sauce|\boil\b|tea|coffee|condiment|canned|flour|sugar|spice|seasoning|soup|pulses?|beans?)\b/i.test(combined)) {
         return CATEGORY_SPEC_GROUPS.pantry_groceries;
     }
 
@@ -207,6 +284,14 @@ export const getCategoryAttributes = (category: string) => {
 };
 
 export const PRODUCT_CATEGORIES = {
+    "Consumer Electronics & Tech": [
+        "Electronics",
+        "Smartphones & Mobile Devices",
+        "Computers & Laptops",
+        "Wearables & Smartwatches",
+        "Audio, Headphones & Speakers",
+        "Batteries, Chargers & Power Banks"
+    ],
     "Fresh Food & Deli": [
         "Fruit & Vegetables",
         "Dairy, Eggs & Fridge",
@@ -298,11 +383,16 @@ export const isDiscreteGeneralMerch = (category?: string): boolean => {
     if (!category) return false;
     const cat = category.toLowerCase();
     const discreteKeywords = [
+        'consumer electronics & tech',
+        'consumer electronics',
         'general merchandise & apparel',
         'stationery, office & books',
         'stationery & office',
         'electronics & batteries',
         'electronics',
+        'smartphones',
+        'laptops',
+        'wearables',
         'homewares, kitchen & dining',
         'clothing & accessories',
         'clothing',

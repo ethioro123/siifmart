@@ -29,9 +29,17 @@ export function useWeeklyShiftPlanner({
     canEdit,
     initialSiteFilter = 'All'
 }: UseWeeklyShiftPlannerProps) {
-    const { addNotification, sites, activeSite } = useData();
+    const { addNotification, sites, activeSite, activeRegionCode, effectiveCountry } = useData();
     const { user } = useStore();
     const queryClient = useQueryClient();
+
+    // Derive regional sites if activeRegionCode is selected
+    const scopedSites = useMemo(() => {
+        if (activeRegionCode) {
+            return sites.filter(s => s.regionCode === activeRegionCode || (s as any).region_code === activeRegionCode);
+        }
+        return sites;
+    }, [sites, activeRegionCode]);
 
     // --- STATE ---
     const [currentMonday, setCurrentMonday] = useState<Date>(() => getWeekMonday(new Date()));
@@ -66,13 +74,22 @@ export function useWeeklyShiftPlanner({
     }, [filterSite]);
 
     // --- QUERY ---
-    const queryKey = useMemo(() => ['staff_schedules_week', startDate, endDate, effectiveSiteId || 'all'], [startDate, endDate, effectiveSiteId]);
+    const queryKey = useMemo(
+        () => ['staff_schedules_week', startDate, endDate, effectiveSiteId || 'all', activeRegionCode || 'all', effectiveCountry || 'all'],
+        [startDate, endDate, effectiveSiteId, activeRegionCode, effectiveCountry]
+    );
 
     const { data: serverSchedules = [], isLoading, refetch } = useQuery({
         queryKey,
         queryFn: async () => {
             try {
-                return await schedulesService.getByDateRange(startDate, endDate, effectiveSiteId);
+                return await schedulesService.getByDateRange(
+                    startDate,
+                    endDate,
+                    effectiveSiteId,
+                    activeRegionCode || undefined,
+                    (effectiveCountry as string) || undefined
+                );
             } catch (err) {
                 logger.error('useWeeklyShiftPlanner', 'Failed to fetch schedules', err as Error);
                 return [];
@@ -103,6 +120,11 @@ export function useWeeklyShiftPlanner({
     // --- FILTERED EMPLOYEES ---
     const filteredEmployees = useMemo(() => {
         return employees.filter(emp => {
+            // Regional lens filter
+            if (activeRegionCode && emp.regionCode !== activeRegionCode && (emp as any).region_code !== activeRegionCode) {
+                return false;
+            }
+
             // Site filter
             if (effectiveSiteId && emp.siteId !== effectiveSiteId && (emp as any).site_id !== effectiveSiteId) {
                 return false;
@@ -124,7 +146,7 @@ export function useWeeklyShiftPlanner({
 
             return true;
         });
-    }, [employees, effectiveSiteId, filterDepartment, searchQuery]);
+    }, [employees, activeRegionCode, effectiveSiteId, filterDepartment, searchQuery]);
 
     // --- NAVIGATION ---
     const navigateWeek = useCallback((deltaWeeks: number) => {
@@ -158,6 +180,9 @@ export function useWeeklyShiftPlanner({
         const preset = SHIFT_PRESETS[nextCode];
 
         let updated: StaffSchedule | null = null;
+        const shiftRegion = employee.regionCode || (employee as any).region_code || activeRegionCode || undefined;
+        const shiftCountry = (employee.country || (employee as any).country_code || (effectiveCountry as string) || '').toUpperCase() || undefined;
+
         if (nextCode === 'O') {
             updated = {
                 id: currentSchedule?.id || crypto.randomUUID(),
@@ -169,7 +194,9 @@ export function useWeeklyShiftPlanner({
                 endTime: '00:00',
                 role: employee.role,
                 notes: '',
-                status: 'Cancelled'
+                status: 'Cancelled',
+                regionCode: shiftRegion,
+                countryCode: shiftCountry
             };
         } else {
             updated = {
@@ -182,13 +209,15 @@ export function useWeeklyShiftPlanner({
                 endTime: preset.endTime,
                 role: employee.role,
                 notes: currentSchedule?.notes || '',
-                status: 'Scheduled'
+                status: 'Scheduled',
+                regionCode: shiftRegion,
+                countryCode: shiftCountry
             };
         }
 
         setLocalOverrides(prev => ({ ...prev, [key]: updated }));
         setIsDirty(true);
-    }, [canEdit, scheduleMap, activeSite]);
+    }, [canEdit, scheduleMap, activeSite, activeRegionCode, effectiveCountry]);
 
     const setCustomShift = useCallback((
         employee: Employee,
@@ -198,6 +227,8 @@ export function useWeeklyShiftPlanner({
         if (!canEdit) return;
         const key = `${employee.id}_${date}`;
         const currentSchedule = scheduleMap.get(key);
+        const shiftRegion = employee.regionCode || (employee as any).region_code || activeRegionCode || undefined;
+        const shiftCountry = (employee.country || (employee as any).country_code || (effectiveCountry as string) || '').toUpperCase() || undefined;
 
         const updated: StaffSchedule = {
             id: currentSchedule?.id || crypto.randomUUID(),
@@ -209,13 +240,15 @@ export function useWeeklyShiftPlanner({
             endTime: details.endTime,
             role: details.role || employee.role,
             notes: details.notes || '',
-            status: details.status || 'Scheduled'
+            status: details.status || 'Scheduled',
+            regionCode: shiftRegion,
+            countryCode: shiftCountry
         };
 
         setLocalOverrides(prev => ({ ...prev, [key]: updated }));
         setIsDirty(true);
         setEditingCell(null);
-    }, [canEdit, scheduleMap, activeSite]);
+    }, [canEdit, scheduleMap, activeSite, activeRegionCode, effectiveCountry]);
 
     // --- SAVE BATCH ---
     const saveMutation = useMutation({
@@ -398,7 +431,7 @@ export function useWeeklyShiftPlanner({
         scheduleMap,
         isLoading,
         isDirty,
-        sites,
+        sites: scopedSites,
 
         // Actions
         navigateWeek,

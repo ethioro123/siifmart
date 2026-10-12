@@ -263,7 +263,7 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
   });
 
   const employeeActions = useEmployeeActions({
-    activeSite, activeSiteId, employees, setEmployees, setShifts,
+    activeSite, activeSiteId, employees, shifts, setEmployees, setShifts,
     addNotification, logSystemEvent
   });
 
@@ -310,7 +310,8 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
     scopedMovements,
     scopedShifts,
     scopedExpenses, scopedAllProducts, scopedProducts, scopedCustomers, scopedSuppliers,
-    scopedDiscountCodes, scopedSettings, effectiveCountry, isCeo
+    scopedDiscountCodes, scopedSettings, effectiveCountry, isCeo,
+    regions, activeRegionCode, setActiveRegionCode, canSwitchRegion, isRegionalUser
   } = useCountryScoping({
     country: settings?.country || 'ET',
     settings,
@@ -348,6 +349,11 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
     activeSite,
     effectiveCountry,
     isCeo,
+    regions,
+    activeRegionCode,
+    setActiveRegionCode,
+    canSwitchRegion,
+    isRegionalUser,
     notifications,
     systemLogs,
     promotions,
@@ -455,7 +461,7 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
   }), [
     settings, scopedSettings, scopedProducts, orders, scopedSuppliers, sales, scopedExpenses, scopedMovements,
     scopedEmployees, scopedCustomers, scopedShifts, heldOrders, scopedSites, activeSite,
-    effectiveCountry, isCeo, notifications, systemLogs, promotions, tasks, storePoints, scopedAllProducts,
+    effectiveCountry, isCeo, regions, activeRegionCode, setActiveRegionCode, canSwitchRegion, isRegionalUser, notifications, systemLogs, promotions, tasks, storePoints, scopedAllProducts,
     scopedAllSales, scopedAllOrders, scopedDiscountCodes, isDataInitialLoading, loadError, syncStatus, pendingCount, posLatencyMs,
     siteActions, productActions, poActions, saleActions, employeeActions, customerActions, financeActions, gamificationActions,
     triggerSync, holdOrder, releaseHold, markNotificationsRead, addNotification, clearNotification, clearAllNotifications,

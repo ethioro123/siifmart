@@ -1,8 +1,10 @@
 import React from 'react';
-import { Tag, ChevronDown, Lock, Package, Scale, Thermometer } from 'lucide-react';
-import { PRODUCT_CATEGORIES, STORAGE_CONDITIONS, isConsumableCategory, NET_CONTENT_UNITS } from './utils';
+import { Tag, ChevronDown, Lock, Package } from 'lucide-react';
+import { PRODUCT_CATEGORIES } from './utils';
 import { CategorySpecificAttributes } from './CategorySpecificAttributes';
 import { PackagingHierarchySection } from './PackagingHierarchySection';
+import { DynamicPhysicalAttributesSection } from './DynamicPhysicalAttributesSection';
+import { DynamicStorageHandlingSection } from './DynamicStorageHandlingSection';
 
 export interface BuyingAttributesProps {
     customItemBrand: string;
@@ -189,101 +191,19 @@ export const BuyingAttributes: React.FC<BuyingAttributesProps> = ({
                     errors={errors}
                 />
 
-                {/* ── 3. PHYSICAL PRODUCT SPECIFICATIONS (CONSUMER ITEM) ── */}
-                <div className="space-y-3 pt-3 border-t border-[var(--theme-border-subtle)]">
-                    <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-[var(--theme-text-secondary)]">
-                            <Scale size={12} className="text-emerald-500" />
-                            <span>3. Physical Specifications (Consumer Unit / Each)</span>
-                        </div>
-                        <span className="text-[9px] text-[var(--theme-text-secondary)] font-medium">
-                            Pure content specs strictly separated from logistics packaging
-                        </span>
-                    </div>
-
-                    <div className="grid grid-cols-6 gap-3.5">
-                        {/* Net Content / Net Weight */}
-                        <div className="col-span-2 space-y-1">
-                            <label className="text-[10px] text-[var(--theme-text-secondary)] uppercase font-semibold ml-1 block">
-                                Net Content / Net Weight {isConsumableCategory(selectedMainCategory) ? <span className="text-rose-500">*</span> : <span className="text-[9px] text-[var(--theme-text-secondary)] font-normal normal-case">(e.g. 217g, 1kg)</span>}
-                            </label>
-                            <div className="flex gap-1">
-                                <input
-                                    type="number"
-                                    min="0"
-                                    step="any"
-                                    title="Net Content Value"
-                                    placeholder="e.g. 217"
-                                    className={`w-full h-10 bg-[var(--theme-bg-subtle)] border ${errors.size ? 'border-rose-500/50' : 'border-[var(--theme-border)]'} rounded-l-xl px-3 text-xs text-[var(--theme-text-primary)] font-mono font-bold focus:border-[var(--theme-accent)] outline-none transition-all placeholder:text-[var(--theme-text-secondary)]/70`}
-                                    value={customItemSize}
-                                    onChange={e => handleNetWeightChange(e.target.value)}
-                                />
-                                <div className="relative min-w-[75px]">
-                                    <select
-                                        title="Net Content Unit"
-                                        className={`w-full h-10 bg-[var(--theme-bg-subtle)] border ${errors.size && !sizeType ? 'border-rose-500/50' : 'border-[var(--theme-border)]'} rounded-r-xl px-2 text-xs text-[var(--theme-text-primary)] focus:border-[var(--theme-accent)] outline-none appearance-none font-bold text-center cursor-pointer`}
-                                        value={sizeType}
-                                        onChange={e => {
-                                             setSizeType(e.target.value);
-                                            if (errors.size) setErrors(p => ({ ...p, size: '' }));
-                                        }}
-                                    >
-                                        <option value="" className="bg-[var(--theme-bg-panel)] text-[var(--theme-text-primary)]">--</option>
-                                        {NET_CONTENT_UNITS.map(t => <option key={t.value} value={t.value} className="bg-[var(--theme-bg-panel)] text-[var(--theme-text-primary)]">{t.label}</option>)}
-                                    </select>
-                                    <ChevronDown size={10} className="absolute right-2 top-1/2 -translate-y-1/2 text-[var(--theme-text-secondary)] pointer-events-none" />
-                                </div>
-                            </div>
-                            <span className="text-[9px] text-[var(--theme-text-secondary)] block ml-1">Actual product weight/volume without packaging</span>
-                            {errors.size && <span className="text-[9px] text-rose-500 ml-1 font-semibold">{errors.size}</span>}
-                        </div>
-
-                        {/* Gross Weight */}
-                        <div className="col-span-1 space-y-1">
-                            <label className="text-[10px] text-[var(--theme-text-secondary)] uppercase font-semibold ml-1 block">Gross Weight (kg)</label>
-                            <input
-                                type="number"
-                                min="0"
-                                step="any"
-                                className="w-full h-10 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3 text-xs text-[var(--theme-text-primary)] font-mono focus:border-[var(--theme-accent)] outline-none transition-all placeholder:text-[var(--theme-text-secondary)]/70 font-semibold"
-                                placeholder="e.g. 0.28"
-                                value={customAttributes.physical?.grossWeight || ''}
-                                onChange={e => setCustomAttributes((p: any) => ({ ...p, physical: { ...p.physical, grossWeight: e.target.value } }))}
-                            />
-                            <span className="text-[9px] text-[var(--theme-text-secondary)] block ml-1">With consumer box</span>
-                        </div>
-
-                        {/* Dimensions */}
-                        <div className="col-span-2 space-y-1">
-                            <label className="text-[10px] text-[var(--theme-text-secondary)] uppercase font-semibold ml-1 block">Dimensions (L×W×H cm)</label>
-                            <input
-                                type="text"
-                                className="w-full h-10 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3 text-xs text-[var(--theme-text-primary)] font-mono focus:border-[var(--theme-accent)] outline-none transition-all placeholder:text-[var(--theme-text-secondary)]/70 font-semibold"
-                                placeholder="e.g. 16.0 × 11.5 × 0.8"
-                                value={customAttributes.physical?.dims || ''}
-                                onChange={e => setCustomAttributes((p: any) => ({ ...p, physical: { ...p.physical, dims: e.target.value } }))}
-                            />
-                            <span className="text-[9px] text-[var(--theme-text-secondary)] block ml-1">For shelf cube allocation</span>
-                        </div>
-
-                        {/* Form / State */}
-                        <div className="col-span-1 space-y-1">
-                            <label className="text-[10px] text-[var(--theme-text-secondary)] uppercase font-semibold ml-1 block">Physical Form</label>
-                            <div className="relative">
-                                <select
-                                    title="Physical Form"
-                                    className="w-full h-10 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-2 text-xs text-[var(--theme-text-primary)] outline-none font-semibold cursor-pointer appearance-none"
-                                    value={customAttributes.physical?.form || ''}
-                                    onChange={e => setCustomAttributes((p: any) => ({ ...p, physical: { ...p.physical, form: e.target.value } }))}
-                                >
-                                    <option value="" className="bg-[var(--theme-bg-panel)] text-[var(--theme-text-primary)]">Select...</option>
-                                    {['Device / Hardware', 'Solid', 'Liquid', 'Powder', 'Gel', 'Paste', 'Granule'].map(f => <option key={f} value={f} className="bg-[var(--theme-bg-panel)] text-[var(--theme-text-primary)]">{f}</option>)}
-                                </select>
-                                <ChevronDown size={10} className="absolute right-2 top-1/2 -translate-y-1/2 text-[var(--theme-text-secondary)] pointer-events-none" />
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                {/* ── 3. PHYSICAL PRODUCT SPECIFICATIONS (DYNAMIC PER CATEGORY) ── */}
+                <DynamicPhysicalAttributesSection
+                    selectedMainCategory={selectedMainCategory}
+                    customItemSize={customItemSize}
+                    setCustomItemSize={setCustomItemSize}
+                    sizeType={sizeType}
+                    setSizeType={setSizeType}
+                    customAttributes={customAttributes}
+                    setCustomAttributes={setCustomAttributes}
+                    errors={errors}
+                    setErrors={setErrors}
+                    handleNetWeightChange={handleNetWeightChange}
+                />
 
                 {/* ── 4. SUPPLY CHAIN PACKAGING HIERARCHY (GS1 STANDARD) ── */}
                 <PackagingHierarchySection
@@ -292,95 +212,15 @@ export const BuyingAttributes: React.FC<BuyingAttributesProps> = ({
                     customAttributes={customAttributes}
                     setCustomAttributes={setCustomAttributes}
                     multiplier={multiplier}
+                    selectedMainCategory={selectedMainCategory}
                 />
 
-                {/* ── 5. STORAGE, INBOUND QC & HANDLING COMPLIANCE ── */}
-                <div className="space-y-3 pt-3 border-t border-[var(--theme-border-subtle)]">
-                    <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-[var(--theme-text-secondary)]">
-                        <Thermometer size={12} className="text-purple-500" />
-                        <span>5. Storage, Inbound QC & Handling Directives</span>
-                    </div>
-
-                    <div className="grid grid-cols-6 gap-3.5">
-                        <div className="col-span-2 space-y-1">
-                            <label className="text-[10px] text-[var(--theme-text-secondary)] uppercase font-semibold ml-1 block">Storage Temperature</label>
-                            <div className="relative">
-                                <select
-                                    title="Storage Temperature"
-                                    className="w-full h-10 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3 text-xs text-[var(--theme-text-primary)] outline-none font-semibold cursor-pointer appearance-none"
-                                    value={customAttributes.storage?.type || 'Ambient (Dry)'}
-                                    onChange={e => setCustomAttributes((p: any) => ({ ...p, storage: { ...p.storage, type: e.target.value } }))}
-                                >
-                                    {STORAGE_CONDITIONS.map(s => <option key={s} value={s} className="bg-[var(--theme-bg-panel)] text-[var(--theme-text-primary)]">{s}</option>)}
-                                </select>
-                                <ChevronDown size={12} className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--theme-text-secondary)] pointer-events-none" />
-                            </div>
-                        </div>
-
-                        <div className="col-span-2 space-y-1">
-                            <label className="text-[10px] text-[var(--theme-text-secondary)] uppercase font-semibold ml-1 block">Shelf Life (Days)</label>
-                            <input
-                                type="number"
-                                min="0"
-                                className="w-full h-10 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3 text-xs text-[var(--theme-text-primary)] font-mono font-bold focus:border-[var(--theme-accent)] outline-none transition-all placeholder:text-[var(--theme-text-secondary)]/70"
-                                placeholder="e.g. 365 (or leave blank if non-perishable)"
-                                value={customAttributes.storage?.shelfLifeDays || ''}
-                                onChange={e => setCustomAttributes((p: any) => ({ ...p, storage: { ...p.storage, shelfLifeDays: e.target.value, isPerishable: Boolean(e.target.value && parseInt(e.target.value) > 0) } }))}
-                            />
-                        </div>
-
-                        <div className="col-span-2 space-y-1">
-                            <label className="text-[10px] text-[var(--theme-text-secondary)] uppercase font-semibold ml-1 block">Max Stack Limit</label>
-                            <input
-                                type="number"
-                                min="1"
-                                className="w-full h-10 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3 text-xs text-[var(--theme-text-primary)] font-mono font-bold focus:border-[var(--theme-accent)] outline-none transition-all placeholder:text-[var(--theme-text-secondary)]/70"
-                                placeholder="e.g. 5 cartons high"
-                                value={customAttributes.storage?.stackLimit || ''}
-                                onChange={e => setCustomAttributes((p: any) => ({ ...p, storage: { ...p.storage, stackLimit: e.target.value } }))}
-                            />
-                        </div>
-                    </div>
-
-                    <div className="flex flex-wrap gap-5 pt-2">
-                        <label className="flex items-center gap-1.5 cursor-pointer group">
-                            <input
-                                type="checkbox"
-                                className="w-3.5 h-3.5 rounded border-[var(--theme-border)] accent-[var(--theme-accent)]"
-                                checked={Boolean(customAttributes.packaging?.isBreakable)}
-                                onChange={e => setCustomAttributes((p: any) => ({ ...p, packaging: { ...p.packaging, isBreakable: e.target.checked } }))}
-                            />
-                            <span className="text-xs text-[var(--theme-text-secondary)] group-hover:text-[var(--theme-text-primary)] font-semibold transition-colors">Breakable Packaging</span>
-                        </label>
-                        <label className="flex items-center gap-1.5 cursor-pointer group">
-                            <input
-                                type="checkbox"
-                                className="w-3.5 h-3.5 rounded border-[var(--theme-border)] accent-[var(--theme-accent)]"
-                                checked={Boolean(customAttributes.storage?.isFragile)}
-                                onChange={e => setCustomAttributes((p: any) => ({ ...p, storage: { ...p.storage, isFragile: e.target.checked } }))}
-                            />
-                            <span className="text-xs text-[var(--theme-text-secondary)] group-hover:text-[var(--theme-text-primary)] font-semibold transition-colors">Fragile Merchandise</span>
-                        </label>
-                        <label className="flex items-center gap-1.5 cursor-pointer group">
-                            <input
-                                type="checkbox"
-                                className="w-3.5 h-3.5 rounded border-[var(--theme-border)] accent-[var(--theme-accent)]"
-                                checked={Boolean(customAttributes.storage?.isLightSensitive)}
-                                onChange={e => setCustomAttributes((p: any) => ({ ...p, storage: { ...p.storage, isLightSensitive: e.target.checked } }))}
-                            />
-                            <span className="text-xs text-[var(--theme-text-secondary)] group-hover:text-[var(--theme-text-primary)] font-semibold transition-colors">Light Sensitive</span>
-                        </label>
-                        <label className="flex items-center gap-1.5 cursor-pointer group">
-                            <input
-                                type="checkbox"
-                                className="w-3.5 h-3.5 rounded border-rose-300 accent-rose-500"
-                                checked={Boolean(customAttributes.storage?.isHazardous)}
-                                onChange={e => setCustomAttributes((p: any) => ({ ...p, storage: { ...p.storage, isHazardous: e.target.checked } }))}
-                            />
-                            <span className="text-xs text-rose-500 font-semibold">Hazardous Material</span>
-                        </label>
-                    </div>
-                </div>
+                {/* ── 5. STORAGE, INBOUND QC & HANDLING COMPLIANCE (DYNAMIC) ── */}
+                <DynamicStorageHandlingSection
+                    selectedMainCategory={selectedMainCategory}
+                    customAttributes={customAttributes}
+                    setCustomAttributes={setCustomAttributes}
+                />
             </div>
         </div>
     );

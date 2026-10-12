@@ -1,7 +1,8 @@
 import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  Lock, ArrowLeft, Printer, Box, Power, Play, PackageCheck, Vault, UserPlus
+  Lock, ArrowLeft, Printer, Box, Power, Play, PackageCheck, Vault, UserPlus,
+  ReceiptText, ShieldCheck, Users2, LayoutGrid
 } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
 import Protected from '../components/Protected';
@@ -15,7 +16,6 @@ import { isManagerialRole } from '../utils/roles';
 import { POSCommandProvider, usePOSCommand } from '../components/pos-command/POSCommandContext';
 import { POSCommandModals } from '../components/pos-command/POSCommandModals';
 import { DashboardKPIs } from '../components/pos-command/layout/DashboardKPIs';
-import { ShiftProgress } from '../components/pos-command/layout/ShiftProgress';
 import { ShiftReconciliationTable } from '../components/pos-command/layout/ShiftReconciliationTable';
 import { OverrideVelocityWidget } from '../components/pos-command/layout/OverrideVelocityWidget';
 import { SafeLedgerModal } from '../components/pos-command/modals/SafeLedgerModal';
@@ -66,6 +66,7 @@ const POSCommandContent: React.FC = () => {
   const [pinError, setPinError] = useState('');
   const [isSafeLedgerOpen, setIsSafeLedgerOpen] = useState(false);
   const [isOnboardModalOpen, setIsOnboardModalOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState<'overview' | 'audit' | 'roster' | 'all'>('overview');
   const canOnboard = isManagerialRole(user?.role) && ['store_manager', 'assistant_manager', 'shift_lead', 'store_supervisor', 'super_admin', 'admin', 'operations_manager', 'regional_manager'].includes(user?.role || '');
 
   const handleUnlock = () => {
@@ -307,48 +308,107 @@ const POSCommandContent: React.FC = () => {
         {/* ===== NEW RECRUIT CREDENTIAL HANDOVER ALERT ===== */}
         <NewHireHandoverBanner />
 
-        {/* ===== SHIFT PROGRESS ===== */}
-        <ShiftProgress />
-
-        {/* ===== KPI GRID ===== */}
+        {/* ===== MASTER COMMAND DECK (Unified Main Cards) ===== */}
         <DashboardKPIs />
 
-        {/* ===== ROSTER GRID ===== */}
-        <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-          <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-6 relative overflow-hidden shadow-xs isolate">
-            <SiteRoster layout="list" limit={6} highlightUser={user?.id} />
+        {/* ===== PANEL NAVIGATION TABS (Apple Segmented Control) ===== */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-2 pb-1 border-b border-[var(--theme-border)]">
+          <div className="inline-flex items-center p-1 rounded-2xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] shadow-2xs gap-1">
+            {[
+              { id: 'overview', label: 'Register & Sales', icon: ReceiptText },
+              { id: 'audit', label: 'Cash & Audit Control', icon: ShieldCheck },
+              { id: 'roster', label: 'Staff & Roster', icon: Users2 },
+              { id: 'all', label: 'All Panels', icon: LayoutGrid },
+            ].map(tab => (
+              <button
+                key={tab.id}
+                type="button"
+                onClick={() => setActiveTab(tab.id as 'overview' | 'audit' | 'roster' | 'all')}
+                className={`px-3 sm:px-4 py-1.5 rounded-xl text-xs font-semibold transition-all flex items-center gap-2 cursor-pointer ${
+                  activeTab === tab.id
+                    ? 'bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)] shadow-2xs border border-[var(--theme-border)]'
+                    : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-card-hover)]'
+                }`}
+              >
+                <tab.icon size={13} className={activeTab === tab.id ? 'text-[#0071E3] dark:text-[#2997FF]' : ''} />
+                <span>{tab.label}</span>
+              </button>
+            ))}
           </div>
-          <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-6 relative overflow-hidden shadow-xs isolate">
-            <RosterManager />
+
+          <div className="flex items-center gap-2 text-[11px] text-[var(--theme-text-secondary)] font-mono">
+            <span className="w-2 h-2 rounded-full bg-emerald-500" />
+            <span>Terminal Live</span>
+            {activeSite?.code && <span>• [{activeSite.code}]</span>}
           </div>
         </div>
 
-        {/* ===== PERFORMANCE SECTION ===== */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2">
-            <StoreBonusDisplay
-              storePoints={storePoints.find(sp => sp.siteId === activeSite?.id)}
-              currentUserRole={user?.role}
-              workerPoints={myPoints}
-              leaderboard={siteWorkerPoints}
-            />
+        {/* ===== PANEL CONTENT ===== */}
+
+        {/* 1. Register & Sales Panel */}
+        {(activeTab === 'overview' || activeTab === 'all') && (
+          <div className="space-y-6">
+            {activeTab === 'all' && (
+              <div className="flex items-center gap-2 pt-2 text-xs font-semibold uppercase tracking-wider text-[var(--theme-text-secondary)]">
+                <ReceiptText size={14} className="text-[#0071E3] dark:text-[#2997FF]" />
+                <span>Register Performance &amp; Live Activity</span>
+              </div>
+            )}
+            <POSCommandCharts />
+            <RecentTransactions />
           </div>
-          <div className="lg:col-span-1">
-            <LeaderboardWidget workers={siteWorkerPoints} currentUserId={user?.id} />
+        )}
+
+        {/* 2. Cash & Audit Control Panel */}
+        {(activeTab === 'audit' || activeTab === 'all') && (
+          <div className="space-y-6">
+            {activeTab === 'all' && (
+              <div className="flex items-center gap-2 pt-2 text-xs font-semibold uppercase tracking-wider text-[var(--theme-text-secondary)]">
+                <ShieldCheck size={14} className="text-[#0071E3] dark:text-[#2997FF]" />
+                <span>Daily Cash Drawer &amp; Supervisory Audit</span>
+              </div>
+            )}
+            <ShiftReconciliationTable />
+            <OverrideVelocityWidget />
           </div>
-        </div>
+        )}
 
-        {/* ===== CHARTS ===== */}
-        <POSCommandCharts />
+        {/* 3. Staff & Floor Roster Panel */}
+        {(activeTab === 'roster' || activeTab === 'all') && (
+          <div className="space-y-6">
+            {activeTab === 'all' && (
+              <div className="flex items-center gap-2 pt-2 text-xs font-semibold uppercase tracking-wider text-[var(--theme-text-secondary)]">
+                <Users2 size={14} className="text-[#0071E3] dark:text-[#2997FF]" />
+                <span>Personnel Roster, Schedule &amp; Team Bonus</span>
+              </div>
+            )}
 
-        {/* ===== HQ SHIFT & CASH RECONCILIATION ===== */}
-        <ShiftReconciliationTable />
+            {/* Shift Roster & Schedules Grid */}
+            <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+              <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-6 relative overflow-hidden shadow-xs isolate">
+                <SiteRoster layout="list" limit={6} highlightUser={user?.id} />
+              </div>
+              <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-6 relative overflow-hidden shadow-xs isolate">
+                <RosterManager />
+              </div>
+            </div>
 
-        {/* ===== SUPERVISOR OVERRIDE VELOCITY (RULE 18 AUDIT) ===== */}
-        <OverrideVelocityWidget />
-
-        {/* ===== RECENT TRANSACTIONS ===== */}
-        <RecentTransactions />
+            {/* Performance & Bonus Section */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <div className="lg:col-span-2">
+                <StoreBonusDisplay
+                  storePoints={storePoints.find(sp => sp.siteId === activeSite?.id)}
+                  currentUserRole={user?.role}
+                  workerPoints={myPoints}
+                  leaderboard={siteWorkerPoints}
+                />
+              </div>
+              <div className="lg:col-span-1">
+                <LeaderboardWidget workers={siteWorkerPoints} currentUserId={user?.id} />
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* All Modals */}
         <POSCommandModals />

@@ -44,17 +44,17 @@ export const ReceivingModal: React.FC = () => {
                     <div className="flex p-1 bg-[var(--theme-bg-subtle)] rounded-2xl mb-4 border border-[var(--theme-border)]">
                         <button
                             onClick={() => setActiveTab2('pending')}
-                            className={`flex-1 py-2.5 text-xs font-bold uppercase tracking-wider rounded-xl transition-all cursor-pointer ${
+                            className={`flex-1 py-2 text-xs font-semibold rounded-xl transition-all cursor-pointer ${
                                 activeTab === 'pending'
                                     ? 'bg-[var(--theme-primary)] text-[var(--theme-primary-text)] shadow-xs'
                                     : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-card-hover)]'
                             }`}
                         >
-                            {t('posCommand.pendingTab')} ({activeSite?.name})
+                            {t('posCommand.pendingTab')}{activeSite?.name ? ` (${activeSite.name.trim()})` : ''}
                         </button>
                         <button
                             onClick={() => setActiveTab2('history')}
-                            className={`flex-1 py-2.5 text-xs font-bold uppercase tracking-wider rounded-xl transition-all cursor-pointer ${
+                            className={`flex-1 py-2 text-xs font-semibold rounded-xl transition-all cursor-pointer ${
                                 activeTab === 'history'
                                     ? 'bg-[var(--theme-primary)] text-[var(--theme-primary-text)] shadow-xs'
                                     : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-card-hover)]'

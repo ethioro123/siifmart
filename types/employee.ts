@@ -22,6 +22,10 @@ export interface StaffSchedule {
   role: string; // Role for this specific shift
   notes?: string;
   status: 'Scheduled' | 'Confirmed' | 'Completed' | 'Cancelled';
+  regionCode?: string;
+  region_code?: string;
+  countryCode?: string;
+  country_code?: string;
   created_at?: string;
   updated_at?: string;
 }
@@ -39,6 +43,8 @@ export interface Employee {
   code: string; // Simplified Display ID
   siteId: string;
   site_id?: string; // Supabase compatibility
+  regionCode?: string;
+  region_code?: string;
   country?: string;
   country_code?: string;
   name: string;

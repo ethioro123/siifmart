@@ -85,7 +85,6 @@ export const ACTION_PERMISSIONS: Record<UserRole, Permission[]> = {
     store_supervisor: [
         'dashboard.view',
         'pos.view', 'pos.create_sale', 'pos.refund', 'pos.hold_order',
-        'inventory.view', 'inventory.count',
         'sales.view',
         'customers.view', 'customers.create', 'customers.edit',
         'employees.view', 'employees.manage_attendance'
@@ -182,7 +181,6 @@ export const ACTION_PERMISSIONS: Record<UserRole, Permission[]> = {
     shift_lead: [
         'dashboard.view',
         'pos.view', 'pos.create_sale', 'pos.refund', 'pos.hold_order',
-        'inventory.view', 'inventory.count',
         'customers.view', 'customers.create', 'customers.edit',
         'employees.view', 'employees.manage_attendance'
     ],
@@ -240,6 +238,44 @@ export const ACTION_PERMISSIONS: Record<UserRole, Permission[]> = {
         'employees.view', 'employees.create', 'employees.edit', 'employees.approve', 'employees.manage_attendance',
         'pricing.view', 'pricing.edit', 'pricing.create_promo', 'pricing.approve_promo',
         'settings.view', 'settings.edit', 'settings.manage_sites', 'settings.view_logs'
+    ],
+
+    regional_procurement_lead: [
+        'dashboard.view',
+        'procurement.view', 'procurement.create_po', 'procurement.edit_po', 'procurement.approve_po', 'procurement.delete_po', 'procurement.receive',
+        'inventory.view', 'inventory.transfer',
+        'pricing.view',
+        'customers.view'
+    ],
+
+    regional_finance_officer: [
+        'dashboard.view',
+        'finance.view', 'finance.view_reports', 'finance.create_expense', 'finance.approve_expense', 'finance.reconcile_drawer', 'finance.view_payroll',
+        'sales.view', 'sales.view_reports',
+        'procurement.view', 'procurement.approve_po',
+        'pos.view',
+        'inventory.view'
+    ],
+
+    regional_hr_officer: [
+        'dashboard.view',
+        'employees.view', 'employees.create', 'employees.edit', 'employees.manage_attendance', 'employees.view_salary',
+        'finance.view_payroll'
+    ],
+
+    regional_logistics_lead: [
+        'dashboard.view',
+        'warehouse.view', 'warehouse.view_tasks', 'warehouse.dispatch', 'warehouse.receive',
+        'inventory.view', 'inventory.transfer',
+        'employees.view', 'employees.manage_attendance'
+    ],
+
+    regional_security_supervisor: [
+        'dashboard.view',
+        'settings.view_logs',
+        'pos.view', 'pos.void_sale',
+        'inventory.view', 'inventory.adjust',
+        'employees.view', 'employees.manage_attendance'
     ],
 
     operations_manager: [

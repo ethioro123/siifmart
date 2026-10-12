@@ -37,7 +37,7 @@ const ITEMS_PER_PAGE = 25;
 export default function Employees() {
    const navigate = useNavigate();
    const { user, updateUserAvatar, onlineIds } = useStore();
-   const { employees, addEmployee, updateEmployee, deleteEmployee, activeSite, sites, addNotification, tasks, shifts, effectiveCountry } = useData();
+   const { employees, addEmployee, updateEmployee, deleteEmployee, activeSite, sites, addNotification, tasks, shifts, effectiveCountry, activeRegionCode } = useData();
 
    // --- STATE ---
    const [viewMode, setViewMode] = useState<ViewMode>('directory');
@@ -132,6 +132,14 @@ export default function Employees() {
       }
    };
 
+   const scopedSites = React.useMemo(() => {
+      const targetRegion = activeRegionCode || user?.regionCode;
+      if (targetRegion) {
+         return sites.filter(s => s.regionCode === targetRegion || (s as any).region_code === targetRegion);
+      }
+      return sites;
+   }, [sites, activeRegionCode, user?.regionCode]);
+
    // --- HOOKS ---
    const { displayedEmployees, totalCount, totalPages, isLoadingEmployees, canViewAll, restricted, isOnlyManagers } = useEmployeeData({
       user,
@@ -145,7 +153,8 @@ export default function Employees() {
       ITEMS_PER_PAGE,
       country: effectiveCountry,
       countrySites: sites,
-      fallbackEmployees: employees
+      fallbackEmployees: employees,
+      regionCode: activeRegionCode || user?.regionCode
    });
    const actions = useEmployeeActions({ user, employees, updateEmployee, deleteEmployee, addNotification, updateUserAvatar });
    const wizard = useEmployeeWizard({ user, employees, sites, activeSite, addEmployee, addNotification });
@@ -293,7 +302,7 @@ export default function Employees() {
                   setFilterDepartment={setFilterDepartment}
                   filterSite={filterSite}
                   setFilterSite={setFilterSite}
-                  sites={sites}
+                  sites={scopedSites}
                   layoutMode={layoutMode}
                   setLayoutMode={setLayoutMode}
                   isTaskQueueOpen={isTaskQueueOpen}

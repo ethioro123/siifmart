@@ -8,6 +8,7 @@ interface WaveDistributionAllocationsProps {
     isSearchingProduct: boolean;
     setIsSearchingProduct: (searching: boolean) => void;
     allProducts: Product[];
+    products?: Product[];
     bulkDistributionSourceSite: string;
     activeSite: Site | null;
     sites: Site[];
@@ -22,6 +23,7 @@ export const WaveDistributionAllocations: React.FC<WaveDistributionAllocationsPr
     isSearchingProduct,
     setIsSearchingProduct,
     allProducts,
+    products = [],
     bulkDistributionSourceSite,
     activeSite,
     sites,
@@ -31,6 +33,14 @@ export const WaveDistributionAllocations: React.FC<WaveDistributionAllocationsPr
     waveProducts,
     setWaveProducts,
 }) => {
+    const actualSourceSite = bulkDistributionSourceSite || activeSite?.id;
+    const availableProducts = React.useMemo(() => {
+        if (actualSourceSite === activeSite?.id && products.length > 0) return products;
+        const siteSpecific = allProducts.filter(p => (p.siteId || (p as any).site_id) === actualSourceSite);
+        if (siteSpecific.length > 0) return siteSpecific;
+        return products.length > 0 ? products : allProducts;
+    }, [actualSourceSite, activeSite?.id, products, allProducts]);
+
     return (
         <div className="space-y-4 animate-in fade-in duration-200">
             <div className="bg-primary/10 border border-primary/20 rounded-2xl p-4 flex items-start gap-3">
@@ -44,7 +54,7 @@ export const WaveDistributionAllocations: React.FC<WaveDistributionAllocationsPr
             {isSearchingProduct ? (
                 <div className="mt-2">
                     <ProductSelector
-                        products={allProducts}
+                        products={availableProducts}
                         onSelect={(product) => {
                             const warehouseId = bulkDistributionSourceSite || activeSite?.id;
                             let stores = sites.filter(s => {
@@ -78,14 +88,19 @@ export const WaveDistributionAllocations: React.FC<WaveDistributionAllocationsPr
 
             <div className="space-y-3.5">
                 {waveProducts.map((wp, idx) => {
-                    const prod = allProducts.find(p => p.id === wp.productId);
+                    const prod = availableProducts.find(p => p.id === wp.productId)
+                        || products.find(p => p.id === wp.productId)
+                        || allProducts.find(p => p.id === wp.productId);
                     return (
                         <div key={idx} className="bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-2xl overflow-hidden shadow-xs">
                             <div className="p-3.5 bg-[var(--theme-bg-card)] border-b border-[var(--theme-border)] flex justify-between items-center">
                                 <div className="flex items-center gap-3">
                                     <div className="font-bold text-[var(--theme-text-primary)] text-sm">{prod?.name}</div>
                                     {(() => {
-                                        const sourceStockItem = allProducts.find(p => p.sku === prod?.sku && p.siteId === bulkDistributionSourceSite);
+                                        const sourceStockItem = availableProducts.find(p => p.sku === prod?.sku && (p.siteId === actualSourceSite || (p as any).site_id === actualSourceSite))
+                                            || products.find(p => p.sku === prod?.sku && (p.siteId === actualSourceSite || (p as any).site_id === actualSourceSite))
+                                            || allProducts.find(p => p.sku === prod?.sku && (p.siteId === actualSourceSite || (p as any).site_id === actualSourceSite))
+                                            || prod;
                                         const rawStock = sourceStockItem?.stock || 0;
                                         const unitDef = getSellUnit(sourceStockItem?.unit || prod?.unit || '');
                                         const sizeNum = parseFloat(sourceStockItem?.size || prod?.size || '0');

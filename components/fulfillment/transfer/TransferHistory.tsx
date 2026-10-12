@@ -144,7 +144,7 @@ export const TransferHistory: React.FC<TransferHistoryProps> = ({
                         <div className="w-9 h-9 rounded-xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] flex items-center justify-center text-[var(--theme-accent)]">
                             <HistoryIcon size={18} />
                         </div>
-                        <span>{t('warehouse.putaway.history')}</span>
+                        <span>{t('warehouse.transferHistory')}</span>
                     </h4>
                     <p className="text-[11px] text-[var(--theme-text-secondary)] font-medium mt-0.5">{t('warehouse.completedAndFinalizedShipments')}</p>
                 </div>
@@ -195,15 +195,22 @@ export const TransferHistory: React.FC<TransferHistoryProps> = ({
                                                     {t('warehouse.interSiteTransfers').split(' ')[0]}
                                                 </span>
                                             </div>
-                                            <span className={`text-[11px] px-2.5 py-0.5 rounded-full uppercase font-semibold border ${
-                                                isCancelled
-                                                    ? 'bg-red-500/10 text-red-500 border-red-500/20'
-                                                    : isReceived
-                                                        ? 'bg-green-500/10 text-green-600 dark:text-green-400 border-green-500/20'
-                                                        : 'bg-[var(--theme-bg-subtle)] text-[var(--theme-accent)] border-[var(--theme-border)]'
-                                            }`}>
-                                                {transfer.transferStatus === 'Received' ? t('warehouse.received') : isCancelled ? 'Cancelled' : (transfer.transferStatus || transfer.status)}
-                                            </span>
+                                            <div className="flex items-center gap-1.5 shrink-0">
+                                                {(transfer.isInterRegion || (transfer.sourceRegionCode && transfer.destRegionCode && transfer.sourceRegionCode !== transfer.destRegionCode)) && (
+                                                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] border border-[var(--theme-accent)]/20 shrink-0">
+                                                        Inter-Region
+                                                    </span>
+                                                )}
+                                                <span className={`text-[11px] px-2.5 py-0.5 rounded-full uppercase font-semibold border ${
+                                                    isCancelled
+                                                        ? 'bg-red-500/10 text-red-500 border-red-500/20'
+                                                        : isReceived
+                                                            ? 'bg-green-500/10 text-green-600 dark:text-green-400 border-green-500/20'
+                                                            : 'bg-[var(--theme-bg-subtle)] text-[var(--theme-accent)] border-[var(--theme-border)]'
+                                                }`}>
+                                                    {transfer.transferStatus === 'Received' ? t('warehouse.received') : isCancelled ? 'Cancelled' : (transfer.transferStatus || transfer.status)}
+                                                </span>
+                                            </div>
                                         </div>
 
                                         <div>

@@ -47,6 +47,7 @@ const getDomainIcon = (iconType: string) => {
         case 'snowflake': return Snowflake;
         case 'dog': return PawPrint;
         case 'book-open': return BookOpen;
+        case 'utensils': return UtensilsCrossed;
         case 'tag':
         default: return Tag;
     }
@@ -82,12 +83,19 @@ export const CategorySpecificAttributes: React.FC<CategorySpecificAttributesProp
             };
 
             const nextIdentity = { ...(prev.identity || {}) };
+            const nextPhysical = { ...(prev.physical || {}) };
             const nextStorage = { ...(prev.storage || {}) };
             const nextDescriptive = { ...(prev.descriptive || {}) };
 
             // Cross-mesh dynamic synchronization with core GS1 nodes
             if (field.key === 'modelNumber') {
                 nextIdentity.modelNumber = value;
+            }
+            if (field.key === 'deviceType' && !nextIdentity.subcategory) {
+                nextIdentity.subcategory = value;
+            }
+            if (field.key === 'colorFinish') {
+                nextPhysical.color = value;
             }
             if (field.key === 'apparelSize' && !nextIdentity.variant) {
                 nextIdentity.variant = value;
@@ -106,6 +114,7 @@ export const CategorySpecificAttributes: React.FC<CategorySpecificAttributesProp
             return {
                 ...prev,
                 identity: nextIdentity,
+                physical: nextPhysical,
                 storage: nextStorage,
                 descriptive: nextDescriptive,
                 categorySpecific: nextCategorySpecific
@@ -152,6 +161,8 @@ export const CategorySpecificAttributes: React.FC<CategorySpecificAttributesProp
                         field.key === 'modelNumber' ? customAttributes?.identity?.modelNumber || '' :
                         field.key === 'shelfLifeDays' ? customAttributes?.storage?.shelfLifeDays || '' :
                         field.key === 'variantStyle' ? customAttributes?.identity?.variant || '' :
+                        field.key === 'colorFinish' ? customAttributes?.physical?.color || '' :
+                        field.key === 'deviceType' ? customAttributes?.identity?.subcategory || '' :
                         ''
                     );
 

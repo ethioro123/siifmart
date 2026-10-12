@@ -26,114 +26,118 @@ export default function Pagination({
 }: PaginationProps) {
     const { t, language } = useLanguage();
 
+    if (totalItems <= 0) return null;
+
+    const curr = Math.max(1, Number(currentPage) || 1);
+    const total = Math.max(1, Number(totalPages) || 1);
+
     // Calculate range for display
-    const startItem = totalItems === 0 ? 0 : (currentPage - 1) * itemsPerPage + 1;
-    const endItem = Math.min(currentPage * itemsPerPage, totalItems);
+    const startItem = (curr - 1) * itemsPerPage + 1;
+    const endItem = Math.min(curr * itemsPerPage, totalItems);
 
     return (
-        <div className={`flex flex-row justify-between items-center gap-2 md:gap-4 p-3 md:p-4 border border-white/5 bg-black/40 backdrop-blur-md rounded-xl md:rounded-2xl shadow-xl ${className}`}>
+        <div className={`flex flex-col sm:flex-row justify-between items-center gap-3 p-3 sm:p-4 rounded-2xl bg-[var(--theme-bg-card)] border border-[var(--theme-border)] shadow-[var(--shadow-sm)] select-none ${className}`}>
 
             {/* Left: Stats Display */}
-            <div className="flex items-center gap-2 text-[10px] font-black tracking-widest uppercase text-gray-500">
-                <div className="w-1.5 h-1.5 rounded-full bg-cyan-500/50" />
-                {totalItems > 0 ? (
-                    language === 'or' ? (
-                        <div className="flex items-center gap-2">
-                            <span>{t('common.showing')}</span>
-                            <span className="text-white bg-white/5 px-2 py-0.5 rounded border border-white/5 font-mono">
-                                {startItem}{t('common.rangeSeparator')}{endItem}
-                            </span>
-                            <span>{t('common.of')}</span>
-                            <span>{itemName}</span>
-                            <span className="text-cyan-400 font-mono text-xs">{formatCompactNumber(totalItems)}</span>
-                            <span>{t('common.fromSuffix')}</span>
-                        </div>
-                    ) : (
-                        <div className="flex items-center gap-2">
-                            <span>{t('common.showing')}</span>
-                            <span className="text-white bg-white/5 px-2 py-0.5 rounded border border-white/5 font-mono">{startItem}-{endItem}</span>
-                            <span>{t('common.of')}</span>
-                            <span className="text-cyan-400 font-mono text-xs">{formatCompactNumber(totalItems)}</span>
-                            <span>{itemName}</span>
-                        </div>
-                    )
+            <div className="text-xs text-[var(--theme-text-secondary)] font-medium flex items-center gap-1.5">
+                {language === 'or' ? (
+                    <>
+                        <span>{t('common.showing') || 'Showing'}</span>
+                        <span className="font-mono tabular-nums font-semibold text-[var(--theme-text-primary)]">
+                            {startItem}{t('common.rangeSeparator') || '-'}{endItem}
+                        </span>
+                        <span>{t('common.of') || 'of'}</span>
+                        <span className="font-mono tabular-nums font-semibold text-[var(--theme-text-primary)]">{formatCompactNumber(totalItems)}</span>
+                        <span>{itemName}</span>
+                        <span>{t('common.fromSuffix') || ''}</span>
+                    </>
                 ) : (
-                    <span>{t('common.noAvailable').replace('{item}', itemName)}</span>
+                    <>
+                        <span>{t('common.showing') || 'Showing'}</span>
+                        <span className="font-mono tabular-nums font-semibold text-[var(--theme-text-primary)]">
+                            {startItem}-{endItem}
+                        </span>
+                        <span>{t('common.of') || 'of'}</span>
+                        <span className="font-mono tabular-nums font-semibold text-[var(--theme-text-primary)]">
+                            {formatCompactNumber(totalItems)}
+                        </span>
+                        <span>{itemName}</span>
+                    </>
                 )}
             </div>
 
             {/* Right: Controls */}
-            <div className="flex items-center gap-2 bg-black/20 p-1 rounded-xl border border-white/5 relative z-50">
+            <div className="flex items-center gap-1.5">
                 <button
                     type="button"
-                    onClick={() => onPageChange(Math.max(1, currentPage - 1))}
-                    disabled={currentPage <= 1 || isLoading}
-                    className="w-10 h-10 md:w-8 md:h-8 flex items-center justify-center rounded-lg bg-white/5 hover:bg-cyan-500 hover:text-black text-gray-400 disabled:opacity-30 disabled:hover:bg-white/5 disabled:hover:text-gray-400 transition-all active:scale-95 cursor-pointer disabled:cursor-not-allowed"
-                    title="Previous Page"
+                    onClick={() => onPageChange(Math.max(1, curr - 1))}
+                    disabled={curr <= 1 || isLoading}
+                    className="h-8 px-2.5 sm:px-3 rounded-xl bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card-hover)] border border-[var(--theme-border)] text-[var(--theme-text-primary)] disabled:opacity-30 disabled:pointer-events-none transition-all active:scale-[0.98] cursor-pointer flex items-center gap-1 text-xs font-medium touch-manipulation"
+                    title={t('common.previousPage') || 'Previous Page'}
+                    aria-label="Previous Page"
                 >
-                    <ChevronLeft size={18} strokeWidth={3} />
+                    <ChevronLeft size={14} />
+                    <span className="hidden sm:inline">{t('common.previous') || 'Previous'}</span>
                 </button>
 
-                {/* Page Numbers — hidden on mobile, just show prev/next */}
-                <div className="hidden md:flex items-center gap-1 mx-2 overflow-x-auto no-scrollbar max-w-[200px] sm:max-w-none">
+                {/* Page Numbers — hidden on compact mobile */}
+                <div className="hidden sm:flex items-center gap-1 mx-1 overflow-x-auto no-scrollbar">
                     {(() => {
                         const pages = [];
-                        // Responsive max visible pages
                         const maxVisible = 5;
-                        let startPage = Math.max(1, currentPage - 2);
-                        let endPage = Math.min(totalPages, startPage + maxVisible - 1);
+                        let startPage = Math.max(1, curr - 2);
+                        let endPage = Math.min(total, startPage + maxVisible - 1);
 
                         if (endPage - startPage < maxVisible - 1) {
                             startPage = Math.max(1, endPage - maxVisible + 1);
                         }
 
-                        // First page
                         if (startPage > 1) {
                             pages.push(
                                 <button
                                     key={1}
                                     type="button"
                                     onClick={() => onPageChange(1)}
-                                    className="w-8 h-8 flex-shrink-0 flex items-center justify-center rounded-lg text-xs font-bold text-gray-400 hover:bg-white/5 hover:text-white transition-all"
+                                    className="w-8 h-8 rounded-xl text-xs font-mono tabular-nums transition-all bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card-hover)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] border border-[var(--theme-border)] font-medium active:scale-[0.98] cursor-pointer touch-manipulation"
                                 >
                                     1
                                 </button>
                             );
                             if (startPage > 2) {
-                                pages.push(<span key="start-ellipsis" className="text-gray-600 flex-shrink-0">...</span>);
+                                pages.push(<span key="start-ellipsis" className="text-[var(--theme-text-secondary)] px-1 text-xs">...</span>);
                             }
                         }
 
-                        // Middle pages
                         for (let i = startPage; i <= endPage; i++) {
+                            const isActive = curr === i;
                             pages.push(
                                 <button
                                     key={i}
                                     type="button"
                                     onClick={() => onPageChange(i)}
-                                    className={`w-8 h-8 flex-shrink-0 flex items-center justify-center rounded-lg text-xs font-bold transition-all ${currentPage === i
-                                        ? 'bg-cyan-500 text-black shadow-lg shadow-cyan-500/20'
-                                        : 'text-gray-400 hover:bg-white/5 hover:text-white'
-                                        }`}
+                                    className={`w-8 h-8 rounded-xl text-xs font-mono tabular-nums transition-all active:scale-[0.98] cursor-pointer touch-manipulation ${
+                                        isActive
+                                            ? 'bg-[var(--theme-accent)] text-white font-semibold shadow-xs'
+                                            : 'bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card-hover)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] border border-[var(--theme-border)] font-medium'
+                                    }`}
                                 >
                                     {i}
                                 </button>
                             );
                         }
 
-                        // Last page
-                        if (endPage < totalPages) {
-                            if (endPage < totalPages - 1) {
-                                pages.push(<span key="end-ellipsis" className="text-gray-600 flex-shrink-0">...</span>);
+                        if (endPage < total) {
+                            if (endPage < total - 1) {
+                                pages.push(<span key="end-ellipsis" className="text-[var(--theme-text-secondary)] px-1 text-xs">...</span>);
                             }
                             pages.push(
                                 <button
-                                    key={totalPages}
+                                    key={total}
                                     type="button"
-                                    onClick={() => onPageChange(totalPages)}
-                                    className="w-8 h-8 flex-shrink-0 flex items-center justify-center rounded-lg text-xs font-bold text-gray-400 hover:bg-white/5 hover:text-white transition-all"
+                                    onClick={() => onPageChange(total)}
+                                    className="w-8 h-8 rounded-xl text-xs font-mono tabular-nums transition-all bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card-hover)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] border border-[var(--theme-border)] font-medium active:scale-[0.98] cursor-pointer touch-manipulation"
                                 >
-                                    {totalPages}
+                                    {total}
                                 </button>
                             );
                         }
@@ -144,16 +148,14 @@ export default function Pagination({
 
                 <button
                     type="button"
-                    onClick={() => {
-                        if (currentPage < totalPages) {
-                            onPageChange(currentPage + 1);
-                        }
-                    }}
-                    disabled={currentPage >= totalPages || isLoading}
-                    className="w-10 h-10 md:w-8 md:h-8 flex items-center justify-center rounded-lg bg-white/5 hover:bg-cyan-500 hover:text-black text-gray-400 disabled:opacity-30 disabled:hover:bg-white/5 disabled:hover:text-gray-400 transition-all active:scale-95 cursor-pointer disabled:cursor-not-allowed border border-white/20"
-                    title="Next Page"
+                    onClick={() => onPageChange(Math.min(total, curr + 1))}
+                    disabled={curr >= total || isLoading}
+                    className="h-8 px-2.5 sm:px-3 rounded-xl bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card-hover)] border border-[var(--theme-border)] text-[var(--theme-text-primary)] disabled:opacity-30 disabled:pointer-events-none transition-all active:scale-[0.98] cursor-pointer flex items-center gap-1 text-xs font-medium touch-manipulation"
+                    title={t('common.nextPage') || 'Next Page'}
+                    aria-label="Next Page"
                 >
-                    <ChevronRight size={18} strokeWidth={3} />
+                    <span className="hidden sm:inline">{t('common.next') || 'Next'}</span>
+                    <ChevronRight size={14} />
                 </button>
             </div>
         </div>

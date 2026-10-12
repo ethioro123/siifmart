@@ -8,6 +8,7 @@ import { WMSJob, User, Site, Product, Employee } from '../../../types';
 import { formatJobId } from '../../../utils/jobIdFormatter';
 import { useLanguage } from '../../../contexts/LanguageContext';
 import { getSellUnit } from '../../../utils/units';
+import { ItemAttributeBadges } from '../ItemAttributeBadges';
 
 export const formatBeautifulLocation = (loc: string | undefined, theme: 'purple' | 'cyan' | 'woody' = 'woody') => {
     if (!loc || loc === 'PENDING' || loc === 'Unassigned') {
@@ -216,6 +217,7 @@ export const PutawayJobModal: React.FC<PutawayJobModalProps> = ({
                                                         </div>
                                                     )}
                                                 </div>
+                                                <ItemAttributeBadges item={item} allProducts={products} className="mt-1.5" />
                                             </div>
                                         </div>
 

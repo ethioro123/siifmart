@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Upload, MapPin, Eye, EyeOff, Camera } from 'lucide-react';
+import { Upload, MapPin, Eye, EyeOff, Camera, Mail } from 'lucide-react';
 import { Site } from '../../../types';
 
 interface StepIdentityProps {
@@ -77,7 +77,10 @@ export default function StepIdentity({
 
                     <div className="bg-stone-50 dark:bg-white/[0.02] rounded-xl px-3 py-2 border border-[#E2DCCE]/60 dark:border-white/5 flex items-center justify-between">
                         <span className="text-[11px] text-stone-500 dark:text-stone-400 font-bold uppercase">System Email</span>
-                        <p className="text-xs text-[#2C5E3B] dark:text-[#A9CBA2] font-semibold">📧 Auto-assigned from Employee ID</p>
+                        <p className="text-xs text-[#2C5E3B] dark:text-[#A9CBA2] font-semibold flex items-center gap-1.5">
+                            <Mail size={13} className="shrink-0" />
+                            <span>Auto-assigned from Employee ID</span>
+                        </p>
                     </div>
 
                     <div>
@@ -153,7 +156,7 @@ export default function StepIdentity({
                     <input
                         className="w-full bg-white dark:bg-black/30 border border-[#E2DCCE] dark:border-white/10 rounded-xl px-3 py-2 text-stone-900 dark:text-white focus:border-[#2C5E3B] dark:focus:border-emerald-500 outline-none text-sm font-medium"
                         value={newEmpData.phone}
-                        placeholder="e.g. +251 911 000 000"
+                        placeholder={activeSite?.country === 'KE' || sites.find(s => s.id === newEmpData.siteId)?.country === 'KE' ? "e.g. +254 712 345 678" : "e.g. +251 911 000 000"}
                         onChange={e => setNewEmpData({ ...newEmpData, phone: e.target.value })}
                         aria-label="Phone Number"
                     />

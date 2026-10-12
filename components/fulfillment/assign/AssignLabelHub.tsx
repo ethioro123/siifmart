@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { Printer, Package, Layers, Layout, Info, Shield, Lock, BarChart3, Route, Boxes, CheckCircle } from 'lucide-react';
+import { Printer, Package, Layers, Layout, Info, CheckCircle } from 'lucide-react';
 import { generateUnifiedBatchLabelsHTML } from '../../../utils/labels/ProductLabelGenerator';
 import { generateLocationLabelHTML } from '../../../utils/labels/LocationLabelGenerator';
 import { encodeLocation, extractSitePrefix } from '../../../utils/locationEncoder';
@@ -103,8 +103,8 @@ export const AssignLabelHub: React.FC<AssignLabelHubProps> = ({
                     <div className="flex items-center justify-between mb-6">
                         <div>
                             <h3 className="text-xl font-bold text-[var(--theme-text-primary)] flex items-center gap-3">
-                                <div className="p-2 bg-primary/10 rounded-xl">
-                                    <Printer size={20} className="text-primary" />
+                                <div className="p-2 bg-[var(--theme-accent)]/10 rounded-xl">
+                                    <Printer size={20} className="text-[var(--theme-accent)]" />
                                 </div>
                                 Label Printing Hub
                             </h3>
@@ -113,13 +113,13 @@ export const AssignLabelHub: React.FC<AssignLabelHubProps> = ({
                         <div className="flex bg-[var(--theme-bg-subtle)] p-1 rounded-xl border border-[var(--theme-border)]">
                             <button
                                 onClick={() => { setLabelMode('PRODUCT'); setLabelSize('MEDIUM'); }}
-                                className={`px-4 py-2 min-h-[38px] rounded-lg text-xs font-semibold transition-colors touch-manipulation ${labelMode === 'PRODUCT' ? 'bg-primary text-white shadow-sm' : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)]'}`}
+                                className={`px-4 py-2 min-h-[38px] rounded-lg text-xs font-semibold transition-colors touch-manipulation ${labelMode === 'PRODUCT' ? 'bg-[var(--theme-accent)] text-white shadow-xs' : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)]'}`}
                             >
                                 <Package size={14} className="inline mr-2" /> Products
                             </button>
                             <button
                                 onClick={() => { setLabelMode('BAY'); setLabelSize('MEDIUM'); }}
-                                className={`px-4 py-2 min-h-[38px] rounded-lg text-xs font-semibold transition-colors touch-manipulation ${labelMode === 'BAY' ? 'bg-primary text-white shadow-sm' : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)]'}`}
+                                className={`px-4 py-2 min-h-[38px] rounded-lg text-xs font-semibold transition-colors touch-manipulation ${labelMode === 'BAY' ? 'bg-[var(--theme-accent)] text-white shadow-xs' : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)]'}`}
                             >
                                 <Layout size={14} className="inline mr-2" /> Bays
                             </button>
@@ -131,18 +131,18 @@ export const AssignLabelHub: React.FC<AssignLabelHubProps> = ({
                         <div className="grid grid-cols-2 gap-4">
                             <div className="space-y-2">
                                 <label className="text-xs uppercase tracking-wider font-semibold text-[var(--theme-text-secondary)] flex items-center gap-2">
-                                    <Layers size={14} className="text-primary" /> Format
+                                    <Layers size={14} className="text-[var(--theme-accent)]" /> Format
                                 </label>
                                 <div className="flex bg-[var(--theme-bg-subtle)] p-1 rounded-xl border border-[var(--theme-border)]">
                                     <button
                                         onClick={() => setLabelFormat('BARCODE')}
-                                        className={`flex-1 py-2 min-h-[38px] rounded-lg text-xs font-semibold transition-colors touch-manipulation ${labelFormat === 'BARCODE' ? 'bg-primary text-white shadow-sm' : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)]'}`}
+                                        className={`flex-1 py-2 min-h-[38px] rounded-lg text-xs font-semibold transition-colors touch-manipulation ${labelFormat === 'BARCODE' ? 'bg-[var(--theme-accent)] text-white shadow-xs' : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)]'}`}
                                     >
                                         BARCODE
                                     </button>
                                     <button
                                         onClick={() => setLabelFormat('QR')}
-                                        className={`flex-1 py-2 min-h-[38px] rounded-lg text-xs font-semibold transition-colors touch-manipulation ${labelFormat === 'QR' ? 'bg-primary text-white shadow-sm' : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)]'}`}
+                                        className={`flex-1 py-2 min-h-[38px] rounded-lg text-xs font-semibold transition-colors touch-manipulation ${labelFormat === 'QR' ? 'bg-[var(--theme-accent)] text-white shadow-xs' : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)]'}`}
                                     >
                                         QR CODE
                                     </button>
@@ -150,7 +150,7 @@ export const AssignLabelHub: React.FC<AssignLabelHubProps> = ({
                             </div>
                             <div className="space-y-2">
                                 <label className="text-xs uppercase tracking-wider font-semibold text-[var(--theme-text-secondary)] flex items-center gap-2">
-                                    <Layout size={14} className="text-primary" /> Size
+                                    <Layout size={14} className="text-[var(--theme-accent)]" /> Size
                                 </label>
                                 <select
                                     title="Label Size"
@@ -213,16 +213,16 @@ export const AssignLabelHub: React.FC<AssignLabelHubProps> = ({
                                 {/* LIVE PREVIEW */}
                                 <div className="bg-[var(--theme-bg-subtle)] rounded-2xl border border-[var(--theme-border)] p-5 relative overflow-hidden">
                                     <div className="absolute top-0 right-0 p-3 flex gap-2">
-                                        <div className="text-[11px] font-mono tabular-nums bg-primary/10 text-primary px-2.5 py-1 rounded border border-primary/20 font-semibold uppercase tracking-wider">15-DIGIT PROTOCOL</div>
+                                        <div className="text-[11px] font-mono tabular-nums bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] px-2.5 py-1 rounded border border-[var(--theme-accent)]/20 font-semibold uppercase tracking-wider">15-DIGIT PROTOCOL</div>
                                     </div>
 
                                     <div className="flex items-center gap-6">
                                         <div className="flex-1">
                                             <div className="text-xs text-[var(--theme-text-muted)] uppercase font-semibold mb-2 flex items-center gap-2">
                                                 Live Preview
-                                                <span className="text-[11px] text-primary font-bold animate-pulse">LIVE</span>
+                                                <span className="text-[11px] text-[var(--theme-accent)] font-bold animate-pulse">LIVE</span>
                                             </div>
-                                            <div className="text-3xl font-black text-primary tracking-[6px] mb-2 font-mono tabular-nums">
+                                            <div className="text-3xl font-black text-[var(--theme-accent)] tracking-[6px] mb-2 font-mono tabular-nums">
                                                 {bayConfig.zone}-{bayConfig.aisle.padStart(2, '0')}-{bayConfig.bay.padStart(2, '0')}
                                             </div>
                                             <div className="flex items-center gap-3 text-xs">
@@ -242,7 +242,7 @@ export const AssignLabelHub: React.FC<AssignLabelHubProps> = ({
                                 {/* GENERATE BUTTON */}
                                 <button
                                     onClick={handlePrintLocation}
-                                    className="w-full min-h-[44px] py-3.5 bg-primary text-white font-semibold text-sm rounded-xl flex items-center justify-center gap-3 hover:opacity-90 active:scale-[0.98] transition-all touch-manipulation"
+                                    className="w-full min-h-[44px] py-3.5 bg-[var(--theme-accent)] text-white font-semibold text-sm rounded-xl flex items-center justify-center gap-3 hover:opacity-90 active:scale-[0.98] transition-all touch-manipulation"
                                 >
                                     <Printer size={18} />
                                     GENERATE LOCATION LABEL
@@ -261,7 +261,7 @@ export const AssignLabelHub: React.FC<AssignLabelHubProps> = ({
                                     />
                                     <Package className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--theme-text-muted)]" size={20} />
                                     {matchedProduct && (
-                                        <div className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center gap-1.5 text-primary">
+                                        <div className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center gap-1.5 text-[var(--theme-accent)]">
                                             <CheckCircle size={16} />
                                             <span className="text-xs font-semibold uppercase tracking-wider hidden sm:inline">Matched</span>
                                         </div>
@@ -270,7 +270,7 @@ export const AssignLabelHub: React.FC<AssignLabelHubProps> = ({
 
                                 {/* Matched Product Summary */}
                                 {searchSku.trim() && (
-                                    <div className={`p-4 rounded-2xl border transition-colors ${matchedProduct ? 'bg-primary/5 border-primary/20' : 'bg-amber-500/5 border-amber-500/20'}`}>
+                                    <div className={`p-4 rounded-2xl border transition-colors ${matchedProduct ? 'bg-[var(--theme-accent)]/5 border-[var(--theme-accent)]/20' : 'bg-amber-500/5 border-amber-500/20'}`}>
                                         <div className="flex justify-between items-start">
                                             <div>
                                                 <h4 className={`text-sm font-semibold mb-1 ${matchedProduct ? 'text-[var(--theme-text-primary)]' : 'text-amber-700 dark:text-amber-400'}`}>
@@ -279,7 +279,7 @@ export const AssignLabelHub: React.FC<AssignLabelHubProps> = ({
                                                 <div className="flex gap-3 text-xs font-mono tabular-nums tracking-wider">
                                                     <span className="text-[var(--theme-text-secondary)]">SKU: <span className="text-[var(--theme-text-primary)] font-bold">{matchedProduct ? matchedProduct.sku : searchSku}</span></span>
                                                     {matchedProduct?.price && (
-                                                        <span className="text-[var(--theme-text-secondary)]">Price: <span className="text-primary font-bold">${matchedProduct.price.toFixed(2)}</span></span>
+                                                        <span className="text-[var(--theme-text-secondary)]">Price: <span className="text-[var(--theme-accent)] font-bold">${matchedProduct.price.toFixed(2)}</span></span>
                                                     )}
                                                 </div>
                                             </div>
@@ -332,7 +332,7 @@ export const AssignLabelHub: React.FC<AssignLabelHubProps> = ({
                                             addNotification('success', `${printQty} Product label${printQty > 1 ? 's' : ''} ready!`);
                                         }}
                                         className={`flex-1 min-h-[44px] py-3.5 font-semibold rounded-2xl transition-all flex items-center justify-center gap-3 text-xs touch-manipulation ${searchSku.trim()
-                                            ? 'bg-primary text-white hover:opacity-90 active:scale-[0.98]'
+                                            ? 'bg-[var(--theme-accent)] text-white hover:opacity-90 active:scale-[0.98]'
                                             : 'bg-[var(--theme-bg-subtle)] text-[var(--theme-text-muted)] cursor-not-allowed border border-[var(--theme-border)]'
                                             }`}
                                     >
@@ -342,104 +342,16 @@ export const AssignLabelHub: React.FC<AssignLabelHubProps> = ({
                                 </div>
 
                                 <div className="p-4 bg-[var(--theme-bg-subtle)] rounded-2xl border border-dashed border-[var(--theme-border)] flex items-center gap-4">
-                                    <div className="p-2 bg-primary/10 rounded-xl">
-                                        <Info size={16} className="text-primary" />
+                                    <div className="p-2 bg-[var(--theme-accent)]/10 rounded-xl">
+                                        <Info size={16} className="text-[var(--theme-accent)]" />
                                     </div>
                                     <p className="text-xs text-[var(--theme-text-secondary)] leading-relaxed">
-                                        <span className="text-primary font-bold uppercase mr-1">TIPS:</span>
+                                        <span className="text-[var(--theme-accent)] font-bold uppercase mr-1">TIPS:</span>
                                         Labels include price and category by default. For inventory tracking, use barcodes for faster scanning.
                                     </p>
                                 </div>
                             </div>
                         )}
-                    </div>
-                </div>
-            </div>
-
-            {/* ZONE OPERATIONS MANAGER — COMING SOON */}
-            <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl overflow-hidden relative">
-                <div className="p-6">
-                    {/* Header */}
-                    <div className="flex items-center justify-between mb-6">
-                        <div className="flex items-center gap-4">
-                            <div className="p-3 bg-primary/10 rounded-2xl">
-                                <Shield size={24} className="text-primary" />
-                            </div>
-                            <div>
-                                <h3 className="text-lg font-bold text-[var(--theme-text-primary)] tracking-tight uppercase flex items-center gap-3">
-                                    Zone Operations Manager
-                                    <span className="text-[11px] bg-amber-500/10 text-amber-700 dark:text-amber-400 px-2.5 py-1 rounded-full border border-amber-500/20 font-semibold uppercase tracking-wider">
-                                        Coming Soon
-                                    </span>
-                                </h3>
-                                <p className="text-xs text-[var(--theme-text-secondary)] mt-0.5">Advanced warehouse zone control & optimization — launching mid-2026</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Feature Roadmap Grid */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-                        {[
-                            {
-                                icon: <Lock size={20} />,
-                                title: 'Zone Lock / Unlock',
-                                desc: 'Lock zones for maintenance, restocking, or hazard containment. Locked zones block all pick, pack, and putaway job assignments automatically.',
-                                color: 'red'
-                            },
-                            {
-                                icon: <Boxes size={20} />,
-                                title: 'Capacity Controls',
-                                desc: 'Set max bay capacity per zone, monitor live occupancy rates, and trigger overflow alerts when zones approach full capacity.',
-                                color: 'blue'
-                            },
-                            {
-                                icon: <Route size={20} />,
-                                title: 'Movement Rules',
-                                desc: 'Define zone-to-zone transfer rules, priority pathways, and sequence optimizations for faster pick walks and reduced travel time.',
-                                color: 'purple'
-                            },
-                            {
-                                icon: <BarChart3 size={20} />,
-                                title: 'Real-Time Analytics',
-                                desc: 'Live dashboards for zone throughput, worker density heatmaps, bottleneck detection, and historical performance comparisons.',
-                                color: 'green'
-                            }
-                        ].map((feature) => (
-                            <div
-                                key={feature.title}
-                                className="p-5 rounded-2xl border border-[var(--theme-border)] bg-[var(--theme-bg-subtle)] transition-colors"
-                            >
-                                <div className={`p-2.5 rounded-xl w-fit mb-3 ${feature.color === 'red' ? 'bg-red-500/10 text-red-500' :
-                                    feature.color === 'blue' ? 'bg-blue-500/10 text-blue-500' :
-                                        feature.color === 'purple' ? 'bg-purple-500/10 text-purple-500' :
-                                            'bg-emerald-500/10 text-emerald-500'
-                                    }`}>
-                                    {feature.icon}
-                                </div>
-                                <h4 className="text-sm font-bold text-[var(--theme-text-primary)] mb-2 uppercase tracking-tight">{feature.title}</h4>
-                                <p className="text-xs text-[var(--theme-text-secondary)] leading-relaxed">{feature.desc}</p>
-                            </div>
-                        ))}
-                    </div>
-
-                    {/* Bottom Bar */}
-                    <div className="flex items-center justify-between pt-4 border-t border-[var(--theme-border)]">
-                        <div className="flex items-center gap-3">
-                            <div className="flex -space-x-1">
-                                <div className="w-2 h-2 rounded-full bg-primary" />
-                                <div className="w-2 h-2 rounded-full bg-amber-400" />
-                                <div className="w-2 h-2 rounded-full bg-emerald-400" />
-                            </div>
-                            <span className="text-[11px] text-[var(--theme-text-muted)] font-semibold uppercase tracking-wider">Under Active Development</span>
-                        </div>
-                        <div className="flex gap-2 font-mono tabular-nums">
-                            <div className="px-3 py-1 bg-[var(--theme-bg-subtle)] rounded-full border border-[var(--theme-border)] text-xs text-[var(--theme-text-secondary)] font-semibold uppercase tracking-wider">
-                                {zones.length} Zone{zones.length !== 1 ? 's' : ''} Configured
-                            </div>
-                            <div className="px-3 py-1 bg-amber-500/10 rounded-full border border-amber-500/20 text-xs text-amber-700 dark:text-amber-400 font-semibold uppercase tracking-wider">
-                                ETA: Mid 2026
-                            </div>
-                        </div>
                     </div>
                 </div>
             </div>

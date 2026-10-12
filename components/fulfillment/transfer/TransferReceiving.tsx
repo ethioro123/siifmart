@@ -42,7 +42,7 @@ export const TransferReceiving: React.FC<TransferReceivingProps> = ({
 }) => {
     const { t } = useLanguage();
     const { user, employees, logSystemEvent } = useFulfillment();
-    const { settings, effectiveCountry } = useData();
+    const { settings, effectiveCountry, products } = useData();
     const isBlindReceiving = resolveReceivingPolicy(settings, effectiveCountry).blind;
     const [isHandshakeModalOpen, setIsHandshakeModalOpen] = useState(false);
     const [isSubmittingReceipt, setIsSubmittingReceipt] = useState(false);
@@ -126,11 +126,17 @@ export const TransferReceiving: React.FC<TransferReceivingProps> = ({
             for (const item of transferReceiveItems) {
                 if ((item.receivedQty || 0) > 0) {
                     // Find the source product first to get the SKU
-                    const sourceProduct = allProducts.find(p => p.id === item.productId || (item.barcode && p.barcode === item.barcode));
+                    const sourceProduct = allProducts.find(p => p.id === item.productId || (item.barcode && p.barcode === item.barcode))
+                        || products.find(p => p.id === item.productId || (item.barcode && p.barcode === item.barcode));
                     // Try to find the product record at the destination site by SKU
-                    const destProduct = sourceProduct ? allProducts.find(p => 
-                        p.sku === sourceProduct.sku && 
-                        (p.siteId === destSiteId || (p as any).site_id === destSiteId)
+                    const destProduct = sourceProduct ? (
+                        allProducts.find(p => 
+                            p.sku === sourceProduct.sku && 
+                            (p.siteId === destSiteId || (p as any).site_id === destSiteId)
+                        ) || products.find(p => 
+                            p.sku === sourceProduct.sku && 
+                            (p.siteId === destSiteId || (p as any).site_id === destSiteId)
+                        )
                     ) : undefined;
                     
                     let targetProductId = destProduct?.id;

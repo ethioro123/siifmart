@@ -1,4 +1,5 @@
 import React from 'react';
+import { createPortal } from 'react-dom';
 import { Product, Site, User } from '../../../types';
 import { useData } from '../../../contexts/DataContext';
 
@@ -77,10 +78,10 @@ export const SmartReplenishModal: React.FC<SmartReplenishModalProps> = ({
     const criticalCount = state.distHubLowStockItems.filter(item => (item.stock / (item.minStock || 1)) <= 0.3).length;
     const stagedCount = state.dbDraftJobs.length;
 
-    return (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/80 animate-in fade-in duration-200">
-            <div className="w-full h-full md:p-6 lg:p-8 flex flex-col max-w-[1700px] max-h-[1000px]">
-                <div className="flex-1 bg-[var(--theme-bg-card)] md:rounded-3xl border border-[var(--theme-border)] shadow-2xl flex flex-col overflow-hidden relative">
+    return createPortal(
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/80 p-3 sm:p-4 md:p-6 lg:p-8 animate-in fade-in duration-200">
+            <div className="w-full h-full max-w-[1700px] max-h-[96vh] md:max-h-[92vh] flex flex-col">
+                <div className="flex-1 bg-[var(--theme-bg-card)] rounded-2xl md:rounded-3xl border border-[var(--theme-border)] shadow-2xl flex flex-col overflow-hidden relative">
                     
                     {/* Header bar */}
                     <SmartReplenishHeader
@@ -139,6 +140,7 @@ export const SmartReplenishModal: React.FC<SmartReplenishModalProps> = ({
                     </div>
                 </div>
             </div>
-        </div>
+        </div>,
+        document.body
     );
 };

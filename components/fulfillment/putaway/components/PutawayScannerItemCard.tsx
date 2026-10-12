@@ -1,6 +1,7 @@
 import React from 'react';
 import { Box } from 'lucide-react';
 import { Product } from '../../../../types';
+import { ItemAttributeBadges } from '../../ItemAttributeBadges';
 
 interface PutawayScannerItemCardProps {
     currentItem: any;
@@ -25,6 +26,8 @@ export const PutawayScannerItemCard: React.FC<PutawayScannerItemCardProps> = ({
                 <div className="inline-block px-3.5 py-1.5 bg-[var(--theme-accent)] text-white font-semibold font-mono text-sm rounded-xl tracking-wider mb-2">
                     {currentItem?.sku}
                 </div>
+
+                <ItemAttributeBadges item={currentItem} className="justify-center mt-2 mb-1" />
 
                 {currentOccupants.length > 0 && (
                     <div className="mt-4 space-y-2.5 pt-4 border-t border-[var(--theme-border)] text-left">

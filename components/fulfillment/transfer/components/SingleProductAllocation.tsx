@@ -37,6 +37,14 @@ export const SingleProductAllocation: React.FC<SingleProductAllocationProps> = (
     bulkDistributionAllocations,
     setBulkDistributionAllocations,
 }) => {
+    const actualSourceSite = bulkDistributionSourceSite || activeSite?.id;
+    const availableProducts = React.useMemo(() => {
+        if (actualSourceSite === activeSite?.id && products.length > 0) return products;
+        const siteSpecific = allProducts.filter(p => (p.siteId || (p as any).site_id) === actualSourceSite);
+        if (siteSpecific.length > 0) return siteSpecific;
+        return products.length > 0 ? products : allProducts;
+    }, [actualSourceSite, activeSite?.id, products, allProducts]);
+
     return (
         <div className="space-y-4 animate-in fade-in duration-200">
             <div>
@@ -44,7 +52,7 @@ export const SingleProductAllocation: React.FC<SingleProductAllocationProps> = (
                 {isSearchingProduct ? (
                     <div className="mt-2">
                         <ProductSelector
-                            products={allProducts}
+                            products={availableProducts}
                             onSelect={(product) => {
                                 setBulkDistributionProductId(product.id);
                                 const warehouseId = bulkDistributionSourceSite || activeSite?.id;
@@ -69,7 +77,7 @@ export const SingleProductAllocation: React.FC<SingleProductAllocationProps> = (
                         <div className="w-full min-h-[44px] bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-4 py-2.5 text-sm text-[var(--theme-text-primary)] flex justify-between items-center hover:border-primary transition-colors touch-manipulation">
                             <span>
                                 {bulkDistributionProductId
-                                    ? products.find(p => p.id === bulkDistributionProductId)?.name
+                                    ? (availableProducts.find(p => p.id === bulkDistributionProductId)?.name || products.find(p => p.id === bulkDistributionProductId)?.name || allProducts.find(p => p.id === bulkDistributionProductId)?.name)
                                     : "Select Product to Distribute..."}
                             </span>
                             <Search size={16} className="text-[var(--theme-text-secondary)]" />
@@ -84,8 +92,13 @@ export const SingleProductAllocation: React.FC<SingleProductAllocationProps> = (
                         <span>Store Allocation</span>
                         <div className="flex items-center gap-3">
                             {(() => {
-                                const prod = allProducts.find(p => p.id === bulkDistributionProductId);
-                                const sourceStockItem = allProducts.find(p => p.sku === prod?.sku && p.siteId === bulkDistributionSourceSite);
+                                const prod = availableProducts.find(p => p.id === bulkDistributionProductId)
+                                    || products.find(p => p.id === bulkDistributionProductId)
+                                    || allProducts.find(p => p.id === bulkDistributionProductId);
+                                const sourceStockItem = availableProducts.find(p => p.sku === prod?.sku && (p.siteId === actualSourceSite || (p as any).site_id === actualSourceSite))
+                                    || products.find(p => p.sku === prod?.sku && (p.siteId === actualSourceSite || (p as any).site_id === actualSourceSite))
+                                    || allProducts.find(p => p.sku === prod?.sku && (p.siteId === actualSourceSite || (p as any).site_id === actualSourceSite))
+                                    || prod;
                                 const rawStock = sourceStockItem?.stock || 0;
                                 const unitDef = getSellUnit(sourceStockItem?.unit || prod?.unit || '');
                                 const sizeNum = parseFloat(sourceStockItem?.size || prod?.size || '0');

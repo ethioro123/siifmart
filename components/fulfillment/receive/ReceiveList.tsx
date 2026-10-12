@@ -11,6 +11,7 @@ import { useData } from '../../../contexts/DataContext';
 import { generateBatchNumber } from '../../../utils/batchNumber';
 import { resolveReceivingPolicy } from '../../../utils/receivingPolicy';
 import { buildPOJobsReceivedMap, resolvePOLineItemProgress } from './receiveQuantityResolver';
+import { ItemAttributeBadges } from '../ItemAttributeBadges';
 
 interface ReceiveListProps {
     paginatedReceiveOrders: PurchaseOrder[];
@@ -186,6 +187,7 @@ export const ReceiveList: React.FC<ReceiveListProps> = ({
                                                         <p className="text-[11px] text-[var(--theme-text-secondary)] font-mono mt-1">
                                                             SKU: {resolvedSku || finalizedSkus[item.productId || ''] || product?.sku || item.sku || 'PENDING'}
                                                         </p>
+                                                        <ItemAttributeBadges item={item} allProducts={allProducts} className="mt-1.5" />
                                                     </div>
                                                     <div className="flex flex-col items-end shrink-0">
                                                         {(() => {

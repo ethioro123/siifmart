@@ -88,7 +88,7 @@ export const POTotalsSummary: React.FC<POTotalsSummaryProps> = ({
                 {/* Subtotal */}
                 <div className="flex justify-between items-center">
                     <span className="text-xs font-bold text-[var(--theme-text-secondary)] uppercase tracking-wide">Net Subtotal</span>
-                    <span className="text-base font-black text-[var(--theme-text-primary)] font-mono tabular-nums">{formatCompactNumber(poSubtotal, { currency: currencySymbol })}</span>
+                    <span className="text-base font-bold text-[var(--theme-text-primary)] font-mono tabular-nums">{formatCompactNumber(poSubtotal, { currency: currencySymbol })}</span>
                 </div>
 
                 {/* Discount */}
@@ -122,11 +122,11 @@ export const POTotalsSummary: React.FC<POTotalsSummaryProps> = ({
                     <div className="flex justify-between items-center">
                         <span className="text-xs font-bold text-[var(--theme-text-secondary)] flex items-center gap-1.5">
                             <Percent size={13} className="text-amber-600 dark:text-amber-400" /> Regulatory Tax
-                            <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-700 dark:text-amber-400 font-black">
+                            <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-700 dark:text-amber-400 font-semibold">
                                 {currencySymbol === 'KSh' ? 'KRA' : 'ERCA'} {taxRate}%
                             </span>
                         </span>
-                        <span className="text-xs font-black text-amber-700 dark:text-amber-300 font-mono tabular-nums">
+                        <span className="text-xs font-bold text-amber-700 dark:text-amber-300 font-mono tabular-nums">
                             + {formatCompactNumber(poTax, { currency: currencySymbol })}
                         </span>
                     </div>
@@ -159,7 +159,7 @@ export const POTotalsSummary: React.FC<POTotalsSummaryProps> = ({
                         </span>
                     </div>
                     <div className="text-right">
-                        <div className="text-2xl font-black text-[var(--theme-text-primary)] font-mono tracking-tight tabular-nums">
+                        <div className="text-2xl font-bold text-[var(--theme-text-primary)] font-mono tracking-tight tabular-nums">
                             {formatCompactNumber(poTotal, { currency: currencySymbol })}
                         </div>
                     </div>

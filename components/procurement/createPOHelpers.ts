@@ -20,6 +20,10 @@ export interface BuildPurchaseOrdersParams {
     poPriority: 'Normal' | 'High' | 'Urgent' | 'Low';
     userName?: string;
     poRequestedBy?: string;
+    incoterms?: string;
+    tempReq?: 'Ambient' | 'Chilled' | 'Frozen';
+    shelfLife?: string;
+    dockSlot?: string;
 }
 
 export interface GeneratedPurchaseOrder {
@@ -45,7 +49,11 @@ export function buildPurchaseOrders(params: BuildPurchaseOrdersParams): Generate
         paymentTerms,
         poPriority,
         userName,
-        poRequestedBy
+        poRequestedBy,
+        incoterms,
+        tempReq,
+        shelfLife,
+        dockSlot
     } = params;
 
     const results: GeneratedPurchaseOrder[] = [];
@@ -85,10 +93,12 @@ export function buildPurchaseOrders(params: BuildPurchaseOrdersParams): Generate
         const isEditMode = Boolean(editingPO?.id);
         const destSite = sites.find(s => s.id === siteId);
         const poCurrency = destSite?.currency || (destSite?.country === 'KE' ? 'KSh' : currencySymbol);
+        const effectiveRegion = destSite?.region_code || destSite?.regionCode || null;
 
         const newPO: PurchaseOrder = {
             id: (isEditMode && editingPO?.id) ? editingPO.id : crypto.randomUUID(),
             siteId: siteId,
+            site_id: siteId,
             supplierId: vendorId,
             supplierName: vendorName,
             date: new Date().toISOString().split('T')[0],
@@ -108,6 +118,13 @@ export function buildPurchaseOrders(params: BuildPurchaseOrdersParams): Generate
             currency: poCurrency,
             countryCode: destSite?.country || getEffectiveCountry({ country: destSite?.country, currency: poCurrency }),
             country_code: destSite?.country || getEffectiveCountry({ country: destSite?.country, currency: poCurrency }),
+            regionCode: effectiveRegion || undefined,
+            region_code: effectiveRegion || undefined,
+            destination: destSite?.name || undefined,
+            incoterms: incoterms || undefined,
+            tempReq: tempReq || undefined,
+            shelfLife: shelfLife || undefined,
+            dockSlot: dockSlot || undefined,
         };
 
         results.push({ po: newPO, items: siteItems });

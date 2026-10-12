@@ -4,8 +4,8 @@ import { WMSJob } from '../../../types';
 import { useFulfillment } from '../FulfillmentContext';
 import { formatDateTime } from '../../../utils/formatting';
 import { formatJobId } from '../../../utils/jobIdFormatter';
-
 import { useStore } from '../../../contexts/CentralStore';
+import { ItemAttributeBadges } from '../ItemAttributeBadges';
 
 interface PutawayDetailsModalProps {
     selectedItem: WMSJob;
@@ -25,6 +25,7 @@ export const PutawayDetailsModal: React.FC<PutawayDetailsModalProps> = ({
     t
 }) => {
     const { user } = useStore();
+    const { allProducts } = useFulfillment();
     const isCompleted = (selectedItem.status || '').toLowerCase() === 'completed';
     // Resolve User Name: prioritize actual completion author for completed jobs
     const completedUserId = selectedItem.completedBy || (selectedItem as any).completed_by;
@@ -153,6 +154,7 @@ export const PutawayDetailsModal: React.FC<PutawayDetailsModalProps> = ({
                                                 </span>
                                             </div>
                                         </div>
+                                        <ItemAttributeBadges item={item} allProducts={allProducts} className="mt-2" />
                                     </div>
                                 </div>
 

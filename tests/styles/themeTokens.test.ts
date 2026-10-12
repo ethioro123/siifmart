@@ -150,8 +150,8 @@ describe('Modern CSS Token Layer & Aesthetic Architecture', () => {
     const execDeckContent = fs.readFileSync(execDeckPath, 'utf8');
     const headerContent = fs.readFileSync(headerPath, 'utf8');
 
-    // Accent color uses Apple off-white in dark and deep black in light
-    expect(centralOpsContent).toContain("accentColor = isDark ? '#F5F5F7' : '#1D1D1F'");
+    // Accent color uses official Apple accent token (#2997FF in dark, #0071E3 in light)
+    expect(centralOpsContent).toContain("accentColor = isDark ? '#2997FF' : '#0071E3'");
 
     // Executive deck uses semantic card and text tokens
     expect(execDeckContent).toContain('bg-[var(--theme-bg-card)]');

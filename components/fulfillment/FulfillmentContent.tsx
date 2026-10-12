@@ -361,6 +361,8 @@ export const FulfillmentContent: React.FC = () => {
                         logSystemEvent={logSystemEvent}
                         playBeep={(type: string) => logger.debug('FulfillmentContent', `Beep: ${type}`)}
                         fixBrokenJobs={fixBrokenJobs}
+                        historicalJobs={historicalJobs}
+                        loadHistoricalJobs={loadHistoricalJobs}
                     />
                 )
             }

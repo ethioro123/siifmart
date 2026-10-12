@@ -2,6 +2,9 @@ import React from 'react';
 import { Package, Layers, ShieldCheck, Tag, Info, Sparkles } from 'lucide-react';
 import { Product } from '../../../types';
 import { getCategorySpecGroup } from '../../procurement/categoryAttributes';
+import { getPOItemPhysicalSummary } from '../../procurement/physicalUtils';
+import { getCategoryStorageDefaults } from '../../procurement/categoryLogistics';
+import { getCategoryPackagingDefaults } from '../../procurement/categoryPackaging';
 
 // ── Compact Attribute Badge ──
 const AttrBadge = ({ label, value, color }: { label: string; value?: string | number | boolean | null; color?: string }) => {
@@ -37,11 +40,36 @@ interface ProductAttributesPanelProps {
 
 export const ProductAttributesPanel: React.FC<ProductAttributesPanelProps> = ({ product }) => {
     const customAttrs = product.customAttributes || (product as any).custom_attributes;
+    const category = product.category || '';
+    const storageDefaults = category ? getCategoryStorageDefaults(category) : null;
+    const pkgDefaults = category ? getCategoryPackagingDefaults(category) : null;
+    const physSummary = getPOItemPhysicalSummary(product);
 
     const hasIdentity = !!(customAttrs?.identity?.variant || customAttrs?.identity?.modelNumber || customAttrs?.identity?.subcategory);
-    const hasPhysical = !!(customAttrs?.physical?.netWeight || customAttrs?.physical?.grossWeight || customAttrs?.physical?.form || customAttrs?.physical?.color || customAttrs?.physical?.texture || customAttrs?.physical?.dims);
-    const hasPackaging = !!(customAttrs?.packaging?.packQty || customAttrs?.packaging?.caseSize || customAttrs?.packaging?.packagingLevel || customAttrs?.packaging?.packageType || customAttrs?.packaging?.material || customAttrs?.packaging?.isBreakable);
-    const hasStorage = !!(customAttrs?.storage?.type || customAttrs?.storage?.isPerishable || customAttrs?.storage?.isHazardous || customAttrs?.storage?.isFragile || customAttrs?.storage?.isLightSensitive || customAttrs?.storage?.stackLimit);
+    const hasPhysical = !!(physSummary.specBadge || customAttrs?.physical?.netWeight || customAttrs?.physical?.grossWeight || customAttrs?.physical?.form || customAttrs?.physical?.color || customAttrs?.physical?.texture || customAttrs?.physical?.dims);
+
+    // Inbound QC & Storage resolution
+    const inboundQc = customAttrs?.storage?.inboundQcDirective || storageDefaults?.inboundDirectives?.[0] || null;
+    const storageType = customAttrs?.storage?.type || storageDefaults?.defaultStorage || null;
+    const isPerishable = customAttrs?.storage?.isPerishable ?? storageDefaults?.defaultPerishable ?? false;
+    const shelfLife = customAttrs?.storage?.shelfLifeDays || storageDefaults?.defaultShelfLife || null;
+    const isColdChain = customAttrs?.storage?.coldChain || (storageType && /chilled|cold/i.test(storageType));
+    const isDeepFreeze = customAttrs?.storage?.deepFreeze || (storageType && /freeze|frozen/i.test(storageType));
+    const isHighValue = customAttrs?.storage?.highTheft || customAttrs?.storage?.highValueCage;
+    const isFragile = customAttrs?.storage?.isFragile || customAttrs?.packaging?.isBreakable;
+    const isAntiStatic = customAttrs?.storage?.antiStatic;
+    const isHalal = customAttrs?.storage?.halalVerified || customAttrs?.categorySpecific?.halalCertified === 'Yes';
+    const isSerialTracked = customAttrs?.storage?.serialTracked || customAttrs?.categorySpecific?.serialNumberTracking;
+
+    const hasStorage = !!(inboundQc || storageType || isPerishable || customAttrs?.storage?.isHazardous || isFragile || isHighValue || isAntiStatic || isHalal || isSerialTracked);
+
+    // Packaging resolution
+    const packageType = customAttrs?.packaging?.packageType || pkgDefaults?.containers?.[0] || null;
+    const packagingLevel = customAttrs?.packaging?.packagingLevel || pkgDefaults?.defaultLevel || null;
+    const packQty = customAttrs?.packaging?.packQty || pkgDefaults?.defaultPackQty || null;
+    const packagingMaterial = customAttrs?.packaging?.material || pkgDefaults?.defaultMaterial || null;
+
+    const hasPackaging = !!(packageType || packagingLevel || packQty || customAttrs?.packaging?.caseSize || packagingMaterial || customAttrs?.packaging?.isBreakable);
     const hasCommercial = !!(customAttrs?.commercial?.sellBy || customAttrs?.commercial?.priceType || customAttrs?.commercial?.isWeighted || customAttrs?.commercial?.isReturnable || customAttrs?.commercial?.isBundleEligible);
     const hasDescriptive = !!(customAttrs?.descriptive?.usage || customAttrs?.descriptive?.audience || customAttrs?.descriptive?.scent || customAttrs?.descriptive?.flavor || customAttrs?.descriptive?.strength);
 
@@ -75,14 +103,14 @@ export const ProductAttributesPanel: React.FC<ProductAttributesPanelProps> = ({ 
                 <div className="p-3.5 bg-[var(--theme-bg-subtle)] rounded-2xl border border-[var(--theme-border)] space-y-2">
                     <div className="flex items-center gap-1.5 text-[11px] font-bold text-[var(--theme-text-secondary)] uppercase tracking-wider">
                         <Package size={12} className="text-blue-500 shrink-0" />
-                        <span>Packaging & Outer Casing</span>
+                        <span>Packaging & Outer Casing (GS1 Logistics)</span>
                     </div>
                     <div className="flex flex-wrap gap-1.5">
-                        <AttrBadge label="Pack Qty" value={customAttrs?.packaging?.packQty ? `×${customAttrs.packaging.packQty}` : null} />
+                        <AttrBadge label="Container" value={packageType} color="blue" />
+                        <AttrBadge label="Level" value={packagingLevel} />
+                        <AttrBadge label="Pack Qty" value={packQty ? `×${packQty}` : null} />
                         <AttrBadge label="Case Size" value={customAttrs?.packaging?.caseSize ? `×${customAttrs.packaging.caseSize}` : null} />
-                        <AttrBadge label="Type" value={customAttrs?.packaging?.packageType} />
-                        <AttrBadge label="Level" value={customAttrs?.packaging?.packagingLevel} />
-                        <AttrBadge label="Material" value={customAttrs?.packaging?.material} />
+                        <AttrBadge label="Material" value={packagingMaterial} />
                         <AttrBadge label="Breakable" value={customAttrs?.packaging?.isBreakable} color="red" />
                     </div>
                 </div>
@@ -91,9 +119,16 @@ export const ProductAttributesPanel: React.FC<ProductAttributesPanelProps> = ({ 
             {/* 3. Physical Specs Domain */}
             {hasPhysical && (
                 <div className="p-3.5 bg-[var(--theme-bg-subtle)] rounded-2xl border border-[var(--theme-border)] space-y-2">
-                    <div className="flex items-center gap-1.5 text-[11px] font-bold text-[var(--theme-text-secondary)] uppercase tracking-wider">
-                        <Layers size={12} className="text-amber-500 shrink-0" />
-                        <span>Physical Specifications</span>
+                    <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-1.5 text-[11px] font-bold text-[var(--theme-text-secondary)] uppercase tracking-wider">
+                            <Layers size={12} className="text-amber-500 shrink-0" />
+                            <span>Physical Specifications</span>
+                        </div>
+                        {physSummary.specBadge && (
+                            <span className="text-[10px] font-mono font-semibold text-[var(--theme-accent)] bg-[var(--theme-bg-app)] border border-[var(--theme-border)] px-2 py-0.5 rounded-full truncate max-w-[220px]">
+                                {physSummary.specBadge}
+                            </span>
+                        )}
                     </div>
                     <div className="flex flex-wrap gap-1.5">
                         <AttrBadge label="Net Weight" value={customAttrs?.physical?.netWeight ? `${customAttrs.physical.netWeight}${customAttrs?.physical?.sizeType || product.unit || ''}` : null} />
@@ -111,14 +146,24 @@ export const ProductAttributesPanel: React.FC<ProductAttributesPanelProps> = ({ 
                 <div className="p-3.5 bg-[var(--theme-bg-subtle)] rounded-2xl border border-[var(--theme-border)] space-y-2">
                     <div className="flex items-center gap-1.5 text-[11px] font-bold text-[var(--theme-text-secondary)] uppercase tracking-wider">
                         <ShieldCheck size={12} className="text-emerald-500 shrink-0" />
-                        <span>Storage & Care Conditions</span>
+                        <span>Storage & Inbound QC Directives</span>
                     </div>
+                    {inboundQc && (
+                        <div className="p-2 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-xs font-semibold flex items-center gap-2">
+                            <ShieldCheck size={13} className="shrink-0" />
+                            <span>Inbound QC: {inboundQc}</span>
+                        </div>
+                    )}
                     <div className="flex flex-wrap gap-1.5">
-                        <AttrBadge label="Storage" value={customAttrs?.storage?.type} color={customAttrs?.storage?.type === 'Frozen' ? 'blue' : customAttrs?.storage?.type === 'Chilled' ? 'cyan' : undefined} />
-                        <AttrBadge label="Perishable" value={customAttrs?.storage?.isPerishable} color="orange" />
+                        <AttrBadge label="Storage" value={storageType} color={isDeepFreeze ? 'blue' : isColdChain ? 'cyan' : undefined} />
+                        <AttrBadge label="Perishable" value={isPerishable ? (shelfLife ? `Yes (${shelfLife}d)` : 'Yes') : null} color="orange" />
+                        <AttrBadge label="Cold Chain" value={isColdChain ? 'Strict Cold Chain' : null} color="cyan" />
+                        <AttrBadge label="High Value" value={isHighValue ? 'Secure Cage' : null} color="red" />
+                        <AttrBadge label="Anti-Static" value={isAntiStatic ? 'ESD Sensitive' : null} color="purple" />
+                        <AttrBadge label="Serial Tracked" value={isSerialTracked ? 'Serial Scan Required' : null} color="blue" />
+                        <AttrBadge label="Halal" value={isHalal ? 'Halal Certified' : null} color="green" />
                         <AttrBadge label="Hazardous" value={customAttrs?.storage?.isHazardous} color="red" />
-                        <AttrBadge label="Fragile" value={customAttrs?.storage?.isFragile} color="orange" />
-                        <AttrBadge label="Light Sensitive" value={customAttrs?.storage?.isLightSensitive} color="yellow" />
+                        <AttrBadge label="Fragile" value={isFragile} color="orange" />
                         <AttrBadge label="Stack Limit" value={customAttrs?.storage?.stackLimit ? `Max ${customAttrs.storage.stackLimit}` : null} />
                     </div>
                 </div>

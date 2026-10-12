@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { authService } from '../services/auth.service';
-import { UserRole } from '../types';
+import { UserRole, User } from '../types';
 import { employeesService } from '../services/employees.service';
 import { useSessionManager } from '../hooks/useSessionManager';
 import { useDataRefresh } from '../hooks/useDataRefresh';
@@ -13,18 +13,6 @@ import { usePresence } from '../hooks/useRealtime';
 import { logger } from '../utils/logger';
 import { fetchLoginLocation } from '../utils/geolocationHelper';
 import { evaluateGeofence } from '../utils/geofence';
-interface User {
-  id: string;
-  name: string;
-  role: UserRole;
-  avatar: string;
-  title: string;
-  siteId?: string;
-  employeeId?: string;
-  code?: string;
-  email?: string;
-  loginLocation?: string;
-}
 interface ToastMessage {
   id: string;
   message: string;
@@ -108,11 +96,11 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         if (rawNormalized === 'ceo') mappedRole = 'super_admin';
         else if (rawNormalized === 'procurement') mappedRole = 'procurement_manager';
 
-        // Resolve location: use preset on explicit login, check sessionStorage, or fallback to active session
+        // Resolve location: use preset on explicit login, check sessionStorage/localStorage, or fallback to active session
         let location = presetLocation;
         if (!location) {
           try {
-            location = sessionStorage.getItem('siifmart_login_location') || undefined;
+            location = sessionStorage.getItem('siifmart_login_location') || localStorage.getItem('siifmart_login_location') || undefined;
           } catch (e) {
             logger.warn('CentralStore', 'sessionStorage is disabled in this environment');
           }
@@ -125,6 +113,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
             .then(resolvedLoc => {
               try {
                 sessionStorage.setItem('siifmart_login_location', resolvedLoc);
+                localStorage.setItem('siifmart_login_location', resolvedLoc);
               } catch (_) {}
               setUser(prev => prev ? { ...prev, loginLocation: resolvedLoc } : null);
             })
@@ -132,6 +121,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         } else {
           try {
             sessionStorage.setItem('siifmart_login_location', location);
+            localStorage.setItem('siifmart_login_location', location);
           } catch (_) {}
         }
 

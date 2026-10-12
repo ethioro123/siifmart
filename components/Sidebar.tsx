@@ -71,8 +71,8 @@ export default function Sidebar() {
       // NETWORK INVENTORY - Executive & Supply Chain Leadership
       { to: "/network-inventory", icon: Globe, label: "Network View", section: "inventory", roles: ['super_admin', 'admin', 'supply_chain_manager', 'operations_manager', 'finance_manager', 'procurement_manager', 'auditor', 'regional_manager', 'replenishment_planner'] },
 
-      // INVENTORY
-      { to: "/inventory", icon: Package, label: "Inventory", section: "inventory", roles: ['super_admin', 'store_manager', 'assistant_manager', 'shift_lead', 'warehouse_manager', 'dispatcher', 'dispatch_manager', 'auditor', 'procurement_manager', 'inventory_specialist', 'store_supervisor', 'pos', 'operations_manager', 'regional_manager', 'supply_chain_manager', 'inventory_manager', 'logistics_manager', 'security_manager', 'vendor_relations_manager', 'customs_import_specialist', 'inbound_qc_inspector', 'replenishment_planner', 'fleet_maintenance_supervisor', 'store_operations_auditor'] },
+      // INVENTORY - Strictly Warehouse & Distribution Center Only
+      { to: "/inventory", icon: Package, label: "Inventory", section: "inventory", roles: ['super_admin', 'admin', 'warehouse_manager', 'dispatcher', 'dispatch_manager', 'auditor', 'procurement_manager', 'inventory_specialist', 'operations_manager', 'regional_manager', 'supply_chain_manager', 'inventory_manager', 'logistics_manager', 'security_manager', 'vendor_relations_manager', 'customs_import_specialist', 'inbound_qc_inspector', 'replenishment_planner', 'fleet_maintenance_supervisor', 'store_operations_auditor'] },
 
       // FULFILLMENT (WMS) - Warehouse staff & operations leadership
       { to: "/wms-ops", icon: ClipboardList, label: "Fulfillment", section: "warehouse", roles: ['super_admin', 'admin', 'warehouse_manager', 'operations_manager', 'dispatch_manager', 'dispatcher', 'picker', 'packer', 'receiver', 'driver', 'inventory_specialist', 'regional_manager', 'supply_chain_manager', 'inventory_manager', 'logistics_manager', 'inbound_qc_inspector', 'replenishment_planner', 'fleet_maintenance_supervisor'] },
@@ -154,20 +154,20 @@ export default function Sidebar() {
         }
       } else if (isStore) {
         // ═══ STORE / POS SITE CONTEXT ═══
-        // Store Manager view: POS Terminal, POS Command, Inventory, Sales, Customers, Staff.
-        // Floor staff have warehouse, procurement, merchandising, financials, settings hidden.
-        // Departmental specialists retain access to their respective modules.
+        // Store Manager view: POS Terminal, POS Command, Sales, Customers, Staff.
+        // POS sites strictly DO NOT have access to inventory (strictly for warehouse and distribution center).
+        if (item.to === '/inventory' || item.section === 'inventory' || item.to === '/network-inventory' || item.to === '/roadmap') {
+          isAllowedForSite = false;
+        }
+
         const isMerchandisingSpecialist = item.section === 'pricing' && ['merchandising_manager', 'merchandiser'].includes(userRole);
         const isFinanceSpecialist = item.section === 'finance' && ['finance_manager', 'accountant', 'treasury_officer', 'tax_compliance_officer', 'credit_control_officer', 'auditor'].includes(userRole);
         const isProcurementSpecialist = item.section === 'procurement' && ['procurement_manager', 'supply_chain_manager', 'buyer', 'vendor_relations_manager', 'inbound_qc_inspector'].includes(userRole);
 
-        if (['warehouse', 'procurement', 'pricing', 'finance', 'settings'].includes(item.section)) {
+        if (['warehouse', 'inventory', 'procurement', 'pricing', 'finance', 'settings'].includes(item.section)) {
           if (!isMerchandisingSpecialist && !isFinanceSpecialist && !isProcurementSpecialist) {
             isAllowedForSite = false;
           }
-        }
-        if (item.to === '/network-inventory' || item.to === '/roadmap') {
-          isAllowedForSite = false;
         }
         // Central Operations button is kept for CEO & operational leadership to return to HQ
         if (item.to === '/admin' && !isSuperAdminOrCeo && !['regional_manager', 'operations_manager'].includes(userRole)) {

@@ -12,6 +12,7 @@ import { canAccessModule, canViewAllEmployees } from '../utils/permissions';
 
 // Sub-components
 import { LocationBadge } from './topbar/LocationBadge';
+import { RegionBadge } from './topbar/RegionBadge';
 import { DesktopSearch } from './topbar/DesktopSearch';
 import { MobileSearch } from './topbar/MobileSearch';
 import { UserMenu } from './topbar/UserMenu';
@@ -404,6 +405,8 @@ export default function TopBar() {
                activeSite={activeSite}
                setActiveSite={setActiveSite}
             />
+
+            <RegionBadge />
          </div>
 
          <div className="flex items-center space-x-1 sm:space-x-2 md:space-x-3 flex-shrink-0 ml-2">

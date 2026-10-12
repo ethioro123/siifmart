@@ -9,6 +9,7 @@ import { parseBatchNumber, getBatchExpiryStatus } from '../../../utils/batchNumb
 import { useData } from '../../../contexts/DataContext';
 import { resolveReceivingPolicy } from '../../../utils/receivingPolicy';
 import { formatPOItemDescription, formatPackBadge } from '../../procurement/utils';
+import { ItemAttributeBadges } from '../ItemAttributeBadges';
 
 interface ReceiveDetailsModalProps {
     selectedItem: WMSJob | PurchaseOrder;
@@ -27,7 +28,7 @@ export const ReceiveDetailsModal: React.FC<ReceiveDetailsModalProps> = ({
     sites,
     t
 }) => {
-    const { addNotification, isSubmitting, setIsSubmitting, employees, user, jobs, historicalJobs } = useFulfillment();
+    const { addNotification, isSubmitting, setIsSubmitting, employees, user, jobs, historicalJobs, allProducts } = useFulfillment();
     const { settings, effectiveCountry } = useData();
     const [printingId, setPrintingId] = useState<string | null>(null);
     const isBlindReceiving = resolveReceivingPolicy(settings, effectiveCountry).blind;
@@ -206,6 +207,9 @@ export const ReceiveDetailsModal: React.FC<ReceiveDetailsModalProps> = ({
                                                 </span>
                                             )}
                                         </div>
+
+                                        {/* Dynamic Logistics, Packaging & Inbound QC Directives */}
+                                        <ItemAttributeBadges item={item} allProducts={allProducts} className="mt-2" />
 
                                         {/* Granular Metadata (Batch / Expiry) */}
                                         <div className="flex flex-wrap items-center gap-2 mt-2">

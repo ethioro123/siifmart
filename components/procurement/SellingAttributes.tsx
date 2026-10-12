@@ -1,7 +1,9 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { DollarSign, ChevronDown, Percent } from 'lucide-react';
+import { DollarSign, ChevronDown, Percent, TrendingUp, Sparkles } from 'lucide-react';
 import { getGroupedUnits, getSellUnit } from '../../utils/units';
 import { logger } from '../../utils/logger';
+import { getCategorySpecGroup } from './categoryAttributes';
+import { getCategoryMarginBenchmark } from './categoryLogistics';
 
 /* ─────────── UNIT CONVERSION (size type → sell unit) ────────── */
 
@@ -115,6 +117,9 @@ export interface SellingAttributesProps {
     /* Sovereign Currency */
     currencySymbol?: string;
 
+    /* Category Scope for Dynamic Margin Intelligence */
+    selectedMainCategory?: string;
+
     /* Errors */
     errors: Record<string, string>;
     setErrors: React.Dispatch<React.SetStateAction<Record<string, string>>>;
@@ -128,10 +133,16 @@ export const SellingAttributes: React.FC<SellingAttributesProps> = ({
     currentCost, customItemSize, sizeType,
     customAttributes, setCustomAttributes,
     currencySymbol = 'ETB',
+    selectedMainCategory = '',
     errors, setErrors,
 }) => {
     const unitDef = getSellUnit(customItemUnit);
     const showPerUnit = customItemUnit && unitDef.category !== 'count';
+
+    // Domain category margin benchmark
+    const specGroup = getCategorySpecGroup(selectedMainCategory, customAttributes?.identity?.subcategory);
+    const domainId = specGroup.id;
+    const marginBenchmark = getCategoryMarginBenchmark(domainId);
 
     // Margin state
     const [marginPercent, setMarginPercent] = useState<string>('');
@@ -273,20 +284,35 @@ export const SellingAttributes: React.FC<SellingAttributesProps> = ({
                         )}
 
                         <div className="grid grid-cols-2 gap-3">
-                            {/* Margin Input */}
+                            {/* Margin Input with Category Target Benchmark */}
                             <div className="relative">
-                                <label className="text-[9px] text-[var(--theme-text-secondary)] uppercase font-semibold ml-1 block mb-0.5">Margin %</label>
-                                <input
-                                    type="number"
-                                    min="0.1"
-                                    max="99.99"
-                                    step="0.01"
-                                    className="w-full h-11 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-2xl pl-3 pr-8 text-xs text-[var(--theme-text-primary)] font-mono font-bold focus:border-[var(--theme-accent)] outline-none transition-all text-center tabular-nums"
-                                    value={marginPercent}
-                                    onChange={e => handleMarginChange(e.target.value)}
-                                    placeholder="e.g. 33.5"
-                                />
-                                <Percent size={12} className="absolute right-3.5 bottom-3.5 text-[var(--theme-text-secondary)]" />
+                                <div className="flex items-center justify-between mb-0.5">
+                                    <label className="text-[9px] text-[var(--theme-text-secondary)] uppercase font-semibold ml-1 block">Margin %</label>
+                                    <button
+                                        type="button"
+                                        onClick={() => handleMarginChange(marginBenchmark.benchmarkPct.toString())}
+                                        className="text-[9px] text-[var(--theme-accent)] hover:underline font-mono font-bold cursor-pointer"
+                                        title={`Apply category target of ${marginBenchmark.benchmarkPct}%`}
+                                    >
+                                        Target: {marginBenchmark.benchmarkPct}%
+                                    </button>
+                                </div>
+                                <div className="relative">
+                                    <input
+                                        type="number"
+                                        min="0.1"
+                                        max="99.99"
+                                        step="0.01"
+                                        className="w-full h-11 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-2xl pl-3 pr-8 text-xs text-[var(--theme-text-primary)] font-mono font-bold focus:border-[var(--theme-accent)] outline-none transition-all text-center tabular-nums"
+                                        value={marginPercent}
+                                        onChange={e => handleMarginChange(e.target.value)}
+                                        placeholder={`e.g. ${marginBenchmark.benchmarkPct}`}
+                                    />
+                                    <Percent size={12} className="absolute right-3.5 bottom-3.5 text-[var(--theme-text-secondary)] pointer-events-none" />
+                                </div>
+                                <span className="text-[8px] text-[var(--theme-text-secondary)] block ml-1 mt-0.5 truncate" title={marginBenchmark.benchmarkLabel}>
+                                    {marginBenchmark.benchmarkLabel}
+                                </span>
                             </div>
                             {/* Retail Price */}
                             <div>
@@ -356,6 +382,15 @@ export const SellingAttributes: React.FC<SellingAttributesProps> = ({
                             <span className="text-xs text-[var(--theme-text-secondary)] group-hover:text-[var(--theme-text-primary)] font-semibold transition-colors">Bundle Eligible</span>
                         </label>
                     </div>
+
+                    {marginBenchmark.commercialNotes && (
+                        <div className="col-span-2 md:col-span-4 mt-2 px-3 py-2 rounded-xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border-subtle)] flex items-center gap-2">
+                            <TrendingUp size={12} className="text-[var(--theme-accent)] shrink-0" />
+                            <span className="text-[10px] text-[var(--theme-text-secondary)] leading-tight">
+                                <strong className="text-[var(--theme-text-primary)]">{specGroup.domainTitle} Commercial Note:</strong> {marginBenchmark.commercialNotes}
+                            </span>
+                        </div>
+                    )}
                 </div>
             </div>
         </div>

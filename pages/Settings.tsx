@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import {
     LucideIcon, Globe, ShoppingCart, Box, Shield, Bell, Database, Printer,
-    FileText, Tag, Users, DollarSign, MapPin, List, Trophy, CloudLightning, X
+    FileText, Tag, Users, DollarSign, MapPin, List, Trophy, CloudLightning, X, Network
 } from 'lucide-react';
 import { useStore } from '../contexts/CentralStore';
 import { Protected } from '../components/Protected';
@@ -20,9 +20,10 @@ import RoleSettings from '../components/settings/RoleSettings';
 import GamificationSettings from '../components/settings/GamificationSettings';
 import DiscountCodesSettings from '../components/settings/DiscountCodesSettings';
 import LocationSettings from '../components/settings/LocationSettings';
+import RegionsSettingsTab from '../components/settings/RegionsSettingsTab';
 import HRSettings from '../components/settings/HRSettings';
 
-type SettingsTab = 'general' | 'inventory' | 'pos' | 'discounts' | 'finance' | 'hr' | 'roles' | 'locations' | 'infrastructure' | 'integrations' | 'security' | 'notifications' | 'data' | 'audit' | 'gamification';
+type SettingsTab = 'general' | 'inventory' | 'pos' | 'discounts' | 'finance' | 'hr' | 'roles' | 'locations' | 'regions' | 'infrastructure' | 'integrations' | 'security' | 'notifications' | 'data' | 'audit' | 'gamification';
 
 export default function SettingsPage() {
     const { user } = useStore();
@@ -77,6 +78,9 @@ export default function SettingsPage() {
                     </Protected>
                     <Protected permission="MANAGE_WAREHOUSE">
                         <TabButton id="locations" icon={MapPin} label="Locations & Sites" />
+                    </Protected>
+                    <Protected permission="MANAGE_WAREHOUSE">
+                        <TabButton id="regions" icon={Network} label="Regional Administration" />
                     </Protected>
                     <Protected permission="MANAGE_WAREHOUSE">
                         <TabButton id="inventory" icon={Box} label="WMS & Inbound Rules" />
@@ -149,6 +153,11 @@ export default function SettingsPage() {
                     {activeTab === 'locations' && (
                         <Protected permission="MANAGE_WAREHOUSE">
                             <LocationSettings />
+                        </Protected>
+                    )}
+                    {activeTab === 'regions' && (
+                        <Protected permission="MANAGE_WAREHOUSE">
+                            <RegionsSettingsTab />
                         </Protected>
                     )}
                     {activeTab === 'pos' && (

@@ -58,4 +58,5 @@ export const common: TranslationBlock = {
     category: { en: 'Category', am: 'ምድብ', or: 'Ramaddii' },
     both: { en: 'Both', am: 'ሁለቱም', or: 'Lamaan' },
     processing: { en: 'Processing', am: 'በማስኬድ ላይ', or: 'Adeemsisaa jira' },
+    verify: { en: 'Verify', am: 'አረጋግጥ', or: 'Mirkaneessi' },
 };

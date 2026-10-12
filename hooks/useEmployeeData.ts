@@ -20,6 +20,7 @@ interface UseEmployeeDataProps {
    country?: Country;
    countrySites?: Site[];
    fallbackEmployees?: Employee[];
+   regionCode?: string;
 }
 
 export function useEmployeeData({
@@ -34,7 +35,8 @@ export function useEmployeeData({
    ITEMS_PER_PAGE,
    country = 'ET',
    countrySites = [],
-   fallbackEmployees = []
+   fallbackEmployees = [],
+   regionCode
 }: UseEmployeeDataProps) {
    const [paginatedEmployees, setPaginatedEmployees] = useState<Employee[]>([]);
    const [totalPages, setTotalPages] = useState(1);
@@ -59,11 +61,14 @@ export function useEmployeeData({
                querySiteId = filterSite;
             }
 
-            // Derive site IDs belonging to the active country
-            const countrySiteIds = countrySites.map(s => s.id);
+            // Derive site IDs belonging to the active country and optional regional lens
+            const scopedSites = regionCode 
+               ? countrySites.filter(s => s.regionCode === regionCode || (s as any).region_code === regionCode)
+               : countrySites;
+            const countrySiteIds = scopedSites.map(s => s.id);
 
             // Selective loading: Only load managers & leadership at first unless filtering by store/warehouse, searching, or role
-            const isLocationFiltered = Boolean((querySiteId && querySiteId !== 'All') || (restricted && user?.siteId));
+            const isLocationFiltered = Boolean((querySiteId && querySiteId !== 'All') || (restricted && user?.siteId) || regionCode);
             const isSearchActive = Boolean(searchTerm && searchTerm.trim() !== '');
             const isSpecificRole = Boolean(filterRole && filterRole !== 'All');
             const onlyManagers = !isLocationFiltered && !isSearchActive && !isSpecificRole;
@@ -75,7 +80,8 @@ export function useEmployeeData({
                department: filterDepartment,
                country,
                countrySiteIds,
-               onlyManagers
+               onlyManagers,
+               regionCode
             };
 
             const { data, count } = await employeesService.getPaginated(
@@ -96,13 +102,16 @@ export function useEmployeeData({
 
             // Resilient in-memory fallback using country-scoped employees
             let filtered = [...fallbackEmployees];
+            if (regionCode) {
+               filtered = filtered.filter(e => e.regionCode === regionCode || (e as any).region_code === regionCode);
+            }
             if (restricted && user?.siteId) {
                filtered = filtered.filter(e => e.siteId === user.siteId);
             } else if (filterSite && filterSite !== 'All') {
                filtered = filtered.filter(e => e.siteId === filterSite);
             }
 
-            const isLocationFiltered = Boolean((filterSite && filterSite !== 'All') || (restricted && user?.siteId));
+            const isLocationFiltered = Boolean((filterSite && filterSite !== 'All') || (restricted && user?.siteId) || regionCode);
             const isSearchActive = Boolean(searchTerm && searchTerm.trim() !== '');
             const isSpecificRole = Boolean(filterRole && filterRole !== 'All');
             const onlyManagers = !isLocationFiltered && !isSearchActive && !isSpecificRole;
@@ -143,7 +152,7 @@ export function useEmployeeData({
    }, [
       currentPage, searchTerm, filterRole, filterStatus, filterDepartment,
       filterSite, activeSite?.id, restricted, user?.siteId, ITEMS_PER_PAGE,
-      country, countrySites, fallbackEmployees
+      country, countrySites, fallbackEmployees, regionCode
    ]);
 
    const displayedEmployees = useMemo(() => {

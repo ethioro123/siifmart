@@ -73,6 +73,24 @@ export interface Site {
   replenishmentSourceIds?: string[]; // IDs of all warehouses/DCs feeding this store (many-to-many)
   logisticsZoneId?: string;
   region?: string; // User-defined logistics zone name (e.g. Harar Zone, Addis Ababa Zone)
+  regionCode?: string; // Standard operational region code (e.g. 'ke_mombasa', 'ke_nairobi')
+  region_code?: string;
+}
+
+export interface Region {
+  code: string;
+  name: string;
+  country: string;
+  city?: string;
+  default_currency?: string;
+  default_language?: string;
+  admin_hub_site_id?: string;
+  regional_manager_id?: string;
+  monthly_procurement_budget?: number;
+  autonomous_po_limit?: number;
+  status: 'active' | 'suspended' | 'planning';
+  created_at?: string;
+  updated_at?: string;
 }
 
 export interface LogisticsZone {
@@ -261,6 +279,8 @@ export interface TransferRecord {
   requestedAt: string;
   approvedAt?: string;
   shippedAt?: string;
+  deliveredAt?: string;
+  delivered_at?: string;
   receivedAt?: string;
   completedAt?: string;
   createdAt?: string;
@@ -272,6 +292,16 @@ export interface TransferRecord {
   orderRef?: string;
   hasDiscrepancy?: boolean;
   discrepancyDetails?: string;
+  sourceRegionCode?: string;
+  source_region_code?: string;
+  destRegionCode?: string;
+  dest_region_code?: string;
+  countryCode?: string;
+  country_code?: string;
+  isInterRegion?: boolean;
+  is_inter_region?: boolean;
+  receivedBy?: string;
+  received_by?: string;
 }
 
 export enum NavSection {

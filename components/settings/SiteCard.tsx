@@ -1,6 +1,6 @@
 import React from 'react';
-import { ChevronDown, Edit2, Trash2, Lock, Hash, Landmark, Globe } from 'lucide-react';
-import { Site } from '../../types';
+import { ChevronDown, Edit2, Trash2, Lock, Hash, Landmark, Globe, MapPin } from 'lucide-react';
+import { Site, Region } from '../../types';
 import { isAdminSite } from '../../utils/countryAdmin';
 import { formatDisplaySiteId, getSiteCountryId } from '../../utils/siteIdGenerator';
 import { getCountryProfile, Country } from '../../utils/localization';
@@ -14,6 +14,7 @@ interface SiteCardProps {
   handleDeleteSite: (id: string) => void;
   isDeleting: boolean;
   logisticsZones: any[];
+  regions?: Region[];
 }
 
 export function SiteCard({
@@ -24,13 +25,15 @@ export function SiteCard({
   setIsSiteModalOpen,
   handleDeleteSite,
   isDeleting,
-  logisticsZones
+  logisticsZones,
+  regions = []
 }: SiteCardProps) {
   const isExpanded = expandedSiteId === site.id;
   const isAdmin = isAdminSite(site);
   const countryId = getSiteCountryId(site) as Country;
   const countryProfile = getCountryProfile(countryId);
   const humanReadableSiteId = formatDisplaySiteId(site);
+  const region = regions.find(r => r.code === (site.region_code || site.regionCode));
 
   return (
     <div
@@ -61,6 +64,14 @@ export function SiteCard({
               <Hash size={11} className="opacity-60" />
               <span>{humanReadableSiteId}</span>
             </span>
+
+            {/* Regional Territory Badge */}
+            {(region || site.region_code || site.regionCode) && (
+              <span className="text-[11px] px-2 py-0.5 rounded-full font-semibold shrink-0 bg-stone-500/10 text-[var(--theme-text-secondary)] border border-[var(--theme-border)] flex items-center gap-1" title={region ? `Territory: ${region.name} (${region.city || region.code})` : `Region: ${site.region_code || site.regionCode}`}>
+                <MapPin size={11} className="text-[#0071E3] dark:text-[#2997FF]" />
+                <span>{region ? (region.city || region.name.replace(/\s+Region$/i, '')) : (site.region_code || site.regionCode)}</span>
+              </span>
+            )}
 
             {isAdmin && (
               <span className="text-[11px] px-2 py-0.5 rounded-full font-semibold shrink-0 bg-purple-500/10 text-purple-700 dark:text-purple-300 border border-purple-500/20 flex items-center gap-1">
@@ -115,17 +126,26 @@ export function SiteCard({
               </span>
             </div>
           </div>
-          <div>
-            <span className="font-semibold text-[var(--theme-text-muted)] block uppercase tracking-wider text-[11px]">Logistics Zone</span>
-            <span className="text-[var(--theme-text-primary)] font-medium truncate block mt-0.5" title={
-              site.logisticsZoneId
-                ? (logisticsZones.find(z => z.id === site.logisticsZoneId)?.name || 'Unknown')
-                : 'Unassigned'
-            }>
-              {site.logisticsZoneId
-                ? (logisticsZones.find(z => z.id === site.logisticsZoneId)?.name || 'Unknown')
-                : 'Unassigned'}
-            </span>
+          <div className="grid grid-cols-2 gap-2">
+            <div>
+              <span className="font-semibold text-[var(--theme-text-muted)] block uppercase tracking-wider text-[11px]">Operational Region</span>
+              <span className="text-[var(--theme-text-primary)] font-semibold truncate block mt-0.5 flex items-center gap-1" title={region?.name || site.region_code || 'Unassigned'}>
+                <MapPin size={11} className="text-[#0071E3] dark:text-[#2997FF] shrink-0" />
+                <span className="truncate">{region ? region.name : (site.region_code || site.regionCode || 'Unassigned')}</span>
+              </span>
+            </div>
+            <div>
+              <span className="font-semibold text-[var(--theme-text-muted)] block uppercase tracking-wider text-[11px]">Logistics Zone</span>
+              <span className="text-[var(--theme-text-primary)] font-medium truncate block mt-0.5" title={
+                site.logisticsZoneId
+                  ? (logisticsZones.find(z => z.id === site.logisticsZoneId)?.name || 'Unknown')
+                  : 'Unassigned'
+              }>
+                {site.logisticsZoneId
+                  ? (logisticsZones.find(z => z.id === site.logisticsZoneId)?.name || 'Unknown')
+                  : 'Unassigned'}
+              </span>
+            </div>
           </div>
           <div>
             <span className="font-semibold text-[var(--theme-text-muted)] block uppercase tracking-wider text-[11px]">

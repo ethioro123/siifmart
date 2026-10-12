@@ -242,9 +242,9 @@ export const POSupplierLogistics: React.FC<POSupplierLogisticsProps> = ({
                                     const site = sites.find(s => s.id === id);
                                     return (
                                         <span key={id} className="text-xs bg-emerald-500/20 border border-emerald-500/40 text-emerald-950 dark:text-emerald-100 px-3 py-1.5 rounded-xl flex items-center gap-2 font-bold shadow-sm backdrop-blur-sm">
-                                            <span className="font-mono text-emerald-950 dark:text-emerald-200 font-extrabold">{formatDisplaySiteId(site)}</span>
-                                            <span className="truncate max-w-[140px] text-[var(--theme-text-primary)] font-extrabold">{site?.name}</span>
-                                            <span className="text-[10px] uppercase font-mono font-black px-1.5 py-0.5 rounded bg-amber-500/25 text-amber-950 dark:text-amber-200 border border-amber-500/40">
+                                            <span className="font-mono text-emerald-950 dark:text-emerald-200 font-bold">{formatDisplaySiteId(site)}</span>
+                                            <span className="truncate max-w-[140px] text-[var(--theme-text-primary)] font-bold">{site?.name}</span>
+                                            <span className="text-[10px] uppercase font-mono font-semibold px-1.5 py-0.5 rounded bg-amber-500/25 text-amber-950 dark:text-amber-200 border border-amber-500/40">
                                                 [{site?.type === 'Distribution Center' ? 'DC' : 'WH'}]
                                             </span>
                                             <X

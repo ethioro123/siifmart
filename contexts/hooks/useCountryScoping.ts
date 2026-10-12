@@ -1,14 +1,15 @@
-import { useMemo, useEffect, useRef, useCallback } from 'react';
+import { useMemo, useEffect, useRef, useCallback, useState } from 'react';
 import {
   Site, PurchaseOrder, SaleRecord, Employee,
   StockMovement, ShiftRecord, ExpenseRecord, Product, Supplier, Customer,
-  DiscountCode
+  DiscountCode, Region
 } from '../../types';
-import { canSwitchCountry, getUserCountry } from '../../utils/permissions';
+import { canSwitchCountry, getUserCountry, canSwitchRegion, getUserRegion } from '../../utils/permissions';
 import { Country, getCountryProfile, COUNTRY_LEGAL_DEFAULTS } from '../../utils/localization';
 import { logger } from '../../utils/logger';
 import { findCountryAdminSite } from '../../utils/countryAdmin';
 import { setCurrencySymbol } from '../../constants/categories';
+import { regionsService } from '../../services/regions.service';
 
 function getSiteCountry(s: Site): Country {
   if (s.country) return s.country;
@@ -63,6 +64,8 @@ export function useCountryScoping({
   // Regular employees from another country CANNOT access a different country.
   // Their country is strictly pinned to their assigned site.
   const isCeo = canSwitchCountry(user);
+  const canSwitchRegionUser = canSwitchRegion(user);
+
   const effectiveCountry: Country = useMemo(() => {
     // If no user context (e.g. system init/testing) or user is CEO/Super Admin, respect active country setting
     if (!user || isCeo) {
@@ -71,6 +74,48 @@ export function useCountryScoping({
     // Regular employees from another country CANNOT access a different country. Locked to branch.
     return getUserCountry(user, sites, employees);
   }, [isCeo, country, user, sites, employees]);
+
+  // Regional Authority & Lens State
+  const userRegionCode = useMemo(() => {
+    return getUserRegion(user, sites, employees);
+  }, [user, sites, employees]);
+
+  const isRegionalUser = Boolean(!canSwitchRegionUser && userRegionCode);
+
+  const [activeRegionCode, setActiveRegionCodeState] = useState<string | null>(() => {
+    if (isRegionalUser && userRegionCode) return userRegionCode;
+    return null;
+  });
+
+  const [regions, setRegions] = useState<Region[]>([]);
+
+  // Fetch regions for effective sovereign country
+  useEffect(() => {
+    let isMounted = true;
+    regionsService.getRegions(effectiveCountry).then(data => {
+      if (isMounted) setRegions(data);
+    }).catch(err => {
+      logger.warn('useCountryScoping', 'Failed to load regions for country:', err);
+    });
+    return () => { isMounted = false; };
+  }, [effectiveCountry]);
+
+  // Sync regional lock for regional users or reset on country change for HQ
+  useEffect(() => {
+    if (isRegionalUser && userRegionCode) {
+      setActiveRegionCodeState(userRegionCode);
+    } else if (canSwitchRegionUser) {
+      setActiveRegionCodeState(null);
+    }
+  }, [effectiveCountry, isRegionalUser, userRegionCode, canSwitchRegionUser]);
+
+  const setActiveRegionCode = useCallback((code: string | null) => {
+    if (isRegionalUser) {
+      logger.warn('useCountryScoping', 'Regional user cannot switch regional lens');
+      return;
+    }
+    setActiveRegionCodeState(code);
+  }, [isRegionalUser]);
 
   // 1. Site Country Lookup Map (all existing/unassigned sites default to Ethiopia ET)
   const siteCountryMap = useMemo(() => {
@@ -84,10 +129,13 @@ export function useCountryScoping({
     return map;
   }, [sites]);
 
-  // 2. Scoped Sites: only facilities in effective country
+  // 2. Scoped Sites: facilities in effective country matching activeRegionCode (if selected)
   const scopedSites = useMemo(() => {
-    return sites.filter(s => getSiteCountry(s) === effectiveCountry);
-  }, [sites, effectiveCountry]);
+    const countrySites = sites.filter(s => getSiteCountry(s) === effectiveCountry);
+    if (!activeRegionCode) return countrySites;
+    const regionalSites = countrySites.filter(s => s.regionCode === activeRegionCode || s.region_code === activeRegionCode);
+    return regionalSites.length > 0 ? regionalSites : countrySites;
+  }, [sites, effectiveCountry, activeRegionCode]);
 
   // 3. Auto-switch active site when effective country changes
   const prevCountryRef = useRef<Country>(effectiveCountry);
@@ -121,9 +169,13 @@ export function useCountryScoping({
     return allOrders.filter(po => {
       if (!po.siteId) return effectiveCountry === 'ET'; // fallback legacy unassigned to ET
       const poCountry = siteCountryMap.get(po.siteId) || 'ET';
-      return poCountry === effectiveCountry;
+      if (poCountry !== effectiveCountry) return false;
+      if (!activeRegionCode) return true;
+      const poSite = sites.find(s => s.id === po.siteId || s.code === po.siteId);
+      if (!poSite) return true;
+      return poSite.regionCode === activeRegionCode || poSite.region_code === activeRegionCode;
     });
-  }, [allOrders, siteCountryMap, effectiveCountry]);
+  }, [allOrders, siteCountryMap, effectiveCountry, activeRegionCode, sites]);
 
   // 5. Scoped Sales History
   const scopedAllSales = useMemo(() => {
@@ -296,6 +348,11 @@ export function useCountryScoping({
     scopedSettings,
     siteCountryMap,
     effectiveCountry,
-    isCeo
+    isCeo,
+    regions,
+    activeRegionCode,
+    setActiveRegionCode,
+    canSwitchRegion: canSwitchRegionUser,
+    isRegionalUser
   };
 }

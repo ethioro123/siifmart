@@ -38,6 +38,7 @@ export const CentralOperationsHeader: React.FC<CentralOperationsHeaderProps> = (
 
     const navTabs: { id: CentralOpsViewMode; label: string; icon: React.ComponentType<{ size?: number; className?: string }> }[] = [
         { id: 'executive', label: 'Executive Deck', icon: LayoutDashboard },
+        { id: 'regional', label: 'Regional Command', icon: Building2 },
         { id: 'team', label: 'Central Ops Team', icon: Users },
         { id: 'financial', label: 'Financials', icon: DollarSign },
         { id: 'inventory', label: 'Logistics & Supply', icon: Box },

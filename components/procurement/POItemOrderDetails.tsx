@@ -1,5 +1,7 @@
 import React from 'react';
-import { ShoppingBag } from 'lucide-react';
+import { ShoppingBag, Sparkles } from 'lucide-react';
+import { getCategorySpecGroup } from './categoryAttributes';
+import { getCategoryProcurementMetrics } from './categoryLogistics';
 
 export interface POItemOrderDetailsProps {
     currentQty: number;
@@ -18,6 +20,8 @@ export interface POItemOrderDetailsProps {
     showRetailInput: boolean;
     errors: Record<string, string>;
     setErrors: React.Dispatch<React.SetStateAction<Record<string, string>>>;
+    selectedMainCategory?: string;
+    customAttributes?: any;
 }
 
 export const POItemOrderDetails: React.FC<POItemOrderDetailsProps> = ({
@@ -36,9 +40,15 @@ export const POItemOrderDetails: React.FC<POItemOrderDetailsProps> = ({
     currencySymbol,
     showRetailInput,
     errors,
-    setErrors
+    setErrors,
+    selectedMainCategory = '',
+    customAttributes
 }) => {
     const costPerSellUnit = unitsPerOrderUnit > 1 ? currentCost / unitsPerOrderUnit : currentCost;
+    const specGroup = getCategorySpecGroup(selectedMainCategory, customAttributes?.identity?.subcategory);
+    const domainId = specGroup.id;
+    const procurementMetrics = getCategoryProcurementMetrics(domainId, currentQty, unitsPerOrderUnit, customAttributes);
+    const totalCommitment = currentQty > 0 && currentCost > 0 ? currentQty * currentCost : 0;
 
     return (
         <div className="space-y-4">
@@ -144,6 +154,26 @@ export const POItemOrderDetails: React.FC<POItemOrderDetailsProps> = ({
                         </div>
                     )}
                 </div>
+
+                {/* Dynamic Category Procurement Metrics & Order Commitment */}
+                {(procurementMetrics.length > 0 || totalCommitment > 0) && (
+                    <div className="pt-2 border-t border-[var(--theme-border-subtle)] flex flex-wrap items-center justify-between gap-2">
+                        <div className="flex flex-wrap items-center gap-2">
+                            {procurementMetrics.map((m, idx) => (
+                                <div key={idx} className="flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-[10px]">
+                                    <span className="text-[var(--theme-text-secondary)] font-medium">{m.label}:</span>
+                                    <span className={`font-bold font-mono ${m.badgeColor || 'text-[var(--theme-text-primary)]'}`}>{m.value}</span>
+                                </div>
+                            ))}
+                        </div>
+                        {totalCommitment > 0 && (
+                            <div className="text-[11px] font-mono font-bold text-[var(--theme-text-primary)]">
+                                <span className="text-[10px] text-[var(--theme-text-secondary)] font-normal mr-1">Line Commitment:</span>
+                                {currencySymbol} {totalCommitment.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                            </div>
+                        )}
+                    </div>
+                )}
             </div>
         </div>
     );

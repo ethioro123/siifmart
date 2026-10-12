@@ -69,7 +69,7 @@ export const PickHeader: React.FC<PickHeaderProps> = ({
                                     : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)]'
                             }`}
                         >
-                            {t('warehouse.putaway.process')}
+                            {t('warehouse.process') || 'Queue'}
                         </button>
                         <button
                             onClick={() => setViewMode('History')}

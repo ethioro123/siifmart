@@ -1,0 +1,384 @@
+import { UserRole } from '../types';
+
+/**
+ * AUTOMATIC ROLE SEGREGATION SYSTEM RULES
+ * 
+ * Defines which site type each role should be assigned to.
+ */
+
+export interface RoleSegregationRule {
+    role: UserRole;
+    siteType: 'Administration' | 'Warehouse' | 'Store' | 'Any';
+    department?: string;
+    description: string;
+}
+
+/**
+ * Complete role segregation rules
+ * Defines which site type each role should be assigned to
+ */
+export const ROLE_SEGREGATION_RULES: RoleSegregationRule[] = [
+    // ========================================
+    // HQ ROLES - Must be at SIIFMART HQ
+    // ========================================
+    {
+        role: 'super_admin',
+        siteType: 'Administration',
+        department: 'Management',
+        description: 'CEO - Executive leadership at headquarters'
+    },
+    {
+        role: 'admin',
+        siteType: 'Administration',
+        department: 'Management',
+        description: 'System Administrator - Central IT operations at HQ'
+    },
+    {
+        role: 'hr',
+        siteType: 'Administration',
+        department: 'Human Resources',
+        description: 'HR Manager - Workforce management at HQ'
+    },
+    {
+        role: 'hr_manager',
+        siteType: 'Administration',
+        department: 'Human Resources',
+        description: 'HR Director - Workforce management at HQ'
+    },
+    {
+        role: 'finance_manager',
+        siteType: 'Administration',
+        department: 'Management',
+        description: 'Finance Manager - Financial oversight at HQ'
+    },
+    {
+        role: 'accountant',
+        siteType: 'Administration',
+        department: 'Management',
+        description: 'Accountant - Financial tracking'
+    },
+    {
+        role: 'treasury_officer',
+        siteType: 'Administration',
+        department: 'Management',
+        description: 'Treasury Officer - Daily cash and mobile money tender reconciliation'
+    },
+    {
+        role: 'tax_compliance_officer',
+        siteType: 'Administration',
+        department: 'Management',
+        description: 'Tax Compliance Officer - Sovereign VAT and withholding tax filings'
+    },
+    {
+        role: 'credit_control_officer',
+        siteType: 'Administration',
+        department: 'Management',
+        description: 'Credit Control Officer - B2B credit terms and institutional accounts'
+    },
+    {
+        role: 'procurement_manager',
+        siteType: 'Administration',
+        department: 'Management',
+        description: 'Procurement Manager - Supply chain management at HQ'
+    },
+    {
+        role: 'supply_chain_manager',
+        siteType: 'Administration',
+        department: 'Management',
+        description: 'Supply Chain Manager - Supply chain oversight'
+    },
+    {
+        role: 'merchandising_manager',
+        siteType: 'Administration',
+        department: 'Management',
+        description: 'Merchandising Manager - Corporate pricing, margins & planograms at HQ'
+    },
+    {
+        role: 'cs_manager',
+        siteType: 'Administration',
+        department: 'Management',
+        description: 'Customer Service Manager - CS operations at HQ'
+    },
+    {
+        role: 'auditor',
+        siteType: 'Administration',
+        department: 'Management',
+        description: 'Auditor - Compliance and auditing at HQ'
+    },
+    {
+        role: 'it_support',
+        siteType: 'Administration',
+        department: 'Management',
+        description: 'IT Support - Technical support'
+    },
+    {
+        role: 'data_analyst',
+        siteType: 'Administration',
+        department: 'Management',
+        description: 'Data Analyst - Business intelligence'
+    },
+    {
+        role: 'training_coordinator',
+        siteType: 'Administration',
+        department: 'Human Resources',
+        description: 'Training Coordinator - Staff onboarding'
+    },
+    {
+        role: 'payroll_specialist',
+        siteType: 'Administration',
+        department: 'Human Resources',
+        description: 'Payroll Specialist - Compensation & Payroll Runs'
+    },
+    {
+        role: 'talent_recruiter',
+        siteType: 'Administration',
+        department: 'Human Resources',
+        description: 'Talent Recruiter - Candidate Sourcing & Hiring'
+    },
+
+    // ========================================
+    // WAREHOUSE ROLES - Must be at Warehouse/DC
+    // ========================================
+    {
+        role: 'warehouse_manager',
+        siteType: 'Warehouse',
+        department: 'Logistics & Warehouse',
+        description: 'Warehouse Manager - Oversees warehouse operations'
+    },
+    {
+        role: 'dispatch_manager',
+        siteType: 'Warehouse',
+        department: 'Logistics & Warehouse',
+        description: 'Dispatch Manager - Oversees dispatch operations'
+    },
+    {
+        role: 'dispatcher',
+        siteType: 'Warehouse',
+        department: 'Logistics & Warehouse',
+        description: 'Dispatcher - Coordinates warehouse logistics'
+    },
+    {
+        role: 'picker',
+        siteType: 'Warehouse',
+        department: 'Logistics & Warehouse',
+        description: 'Picker - Order fulfillment at warehouse'
+    },
+    {
+        role: 'packer',
+        siteType: 'Warehouse',
+        department: 'Logistics & Warehouse',
+        description: 'Packer - Order packing at warehouse'
+    },
+    {
+        role: 'receiver',
+        siteType: 'Warehouse',
+        department: 'Logistics & Warehouse',
+        description: 'Receiver - Inbound shipment receiving'
+    },
+    {
+        role: 'forklift_operator',
+        siteType: 'Warehouse',
+        department: 'Logistics & Warehouse',
+        description: 'Forklift Operator - Heavy stock movement'
+    },
+    {
+        role: 'driver',
+        siteType: 'Warehouse',
+        department: 'Transport',
+        description: 'Driver - Delivery operations from warehouse'
+    },
+
+    // ========================================
+    // RETAIL ROLES - Must be at Store
+    // ========================================
+    {
+        role: 'store_manager',
+        siteType: 'Store',
+        department: 'Retail Operations',
+        description: 'Store Manager - Overall store leadership'
+    },
+    {
+        role: 'store_supervisor',
+        siteType: 'Store',
+        department: 'Retail Operations',
+        description: 'Store Supervisor - Floor management at retail store'
+    },
+    {
+        role: 'assistant_manager',
+        siteType: 'Store',
+        department: 'Retail Operations',
+        description: 'Assistant Manager - Store operations'
+    },
+    {
+        role: 'shift_lead',
+        siteType: 'Store',
+        department: 'Retail Operations',
+        description: 'Shift Lead - Shift supervision'
+    },
+    {
+        role: 'pos',
+        siteType: 'Store',
+        department: 'Retail Operations',
+        description: 'Legacy Cashier - Point of sale'
+    },
+    {
+        role: 'cashier',
+        siteType: 'Store',
+        department: 'Retail Operations',
+        description: 'Cashier - Point of sale operations'
+    },
+    {
+        role: 'sales_associate',
+        siteType: 'Store',
+        department: 'Retail Operations',
+        description: 'Sales Associate - Customer floor assistance'
+    },
+    {
+        role: 'stock_clerk',
+        siteType: 'Store',
+        department: 'Retail Operations',
+        description: 'Stock Clerk - Shelf replenishment'
+    },
+    {
+        role: 'customer_service',
+        siteType: 'Store',
+        department: 'Retail Operations',
+        description: 'Customer Service - Returns and assistance'
+    },
+    {
+        role: 'inventory_specialist',
+        siteType: 'Store',
+        department: 'Retail Operations',
+        description: 'Inventory Specialist - Stock control'
+    },
+    {
+        role: 'merchandiser',
+        siteType: 'Store',
+        department: 'Retail Operations',
+        description: 'Merchandiser - Display arrangement'
+    },
+    {
+        role: 'loss_prevention',
+        siteType: 'Store',
+        department: 'Security',
+        description: 'Loss Prevention - Store security'
+    },
+    {
+        role: 'returns_clerk',
+        siteType: 'Store',
+        department: 'Retail Operations',
+        description: 'Returns Clerk - Product returns'
+    },
+
+    // ========================================
+    // FLEXIBLE & REGIONAL ROLES - Can be at any location
+    // ========================================
+    {
+        role: 'regional_manager',
+        siteType: 'Any',
+        department: 'Management',
+        description: 'Regional Manager - Oversees multiple locations'
+    },
+    {
+        role: 'regional_procurement_lead',
+        siteType: 'Any',
+        department: 'Procurement',
+        description: 'Regional Procurement Lead - Territorial sourcing & local farm/port vendor POs'
+    },
+    {
+        role: 'regional_finance_officer',
+        siteType: 'Any',
+        department: 'Management',
+        description: 'Regional Finance Officer - Branch cash drop audits and regional reconciliations'
+    },
+    {
+        role: 'regional_hr_officer',
+        siteType: 'Any',
+        department: 'Human Resources',
+        description: 'Regional HR Officer - Territorial branch hiring and shift rosters'
+    },
+    {
+        role: 'regional_logistics_lead',
+        siteType: 'Any',
+        department: 'Transport',
+        description: 'Regional Logistics Lead - Territorial fleet coordination & inter-store transit'
+    },
+    {
+        role: 'regional_security_supervisor',
+        siteType: 'Any',
+        department: 'Security',
+        description: 'Regional Security Supervisor - Loss prevention & supervisory audit investigations'
+    },
+    {
+        role: 'operations_manager',
+        siteType: 'Any',
+        department: 'Management',
+        description: 'Operations Manager - Field operations'
+    },
+    {
+        role: 'logistics_manager',
+        siteType: 'Any',
+        department: 'Transport',
+        description: 'Logistics Manager - Oversees transport and fleet'
+    },
+    {
+        role: 'inventory_manager',
+        siteType: 'Any',
+        department: 'Logistics & Warehouse',
+        description: 'Inventory Manager - Stock audit and accuracy control'
+    },
+    {
+        role: 'security_manager',
+        siteType: 'Any',
+        department: 'Security',
+        description: 'Security & LP Manager - Shrinkage and compliance audit'
+    },
+    {
+        role: 'buyer',
+        siteType: 'Administration',
+        department: 'Procurement',
+        description: 'Sourcing Buyer - Supplier purchase orders'
+    },
+    {
+        role: 'demand_planner',
+        siteType: 'Administration',
+        department: 'Logistics & Warehouse',
+        description: 'Demand Planner - Stock allocation forecasting'
+    },
+    {
+        role: 'vendor_relations_manager',
+        siteType: 'Administration',
+        department: 'Procurement',
+        description: 'Vendor Relations Manager - Supplier onboarding, scorecards & cooperatives'
+    },
+    {
+        role: 'customs_import_specialist',
+        siteType: 'Administration',
+        department: 'Procurement',
+        description: 'Customs & Import Specialist - Freight, LC & port clearances'
+    },
+    {
+        role: 'inbound_qc_inspector',
+        siteType: 'Warehouse',
+        department: 'Logistics & Warehouse',
+        description: 'Inbound QC Inspector - Food safety, cold-chain & dock QC compliance'
+    },
+    {
+        role: 'replenishment_planner',
+        siteType: 'Any',
+        department: 'Logistics & Warehouse',
+        description: 'Replenishment Planner - Store shelf velocity and automated RDC transfers'
+    },
+    {
+        role: 'fleet_maintenance_supervisor',
+        siteType: 'Warehouse',
+        department: 'Transport',
+        description: 'Fleet Maintenance Supervisor - Vehicle inspections, fuel cards, driver logs, transport maintenance'
+    },
+    {
+        role: 'store_operations_auditor',
+        siteType: 'Any',
+        department: 'Management',
+        description: 'Store Operations Auditor - Unannounced store walkthroughs, planogram/merchandising checks, and cash handling spot audits'
+    }
+];

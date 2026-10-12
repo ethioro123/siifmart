@@ -13,6 +13,8 @@ interface TransferRequestReviewProps {
     settings: any;
     transferItems: Array<{ productId: string; quantity: number; isMeasure?: boolean }>;
     allProducts: Product[];
+    availableProducts?: Product[];
+    products?: Product[];
     getZoneName: (zoneId?: string) => string;
     getSellUnit: (unit: string) => any;
 }
@@ -28,6 +30,8 @@ export const TransferRequestReview: React.FC<TransferRequestReviewProps> = ({
     settings,
     transferItems,
     allProducts,
+    availableProducts = [],
+    products = [],
     getZoneName,
     getSellUnit
 }) => {
@@ -79,7 +83,9 @@ export const TransferRequestReview: React.FC<TransferRequestReviewProps> = ({
                 <div className="space-y-2">
                     <p className="text-[11px] text-[var(--theme-text-secondary)] font-semibold uppercase tracking-wider mb-2">{t('warehouse.putaway.itemsToPutaway')}</p>
                     {transferItems.map((item, idx) => {
-                        const prod = allProducts.find(p => p.id === item.productId);
+                        const prod = availableProducts.find(p => p.id === item.productId)
+                            || products.find(p => p.id === item.productId)
+                            || allProducts.find(p => p.id === item.productId);
                         const unitDef = getSellUnit(prod?.unit || '');
                         let displayQty = `${item.quantity} `;
                         if (item.isMeasure) {

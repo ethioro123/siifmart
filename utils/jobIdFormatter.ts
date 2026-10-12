@@ -117,23 +117,47 @@ export const formatTransferId = (transfer: { id: string; jobNumber?: string; job
 };
 
 /**
- * Formats a shift ID for human display (e.g. SHF-1F1742C4 or SHF-0042)
+ * Formats a shift ID for human display (e.g. SHF-0001, SHF-0042)
+ * Eliminates raw UUID hex slices (e.g. SHF-7BE9746E)
  */
 export const formatShiftId = (shift?: { id?: string; shiftNumber?: string | number; shift_number?: string | number } | string | null): string => {
     if (!shift) return 'N/A';
-    const rawId = typeof shift === 'string' ? shift : (shift.shiftNumber || shift.shift_number || shift.id);
+
+    // Prioritize explicit human-readable shiftNumber / shift_number
+    const explicitNum = typeof shift === 'object' ? (shift.shiftNumber || shift.shift_number) : undefined;
+    const rawId = explicitNum !== undefined && explicitNum !== null && explicitNum !== '' 
+        ? explicitNum 
+        : (typeof shift === 'string' ? shift : shift.id);
+
     if (!rawId) return 'N/A';
 
     const clean = String(rawId).trim();
-    if (clean.toUpperCase().startsWith('SHF-')) return clean.toUpperCase();
 
+    // Pure digits: e.g. 1 -> SHF-0001
     if (/^\d+$/.test(clean)) return `SHF-${clean.padStart(4, '0')}`;
 
-    if (clean.length > 8 && clean.includes('-')) {
-        return `SHF-${clean.split('-')[0].slice(0, 8).toUpperCase()}`;
+    // Clean sequential code: e.g. SHF-0001, SHF-0042
+    if (/^SHF-\d+$/i.test(clean)) return clean.toUpperCase();
+
+    // Check if clean or rawId is a UUID or hex hash (e.g. 7be9746e-e6bf-4e58-bd89-2df39617b9e5)
+    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}/i.test(clean);
+    if (isUuid) {
+        if (explicitNum && /^\d+$/.test(String(explicitNum))) {
+            return `SHF-${String(explicitNum).padStart(4, '0')}`;
+        }
+        return 'SHF-0001';
     }
 
-    return `SHF-${clean.slice(0, 8).toUpperCase()}`;
+    // Check if it has legacy raw hex slice after SHF- (e.g. SHF-7BE9746E)
+    if (clean.toUpperCase().startsWith('SHF-')) {
+        const afterPrefix = clean.slice(4);
+        if (/^[0-9a-f]{8}$/i.test(afterPrefix) && !/^\d{4,}$/.test(afterPrefix)) {
+            return 'SHF-0001';
+        }
+        return clean.toUpperCase();
+    }
+
+    return `SHF-${clean.slice(0, 4).toUpperCase()}`;
 };
 
 /**

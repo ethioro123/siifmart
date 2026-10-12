@@ -18,7 +18,7 @@ export const BarcodeImageLightbox: React.FC<BarcodeImageLightboxProps> = ({
             onClick={onClose}
         >
             <div 
-                className="relative max-w-4xl w-full max-h-[92vh] flex flex-col items-center justify-center bg-[var(--theme-bg-card)] rounded-2xl overflow-hidden border border-[var(--theme-border)] p-3 shadow-2xl"
+                className="relative max-w-4xl w-full max-h-[92vh] flex flex-col items-center justify-center bg-[var(--theme-bg-card)] rounded-3xl overflow-hidden border border-[var(--theme-border)] p-3 shadow-2xl"
                 onClick={e => e.stopPropagation()}
             >
                 <div className="absolute top-4 right-4 z-10">

@@ -281,59 +281,10 @@ export const getPOItemPackagingSummary = (item: any, allProducts?: any[]): POIte
     };
 };
 
-export interface POItemPhysicalSummary {
-    netWeightFormatted: string | null;
-    grossWeightFormatted: string | null;
-    dimensionsFormatted: string | null;
-    form: string | null;
-    specBadge: string | null;
-}
-
-/**
- * Returns structured physical specifications for a product or PO item
- * strictly separated from packaging hierarchy (GS1 / Walmart Item 360 standard).
- */
-export const getPOItemPhysicalSummary = (item: any, allProducts?: any[]): POItemPhysicalSummary => {
-    const matchedProduct = allProducts?.find(p => (item.productId && p.id === item.productId) || (item.sku && p.sku === item.sku) || (item.productName && p.name === item.productName));
-    const attrs = item.customAttributes || item.custom_attributes || matchedProduct?.customAttributes || (matchedProduct as any)?.custom_attributes;
-    const physical = attrs?.physical || {};
-
-    const rawNet = (physical.netWeight || item.size || matchedProduct?.size || '').toString().trim();
-    const sizeType = (physical.sizeType || physical.unit || '').toString().trim();
-    let netWeightFormatted: string | null = null;
-    if (rawNet) {
-        if (/[a-zA-Z]/.test(rawNet)) {
-            netWeightFormatted = rawNet;
-        } else if (sizeType) {
-            netWeightFormatted = `${rawNet} ${sizeType}`;
-        } else {
-            netWeightFormatted = rawNet;
-        }
-    }
-
-    const rawGross = (physical.grossWeight || '').toString().trim();
-    const grossWeightFormatted = rawGross ? (/[a-zA-Z]/.test(rawGross) ? rawGross : `${rawGross} kg`) : null;
-
-    const rawDims = (physical.dims || '').toString().trim();
-    const dimensionsFormatted = rawDims ? (/[a-zA-Z]/.test(rawDims) ? rawDims : `${rawDims} cm`) : null;
-
-    const form = physical.form || null;
-
-    const specParts: string[] = [];
-    if (netWeightFormatted) specParts.push(`Net: ${netWeightFormatted}`);
-    if (grossWeightFormatted) specParts.push(`Gross: ${grossWeightFormatted}`);
-    if (dimensionsFormatted) specParts.push(`Dims: ${dimensionsFormatted}`);
-
-    const specBadge = specParts.length > 0 ? specParts.join(' • ') : null;
-
-    return {
-        netWeightFormatted,
-        grossWeightFormatted,
-        dimensionsFormatted,
-        form,
-        specBadge
-    };
-};
+export {
+    getPOItemPhysicalSummary,
+    type POItemPhysicalSummary
+} from './physicalUtils';
 
 export const formatPOItemDescription = (item: any) => {
     const rawBrand = (item.brand || item.customAttributes?.identity?.brand || '').trim();

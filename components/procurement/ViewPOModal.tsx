@@ -24,7 +24,7 @@ interface ViewPOModalProps {
 }
 
 export const ViewPOModal: React.FC<ViewPOModalProps> = ({ isOpen, onClose, po, onEdit, onSuccess }) => {
-    const { allProducts, sites, settings } = useData();
+    const { allProducts, sites, settings, regions = [] } = useData();
     const { user, showToast } = useStore();
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [expandedItems, setExpandedItems] = useState<Record<number, boolean>>({});
@@ -41,10 +41,19 @@ export const ViewPOModal: React.FC<ViewPOModalProps> = ({ isOpen, onClose, po, o
 
     if (!po) return null;
 
-    const isCEO = user?.role === 'super_admin';
+    const poRegionCode = po.regionCode || (po as any).region_code;
+    const poRegion = poRegionCode ? regions.find(r => r.code === poRegionCode) : undefined;
+    const autonomousLimit = poRegion?.autonomous_po_limit ?? 150000;
+    const isExceedingAutonomous = Boolean(poRegionCode && po.totalAmount > autonomousLimit);
+
+    const isCEO = user?.role === 'super_admin' || user?.role === 'CEO' || user?.role === 'ceo';
     const isProcurementManager = user?.role === 'procurement_manager';
-    const isOperationalDirector = user?.role === 'regional_manager' || user?.role === 'operations_manager';
-    const isAuthorizedApprover = isProcurementManager || user?.role === 'finance_manager' || user?.role === 'admin' || isCEO || isOperationalDirector;
+    const isHQExecutive = isCEO || user?.role === 'admin' || user?.role === 'finance_manager' || isProcurementManager;
+    const isRegionalRole = ['regional_manager', 'regional_procurement_lead', 'regional_finance_officer'].includes(user?.role || '');
+    const isOperationalDirector = isRegionalRole || user?.role === 'operations_manager';
+    const isAuthorizedApprover = isExceedingAutonomous
+        ? isHQExecutive
+        : (isProcurementManager || user?.role === 'finance_manager' || user?.role === 'admin' || isCEO || isOperationalDirector);
 
     // Zero-Trust 4-Eyes Check: Creator cannot approve their own PO (Captain Owns the Ship Doctrine)
     const isCreator = Boolean(
@@ -271,10 +280,10 @@ export const ViewPOModal: React.FC<ViewPOModalProps> = ({ isOpen, onClose, po, o
                                                     <div className="text-[var(--theme-text-primary)] font-bold tracking-tight text-sm break-words leading-tight max-w-[360px]">{formatPOItemDescription(item)}</div>
                                                     <div className="flex items-center gap-1.5 mt-1 flex-wrap">
                                                         {item.productId?.startsWith('CUSTOM') && (
-                                                            <span className="inline-block text-[10px] bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 px-1.5 py-0.5 rounded font-black tracking-widest uppercase italic">Custom Resource</span>
+                                                            <span className="inline-block text-[10px] bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 px-1.5 py-0.5 rounded font-semibold tracking-widest uppercase italic">Custom Resource</span>
                                                         )}
                                                         {pkg.packBadge && (
-                                                            <span className="inline-flex items-center gap-1 text-[9px] bg-amber-500/10 border border-amber-500/20 text-amber-700 dark:text-amber-400 px-1.5 py-0.5 rounded font-black tracking-wider uppercase">
+                                                            <span className="inline-flex items-center gap-1 text-[9px] bg-amber-500/10 border border-amber-500/20 text-amber-700 dark:text-amber-400 px-1.5 py-0.5 rounded font-semibold tracking-wider uppercase">
                                                                 <Package size={11} className="shrink-0" /> {pkg.packBadge}
                                                             </span>
                                                         )}
@@ -282,7 +291,7 @@ export const ViewPOModal: React.FC<ViewPOModalProps> = ({ isOpen, onClose, po, o
                                                 </td>
                                                 <td className="p-4">
                                                     <div className="text-xs font-bold text-[var(--theme-text-primary)] flex items-center gap-1">
-                                                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-amber-500/10 border border-amber-500/20 text-amber-700 dark:text-amber-400 text-[10px] font-black uppercase">
+                                                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-amber-500/10 border border-amber-500/20 text-amber-700 dark:text-amber-400 text-[10px] font-semibold uppercase">
                                                             <Package size={11} className="shrink-0" /> {pkg.packBadge || pkg.manifestUnitName}
                                                         </span>
                                                     </div>
@@ -387,7 +396,7 @@ export const ViewPOModal: React.FC<ViewPOModalProps> = ({ isOpen, onClose, po, o
                                     className={`h-11 px-5 bg-[var(--theme-primary)] hover:opacity-90 active:scale-[0.98] text-[var(--theme-primary-text)] font-semibold text-sm rounded-full transition-all flex items-center justify-center gap-2 shadow-sm ${isSubmitting ? 'opacity-50 cursor-not-allowed' : ''}`}
                                 >
                                     {isSubmitting ? <Loader2 size={16} className="animate-spin" /> : <ShieldCheck size={16} />}
-                                    {isSubmitting ? 'Signing Off...' : 'Sign Off & Authorize PO'}
+                                    {isSubmitting ? 'Signing Off...' : isExceedingAutonomous ? 'Authorize Escalated PO (HQ)' : 'Sign Off & Authorize PO'}
                                 </button>
                                 {user?.role === 'super_admin' && (
                                     <button
@@ -398,6 +407,11 @@ export const ViewPOModal: React.FC<ViewPOModalProps> = ({ isOpen, onClose, po, o
                                     </button>
                                 )}
                             </div>
+                        ) : isExceedingAutonomous && isRegionalRole && !isHQExecutive ? (
+                            <div className="p-3.5 px-4 bg-amber-500/10 border border-amber-500/20 rounded-2xl flex items-center gap-2.5 text-amber-600 dark:text-amber-400 text-xs font-medium">
+                                <Clock size={16} className="shrink-0" />
+                                <span>Autonomous Limit Exceeded: PO ({currencySymbol} {po.totalAmount.toLocaleString()}) exceeds regional cap ({currencySymbol} {autonomousLimit.toLocaleString()}). Escalated to National HQ for approval.</span>
+                            </div>
                         ) : isCreator && !isCEO ? (
                             <div className="p-3.5 px-4 bg-purple-500/10 border border-purple-500/20 rounded-2xl flex items-center gap-2.5 text-purple-600 dark:text-purple-400 text-xs font-medium">
                                 <Clock size={16} className="shrink-0" />
@@ -406,7 +420,7 @@ export const ViewPOModal: React.FC<ViewPOModalProps> = ({ isOpen, onClose, po, o
                         ) : (
                             <div className="p-3.5 px-4 bg-amber-500/10 border border-amber-500/20 rounded-2xl flex items-center gap-2.5 text-amber-600 dark:text-amber-400 text-xs font-medium">
                                 <Clock size={16} className="shrink-0" />
-                                <span>Maker Draft: PO drafted by {po.createdBy || 'Staff'} • Awaiting Procurement Manager Sign-Off</span>
+                                <span>Maker Draft: PO drafted by {po.createdBy || 'Staff'} • {isExceedingAutonomous ? 'Awaiting National HQ Sign-Off' : 'Awaiting Procurement Manager Sign-Off'}</span>
                             </div>
                         )
                     )}

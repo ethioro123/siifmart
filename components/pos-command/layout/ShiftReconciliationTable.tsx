@@ -1,14 +1,16 @@
 import React, { useState } from 'react';
 import { useData } from '../../../contexts/DataContext';
 import { useStore } from '../../../contexts/CentralStore';
-import { CURRENCY_SYMBOL } from '../../../constants';
+import { useLanguage } from '../../../contexts/LanguageContext';
 import { ShiftRecord } from '../../../types';
 import { ShieldCheck, AlertTriangle, CheckCircle, Clock, Search, Printer, X } from 'lucide-react';
 import { formatDateTime } from '../../../utils/formatting';
 import { generateZReportReceiptHtml } from '../utils/receiptTemplate';
 
 export const ShiftReconciliationTable: React.FC = () => {
-    const { shifts, reconcileShift, activeSite, addNotification } = useData();
+    const { shifts, reconcileShift, activeSite, addNotification, effectiveCountry } = useData();
+    const { currencySymbol } = useLanguage();
+    const currency = currencySymbol || (effectiveCountry === 'KE' ? 'KSh' : 'ETB');
     const { user } = useStore();
     const [searchTerm, setSearchTerm] = useState('');
     const [filterStatus, setFilterStatus] = useState<'All' | 'Open' | 'Closed' | 'Audited' | 'Flagged'>('All');
@@ -184,22 +186,22 @@ export const ShiftReconciliationTable: React.FC = () => {
 
                                         {/* Opening Float */}
                                         <td className="py-3 px-4 text-right text-[var(--theme-text-secondary)]">
-                                            {CURRENCY_SYMBOL} {(shift.openingFloat || 0).toLocaleString()}
+                                            {currency} {(shift.openingFloat || 0).toLocaleString()}
                                         </td>
 
                                         {/* Cash Sales */}
                                         <td className="py-3 px-4 text-right text-[var(--theme-text-primary)] font-bold">
-                                            {CURRENCY_SYMBOL} {(shift.cashSales || 0).toLocaleString()}
+                                            {currency} {(shift.cashSales || 0).toLocaleString()}
                                         </td>
 
                                         {/* Expected Cash */}
                                         <td className="py-3 px-4 text-right font-semibold text-[var(--theme-text-secondary)]">
-                                            {CURRENCY_SYMBOL} {(shift.expectedCash || 0).toLocaleString()}
+                                            {currency} {(shift.expectedCash || 0).toLocaleString()}
                                         </td>
 
                                         {/* Actual Counted */}
                                         <td className="py-3 px-4 text-right font-bold text-[var(--theme-text-primary)]">
-                                            {shift.status === 'Open' ? 'Active...' : `${CURRENCY_SYMBOL} ${(shift.actualCash || 0).toLocaleString()}`}
+                                            {shift.status === 'Open' ? 'Active...' : `${currency} ${(shift.actualCash || 0).toLocaleString()}`}
                                         </td>
 
                                         {/* Variance */}

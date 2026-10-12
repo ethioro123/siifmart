@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { PurchaseOrder, Supplier } from '../../types';
-import { Search, MapPin, CheckCircle, Clock, Truck, XCircle, Printer, Edit3, Trash2 } from 'lucide-react';
+import { Search, MapPin, CheckCircle, Clock, Truck, XCircle, Printer, Edit3, Trash2, ShieldAlert } from 'lucide-react';
 import { formatCompactNumber } from '../../utils/formatting';
 import { formatPONumber } from '../../utils/jobIdFormatter';
 import { ViewPOModal } from './ViewPOModal';
@@ -305,7 +305,15 @@ export const PurchaseOrdersList: React.FC<PurchaseOrdersListProps> = ({
                                         {po.currency || currencySymbol} {po.totalAmount.toLocaleString()}
                                     </td>
                                     <td className="px-5 py-4 align-middle text-center whitespace-nowrap">
-                                        {renderStatusBadge(po.status)}
+                                        <div className="flex flex-col items-center gap-1">
+                                            {renderStatusBadge(po.status)}
+                                            {(po.requiresHqApproval || (po as any).requires_hq_approval) && po.status === 'Draft' && (
+                                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-semibold bg-purple-500/10 text-purple-600 dark:text-purple-400 border border-purple-500/20">
+                                                    <ShieldAlert size={10} />
+                                                    HQ Escalated
+                                                </span>
+                                            )}
+                                        </div>
                                     </td>
                                     <td className="px-5 py-4 align-middle text-xs text-[var(--theme-text-secondary)] max-w-[120px] truncate whitespace-nowrap">
                                         {po.requestedBy || po.createdBy || 'Unknown'}

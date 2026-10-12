@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import {
-    Building, Store, Plus, Globe, Lock
+    Building, Store, Plus, Globe, Lock, Truck, Box, ShoppingCart
 } from 'lucide-react';
 import { useData } from '../../contexts/DataContext';
 import { useStore } from '../../contexts/CentralStore';
@@ -14,12 +14,13 @@ import { ZoneManagerModal } from './ZoneManagerModal';
 import { SiteCard } from './SiteCard';
 import { LocationEmptyState } from './locations/LocationEmptyState';
 import { LocationCategoryView } from './locations/LocationCategoryView';
+import { LocationRegionView } from './locations/LocationRegionView';
 import { LocationZoneView } from './locations/LocationZoneView';
 import { generateLocationBarcodesCSV } from './locationBarcodeHelper';
 import { logger } from '../../utils/logger';
 import { getCountryProfile, Country } from '../../utils/localization';
 import { isAdminSite } from '../../utils/countryAdmin';
-import { generateNextSiteCode } from '../../utils/siteIdGenerator';
+import { generateNextSiteCode, generatePlaceSpecificSiteCode } from '../../utils/siteIdGenerator';
 
 const SectionHeader = ({ title, desc }: { title: string, desc: string }) => (
     <div className="mb-6 pb-4 border-b border-[var(--theme-border)]">
@@ -32,7 +33,7 @@ export default function LocationSettings() {
     const { user } = useStore();
     const {
         settings, updateSettings, sites, addSite, updateSite, deleteSite,
-        addNotification, refreshData, effectiveCountry
+        addNotification, refreshData, effectiveCountry, regions
     } = useData();
 
     const activeCountry: Country = (effectiveCountry || settings?.country || 'ET') as Country;
@@ -43,7 +44,7 @@ export default function LocationSettings() {
     const [newSite, setNewSite] = useState<Partial<Site>>({});
     const [isSavingSite, setIsSavingSite] = useState(false);
     const [expandedSiteId, setExpandedSiteId] = useState<string | null>(null);
-    const [locationViewMode, setLocationViewMode] = useState<'category' | 'zone'>('category');
+    const [locationViewMode, setLocationViewMode] = useState<'category' | 'region' | 'zone'>('category');
 
     // Logistics Zones State
     const [logisticsZones, setLogisticsZones] = useState<LogisticsZone[]>([]);
@@ -125,6 +126,8 @@ export default function LocationSettings() {
                 replenishmentSourceIds: newSite.replenishmentSourceIds ?? [],
                 replenishmentSourceId: (newSite.replenishmentSourceIds ?? [])[0],
                 logisticsZoneId: newSite.logisticsZoneId || undefined,
+                region_code: newSite.region_code || newSite.regionCode || undefined,
+                regionCode: newSite.region_code || newSite.regionCode || undefined,
                 country: siteCountry,
                 currency: siteCurrency
             };
@@ -147,18 +150,24 @@ export default function LocationSettings() {
                 });
             } else {
                 const countryCode = (siteCountry || 'ET').toUpperCase();
-                const nextCountrySiteCode = generateNextSiteCode(sites, countryCode);
+                const placeCode = generatePlaceSpecificSiteCode({
+                    country: countryCode,
+                    regionCode: newSite.region_code || newSite.regionCode,
+                    type: newSite.type,
+                    name: newSite.name,
+                    existingSites: sites
+                });
                 const siteData: Omit<Site, 'id'> = {
                     ...commonData,
-                    code: newSite.code || nextCountrySiteCode
+                    code: newSite.code || placeCode
                 };
                 await addSite(siteData as Site, user?.name || 'Admin');
-                addNotification('success', `Location "${newSite.name}" (${nextCountrySiteCode}) registered successfully for ${countryProfile.name}`);
+                addNotification('success', `Location "${newSite.name}" (${placeCode}) registered successfully for ${countryProfile.name}`);
 
                 // Tamper-Proof Audit Logging
                 await supabase.from('system_logs').insert({
                     action: 'Location Created',
-                    details: `Registered new facility "${newSite.name}" [${nextCountrySiteCode}] in ${countryProfile.name} (${siteCountry}) by ${user?.name || user?.email}`,
+                    details: `Registered new facility "${newSite.name}" [${placeCode}] in ${countryProfile.name} (${siteCountry}) by ${user?.name || user?.email}`,
                     user_name: user?.name || user?.email || 'Admin',
                     module: 'Settings'
                 });
@@ -284,6 +293,7 @@ export default function LocationSettings() {
                 handleDeleteSite={handleDeleteSite}
                 isDeleting={isDeleting}
                 logisticsZones={logisticsZones}
+                regions={regions}
             />
         );
     };
@@ -310,15 +320,23 @@ export default function LocationSettings() {
                         <div className="flex flex-wrap items-center gap-2 mt-2">
                             <div className="flex items-center gap-1.5 text-xs font-semibold text-purple-700 dark:text-purple-300 bg-purple-500/10 px-2.5 py-1 rounded-full border border-purple-500/20">
                                 <Building size={14} />
-                                <span>{sites.filter((s: Site) => s.type === 'Administration').length} Administration</span>
+                                <span>{sites.filter((s: Site) => ['Administration', 'Administrative', 'Central Operations', 'HQ'].includes(s.type)).length} Administration</span>
+                            </div>
+                            <div className="flex items-center gap-1.5 text-xs font-semibold text-cyan-700 dark:text-cyan-300 bg-cyan-500/10 px-2.5 py-1 rounded-full border border-cyan-500/20">
+                                <Truck size={14} />
+                                <span>{sites.filter((s: Site) => s.type === 'Distribution Center').length} Distribution</span>
                             </div>
                             <div className="flex items-center gap-1.5 text-xs font-semibold text-[#0071E3] dark:text-[#2997FF] bg-[#0071E3]/10 px-2.5 py-1 rounded-full border border-[#0071E3]/20">
-                                <Building size={14} />
+                                <Box size={14} />
                                 <span>{sites.filter((s: Site) => s.type === 'Warehouse').length} Warehouses</span>
                             </div>
                             <div className="flex items-center gap-1.5 text-xs font-semibold text-emerald-700 dark:text-emerald-300 bg-emerald-500/10 px-2.5 py-1 rounded-full border border-emerald-500/20">
                                 <Store size={14} />
                                 <span>{sites.filter((s: Site) => s.type === 'Store').length} Stores</span>
+                            </div>
+                            <div className="flex items-center gap-1.5 text-xs font-semibold text-amber-700 dark:text-amber-300 bg-amber-500/10 px-2.5 py-1 rounded-full border border-amber-500/20">
+                                <ShoppingCart size={14} />
+                                <span>{sites.filter((s: Site) => s.type === 'Online Store' || s.type === 'Dark Store').length} Online Stores</span>
                             </div>
                         </div>
 
@@ -333,6 +351,17 @@ export default function LocationSettings() {
                                 }`}
                             >
                                 By Category
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => setLocationViewMode('region')}
+                                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all cursor-pointer ${
+                                    locationViewMode === 'region'
+                                        ? 'bg-[#0071E3] dark:bg-[#2997FF] text-white shadow-xs font-semibold'
+                                        : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-card)]'
+                                }`}
+                            >
+                                By Region
                             </button>
                             <button
                                 type="button"
@@ -371,6 +400,12 @@ export default function LocationSettings() {
                         countryName={countryProfile.name}
                         onAddLocation={handleOpenAddSite}
                     />
+                ) : locationViewMode === 'region' ? (
+                    <LocationRegionView
+                        sites={sites}
+                        regions={regions.filter(r => !r.country || r.country.toUpperCase() === activeCountry)}
+                        renderSiteCard={renderSiteCard}
+                    />
                 ) : locationViewMode === 'zone' ? (
                     <LocationZoneView
                         sites={sites}
@@ -397,6 +432,7 @@ export default function LocationSettings() {
                     generateBarcodes={generateBarcodes}
                     handleSaveSite={handleSaveSite}
                     existingSites={sites}
+                    regions={regions}
                 />
 
                 <DeleteSiteModal

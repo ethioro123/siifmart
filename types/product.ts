@@ -126,6 +126,8 @@ export interface PendingInventoryChange {
   site_id?: string; // Supabase compatibility
   countryCode?: string;
   country_code?: string; // Supabase compatibility
+  regionCode?: string;
+  region_code?: string; // Supabase compatibility
   changeType: InventoryChangeType;
   change_type?: InventoryChangeType; // Supabase compatibility
   requestedBy: string;
@@ -356,6 +358,14 @@ export interface PurchaseOrder {
   updatedAt?: string;
   updated_at?: string; // Supabase compatibility
   isRequest?: boolean; // Distinguishes between PO and PR
+  regionCode?: string;
+  region_code?: string;
+  requiresHqApproval?: boolean;
+  requires_hq_approval?: boolean;
+  hqApprovedBy?: string;
+  hq_approved_by?: string;
+  hqApprovedAt?: string;
+  hq_approved_at?: string;
 }
 
 export interface ReceivingItem {

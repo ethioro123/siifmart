@@ -11,6 +11,7 @@ export interface EmployeeFilters {
     country?: Country;
     countrySiteIds?: string[];
     onlyManagers?: boolean;
+    regionCode?: string;
 }
 
 interface RawDbEmployee {
@@ -71,7 +72,11 @@ function mapDbEmployeeToEmployee(e: RawDbEmployee): Employee {
         lastLoginDevice: e.last_login_device,
         last_login_device: e.last_login_device,
         loginHistory: e.login_history,
-        login_history: e.login_history
+        login_history: e.login_history,
+        regionCode: (e.region_code || e.regionCode) as string,
+        region_code: (e.region_code || e.regionCode) as string,
+        country: (e.country || e.country_code || e.countryCode) as string,
+        country_code: (e.country_code || e.countryCode || e.country) as string
     } as Employee;
 }
 
@@ -132,6 +137,7 @@ export const employeesService = {
         if (filters?.role && filters.role !== 'All') query = query.eq('role', filters.role);
         if (filters?.status && filters.status !== 'All') query = query.eq('status', filters.status);
         if (filters?.department && filters.department !== 'All') query = query.eq('department', filters.department);
+        if (filters?.regionCode) query = query.eq('region_code', filters.regionCode);
 
         // When onlyManagers is requested (e.g. initial global directory/org view), limit to L1-L3 leadership
         if (filters?.onlyManagers) {
@@ -233,6 +239,22 @@ export const employeesService = {
             throw new Error('Workplace location is mandatory. Every employee must be assigned to an operating location.');
         }
 
+        let resolvedRegionCode = (employee as any).region_code || employee.regionCode || null;
+        if (!resolvedRegionCode && employee.siteId) {
+            try {
+                const { data: siteRow } = await supabase
+                    .from('sites')
+                    .select('region_code')
+                    .eq('id', employee.siteId)
+                    .maybeSingle();
+                if (siteRow?.region_code) {
+                    resolvedRegionCode = siteRow.region_code;
+                }
+            } catch {
+                // Non-blocking fallback
+            }
+        }
+
         let currentCode = employee.code;
 
         for (let attempt = 0; attempt < 3; attempt++) {
@@ -240,6 +262,7 @@ export const employeesService = {
                 id: employee.id,
                 code: currentCode,
                 site_id: employee.siteId,
+                region_code: resolvedRegionCode,
                 name: employee.name,
                 role: employee.role,
                 email: employee.email.toLowerCase(),
@@ -311,6 +334,8 @@ export const employeesService = {
             age: 'age',
             dateOfBirth: 'date_of_birth',
             nationalIdNumber: 'national_id_number',
+            regionCode: 'region_code',
+            region_code: 'region_code',
         };
 
         const dbUpdates: Record<string, unknown> = {};

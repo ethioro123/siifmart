@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Clock } from 'lucide-react';
 import { usePOSCommand } from '../../POSCommandContext';
 import { useData } from '../../../../contexts/DataContext';
@@ -6,12 +6,15 @@ import { useFulfillmentData } from '../../../fulfillment/FulfillmentDataProvider
 import { useLanguage } from '../../../../contexts/LanguageContext';
 import { formatDateTime } from '../../../../utils/formatting';
 import { formatJobId } from '../../../../utils/jobIdFormatter';
+import Pagination from '../../../shared/Pagination';
 
 export const ReceivingHistory: React.FC = () => {
     const { t } = useLanguage();
     const { activeSite, allProducts } = useData();
     const { jobs, transfers } = useFulfillmentData();
     const { setReceivingSummary } = usePOSCommand();
+    const [currentPage, setCurrentPage] = useState(1);
+    const ITEMS_PER_PAGE = 8;
 
     const wmsTransferJobs = React.useMemo(() => {
         return jobs
@@ -53,14 +56,17 @@ export const ReceivingHistory: React.FC = () => {
             const dateA = new Date((a as any).receivedAt || (a as any).updatedAt || 0).getTime();
             const dateB = new Date((b as any).receivedAt || (b as any).updatedAt || 0).getTime();
             return dateB - dateA;
-        }).slice(0, 20);
+        });
     }, [transfers, wmsTransferJobs, activeSite]);
+
+    const totalPages = Math.max(1, Math.ceil(historyItems.length / ITEMS_PER_PAGE));
+    const paginatedItems = historyItems.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
 
     if (historyItems.length === 0) {
         return (
-            <div className="text-center py-12 text-stone-400 dark:text-gray-500">
-                <Clock size={40} className="mx-auto mb-4 opacity-50 text-stone-300 dark:text-gray-600" />
-                <p>{t('posCommand.noHistory')}</p>
+            <div className="text-center py-12 text-[var(--theme-text-muted)]">
+                <Clock size={40} className="mx-auto mb-4 opacity-40 text-[var(--theme-text-secondary)]" />
+                <p className="text-sm font-medium">{t('posCommand.noHistory')}</p>
             </div>
         );
     }
@@ -70,7 +76,7 @@ export const ReceivingHistory: React.FC = () => {
             <div className="bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-2xl p-4">
                 <div className="flex items-center gap-3">
                     <Clock className="text-[var(--theme-text-primary)]" size={20} />
-                    <h3 className="text-[var(--theme-text-primary)] font-bold">{t('posCommand.recentTransactions')}</h3>
+                    <h3 className="text-[var(--theme-text-primary)] font-bold">{t('posCommand.receivingHistory')}</h3>
                 </div>
                 <p className="text-xs text-[var(--theme-text-secondary)] mt-1">
                     {t('posCommand.showingHistory')} <span className="text-[var(--theme-text-primary)] font-bold">{activeSite?.name}</span>.
@@ -78,7 +84,7 @@ export const ReceivingHistory: React.FC = () => {
             </div>
 
             <div className="space-y-2">
-                {historyItems.map(item => (
+                {paginatedItems.map(item => (
                     <div
                         key={item.id}
                         onClick={() => {
@@ -104,7 +110,7 @@ export const ReceivingHistory: React.FC = () => {
                                 isHistory: true
                             });
                         }}
-                        className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-4 flex items-center justify-between cursor-pointer hover:bg-[var(--theme-bg-card-hover)] transition-all shadow-xs"
+                        className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-4 flex items-center justify-between cursor-pointer hover:bg-[var(--theme-bg-card-hover)] transition-all shadow-xs active:scale-[0.99]"
                     >
                         <div>
                             <p className="font-mono font-bold text-[var(--theme-text-primary)]">{formatJobId({ ...item, type: 'TRANSFER' } as any)}</p>
@@ -120,6 +126,15 @@ export const ReceivingHistory: React.FC = () => {
                     </div>
                 ))}
             </div>
+
+            <Pagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                totalItems={historyItems.length}
+                itemsPerPage={ITEMS_PER_PAGE}
+                onPageChange={setCurrentPage}
+                itemName={t('posCommand.productsLabel') || 'shipments'}
+            />
         </div>
     );
 };

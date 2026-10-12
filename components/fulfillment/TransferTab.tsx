@@ -46,6 +46,8 @@ interface TransferTabProps {
     playBeep: (type: 'success' | 'error' | 'warning') => void;
     setShowTransferArchive?: (show: boolean) => void;
     fixBrokenJobs?: () => Promise<void>;
+    historicalJobs?: WMSJob[];
+    loadHistoricalJobs?: (limit?: number) => Promise<void>;
 }
 
 export const TransferTab: React.FC<TransferTabProps> = ({
@@ -73,10 +75,19 @@ export const TransferTab: React.FC<TransferTabProps> = ({
     logSystemEvent,
     playBeep,
     setShowTransferArchive,
-    fixBrokenJobs
+    fixBrokenJobs,
+    historicalJobs = [],
+    loadHistoricalJobs
 }) => {
     // --- STATE ---
     const [viewMode, setViewMode] = useState<'Process' | 'History'>('Process');
+
+    // RULE 10: Fetch history on demand when user switches to History view
+    useEffect(() => {
+        if (viewMode === 'History' && loadHistoricalJobs) {
+            loadHistoricalJobs();
+        }
+    }, [viewMode, loadHistoricalJobs]);
 
     // Transfer Center State
     const [transferCenterTab, setTransferCenterTab] = useState<'request' | 'bulk' | 'smart'>('request');
@@ -161,7 +172,7 @@ export const TransferTab: React.FC<TransferTabProps> = ({
                 const scanJobTypes: string[] = ['PICK', 'PACK', 'PUTAWAY'];
                 if (scanJobTypes.includes(selectedJob.type) && scannedItem && scannedItem.trim()) {
                     const scannedValue = scannedItem.trim().toUpperCase();
-                    const product = allProducts.find(p => p.id === item.productId || p.sku === item.sku);
+                    const product = allProducts.find(p => p.id === item.productId || p.sku === item.sku) || products.find(p => p.id === item.productId || p.sku === item.sku);
                     const expectedSku = (item.sku || product?.sku || '').trim().toUpperCase();
                     const expectedBarcode = (product?.barcode || '').trim().toUpperCase();
 
@@ -320,7 +331,7 @@ export const TransferTab: React.FC<TransferTabProps> = ({
                         ) : (
                             <TransferHistory
                                 transfers={transfers}
-                                jobs={filteredJobs}
+                                jobs={historicalJobs && historicalJobs.length > 0 ? historicalJobs : filteredJobs}
                                 sites={sites}
                                 setSelectedJob={setSelectedJob}
                                 setIsDetailsOpen={setIsDetailsOpen}

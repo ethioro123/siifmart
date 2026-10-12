@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { createPortal } from 'react-dom';
 import { ShieldCheck, AlertTriangle, CheckCircle, Truck, UserCheck, X } from 'lucide-react';
 import { WMSJob, ReceivingItem, Product, User } from '../../../types';
 import { formatJobId } from '../../../utils/jobIdFormatter';
@@ -57,8 +58,8 @@ export const CustodyHandshakeModal: React.FC<CustodyHandshakeModalProps> = ({
         });
     };
 
-    return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 animate-in fade-in duration-200">
+    const modalContent = (
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/80 animate-in fade-in duration-200">
             <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl max-w-xl w-full overflow-hidden shadow-2xl flex flex-col max-h-[90vh]">
                 
                 {/* Header */}
@@ -221,4 +222,6 @@ export const CustodyHandshakeModal: React.FC<CustodyHandshakeModalProps> = ({
             </div>
         </div>
     );
+
+    return createPortal(modalContent, document.body);
 };

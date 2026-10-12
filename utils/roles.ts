@@ -12,6 +12,11 @@ export const SYSTEM_ROLES: {
 
    // ═══ LEVEL 2 - REGIONAL/DIRECTORS ═══
    { id: 'regional_manager', label: 'Regional Manager', desc: 'Multi-Store Oversight', level: 2, styles: { text: 'text-blue-600 dark:text-blue-500', bg: 'bg-blue-100 dark:bg-blue-500/10', border: 'border-blue-200 dark:border-blue-500/20', badge: 'bg-blue-100 dark:bg-blue-500/20 text-blue-700 dark:text-blue-500' } },
+   { id: 'regional_procurement_lead', label: 'Regional Procurement Lead', desc: 'Territorial Sourcing & Local Vendor POs', level: 2, styles: { text: 'text-indigo-600 dark:text-indigo-400', bg: 'bg-indigo-100 dark:bg-indigo-400/10', border: 'border-indigo-200 dark:border-indigo-400/20', badge: 'bg-indigo-100 dark:bg-indigo-400/20 text-indigo-700 dark:text-indigo-400' } },
+   { id: 'regional_finance_officer', label: 'Regional Finance Officer', desc: 'Regional Reconciliations & Drawer Audits', level: 2, styles: { text: 'text-emerald-600 dark:text-emerald-400', bg: 'bg-emerald-100 dark:bg-emerald-400/10', border: 'border-emerald-200 dark:border-emerald-400/20', badge: 'bg-emerald-100 dark:bg-emerald-400/20 text-emerald-700 dark:text-emerald-400' } },
+   { id: 'regional_hr_officer', label: 'Regional HR Officer', desc: 'Regional Branch Recruitment & Rosters', level: 2, styles: { text: 'text-pink-600 dark:text-pink-400', bg: 'bg-pink-100 dark:bg-pink-400/10', border: 'border-pink-200 dark:border-pink-400/20', badge: 'bg-pink-100 dark:bg-pink-400/20 text-pink-700 dark:text-pink-400' } },
+   { id: 'regional_logistics_lead', label: 'Regional Logistics Lead', desc: 'Territorial Fleet & Inter-Store Transfers', level: 2, styles: { text: 'text-violet-600 dark:text-violet-400', bg: 'bg-violet-100 dark:bg-violet-400/10', border: 'border-violet-200 dark:border-violet-400/20', badge: 'bg-violet-100 dark:bg-violet-400/20 text-violet-700 dark:text-violet-400' } },
+   { id: 'regional_security_supervisor', label: 'Regional Security Supervisor', desc: 'Loss Prevention & Supervisory Overrides Audit', level: 2, styles: { text: 'text-rose-600 dark:text-rose-400', bg: 'bg-rose-50 dark:bg-rose-400/10', border: 'border-rose-200 dark:border-rose-400/20', badge: 'bg-rose-50 dark:bg-rose-400/20 text-rose-700 dark:text-rose-400' } },
    { id: 'operations_manager', label: 'Operations Manager', desc: 'HQ Operations', level: 2, styles: { text: 'text-blue-600 dark:text-blue-400', bg: 'bg-blue-50 dark:bg-blue-400/10', border: 'border-blue-200 dark:border-blue-400/20', badge: 'bg-blue-50 dark:bg-blue-400/20 text-blue-700 dark:text-blue-400' } },
    { id: 'finance_manager', label: 'Finance Manager', desc: 'Financial Oversight', level: 2, styles: { text: 'text-emerald-600 dark:text-emerald-400', bg: 'bg-emerald-100 dark:bg-emerald-400/10', border: 'border-emerald-200 dark:border-emerald-400/20', badge: 'bg-emerald-100 dark:bg-emerald-400/20 text-emerald-700 dark:text-emerald-400' } },
    { id: 'hr_manager', label: 'HR Manager', desc: 'Staff & Payroll Management', level: 2, styles: { text: 'text-pink-600 dark:text-pink-400', bg: 'bg-pink-100 dark:bg-pink-400/10', border: 'border-pink-200 dark:border-pink-400/20', badge: 'bg-pink-100 dark:bg-pink-400/20 text-pink-700 dark:text-pink-400' } },
@@ -80,6 +85,11 @@ export const getRoleHierarchy = (role: UserRole | string): number => {
 
         // Level 2: Directors & Regional
         'regional_manager': 95,
+        'regional_procurement_lead': 83,
+        'regional_finance_officer': 83,
+        'regional_hr_officer': 83,
+        'regional_logistics_lead': 81,
+        'regional_security_supervisor': 76,
         'operations_manager': 90,
         'admin': 90, // Legacy admin
         'finance_manager': 85,
@@ -170,6 +180,8 @@ export const canViewCostPrice = (role: string | undefined): boolean => {
     // Explicitly allow regional/operations directors, finance, procurement, and merchandising leadership
     if (
         role === 'regional_manager' ||
+        role === 'regional_procurement_lead' ||
+        role === 'regional_finance_officer' ||
         role === 'operations_manager' ||
         role === 'finance_manager' ||
         role === 'procurement_manager' ||

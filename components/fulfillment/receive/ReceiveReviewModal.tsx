@@ -5,6 +5,7 @@ import { useFulfillment } from '../../fulfillment/FulfillmentContext';
 import { convertToSellableUnits } from '../useReceiving';
 import { formatPackBadge, formatPOItemDescription } from '../../procurement/utils';
 import { buildPOJobsReceivedMap, resolvePOLineItemProgress } from './receiveQuantityResolver';
+import { ItemAttributeBadges } from '../ItemAttributeBadges';
 
 interface ReceiveReviewModalProps {
     po: PurchaseOrder;
@@ -140,6 +141,7 @@ export const ReceiveReviewModal: React.FC<ReceiveReviewModalProps> = ({
                                                 ) : null;
                                             })()}
                                             <p className="text-[11px] text-[var(--theme-text-secondary)] font-mono mt-1">{item.sku}</p>
+                                            <ItemAttributeBadges item={item} allProducts={allProducts} className="mt-1" compact />
                                         </td>
                                         <td className="p-3 md:p-4 text-center text-[var(--theme-text-secondary)] font-medium tabular-nums font-mono text-xs md:text-sm">
                                             {item.expectedSellable}

@@ -95,16 +95,18 @@ export const RecentTransactions: React.FC = () => {
                 </div>
                 <div className="flex gap-2">
                     <button
+                        type="button"
                         onClick={() => setTxPage(p => Math.max(1, p - 1))}
-                        disabled={txPage === 1}
-                        className="px-3.5 py-1.5 bg-[var(--theme-bg-card)] hover:bg-[var(--theme-bg-card-hover)] text-[var(--theme-text-primary)] text-xs font-semibold rounded-xl border border-[var(--theme-border)] disabled:opacity-30 disabled:cursor-not-allowed transition-all cursor-pointer shadow-2xs"
+                        disabled={txPage <= 1}
+                        className="px-3.5 py-1.5 bg-[var(--theme-bg-card)] hover:bg-[var(--theme-bg-card-hover)] text-[var(--theme-text-primary)] text-xs font-semibold rounded-xl border border-[var(--theme-border)] disabled:opacity-30 disabled:cursor-not-allowed transition-all cursor-pointer shadow-2xs active:scale-[0.98]"
                     >
                         {t('common.previous')}
                     </button>
                     <button
-                        onClick={() => setTxPage(p => Math.min(Math.ceil(filteredSales.length / TX_PER_PAGE), p + 1))}
-                        disabled={txPage >= Math.ceil(filteredSales.length / TX_PER_PAGE)}
-                        className="px-3.5 py-1.5 bg-[var(--theme-primary)] hover:opacity-90 text-[var(--theme-primary-text)] text-xs font-semibold rounded-xl border border-transparent disabled:opacity-30 disabled:cursor-not-allowed transition-all shadow-xs cursor-pointer"
+                        type="button"
+                        onClick={() => setTxPage(p => Math.min(Math.max(1, Math.ceil(filteredSales.length / TX_PER_PAGE)), p + 1))}
+                        disabled={txPage >= Math.max(1, Math.ceil(filteredSales.length / TX_PER_PAGE))}
+                        className="px-3.5 py-1.5 bg-[var(--theme-primary)] hover:opacity-90 text-[var(--theme-primary-text)] text-xs font-semibold rounded-xl border border-transparent disabled:opacity-30 disabled:cursor-not-allowed transition-all shadow-xs cursor-pointer active:scale-[0.98]"
                     >
                         {t('common.next')}
                     </button>

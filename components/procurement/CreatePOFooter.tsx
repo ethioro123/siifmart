@@ -27,7 +27,7 @@ export const CreatePOFooter: React.FC<CreatePOFooterProps> = ({
                 <div className="h-8 w-[1px] bg-[var(--theme-border-subtle)] hidden md:block"></div>
                 <div className="flex flex-col">
                     <span className="text-[10px] text-[var(--theme-text-secondary)] uppercase font-bold tracking-wider leading-none">Total Value</span>
-                    <span className="text-lg font-mono text-[var(--theme-text-primary)] tracking-tight font-black tabular-nums">
+                    <span className="text-lg font-mono text-[var(--theme-text-primary)] tracking-tight font-bold tabular-nums">
                         {currencySymbol} {formatCompactNumber(poTotal)}
                     </span>
                 </div>

@@ -280,7 +280,7 @@ export function UserMenu({
                                     } ${isSwitchingMarket ? 'opacity-50 cursor-wait' : ''}`}
                                     title={prof.name}
                                  >
-                                    <span>{prof.flag}</span>
+                                    <span className="text-[10px] font-mono font-bold px-1 py-0.5 rounded bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-[var(--theme-text-primary)]">{prof.code}</span>
                                     <span className="truncate">{prof.name.split(' ')[0]}</span>
                                  </button>
                               ))}
@@ -288,7 +288,7 @@ export function UserMenu({
                         ) : (
                            <div className="flex items-center justify-between bg-[var(--theme-bg-subtle)] rounded-lg px-2.5 py-1.5 border border-[var(--theme-border)]">
                               <span className="text-xs font-bold text-[var(--theme-text-primary)] flex items-center gap-1.5">
-                                 <span>{currentMarketProfile.flag}</span>
+                                 <span className="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded bg-[var(--theme-bg-panel)] border border-[var(--theme-border)] text-[var(--theme-text-primary)]">{currentMarketProfile.code}</span>
                                  <span className="truncate max-w-[150px]">{currentMarketProfile.name}</span>
                               </span>
                               <span className="text-[10px] font-mono text-[var(--theme-text-secondary)] font-semibold">
@@ -305,8 +305,8 @@ export function UserMenu({
                      >
                         <div className="flex items-center justify-between mb-2">
                            <p className="text-[10px] font-bold text-[var(--theme-text-muted)] uppercase tracking-widest">Display Language</p>
-                           <span className="text-[10px] font-mono font-bold text-[var(--theme-primary)] flex items-center gap-1">
-                              {currentMarketProfile.flag} {currentMarketProfile.code}
+                           <span className="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-[var(--theme-primary)]">
+                              {currentMarketProfile.code}
                            </span>
                         </div>
                         {availableLanguages.length <= 1 ? (

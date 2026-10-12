@@ -9,15 +9,17 @@ import { getEffectiveCountry } from '../utils/localization';
 import { purchaseOrdersApprovalService } from './purchase-orders.approval';
 import { purchaseOrdersLifecycleService } from './purchase-orders.lifecycle';
 
-async function validateWarehouseDestination(siteId?: string): Promise<void> {
-    if (!siteId) return;
+async function validateWarehouseDestination(siteId?: string): Promise<{ name?: string; type?: string; region_code?: string; country?: string } | null> {
+    if (!siteId) return null;
     try {
-        const { data: s } = await supabase.from('sites').select('name, type').eq('id', siteId).maybeSingle();
+        const { data: s } = await supabase.from('sites').select('name, type, region_code, country').eq('id', siteId).maybeSingle();
         if (s && s.type !== 'Warehouse' && s.type !== 'Distribution Center') {
             throw new Error(`Procurement policy violation: Purchase orders can only be sent to a Warehouse or Distribution Center. Selected site "${s.name}" is a ${s.type}.`);
         }
+        return s;
     } catch (err) {
         if (err instanceof Error && err.message.includes('Procurement policy violation')) throw err;
+        return null;
     }
 }
 
@@ -60,7 +62,7 @@ export const purchaseOrdersService = {
         }
 
         // Enforce enterprise procurement policy: Purchase orders can only be sent to Warehouse or Distribution Center
-        await validateWarehouseDestination(po.siteId);
+        const destSite = await validateWarehouseDestination(po.siteId);
 
         const dbPO = {
             id: poId,
@@ -77,7 +79,7 @@ export const purchaseOrdersService = {
             notes: po.notes,
             payment_terms: po.paymentTerms,
             incoterms: po.incoterms,
-            destination: po.destination,
+            destination: po.destination || destSite?.name || null,
             discount: po.discount,
             temp_req: po.tempReq,
             shelf_life: po.shelfLife,
@@ -87,7 +89,9 @@ export const purchaseOrdersService = {
             created_by: po.createdBy,
             priority: po.priority,
             currency: po.currency || 'ETB',
-            country_code: po.countryCode || po.country_code || getEffectiveCountry({ country: po.countryCode || po.country_code, currency: po.currency })
+            country_code: po.countryCode || po.country_code || destSite?.country || getEffectiveCountry({ country: po.countryCode || po.country_code, currency: po.currency }),
+            region_code: po.regionCode || po.region_code || destSite?.region_code || null,
+            requires_hq_approval: Boolean(po.requiresHqApproval || po.requires_hq_approval)
         };
 
         let { error: poError } = await supabase.from('purchase_orders').insert(dbPO);
@@ -101,28 +105,29 @@ export const purchaseOrdersService = {
 
         // Create PO items
         const itemsWithPOId = items.map(item => {
-            const isValidUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(item.productId);
+            const rawProdId = item.productId || item.product_id;
+            const isValidUUID = Boolean(rawProdId && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(rawProdId));
             return {
                 po_id: poId,
-                product_id: isValidUUID ? item.productId : null,
-                product_name: item.productName,
+                product_id: isValidUUID ? rawProdId : null,
+                product_name: item.productName || item.product_name,
                 sku: item.sku || null,
                 quantity: item.quantity,
-                unit_cost: item.unitCost,
-                total_cost: item.totalCost,
-                retail_price: item.retailPrice || 0,
+                unit_cost: item.unitCost ?? item.unit_cost ?? 0,
+                total_cost: item.totalCost ?? item.total_cost ?? (item.quantity * (item.unitCost ?? item.unit_cost ?? 0)),
+                retail_price: item.retailPrice ?? item.retail_price ?? 0,
                 image: item.image || null,
                 brand: item.brand || null,
                 size: item.size || null,
                 unit: item.unit || null,
                 category: item.category || null,
-                identity_type: item.identityType || 'known',
-                pack_quantity: item.packQuantity || item.pack_quantity || 1,
-                case_size: item.caseSize || item.case_size || 0,
-                package_type: item.packageType || item.package_type || item.customAttributes?.packaging?.packageType || null,
+                identity_type: item.identityType || item.identity_type || 'known',
+                pack_quantity: item.packQuantity ?? item.pack_quantity ?? 1,
+                case_size: item.caseSize ?? item.case_size ?? 0,
+                package_type: item.packageType || item.package_type || item.customAttributes?.packaging?.packageType || item.custom_attributes?.packaging?.packageType || null,
                 description: item.description || null,
-                min_stock: item.minStock || 0,
-                max_stock: item.maxStock || 0,
+                min_stock: item.minStock ?? item.min_stock ?? 0,
+                max_stock: item.maxStock ?? item.max_stock ?? 0,
                 custom_attributes: item.customAttributes || item.custom_attributes || null
             };
         });
@@ -346,6 +351,14 @@ export const purchaseOrdersService = {
         if (updates.currency !== undefined) { dbUpdates.currency = updates.currency; }
         if (updates.countryCode !== undefined) { dbUpdates.country_code = updates.countryCode; }
         if (updates.country_code !== undefined) { dbUpdates.country_code = updates.country_code; }
+        if (updates.regionCode !== undefined) { dbUpdates.region_code = updates.regionCode; }
+        if (updates.region_code !== undefined) { dbUpdates.region_code = updates.region_code; }
+        if (updates.requiresHqApproval !== undefined) { dbUpdates.requires_hq_approval = updates.requiresHqApproval; }
+        if (updates.requires_hq_approval !== undefined) { dbUpdates.requires_hq_approval = updates.requires_hq_approval; }
+        if (updates.hqApprovedBy !== undefined) { dbUpdates.hq_approved_by = updates.hqApprovedBy; }
+        if (updates.hq_approved_by !== undefined) { dbUpdates.hq_approved_by = updates.hq_approved_by; }
+        if (updates.hqApprovedAt !== undefined) { dbUpdates.hq_approved_at = updates.hqApprovedAt; }
+        if (updates.hq_approved_at !== undefined) { dbUpdates.hq_approved_at = updates.hq_approved_at; }
 
         // Remove undefined values
         Object.keys(dbUpdates).forEach(key => {

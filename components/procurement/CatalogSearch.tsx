@@ -13,6 +13,7 @@ interface CatalogSearchProps {
     setCurrentCost: (v: number) => void;
     setCurrentRetailPrice: (v: number) => void;
     setCustomItemUnit: (v: string) => void;
+    onSelectProduct?: (p: Product) => void;
     errors: Record<string, string>;
     setErrors: React.Dispatch<React.SetStateAction<Record<string, string>>>;
 }
@@ -22,6 +23,7 @@ export const CatalogSearch: React.FC<CatalogSearchProps> = ({
     isSearchOpen, setIsSearchOpen,
     currentProductToAdd, setCurrentProductToAdd,
     setCurrentCost, setCurrentRetailPrice, setCustomItemUnit,
+    onSelectProduct,
     errors, setErrors,
 }) => {
     const filteredProducts = searchTerm
@@ -67,6 +69,7 @@ export const CatalogSearch: React.FC<CatalogSearchProps> = ({
                                         if (p.costPrice) setCurrentCost(p.costPrice);
                                         if (p.price) setCurrentRetailPrice(p.price);
                                         if (p.unit) setCustomItemUnit(p.unit);
+                                        onSelectProduct?.(p);
                                     }}
                                     className="px-3.5 py-2.5 hover:bg-[var(--theme-bg-subtle)] rounded-xl cursor-pointer flex justify-between items-center group transition-colors"
                                 >

@@ -18,6 +18,7 @@ import { InventorySection } from '../components/dashboard/sections/InventorySect
 import { NetworkSection } from '../components/dashboard/sections/NetworkSection';
 import { TelemetrySection } from '../components/dashboard/sections/TelemetrySection';
 import { CentralOpsTeamSection } from '../components/dashboard/sections/CentralOpsTeamSection';
+import { RegionalCommandSection } from '../components/dashboard/sections/RegionalCommandSection';
 import { CentralOperationsHeader } from '../components/dashboard/CentralOperationsHeader';
 import { CentralOpsExecutiveDeck } from '../components/dashboard/CentralOpsExecutiveDeck';
 import { SitePerformance, CentralOpsViewMode, FacilityScope } from '../components/dashboard/types';
@@ -31,8 +32,8 @@ import { useQuery } from '@tanstack/react-query';
 import { systemLogsService } from '../services/system-logs.service';
 
 export default function CentralOperations() {
-    const { sites, employees, allSales, allOrders, allProducts, systemLogs: contextLogs, storePoints, effectiveCountry, settings } = useData();
-    const { jobs } = useFulfillmentData();
+    const { sites, employees, allSales, allOrders, allProducts, systemLogs: contextLogs, storePoints, effectiveCountry, settings, regions } = useData();
+    const { jobs, transfers } = useFulfillmentData();
     const { workerPoints } = useGamification();
     const { loading, theme } = useStore();
     const navigate = useNavigate();
@@ -351,6 +352,19 @@ export default function CentralOperations() {
                 />
             )}
 
+            {viewMode === 'regional' && (
+                <RegionalCommandSection
+                    regions={regions}
+                    sites={sites}
+                    employees={employees}
+                    allSales={allSales}
+                    allOrders={allOrders}
+                    transfers={transfers}
+                    activeCountry={activeCountry}
+                    currencySymbol={currencySymbol}
+                />
+            )}
+
             {viewMode === 'telemetry' && (
                 <TelemetrySection
                     systemLogs={systemLogs}
@@ -398,6 +412,17 @@ export default function CentralOperations() {
                         metrics={metrics}
                         sitePerformance={sitePerformance}
                         allSales={allSales}
+                        currencySymbol={currencySymbol}
+                    />
+
+                    <RegionalCommandSection
+                        regions={regions}
+                        sites={sites}
+                        employees={employees}
+                        allSales={allSales}
+                        allOrders={allOrders}
+                        transfers={transfers}
+                        activeCountry={activeCountry}
                         currencySymbol={currencySymbol}
                     />
 

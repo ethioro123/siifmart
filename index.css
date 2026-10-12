@@ -20,9 +20,17 @@
   --color-theme-primary-active: var(--theme-primary-active);
   --color-theme-primary-muted: var(--theme-primary-muted);
 
+  --color-primary: var(--theme-accent);
+  --color-primary-hover: var(--theme-accent-hover);
+  --color-primary-active: var(--theme-accent-hover);
+  --color-primary-muted: var(--theme-accent-muted);
+
   --color-theme-accent: var(--theme-accent);
   --color-theme-accent-hover: var(--theme-accent-hover);
   --color-theme-accent-muted: var(--theme-accent-muted);
+  --color-accent: var(--theme-accent);
+  --color-accent-hover: var(--theme-accent-hover);
+  --color-accent-muted: var(--theme-accent-muted);
 
   --color-theme-border: var(--theme-border);
   --color-theme-border-subtle: var(--theme-border-subtle);

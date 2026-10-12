@@ -7,13 +7,13 @@
 import { UserRole } from '../types';
 import { authService } from '../services/auth.service';
 import type { Permission } from '../services/permissions.service';
-import { canSwitchCountry, getUserCountry } from './userCountry';
+import { canSwitchCountry, getUserCountry, canSwitchRegion, getUserRegion } from './userCountry';
 
 // ============================================================================
 // RE-EXPORT NEW PERMISSION SYSTEM
 // ============================================================================
 
-export { authService, canSwitchCountry, getUserCountry };
+export { authService, canSwitchCountry, getUserCountry, canSwitchRegion, getUserRegion };
 export type { Permission };
 
 // ============================================================================
@@ -39,8 +39,8 @@ export const PERMISSIONS = {
     APPLY_DISCOUNT: ['super_admin', 'store_manager', 'assistant_manager', 'shift_lead', 'store_supervisor'],
     VIEW_ALL_TRANSACTIONS: ['super_admin', 'regional_manager', 'operations_manager', 'store_manager', 'assistant_manager', 'shift_lead', 'auditor', 'finance_manager', 'store_supervisor', 'treasury_officer', 'store_operations_auditor'],
 
-    // Inventory
-    ACCESS_INVENTORY: ['super_admin', 'admin', 'regional_manager', 'operations_manager', 'store_manager', 'assistant_manager', 'shift_lead', 'warehouse_manager', 'dispatcher', 'auditor', 'procurement_manager', 'inventory_specialist', 'store_supervisor', 'pos', 'logistics_manager', 'inventory_manager', 'demand_planner', 'security_manager', 'vendor_relations_manager', 'customs_import_specialist', 'inbound_qc_inspector', 'replenishment_planner', 'fleet_maintenance_supervisor', 'store_operations_auditor'],
+    // Inventory - Strictly Warehouse & Distribution Center Only
+    ACCESS_INVENTORY: ['super_admin', 'admin', 'regional_manager', 'operations_manager', 'warehouse_manager', 'dispatcher', 'auditor', 'procurement_manager', 'inventory_specialist', 'logistics_manager', 'inventory_manager', 'demand_planner', 'security_manager', 'vendor_relations_manager', 'customs_import_specialist', 'inbound_qc_inspector', 'replenishment_planner', 'fleet_maintenance_supervisor', 'store_operations_auditor'],
     ADD_PRODUCT: ['super_admin', 'admin', 'warehouse_manager'],
     EDIT_PRODUCT: ['super_admin', 'admin', 'warehouse_manager'],
     DELETE_PRODUCT: ['super_admin'],
@@ -333,6 +333,8 @@ export default {
     shouldFilterBySite,
     canSwitchCountry,
     getUserCountry,
+    canSwitchRegion,
+    getUserRegion,
     PERMISSIONS,
     authService,
 };

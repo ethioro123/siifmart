@@ -1,6 +1,7 @@
 import React from 'react';
 import { Layers, ChevronDown } from 'lucide-react';
-import { PACKAGE_TYPES } from './utils';
+import { getCategorySpecGroup } from './categoryAttributes';
+import { getCategoryPackagingDefaults } from './categoryLogistics';
 
 export interface PackagingHierarchySectionProps {
     packagingLevel: 'single' | 'case' | 'bale' | 'two_tier';
@@ -8,6 +9,7 @@ export interface PackagingHierarchySectionProps {
     customAttributes: any;
     setCustomAttributes: React.Dispatch<React.SetStateAction<any>>;
     multiplier: number;
+    selectedMainCategory?: string;
 }
 
 export const PackagingHierarchySection: React.FC<PackagingHierarchySectionProps> = ({
@@ -16,7 +18,36 @@ export const PackagingHierarchySection: React.FC<PackagingHierarchySectionProps>
     customAttributes,
     setCustomAttributes,
     multiplier,
+    selectedMainCategory = ''
 }) => {
+    const specGroup = getCategorySpecGroup(selectedMainCategory, customAttributes.identity?.subcategory);
+    const domainId = specGroup.id;
+    const pkgDefaults = getCategoryPackagingDefaults(domainId);
+    const containerOptions = pkgDefaults.containers;
+
+    const tiers = [
+        {
+            id: 'single',
+            label: pkgDefaults.levelLabels?.single || 'Single Consumer Unit',
+            sub: '1:1 Individual Each'
+        },
+        {
+            id: 'case',
+            label: pkgDefaults.levelLabels?.case || 'Master Case / Carton',
+            sub: 'Wholesale shipping case'
+        },
+        {
+            id: 'bale',
+            label: pkgDefaults.levelLabels?.bale || 'Bulk Bale / Bundle',
+            sub: 'Commodity bale / bundle'
+        },
+        {
+            id: 'two_tier',
+            label: pkgDefaults.levelLabels?.two_tier || '2-Tier Master Case',
+            sub: 'Inner packs in master case'
+        },
+    ];
+
     return (
         <div className="space-y-3 pt-3 border-t border-[var(--theme-border-subtle)]">
             <div className="flex items-center justify-between">
@@ -31,12 +62,7 @@ export const PackagingHierarchySection: React.FC<PackagingHierarchySectionProps>
 
             {/* Packaging Level Selector Pills */}
             <div className="grid grid-cols-4 gap-2">
-                {[
-                    { id: 'single', label: 'Single Consumer Unit', sub: '1:1 Individual Each' },
-                    { id: 'case', label: 'Master Case / Carton', sub: 'Wholesale shipping case' },
-                    { id: 'bale', label: 'Bulk Bale / Bundle', sub: 'Commodity bale (e.g. 12 pk)' },
-                    { id: 'two_tier', label: '2-Tier Master Case', sub: 'Inner packs in master case' },
-                ].map(tier => (
+                {tiers.map(tier => (
                     <button
                         key={tier.id}
                         type="button"
@@ -69,7 +95,7 @@ export const PackagingHierarchySection: React.FC<PackagingHierarchySectionProps>
                             onChange={e => setCustomAttributes((p: any) => ({ ...p, packaging: { ...p.packaging, packageType: e.target.value } }))}
                         >
                             <option value="" className="bg-[var(--theme-bg-panel)] text-[var(--theme-text-primary)]">Select Container...</option>
-                            {PACKAGE_TYPES.map(t => <option key={t} value={t} className="bg-[var(--theme-bg-panel)] text-[var(--theme-text-primary)]">{t}</option>)}
+                            {containerOptions.map(t => <option key={t} value={t} className="bg-[var(--theme-bg-panel)] text-[var(--theme-text-primary)]">{t}</option>)}
                         </select>
                         <ChevronDown size={12} className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--theme-text-secondary)] pointer-events-none" />
                     </div>

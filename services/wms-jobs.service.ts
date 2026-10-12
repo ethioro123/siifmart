@@ -104,7 +104,7 @@ export const wmsJobsService = {
      * RULE 10 — On-demand history fetch. Call ONLY when user explicitly clicks the History tab.
      * Never call on module mount/login. Returns latest 25 completed/cancelled jobs by default.
      */
-    async getHistory(siteId?: string, limit: number = 25, employeeId?: string, countryCode?: string) {
+    async getHistory(siteId?: string, limit: number = 200, employeeId?: string, countryCode?: string, type?: WMSJob['type']) {
         let q = supabase
             .from('wms_jobs')
             .select(WMS_JOB_COLUMNS)
@@ -112,6 +112,7 @@ export const wmsJobsService = {
             .order('updated_at', { ascending: false })
             .limit(limit);
 
+        if (type) q = q.eq('type', type);
         if (countryCode) q = q.eq('country_code', countryCode);
 
         if (siteId && employeeId) {
