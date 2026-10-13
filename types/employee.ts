@@ -45,6 +45,8 @@ export interface Employee {
   site_id?: string; // Supabase compatibility
   regionCode?: string;
   region_code?: string;
+  /** HQ = country-wide authority (default). REGIONAL = locked to regionCode. */
+  scopeLevel?: 'HQ' | 'REGIONAL';
   country?: string;
   country_code?: string;
   name: string;

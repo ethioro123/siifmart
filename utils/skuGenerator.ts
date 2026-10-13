@@ -226,34 +226,48 @@ export function extractCategoryFromSKU(sku: string): string | null {
 }
 
 /**
- * Async wrapper for generateSKU — drop-in replacement for sequentialSkuGenerator
- * Uses the same logic but fetches products from supabase first
+ * Async sequential SKU generator.
+ * Uses atomic server-side RPC next_sku() to eliminate race conditions and collisions across concurrent users.
+ * Gracefully falls back to client-side generation if offline or RPC is unavailable.
  */
 export async function generateSequentialSKU(
     category: string = 'General',
     existingProducts?: Array<{ sku?: string; country?: string }>,
     country?: Country
 ): Promise<string> {
-    // If products already provided, use them directly
+    const catPrefix = getCategoryPrefix(category);
+
+    // 1. Primary: Use atomic server sequence if country is defined
+    if (country) {
+        try {
+            const { issueSku } = await import('../services/products/product-master.service');
+            const atomicSku = await issueSku(country, catPrefix);
+            if (atomicSku) return atomicSku;
+        } catch {
+            // Fallback to client sequence if RPC fails or migration not applied
+        }
+    }
+
+    // 2. Fallback: If products already provided in memory, compute next client-side
     if (existingProducts && existingProducts.length > 0) {
         return generateSKU(category, existingProducts, undefined, country);
     }
 
-    // Otherwise fetch from supabase
+    // 3. Fallback: Fetch latest matching SKUs from Supabase
     try {
         const { supabase } = await import('../lib/supabase');
-        const prefix = getCategoryPrefix(category);
         const countryPrefix = country ? country.toUpperCase() : '';
-        const searchPrefix = `${countryPrefix}${prefix}`;
+        const searchPrefix = `${countryPrefix}${catPrefix}`;
         const { data } = await supabase
             .from('products')
             .select('sku')
-            .or(`sku.ilike.${searchPrefix}%,sku.ilike.${prefix}%`)
+            .or(`sku.ilike.${searchPrefix}%,sku.ilike.${catPrefix}%`)
+            .order('sku', { ascending: false })
             .limit(100);
 
         return generateSKU(category, (data || []) as Array<{ sku?: string }>, undefined, country);
     } catch {
-        // Fallback: generate with empty list (starts at 001)
+        // Ultimate fallback: generate initial 001
         return generateSKU(category, [], undefined, country);
     }
 }

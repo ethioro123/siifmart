@@ -8,8 +8,15 @@ interface NetworkLoadCardProps {
 
 export const NetworkLoadCard: React.FC<NetworkLoadCardProps> = ({
   onQuickAction,
-  loadPercent = 84
+  loadPercent = 100
 }) => {
+  const statusText = loadPercent >= 80 ? 'Optimal' : loadPercent >= 50 ? 'Moderate' : 'High Load';
+  const statusColor = loadPercent >= 80
+    ? 'text-[#34C759] dark:text-[#30D158]'
+    : loadPercent >= 50
+      ? 'text-[#FF9500] dark:text-[#FF9F0A]'
+      : 'text-[#FF3B30] dark:text-[#FF453A]';
+
   return (
     <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-5 sm:p-6 shadow-xs flex flex-col justify-between h-full">
       <div>
@@ -35,8 +42,8 @@ export const NetworkLoadCard: React.FC<NetworkLoadCardProps> = ({
             <span className="block text-2xl font-bold font-mono text-[var(--theme-text-primary)] leading-none">
               {loadPercent}%
             </span>
-            <span className="text-[11px] font-semibold text-[#34C759] dark:text-[#30D158] mt-1 block">
-              Optimal
+            <span className={`text-[11px] font-semibold ${statusColor} mt-1 block`}>
+              {statusText}
             </span>
           </div>
         </div>

@@ -39,41 +39,60 @@ export const inventoryRequestsService = {
     },
 
     async create(request: Omit<PendingInventoryChange, 'id'>) {
-        const country = (request.countryCode || (request as any).country_code || 'ET').toUpperCase();
+        let country = request.countryCode || (request as any).country_code;
         let regionCode = request.regionCode || (request as any).region_code;
 
-        if (!regionCode && request.siteId) {
+        // Resilient resolution: if country or region is missing, fetch from sites table
+        if ((!country || !regionCode) && request.siteId) {
             try {
                 const { data: site } = await supabase
                     .from('sites')
-                    .select('region_code')
+                    .select('country, region_code')
                     .eq('id', request.siteId)
                     .maybeSingle();
-                if (site?.region_code) {
-                    regionCode = site.region_code;
+                if (site) {
+                    if (!country && site.country) {
+                        country = site.country;
+                    }
+                    if (!regionCode && site.region_code) {
+                        regionCode = site.region_code;
+                    }
                 }
             } catch (err) {
-                logger.warn('inventoryRequestsService', 'Could not resolve region for site', { siteId: request.siteId });
+                logger.warn('inventoryRequestsService', 'Could not resolve country/region for site', { siteId: request.siteId });
             }
         }
 
-        const { data, error } = await supabase.from('inventory_requests').insert({
+        const resolvedCountry = (country || 'ET').toUpperCase();
+
+        const insertPayload = {
             site_id: request.siteId,
-            country_code: country,
+            country_code: resolvedCountry,
             region_code: regionCode || null,
             product_id: request.productId || null,
             product_name: request.productName,
             product_sku: request.productSku,
             change_type: request.changeType,
             requested_by: request.requestedBy,
-            status: 'pending',
+            status: request.status || 'pending',
+            approved_by: request.approvedBy || null,
+            approved_at: request.approvedAt || null,
             proposed_changes: request.proposedChanges,
             adjustment_type: request.adjustmentType,
             adjustment_qty: request.adjustmentQty,
             adjustment_reason: request.adjustmentReason
-        }).select().single();
+        };
 
-        if (error) throw error;
+        const { data, error } = await supabase
+            .from('inventory_requests')
+            .insert(insertPayload)
+            .select()
+            .single();
+
+        if (error) {
+            logger.error('inventoryRequestsService', 'create FAILED:', error);
+            throw error;
+        }
         return {
             ...data,
             siteId: data.site_id,

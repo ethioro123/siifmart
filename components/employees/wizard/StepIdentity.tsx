@@ -54,6 +54,17 @@ export default function StepIdentity({
                                 First Name <span className="text-rose-500">*</span>
                             </label>
                             <input
+                                id="candidate_first_name"
+                                name="candidate_first_name"
+                                type="text"
+                                autoComplete="off"
+                                autoCorrect="off"
+                                autoCapitalize="words"
+                                spellCheck={false}
+                                data-lpignore="true"
+                                data-1p-ignore="true"
+                                data-bwignore="true"
+                                data-form-type="other"
                                 className="w-full bg-white dark:bg-black/30 border border-[#E2DCCE] dark:border-white/10 rounded-xl px-3 py-2 text-stone-900 dark:text-white focus:border-[#2C5E3B] dark:focus:border-emerald-500 outline-none text-sm font-medium"
                                 value={newEmpData.firstName}
                                 onChange={e => setNewEmpData({ ...newEmpData, firstName: e.target.value })}
@@ -66,6 +77,17 @@ export default function StepIdentity({
                                 Last Name
                             </label>
                             <input
+                                id="candidate_last_name"
+                                name="candidate_last_name"
+                                type="text"
+                                autoComplete="off"
+                                autoCorrect="off"
+                                autoCapitalize="words"
+                                spellCheck={false}
+                                data-lpignore="true"
+                                data-1p-ignore="true"
+                                data-bwignore="true"
+                                data-form-type="other"
                                 className="w-full bg-white dark:bg-black/30 border border-[#E2DCCE] dark:border-white/10 rounded-xl px-3 py-2 text-stone-900 dark:text-white focus:border-[#2C5E3B] dark:focus:border-emerald-500 outline-none text-sm font-medium"
                                 value={newEmpData.lastName}
                                 onChange={e => setNewEmpData({ ...newEmpData, lastName: e.target.value })}
@@ -89,7 +111,16 @@ export default function StepIdentity({
                         </label>
                         <div className="relative">
                             <input
+                                id="candidate_temp_password"
+                                name="candidate_temp_password"
                                 type={showPassword ? 'text' : 'password'}
+                                autoComplete="new-password"
+                                autoCorrect="off"
+                                spellCheck={false}
+                                data-lpignore="true"
+                                data-1p-ignore="true"
+                                data-bwignore="true"
+                                data-form-type="other"
                                 className="w-full bg-white dark:bg-black/30 border border-[#E2DCCE] dark:border-white/10 rounded-xl px-3 py-2 pr-10 text-stone-900 dark:text-white focus:border-[#2C5E3B] dark:focus:border-emerald-500 outline-none text-sm font-mono"
                                 value={newEmpData.password}
                                 onChange={e => setNewEmpData({ ...newEmpData, password: e.target.value })}

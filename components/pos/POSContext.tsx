@@ -115,10 +115,10 @@ export const POSProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     const searchInputRef = React.useRef<HTMLInputElement>(null);
     const [weightPromptProduct, setWeightPromptProduct] = useState<Product | null>(null);
 
-    const handleStartShift = useCallback(async (openingFloat: number) => {
+    const handleStartShift = useCallback(async (openingFloat: number, counterNumber?: string) => {
         if (!user) return;
         setIsStartShiftModalOpen(false);
-        await startShift(user.id, openingFloat);
+        await startShift(user.id, openingFloat, counterNumber);
     }, [user, startShift]);
 
     const dismissStartShiftModal = useCallback(() => {

@@ -5,6 +5,7 @@ export interface EmployeeDocument {
     name: string;
     size: string;
     type: string;
+    category?: string;
     uploadedAt: string;
     dataUrl?: string;
 }
@@ -146,6 +147,7 @@ export function getEmployeeDocuments(employeeId: string): EmployeeDocument[] {
                     name: `Employment_Contract_${employeeId}.pdf`,
                     size: '1.4 MB',
                     type: 'pdf',
+                    category: 'Employment Contract / NDA',
                     uploadedAt: '2025-01-15'
                 },
                 {
@@ -153,6 +155,7 @@ export function getEmployeeDocuments(employeeId: string): EmployeeDocument[] {
                     name: 'National_ID_Card.png',
                     size: '420 KB',
                     type: 'png',
+                    category: 'National ID / Passport',
                     uploadedAt: '2025-01-15'
                 }
             ];
@@ -177,11 +180,12 @@ export function saveEmployeeDocument(employeeId: string, doc: Omit<EmployeeDocum
     return newDoc;
 }
 
-export function addEmployeeDocument(employeeId: string, name: string, size: string, dataUrl?: string): EmployeeDocument {
+export function addEmployeeDocument(employeeId: string, name: string, size: string, dataUrl?: string, category?: string): EmployeeDocument {
     return saveEmployeeDocument(employeeId, {
         name,
         size,
         type: name.split('.').pop() || 'file',
+        category,
         dataUrl
     });
 }

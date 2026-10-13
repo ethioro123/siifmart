@@ -96,9 +96,16 @@ export default function DocumentsTab({
                                         <FileCheck size={20} />
                                     </div>
                                     <div className="min-w-0">
-                                        <p className="font-semibold text-sm text-[var(--theme-text-primary)] truncate">
-                                            {doc.name}
-                                        </p>
+                                        <div className="flex items-center gap-2 flex-wrap">
+                                            <p className="font-semibold text-sm text-[var(--theme-text-primary)] truncate">
+                                                {doc.name}
+                                            </p>
+                                            {doc.category && (
+                                                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] border border-[var(--theme-accent)]/20 shrink-0">
+                                                    {doc.category}
+                                                </span>
+                                            )}
+                                        </div>
                                         <p className="text-[11px] text-[var(--theme-text-secondary)] font-mono tabular-nums mt-0.5">
                                             Uploaded: {doc.uploadedAt} • {doc.size}
                                         </p>

@@ -4,6 +4,7 @@ import { stockMovementsService } from '../stock-movements.service';
 import { _mapProduct, _calculateStatus } from './products-helpers';
 import { handleAutoReplenish } from './products-replenish';
 import { logger } from '../../utils/logger';
+import { ensureMaster } from './product-master.service';
 
 /**
  * Check if a barcode is registered under a different SKU.
@@ -122,6 +123,23 @@ export async function createProduct(product: Omit<Product, 'id' | 'created_at' |
             logger.info('products-mutations', `Product ${dbProduct.sku} already exists at site ${dbProduct.site_id}. Reusing existing record instead of creating duplicate.`);
             return _mapProduct(existingGhostOrReal);
         }
+    }
+
+    if (dbProduct.sku && dbProduct.site_id) {
+        const masterId = await ensureMaster({
+            siteId: dbProduct.site_id,
+            sku: dbProduct.sku,
+            name: dbProduct.name,
+            category: dbProduct.category,
+            barcode: dbProduct.barcode,
+            brand: dbProduct.brand,
+            unit: dbProduct.unit,
+            size: dbProduct.size,
+            costPrice: dbProduct.cost_price,
+            approved: Boolean(product.approvedBy),
+            createdBy: product.approvedBy ?? null
+        });
+        if (masterId) dbProduct.master_id = masterId;
     }
 
     const { data, error } = await supabase

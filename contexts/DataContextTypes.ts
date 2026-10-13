@@ -75,7 +75,7 @@ export interface DataContextType {
   processSale: (cart: CartItem[], method: PaymentMethod, user: string, tendered: number, change: number, customerId?: string, pointsRedeemed?: number, type?: 'In-Store' | 'Delivery' | 'Pickup', taxBreakdown?: any[], receiptNumber?: string, roundedTotal?: number) => Promise<{ saleId: string; pointsResult?: any }>;
   processReturn: (saleId: string, items: ReturnItem[], totalRefund: number, user: string) => void;
   closeShift: (shift: ShiftRecord) => void;
-  startShift: (cashierId: string, openingFloat: number) => void;
+  startShift: (cashierId: string, openingFloat: number, counterNumber?: string) => void;
   reconcileShift: (shiftId: string, hqUserName: string, status?: 'Reconciled' | 'Discrepancy_Flagged', hqNotes?: string) => Promise<void>;
   triggerSync: () => void;
 

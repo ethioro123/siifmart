@@ -106,15 +106,17 @@ export default function Inventory() {
         return (Array.isArray(base) ? base : []).filter(p => (p.status || (p as any).status) !== 'archived');
     }, [products, allProducts, isReadOnly, user?.role, activeSite]);
 
-    // Pending (needed for Badge)
-    const [pendingChanges, setPendingChanges] = useState<PendingInventoryChange[]>([]);
+    // Pending & History Requests (needed for Badge & Audit Log)
+    const [allRequests, setAllRequests] = useState<PendingInventoryChange[]>([]);
+    const pendingChanges = useMemo(() => allRequests.filter(r => r.status === 'pending'), [allRequests]);
+    const historyChanges = useMemo(() => allRequests.filter(r => r.status === 'approved' || r.status === 'rejected'), [allRequests]);
     const loadPendingRequests = useCallback(async () => {
         try {
             const isHqOrApprover = isAdminSite(activeSite) || canApprove;
             const targetSiteId = isHqOrApprover ? undefined : activeSite?.id;
             const targetRegion = activeRegionCode || user?.regionCode;
-            const requests = await inventoryRequestsService.getAll(targetSiteId, activeCountry, 25, targetRegion);
-            setPendingChanges(requests.filter(r => r.status === 'pending'));
+            const requests = await inventoryRequestsService.getAll(targetSiteId, activeCountry, 50, targetRegion);
+            setAllRequests(requests);
         } catch (err) {
             logger.error('Inventory', 'Failed to load pending requests:', err);
         }
@@ -315,16 +317,9 @@ export default function Inventory() {
 
     // Pending Handlers
     const makePendingChange = (product: Product): PendingInventoryChange => ({
-        id: 'view-only',
-        productId: product.id,
-        changeType: 'create',
-        proposedChanges: product,
-        productName: product.name,
-        productSku: product.sku,
-        requestedBy: product.createdBy || 'Unknown',
-        requestedAt: product.createdAt || new Date().toISOString(),
-        status: 'pending',
-        siteId: product.siteId || ''
+        id: 'view-only', productId: product.id, changeType: 'create', proposedChanges: product,
+        productName: product.name, productSku: product.sku, requestedBy: product.createdBy || 'Unknown',
+        requestedAt: product.createdAt || new Date().toISOString(), status: 'pending', siteId: product.siteId || ''
     });
 
     const handleApproveProduct = async (product: Product) => {
@@ -413,10 +408,8 @@ export default function Inventory() {
                 )}
                 {activeTab === 'pending' && (
                     <InventoryPending
-                        pendingProducts={pendingProducts} pendingChanges={pendingChanges} allProducts={allProducts}
-                        canApprove={canApprove}
-                        userRole={user?.role}
-                        currencySymbol={currencySymbol}
+                        pendingProducts={pendingProducts} pendingChanges={pendingChanges} historyChanges={historyChanges}
+                        allProducts={allProducts} canApprove={canApprove} userRole={user?.role} currencySymbol={currencySymbol}
                         isSubmitting={approveRequestMutation.isPending || rejectRequestMutation.isPending}
                         onApproveProduct={handleApproveProduct} onApproveChange={handleApproveChange}
                         onRejectProduct={handleRejectProduct} onRejectChange={handleRejectChange} onBulkCleanup={handleBulkCleanup}

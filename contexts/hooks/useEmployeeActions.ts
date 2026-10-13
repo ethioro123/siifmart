@@ -61,11 +61,13 @@ export function useEmployeeActions(deps: UseEmployeeActionsDeps) {
         }
     }, [addNotification]);
 
-    const startShift = useCallback(async (cashierId: string, openingFloat: number) => {
+    const startShift = useCallback(async (cashierId: string, openingFloat: number, counterNumber?: string) => {
         try {
-            const cashier = employees.find(e => e.id === cashierId);
+            const cashier = employees.find(e => e.id === cashierId || e.code === cashierId);
             const staffName = cashier?.name || 'Staff Member';
+            const cashierCode = cashier?.code || undefined;
             const shiftId = crypto.randomUUID();
+            const resolvedCounter = counterNumber || 'Counter 1';
 
             // Calculate sequential human-readable shift number (e.g. SHF-0001, SHF-0002)
             const existingNums = (shifts || [])
@@ -85,6 +87,10 @@ export function useEmployeeActions(deps: UseEmployeeActionsDeps) {
                 siteId: activeSiteId || activeSite?.id || '',
                 cashierId,
                 cashierName: staffName,
+                cashierCode,
+                cashier_code: cashierCode,
+                counterNumber: resolvedCounter,
+                counter_number: resolvedCounter,
                 startTime: new Date().toISOString(),
                 status: 'Open',
                 openingFloat,
@@ -97,7 +103,7 @@ export function useEmployeeActions(deps: UseEmployeeActionsDeps) {
             };
 
             // 1. Optimistic local state update
-            setShifts(prev => [shift, ...prev.filter(s => !(s.cashierId === cashierId && s.status === 'Open'))]);
+            setShifts(prev => [shift, ...prev.filter(s => !(s.status === 'Open' && (s.cashierId === cashierId || s.counterNumber === resolvedCounter || s.counter_number === resolvedCounter)))]);
 
             // 2. Persist directly to Supabase with resilient fallback
             try {
@@ -106,8 +112,9 @@ export function useEmployeeActions(deps: UseEmployeeActionsDeps) {
                 logger.warn('useEmployeeActions', `Supabase shift insert error (operating optimistically): ${dbErr}`);
             }
 
-            addNotification('success', `Shift ${formattedShiftNumber} started with ${openingFloat.toLocaleString()} float`);
-            logSystemEvent('Start Shift', `Started shift ${formattedShiftNumber} for ${staffName} with float ${openingFloat}`, staffName, 'HR');
+            const staffBadge = cashierCode ? `${cashierCode} (${staffName})` : staffName;
+            addNotification('success', `Shift started on ${resolvedCounter} for ${staffBadge} with ${openingFloat.toLocaleString()} float`);
+            logSystemEvent('Start Shift', `Started shift ${formattedShiftNumber} on ${resolvedCounter} for ${staffBadge} with float ${openingFloat}`, staffName, 'HR');
         } catch (error) {
             logger.error('useEmployeeActions', 'Failed to start shift:', error as Error);
             addNotification('alert', 'Failed to start shift');

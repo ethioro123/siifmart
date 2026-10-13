@@ -71,7 +71,8 @@ export function useEmployeeData({
             const isLocationFiltered = Boolean((querySiteId && querySiteId !== 'All') || (restricted && user?.siteId) || regionCode);
             const isSearchActive = Boolean(searchTerm && searchTerm.trim() !== '');
             const isSpecificRole = Boolean(filterRole && filterRole !== 'All');
-            const onlyManagers = !isLocationFiltered && !isSearchActive && !isSpecificRole;
+            const isStatusFiltered = Boolean(filterStatus && filterStatus !== 'All');
+            const onlyManagers = !isLocationFiltered && !isSearchActive && !isSpecificRole && !isStatusFiltered;
 
             // Build country-scoped filters object
             const queryFilters: EmployeeFilters = {
@@ -114,10 +115,11 @@ export function useEmployeeData({
             const isLocationFiltered = Boolean((filterSite && filterSite !== 'All') || (restricted && user?.siteId) || regionCode);
             const isSearchActive = Boolean(searchTerm && searchTerm.trim() !== '');
             const isSpecificRole = Boolean(filterRole && filterRole !== 'All');
-            const onlyManagers = !isLocationFiltered && !isSearchActive && !isSpecificRole;
+            const isStatusFiltered = Boolean(filterStatus && filterStatus !== 'All');
+            const onlyManagers = !isLocationFiltered && !isSearchActive && !isSpecificRole && !isStatusFiltered;
 
             if (onlyManagers) {
-               filtered = filtered.filter(e => isManagerialRole(e.role));
+               filtered = filtered.filter(e => isManagerialRole(e.role) || e.status === 'Pending Approval');
             }
             if (filterRole !== 'All') filtered = filtered.filter(e => e.role === filterRole);
             if (filterStatus !== 'All') filtered = filtered.filter(e => e.status === filterStatus);
@@ -168,8 +170,9 @@ export function useEmployeeData({
       const isLocationFiltered = Boolean((filterSite && filterSite !== 'All') || (restricted && user?.siteId));
       const isSearchActive = Boolean(searchTerm && searchTerm.trim() !== '');
       const isSpecificRole = Boolean(filterRole && filterRole !== 'All');
-      return !isLocationFiltered && !isSearchActive && !isSpecificRole;
-   }, [filterSite, restricted, user?.siteId, searchTerm, filterRole]);
+      const isStatusFiltered = Boolean(filterStatus && filterStatus !== 'All');
+      return !isLocationFiltered && !isSearchActive && !isSpecificRole && !isStatusFiltered;
+   }, [filterSite, restricted, user?.siteId, searchTerm, filterRole, filterStatus]);
 
    return {
       displayedEmployees,

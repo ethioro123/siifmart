@@ -1,4 +1,4 @@
-export type CentralOpsViewMode = 'executive' | 'regional' | 'financial' | 'inventory' | 'network' | 'telemetry' | 'team' | 'all';
+export type CentralOpsViewMode = 'executive' | 'regional' | 'catalog' | 'financial' | 'inventory' | 'network' | 'telemetry' | 'team' | 'all';
 export type FacilityScope = 'all' | 'store' | 'warehouse';
 
 export type StoreAuditType = 'unannounced_walkthrough' | 'cash_spot_audit' | 'planogram_check' | 'full_inspection';

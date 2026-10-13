@@ -82,34 +82,33 @@ export function canSwitchRegion(user: { role?: string; title?: string } | null |
 }
 
 /**
- * Resolve user's assigned region code if they are regional or branch staff.
+ * Resolve user's regional lock. Only workers with scopeLevel === 'REGIONAL' are region-locked;
+ * everyone else (default 'HQ') has country-wide authority and returns null.
  */
 export function getUserRegion(
-    user: { role?: string; regionCode?: string; region_code?: string; siteId?: string; id?: string; employeeId?: string } | null | undefined,
+    user: { role?: string; regionCode?: string; region_code?: string; scopeLevel?: string; siteId?: string; id?: string; employeeId?: string } | null | undefined,
     sites?: Array<{ id: string; regionCode?: string; region_code?: string; code?: string }>,
-    employees?: Array<{ id: string; regionCode?: string; region_code?: string; siteId?: string; site_id?: string }>
+    employees?: Array<{ id: string; regionCode?: string; region_code?: string; scopeLevel?: string; siteId?: string; site_id?: string }>
 ): string | null {
     if (!user) return null;
 
+    const emp = employees?.find(e => e.id === user.employeeId || e.id === user.id);
+    const scope = emp?.scopeLevel ?? user.scopeLevel ?? 'HQ';
+    if (scope !== 'REGIONAL') return null;
+
     // 1. Employee profile region_code
-    if (employees && employees.length > 0) {
-        const emp = employees.find(e => e.id === user.employeeId || e.id === user.id);
-        if (emp && (emp.regionCode || (emp as any).region_code)) {
-            return emp.regionCode || (emp as any).region_code;
-        }
-    }
+    const empRegion = emp?.regionCode || emp?.region_code;
+    if (empRegion) return empRegion;
 
     // 2. Direct property on user object
-    if (user.regionCode || (user as any).region_code) {
-        return user.regionCode || (user as any).region_code;
-    }
+    const userRegion = user.regionCode || user.region_code;
+    if (userRegion) return userRegion;
 
     // 3. Fallback to user's assigned site's region
     if (user.siteId && sites && sites.length > 0) {
         const site = sites.find(s => s.id === user.siteId || s.code === user.siteId);
-        if (site && (site.regionCode || (site as any).region_code)) {
-            return site.regionCode || (site as any).region_code;
-        }
+        const siteRegion = site?.regionCode || site?.region_code;
+        if (siteRegion) return siteRegion;
     }
 
     return null;

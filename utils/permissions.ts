@@ -40,7 +40,7 @@ export const PERMISSIONS = {
     VIEW_ALL_TRANSACTIONS: ['super_admin', 'regional_manager', 'operations_manager', 'store_manager', 'assistant_manager', 'shift_lead', 'auditor', 'finance_manager', 'store_supervisor', 'treasury_officer', 'store_operations_auditor'],
 
     // Inventory - Strictly Warehouse & Distribution Center Only
-    ACCESS_INVENTORY: ['super_admin', 'admin', 'regional_manager', 'operations_manager', 'warehouse_manager', 'dispatcher', 'auditor', 'procurement_manager', 'inventory_specialist', 'logistics_manager', 'inventory_manager', 'demand_planner', 'security_manager', 'vendor_relations_manager', 'customs_import_specialist', 'inbound_qc_inspector', 'replenishment_planner', 'fleet_maintenance_supervisor', 'store_operations_auditor'],
+    ACCESS_INVENTORY: ['super_admin', 'admin', 'regional_manager', 'operations_manager', 'warehouse_manager', 'dispatcher', 'auditor', 'inventory_specialist', 'inventory_manager', 'demand_planner', 'inbound_qc_inspector', 'replenishment_planner', 'store_operations_auditor'],
     ADD_PRODUCT: ['super_admin', 'admin', 'warehouse_manager'],
     EDIT_PRODUCT: ['super_admin', 'admin', 'warehouse_manager'],
     DELETE_PRODUCT: ['super_admin'],
@@ -77,24 +77,24 @@ export const PERMISSIONS = {
     APPROVE_EMPLOYEE: ['super_admin', 'admin', 'hr', 'hr_manager', 'regional_manager', 'operations_manager'],
 
     // Procurement
-    ACCESS_PROCUREMENT: ['super_admin', 'admin', 'regional_manager', 'operations_manager', 'procurement_manager', 'finance_manager', 'supply_chain_manager', 'buyer', 'demand_planner', 'credit_control_officer', 'vendor_relations_manager', 'customs_import_specialist', 'replenishment_planner', 'inbound_qc_inspector'],
+    ACCESS_PROCUREMENT: ['super_admin', 'admin', 'regional_manager', 'operations_manager', 'procurement_manager', 'supply_chain_manager', 'buyer', 'demand_planner', 'vendor_relations_manager', 'customs_import_specialist', 'replenishment_planner'],
     CREATE_PO: ['super_admin', 'admin', 'procurement_manager', 'buyer', 'supply_chain_manager'],
-    APPROVE_PO: ['super_admin', 'admin', 'regional_manager', 'operations_manager', 'procurement_manager', 'finance_manager'],
+    APPROVE_PO: ['super_admin', 'admin', 'regional_manager', 'operations_manager', 'procurement_manager'],
     RECEIVE_PO: ['super_admin', 'warehouse_manager', 'dispatcher', 'inventory_specialist'],
     DELETE_PO: ['super_admin', 'admin', 'procurement_manager'],
     MANAGE_SUPPLIERS: ['super_admin', 'admin', 'procurement_manager', 'vendor_relations_manager'],
 
     // Finance
-    ACCESS_FINANCE: ['super_admin', 'admin', 'regional_manager', 'operations_manager', 'auditor', 'finance_manager', 'hr_manager', 'hr', 'accountant', 'payroll_specialist', 'treasury_officer', 'tax_compliance_officer', 'credit_control_officer'],
+    ACCESS_FINANCE: ['super_admin', 'admin', 'regional_manager', 'operations_manager', 'auditor', 'finance_manager', 'accountant', 'payroll_specialist', 'treasury_officer', 'tax_compliance_officer', 'credit_control_officer'],
     VIEW_REVENUE: ['super_admin', 'regional_manager', 'operations_manager', 'auditor', 'finance_manager', 'treasury_officer', 'tax_compliance_officer', 'credit_control_officer'],
-    VIEW_EXPENSES: ['super_admin', 'admin', 'regional_manager', 'operations_manager', 'auditor', 'finance_manager', 'procurement_manager', 'treasury_officer', 'tax_compliance_officer', 'credit_control_officer'],
+    VIEW_EXPENSES: ['super_admin', 'admin', 'regional_manager', 'operations_manager', 'auditor', 'finance_manager', 'treasury_officer', 'tax_compliance_officer', 'credit_control_officer'],
     ADD_EXPENSE: ['super_admin', 'finance_manager'],
     VIEW_PAYROLL: ['super_admin', 'hr', 'hr_manager', 'finance_manager', 'payroll_specialist'],
     PROCESS_PAYROLL: ['super_admin', 'hr', 'hr_manager', 'finance_manager', 'payroll_specialist'],
     EXPORT_FINANCIAL_DATA: ['super_admin', 'auditor', 'finance_manager', 'tax_compliance_officer'],
 
     // Pricing
-    ACCESS_PRICING: ['super_admin', 'merchandising_manager', 'merchandiser', 'regional_manager', 'operations_manager', 'finance_manager', 'procurement_manager', 'vendor_relations_manager', 'store_operations_auditor'],
+    ACCESS_PRICING: ['super_admin', 'merchandising_manager', 'merchandiser', 'regional_manager', 'operations_manager', 'finance_manager', 'store_operations_auditor'],
     EDIT_PRICE: ['super_admin', 'merchandising_manager', 'regional_manager', 'finance_manager'],
     CREATE_PROMOTION: ['super_admin', 'merchandising_manager', 'merchandiser', 'regional_manager'],
     APPROVE_PRICE_CHANGE: ['super_admin', 'merchandising_manager', 'regional_manager', 'finance_manager'],
@@ -111,7 +111,7 @@ export const PERMISSIONS = {
     MANAGE_REPLENISHMENT: ['super_admin', 'warehouse_manager', 'dispatcher', 'inventory_specialist', 'replenishment_planner'],
 
     // Settings
-    ACCESS_SETTINGS: ['super_admin', 'admin', 'regional_manager', 'operations_manager', 'hr', 'it_support', 'security_manager', 'auditor'],
+    ACCESS_SETTINGS: ['super_admin', 'admin', 'regional_manager', 'operations_manager', 'it_support', 'security_manager', 'auditor'],
     EDIT_SYSTEM_SETTINGS: ['super_admin', 'admin', 'it_support'],
     EDIT_OPERATIONAL_SETTINGS: ['super_admin', 'admin'],
     EDIT_HR_SETTINGS: ['super_admin', 'admin', 'hr'],

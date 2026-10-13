@@ -3,17 +3,17 @@ import { Thermometer } from 'lucide-react';
 
 interface ZoneOccupancyCardProps {
     warehouseMetrics: any;
-    mockZones: any[];
     fastMovers: any[];
     t: (key: string) => string;
 }
 
 export const ZoneOccupancyCard: React.FC<ZoneOccupancyCardProps> = ({
     warehouseMetrics,
-    mockZones,
     fastMovers,
     t
 }) => {
+    const zones = warehouseMetrics?.zone_data || [];
+
     return (
         <div className="flex flex-col gap-6">
             {/* Spatial Density Card */}
@@ -29,35 +29,52 @@ export const ZoneOccupancyCard: React.FC<ZoneOccupancyCardProps> = ({
                 </div>
 
                 <div className="space-y-5">
-                    {(warehouseMetrics?.zone_data?.length > 0 ? warehouseMetrics.zone_data : mockZones).slice(0, 4).map((zone: any) => {
-                        const percent = Math.min(100, Math.max(0, (zone.occupied / zone.capacity) * 100));
-                        let barColor = 'bg-[#0071E3] dark:bg-[#2997FF]';
-                        let textColor = 'text-[#0071E3] dark:text-[#2997FF]';
-                        if (percent > 90) {
-                            barColor = 'bg-[#FF3B30] dark:bg-[#FF453A]';
-                            textColor = 'text-[#FF3B30] dark:text-[#FF453A]';
-                        } else if (percent > 75) {
-                            barColor = 'bg-[#FF9500] dark:bg-[#FF9F0A]';
-                            textColor = 'text-[#FF9500] dark:text-[#FF9F0A]';
-                        }
+                    {zones.length > 0 ? (
+                        zones.slice(0, 4).map((zone: any) => {
+                            const capacity = zone.capacity || 100;
+                            const occupied = zone.occupied || 0;
+                            const percent = Math.min(100, Math.max(0, (occupied / capacity) * 100));
+                            let barColor = 'bg-[#0071E3] dark:bg-[#2997FF]';
+                            let textColor = 'text-[#0071E3] dark:text-[#2997FF]';
+                            if (percent > 90) {
+                                barColor = 'bg-[#FF3B30] dark:bg-[#FF453A]';
+                                textColor = 'text-[#FF3B30] dark:text-[#FF453A]';
+                            } else if (percent > 75) {
+                                barColor = 'bg-[#FF9500] dark:bg-[#FF9F0A]';
+                                textColor = 'text-[#FF9500] dark:text-[#FF9F0A]';
+                            }
 
-                        return (
-                            <div key={zone.id} className="group">
-                                <div className="flex justify-between items-baseline mb-1.5 px-0.5">
-                                    <span className="text-xs font-medium text-[var(--theme-text-primary)]">{zone.name}</span>
-                                    <span className={`text-xs font-semibold font-mono ${textColor}`}>
-                                        {percent.toFixed(0)}%
-                                    </span>
+                            return (
+                                <div key={zone.id} className="group">
+                                    <div className="flex justify-between items-baseline mb-1.5 px-0.5">
+                                        <div className="flex items-center gap-2">
+                                            <span className="text-xs font-medium text-[var(--theme-text-primary)]">{zone.name}</span>
+                                            {zone.temperature && (
+                                                <span className="text-[10px] font-mono text-[#0071E3] dark:text-[#2997FF] bg-[#0071E3]/10 px-1.5 py-0.2 rounded-md">
+                                                    {zone.temperature}
+                                                </span>
+                                            )}
+                                        </div>
+                                        <span className={`text-xs font-semibold font-mono ${textColor}`}>
+                                            {percent.toFixed(0)}%
+                                        </span>
+                                    </div>
+                                    <div className="w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-full h-2 overflow-hidden p-0.5">
+                                        <div
+                                            className={`h-full rounded-full ${barColor} transition-all duration-500 ease-out`}
+                                            style={{ width: `${percent}%` }}
+                                        />
+                                    </div>
                                 </div>
-                                <div className="w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-full h-2 overflow-hidden p-0.5">
-                                    <div
-                                        className={`h-full rounded-full ${barColor} transition-all duration-500 ease-out`}
-                                        style={{ width: `${percent}%` }}
-                                    />
-                                </div>
-                            </div>
-                        );
-                    })}
+                            );
+                        })
+                    ) : (
+                        <div className="py-8 text-center text-[var(--theme-text-secondary)] text-xs">
+                            <Thermometer size={22} className="mx-auto mb-2 opacity-40 text-[#0071E3] dark:text-[#2997FF]" />
+                            <p className="font-semibold text-[var(--theme-text-primary)]">No Active Storage Zones</p>
+                            <p className="text-[11px] mt-0.5">Bays will appear when configured in facility settings</p>
+                        </div>
+                    )}
                 </div>
             </div>
 

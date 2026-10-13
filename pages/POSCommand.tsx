@@ -2,7 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Lock, ArrowLeft, Printer, Box, Power, Play, PackageCheck, Vault, UserPlus,
-  ReceiptText, ShieldCheck, Users2, LayoutGrid
+  ReceiptText, ShieldCheck, Users2, LayoutGrid, ChevronDown, Tags
 } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
 import Protected from '../components/Protected';
@@ -64,6 +64,7 @@ const POSCommandContent: React.FC = () => {
   } = usePOSCommand();
 
   const [pinError, setPinError] = useState('');
+  const [isPrintMenuOpen, setIsPrintMenuOpen] = useState(false);
   const [isSafeLedgerOpen, setIsSafeLedgerOpen] = useState(false);
   const [isOnboardModalOpen, setIsOnboardModalOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<'overview' | 'audit' | 'roster' | 'all'>('overview');
@@ -155,9 +156,14 @@ const POSCommandContent: React.FC = () => {
             </span>
 
             {currentShift ? (
-              <span className="inline-flex items-center gap-2 px-3.5 py-2 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-xs font-semibold text-emerald-800 dark:text-emerald-300 shadow-2xs">
+              <span
+                className="inline-flex items-center gap-2 px-3.5 py-2 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-xs font-semibold text-emerald-800 dark:text-emerald-300 shadow-2xs cursor-default"
+                title={`Cashier: ${currentShift.cashierName || user?.name || 'Staff'} • Float: ${(currentShift.openingFloat || 0).toLocaleString()}`}
+              >
                 <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                <span>Active Shift: {formatShiftId(currentShift)}</span>
+                <span className="font-mono font-bold">{currentShift.cashierCode || currentShift.cashier_code || user?.code || 'STAFF'}</span>
+                <span className="text-[10px] opacity-60">•</span>
+                <span>{currentShift.counterNumber || currentShift.counter_number || 'Counter 1'}</span>
                 <span className="text-[10px] opacity-75 font-mono">
                   ({new Date(currentShift.startTime).toLocaleTimeString([], {
                     hour: '2-digit',
@@ -264,31 +270,65 @@ const POSCommandContent: React.FC = () => {
               </button>
             )}
 
-            {/* Terminal Controls */}
-            <div className="flex items-center bg-[var(--theme-bg-card)] rounded-2xl border border-[var(--theme-border)] p-1 shadow-2xs gap-0.5">
-              <button
-                onClick={handleReprint}
-                className="px-3 py-1.5 hover:bg-[var(--theme-bg-subtle)] text-[var(--theme-text-primary)] text-xs font-semibold rounded-xl transition-all flex items-center gap-2 cursor-pointer group"
-                title="Reprint Last Customer Sale Receipt"
-              >
-                <div className="w-5 h-5 rounded-md bg-purple-500/10 text-purple-500 flex items-center justify-center shrink-0">
-                  <ReceiptText size={13} />
-                </div>
-                <span>{t('posCommand.reprintReceipt') || 'Reprint Receipt'}</span>
-              </button>
+            {/* Terminal Controls — Consolidated Print Center & Lock */}
+            <div className="flex items-center bg-[var(--theme-bg-card)] rounded-2xl border border-[var(--theme-border)] p-1 shadow-2xs gap-0.5 relative">
+              <div className="relative">
+                <button
+                  type="button"
+                  onClick={() => setIsPrintMenuOpen(prev => !prev)}
+                  className="px-3 py-1.5 hover:bg-[var(--theme-bg-subtle)] text-[var(--theme-text-primary)] text-xs font-semibold rounded-xl transition-all flex items-center gap-1.5 cursor-pointer group"
+                  title="Unified Print Center (Receipts, Barcodes & Shelf Tags)"
+                >
+                  <div className="w-5 h-5 rounded-md bg-indigo-500/10 text-indigo-500 flex items-center justify-center shrink-0">
+                    <Printer size={13} />
+                  </div>
+                  <span>Print</span>
+                  <ChevronDown size={11} className={`text-[var(--theme-text-muted)] transition-transform duration-150 ${isPrintMenuOpen ? 'rotate-180' : ''}`} />
+                </button>
+
+                {isPrintMenuOpen && (
+                  <div className="absolute right-0 top-full mt-2 w-60 p-1.5 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl shadow-xl z-50 animate-in fade-in zoom-in-95 duration-150 backdrop-blur-md">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setIsPrintMenuOpen(false);
+                        handleReprint();
+                      }}
+                      className="w-full px-3 py-2 text-left rounded-xl hover:bg-[var(--theme-bg-subtle)] transition-colors flex items-center gap-2.5 cursor-pointer group"
+                      title="Reprint last customer transaction receipt"
+                    >
+                      <div className="w-6 h-6 rounded-lg bg-purple-500/10 text-purple-500 flex items-center justify-center shrink-0">
+                        <ReceiptText size={13} />
+                      </div>
+                      <div>
+                        <p className="text-xs font-bold text-[var(--theme-text-primary)] leading-tight">Reprint Last Receipt</p>
+                        <p className="text-[10px] text-[var(--theme-text-secondary)] mt-0.5">Customer sale receipt</p>
+                      </div>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setIsPrintMenuOpen(false);
+                        setIsPrintHubOpen(true);
+                      }}
+                      className="w-full px-3 py-2 text-left rounded-xl hover:bg-[var(--theme-bg-subtle)] transition-colors flex items-center gap-2.5 cursor-pointer group"
+                      title="Generate barcode labels and shelf price tags"
+                    >
+                      <div className="w-6 h-6 rounded-lg bg-indigo-500/10 text-indigo-500 flex items-center justify-center shrink-0">
+                        <Tags size={13} />
+                      </div>
+                      <div>
+                        <p className="text-xs font-bold text-[var(--theme-text-primary)] leading-tight">Price Tags & Barcodes</p>
+                        <p className="text-[10px] text-[var(--theme-text-secondary)] mt-0.5">Thermal label hub</p>
+                      </div>
+                    </button>
+                  </div>
+                )}
+              </div>
 
               <button
-                onClick={() => setIsPrintHubOpen(true)}
-                className="px-3 py-1.5 hover:bg-[var(--theme-bg-subtle)] text-[var(--theme-text-primary)] text-xs font-semibold rounded-xl transition-all flex items-center gap-2 cursor-pointer group"
-                title="Thermal Label Hub (Barcodes &amp; Shelf Price Tags)"
-              >
-                <div className="w-5 h-5 rounded-md bg-indigo-500/10 text-indigo-500 flex items-center justify-center shrink-0">
-                  <Printer size={13} />
-                </div>
-                <span>Print Hub</span>
-              </button>
-
-              <button
+                type="button"
                 onClick={handleLockScreen}
                 className="px-3 py-1.5 hover:bg-[var(--theme-bg-subtle)] text-[var(--theme-text-primary)] text-xs font-semibold rounded-xl transition-all flex items-center gap-2 cursor-pointer group"
                 title="Lock Terminal Screen"

@@ -57,7 +57,7 @@ export function ProtectedRoute({
       if (isExecutive) return true;
       if (mod === 'pricing') return ['merchandising_manager', 'merchandiser'].includes(normalizedRole);
       if (mod === 'finance') return ['finance_manager', 'accountant', 'treasury_officer', 'tax_compliance_officer', 'credit_control_officer', 'auditor'].includes(normalizedRole);
-      if (mod === 'procurement') return ['procurement_manager', 'supply_chain_manager', 'buyer', 'demand_planner', 'vendor_relations_manager', 'customs_import_specialist', 'inbound_qc_inspector'].includes(normalizedRole);
+      if (mod === 'procurement') return ['procurement_manager', 'supply_chain_manager', 'buyer', 'demand_planner', 'vendor_relations_manager', 'customs_import_specialist'].includes(normalizedRole);
       return false;
     };
 

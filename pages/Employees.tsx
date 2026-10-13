@@ -30,6 +30,7 @@ import AccessReviewTab from '../components/employees/compliance/AccessReviewTab'
 import { salaryRequestsService } from '../services/salary-requests.service';
 import { employeeChangesService } from '../services/employee-changes.service';
 import { payrollRunsService } from '../services/payroll-runs.service';
+import { employeesService } from '../services/employees.service';
 
 // Pagination Shelf Limit (Rule 10: 25-Item Shelf Rule)
 const ITEMS_PER_PAGE = 25;
@@ -90,18 +91,44 @@ export default function Employees() {
       }
    }, [activeSite?.id, effectiveCountry]);
 
+   const scopedSites = React.useMemo(() => {
+      const targetRegion = activeRegionCode || user?.regionCode;
+      if (targetRegion) {
+         return sites.filter(s => s.regionCode === targetRegion || (s as any).region_code === targetRegion);
+      }
+      return sites;
+   }, [sites, activeRegionCode, user?.regionCode]);
+
+   const [pendingRecruits, setPendingRecruits] = useState<Employee[]>(() =>
+      employees.filter(e => e.status === 'Pending Approval')
+   );
+
+   const refreshPendingRecruits = useCallback(async () => {
+      try {
+         const targetSiteIds = scopedSites.map(s => s.id);
+         const recruits = await employeesService.getPendingApproval(effectiveCountry, targetSiteIds);
+         setPendingRecruits(recruits);
+      } catch {
+         setPendingRecruits(employees.filter(e => e.status === 'Pending Approval'));
+      }
+   }, [scopedSites, effectiveCountry, employees]);
+
    useEffect(() => {
       refreshPendingSalary();
       refreshPendingChanges();
       refreshPayrollRun();
-      const handleCreated = () => { refreshPendingSalary(); refreshPendingChanges(); };
-      const handleApproved = () => { refreshPendingSalary(); refreshPendingChanges(); };
-      const handleRejected = () => { refreshPendingSalary(); refreshPendingChanges(); };
+      refreshPendingRecruits();
+      const handleCreated = () => { refreshPendingSalary(); refreshPendingChanges(); refreshPendingRecruits(); };
+      const handleApproved = () => { refreshPendingSalary(); refreshPendingChanges(); refreshPendingRecruits(); };
+      const handleRejected = () => { refreshPendingSalary(); refreshPendingChanges(); refreshPendingRecruits(); };
       const handlePayrollUpdated = () => refreshPayrollRun();
 
       window.addEventListener('salary:request-created', handleCreated);
       window.addEventListener('salary:request-approved', handleApproved);
       window.addEventListener('salary:request-rejected', handleRejected);
+      window.addEventListener('employee:created', handleCreated);
+      window.addEventListener('employee:updated', handleCreated);
+      window.addEventListener('employee:approved', handleApproved);
       window.addEventListener('employee-change:updated', refreshPendingChanges);
       window.addEventListener('payroll:updated', handlePayrollUpdated);
       window.addEventListener('payroll:disbursed', handlePayrollUpdated);
@@ -110,11 +137,26 @@ export default function Employees() {
          window.removeEventListener('salary:request-created', handleCreated);
          window.removeEventListener('salary:request-approved', handleApproved);
          window.removeEventListener('salary:request-rejected', handleRejected);
+         window.removeEventListener('employee:created', handleCreated);
+         window.removeEventListener('employee:updated', handleCreated);
+         window.removeEventListener('employee:approved', handleApproved);
          window.removeEventListener('employee-change:updated', refreshPendingChanges);
          window.removeEventListener('payroll:updated', handlePayrollUpdated);
          window.removeEventListener('payroll:disbursed', handlePayrollUpdated);
       };
-   }, [refreshPendingSalary, refreshPendingChanges, refreshPayrollRun]);
+   }, [refreshPendingSalary, refreshPendingChanges, refreshPayrollRun, refreshPendingRecruits]);
+
+   useEffect(() => {
+      const fromContext = employees.filter(e => e.status === 'Pending Approval');
+      if (fromContext.length > 0) {
+         setPendingRecruits(prev => {
+            const map = new Map<string, Employee>();
+            prev.forEach(p => map.set(p.id, p));
+            fromContext.forEach(p => map.set(p.id, p));
+            return Array.from(map.values()).filter(p => p.status === 'Pending Approval');
+         });
+      }
+   }, [employees]);
 
    const handleCertifyPayrollAsHR = async () => {
       if (!pendingPayrollRun) return;
@@ -131,14 +173,6 @@ export default function Employees() {
          addNotification('alert', err.message || 'Certification failed');
       }
    };
-
-   const scopedSites = React.useMemo(() => {
-      const targetRegion = activeRegionCode || user?.regionCode;
-      if (targetRegion) {
-         return sites.filter(s => s.regionCode === targetRegion || (s as any).region_code === targetRegion);
-      }
-      return sites;
-   }, [sites, activeRegionCode, user?.regionCode]);
 
    // --- HOOKS ---
    const { displayedEmployees, totalCount, totalPages, isLoadingEmployees, canViewAll, restricted, isOnlyManagers } = useEmployeeData({
@@ -158,7 +192,6 @@ export default function Employees() {
    });
    const actions = useEmployeeActions({ user, employees, updateEmployee, deleteEmployee, addNotification, updateUserAvatar });
    const wizard = useEmployeeWizard({ user, employees, sites, activeSite, addEmployee, addNotification });
-   const pendingRecruits = employees.filter(e => e.status === 'Pending Approval');
 
    // --- HANDLERS ---
    const handlePhotoClick = () => {
@@ -413,6 +446,7 @@ export default function Employees() {
                   if (selectedEmployee && emp && selectedEmployee.id === emp.id) {
                      setSelectedEmployee(prev => prev ? { ...prev, status: 'Active' } : null);
                   }
+                  refreshPendingRecruits();
                }
             }} 
             validationProps={{ isOpen: false, onClose: () => {}, onConfirm: () => {}, message: '' }} 

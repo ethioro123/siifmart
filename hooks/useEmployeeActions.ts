@@ -148,8 +148,11 @@ export function useEmployeeActions({
          setEmployeeToApprove(null);
          return;
       }
+      const updatedBadges = Array.isArray(employeeToApprove.badges)
+         ? employeeToApprove.badges.filter(b => b !== 'Pending HR Review').concat('New Hire')
+         : ['New Hire'];
       // Explicit column update without mass-assignment
-      const result = updateEmployee({ ...employeeToApprove, status: 'Active' }, user?.name || 'Admin');
+      const result = updateEmployee({ ...employeeToApprove, status: 'Active', badges: updatedBadges }, user?.name || 'Admin');
       if (result instanceof Promise) await result;
 
       systemLogsService.logHR(
@@ -159,6 +162,11 @@ export function useEmployeeActions({
          'INFO',
          { employeeId: employeeToApprove.id, role: employeeToApprove.role }
       );
+
+      if (typeof window !== 'undefined') {
+         window.dispatchEvent(new CustomEvent('employee:approved', { detail: { employeeId: employeeToApprove.id } }));
+         window.dispatchEvent(new CustomEvent('employee:updated'));
+      }
 
       addNotification('success', `${employeeToApprove.name} is now Active.`);
       setIsApproveModalOpen(false);

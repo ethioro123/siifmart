@@ -360,7 +360,7 @@ export const BulkDistributionModal: React.FC<BulkDistributionModalProps> = ({
                                 ) : (
                                     <>
                                         <option value="">Select Distribution Source</option>
-                                        {sites.map(site => (
+                                        {sites.filter(site => ['Warehouse', 'Distribution Center'].includes(site.type)).map(site => (
                                             <option key={site.id} value={site.id}>{site.name} ({site.type})</option>
                                         ))}
                                     </>

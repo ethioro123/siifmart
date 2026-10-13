@@ -12,6 +12,10 @@ function mapShiftRow(row: any): ShiftRecord {
         site_id: row.site_id,
         cashierId: row.cashier_id,
         cashierName: row.cashier_name || 'Staff Member',
+        counterNumber: row.counter_number || 'Counter 1',
+        counter_number: row.counter_number || 'Counter 1',
+        cashierCode: row.cashier_code,
+        cashier_code: row.cashier_code,
         startTime: row.start_time || row.created_at,
         endTime: row.status === 'Open' ? undefined : (row.end_time || undefined),
         openingFloat: Number(row.opening_float) || 0,
@@ -130,8 +134,10 @@ export const shiftsService = {
             id,
             site_id: rawSiteId,
             shift_number: shift.shiftNumber ? String(shift.shiftNumber) : (shift.shift_number ? String(shift.shift_number) : undefined),
+            counter_number: shift.counterNumber || shift.counter_number || 'Counter 1',
             cashier_id: shift.cashierId ? String(shift.cashierId) : null,
             cashier_name: shift.cashierName || 'Staff Member',
+            cashier_code: shift.cashierCode || shift.cashier_code || null,
             start_time: startTime,
             opening_float: Number(shift.openingFloat) || 0,
             cash_sales: Number(shift.cashSales) || 0,
@@ -176,6 +182,10 @@ export const shiftsService = {
                 siteId: dbShift.site_id || '',
                 cashierId: dbShift.cashier_id || '',
                 cashierName: dbShift.cashier_name || 'Staff Member',
+                cashierCode: dbShift.cashier_code || undefined,
+                cashier_code: dbShift.cashier_code || undefined,
+                counterNumber: dbShift.counter_number,
+                counter_number: dbShift.counter_number,
                 startTime,
                 openingFloat: dbShift.opening_float,
                 cashSales: dbShift.cash_sales,
@@ -210,6 +220,12 @@ export const shiftsService = {
             updated_at: new Date().toISOString()
         };
 
+        if (updates.counterNumber !== undefined || updates.counter_number !== undefined) {
+            dbUpdates.counter_number = updates.counterNumber || updates.counter_number;
+        }
+        if (updates.cashierCode !== undefined || updates.cashier_code !== undefined) {
+            dbUpdates.cashier_code = updates.cashierCode || updates.cashier_code;
+        }
         if (updates.status !== undefined) dbUpdates.status = updates.status;
         if (updates.endTime !== undefined) dbUpdates.end_time = updates.endTime;
         if (updates.cashSales !== undefined) dbUpdates.cash_sales = updates.cashSales;

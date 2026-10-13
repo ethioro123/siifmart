@@ -1,20 +1,46 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { usePOSCommand } from '../POSCommandContext';
 import { useStore } from '../../../contexts/CentralStore';
 import { useData } from '../../../contexts/DataContext';
 import Modal from '../../Modal';
 import { CURRENCY_SYMBOL } from '../../../constants';
 import { audioFeedback } from '../../../utils/audioFeedback';
-import { Store, User, Clock, ShieldCheck, DollarSign, Play } from 'lucide-react';
+import { Store, User, Clock, ShieldCheck, DollarSign, Play, Monitor, CheckCircle2, Lock } from 'lucide-react';
 
 const PRESET_FLOATS = [500, 1000, 2000, 3000, 5000];
 
 export const StartShiftModal: React.FC = () => {
     const { user } = useStore();
-    const { activeSite } = useData();
+    const { activeSite, shifts } = useData();
     const { isStartShiftModalOpen, setIsStartShiftModalOpen, handleStartShift } = usePOSCommand();
     const [openingFloat, setOpeningFloat] = useState<string>('1000');
     const [isSubmitting, setIsSubmitting] = useState(false);
+
+    // Dynamic Counter / Station Options based on site configuration
+    const counterCount = Math.max(1, activeSite?.terminalCount || (activeSite as any)?.terminal_count || 4);
+    const counterList = useMemo(() => {
+        return Array.from({ length: counterCount }, (_, i) => `Counter ${i + 1}`);
+    }, [counterCount]);
+
+    // Active shifts at this site to determine counter occupancy
+    const occupiedCounters = useMemo(() => {
+        const siteShifts = (shifts || []).filter(
+            s => s.status === 'Open' && (!activeSite?.id || s.siteId === activeSite.id || s.site_id === activeSite.id)
+        );
+        const map = new Map<string, { cashierCode?: string; cashierName?: string }>();
+        siteShifts.forEach(s => {
+            const cName = s.counterNumber || s.counter_number || 'Counter 1';
+            map.set(cName, {
+                cashierCode: s.cashierCode || s.cashier_code,
+                cashierName: s.cashierName
+            });
+        });
+        return map;
+    }, [shifts, activeSite?.id]);
+
+    // Default to the first available counter
+    const firstFreeCounter = counterList.find(c => !occupiedCounters.has(c)) || counterList[0];
+    const [selectedCounter, setSelectedCounter] = useState<string>(firstFreeCounter);
 
     const floatNum = parseFloat(openingFloat) || 0;
 
@@ -25,12 +51,14 @@ export const StartShiftModal: React.FC = () => {
         setIsSubmitting(true);
         try {
             audioFeedback.playSaleComplete();
-            await handleStartShift(floatNum);
+            await handleStartShift(floatNum, selectedCounter);
             setIsStartShiftModalOpen(false);
         } finally {
             setIsSubmitting(false);
         }
     };
+
+    const cashierBadge = user?.code || 'EMP-001';
 
     return (
         <Modal
@@ -39,17 +67,22 @@ export const StartShiftModal: React.FC = () => {
             title="Start Daily Shift & Cash Drawer"
             size="md"
         >
-            <form onSubmit={handleSubmit} className="p-4 sm:p-6 space-y-6">
-                {/* Cashier & Station Header */}
+            <form onSubmit={handleSubmit} className="p-4 sm:p-6 space-y-5">
+                {/* Cashier & Sovereign Identity Card */}
                 <div className="p-4 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-2xl space-y-2.5">
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2.5">
-                            <div className="w-9 h-9 rounded-xl bg-[var(--theme-pill-bg)] text-[var(--theme-text-primary)] flex items-center justify-center border border-[var(--theme-border)]">
-                                <User size={18} className="text-blue-500" />
+                            <div className="w-10 h-10 rounded-xl bg-blue-500/10 text-blue-500 flex items-center justify-center border border-blue-500/20 shrink-0">
+                                <User size={18} />
                             </div>
                             <div>
-                                <p className="text-xs font-bold text-[var(--theme-text-primary)] leading-tight">{user?.name || 'Staff Cashier'}</p>
-                                <p className="text-[10px] text-[var(--theme-text-secondary)] font-mono uppercase tracking-wider">{user?.role || 'Cashier'}</p>
+                                <div className="flex items-center gap-2">
+                                    <p className="text-xs font-bold text-[var(--theme-text-primary)] leading-tight">{user?.name || 'Staff Cashier'}</p>
+                                    <span className="px-2 py-0.5 rounded-md bg-blue-500/15 text-blue-600 dark:text-blue-400 font-mono text-[10px] font-black tracking-wider border border-blue-500/20">
+                                        {cashierBadge}
+                                    </span>
+                                </div>
+                                <p className="text-[10px] text-[var(--theme-text-secondary)] font-mono uppercase tracking-wider mt-0.5">{user?.role || 'Cashier'}</p>
                             </div>
                         </div>
 
@@ -64,7 +97,64 @@ export const StartShiftModal: React.FC = () => {
                             <Clock size={12} className="text-teal-500" />
                             <span>Shift starting {new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
                         </div>
-                        <span className="text-[10px] uppercase font-bold text-amber-500">Zero-Trust Audit Logged</span>
+                        <span className="text-[10px] uppercase font-bold text-amber-500">1:1 Cashier Responsibility</span>
+                    </div>
+                </div>
+
+                {/* Counter / Station Selector Grid */}
+                <div className="space-y-2">
+                    <div className="flex justify-between items-baseline">
+                        <label className="text-xs font-bold text-[var(--theme-text-primary)] uppercase tracking-wider flex items-center gap-1.5">
+                            <Monitor size={14} className="text-indigo-500" />
+                            Assign Physical Counter / Register
+                        </label>
+                        <span className="text-[11px] text-[var(--theme-text-secondary)]">Strict mutual exclusion</span>
+                    </div>
+
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                        {counterList.map((counter) => {
+                            const occ = occupiedCounters.get(counter);
+                            const isOccupied = Boolean(occ);
+                            const isSelected = selectedCounter === counter && !isOccupied;
+
+                            return (
+                                <button
+                                    key={counter}
+                                    type="button"
+                                    disabled={isOccupied}
+                                    onClick={() => setSelectedCounter(counter)}
+                                    className={`p-2.5 rounded-xl border text-left transition-all relative flex flex-col justify-between ${
+                                        isOccupied
+                                            ? 'bg-rose-500/5 border-rose-500/20 opacity-60 cursor-not-allowed'
+                                            : isSelected
+                                                ? 'bg-blue-500/10 border-blue-500/50 shadow-xs ring-1 ring-blue-500/30 cursor-pointer'
+                                                : 'bg-[var(--theme-bg-card)] border-[var(--theme-border)] hover:bg-[var(--theme-bg-card-hover)] cursor-pointer'
+                                    }`}
+                                >
+                                    <div className="flex items-center justify-between">
+                                        <span className={`text-xs font-bold ${isSelected ? 'text-blue-500' : 'text-[var(--theme-text-primary)]'}`}>
+                                            {counter}
+                                        </span>
+                                        {isOccupied ? (
+                                            <Lock size={12} className="text-rose-500" />
+                                        ) : isSelected ? (
+                                            <CheckCircle2 size={12} className="text-blue-500" />
+                                        ) : (
+                                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                                        )}
+                                    </div>
+                                    <span className="text-[10px] font-mono mt-1">
+                                        {isOccupied ? (
+                                            <span className="text-rose-500 font-semibold truncate block">
+                                                {occ?.cashierCode || 'Occupied'}
+                                            </span>
+                                        ) : (
+                                            <span className="text-emerald-500 font-semibold">Available</span>
+                                        )}
+                                    </span>
+                                </button>
+                            );
+                        })}
                     </div>
                 </div>
 
@@ -89,7 +179,7 @@ export const StartShiftModal: React.FC = () => {
                             value={openingFloat}
                             onChange={(e) => setOpeningFloat(e.target.value)}
                             placeholder="0.00"
-                            className="w-full pl-16 pr-4 py-3.5 bg-[var(--theme-input-bg)] border border-[var(--theme-border)] rounded-2xl text-xl font-mono font-bold text-[var(--theme-text-primary)] focus:border-[var(--theme-border-focus)] outline-hidden shadow-xs transition-colors"
+                            className="w-full pl-16 pr-4 py-3 bg-[var(--theme-input-bg)] border border-[var(--theme-border)] rounded-2xl text-xl font-mono font-bold text-[var(--theme-text-primary)] focus:border-[var(--theme-border-focus)] outline-hidden shadow-xs transition-colors"
                             autoFocus
                         />
                     </div>
@@ -101,7 +191,7 @@ export const StartShiftModal: React.FC = () => {
                                 key={val}
                                 type="button"
                                 onClick={() => setOpeningFloat(String(val))}
-                                className={`py-2 px-1 text-xs font-mono font-bold rounded-xl border transition-all cursor-pointer ${
+                                className={`py-1.5 px-1 text-xs font-mono font-bold rounded-xl border transition-all cursor-pointer ${
                                     floatNum === val
                                         ? 'bg-[var(--theme-primary)] text-[var(--theme-primary-text)] border-[var(--theme-primary)] shadow-xs'
                                         : 'bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] border-[var(--theme-border)] hover:bg-[var(--theme-bg-card-hover)] hover:text-[var(--theme-text-primary)]'
@@ -114,15 +204,15 @@ export const StartShiftModal: React.FC = () => {
                 </div>
 
                 {/* Audit Notice */}
-                <div className="p-3.5 bg-amber-500/10 border border-amber-500/20 rounded-2xl flex items-start gap-2.5">
+                <div className="p-3 bg-amber-500/10 border border-amber-500/20 rounded-2xl flex items-start gap-2.5">
                     <ShieldCheck size={16} className="text-amber-500 shrink-0 mt-0.5" />
                     <p className="text-[11px] text-amber-500 leading-relaxed font-medium">
-                        Opening float syncs in real-time to Supabase for central HQ reconciliation. End-of-day drawer count will be reconciled against this amount.
+                        Opening float syncs in real-time to Supabase for central HQ reconciliation. End-of-day drawer count on {selectedCounter} will be reconciled against this amount under badge <strong>{cashierBadge}</strong>.
                     </p>
                 </div>
 
                 {/* Actions */}
-                <div className="flex gap-3 pt-2">
+                <div className="flex gap-3 pt-1">
                     <button
                         type="button"
                         onClick={() => setIsStartShiftModalOpen(false)}
@@ -136,7 +226,7 @@ export const StartShiftModal: React.FC = () => {
                         className="flex-2 py-3 bg-[var(--theme-primary)] hover:opacity-90 disabled:opacity-50 text-[var(--theme-primary-text)] text-xs font-semibold uppercase tracking-wider rounded-2xl shadow-xs transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-95"
                     >
                         <Play size={14} className="fill-current" />
-                        <span>{isSubmitting ? 'Starting...' : 'Open Drawer & Start Shift'}</span>
+                        <span>{isSubmitting ? 'Starting...' : `Open ${selectedCounter} & Start Shift`}</span>
                     </button>
                 </div>
             </form>

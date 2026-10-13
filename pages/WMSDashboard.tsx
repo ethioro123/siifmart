@@ -1,10 +1,8 @@
 import React from 'react';
 import {
-  Box, AlertTriangle, Thermometer, UserPlus,
-  Activity, Users2, LayoutGrid, Cpu
+  Box, Activity, Users2, LayoutGrid, Cpu
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { MOCK_ZONES } from '../constants';
 import { useStore } from '../contexts/CentralStore';
 import { useData } from '../contexts/DataContext';
 import { useGamification } from '../contexts/GamificationContext';
@@ -13,10 +11,10 @@ import NewHireHandoverBanner from '../components/employees/NewHireHandoverBanner
 import { isManagerialRole } from '../utils/roles';
 import { native } from '../utils/native';
 import { useDateFilter } from '../hooks/useDateFilter';
-import DateRangeSelector from '../components/DateRangeSelector';
 import { Country, getCountryProfile } from '../utils/localization';
 
 // WMS Dashboard Subcomponents
+import WMSHeaderBar from '../components/wms-dashboard/WMSHeaderBar';
 import WarehouseCommandDeck from '../components/wms-dashboard/WarehouseCommandDeck';
 import OperationalThroughputCard from '../components/wms-dashboard/OperationalThroughputCard';
 import NetworkLoadCard from '../components/wms-dashboard/NetworkLoadCard';
@@ -31,12 +29,33 @@ type ActivePanel = 'flow' | 'storage' | 'team' | 'all';
 export default function WMSDashboard() {
   const navigate = useNavigate();
   const { user, theme } = useStore();
-  const { movements, addNotification, activeSite, employees, settings, effectiveCountry } = useData();
+  const { movements, addNotification, activeSite, sites, employees, settings, effectiveCountry } = useData();
   const { getLeaderboard } = useGamification();
 
   // Sovereign country scoping
   const activeCountry: Country = (activeSite?.country || effectiveCountry || settings?.country || 'ET') as Country;
   const countryProfile = getCountryProfile(activeCountry);
+
+  // Sovereign country warehouse facilities
+  const countryWarehouses = React.useMemo(() => {
+    return sites.filter(s =>
+      (s.country || 'ET').toUpperCase() === activeCountry.toUpperCase() &&
+      (s.type === 'Warehouse' || s.type === 'Distribution Center')
+    );
+  }, [sites, activeCountry]);
+
+  // Selected warehouse state for multi-warehouse HQ inspection
+  const isCurrentSiteWarehouse = activeSite?.type === 'Warehouse' || activeSite?.type === 'Distribution Center';
+  const [selectedWarehouseId, setSelectedWarehouseId] = React.useState<string>('');
+
+  const effectiveWarehouse = React.useMemo(() => {
+    if (isCurrentSiteWarehouse) return activeSite;
+    if (selectedWarehouseId) {
+      const match = countryWarehouses.find(w => w.id === selectedWarehouseId);
+      if (match) return match;
+    }
+    return countryWarehouses[0] || activeSite;
+  }, [isCurrentSiteWarehouse, activeSite, selectedWarehouseId, countryWarehouses]);
 
   // Active Panel State (Apple Segmented Control)
   const [activeTab, setActiveTab] = React.useState<ActivePanel>('flow');
@@ -52,8 +71,6 @@ export default function WMSDashboard() {
 
   // Server metrics state
   const [warehouseMetrics, setWarehouseMetrics] = React.useState<any>(null);
-  const [inventoryMetrics, setInventoryMetrics] = React.useState<any>(null);
-  const [financialMetrics, setFinancialMetrics] = React.useState<any>(null);
   const [refreshing, setRefreshing] = React.useState(false);
   const [isOnboardModalOpen, setIsOnboardModalOpen] = React.useState(false);
   const canOnboard = isManagerialRole(user?.role) && [
@@ -73,35 +90,33 @@ export default function WMSDashboard() {
     return key;
   };
 
+  // Sovereign metrics fetch: scoped strictly to country and effective warehouse
   React.useEffect(() => {
     const fetchMetrics = async () => {
       setRefreshing(true);
       try {
-        const { stockMovementsService, productsService } = await import('../services/supabase.service');
-        const siteId = activeSite?.id;
-
-        const startISO = startDate ? startDate.toISOString() : undefined;
-        const endISO = endDate ? endDate.toISOString() : undefined;
+        const { stockMovementsService } = await import('../services/supabase.service');
+        const targetSiteId = effectiveWarehouse?.id;
         const simplifiedStart = startDate ? startDate.toISOString().split('T')[0] : undefined;
 
-        const [wmRes, imRes, fmRes] = await Promise.allSettled([
-          stockMovementsService.getAnalytics(siteId, simplifiedStart),
-          productsService.getMetrics(siteId),
-          productsService.getFinancialMetrics(siteId, startISO, endISO)
-        ]);
+        const metricsData = await stockMovementsService.getAnalytics(
+          targetSiteId,
+          simplifiedStart,
+          undefined,
+          activeCountry
+        );
 
-        if (wmRes.status === 'fulfilled') setWarehouseMetrics(wmRes.value);
-        if (imRes.status === 'fulfilled') setInventoryMetrics(imRes.value);
-        if (fmRes.status === 'fulfilled') setFinancialMetrics(fmRes.value);
-
+        if (metricsData) {
+          setWarehouseMetrics(metricsData);
+        }
       } catch (e: any) {
-        logger.error('WMSDashboard', "Dashboard metrics fetch failed:", e);
+        logger.error('WMSDashboard', "Warehouse metrics fetch failed:", e);
       } finally {
         setRefreshing(false);
       }
     };
     fetchMetrics();
-  }, [activeSite?.id, dateRange, startDate, endDate]);
+  }, [effectiveWarehouse?.id, activeCountry, dateRange, startDate, endDate]);
 
   const INBOUND_OUTBOUND_DATA = warehouseMetrics?.flow_data || [];
   const FAST_MOVERS = warehouseMetrics?.fast_movers || [];
@@ -112,22 +127,38 @@ export default function WMSDashboard() {
     const hasActivity = completedJobs > 0;
 
     return {
-      totalRevenue: financialMetrics?.total_revenue || inventoryMetrics?.total_revenue || 0,
-      active_alerts: inventoryMetrics?.active_alerts || 0,
-      inboundPOs: inventoryMetrics?.inbound_pos || 0,
+      totalRevenue: 0,
+      active_alerts: warehouseMetrics?.active_alerts || 0,
+      inboundPOs: warehouseMetrics?.inbound_pos || 0,
       pendingPicks: warehouseMetrics?.job_stats?.pending_picks || 0,
       completedJobs: completedJobs,
       criticalPicks: warehouseMetrics?.job_stats?.critical_picks || 0,
       avgCycleTime: hasActivity ? (warehouseMetrics?.job_stats?.avg_cycle_time || '--') : '--',
       pickAccuracy: hasActivity ? (warehouseMetrics?.job_stats?.pick_accuracy || '0%') : 'N/A',
     };
-  }, [warehouseMetrics, inventoryMetrics, financialMetrics]);
+  }, [warehouseMetrics]);
 
-  // Site-Specific Gamification Data
+  // Real cold chain telemetry from actual database zones
+  const coldZone = React.useMemo(() => {
+    return warehouseMetrics?.zone_data?.find((z: any) =>
+      z.type?.toLowerCase() === 'cold' || (z.temperature && z.temperature.trim() !== '')
+    );
+  }, [warehouseMetrics?.zone_data]);
+
+  // Operational throughput completion percentage
+  const networkLoadPercent = React.useMemo(() => {
+    const total = warehouseMetrics?.job_stats?.total || 0;
+    const completed = warehouseMetrics?.job_stats?.completed || 0;
+    if (total === 0) return 100;
+    return Math.min(100, Math.round((completed / total) * 100));
+  }, [warehouseMetrics?.job_stats]);
+
+  // Site-Specific Gamification Data scoped to effective warehouse
   const siteLeaderboard = React.useMemo(() => {
-    if (!activeSite?.id) return [];
-    const siteStaff = employees.filter(emp => emp.siteId === activeSite.id);
-    const pointsData = getLeaderboard(activeSite.id, 'week');
+    const targetSiteId = effectiveWarehouse?.id;
+    if (!targetSiteId) return [];
+    const siteStaff = employees.filter(emp => emp.siteId === targetSiteId);
+    const pointsData = getLeaderboard(targetSiteId, 'week');
 
     const fullList = siteStaff.map(emp => {
       const existingPoints = pointsData.find(wp => wp.employeeId === emp.id);
@@ -155,7 +186,7 @@ export default function WMSDashboard() {
       ...worker,
       rank: idx + 1
     }));
-  }, [employees, getLeaderboard, activeSite?.id]);
+  }, [employees, getLeaderboard, effectiveWarehouse?.id]);
 
   const handleViewAllLogs = () => {
     navigate('/inventory');
@@ -190,59 +221,22 @@ export default function WMSDashboard() {
       <div className="space-y-6">
 
         {/* ===== TOP BAR (Apple Minimalist Operations Header) ===== */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 pb-6 border-b border-[var(--theme-border)]">
-          <div>
-            <div className="flex items-center gap-3 mb-2">
-              <div className="w-10 h-10 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-[#0071E3] dark:text-[#2997FF] rounded-xl flex items-center justify-center shrink-0 shadow-xs">
-                <Box size={20} />
-              </div>
-              <div>
-                <div className="flex items-center gap-2">
-                  <h1 className="text-xl sm:text-2xl font-bold text-[var(--theme-text-primary)] tracking-tight">
-                    Warehouse Operations Center
-                  </h1>
-                  <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-[#0071E3]/10 text-[#0071E3] dark:text-[#2997FF] border border-[#0071E3]/20">
-                    {countryProfile.name} ({activeCountry})
-                  </span>
-                </div>
-                <div className="flex items-center gap-2 text-[var(--theme-text-secondary)] text-xs font-medium mt-1">
-                  <span className={`w-2 h-2 rounded-full ${refreshing ? 'bg-[#FF9500] animate-pulse' : 'bg-[#34C759]'}`} />
-                  <span>{refreshing ? 'Synchronizing Operational Data...' : `Operational Command Node • ${activeSite?.name || 'Central Facility'}`}</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="flex flex-wrap items-center gap-3">
-            <div className="flex items-center gap-2">
-              <div className="px-3 py-1.5 bg-[#FF3B30]/10 border border-[#FF3B30]/20 text-[#FF3B30] dark:text-[#FF453A] text-xs font-medium rounded-xl flex items-center shadow-2xs">
-                <AlertTriangle size={13} className="mr-1.5" />
-                {metrics.active_alerts} Alerts Active
-              </div>
-              <div className="px-3 py-1.5 bg-[#0071E3]/10 border border-[#0071E3]/20 text-[#0071E3] dark:text-[#2997FF] text-xs font-medium rounded-xl flex items-center shadow-2xs">
-                <Thermometer size={13} className="mr-1.5" />
-                Zone C: -4°C
-              </div>
-            </div>
-
-            {canOnboard && (
-              <button
-                type="button"
-                onClick={() => setIsOnboardModalOpen(true)}
-                className="h-9 px-3.5 bg-[#0071E3] dark:bg-[#2997FF] hover:opacity-90 active:scale-95 text-white rounded-xl text-xs font-semibold transition-all flex items-center gap-2 shadow-xs cursor-pointer shrink-0"
-                title="Onboard warehouse pickers, packers, receivers, drivers & operators"
-              >
-                <UserPlus size={14} />
-                <span>Onboard Talent</span>
-              </button>
-            )}
-
-            <DateRangeSelector
-              value={dateRange}
-              onChange={setDateRange}
-            />
-          </div>
-        </div>
+        <WMSHeaderBar
+          countryProfile={countryProfile}
+          activeCountry={activeCountry}
+          refreshing={refreshing}
+          isCurrentSiteWarehouse={isCurrentSiteWarehouse}
+          effectiveWarehouse={effectiveWarehouse}
+          countryWarehouses={countryWarehouses}
+          onSelectWarehouse={setSelectedWarehouseId}
+          activeAlerts={metrics.active_alerts}
+          coldZone={coldZone}
+          totalZonesCount={warehouseMetrics?.zone_data?.length || 0}
+          canOnboard={canOnboard}
+          onOpenOnboardModal={() => setIsOnboardModalOpen(true)}
+          dateRange={dateRange}
+          onDateRangeChange={setDateRange}
+        />
 
         {/* ===== NEW RECRUIT HANDOVER BANNER ===== */}
         <NewHireHandoverBanner />
@@ -281,7 +275,7 @@ export default function WMSDashboard() {
           <div className="flex items-center gap-2 text-[11px] text-[var(--theme-text-secondary)] font-mono">
             <span className="w-2 h-2 rounded-full bg-[#34C759] dark:bg-[#30D158] animate-pulse" />
             <span>WMS Core Synced</span>
-            {activeSite?.code && <span>• [{activeSite.code}]</span>}
+            {effectiveWarehouse?.code && <span>• [{effectiveWarehouse.code}]</span>}
           </div>
         </div>
 
@@ -301,7 +295,10 @@ export default function WMSDashboard() {
                 t={t}
               />
               <div className="lg:col-span-1">
-                <NetworkLoadCard onQuickAction={handleQuickAction} />
+                <NetworkLoadCard
+                  onQuickAction={handleQuickAction}
+                  loadPercent={networkLoadPercent}
+                />
               </div>
             </div>
 
@@ -317,7 +314,6 @@ export default function WMSDashboard() {
               <div className="lg:col-span-1 hidden lg:block">
                 <ZoneOccupancyCard
                   warehouseMetrics={warehouseMetrics}
-                  mockZones={MOCK_ZONES}
                   fastMovers={FAST_MOVERS}
                   t={t}
                 />
@@ -333,7 +329,6 @@ export default function WMSDashboard() {
               <div className="lg:col-span-1">
                 <ZoneOccupancyCard
                   warehouseMetrics={warehouseMetrics}
-                  mockZones={MOCK_ZONES}
                   fastMovers={FAST_MOVERS}
                   t={t}
                 />
@@ -358,7 +353,7 @@ export default function WMSDashboard() {
             canOnboard={canOnboard}
             onOpenOnboardModal={() => setIsOnboardModalOpen(true)}
             siteLeaderboard={siteLeaderboard}
-            activeSite={activeSite}
+            activeSite={effectiveWarehouse}
             t={t}
           />
         )}
@@ -384,7 +379,6 @@ export default function WMSDashboard() {
                 />
                 <ZoneOccupancyCard
                   warehouseMetrics={warehouseMetrics}
-                  mockZones={MOCK_ZONES}
                   fastMovers={FAST_MOVERS}
                   t={t}
                 />
@@ -412,7 +406,7 @@ export default function WMSDashboard() {
                 canOnboard={canOnboard}
                 onOpenOnboardModal={() => setIsOnboardModalOpen(true)}
                 siteLeaderboard={siteLeaderboard}
-                activeSite={activeSite}
+                activeSite={effectiveWarehouse}
                 t={t}
               />
             </div>
@@ -429,7 +423,10 @@ export default function WMSDashboard() {
                   handleViewAllLogs={handleViewAllLogs}
                 />
                 <div className="lg:col-span-1">
-                  <NetworkLoadCard onQuickAction={handleQuickAction} />
+                  <NetworkLoadCard
+                    onQuickAction={handleQuickAction}
+                    loadPercent={networkLoadPercent}
+                  />
                 </div>
               </div>
             </div>

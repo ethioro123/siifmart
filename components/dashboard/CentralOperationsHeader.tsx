@@ -1,7 +1,7 @@
 import React from 'react';
 import {
     Activity, LayoutDashboard, DollarSign, Box,
-    Network, Server, Eye, Building2, Store, Warehouse, Users
+    Network, Server, Eye, Building2, Store, Warehouse, Users, Layers
 } from 'lucide-react';
 import { Country, getCountryProfile } from '../../utils/localization';
 import { DateRangeOption } from '../../hooks/useDateFilter';
@@ -39,6 +39,7 @@ export const CentralOperationsHeader: React.FC<CentralOperationsHeaderProps> = (
     const navTabs: { id: CentralOpsViewMode; label: string; icon: React.ComponentType<{ size?: number; className?: string }> }[] = [
         { id: 'executive', label: 'Executive Deck', icon: LayoutDashboard },
         { id: 'regional', label: 'Regional Command', icon: Building2 },
+        { id: 'catalog', label: 'Catalog Governance', icon: Layers },
         { id: 'team', label: 'Central Ops Team', icon: Users },
         { id: 'financial', label: 'Financials', icon: DollarSign },
         { id: 'inventory', label: 'Logistics & Supply', icon: Box },

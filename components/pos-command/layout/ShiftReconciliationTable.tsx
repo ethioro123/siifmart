@@ -33,6 +33,8 @@ export const ShiftReconciliationTable: React.FC = () => {
         const matchesStatus = filterStatus === 'All' || s.status === filterStatus;
         const matchesSearch = !searchTerm.trim() ||
             (s.cashierName && s.cashierName.toLowerCase().includes(searchTerm.toLowerCase())) ||
+            (s.cashierCode && s.cashierCode.toLowerCase().includes(searchTerm.toLowerCase())) ||
+            (s.counterNumber && s.counterNumber.toLowerCase().includes(searchTerm.toLowerCase())) ||
             s.id.toLowerCase().includes(searchTerm.toLowerCase());
         return matchesStatus && matchesSearch;
     });
@@ -131,7 +133,7 @@ export const ShiftReconciliationTable: React.FC = () => {
                     <thead>
                         <tr className="border-b border-[var(--theme-border)] text-[10px] uppercase font-semibold tracking-wider text-[var(--theme-text-secondary)] bg-[var(--theme-bg-subtle)]/70">
                             <th className="py-3.5 px-4">Status</th>
-                            <th className="py-3.5 px-4">Cashier</th>
+                            <th className="py-3.5 px-4">Cashier &amp; Counter</th>
                             <th className="py-3.5 px-4">Start Time</th>
                             <th className="py-3.5 px-4 text-right">Float</th>
                             <th className="py-3.5 px-4 text-right">Cash Sales</th>
@@ -174,9 +176,17 @@ export const ShiftReconciliationTable: React.FC = () => {
                                             )}
                                         </td>
 
-                                        {/* Cashier */}
-                                        <td className="py-3 px-4 font-sans font-semibold text-[var(--theme-text-primary)]">
-                                            {shift.cashierName}
+                                        {/* Cashier & Counter */}
+                                        <td className="py-3 px-4 font-sans">
+                                            <div className="flex items-center gap-2">
+                                                <span className="font-mono text-[10px] font-bold px-1.5 py-0.5 rounded-md bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20 shrink-0">
+                                                    {shift.cashierCode || shift.cashier_code || 'STAFF'}
+                                                </span>
+                                                <span className="font-semibold text-[var(--theme-text-primary)] truncate max-w-[140px]">{shift.cashierName}</span>
+                                            </div>
+                                            <div className="text-[10px] text-[var(--theme-text-secondary)] font-mono mt-0.5 font-medium">
+                                                {shift.counterNumber || shift.counter_number || 'Counter 1'}
+                                            </div>
                                         </td>
 
                                         {/* Start Time */}

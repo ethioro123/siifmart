@@ -5,9 +5,11 @@ import { autoSelectSiteForRole, getRecommendedDepartment, validateRoleSiteAssign
 import { SYSTEM_ROLES, canEmployRole, getRoleHierarchy } from '../utils/roles';
 import { logger } from '../utils/logger';
 import { employeesService } from '../services/employees.service';
-import { saveEmployeeDocument } from '../utils/employeeProfileData';
 import { formatEmployeeCode, parseEmployeeCode, normalizeCountryCode, generateEmployeeEmail } from '../utils/employeeIdGenerator';
 import { getSiteCountryId } from '../utils/siteIdGenerator';
+import { isDirectOnboardingAuthorized, persistCandidateDocuments } from '../utils/employeeOnboardingGovernance';
+import { saveEmployeeDraft } from '../utils/employeeDrafts';
+import { systemLogsService } from '../services/system-logs.service';
 
 export interface NewEmployeeFormData {
    firstName: string;
@@ -40,7 +42,7 @@ interface UseEmployeeWizardProps {
    addNotification: (type: 'success' | 'alert' | 'info', message: string) => void;
 }
 
-const DEPARTMENTS = ['Retail Operations', 'Logistics & Warehouse', 'Management', 'Human Resources', 'Security', 'Transport', 'Procurement'];
+const DEPARTMENTS = ['Retail Operations', 'Logistics & Warehouse', 'Finance', 'Management', 'Human Resources', 'Security', 'Transport', 'Procurement'];
 
 export function useEmployeeWizard({
    user,
@@ -54,7 +56,7 @@ export function useEmployeeWizard({
    const [isSubmitting, setIsSubmitting] = useState(false);
    const [isAddModalOpen, setIsAddModalOpen] = useState(false);
    
-   const [newEmpData, setNewEmpData] = useState({
+   const [newEmpData, setNewEmpData] = useState<NewEmployeeFormData>({
       firstName: '', lastName: '', email: '', phone: '', password: '',
       role: 'pos' as UserRole,
       department: 'Retail Operations',
@@ -63,10 +65,10 @@ export function useEmployeeWizard({
       avatar: '',
       siteId: activeSite?.id,
       nationalIdNumber: '',
-      nationalIdPhoto: null as string | null,
-      nationalIdInfo: null as any,
-      resume: null as any,
-      certificates: [] as any[]
+      nationalIdPhoto: null,
+      nationalIdInfo: null,
+      resume: null,
+      certificates: []
    });
 
    const getCreatableRoles = (): UserRole[] => {
@@ -78,12 +80,10 @@ export function useEmployeeWizard({
       const userLevel = SYSTEM_ROLES.find(r => r.id === user.role)?.level || 4;
       const userHierarchy = getRoleHierarchy(user.role);
 
-      // HR and above (Level 2 & above, hierarchy >= 82): strictly roles below their level and rank
       if (userLevel <= 2 || userHierarchy >= 82) {
          return SYSTEM_ROLES.filter(r => canEmployRole(user.role, r.id)).map(r => r.id);
       }
 
-      // Site Managers: strictly roles below their level and rank within their facility domain
       if (user.role === 'store_manager') {
          const storePool: UserRole[] = ['assistant_manager', 'shift_lead', 'cashier', 'sales_associate', 'stock_clerk', 'customer_service', 'pos', 'cs_manager', 'store_supervisor', 'merchandiser'];
          return storePool.filter(roleId => canEmployRole(user.role, roleId));
@@ -145,10 +145,6 @@ export function useEmployeeWizard({
       const validDepts = getAvailableDepartments();
       const initialRole = validRoles.length > 0 ? validRoles[0] : 'pos';
 
-      // Determine initial site location:
-      // 1. User activeSite if present in sites list
-      // 2. Auto-selected site matching initialRole
-      // 3. First available site in sites
       let initialSiteId = '';
       if (activeSite?.id && sites.some(s => s.id === activeSite.id)) {
          initialSiteId = activeSite.id;
@@ -242,10 +238,9 @@ export function useEmployeeWizard({
    const handleFinalSubmit = async () => {
       setIsSubmitting(true);
 
-      // Validate work location is mandatory
-      if (!newEmpData.siteId || !newEmpData.siteId.trim()) {
+      if (!newEmpData.firstName.trim() || !newEmpData.lastName.trim()) {
          setIsSubmitting(false);
-         const errorMsg = 'Work location is mandatory. Every employee must have a location they are getting employed to.';
+         const errorMsg = 'First and Last name are strictly required.';
          addNotification('alert', errorMsg);
          return errorMsg;
       }
@@ -258,7 +253,6 @@ export function useEmployeeWizard({
          return errorMsg;
       }
 
-      // Validate user is authorized to hire this specific role
       const creatableRoles = getCreatableRoles();
       if (!creatableRoles.includes(newEmpData.role)) {
          setIsSubmitting(false);
@@ -268,7 +262,6 @@ export function useEmployeeWizard({
          return errorMsg;
       }
 
-      // Validate role-site assignment
       const validationError = validateRoleSiteAssignment(newEmpData.role, selectedSite.type);
       if (validationError) {
          setIsSubmitting(false);
@@ -282,7 +275,7 @@ export function useEmployeeWizard({
    };
 
    const submitEmployeeData = async () => {
-      const isAutoApproved = ['super_admin', 'admin', 'hr'].includes(user?.role || '');
+      const isAutoApproved = isDirectOnboardingAuthorized(user?.role);
       const initialStatus = isAutoApproved ? 'Active' : 'Pending Approval';
 
       try {
@@ -296,14 +289,12 @@ export function useEmployeeWizard({
          const assignedSite = sites.find(s => s.id === validatedSiteId);
          const targetCountry = normalizeCountryCode(getSiteCountryId(assignedSite) || activeSite?.country || 'ET');
 
-         let maxCodeNumber = targetCountry === 'ET' ? 39 : 0; // ET baseline 39, other countries start from 0
+         let maxCodeNumber = targetCountry === 'ET' ? 39 : 0;
          if (Array.isArray(employees)) {
             employees.forEach(emp => {
                const parsed = parseEmployeeCode(emp.code);
-               if (parsed && parsed.country === targetCountry) {
-                  if (parsed.seq > maxCodeNumber) {
-                     maxCodeNumber = parsed.seq;
-                  }
+               if (parsed && parsed.country === targetCountry && parsed.seq > maxCodeNumber) {
+                  maxCodeNumber = parsed.seq;
                }
             });
          }
@@ -324,62 +315,62 @@ export function useEmployeeWizard({
             employeeCode = formatEmployeeCode(targetCountry, nextCodeNumber);
          }
 
-         const adminClient = createClient(
-            import.meta.env.VITE_SUPABASE_URL,
-            import.meta.env.VITE_SUPABASE_ANON_KEY,
-            {
-               auth: {
-                  autoRefreshToken: false,
-                  persistSession: false,
-                  detectSessionInUrl: false,
-                  storage: {
-                     getItem: () => null,
-                     setItem: () => {},
-                     removeItem: () => {}
-                  },
-                  storageKey: 'siifmart-onboarding-temp'
-               }
-            }
-         );
-
-         // Email is always auto-generated from employee code
          let signupEmail = generateEmployeeEmail(employeeCode);
+         let employeeId: string = crypto.randomUUID();
 
-         const buildPayload = () => ({
-            email: signupEmail,
-            password: newEmpData.password,
-            options: {
-               data: {
-                  name: `${newEmpData.firstName} ${newEmpData.lastName}`,
-                  role: newEmpData.role,
-                  siteId: validatedSiteId
+         // Only direct authorized executives/HR register live Auth accounts immediately.
+         // Facility/Site Managers (Warehouse Managers, Store Managers, Online Store Managers)
+         // draft candidate proposals for 4-Eyes HR authorization without calling auth.signUp.
+         if (isAutoApproved) {
+            try {
+               const adminClient = createClient(
+                  import.meta.env.VITE_SUPABASE_URL,
+                  import.meta.env.VITE_SUPABASE_ANON_KEY,
+                  {
+                     auth: {
+                        autoRefreshToken: false,
+                        persistSession: false,
+                        detectSessionInUrl: false,
+                        storage: { getItem: () => null, setItem: () => {}, removeItem: () => {} },
+                        storageKey: 'siifmart-onboarding-temp'
+                     }
+                  }
+               );
+
+               const buildPayload = () => ({
+                  email: signupEmail,
+                  password: newEmpData.password,
+                  options: {
+                     data: {
+                        name: `${newEmpData.firstName} ${newEmpData.lastName}`,
+                        role: newEmpData.role,
+                        siteId: validatedSiteId
+                     }
+                  }
+               });
+
+               const { data: firstAttempt, error: firstError } = await adminClient.auth.signUp(buildPayload());
+               if (!firstError && firstAttempt?.user) {
+                  employeeId = firstAttempt.user.id;
+               } else if (firstError) {
+                  const errStr = (firstError.message || '').toLowerCase();
+                  if (errStr.includes('already registered') || errStr.includes('already exist') || (firstError as any).status === 422) {
+                     const ts = Date.now().toString(36);
+                     signupEmail = `${employeeCode.toLowerCase()}-${ts}@siifmart.com`;
+                     const { data: retryData, error: retryError } = await adminClient.auth.signUp(buildPayload());
+                     if (!retryError && retryData?.user) {
+                        employeeId = retryData.user.id;
+                     } else {
+                        logger.warn('useEmployeeWizard', 'Auth signUp fallback to personnel record UUID', { error: retryError || firstError });
+                     }
+                  } else {
+                     logger.warn('useEmployeeWizard', 'Auth signUp fallback to personnel record UUID', { error: firstError });
+                  }
                }
+            } catch (authErr) {
+               logger.warn('useEmployeeWizard', 'Auth signUp network exception, fallback to personnel UUID', { error: authErr });
             }
-         });
-
-         let authData: any = null;
-         const { data: firstAttempt, error: firstError } = await adminClient.auth.signUp(buildPayload());
-
-         if (firstError) {
-            const errStr = (firstError.message || '').toLowerCase();
-            if (errStr.includes('already registered') || errStr.includes('already exist') || (firstError as any).status === 422) {
-               // Ghost auth record or existing email — retry with a unique timestamp suffix
-               const ts = Date.now().toString(36);
-               signupEmail = `${employeeCode.toLowerCase()}-${ts}@siifmart.com`;
-               const { data: retryData, error: retryError } = await adminClient.auth.signUp(buildPayload());
-               if (retryError) throw retryError;
-               if (!retryData.user) throw new Error('Failed to create user account on retry');
-               authData = retryData;
-            } else {
-               throw firstError;
-            }
-         } else {
-            authData = firstAttempt;
          }
-
-         if (!authData?.user) throw new Error('Failed to create user account');
-
-         const employeeId = authData.user.id;
 
          const newEmp: Employee = {
             id: employeeId,
@@ -399,7 +390,7 @@ export function useEmployeeWizard({
             specialization: newEmpData.specialization || 'Generalist',
             salary: parseFloat(newEmpData.salary) || 0,
             attendanceRate: 100,
-            badges: ['New Recruit'],
+            badges: isAutoApproved ? ['New Recruit'] : ['Pending HR Review'],
             address: newEmpData.address,
             emergencyContact: newEmpData.emergencyContact,
             nationalIdNumber: newEmpData.nationalIdNumber || undefined,
@@ -410,50 +401,67 @@ export function useEmployeeWizard({
          const result = addEmployee(newEmp);
          if (result instanceof Promise) await result;
 
-         // Persist onboarding documents to verified personnel records
-         if (newEmpData.nationalIdPhoto) {
-            saveEmployeeDocument(employeeId, {
-               name: 'National_ID_Card.jpg',
-               size: newEmpData.nationalIdInfo?.compressedSize || '180 KB',
-               type: 'jpg',
-               dataUrl: newEmpData.nationalIdPhoto
-            });
+         if (typeof window !== 'undefined') {
+            window.dispatchEvent(new CustomEvent('employee:created', { detail: { employee: newEmp } }));
+            window.dispatchEvent(new CustomEvent('employee:updated'));
          }
-         if (newEmpData.resume?.dataUrl) {
-            saveEmployeeDocument(employeeId, {
-               name: newEmpData.resume.name,
-               size: newEmpData.resume.size,
-               type: newEmpData.resume.type,
-               dataUrl: newEmpData.resume.dataUrl
-            });
-         }
-         if (Array.isArray(newEmpData.certificates)) {
-            newEmpData.certificates.forEach((cert: any) => {
-               saveEmployeeDocument(employeeId, {
-                  name: cert.name,
-                  size: cert.size,
-                  type: cert.type,
-                  dataUrl: cert.dataUrl
-               });
-            });
-         }
+
+         // Persist onboarding documents
+         persistCandidateDocuments(employeeId, newEmpData);
+
+         // Zero-Trust audit log under Rule 5
+         await systemLogsService.create({
+            action: isAutoApproved ? 'EMPLOYEE_ONBOARDED' : 'CANDIDATE_DRAFT_SUBMITTED_TO_HR',
+            module: 'HR',
+            site_id: validatedSiteId,
+            country_code: targetCountry,
+            user_name: user?.name || 'Unknown',
+            employee_id: user?.id,
+            details: {
+               candidateName: `${newEmpData.firstName} ${newEmpData.lastName}`,
+               role: newEmpData.role,
+               siteId: validatedSiteId,
+               status: initialStatus,
+               submittedByRole: user?.role
+            }
+         }).catch(err => {
+            logger.warn('useEmployeeWizard', 'Failed to record audit log', { error: err });
+         });
 
          resetWizard();
-         addNotification('success', `Employee Profile Created!\n\n${newEmpData.firstName} has been onboarded successfully.`);
+
+         if (isAutoApproved) {
+            addNotification('success', `Employee Profile Created!\n\n${newEmpData.firstName} has been onboarded successfully.`);
+         } else {
+            addNotification('success', `Candidate Proposal Submitted to HR!\n\n${newEmpData.firstName} ${newEmpData.lastName} has been drafted and submitted to HR for approval.`);
+         }
          return null;
       } catch (error: any) {
-         logger.error('useEmployeeWizard', 'Failed to create employee:', error);
-         addNotification('alert', `Failed to onboard employee: ${error.message || 'Unknown error'}`);
+         logger.error('useEmployeeWizard', 'Failed to submit candidate:', error);
+         addNotification('alert', `Failed to process candidate: ${error.message || 'Unknown error'}`);
          return error.message || 'Unknown error';
       }
-    };
+   };
 
-    const canAdjustPayroll = ['super_admin', 'hr_manager', 'hr', 'admin'].includes(user?.role || '');
+   const handleSaveDraft = () => {
+      if (!newEmpData.firstName.trim() && !newEmpData.role) {
+         addNotification('alert', 'Please enter at least candidate name or role before saving a draft.');
+         return;
+      }
+      const assignedSite = sites.find(s => s.id === newEmpData.siteId);
+      const targetCountry = normalizeCountryCode(getSiteCountryId(assignedSite) || activeSite?.country || 'ET');
+      const draft = saveEmployeeDraft(newEmpData, addStep, undefined, targetCountry, assignedSite?.name);
+      addNotification('success', `Draft saved: "${draft.title}" at Step ${addStep}. You can resume anytime.`);
+   };
 
-    return {
-       addStep, setAddStep, isSubmitting, setIsSubmitting, isAddModalOpen, setIsAddModalOpen,
-       newEmpData, setNewEmpData, availableRoles, availableDepartments,
-       resetWizard, handleOpenWizard, handleRoleChange, handleFinalSubmit,
-       getCreatableRoles, handleWizardNext, handleWizardBack, canAdjustPayroll
-    };
+   const canAdjustPayroll = ['super_admin', 'hr_manager', 'hr', 'admin'].includes(user?.role || '');
+
+   return {
+      addStep, setAddStep, isSubmitting, setIsSubmitting, isAddModalOpen, setIsAddModalOpen,
+      newEmpData, setNewEmpData, availableRoles, availableDepartments,
+      resetWizard, handleOpenWizard, handleRoleChange, handleFinalSubmit,
+      getCreatableRoles, handleWizardNext, handleWizardBack, canAdjustPayroll,
+      handleSaveDraft,
+      isDirectOnboarding: isDirectOnboardingAuthorized(user?.role)
+   };
 }

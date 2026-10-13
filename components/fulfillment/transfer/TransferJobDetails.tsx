@@ -1,12 +1,14 @@
 import React, { useState } from 'react';
-import { X, Package, Box, CheckCircle, XCircle, Trash2, Truck, Clock, ArrowRight, Loader2, AlertTriangle } from 'lucide-react';
+import { X, Package, CheckCircle, XCircle, Trash2, Truck, Clock, ArrowRight, Loader2 } from 'lucide-react';
 import { WMSJob, Product, User, Site, ReceivingItem } from '../../../types';
 import { formatJobId } from '../../../utils/jobIdFormatter';
-import { getSellUnit, getEffectivePackageSize } from '../../../utils/units';
 import { supabase } from '../../../lib/supabase';
 import { productsService } from '../../../services/products.service';
+import { systemLogsService } from '../../../services/system-logs.service';
 import { useLanguage } from '../../../contexts/LanguageContext';
 import { logger } from '../../../utils/logger';
+import { canDeleteTransferManifest, isTransferManager } from '../../../utils/transferGovernance';
+import { TransferLineItemRow } from './TransferLineItemRow';
 
 interface TransferJobDetailsProps {
     selectedJob: WMSJob | null;
@@ -25,8 +27,6 @@ interface TransferJobDetailsProps {
     setTransferReceiveItems: (items: ReceivingItem[]) => void;
     onResolveDiscrepancy?: (job: WMSJob, item: any, index: number) => void;
 }
-
-const MANAGER_ROLES = ['super_admin', 'warehouse_manager'];
 
 export const TransferJobDetails: React.FC<TransferJobDetailsProps> = ({
     selectedJob,
@@ -49,8 +49,9 @@ export const TransferJobDetails: React.FC<TransferJobDetailsProps> = ({
 
     if (!selectedJob || !isDetailsOpen || ['PICK', 'PACK', 'DISPATCH'].includes(selectedJob.type)) return null;
 
-    const isManager = MANAGER_ROLES.includes(user?.role || '');
-    const transferStatus = selectedJob.transferStatus || 'Requested';
+    const isManager = isTransferManager(user);
+    const transferStatus = selectedJob.transferStatus || selectedJob.status || 'Requested';
+    const deletionPerm = canDeleteTransferManifest(selectedJob, user);
 
     const handleApprove = async () => {
         setLoading('approve');
@@ -104,6 +105,13 @@ export const TransferJobDetails: React.FC<TransferJobDetailsProps> = ({
         if (!window.confirm('Delete this transfer manifest?')) return;
         setLoading('delete');
         try {
+            const perm = canDeleteTransferManifest(selectedJob, user);
+            if (!perm.canDelete) {
+                addNotification('alert', perm.reason || 'Manifest cannot be deleted.');
+                setLoading(null);
+                return;
+            }
+
             const { data: childPickJobs, error: checkError } = await supabase
                 .from('wms_jobs')
                 .select('status')
@@ -114,9 +122,11 @@ export const TransferJobDetails: React.FC<TransferJobDetailsProps> = ({
                 logger.error('TransferJobDetails', 'Failed to check child pick jobs:', checkError);
             }
 
-            const isPickCompleted = childPickJobs?.some((j: any) => j.status === 'Completed');
-            if (isPickCompleted) {
-                addNotification('alert', 'Cannot delete manifest: picking has already been completed.');
+            const isPickActiveOrDone = childPickJobs?.some((j: any) =>
+                ['Completed', 'Picking', 'In-Progress'].includes(j.status)
+            );
+            if (isPickActiveOrDone) {
+                addNotification('alert', 'Cannot delete manifest: picking is already in progress or completed.');
                 setLoading(null);
                 return;
             }
@@ -130,7 +140,35 @@ export const TransferJobDetails: React.FC<TransferJobDetailsProps> = ({
                 logger.error('TransferJobDetails', 'Failed to delete child jobs:', deleteChildrenError);
             }
 
+            // Clean up mirrored transfer row if present
+            await supabase
+                .from('transfers')
+                .delete()
+                .or(`id.eq.${selectedJob.id},order_ref.eq.${selectedJob.id},order_ref.eq.${selectedJob.jobNumber}`);
+
             await wmsJobsService.delete(selectedJob.id);
+
+            // Audit log high-risk deletion under Zero-Trust Rule 5
+            await systemLogsService.create({
+                action: 'TRANSFER_MANIFEST_DELETED',
+                module: 'Fulfillment',
+                site_id: selectedJob.sourceSiteId || selectedJob.siteId || activeSite?.id,
+                country_code: (selectedJob as any).country_code || (selectedJob as any).countryCode || activeSite?.country || 'ET',
+                user_name: user?.name || 'Unknown',
+                employee_id: user?.id,
+                details: {
+                    manifestId: selectedJob.id,
+                    jobNumber: selectedJob.jobNumber,
+                    transferStatus: selectedJob.transferStatus,
+                    requestedBy: selectedJob.requestedBy,
+                    sourceSiteId: selectedJob.sourceSiteId,
+                    destSiteId: selectedJob.destSiteId,
+                    itemsCount: resolvedLineItems.length
+                }
+            }).catch(err => {
+                logger.error('TransferJobDetails', 'Failed to record audit log:', err);
+            });
+
             addNotification('success', 'Manifest deleted successfully');
 
             const lineItems = selectedJob.lineItems || (selectedJob as any).line_items || [];
@@ -262,77 +300,16 @@ export const TransferJobDetails: React.FC<TransferJobDetailsProps> = ({
                     <div className="space-y-2">
                         {resolvedLineItems.map((item: any, idx: number) => {
                             const product = products.find(p => p.id === item.productId || p.sku === item.sku);
-                            const itemQty = item.expectedQty || item.quantity || item.pickedQty || 0;
-                            const itemSku = item.sku || product?.sku || 'N/A';
-                            const itemUnit = getSellUnit(item.unit || product?.unit);
-                            const sizeNum = getEffectivePackageSize(item.unit || product?.unit, product?.size || item.size);
-                            const isWeightVol = (itemUnit.category === 'weight' || itemUnit.category === 'volume') && sizeNum > 0;
-                            const expectedMeasure = isWeightVol ? (item.requestedMeasureQty !== undefined ? item.requestedMeasureQty : (itemQty * sizeNum)) : itemQty;
-                            const showReceived = item.receivedQty !== undefined && ['Received', 'Delivered', 'Completed'].some(s => s === selectedJob.transferStatus || s === selectedJob.status);
-                            const hasDiscrepancy = showReceived && item.receivedQty !== expectedMeasure;
-                            const isDone = showReceived && !hasDiscrepancy;
-
                             return (
-                                <div
+                                <TransferLineItemRow
                                     key={idx}
-                                    className={`bg-[var(--theme-bg-card)] border ${isDone ? 'border-green-500/30' : 'border-[var(--theme-border)]'} rounded-xl px-4 py-3 flex items-center justify-between gap-3 shadow-sm`}
-                                >
-                                    <div className="flex items-center gap-3 min-w-0">
-                                        <div className="relative w-10 h-10 rounded-lg bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] flex items-center justify-center overflow-hidden shrink-0">
-                                            {product?.image ? (
-                                                <img src={product.image} alt="" className="w-full h-full object-cover" />
-                                            ) : (
-                                                <Box size={18} className="text-[var(--theme-text-secondary)]/50" />
-                                            )}
-                                            {isDone && (
-                                                <div className="absolute inset-0 bg-green-500/20 flex items-center justify-center">
-                                                    <CheckCircle size={16} className="text-green-600 dark:text-green-400" />
-                                                </div>
-                                            )}
-                                            {hasDiscrepancy && (
-                                                <div className="absolute inset-0 bg-red-500/20 flex items-center justify-center">
-                                                    <XCircle size={16} className="text-red-600 dark:text-red-400" />
-                                                </div>
-                                            )}
-                                        </div>
-                                        <div className="min-w-0">
-                                            <h4 className="text-[var(--theme-text-primary)] font-semibold tracking-tight truncate uppercase text-xs leading-snug">
-                                                {item.name || item.productName || product?.name || 'Unknown'}
-                                            </h4>
-                                            <span className="text-[11px] font-mono tabular-nums text-[var(--theme-text-secondary)] bg-[var(--theme-bg-subtle)] px-1.5 py-0.5 rounded border border-[var(--theme-border)] uppercase">
-                                                {itemSku}
-                                            </span>
-                                        </div>
-                                    </div>
-
-                                    <div className="flex items-center gap-4 sm:gap-6 shrink-0">
-                                        <div className="text-right">
-                                            <span className="text-[11px] text-[var(--theme-text-secondary)] font-medium uppercase tracking-wider block">
-                                                {t('warehouse.expected')}
-                                            </span>
-                                            <QtyDisplay qty={itemQty} size={product?.size || item.size} unit={itemUnit} t={t} />
-                                        </div>
-
-                                        {showReceived && (
-                                            <div className="text-right">
-                                                <span className={`text-[11px] font-medium uppercase tracking-wider block ${hasDiscrepancy ? 'text-red-500' : 'text-green-600 dark:text-green-400'}`}>
-                                                    {t('warehouse.received')}
-                                                </span>
-                                                <QtyDisplay qty={item.receivedQty} size={product?.size || item.size} unit={itemUnit} color={hasDiscrepancy ? 'red' : 'green'} t={t} />
-                                            </div>
-                                        )}
-
-                                        {hasDiscrepancy && onResolveDiscrepancy && (
-                                            <button
-                                                onClick={(e) => { e.stopPropagation(); onResolveDiscrepancy(selectedJob, item, idx); }}
-                                                className="px-2.5 py-1.5 bg-red-500/10 hover:bg-red-500 text-red-500 hover:text-white border border-red-500/20 text-[11px] uppercase font-semibold tracking-wider rounded-lg transition-colors flex items-center gap-1 min-h-[36px]"
-                                            >
-                                                <AlertTriangle size={12} />
-                                                <span>Resolve</span>
-                                            </button>
-                                        )}
-                                    </div>
-                                </div>
+                                    item={item}
+                                    idx={idx}
+                                    product={product}
+                                    selectedJob={selectedJob}
+                                    onResolveDiscrepancy={onResolveDiscrepancy}
+                                    t={t}
+                                />
                             );
                         })}
                     </div>
@@ -360,7 +337,7 @@ export const TransferJobDetails: React.FC<TransferJobDetailsProps> = ({
                     </div>
 
                     <div className="flex items-center gap-2 ml-auto">
-                        {['Requested', 'Draft'].includes(transferStatus) && isManager && (
+                        {['Requested', 'Draft', 'Pending'].includes(transferStatus) && isManager && (
                             <button
                                 onClick={handleApprove}
                                 disabled={loading !== null}
@@ -370,7 +347,7 @@ export const TransferJobDetails: React.FC<TransferJobDetailsProps> = ({
                                 <span>Approve</span>
                             </button>
                         )}
-                        {['Requested', 'Draft', 'Picking'].includes(transferStatus) && isManager && (
+                        {['Requested', 'Draft', 'Pending'].includes(transferStatus) && isManager && (
                             <button
                                 onClick={handleReject}
                                 disabled={loading !== null}
@@ -380,7 +357,7 @@ export const TransferJobDetails: React.FC<TransferJobDetailsProps> = ({
                                 <span>Reject</span>
                             </button>
                         )}
-                        {['Requested', 'Draft', 'Approved', 'Picking', 'Rejected'].includes(transferStatus) && isManager && (
+                        {deletionPerm.canDelete && (
                             <button
                                 onClick={handleDelete}
                                 disabled={loading !== null}
@@ -422,24 +399,6 @@ export const TransferJobDetails: React.FC<TransferJobDetailsProps> = ({
                 </div>
             </div>
         </div>
-    );
-};
-
-const QtyDisplay = ({ qty, size, unit, color, t }: any) => {
-    const textColor = color === 'red' ? 'text-red-600 dark:text-red-400' : color === 'green' ? 'text-green-600 dark:text-green-400' : 'text-[var(--theme-text-primary)]';
-    const isWeightVol = unit && (unit.category === 'weight' || unit.category === 'volume');
-
-    let unitLabel = unit?.code !== 'UNIT' ? unit?.shortLabel : (qty === 1 ? t('warehouse.itemSingular') : t('warehouse.itemPlural'));
-    if (isWeightVol && size) {
-        unitLabel = `packs (${size}${unit.shortLabel})`;
-    } else if (isWeightVol) {
-        unitLabel = `packs (${unit.shortLabel})`;
-    }
-
-    return (
-        <span className={`text-sm font-mono tabular-nums font-bold ${textColor}`}>
-            {qty.toLocaleString()} <span className="text-[11px] opacity-75 font-normal uppercase">{unitLabel}</span>
-        </span>
     );
 };
 

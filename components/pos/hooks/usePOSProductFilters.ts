@@ -148,6 +148,10 @@ export const usePOSProductFilters = ({
             if (siteCountry === 'KE' && (isET || isUG)) return false;
             if (siteCountry === 'UG' && (isET || isKE)) return false;
 
+            // Guard: Block unapproved / pending products from POS sales (can be received into warehouse stock, but not sold until HQ approves)
+            const approval = ((p.approvalStatus || (p as any).approval_status) || 'approved').toLowerCase();
+            if (approval === 'pending' || approval === 'rejected') return false;
+
             const searchLower = searchTerm.toLowerCase();
             const matchesSearch = 
                 (p.name || '').toLowerCase().includes(searchLower) || 

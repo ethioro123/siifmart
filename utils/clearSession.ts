@@ -28,4 +28,5 @@ export async function clearSession() {
 // Make it available globally for debugging
 if (typeof window !== 'undefined') {
     (window as any).clearSession = clearSession;
+    (window as any).__supabase = supabase;
 }

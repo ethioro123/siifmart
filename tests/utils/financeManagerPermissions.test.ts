@@ -9,12 +9,12 @@ describe('Finance Manager Role & Fiscal Governance Engine (SOP-MGT-022)', () => 
             expect(canAccessModule('finance_manager', 'finance')).toBe(true);
             expect(canAccessModule('finance_manager', 'pricing')).toBe(true);
             expect(canAccessModule('finance_manager', 'sales')).toBe(true);
-            expect(canAccessModule('finance_manager', 'procurement')).toBe(true);
-            expect(canAccessModule('finance_manager', 'pos')).toBe(true);
-            expect(canAccessModule('finance_manager', 'inventory')).toBe(true);
         });
 
-        it('blocks finance_manager from warehouse floor operations modules', () => {
+        it('strictly blocks finance_manager from cross-department operations (procurement, warehouse, pos, settings)', () => {
+            expect(canAccessModule('finance_manager', 'procurement')).toBe(false);
+            expect(canAccessModule('finance_manager', 'pos')).toBe(false);
+            expect(canAccessModule('finance_manager', 'inventory')).toBe(false);
             expect(canAccessModule('finance_manager', 'warehouse')).toBe(false);
             expect(canAccessModule('finance_manager', 'settings')).toBe(false);
         });
@@ -30,16 +30,13 @@ describe('Finance Manager Role & Fiscal Governance Engine (SOP-MGT-022)', () => 
             expect(hasPermission('finance_manager', 'APPROVE_PRICE_CHANGE')).toBe(true);
         });
 
-        it('grants inventory valuation and cost price viewing permissions', () => {
-            expect(authService.checkPermission('finance_manager', 'inventory.view')).toBe(true);
+        it('blocks inventory stock view while granting cost price viewing for valuation', () => {
+            expect(authService.checkPermission('finance_manager', 'inventory.view')).toBe(false);
             expect(hasPermission('finance_manager', 'VIEW_COST_PRICE')).toBe(true);
         });
 
-        it('grants pos view monitoring for shift reconciliation while blocking till execution', () => {
-            // Authorized monitoring
-            expect(authService.checkPermission('finance_manager', 'pos.view')).toBe(true);
-            expect(hasPermission('finance_manager', 'VIEW_ALL_TRANSACTIONS')).toBe(true);
-            expect(hasPermission('finance_manager', 'VIEW_POS_DASHBOARD')).toBe(true);
+        it('blocks till execution and POS store access under departmental isolation', () => {
+            expect(authService.checkPermission('finance_manager', 'pos.view')).toBe(false);
 
             // Prohibited till operations (Zero Live Till Operation)
             expect(authService.checkPermission('finance_manager', 'pos.create_sale')).toBe(false);
@@ -78,9 +75,9 @@ describe('Finance Manager Role & Fiscal Governance Engine (SOP-MGT-022)', () => 
     });
 
     describe('Accountant & Auditor Financial Access Coverage', () => {
-        it('allows accountant to access finance, procurement, and sales modules', () => {
+        it('allows accountant to access finance and sales modules while strictly blocking procurement', () => {
             expect(canAccessModule('accountant', 'finance')).toBe(true);
-            expect(canAccessModule('accountant', 'procurement')).toBe(true);
+            expect(canAccessModule('accountant', 'procurement')).toBe(false);
             expect(canAccessModule('accountant', 'sales')).toBe(true);
             expect(hasPermission('accountant', 'ACCESS_FINANCE')).toBe(true);
         });

@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Calendar, Check } from 'lucide-react';
 import { DateRangeOption } from '../hooks/useDateFilter';
+export type { DateRangeOption };
 
 interface DateRangeSelectorProps {
     value: DateRangeOption;

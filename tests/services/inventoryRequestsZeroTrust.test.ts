@@ -10,6 +10,7 @@ vi.mock('../../lib/supabase', () => {
     const mockDelete = vi.fn();
     const mockEq = vi.fn();
     const mockSingle = vi.fn();
+    const mockMaybeSingle = vi.fn();
 
     const queryBuilder: any = {
         select: mockSelect,
@@ -17,7 +18,8 @@ vi.mock('../../lib/supabase', () => {
         update: mockUpdate,
         delete: mockDelete,
         eq: mockEq,
-        single: mockSingle
+        single: mockSingle,
+        maybeSingle: mockMaybeSingle
     };
 
     mockSelect.mockReturnValue(queryBuilder);
@@ -102,6 +104,39 @@ describe('Zero-Trust Inventory Requests & HQ Approval Governance', () => {
             );
 
             expect(created.country_code).toBe('KE');
+        });
+
+        it('dynamically resolves country from site when countryCode is omitted in request', async () => {
+            const { mockQueryBuilder } = await import('../../lib/supabase') as any;
+            mockQueryBuilder.maybeSingle.mockResolvedValueOnce({
+                data: { country: 'KE', region_code: 'NRB' }
+            });
+            mockQueryBuilder.single.mockResolvedValueOnce({
+                data: { id: 'req-dyn-01', country_code: 'KE', region_code: 'NRB', site_id: 'site-ke-kileleshwa' },
+                error: null
+            });
+
+            await inventoryRequestsService.create({
+                siteId: 'site-ke-kileleshwa',
+                productId: '',
+                productName: 'Fresh Milk 500ml',
+                productSku: 'KE-MLK-001',
+                changeType: 'create',
+                requestedBy: 'Makena Benson',
+                requestedAt: new Date().toISOString(),
+                status: 'pending',
+                adjustmentType: 'IN',
+                adjustmentQty: 10,
+                adjustmentReason: 'Initial stock on creation'
+            });
+
+            expect(mockQueryBuilder.insert).toHaveBeenCalledWith(
+                expect.objectContaining({
+                    country_code: 'KE',
+                    region_code: 'NRB',
+                    site_id: 'site-ke-kileleshwa'
+                })
+            );
         });
     });
 

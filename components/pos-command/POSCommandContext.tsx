@@ -98,7 +98,7 @@ interface POSCommandContextType {
     handleCloseReceivingModal: () => void;
     handleLockScreen: () => void;
     handleReprint: () => void;
-    handleStartShift: (openingFloat: number) => Promise<void>;
+    handleStartShift: (openingFloat: number, counterNumber?: string) => Promise<void>;
     handleEndShift: () => void;
     handleSubmitShift: () => Promise<void>;
     handleUpdateDenomination: (den: number, quantity: number) => void;
@@ -182,7 +182,7 @@ export const POSCommandProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     // --- COMPUTED DATA ---
     // Prioritize current cashier's active shift. If user is central manager/admin without an active shift, view site's shift.
     const activeShift = shifts.find(s =>
-        (s.cashierId === user?.id || (user?.code && s.cashierId === user?.code) || (user?.employeeId && s.cashierId === user?.employeeId)) && s.status === 'Open'
+        (s.cashierId === user?.id || (user?.code && (s.cashierId === user?.code || s.cashierCode === user?.code || s.cashier_code === user?.code)) || (user?.employeeId && s.cashierId === user?.employeeId)) && s.status === 'Open'
     ) || (isCentralHQ ? shifts.find(s => s.siteId === activeSite?.id && s.status === 'Open') : undefined);
 
     const getShiftSummary = () => {
@@ -340,11 +340,10 @@ export const POSCommandProvider: React.FC<{ children: React.ReactNode }> = ({ ch
         addNotification('success', `Reprinted receipt #${lastSale.receiptNumber || lastSale.id.slice(0, 8)}`);
     };
 
-    const handleStartShift = async (openingFloat: number) => {
+    const handleStartShift = async (openingFloat: number, counterNumber?: string) => {
         if (!user) return;
         try {
-            await startShift(user.id, openingFloat);
-            addNotification('success', t('pos.shiftStarted') || 'Shift started successfully with drawer float.');
+            await startShift(user.id, openingFloat, counterNumber);
         } catch (error) {
             logger.error('POSCommandContext', 'Failed to start shift:', error as Error);
             addNotification('alert', 'Failed to start shift. Please try again.');

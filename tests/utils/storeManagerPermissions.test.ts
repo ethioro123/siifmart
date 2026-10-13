@@ -9,12 +9,12 @@ describe('Store Manager Role & Retail Governance Engine (SOP-MGT-026)', () => {
             expect(canAccessModule('store_manager', 'pos')).toBe(true);
             expect(canAccessModule('store_manager', 'sales')).toBe(true);
             expect(canAccessModule('store_manager', 'customers')).toBe(true);
-            expect(canAccessModule('store_manager', 'inventory')).toBe(true);
             expect(canAccessModule('store_manager', 'employees')).toBe(true);
         });
 
-        it('strictly blocks store_manager from administrative, central pricing, and finance modules', () => {
+        it('strictly blocks store_manager from administrative, inventory, central pricing, and finance modules', () => {
             expect(canAccessModule('store_manager', 'admin')).toBe(false);
+            expect(canAccessModule('store_manager', 'inventory')).toBe(false);
             expect(canAccessModule('store_manager', 'pricing')).toBe(false);
             expect(canAccessModule('store_manager', 'finance')).toBe(false);
             expect(canAccessModule('store_manager', 'settings')).toBe(false);
@@ -38,7 +38,9 @@ describe('Store Manager Role & Retail Governance Engine (SOP-MGT-026)', () => {
             expect(authService.checkPermission('store_manager', 'pos.hold_order')).toBe(true);
         });
 
-        it('blocks unilateral inventory adjustments and retail price tampering (Zero Autonomous Authority)', () => {
+        it('blocks unilateral inventory adjustments, inventory view, and retail price tampering (Zero Autonomous Authority)', () => {
+            expect(authService.checkPermission('store_manager', 'inventory.view')).toBe(false);
+            expect(authService.checkPermission('store_manager', 'inventory.count')).toBe(false);
             expect(authService.checkPermission('store_manager', 'inventory.adjust')).toBe(false);
             expect(authService.checkPermission('store_manager', 'inventory.transfer')).toBe(false);
             expect(authService.checkPermission('store_manager', 'pricing.edit')).toBe(false);

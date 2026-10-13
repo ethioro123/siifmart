@@ -75,13 +75,13 @@ export const DashboardLeaderboard: React.FC<DashboardLeaderboardProps> = ({
                                 <div className="p-2 rounded-lg bg-[var(--theme-bg-card)] border border-[var(--theme-border)] text-center">
                                     <p className="text-[10px] text-[var(--theme-text-secondary)]">Accuracy</p>
                                     <span className="text-xs font-semibold font-mono text-[var(--theme-text-primary)]">
-                                        {worker.averageAccuracy || '98'}%
+                                        {worker.averageAccuracy > 0 ? `${worker.averageAccuracy}%` : '--'}
                                     </span>
                                 </div>
                                 <div className="p-2 rounded-lg bg-[var(--theme-bg-card)] border border-[var(--theme-border)] text-center">
                                     <p className="text-[10px] text-[var(--theme-text-secondary)]">Speed</p>
                                     <span className="text-xs font-semibold font-mono text-[var(--theme-text-primary)]">
-                                        {worker.averageTimePerJob || '4.2'}m
+                                        {worker.averageTimePerJob > 0 ? `${worker.averageTimePerJob}m` : '--'}
                                     </span>
                                 </div>
                             </div>
@@ -96,7 +96,7 @@ export const DashboardLeaderboard: React.FC<DashboardLeaderboardProps> = ({
                                 <div className="h-1.5 bg-[var(--theme-bg-card)] rounded-full overflow-hidden border border-[var(--theme-border)]">
                                     <div
                                         className="h-full rounded-full bg-[#0071E3] dark:bg-[#2997FF] transition-all duration-500"
-                                        style={{ width: `${Math.min(100, (worker.weeklyPoints / 2500) * 100)}%` }}
+                                        style={{ width: `${Math.min(100, Math.max(0, (worker.weeklyPoints / 2000) * 100))}%` }}
                                     />
                                 </div>
                             </div>

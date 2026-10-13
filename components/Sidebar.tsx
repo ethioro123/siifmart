@@ -69,16 +69,16 @@ export default function Sidebar() {
       { to: "/wms-dashboard", icon: LayoutDashboard, label: "WMS Dashboard", section: "warehouse", roles: ['super_admin', 'warehouse_manager', 'dispatcher', 'inventory_specialist', 'operations_manager', 'regional_manager', 'supply_chain_manager', 'inventory_manager', 'logistics_manager', 'fleet_maintenance_supervisor'] },
 
       // NETWORK INVENTORY - Executive & Supply Chain Leadership
-      { to: "/network-inventory", icon: Globe, label: "Network View", section: "inventory", roles: ['super_admin', 'admin', 'supply_chain_manager', 'operations_manager', 'finance_manager', 'procurement_manager', 'auditor', 'regional_manager', 'replenishment_planner'] },
+      { to: "/network-inventory", icon: Globe, label: "Network View", section: "inventory", roles: ['super_admin', 'admin', 'supply_chain_manager', 'operations_manager', 'auditor', 'regional_manager', 'replenishment_planner'] },
 
       // INVENTORY - Strictly Warehouse & Distribution Center Only
-      { to: "/inventory", icon: Package, label: "Inventory", section: "inventory", roles: ['super_admin', 'admin', 'warehouse_manager', 'dispatcher', 'dispatch_manager', 'auditor', 'procurement_manager', 'inventory_specialist', 'operations_manager', 'regional_manager', 'supply_chain_manager', 'inventory_manager', 'logistics_manager', 'security_manager', 'vendor_relations_manager', 'customs_import_specialist', 'inbound_qc_inspector', 'replenishment_planner', 'fleet_maintenance_supervisor', 'store_operations_auditor'] },
+      { to: "/inventory", icon: Package, label: "Inventory", section: "inventory", roles: ['super_admin', 'admin', 'warehouse_manager', 'dispatcher', 'dispatch_manager', 'auditor', 'inventory_specialist', 'operations_manager', 'regional_manager', 'supply_chain_manager', 'inventory_manager', 'inbound_qc_inspector', 'replenishment_planner', 'store_operations_auditor'] },
 
       // FULFILLMENT (WMS) - Warehouse staff & operations leadership
       { to: "/wms-ops", icon: ClipboardList, label: "Fulfillment", section: "warehouse", roles: ['super_admin', 'admin', 'warehouse_manager', 'operations_manager', 'dispatch_manager', 'dispatcher', 'picker', 'packer', 'receiver', 'driver', 'inventory_specialist', 'regional_manager', 'supply_chain_manager', 'inventory_manager', 'logistics_manager', 'inbound_qc_inspector', 'replenishment_planner', 'fleet_maintenance_supervisor'] },
 
       // PROCUREMENT - Corporate administration, procurement & operational leadership
-      { to: "/procurement", icon: Truck, label: "Procurement", section: "procurement", roles: ['super_admin', 'admin', 'procurement_manager', 'buyer', 'demand_planner', 'vendor_relations_manager', 'customs_import_specialist', 'supply_chain_manager', 'finance_manager', 'operations_manager', 'regional_manager', 'replenishment_planner', 'credit_control_officer', 'accountant', 'inbound_qc_inspector'] },
+      { to: "/procurement", icon: Truck, label: "Procurement", section: "procurement", roles: ['super_admin', 'admin', 'procurement_manager', 'buyer', 'demand_planner', 'vendor_relations_manager', 'customs_import_specialist', 'supply_chain_manager', 'operations_manager', 'regional_manager', 'replenishment_planner'] },
 
       // ROADMAP - CEO Only (Confidential Strategic Canvas)
       { to: "/roadmap", icon: Map, label: "Roadmap", section: "dashboard", roles: ['super_admin'] },
@@ -90,16 +90,16 @@ export default function Sidebar() {
       { to: "/pos", icon: ShoppingCart, label: "POS Terminal", section: "pos", roles: ['super_admin', 'store_manager', 'assistant_manager', 'shift_lead', 'pos', 'store_supervisor'] },
 
       // POS COMMAND CENTER - Store management & regional operations
-      { to: "/pos-dashboard", icon: Eye, label: "POS Command", section: "pos", roles: ['super_admin', 'store_manager', 'assistant_manager', 'shift_lead', 'pos', 'store_supervisor', 'operations_manager', 'regional_manager', 'finance_manager', 'auditor', 'treasury_officer', 'store_operations_auditor'] },
+      { to: "/pos-dashboard", icon: Eye, label: "POS Command", section: "pos", roles: ['super_admin', 'store_manager', 'assistant_manager', 'shift_lead', 'pos', 'store_supervisor', 'operations_manager', 'regional_manager', 'auditor', 'store_operations_auditor'] },
 
       // SALES - Management & Auditing (Cashiers blocked from historical revenue)
       { to: "/sales", icon: FileText, label: "Sales History", section: "sales", roles: ['super_admin', 'store_manager', 'assistant_manager', 'shift_lead', 'auditor', 'finance_manager', 'cs_manager', 'store_supervisor', 'operations_manager', 'regional_manager', 'accountant', 'treasury_officer', 'tax_compliance_officer', 'credit_control_officer', 'demand_planner', 'replenishment_planner', 'store_operations_auditor'] },
 
       // MERCHANDISING
-      { to: "/pricing", icon: Tags, label: "Merchandising", section: "pricing", roles: ['super_admin', 'merchandising_manager', 'merchandiser', 'finance_manager', 'procurement_manager', 'regional_manager', 'operations_manager', 'vendor_relations_manager', 'store_operations_auditor'] },
+      { to: "/pricing", icon: Tags, label: "Merchandising", section: "pricing", roles: ['super_admin', 'merchandising_manager', 'merchandiser', 'finance_manager', 'regional_manager', 'operations_manager', 'store_operations_auditor'] },
 
       // FINANCE
-      { to: "/finance", icon: DollarSign, label: "Financials", section: "finance", roles: ['super_admin', 'auditor', 'finance_manager', 'regional_manager', 'operations_manager', 'hr_manager', 'hr', 'accountant', 'payroll_specialist', 'treasury_officer', 'tax_compliance_officer', 'credit_control_officer'] },
+      { to: "/finance", icon: DollarSign, label: "Financials", section: "finance", roles: ['super_admin', 'auditor', 'finance_manager', 'regional_manager', 'operations_manager', 'accountant', 'payroll_specialist', 'treasury_officer', 'tax_compliance_officer', 'credit_control_officer'] },
 
       // CUSTOMERS
       { to: "/customers", icon: Users, label: "Customers", section: "customers", roles: ['super_admin', 'store_manager', 'assistant_manager', 'shift_lead', 'pos', 'cs_manager', 'store_supervisor', 'operations_manager', 'regional_manager', 'credit_control_officer'] },
@@ -108,7 +108,7 @@ export default function Sidebar() {
       { to: "/employees", icon: Briefcase, label: "Employees", section: "employees", roles: ['super_admin', 'admin', 'hr', 'hr_manager', 'operations_manager', 'regional_manager', 'training_coordinator', 'payroll_specialist', 'talent_recruiter'] },
 
       // SETTINGS
-      { to: "/settings", icon: Settings, label: "Settings", section: "settings", roles: ['super_admin', 'admin', 'hr', 'hr_manager', 'it_support', 'security_manager', 'regional_manager', 'operations_manager', 'auditor'] },
+      { to: "/settings", icon: Settings, label: "Settings", section: "settings", roles: ['super_admin', 'admin', 'it_support', 'security_manager', 'regional_manager', 'operations_manager', 'auditor'] },
     ];
 
     // Filter by role AND site-type context

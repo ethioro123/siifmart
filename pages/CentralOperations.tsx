@@ -19,6 +19,7 @@ import { NetworkSection } from '../components/dashboard/sections/NetworkSection'
 import { TelemetrySection } from '../components/dashboard/sections/TelemetrySection';
 import { CentralOpsTeamSection } from '../components/dashboard/sections/CentralOpsTeamSection';
 import { RegionalCommandSection } from '../components/dashboard/sections/RegionalCommandSection';
+import { CatalogGovernanceSection } from '../components/dashboard/sections/CatalogGovernanceSection';
 import { CentralOperationsHeader } from '../components/dashboard/CentralOperationsHeader';
 import { CentralOpsExecutiveDeck } from '../components/dashboard/CentralOpsExecutiveDeck';
 import { SitePerformance, CentralOpsViewMode, FacilityScope } from '../components/dashboard/types';
@@ -360,6 +361,13 @@ export default function CentralOperations() {
                     allSales={allSales}
                     allOrders={allOrders}
                     transfers={transfers}
+                    activeCountry={activeCountry}
+                    currencySymbol={currencySymbol}
+                />
+            )}
+
+            {viewMode === 'catalog' && (
+                <CatalogGovernanceSection
                     activeCountry={activeCountry}
                     currencySymbol={currencySymbol}
                 />

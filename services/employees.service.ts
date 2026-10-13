@@ -75,6 +75,7 @@ function mapDbEmployeeToEmployee(e: RawDbEmployee): Employee {
         login_history: e.login_history,
         regionCode: (e.region_code || e.regionCode) as string,
         region_code: (e.region_code || e.regionCode) as string,
+        scopeLevel: ((e.scope_level || e.scopeLevel) === 'REGIONAL' ? 'REGIONAL' : 'HQ') as 'HQ' | 'REGIONAL',
         country: (e.country || e.country_code || e.countryCode) as string,
         country_code: (e.country_code || e.countryCode || e.country) as string
     } as Employee;
@@ -92,7 +93,35 @@ export const employeesService = {
         }
 
         if (onlyManagers) {
-            query = query.in('role', MANAGERIAL_ROLES as unknown as string[]);
+            query = query.or(`role.in.(${MANAGERIAL_ROLES.join(',')}),status.eq."Pending Approval"`);
+        }
+
+        const { data, error } = await query;
+        if (error) throw error;
+        return (data as RawDbEmployee[]).map(mapDbEmployeeToEmployee);
+    },
+
+    async getPendingApproval(country?: string, countrySiteIds?: string[]): Promise<Employee[]> {
+        let query = supabase
+            .from('employees')
+            .select('*')
+            .eq('status', 'Pending Approval')
+            .order('created_at', { ascending: false });
+
+        if (country) {
+            if (country === 'ET') {
+                if (countrySiteIds && countrySiteIds.length > 0) {
+                    query = query.or(`site_id.in.(${countrySiteIds.join(',')}),site_id.is.null`);
+                } else {
+                    query = query.is('site_id', null);
+                }
+            } else {
+                if (countrySiteIds && countrySiteIds.length > 0) {
+                    query = query.in('site_id', countrySiteIds);
+                } else {
+                    return [];
+                }
+            }
         }
 
         const { data, error } = await query;
@@ -139,9 +168,11 @@ export const employeesService = {
         if (filters?.department && filters.department !== 'All') query = query.eq('department', filters.department);
         if (filters?.regionCode) query = query.eq('region_code', filters.regionCode);
 
-        // When onlyManagers is requested (e.g. initial global directory/org view), limit to L1-L3 leadership
-        if (filters?.onlyManagers) {
-            query = query.in('role', MANAGERIAL_ROLES as unknown as string[]);
+        // When onlyManagers is requested (e.g. initial global directory/org view), limit to L1-L3 leadership.
+        // If a status filter like 'Pending Approval' is set, bypass managerial restriction so
+        // candidates awaiting sign-off (pickers, cashiers, drivers, packers) are never hidden from HR checkers.
+        if (filters?.onlyManagers && filters?.status !== 'Pending Approval') {
+            query = query.or(`role.in.(${MANAGERIAL_ROLES.join(',')}),status.eq."Pending Approval"`);
         }
 
         // Search
@@ -239,8 +270,12 @@ export const employeesService = {
             throw new Error('Workplace location is mandatory. Every employee must be assigned to an operating location.');
         }
 
-        let resolvedRegionCode = (employee as any).region_code || employee.regionCode || null;
-        if (!resolvedRegionCode && employee.siteId) {
+        // Default scope is HQ (country-wide). Region is only bound for explicit REGIONAL workers.
+        const scopeLevel = employee.scopeLevel === 'REGIONAL' ? 'REGIONAL' : 'HQ';
+        let resolvedRegionCode: string | null = scopeLevel === 'REGIONAL'
+            ? ((employee as any).region_code || employee.regionCode || null)
+            : null;
+        if (scopeLevel === 'REGIONAL' && !resolvedRegionCode && employee.siteId) {
             try {
                 const { data: siteRow } = await supabase
                     .from('sites')
@@ -263,6 +298,7 @@ export const employeesService = {
                 code: currentCode,
                 site_id: employee.siteId,
                 region_code: resolvedRegionCode,
+                scope_level: scopeLevel,
                 name: employee.name,
                 role: employee.role,
                 email: employee.email.toLowerCase(),
@@ -336,6 +372,7 @@ export const employeesService = {
             nationalIdNumber: 'national_id_number',
             regionCode: 'region_code',
             region_code: 'region_code',
+            scopeLevel: 'scope_level',
         };
 
         const dbUpdates: Record<string, unknown> = {};
@@ -356,11 +393,14 @@ export const employeesService = {
             if (error) throw error;
             return mapDbEmployeeToEmployee(data as RawDbEmployee);
         } catch (err: any) {
-            // Resilient fallback if optional new columns (age, date_of_birth) do not exist yet in DB
+            // Resilient fallback if optional new columns do not exist yet in DB schema
             if (err?.code === 'PGRST204' || err?.message?.includes('column') || err?.message?.includes('schema')) {
                 delete dbUpdates.age;
                 delete dbUpdates.date_of_birth;
                 delete dbUpdates.national_id_number;
+                delete dbUpdates.emergency_contact;
+                delete dbUpdates.address;
+                delete dbUpdates.scope_level;
                 const { data, error: retryError } = await supabase
                     .from('employees')
                     .update(dbUpdates)
@@ -368,12 +408,7 @@ export const employeesService = {
                     .select()
                     .single();
                 if (retryError) throw retryError;
-                return {
-                    ...mapDbEmployeeToEmployee(data as RawDbEmployee),
-                    age: updates.age,
-                    dateOfBirth: updates.dateOfBirth,
-                    nationalIdNumber: updates.nationalIdNumber
-                } as Employee;
+                return mapDbEmployeeToEmployee(data as RawDbEmployee);
             }
             throw err;
         }

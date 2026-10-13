@@ -7,6 +7,17 @@ import {
     MAX_DOCUMENT_FILE_SIZE_MB
 } from '../../../utils/imageCompression';
 
+export const DOCUMENT_CATEGORIES = [
+    { id: 'Professional Certificate', label: 'Professional Certificate' },
+    { id: "Driver's License", label: "Driver's License" },
+    { id: 'Academic Degree / Diploma', label: 'Academic Degree / Diploma' },
+    { id: 'Certificate of Good Conduct', label: 'Certificate of Good Conduct' },
+    { id: 'National ID / Passport', label: 'National ID / Passport' },
+    { id: 'Medical Clearance Form', label: 'Medical Clearance Form' },
+    { id: 'Employment Contract / NDA', label: 'Employment Contract / NDA' },
+    { id: 'Other Compliance Document', label: 'Other Compliance Document' }
+] as const;
+
 interface StepDocumentsCertificatesProps {
     newEmpData: any;
     setNewEmpData: (data: any) => void;
@@ -19,7 +30,7 @@ export const StepDocumentsCertificates: React.FC<StepDocumentsCertificatesProps>
     addNotification
 }) => {
     const [isUploadingCert, setIsUploadingCert] = useState(false);
-    const [certCategory, setCertCategory] = useState('Certificate');
+    const [certCategory, setCertCategory] = useState<string>(DOCUMENT_CATEGORIES[0].id);
     const [isDraggingCert, setIsDraggingCert] = useState(false);
     const certInputRef = useRef<HTMLInputElement>(null);
 
@@ -90,6 +101,16 @@ export const StepDocumentsCertificates: React.FC<StepDocumentsCertificatesProps>
         }));
     };
 
+    const updateCertCategory = (id: string, newCategory: string) => {
+        setNewEmpData((prev: any) => ({
+            ...prev,
+            certificates: (prev.certificates || []).map((c: any) => 
+                c.id === id ? { ...c, category: newCategory } : c
+            )
+        }));
+        addNotification('info', `Document category set to "${newCategory}"`);
+    };
+
     return (
         <div className="p-4 rounded-2xl bg-white dark:bg-[#18201B] border border-[#E2DCCE] dark:border-white/10 shadow-xs">
             <div className="flex items-center justify-between mb-3">
@@ -120,14 +141,11 @@ export const StepDocumentsCertificates: React.FC<StepDocumentsCertificatesProps>
                 <select
                     value={certCategory}
                     onChange={e => setCertCategory(e.target.value)}
-                    className="bg-stone-50 dark:bg-black/30 border border-[#E2DCCE] dark:border-white/10 rounded-xl px-3 py-2 text-xs font-semibold text-stone-800 dark:text-stone-200 outline-none"
+                    className="bg-stone-50 dark:bg-black/30 border border-[#E2DCCE] dark:border-white/10 rounded-xl px-3 py-2 text-xs font-semibold text-stone-800 dark:text-stone-200 outline-none cursor-pointer"
                 >
-                    <option value="Degree / Diploma">Academic Degree / Diploma</option>
-                    <option value="Certificate">Professional Certificate</option>
-                    <option value="Good Conduct">Certificate of Good Conduct</option>
-                    <option value="Driver License">Driver's License</option>
-                    <option value="Medical Clearance">Medical Clearance Form</option>
-                    <option value="Other">Other Compliance Document</option>
+                    {DOCUMENT_CATEGORIES.map(cat => (
+                        <option key={cat.id} value={cat.id}>{cat.label}</option>
+                    ))}
                 </select>
 
                 <button
@@ -157,15 +175,27 @@ export const StepDocumentsCertificates: React.FC<StepDocumentsCertificatesProps>
                             key={cert.id}
                             className="p-2.5 rounded-xl bg-stone-50 dark:bg-white/[0.02] border border-[#E2DCCE]/60 dark:border-white/5 flex items-center justify-between gap-3 text-xs"
                         >
-                            <div className="flex items-center gap-2.5 min-w-0">
+                            <div className="flex items-center gap-2.5 min-w-0 flex-1">
                                 <div className="p-1.5 rounded-lg bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400 shrink-0">
                                     <Award size={14} />
                                 </div>
-                                <div className="min-w-0">
+                                <div className="min-w-0 flex-1">
                                     <p className="font-bold text-stone-800 dark:text-stone-200 truncate">{cert.name}</p>
-                                    <p className="text-[10px] text-stone-400 font-mono">
-                                        {cert.category} • {cert.size}
-                                    </p>
+                                    <div className="flex items-center gap-2 mt-1 flex-wrap">
+                                        <select
+                                            value={cert.category || 'Professional Certificate'}
+                                            onChange={(e) => updateCertCategory(cert.id, e.target.value)}
+                                            className="text-[10px] font-bold bg-white dark:bg-black/40 border border-[#E2DCCE] dark:border-white/10 rounded-md px-2 py-0.5 text-[#2C5E3B] dark:text-[#A9CBA2] outline-none cursor-pointer hover:border-[#2C5E3B]"
+                                            title="Change Document Category"
+                                        >
+                                            {DOCUMENT_CATEGORIES.map(cat => (
+                                                <option key={cat.id} value={cat.id}>{cat.label}</option>
+                                            ))}
+                                        </select>
+                                        <span className="text-[10px] text-stone-400 font-mono">
+                                            {cert.size}
+                                        </span>
+                                    </div>
                                 </div>
                             </div>
                             <button

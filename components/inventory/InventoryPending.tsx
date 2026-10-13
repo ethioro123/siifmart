@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import {
-    Package, CheckCircle, Clock, User, Edit, Trash2, RefreshCw, Plus, Search, XCircle, ArrowRight
+    Package, CheckCircle, Clock, User, Edit, Trash2, RefreshCw, Plus, Search, XCircle, ArrowRight, History
 } from 'lucide-react';
 import Button from '../shared/Button';
 import Modal from '../Modal';
@@ -11,6 +11,7 @@ import { CURRENCY_SYMBOL } from '../../constants';
 import { InventoryRequestDetailsModal } from './components/InventoryRequestDetailsModal';
 import { InventoryRejectionModal } from './components/InventoryRejectionModal';
 import { renderChangeDiff, DetailedComparison } from './components/InventoryChangeDiff';
+import { InventoryHistoryTable } from './components/InventoryHistoryTable';
 import {
     isPriceChangeRequest,
     requiresFinanceCoApproval,
@@ -20,6 +21,7 @@ import {
 interface InventoryPendingProps {
     pendingProducts: Product[];
     pendingChanges: PendingInventoryChange[];
+    historyChanges?: PendingInventoryChange[];
     allProducts: Product[];
     canApprove: boolean;
     isSubmitting: boolean;
@@ -35,6 +37,7 @@ interface InventoryPendingProps {
 export const InventoryPending: React.FC<InventoryPendingProps> = ({
     pendingProducts,
     pendingChanges,
+    historyChanges = [],
     allProducts,
     canApprove,
     isSubmitting,
@@ -84,10 +87,63 @@ export const InventoryPending: React.FC<InventoryPendingProps> = ({
     };
 
 
+    const [activeSection, setActiveSection] = useState<'pending' | 'history'>('pending');
+    const totalPendingCount = pendingProducts.length + pendingChanges.length;
+
     return (
         <div className="space-y-6 animate-in fade-in">
-            {/* Pending Products Section */}
-            <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl overflow-hidden shadow-xs">
+            {/* Top Segmented Controls: Pending Approvals vs Change History */}
+            <div className="flex items-center gap-2 p-1 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-2xl w-fit">
+                <button
+                    type="button"
+                    onClick={() => setActiveSection('pending')}
+                    className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all flex items-center gap-2 cursor-pointer ${
+                        activeSection === 'pending'
+                            ? 'bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)] shadow-xs'
+                            : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)]'
+                    }`}
+                >
+                    <Clock size={13} />
+                    <span>Pending Approvals</span>
+                    {totalPendingCount > 0 && (
+                        <span className="px-1.5 py-0.2 rounded-full text-[10px] font-mono bg-[#FF9F0A]/10 text-[#FF9F0A] border border-[#FF9F0A]/20">
+                            {totalPendingCount}
+                        </span>
+                    )}
+                </button>
+                <button
+                    type="button"
+                    onClick={() => setActiveSection('history')}
+                    className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all flex items-center gap-2 cursor-pointer ${
+                        activeSection === 'history'
+                            ? 'bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)] shadow-xs'
+                            : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)]'
+                    }`}
+                >
+                    <History size={13} />
+                    <span>Change History Log</span>
+                    {historyChanges.length > 0 && (
+                        <span className="px-1.5 py-0.2 rounded-full text-[10px] font-mono bg-[var(--theme-bg-hover)] text-[var(--theme-text-secondary)] border border-[var(--theme-border)]">
+                            {historyChanges.length}
+                        </span>
+                    )}
+                </button>
+            </div>
+
+            {activeSection === 'history' ? (
+                <InventoryHistoryTable
+                    historyChanges={historyChanges}
+                    allProducts={allProducts}
+                    currencySymbol={currencySymbol}
+                    onViewDetails={(item) => {
+                        setRequestForDetails(item);
+                        setIsRequestDetailsModalOpen(true);
+                    }}
+                />
+            ) : (
+                <>
+                    {/* Pending Products Section */}
+                    <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl overflow-hidden shadow-xs">
                 <div className="px-5 py-4 border-b border-[var(--theme-border)] flex items-center justify-between">
                     <div className="flex items-center gap-3">
                         <div className="w-8 h-8 rounded-lg bg-[#FF9F0A]/10 border border-[#FF9F0A]/20 flex items-center justify-center text-[#FF9F0A]">
@@ -389,7 +445,11 @@ export const InventoryPending: React.FC<InventoryPendingProps> = ({
                         </table>
                     </div>
                 )}
-            </div>            {/* Detailed Request Modal */}
+            </div>
+                </>
+            )}
+
+            {/* Detailed Request Modal */}
             <InventoryRequestDetailsModal
                 isOpen={isRequestDetailsModalOpen}
                 onClose={() => {

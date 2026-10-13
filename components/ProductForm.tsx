@@ -10,7 +10,7 @@ import { useData } from '../contexts/DataContext';
 import { useLanguage } from '../contexts/LanguageContext';
 import { getRoleHierarchy, canViewCostPrice } from '../utils/roles';
 import { CURRENCY_SYMBOL } from '../constants';
-import { generateSKU } from '../utils/skuGenerator';
+import { generateSKU, generateSequentialSKU } from '../utils/skuGenerator';
 import { generateInternalBarcode } from '../utils/barcodeNumberGenerator';
 
 // Modular Subcomponents
@@ -131,9 +131,9 @@ export function ProductForm({
         });
     }, [initialData, allProducts, sites]);
 
-    const handleGenerateSKU = () => {
+    const handleGenerateSKU = async () => {
         const category = formData.category || 'General';
-        const newSku = generateSKU(category, allProducts || [], undefined, effectiveCountry as any);
+        const newSku = await generateSequentialSKU(category, allProducts || [], effectiveCountry as any);
         setValue('sku', newSku);
         showToast(`Generated sovereign SKU: ${newSku}`, 'info');
     };

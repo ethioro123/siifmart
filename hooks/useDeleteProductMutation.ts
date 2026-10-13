@@ -10,6 +10,7 @@ interface DeleteProductParams {
     productName: string;
     productSku: string;
     siteId: string;
+    countryCode?: string;
     canApprove: boolean;
 }
 
@@ -21,6 +22,7 @@ export function useDeleteProductMutation() {
     return useMutation({
         mutationFn: async (params: DeleteProductParams) => {
             const { productId, productName, productSku, siteId, canApprove } = params;
+            const countryCode = params.countryCode || (user as any)?.country || (user as any)?.country_code || 'ET';
 
             if (canApprove) {
                 // Direct deletion
@@ -33,6 +35,7 @@ export function useDeleteProductMutation() {
                     productName,
                     productSku,
                     siteId,
+                    countryCode,
                     changeType: 'delete',
                     requestedBy: user?.name || 'Unknown',
                     requestedAt: new Date().toISOString(),

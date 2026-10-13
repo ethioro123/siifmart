@@ -96,7 +96,41 @@ export const InventoryRequestDetailsModal: React.FC<InventoryRequestDetailsModal
                     {children}
                 </div>
 
-                {canApprove && (
+                {requestForDetails?.status === 'approved' && (
+                    <div className="p-3.5 rounded-xl bg-[#34C759]/10 border border-[#34C759]/20 flex items-center justify-between text-xs">
+                        <div className="flex items-center gap-2 text-[#34C759] font-bold">
+                            <CheckCircle size={15} />
+                            <span>Approved by {requestForDetails.approvedBy || 'Regional Manager'}</span>
+                        </div>
+                        {requestForDetails.approvedAt && (
+                            <span className="text-[var(--theme-text-secondary)] font-mono text-[11px]">
+                                {new Date(requestForDetails.approvedAt).toLocaleString()}
+                            </span>
+                        )}
+                    </div>
+                )}
+
+                {requestForDetails?.status === 'rejected' && (
+                    <div className="p-3.5 rounded-xl bg-[#FF3B30]/10 border border-[#FF3B30]/20 flex flex-col gap-1 text-xs">
+                        <div className="flex items-center justify-between">
+                            <span className="text-[#FF3B30] font-bold flex items-center gap-1.5">
+                                <XCircle size={15} /> Rejected by {requestForDetails.rejectedBy || 'Manager'}
+                            </span>
+                            {requestForDetails.rejectedAt && (
+                                <span className="text-[var(--theme-text-secondary)] font-mono text-[11px]">
+                                    {new Date(requestForDetails.rejectedAt).toLocaleString()}
+                                </span>
+                            )}
+                        </div>
+                        {requestForDetails.rejectionReason && (
+                            <p className="text-[var(--theme-text-secondary)] mt-1 text-[11px]">
+                                Reason: {requestForDetails.rejectionReason}
+                            </p>
+                        )}
+                    </div>
+                )}
+
+                {canApprove && requestForDetails?.status === 'pending' && (
                     <div className="flex items-center gap-3 pt-3 border-t border-[var(--theme-border)]">
                         {(!requestForDetails?.approvalRole || canApproveThisChange(requestForDetails!)) ? (
                             <>

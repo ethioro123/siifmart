@@ -44,6 +44,7 @@ export function useSaveProductMutation() {
                         productName: product.name,
                         productSku: product.sku,
                         siteId: activeSite.id,
+                        countryCode: countryCode,
                         changeType: 'create',
                         requestedBy: user?.name || 'Unknown',
                         requestedAt: new Date().toISOString(),
@@ -121,6 +122,7 @@ export function useSaveProductMutation() {
                         productName: product.name,
                         productSku: product.sku,
                         siteId: activeSite.id,
+                        countryCode: countryCode,
                         changeType: 'edit',
                         requestedBy: user?.name || 'Unknown',
                         requestedAt: new Date().toISOString(),
@@ -166,6 +168,27 @@ export function useSaveProductMutation() {
                         logger.warn('useSaveProductMutation', 'POS IndexedDB sync skipped', { error: String(err) });
                     }
 
+                    // Record in change history log as approved direct edit
+                    try {
+                        await inventoryRequestsService.create({
+                            productId: updated.id,
+                            productName: updated.name,
+                            productSku: updated.sku,
+                            siteId: activeSite.id,
+                            countryCode: countryCode,
+                            changeType: 'edit',
+                            requestedBy: user?.name || 'Manager',
+                            requestedAt: new Date().toISOString(),
+                            status: 'approved',
+                            approvedBy: user?.name || 'Manager',
+                            approvedAt: new Date().toISOString(),
+                            proposedChanges: productToSave,
+                            adjustmentReason: 'Direct Manager Update'
+                        });
+                    } catch (histErr) {
+                        logger.warn('useSaveProductMutation', 'History record creation skipped', { error: String(histErr) });
+                    }
+
                     // Zero-Trust Rule 5 Audit Logging
                     await systemLogsService.create({
                         action: 'PRODUCT_UPDATED',
@@ -176,6 +199,8 @@ export function useSaveProductMutation() {
                             price: updated.price,
                             stock: updated.stock,
                             siteId: activeSite.id,
+                            updatedBy: user?.name,
+                            userRole: user?.role
                         },
                         module: 'Inventory',
                         user_name: user?.name || 'Unknown',

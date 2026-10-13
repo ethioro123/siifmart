@@ -302,7 +302,7 @@ export const TransferRequestModal: React.FC<TransferRequestModalProps> = ({
                                             ) : (
                                                 <>
                                                     <option value="">Select Source Site</option>
-                                                    {sites.map(site => (
+                                                    {sites.filter(site => ['Warehouse', 'Distribution Center'].includes(site.type)).map(site => (
                                                         <option key={site.id} value={site.id}>{site.name} ({site.type})</option>
                                                     ))}
                                                 </>

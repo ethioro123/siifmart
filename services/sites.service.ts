@@ -138,6 +138,10 @@ export const sitesService = {
             .from('sites')
             .select('code, site_number, country');
 
+        if (!(site.region_code || site.regionCode)) {
+            throw new Error('Operational region is mandatory. Every location must belong to a region.');
+        }
+
         let nextSiteNum = 1;
         if (allSites && allSites.length > 0) {
             const maxId = allSites.reduce((max, s: any) => {

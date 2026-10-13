@@ -2,6 +2,8 @@ import React from 'react';
 import { User, Briefcase, DollarSign, Key, IdCard, FileText, CheckCircle2, ShieldCheck, Award } from 'lucide-react';
 import { Site } from '../../../types';
 
+import { isDirectOnboardingAuthorized } from '../../../utils/employeeOnboardingGovernance';
+
 interface StepReviewProps {
     newEmpData: any;
     sites: Site[];
@@ -16,9 +18,22 @@ export default function StepReview({
     user
 }: StepReviewProps) {
     const assignedSite = sites.find(s => s.id === newEmpData.siteId);
+    const isDirect = isDirectOnboardingAuthorized(user?.role);
 
     return (
         <div className="space-y-4 animate-in fade-in slide-in-from-right-4">
+            {!isDirect && (
+                <div className="p-3.5 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-start gap-3">
+                    <ShieldCheck size={18} className="text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
+                    <div className="text-xs">
+                        <span className="font-bold text-[var(--theme-text-primary)] block">4-Eyes HR Governance Protocol</span>
+                        <span className="text-[var(--theme-text-secondary)] mt-0.5 block">
+                            As a site manager, submitting this profile registers a candidate proposal with &quot;Pending Approval&quot; status.
+                            Active system credentials will only be provisioned once reviewed and authorized by HR or Executive Admin.
+                        </span>
+                    </div>
+                </div>
+            )}
             <p className="text-xs text-stone-500 dark:text-stone-400">
                 Please verify all onboarding details, facility assignment, and verification documents before confirming hire.
             </p>
@@ -123,6 +138,38 @@ export default function StepReview({
                             </div>
                         </div>
                     </div>
+
+                    {/* Itemized Certificates with Category for Approver Sign-off */}
+                    {(newEmpData.certificates || []).length > 0 && (
+                        <div className="mt-3 pt-3 border-t border-[#E2DCCE]/60 dark:border-white/10 space-y-2">
+                            <p className="text-[11px] font-bold text-stone-600 dark:text-stone-300 uppercase tracking-wider flex items-center gap-1.5">
+                                <Award size={13} className="text-[#2C5E3B] dark:text-[#A9CBA2]" />
+                                <span>Verified Credentials for Sign-off ({(newEmpData.certificates || []).length})</span>
+                            </p>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                {(newEmpData.certificates || []).map((cert: any) => (
+                                    <div
+                                        key={cert.id}
+                                        className="p-2.5 rounded-xl bg-white dark:bg-black/30 border border-[#E2DCCE]/60 dark:border-white/5 flex items-center justify-between gap-2"
+                                    >
+                                        <div className="min-w-0 flex-1">
+                                            <div className="flex items-center gap-1.5 flex-wrap">
+                                                <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-[#2C5E3B]/10 dark:bg-[#A9CBA2]/10 text-[#2C5E3B] dark:text-[#A9CBA2] border border-[#2C5E3B]/20 shrink-0">
+                                                    {cert.category || 'Professional Certificate'}
+                                                </span>
+                                                <span className="text-[10px] text-stone-400 font-mono">
+                                                    {cert.size}
+                                                </span>
+                                            </div>
+                                            <p className="text-xs font-semibold text-stone-800 dark:text-stone-200 truncate mt-1">
+                                                {cert.name}
+                                            </p>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
                 </div>
 
                 {/* Compensation if provided */}

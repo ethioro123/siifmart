@@ -99,12 +99,13 @@ export const stockMovementsService = {
         return data;
     },
 
-    // Server-Side Warehouse Analytics
-    async getAnalytics(siteId?: string, startDate?: string, endDate?: string) {
+    // Server-Side Warehouse Analytics with Multi-Country Isolation
+    async getAnalytics(siteId?: string, startDate?: string, endDate?: string, countryCode?: string) {
         const params: any = {};
         if (siteId && siteId !== 'All') params.p_site_id = siteId;
         if (startDate) params.p_start_date = startDate;
         if (endDate) params.p_end_date = `${endDate}T23:59:59`;
+        if (countryCode) params.p_country_code = countryCode;
 
         const { data, error } = await supabase.rpc('get_warehouse_metrics', params);
         if (error) {

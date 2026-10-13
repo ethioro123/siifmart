@@ -94,7 +94,7 @@ export interface POSContextType {
 
     isStartShiftModalOpen: boolean;
     setIsStartShiftModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
-    handleStartShift: (openingFloat: number) => void;
+    handleStartShift: (openingFloat: number, counterNumber?: string) => void;
     dismissStartShiftModal: () => void;
 
     isShiftModalOpen: boolean;

@@ -367,6 +367,7 @@ export const TransferReceiving: React.FC<TransferReceivingProps> = ({
                 activeTransferJob={activeTransferJob}
                 transferReceiveItems={transferReceiveItems}
                 allProducts={allProducts}
+                products={products}
                 currentUser={user}
                 driverName={driverName}
                 isSubmitting={isSubmittingReceipt}

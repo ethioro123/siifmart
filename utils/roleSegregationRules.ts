@@ -48,37 +48,37 @@ export const ROLE_SEGREGATION_RULES: RoleSegregationRule[] = [
     {
         role: 'finance_manager',
         siteType: 'Administration',
-        department: 'Management',
+        department: 'Finance',
         description: 'Finance Manager - Financial oversight at HQ'
     },
     {
         role: 'accountant',
         siteType: 'Administration',
-        department: 'Management',
+        department: 'Finance',
         description: 'Accountant - Financial tracking'
     },
     {
         role: 'treasury_officer',
         siteType: 'Administration',
-        department: 'Management',
+        department: 'Finance',
         description: 'Treasury Officer - Daily cash and mobile money tender reconciliation'
     },
     {
         role: 'tax_compliance_officer',
         siteType: 'Administration',
-        department: 'Management',
+        department: 'Finance',
         description: 'Tax Compliance Officer - Sovereign VAT and withholding tax filings'
     },
     {
         role: 'credit_control_officer',
         siteType: 'Administration',
-        department: 'Management',
+        department: 'Finance',
         description: 'Credit Control Officer - B2B credit terms and institutional accounts'
     },
     {
         role: 'procurement_manager',
         siteType: 'Administration',
-        department: 'Management',
+        department: 'Procurement',
         description: 'Procurement Manager - Supply chain management at HQ'
     },
     {
@@ -288,7 +288,7 @@ export const ROLE_SEGREGATION_RULES: RoleSegregationRule[] = [
     {
         role: 'regional_finance_officer',
         siteType: 'Any',
-        department: 'Management',
+        department: 'Finance',
         description: 'Regional Finance Officer - Branch cash drop audits and regional reconciliations'
     },
     {

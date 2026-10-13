@@ -80,6 +80,10 @@ export interface ShiftRecord {
   site_id?: string; // Supabase compatibility
   cashierId: string;
   cashierName: string;
+  counterNumber?: string;
+  counter_number?: string;
+  cashierCode?: string;
+  cashier_code?: string;
   startTime: string;
   endTime?: string;
   openingFloat: number;

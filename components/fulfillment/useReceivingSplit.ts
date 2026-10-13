@@ -11,6 +11,7 @@ import { convertToSellableUnits } from './useReceiving';
 import { resolveReceivingPolicy, maxReceivable, buildOverReceiveMessage } from '../../utils/receivingPolicy';
 import { findMatchingProduct, resolveSmartPutawayLocation, cleanSku } from './receivingSplitHelpers';
 import { mergeCustomAttributes, extractProductAttributesFromPOItem } from '../../utils/productAttributes';
+import { syncProductAliases } from '../../services/products/product-master.service';
 
 interface UseReceivingSplitDeps {
     orders: PurchaseOrder[];
@@ -231,6 +232,8 @@ export const useReceivingSplit = (deps: UseReceivingSplitDeps) => {
                         if (changed || Object.keys(updates).length > 0) {
                             if (changed) {
                                 updates.barcodes = currentBarcodes;
+                                const rSku = cleanSku(prodSku || variant.sku || item.sku || '');
+                                if (rSku) syncProductAliases(rSku, targetSiteId, currentBarcodes).catch(() => {});
                             }
                             try {
                                 const updated = await productsService.update(targetProductId, updates);
