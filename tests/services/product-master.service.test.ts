@@ -15,7 +15,7 @@ vi.mock('../../utils/logger', () => ({
 
 const chain = (result: unknown) => {
     const c: Record<string, unknown> = {};
-    ['select', 'eq', 'insert'].forEach(m => { c[m] = vi.fn(() => c); });
+    ['select', 'eq', 'insert', 'update'].forEach(m => { c[m] = vi.fn(() => c); });
     c.maybeSingle = vi.fn(() => Promise.resolve(result));
     c.single = vi.fn(() => Promise.resolve(result));
     return c;
