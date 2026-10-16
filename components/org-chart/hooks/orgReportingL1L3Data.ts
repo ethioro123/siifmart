@@ -29,26 +29,26 @@ export const L1_L3_REPORTING_REGISTRY: Record<string, RoleReportingMeta> = {
     // =========================================================================
     // LEVEL 2: CORPORATE & REGIONAL DIRECTORS
     // =========================================================================
-    regional_manager: {
-        role: 'regional_manager',
-        level: 2,
-        levelCategory: 'director',
-        levelTag: 'L2 Director',
-        reportsToRole: 'super_admin',
-        reportsToLabel: 'CEO',
-        managesRoles: ['operations_manager', 'supply_chain_manager', 'store_manager', 'warehouse_manager'],
-        isManagerial: true
-    },
     operations_manager: {
         role: 'operations_manager',
         level: 2,
         levelCategory: 'director',
-        levelTag: 'L2 Director',
-        reportsToRole: 'regional_manager',
-        reportsToLabel: 'Regional Manager',
+        levelTag: 'L2 Operations Director',
+        reportsToRole: 'super_admin',
+        reportsToLabel: 'CEO / Executive Leadership',
+        managesRoles: ['regional_manager', 'supply_chain_manager', 'store_manager', 'warehouse_manager', 'security_manager', 'cs_manager', 'store_operations_auditor'],
+        isManagerial: true
+    },
+    regional_manager: {
+        role: 'regional_manager',
+        level: 2,
+        levelCategory: 'director',
+        levelTag: 'L2 Regional Director',
+        reportsToRole: 'operations_manager',
+        reportsToLabel: 'Operations Manager (Corporate HQ)',
         dottedLineRole: 'super_admin',
-        dottedLineLabel: 'CEO (HQ Executive Reporting)',
-        managesRoles: ['store_manager', 'warehouse_manager', 'security_manager', 'cs_manager', 'store_operations_auditor'],
+        dottedLineLabel: 'CEO (Executive Oversight)',
+        managesRoles: ['store_manager', 'warehouse_manager', 'regional_procurement_lead', 'regional_finance_officer', 'regional_hr_officer', 'regional_logistics_lead', 'regional_security_supervisor'],
         isManagerial: true
     },
     supply_chain_manager: {
@@ -56,8 +56,8 @@ export const L1_L3_REPORTING_REGISTRY: Record<string, RoleReportingMeta> = {
         level: 2,
         levelCategory: 'director',
         levelTag: 'L2 Director',
-        reportsToRole: 'regional_manager',
-        reportsToLabel: 'Regional Manager',
+        reportsToRole: 'operations_manager',
+        reportsToLabel: 'Operations Manager',
         dottedLineRole: 'super_admin',
         dottedLineLabel: 'CEO (Strategic Sourcing & Logistics)',
         managesRoles: ['demand_planner', 'replenishment_planner', 'logistics_manager', 'inventory_manager'],
@@ -105,6 +105,66 @@ export const L1_L3_REPORTING_REGISTRY: Record<string, RoleReportingMeta> = {
         managesRoles: ['merchandiser'],
         isManagerial: true
     },
+    regional_procurement_lead: {
+        role: 'regional_procurement_lead',
+        level: 2,
+        levelCategory: 'director',
+        levelTag: 'L2 Regional Procurement',
+        reportsToRole: 'regional_manager',
+        reportsToLabel: 'Regional Manager (Territory Administration)',
+        dottedLineRole: 'procurement_manager',
+        dottedLineLabel: 'Procurement Manager (Corporate Sourcing)',
+        managesRoles: ['buyer', 'vendor_relations_manager'],
+        isManagerial: true
+    },
+    regional_finance_officer: {
+        role: 'regional_finance_officer',
+        level: 2,
+        levelCategory: 'director',
+        levelTag: 'L2 Regional Finance',
+        reportsToRole: 'regional_manager',
+        reportsToLabel: 'Regional Manager (Territory Administration)',
+        dottedLineRole: 'finance_manager',
+        dottedLineLabel: 'Finance Manager (Corporate Finance & Audit)',
+        managesRoles: ['accountant', 'treasury_officer'],
+        isManagerial: true
+    },
+    regional_hr_officer: {
+        role: 'regional_hr_officer',
+        level: 2,
+        levelCategory: 'director',
+        levelTag: 'L2 Regional HR',
+        reportsToRole: 'regional_manager',
+        reportsToLabel: 'Regional Manager (Territory Administration)',
+        dottedLineRole: 'hr_manager',
+        dottedLineLabel: 'HR Manager (Corporate People & Payroll)',
+        managesRoles: ['talent_recruiter', 'training_coordinator'],
+        isManagerial: true
+    },
+    regional_logistics_lead: {
+        role: 'regional_logistics_lead',
+        level: 2,
+        levelCategory: 'director',
+        levelTag: 'L2 Regional Logistics',
+        reportsToRole: 'regional_manager',
+        reportsToLabel: 'Regional Manager (Territory Administration)',
+        dottedLineRole: 'supply_chain_manager',
+        dottedLineLabel: 'Supply Chain Manager (Corporate Fulfillment)',
+        managesRoles: ['logistics_manager', 'dispatch_manager'],
+        isManagerial: true
+    },
+    regional_security_supervisor: {
+        role: 'regional_security_supervisor',
+        level: 2,
+        levelCategory: 'director',
+        levelTag: 'L2 Regional Security',
+        reportsToRole: 'regional_manager',
+        reportsToLabel: 'Regional Manager (Territory Administration)',
+        dottedLineRole: 'operations_manager',
+        dottedLineLabel: 'Operations Manager (Enterprise Asset Protection)',
+        managesRoles: ['security_manager', 'loss_prevention'],
+        isManagerial: true
+    },
 
     // =========================================================================
     // LEVEL 3: FACILITY OPERATIONS MANAGERS & SUPERVISORS
@@ -114,10 +174,10 @@ export const L1_L3_REPORTING_REGISTRY: Record<string, RoleReportingMeta> = {
         level: 3,
         levelCategory: 'supervisor',
         levelTag: 'L3 Store Captain',
-        reportsToRole: 'operations_manager',
-        reportsToLabel: 'Operations Manager',
-        dottedLineRole: 'finance_manager',
-        dottedLineLabel: 'Finance Manager (Daily Drawer & Z-Reports)',
+        reportsToRole: 'regional_manager',
+        reportsToLabel: 'Regional Manager (Territory Administration)',
+        dottedLineRole: 'operations_manager',
+        dottedLineLabel: 'Operations Manager (HQ Operational Standards)',
         managesRoles: ['assistant_manager', 'store_supervisor', 'shift_lead', 'merchandiser', 'returns_clerk'],
         isManagerial: true
     },
@@ -126,10 +186,10 @@ export const L1_L3_REPORTING_REGISTRY: Record<string, RoleReportingMeta> = {
         level: 3,
         levelCategory: 'supervisor',
         levelTag: 'L3 Fulfillment Captain',
-        reportsToRole: 'operations_manager',
-        reportsToLabel: 'Operations Manager',
-        dottedLineRole: 'supply_chain_manager',
-        dottedLineLabel: 'Supply Chain Mgr (Cross-Dock & DC Flow)',
+        reportsToRole: 'regional_manager',
+        reportsToLabel: 'Regional Manager (Territory Administration)',
+        dottedLineRole: 'operations_manager',
+        dottedLineLabel: 'Operations Manager (HQ Operational Standards)',
         managesRoles: ['receiver', 'picker', 'packer', 'forklift_operator'],
         isManagerial: true
     },

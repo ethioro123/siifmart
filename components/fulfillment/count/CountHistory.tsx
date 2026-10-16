@@ -135,7 +135,7 @@ export const CountHistory: React.FC<CountHistoryProps> = ({
                                         className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-4 hover:border-[var(--theme-accent)]/40 transition-colors shadow-sm cursor-pointer flex flex-col justify-between gap-3"
                                     >
                                         <div className="flex justify-between items-start gap-2">
-                                            <span className="text-xs font-mono tabular-nums text-[var(--theme-accent)] font-semibold truncate">
+                                            <span className="text-xs font-mono tabular-nums text-[var(--theme-accent)] font-semibold break-words">
                                                 {m.id.slice(0, 10)}
                                             </span>
                                             <span className={`text-[11px] px-2.5 py-0.5 rounded-full uppercase font-semibold border ${
@@ -148,7 +148,7 @@ export const CountHistory: React.FC<CountHistoryProps> = ({
                                         </div>
                                         <div className="flex justify-between items-end gap-2 pt-2 border-t border-[var(--theme-border)]">
                                             <div className="min-w-0 flex-1">
-                                                <p className="text-xs font-medium text-[var(--theme-text-primary)] truncate">
+                                                <p className="text-xs font-medium text-[var(--theme-text-primary)] break-words leading-tight">
                                                     {product?.name || 'Unknown Item'}
                                                 </p>
                                                 <p className="text-[11px] font-mono tabular-nums text-[var(--theme-text-secondary)] mt-0.5">

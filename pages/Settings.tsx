@@ -27,7 +27,16 @@ type SettingsTab = 'general' | 'inventory' | 'pos' | 'discounts' | 'finance' | '
 
 export default function SettingsPage() {
     const { user } = useStore();
-    const [activeTab, setActiveTab] = useState<SettingsTab>('general');
+    const isRegionalStaff = user?.scopeLevel === 'REGIONAL' || (user as any)?.scope_level === 'REGIONAL' || [
+        'regional_manager',
+        'regional_procurement_lead',
+        'regional_finance_officer',
+        'regional_hr_officer',
+        'regional_logistics_lead',
+        'regional_security_supervisor'
+    ].includes(user?.role || '');
+
+    const [activeTab, setActiveTab] = useState<SettingsTab>(isRegionalStaff ? 'regions' : 'general');
     const [isNavOpen, setIsNavOpen] = useState(false);
 
     const TabButton = ({ id, icon: Icon, label }: { id: SettingsTab, icon: LucideIcon, label: string }) => (
@@ -72,59 +81,82 @@ export default function SettingsPage() {
                         </button>
                     </div>
 
-                    <p className="text-[11px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider mb-2 px-2">Operational Rules</p>
-                    <Protected permission="ACCESS_SETTINGS">
-                        <TabButton id="general" icon={Globe} label="General & Slogan" />
-                    </Protected>
-                    <Protected permission="MANAGE_WAREHOUSE">
-                        <TabButton id="locations" icon={MapPin} label="Locations & Sites" />
-                    </Protected>
-                    <Protected permission="MANAGE_WAREHOUSE">
-                        <TabButton id="regions" icon={Network} label="Regional Administration" />
-                    </Protected>
-                    <Protected permission="MANAGE_WAREHOUSE">
-                        <TabButton id="inventory" icon={Box} label="WMS & Inbound Rules" />
-                    </Protected>
-                    <Protected permission="EDIT_OPERATIONAL_SETTINGS">
-                        <TabButton id="pos" icon={ShoppingCart} label="POS & Retail Station" />
-                    </Protected>
-                    <Protected permission="EDIT_OPERATIONAL_SETTINGS">
-                        <TabButton id="discounts" icon={Tag} label="Discount & Promo Codes" />
-                    </Protected>
-                    <Protected permission="ACCESS_FINANCE">
-                        <TabButton id="finance" icon={DollarSign} label="Financial & Tax Policy" />
-                    </Protected>
-                    <Protected permission="EDIT_EMPLOYEE">
-                        <TabButton id="hr" icon={Users} label="HR & Workforce Policy" />
-                    </Protected>
-                    <Protected permission="EDIT_SYSTEM_SETTINGS">
-                        <TabButton id="infrastructure" icon={Printer} label="Infrastructure & Devices" />
-                    </Protected>
-
-                    {(user?.role === 'super_admin' || user?.role === 'admin' || user?.role === 'auditor') && (
+                    {isRegionalStaff ? (
                         <>
-                            <p className="text-[11px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider mt-4 mb-2 px-2">Enterprise Security</p>
-                            <Protected permission="MANAGE_ROLES">
-                                <TabButton id="roles" icon={Users} label="Roles & Zero-Trust" />
-                            </Protected>
-                            <Protected permission="EDIT_SYSTEM_SETTINGS">
-                                <TabButton id="security" icon={Shield} label="Loss Prevention & PIN" />
-                            </Protected>
-                            <Protected permission="EDIT_SYSTEM_SETTINGS">
-                                <TabButton id="integrations" icon={CloudLightning} label="API & Integrations" />
-                            </Protected>
-                            <Protected permission="VIEW_AUDIT_LOGS">
-                                <TabButton id="audit" icon={FileText} label="System Audit Log" />
-                            </Protected>
-                            <Protected permission="ACCESS_SETTINGS">
-                                <TabButton id="notifications" icon={Bell} label="Alert Notifications" />
-                            </Protected>
-                            <Protected permission="EDIT_SYSTEM_SETTINGS">
-                                <TabButton id="data" icon={Database} label="Data Management" />
+                            <p className="text-[11px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider mb-2 px-2">Regional Operational Config</p>
+                            <Protected permission="MANAGE_WAREHOUSE">
+                                <TabButton id="regions" icon={Network} label="Regional Administration" />
                             </Protected>
                             <Protected permission="MANAGE_WAREHOUSE">
-                                <TabButton id="gamification" icon={Trophy} label="Warehouse Gamification" />
+                                <TabButton id="locations" icon={MapPin} label="Locations & Sites" />
                             </Protected>
+                            <Protected permission="EDIT_OPERATIONAL_SETTINGS">
+                                <TabButton id="pos" icon={ShoppingCart} label="POS & Retail Station" />
+                            </Protected>
+                            <Protected permission="EDIT_OPERATIONAL_SETTINGS">
+                                <TabButton id="discounts" icon={Tag} label="Discount & Promo Codes" />
+                            </Protected>
+                            <Protected permission="EDIT_SYSTEM_SETTINGS">
+                                <TabButton id="infrastructure" icon={Printer} label="Infrastructure & Devices" />
+                            </Protected>
+                        </>
+                    ) : (
+                        <>
+                            <p className="text-[11px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider mb-2 px-2">Operational Rules</p>
+                            <Protected permission="ACCESS_SETTINGS">
+                                <TabButton id="general" icon={Globe} label="General & Slogan" />
+                            </Protected>
+                            <Protected permission="MANAGE_WAREHOUSE">
+                                <TabButton id="locations" icon={MapPin} label="Locations & Sites" />
+                            </Protected>
+                            <Protected permission="MANAGE_WAREHOUSE">
+                                <TabButton id="regions" icon={Network} label="Regional Administration" />
+                            </Protected>
+                            <Protected permission="MANAGE_WAREHOUSE">
+                                <TabButton id="inventory" icon={Box} label="WMS & Inbound Rules" />
+                            </Protected>
+                            <Protected permission="EDIT_OPERATIONAL_SETTINGS">
+                                <TabButton id="pos" icon={ShoppingCart} label="POS & Retail Station" />
+                            </Protected>
+                            <Protected permission="EDIT_OPERATIONAL_SETTINGS">
+                                <TabButton id="discounts" icon={Tag} label="Discount & Promo Codes" />
+                            </Protected>
+                            <Protected permission="ACCESS_FINANCE">
+                                <TabButton id="finance" icon={DollarSign} label="Financial & Tax Policy" />
+                            </Protected>
+                            <Protected permission="EDIT_EMPLOYEE">
+                                <TabButton id="hr" icon={Users} label="HR & Workforce Policy" />
+                            </Protected>
+                            <Protected permission="EDIT_SYSTEM_SETTINGS">
+                                <TabButton id="infrastructure" icon={Printer} label="Infrastructure & Devices" />
+                            </Protected>
+
+                            {(user?.role === 'super_admin' || user?.role === 'admin' || user?.role === 'auditor') && (
+                                <>
+                                    <p className="text-[11px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider mt-4 mb-2 px-2">Enterprise Security</p>
+                                    <Protected permission="MANAGE_ROLES">
+                                        <TabButton id="roles" icon={Users} label="Roles & Zero-Trust" />
+                                    </Protected>
+                                    <Protected permission="EDIT_SYSTEM_SETTINGS">
+                                        <TabButton id="security" icon={Shield} label="Loss Prevention & PIN" />
+                                    </Protected>
+                                    <Protected permission="EDIT_SYSTEM_SETTINGS">
+                                        <TabButton id="integrations" icon={CloudLightning} label="API & Integrations" />
+                                    </Protected>
+                                    <Protected permission="VIEW_AUDIT_LOGS">
+                                        <TabButton id="audit" icon={FileText} label="System Audit Log" />
+                                    </Protected>
+                                    <Protected permission="ACCESS_SETTINGS">
+                                        <TabButton id="notifications" icon={Bell} label="Alert Notifications" />
+                                    </Protected>
+                                    <Protected permission="EDIT_SYSTEM_SETTINGS">
+                                        <TabButton id="data" icon={Database} label="Data Management" />
+                                    </Protected>
+                                    <Protected permission="MANAGE_WAREHOUSE">
+                                        <TabButton id="gamification" icon={Trophy} label="Warehouse Gamification" />
+                                    </Protected>
+                                </>
+                            )}
                         </>
                     )}
                 </div>

@@ -16,6 +16,9 @@ import type { UserRole } from './auth.service';
 export const ROLE_PERMISSIONS: Record<string, string[]> = {
     // ═══ LEVEL 1 - EXECUTIVE ═══
     super_admin: ['*'], // CEO / Owner - Full Access to EVERYTHING
+    admin: [
+        'dashboard', 'admin', 'regional-ops', 'pos', 'inventory', 'warehouse', 'sales', 'customers', 'employees', 'pricing', 'finance', 'procurement', 'settings', 'profile'
+    ],
 
     // ═══ LEVEL 2 - REGIONAL/DIRECTORS ═══
     regional_manager: [
@@ -38,6 +41,21 @@ export const ROLE_PERMISSIONS: Record<string, string[]> = {
     ],
     merchandising_manager: [
         'dashboard', 'admin', 'pricing', 'inventory', 'sales', 'procurement', 'profile'
+    ],
+    regional_procurement_lead: [
+        'dashboard', 'procurement', 'inventory', 'pricing', 'customers', 'profile'
+    ],
+    regional_finance_officer: [
+        'dashboard', 'finance', 'sales', 'pos', 'profile'
+    ],
+    regional_hr_officer: [
+        'dashboard', 'employees', 'profile'
+    ],
+    regional_logistics_lead: [
+        'dashboard', 'warehouse', 'inventory', 'procurement', 'profile'
+    ],
+    regional_security_supervisor: [
+        'dashboard', 'settings', 'pos', 'inventory', 'sales', 'employees', 'profile'
     ],
 
     // ═══ LEVEL 3 - SITE MANAGERS ═══
@@ -88,9 +106,6 @@ export const ROLE_PERMISSIONS: Record<string, string[]> = {
     fleet_maintenance_supervisor: ['dashboard', 'warehouse', 'inventory', 'employees', 'profile'],
 
     // ═══ LEGACY ROLES (backwards compatibility) ═══
-    // admin: stripped to read-only — no active users should have this role.
-    // Use super_admin (CEO) or regional_manager instead.
-    admin: ['dashboard', 'profile'],
     manager: ['dashboard', 'pos', 'inventory', 'sales', 'customers', 'profile'],
     hr: ['dashboard', 'employees', 'profile'],
     pos: ['dashboard', 'pos', 'profile'],
@@ -124,7 +139,7 @@ export function canAccessRoute(userRole: UserRole, route: string): boolean {
  */
 export function getAvailableSections(userRole: UserRole, siteType?: string): string[] {
     const basePermissions = ROLE_PERMISSIONS[userRole] || [];
-    if (basePermissions.includes('*') || ['regional_manager', 'operations_manager'].includes(userRole)) return basePermissions;
+    if (basePermissions.includes('*') || ['admin', 'regional_manager', 'operations_manager', 'regional_procurement_lead', 'regional_finance_officer', 'regional_hr_officer', 'regional_logistics_lead', 'regional_security_supervisor'].includes(userRole)) return basePermissions;
     if (!siteType) return basePermissions;
 
     if (siteType === 'Store' || siteType === 'Dark Store') {

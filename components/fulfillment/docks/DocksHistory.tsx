@@ -2,6 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { History as HistoryIcon, Search, Clock, User as UserIcon } from 'lucide-react';
 import Pagination from '../../shared/Pagination';
 import { PurchaseOrder } from '../../../types';
+import { resolveFulfillmentWorker } from '../../../utils/fulfillmentUserResolver';
 
 interface DocksHistoryProps {
     orders: PurchaseOrder[];
@@ -110,12 +111,25 @@ export const DocksHistory: React.FC<DocksHistoryProps> = ({ orders, t }) => {
                                         <span className="text-xs font-medium text-[var(--theme-text-secondary)]">{po.supplierName}</span>
                                     </td>
                                     <td className="px-4 py-3.5">
-                                        <div className="flex items-center gap-2">
-                                            <div className="w-5 h-5 rounded-full bg-primary/10 flex items-center justify-center border border-primary/20 shrink-0">
-                                                <UserIcon size={11} className="text-primary" />
-                                            </div>
-                                            <span className="text-xs font-medium text-[var(--theme-text-secondary)]">{po.approvedBy || '-'}</span>
-                                        </div>
+                                        {(() => {
+                                            const approver = resolveFulfillmentWorker({
+                                                userId: po.approvedBy || po.receivedBy || po.createdBy,
+                                                job: null,
+                                                employees: [],
+                                                sites: [],
+                                                siteId: po.siteId
+                                            });
+                                            return (
+                                                <div className="flex items-center gap-2">
+                                                    <div className="w-5 h-5 rounded-full bg-primary/10 flex items-center justify-center border border-primary/20 shrink-0">
+                                                        <UserIcon size={11} className="text-primary" />
+                                                    </div>
+                                                    <span className="text-xs font-medium text-[var(--theme-text-secondary)] break-words leading-tight">
+                                                        {po.approvedBy ? `${approver.name} (${approver.code || approver.displayId})` : '-'}
+                                                    </span>
+                                                </div>
+                                            );
+                                        })()}
                                     </td>
                                     <td className="px-4 py-3.5">
                                         <span className="text-xs font-mono tabular-nums text-[var(--theme-text-muted)]">{po.lineItems?.length || 0} items</span>

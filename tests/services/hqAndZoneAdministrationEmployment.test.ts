@@ -347,8 +347,8 @@ describe('HQ and Zone Administration Employment & Hierarchy Lifecycle', () => {
     describe('4. Directory Hierarchy Sorting & Seniority Rank', () => {
         it('verifies strict descending hierarchy ranks from Executive to Staff', () => {
             const ceoRank = getRoleHierarchy('super_admin');
-            const regionalMgrRank = getRoleHierarchy('regional_manager');
             const opsMgrRank = getRoleHierarchy('operations_manager');
+            const regionalMgrRank = getRoleHierarchy('regional_manager');
             const hrMgrRank = getRoleHierarchy('hr_manager');
             const storeMgrRank = getRoleHierarchy('store_manager');
             const shiftLeadRank = getRoleHierarchy('shift_lead');
@@ -357,8 +357,8 @@ describe('HQ and Zone Administration Employment & Hierarchy Lifecycle', () => {
             const driverRank = getRoleHierarchy('driver');
 
             expect(ceoRank).toBe(100);
-            expect(regionalMgrRank).toBe(95);
-            expect(opsMgrRank).toBe(90);
+            expect(opsMgrRank).toBe(95);
+            expect(regionalMgrRank).toBe(90);
             expect(hrMgrRank).toBe(85);
             expect(storeMgrRank).toBe(80);
             expect(shiftLeadRank).toBe(55);
@@ -366,9 +366,9 @@ describe('HQ and Zone Administration Employment & Hierarchy Lifecycle', () => {
             expect(pickerRank).toBe(22);
             expect(driverRank).toBe(20);
 
-            expect(ceoRank).toBeGreaterThan(regionalMgrRank);
-            expect(regionalMgrRank).toBeGreaterThan(opsMgrRank);
-            expect(opsMgrRank).toBeGreaterThan(hrMgrRank);
+            expect(ceoRank).toBeGreaterThan(opsMgrRank);
+            expect(opsMgrRank).toBeGreaterThan(regionalMgrRank);
+            expect(regionalMgrRank).toBeGreaterThan(hrMgrRank);
             expect(hrMgrRank).toBeGreaterThan(storeMgrRank);
             expect(storeMgrRank).toBeGreaterThan(shiftLeadRank);
             expect(shiftLeadRank).toBeGreaterThan(cashierRank);

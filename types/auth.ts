@@ -45,6 +45,8 @@ export interface User {
   country_code?: string;
   regionCode?: string;
   region_code?: string;
+  scopeLevel?: 'HQ' | 'REGIONAL';
+  scope_level?: 'HQ' | 'REGIONAL';
   loginLocation?: string;
 }
 

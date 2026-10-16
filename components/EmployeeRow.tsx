@@ -91,12 +91,27 @@ export default function EmployeeRow({
                 <div className="flex items-center gap-1.5">
                     <MapPin size={12} className="flex-shrink-0 text-[var(--theme-text-muted)]" />
                     {siteInfo.isWarning ? (
-                        <span className="truncate text-amber-600 dark:text-amber-400 font-medium flex items-center gap-1" title="Branch personnel requires store/warehouse assignment">
+                        <span className="truncate text-amber-600 dark:text-amber-400 font-medium flex items-center gap-1" title="Workplace facility assignment is mandatory">
                             <AlertTriangle size={11} className="flex-shrink-0" />
                             {siteInfo.label}
                         </span>
                     ) : (
-                        <span className="truncate font-medium">{siteInfo.label}</span>
+                        <span className="truncate font-medium flex items-center gap-1.5">
+                            <span>{siteInfo.label}</span>
+                            {siteInfo.isCEO ? (
+                                <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-purple-500/10 text-purple-600 dark:text-purple-400 border border-purple-500/20 shrink-0 font-semibold" title="CEO sovereign authority across all facilities">
+                                    GLOBAL
+                                </span>
+                            ) : siteInfo.facilityId ? (
+                                <span className={`text-[9px] font-mono px-1.5 py-0.2 rounded shrink-0 font-semibold ${
+                                    siteInfo.isHQ 
+                                        ? 'bg-[#0071E3]/10 text-[#0071E3] dark:text-[#2997FF] border border-[#0071E3]/20' 
+                                        : 'bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] border border-[var(--theme-border)]'
+                                }`} title={`Assigned Facility ID: ${siteInfo.facilityId}`}>
+                                    {siteInfo.facilityId}
+                                </span>
+                            ) : null}
+                        </span>
                     )}
                 </div>
                 {canSeeLocation && geofence ? (

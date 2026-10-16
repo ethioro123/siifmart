@@ -57,9 +57,10 @@ await productsService.update(id, { stock: newStock });
 - A setting configured for one country (e.g. Ethiopia `ET`) MUST NEVER apply to, affect, or override another country (e.g. Kenya `KE`).
 - Settings storage (`system_config`), queries, and mutations must be explicitly scoped to `country_code`.
 
-### Database Migrations & Mandatory In-Chat SQL Delivery
-- **Every database change MUST have a migration file** in `/migrations/` named `YYYYMMDD_description.sql`.
+### Database Migrations, Persistent Files & SQL Execution Status
+- **Every database change MUST FIRST have a persistent migration file** in `/migrations/` named `YYYYMMDD_description.sql`. Creating this permanent, version-controlled file on disk is paramount and takes precedence over in-chat snippets. Never write, propose, or generate SQL without first creating the migration file on disk.
 - **Mandatory In-Chat SQL Delivery**: Whenever ANY SQL migration, table, column, index, RPC function, or RLS policy is created or modified while coding, the AI MUST bring the complete, runnable, copy-pasteable SQL directly into the chat response every single time so the user can easily copy and execute it in Supabase SQL Editor. Never silently create or modify migration files without delivering the full runnable SQL in the chat.
+- **Mandatory SQL Execution Status Notification**: The AI must ALWAYS explicitly inform the user whether the SQL migration file has already been applied/run in the database (e.g. via automated migration tools/Supabase MCP) or if it still requires manual execution by the user in the Supabase SQL Editor.
 
 ### Synaptic Neural Mesh Pattern (Zero Dead-End Mutations)
 - **Every mutation MUST stimulate downstream operational synapses**: An update to one entity cannot stop at a single row write. It must propagate state changes, cache invalidations, and audit signals across the interconnected event mesh (POS → Inventory → WMS → Financials → Gamification → CentralOps).
@@ -80,9 +81,10 @@ To minimize token consumption while maximizing engineering precision, speed, and
 - **Schema-First Verification (Zero Guessing Invariant)**: NEVER guess table column names or types (e.g. assuming `started_at` exists). Verify against `information_schema.columns` or `types/` before constructing projections or mutations. One query saves thousands of tokens in 400 Bad Request debug loops.
 - **High-Signal Conciseness**: Deliver solutions, diffs, and SQL directly. Avoid conversational filler, apologies, restating user prompts, or repeating unchanged code.
 - **Selective Audit Reporting**: Full 15-category checklist is reserved for explicit audit requests (`/audit`) or major multi-file milestones; routine edits confirm compliance concisely in bullet points.
-- **Rule 9 In-Chat SQL Delivery**: Whenever database entities are added/modified, deliver complete, runnable, copy-pasteable SQL in the response and save to `migrations/YYYYMMDD_<name>.sql`.
+- **Rule 9 (Persistent Migration File is Paramount & Execution Status)**: Whenever database entities are added/modified, FIRST save the complete runnable SQL to a persistent version-controlled file in `migrations/YYYYMMDD_<name>.sql` (paramount requirement), deliver the exact same runnable SQL in the chat response, AND explicitly inform the user whether the SQL migration file has already been applied/run in the database or still requires manual execution in Supabase.
 - **Zero Guessing / Single-Shot Accuracy**: Diagnose root causes from logs/types before proposing code changes. Do not try blind iterative patches.
 - **Strict File Modularity (< 500 Lines)**: Split components and hooks before they exceed 500 lines to ensure fast editing, minimal context window bloat, and zero truncation.
+- **Plain-Language Completion Summaries (Zero Technical Code Dumps)**: When concluding a task, NEVER provide technical code dumps, file path listings, or diff breakdowns. Always explain what was worked on in clear, plain-English, easily understandable terms describing the functional changes, user experience improvements, and business logic behavior.
 
 ---
 
@@ -938,7 +940,10 @@ When editing or creating any file, the AI MUST:
 - ❌ Don't add country selectors, dropdowns, or partition switcher banners inside individual settings pages or tabs (country switching belongs ONLY in the central CEO global switch)
 - ❌ Don't expose tenancy selection or multi-tenant mechanics to non-CEO branch users (the application must render seamlessly as a native national platform)
 - ❌ Don't require users to manually target a country when configuring settings — the system must automatically bind and isolate settings per active country in the background
+- ❌ Don't write, propose, or generate ANY SQL without FIRST creating a permanent version-controlled file in /migrations/
+- ❌ Don't rely solely on in-chat SQL without persisting it to a migration file on disk
 - ❌ Don't create or modify SQL migrations without bringing the complete, runnable SQL to the chat for the user to run in Supabase
+- ❌ Don't leave the user in the dark regarding SQL execution status — always explicitly state whether the migration file has already been applied/run or still needs manual execution in Supabase
 - ❌ Don't build isolated operational silos or dead-end mutations — every state change must stimulate its connected neural synapses (inventory, fulfillment, financials, gamification, telemetry) through the event mesh
 - ❌ Don't assign or allow floor workers (pickers, packers, receivers, inventory specialists) to perform delivery missions — deliveries are strictly locked to verified drivers
 - ❌ Don't allow transfer receiving or cargo handovers to bypass the Digital Dual-Handshake, or transfer acceptance without recording discrepancies (unrecorded variances become the accepting custodian's sole liability)

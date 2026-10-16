@@ -13,6 +13,7 @@ import { ModuleErrorBoundary } from './components/shared';
 const POSTerminal = lazy(() => import('./pages/POSTerminal'));
 const POSCommand = lazy(() => import('./pages/POSCommand'));
 const CentralOperations = lazy(() => import('./pages/CentralOperations'));
+const RegionalOperations = lazy(() => import('./pages/RegionalOperations'));
 const WMSDashboard = lazy(() => import('./pages/WMSDashboard'));
 const Inventory = lazy(() => import('./pages/Inventory'));
 const NetworkView = lazy(() => import('./pages/NetworkView'));
@@ -212,6 +213,15 @@ export default function App() {
               <ProtectedRoute module="admin">
                 <ModuleErrorBoundary moduleName="Central Operations">
                   <CentralOperations />
+                </ModuleErrorBoundary>
+              </ProtectedRoute>
+            } />
+
+            {/* Regional Operations Command - Regional Manager & Regional Leads */}
+            <Route path="/regional-ops" element={
+              <ProtectedRoute module="regional-ops">
+                <ModuleErrorBoundary moduleName="Regional Operations">
+                  <RegionalOperations />
                 </ModuleErrorBoundary>
               </ProtectedRoute>
             } />

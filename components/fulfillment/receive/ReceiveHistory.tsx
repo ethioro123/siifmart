@@ -4,6 +4,7 @@ import Pagination from '../../shared/Pagination';
 import { WMSJob, PurchaseOrder, Product } from '../../../types';
 import { formatDateTime } from '../../../utils/formatting';
 import { formatDisplayEmployeeId } from '../../../utils/employeeIdGenerator';
+import { resolveFulfillmentWorker } from '../../../utils/fulfillmentUserResolver';
 
 import { ReturnToWarehouseModal } from '../returns/ReturnToWarehouseModal';
 import { getSellUnit } from '../../../utils/units';
@@ -83,31 +84,18 @@ export const ReceiveHistory: React.FC<ReceiveHistoryProps> = ({
             const matchingJob = jobs?.find(j => j.type === 'RECEIVE' && (j.orderRef === o.id || (o.poNumber && j.jobNumber === o.poNumber))) ||
                 historicalJobs?.find(j => j.type === 'RECEIVE' && (j.orderRef === o.id || (o.poNumber && j.jobNumber === o.poNumber)));
 
-            // Resolve User Name: Prioritize the person who actually completed/received the goods
-            const userId = o.receivedBy || (o as any).received_by || matchingJob?.completedBy || (matchingJob as any)?.completed_by || (o as any).completedBy || o.approvedBy || o.createdBy;
-            const isUUID = (str: string) => /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(str);
-            let userObj = employees.find(e => 
-                e.id === userId || 
-                (e.name && userId && e.name.toLowerCase() === userId.toLowerCase()) || 
-                (e.email && userId && e.email.toLowerCase() === userId.toLowerCase()) ||
-                (e.code && userId && e.code.toLowerCase() === userId.toLowerCase())
-            );
-            if (!userObj && user && userId && (
-                userId.toLowerCase() === user.id?.toLowerCase() || 
-                userId.toLowerCase() === user.email?.toLowerCase() || 
-                userId.toLowerCase() === user.name?.toLowerCase() || 
-                userId.toLowerCase() === user.employeeId?.toLowerCase()
-            )) {
-                userObj = employees.find(e => 
-                    (e.email && user.email && e.email.toLowerCase() === user.email.toLowerCase()) || 
-                    (e.name && user.name && e.name.toLowerCase() === user.name.toLowerCase()) || 
-                    e.id === user.employeeId
-                );
-            }
-            const displayId = (userObj?.code ? formatDisplayEmployeeId(userObj.code) : '') || (userId ? (isUUID(userId) ? userId.slice(0, 8).toUpperCase() : userId) : '');
+            const rawUserId = o.receivedBy || (o as any).received_by || matchingJob?.completedBy || (matchingJob as any)?.completed_by || (o as any).completedBy || o.approvedBy || o.createdBy;
+            const resolvedWorker = resolveFulfillmentWorker({
+                userId: rawUserId,
+                job: matchingJob,
+                employees,
+                sites,
+                currentUser: user,
+                siteId: o.siteId || (o as any).site_id
+            });
             const resolvedUser = {
-                name: userObj?.name || (userId ? userId : 'System'),
-                displayId: displayId || ''
+                name: resolvedWorker.name,
+                displayId: resolvedWorker.code || resolvedWorker.displayId
             };
 
             let displayQty = '';
@@ -336,7 +324,7 @@ export const ReceiveHistory: React.FC<ReceiveHistoryProps> = ({
 
                                     {/* Main Content */}
                                     <div className="mb-4">
-                                        <h5 className="text-sm font-semibold text-[var(--theme-text-primary)] truncate tracking-tight">
+                                        <h5 className="text-sm font-semibold text-[var(--theme-text-primary)] break-words tracking-tight">
                                             {item.subtitle}
                                         </h5>
                                         <div className="flex items-center gap-2 mt-1.5 flex-wrap">
@@ -361,7 +349,7 @@ export const ReceiveHistory: React.FC<ReceiveHistoryProps> = ({
                                 <div className="flex items-center justify-between border-t border-[var(--theme-border)] pt-3 mt-auto">
                                     <div className="flex flex-col min-w-0 pr-2">
                                         <span className="text-[11px] text-[var(--theme-text-secondary)] font-medium">By</span>
-                                        <span className="text-xs font-semibold text-[var(--theme-text-primary)] truncate">
+                                        <span className="text-xs font-semibold text-[var(--theme-text-primary)] break-words leading-tight">
                                             {item.resolvedUser?.name} {item.resolvedUser?.displayId && <span className="font-mono text-[var(--theme-text-secondary)] font-normal">({item.resolvedUser.displayId})</span>}
                                         </span>
                                     </div>

@@ -1,8 +1,9 @@
 import React, { useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
     Building2, Users, DollarSign, ArrowRightLeft, ShieldCheck,
     AlertTriangle, CheckCircle2, ChevronRight, TrendingUp,
-    Store, Warehouse, MapPin, Briefcase
+    Store, Warehouse, MapPin, Briefcase, ArrowUpRight
 } from 'lucide-react';
 import { Region, Site, Employee, SaleRecord, PurchaseOrder, TransferRecord } from '../../../types';
 import { Country } from '../../../utils/localization';
@@ -32,6 +33,7 @@ export const RegionalCommandSection: React.FC<RegionalCommandSectionProps> = ({
     currencySymbol,
     onSelectRegionLens
 }) => {
+    const navigate = useNavigate();
     const { setActiveRegionCode } = useData();
 
     // Sovereign country filter: ensure zero cross-border data leakage
@@ -271,22 +273,34 @@ export const RegionalCommandSection: React.FC<RegionalCommandSectionProps> = ({
                                         </div>
                                     </div>
 
-                                    {/* Quick Lens Switcher */}
-                                    <button
-                                        type="button"
-                                        onClick={() => {
-                                            if (onSelectRegionLens) {
-                                                onSelectRegionLens(region.code);
-                                            } else {
-                                                setActiveRegionCode(region.code);
-                                            }
-                                        }}
-                                        className="px-2.5 py-1.5 rounded-xl text-xs font-semibold bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] hover:bg-[var(--theme-accent)] hover:text-white transition-colors flex items-center gap-1 shrink-0"
-                                        title="Engage Regional Lens"
-                                    >
-                                        <span>Lens</span>
-                                        <ChevronRight size={14} />
-                                    </button>
+                                    {/* Action Buttons: Lens & Full Territorial Command Inspection */}
+                                    <div className="flex items-center gap-1.5 shrink-0">
+                                        <button
+                                            type="button"
+                                            onClick={() => {
+                                                if (onSelectRegionLens) {
+                                                    onSelectRegionLens(region.code);
+                                                } else {
+                                                    setActiveRegionCode(region.code);
+                                                }
+                                            }}
+                                            className="px-2.5 py-1.5 rounded-xl text-xs font-semibold bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] border border-[var(--theme-border)] transition-colors flex items-center gap-1"
+                                            title="Engage Regional Lens"
+                                        >
+                                            <span>Lens</span>
+                                            <ChevronRight size={14} />
+                                        </button>
+
+                                        <button
+                                            type="button"
+                                            onClick={() => navigate(`/regional-ops?regionCode=${region.code}`)}
+                                            className="px-3 py-1.5 rounded-xl text-xs font-semibold bg-[var(--theme-accent)] text-white hover:opacity-90 transition-all flex items-center gap-1.5 shadow-sm"
+                                            title={`Inspect ${region.name} Regional Command`}
+                                        >
+                                            <span>Inspect</span>
+                                            <ArrowUpRight size={14} />
+                                        </button>
+                                    </div>
                                 </div>
 
                                 {/* Dynamic Spend Progress */}

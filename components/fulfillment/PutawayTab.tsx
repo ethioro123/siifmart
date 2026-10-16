@@ -427,6 +427,7 @@ export const PutawayTab: React.FC<PutawayTabProps> = ({
                                 setSelectedJob={setSelectedJob}
                                 setIsDetailsOpen={setIsDetailsOpen}
                                 employees={employees}
+                                sites={tabSites}
                                 t={t}
                             />
                         </div>

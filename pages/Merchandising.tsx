@@ -20,9 +20,21 @@ import { ShelfTagsTab } from '../components/merchandising/ShelfTagsTab';
 
 // Hooks
 import { useMerchandisingState } from '../components/merchandising/useMerchandisingState';
+import { useStore } from '../contexts/CentralStore';
+import { useData } from '../contexts/DataContext';
+import { RegionalScopeBanner } from '../components/regional-ops/RegionalScopeBanner';
 
 export default function Pricing() {
    const state = useMerchandisingState();
+   const { user } = useStore();
+   const { isRegionalUser } = useData();
+
+   const isRegionalStaff = isRegionalUser || user?.scopeLevel === 'REGIONAL' || (user as any)?.scope_level === 'REGIONAL' || [
+      'regional_manager',
+      'regional_procurement_lead',
+      'regional_finance_officer',
+      'store_manager'
+   ].includes(user?.role || '');
 
    const {
       activeTab,
@@ -114,6 +126,16 @@ export default function Pricing() {
                   </div>
                </div>
             </div>
+
+            {/* Adaptive Regional Territory Lens */}
+            <RegionalScopeBanner
+               moduleName="Merchandising"
+               guardrailBadge={
+                  <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-700 dark:text-emerald-300 text-xs font-semibold">
+                     <span>Corporate Margin Floor: 15.0% Min</span>
+                  </div>
+               }
+            />
 
             {/* Segmented Control Tabs */}
             <div className="inline-flex p-1 rounded-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border-subtle)] gap-1 flex-wrap w-fit">

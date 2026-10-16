@@ -28,11 +28,12 @@ export const PERMISSIONS = {
     // Dashboard
     VIEW_ADMIN_DASHBOARD: ['super_admin', 'admin', 'regional_manager', 'operations_manager', 'hr', 'auditor', 'finance_manager', 'it_support', 'store_operations_auditor'],
     ACCESS_ADMIN_MODULE: ['super_admin', 'admin', 'regional_manager', 'operations_manager', 'store_operations_auditor'],
+    ACCESS_REGIONAL_OPS: ['super_admin', 'CEO', 'ceo', 'admin', 'operations_manager', 'regional_manager', 'regional_procurement_lead', 'regional_finance_officer', 'regional_hr_officer', 'regional_logistics_lead', 'regional_security_supervisor', 'auditor', 'store_operations_auditor'],
     VIEW_WMS_DASHBOARD: ['super_admin', 'regional_manager', 'operations_manager', 'warehouse_manager', 'dispatcher', 'picker', 'driver', 'procurement_manager', 'inventory_specialist', 'inventory_manager', 'logistics_manager', 'fleet_maintenance_supervisor'],
     VIEW_POS_DASHBOARD: ['super_admin', 'store_manager', 'assistant_manager', 'shift_lead', 'pos', 'store_supervisor', 'cs_manager', 'operations_manager', 'regional_manager', 'finance_manager', 'auditor', 'treasury_officer', 'store_operations_auditor'],
 
     // POS
-    ACCESS_POS: ['super_admin', 'regional_manager', 'operations_manager', 'store_manager', 'assistant_manager', 'shift_lead', 'pos', 'store_supervisor', 'store_operations_auditor'],
+    ACCESS_POS: ['super_admin', 'regional_manager', 'operations_manager', 'store_manager', 'assistant_manager', 'shift_lead', 'pos', 'store_supervisor', 'store_operations_auditor', 'treasury_officer', 'regional_finance_officer'],
     PROCESS_SALE: ['super_admin', 'store_manager', 'assistant_manager', 'shift_lead', 'pos', 'store_supervisor'],
     VOID_SALE: ['super_admin', 'store_manager', 'store_supervisor'],
     REFUND_SALE: ['super_admin', 'regional_manager', 'operations_manager', 'store_manager', 'assistant_manager', 'store_supervisor', 'cs_manager'],
@@ -40,7 +41,7 @@ export const PERMISSIONS = {
     VIEW_ALL_TRANSACTIONS: ['super_admin', 'regional_manager', 'operations_manager', 'store_manager', 'assistant_manager', 'shift_lead', 'auditor', 'finance_manager', 'store_supervisor', 'treasury_officer', 'store_operations_auditor'],
 
     // Inventory - Strictly Warehouse & Distribution Center Only
-    ACCESS_INVENTORY: ['super_admin', 'admin', 'regional_manager', 'operations_manager', 'warehouse_manager', 'dispatcher', 'auditor', 'inventory_specialist', 'inventory_manager', 'demand_planner', 'inbound_qc_inspector', 'replenishment_planner', 'store_operations_auditor'],
+    ACCESS_INVENTORY: ['super_admin', 'admin', 'regional_manager', 'operations_manager', 'procurement_manager', 'warehouse_manager', 'dispatcher', 'auditor', 'inventory_specialist', 'inventory_manager', 'demand_planner', 'inbound_qc_inspector', 'replenishment_planner', 'store_operations_auditor', 'regional_procurement_lead', 'regional_logistics_lead'],
     ADD_PRODUCT: ['super_admin', 'admin', 'warehouse_manager'],
     EDIT_PRODUCT: ['super_admin', 'admin', 'warehouse_manager'],
     DELETE_PRODUCT: ['super_admin'],
@@ -63,7 +64,7 @@ export const PERMISSIONS = {
     VIEW_CUSTOMER_HISTORY: ['super_admin', 'store_manager', 'assistant_manager', 'shift_lead', 'auditor', 'cs_manager', 'credit_control_officer'],
 
     // Employees
-    ACCESS_EMPLOYEES: ['super_admin', 'admin', 'regional_manager', 'operations_manager', 'hr', 'hr_manager', 'warehouse_manager', 'store_manager', 'assistant_manager', 'shift_lead', 'store_supervisor', 'security_manager', 'logistics_manager', 'inventory_manager', 'training_coordinator', 'payroll_specialist', 'talent_recruiter', 'fleet_maintenance_supervisor'],
+    ACCESS_EMPLOYEES: ['super_admin', 'admin', 'regional_manager', 'operations_manager', 'hr', 'hr_manager', 'warehouse_manager', 'store_manager', 'assistant_manager', 'shift_lead', 'store_supervisor', 'security_manager', 'logistics_manager', 'inventory_manager', 'training_coordinator', 'payroll_specialist', 'talent_recruiter', 'fleet_maintenance_supervisor', 'regional_hr_officer'],
     ADD_EMPLOYEE: ['super_admin', 'admin', 'hr', 'hr_manager', 'talent_recruiter', 'operations_manager', 'regional_manager'],
     EDIT_EMPLOYEE: ['super_admin', 'admin', 'hr', 'hr_manager', 'it_support', 'payroll_specialist', 'talent_recruiter'],
     DELETE_EMPLOYEE: ['super_admin'],
@@ -77,7 +78,7 @@ export const PERMISSIONS = {
     APPROVE_EMPLOYEE: ['super_admin', 'admin', 'hr', 'hr_manager', 'regional_manager', 'operations_manager'],
 
     // Procurement
-    ACCESS_PROCUREMENT: ['super_admin', 'admin', 'regional_manager', 'operations_manager', 'procurement_manager', 'supply_chain_manager', 'buyer', 'demand_planner', 'vendor_relations_manager', 'customs_import_specialist', 'replenishment_planner'],
+    ACCESS_PROCUREMENT: ['super_admin', 'admin', 'regional_manager', 'operations_manager', 'procurement_manager', 'supply_chain_manager', 'buyer', 'demand_planner', 'vendor_relations_manager', 'customs_import_specialist', 'replenishment_planner', 'credit_control_officer', 'inbound_qc_inspector', 'regional_procurement_lead'],
     CREATE_PO: ['super_admin', 'admin', 'procurement_manager', 'buyer', 'supply_chain_manager'],
     APPROVE_PO: ['super_admin', 'admin', 'regional_manager', 'operations_manager', 'procurement_manager'],
     RECEIVE_PO: ['super_admin', 'warehouse_manager', 'dispatcher', 'inventory_specialist'],
@@ -85,7 +86,7 @@ export const PERMISSIONS = {
     MANAGE_SUPPLIERS: ['super_admin', 'admin', 'procurement_manager', 'vendor_relations_manager'],
 
     // Finance
-    ACCESS_FINANCE: ['super_admin', 'admin', 'regional_manager', 'operations_manager', 'auditor', 'finance_manager', 'accountant', 'payroll_specialist', 'treasury_officer', 'tax_compliance_officer', 'credit_control_officer'],
+    ACCESS_FINANCE: ['super_admin', 'admin', 'regional_manager', 'operations_manager', 'auditor', 'finance_manager', 'accountant', 'payroll_specialist', 'treasury_officer', 'tax_compliance_officer', 'credit_control_officer', 'regional_finance_officer', 'procurement_manager'],
     VIEW_REVENUE: ['super_admin', 'regional_manager', 'operations_manager', 'auditor', 'finance_manager', 'treasury_officer', 'tax_compliance_officer', 'credit_control_officer'],
     VIEW_EXPENSES: ['super_admin', 'admin', 'regional_manager', 'operations_manager', 'auditor', 'finance_manager', 'treasury_officer', 'tax_compliance_officer', 'credit_control_officer'],
     ADD_EXPENSE: ['super_admin', 'finance_manager'],
@@ -100,7 +101,7 @@ export const PERMISSIONS = {
     APPROVE_PRICE_CHANGE: ['super_admin', 'merchandising_manager', 'regional_manager', 'finance_manager'],
 
     // Warehouse
-    ACCESS_WAREHOUSE: ['super_admin', 'regional_manager', 'operations_manager', 'warehouse_manager', 'dispatcher', 'picker', 'driver', 'inventory_specialist', 'packer', 'receiver', 'logistics_manager', 'inventory_manager', 'inbound_qc_inspector', 'fleet_maintenance_supervisor', 'replenishment_planner'],
+    ACCESS_WAREHOUSE: ['super_admin', 'regional_manager', 'operations_manager', 'warehouse_manager', 'dispatcher', 'picker', 'driver', 'inventory_specialist', 'packer', 'receiver', 'logistics_manager', 'inventory_manager', 'inbound_qc_inspector', 'fleet_maintenance_supervisor', 'replenishment_planner', 'regional_logistics_lead'],
     MANAGE_WAREHOUSE: ['super_admin', 'warehouse_manager', 'inventory_specialist'],
     ASSIGN_TASKS: ['super_admin', 'warehouse_manager', 'dispatcher', 'inventory_specialist', 'logistics_manager', 'fleet_maintenance_supervisor'],
     COMPLETE_TASKS: ['super_admin', 'warehouse_manager', 'dispatcher', 'picker', 'driver', 'packer', 'receiver'],
@@ -111,11 +112,11 @@ export const PERMISSIONS = {
     MANAGE_REPLENISHMENT: ['super_admin', 'warehouse_manager', 'dispatcher', 'inventory_specialist', 'replenishment_planner'],
 
     // Settings
-    ACCESS_SETTINGS: ['super_admin', 'admin', 'regional_manager', 'operations_manager', 'it_support', 'security_manager', 'auditor'],
+    ACCESS_SETTINGS: ['super_admin', 'admin', 'regional_manager', 'operations_manager', 'it_support', 'security_manager', 'auditor', 'regional_security_supervisor'],
     EDIT_SYSTEM_SETTINGS: ['super_admin', 'admin', 'it_support'],
     EDIT_OPERATIONAL_SETTINGS: ['super_admin', 'admin'],
     EDIT_HR_SETTINGS: ['super_admin', 'admin', 'hr'],
-    VIEW_AUDIT_LOGS: ['super_admin', 'admin', 'auditor', 'it_support', 'security_manager'],
+    VIEW_AUDIT_LOGS: ['super_admin', 'admin', 'auditor', 'it_support', 'security_manager', 'regional_security_supervisor'],
     MANAGE_ROLES: ['super_admin', 'admin'],
     MANAGE_SITES: ['super_admin', 'admin'],
 } as const;
@@ -124,6 +125,7 @@ export const PERMISSIONS = {
 const PERMISSION_MAP: Record<string, Permission> = {
     'VIEW_ADMIN_DASHBOARD': 'dashboard.view',
     'ACCESS_ADMIN_MODULE': 'admin.view',
+    'ACCESS_REGIONAL_OPS': 'admin.view',
     'VIEW_WMS_DASHBOARD': 'dashboard.view',
     'VIEW_POS_DASHBOARD': 'dashboard.view',
     'ACCESS_POS': 'pos.view',
@@ -207,6 +209,15 @@ const PERMISSION_MAP: Record<string, Permission> = {
 export function hasPermission(userRole: UserRole | undefined, permission: keyof typeof PERMISSIONS): boolean {
     if (!userRole) return false;
 
+    // Super admin bypass
+    if (userRole === 'super_admin' || (userRole as string)?.toLowerCase() === 'ceo') return true;
+
+    // Check direct legacy/explicit permission list if specified
+    const explicitRoles = PERMISSIONS[permission];
+    if (explicitRoles && Array.isArray(explicitRoles) && (explicitRoles as string[]).includes(userRole)) {
+        return true;
+    }
+
     // Map old permission to new
     const newPermission = PERMISSION_MAP[permission];
     if (!newPermission) {
@@ -238,6 +249,7 @@ export function canAccessModule(userRole: UserRole | undefined, module: string):
     const modulePermissions: Record<string, keyof typeof PERMISSIONS> = {
         'dashboard': 'VIEW_ADMIN_DASHBOARD',
         'admin': 'ACCESS_ADMIN_MODULE',
+        'regional-ops': 'ACCESS_REGIONAL_OPS',
         'pos': 'ACCESS_POS',
         'inventory': 'ACCESS_INVENTORY',
         'sales': 'ACCESS_SALES',
@@ -261,7 +273,7 @@ export function canAccessModule(userRole: UserRole | undefined, module: string):
  */
 export function getAccessibleModules(userRole: UserRole | undefined): string[] {
     const modules = [
-        'dashboard', 'pos', 'inventory', 'sales', 'customers',
+        'dashboard', 'admin', 'regional-ops', 'pos', 'inventory', 'sales', 'customers',
         'employees', 'procurement', 'finance', 'pricing', 'warehouse', 'settings', 'profile'
     ];
 
@@ -296,14 +308,14 @@ export { getRoleDisplayName, getRoleDescription, getRoleColor };
  * Check if user should see all sites or just their own
  */
 export function canViewAllSites(userRole: UserRole | undefined): boolean {
-    return ['super_admin', 'regional_manager', 'operations_manager', 'finance_manager', 'hr_manager', 'supply_chain_manager', 'hr', 'auditor', 'it_support', 'cs_manager', 'logistics_manager', 'inventory_manager', 'security_manager', 'treasury_officer', 'tax_compliance_officer', 'credit_control_officer', 'store_operations_auditor'].includes(userRole || '');
+    return ['super_admin', 'admin', 'regional_manager', 'operations_manager', 'finance_manager', 'hr_manager', 'supply_chain_manager', 'hr', 'auditor', 'it_support', 'cs_manager', 'logistics_manager', 'inventory_manager', 'security_manager', 'treasury_officer', 'tax_compliance_officer', 'credit_control_officer', 'store_operations_auditor', 'regional_procurement_lead', 'regional_finance_officer', 'regional_hr_officer', 'regional_logistics_lead', 'regional_security_supervisor'].includes(userRole || '');
 }
 
 /**
  * Check if user should see all employees or filtered
  */
 export function canViewAllEmployees(userRole: UserRole | undefined): boolean {
-    return ['super_admin', 'regional_manager', 'operations_manager', 'finance_manager', 'hr_manager', 'supply_chain_manager', 'hr', 'it_support', 'logistics_manager', 'inventory_manager', 'security_manager'].includes(userRole || '');
+    return ['super_admin', 'admin', 'regional_manager', 'operations_manager', 'finance_manager', 'hr_manager', 'supply_chain_manager', 'hr', 'it_support', 'logistics_manager', 'inventory_manager', 'security_manager', 'regional_procurement_lead', 'regional_finance_officer', 'regional_hr_officer', 'regional_logistics_lead', 'regional_security_supervisor'].includes(userRole || '');
 }
 
 /**

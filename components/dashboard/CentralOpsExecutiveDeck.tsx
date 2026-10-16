@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
     DollarSign, TrendingUp, ShoppingCart, Box, ArrowRight,
-    AlertTriangle, Package, Warehouse, Store, Activity
+    AlertTriangle, Package, Warehouse, Store, Activity,
+    ShieldAlert, Building2, Layers, Truck, ArrowRightLeft
 } from 'lucide-react';
 import {
     AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer
@@ -30,6 +31,9 @@ interface CentralOpsExecutiveDeckProps {
     tooltipText: string;
     dateRange: string;
     inventoryValue: number;
+    pendingEscalatedPOCount?: number;
+    interRegionTransfersCount?: number;
+    pendingHeadcountQuotasCount?: number;
 }
 
 export const CentralOpsExecutiveDeck: React.FC<CentralOpsExecutiveDeckProps> = ({
@@ -46,7 +50,10 @@ export const CentralOpsExecutiveDeck: React.FC<CentralOpsExecutiveDeckProps> = (
     tooltipBorder,
     tooltipText,
     dateRange,
-    inventoryValue
+    inventoryValue,
+    pendingEscalatedPOCount = 0,
+    interRegionTransfersCount = 0,
+    pendingHeadcountQuotasCount = 0
 }) => {
     const navigate = useNavigate();
     const [chartMode, setChartMode] = useState<'revenue' | 'transactions'>('revenue');
@@ -80,14 +87,14 @@ export const CentralOpsExecutiveDeck: React.FC<CentralOpsExecutiveDeckProps> = (
                     />
                 </WidgetErrorBoundary>
 
-                <WidgetErrorBoundary title="Fulfillment Velocity">
+                <WidgetErrorBoundary title="Corporate Escalations">
                     <GlassKPICard
-                        title="Fulfillment Pipeline"
-                        value={metrics.pendingPicks + metrics.inProgressPacks}
-                        sub={`${metrics.pendingPOs} Inbound POs • ${metrics.avgCycleTime || '14m'} avg cycle`}
-                        icon={ShoppingCart}
+                        title="Corporate Escalations"
+                        value={pendingEscalatedPOCount + interRegionTransfersCount + pendingHeadcountQuotasCount}
+                        sub={`${pendingEscalatedPOCount} POs • ${interRegionTransfersCount} Transfers • ${pendingHeadcountQuotasCount} Quotas`}
+                        icon={ShieldAlert}
                         swatch="graphite"
-                        route="/fulfillment"
+                        route={pendingHeadcountQuotasCount > 0 ? "/employees" : pendingEscalatedPOCount > 0 ? "/procurement" : "/transfers"}
                     />
                 </WidgetErrorBoundary>
 
@@ -192,84 +199,88 @@ export const CentralOpsExecutiveDeck: React.FC<CentralOpsExecutiveDeckProps> = (
                     </div>
                 </div>
 
-                {/* Operational Command Digest (4 cols) */}
+                {/* Corporate Governance & Escalations Digest (4 cols) */}
                 <div className="lg:col-span-4 p-6 rounded-2xl bg-[var(--theme-bg-card)] border border-[var(--theme-border)] shadow-sm flex flex-col justify-between">
                     <div>
                         <div className="flex items-center justify-between mb-4">
                             <h3 className="font-bold text-[var(--theme-text-primary)] flex items-center gap-2 text-sm">
-                                <AlertTriangle className="text-amber-500" size={16} />
-                                Operational Alert Digest
+                                <ShieldAlert className="text-amber-500" size={16} />
+                                Corporate Governance & Escalations
                             </h3>
                             <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 flex items-center gap-1.5">
                                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                                Real-time
+                                HQ Level
                             </span>
                         </div>
 
                         <div className="space-y-3">
-                            {/* Stock Discrepancy Alert */}
-                            <div className="p-3.5 rounded-xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] flex items-center justify-between hover:border-[var(--theme-border-focus)] transition-colors">
-                                <div className="flex items-center gap-3">
-                                    <div className="p-2 rounded-lg bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20">
-                                        <Box size={16} />
-                                    </div>
-                                    <div>
-                                        <p className="text-xs font-bold text-rose-600 dark:text-rose-400">
-                                             {metrics.lowStockCount + metrics.outOfStockCount} Inventory Alerts
-                                        </p>
-                                        <p className="text-[11px] text-[var(--theme-text-muted)]">
-                                             {metrics.outOfStockCount} critical out-of-stock items
-                                        </p>
-                                    </div>
-                                </div>
-                                <button
-                                    onClick={() => navigate('/inventory')}
-                                    className="p-1.5 hover:bg-[var(--theme-bg-card)] rounded-lg text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] active:scale-[0.98] transition-colors cursor-pointer"
-                                    title="Go to Inventory"
-                                >
-                                    <ArrowRight size={14} />
-                                </button>
-                            </div>
-
-                            {/* Inbound Freight Alert */}
+                            {/* High-Value Regional Procurement Escalation */}
                             <div className="p-3.5 rounded-xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] flex items-center justify-between hover:border-[var(--theme-border-focus)] transition-colors">
                                 <div className="flex items-center gap-3">
                                     <div className="p-2 rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">
-                                        <Warehouse size={16} />
+                                        <Building2 size={16} />
                                     </div>
                                     <div>
                                         <p className="text-xs font-bold text-amber-600 dark:text-amber-400">
-                                            {metrics.pendingPOs} Inbound Shipments
+                                            {pendingEscalatedPOCount} Regional PO Escalations
                                         </p>
-                                        <p className="text-[11px] text-[var(--theme-text-muted)]">Awaiting dock receiving & QC</p>
+                                        <p className="text-[11px] text-[var(--theme-text-muted)]">
+                                            Exceeds regional autonomous ceiling (&gt; 150k)
+                                        </p>
                                     </div>
                                 </div>
                                 <button
                                     onClick={() => navigate('/procurement')}
                                     className="p-1.5 hover:bg-[var(--theme-bg-card)] rounded-lg text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] active:scale-[0.98] transition-colors cursor-pointer"
-                                    title="Go to Procurement"
+                                    title="Review High-Value POs"
                                 >
                                     <ArrowRight size={14} />
                                 </button>
                             </div>
 
-                            {/* Order Fulfillment Pipeline */}
+                            {/* Inter-Regional Dispatches & Logistics */}
                             <div className="p-3.5 rounded-xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] flex items-center justify-between hover:border-[var(--theme-border-focus)] transition-colors">
                                 <div className="flex items-center gap-3">
                                     <div className="p-2 rounded-lg bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20">
-                                        <ShoppingCart size={16} />
+                                        <ArrowRightLeft size={16} />
                                     </div>
                                     <div>
                                         <p className="text-xs font-bold text-blue-600 dark:text-blue-400">
-                                            {metrics.pendingPicks} Picks / {metrics.inProgressPacks} Packs
+                                            {interRegionTransfersCount} Inter-Regional Dispatches
                                         </p>
-                                        <p className="text-[11px] text-[var(--theme-text-muted)]">Active WMS packing lines</p>
+                                        <p className="text-[11px] text-[var(--theme-text-muted)]">
+                                            Cross-territory stock rebalancing in-transit
+                                        </p>
                                     </div>
                                 </div>
                                 <button
                                     onClick={() => navigate('/fulfillment')}
                                     className="p-1.5 hover:bg-[var(--theme-bg-card)] rounded-lg text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] active:scale-[0.98] transition-colors cursor-pointer"
-                                    title="Go to Fulfillment"
+                                    title="View Inter-Region Transfers"
+                                >
+                                    <ArrowRight size={14} />
+                                </button>
+                            </div>
+
+                            {/* Sovereign Catalog Governance */}
+                            <div className="p-3.5 rounded-xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] flex items-center justify-between hover:border-[var(--theme-border-focus)] transition-colors">
+                                <div className="flex items-center gap-3">
+                                    <div className="p-2 rounded-lg bg-purple-500/10 text-purple-600 dark:text-purple-400 border border-purple-500/20">
+                                        <Layers size={16} />
+                                    </div>
+                                    <div>
+                                        <p className="text-xs font-bold text-purple-600 dark:text-purple-400">
+                                            {allProducts.length} Sovereign Master SKUs
+                                        </p>
+                                        <p className="text-[11px] text-[var(--theme-text-muted)]">
+                                            Central pricing & margin compliance active
+                                        </p>
+                                    </div>
+                                </div>
+                                <button
+                                    onClick={() => navigate('/catalog')}
+                                    className="p-1.5 hover:bg-[var(--theme-bg-card)] rounded-lg text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] active:scale-[0.98] transition-colors cursor-pointer"
+                                    title="Manage Master Catalog"
                                 >
                                     <ArrowRight size={14} />
                                 </button>
@@ -278,12 +289,12 @@ export const CentralOpsExecutiveDeck: React.FC<CentralOpsExecutiveDeckProps> = (
                     </div>
 
                     <div className="pt-4 border-t border-[var(--theme-border)] flex items-center justify-between text-xs font-semibold text-[var(--theme-text-secondary)]">
-                        <span>Staff On-Duty: {metrics.activeEmployees || 0}</span>
+                        <span>Territorial Governance: Active</span>
                         <button
-                            onClick={() => navigate('/employees')}
+                            onClick={() => navigate('/regional-ops')}
                             className="text-[var(--theme-accent)] hover:underline flex items-center gap-1 text-[11px] font-bold active:scale-[0.98] cursor-pointer"
                         >
-                            View Roster <ArrowRight size={11} />
+                            Open Regional Ops <ArrowRight size={11} />
                         </button>
                     </div>
                 </div>
@@ -304,36 +315,42 @@ export const CentralOpsExecutiveDeck: React.FC<CentralOpsExecutiveDeckProps> = (
                     </div>
 
                     <div className="space-y-3">
-                        {sitePerformance.slice(0, 5).map((site, index) => {
-                            const percent = Math.min(100, Math.round((site.revenue / maxSiteRevenue) * 100));
-                            return (
-                                <div key={site.id} className="p-3 rounded-xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)]">
-                                    <div className="flex justify-between items-center mb-1 text-xs">
-                                        <div className="flex items-center gap-2">
-                                            <span className={`w-5 h-5 rounded-full text-[11px] font-bold flex items-center justify-center ${
-                                                index === 0 ? 'bg-[var(--theme-accent)] text-white shadow-xs' :
-                                                'bg-[var(--theme-bg-card)] text-[var(--theme-text-secondary)] border border-[var(--theme-border)]'
-                                            }`}>
-                                                {index + 1}
-                                            </span>
-                                            <span className="font-bold text-[var(--theme-text-primary)]">{site.name}</span>
-                                            <span className="text-[11px] px-1.5 py-0.5 rounded bg-[var(--theme-bg-card)] text-[var(--theme-text-secondary)] font-mono border border-[var(--theme-border)]">
-                                                {site.type}
+                        {sitePerformance.length === 0 ? (
+                            <div className="py-8 text-center text-xs text-[var(--theme-text-muted)]">
+                                No facility revenue recorded for this period
+                            </div>
+                        ) : (
+                            sitePerformance.slice(0, 5).map((site, index) => {
+                                const percent = Math.min(100, Math.round((site.revenue / maxSiteRevenue) * 100));
+                                return (
+                                    <div key={site.id} className="p-3 rounded-xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)]">
+                                        <div className="flex justify-between items-center mb-1 text-xs">
+                                            <div className="flex items-center gap-2">
+                                                <span className={`w-5 h-5 rounded-full text-[11px] font-bold flex items-center justify-center ${
+                                                    index === 0 ? 'bg-[var(--theme-accent)] text-white shadow-xs' :
+                                                    'bg-[var(--theme-bg-card)] text-[var(--theme-text-secondary)] border border-[var(--theme-border)]'
+                                                }`}>
+                                                    {index + 1}
+                                                </span>
+                                                <span className="font-bold text-[var(--theme-text-primary)]">{site.name}</span>
+                                                <span className="text-[11px] px-1.5 py-0.5 rounded bg-[var(--theme-bg-card)] text-[var(--theme-text-secondary)] font-mono border border-[var(--theme-border)]">
+                                                    {site.type}
+                                                </span>
+                                            </div>
+                                            <span className="font-mono font-bold text-[var(--theme-text-primary)] tabular-nums">
+                                                {formatCompactNumber(site.revenue, { currency: currencySymbol })}
                                             </span>
                                         </div>
-                                        <span className="font-mono font-bold text-[var(--theme-text-primary)] tabular-nums">
-                                            {formatCompactNumber(site.revenue, { currency: currencySymbol })}
-                                        </span>
+                                        <div className="w-full bg-[var(--theme-border)] h-1.5 rounded-full overflow-hidden">
+                                            <div
+                                                className="h-full bg-[var(--theme-accent)] rounded-full transition-all duration-500"
+                                                style={{ width: `${percent}%` }}
+                                            />
+                                        </div>
                                     </div>
-                                    <div className="w-full bg-[var(--theme-border)] h-1.5 rounded-full overflow-hidden">
-                                        <div
-                                            className="h-full bg-[var(--theme-accent)] rounded-full transition-all duration-500"
-                                            style={{ width: `${percent}%` }}
-                                        />
-                                    </div>
-                                </div>
-                            );
-                        })}
+                                );
+                            })
+                        )}
                     </div>
                 </div>
 
@@ -350,46 +367,52 @@ export const CentralOpsExecutiveDeck: React.FC<CentralOpsExecutiveDeckProps> = (
                     </div>
 
                     <div className="space-y-3">
-                        {topProducts.slice(0, 5).map((prod, i) => {
-                            const matchedProduct = allProducts.find(p => p.name === prod.name);
-                            const sizeBadge = matchedProduct ? formatProductSize(matchedProduct) : '';
-                            const packagingDesc = matchedProduct
-                                ? formatPackagingDescription(matchedProduct, prod.count)
-                                : '';
+                        {topProducts.length === 0 ? (
+                            <div className="py-8 text-center text-xs text-[var(--theme-text-muted)]">
+                                No fast-moving inventory recorded for this period
+                            </div>
+                        ) : (
+                            topProducts.slice(0, 5).map((prod, i) => {
+                                const matchedProduct = allProducts.find(p => p.name === prod.name);
+                                const sizeBadge = matchedProduct ? formatProductSize(matchedProduct) : '';
+                                const packagingDesc = matchedProduct
+                                    ? formatPackagingDescription(matchedProduct, prod.count)
+                                    : '';
 
-                            return (
-                                <div key={i} className="p-3 rounded-xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] flex items-center justify-between">
-                                    <div className="flex items-center gap-3 min-w-0">
-                                        <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[11px] font-bold ${
-                                            i === 0 ? 'bg-emerald-600 text-white shadow-xs' :
-                                            'bg-[var(--theme-bg-card)] text-[var(--theme-text-secondary)] border border-[var(--theme-border)]'
-                                        }`}>
-                                            {i + 1}
-                                        </span>
-                                        <div className="min-w-0">
-                                            <div className="flex items-center gap-2">
-                                                <p className="text-xs font-bold text-[var(--theme-text-primary)] truncate">
-                                                    {prod.name}
+                                return (
+                                    <div key={i} className="p-3 rounded-xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] flex items-center justify-between">
+                                        <div className="flex items-center gap-3 min-w-0">
+                                            <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[11px] font-bold ${
+                                                i === 0 ? 'bg-emerald-600 text-white shadow-xs' :
+                                                'bg-[var(--theme-bg-card)] text-[var(--theme-text-secondary)] border border-[var(--theme-border)]'
+                                            }`}>
+                                                {i + 1}
+                                            </span>
+                                            <div className="min-w-0">
+                                                <div className="flex items-center gap-2">
+                                                    <p className="text-xs font-bold text-[var(--theme-text-primary)] truncate">
+                                                        {prod.name}
+                                                    </p>
+                                                    {sizeBadge && (
+                                                        <span className="text-[11px] px-1.5 py-0.5 rounded font-mono font-semibold bg-[var(--theme-bg-card)] text-[var(--theme-text-secondary)] border border-[var(--theme-border)] shrink-0">
+                                                            {sizeBadge}
+                                                        </span>
+                                                    )}
+                                                </div>
+                                                <p className="text-[11px] text-[var(--theme-text-muted)] font-mono mt-0.5">
+                                                    {prod.count} sellable units {packagingDesc ? `• (${packagingDesc})` : ''}
                                                 </p>
-                                                {sizeBadge && (
-                                                    <span className="text-[11px] px-1.5 py-0.5 rounded font-mono font-semibold bg-[var(--theme-bg-card)] text-[var(--theme-text-secondary)] border border-[var(--theme-border)] shrink-0">
-                                                        {sizeBadge}
-                                                    </span>
-                                                )}
                                             </div>
-                                            <p className="text-[11px] text-[var(--theme-text-muted)] font-mono mt-0.5">
-                                                {prod.count} sellable units {packagingDesc ? `• (${packagingDesc})` : ''}
+                                        </div>
+                                        <div className="text-right shrink-0">
+                                            <p className="text-xs font-mono font-bold text-[var(--theme-text-primary)] tabular-nums">
+                                                {formatCompactNumber(prod.sales, { currency: currencySymbol })}
                                             </p>
                                         </div>
                                     </div>
-                                    <div className="text-right shrink-0">
-                                        <p className="text-xs font-mono font-bold text-[var(--theme-text-primary)] tabular-nums">
-                                            {formatCompactNumber(prod.sales, { currency: currencySymbol })}
-                                        </p>
-                                    </div>
-                                </div>
-                            );
-                        })}
+                                );
+                            })
+                        )}
                     </div>
                 </div>
             </div>

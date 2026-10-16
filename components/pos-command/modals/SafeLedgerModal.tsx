@@ -3,6 +3,7 @@ import Modal from '../../Modal';
 import { useStore } from '../../../contexts/CentralStore';
 import { useData } from '../../../contexts/DataContext';
 import { cashDropsService } from '../../../services/cash-drops.service';
+import { realtimeService } from '../../../services/realtime.service';
 import type { CashDropRecord } from '../../../types/pos-zero-trust';
 import { CURRENCY_SYMBOL } from '../../../constants';
 import { Vault, ShieldCheck, Truck, CheckCircle2, AlertTriangle, FileText, ArrowRight } from 'lucide-react';
@@ -31,6 +32,11 @@ export const SafeLedgerModal: React.FC<SafeLedgerModalProps> = ({ isOpen, onClos
             loadDrops();
             setSelectedDrops([]);
             setArmoredManifest(`ARM-${Date.now().toString().slice(-6)}`);
+
+            const sub = realtimeService.subscribeToCashDrops(() => {
+                loadDrops();
+            }, activeSite?.id);
+            return () => sub.unsubscribe();
         }
     }, [isOpen, activeSite?.id, effectiveCountry]);
 

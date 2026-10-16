@@ -3,6 +3,7 @@ import { History as HistoryIcon, Search, UserCheck } from 'lucide-react';
 import { formatDateTime, formatCompactNumber } from '../../../utils/formatting';
 import { CURRENCY_SYMBOL } from '../../../constants';
 import Pagination from '../../shared/Pagination';
+import { resolveFulfillmentWorker } from '../../../utils/fulfillmentUserResolver';
 
 interface ReturnsHistoryProps {
     sales: any[];
@@ -95,7 +96,15 @@ export const ReturnsHistory: React.FC<ReturnsHistoryProps> = ({ sales }) => {
                                 </tr>
                             ) : (
                                 paginatedRefundedSales.map(sale => {
-                                    const processedBy = sale.cashier_name || sale.cashierName || sale.processed_by || sale.processedBy || 'Staff';
+                                    const rawUser = sale.cashier_id || sale.cashierId || sale.processed_by || sale.processedBy || sale.cashier_name || sale.cashierName;
+                                    const resolved = resolveFulfillmentWorker({
+                                        userId: rawUser,
+                                        job: null,
+                                        employees: [],
+                                        sites: [],
+                                        siteId: sale.site_id || sale.siteId
+                                    });
+                                    const processedBy = resolved.code ? `${resolved.name} (${resolved.code})` : resolved.name;
                                     return (
                                         <tr key={sale.id} className="hover:bg-[var(--theme-bg-subtle)] transition-colors">
                                             <td className="p-4 text-[var(--theme-text-secondary)] font-mono text-[11px] tabular-nums">{formatDateTime(sale.date)}</td>
@@ -104,7 +113,7 @@ export const ReturnsHistory: React.FC<ReturnsHistoryProps> = ({ sales }) => {
                                             <td className="p-4 text-[var(--theme-text-secondary)] text-xs">
                                                 <div className="flex items-center gap-1.5">
                                                     <UserCheck size={13} className="text-primary shrink-0" />
-                                                    <span className="truncate">{processedBy}</span>
+                                                    <span className="break-words leading-tight">{processedBy}</span>
                                                 </div>
                                             </td>
                                             <td className="p-4 text-[var(--theme-text-secondary)] text-xs font-mono tabular-nums">{sale.items?.length || 0} Products</td>

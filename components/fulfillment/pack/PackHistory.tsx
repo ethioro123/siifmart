@@ -5,6 +5,7 @@ import { WMSJob, Site, Product } from '../../../types';
 import { formatJobId } from '../../../utils/jobIdFormatter';
 import { formatDateTime } from '../../../utils/formatting';
 import { formatDisplayEmployeeId } from '../../../utils/employeeIdGenerator';
+import { resolveFulfillmentWorker } from '../../../utils/fulfillmentUserResolver';
 
 
 interface PackHistoryProps {
@@ -58,35 +59,22 @@ export const PackHistory: React.FC<PackHistoryProps> = ({
 
     const filteredHistory = useMemo(() => {
         const mapped = historicalJobs.filter((j: WMSJob) => j.type === 'PACK').map(j => {
-            const userId = j.completedBy || j.assignedTo;
-            const isUUID = (str: string) => /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(str);
-            let userObj = employees?.find(e => 
-                e.id === userId || 
-                (e.name && userId && e.name.toLowerCase() === userId.toLowerCase()) || 
-                (e.email && userId && e.email.toLowerCase() === userId.toLowerCase()) ||
-                (e.code && userId && e.code.toLowerCase() === userId.toLowerCase())
-            );
-            if (!userObj && user && userId && (
-                userId.toLowerCase() === user.id?.toLowerCase() || 
-                userId.toLowerCase() === user.email?.toLowerCase() || 
-                userId.toLowerCase() === user.name?.toLowerCase() || 
-                userId.toLowerCase() === user.employeeId?.toLowerCase()
-            )) {
-                userObj = employees?.find(e => 
-                    (e.email && user.email && e.email.toLowerCase() === user.email.toLowerCase()) || 
-                    (e.name && user.name && e.name.toLowerCase() === user.name.toLowerCase()) || 
-                    e.id === user.employeeId
-                );
-            }
-            const displayId = (userObj?.code ? formatDisplayEmployeeId(userObj.code) : '') || (userId ? (isUUID(userId) ? userId.slice(0, 8).toUpperCase() : userId) : '');
-            const resolvedUser = {
-                name: userObj?.name || (userId ? userId : 'System'),
-                displayId: displayId || ''
-            };
+            const rawUserId = j.completedBy || (j as any).completed_by || j.assignedTo || (j as any).assigned_to;
+            const resolvedWorker = resolveFulfillmentWorker({
+                userId: rawUserId,
+                job: j,
+                employees,
+                sites,
+                currentUser: user,
+                siteId: j.siteId || (j as any).site_id
+            });
 
             return {
                 ...j,
-                resolvedUser
+                resolvedUser: {
+                    name: resolvedWorker.name,
+                    displayId: resolvedWorker.code || resolvedWorker.displayId
+                }
             };
         });
 
@@ -201,7 +189,7 @@ export const PackHistory: React.FC<PackHistoryProps> = ({
                                                             {job.status}
                                                         </span>
                                                     </div>
-                                                    <div className="flex items-center gap-1.5 text-[11px] text-[var(--theme-text-secondary)] mt-0.5 font-medium truncate">
+                                                    <div className="flex items-center flex-wrap gap-1.5 text-[11px] text-[var(--theme-text-secondary)] mt-0.5 font-medium">
                                                         <span>{formatDateTime(job.updatedAt || job.createdAt || '', { showTime: true })}</span>
                                                         <span className="w-1 h-1 rounded-full bg-[var(--theme-text-secondary)]/40" />
                                                         <span className="font-mono tabular-nums">{totalItems} {totalItems === 1 ? t('warehouse.itemSingular') : t('warehouse.itemPlural')}</span>
@@ -244,7 +232,7 @@ export const PackHistory: React.FC<PackHistoryProps> = ({
                                     </div>
 
                                     <div className="mb-3.5">
-                                        <h5 className="text-[var(--theme-text-primary)] font-semibold font-mono text-sm truncate pr-2 tracking-tight">
+                                        <h5 className="text-[var(--theme-text-primary)] font-semibold font-mono text-sm break-words pr-2 tracking-tight">
                                             {formattedId}
                                         </h5>
                                         <div className="flex flex-col gap-1.5 mt-2">
@@ -257,7 +245,7 @@ export const PackHistory: React.FC<PackHistoryProps> = ({
                                             {job.trackingNumber && (
                                                 <div className="flex items-center gap-1.5">
                                                     <Barcode size={12} className="text-[var(--theme-text-secondary)]" />
-                                                    <span className="text-[11px] font-mono font-medium text-[var(--theme-text-secondary)] bg-[var(--theme-bg-subtle)] px-2 py-0.5 rounded-md border border-[var(--theme-border)]">
+                                                    <span className="text-[11px] font-mono font-medium text-[var(--theme-text-secondary)] bg-[var(--theme-bg-subtle)] px-2 py-0.5 rounded-md border border-[var(--theme-border)] break-all">
                                                         {job.trackingNumber}
                                                     </span>
                                                 </div>
@@ -267,7 +255,7 @@ export const PackHistory: React.FC<PackHistoryProps> = ({
 
                                     {productNames.length > 0 && (
                                         <div className="mb-3.5">
-                                            <p className="text-[11px] text-[var(--theme-text-secondary)] truncate leading-relaxed">
+                                            <p className="text-[11px] text-[var(--theme-text-secondary)] line-clamp-2 break-words leading-relaxed">
                                                 {productNames.slice(0, 2).join(', ')}
                                                 {productNames.length > 2 && <span className="text-[var(--theme-accent)]"> +{productNames.length - 2} {t('warehouse.remaining')}</span>}
                                             </p>
@@ -275,7 +263,7 @@ export const PackHistory: React.FC<PackHistoryProps> = ({
                                     )}
 
                                     <div className="flex items-center justify-between border-t border-[var(--theme-border)] pt-3.5">
-                                        <div className="flex items-center gap-2 min-w-0">
+                                        <div className="flex items-center gap-2 min-w-0 pr-2">
                                             <div className="w-7 h-7 rounded-full bg-[var(--theme-bg-subtle)] flex items-center justify-center border border-[var(--theme-border)] shrink-0">
                                                 <span className="text-[11px] font-semibold text-[var(--theme-accent)]">{(job.resolvedUser?.name || 'S').charAt(0).toUpperCase()}</span>
                                             </div>
@@ -283,7 +271,7 @@ export const PackHistory: React.FC<PackHistoryProps> = ({
                                                 <span className="text-[11px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider leading-tight">
                                                     {t('warehouse.completedBy') || 'Completed By'}
                                                 </span>
-                                                <span className="text-xs font-semibold text-[var(--theme-text-primary)] truncate leading-tight">
+                                                <span className="text-xs font-semibold text-[var(--theme-text-primary)] break-words leading-tight">
                                                     {job.resolvedUser?.name} <span className="text-[var(--theme-text-secondary)] font-normal font-mono">({job.resolvedUser?.displayId})</span>
                                                 </span>
                                             </div>

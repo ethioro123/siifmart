@@ -4,6 +4,7 @@ import Pagination from '../../shared/Pagination';
 import { WMSJob, Site, User } from '../../../types';
 import { useLanguage } from '../../../contexts/LanguageContext';
 import { formatDisplayEmployeeId } from '../../../utils/employeeIdGenerator';
+import { resolveFulfillmentWorker } from '../../../utils/fulfillmentUserResolver';
 
 interface DocksOutboundHistoryProps {
     jobs: WMSJob[];
@@ -37,23 +38,21 @@ export const DocksOutboundHistory: React.FC<DocksOutboundHistoryProps> = ({
         });
 
         const mapped = historyJobs.map(job => {
-            const userId = job.completedBy || job.assignedTo;
-            const isUUID = (str: string) => /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(str);
-            let userObj = employees?.find(e => 
-                e.id === userId || 
-                (e.name && userId && e.name.toLowerCase() === userId.toLowerCase()) || 
-                (e.email && userId && e.email.toLowerCase() === userId.toLowerCase()) ||
-                (e.code && userId && e.code.toLowerCase() === userId.toLowerCase())
-            );
-            const displayId = (userObj?.code ? formatDisplayEmployeeId(userObj.code) : '') || (userId ? (isUUID(userId) ? userId.slice(0, 8).toUpperCase() : userId) : '');
-            const resolvedUser = {
-                name: userObj?.name || (userId ? userId : 'System'),
-                displayId: displayId || ''
-            };
+            const rawUserId = job.completedBy || (job as any).completed_by || job.assignedTo || (job as any).assigned_to;
+            const resolvedWorker = resolveFulfillmentWorker({
+                userId: rawUserId,
+                job,
+                employees: employees as any[],
+                sites,
+                siteId: job.siteId || (job as any).site_id
+            });
 
             return {
                 ...job,
-                resolvedUser
+                resolvedUser: {
+                    name: resolvedWorker.name,
+                    displayId: resolvedWorker.code || resolvedWorker.displayId
+                }
             };
         });
 
@@ -148,7 +147,20 @@ export const DocksOutboundHistory: React.FC<DocksOutboundHistoryProps> = ({
                         ) : (
                             paginatedHistory.map((job) => {
                                 const destSite = sites.find(s => s.id === job.destSiteId);
-                                const carrier = employees.find(e => e.id === job.assignedTo);
+                                const resolvedCarrier = resolveFulfillmentWorker({
+                                    userId: job.assignedTo,
+                                    job,
+                                    employees: employees as any[],
+                                    sites,
+                                    siteId: job.siteId || (job as any).site_id
+                                });
+                                const resolvedDispatcher = resolveFulfillmentWorker({
+                                    userId: job.assignedBy,
+                                    job,
+                                    employees: employees as any[],
+                                    sites,
+                                    siteId: job.siteId || (job as any).site_id
+                                });
 
                                 return (
                                     <tr
@@ -175,12 +187,12 @@ export const DocksOutboundHistory: React.FC<DocksOutboundHistoryProps> = ({
                                         </td>
                                         <td className="px-4 py-3.5">
                                             <span className="text-xs font-medium text-[var(--theme-text-secondary)]">
-                                                {job.deliveryMethod === 'External' ? (job.externalCarrierName || 'Unlabeled External') : (carrier?.name || 'Unassigned')}
+                                                {job.deliveryMethod === 'External' ? (job.externalCarrierName || 'Unlabeled External') : `${resolvedCarrier.name} (${resolvedCarrier.code || resolvedCarrier.displayId})`}
                                             </span>
                                         </td>
                                         <td className="px-4 py-3.5">
                                             <span className="text-xs font-semibold text-primary uppercase tracking-tight">
-                                                {job.assignedBy || 'System'}
+                                                {resolvedDispatcher.name} {resolvedDispatcher.code ? `(${resolvedDispatcher.code})` : ''}
                                             </span>
                                         </td>
                                         <td className="px-4 py-3.5">

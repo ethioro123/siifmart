@@ -1,5 +1,5 @@
 import React from 'react';
-import { Loader2 } from 'lucide-react';
+import { Loader2, ShieldAlert } from 'lucide-react';
 import Modal from '../Modal';
 
 interface BulkDiscountModalProps {
@@ -28,6 +28,11 @@ export const BulkDiscountModal: React.FC<BulkDiscountModalProps> = ({
          title="Apply Bulk Discount"
       >
          <div className="space-y-4">
+            <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-700 dark:text-amber-300 text-[11px] font-medium">
+               <ShieldAlert size={14} className="shrink-0 text-amber-600 dark:text-amber-400" />
+               <span>Corporate Margin Tripwire: Any markdown pushing gross margin below 15.0% automatically routes to Corporate Finance for co-approval.</span>
+            </div>
+
             <p className="text-xs text-[var(--theme-text-secondary)]">
                Enter the discount percentage to apply to <span className="font-semibold text-[var(--theme-text-primary)] font-mono">{selectedIdsCount}</span> selected product{selectedIdsCount !== 1 ? 's' : ''}.
             </p>

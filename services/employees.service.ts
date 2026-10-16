@@ -77,7 +77,13 @@ function mapDbEmployeeToEmployee(e: RawDbEmployee): Employee {
         region_code: (e.region_code || e.regionCode) as string,
         scopeLevel: ((e.scope_level || e.scopeLevel) === 'REGIONAL' ? 'REGIONAL' : 'HQ') as 'HQ' | 'REGIONAL',
         country: (e.country || e.country_code || e.countryCode) as string,
-        country_code: (e.country_code || e.countryCode || e.country) as string
+        country_code: (e.country_code || e.countryCode || e.country) as string,
+        quotaApprovedBy: (e as any).quota_approved_by || (e as any).quotaApprovedBy,
+        quota_approved_by: (e as any).quota_approved_by || (e as any).quotaApprovedBy,
+        onboardingTier: (e as any).onboarding_tier || (e as any).onboardingTier,
+        onboarding_tier: (e as any).onboarding_tier || (e as any).onboardingTier,
+        quotaStatus: (e as any).quota_status || (e as any).quotaStatus,
+        quota_status: (e as any).quota_status || (e as any).quotaStatus
     } as Employee;
 }
 
@@ -266,12 +272,24 @@ export const employeesService = {
     },
 
     async create(employee: Omit<Employee, 'created_at' | 'updated_at'>) {
-        if (!employee.siteId || !employee.siteId.trim()) {
-            throw new Error('Workplace location is mandatory. Every employee must be assigned to an operating location.');
+        const isCEO = employee.role === 'ceo' || employee.role === 'super_admin' || (employee.role as string) === 'CEO';
+        if (!isCEO && (!employee.siteId || !employee.siteId.trim())) {
+            throw new Error('Workplace facility ID assignment is mandatory. Every employee must be tied to an operating facility ID, except the CEO.');
         }
 
         // Default scope is HQ (country-wide). Region is only bound for explicit REGIONAL workers.
-        const scopeLevel = employee.scopeLevel === 'REGIONAL' ? 'REGIONAL' : 'HQ';
+        const isExplicitRegionalRole = [
+            'regional_manager',
+            'regional_procurement_lead',
+            'regional_finance_officer',
+            'regional_hr_officer',
+            'regional_logistics_lead',
+            'regional_security_supervisor'
+        ].includes(employee.role as string);
+
+        const scopeLevel = (employee.scopeLevel === 'REGIONAL' || isExplicitRegionalRole)
+            ? 'REGIONAL'
+            : (employee.scopeLevel || 'HQ');
         let resolvedRegionCode: string | null = scopeLevel === 'REGIONAL'
             ? ((employee as any).region_code || employee.regionCode || null)
             : null;
@@ -311,7 +329,10 @@ export const employeesService = {
                 specialization: employee.specialization,
                 salary: employee.salary,
                 badges: employee.badges,
-                attendance_rate: employee.attendanceRate
+                attendance_rate: employee.attendanceRate,
+                quota_approved_by: employee.quotaApprovedBy || (employee as any).quota_approved_by,
+                onboarding_tier: employee.onboardingTier || (employee as any).onboarding_tier,
+                quota_status: employee.quotaStatus || (employee as any).quota_status
             };
             const { data, error } = await supabase
                 .from('employees')
@@ -373,6 +394,12 @@ export const employeesService = {
             regionCode: 'region_code',
             region_code: 'region_code',
             scopeLevel: 'scope_level',
+            homeSiteId: 'home_site_id',
+            home_site_id: 'home_site_id',
+            isLoaned: 'is_loaned',
+            is_loaned: 'is_loaned',
+            loanedAt: 'loaned_at',
+            loaned_at: 'loaned_at',
         };
 
         const dbUpdates: Record<string, unknown> = {};

@@ -27,6 +27,8 @@ import { useJobMaintenance } from './useJobMaintenance';
 import { useTransfers } from './useTransfers';
 import { useGhostJobCleanup } from './hooks/useGhostJobCleanup';
 import { mapWmsJobRow } from '../../services/wms-jobs.mapper';
+import { mapJobAssignmentRow } from '../../services/job-assignments.service';
+import { playBeep } from '../../utils/audioUtils';
 import { logger } from '../../utils/logger';
 import { isAdminSite } from '../../utils/countryAdmin';
 
@@ -223,46 +225,96 @@ export const FulfillmentDataProvider = ({ children }: { children: ReactNode }) =
     useEffect(() => {
         if (!activeSiteId) return;
 
+        const currentWorker = employees.find((e: any) =>
+            (user?.email && e.email === user.email) ||
+            (user?.name && e.name?.toLowerCase() === user.name.toLowerCase()) ||
+            (user?.employeeId && e.id === user.employeeId) ||
+            e.id === user?.id
+        );
+        const currentWorkerId = currentWorker?.id || user?.employeeId || user?.id;
+
         logger.debug('FulfillmentDataProvider', `📡 [Fulfillment] Subscribing to real-time updates for site: ${activeSiteId}`);
 
         const subscriptions = realtimeService.subscribeToSite(activeSiteId, {
             onWMSJobChange: (event, payload) => {
                 if (event === 'INSERT') {
                     const mapped = mapWmsJobRow(payload);
-                    setJobs(prev => prev.find(j => j.id === mapped.id) ? prev : [mapped, ...prev]);
+                    setJobs(prev => {
+                        if (prev.some(j => j.id === mapped.id)) return prev;
+                        return [mapped, ...prev];
+                    });
+                    // If line items not present in payload, fetch full job
+                    if ((mapped.items || 0) > 0 && (!mapped.lineItems || mapped.lineItems.length === 0)) {
+                        wmsJobsService.getById(mapped.id).then((freshJob: WMSJob | null) => {
+                            if (freshJob) {
+                                setJobs(curr => curr.map(j => j.id === freshJob.id ? freshJob : j));
+                            }
+                        }).catch(() => {});
+                    }
+                    // Alert worker if newly assigned to them
+                    if (currentWorkerId && mapped.assignedTo === currentWorkerId) {
+                        try { playBeep('success'); } catch {}
+                        addNotification('info', `New job assigned: ${mapped.jobNumber || mapped.type}`);
+                    }
+                    queryClient.invalidateQueries({ queryKey: ['jobs'] });
                 }
                 else if (event === 'UPDATE') {
                     const mapped = mapWmsJobRow(payload);
-                    // Supabase may truncate large JSONB columns (line_items).
-                    // If line_items came back null/empty but the job already exists locally,
-                    // do a targeted single-row re-fetch to get the full data.
-                    const hasLineItemsInPayload = Array.isArray(payload.line_items) && payload.line_items.length > 0;
+                    let wasAssignedToMeBefore = false;
                     setJobs(prev => {
                         const existing = prev.find(j => j.id === mapped.id);
-                        if (!hasLineItemsInPayload && existing && (existing.lineItems || []).length > 0) {
-                            // Payload was truncated — fetch full job and patch it in
+                        if (!existing) {
+                            return [mapped, ...prev];
+                        }
+                        wasAssignedToMeBefore = existing.assignedTo === currentWorkerId;
+                        const hasLineItemsInPayload = Array.isArray(payload.line_items) && payload.line_items.length > 0;
+                        const mergedLineItems = hasLineItemsInPayload ? mapped.lineItems : (existing.lineItems || []);
+
+                        if (!hasLineItemsInPayload && (!existing.lineItems || existing.lineItems.length === 0)) {
                             wmsJobsService.getById(mapped.id).then((freshJob: WMSJob | null) => {
                                 if (freshJob) {
                                     setJobs(curr => curr.map(j => j.id === freshJob.id ? freshJob : j));
                                 }
-                            }).catch(() => {
-                                // Fallback: use the mapped partial payload (top-level fields are correct)
-                                setJobs(curr => curr.map(j => j.id === mapped.id ? { ...j, ...mapped } : j));
-                            });
-                            // Optimistically merge top-level fields while the fetch completes
-                            return prev.map(j => j.id === mapped.id ? { ...j, ...mapped } : j);
+                            }).catch(() => {});
                         }
-                        return prev.map(j => j.id === mapped.id ? mapped : j);
+                        return prev.map(j => j.id === mapped.id ? { ...existing, ...mapped, lineItems: mergedLineItems } : j);
                     });
+
+                    // Alert if newly assigned to current worker
+                    if (currentWorkerId && mapped.assignedTo === currentWorkerId && !wasAssignedToMeBefore) {
+                        try { playBeep('success'); } catch {}
+                        addNotification('info', `Job assigned to you: ${mapped.jobNumber || mapped.type}`);
+                    }
+                    queryClient.invalidateQueries({ queryKey: ['jobs'] });
                 }
                 else if (event === 'DELETE') {
-                    setJobs(prev => prev.filter(j => j.id !== (payload.old?.id || payload.id)));
+                    const targetId = payload.old?.id || payload.id;
+                    setJobs(prev => prev.filter(j => j.id !== targetId));
+                    queryClient.invalidateQueries({ queryKey: ['jobs'] });
                 }
             },
             onJobAssignmentChange: (event, payload) => {
-                if (event === 'INSERT') setJobAssignments(prev => [payload, ...prev]);
-                else if (event === 'UPDATE') setJobAssignments(prev => prev.map(a => a.id === payload.id ? payload : a));
-                else if (event === 'DELETE') setJobAssignments(prev => prev.filter(a => a.id !== payload.id));
+                const mappedAssignment = mapJobAssignmentRow(payload);
+                if (event === 'INSERT') {
+                    setJobAssignments(prev => {
+                        if (prev.some(a => a.id === mappedAssignment.id)) {
+                            return prev.map(a => a.id === mappedAssignment.id ? mappedAssignment : a);
+                        }
+                        return [mappedAssignment, ...prev];
+                    });
+                }
+                else if (event === 'UPDATE') {
+                    setJobAssignments(prev => {
+                        const exists = prev.some(a => a.id === mappedAssignment.id);
+                        if (!exists) return [mappedAssignment, ...prev];
+                        return prev.map(a => a.id === mappedAssignment.id ? mappedAssignment : a);
+                    });
+                }
+                else if (event === 'DELETE') {
+                    const targetId = payload.old?.id || payload.id;
+                    setJobAssignments(prev => prev.filter(a => a.id !== targetId));
+                }
+                queryClient.invalidateQueries({ queryKey: ['job-assignments'] });
             },
             onTransferChange: (event, payload) => {
                 const mapRealtimeTransfer = (data: any): TransferRecord => ({
@@ -284,6 +336,34 @@ export const FulfillmentDataProvider = ({ children }: { children: ReactNode }) =
                 if (event === 'INSERT') setTransfers(prev => [mapRealtimeTransfer(payload), ...prev]);
                 else if (event === 'UPDATE') setTransfers(prev => prev.map(t => t.id === payload.id ? mapRealtimeTransfer(payload) : t));
                 else if (event === 'DELETE') setTransfers(prev => prev.filter(t => t.id !== payload.id));
+                queryClient.invalidateQueries({ queryKey: ['transfers'] });
+            },
+            onPurchaseOrderChange: (event, payload) => {
+                const poId = payload.id || payload.old?.id;
+                if (!poId) return;
+                queryClient.invalidateQueries({ queryKey: ['purchase-orders'] });
+                queryClient.invalidateQueries({ queryKey: ['orders'] });
+                if (event === 'INSERT' || event === 'UPDATE') {
+                    purchaseOrdersService.getById(poId).then(fullPO => {
+                        if (fullPO) {
+                            setOrders(prev => prev.some(o => o.id === fullPO.id) ? prev.map(o => o.id === fullPO.id ? fullPO : o) : [fullPO, ...prev]);
+                            setAllOrders(prev => prev.some(o => o.id === fullPO.id) ? prev.map(o => o.id === fullPO.id ? fullPO : o) : [fullPO, ...prev]);
+                        }
+                    }).catch(() => {});
+                } else if (event === 'DELETE') {
+                    setOrders(prev => prev.filter(o => o.id !== poId));
+                    setAllOrders(prev => prev.filter(o => o.id !== poId));
+                }
+            },
+            onInventoryRequestChange: () => {
+                queryClient.invalidateQueries({ queryKey: ['inventory-requests'] });
+            },
+            onBarcodeApprovalChange: (event, payload) => {
+                const targetId = payload.id || payload.old?.id;
+                if (event === 'INSERT') setBarcodeApprovals(prev => [payload, ...prev]);
+                else if (event === 'UPDATE') setBarcodeApprovals(prev => prev.map(b => b.id === targetId ? { ...b, ...payload } : b));
+                else if (event === 'DELETE') setBarcodeApprovals(prev => prev.filter(b => b.id !== targetId));
+                queryClient.invalidateQueries({ queryKey: ['barcode-approvals'] });
             }
         });
 
@@ -291,7 +371,7 @@ export const FulfillmentDataProvider = ({ children }: { children: ReactNode }) =
             logger.debug('FulfillmentDataProvider', 'Unsubscribing from fulfillment real-time updates...');
             realtimeService.unsubscribeAll(subscriptions);
         };
-    }, [activeSiteId]);
+    }, [activeSiteId, employees, user?.id, user?.email, user?.employeeId, queryClient, addNotification]);
 
     // --- AUTO CLEANUP OF GHOST JOBS ---
     useGhostJobCleanup({ jobs, orders, user, setJobs });

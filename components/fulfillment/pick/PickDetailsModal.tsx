@@ -7,6 +7,7 @@ import { formatJobId } from '../../../utils/jobIdFormatter';
 import { formatProductSize, formatPackagingDescription, getSellUnit } from '../../../utils/units';
 import { PickAmendModal } from './PickAmendModal';
 import { useLanguage } from '../../../contexts/LanguageContext';
+import { resolveFulfillmentWorker } from '../../../utils/fulfillmentUserResolver';
 
 interface PickDetailsModalProps {
     selectedItem: WMSJob;
@@ -35,32 +36,19 @@ export const PickDetailsModal: React.FC<PickDetailsModalProps> = ({
     const isCompleted = (selectedItem.status || '').toLowerCase() === 'completed';
     const completedUserId = selectedItem.completedBy || (selectedItem as any).completed_by;
     const assignedUserId = selectedItem.assignedTo || (selectedItem as any).assigned_to;
-    const userId = (isCompleted || completedUserId) ? (completedUserId || assignedUserId) : (assignedUserId || completedUserId);
+    const rawTargetUserId = (isCompleted || completedUserId) ? (completedUserId || assignedUserId) : (assignedUserId || completedUserId);
     const workerLabel = (isCompleted || Boolean(completedUserId))
         ? (t('warehouse.completedBy') || 'Completed By')
         : (t('warehouse.assignedTo') || 'Assigned To');
-    const isUUID = (str: string) => /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(str);
-    let userObj = employees.find(e => 
-        e.id === userId || 
-        (e.name && userId && e.name.toLowerCase() === userId.toLowerCase()) || 
-        (e.email && userId && e.email.toLowerCase() === userId.toLowerCase()) ||
-        (e.code && userId && e.code.toLowerCase() === userId.toLowerCase())
-    );
-    if (!userObj && user && userId && (
-        userId.toLowerCase() === user.id?.toLowerCase() || 
-        userId.toLowerCase() === user.email?.toLowerCase() || 
-        userId.toLowerCase() === user.name?.toLowerCase() || 
-        userId.toLowerCase() === user.employeeId?.toLowerCase()
-    )) {
-        userObj = employees.find(e => 
-            (e.email && user.email && e.email.toLowerCase() === user.email.toLowerCase()) || 
-            (e.name && user.name && e.name.toLowerCase() === user.name.toLowerCase()) || 
-            e.id === user.employeeId
-        );
-    }
-    const displayId = userObj?.code || (userId ? (isUUID(userId) ? userId.slice(0, 8).toUpperCase() : userId) : '');
-    const userName = userObj ? userObj.name : (userId ? t('warehouse.picking.unknownUser') : t('warehouse.picking.systemUser'));
-    const userDisplayId = displayId;
+
+    const resolvedWorker = resolveFulfillmentWorker({
+        userId: rawTargetUserId,
+        job: selectedItem,
+        employees,
+        sites,
+        currentUser: user,
+        siteId: selectedItem.siteId || (selectedItem as any).site_id
+    });
 
     let rawItems = selectedItem.lineItems || selectedItem.items || [];
     if (typeof rawItems === 'string') {
@@ -78,13 +66,15 @@ export const PickDetailsModal: React.FC<PickDetailsModalProps> = ({
         title: t('warehouse.pickJobs'),
         status: selectedItem.status,
         date: selectedItem.updatedAt || selectedItem.createdAt || new Date().toISOString(),
-        user: userName,
+        user: resolvedWorker.name,
         items: itemsArray,
         sourceSite: sites.find(s => s.id === (selectedItem.siteId || (selectedItem as any).site_id)),
         destSite: sites.find(s => s.id === (selectedItem.destSiteId || (selectedItem as any).dest_site_id)),
         userDisplay: (
             <>
-                {userName} <span className="text-[var(--theme-text-secondary)] font-normal font-mono">({userDisplayId})</span>
+                {resolvedWorker.name} {resolvedWorker.code && (
+                    <span className="text-[var(--theme-text-secondary)] font-normal font-mono">({resolvedWorker.code})</span>
+                )}
             </>
         )
     };
@@ -135,7 +125,7 @@ export const PickDetailsModal: React.FC<PickDetailsModalProps> = ({
                     </div>
                     <button
                         onClick={onClose}
-                        className="w-10 h-10 rounded-xl bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-border)] flex items-center justify-center text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] transition-colors shrink-0"
+                        className="w-10 h-10 rounded-xl bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-border)] flex items-center justify-center text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] transition-colors shrink-0 cursor-pointer"
                         aria-label={t('warehouse.dismiss')}
                     >
                         <X size={18} />
@@ -148,19 +138,19 @@ export const PickDetailsModal: React.FC<PickDetailsModalProps> = ({
                         <div className="p-2 bg-[var(--theme-bg-subtle)] rounded-xl text-[var(--theme-accent)] border border-[var(--theme-border)] shrink-0">
                             <Calendar size={16} />
                         </div>
-                        <div className="min-w-0">
+                        <div className="min-w-0 flex-1">
                             <p className="text-[11px] text-[var(--theme-text-secondary)] uppercase font-semibold tracking-wider leading-none mb-1">{t('warehouse.timeSort')}</p>
-                            <p className="text-xs text-[var(--theme-text-primary)] font-mono truncate">{formatDateTime(data.date, { showTime: true })}</p>
+                            <p className="text-xs text-[var(--theme-text-primary)] font-mono break-words leading-tight">{formatDateTime(data.date, { showTime: true })}</p>
                         </div>
                     </div>
 
                     <div className="bg-[var(--theme-bg-card)] p-3.5 sm:p-4 flex items-center gap-3">
                         <div className="w-8 h-8 rounded-full bg-[var(--theme-accent)]/10 flex items-center justify-center border border-[var(--theme-accent)]/20 shrink-0">
-                            <span className="text-[11px] font-bold text-[var(--theme-accent)] font-mono">{(data.user || 'S').charAt(0).toUpperCase()}</span>
+                            <span className="text-[11px] font-bold text-[var(--theme-accent)] font-mono">{resolvedWorker.initials}</span>
                         </div>
-                        <div className="min-w-0">
+                        <div className="min-w-0 flex-1">
                             <p className="text-[11px] text-[var(--theme-text-secondary)] uppercase font-semibold tracking-wider leading-none mb-1">{workerLabel}</p>
-                            <p className="text-xs text-[var(--theme-text-primary)] font-semibold uppercase truncate">{data.userDisplay}</p>
+                            <p className="text-xs text-[var(--theme-text-primary)] font-semibold uppercase break-words leading-tight">{data.userDisplay}</p>
                         </div>
                     </div>
 
@@ -168,9 +158,9 @@ export const PickDetailsModal: React.FC<PickDetailsModalProps> = ({
                         <div className="p-2 bg-[var(--theme-bg-subtle)] rounded-xl text-emerald-500 border border-[var(--theme-border)] shrink-0">
                             <MapPin size={16} />
                         </div>
-                        <div className="min-w-0">
+                        <div className="min-w-0 flex-1">
                             <p className="text-[11px] text-[var(--theme-text-secondary)] uppercase font-semibold tracking-wider leading-none mb-1">{t('warehouse.from')}</p>
-                            <p className="text-xs text-[var(--theme-text-primary)] font-semibold uppercase truncate">{sourceDisplay}</p>
+                            <p className="text-xs text-[var(--theme-text-primary)] font-semibold uppercase break-words leading-tight">{sourceDisplay}</p>
                         </div>
                     </div>
 
@@ -178,9 +168,9 @@ export const PickDetailsModal: React.FC<PickDetailsModalProps> = ({
                         <div className="p-2 bg-[var(--theme-bg-subtle)] rounded-xl text-[var(--theme-accent)] border border-[var(--theme-border)] shrink-0">
                             <ArrowRight size={16} />
                         </div>
-                        <div className="min-w-0">
+                        <div className="min-w-0 flex-1">
                             <p className="text-[11px] text-[var(--theme-text-secondary)] uppercase font-semibold tracking-wider leading-none mb-1">{t('warehouse.to')}</p>
-                            <p className="text-xs text-[var(--theme-text-primary)] font-semibold uppercase truncate">{destDisplay}</p>
+                            <p className="text-xs text-[var(--theme-text-primary)] font-semibold uppercase break-words leading-tight">{destDisplay}</p>
                         </div>
                     </div>
                 </div>

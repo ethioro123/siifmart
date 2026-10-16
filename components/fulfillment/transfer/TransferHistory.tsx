@@ -4,6 +4,7 @@ import Pagination from '../../shared/Pagination';
 import { WMSJob, Site, TransferRecord } from '../../../types';
 import { formatJobId } from '../../../utils/jobIdFormatter';
 import { formatDateTime } from '../../../utils/formatting';
+import { resolveFulfillmentWorker } from '../../../utils/fulfillmentUserResolver';
 
 interface TransferHistoryProps {
     transfers: TransferRecord[];
@@ -30,17 +31,15 @@ export const TransferHistory: React.FC<TransferHistoryProps> = ({
     const [currentPage, setCurrentPage] = useState(1);
 
     const getWorkerDisplay = (job: any) => {
-        const workerId = job.completedBy || job.receiverName || job.assignedTo;
-        if (!workerId) return 'Unassigned';
-        const emp = employees?.find(e =>
-            e.id === workerId ||
-            e.name === workerId ||
-            (e.name && workerId && e.name.toLowerCase() === workerId.toLowerCase()) ||
-            (e.email && workerId && e.email.toLowerCase() === workerId.toLowerCase()) ||
-            (e.code && workerId && e.code.toLowerCase() === workerId.toLowerCase())
-        );
-        if (!emp) return workerId;
-        return emp.code ? `${emp.name} (${emp.code})` : emp.name;
+        const rawUserId = job.completedBy || (job as any).completed_by || job.receiverName || (job as any).receiver_name || job.assignedTo || (job as any).assigned_to;
+        const resolved = resolveFulfillmentWorker({
+            userId: rawUserId,
+            job,
+            employees: employees || [],
+            sites,
+            siteId: job.siteId || (job as any).site_id || job.sourceSiteId || (job as any).source_site_id
+        });
+        return resolved.code ? `${resolved.name} (${resolved.code})` : resolved.name;
     };
 
     const filteredHistory = useMemo(() => {
@@ -214,7 +213,7 @@ export const TransferHistory: React.FC<TransferHistoryProps> = ({
                                         </div>
 
                                         <div>
-                                            <h5 className="text-[var(--theme-text-primary)] font-semibold text-sm truncate uppercase tracking-tight">
+                                            <h5 className="text-[var(--theme-text-primary)] font-semibold text-sm break-words uppercase tracking-tight">
                                                 {formattedId}
                                             </h5>
                                             <div className="flex flex-col gap-1 mt-1.5">
@@ -235,13 +234,13 @@ export const TransferHistory: React.FC<TransferHistoryProps> = ({
                                                 <div className="flex items-center gap-1.5 text-[11px] text-[var(--theme-text-secondary)] font-medium">
                                                     <User size={12} className="text-[var(--theme-accent)] shrink-0" />
                                                     <span className="font-semibold text-[var(--theme-text-primary)]">Completed By:</span>
-                                                    <span className="truncate">{getWorkerDisplay(transfer)}</span>
+                                                    <span className="break-words leading-tight">{getWorkerDisplay(transfer)}</span>
                                                 </div>
                                             </div>
                                         </div>
 
                                         {productNames.length > 0 && (
-                                            <div className="mt-2 text-[11px] text-[var(--theme-text-secondary)] truncate">
+                                            <div className="mt-2 text-[11px] text-[var(--theme-text-secondary)] line-clamp-2 break-words">
                                                 <span>{productNames.slice(0, 2).join(', ')}</span>
                                                 {productNames.length > 2 && (
                                                     <span className="text-[var(--theme-accent)] font-medium ml-1">

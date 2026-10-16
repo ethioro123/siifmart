@@ -4,6 +4,7 @@ import Pagination from '../../shared/Pagination';
 import { WMSJob } from '../../../types';
 import { formatJobId } from '../../../utils/jobIdFormatter';
 import { formatDateTime } from '../../../utils/formatting';
+import { resolveFulfillmentWorker } from '../../../utils/fulfillmentUserResolver';
 
 interface ReplenishHistoryProps {
     historicalJobs: WMSJob[];
@@ -24,17 +25,15 @@ export const ReplenishHistory: React.FC<ReplenishHistoryProps> = ({
     const [replenishHistoryPage, setReplenishHistoryPage] = useState(1);
 
     const getWorkerDisplay = (job: WMSJob) => {
-        const workerId = job.completedBy || job.assignedTo;
-        if (!workerId) return 'Unassigned';
-        const emp = employees?.find(e =>
-            e.id === workerId ||
-            e.name === workerId ||
-            (e.name && workerId && e.name.toLowerCase() === workerId.toLowerCase()) ||
-            (e.email && workerId && e.email.toLowerCase() === workerId.toLowerCase()) ||
-            (e.code && workerId && e.code.toLowerCase() === workerId.toLowerCase())
-        );
-        if (!emp) return workerId;
-        return emp.code ? `${emp.name} (${emp.code})` : emp.name;
+        const rawUserId = job.completedBy || (job as any).completed_by || job.assignedTo || (job as any).assigned_to;
+        const resolved = resolveFulfillmentWorker({
+            userId: rawUserId,
+            job,
+            employees: employees || [],
+            sites: [],
+            siteId: job.siteId || (job as any).site_id
+        });
+        return resolved.code ? `${resolved.name} (${resolved.code})` : resolved.name;
     };
 
     const filteredReplenishHistory = useMemo(() => {
@@ -121,7 +120,7 @@ export const ReplenishHistory: React.FC<ReplenishHistoryProps> = ({
                                         <span className="text-xs font-mono tabular-nums text-[var(--theme-accent)] font-semibold block">
                                             {formatJobId(job)}
                                         </span>
-                                        <p className="text-[11px] text-[var(--theme-text-secondary)] font-medium truncate mt-0.5">
+                                        <p className="text-[11px] text-[var(--theme-text-secondary)] font-medium break-words mt-0.5">
                                             {job.orderRef || 'Internal'}
                                             {job.jobNumber && <span className="text-[var(--theme-text-primary)] ml-1 font-mono">• {job.jobNumber}</span>}
                                         </p>
@@ -136,7 +135,7 @@ export const ReplenishHistory: React.FC<ReplenishHistoryProps> = ({
                                     <div className="flex items-center gap-1.5 text-[11px] text-[var(--theme-text-secondary)] font-medium">
                                         <User size={13} className="text-[var(--theme-accent)] shrink-0" />
                                         <span className="font-semibold text-[var(--theme-text-primary)]">Completed By:</span>
-                                        <span className="truncate">{getWorkerDisplay(job)}</span>
+                                        <span className="break-words leading-tight">{getWorkerDisplay(job)}</span>
                                     </div>
 
                                     <div className="flex justify-between items-center text-[11px] text-[var(--theme-text-secondary)] font-mono tabular-nums">

@@ -41,10 +41,25 @@ const SidebarItem: React.FC<SidebarItemProps> = ({ to, icon: Icon, label, onClic
 
 export default function Sidebar() {
   const { user, isSidebarOpen, toggleSidebar } = useStore();
-  const { activeSite, sites, setActiveSite, effectiveCountry } = useData();
+  const { activeSite, sites, setActiveSite, effectiveCountry, regions, activeRegionCode, isRegionalUser } = useData();
   const navigate = useNavigate();
 
   if (!user) return null;
+
+  // Regional Scope & Dynamic Persona Navigation
+  const userScope = user.scopeLevel || user.scope_level || (isRegionalUser ? 'REGIONAL' : 'HQ');
+  const isRegionalStaff = userScope === 'REGIONAL' || [
+    'regional_manager',
+    'regional_procurement_lead',
+    'regional_finance_officer',
+    'regional_hr_officer',
+    'regional_logistics_lead',
+    'regional_security_supervisor'
+  ].includes(user.role);
+
+  const targetRegionCode = activeRegionCode || user.regionCode || user.region_code;
+  const activeRegion = (regions || []).find(r => r.code === targetRegionCode);
+  const regionDisplayName = activeRegion?.name ? activeRegion.name.replace(/ Territory| Region/gi, '') : (targetRegionCode || 'Territory');
 
   // Get available sections based on role AND site type
   const availableSections = getAvailableSections(user.role, activeSite?.type);
@@ -83,8 +98,24 @@ export default function Sidebar() {
       // ROADMAP - CEO Only (Confidential Strategic Canvas)
       { to: "/roadmap", icon: Map, label: "Roadmap", section: "dashboard", roles: ['super_admin'] },
 
-      // CENTRAL OPERATIONS - CEO & Operations Leadership
-      { to: "/admin", icon: Activity, label: "Central Operations", section: "dashboard", roles: ['super_admin', 'admin', 'operations_manager', 'regional_manager', 'store_operations_auditor'] },
+      // CENTRAL HQ vs REGIONAL COMMAND - Dynamic Persona Navigation
+      ...(isRegionalStaff ? [
+        {
+          to: "/regional-ops",
+          icon: Activity,
+          label: `Regional Command (${regionDisplayName})`,
+          section: "dashboard",
+          roles: ['super_admin', 'admin', 'operations_manager', 'regional_manager', 'regional_procurement_lead', 'regional_finance_officer', 'regional_hr_officer', 'regional_logistics_lead', 'regional_security_supervisor', 'store_operations_auditor']
+        }
+      ] : [
+        {
+          to: "/admin",
+          icon: Activity,
+          label: "Central Operations",
+          section: "dashboard",
+          roles: ['super_admin', 'admin', 'operations_manager', 'store_operations_auditor']
+        }
+      ]),
 
       // POS
       { to: "/pos", icon: ShoppingCart, label: "POS Terminal", section: "pos", roles: ['super_admin', 'store_manager', 'assistant_manager', 'shift_lead', 'pos', 'store_supervisor'] },

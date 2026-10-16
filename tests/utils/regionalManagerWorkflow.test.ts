@@ -102,9 +102,9 @@ describe('Regional Manager (SOP-MGT-020, Level 2, Rank 95) Full Operational Audi
     });
 
     describe('3. Role Hierarchy & Multi-Tier Hiring Authority', () => {
-        it('has Rank 95 hierarchy — highest ranking manager beneath CEO', () => {
-            expect(getRoleHierarchy('regional_manager')).toBe(95);
-            expect(getRoleHierarchy('regional_manager')).toBeGreaterThan(getRoleHierarchy('operations_manager'));
+        it('has Rank 90 hierarchy — territorial director outranking facility leadership', () => {
+            expect(getRoleHierarchy('regional_manager')).toBe(90);
+            expect(getRoleHierarchy('operations_manager')).toBeGreaterThan(getRoleHierarchy('regional_manager'));
             expect(getRoleHierarchy('regional_manager')).toBeGreaterThan(getRoleHierarchy('finance_manager'));
             expect(getRoleHierarchy('regional_manager')).toBeGreaterThan(getRoleHierarchy('store_manager'));
             expect(getRoleHierarchy('regional_manager')).toBeGreaterThan(getRoleHierarchy('warehouse_manager'));

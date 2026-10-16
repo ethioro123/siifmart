@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Upload, MapPin, Eye, EyeOff, Camera, Mail } from 'lucide-react';
+import { Upload, MapPin, Eye, EyeOff, Camera, Mail, AlertTriangle } from 'lucide-react';
 import { Site } from '../../../types';
 
 interface StepIdentityProps {
@@ -143,7 +143,7 @@ export default function StepIdentity({
             {/* Workplace Location */}
             <div>
                 <label className="text-xs text-[#2C5E3B] dark:text-[#A9CBA2] uppercase font-bold mb-1.5 flex items-center gap-1.5">
-                    <MapPin size={14} /> Assigned Workplace Location <span className="text-rose-500">*</span>
+                    <MapPin size={14} /> Assigned Workplace Facility ID <span className="text-rose-500">*</span>
                 </label>
                 {canAssignAnySite ? (
                     <div>
@@ -153,25 +153,29 @@ export default function StepIdentity({
                             } text-stone-900 dark:text-white rounded-xl px-3 py-2.5 outline-none focus:border-[#2C5E3B] dark:focus:border-emerald-500 text-sm font-medium`}
                             value={newEmpData.siteId || ''}
                             onChange={e => setNewEmpData({ ...newEmpData, siteId: e.target.value })}
-                            aria-label="Assign Workplace Location"
+                            aria-label="Assign Workplace Facility ID"
                         >
                             <option value="" disabled className="text-stone-400">-- Select Workplace Facility (Mandatory) --</option>
                             {sites.map(s => (
                                 <option key={s.id} value={s.id} className="text-black">
-                                    {s.name} ({s.type})
+                                    {s.name} [{s.code}] ({s.type})
                                 </option>
                             ))}
                         </select>
                         {!newEmpData.siteId && (
-                            <p className="text-[11px] text-amber-600 dark:text-amber-400 mt-1 font-semibold">
-                                ⚠️ Workplace assignment is mandatory for role-scoping and facility inventory control.
+                            <p className="text-[11px] text-amber-600 dark:text-amber-400 mt-1 font-semibold flex items-center gap-1">
+                                <AlertTriangle size={12} className="shrink-0" />
+                                <span>Facility assignment is mandatory for role-scoping and security control (except CEO).</span>
                             </p>
                         )}
                     </div>
                 ) : (
                     <div className="w-full bg-stone-50 dark:bg-black/30 border border-[#E2DCCE] dark:border-white/10 rounded-xl px-3 py-2.5 text-stone-900 dark:text-white flex items-center justify-between">
                         <span className="font-semibold text-sm">
-                            {sites.find(s => s.id === newEmpData.siteId)?.name || activeSite?.name || 'Unassigned Location'}
+                            {(() => {
+                                const s = sites.find(st => st.id === newEmpData.siteId) || activeSite;
+                                return s ? `${s.name} [${s.code}]` : 'Unassigned Location';
+                            })()}
                         </span>
                         <span className="text-xs px-2.5 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 font-bold border border-emerald-200 dark:border-emerald-500/20">
                             {sites.find(s => s.id === newEmpData.siteId)?.type || activeSite?.type || 'Site'}

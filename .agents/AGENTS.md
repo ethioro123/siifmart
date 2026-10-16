@@ -8,7 +8,7 @@
 3. **Verify, don't guess**: confirm DB columns/types via `information_schema.columns` or `types/` before writing queries/mutations; confirm function signatures via grep before calling. Diagnose from logs/types, no blind iterative patches.
 4. **Split before growing**: target file > 500 lines -> extract modals/tabs/hooks first, then change behaviour.
 5. **Done = green**: `npx tsc --noEmit` clean, plus targeted `npx vitest run <path>` for touched logic. Full suite only at milestones.
-6. **Report briefly**: bullets of what changed and why; no filler, no restating the prompt, no repeating unchanged code. Full audit checklist only on explicit `/audit`.
+6. **Report in plain English (no code dumps)**: when finished, do NOT output technical code, internal file paths, or line diffs. Provide clear, easily understandable information about what was worked on, what changed for users/managers, and how it behaves. Full audit checklist only on explicit `/audit`.
 
 ## 2. Invariants (never violate)
 
@@ -33,8 +33,7 @@
 - Halal catalog: no liquor, beer, wine, or spirits anywhere (catalog, mocks, examples). Use cooking oil, baby formula, coffee, etc.
 
 ### Database and RLS
-- RLS on every table. Service `update()` uses explicit column allowlists, never `{ ...object }`. Remember `.insert().select()` triggers INSERT and SELECT policies.
-- **Rule 9**: any migration/table/column/index/RPC/policy change -> save runnable SQL to `migrations/YYYYMMDD_<name>.sql` AND paste the same SQL in chat.
+- **Rule 9 (Persistent Migration File is Paramount & Execution Status)**: creating a permanent, version-controlled file in `migrations/YYYYMMDD_<name>.sql` for ANY SQL created or modified is strictly mandatory and takes precedence over in-chat snippets. Never write or propose SQL without saving it to disk first; ALSO paste the same runnable SQL in chat. **Execution Status**: explicitly inform the user whether the SQL migration has already been applied/run in the database or still requires manual execution in Supabase.
 
 ### Egress efficiency (Rule 10)
 - Lists/history default to **25 records**; more via pagination or "Load More".

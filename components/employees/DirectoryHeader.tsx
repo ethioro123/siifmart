@@ -1,6 +1,6 @@
 import React from 'react';
 import { Search, X, LayoutGrid, List, ClipboardList, ChevronDown, ShieldCheck, RotateCcw } from 'lucide-react';
-import { Employee, Site } from '../../types';
+import { Employee, Site, Region } from '../../types';
 import { SYSTEM_ROLES } from '../../utils/roles';
 
 interface DirectoryHeaderProps {
@@ -14,6 +14,9 @@ interface DirectoryHeaderProps {
    setFilterDepartment: (dept: string) => void;
    filterSite: string;
    setFilterSite: (site: string) => void;
+   filterRegion?: string;
+   setFilterRegion?: (region: string) => void;
+   regions?: Region[];
    sites: Site[];
    layoutMode: 'grid' | 'list';
    setLayoutMode: (mode: 'grid' | 'list') => void;
@@ -32,22 +35,45 @@ interface DirectoryHeaderProps {
 
 export default function DirectoryHeader({
    searchTerm, setSearchTerm, filterRole, setFilterRole, filterStatus, setFilterStatus,
-   filterDepartment, setFilterDepartment, filterSite, setFilterSite, sites,
+   filterDepartment, setFilterDepartment, filterSite, setFilterSite,
+   filterRegion = 'All', setFilterRegion, regions = [], sites,
    layoutMode, setLayoutMode, isTaskQueueOpen, setIsTaskQueueOpen,
    totalCount, tasksCount, canViewAll, restricted, setCurrentPage, visibleEmployees,
    pendingSalaryCount = 0, onOpenSalaryQueue, isOnlyManagers = false
 }: DirectoryHeaderProps) {
    
+   const handleRegionChange = (newRegion: string) => {
+      if (setFilterRegion) {
+         setFilterRegion(newRegion);
+         if (newRegion !== 'All' && filterSite !== 'All') {
+            const matches = sites.some(s => s.id === filterSite && (s.regionCode === newRegion || (s as any).region_code === newRegion));
+            if (!matches) {
+               setFilterSite('All');
+            }
+         }
+      }
+   };
+
+   const regionOptions = (regions || []).map(r => ({ value: r.code, label: r.name }));
+   const siteOptions = sites.map(s => ({ value: s.id, label: s.name }));
+
    const filterOptions = [
+      ...(regions && regions.length > 0 && !restricted && setFilterRegion ? [{
+         value: filterRegion || 'All',
+         setValue: handleRegionChange,
+         options: regionOptions,
+         default: 'All Regions'
+      }] : []),
       { value: filterRole, setValue: setFilterRole, options: SYSTEM_ROLES.map(r => ({ value: r.id, label: r.label })), default: 'All Roles' },
       { value: filterStatus, setValue: setFilterStatus, options: [{ value: 'Active', label: 'Active' }, { value: 'Pending Approval', label: 'Pending' }, { value: 'Inactive', label: 'Inactive' }], default: 'All Status' },
       { value: filterDepartment, setValue: setFilterDepartment, options: Array.from(new Set(visibleEmployees.map(e => e.department).filter(Boolean))).map(d => ({ value: (d as string), label: (d as string) })), default: 'All Departments' },
-      ...(restricted ? [] : [{ value: filterSite, setValue: setFilterSite, options: sites.map(s => ({ value: s.id, label: s.name })), default: 'All Locations' }])
+      ...(restricted ? [] : [{ value: filterSite, setValue: setFilterSite, options: siteOptions, default: 'All Locations' }])
    ];
 
-   const hasActiveFilters = filterRole !== 'All' || filterStatus !== 'All' || filterDepartment !== 'All' || filterSite !== 'All';
+   const hasActiveFilters = (Boolean(filterRegion) && filterRegion !== 'All') || filterRole !== 'All' || filterStatus !== 'All' || filterDepartment !== 'All' || filterSite !== 'All';
 
    const handleClearFilters = () => {
+      if (setFilterRegion) setFilterRegion('All');
       setFilterRole('All');
       setFilterStatus('All');
       setFilterDepartment('All');

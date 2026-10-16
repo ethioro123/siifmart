@@ -5,8 +5,8 @@ import { formatDateTime } from '../../../utils/formatting';
 import { formatJobId } from '../../../utils/jobIdFormatter';
 import { formatProductSize, formatPackagingDescription, getSellUnit, isWeightBased, isVolumeBased } from '../../../utils/units';
 import { useLanguage } from '../../../contexts/LanguageContext';
-
 import { useStore } from '../../../contexts/CentralStore';
+import { resolveFulfillmentWorker } from '../../../utils/fulfillmentUserResolver';
 
 interface PackDetailsModalProps {
     selectedItem: WMSJob;
@@ -35,34 +35,19 @@ export const PackDetailsModal: React.FC<PackDetailsModalProps> = ({
     const isCompleted = (selectedItem.status || '').toLowerCase() === 'completed';
     const completedUserId = selectedItem.completedBy || (selectedItem as any).completed_by;
     const assignedUserId = selectedItem.assignedTo || (selectedItem as any).assigned_to;
-    const userId = (isCompleted || completedUserId) ? (completedUserId || assignedUserId) : (assignedUserId || completedUserId);
+    const rawTargetUserId = (isCompleted || completedUserId) ? (completedUserId || assignedUserId) : (assignedUserId || completedUserId);
     const workerLabel = (isCompleted || Boolean(completedUserId))
         ? (t('warehouse.completedBy') || 'Completed By')
         : (t('warehouse.assignedTo') || 'Assigned To');
-    const isUUID = (str: string) => /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(str);
-    let userObj = employees.find(e => 
-        e.id === userId || 
-        (e.name && userId && e.name.toLowerCase() === userId.toLowerCase()) || 
-        (e.email && userId && e.email.toLowerCase() === userId.toLowerCase()) ||
-        (e.code && userId && e.code.toLowerCase() === userId.toLowerCase())
-    );
-    if (!userObj && user && userId && (
-        userId.toLowerCase() === user.id?.toLowerCase() || 
-        userId.toLowerCase() === user.email?.toLowerCase() || 
-        userId.toLowerCase() === user.name?.toLowerCase() || 
-        userId.toLowerCase() === user.employeeId?.toLowerCase()
-    )) {
-        userObj = employees.find(e => 
-            (e.email && user.email && e.email.toLowerCase() === user.email.toLowerCase()) || 
-            (e.name && user.name && e.name.toLowerCase() === user.name.toLowerCase()) || 
-            e.id === user.employeeId
-        );
-    }
-    // Use code if available, otherwise fallback to full ID unless it's a UUID
-    const displayId = userObj?.code || (userId ? (isUUID(userId) ? userId.slice(0, 8).toUpperCase() : userId) : '');
 
-    const userName = userObj ? userObj.name : (userId ? 'Unknown' : 'System');
-    const userDisplayId = displayId;
+    const resolvedWorker = resolveFulfillmentWorker({
+        userId: rawTargetUserId,
+        job: selectedItem,
+        employees,
+        sites,
+        currentUser: user,
+        siteId: selectedItem.siteId || (selectedItem as any).site_id
+    });
 
     const sourceSite = sites.find(s => s.id === selectedItem.siteId);
     const destSite = sites.find(s => s.id === selectedItem.destSiteId);
@@ -105,8 +90,8 @@ export const PackDetailsModal: React.FC<PackDetailsModalProps> = ({
         title: t('warehouse.packJobTitle'),
         status: selectedItem.status,
         date: selectedItem.updatedAt || selectedItem.createdAt || new Date().toISOString(),
-        userName: userName,
-        userDisplayId: displayId,
+        userName: resolvedWorker.name,
+        userDisplayId: resolvedWorker.code || resolvedWorker.displayId,
         sourceSite: sourceSite,
         destSite: destSite,
         trackingNumber: trackingNum,
@@ -159,8 +144,8 @@ export const PackDetailsModal: React.FC<PackDetailsModalProps> = ({
                             <Calendar size={16} />
                         </div>
                         <div className="min-w-0">
-                            <p className="text-[11px] text-[var(--theme-text-secondary)] uppercase font-semibold tracking-wider leading-none mb-1 truncate">{t('warehouse.completed')}</p>
-                            <p className="text-xs text-[var(--theme-text-primary)] font-mono tabular-nums tracking-tight truncate">{formatDateTime(data.date, { showTime: true })}</p>
+                            <p className="text-[11px] text-[var(--theme-text-secondary)] uppercase font-semibold tracking-wider leading-none mb-1">{t('warehouse.completed')}</p>
+                            <p className="text-xs text-[var(--theme-text-primary)] font-mono tabular-nums tracking-tight break-words leading-tight">{formatDateTime(data.date, { showTime: true })}</p>
                         </div>
                     </div>
                     
@@ -169,9 +154,9 @@ export const PackDetailsModal: React.FC<PackDetailsModalProps> = ({
                             <span className="text-xs font-semibold">{(data.userName || 'S').charAt(0).toUpperCase()}</span>
                         </div>
                         <div className="min-w-0">
-                            <p className="text-[11px] text-[var(--theme-text-secondary)] uppercase font-semibold tracking-wider leading-none mb-1 truncate">{workerLabel}</p>
-                            <p className="text-xs text-[var(--theme-text-primary)] font-semibold truncate leading-tight">
-                                {data.userName} <span className="text-[var(--theme-text-secondary)] font-normal font-mono">({data.userDisplayId})</span>
+                            <p className="text-[11px] text-[var(--theme-text-secondary)] uppercase font-semibold tracking-wider leading-none mb-1">{workerLabel}</p>
+                            <p className="text-xs text-[var(--theme-text-primary)] font-semibold break-words leading-tight">
+                                {data.userName} {data.userDisplayId && <span className="text-[var(--theme-text-secondary)] font-normal font-mono">({data.userDisplayId})</span>}
                             </p>
                         </div>
                     </div>
@@ -181,8 +166,8 @@ export const PackDetailsModal: React.FC<PackDetailsModalProps> = ({
                             <Printer size={16} />
                         </div>
                         <div className="min-w-0">
-                            <p className="text-[11px] text-[var(--theme-text-secondary)] uppercase font-semibold tracking-wider leading-none mb-1 truncate">{t('warehouse.labelSize').split(' ')[0]}</p>
-                            <p className="text-xs text-[var(--theme-accent)] font-mono tracking-tight font-semibold truncate">{data.trackingNumber}</p>
+                            <p className="text-[11px] text-[var(--theme-text-secondary)] uppercase font-semibold tracking-wider leading-none mb-1">{t('warehouse.labelSize').split(' ')[0]}</p>
+                            <p className="text-xs text-[var(--theme-accent)] font-mono tracking-tight font-semibold break-words leading-tight">{data.trackingNumber}</p>
                         </div>
                     </div>
 
@@ -191,8 +176,8 @@ export const PackDetailsModal: React.FC<PackDetailsModalProps> = ({
                             <MapPin size={16} />
                         </div>
                         <div className="min-w-0">
-                            <p className="text-[11px] text-[var(--theme-text-secondary)] uppercase font-semibold tracking-wider leading-none mb-1 truncate">{t('warehouse.from')}</p>
-                            <p className="text-xs text-[var(--theme-text-primary)] font-semibold truncate leading-tight">
+                            <p className="text-[11px] text-[var(--theme-text-secondary)] uppercase font-semibold tracking-wider leading-none mb-1">{t('warehouse.from')}</p>
+                            <p className="text-xs text-[var(--theme-text-primary)] font-semibold break-words leading-tight">
                                 {data.sourceSite ? (
                                     <>
                                         {data.sourceSite.name} <span className="text-[var(--theme-text-secondary)] font-normal font-mono">({data.sourceSite.code || data.sourceSite.id})</span>
@@ -207,8 +192,8 @@ export const PackDetailsModal: React.FC<PackDetailsModalProps> = ({
                             <ArrowRight size={16} />
                         </div>
                         <div className="min-w-0">
-                            <p className="text-[11px] text-[var(--theme-text-secondary)] uppercase font-semibold tracking-wider leading-none mb-1 truncate">{t('warehouse.to')}</p>
-                            <p className="text-xs text-[var(--theme-text-primary)] font-semibold truncate leading-tight">
+                            <p className="text-[11px] text-[var(--theme-text-secondary)] uppercase font-semibold tracking-wider leading-none mb-1">{t('warehouse.to')}</p>
+                            <p className="text-xs text-[var(--theme-text-primary)] font-semibold break-words leading-tight">
                                 {data.destSite ? (
                                     <>
                                         {data.destSite.name} <span className="text-[var(--theme-text-secondary)] font-normal font-mono">({data.destSite.code || data.destSite.id})</span>

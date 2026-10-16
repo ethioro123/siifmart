@@ -32,7 +32,13 @@ export default function DirectoryList({
 
             {displayedEmployees.length > 0 ? (
                displayedEmployees.map((employee) => {
-                  const roleConfig = SYSTEM_ROLES.find(r => r.id === employee.role) || SYSTEM_ROLES[8];
+                  const roleConfig = SYSTEM_ROLES.find(r => r.id === employee.role) || {
+                     id: employee.role,
+                     label: employee.role?.replace(/_/g, ' ') || 'Staff',
+                     desc: 'Team Member',
+                     level: 4,
+                     styles: { text: 'text-slate-400', bg: 'bg-slate-500/10', border: 'border-slate-500/20', badge: 'bg-slate-500/20 text-slate-300' }
+                  };
                   return (
                      <EmployeeRow
                         key={employee.id}

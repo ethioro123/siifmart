@@ -101,13 +101,9 @@ export default function CentralOperations() {
     // --- REPORT GENERATION ---
     const handleGenerateReport = () => {
         const filteredMetrics = calculateMetrics(
-            filteredSales,
-            scopedProducts,
+            filteredSales, scopedProducts,
             jobs.filter(j => isWithinRange(j.createdAt || '')),
-            filteredOrders,
-            employees,
-            [],
-            undefined
+            filteredOrders, employees, [], undefined
         );
         generateQuarterlyReport(filteredMetrics, dateRange, 'Operations');
     };
@@ -116,13 +112,8 @@ export default function CentralOperations() {
     const metrics: DashboardMetrics = useMemo(() => {
         try {
             return calculateMetrics(
-                filteredSales,
-                scopedProducts,
-                jobs || [],
-                filteredOrders,
-                employees || [],
-                [],
-                undefined
+                filteredSales, scopedProducts, jobs || [],
+                filteredOrders, employees || [], [], undefined
             ) as DashboardMetrics;
         } catch (err) {
             logger.error('CentralOperations', "Error calculating metrics:", err);
@@ -147,6 +138,19 @@ export default function CentralOperations() {
 
     const activeAlerts = metrics?.activeAlerts || 0;
     const inventoryValue = metrics?.totalNetworkStockValue || 0;
+
+    const pendingEscalatedPOCount = useMemo(() => {
+        return (allOrders || []).filter(o =>
+            (o.status === 'Pending' || o.status === 'Draft') &&
+            ((o.totalAmount || 0) > 150000 || (o as any).requiresHqApproval)
+        ).length;
+    }, [allOrders]);
+
+    const interRegionTransfersCount = useMemo(() => {
+        return (transfers || []).filter(t =>
+            (t as any).isInterRegion && t.status !== 'Completed' && t.status !== 'Cancelled'
+        ).length;
+    }, [transfers]);
 
     // Stock Status Data (Scoped to Country & Facility Catalog)
     const stockStatusData = useMemo(() => {
@@ -294,6 +298,8 @@ export default function CentralOperations() {
                     tooltipText={tooltipText}
                     dateRange={dateRange}
                     inventoryValue={inventoryValue}
+                    pendingEscalatedPOCount={pendingEscalatedPOCount}
+                    interRegionTransfersCount={interRegionTransfersCount}
                 />
             )}
 

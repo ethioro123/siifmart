@@ -6,6 +6,7 @@ import { formatDateTime } from '../../../utils/formatting';
 import { formatJobId } from '../../../utils/jobIdFormatter';
 import { useStore } from '../../../contexts/CentralStore';
 import { ItemAttributeBadges } from '../ItemAttributeBadges';
+import { resolveFulfillmentWorker } from '../../../utils/fulfillmentUserResolver';
 
 interface PutawayDetailsModalProps {
     selectedItem: WMSJob;
@@ -30,32 +31,22 @@ export const PutawayDetailsModal: React.FC<PutawayDetailsModalProps> = ({
     // Resolve User Name: prioritize actual completion author for completed jobs
     const completedUserId = selectedItem.completedBy || (selectedItem as any).completed_by;
     const assignedUserId = selectedItem.assignedTo || (selectedItem as any).assigned_to;
-    const userId = (isCompleted || completedUserId) ? (completedUserId || assignedUserId) : (assignedUserId || completedUserId);
+    const rawTargetUserId = (isCompleted || completedUserId) ? (completedUserId || assignedUserId) : (assignedUserId || completedUserId);
     const workerLabel = (isCompleted || Boolean(completedUserId))
         ? (t('warehouse.completedBy') || 'Completed By')
         : (t('warehouse.assignedTo') || 'Assigned To');
 
-    const isUUID = (str: string) => /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(str);
-    let userObj = employees.find(e => 
-        e.id === userId || 
-        (e.name && userId && e.name.toLowerCase() === userId.toLowerCase()) || 
-        (e.email && userId && e.email.toLowerCase() === userId.toLowerCase()) ||
-        (e.code && userId && e.code.toLowerCase() === userId.toLowerCase())
-    );
-    if (!userObj && user && userId && (
-        userId.toLowerCase() === user.id?.toLowerCase() || 
-        userId.toLowerCase() === user.email?.toLowerCase() || 
-        userId.toLowerCase() === user.name?.toLowerCase() || 
-        userId.toLowerCase() === user.employeeId?.toLowerCase()
-    )) {
-        userObj = employees.find(e => 
-            (e.email && user.email && e.email.toLowerCase() === user.email.toLowerCase()) || 
-            (e.name && user.name && e.name.toLowerCase() === user.name.toLowerCase()) || 
-            e.id === user.employeeId
-        );
-    }
-    const displayId = userObj?.code || (userId ? (isUUID(userId) ? userId.slice(0, 8).toUpperCase() : userId) : '');
-    const userName = userObj ? userObj.name : (userId ? 'System Process' : 'Automated Hub');
+    const resolvedWorker = resolveFulfillmentWorker({
+        userId: rawTargetUserId,
+        job: selectedItem,
+        employees,
+        sites,
+        currentUser: user,
+        siteId: selectedItem.siteId || (selectedItem as any).site_id
+    });
+
+    const displayId = resolvedWorker.code || resolvedWorker.displayId;
+    const userName = resolvedWorker.name;
 
     // Resolve destination location across all items
     const isRealBay = (loc?: string) => loc && loc !== 'Receiving Dock' && loc !== 'Unknown' && loc !== 'Unassigned';
@@ -142,7 +133,7 @@ export const PutawayDetailsModal: React.FC<PutawayDetailsModalProps> = ({
                                         {String(idx + 1).padStart(2, '0')}
                                     </div>
                                     <div className="min-w-0">
-                                        <p className="text-[var(--theme-text-primary)] font-semibold tracking-tight text-xs md:text-sm leading-tight mb-1.5 truncate">{item.name || 'Unnamed Specimen'}</p>
+                                        <p className="text-[var(--theme-text-primary)] font-semibold tracking-tight text-xs md:text-sm leading-tight mb-1.5 break-words">{item.name || 'Unnamed Specimen'}</p>
                                         <div className="flex flex-wrap items-center gap-2">
                                             <span className="text-[11px] text-[var(--theme-text-primary)] font-semibold font-mono tracking-wider bg-[var(--theme-bg-subtle)] px-2 py-0.5 rounded-md border border-[var(--theme-border)] uppercase">
                                                 SKU: {item.sku}

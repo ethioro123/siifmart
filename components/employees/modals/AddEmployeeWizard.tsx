@@ -35,6 +35,7 @@ interface AddEmployeeWizardProps {
     resetWizard: () => void;
     canAdjustPayroll: boolean;
     handleSaveDraft?: () => void;
+    quotaResult?: any;
 }
 
 const WIZARD_STEPS = ['Identity', 'Role', 'Details', 'Documents', 'Review'];
@@ -56,20 +57,22 @@ export default function AddEmployeeWizard({
     isSubmitting,
     resetWizard,
     canAdjustPayroll,
-    handleSaveDraft
+    handleSaveDraft,
+    quotaResult
 }: AddEmployeeWizardProps) {
     const { settings, activeSite, addNotification } = useData();
     const currencySymbol = (activeSite as any)?.currency || settings?.currency || CURRENCY_SYMBOL;
-    const isDirect = isDirectOnboardingAuthorized(user?.role);
+    const isDirect = isDirectOnboardingAuthorized(user?.role, newEmpData.role, Boolean(quotaResult?.canAutoActivate));
 
     return (
         <Modal
             isOpen={isOpen}
             onClose={resetWizard}
-            title={getOnboardingModalTitle(user?.role)}
+            title={getOnboardingModalTitle(user?.role, newEmpData.role, Boolean(quotaResult?.canAutoActivate))}
             size="xl"
             closeOnClickOutside={false}
             closeOnEscape={false}
+
             footer={
                 <div className="flex justify-between items-center w-full">
                     <button
@@ -110,7 +113,7 @@ export default function AddEmployeeWizard({
                                 }`}
                             >
                                 {isSubmitting ? <Loader2 className="animate-spin" size={15} /> : <CheckCircle size={15} />}
-                                {getOnboardingSubmitLabel(user?.role, isSubmitting)}
+                                {getOnboardingSubmitLabel(user?.role, isSubmitting, newEmpData.role, Boolean(quotaResult?.canAutoActivate))}
                             </button>
                         )}
                     </div>
@@ -166,6 +169,7 @@ export default function AddEmployeeWizard({
                             sites={sites}
                             currencySymbol={currencySymbol}
                             user={user}
+                            quotaResult={quotaResult}
                         />
                     )}
                 </div>

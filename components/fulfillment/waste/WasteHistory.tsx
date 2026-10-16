@@ -3,6 +3,7 @@ import { History as HistoryIcon, Search, UserCheck } from 'lucide-react';
 import Pagination from '../../shared/Pagination';
 import { Product, StockMovement } from '../../../types';
 import { formatDateTime } from '../../../utils/formatting';
+import { resolveFulfillmentWorker } from '../../../utils/fulfillmentUserResolver';
 
 interface WasteHistoryProps {
     movements: StockMovement[];
@@ -74,7 +75,15 @@ export const WasteHistory: React.FC<WasteHistoryProps> = ({
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3.5">
                         {paginatedHistory.map((m: any) => {
                             const product = products.find(p => p.id === m.productId);
-                            const workerName = m.userName || m.user || m.userId || 'Floor Custodian';
+                            const rawUser = m.userId || m.user_id || m.userName || m.user;
+                            const resolved = resolveFulfillmentWorker({
+                                userId: rawUser,
+                                job: null,
+                                employees: [],
+                                sites: [],
+                                siteId: m.siteId || m.site_id
+                            });
+                            const workerName = resolved.code ? `${resolved.name} (${resolved.code})` : resolved.name;
 
                             return (
                                 <div
@@ -92,13 +101,13 @@ export const WasteHistory: React.FC<WasteHistoryProps> = ({
                                         </span>
                                     </div>
                                     <div className="space-y-1 mb-2.5">
-                                        <p className="text-sm font-bold text-[var(--theme-text-primary)] truncate">{product?.name || m.productName || 'Unknown Item'}</p>
+                                        <p className="text-sm font-bold text-[var(--theme-text-primary)] break-words">{product?.name || m.productName || 'Unknown Item'}</p>
                                         <p className="text-[11px] text-[var(--theme-text-secondary)] font-mono">{product?.sku || 'SKU N/A'}</p>
                                     </div>
                                     <div className="flex items-center justify-between text-[11px] pt-2 border-t border-[var(--theme-border)]">
-                                        <div className="flex items-center gap-1 text-[var(--theme-text-secondary)] truncate max-w-[130px]">
+                                        <div className="flex items-center gap-1 text-[var(--theme-text-secondary)] min-w-0 pr-2">
                                             <UserCheck size={12} className="shrink-0 text-primary" />
-                                            <span className="truncate">By: {workerName}</span>
+                                            <span className="break-words leading-tight">By: {workerName}</span>
                                         </div>
                                         <div className="text-right text-[var(--theme-text-primary)] font-mono font-bold text-xs tabular-nums shrink-0">
                                             {m.quantity} <span className="text-[11px] text-[var(--theme-text-secondary)] font-normal">units</span>

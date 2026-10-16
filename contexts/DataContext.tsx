@@ -226,7 +226,8 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
     setAllProducts,
     setSales,
     setCustomers,
-    setOrders
+    setOrders,
+    setShifts
   });
 
   // ══════════════════════════════════════════════════════════════

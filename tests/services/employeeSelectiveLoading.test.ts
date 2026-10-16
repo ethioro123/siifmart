@@ -68,7 +68,7 @@ describe('Selective Employee Loading & Egress Policy (Rule 10)', () => {
 
     describe('employeesService selective fetching queries', () => {
         it('filters by MANAGERIAL_ROLES when onlyManagers is true in getAll', async () => {
-            const inMock = vi.fn().mockResolvedValue({
+            const orMock = vi.fn().mockResolvedValue({
                 data: [
                     { id: '1', role: 'super_admin', name: 'CEO' },
                     { id: '2', role: 'store_manager', name: 'Store Lead' }
@@ -77,7 +77,7 @@ describe('Selective Employee Loading & Egress Policy (Rule 10)', () => {
             });
 
             const orderMock = vi.fn().mockReturnValue({
-                in: inMock
+                or: orMock
             });
 
             const selectMock = vi.fn().mockReturnValue({
@@ -90,7 +90,7 @@ describe('Selective Employee Loading & Egress Policy (Rule 10)', () => {
 
             const res = await employeesService.getAll(undefined, true);
             expect(supabase.from).toHaveBeenCalledWith('employees');
-            expect(inMock).toHaveBeenCalledWith('role', MANAGERIAL_ROLES);
+            expect(orMock).toHaveBeenCalledWith(expect.stringContaining('role.in.'));
             expect(res).toHaveLength(2);
         });
 
@@ -121,7 +121,7 @@ describe('Selective Employee Loading & Egress Policy (Rule 10)', () => {
         });
 
         it('applies onlyManagers in getPaginated for initial un-filtered view', async () => {
-            const inMock = vi.fn().mockResolvedValue({
+            const orMock = vi.fn().mockResolvedValue({
                 data: [
                     { id: '1', role: 'super_admin', name: 'CEO', created_at: '2026-01-01' }
                 ],
@@ -132,7 +132,7 @@ describe('Selective Employee Loading & Egress Policy (Rule 10)', () => {
             // Mock query chain for getPaginated lightweight query
             const mockChain: any = {
                 eq: vi.fn().mockReturnThis(),
-                in: inMock
+                or: orMock
             };
 
             const selectLightMock = vi.fn().mockReturnValue(mockChain);
@@ -158,7 +158,7 @@ describe('Selective Employee Loading & Egress Policy (Rule 10)', () => {
                 { onlyManagers: true }
             );
 
-            expect(mockChain.in).toHaveBeenCalledWith('role', MANAGERIAL_ROLES);
+            expect(mockChain.or).toHaveBeenCalledWith(expect.stringContaining('role.in.'));
             expect(result.data).toHaveLength(1);
         });
     });

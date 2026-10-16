@@ -1,17 +1,21 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Network, ChevronDown, Check, ExternalLink, Shield, Building2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useStore } from '../../contexts/CentralStore';
 import { useData } from '../../contexts/DataContext';
 import { getCountryProfile, Country } from '../../utils/localization';
 
 export function RegionBadge() {
+    const { user } = useStore();
     const {
         regions = [],
         activeRegionCode,
         setActiveRegionCode,
         canSwitchRegion,
-        isRegionalUser,
-        effectiveCountry = 'ET'
+        effectiveCountry = 'ET',
+        sites = [],
+        activeSite,
+        setActiveSite
     } = useData();
 
     const [isOpen, setIsOpen] = useState(false);
@@ -33,19 +37,53 @@ export function RegionBadge() {
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, [isOpen]);
 
-    // Active region record
+    // Active region record & clean name formatting (preventing "Region Region" duplication)
     const activeRegion = activeRegionCode ? regions.find(r => r.code === activeRegionCode) : null;
-    const regionName = activeRegion ? activeRegion.name : 'All Regions';
+    const cleanRegionName = activeRegion ? activeRegion.name.replace(/\s*(Region|Territory)$/i, '') : 'All Regions';
 
-    // If user is a branch staff member with neither HQ switcher nor regional authority, don't display
-    if (!canSwitchRegion && !isRegionalUser && !activeRegionCode) {
+    // Role-based authority:
+    // Only HQ Executives (who can switch regions) or dedicated Regional Directors see RegionBadge.
+    // Frontline branch workers (cashiers, store staff, warehouse pickers) have their region cleanly
+    // unified inside LocationBadge without a duplicate static pill in the top bar.
+    const isRegionalOfficer = Boolean(user && (
+        user.role === 'regional_manager' ||
+        (typeof user.role === 'string' && user.role.startsWith('regional_'))
+    ));
+
+    if (!canSwitchRegion && !isRegionalOfficer) {
         return null;
     }
+
+    const regionSubtitle = activeRegionCode
+        ? (canSwitchRegion ? 'Territory Lens' : 'Regional Command')
+        : 'National HQ';
 
     const handleSelectRegion = (code: string | null) => {
         if (!setActiveRegionCode || !canSwitchRegion) return;
         setActiveRegionCode(code);
         setIsOpen(false);
+
+        // Dynamic bidirectional synchronization with active site
+        if (setActiveSite && sites.length > 0) {
+            if (code) {
+                const regionalSites = sites.filter(s => s.regionCode === code || s.region_code === code);
+                if (regionalSites.length > 0) {
+                    const isCurrentInRegion = activeSite && (activeSite.regionCode === code || activeSite.region_code === code);
+                    if (!isCurrentInRegion) {
+                        const hubSite = regionalSites.find(s => s.type === 'Administration' || s.type === 'Administrative') || regionalSites[0];
+                        setActiveSite(hubSite.id);
+                    }
+                }
+            } else {
+                const nationalHq = sites.find(s =>
+                    (s.type === 'Administration' || s.type === 'Administrative' || s.type === 'HQ') &&
+                    !s.regionCode && !s.region_code
+                ) || sites.find(s => s.code?.endsWith('-HQ') || s.code === 'SITE-0001');
+                if (nationalHq) {
+                    setActiveSite(nationalHq.id);
+                }
+            }
+        }
     };
 
     return (
@@ -72,10 +110,10 @@ export function RegionBadge() {
 
                 <div className="flex flex-col min-w-0 max-w-[100px] sm:max-w-[150px]">
                     <span className="text-[11px] sm:text-[13px] font-bold text-[var(--theme-text-primary)] truncate leading-tight">
-                        {regionName}
+                        {cleanRegionName}
                     </span>
                     <span className="text-[9px] font-medium text-[var(--theme-text-secondary)] leading-none truncate">
-                        {activeRegionCode ? 'Regional Lens' : 'National HQ Lens'}
+                        {regionSubtitle}
                     </span>
                 </div>
 

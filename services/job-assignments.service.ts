@@ -1,7 +1,37 @@
 import { supabase } from '../lib/supabase';
+import type { JobAssignment } from '../types';
+
+export const mapJobAssignmentRow = (row: any): JobAssignment => {
+    if (!row) return row;
+    return {
+        ...row,
+        jobId: row.job_id || row.jobId,
+        job_id: row.job_id || row.jobId,
+        employeeId: row.employee_id || row.employeeId,
+        employee_id: row.employee_id || row.employeeId,
+        employeeName: row.employee_name || row.employeeName,
+        employee_name: row.employee_name || row.employeeName,
+        assignedAt: row.assigned_at || row.assignedAt,
+        assigned_at: row.assigned_at || row.assignedAt,
+        startedAt: row.started_at || row.startedAt,
+        started_at: row.started_at || row.startedAt,
+        completedAt: row.completed_at || row.completedAt,
+        completed_at: row.completed_at || row.completedAt,
+        status: row.status,
+        notes: row.notes,
+        estimatedDuration: row.estimated_duration ?? row.estimatedDuration,
+        estimated_duration: row.estimated_duration ?? row.estimatedDuration,
+        actualDuration: row.actual_duration ?? row.actualDuration,
+        actual_duration: row.actual_duration ?? row.actualDuration,
+        unitsProcessed: row.units_processed ?? row.unitsProcessed,
+        units_processed: row.units_processed ?? row.unitsProcessed,
+        accuracyRate: row.accuracy_rate ?? row.accuracyRate,
+        accuracy_rate: row.accuracy_rate ?? row.accuracyRate
+    };
+};
 
 export const jobAssignmentsService = {
-    async getAll(siteId?: string, employeeId?: string, limit?: number) {
+    async getAll(siteId?: string, employeeId?: string, limit?: number): Promise<JobAssignment[]> {
         let query = supabase
             .from('job_assignments')
             .select(`
@@ -25,45 +55,21 @@ export const jobAssignmentsService = {
         const { data, error } = await query;
         if (error) throw error;
 
-        return data.map((a: any) => ({
-            ...a,
-            jobId: a.job_id,
-            employeeId: a.employee_id,
-            employeeName: a.employee_name,
-            assignedAt: a.assigned_at,
-            startedAt: a.started_at,
-            completedAt: a.completed_at,
-            estimatedDuration: a.estimated_duration,
-            actualDuration: a.actual_duration,
-            unitsProcessed: a.units_processed,
-            accuracyRate: a.accuracy_rate
-        }));
+        return data.map(mapJobAssignmentRow);
     },
 
-    async getById(id: string) {
+    async getById(id: string): Promise<JobAssignment | null> {
         const { data, error } = await supabase
             .from('job_assignments')
             .select('*')
             .eq('id', id)
-            .single();
+            .maybeSingle();
 
         if (error) throw error;
-        return {
-            ...data,
-            jobId: data.job_id,
-            employeeId: data.employee_id,
-            employeeName: data.employee_name,
-            assignedAt: data.assigned_at,
-            startedAt: data.started_at,
-            completedAt: data.completed_at,
-            estimatedDuration: data.estimated_duration,
-            actualDuration: data.actual_duration,
-            unitsProcessed: data.units_processed,
-            accuracyRate: data.accuracy_rate
-        };
+        return data ? mapJobAssignmentRow(data) : null;
     },
 
-    async getByJobId(jobId: string) {
+    async getByJobId(jobId: string): Promise<JobAssignment[]> {
         const { data, error } = await supabase
             .from('job_assignments')
             .select('*')
@@ -71,22 +77,10 @@ export const jobAssignmentsService = {
             .order('assigned_at', { ascending: false });
 
         if (error) throw error;
-        return data.map((a: any) => ({
-            ...a,
-            jobId: a.job_id,
-            employeeId: a.employee_id,
-            employeeName: a.employee_name,
-            assignedAt: a.assigned_at,
-            startedAt: a.started_at,
-            completedAt: a.completed_at,
-            estimatedDuration: a.estimated_duration,
-            actualDuration: a.actual_duration,
-            unitsProcessed: a.units_processed,
-            accuracyRate: a.accuracy_rate
-        }));
+        return data.map(mapJobAssignmentRow);
     },
 
-    async getByEmployeeId(employeeId: string, status?: string) {
+    async getByEmployeeId(employeeId: string, status?: string): Promise<JobAssignment[]> {
         let query = supabase
             .from('job_assignments')
             .select('*')
@@ -100,19 +94,7 @@ export const jobAssignmentsService = {
         const { data, error } = await query;
         if (error) throw error;
 
-        return data.map((a: any) => ({
-            ...a,
-            jobId: a.job_id,
-            employeeId: a.employee_id,
-            employeeName: a.employee_name,
-            assignedAt: a.assigned_at,
-            startedAt: a.started_at,
-            completedAt: a.completed_at,
-            estimatedDuration: a.estimated_duration,
-            actualDuration: a.actual_duration,
-            unitsProcessed: a.units_processed,
-            accuracyRate: a.accuracy_rate
-        }));
+        return data.map(mapJobAssignmentRow);
     },
 
     async create(assignment: any) {

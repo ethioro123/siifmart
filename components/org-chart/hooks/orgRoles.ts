@@ -3,13 +3,18 @@
 export const ROLE_LEVELS: Record<string, number> = {
     super_admin: 1,
     admin: 1,
-    regional_manager: 2,
     operations_manager: 2,
+    regional_manager: 2,
     finance_manager: 2,
     hr_manager: 2,
     procurement_manager: 2,
     supply_chain_manager: 2,
     merchandising_manager: 2,
+    regional_procurement_lead: 2,
+    regional_finance_officer: 2,
+    regional_hr_officer: 2,
+    regional_logistics_lead: 2,
+    regional_security_supervisor: 2,
     store_manager: 3,
     warehouse_manager: 3,
     logistics_manager: 3,
@@ -42,8 +47,8 @@ export const ROLE_MATRIX_RANK: Record<string, number> = {
     // 1. Executive Leadership (10-19)
     super_admin: 10,
     admin: 11,
-    regional_manager: 12,
-    operations_manager: 13,
+    operations_manager: 12,
+    regional_manager: 13,
 
     // 2. Department Heads & Directors (20-29)
     finance_manager: 20,
@@ -51,6 +56,11 @@ export const ROLE_MATRIX_RANK: Record<string, number> = {
     procurement_manager: 22,
     supply_chain_manager: 23,
     merchandising_manager: 24,
+    regional_procurement_lead: 25,
+    regional_finance_officer: 26,
+    regional_hr_officer: 27,
+    regional_logistics_lead: 28,
+    regional_security_supervisor: 29,
 
     // 3. Facility Managers (30-39)
     store_manager: 30,
@@ -135,12 +145,12 @@ export const getRoleDept = (role: string, empDept?: string): string => {
 
     // 2. Authoritative role-based department mapping
     if (['super_admin', 'admin', 'regional_manager', 'operations_manager', 'merchandising_manager', 'store_operations_auditor'].includes(r)) return 'executive';
-    if (['finance_manager', 'accountant', 'auditor', 'data_analyst', 'treasury_officer', 'tax_compliance_officer', 'credit_control_officer'].includes(r)) return 'finance';
-    if (['hr_manager', 'hr', 'payroll_specialist', 'talent_recruiter', 'training_coordinator'].includes(r)) return 'hr';
-    if (['procurement_manager', 'supply_chain_manager', 'buyer', 'demand_planner', 'vendor_relations_manager', 'customs_import_specialist', 'inbound_qc_inspector', 'replenishment_planner'].includes(r)) return 'procurement';
+    if (['finance_manager', 'accountant', 'auditor', 'data_analyst', 'treasury_officer', 'tax_compliance_officer', 'credit_control_officer', 'regional_finance_officer'].includes(r)) return 'finance';
+    if (['hr_manager', 'hr', 'payroll_specialist', 'talent_recruiter', 'training_coordinator', 'regional_hr_officer'].includes(r)) return 'hr';
+    if (['procurement_manager', 'supply_chain_manager', 'buyer', 'demand_planner', 'vendor_relations_manager', 'customs_import_specialist', 'inbound_qc_inspector', 'replenishment_planner', 'regional_procurement_lead'].includes(r)) return 'procurement';
     if (['store_manager', 'assistant_manager', 'shift_lead', 'store_supervisor', 'cashier', 'sales_associate', 'stock_clerk', 'customer_service', 'merchandiser', 'returns_clerk', 'pos'].includes(r)) return 'store';
-    if (['warehouse_manager', 'logistics_manager', 'inventory_manager', 'dispatch_manager', 'dispatcher', 'picker', 'packer', 'receiver', 'driver', 'forklift_operator', 'inventory_specialist', 'fleet_maintenance_supervisor'].includes(r)) return 'warehouse';
-    if (['it_support', 'security_manager', 'loss_prevention'].includes(r)) return 'support';
+    if (['warehouse_manager', 'logistics_manager', 'inventory_manager', 'dispatch_manager', 'dispatcher', 'picker', 'packer', 'receiver', 'driver', 'forklift_operator', 'inventory_specialist', 'fleet_maintenance_supervisor', 'regional_logistics_lead'].includes(r)) return 'warehouse';
+    if (['it_support', 'security_manager', 'loss_prevention', 'regional_security_supervisor'].includes(r)) return 'support';
 
     return 'support';
 };

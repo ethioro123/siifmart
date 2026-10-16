@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { isWeightBased, isVolumeBased } from '../../../utils/units';
 import { logger } from '../../../utils/logger';
 import { repairShipmentInventoryHelper } from './utils/receivingRepair';
+import { processReceivingStockIntake } from './utils/receivingIntake';
 
 interface UsePOSReceivingProps {
     user: any;
@@ -356,63 +357,31 @@ export const usePOSReceiving = ({
                 }
             }
 
-            const destSiteId = transfer.destSiteId || activeSite?.id;
-            const failedItems: string[] = [];
-
-            if (destSiteId) {
-                const { productsService } = await import('../../../services/supabase.service');
-
-                for (const item of transferReceivingItems) {
-                    if (item.receivedQty > 0) {
-                        const itemSku = item.sku?.trim()?.toUpperCase();
-                        const destProduct = itemSku
-                            ? allProducts.find(p =>
-                                p.sku?.trim()?.toUpperCase() === itemSku &&
-                                (p.siteId === destSiteId || p.site_id === destSiteId)
-                            )
-                            : null;
-
-                        if (destProduct) {
-                            const newStock = (destProduct.stock || 0) + item.receivedQty;
-                            await productsService.update(destProduct.id, {
-                                stock: newStock,
-                                pos_received_by: receiverName,
-                                pos_received_at: timestampStr,
-                                updated_by: receiverName
-                            } as any);
-                        } else {
-                            const templateProduct = itemSku
-                                ? allProducts.find(p => p.sku?.trim()?.toUpperCase() === itemSku)
-                                : null;
-
-                            try {
-                                await addProduct({
-                                    name: item.name || templateProduct?.name || t('posCommand.newProduct'),
-                                    sku: item.sku,
-                                    price: templateProduct?.price || 0,
-                                    costPrice: (templateProduct as any)?.costPrice || (templateProduct as any)?.cost || 0,
-                                    stock: item.receivedQty,
-                                    unit: templateProduct?.unit || 'pcs',
-                                    siteId: destSiteId,
-                                    category: templateProduct?.category || t('posCommand.uncategorized'),
-                                    minStockLevel: 5,
-                                    image: templateProduct?.image || '',
-                                    productId: templateProduct?.productId || templateProduct?.id,
-                                    createdBy: receiverName,
-                                    posReceivedBy: receiverName,
-                                    posReceivedAt: timestampStr
-                                } as any);
-                            } catch (err) {
-                                logger.error('usePOSReceiving', 'Failed to auto-create product:', err);
-                                failedItems.push(item.sku || item.name);
-                            }
-                        }
-                    }
-                }
+            // Sync transfer status to transfers table if record exists there
+            try {
+                const { transfersService } = await import('../../../services/transfers.service');
+                await transfersService.update(targetTransferId, {
+                    transferStatus: 'Received',
+                    status: 'Received',
+                    receivedAt: timestampStr,
+                    receivedBy: receiverName
+                });
+            } catch {
+                // If record was only in wms_jobs, transfersService update failure is safe to ignore
             }
 
-            if (failedItems.length > 0) {
-                addNotification('alert', `Failed to create: ${failedItems.join(', ')}. Please add manually.`);
+            const destSiteId = transfer.destSiteId || activeSite?.id;
+            if (destSiteId) {
+                await processReceivingStockIntake({
+                    destSiteId,
+                    transferReceivingItems,
+                    allProducts,
+                    receiverName,
+                    timestampStr,
+                    addProduct,
+                    addNotification,
+                    t
+                });
             }
 
             const hasDiscrepancies = transferReceivingItems.some(i => {

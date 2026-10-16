@@ -187,26 +187,52 @@ export function evaluateGeofence(
 export function formatSiteAssignment(
     siteId?: string,
     role?: string,
-    sites: Array<{ id: string; name: string }> = []
-): { label: string; isWarning: boolean; isHQ: boolean } {
+    sites: Array<{ id: string; name: string; code?: string; type?: string }> = []
+): {
+    label: string;
+    isWarning: boolean;
+    isHQ: boolean;
+    facilityId?: string;
+    isCEO: boolean;
+} {
+    const isCEO = role === 'ceo' || role === 'super_admin' || role === 'CEO';
+
+    if (isCEO) {
+        const site = siteId ? sites.find(s => s.id === siteId) : null;
+        return {
+            label: site ? site.name : 'Central Operations',
+            facilityId: 'GLOBAL',
+            isWarning: false,
+            isHQ: true,
+            isCEO: true
+        };
+    }
+
     if (siteId) {
         const site = sites.find(s => s.id === siteId);
         if (site) {
-            return { label: site.name, isWarning: false, isHQ: false };
+            const isHQFacility = site.code === 'ET-HQ' || site.code === 'KE-HQ' || site.type === 'Administration';
+            return {
+                label: site.name,
+                facilityId: site.code,
+                isWarning: false,
+                isHQ: isHQFacility,
+                isCEO: false
+            };
         }
     }
 
-    // Executive and corporate roles without a specific branch belong to Central HQ
+    // Corporate roles without a specific branch assignment fallback
     const HQ_ROLES = [
-        'super_admin', 'ceo', 'CEO', 'operations_manager', 'finance_manager',
+        'operations_manager', 'finance_manager',
         'hr_manager', 'procurement_manager', 'supply_chain_manager',
         'admin', 'hr', 'data_analyst', 'auditor'
     ];
 
     if (role && HQ_ROLES.includes(role)) {
-        return { label: 'Ethiopia HQ (Central)', isWarning: false, isHQ: true };
+        return { label: 'Central Operations', facilityId: 'ET-HQ', isWarning: false, isHQ: true, isCEO: false };
     }
 
-    // Site-bound roles without an assigned branch are a security risk
-    return { label: 'Unassigned Branch Staff', isWarning: true, isHQ: false };
+    // Site-bound roles without an assigned branch/facility are a security risk
+    return { label: 'Unassigned Facility', isWarning: true, isHQ: false, facilityId: undefined, isCEO: false };
 }

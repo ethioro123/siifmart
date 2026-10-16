@@ -35,10 +35,13 @@ export default function Logo({
   const scale = size / 32;
   const fontSize = `${Math.round(1.25 * scale * 16)}px`;
 
+  const hasDisplayOverride = /\b(hidden|block|inline-block|flex|inline-flex)\b/.test(className);
+  const containerClass = `${hasDisplayOverride ? '' : 'inline-flex '}items-center select-none ${className}`.trim();
+
   // If a custom image logo is uploaded by the user and loads successfully, display it
   if (effectiveLogoUrl && !imgError) {
     return (
-      <div className={`inline-flex items-center select-none ${className}`}>
+      <div className={containerClass}>
         <img 
           src={effectiveLogoUrl} 
           alt={effectiveStoreName} 
@@ -52,7 +55,7 @@ export default function Logo({
 
   // The system logo is the name itself: two-tone Apple neutral + signature Green
   return (
-    <div className={`inline-flex items-center select-none ${className}`}>
+    <div className={containerClass}>
       <span 
         style={{ fontSize }}
         className="font-black tracking-tight leading-none"

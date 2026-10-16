@@ -1,8 +1,9 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { Building, Store, ChevronDown, Check, MapPin, ExternalLink } from 'lucide-react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
+import { Building, Store, ChevronDown, Check, MapPin, ExternalLink, Filter } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { canSwitchCountry } from '../../utils/permissions';
 import { formatDisplaySiteId } from '../../utils/siteIdGenerator';
+import { useData } from '../../contexts/DataContext';
 
 interface LocationBadgeProps {
    user: any;
@@ -14,8 +15,16 @@ interface LocationBadgeProps {
 
 export function LocationBadge({ user, sites, employees, activeSite, setActiveSite }: LocationBadgeProps) {
    const [isOpen, setIsOpen] = useState(false);
+   const [showOnlyActiveRegion, setShowOnlyActiveRegion] = useState(true);
    const dropdownRef = useRef<HTMLDivElement>(null);
    const navigate = useNavigate();
+
+   const {
+      regions = [],
+      activeRegionCode,
+      setActiveRegionCode,
+      canSwitchRegion
+   } = useData();
 
    // Close dropdown on click outside
    useEffect(() => {
@@ -50,19 +59,52 @@ export function LocationBadge({ user, sites, employees, activeSite, setActiveSit
 
    const finalSite = employeeSite || (siteId ? sites.find(s => s.id === siteId) : null);
    const displaySite = activeSite || finalSite;
-   const locationName = displaySite?.name || 'Administration';
    const siteType = displaySite?.type;
 
-   const isWarehouse = siteType === 'Warehouse' || siteType === 'Distribution Center';
+   const isWarehouse = siteType === 'Warehouse' || siteType === 'Distribution Center' || siteType === 'WMS';
    const isCeo = canSwitchCountry(user);
    const canSwitchSites = !!setActiveSite && isCeo && sites.length > 1;
 
-   const handleSelectSite = (siteId: string) => {
+   // Role check for regional authority
+   const isRegionalOfficer = Boolean(user && (
+      user.role === 'regional_manager' ||
+      (typeof user.role === 'string' && user.role.startsWith('regional_'))
+   ));
+   const isRegionBadgeVisible = canSwitchRegion || isRegionalOfficer;
+
+   // Region details for active site
+   const siteRegionCode = displaySite?.region_code || displaySite?.regionCode;
+   const siteRegion = siteRegionCode ? regions.find(r => r.code === siteRegionCode) : null;
+   const cleanSiteRegionName = siteRegion ? siteRegion.name.replace(/\s*(Region|Territory)$/i, '') : '';
+
+   // Deduplicated name logic:
+   // If RegionBadge is already visible in the topbar and the site is an Administrative office for that region,
+   // label it cleanly as "Regional Hub" to prevent stutter ("Nairobi Region Administration" next to "Nairobi Metro").
+   let displayLocationTitle = displaySite?.name || 'Administration';
+   const isRegionalAdminSite = (siteType === 'Administration' || siteType === 'Administrative') && Boolean(siteRegionCode);
+   if (isRegionBadgeVisible && isRegionalAdminSite) {
+      displayLocationTitle = 'Regional Hub';
+   }
+
+   // Subtitle logic:
+   // When RegionBadge is hidden (frontline staff), append their territory cleanly (e.g. "SITE-0002 • Nairobi Metro").
+   // When RegionBadge is visible (executives), display just the concise facility code.
+   const displaySubtitle = !isRegionBadgeVisible && cleanSiteRegionName
+      ? `${formatDisplaySiteId(displaySite)} • ${cleanSiteRegionName}`
+      : formatDisplaySiteId(displaySite);
+
+   // Dynamic bidirectional sync when selecting a site
+   const handleSelectSite = (selectedSiteId: string) => {
       if (!setActiveSite || !canSwitchSites) return;
-      setActiveSite(siteId);
+      setActiveSite(selectedSiteId);
       setIsOpen(false);
-      const selected = sites.find(s => s.id === siteId);
+      const selected = sites.find(s => s.id === selectedSiteId);
       if (selected) {
+         // Sync active region lens with the selected site's territory
+         if (setActiveRegionCode) {
+            const selectedRegion = selected.region_code || selected.regionCode || null;
+            setActiveRegionCode(selectedRegion);
+         }
          const isWh = ['Warehouse', 'Distribution Center', 'WMS', 'Fulfillment Center'].includes(selected.type || '');
          const isSt = ['Store', 'Dark Store', 'Retail', 'POS'].includes(selected.type || '');
          if (isWh) navigate('/wms-ops');
@@ -70,6 +112,18 @@ export function LocationBadge({ user, sites, employees, activeSite, setActiveSit
          else navigate('/admin');
       }
    };
+
+   // Filter sites in dropdown based on active regional lens
+   const availableSites = useMemo(() => {
+      if (showOnlyActiveRegion && activeRegionCode) {
+         const regionalSites = sites.filter(s => (s.region_code === activeRegionCode || s.regionCode === activeRegionCode));
+         if (regionalSites.length > 0) return regionalSites;
+      }
+      return sites;
+   }, [sites, showOnlyActiveRegion, activeRegionCode]);
+
+   const activeRegionObj = activeRegionCode ? regions.find(r => r.code === activeRegionCode) : null;
+   const activeRegionShortName = activeRegionObj ? activeRegionObj.name.replace(/\s*(Region|Territory)$/i, '') : '';
 
    return (
       <div className="relative" ref={dropdownRef}>
@@ -91,11 +145,11 @@ export function LocationBadge({ user, sites, employees, activeSite, setActiveSit
 
             <div className="flex flex-col min-w-0 max-w-[110px] sm:max-w-[160px]">
                <span className="text-[11px] sm:text-[13px] font-bold text-[#1E3F27] dark:text-[#EAE5D9] truncate leading-tight">
-                  {locationName}
+                  {displayLocationTitle}
                </span>
-               {(displaySite?.code || displaySite?.id) && (
-                  <span className="font-mono text-[9px] text-[#4D6E56] dark:text-[#7A9E83] font-semibold leading-none truncate">
-                     {formatDisplaySiteId(displaySite)}
+               {displaySubtitle && (
+                  <span className="font-mono text-[9px] text-[#4D6E56] dark:text-[#7A9E83] font-semibold leading-none truncate mt-0.5">
+                     {displaySubtitle}
                   </span>
                )}
             </div>
@@ -115,22 +169,37 @@ export function LocationBadge({ user, sites, employees, activeSite, setActiveSit
             <div className="absolute left-0 mt-1.5 w-64 sm:w-72 bg-[#FDFBF7] dark:bg-[#18201B] border border-[#E2DCCE] dark:border-white/10 rounded-2xl shadow-xl z-50 p-2 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
                <div className="px-3 py-1.5 mb-1 border-b border-[#E2DCCE]/60 dark:border-white/5 flex items-center justify-between">
                   <span className="text-[10px] font-bold uppercase tracking-wider text-[#4D6E56] dark:text-[#7A9E83]">
-                     Switch Location
+                     {activeRegionShortName && showOnlyActiveRegion ? `${activeRegionShortName} Sites` : 'Switch Location'}
                   </span>
-                  <button
-                     onClick={() => { setIsOpen(false); navigate('/location-select'); }}
-                     className="text-[10px] font-bold text-[#2C5E3B] dark:text-[#A9CBA2] hover:underline flex items-center gap-0.5 cursor-pointer"
-                  >
-                     <span>All</span>
-                     <ExternalLink size={10} />
-                  </button>
+                  <div className="flex items-center gap-2">
+                     {activeRegionCode && (
+                        <button
+                           type="button"
+                           onClick={() => setShowOnlyActiveRegion(!showOnlyActiveRegion)}
+                           className="text-[10px] font-bold text-[#4D6E56] dark:text-[#7A9E83] hover:text-[#2C5E3B] dark:hover:text-[#A9CBA2] flex items-center gap-0.5 cursor-pointer"
+                           title={showOnlyActiveRegion ? "Show all facilities across all regions" : `Filter facilities to ${activeRegionShortName}`}
+                        >
+                           <Filter size={10} />
+                           <span>{showOnlyActiveRegion ? 'All' : activeRegionShortName}</span>
+                        </button>
+                     )}
+                     <button
+                        type="button"
+                        onClick={() => { setIsOpen(false); navigate('/location-select'); }}
+                        className="text-[10px] font-bold text-[#2C5E3B] dark:text-[#A9CBA2] hover:underline flex items-center gap-0.5 cursor-pointer"
+                     >
+                        <span>All</span>
+                        <ExternalLink size={10} />
+                     </button>
+                  </div>
                </div>
 
                <div className="max-h-64 overflow-y-auto space-y-1 custom-scrollbar">
-                  {sites.map(site => {
+                  {availableSites.map(site => {
                      const isSelected = displaySite?.id === site.id;
                      const isStore = site.type === 'Store' || site.type === 'Dark Store';
                      const isWh = site.type === 'Warehouse' || site.type === 'Distribution Center';
+                     const siteRegionName = regions.find(r => r.code === (site.region_code || site.regionCode))?.name?.replace(/\s*(Region|Territory)$/i, '');
                      return (
                         <button
                            key={site.id}
@@ -152,7 +221,10 @@ export function LocationBadge({ user, sites, employees, activeSite, setActiveSit
                               )}
                               <div className="min-w-0">
                                  <p className="text-xs font-semibold truncate leading-tight">{site.name}</p>
-                                 <p className="text-[9px] font-mono opacity-60 leading-none">{formatDisplaySiteId(site)} • {site.type}</p>
+                                 <p className="text-[9px] font-mono opacity-60 leading-none">
+                                    {formatDisplaySiteId(site)} • {site.type}
+                                    {siteRegionName && !activeRegionCode && ` • ${siteRegionName}`}
+                                 </p>
                               </div>
                            </div>
                            {isSelected && <Check size={14} className="text-[#2C5E3B] dark:text-[#A9CBA2] flex-shrink-0" />}

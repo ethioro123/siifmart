@@ -10,6 +10,7 @@ import { NetworkKPIDeck } from '../components/network/NetworkKPIDeck';
 import { NetworkSiteCard } from '../components/network/NetworkSiteCard';
 import { ProductNetworkStockModal } from '../components/network/ProductNetworkStockModal';
 import { productsService } from '../services/products.service';
+import { RegionalScopeBanner } from '../components/regional-ops/RegionalScopeBanner';
 
 export default function NetworkInventory() {
     const { sites, allProducts } = useData();
@@ -147,6 +148,9 @@ export default function NetworkInventory() {
                     </p>
                 </div>
             </div>
+
+            {/* Adaptive Regional Territory Lens */}
+            <RegionalScopeBanner moduleName="Network Inventory" />
 
             {/* Network Summary KPI Cards */}
             <NetworkKPIDeck

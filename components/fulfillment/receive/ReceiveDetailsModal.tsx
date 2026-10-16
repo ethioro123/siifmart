@@ -10,6 +10,7 @@ import { useData } from '../../../contexts/DataContext';
 import { resolveReceivingPolicy } from '../../../utils/receivingPolicy';
 import { formatPOItemDescription, formatPackBadge } from '../../procurement/utils';
 import { ItemAttributeBadges } from '../ItemAttributeBadges';
+import { resolveFulfillmentWorker } from '../../../utils/fulfillmentUserResolver';
 
 interface ReceiveDetailsModalProps {
     selectedItem: WMSJob | PurchaseOrder;
@@ -37,26 +38,23 @@ export const ReceiveDetailsModal: React.FC<ReceiveDetailsModalProps> = ({
         return (item as PurchaseOrder).poNumber !== undefined || (item as PurchaseOrder).supplierName !== undefined;
     };
 
-    const resolveUser = (userId?: string) => {
-        if (!userId || userId === 'System') return { name: 'System', displayId: '' };
-        const isUUID = (str: string) => /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(str);
-        const userObj = employees.find(e => 
-            e.id === userId || 
-            (e.name && userId && e.name.toLowerCase() === userId.toLowerCase()) || 
-            (e.email && userId && e.email.toLowerCase() === userId.toLowerCase()) ||
-            (e.code && userId && e.code.toLowerCase() === userId.toLowerCase())
-        );
-        const displayId = userObj?.code || (isUUID(userId) ? userId.slice(0, 8).toUpperCase() : '');
-        return {
-            name: userObj ? userObj.name : userId,
-            displayId: displayId
-        };
-    };
-
     const matchingJob = isPO(selectedItem)
         ? (jobs?.find(j => j.type === 'RECEIVE' && (j.orderRef === selectedItem.id || (selectedItem.poNumber && j.jobNumber === selectedItem.poNumber))) ||
            historicalJobs?.find(j => j.type === 'RECEIVE' && (j.orderRef === selectedItem.id || (selectedItem.poNumber && j.jobNumber === selectedItem.poNumber))))
         : null;
+
+    const rawTargetUserId = isPO(selectedItem)
+        ? ((selectedItem as any).receivedBy || (selectedItem as any).received_by || matchingJob?.completedBy || (matchingJob as any)?.completed_by || (selectedItem as any).completedBy || selectedItem.createdBy)
+        : (selectedItem.completedBy || (selectedItem as any).completed_by || (selectedItem as any).receivedBy || (selectedItem as any).received_by || selectedItem.assignedTo || selectedItem.createdBy);
+
+    const resolvedWorker = resolveFulfillmentWorker({
+        userId: rawTargetUserId,
+        job: isPO(selectedItem) ? matchingJob : selectedItem,
+        employees,
+        sites,
+        currentUser: user,
+        siteId: selectedItem.siteId || (selectedItem as any).site_id
+    });
 
     const data = isPO(selectedItem) ? {
         type: 'PO',
@@ -65,7 +63,10 @@ export const ReceiveDetailsModal: React.FC<ReceiveDetailsModalProps> = ({
         title: selectedItem.supplierName || 'Unknown Supplier',
         status: selectedItem.status,
         date: selectedItem.updatedAt || selectedItem.createdAt,
-        user: resolveUser((selectedItem as any).receivedBy || (selectedItem as any).received_by || matchingJob?.completedBy || (matchingJob as any)?.completed_by || (selectedItem as any).completedBy || selectedItem.createdBy),
+        user: {
+            name: resolvedWorker.name,
+            displayId: resolvedWorker.code || resolvedWorker.displayId
+        },
         items: selectedItem.lineItems || []
     } : {
         type: 'JOB',
@@ -74,7 +75,10 @@ export const ReceiveDetailsModal: React.FC<ReceiveDetailsModalProps> = ({
         title: selectedItem.type === 'PUTAWAY' ? 'Item Receipt' : selectedItem.type,
         status: selectedItem.status,
         date: selectedItem.completedAt || selectedItem.updatedAt || selectedItem.createdAt,
-        user: resolveUser(selectedItem.completedBy || (selectedItem as any).completed_by || (selectedItem as any).receivedBy || (selectedItem as any).received_by || selectedItem.assignedTo || selectedItem.createdBy),
+        user: {
+            name: resolvedWorker.name,
+            displayId: resolvedWorker.code || resolvedWorker.displayId
+        },
         items: selectedItem.lineItems || [],
         destination: sites.find(s => s.id === (selectedItem as any).siteId)?.name || 'Unknown'
     };
@@ -180,7 +184,7 @@ export const ReceiveDetailsModal: React.FC<ReceiveDetailsModalProps> = ({
                                         {String(idx + 1).padStart(2, '0')}
                                     </div>
                                     <div className="flex-1 min-w-0">
-                                        <p className="text-[var(--theme-text-primary)] font-semibold tracking-tight text-xs md:text-sm truncate">{formatPOItemDescription(item) || item.name || item.productName || 'Unknown Item'}</p>
+                                        <p className="text-[var(--theme-text-primary)] font-semibold tracking-tight text-xs md:text-sm break-words">{formatPOItemDescription(item) || item.name || item.productName || 'Unknown Item'}</p>
                                         {(() => {
                                              const badge = formatPackBadge(item);
                                              return badge ? (

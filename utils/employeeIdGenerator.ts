@@ -151,12 +151,12 @@ export function extractEmployeeSequence(code?: string | null, targetCountry?: st
 
 /**
  * Derives official staff login email from employee code.
- * Example: 'KE-SIIF0044' -> 'ke-siif0044@siifmart.com'
- *          'ET-SIIF0020' -> 'et-siif0020@siifmart.com'
+ * Example: 'KE-SIIF0044' -> 'KE-SIIF0044@siifmart.com'
+ *          'ET-SIIF0020' -> 'ET-SIIF0020@siifmart.com'
  */
 export function generateEmployeeEmail(code: string): string {
     if (!code) return '';
-    const clean = code.trim().toLowerCase();
+    const clean = code.trim().toUpperCase();
     return `${clean}@siifmart.com`;
 }
 
@@ -168,7 +168,7 @@ export function generateEmployeeEmail(code: string): string {
  */
 export function buildCodeFilterFromLoginEmail(email?: string | null): string | null {
     if (!email) return null;
-    const m = email.trim().toLowerCase().match(/^(?:([a-z]{2})-)?siif-?(\d+)@siifmart\.com$/);
+    const m = email.trim().toLowerCase().match(/^(?:([a-z]{2})-)?siif-?(\d+)(?:-[a-z0-9]+)?@siifmart\.com$/);
     if (!m) return null;
     const pad = m[2].padStart(4, '0');
     if (m[1]) {

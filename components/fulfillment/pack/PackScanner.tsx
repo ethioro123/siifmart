@@ -256,7 +256,7 @@ export const PackScanner: React.FC<PackScannerProps> = ({
                         <X size={24} />
                     </button>
                     <div className="min-w-0">
-                        <h3 className="font-semibold text-base sm:text-lg uppercase tracking-wider truncate">
+                        <h3 className="font-semibold text-xs sm:text-sm md:text-base uppercase tracking-wider truncate">
                             {step === 'SCAN' ? t('warehouse.scanProductBarcode') : t('warehouse.putaway.progress')}
                         </h3>
                         <p className="text-xs text-[var(--theme-accent)] font-mono tabular-nums font-medium truncate">JOB: {formatJobId(job)}</p>

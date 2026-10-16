@@ -88,6 +88,11 @@ describe('Human-Readable Country-Scoped Site ID Generator', () => {
 
     describe('formatDisplaySiteId', () => {
         it('formats existing direct codes cleanly', () => {
+            expect(formatDisplaySiteId({ code: 'ET-HQ', country: 'ET' })).toBe('ET-HQ');
+            expect(formatDisplaySiteId({ code: 'KE-HQ', country: 'KE' })).toBe('KE-HQ');
+            expect(formatDisplaySiteId({ code: 'ET-ADD', country: 'ET' })).toBe('ET-ADD');
+            expect(formatDisplaySiteId({ code: 'KE-NRB', country: 'KE' })).toBe('KE-NRB');
+            expect(formatDisplaySiteId({ code: 'ET-ADA', country: 'ET' })).toBe('ET-ADA');
             expect(formatDisplaySiteId({ code: 'KE-01', country: 'KE' })).toBe('KE-01');
             expect(formatDisplaySiteId({ code: 'UG-02', country: 'UG' })).toBe('UG-02');
             expect(formatDisplaySiteId({ code: 'TZ-01', country: 'TZ' })).toBe('TZ-01');
@@ -156,14 +161,14 @@ describe('Human-Readable Country-Scoped Site ID Generator', () => {
             });
             expect(adamaDcCode).toBe('ET-ADA-DC-04');
 
-            const hqCode = generatePlaceSpecificSiteCode({
+            const regionalAdminCode = generatePlaceSpecificSiteCode({
                 country: 'KE',
                 regionCode: 'ke_nairobi',
                 type: 'Administration',
-                name: 'Kenya Central Operations',
+                name: 'Nairobi Region Administration',
                 siteNumber: 13
             });
-            expect(hqCode).toBe('KE-NRB-ADM-13');
+            expect(regionalAdminCode).toBe('KE-NRB');
         });
 
         it('guarantees unique numbers across all facilities even if name, type, region or country differ', () => {

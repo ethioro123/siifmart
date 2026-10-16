@@ -104,7 +104,7 @@ export const CustodyHandshakeModal: React.FC<CustodyHandshakeModalProps> = ({
                             <div className="flex items-center gap-1.5 mb-1 text-[11px] font-semibold text-amber-500 uppercase tracking-wider">
                                 <Truck size={14} /> Relinquishing Custody
                             </div>
-                            <p className="font-bold text-[var(--theme-text-primary)] truncate text-sm">{driverName}</p>
+                            <p className="font-bold text-[var(--theme-text-primary)] break-words text-sm leading-tight">{driverName}</p>
                             <p className="text-[11px] text-[var(--theme-text-secondary)] font-mono">Transit Driver / Courier</p>
                         </div>
 
@@ -112,7 +112,7 @@ export const CustodyHandshakeModal: React.FC<CustodyHandshakeModalProps> = ({
                             <div className="flex items-center gap-1.5 mb-1 text-[11px] font-semibold text-primary uppercase tracking-wider">
                                 <UserCheck size={14} /> Assuming Custody
                             </div>
-                            <p className="font-bold text-[var(--theme-text-primary)] truncate text-sm">{currentUser?.name || 'Receiver Staff'}</p>
+                            <p className="font-bold text-[var(--theme-text-primary)] break-words text-sm leading-tight">{currentUser?.name || 'Receiver Staff'}</p>
                             <p className="text-[11px] text-primary font-mono">Store Receiving Custodian</p>
                         </div>
                     </div>

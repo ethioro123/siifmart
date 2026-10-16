@@ -1,10 +1,9 @@
 /**
  * Supabase Real-time Service
- * Live updates for products, sales, and inventory
+ * Live websocket updates for warehouse jobs, assignments, procurement, products, transfers, and inventory
  */
 
 import { supabase } from '../lib/supabase';
-
 import type { RealtimeChannel } from '@supabase/supabase-js';
 
 export type RealtimeEvent = 'INSERT' | 'UPDATE' | 'DELETE' | '*';
@@ -14,8 +13,52 @@ export interface RealtimeSubscription {
     unsubscribe: () => void;
 }
 
+/**
+ * Creates a unique scoped channel subscription with automatic cleanup via supabase.removeChannel
+ */
+function createScopedSubscription(
+    table: string,
+    callback: (event: string, payload: any) => void,
+    siteId?: string,
+    filterPredicate?: (data: any) => boolean
+): RealtimeSubscription {
+    const channelId = `${table}-${siteId || 'all'}-${Math.random().toString(36).substring(2, 7)}`;
+    const channel = supabase
+        .channel(channelId)
+        .on(
+            'postgres_changes',
+            {
+                event: '*',
+                schema: 'public',
+                table
+            },
+            (payload) => {
+                const data = (payload.new || payload.old) as any;
+                if (filterPredicate) {
+                    if (filterPredicate(data)) {
+                        callback(payload.eventType, data);
+                    }
+                } else if (!siteId || data.site_id === siteId || data.siteId === siteId) {
+                    callback(payload.eventType, data);
+                }
+            }
+        )
+        .subscribe();
+
+    return {
+        channel,
+        unsubscribe: () => {
+            try {
+                supabase.removeChannel(channel);
+            } catch {
+                channel.unsubscribe();
+            }
+        }
+    };
+}
+
 // ============================================================================
-// REAL-TIME SUBSCRIPTIONS
+// REAL-TIME SERVICE
 // ============================================================================
 
 export const realtimeService = {
@@ -26,26 +69,7 @@ export const realtimeService = {
         callback: (event: string, payload: any) => void,
         siteId?: string
     ): RealtimeSubscription {
-        const channel = supabase
-            .channel('products-changes')
-            .on(
-                'postgres_changes',
-                {
-                    event: '*',
-                    schema: 'public',
-                    table: 'products',
-                    filter: siteId ? `site_id=eq.${siteId}` : undefined
-                },
-                (payload) => {
-                    callback(payload.eventType, payload.new || payload.old);
-                }
-            )
-            .subscribe();
-
-        return {
-            channel,
-            unsubscribe: () => channel.unsubscribe()
-        };
+        return createScopedSubscription('products', callback, siteId);
     },
 
     /**
@@ -55,26 +79,7 @@ export const realtimeService = {
         callback: (event: string, payload: any) => void,
         siteId?: string
     ): RealtimeSubscription {
-        const channel = supabase
-            .channel('sales-changes')
-            .on(
-                'postgres_changes',
-                {
-                    event: '*',
-                    schema: 'public',
-                    table: 'sales',
-                    filter: siteId ? `site_id=eq.${siteId}` : undefined
-                },
-                (payload) => {
-                    callback(payload.eventType, payload.new || payload.old);
-                }
-            )
-            .subscribe();
-
-        return {
-            channel,
-            unsubscribe: () => channel.unsubscribe()
-        };
+        return createScopedSubscription('sales', callback, siteId);
     },
 
     /**
@@ -84,26 +89,7 @@ export const realtimeService = {
         callback: (event: string, payload: any) => void,
         siteId?: string
     ): RealtimeSubscription {
-        const channel = supabase
-            .channel('stock-movements-changes')
-            .on(
-                'postgres_changes',
-                {
-                    event: '*',
-                    schema: 'public',
-                    table: 'stock_movements',
-                    filter: siteId ? `site_id=eq.${siteId}` : undefined
-                },
-                (payload) => {
-                    callback(payload.eventType, payload.new || payload.old);
-                }
-            )
-            .subscribe();
-
-        return {
-            channel,
-            unsubscribe: () => channel.unsubscribe()
-        };
+        return createScopedSubscription('stock_movements', callback, siteId);
     },
 
     /**
@@ -112,92 +98,42 @@ export const realtimeService = {
     subscribeToCustomers(
         callback: (event: string, payload: any) => void
     ): RealtimeSubscription {
-        const channel = supabase
-            .channel('customers-changes')
-            .on(
-                'postgres_changes',
-                {
-                    event: '*',
-                    schema: 'public',
-                    table: 'customers'
-                },
-                (payload) => {
-                    callback(payload.eventType, payload.new || payload.old);
-                }
-            )
-            .subscribe();
-
-        return {
-            channel,
-            unsubscribe: () => channel.unsubscribe()
-        };
+        return createScopedSubscription('customers', callback, undefined, () => true);
     },
 
     /**
-     * Subscribe to WMS jobs
+     * Subscribe to WMS jobs (supports dual-site: source site OR destination site)
      */
     subscribeToWMSJobs(
         callback: (event: string, payload: any) => void,
         siteId?: string
     ): RealtimeSubscription {
-        const channel = supabase
-            .channel('wms-jobs-changes')
-            .on(
-                'postgres_changes',
-                {
-                    event: '*',
-                    schema: 'public',
-                    table: 'wms_jobs'
-                    // Remove database-level filter to support dual-site (source OR destination) via callback
-                },
-                (payload) => {
-                    const data = (payload.new || payload.old) as any;
-                    // Filter in callback to support dual-site logic
-                    if (!siteId || data.site_id === siteId || data.dest_site_id === siteId) {
-                        callback(payload.eventType, data);
-                    }
-                }
-            )
-            .subscribe();
-
-        return {
-            channel,
-            unsubscribe: () => channel.unsubscribe()
-        };
+        return createScopedSubscription('wms_jobs', callback, siteId, (data) => {
+            return !siteId || 
+                data.site_id === siteId || 
+                data.dest_site_id === siteId || 
+                data.source_site_id === siteId || 
+                data.siteId === siteId || 
+                data.destSiteId === siteId || 
+                data.sourceSiteId === siteId;
+        });
     },
 
     /**
-     * Subscribe to transfers
+     * Subscribe to transfers (supports dual-site: source site OR destination site)
      */
     subscribeToTransfers(
         callback: (event: string, payload: any) => void,
         siteId?: string
     ): RealtimeSubscription {
-        const channel = supabase
-            .channel('transfers-changes')
-            .on(
-                'postgres_changes',
-                {
-                    event: '*',
-                    schema: 'public',
-                    table: 'transfers'
-                },
-                (payload) => {
-                    const data = (payload.new || payload.old) as any;
-                    // Dual-site filtering (source OR destination)
-                    if (!siteId || data.source_site_id === siteId || data.dest_site_id === siteId) {
-                        callback(payload.eventType, data);
-                    }
-                }
-            )
-            .subscribe();
-
-        return {
-            channel,
-            unsubscribe: () => channel.unsubscribe()
-        };
+        return createScopedSubscription('transfers', callback, siteId, (data) => {
+            return !siteId || 
+                data.source_site_id === siteId || 
+                data.dest_site_id === siteId || 
+                data.sourceSiteId === siteId || 
+                data.destSiteId === siteId;
+        });
     },
-
 
     /**
      * Subscribe to purchase orders
@@ -206,26 +142,7 @@ export const realtimeService = {
         callback: (event: string, payload: any) => void,
         siteId?: string
     ): RealtimeSubscription {
-        const channel = supabase
-            .channel('purchase-orders-changes')
-            .on(
-                'postgres_changes',
-                {
-                    event: '*',
-                    schema: 'public',
-                    table: 'purchase_orders',
-                    filter: siteId ? `site_id=eq.${siteId}` : undefined
-                },
-                (payload) => {
-                    callback(payload.eventType, payload.new || payload.old);
-                }
-            )
-            .subscribe();
-
-        return {
-            channel,
-            unsubscribe: () => channel.unsubscribe()
-        };
+        return createScopedSubscription('purchase_orders', callback, siteId);
     },
 
     /**
@@ -235,26 +152,7 @@ export const realtimeService = {
         callback: (event: string, payload: any) => void,
         siteId?: string
     ): RealtimeSubscription {
-        const channel = supabase
-            .channel('employees-changes')
-            .on(
-                'postgres_changes',
-                {
-                    event: '*',
-                    schema: 'public',
-                    table: 'employees',
-                    filter: siteId ? `site_id=eq.${siteId}` : undefined
-                },
-                (payload) => {
-                    callback(payload.eventType, payload.new || payload.old);
-                }
-            )
-            .subscribe();
-
-        return {
-            channel,
-            unsubscribe: () => channel.unsubscribe()
-        };
+        return createScopedSubscription('employees', callback, siteId);
     },
 
     /**
@@ -264,58 +162,63 @@ export const realtimeService = {
         callback: (event: string, payload: any) => void,
         siteId?: string
     ): RealtimeSubscription {
-        const channel = supabase
-            .channel('job-assignments-changes')
-            .on(
-                'postgres_changes',
-                {
-                    event: '*',
-                    schema: 'public',
-                    table: 'job_assignments'
-                },
-                (payload) => {
-                    callback(payload.eventType, payload.new || payload.old);
-                }
-            )
-            .subscribe();
-
-        return {
-            channel,
-            unsubscribe: () => channel.unsubscribe()
-        };
+        return createScopedSubscription('job_assignments', callback, siteId, () => true);
     },
 
     /**
-     * Subscribe to inventory requests (Pending Approvals)
+     * Subscribe to inventory requests (Pending Approvals for Count, Waste, Returns)
      */
     subscribeToInventoryRequests(
         callback: (event: string, payload: any) => void,
         siteId?: string
     ): RealtimeSubscription {
-        const channel = supabase
-            .channel('inventory-requests-changes')
-            .on(
-                'postgres_changes',
-                {
-                    event: '*',
-                    schema: 'public',
-                    table: 'inventory_requests',
-                    filter: siteId ? `site_id=eq.${siteId}` : undefined
-                },
-                (payload) => {
-                    callback(payload.eventType, payload.new || payload.old);
-                }
-            )
-            .subscribe();
-
-        return {
-            channel,
-            unsubscribe: () => channel.unsubscribe()
-        };
+        return createScopedSubscription('inventory_requests', callback, siteId);
     },
 
     /**
-     * Subscribe to all changes for a site
+     * Subscribe to barcode approvals (Labels and Barcode Audits)
+     */
+    subscribeToBarcodeApprovals(
+        callback: (event: string, payload: any) => void,
+        siteId?: string
+    ): RealtimeSubscription {
+        return createScopedSubscription('barcode_approvals', callback, siteId);
+    },
+
+    /**
+     * Subscribe to cashier shifts and drawer sessions
+     */
+    subscribeToShifts(
+        callback: (event: string, payload: any) => void,
+        siteId?: string
+    ): RealtimeSubscription {
+        return createScopedSubscription('shifts', callback, siteId, (data) => {
+            return !siteId || data.site_id === siteId || data.home_site_id === siteId || data.siteId === siteId;
+        });
+    },
+
+    /**
+     * Subscribe to mid-shift cash drops to store safe
+     */
+    subscribeToCashDrops(
+        callback: (event: string, payload: any) => void,
+        siteId?: string
+    ): RealtimeSubscription {
+        return createScopedSubscription('pos_cash_drops', callback, siteId);
+    },
+
+    /**
+     * Subscribe to supervisory overrides (voids, price overrides, drawer kicks)
+     */
+    subscribeToSupervisoryOverrides(
+        callback: (event: string, payload: any) => void,
+        siteId?: string
+    ): RealtimeSubscription {
+        return createScopedSubscription('pos_supervisory_overrides', callback, siteId);
+    },
+
+    /**
+     * Subscribe to all operational changes for a site
      */
     subscribeToSite(
         siteId: string,
@@ -328,6 +231,11 @@ export const realtimeService = {
             onJobAssignmentChange?: (event: string, payload: any) => void;
             onTransferChange?: (event: string, payload: any) => void;
             onPurchaseOrderChange?: (event: string, payload: any) => void;
+            onInventoryRequestChange?: (event: string, payload: any) => void;
+            onBarcodeApprovalChange?: (event: string, payload: any) => void;
+            onShiftChange?: (event: string, payload: any) => void;
+            onCashDropChange?: (event: string, payload: any) => void;
+            onOverrideChange?: (event: string, payload: any) => void;
         }
     ): RealtimeSubscription[] {
         const subscriptions: RealtimeSubscription[] = [];
@@ -335,45 +243,59 @@ export const realtimeService = {
         if (callbacks.onProductChange) {
             subscriptions.push(this.subscribeToProducts(callbacks.onProductChange, siteId));
         }
-
         if (callbacks.onSaleChange) {
             subscriptions.push(this.subscribeToSales(callbacks.onSaleChange, siteId));
         }
-
         if (callbacks.onStockChange) {
             subscriptions.push(this.subscribeToStockMovements(callbacks.onStockChange, siteId));
         }
-
         if (callbacks.onCustomerChange) {
             subscriptions.push(this.subscribeToCustomers(callbacks.onCustomerChange));
         }
-
         if (callbacks.onWMSJobChange) {
             subscriptions.push(this.subscribeToWMSJobs(callbacks.onWMSJobChange, siteId));
         }
-
         if (callbacks.onJobAssignmentChange) {
             subscriptions.push(this.subscribeToJobAssignments(callbacks.onJobAssignmentChange, siteId));
         }
-
         if (callbacks.onTransferChange) {
             subscriptions.push(this.subscribeToTransfers(callbacks.onTransferChange, siteId));
         }
-
         if (callbacks.onPurchaseOrderChange) {
             subscriptions.push(this.subscribeToPurchaseOrders(callbacks.onPurchaseOrderChange, siteId));
         }
-
-
+        if (callbacks.onInventoryRequestChange) {
+            subscriptions.push(this.subscribeToInventoryRequests(callbacks.onInventoryRequestChange, siteId));
+        }
+        if (callbacks.onBarcodeApprovalChange) {
+            subscriptions.push(this.subscribeToBarcodeApprovals(callbacks.onBarcodeApprovalChange, siteId));
+        }
+        if (callbacks.onShiftChange) {
+            subscriptions.push(this.subscribeToShifts(callbacks.onShiftChange, siteId));
+        }
+        if (callbacks.onCashDropChange) {
+            subscriptions.push(this.subscribeToCashDrops(callbacks.onCashDropChange, siteId));
+        }
+        if (callbacks.onOverrideChange) {
+            subscriptions.push(this.subscribeToSupervisoryOverrides(callbacks.onOverrideChange, siteId));
+        }
 
         return subscriptions;
     },
 
     /**
-     * Unsubscribe from all channels
+     * Unsubscribe and safely release all channels
      */
     unsubscribeAll(subscriptions: RealtimeSubscription[]) {
-        subscriptions.forEach(sub => sub.unsubscribe());
+        if (!subscriptions) return;
+        subscriptions.forEach(sub => {
+            try {
+                if (sub?.unsubscribe) sub.unsubscribe();
+                else if (sub?.channel) supabase.removeChannel(sub.channel);
+            } catch {
+                // ignore cleanup errors
+            }
+        });
     },
 
     /**
@@ -407,14 +329,14 @@ export const realtimeService = {
         });
 
         ch.on('presence', { event: 'sync' }, () => {
-            const state = ch.presenceState();
+            ch.presenceState();
         });
 
-        ch.on('presence', { event: 'join' }, ({ key, newPresences }) => {
+        ch.on('presence', { event: 'join' }, ({ newPresences }) => {
             if (onJoin) onJoin(newPresences[0]);
         });
 
-        ch.on('presence', { event: 'leave' }, ({ key, leftPresences }) => {
+        ch.on('presence', { event: 'leave' }, ({ leftPresences }) => {
             if (onLeave) onLeave(leftPresences[0]);
         });
 
@@ -431,6 +353,3 @@ export const realtimeService = {
         return ch;
     }
 };
-
-
-

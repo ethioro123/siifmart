@@ -56,7 +56,16 @@ export const transfersService = {
             shippedAt: t.shipped_at,
             deliveredAt: t.delivered_at,
             receivedAt: t.received_at,
-            receivedBy: t.received_by,
+            hasDiscrepancy: t.has_discrepancy,
+            discrepancyDetails: t.discrepancy_details,
+            discrepancyResolutionType: t.discrepancy_resolution_type,
+            discrepancy_resolution_type: t.discrepancy_resolution_type,
+            discrepancyReasonCode: t.discrepancy_reason_code,
+            discrepancy_reason_code: t.discrepancy_reason_code,
+            discrepancyResolvedBy: t.discrepancy_resolved_by,
+            discrepancy_resolved_by: t.discrepancy_resolved_by,
+            discrepancyResolvedAt: t.discrepancy_resolved_at,
+            discrepancy_resolved_at: t.discrepancy_resolved_at,
             sourceRegionCode: t.source_region_code,
             source_region_code: t.source_region_code,
             destRegionCode: t.dest_region_code,
@@ -65,6 +74,16 @@ export const transfersService = {
             country_code: t.country_code,
             isInterRegion: t.is_inter_region ?? (t.source_region_code && t.dest_region_code && t.source_region_code !== t.dest_region_code),
             is_inter_region: t.is_inter_region ?? (t.source_region_code && t.dest_region_code && t.source_region_code !== t.dest_region_code),
+            driverType: t.driver_type || 'INTERNAL',
+            driver_type: t.driver_type || 'INTERNAL',
+            driverId: t.driver_id,
+            driver_id: t.driver_id,
+            driverName: t.driver_name,
+            driver_name: t.driver_name,
+            dispatchedAt: t.dispatched_at,
+            dispatched_at: t.dispatched_at,
+            dispatchedBy: t.dispatched_by,
+            dispatched_by: t.dispatched_by
         }));
     },
 
@@ -152,11 +171,20 @@ export const transfersService = {
         if (updates.status) dbUpdates.status = updates.status;
         if (updates.hasDiscrepancy !== undefined) { dbUpdates.has_discrepancy = updates.hasDiscrepancy; delete dbUpdates.hasDiscrepancy; }
         if (updates.discrepancyDetails !== undefined) { dbUpdates.discrepancy_details = updates.discrepancyDetails; delete dbUpdates.discrepancyDetails; }
+        if (updates.discrepancyResolutionType !== undefined) { dbUpdates.discrepancy_resolution_type = updates.discrepancyResolutionType; delete dbUpdates.discrepancyResolutionType; }
+        if (updates.discrepancyReasonCode !== undefined) { dbUpdates.discrepancy_reason_code = updates.discrepancyReasonCode; delete dbUpdates.discrepancyReasonCode; }
+        if (updates.discrepancyResolvedBy !== undefined) { dbUpdates.discrepancy_resolved_by = updates.discrepancyResolvedBy; delete dbUpdates.discrepancyResolvedBy; }
+        if (updates.discrepancyResolvedAt !== undefined) { dbUpdates.discrepancy_resolved_at = updates.discrepancyResolvedAt; delete dbUpdates.discrepancyResolvedAt; }
         if (updates.transferStatus !== undefined) { dbUpdates.transfer_status = updates.transferStatus; delete dbUpdates.transferStatus; }
         if (updates.shippedAt !== undefined) { dbUpdates.shipped_at = updates.shippedAt; delete dbUpdates.shippedAt; }
         if (updates.deliveredAt !== undefined) { dbUpdates.delivered_at = updates.deliveredAt; delete dbUpdates.deliveredAt; }
         if (updates.receivedAt !== undefined) { dbUpdates.received_at = updates.receivedAt; delete dbUpdates.receivedAt; }
         if (updates.receivedBy !== undefined) { dbUpdates.received_by = updates.receivedBy; delete dbUpdates.receivedBy; }
+        if (updates.driverType !== undefined) { dbUpdates.driver_type = updates.driverType; delete dbUpdates.driverType; }
+        if (updates.driverId !== undefined) { dbUpdates.driver_id = updates.driverId; delete dbUpdates.driverId; }
+        if (updates.driverName !== undefined) { dbUpdates.driver_name = updates.driverName; delete dbUpdates.driverName; }
+        if (updates.dispatchedAt !== undefined) { dbUpdates.dispatched_at = updates.dispatchedAt; delete dbUpdates.dispatchedAt; }
+        if (updates.dispatchedBy !== undefined) { dbUpdates.dispatched_by = updates.dispatchedBy; delete dbUpdates.dispatchedBy; }
 
         // Clean client-only fields before sending to supabase
         delete dbUpdates.sourceSiteId;
@@ -184,6 +212,14 @@ export const transfersService = {
             orderRef: data.order_ref,
             hasDiscrepancy: data.has_discrepancy,
             discrepancyDetails: data.discrepancy_details,
+            discrepancyResolutionType: data.discrepancy_resolution_type,
+            discrepancy_resolution_type: data.discrepancy_resolution_type,
+            discrepancyReasonCode: data.discrepancy_reason_code,
+            discrepancy_reason_code: data.discrepancy_reason_code,
+            discrepancyResolvedBy: data.discrepancy_resolved_by,
+            discrepancy_resolved_by: data.discrepancy_resolved_by,
+            discrepancyResolvedAt: data.discrepancy_resolved_at,
+            discrepancy_resolved_at: data.discrepancy_resolved_at,
             notes: data.notes,
             transferStatus: data.transfer_status,
             sourceRegionCode: data.source_region_code,
@@ -198,7 +234,17 @@ export const transfersService = {
             shippedAt: data.shipped_at,
             deliveredAt: data.delivered_at,
             receivedAt: data.received_at,
-            receivedBy: data.received_by
+            receivedBy: data.received_by,
+            driverType: data.driver_type || 'INTERNAL',
+            driver_type: data.driver_type || 'INTERNAL',
+            driverId: data.driver_id,
+            driver_id: data.driver_id,
+            driverName: data.driver_name,
+            driver_name: data.driver_name,
+            dispatchedAt: data.dispatched_at,
+            dispatched_at: data.dispatched_at,
+            dispatchedBy: data.dispatched_by,
+            dispatched_by: data.dispatched_by
         };
     },
 

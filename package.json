@@ -2,7 +2,7 @@
   "name": "siifmart",
   "productName": "SIIFMART",
   "private": true,
-  "version": "3.5.7",
+  "version": "3.5.8",
   "description": "SIIFMART WMS & POS Enterprise Desktop Application",
   "author": "SIIFMART",
   "type": "module",

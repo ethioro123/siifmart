@@ -1,5 +1,4 @@
-import { useState } from 'react';
-import { createClient } from '@supabase/supabase-js';
+import { useState, useEffect } from 'react';
 import { Employee, Site, UserRole } from '../types';
 import { autoSelectSiteForRole, getRecommendedDepartment, validateRoleSiteAssignment, getRoleLocationDescription, canRoleBeAtSiteType } from '../utils/roleSegregation';
 import { SYSTEM_ROLES, canEmployRole, getRoleHierarchy } from '../utils/roles';
@@ -10,6 +9,8 @@ import { getSiteCountryId } from '../utils/siteIdGenerator';
 import { isDirectOnboardingAuthorized, persistCandidateDocuments } from '../utils/employeeOnboardingGovernance';
 import { saveEmployeeDraft } from '../utils/employeeDrafts';
 import { systemLogsService } from '../services/system-logs.service';
+import { createAuthAccountForNewHire } from '../utils/employeeAuthHelper';
+import { headcountQuotaService, QuotaEvaluationResult } from '../services/headcountQuota.service';
 
 export interface NewEmployeeFormData {
    firstName: string;
@@ -55,6 +56,7 @@ export function useEmployeeWizard({
    const [addStep, setAddStep] = useState(1);
    const [isSubmitting, setIsSubmitting] = useState(false);
    const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+   const [quotaResult, setQuotaResult] = useState<QuotaEvaluationResult | null>(null);
    
    const [newEmpData, setNewEmpData] = useState<NewEmployeeFormData>({
       firstName: '', lastName: '', email: '', phone: '', password: '',
@@ -70,6 +72,19 @@ export function useEmployeeWizard({
       resume: null,
       certificates: []
    });
+
+   // Automatically evaluate facility headcount quota when role, site or salary changes
+   useEffect(() => {
+      const siteId = newEmpData.siteId || activeSite?.id;
+      if (siteId && newEmpData.role) {
+         const proposedSalary = parseFloat(newEmpData.salary) || undefined;
+         headcountQuotaService.evaluateFrontlineOnboarding(siteId, newEmpData.role, proposedSalary)
+            .then(res => setQuotaResult(res))
+            .catch(() => setQuotaResult(null));
+      } else {
+         setQuotaResult(null);
+      }
+   }, [newEmpData.siteId, newEmpData.role, newEmpData.salary, activeSite?.id]);
 
    const getCreatableRoles = (): UserRole[] => {
       if (!user?.role) return [];
@@ -275,8 +290,18 @@ export function useEmployeeWizard({
    };
 
    const submitEmployeeData = async () => {
-      const isAutoApproved = isDirectOnboardingAuthorized(user?.role);
+      const isAutoApproved = isDirectOnboardingAuthorized(
+         user?.role,
+         newEmpData.role,
+         Boolean(quotaResult?.canAutoActivate)
+      );
       const initialStatus = isAutoApproved ? 'Active' : 'Pending Approval';
+      const onboardingTier = isAutoApproved
+         ? (quotaResult?.canAutoActivate ? 'FRONTLINE_FAST_TRACK' : 'HQ_GOVERNANCE')
+         : 'HQ_GOVERNANCE';
+      const quotaStatus = quotaResult?.canAutoActivate
+         ? 'WITHIN_QUOTA'
+         : (quotaResult ? 'EXCEEDED_QUOTA' : 'WITHIN_QUOTA');
 
       try {
          if (!newEmpData.password || newEmpData.password.length < 6) {
@@ -318,58 +343,20 @@ export function useEmployeeWizard({
          let signupEmail = generateEmployeeEmail(employeeCode);
          let employeeId: string = crypto.randomUUID();
 
-         // Only direct authorized executives/HR register live Auth accounts immediately.
-         // Facility/Site Managers (Warehouse Managers, Store Managers, Online Store Managers)
-         // draft candidate proposals for 4-Eyes HR authorization without calling auth.signUp.
+         // Direct authorized executives or quota-approved frontline hires register live credentials
          if (isAutoApproved) {
-            try {
-               const adminClient = createClient(
-                  import.meta.env.VITE_SUPABASE_URL,
-                  import.meta.env.VITE_SUPABASE_ANON_KEY,
-                  {
-                     auth: {
-                        autoRefreshToken: false,
-                        persistSession: false,
-                        detectSessionInUrl: false,
-                        storage: { getItem: () => null, setItem: () => {}, removeItem: () => {} },
-                        storageKey: 'siifmart-onboarding-temp'
-                     }
-                  }
-               );
-
-               const buildPayload = () => ({
-                  email: signupEmail,
-                  password: newEmpData.password,
-                  options: {
-                     data: {
-                        name: `${newEmpData.firstName} ${newEmpData.lastName}`,
-                        role: newEmpData.role,
-                        siteId: validatedSiteId
-                     }
-                  }
-               });
-
-               const { data: firstAttempt, error: firstError } = await adminClient.auth.signUp(buildPayload());
-               if (!firstError && firstAttempt?.user) {
-                  employeeId = firstAttempt.user.id;
-               } else if (firstError) {
-                  const errStr = (firstError.message || '').toLowerCase();
-                  if (errStr.includes('already registered') || errStr.includes('already exist') || (firstError as any).status === 422) {
-                     const ts = Date.now().toString(36);
-                     signupEmail = `${employeeCode.toLowerCase()}-${ts}@siifmart.com`;
-                     const { data: retryData, error: retryError } = await adminClient.auth.signUp(buildPayload());
-                     if (!retryError && retryData?.user) {
-                        employeeId = retryData.user.id;
-                     } else {
-                        logger.warn('useEmployeeWizard', 'Auth signUp fallback to personnel record UUID', { error: retryError || firstError });
-                     }
-                  } else {
-                     logger.warn('useEmployeeWizard', 'Auth signUp fallback to personnel record UUID', { error: firstError });
-                  }
-               }
-            } catch (authErr) {
-               logger.warn('useEmployeeWizard', 'Auth signUp network exception, fallback to personnel UUID', { error: authErr });
-            }
+            const authRes = await createAuthAccountForNewHire({
+               signupEmail,
+               password: newEmpData.password,
+               firstName: newEmpData.firstName,
+               lastName: newEmpData.lastName,
+               role: newEmpData.role,
+               siteId: validatedSiteId,
+               employeeCode,
+               fallbackEmployeeId: employeeId
+            });
+            employeeId = authRes.employeeId;
+            signupEmail = authRes.finalEmail;
          }
 
          const newEmp: Employee = {
@@ -395,7 +382,10 @@ export function useEmployeeWizard({
             emergencyContact: newEmpData.emergencyContact,
             nationalIdNumber: newEmpData.nationalIdNumber || undefined,
             nationalIdPhoto: newEmpData.nationalIdPhoto || undefined,
-            resumeUrl: newEmpData.resume?.name || undefined
+            resumeUrl: newEmpData.resume?.name || undefined,
+            quotaApprovedBy: isAutoApproved && quotaResult?.canAutoActivate ? (user?.name || user?.role) : undefined,
+            onboardingTier,
+            quotaStatus
          };
 
          const result = addEmployee(newEmp);
@@ -422,6 +412,8 @@ export function useEmployeeWizard({
                role: newEmpData.role,
                siteId: validatedSiteId,
                status: initialStatus,
+               onboardingTier,
+               quotaStatus,
                submittedByRole: user?.role
             }
          }).catch(err => {
@@ -430,10 +422,12 @@ export function useEmployeeWizard({
 
          resetWizard();
 
-         if (isAutoApproved) {
+         if (quotaResult?.canAutoActivate) {
+            addNotification('success', `Frontline Fast-Track Active!\n\n${newEmpData.firstName} has been activated immediately within pre-approved site quota.`);
+         } else if (isAutoApproved) {
             addNotification('success', `Employee Profile Created!\n\n${newEmpData.firstName} has been onboarded successfully.`);
          } else {
-            addNotification('success', `Candidate Proposal Submitted to HR!\n\n${newEmpData.firstName} ${newEmpData.lastName} has been drafted and submitted to HR for approval.`);
+            addNotification('success', `Candidate Proposal Submitted to HQ!\n\n${newEmpData.firstName} ${newEmpData.lastName} has been submitted to Corporate HQ for approval.`);
          }
          return null;
       } catch (error: any) {
@@ -462,6 +456,7 @@ export function useEmployeeWizard({
       resetWizard, handleOpenWizard, handleRoleChange, handleFinalSubmit,
       getCreatableRoles, handleWizardNext, handleWizardBack, canAdjustPayroll,
       handleSaveDraft,
-      isDirectOnboarding: isDirectOnboardingAuthorized(user?.role)
+      quotaResult,
+      isDirectOnboarding: isDirectOnboardingAuthorized(user?.role, newEmpData.role, Boolean(quotaResult?.canAutoActivate))
    };
 }

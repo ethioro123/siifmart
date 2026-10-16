@@ -177,14 +177,24 @@ export function useCountryScoping({
     });
   }, [allOrders, siteCountryMap, effectiveCountry, activeRegionCode, sites]);
 
+  // Helper: check if a site belongs to the currently active region (if any)
+  const isSiteInActiveRegion = useCallback((siteId?: string): boolean => {
+    if (!activeRegionCode) return true;
+    if (!siteId) return false;
+    const site = sites.find(s => s.id === siteId || (s as any).code === siteId);
+    if (!site) return false;
+    return site.regionCode === activeRegionCode || (site as any).region_code === activeRegionCode;
+  }, [activeRegionCode, sites]);
+
   // 5. Scoped Sales History
   const scopedAllSales = useMemo(() => {
     return allSales.filter(sale => {
       if (!sale.siteId) return effectiveCountry === 'ET';
       const saleCountry = siteCountryMap.get(sale.siteId) || 'ET';
-      return saleCountry === effectiveCountry;
+      if (saleCountry !== effectiveCountry) return false;
+      return isSiteInActiveRegion(sale.siteId);
     });
-  }, [allSales, siteCountryMap, effectiveCountry]);
+  }, [allSales, siteCountryMap, effectiveCountry, isSiteInActiveRegion]);
 
   // 6. Scoped Employees (All existing employees default to Ethiopia ET)
   const scopedEmployees = useMemo(() => {
@@ -194,9 +204,13 @@ export function useCountryScoping({
         empCountry = siteCountryMap.get(emp.siteId);
       }
       const finalCountry = empCountry || 'ET';
-      return finalCountry === effectiveCountry;
+      if (finalCountry !== effectiveCountry) return false;
+      if (!activeRegionCode) return true;
+      const empRegion = emp.regionCode || (emp as any).region_code;
+      if (empRegion) return empRegion === activeRegionCode;
+      return isSiteInActiveRegion(emp.siteId);
     });
-  }, [employees, siteCountryMap, effectiveCountry]);
+  }, [employees, siteCountryMap, effectiveCountry, activeRegionCode, isSiteInActiveRegion]);
 
   // 7. Scoped Goods / Stock Movements
   const scopedMovements = useMemo(() => {
@@ -204,27 +218,30 @@ export function useCountryScoping({
       const siteId = m.siteId || (m as any).site_id;
       if (!siteId) return effectiveCountry === 'ET';
       const mCountry = siteCountryMap.get(siteId) || 'ET';
-      return mCountry === effectiveCountry;
+      if (mCountry !== effectiveCountry) return false;
+      return isSiteInActiveRegion(siteId);
     });
-  }, [movements, siteCountryMap, effectiveCountry]);
+  }, [movements, siteCountryMap, effectiveCountry, isSiteInActiveRegion]);
 
   // 8. Scoped Shifts (POS Cash Drawer & Reconciliations)
   const scopedShifts = useMemo(() => {
     return shifts.filter(sh => {
       if (!sh.siteId) return effectiveCountry === 'ET';
       const shCountry = siteCountryMap.get(sh.siteId) || 'ET';
-      return shCountry === effectiveCountry;
+      if (shCountry !== effectiveCountry) return false;
+      return isSiteInActiveRegion(sh.siteId);
     });
-  }, [shifts, siteCountryMap, effectiveCountry]);
+  }, [shifts, siteCountryMap, effectiveCountry, isSiteInActiveRegion]);
 
   // 9. Scoped Expenses
   const scopedExpenses = useMemo(() => {
     return expenses.filter(exp => {
       if (!exp.siteId) return effectiveCountry === 'ET';
       const expCountry = siteCountryMap.get(exp.siteId) || 'ET';
-      return expCountry === effectiveCountry;
+      if (expCountry !== effectiveCountry) return false;
+      return isSiteInActiveRegion(exp.siteId);
     });
-  }, [expenses, siteCountryMap, effectiveCountry]);
+  }, [expenses, siteCountryMap, effectiveCountry, isSiteInActiveRegion]);
 
   // 10. Scoped Products (Multi-site catalog inventory & POS)
   const isProductInCountry = useCallback((p: Product): boolean => {
@@ -261,25 +278,39 @@ export function useCountryScoping({
   const scopedCustomers = useMemo(() => {
     return customers.filter(c => {
       const explicitCountry = (c as any).country;
-      if (explicitCountry) return explicitCountry === effectiveCountry;
-      const isKeCustomer = c.phone?.startsWith('+254') || c.phone?.startsWith('07') || c.phone?.startsWith('01');
-      const isUgCustomer = c.phone?.startsWith('+256');
-      const custCountry = isKeCustomer ? 'KE' : isUgCustomer ? 'UG' : 'ET';
-      return custCountry === effectiveCountry;
+      let custCountry = explicitCountry;
+      if (!custCountry) {
+        const isKeCustomer = c.phone?.startsWith('+254') || c.phone?.startsWith('07') || c.phone?.startsWith('01');
+        const isUgCustomer = c.phone?.startsWith('+256');
+        custCountry = isKeCustomer ? 'KE' : isUgCustomer ? 'UG' : 'ET';
+      }
+      if (custCountry !== effectiveCountry) return false;
+      if (activeRegionCode) {
+        const custRegion = (c as any).regionCode || (c as any).region_code;
+        if (custRegion && custRegion !== activeRegionCode) return false;
+      }
+      return true;
     });
-  }, [customers, effectiveCountry]);
+  }, [customers, effectiveCountry, activeRegionCode]);
 
   // 12. Scoped Suppliers
   const scopedSuppliers = useMemo(() => {
     return suppliers.filter(s => {
       const explicitCountry = (s as any).country;
-      if (explicitCountry) return explicitCountry === effectiveCountry;
-      const isKeSupplier = s.phone?.startsWith('+254') || s.phone?.startsWith('07') || s.phone?.startsWith('01') || (s.location && /kenya|nairobi|mombasa|kisumu|eldoret|nakuru/i.test(s.location));
-      const isUgSupplier = s.phone?.startsWith('+256') || (s.location && /uganda|kampala|entebbe|jinja/i.test(s.location));
-      const suppCountry = isKeSupplier ? 'KE' : isUgSupplier ? 'UG' : 'ET';
-      return suppCountry === effectiveCountry;
+      let suppCountry = explicitCountry;
+      if (!suppCountry) {
+        const isKeSupplier = s.phone?.startsWith('+254') || s.phone?.startsWith('07') || s.phone?.startsWith('01') || (s.location && /kenya|nairobi|mombasa|kisumu|eldoret|nakuru/i.test(s.location));
+        const isUgSupplier = s.phone?.startsWith('+256') || (s.location && /uganda|kampala|entebbe|jinja/i.test(s.location));
+        suppCountry = isKeSupplier ? 'KE' : isUgSupplier ? 'UG' : 'ET';
+      }
+      if (suppCountry !== effectiveCountry) return false;
+      if (activeRegionCode) {
+        const suppRegion = (s as any).regionCode || (s as any).region_code;
+        if (suppRegion && suppRegion !== activeRegionCode) return false;
+      }
+      return true;
     });
-  }, [suppliers, effectiveCountry]);
+  }, [suppliers, effectiveCountry, activeRegionCode]);
 
   // 13. Scoped Discount Codes (Multi-Country Voucher Isolation)
   const scopedDiscountCodes = useMemo(() => {

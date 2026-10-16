@@ -10,6 +10,7 @@ import { usePurchaseOrderMutations } from '../../hooks/usePurchaseOrderMutations
 import { logger } from '../../utils/logger';
 import { purchaseOrdersService } from '../../services/purchase-orders.service';
 import { PurchaseOrdersMobileList } from './components/PurchaseOrdersMobileList';
+import { renderPriorityBadge, renderStatusBadge } from './components/POBadges';
 
 interface PurchaseOrdersListProps {
     orders: PurchaseOrder[];
@@ -43,7 +44,7 @@ export const PurchaseOrdersList: React.FC<PurchaseOrdersListProps> = ({
     suppliers, sites, currencySymbol = 'ETB', onEdit, onRefresh
 }) => {
     const { user, showToast } = useStore();
-    const { approvePOMutation, bulkApproveMutation, cancelPOMutation } = usePurchaseOrderMutations();
+    const { approvePOMutation, bulkApproveMutation, cancelPOMutation, updatePOMutation } = usePurchaseOrderMutations();
     const [selectedPO, setSelectedPO] = useState<PurchaseOrder | null>(null);
     const [selectedPOIds, setSelectedPOIds] = useState<string[]>([]);
     const isBulkApproving = bulkApproveMutation.isPending;
@@ -51,19 +52,46 @@ export const PurchaseOrdersList: React.FC<PurchaseOrdersListProps> = ({
     const ITEMS_PER_PAGE = 20;
     const isCEO = user?.role === 'super_admin';
     const isProcurementManager = user?.role === 'procurement_manager';
-    const isOperationalDirector = user?.role === 'regional_manager' || user?.role === 'operations_manager';
+    const isOperationalDirector = user?.role === 'regional_manager' || user?.role === 'operations_manager' || user?.role === 'regional_procurement_lead';
     const canApprove = isProcurementManager || user?.role === 'finance_manager' || user?.role === 'admin' || isCEO || isOperationalDirector;
 
+    const isRegionalStaff = user?.scopeLevel === 'REGIONAL' || (user as any)?.scope_level === 'REGIONAL' || [
+        'regional_manager', 'regional_procurement_lead', 'regional_finance_officer', 'regional_logistics_lead'
+    ].includes(user?.role || '');
+
+    const isExceedingRegionalLimit = (po: PurchaseOrder) => {
+        if (!isRegionalStaff) return false;
+        const isKe = po.countryCode === 'KE' || (po as any).country_code === 'KE' || po.currency === 'KSh' || po.currency === 'KES';
+        return (po.totalAmount || 0) > (isKe ? 500000 : 1000000);
+    };
+
     const handleBulkApprove = async () => {
-        const ordersToApprove = orders.filter(p => selectedPOIds.includes(p.id));
+        let ordersToApprove = orders.filter(p => selectedPOIds.includes(p.id));
         if (ordersToApprove.length === 0) return;
-        try {
-            await bulkApproveMutation.mutateAsync(ordersToApprove);
-            setSelectedPOIds([]);
-            onRefresh();
-        } catch (e) {
-            logger.error('PurchaseOrdersList', "Bulk approve failed", e);
+
+        if (isRegionalStaff) {
+            const overLimit = ordersToApprove.filter(isExceedingRegionalLimit);
+            ordersToApprove = ordersToApprove.filter(p => !isExceedingRegionalLimit(p));
+            for (const po of overLimit) {
+                await updatePOMutation.mutateAsync({
+                    id: po.id,
+                    updates: { requiresHqApproval: true }
+                });
+            }
+            if (overLimit.length > 0) {
+                showToast(`${overLimit.length} order(s) exceeded regional autonomous cap and were routed to Corporate HQ.`, 'warning');
+            }
         }
+
+        if (ordersToApprove.length > 0) {
+            try {
+                await bulkApproveMutation.mutateAsync(ordersToApprove);
+            } catch (e) {
+                logger.error('PurchaseOrdersList', "Bulk approve failed", e);
+            }
+        }
+        setSelectedPOIds([]);
+        onRefresh();
     };
 
     // RULE 10: Lazy loading — load line items on-demand only when a PO is opened
@@ -91,41 +119,29 @@ export const PurchaseOrdersList: React.FC<PurchaseOrdersListProps> = ({
 
     const handleSingleApprove = async (e: React.MouseEvent, po: PurchaseOrder) => {
         e.stopPropagation();
+        if (isExceedingRegionalLimit(po)) {
+            try {
+                await updatePOMutation.mutateAsync({
+                    id: po.id,
+                    updates: {
+                        requiresHqApproval: true,
+                        notes: (po.notes ? `${po.notes}\n` : '') + `[HQ Escalation] Order total (${po.totalAmount}) exceeds regional ceiling. Escalated by ${user?.name || 'Regional Lead'} to Corporate HQ.`
+                    }
+                });
+                showToast("Order exceeds regional autonomous ceiling. Escalated to Corporate HQ for exception review.", "warning");
+                onRefresh();
+            } catch (err) {
+                logger.error('PurchaseOrdersList', "Escalate to HQ failed", err);
+            }
+            return;
+        }
+
         try {
             await approvePOMutation.mutateAsync(po);
             onRefresh();
         } catch (e) {
             logger.error('PurchaseOrdersList', "Approve failed", e);
         }
-    };
-
-    const renderPriorityBadge = (priority?: string) => {
-        const p = (priority || 'Normal').toLowerCase();
-        const isUrgent = p === 'urgent' || p === 'high';
-        return (
-            <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold tracking-wide uppercase ${isUrgent ? 'bg-red-500/10 text-red-500 border border-red-500/20' : 'bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] border border-[var(--theme-border)]'}`}>
-                {priority || 'Normal'}
-            </span>
-        );
-    };
-
-    const renderStatusBadge = (status: string) => {
-        const config: Record<string, { bg: string; text: string; border: string }> = {
-            Received: { bg: 'bg-emerald-500/10', text: 'text-emerald-500', border: 'border-emerald-500/20' },
-            'Partially Received': { bg: 'bg-amber-500/10', text: 'text-amber-500', border: 'border-amber-500/20' },
-            Approved: { bg: 'bg-blue-500/10', text: 'text-blue-500', border: 'border-blue-500/20' },
-            Ordered: { bg: 'bg-indigo-500/10', text: 'text-indigo-500', border: 'border-indigo-500/20' },
-            Draft: { bg: 'bg-[var(--theme-bg-subtle)]', text: 'text-[var(--theme-text-secondary)]', border: 'border-[var(--theme-border)]' },
-            Pending: { bg: 'bg-amber-500/10', text: 'text-amber-500', border: 'border-amber-500/20' },
-            Cancelled: { bg: 'bg-red-500/10', text: 'text-red-500', border: 'border-red-500/20' },
-            Rejected: { bg: 'bg-red-500/10', text: 'text-red-500', border: 'border-red-500/20' },
-        };
-        const c = config[status] || config.Draft;
-        return (
-            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wider ${c.bg} ${c.text} border ${c.border}`}>
-                {status}
-            </span>
-        );
     };
 
     return (
@@ -333,13 +349,19 @@ export const PurchaseOrdersList: React.FC<PurchaseOrdersListProps> = ({
                                                 );
 
                                                 if (canApprove && (!isCreator || isCEO)) {
+                                                    const isOverLimit = isExceedingRegionalLimit(po);
                                                     return (
                                                         <button
                                                             onClick={(e) => handleSingleApprove(e, po)}
-                                                            className="h-8 px-3.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-xs font-medium transition-all active:scale-[0.98] flex items-center gap-1.5 cursor-pointer"
-                                                            title="Authorize & Sign Off PO"
+                                                            className={`h-8 px-3.5 rounded-full border text-xs font-medium transition-all active:scale-[0.98] flex items-center gap-1.5 cursor-pointer ${
+                                                                isOverLimit
+                                                                    ? 'border-amber-500/30 bg-amber-500/10 hover:bg-amber-500/20 text-amber-700 dark:text-amber-300'
+                                                                    : 'border-emerald-500/30 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400'
+                                                            }`}
+                                                            title={isOverLimit ? 'Order exceeds regional autonomous ceiling. Click to route to Corporate HQ for exception review.' : 'Authorize & Sign Off PO'}
                                                         >
-                                                            <CheckCircle size={13} /> Sign Off
+                                                            {isOverLimit ? <ShieldAlert size={13} /> : <CheckCircle size={13} />}
+                                                            <span>{isOverLimit ? 'Escalate to HQ' : 'Sign Off'}</span>
                                                         </button>
                                                     );
                                                 }

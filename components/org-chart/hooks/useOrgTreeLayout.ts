@@ -76,7 +76,8 @@ export const useOrgTreeLayout = ({ employees, sites = [], filters }: UseOrgTreeL
         }
 
         // Categorize managers
-        const regionalMgr = allNodes.find(n => n.role === 'regional_manager');
+        const regionalMgrs = allNodes.filter(n => n.role === 'regional_manager');
+        const regionalMgr = regionalMgrs[0];
         const opsMgr = allNodes.find(n => n.role === 'operations_manager');
         const financeMgr = allNodes.find(n => n.role === 'finance_manager');
         const hrMgr = allNodes.find(n => n.role === 'hr_manager');
@@ -92,10 +93,21 @@ export const useOrgTreeLayout = ({ employees, sites = [], filters }: UseOrgTreeL
         const findParent = (node: OrgTreeNode): OrgTreeNode | null => {
             if (node.id === rootNode?.id) return null;
 
-            // Level 2 (Executive Leads) -> Report to CEO
+            // Level 2 (Executive Leads)
             if (node.level === 2) {
-                if (['operations_manager', 'supply_chain_manager'].includes(node.role) && regionalMgr && regionalMgr.id !== node.id) {
-                    return regionalMgr;
+                // Operations Manager reports directly to CEO
+                if (node.role === 'operations_manager') {
+                    return rootNode || null;
+                }
+                // Regional Manager reports to Operations Manager (or CEO if no Ops Mgr)
+                if (node.role === 'regional_manager') {
+                    if (opsMgr && opsMgr.id !== node.id) return opsMgr;
+                    return rootNode || null;
+                }
+                // Supply Chain Manager reports to Operations Manager (or CEO)
+                if (node.role === 'supply_chain_manager') {
+                    if (opsMgr && opsMgr.id !== node.id) return opsMgr;
+                    return rootNode || null;
                 }
                 return rootNode || null;
             }
@@ -117,9 +129,25 @@ export const useOrgTreeLayout = ({ employees, sites = [], filters }: UseOrgTreeL
                 if (['security_manager', 'cs_manager'].includes(node.role)) {
                     if (opsMgr && opsMgr.id !== node.id) return opsMgr;
                 }
-                // Store/Warehouse managers report to Operations Manager (or Regional Manager, or CEO)
-                if (opsMgr && opsMgr.id !== node.id) return opsMgr;
+                // Store/Warehouse managers report to their Regional Manager in the same territory
+                if (['store_manager', 'warehouse_manager'].includes(node.role)) {
+                    const empObj = node.employee as any;
+                    const empRegion = empObj?.regionCode || empObj?.region_code;
+                    if (empRegion) {
+                        const matchingRm = regionalMgrs.find(rm => {
+                            const rmEmp = rm.employee as any;
+                            return (rmEmp?.regionCode || rmEmp?.region_code) === empRegion;
+                        });
+                        if (matchingRm && matchingRm.id !== node.id) return matchingRm;
+                    }
+                    if (regionalMgr && regionalMgr.id !== node.id) return regionalMgr;
+                    if (opsMgr && opsMgr.id !== node.id) return opsMgr;
+                    return rootNode || null;
+                }
+
+                // Default Level 3 fallback
                 if (regionalMgr && regionalMgr.id !== node.id) return regionalMgr;
+                if (opsMgr && opsMgr.id !== node.id) return opsMgr;
                 return rootNode || null;
             }
 

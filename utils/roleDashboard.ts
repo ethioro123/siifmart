@@ -21,9 +21,20 @@ export function getRoleDashboardRoute(role?: UserRole | string, siteType?: strin
     const isWarehouseSite = siteType && ['Warehouse', 'Distribution Center', 'WMS', 'Fulfillment Center'].includes(siteType);
     const isStoreSite = siteType && ['Store', 'Dark Store', 'Retail', 'POS'].includes(siteType);
 
-    // 1. Level 1 - Executive Leadership (Central Operations /admin unless scoped to site)
-    const isExecutive = ['super_admin', 'CEO', 'ceo', 'regional_manager', 'operations_manager'].includes(role);
-    if (isExecutive) {
+    // 1. Regional Command: Regional Managers & Functional Leads command from /regional-ops
+    if (role === 'regional_manager' || [
+        'regional_procurement_lead',
+        'regional_finance_officer',
+        'regional_hr_officer',
+        'regional_logistics_lead',
+        'regional_security_supervisor'
+    ].includes(role)) {
+        return '/regional-ops';
+    }
+
+    // 1.5. Corporate HQ Executive Deck
+    const isHQExecutive = ['super_admin', 'CEO', 'ceo', 'operations_manager', 'admin'].includes(role);
+    if (isHQExecutive) {
         if (isWarehouseSite) return '/wms-ops';
         if (isStoreSite) return '/pos-dashboard';
         return '/admin';

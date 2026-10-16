@@ -101,8 +101,8 @@ describe('Operations Manager (SOP-MGT-021, Level 2, Rank 90) Full Operational Au
     });
 
     describe('3. Role Hierarchy & Employment Authority (canEmployRole)', () => {
-        it('has Level 2 Hierarchy Rank of 90', () => {
-            expect(getRoleHierarchy('operations_manager')).toBe(90);
+        it('has Level 2 Hierarchy Rank of 95', () => {
+            expect(getRoleHierarchy('operations_manager')).toBe(95);
         });
 
         it('can hire Level 3 managers and Level 4 operational personnel', () => {
@@ -212,7 +212,7 @@ describe('Operations Manager (SOP-MGT-021, Level 2, Rank 90) Full Operational Au
         });
 
         it('verifies hierarchy ranks for Central Operations Team', () => {
-            expect(getRoleHierarchy('operations_manager')).toBe(90);
+            expect(getRoleHierarchy('operations_manager')).toBe(95);
             expect(getRoleHierarchy('security_manager')).toBe(75);
             expect(getRoleHierarchy('cs_manager')).toBe(60);
             expect(getRoleHierarchy('store_operations_auditor')).toBe(45);

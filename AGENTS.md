@@ -17,7 +17,8 @@
 - **Config-Gating**: Whenever creating or auditing logic, check if it needs a setting to control it — never hardcode operational policies
 - **Country-Isolated Settings**: Every setting must be 100% separated per country; settings in one country must never apply to another
 - **Invisible Tenancy & Single Global Switch**: Country switching is done exclusively by the CEO via ONE central toggle in the top navigation. Settings pages must NEVER contain per-screen country selectors. Non-CEO users see a seamless, native national platform with zero awareness of multi-tenancy. All separation is enforced automatically in the background.
-- **Mandatory In-Chat SQL Delivery**: Whenever ANY SQL migration, table, column, index, RPC function, or RLS policy is created or modified while coding, ALWAYS output the complete, runnable, copy-pasteable SQL snippet directly in the chat response so the user can easily copy and execute it in Supabase SQL Editor. Never silently create or alter migrations without bringing the full runnable SQL to the chat.
+- **Mandatory Persistent SQL Migration File & Execution Status (Paramount & First Priority)**: Creating a permanent, version-controlled migration file on disk in `/migrations/YYYYMMDD_<description>.sql` for ALL SQL created or modified (tables, columns, indexes, RPC functions, views, RLS policies, seeds, or patches) is **strictly mandatory and paramount** (more important than in-chat SQL). Never write, propose, or generate SQL without FIRST creating a physical migration file on disk. In addition, ALWAYS output the complete, runnable, copy-pasteable SQL snippet directly in the chat response so the user can easily copy and execute it in Supabase SQL Editor. **Execution Status Notification**: The AI must ALWAYS explicitly inform the user whether the SQL migration file has already been applied/run in the database or if it still requires manual execution by the user in Supabase SQL Editor.
+- **Plain-Language Completion Summaries (Zero Technical Code Dumps)**: When finished working on a task, NEVER provide technical code explanations, internal file paths, or code change breakdowns. Provide clear, easily understandable, plain-English information explaining what was worked on, what changed from a user/business perspective, and how it works in the app.
 
 ## File Size Limit (ENFORCED)
 No file may exceed **500 lines**. Before editing a large file, split it using these patterns:
@@ -88,7 +89,11 @@ No file may exceed **500 lines**. Before editing a large file, split it using th
 - ❌ Don't add country selectors or partition switchers inside individual settings pages (country switching belongs ONLY in the central CEO global switch)
 - ❌ Don't expose tenancy mechanics to non-CEO users (the app must render as a seamless native national platform)
 - ❌ Don't require users to manually target a country when configuring settings — bind and isolate per active country automatically
+- ❌ Don't write, propose, or generate ANY SQL without FIRST creating a permanent version-controlled file in /migrations/
+- ❌ Don't rely solely on in-chat SQL without persisting it to a migration file on disk
 - ❌ Don't create or modify SQL migrations without bringing the complete, runnable SQL to the chat for the user to run in Supabase
+- ❌ Don't leave the user in the dark regarding SQL execution status — always explicitly state whether the migration file has already been applied/run or still needs manual execution in Supabase
+- ❌ Don't output technical code, file paths, or line diffs when completing work — summarize in plain, easily understandable terms what was built and how it works for users
 
 ## References
 - Full rules: `.agent/RULES.md`

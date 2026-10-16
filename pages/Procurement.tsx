@@ -4,6 +4,7 @@ import { useData } from '../contexts/DataContext';
 import { useStore } from '../contexts/CentralStore';
 import { PurchaseOrder, Supplier, Product } from '../types';
 import { purchaseOrdersService, suppliersService } from '../services/supabase.service';
+import { realtimeService } from '../services/realtime.service';
 import { useDateFilter } from '../hooks/useDateFilter';
 import { ProcurementDashboard } from '../components/procurement/ProcurementDashboard';
 import { PurchaseOrdersList } from '../components/procurement/PurchaseOrdersList';
@@ -16,10 +17,18 @@ import { getCountryProfile, type Country } from '../utils/localization';
 import { VendorRelationsTab } from '../components/procurement/VendorRelationsTab';
 import { CustomsImportTab } from '../components/procurement/CustomsImportTab';
 import { InboundQCTab } from '../components/procurement/InboundQCTab';
+import { RegionalScopeBanner } from '../components/regional-ops/RegionalScopeBanner';
 
 export default function Procurement() {
     const { user } = useStore();
-    const { suppliers: allSuppliers, sites, settings, effectiveCountry } = useData(); // Global suppliers validation & sites
+    const { suppliers: allSuppliers, sites, settings, effectiveCountry, isRegionalUser } = useData(); // Global suppliers validation & sites
+
+    const isRegionalStaff = isRegionalUser || user?.scopeLevel === 'REGIONAL' || (user as any)?.scope_level === 'REGIONAL' || [
+        'regional_manager',
+        'regional_procurement_lead',
+        'regional_finance_officer',
+        'regional_logistics_lead'
+    ].includes(user?.role || '');
 
     const activeCountry: Country = (effectiveCountry || (settings?.country as Country) || 'ET');
     const countryProfile = getCountryProfile(activeCountry);
@@ -179,6 +188,18 @@ export default function Procurement() {
         fetchData();
     }, [fetchData]);
 
+    // Live Real-Time Updates: synchronizes PO status changes (approvals, warehouse receiving, item check-ins)
+    useEffect(() => {
+        const sub = realtimeService.subscribeToPurchaseOrders((event, payload) => {
+            logger.debug('Procurement', `📡 Live PO update received (${event}):`, payload?.id);
+            fetchData();
+        });
+
+        return () => {
+            sub.unsubscribe();
+        };
+    }, [fetchData]);
+
     const handleCreatePOOpen = (product?: Product) => {
         setEditingPO(null);
         setInitialSupplierId(product?.preferredSupplierId || undefined);
@@ -249,9 +270,22 @@ export default function Procurement() {
                 </div>
             </div>
 
+            {/* Adaptive Regional Territory Lens */}
+            <RegionalScopeBanner
+                moduleName="Procurement"
+                guardrailBadge={
+                    <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-700 dark:text-amber-300 text-xs font-semibold">
+                        <span>Autonomous PO Limit: {currencySymbol} {activeCountry === 'KE' ? '500,000' : '1,000,000'}</span>
+                    </div>
+                }
+            />
+
             {/* Navigation Tabs */}
             <div className="inline-flex p-1 rounded-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border-subtle)] gap-1 flex-wrap w-fit">
-                {(['overview', 'orders', 'suppliers', 'vendor_relations', 'customs_import', 'inbound_qc'] as const).map(tab => {
+                {(isRegionalStaff
+                    ? (['overview', 'orders', 'suppliers', 'inbound_qc'] as const)
+                    : (['overview', 'orders', 'suppliers', 'vendor_relations', 'customs_import', 'inbound_qc'] as const)
+                ).map(tab => {
                     const isActive = activeTab === tab;
                     return (
                         <button

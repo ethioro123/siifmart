@@ -263,7 +263,7 @@ export interface TransferItem {
   receivedAt?: string;
 }
 
-export type TransferStatus = 'Requested' | 'Approved' | 'Picking' | 'Packed' | 'Shipped' | 'In-Transit' | 'Delivered' | 'Completed' | 'Rejected' | 'Received' | 'Cancelled';
+export type TransferStatus = 'Requested' | 'Approved' | 'Picking' | 'Packed' | 'Shipped' | 'Dispatched' | 'In-Transit' | 'Delivered' | 'Completed' | 'Rejected' | 'Received' | 'Cancelled';
 
 export interface TransferRecord {
   id: string;
@@ -292,6 +292,14 @@ export interface TransferRecord {
   orderRef?: string;
   hasDiscrepancy?: boolean;
   discrepancyDetails?: string;
+  discrepancyResolutionType?: 'LOCAL_STORE_MANAGER' | 'ESCALATED_LOSS_PREVENTION';
+  discrepancy_resolution_type?: string;
+  discrepancyReasonCode?: string;
+  discrepancy_reason_code?: string;
+  discrepancyResolvedBy?: string;
+  discrepancy_resolved_by?: string;
+  discrepancyResolvedAt?: string;
+  discrepancy_resolved_at?: string;
   sourceRegionCode?: string;
   source_region_code?: string;
   destRegionCode?: string;
@@ -302,6 +310,16 @@ export interface TransferRecord {
   is_inter_region?: boolean;
   receivedBy?: string;
   received_by?: string;
+  driverType?: 'INTERNAL' | 'EXTERNAL';
+  driver_type?: 'INTERNAL' | 'EXTERNAL' | string;
+  driverId?: string;
+  driver_id?: string;
+  driverName?: string;
+  driver_name?: string;
+  dispatchedAt?: string;
+  dispatched_at?: string;
+  dispatchedBy?: string;
+  dispatched_by?: string;
 }
 
 export enum NavSection {

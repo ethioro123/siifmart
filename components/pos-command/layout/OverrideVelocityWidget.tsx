@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useData } from '../../../contexts/DataContext';
 import { posOverridesService, OverrideVelocityStats } from '../../../services/pos-overrides.service';
+import { realtimeService } from '../../../services/realtime.service';
 import type { SupervisoryOverrideRecord } from '../../../types/pos-zero-trust';
 import { OVERRIDE_REASON_LABELS } from '../../../types/pos-zero-trust';
 import { ShieldAlert, ShieldCheck, AlertTriangle, CheckCircle2, Trash2, RefreshCcw, KeyRound, Tag } from 'lucide-react';
@@ -19,6 +20,10 @@ export const OverrideVelocityWidget: React.FC = () => {
 
     useEffect(() => {
         loadData();
+        const sub = realtimeService.subscribeToSupervisoryOverrides(() => {
+            loadData();
+        }, activeSite?.id);
+        return () => sub.unsubscribe();
     }, [activeSite?.id]);
 
     if (!stats) return null;

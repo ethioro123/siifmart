@@ -142,6 +142,7 @@ export function OnboardTalentModal({ isOpen, onClose, onSuccess }: OnboardTalent
                 resetWizard={handleModalClose}
                 canAdjustPayroll={wizard.canAdjustPayroll}
                 handleSaveDraft={wizard.handleSaveDraft}
+                quotaResult={wizard.quotaResult}
             />
         </>
     );

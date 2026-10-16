@@ -9,31 +9,42 @@ interface StepReviewProps {
     sites: Site[];
     currencySymbol: string;
     user: any;
+    quotaResult?: any;
 }
 
 export default function StepReview({
     newEmpData,
     sites,
     currencySymbol,
-    user
+    user,
+    quotaResult
 }: StepReviewProps) {
     const assignedSite = sites.find(s => s.id === newEmpData.siteId);
-    const isDirect = isDirectOnboardingAuthorized(user?.role);
+    const isDirect = isDirectOnboardingAuthorized(user?.role, newEmpData.role, Boolean(quotaResult?.canAutoActivate));
 
     return (
         <div className="space-y-4 animate-in fade-in slide-in-from-right-4">
-            {!isDirect && (
-                <div className="p-3.5 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-start gap-3">
-                    <ShieldCheck size={18} className="text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
+            {quotaResult?.canAutoActivate ? (
+                <div className="p-3.5 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-start gap-3">
+                    <CheckCircle2 size={18} className="text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5" />
                     <div className="text-xs">
-                        <span className="font-bold text-[var(--theme-text-primary)] block">4-Eyes HR Governance Protocol</span>
-                        <span className="text-[var(--theme-text-secondary)] mt-0.5 block">
-                            As a site manager, submitting this profile registers a candidate proposal with &quot;Pending Approval&quot; status.
-                            Active system credentials will only be provisioned once reviewed and authorized by HR or Executive Admin.
+                        <span className="font-bold text-emerald-800 dark:text-emerald-300 block">Pre-Approved Headcount Slot (Instant Floor Activation)</span>
+                        <span className="text-emerald-700 dark:text-emerald-400 mt-0.5 block">
+                            {quotaResult.reason} This frontline candidate will be activated immediately upon confirmation, issuing login credentials and adding them to the shift roster with zero HQ delay.
                         </span>
                     </div>
                 </div>
-            )}
+            ) : !isDirect ? (
+                <div className="p-3.5 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-start gap-3">
+                    <ShieldCheck size={18} className="text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
+                    <div className="text-xs">
+                        <span className="font-bold text-[var(--theme-text-primary)] block">Corporate HQ Exception Queue</span>
+                        <span className="text-[var(--theme-text-secondary)] mt-0.5 block">
+                            {quotaResult?.reason || 'As a site or regional manager, submitting this profile registers a candidate proposal in "Pending Approval" status. Requires Corporate HQ review before system credentials can be activated.'}
+                        </span>
+                    </div>
+                </div>
+            ) : null}
             <p className="text-xs text-stone-500 dark:text-stone-400">
                 Please verify all onboarding details, facility assignment, and verification documents before confirming hire.
             </p>

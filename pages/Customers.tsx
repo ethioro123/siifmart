@@ -10,6 +10,7 @@ import Modal from '../components/Modal';
 import { useData } from '../contexts/DataContext';
 import { Protected, ProtectedButton } from '../components/Protected';
 import { logger } from '../utils/logger';
+import { RegionalScopeBanner } from '../components/regional-ops/RegionalScopeBanner';
 
 export default function Customers() {
    const { customers, addCustomer, updateCustomer, deleteCustomer, addNotification } = useData();
@@ -126,6 +127,9 @@ export default function Customers() {
                 </button>
              </Protected>
          </div>
+
+         {/* Adaptive Regional Territory Lens */}
+         <RegionalScopeBanner moduleName="Customers" />
 
          {/* Search Bar */}
           <div className="glass-panel p-4">

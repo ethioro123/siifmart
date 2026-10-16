@@ -32,7 +32,13 @@ export default function DirectoryGrid({
    return (
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4">
          {displayedEmployees.map((employee) => {
-            const roleConfig = SYSTEM_ROLES.find(r => r.id === employee.role) || SYSTEM_ROLES[8];
+            const roleConfig = SYSTEM_ROLES.find(r => r.id === employee.role) || {
+               id: employee.role,
+               label: employee.role?.replace(/_/g, ' ') || 'Staff',
+               desc: 'Team Member',
+               level: 4,
+               styles: { text: 'text-slate-400', bg: 'bg-slate-500/10', border: 'border-slate-500/20', badge: 'bg-slate-500/20 text-slate-300' }
+            };
             const isOwn = currentUser?.id === employee.id;
             const canSeeLocation = canViewLocation(currentUser?.role, employee.role, isOwn);
             const siteInfo = formatSiteAssignment(employee.siteId, employee.role, sites);
@@ -80,14 +86,29 @@ export default function DirectoryGrid({
                         
                         {/* Site Scoping / Unassigned Warning */}
                         {siteInfo.isWarning ? (
-                           <p className="text-[11px] text-amber-600 dark:text-amber-400 mt-1.5 truncate font-medium flex items-center gap-1" title="Branch personnel requires store/warehouse assignment">
+                           <p className="text-[11px] text-amber-600 dark:text-amber-400 mt-1.5 truncate font-medium flex items-center gap-1" title="Workplace facility assignment is mandatory">
                               <AlertTriangle size={11} className="shrink-0" />
                               <span>{siteInfo.label}</span>
                            </p>
                         ) : (
-                           <p className="text-[11px] text-[var(--theme-text-secondary)] mt-1.5 truncate font-normal">
-                              {siteInfo.label}
-                           </p>
+                           <div className="flex items-center gap-1.5 mt-1.5 truncate">
+                              <p className="text-[11px] text-[var(--theme-text-secondary)] truncate font-normal">
+                                 {siteInfo.label}
+                              </p>
+                              {siteInfo.isCEO ? (
+                                 <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-purple-500/10 text-purple-600 dark:text-purple-400 border border-purple-500/20 shrink-0 font-semibold" title="CEO sovereign authority across all facilities">
+                                    GLOBAL
+                                 </span>
+                              ) : siteInfo.facilityId ? (
+                                 <span className={`text-[9px] font-mono px-1.5 py-0.2 rounded shrink-0 font-semibold ${
+                                    siteInfo.isHQ 
+                                       ? 'bg-[#0071E3]/10 text-[#0071E3] dark:text-[#2997FF] border border-[#0071E3]/20' 
+                                       : 'bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] border border-[var(--theme-border)]'
+                                 }`} title={`Assigned Facility ID: ${siteInfo.facilityId}`}>
+                                    {siteInfo.facilityId}
+                                 </span>
+                              ) : null}
+                           </div>
                         )}
 
                         {/* Location & Geofence (Zero Emojis - Lucide MapPin) */}

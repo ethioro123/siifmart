@@ -53,10 +53,31 @@ export const DriverScanner: React.FC<DriverScannerProps> = ({
                                         addNotification('info', t('warehouse.driverHub.jobAlreadyFinalized'));
                                         return;
                                     }
+                                    const timestamp = new Date().toISOString();
                                     await wmsJobsService.update(selectedJob.id, {
                                         transferStatus: 'Delivered',
-                                        deliveredAt: new Date().toISOString()
+                                        deliveredAt: timestamp
                                     } as any);
+
+                                    // Ensure parent transfer job / record reflects Delivered status so POS receiving unlocks live
+                                    if (selectedJob.orderRef) {
+                                        try {
+                                            await wmsJobsService.update(selectedJob.orderRef, {
+                                                status: 'Pending',
+                                                transferStatus: 'Delivered',
+                                                deliveredAt: timestamp
+                                            } as any);
+                                        } catch {}
+
+                                        try {
+                                            const { transfersService } = await import('../../../services/transfers.service');
+                                            await transfersService.update(selectedJob.orderRef, {
+                                                transferStatus: 'Delivered',
+                                                deliveredAt: timestamp
+                                            });
+                                        } catch {}
+                                    }
+
                                     addNotification('success', t('warehouse.driverHub.jobCompletedSuccess'));
                                     await refreshData();
                                 } catch (err) {

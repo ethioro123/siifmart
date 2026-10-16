@@ -6,6 +6,7 @@ import { formatJobId } from '../../../utils/jobIdFormatter';
 import { formatDateTime } from '../../../utils/formatting';
 import { formatDisplayEmployeeId } from '../../../utils/employeeIdGenerator';
 import { ReturnToWarehouseModal } from '../returns/ReturnToWarehouseModal';
+import { resolveFulfillmentWorker } from '../../../utils/fulfillmentUserResolver';
 
 interface DriversHistoryProps {
     t: (key: string) => string;
@@ -37,35 +38,22 @@ export const DriversHistory: React.FC<DriversHistoryProps> = ({
         });
 
         const mapped = filteredByTypeAndRole.map(j => {
-            const userId = j.completedBy || j.assignedTo;
-            const isUUID = (str: string) => /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(str);
-            let userObj = employees?.find(e => 
-                e.id === userId || 
-                (e.name && userId && e.name.toLowerCase() === userId.toLowerCase()) || 
-                (e.email && userId && e.email.toLowerCase() === userId.toLowerCase()) ||
-                (e.code && userId && e.code.toLowerCase() === userId.toLowerCase())
-            );
-            if (!userObj && user && userId && (
-                userId.toLowerCase() === user.id?.toLowerCase() || 
-                userId.toLowerCase() === user.email?.toLowerCase() || 
-                userId.toLowerCase() === user.name?.toLowerCase() || 
-                userId.toLowerCase() === user.employeeId?.toLowerCase()
-            )) {
-                userObj = employees?.find(e => 
-                    (e.email && user.email && e.email.toLowerCase() === user.email.toLowerCase()) || 
-                    (e.name && user.name && e.name.toLowerCase() === user.name.toLowerCase()) || 
-                    e.id === user.employeeId
-                );
-            }
-            const displayId = (userObj?.code ? formatDisplayEmployeeId(userObj.code) : '') || (userId ? (isUUID(userId) ? userId.slice(0, 8).toUpperCase() : userId) : '');
-            const resolvedUser = {
-                name: userObj?.name || (userId ? userId : 'System'),
-                displayId: displayId || ''
-            };
+            const rawUserId = j.completedBy || (j as any).completed_by || j.assignedTo || (j as any).assigned_to;
+            const resolvedWorker = resolveFulfillmentWorker({
+                userId: rawUserId,
+                job: j,
+                employees,
+                sites,
+                currentUser: user,
+                siteId: j.siteId || (j as any).site_id
+            });
 
             return {
                 ...j,
-                resolvedUser
+                resolvedUser: {
+                    name: resolvedWorker.name,
+                    displayId: resolvedWorker.code || resolvedWorker.displayId
+                }
             };
         });
 
@@ -105,7 +93,7 @@ export const DriversHistory: React.FC<DriversHistoryProps> = ({
                 matchesItems
             );
         });
-    }, [historicalJobs, searchQuery, resolveOrderRef, currentEmployee, user?.role, user?.id, user?.email, user?.name, user?.employeeId, employees, user]);
+    }, [historicalJobs, searchQuery, resolveOrderRef, currentEmployee, employees, user]);
 
     const totalPages = Math.ceil(filteredHistory.length / ITEMS_PER_PAGE);
     const paginatedHistory = useMemo(() => filteredHistory.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE), [filteredHistory, currentPage]);
@@ -165,10 +153,10 @@ export const DriversHistory: React.FC<DriversHistoryProps> = ({
                                         </div>
                                         <div className="min-w-0 flex-1">
                                             <p className="text-[11px] text-[var(--theme-text-muted)] font-medium uppercase tracking-wider mb-0.5">{t('warehouse.driverHub.destination')}</p>
-                                            <h6 className="text-sm font-semibold text-[var(--theme-text-primary)] uppercase tracking-tight truncate">{destSite?.name || t('warehouse.driverHub.customer')}</h6>
+                                            <h6 className="text-sm font-semibold text-[var(--theme-text-primary)] uppercase tracking-tight break-words">{destSite?.name || t('warehouse.driverHub.customer')}</h6>
                                             <div className="flex items-center gap-1.5 mt-1 text-[11px] text-[var(--theme-text-secondary)]">
                                                 <UserCheck size={12} className="text-primary shrink-0" />
-                                                <span className="font-medium truncate">
+                                                <span className="font-medium break-words leading-tight">
                                                     Delivered By: {job.resolvedUser?.name || 'Driver'}{job.resolvedUser?.displayId ? ` (${job.resolvedUser.displayId})` : ''}
                                                 </span>
                                             </div>

@@ -1,7 +1,8 @@
 import { useEffect } from 'react';
 import { realtimeService } from '../../services/realtime.service';
-import { salesService } from '../../services/supabase.service';
-import type { Product, SaleRecord, Customer, PurchaseOrder } from '../../types';
+import { salesService, purchaseOrdersService } from '../../services/supabase.service';
+import { mapShiftRow } from '../../services/shifts.service';
+import type { Product, SaleRecord, Customer, PurchaseOrder, ShiftRecord } from '../../types';
 import { logger } from '../../utils/logger';
 
 interface UseRealtimeUpdatesProps {
@@ -11,6 +12,7 @@ interface UseRealtimeUpdatesProps {
   setSales: React.Dispatch<React.SetStateAction<SaleRecord[]>>;
   setCustomers: React.Dispatch<React.SetStateAction<Customer[]>>;
   setOrders: React.Dispatch<React.SetStateAction<PurchaseOrder[]>>;
+  setShifts?: React.Dispatch<React.SetStateAction<ShiftRecord[]>>;
 }
 
 export function useRealtimeUpdates({
@@ -19,7 +21,8 @@ export function useRealtimeUpdates({
   setAllProducts,
   setSales,
   setCustomers,
-  setOrders
+  setOrders,
+  setShifts
 }: UseRealtimeUpdatesProps) {
   useEffect(() => {
     if (!activeSiteId) return;
@@ -140,9 +143,46 @@ export function useRealtimeUpdates({
       },
       onPurchaseOrderChange: (event, payload) => {
         const poId = payload.id || payload.old?.id;
-        if (event === 'INSERT') setOrders(prev => prev.some(o => o.id === poId) ? prev : [payload, ...prev]);
-        else if (event === 'UPDATE') setOrders(prev => prev.map(o => o.id === poId ? { ...o, ...payload } : o));
-        else if (event === 'DELETE') setOrders(prev => prev.filter(o => o.id !== poId));
+        if (!poId) return;
+
+        if (event === 'INSERT' || event === 'UPDATE') {
+          purchaseOrdersService.getById(poId).then((fullPO: any) => {
+            if (fullPO) {
+              setOrders(prev => {
+                const exists = prev.some(o => o.id === fullPO.id);
+                if (exists) return prev.map(o => o.id === fullPO.id ? fullPO : o);
+                return [fullPO, ...prev];
+              });
+              setAllProducts?.((prev: any) => prev); // keep state reactive
+            }
+          }).catch(() => {
+            // Fallback to basic payload if full fetch fails
+            if (event === 'INSERT') setOrders(prev => prev.some(o => o.id === poId) ? prev : [payload, ...prev]);
+            else if (event === 'UPDATE') setOrders(prev => prev.map(o => o.id === poId ? { ...o, ...payload } : o));
+          });
+        }
+        else if (event === 'DELETE') {
+          setOrders(prev => prev.filter(o => o.id !== poId));
+        }
+      },
+      onShiftChange: (event, payload) => {
+        if (!setShifts) return;
+        const shiftId = payload.id || payload.old?.id;
+        if (!shiftId) return;
+
+        if (event === 'INSERT') {
+          const mapped = mapShiftRow(payload);
+          setShifts(prev => prev.some(s => s.id === mapped.id) ? prev.map(s => s.id === mapped.id ? mapped : s) : [mapped, ...prev]);
+        } else if (event === 'UPDATE') {
+          const mapped = mapShiftRow(payload);
+          setShifts(prev => {
+            const exists = prev.some(s => s.id === mapped.id);
+            if (!exists) return [mapped, ...prev];
+            return prev.map(s => s.id === mapped.id ? { ...s, ...mapped } : s);
+          });
+        } else if (event === 'DELETE') {
+          setShifts(prev => prev.filter(s => s.id !== shiftId));
+        }
       }
     });
 
@@ -150,6 +190,6 @@ export function useRealtimeUpdates({
       logger.debug('useRealtimeUpdates', 'Unsubscribing from real-time updates...');
       realtimeService.unsubscribeAll(subscriptions);
     };
-  }, [activeSiteId, setProducts, setAllProducts, setSales, setCustomers, setOrders]);
+  }, [activeSiteId, setProducts, setAllProducts, setSales, setCustomers, setOrders, setShifts]);
 }
 

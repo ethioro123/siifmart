@@ -2,7 +2,7 @@ import { supabase } from '../lib/supabase';
 import type { EmployeeTask } from '../types';
 
 export const tasksService = {
-    async getAll(siteId?: string, limit: number = 25): Promise<EmployeeTask[]> {
+    async getAll(siteId?: string, limit: number = 25, regionCode?: string): Promise<EmployeeTask[]> {
         try {
             let query = supabase
                 .from('employee_tasks')
@@ -12,7 +12,9 @@ export const tasksService = {
             if (siteId) {
                 query = query.eq('site_id', siteId);
             }
-
+            if (regionCode) {
+                query = query.eq('region_code', regionCode);
+            }
             if (limit) {
                 query = query.limit(limit);
             }
@@ -29,6 +31,10 @@ export const tasksService = {
             console.error('Error in tasksService.getAll:', error);
             return [];
         }
+    },
+
+    async getByRegion(regionCode: string, limit: number = 25): Promise<EmployeeTask[]> {
+        return this.getAll(undefined, limit, regionCode);
     },
 
     async getById(id: string): Promise<EmployeeTask | null> {
@@ -79,7 +85,10 @@ export const tasksService = {
                 assigned_to: task.assignedTo,
                 status: task.status || 'Pending',
                 priority: task.priority || 'Medium',
-                due_date: task.dueDate
+                due_date: task.dueDate,
+                created_by: task.createdBy || null,
+                region_code: task.regionCode || (task as any).region_code || null,
+                task_type: task.taskType || (task as any).task_type || 'GENERAL'
             };
 
             const { data, error } = await supabase
@@ -110,6 +119,8 @@ export const tasksService = {
             if (updates.status !== undefined) dbUpdates.status = updates.status;
             if (updates.priority !== undefined) dbUpdates.priority = updates.priority;
             if (updates.dueDate !== undefined) dbUpdates.due_date = updates.dueDate;
+            if (updates.regionCode !== undefined) dbUpdates.region_code = updates.regionCode;
+            if (updates.taskType !== undefined) dbUpdates.task_type = updates.taskType;
 
             dbUpdates.updated_at = new Date().toISOString();
 
@@ -160,7 +171,9 @@ export const tasksService = {
             status: data.status as EmployeeTask['status'],
             priority: data.priority as EmployeeTask['priority'],
             dueDate: data.due_date,
-            createdBy: data.created_by
+            createdBy: data.created_by,
+            regionCode: data.region_code,
+            taskType: data.task_type
         };
     }
 };

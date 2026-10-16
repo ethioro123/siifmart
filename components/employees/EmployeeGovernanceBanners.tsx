@@ -1,5 +1,5 @@
 import React from 'react';
-import { ShieldCheck, DollarSign, AlertTriangle } from 'lucide-react';
+import { ShieldCheck, DollarSign, AlertTriangle, TrendingUp } from 'lucide-react';
 import { PayrollRun } from '../../types';
 
 interface EmployeeGovernanceBannersProps {
@@ -16,6 +16,8 @@ interface EmployeeGovernanceBannersProps {
    filterStatus?: string;
    onFilterPendingRecruits?: () => void;
    onShowAllRecruits?: () => void;
+   pendingQuotaCount?: number;
+   onOpenQuotaModal?: () => void;
 }
 
 export const EmployeeGovernanceBanners: React.FC<EmployeeGovernanceBannersProps> = ({
@@ -31,7 +33,9 @@ export const EmployeeGovernanceBanners: React.FC<EmployeeGovernanceBannersProps>
    pendingRecruitsCount = 0,
    filterStatus = 'All',
    onFilterPendingRecruits,
-   onShowAllRecruits
+   onShowAllRecruits,
+   pendingQuotaCount = 0,
+   onOpenQuotaModal
 }) => {
    return (
       <div className="space-y-3">
@@ -160,6 +164,32 @@ export const EmployeeGovernanceBanners: React.FC<EmployeeGovernanceBannersProps>
                      </button>
                   )}
                </div>
+            </div>
+         )}
+
+         {/* Headcount Quota Surge Alert */}
+         {(pendingQuotaCount ?? 0) > 0 && onOpenQuotaModal && (
+            <div className="p-4 sm:p-5 rounded-2xl bg-blue-500/5 border border-blue-500/20 shadow-[var(--shadow-sm)] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+               <div className="flex items-center gap-3">
+                  <div className="w-9 h-9 rounded-xl bg-blue-500/10 text-[#0071E3] dark:text-[#2997FF] flex items-center justify-center shrink-0">
+                     <TrendingUp size={18} />
+                  </div>
+                  <div>
+                     <h4 className="text-sm font-semibold text-[var(--theme-text-primary)]">
+                        {pendingQuotaCount} Regional Headcount Quota {pendingQuotaCount === 1 ? 'Surge' : 'Surges'} Awaiting HQ Review
+                     </h4>
+                     <p className="text-xs text-[var(--theme-text-secondary)] mt-0.5">
+                        Capacity & Delegation Governance: Regional administration offices require Corporate HQ sign-off to exceed branch staffing ceilings.
+                     </p>
+                  </div>
+               </div>
+               <button
+                  type="button"
+                  onClick={onOpenQuotaModal}
+                  className="h-9 px-3.5 rounded-xl bg-[var(--theme-accent)] hover:opacity-90 text-white font-semibold text-xs transition-colors cursor-pointer shrink-0 shadow-xs active:scale-[0.98]"
+               >
+                  Review Quota Requests
+               </button>
             </div>
          )}
       </div>

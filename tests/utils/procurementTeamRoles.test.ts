@@ -38,7 +38,7 @@ describe('Procurement Directorate Team Roles & Hierarchy', () => {
             expect(getRoleDept(role)).toBe('procurement');
             const sysRole = SYSTEM_ROLES.find(r => r.id === role);
             expect(sysRole?.level).toBe(2);
-            expect(sysRole?.label).toBe('Procurement Manager');
+            expect(sysRole?.label).toBe('Head of Procurement');
         });
     });
 

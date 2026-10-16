@@ -5,6 +5,7 @@ import { WMSJob, Product } from '../../../types';
 import { formatJobId } from '../../../utils/jobIdFormatter';
 import { formatDateTime } from '../../../utils/formatting';
 import { formatDisplayEmployeeId } from '../../../utils/employeeIdGenerator';
+import { resolveFulfillmentWorker } from '../../../utils/fulfillmentUserResolver';
 import { ReturnToWarehouseModal } from '../returns/ReturnToWarehouseModal';
 
 /** Returns true when viewport < 768 px (md breakpoint). SSR-safe. */
@@ -60,30 +61,19 @@ export const PickHistory: React.FC<PickHistoryProps> = ({
 
     const filteredHistory = useMemo(() => {
         const mapped = historicalJobs.filter((j: WMSJob) => j.type === 'PICK').map(j => {
-            const userId = j.completedBy || (j as any).completed_by || j.assignedTo || (j as any).assigned_to;
-            const isUUID = (str: string) => /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(str);
-            let userObj = employees?.find(e => 
-                e.id === userId || 
-                (e.name && userId && e.name.toLowerCase() === userId.toLowerCase()) || 
-                (e.email && userId && e.email.toLowerCase() === userId.toLowerCase()) ||
-                (e.code && userId && e.code.toLowerCase() === userId.toLowerCase())
-            );
-            if (!userObj && user && userId && (
-                userId.toLowerCase() === user.id?.toLowerCase() || 
-                userId.toLowerCase() === user.email?.toLowerCase() || 
-                userId.toLowerCase() === user.name?.toLowerCase() || 
-                userId.toLowerCase() === user.employeeId?.toLowerCase()
-            )) {
-                userObj = employees?.find(e => 
-                    (e.email && user.email && e.email.toLowerCase() === user.email.toLowerCase()) || 
-                    (e.name && user.name && e.name.toLowerCase() === user.name.toLowerCase()) || 
-                    e.id === user.employeeId
-                );
-            }
-            const displayId = (userObj?.code ? formatDisplayEmployeeId(userObj.code) : '') || (userId ? (isUUID(userId) ? userId.slice(0, 8).toUpperCase() : userId) : '');
+            const rawUserId = j.completedBy || (j as any).completed_by || j.assignedTo || (j as any).assigned_to;
+            const worker = resolveFulfillmentWorker({
+                userId: rawUserId,
+                job: j,
+                employees,
+                currentUser: user,
+                siteId: j.siteId || (j as any).site_id
+            });
             const resolvedUser = {
-                name: userObj?.name || (userId ? userId : t('warehouse.picking.systemUser')),
-                displayId: displayId || ''
+                name: worker.name,
+                displayId: worker.code,
+                display: worker.display,
+                initials: worker.initials
             };
 
             return {
@@ -246,7 +236,7 @@ export const PickHistory: React.FC<PickHistoryProps> = ({
                                         </div>
 
                                         <div className="mb-3">
-                                            <h5 className="text-[var(--theme-text-primary)] font-semibold text-sm truncate font-mono uppercase tracking-tight">
+                                            <h5 className="text-[var(--theme-text-primary)] font-semibold text-sm break-words font-mono uppercase tracking-tight">
                                                 {formattedId}
                                             </h5>
                                             <div className="flex items-center gap-1.5 mt-1.5 font-mono">
@@ -260,7 +250,7 @@ export const PickHistory: React.FC<PickHistoryProps> = ({
                                         {/* Product Names Preview */}
                                         {productNames.length > 0 && (
                                             <div className="mb-3">
-                                                <p className="text-[11px] text-[var(--theme-text-secondary)] truncate">
+                                                <p className="text-[11px] text-[var(--theme-text-secondary)] line-clamp-2 break-words">
                                                     {productNames.slice(0, 2).join(', ')}
                                                     {productNames.length > 2 && <span className="text-[var(--theme-accent)] font-semibold"> +{productNames.length - 2} {t('warehouse.remaining')}</span>}
                                                 </p>
@@ -269,17 +259,17 @@ export const PickHistory: React.FC<PickHistoryProps> = ({
                                     </div>
 
                                     <div className="flex items-center justify-between border-t border-[var(--theme-border)] pt-3 mt-auto">
-                                        <div className="flex items-center gap-2">
+                                        <div className="flex items-center gap-2 min-w-0 pr-2">
                                             <div className="w-7 h-7 rounded-lg bg-[var(--theme-bg-subtle)] flex items-center justify-center border border-[var(--theme-border)] shrink-0">
                                                 <span className="text-[11px] font-bold text-[var(--theme-text-primary)] font-mono">
                                                     {(job.resolvedUser?.name || 'S').charAt(0).toUpperCase()}
                                                 </span>
                                             </div>
-                                            <div className="flex flex-col">
+                                            <div className="flex flex-col min-w-0">
                                                 <span className="text-[10px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider leading-none mb-0.5">
                                                     {isCompleted ? (t('warehouse.completedBy') || 'Completed By') : t('warehouse.picking.by')}
                                                 </span>
-                                                <span className="text-xs font-semibold text-[var(--theme-text-primary)] uppercase tracking-tight leading-none truncate max-w-[120px]">
+                                                <span className="text-xs font-semibold text-[var(--theme-text-primary)] uppercase tracking-tight leading-tight break-words">
                                                     {job.resolvedUser?.name} <span className="text-[var(--theme-text-secondary)] font-normal font-mono">({job.resolvedUser?.displayId})</span>
                                                 </span>
                                             </div>

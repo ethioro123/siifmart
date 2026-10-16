@@ -78,6 +78,8 @@ export interface ShiftRecord {
   shift_number?: string | number;
   siteId: string;
   site_id?: string; // Supabase compatibility
+  homeSiteId?: string;
+  home_site_id?: string;
   cashierId: string;
   cashierName: string;
   counterNumber?: string;

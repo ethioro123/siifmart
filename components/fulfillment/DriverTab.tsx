@@ -93,13 +93,21 @@ export const DriverTab: React.FC<DriverTabProps> = ({
                     // 1. Update parent transfer job (keep active until destination store receives)
                     if (job.orderRef) {
                         const parentJob = jobs.find(j => j.id === job.orderRef);
+                        const deliveredTimestamp = new Date().toISOString();
                         if (parentJob) {
                             await wmsJobsService.update(parentJob.id, {
                                 status: 'Pending',
                                 transferStatus: 'Delivered',
-                                deliveredAt: new Date().toISOString()
+                                deliveredAt: deliveredTimestamp
                             } as any);
                         }
+                        try {
+                            const { transfersService } = await import('../../services/transfers.service');
+                            await transfersService.update(job.orderRef, {
+                                transferStatus: 'Delivered',
+                                deliveredAt: deliveredTimestamp
+                            });
+                        } catch {}
                     }
                     // Note: Stock intake is authoritatively handled by destination store receiver
                     // during TransferReceiving and Digital Dual-Handshake (Zero-Trust Acceptance Policy).

@@ -54,8 +54,8 @@ export const PackJobItemCard: React.FC<PackJobItemCardProps> = ({
                     : 'border-[var(--theme-border)]'
         } rounded-2xl px-3.5 py-3 flex flex-col hover:border-[var(--theme-accent)]/30 transition-all duration-200 shadow-sm`}>
 
-            <div className="flex items-center justify-between gap-3">
-                <div className="flex items-center gap-3 flex-1 min-w-0">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-3">
+                <div className="flex items-center gap-3 min-w-0 flex-1">
                     {/* Item Thumbnail */}
                     <div className="relative w-11 h-11 rounded-xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] flex items-center justify-center overflow-hidden shrink-0">
                         {product?.image ? (
@@ -73,21 +73,35 @@ export const PackJobItemCard: React.FC<PackJobItemCardProps> = ({
                     </div>
 
                     {/* Item Info */}
-                    <div className="min-w-0">
-                        <h4 className={`text-xs font-semibold tracking-tight truncate uppercase leading-snug ${isDone ? 'line-through text-[var(--theme-text-secondary)] opacity-60' : 'text-[var(--theme-text-primary)] group-hover:text-[var(--theme-accent)]'}`}>
-                            {item.name || product?.name || 'Unknown SKU'}
-                        </h4>
-                        <div className="flex items-center gap-2 mt-1">
-                            <span className="text-[11px] font-mono font-medium text-[var(--theme-text-secondary)] bg-[var(--theme-bg-subtle)] px-2 py-0.5 rounded-md border border-[var(--theme-border)] uppercase">
+                    <div className="min-w-0 flex-1">
+                        <div className="flex items-center justify-between gap-2">
+                            <h4 className={`text-xs font-semibold tracking-tight truncate uppercase leading-snug ${isDone ? 'line-through text-[var(--theme-text-secondary)] opacity-60' : 'text-[var(--theme-text-primary)] group-hover:text-[var(--theme-accent)]'}`}>
+                                {item.name || product?.name || 'Unknown SKU'}
+                            </h4>
+                            {/* Mobile-only status pill in top row */}
+                            <span className={`sm:hidden px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wider border shrink-0 flex items-center gap-1 ${
+                                isDone
+                                    ? 'bg-green-500/10 border-green-500/20 text-green-600 dark:text-green-400'
+                                    : 'bg-amber-500/10 border-amber-500/20 text-amber-600 dark:text-amber-400'
+                            }`}>
+                                {isDone ? (
+                                    <>
+                                        <CheckCircle size={10} /> Packed
+                                    </>
+                                ) : 'Pending'}
+                            </span>
+                        </div>
+                        <div className="flex flex-wrap items-center gap-1.5 mt-1">
+                            <span className="text-[11px] font-mono font-medium text-[var(--theme-text-secondary)] bg-[var(--theme-bg-subtle)] px-2 py-0.5 rounded-md border border-[var(--theme-border)] uppercase shrink-0">
                                 {item.sku || product?.sku || 'NO SKU'}
                             </span>
                             {formatProductSize(product || item) && (
-                                <span className="text-[11px] font-mono text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-md border border-emerald-500/20">
+                                <span className="text-[11px] font-mono text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-md border border-emerald-500/20 shrink-0">
                                     {formatProductSize(product || item)}
                                 </span>
                             )}
                             {product?.barcode && (
-                                <div className="flex items-center gap-1 text-[11px] text-[var(--theme-text-secondary)] font-medium uppercase font-mono hidden sm:flex">
+                                <div className="flex items-center gap-1 text-[11px] text-[var(--theme-text-secondary)] font-medium uppercase font-mono hidden sm:flex shrink-0">
                                     <Barcode size={11} />
                                     {product.barcode}
                                 </div>
@@ -96,9 +110,9 @@ export const PackJobItemCard: React.FC<PackJobItemCardProps> = ({
                     </div>
                 </div>
 
-                {/* Pack Details */}
-                <div className="flex items-center gap-2.5 shrink-0">
-                    <div className="text-right">
+                {/* Pack Details / Actions */}
+                <div className="flex items-center justify-between sm:justify-end gap-2.5 pt-2 sm:pt-0 border-t sm:border-0 border-[var(--theme-border)]/60 shrink-0">
+                    <div className="text-left sm:text-right">
                         <span className={`text-xs font-mono tabular-nums font-semibold ${isDone ? 'text-green-600 dark:text-green-400' : 'text-[var(--theme-text-primary)]'}`}>
                             {picked} <span className="text-[var(--theme-text-secondary)] font-normal">/ {expected} {unitLabel}</span>
                         </span>
@@ -118,7 +132,7 @@ export const PackJobItemCard: React.FC<PackJobItemCardProps> = ({
                                         setScannedItemIndex(idx);
                                         setConfirmQty(String(item.expectedQty || 1));
                                     }}
-                                    className="px-3 py-1.5 min-h-[36px] rounded-xl bg-[var(--theme-accent)]/10 hover:bg-[var(--theme-accent)]/20 text-[var(--theme-accent)] border border-[var(--theme-accent)]/20 font-semibold text-[11px] uppercase tracking-wider flex items-center gap-1 transition-colors cursor-pointer"
+                                    className="px-3 py-1.5 min-h-[36px] rounded-xl bg-[var(--theme-accent)]/10 hover:bg-[var(--theme-accent)]/20 text-[var(--theme-accent)] border border-[var(--theme-accent)]/20 font-semibold text-[11px] uppercase tracking-wider flex items-center gap-1 transition-colors cursor-pointer touch-manipulation"
                                 >
                                     <span>Pack</span>
                                     <ArrowRight size={12} />
@@ -129,12 +143,13 @@ export const PackJobItemCard: React.FC<PackJobItemCardProps> = ({
                                     type="button"
                                     onClick={() => onPrintItemLabel(item, product, boxSize)}
                                     title="Print label"
-                                    className="w-9 h-9 min-h-[36px] min-w-[36px] rounded-xl bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-app)] border border-[var(--theme-border)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] transition-colors flex items-center justify-center cursor-pointer"
+                                    className="w-9 h-9 min-h-[36px] min-w-[36px] rounded-xl bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-app)] border border-[var(--theme-border)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] transition-colors flex items-center justify-center cursor-pointer touch-manipulation"
                                 >
                                     <Printer size={14} />
                                 </button>
                             )}
-                            <span className={`px-2.5 py-1 rounded-full text-[11px] font-semibold uppercase tracking-wider border flex items-center gap-1 ${
+                            {/* Desktop-only status badge */}
+                            <span className={`hidden sm:flex px-2.5 py-1 rounded-full text-[11px] font-semibold uppercase tracking-wider border items-center gap-1 ${
                                 isDone
                                     ? 'bg-green-500/10 border-green-500/20 text-green-600 dark:text-green-400'
                                     : 'bg-amber-500/10 border-amber-500/20 text-amber-600 dark:text-amber-400'

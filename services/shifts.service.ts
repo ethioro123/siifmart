@@ -3,13 +3,15 @@ import type { ShiftRecord } from '../types';
 import { logger } from '../utils/logger';
 
 // Helper to map DB snake_case row to TypeScript camelCase ShiftRecord
-function mapShiftRow(row: any): ShiftRecord {
+export function mapShiftRow(row: any): ShiftRecord {
     return {
         id: row.id,
         shiftNumber: row.shift_number,
         shift_number: row.shift_number,
         siteId: row.site_id,
         site_id: row.site_id,
+        homeSiteId: row.home_site_id,
+        home_site_id: row.home_site_id,
         cashierId: row.cashier_id,
         cashierName: row.cashier_name || 'Staff Member',
         counterNumber: row.counter_number || 'Counter 1',
@@ -133,6 +135,7 @@ export const shiftsService = {
         const dbShift = {
             id,
             site_id: rawSiteId,
+            home_site_id: shift.homeSiteId || shift.home_site_id || null,
             shift_number: shift.shiftNumber ? String(shift.shiftNumber) : (shift.shift_number ? String(shift.shift_number) : undefined),
             counter_number: shift.counterNumber || shift.counter_number || 'Counter 1',
             cashier_id: shift.cashierId ? String(shift.cashierId) : null,
@@ -180,6 +183,8 @@ export const shiftsService = {
             return {
                 id,
                 siteId: dbShift.site_id || '',
+                homeSiteId: dbShift.home_site_id || undefined,
+                home_site_id: dbShift.home_site_id || undefined,
                 cashierId: dbShift.cashier_id || '',
                 cashierName: dbShift.cashier_name || 'Staff Member',
                 cashierCode: dbShift.cashier_code || undefined,
@@ -225,6 +230,9 @@ export const shiftsService = {
         }
         if (updates.cashierCode !== undefined || updates.cashier_code !== undefined) {
             dbUpdates.cashier_code = updates.cashierCode || updates.cashier_code;
+        }
+        if (updates.homeSiteId !== undefined || updates.home_site_id !== undefined) {
+            dbUpdates.home_site_id = updates.homeSiteId || updates.home_site_id;
         }
         if (updates.status !== undefined) dbUpdates.status = updates.status;
         if (updates.endTime !== undefined) dbUpdates.end_time = updates.endTime;

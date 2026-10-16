@@ -123,10 +123,10 @@ describe('employeeIdGenerator - Sovereign Country-Prefixed Worker IDs', () => {
     });
 
     describe('generateEmployeeEmail', () => {
-        it('generates lowercase official staff emails matching user prompt patterns', () => {
-            expect(generateEmployeeEmail('KE-SIIF0044')).toBe('ke-siif0044@siifmart.com');
-            expect(generateEmployeeEmail('ET-SIIF0020')).toBe('et-siif0020@siifmart.com');
-            expect(generateEmployeeEmail('UG-SIIF0100')).toBe('ug-siif0100@siifmart.com');
+        it('generates uppercase code official staff emails matching corporate standards', () => {
+            expect(generateEmployeeEmail('KE-SIIF0044')).toBe('KE-SIIF0044@siifmart.com');
+            expect(generateEmployeeEmail('ET-SIIF0020')).toBe('ET-SIIF0020@siifmart.com');
+            expect(generateEmployeeEmail('UG-SIIF0100')).toBe('UG-SIIF0100@siifmart.com');
         });
     });
 

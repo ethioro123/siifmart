@@ -80,8 +80,6 @@ export const PackJobModal: React.FC<PackJobModalProps> = ({
         }
     }, [isOpen, scannedItemIndex]);
 
-    if (!isOpen) return null;
-
     const getProduct = (item: any) => getProductForItem(item, job, products);
     const getItemMeasureQty = (item: any, product?: any) => getItemMeasureQtyShared(item, job, products, product);
 
@@ -164,7 +162,7 @@ export const PackJobModal: React.FC<PackJobModalProps> = ({
             return sum + (w * q);
         }, 0);
         return parseFloat((tare + itemsMass).toFixed(2));
-    }, [job.lineItems, boxSize, products]);
+    }, [job?.lineItems, boxSize, products]);
 
     const boxDetails = {
         boxSize,
@@ -178,6 +176,8 @@ export const PackJobModal: React.FC<PackJobModalProps> = ({
         destSiteName: destSite?.name,
         destSite
     };
+
+    if (!isOpen) return null;
 
     return (
         <div className="fixed inset-0 z-[150] flex items-center justify-center p-2 md:p-4 bg-black/80 overflow-x-hidden">
@@ -197,13 +197,13 @@ export const PackJobModal: React.FC<PackJobModalProps> = ({
                     
                     {/* Top Row / Stats */}
                     <div className="p-3 md:p-4 shrink-0 border-b border-[var(--theme-border)] bg-[var(--theme-bg-card)]">
-                        <div className="flex items-center justify-between gap-3 shrink-0">
+                        <div className="flex flex-wrap items-center justify-between gap-2.5 sm:gap-3">
                             {/* Job Progress Pill */}
-                            <div className="flex items-center gap-3 shrink-0 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] px-3.5 py-2 rounded-xl">
+                            <div className="flex items-center gap-2.5 sm:gap-3 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-xl">
                                 <span className="text-xs font-mono font-semibold text-[var(--theme-text-primary)] uppercase tracking-wider">
                                     <span>{completedItems}</span> / {totalItems} {t('warehouse.packed') || 'Packed'}
                                 </span>
-                                <div className="w-20 md:w-28 h-2 bg-[var(--theme-bg-app)] rounded-full overflow-hidden shrink-0">
+                                <div className="w-16 sm:w-20 md:w-28 h-2 bg-[var(--theme-bg-app)] rounded-full overflow-hidden shrink-0">
                                     <ProgressBar
                                         progress={progressPercent}
                                         containerClassName="h-full bg-transparent"
@@ -214,9 +214,9 @@ export const PackJobModal: React.FC<PackJobModalProps> = ({
                             
                             {/* Tracking Number (Compact) */}
                             {job.trackingNumber && (
-                                <div className="flex items-center gap-2 bg-[var(--theme-accent)]/10 border border-[var(--theme-accent)]/20 px-3.5 py-2 rounded-xl shrink-0 text-[var(--theme-accent)]">
-                                    <Hash size={14} />
-                                    <span className="text-xs font-mono font-semibold">{job.trackingNumber}</span>
+                                <div className="flex items-center gap-1.5 sm:gap-2 bg-[var(--theme-accent)]/10 border border-[var(--theme-accent)]/20 px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-xl text-[var(--theme-accent)] shrink-0 max-w-full">
+                                    <Hash size={14} className="shrink-0" />
+                                    <span className="text-xs font-mono font-semibold truncate">{job.trackingNumber}</span>
                                 </div>
                             )}
                         </div>

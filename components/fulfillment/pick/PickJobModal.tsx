@@ -68,15 +68,13 @@ export const PickJobModal: React.FC<PickJobModalProps> = ({
 }) => {
     const { t } = useLanguage();
 
-    if (!isOpen) return null;
-
     const getProduct = (item: any) => {
-        const targetSiteId = job.siteId || (job as any).site_id;
+        const targetSiteId = job?.siteId || (job as any)?.site_id;
         return products.find(p => (p.id === item.productId || p.sku === item.sku) && (p.siteId === targetSiteId || p.site_id === targetSiteId));
     };
 
     const getItemMeasureQty = (item: any, product?: any) => {
-        if ((item as any).requestedMeasureQty !== undefined && (item as any).requestedMeasureQty !== null) {
+        if ((item as any)?.requestedMeasureQty !== undefined && (item as any)?.requestedMeasureQty !== null) {
             return (item as any).requestedMeasureQty;
         }
         const prod = product || getProduct(item);
@@ -85,29 +83,31 @@ export const PickJobModal: React.FC<PickJobModalProps> = ({
         const isWeighted = customAttrs?.commercial?.isWeighted === true;
 
         if (sellBy === 'Weight' || sellBy === 'Volume' || isWeighted) {
-            return item.expectedQty || (item as any).quantity || null;
+            return item.expectedQty || (item as any)?.quantity || null;
         }
         return null;
     };
 
-    const sourceSite = sites.find(s => s.id === job.sourceSiteId || s.id === (job as any).site_id);
-    const totalItems = job.lineItems?.length || 0;
-    const completedItems = job.lineItems?.filter(i => {
+    const sourceSite = sites.find(s => s.id === job?.sourceSiteId || s.id === (job as any)?.site_id);
+    const totalItems = job?.lineItems?.length || 0;
+    const completedItems = job?.lineItems?.filter(i => {
         const isDone = i.status === 'Completed' || i.status === 'Picked';
         const measureQty = getItemMeasureQty(i);
         const requiredAmount = measureQty || i.expectedQty || 1;
         return isDone || (i.pickedQty || 0) >= requiredAmount;
     }).length || 0;
     const progressPercent = totalItems > 0 ? (completedItems / totalItems) * 100 : 0;
-    const isCompleted = job.status === 'Completed';
+    const isCompleted = job?.status === 'Completed';
 
     const sortedLineItems = React.useMemo(() => {
-        if (!job.lineItems) return [];
+        if (!job?.lineItems) return [];
         return sortPickItemsByOptimalRoute(job.lineItems, (item) => {
             const prod = getProduct(item);
             return item.location || prod?.location;
         });
-    }, [job.lineItems, products]);
+    }, [job?.lineItems, products]);
+
+    if (!isOpen) return null;
 
     return (
         <div className="fixed inset-0 z-[150] flex items-center justify-center p-2 sm:p-4 bg-black/60 overflow-y-auto animate-in fade-in duration-200">

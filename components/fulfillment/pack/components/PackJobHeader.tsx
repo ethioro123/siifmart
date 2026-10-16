@@ -21,7 +21,7 @@ export const PackJobHeader: React.FC<PackJobHeaderProps> = ({
     return (
         <div className="relative p-4 md:p-6 border-b border-[var(--theme-border)] bg-[var(--theme-bg-card)] shrink-0 z-10">
             <div className="relative flex justify-between items-start">
-                <div className="flex items-center gap-3.5 md:gap-4">
+                <div className="flex items-center gap-3 md:gap-4 min-w-0 flex-1">
                     <div className={`w-11 h-11 md:w-14 md:h-14 rounded-2xl border flex items-center justify-center shadow-sm shrink-0 ${
                         isFullyPacked
                             ? 'bg-green-500/10 border-green-500/30 text-green-600 dark:text-green-400'
@@ -29,12 +29,12 @@ export const PackJobHeader: React.FC<PackJobHeaderProps> = ({
                     }`}>
                         {isFullyPacked ? <ShieldCheck size={22} className="md:w-7 md:h-7" /> : <Archive size={22} className="md:w-7 md:h-7" />}
                     </div>
-                    <div>
-                        <div className="flex items-center gap-2 mb-1">
-                            <h2 className="text-lg md:text-xl font-bold text-[var(--theme-text-primary)] tracking-tight uppercase leading-none">
+                    <div className="min-w-0 flex-1">
+                        <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 mb-1">
+                            <h2 className="text-base sm:text-lg md:text-xl font-bold text-[var(--theme-text-primary)] tracking-tight uppercase leading-none truncate">
                                 {isFullyPacked ? t('warehouse.completed') : t('warehouse.packJobTitle')}
                             </h2>
-                            <span className="px-2.5 py-1 rounded-xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-xs font-mono text-[var(--theme-text-secondary)]">
+                            <span className="px-2 py-0.5 rounded-xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-xs font-mono text-[var(--theme-text-secondary)] shrink-0">
                                 #{formatJobId(job)}
                             </span>
                         </div>

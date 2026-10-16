@@ -49,9 +49,9 @@ describe('Delegated Hiring & Credential Handover Governance', () => {
 
     describe('2. Sovereign Credential Derivation for Handover Slip', () => {
         it('generates the sovereign login email matching corporate standards', () => {
-            expect(generateEmployeeEmail('KE-SIIF0045')).toBe('ke-siif0045@siifmart.com');
-            expect(generateEmployeeEmail('ET-SIIF0012')).toBe('et-siif0012@siifmart.com');
-            expect(generateEmployeeEmail('UG-SIIF0001')).toBe('ug-siif0001@siifmart.com');
+            expect(generateEmployeeEmail('KE-SIIF0045')).toBe('KE-SIIF0045@siifmart.com');
+            expect(generateEmployeeEmail('ET-SIIF0012')).toBe('ET-SIIF0012@siifmart.com');
+            expect(generateEmployeeEmail('UG-SIIF0001')).toBe('UG-SIIF0001@siifmart.com');
         });
 
         it('extracts the exact 4-digit quick terminal PIN from employee code sequence', () => {

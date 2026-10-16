@@ -20,8 +20,7 @@ import DirectoryGrid from '../components/employees/DirectoryGrid';
 import DirectoryList from '../components/employees/DirectoryList';
 import EmployeePagination from '../components/employees/EmployeePagination';
 import EmployeeModals from '../components/employees/EmployeeModals';
-import SalaryApprovalQueueModal from '../components/employees/SalaryApprovalQueueModal';
-import { EmployeeChangeApprovalModal } from '../components/employees/modals/EmployeeChangeApprovalModal';
+import { EmployeeGovernanceModals } from '../components/employees/EmployeeGovernanceModals';
 import { EmployeeGovernanceBanners } from '../components/employees/EmployeeGovernanceBanners';
 import { EmployeesHeader, ViewMode } from '../components/employees/EmployeesHeader';
 import RecruitmentPipelineTab from '../components/employees/recruitment/RecruitmentPipelineTab';
@@ -31,6 +30,7 @@ import { salaryRequestsService } from '../services/salary-requests.service';
 import { employeeChangesService } from '../services/employee-changes.service';
 import { payrollRunsService } from '../services/payroll-runs.service';
 import { employeesService } from '../services/employees.service';
+import { headcountQuotaService } from '../services/headcountQuota.service';
 
 // Pagination Shelf Limit (Rule 10: 25-Item Shelf Rule)
 const ITEMS_PER_PAGE = 25;
@@ -38,7 +38,7 @@ const ITEMS_PER_PAGE = 25;
 export default function Employees() {
    const navigate = useNavigate();
    const { user, updateUserAvatar, onlineIds } = useStore();
-   const { employees, addEmployee, updateEmployee, deleteEmployee, activeSite, sites, addNotification, tasks, shifts, effectiveCountry, activeRegionCode } = useData();
+   const { employees, addEmployee, updateEmployee, deleteEmployee, activeSite, sites, addNotification, tasks, shifts, effectiveCountry, activeRegionCode, regions } = useData();
 
    // --- STATE ---
    const [viewMode, setViewMode] = useState<ViewMode>('directory');
@@ -47,6 +47,7 @@ export default function Employees() {
    const [filterStatus, setFilterStatus] = useState('All');
    const [filterDepartment, setFilterDepartment] = useState('All');
    const [filterSite, setFilterSite] = useState('All');
+   const [filterRegion, setFilterRegion] = useState('All');
    const [layoutMode, setLayoutMode] = useState<'grid' | 'list'>('grid');
    const [currentPage, setCurrentPage] = useState(1);
    const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null);
@@ -62,6 +63,8 @@ export default function Employees() {
    const [pendingSalaryCount, setPendingSalaryCount] = useState(0);
    const [isChangeApprovalModalOpen, setIsChangeApprovalModalOpen] = useState(false);
    const [pendingChangeCount, setPendingChangeCount] = useState(0);
+   const [isQuotaApprovalModalOpen, setIsQuotaApprovalModalOpen] = useState(false);
+   const [pendingQuotaCount, setPendingQuotaCount] = useState(0);
    const [pendingPayrollRun, setPendingPayrollRun] = useState<PayrollRun | null>(null);
 
    const refreshPendingSalary = useCallback(async () => {
@@ -82,6 +85,15 @@ export default function Employees() {
       }
    }, [effectiveCountry]);
 
+   const refreshPendingQuotas = useCallback(async () => {
+      try {
+         const pending = await headcountQuotaService.getQuotaRequests(effectiveCountry || 'ET', undefined, 'PENDING');
+         setPendingQuotaCount(pending.length);
+      } catch {
+         // Fallback
+      }
+   }, [effectiveCountry]);
+
    const refreshPayrollRun = useCallback(async () => {
       try {
          const run = await payrollRunsService.getLatestRun(activeSite?.id, effectiveCountry);
@@ -92,12 +104,12 @@ export default function Employees() {
    }, [activeSite?.id, effectiveCountry]);
 
    const scopedSites = React.useMemo(() => {
-      const targetRegion = activeRegionCode || user?.regionCode;
+      const targetRegion = (filterRegion !== 'All' ? filterRegion : null) || activeRegionCode || user?.regionCode;
       if (targetRegion) {
          return sites.filter(s => s.regionCode === targetRegion || (s as any).region_code === targetRegion);
       }
       return sites;
-   }, [sites, activeRegionCode, user?.regionCode]);
+   }, [sites, filterRegion, activeRegionCode, user?.regionCode]);
 
    const [pendingRecruits, setPendingRecruits] = useState<Employee[]>(() =>
       employees.filter(e => e.status === 'Pending Approval')
@@ -116,35 +128,22 @@ export default function Employees() {
    useEffect(() => {
       refreshPendingSalary();
       refreshPendingChanges();
+      refreshPendingQuotas();
       refreshPayrollRun();
       refreshPendingRecruits();
-      const handleCreated = () => { refreshPendingSalary(); refreshPendingChanges(); refreshPendingRecruits(); };
-      const handleApproved = () => { refreshPendingSalary(); refreshPendingChanges(); refreshPendingRecruits(); };
-      const handleRejected = () => { refreshPendingSalary(); refreshPendingChanges(); refreshPendingRecruits(); };
+      const handleCreated = () => { refreshPendingSalary(); refreshPendingChanges(); refreshPendingQuotas(); refreshPendingRecruits(); };
+      const handleApproved = () => { refreshPendingSalary(); refreshPendingChanges(); refreshPendingQuotas(); refreshPendingRecruits(); };
+      const handleRejected = () => { refreshPendingSalary(); refreshPendingChanges(); refreshPendingQuotas(); refreshPendingRecruits(); };
       const handlePayrollUpdated = () => refreshPayrollRun();
 
-      window.addEventListener('salary:request-created', handleCreated);
-      window.addEventListener('salary:request-approved', handleApproved);
-      window.addEventListener('salary:request-rejected', handleRejected);
-      window.addEventListener('employee:created', handleCreated);
-      window.addEventListener('employee:updated', handleCreated);
-      window.addEventListener('employee:approved', handleApproved);
-      window.addEventListener('employee-change:updated', refreshPendingChanges);
-      window.addEventListener('payroll:updated', handlePayrollUpdated);
-      window.addEventListener('payroll:disbursed', handlePayrollUpdated);
-
-      return () => {
-         window.removeEventListener('salary:request-created', handleCreated);
-         window.removeEventListener('salary:request-approved', handleApproved);
-         window.removeEventListener('salary:request-rejected', handleRejected);
-         window.removeEventListener('employee:created', handleCreated);
-         window.removeEventListener('employee:updated', handleCreated);
-         window.removeEventListener('employee:approved', handleApproved);
-         window.removeEventListener('employee-change:updated', refreshPendingChanges);
-         window.removeEventListener('payroll:updated', handlePayrollUpdated);
-         window.removeEventListener('payroll:disbursed', handlePayrollUpdated);
-      };
-   }, [refreshPendingSalary, refreshPendingChanges, refreshPayrollRun, refreshPendingRecruits]);
+      const events: [string, () => void][] = [
+         ['salary:request-created', handleCreated], ['salary:request-approved', handleApproved], ['salary:request-rejected', handleRejected],
+         ['employee:created', handleCreated], ['employee:updated', handleCreated], ['employee:approved', handleApproved],
+         ['employee-change:updated', refreshPendingChanges], ['payroll:updated', handlePayrollUpdated], ['payroll:disbursed', handlePayrollUpdated]
+      ];
+      events.forEach(([ev, fn]) => window.addEventListener(ev, fn));
+      return () => events.forEach(([ev, fn]) => window.removeEventListener(ev, fn));
+   }, [refreshPendingSalary, refreshPendingChanges, refreshPendingQuotas, refreshPayrollRun, refreshPendingRecruits]);
 
    useEffect(() => {
       const fromContext = employees.filter(e => e.status === 'Pending Approval');
@@ -188,7 +187,7 @@ export default function Employees() {
       country: effectiveCountry,
       countrySites: sites,
       fallbackEmployees: employees,
-      regionCode: activeRegionCode || user?.regionCode
+      regionCode: (filterRegion !== 'All' ? filterRegion : undefined) || activeRegionCode || user?.regionCode
    });
    const actions = useEmployeeActions({ user, employees, updateEmployee, deleteEmployee, addNotification, updateUserAvatar });
    const wizard = useEmployeeWizard({ user, employees, sites, activeSite, addEmployee, addNotification });
@@ -271,6 +270,7 @@ export default function Employees() {
             pendingSignOffsCount={
                pendingSalaryCount + 
                pendingChangeCount + 
+               pendingQuotaCount +
                (pendingPayrollRun && !pendingPayrollRun.hrApprovedBy && pendingPayrollRun.status !== 'disbursed' && pendingPayrollRun.status !== 'rejected' ? 1 : 0) + 
                pendingRecruits.length
             }
@@ -279,6 +279,8 @@ export default function Employees() {
                   setViewMode('directory');
                   setFilterStatus('Pending Approval');
                   setCurrentPage(1);
+               } else if (pendingQuotaCount > 0) {
+                  setIsQuotaApprovalModalOpen(true);
                } else if (pendingSalaryCount > 0) {
                   setIsSalaryQueueOpen(true);
                } else if (pendingChangeCount > 0) {
@@ -304,6 +306,8 @@ export default function Employees() {
             filterStatus={filterStatus}
             onFilterPendingRecruits={() => { setFilterStatus('Pending Approval'); setCurrentPage(1); }}
             onShowAllRecruits={() => { setFilterStatus('All'); setCurrentPage(1); }}
+            pendingQuotaCount={pendingQuotaCount}
+            onOpenQuotaModal={() => setIsQuotaApprovalModalOpen(true)}
          />
 
          {/* --- DIRECTORY TAB CONTENT --- */}
@@ -335,6 +339,9 @@ export default function Employees() {
                   setFilterDepartment={setFilterDepartment}
                   filterSite={filterSite}
                   setFilterSite={setFilterSite}
+                  filterRegion={filterRegion}
+                  setFilterRegion={setFilterRegion}
+                  regions={regions}
                   sites={scopedSites}
                   layoutMode={layoutMode}
                   setLayoutMode={setLayoutMode}
@@ -461,21 +468,17 @@ export default function Employees() {
             handleSaveOnboardingPhoto={handleSaveOnboardingPhoto}
          />
 
-         {isSalaryQueueOpen && (
-            <SalaryApprovalQueueModal
-               isOpen={isSalaryQueueOpen}
-               onClose={() => setIsSalaryQueueOpen(false)}
-               onRequestsUpdated={refreshPendingSalary}
-            />
-         )}
-
-         {isChangeApprovalModalOpen && (
-            <EmployeeChangeApprovalModal
-               isOpen={isChangeApprovalModalOpen}
-               onClose={() => setIsChangeApprovalModalOpen(false)}
-               onRequestsUpdated={refreshPendingChanges}
-            />
-         )}
+         <EmployeeGovernanceModals
+            isSalaryQueueOpen={isSalaryQueueOpen}
+            onCloseSalaryQueue={() => setIsSalaryQueueOpen(false)}
+            onRefreshSalaryQueue={refreshPendingSalary}
+            isChangeModalOpen={isChangeApprovalModalOpen}
+            onCloseChangeModal={() => setIsChangeApprovalModalOpen(false)}
+            onRefreshChangeModal={refreshPendingChanges}
+            isQuotaModalOpen={isQuotaApprovalModalOpen}
+            onCloseQuotaModal={() => setIsQuotaApprovalModalOpen(false)}
+            onRefreshQuotaModal={refreshPendingQuotas}
+         />
       </div>
    );
 }
