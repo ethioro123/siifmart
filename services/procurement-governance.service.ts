@@ -1,5 +1,6 @@
 import { supabase } from '../lib/supabase';
 import { logger } from '../utils/logger';
+import { systemLogsService } from './system-logs.service';
 import type {
   VendorScorecard,
   VendorContract,
@@ -93,6 +94,9 @@ export const procurementGovernanceService = {
         agreedMarginPct: c.agreed_margin_pct ? Number(c.agreed_margin_pct) : undefined,
         notes: c.notes,
         createdBy: c.created_by,
+        signedOffBy: c.signed_off_by,
+        signedOffAt: c.signed_off_at,
+        signedOffRole: c.signed_off_role,
         createdAt: c.created_at
       })) as VendorContract[];
     } catch {
@@ -114,11 +118,53 @@ export const procurementGovernanceService = {
       auto_renew: contract.autoRenew || false,
       agreed_margin_pct: contract.agreedMarginPct || null,
       notes: contract.notes || null,
-      created_by: contract.createdBy || 'Authorized Manager'
+      created_by: contract.createdBy || 'Authorized Manager',
+      signed_off_by: contract.signedOffBy || null,
+      signed_off_at: contract.signedOffAt || null,
+      signed_off_role: contract.signedOffRole || null
     };
 
     const { data, error } = await supabase.from('vendor_contracts').insert(db).select().single();
     if (error) throw error;
+    return data;
+  },
+
+  async authorizeContract(params: {
+    contractId: string;
+    signedOffBy: string;
+    signedOffRole: string;
+    notes?: string;
+  }) {
+    const { contractId, signedOffBy, signedOffRole, notes } = params;
+    const now = new Date().toISOString();
+    const updateData: any = {
+      status: 'Active',
+      signed_off_by: signedOffBy,
+      signed_off_at: now,
+      signed_off_role: signedOffRole
+    };
+    if (notes) updateData.notes = notes;
+
+    const { data, error } = await supabase
+      .from('vendor_contracts')
+      .update(updateData)
+      .eq('id', contractId)
+      .select()
+      .single();
+
+    if (error) throw error;
+
+    try {
+      await systemLogsService.create({
+        action: 'VENDOR_CONTRACT_AUTHORIZED',
+        module: 'Procurement',
+        user_name: signedOffBy,
+        details: `Vendor contract ${data.contract_number} (${data.title}) signed off & authorized by ${signedOffBy} (${signedOffRole})`
+      });
+    } catch (logErr) {
+      logger.warn('ProcurementGovernance', 'Audit log for contract authorization failed', { error: String(logErr) });
+    }
+
     return data;
   },
 
@@ -203,6 +249,8 @@ export const procurementGovernanceService = {
         currency: c.currency,
         eta: c.eta,
         clearedAt: c.cleared_at,
+        clearedBy: c.cleared_by,
+        clearedByRole: c.cleared_by_role,
         associatedPoNumbers: c.associated_po_numbers || [],
         specialistId: c.specialist_id,
         specialistName: c.specialist_name,
@@ -239,6 +287,45 @@ export const procurementGovernanceService = {
     return data;
   },
 
+  async authorizeCustomsRelease(params: {
+    declarationId: string;
+    clearedBy: string;
+    clearedByRole: string;
+    notes?: string;
+  }) {
+    const { declarationId, clearedBy, clearedByRole, notes } = params;
+    const now = new Date().toISOString();
+    const updateData: any = {
+      customs_status: 'Cleared',
+      cleared_at: now,
+      cleared_by: clearedBy,
+      cleared_by_role: clearedByRole
+    };
+    if (notes) updateData.notes = notes;
+
+    const { data, error } = await supabase
+      .from('customs_declarations')
+      .update(updateData)
+      .eq('id', declarationId)
+      .select()
+      .single();
+
+    if (error) throw error;
+
+    try {
+      await systemLogsService.create({
+        action: 'CUSTOMS_RELEASE_AUTHORIZED',
+        module: 'Procurement',
+        user_name: clearedBy,
+        details: `Customs declaration ${data.declaration_number} (${data.port_of_entry}) authorized & cleared by ${clearedBy} (${clearedByRole})`
+      });
+    } catch (logErr) {
+      logger.warn('ProcurementGovernance', 'Audit log for customs release failed', { error: String(logErr) });
+    }
+
+    return data;
+  },
+
   // ==========================================
   // INBOUND DOCK QC INSPECTIONS
   // ==========================================
@@ -271,6 +358,9 @@ export const procurementGovernanceService = {
         discrepancyDetails: q.discrepancy_details,
         disposition: q.disposition,
         supervisorNotes: q.supervisor_notes,
+        supervisorWaivedBy: q.supervisor_waived_by,
+        supervisorWaivedAt: q.supervisor_waived_at,
+        supervisorWaivedReason: q.supervisor_waived_reason,
         createdAt: q.created_at
       })) as InboundQCInspection[];
     } catch {
@@ -302,6 +392,48 @@ export const procurementGovernanceService = {
 
     const { data, error } = await supabase.from('inbound_qc_inspections').insert(db).select().single();
     if (error) throw error;
+    return data;
+  },
+
+  async signOffQCWaiver(params: {
+    inspectionId: string;
+    supervisorName: string;
+    supervisorRole: string;
+    waiverReason?: string;
+    newDisposition?: 'Accepted' | 'Conditionally Accepted' | 'Rejected' | 'Quarantined';
+  }) {
+    const { inspectionId, supervisorName, supervisorRole, waiverReason, newDisposition = 'Conditionally Accepted' } = params;
+    const now = new Date().toISOString();
+    const updateData: any = {
+      disposition: newDisposition,
+      supervisor_waived_by: supervisorName,
+      supervisor_waived_at: now,
+      supervisor_waived_reason: waiverReason || 'Supervisor conditional acceptance sign-off'
+    };
+    if (waiverReason) {
+      updateData.supervisor_notes = `[WAIVER BY ${supervisorName} (${supervisorRole}) on ${now}]: ${waiverReason}`;
+    }
+
+    const { data, error } = await supabase
+      .from('inbound_qc_inspections')
+      .update(updateData)
+      .eq('id', inspectionId)
+      .select()
+      .single();
+
+    if (error) throw error;
+
+    try {
+      await systemLogsService.create({
+        action: 'INBOUND_QC_WAIVER_SIGNED',
+        module: 'Procurement',
+        user_name: supervisorName,
+        details: `Dock QC inspection for PO ${data.po_number || data.id} signed off with waiver (${newDisposition}) by ${supervisorName} (${supervisorRole})`
+      });
+    } catch (logErr) {
+      logger.warn('ProcurementGovernance', 'Audit log for QC waiver sign-off failed', { error: String(logErr) });
+    }
+
     return data;
   }
 };

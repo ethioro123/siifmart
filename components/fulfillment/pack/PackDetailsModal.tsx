@@ -1,5 +1,5 @@
 import React from 'react';
-import { X, Calendar, User, Package, Archive, Box, MapPin, Printer, ArrowRight, Undo2 } from 'lucide-react';
+import { X, Calendar, User, Package, Archive, Box, MapPin, Printer, ArrowRight, Undo2, Trash2 } from 'lucide-react';
 import { WMSJob, Product } from '../../../types';
 import { formatDateTime } from '../../../utils/formatting';
 import { formatJobId } from '../../../utils/jobIdFormatter';
@@ -17,6 +17,7 @@ interface PackDetailsModalProps {
     products: Product[];
     onReturn?: (job: WMSJob) => void;
     onReprintLabel?: (job: WMSJob, labelSize: string) => void;
+    onDeleteJob?: (jobId: string) => void;
 }
 
 export const PackDetailsModal: React.FC<PackDetailsModalProps> = ({
@@ -27,10 +28,19 @@ export const PackDetailsModal: React.FC<PackDetailsModalProps> = ({
     sites,
     products,
     onReturn,
-    onReprintLabel
+    onReprintLabel,
+    onDeleteJob
 }) => {
     const { t } = useLanguage();
     const { user } = useStore();
+    const canDelete = ['super_admin', 'warehouse_manager', 'operations_manager', 'regional_manager'].includes(user?.role || '');
+
+    const handleDelete = () => {
+        if (!window.confirm(t('warehouse.confirmDeleteJob') || 'Are you sure you want to delete this job? This action cannot be undone.')) return;
+        onDeleteJob?.(selectedItem.id);
+        onClose();
+    };
+
     // Resolve User Name: prioritize completion author for completed jobs
     const isCompleted = (selectedItem.status || '').toLowerCase() === 'completed';
     const completedUserId = selectedItem.completedBy || (selectedItem as any).completed_by;
@@ -64,7 +74,7 @@ export const PackDetailsModal: React.FC<PackDetailsModalProps> = ({
             const isWeightVol = isWeightBased(unit) || isVolumeBased(unit);
             const sizeNum = productInfo.size ? parseFloat(productInfo.size as string) : 0;
             if (isWeightVol && sizeNum > 0) {
-                const expected = item.expectedQty || (item as any).quantity || 0;
+                const expected = item.expectedQty || (item as any).quantity || item.packedQty || item.pickedQty || 0;
                 return expected * sizeNum;
             }
         }
@@ -206,10 +216,23 @@ export const PackDetailsModal: React.FC<PackDetailsModalProps> = ({
 
                 {/* Line Items */}
                 <div className="flex-1 overflow-y-auto p-4 md:p-6 custom-scrollbar bg-[var(--theme-bg-app)]">
-                    <h4 className="text-[11px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider mb-3">{t('warehouse.picking')}</h4>
+                    <h4 className="text-[11px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider mb-3">{t('warehouse.packing.itemsToPack') || 'Items to Pack'}</h4>
                     <div className="space-y-2.5">
                         {itemsArray.map((item: any, idx: number) => {
-                            const isShortPicked = item.orderedQty && item.orderedQty > (item.expectedQty || item.quantity || 1);
+                            const isJobCompleted = (data.status || '').toLowerCase() === 'completed';
+                            const isItemPacked = isJobCompleted || (item as any).packed === true;
+
+                            // Resolve expected (required) quantity with robust fallbacks
+                            const expected = item.expectedQty || (item as any).quantity || item.orderedQty || 
+                                (item.packedQty ? item.packedQty : (item.pickedQty || 0));
+
+                            // Resolve packed quantity: prioritize packedQty, then if completed/packed use expected, then fall back to pickedQty
+                            const packed = (item.packedQty !== undefined && item.packedQty !== null)
+                                ? item.packedQty
+                                : (isItemPacked ? expected : (item.pickedQty !== undefined && item.pickedQty !== null ? item.pickedQty : 0));
+
+                            const isShortPicked = item.orderedQty && item.orderedQty > expected;
+                            const isUnderpacked = isJobCompleted && packed < expected;
 
                             // Resolve full product info
                             const productInfo = products?.find(p =>
@@ -269,16 +292,14 @@ export const PackDetailsModal: React.FC<PackDetailsModalProps> = ({
                                                 )}
                                                 <div className="text-base md:text-lg font-bold text-[var(--theme-text-primary)] tabular-nums font-mono leading-none">
                                                     {(() => {
-                                                        const expected = item.expectedQty || (item as any).quantity || 0;
-                                                        const picked = item.pickedQty !== undefined && item.pickedQty !== null ? item.pickedQty : 0;
                                                         const packDesc = formatPackagingDescription(productInfo, expected);
                                                         const unitDef = getSellUnit(productInfo?.unit || item.unit);
                                                         const unitLabel = unitDef.category === 'count' && unitDef.code !== 'UNIT' ? unitDef.shortLabel : 'pk';
 
                                                         return (
                                                             <div className="flex flex-col items-end">
-                                                                <span className="text-base md:text-lg font-mono font-bold text-[var(--theme-accent)]">
-                                                                    {picked} / {expected} <span className="text-[11px] font-semibold uppercase">{unitLabel}</span>
+                                                                <span className={`text-base md:text-lg font-mono font-bold ${isUnderpacked ? 'text-amber-500' : 'text-[var(--theme-accent)]'}`}>
+                                                                    {packed} / {expected} <span className="text-[11px] font-semibold uppercase">{unitLabel}</span>
                                                                 </span>
                                                                 {packDesc && (
                                                                     <span className="text-[11px] font-mono font-medium text-[var(--theme-text-secondary)] uppercase">
@@ -336,6 +357,16 @@ export const PackDetailsModal: React.FC<PackDetailsModalProps> = ({
                                 </div>
                             )}
                         </div>
+                        {canDelete && onDeleteJob && (
+                            <button
+                                onClick={handleDelete}
+                                className="flex items-center gap-1.5 md:gap-2 px-3.5 md:px-4 py-2.5 min-h-[44px] bg-red-500/10 hover:bg-red-500/20 text-red-600 dark:text-red-400 border border-red-500/20 rounded-xl font-semibold uppercase tracking-wider text-xs transition-colors"
+                                title={t('common.delete') || 'Delete Job'}
+                            >
+                                <Trash2 size={14} />
+                                <span className="hidden sm:inline">{t('common.delete') || 'Delete'}</span>
+                            </button>
+                        )}
                     </div>
 
                     <button

@@ -3,6 +3,8 @@ import { createPortal } from 'react-dom';
 import { ShieldCheck, AlertTriangle, CheckCircle, Truck, UserCheck, X } from 'lucide-react';
 import { WMSJob, ReceivingItem, Product, User } from '../../../types';
 import { formatJobId } from '../../../utils/jobIdFormatter';
+import { useData } from '../../../contexts/DataContext';
+import { resolveReceivingPolicy } from '../../../utils/receivingPolicy';
 
 interface CustodyHandshakeModalProps {
     isOpen: boolean;
@@ -29,6 +31,8 @@ export const CustodyHandshakeModal: React.FC<CustodyHandshakeModalProps> = ({
     driverName = 'Assigned Driver / Logistics Courier',
     isSubmitting
 }) => {
+    const { settings, effectiveCountry } = useData();
+    const isBlindReceiving = resolveReceivingPolicy(settings, effectiveCountry).blind;
     const [receiverCertified, setReceiverCertified] = useState(false);
     const [driverAcknowledged, setDriverAcknowledged] = useState(false);
 
@@ -133,7 +137,11 @@ export const CustodyHandshakeModal: React.FC<CustodyHandshakeModalProps> = ({
                             <div className="p-3.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-900 dark:text-amber-300 flex items-start gap-3">
                                 <AlertTriangle size={18} className="text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
                                 <div>
-                                    <p className="font-bold tracking-tight">Discrepancy Detected ({totalDiscrepantUnits} Units Affected)</p>
+                                    <p className="font-bold tracking-tight">
+                                        {isBlindReceiving
+                                            ? `Discrepancy Detected (${discrepantItems.length} Line Item${discrepantItems.length > 1 ? 's' : ''} Affected)`
+                                            : `Discrepancy Detected (${totalDiscrepantUnits} Units Affected)`}
+                                    </p>
                                     <p className="text-[11px] text-amber-800/80 dark:text-amber-300/80 mt-0.5">
                                         This variance will be permanently recorded in enterprise audit logs. Transit driver's accuracy score on the national gamification leaderboard will be penalized.
                                     </p>
@@ -156,7 +164,9 @@ export const CustodyHandshakeModal: React.FC<CustodyHandshakeModalProps> = ({
                                             </div>
                                             <div className="text-right shrink-0">
                                                 <span className={`font-mono font-bold text-xs px-2 py-0.5 rounded-full ${variance < 0 ? 'bg-red-500/10 text-red-600 dark:text-red-400 border border-red-500/20' : 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20'}`}>
-                                                    {variance > 0 ? `+${variance}` : variance} ({received}/{expected})
+                                                    {isBlindReceiving
+                                                        ? `Counted: ${received} (Variance)`
+                                                        : `${variance > 0 ? `+${variance}` : variance} (${received}/${expected})`}
                                                 </span>
                                             </div>
                                         </div>

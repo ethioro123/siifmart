@@ -4,6 +4,8 @@ import { Product, PendingInventoryChange, User } from '../../../types';
 import { formatCompactNumber } from '../../../utils/formatting';
 import { CURRENCY_SYMBOL } from '../../../constants';
 import { useCreateInventoryRequestMutation } from '../../../hooks/useInventoryRequestMutations';
+import { useData } from '../../../contexts/DataContext';
+import { resolveReceivingPolicy } from '../../../utils/receivingPolicy';
 import { logger } from '../../../utils/logger';
 
 interface WasteLogProps {
@@ -18,6 +20,11 @@ export const WasteLog: React.FC<WasteLogProps> = ({
     user,
     addNotification,
 }) => {
+    const { settings, effectiveCountry } = useData();
+    const isBlindMode = resolveReceivingPolicy(settings, effectiveCountry).blind;
+    const isManagerOrHQ = ['super_admin', 'ceo', 'admin', 'regional_manager', 'operations_manager', 'warehouse_manager', 'store_manager', 'inventory_manager'].includes((user?.role || '').toLowerCase());
+    const hideSystemStock = isBlindMode && !isManagerOrHQ;
+
     const createRequestMutation = useCreateInventoryRequestMutation();
     const [wasteBasket, setWasteBasket] = useState<{
         productId: string;
@@ -78,7 +85,11 @@ export const WasteLog: React.FC<WasteLogProps> = ({
                             aria-label="Select Product"
                         >
                             <option value="">Select Product...</option>
-                            {products.map(p => <option key={p.id} value={p.id}>{p.name} (Stock: {p.stock})</option>)}
+                            {products.map(p => (
+                                <option key={p.id} value={p.id}>
+                                    {hideSystemStock ? `${p.name} (${p.sku})` : `${p.name} (Stock: ${p.stock})`}
+                                </option>
+                            ))}
                         </select>
                     </div>
 

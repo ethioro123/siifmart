@@ -100,35 +100,35 @@ export const AssignLabelHub: React.FC<AssignLabelHubProps> = ({
             {/* LEFT PANEL: PRINTING HUB */}
             <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl overflow-hidden relative">
                 <div className="p-6">
-                    <div className="flex items-center justify-between mb-6">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
                         <div>
-                            <h3 className="text-xl font-bold text-[var(--theme-text-primary)] flex items-center gap-3">
-                                <div className="p-2 bg-[var(--theme-accent)]/10 rounded-xl">
+                            <h3 className="text-lg sm:text-xl font-bold text-[var(--theme-text-primary)] flex items-center gap-2.5 sm:gap-3">
+                                <div className="p-2 bg-[var(--theme-accent)]/10 rounded-xl shrink-0">
                                     <Printer size={20} className="text-[var(--theme-accent)]" />
                                 </div>
-                                Label Printing Hub
+                                <span className="truncate">Label Printing Hub</span>
                             </h3>
-                            <p className="text-xs text-[var(--theme-text-secondary)] mt-1 ml-11">Management & Identity Systems</p>
+                            <p className="text-xs text-[var(--theme-text-secondary)] mt-1 ml-10 sm:ml-11">Management & Identity Systems</p>
                         </div>
-                        <div className="flex bg-[var(--theme-bg-subtle)] p-1 rounded-xl border border-[var(--theme-border)]">
+                        <div className="flex bg-[var(--theme-bg-subtle)] p-1 rounded-xl border border-[var(--theme-border)] w-full sm:w-auto">
                             <button
                                 onClick={() => { setLabelMode('PRODUCT'); setLabelSize('MEDIUM'); }}
-                                className={`px-4 py-2 min-h-[38px] rounded-lg text-xs font-semibold transition-colors touch-manipulation ${labelMode === 'PRODUCT' ? 'bg-[var(--theme-accent)] text-white shadow-xs' : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)]'}`}
+                                className={`flex-1 sm:flex-initial px-4 py-2 min-h-[38px] rounded-lg text-xs font-semibold transition-colors touch-manipulation flex items-center justify-center ${labelMode === 'PRODUCT' ? 'bg-[var(--theme-accent)] text-white shadow-xs' : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)]'}`}
                             >
-                                <Package size={14} className="inline mr-2" /> Products
+                                <Package size={14} className="inline mr-2 shrink-0" /> Products
                             </button>
                             <button
                                 onClick={() => { setLabelMode('BAY'); setLabelSize('MEDIUM'); }}
-                                className={`px-4 py-2 min-h-[38px] rounded-lg text-xs font-semibold transition-colors touch-manipulation ${labelMode === 'BAY' ? 'bg-[var(--theme-accent)] text-white shadow-xs' : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)]'}`}
+                                className={`flex-1 sm:flex-initial px-4 py-2 min-h-[38px] rounded-lg text-xs font-semibold transition-colors touch-manipulation flex items-center justify-center ${labelMode === 'BAY' ? 'bg-[var(--theme-accent)] text-white shadow-xs' : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)]'}`}
                             >
-                                <Layout size={14} className="inline mr-2" /> Bays
+                                <Layout size={14} className="inline mr-2 shrink-0" /> Bays
                             </button>
                         </div>
                     </div>
 
                     <div className="space-y-6">
                         {/* Format & Size Selection */}
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div className="space-y-2">
                                 <label className="text-xs uppercase tracking-wider font-semibold text-[var(--theme-text-secondary)] flex items-center gap-2">
                                     <Layers size={14} className="text-[var(--theme-accent)]" /> Format

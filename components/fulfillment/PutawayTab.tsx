@@ -82,7 +82,8 @@ export const PutawayTab: React.FC<PutawayTabProps> = ({
         activeSite,
         zones,
         putawayStock,
-        t
+        t,
+        deleteJob
     } = useFulfillment();
 
     // --- AUTO-REPAIR MISSING PRODUCTS FOR PUTAWAY JOBS ---
@@ -458,10 +459,7 @@ export const PutawayTab: React.FC<PutawayTabProps> = ({
             {jobForModal && (
                 <PutawayJobModal
                     isOpen={isJobModalOpen}
-                    onClose={() => {
-                        setIsJobModalOpen(false);
-                        setSelectedJob(null); // Clear active sync if they close the hub
-                    }}
+                    onClose={() => { setIsJobModalOpen(false); setSelectedJob(null); }}
                     job={selectedJob?.id === jobForModal.id ? selectedJob : jobForModal}
                     user={user}
                     sites={sites}
@@ -473,6 +471,7 @@ export const PutawayTab: React.FC<PutawayTabProps> = ({
                     resolveOrderRef={resolveOrderRef}
                     employees={employees}
                     t={t}
+                    onDeleteJob={deleteJob}
                 />
             )}
 
@@ -480,14 +479,12 @@ export const PutawayTab: React.FC<PutawayTabProps> = ({
             {isDetailsOpen && selectedJob && (
                 <PutawayDetailsModal
                     selectedItem={selectedJob}
-                    onClose={() => {
-                        setIsDetailsOpen(false);
-                        setSelectedJob(null);
-                    }}
+                    onClose={() => { setIsDetailsOpen(false); setSelectedJob(null); }}
                     resolveOrderRef={resolveOrderRef}
                     employees={employees}
                     sites={sites}
                     t={t}
+                    onDeleteJob={deleteJob}
                 />
             )}
         </div>

@@ -31,6 +31,18 @@ export const DriverActiveMission: React.FC<DriverActiveMissionProps> = ({
         const employeeId = currentEmployee?.id || user?.id;
         const result = filteredJobs.filter(j => {
             if (j.type !== 'DISPATCH' && j.type !== 'TRANSFER' && j.type !== 'DRIVER') return false;
+            if (j.status === 'Cancelled' || j.transferStatus === 'Cancelled' || j.transferStatus === 'Rejected') return false;
+
+            // Suppress parent TRANSFER if a child DISPATCH exists
+            if (j.type === 'TRANSFER') {
+                const hasChildDispatch = filteredJobs.some(d =>
+                    d.type === 'DISPATCH' &&
+                    (d.orderRef === j.id || d.orderRef === j.jobNumber) &&
+                    d.status !== 'Cancelled'
+                );
+                if (hasChildDispatch) return false;
+            }
+
             if (canSeeGlobalQueue ? !j.assignedTo : j.assignedTo !== employeeId) return false;
             if (j.status === 'Completed' || j.transferStatus === 'Delivered' || j.transferStatus === 'Received') return false;
             return (j.transferStatus === 'In-Transit' || j.transferStatus === 'Shipped');
@@ -96,7 +108,7 @@ export const DriverActiveMission: React.FC<DriverActiveMissionProps> = ({
                                             <div className="p-2.5 bg-[var(--theme-bg-subtle)] rounded-xl border border-[var(--theme-border)]">
                                                 <div className="flex flex-wrap gap-1.5">
                                                     {lineItems.slice(0, 3).map((item: any, idxItem: number) => {
-                                                        const qty = item.pickedQty || item.quantity || item.expectedQty || 0;
+                                                        const qty = item.expectedQty || item.packedQty || item.pickedQty || item.quantity || 1;
                                                         return (
                                                             <span key={idxItem} className="inline-flex items-center gap-1.5 bg-[var(--theme-bg-card)] px-2 py-1 rounded-lg text-[11px] text-[var(--theme-text-secondary)] font-medium border border-[var(--theme-border)] max-w-[140px] sm:max-w-[160px] truncate">
                                                                 <span className="truncate">{item.name || item.sku}</span>

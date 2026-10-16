@@ -1,12 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { Box, Zap, UserIcon, Lock, RefreshCw, Play, Info, Archive, Clock, Package, MapPin, User, ChevronRight, Loader2, Trash2 } from 'lucide-react';
+import { Box, Zap, UserIcon, Lock, RefreshCw, Play, Info, Archive, Clock, Package, MapPin, User, ChevronRight, Loader2 } from 'lucide-react';
 
 import { WMSJob, Employee } from '../../../types';
 import Pagination from '../../shared/Pagination';
 import { formatJobId } from '../../../utils/jobIdFormatter';
 import { isUUID } from '../FulfillmentShared';
 import Protected from '../../Protected';
-import { useFulfillment } from '../FulfillmentContext';
 
 interface PutawayListProps {
     sortedPutawayJobs: WMSJob[];
@@ -45,15 +44,6 @@ export const PutawayList: React.FC<PutawayListProps> = ({
     onShowDetails,
     t
 }) => {
-    const { deleteJob } = useFulfillment();
-
-    const handleDelete = async (e: React.MouseEvent, jobId: string) => {
-        e.stopPropagation();
-        if (window.confirm(t('warehouse.putaway.deleteJobConfirm'))) {
-            await deleteJob(jobId);
-        }
-    };
-
     if (sortedPutawayJobs.length === 0) {
         return (
             <div className="col-span-full flex flex-col items-center justify-center py-16 text-center space-y-4 rounded-2xl border border-dashed border-[var(--theme-border)] bg-[var(--theme-bg-card)]">
@@ -130,15 +120,6 @@ export const PutawayList: React.FC<PutawayListProps> = ({
                                             <UserIcon size={16} />
                                         </button>
                                     </Protected>
-                                    {['super_admin', 'warehouse_manager'].includes(user?.role) && (
-                                        <button
-                                            onClick={(e) => handleDelete(e, job.id)}
-                                            className="w-10 h-10 rounded-xl border border-[var(--theme-border)] bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] hover:text-red-500 hover:bg-red-500/10 transition-colors flex items-center justify-center min-h-[40px] min-w-[40px]"
-                                            title="Delete Job"
-                                        >
-                                            <Trash2 size={16} />
-                                        </button>
-                                    )}
                                 </div>
                             </div>
 

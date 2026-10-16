@@ -27,6 +27,21 @@ export const DriverJobBoard: React.FC<DriverJobBoardProps> = ({
         const employeeId = currentEmployee?.id || user?.id;
         let baseJobs = filteredJobs.filter(j => {
             if (j.type !== 'DISPATCH' && j.type !== 'TRANSFER' && j.type !== 'DRIVER') return false;
+            if (j.status === 'Cancelled' || j.transferStatus === 'Cancelled' || j.transferStatus === 'Rejected') return false;
+
+            // If it's a TRANSFER, suppress it if a child DISPATCH job exists, and only allow if packed/ready
+            if (j.type === 'TRANSFER') {
+                const hasChildDispatch = filteredJobs.some(d =>
+                    d.type === 'DISPATCH' &&
+                    (d.orderRef === j.id || d.orderRef === j.jobNumber) &&
+                    d.status !== 'Cancelled'
+                );
+                if (hasChildDispatch) return false;
+
+                const isReadyToShip = ['Packed', 'Approved', 'Ready', 'In-Transit', 'Shipped'].includes(j.transferStatus || '');
+                if (!isReadyToShip) return false;
+            }
+
             const isUnassigned = !j.assignedTo && j.status === 'Pending';
             const isNotPickedUp = j.transferStatus !== 'In-Transit' && j.transferStatus !== 'Shipped' && j.transferStatus !== 'Delivered' && j.transferStatus !== 'Received' && j.status !== 'Completed';
             return isUnassigned || (j.assignedTo === employeeId && isNotPickedUp) || (canSeeGlobalQueue && j.assignedTo && isNotPickedUp);
@@ -57,7 +72,13 @@ export const DriverJobBoard: React.FC<DriverJobBoardProps> = ({
                         </div>
                     ) : (
                         paginatedDispatchJobs.map(job => {
-                            const dest = sites.find(s => s.id === job.destSiteId); const source = sites.find(s => s.id === job.sourceSiteId || s.id === job.siteId); const isCritical = job.priority === 'Critical';
+                            const dest = sites.find(s => s.id === job.destSiteId); 
+                            const source = sites.find(s => s.id === job.sourceSiteId || s.id === job.siteId); 
+                            const isCritical = job.priority === 'Critical';
+                            const totalUnits = (job.lineItems && Array.isArray(job.lineItems) && job.lineItems.length > 0)
+                                ? job.lineItems.reduce((sum: number, it: any) => sum + (it.packedQty || it.expectedQty || it.quantity || it.pickedQty || 1), 0)
+                                : (job.items || (job as any).items_count || 0);
+
                             return (
                                 <div key={job.id} onClick={() => { setSelectedJob(job); setIsDetailsOpen(true); }} className={`group border ${isCritical ? 'border-red-500/30' : 'border-[var(--theme-border)]'} rounded-2xl p-3.5 sm:p-5 bg-[var(--theme-bg-card)] cursor-pointer relative overflow-hidden shadow-sm active:scale-[0.99] transition-colors touch-manipulation`}>
                                     <div className="flex justify-between items-start mb-3">
@@ -69,7 +90,7 @@ export const DriverJobBoard: React.FC<DriverJobBoardProps> = ({
                                         <div className="flex items-center gap-2 text-xs font-semibold text-[var(--theme-text-primary)] uppercase leading-none min-w-0"><span className="truncate">{source?.name || finalT('warehouse.centralOpsArea')}</span><ArrowRight size={12} className="text-primary shrink-0" /><span className="truncate">{dest?.name || finalT('warehouse.driverHub.customer')}</span></div>
                                     </div>
                                     <div className="flex flex-wrap items-center justify-between gap-2 sm:gap-4 pt-3 sm:pt-4 border-t border-[var(--theme-border)]">
-                                        <div className="bg-[var(--theme-bg-subtle)] px-3 py-1.5 rounded-xl border border-[var(--theme-border)]"><span className="text-xs font-bold font-mono tabular-nums text-[var(--theme-text-primary)]">{job.items || 0}</span><span className="text-[11px] text-[var(--theme-text-muted)] ml-1.5 uppercase font-medium tracking-wider">{finalT('warehouse.driverHub.units')}</span></div>
+                                        <div className="bg-[var(--theme-bg-subtle)] px-3 py-1.5 rounded-xl border border-[var(--theme-border)]"><span className="text-xs font-bold font-mono tabular-nums text-[var(--theme-text-primary)]">{totalUnits}</span><span className="text-[11px] text-[var(--theme-text-muted)] ml-1.5 uppercase font-medium tracking-wider">{finalT('warehouse.driverHub.units')}</span></div>
                                         {job.assignedTo ? (
                                             <button disabled={processingJobIds.has(job.id)} onClick={async (e) => {
                                                 e.stopPropagation(); const currentEmployee = employees.find(emp => (user?.email && emp.email === user.email) || (user?.name && emp.name?.toLowerCase() === user.name.toLowerCase()) || ((user as any)?.employeeId && emp.id === (user as any).employeeId) || emp.id === user?.id); const employeeId = currentEmployee?.id || user?.id;
@@ -77,7 +98,7 @@ export const DriverJobBoard: React.FC<DriverJobBoardProps> = ({
                                                 setProcessingJobIds(prev => new Set(prev).add(job.id));
                                                 try {
                                                     await wmsJobsService.update(job.id, { status: 'In-Progress', transferStatus: 'In-Transit', shippedAt: new Date().toISOString() } as any);
-                                                    if (job.orderRef) { const parentTransfer = jobs.find(j => j.id === job.orderRef && j.type === 'TRANSFER'); if (parentTransfer) await wmsJobsService.update(parentTransfer.id, { transferStatus: 'In-Transit' } as any); }
+                                                    if (job.orderRef) { const parentTransfer = jobs.find(j => (j.id === job.orderRef || j.jobNumber === job.orderRef) && j.type === 'TRANSFER'); if (parentTransfer) await wmsJobsService.update(parentTransfer.id, { transferStatus: 'In-Transit', shippedAt: new Date().toISOString() } as any); }
                                                     await refreshData(); addNotification('success', finalT('warehouse.driverHub.payloadSecure'));
                                                 } catch (err) { addNotification('alert', finalT('warehouse.driverHub.cloudSyncFailed')); } finally { setProcessingJobIds(prev => { const next = new Set(prev); next.delete(job.id); return next; }); }
                                             }} className="flex-1 min-h-[44px] py-2.5 px-4 rounded-xl text-xs font-semibold uppercase tracking-wider flex items-center justify-center gap-2 disabled:opacity-50 transition-colors bg-primary text-white hover:bg-primary/90 active:scale-[0.98] touch-manipulation">{processingJobIds.has(job.id) ? <RefreshCw className="animate-spin" size={14} /> : <Zap size={14} />} {finalT('warehouse.driverHub.pickup')}</button>
@@ -87,7 +108,21 @@ export const DriverJobBoard: React.FC<DriverJobBoardProps> = ({
                                                 if (!currentEmployee) { addNotification('alert', finalT('warehouse.driverHub.protocolFault')); return; }
                                                 if (!canWorkerPerformJob(currentEmployee.role, job.type)) { addNotification('alert', 'Floor workers cannot accept delivery missions. Only verified drivers can perform deliveries.'); return; }
                                                 const isInternal = !currentEmployee?.driverType || currentEmployee?.driverType === 'internal'; setProcessingJobIds(prev => new Set(prev).add(job.id));
-                                                try { await wmsJobsService.update(job.id, { assignedTo: currentEmployee.id, status: isInternal ? 'In-Progress' : 'Pending' }); await refreshData(); addNotification('success', finalT('warehouse.driverHub.jobAccepted')); } catch (err) { addNotification('alert', finalT('warehouse.driverHub.jobAcceptFailed')); } finally { setProcessingJobIds(prev => { const next = new Set(prev); next.delete(job.id); return next; }); }
+                                                try { 
+                                                    await wmsJobsService.update(job.id, { assignedTo: currentEmployee.id, status: isInternal ? 'In-Progress' : 'Pending' }); 
+                                                    if (job.orderRef) {
+                                                        const parentTransfer = jobs.find(j => (j.id === job.orderRef || j.jobNumber === job.orderRef) && j.type === 'TRANSFER');
+                                                        if (parentTransfer) {
+                                                            await wmsJobsService.update(parentTransfer.id, { assignedTo: currentEmployee.id });
+                                                        }
+                                                    }
+                                                    await refreshData(); 
+                                                    addNotification('success', finalT('warehouse.driverHub.jobAccepted')); 
+                                                } catch (err) { 
+                                                    addNotification('alert', finalT('warehouse.driverHub.jobAcceptFailed')); 
+                                                } finally { 
+                                                    setProcessingJobIds(prev => { const next = new Set(prev); next.delete(job.id); return next; }); 
+                                                }
                                             }} className={`flex-1 min-h-[44px] py-2.5 px-4 rounded-xl text-xs font-semibold uppercase tracking-wider flex items-center justify-center gap-2 disabled:opacity-50 transition-colors active:scale-[0.98] touch-manipulation ${isCritical ? 'bg-red-600 text-white hover:bg-red-700' : 'bg-primary text-white hover:bg-primary/90'}`}>{processingJobIds.has(job.id) ? <RefreshCw className="animate-spin" size={14} /> : <Zap size={14} />} {finalT('warehouse.driverHub.acceptJob')}</button>
                                         )}
                                     </div>

@@ -83,7 +83,7 @@ export const picking: any = {
     localSite: { en: 'Local Site', am: 'አካባቢያዊ ጣቢያ', or: 'Iddoo Dhaabbataa' },
     internalOrUnknown: { en: 'Internal / Unknown', am: 'ውስጣዊ / ያልታወቀ', or: 'Keessoo / Hin Beekamne' },
     unknownItem: { en: 'Unknown Item', am: 'ያልታወቀ ዕቃ', or: 'Meeshaa Hin Beekamne' },
-    reqPkd: { en: 'Req / Pkd', am: 'የሚፈለግ / የተመረጠ', or: 'Barbaachisu / Filatame' },
+    reqPkd: { en: 'Pkd / Req', am: 'የተመረጠ / የሚፈለግ', or: 'Filatame / Barbaachisu' },
     returnItems: { en: 'Return Items', am: 'ዕቃዎችን መልስ', or: 'Meeshalee Deebisi' },
     amendQuantities: { en: 'Amend Quantities', am: 'ብዛትን አሻሽል', or: 'Baay\'ina Sirreessi' },
     amendPickQuantities: { en: 'Amend Pick Quantities', am: 'የምርጫ ብዛትን አሻሽል', or: 'Baay\'ina Filannoo Sirreessi' },

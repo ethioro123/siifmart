@@ -19,12 +19,7 @@ const getTranslation = (path: string): string => {
     try {
         const { TRANSLATIONS } = require('../../utils/translations');
         const lang = localStorage.getItem('language') || 'en';
-        const keys = path.split('.');
-        let result: any = TRANSLATIONS[lang as keyof typeof TRANSLATIONS] || TRANSLATIONS.en;
-        for (const key of keys) {
-            result = result?.[key];
-        }
-        return typeof result === 'string' ? result : path;
+        return path.split('.').reduce((acc: any, key) => acc?.[key], TRANSLATIONS[lang as keyof typeof TRANSLATIONS] || TRANSLATIONS.en) || path;
     } catch { return path; }
 };
 
@@ -128,11 +123,17 @@ export const useJobCompletion = (deps: UseJobCompletionDeps) => {
 
                 itemsToValidate = forcedLineItems;
             } else {
+                const isPack = job.type === 'PACK';
                 await wmsJobsService.update(jobId, {
                     status: 'Completed',
                     lineItems: itemsToValidate.map((i: any) => ({
                         ...i,
-                        status: (i.status === 'Short' ? 'Short' : 'Completed') as JobItem['status']
+                        status: (i.status === 'Short' ? 'Short' : 'Completed') as JobItem['status'],
+                        ...(isPack ? {
+                            packed: i.packed !== undefined ? i.packed : true,
+                            packedQty: i.packedQty ?? (i.expectedQty || 0),
+                            pickedQty: i.pickedQty || i.packedQty || i.expectedQty || 0
+                        } : {})
                     })),
                     completedBy: completedByValue,
                     completedAt: timestamp || new Date().toISOString()
@@ -292,7 +293,9 @@ export const useJobCompletion = (deps: UseJobCompletionDeps) => {
                         ...item,
                         orderedQty: item.orderedQty || item.expectedQty,
                         expectedQty: item.pickedQty,
-                        pickedQty: 0,
+                        pickedQty: item.pickedQty,
+                        packedQty: 0,
+                        packed: false,
                         status: 'Pending' as JobItem['status']
                     }));
 
@@ -389,11 +392,13 @@ export const useJobCompletion = (deps: UseJobCompletionDeps) => {
                 const tId = transfer?.id || job.orderRef;
 
                 const dispatchItems = itemsToValidate
-                    .filter((item: any) => (item.pickedQty || 0) > 0)
+                    .filter((item: any) => (item.packedQty || item.pickedQty || 0) > 0)
                     .map((item: any) => ({
                         ...item,
-                        expectedQty: item.pickedQty,
+                        expectedQty: item.packedQty || item.pickedQty,
                         pickedQty: 0,
+                        packedQty: 0,
+                        packed: false,
                         status: 'Pending' as JobItem['status']
                     }));
 
@@ -409,7 +414,7 @@ export const useJobCompletion = (deps: UseJobCompletionDeps) => {
                             type: 'DISPATCH',
                             priority: job.priority,
                             status: 'Pending',
-                            items: dispatchItems.length,
+                            items: Math.ceil(dispatchItems.reduce((acc: number, curr: any) => acc + (curr.expectedQty || 0), 0)) || dispatchItems.length,
                             lineItems: dispatchItems,
                             location: 'Dispatch Bay',
                             orderRef: job.orderRef,

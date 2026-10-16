@@ -94,30 +94,18 @@ export const PutawayHeader: React.FC<PutawayHeaderProps> = ({
             {isMobile ? (
                 /* MOBILE: Compact bar */
                 <div className="flex flex-col gap-3 relative z-10 mt-2">
-                    <div className="flex items-center gap-2">
-                        <div className="flex-1 relative">
-                            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--theme-text-secondary)]" size={16} />
-                            <input
-                                type="text"
-                                placeholder={`${t('warehouse.putaway.search')}`}
-                                aria-label={t('warehouse.putaway.search')}
-                                title={t('warehouse.putaway.search')}
-                                value={putawaySearch}
-                                onChange={(e) => setPutawaySearch(e.target.value)}
-                                className="w-full pl-10 pr-4 py-2.5 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl text-xs md:text-sm font-mono text-[var(--theme-text-primary)] min-h-[44px] focus:outline-none focus:ring-2 focus:ring-blue-500/20"
-                            />
-                        </div>
-                        
+                    {/* View mode toggle + sync on top row */}
+                    <div className="flex items-center justify-between gap-2">
                         <div className="p-1 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl flex items-center shrink-0">
                             <button
                                 onClick={() => setViewMode('Process')}
-                                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all min-h-[36px] ${viewMode === 'Process' ? 'bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)] shadow-sm' : 'text-[var(--theme-text-secondary)]'}`}
+                                className={`px-4 py-2 rounded-lg text-xs font-semibold transition-all min-h-[36px] ${viewMode === 'Process' ? 'bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)] shadow-sm' : 'text-[var(--theme-text-secondary)]'}`}
                             >
                                 {t('warehouse.putaway.process')}
                             </button>
                             <button
                                 onClick={() => setViewMode('History')}
-                                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all min-h-[36px] ${viewMode === 'History' ? 'bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)] shadow-sm' : 'text-[var(--theme-text-secondary)]'}`}
+                                className={`px-4 py-2 rounded-lg text-xs font-semibold transition-all min-h-[36px] ${viewMode === 'History' ? 'bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)] shadow-sm' : 'text-[var(--theme-text-secondary)]'}`}
                             >
                                 {t('warehouse.putaway.history')}
                             </button>
@@ -126,11 +114,25 @@ export const PutawayHeader: React.FC<PutawayHeaderProps> = ({
                         <button
                             onClick={() => refreshData()}
                             disabled={isSubmitting}
-                            className="p-2.5 rounded-xl border border-[var(--theme-border)] bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)] min-h-[44px] min-w-[44px] flex items-center justify-center transition-colors"
+                            className="p-2.5 rounded-xl border border-[var(--theme-border)] bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)] min-h-[44px] min-w-[44px] flex items-center justify-center transition-colors shrink-0"
                             title={t('warehouse.putaway.syncOperations')}
                         >
                             <RefreshCw size={18} className={isSubmitting ? 'animate-spin' : ''} />
                         </button>
+                    </div>
+
+                    {/* Full-width Search row */}
+                    <div className="relative w-full">
+                        <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--theme-text-secondary)]" size={16} />
+                        <input
+                            type="text"
+                            placeholder={`${t('warehouse.putaway.search')}`}
+                            aria-label={t('warehouse.putaway.search')}
+                            title={t('warehouse.putaway.search')}
+                            value={putawaySearch}
+                            onChange={(e) => setPutawaySearch(e.target.value)}
+                            className="w-full pl-10 pr-4 py-2.5 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl text-xs md:text-sm font-mono text-[var(--theme-text-primary)] min-h-[44px] focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                        />
                     </div>
 
                     {onStartScanning && viewMode === 'Process' && (

@@ -12,11 +12,14 @@ import {
     ShieldCheck, 
     Calendar,
     ClipboardList,
-    AlertTriangle
+    AlertTriangle,
+    Trash2
 } from 'lucide-react';
 import { WMSJob, Site } from '../../../types';
 import { formatJobId, formatOrderRef } from '../../../utils/jobIdFormatter';
 import { formatDateTime } from '../../../utils/formatting';
+import { useFulfillment } from '../FulfillmentContext';
+import { useStore } from '../../../contexts/CentralStore';
 
 interface AssignJobDetailsProps {
     selectedJob: WMSJob | null;
@@ -33,6 +36,17 @@ export const AssignJobDetails: React.FC<AssignJobDetailsProps> = ({
     sites,
     t
 }) => {
+    const { deleteJob } = useFulfillment();
+    const { user } = useStore();
+    const canDelete = ['super_admin', 'warehouse_manager', 'operations_manager', 'regional_manager'].includes(user?.role || '');
+
+    const handleDelete = async () => {
+        if (!selectedJob) return;
+        if (!window.confirm('Are you sure you want to permanently delete this job?')) return;
+        await deleteJob(selectedJob.id);
+        setIsDetailsOpen(false);
+    };
+
     if (!selectedJob || !isDetailsOpen) return null;
 
     // Resolve camelCase and snake_case properties from Supabase query mapping
@@ -248,7 +262,19 @@ export const AssignJobDetails: React.FC<AssignJobDetailsProps> = ({
                 </div>
 
                 {/* Footer Actions */}
-                <div className="p-4 sm:p-5 border-t border-[var(--theme-border)] bg-[var(--theme-bg-subtle)] flex justify-end gap-3">
+                <div className="p-4 sm:p-5 border-t border-[var(--theme-border)] bg-[var(--theme-bg-subtle)] flex justify-between items-center gap-3">
+                    <div>
+                        {canDelete && (
+                            <button
+                                onClick={handleDelete}
+                                className="min-h-[44px] px-4 py-2.5 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-600 dark:text-red-400 border border-red-500/20 text-xs font-semibold uppercase tracking-wider flex items-center gap-1.5 transition-colors cursor-pointer touch-manipulation"
+                                title="Delete Job"
+                            >
+                                <Trash2 size={14} />
+                                <span>{t('common.delete') || 'Delete'}</span>
+                            </button>
+                        )}
+                    </div>
                     <button
                         onClick={() => setIsDetailsOpen(false)}
                         className="min-h-[44px] px-6 py-2.5 rounded-xl border border-[var(--theme-border)] bg-[var(--theme-bg-card)] hover:bg-[var(--theme-bg-subtle)] text-xs font-semibold uppercase tracking-wider text-[var(--theme-text-primary)] transition-colors active:scale-[0.98] touch-manipulation"

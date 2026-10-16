@@ -33,9 +33,9 @@ export const PackScannerItemTally: React.FC<PackScannerItemTallyProps> = ({
             <div className="flex flex-col gap-2">
                 {packedItems.map((item: any, idx: number) => {
                     const product = getProduct(item);
-                    const packed = item.pickedQty ?? item.packedQty ?? 0;
+                    const packed = (item as any).packedQty ?? 0;
                     const expected = item.expectedQty || 1;
-                    const isDone = packed >= expected - 0.001;
+                    const isDone = (item as any).packed === true || packed >= expected - 0.001;
 
                     return (
                         <div

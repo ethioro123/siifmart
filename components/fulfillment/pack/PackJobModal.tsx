@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useRef, useEffect } from 'react';
-import { ArrowLeft, ArrowRight, CheckCircle, Loader2 } from 'lucide-react';
+import { ArrowLeft, ArrowRight, CheckCircle, Loader2, Lock } from 'lucide-react';
 import { WMSJob, User, Site, Product } from '../../../types';
 import { useLanguage } from '../../../contexts/LanguageContext';
 import { useData } from '../../../contexts/DataContext';
@@ -7,10 +7,12 @@ import { resolveCountAndPackPolicy } from '../../../utils/receivingPolicy';
 import { getProductForItem, getItemMeasureQty as getItemMeasureQtyShared } from './utils/packItemHelpers';
 import { PackJobHeader } from './components/PackJobHeader';
 import { PackStepIndicator, PackStep } from './steps/PackStepIndicator';
+import { Step1PackDetails } from './steps/Step1PackDetails';
 import { Step1PackItems } from './steps/Step1PackItems';
 import { Step2BoxPrep, BoxSizeType, PackingMaterialsState } from './steps/Step2BoxPrep';
 import { Step3WeighSeal } from './steps/Step3WeighSeal';
 import { Step4PrintFinish } from './steps/Step4PrintFinish';
+import { PackJobFooter } from './components/PackJobFooter';
 
 interface PackJobModalProps {
     isOpen: boolean;
@@ -28,6 +30,7 @@ interface PackJobModalProps {
     onOpenScanner?: () => void;
     onPrintItemLabel?: (item: any, product?: any, boxSize?: string) => void;
     onFlagDiscrepancy?: () => void;
+    onDeleteJob?: (jobId: string) => void;
 }
 
 export const PackJobModal: React.FC<PackJobModalProps> = ({
@@ -46,13 +49,21 @@ export const PackJobModal: React.FC<PackJobModalProps> = ({
     onOpenScanner,
     onPrintItemLabel,
     onFlagDiscrepancy,
+    onDeleteJob,
 }) => {
     const { t } = useLanguage();
     const { settings, effectiveCountry } = useData();
     const packPolicy = resolveCountAndPackPolicy(settings, effectiveCountry);
+    const canDelete = ['super_admin', 'warehouse_manager', 'operations_manager', 'regional_manager'].includes(user?.role || '');
 
-    // Active wizard step
-    const [step, setStep] = useState<PackStep>('ITEMS');
+    // Active wizard step - starts on Job Details overview
+    const [step, setStep] = useState<PackStep>('DETAILS');
+
+    useEffect(() => {
+        if (isOpen) {
+            setStep('DETAILS');
+        }
+    }, [isOpen, job?.id]);
 
     // Box and Materials State
     const [boxSize, setBoxSize] = useState<BoxSizeType>('Medium');
@@ -86,13 +97,22 @@ export const PackJobModal: React.FC<PackJobModalProps> = ({
     const destSite = job?.destSiteId ? sites.find(s => s.id === job.destSiteId) : undefined;
     const totalItems = job?.lineItems?.length || 0;
     const completedItems = job?.lineItems?.filter(i => {
-        if (i.status === 'Completed' || i.status === 'Picked' || (i as any).packed === true) return true;
+        if (job?.status === 'Completed') return true;
+        if ((i as any).packed === true) return true;
         const measureQty = getItemMeasureQty(i);
         const requiredAmount = measureQty || i.expectedQty || 1;
-        return (i.pickedQty || 0) >= requiredAmount - 0.001;
+        const packedQty = (i as any).packedQty ?? 0;
+        return packedQty >= requiredAmount - 0.001;
     }).length || 0;
     const progressPercent = totalItems > 0 ? (completedItems / totalItems) * 100 : 0;
     const isFullyPacked = completedItems === totalItems && totalItems > 0;
+    const totalUnits = useMemo(() => {
+        return (job?.lineItems || []).reduce((sum, item) => {
+            const prod = getProduct(item);
+            const measureQty = getItemMeasureQty(item, prod);
+            return sum + (measureQty || item.expectedQty || 1);
+        }, 0);
+    }, [job?.lineItems, products]);
 
     const hasColdItems = job?.lineItems?.some(item => ['Frozen', 'Dairy'].includes(getProduct(item)?.category || ''));
     const hasFragileItems = job?.lineItems?.some(item => {
@@ -125,11 +145,7 @@ export const PackJobModal: React.FC<PackJobModalProps> = ({
     const prevOpenRef = useRef(false);
     useEffect(() => {
         if (isOpen && !prevOpenRef.current) {
-            if (isFullyPacked) {
-                setStep('BOX');
-            } else {
-                setStep('ITEMS');
-            }
+            setStep(isFullyPacked ? 'BOX' : 'ITEMS');
             if (recommendedBoxSize) {
                 setBoxSize(recommendedBoxSize);
                 if (hasColdItems) setHasIcePack(true);
@@ -152,7 +168,8 @@ export const PackJobModal: React.FC<PackJobModalProps> = ({
         job?.lineItems?.forEach((item, index) => {
             const measureQty = getItemMeasureQty(item);
             const requiredAmount = measureQty || item.expectedQty || 1;
-            if (item.status === 'Completed' || (item.pickedQty || 0) >= requiredAmount) return;
+            const isItemPacked = job?.status === 'Completed' || (item as any).packed === true || ((item as any).packedQty ?? 0) >= requiredAmount - 0.001;
+            if (isItemPacked) return;
             const product = getProduct(item);
             if (
                 item.sku?.toUpperCase() === barcode ||
@@ -261,6 +278,27 @@ export const PackJobModal: React.FC<PackJobModalProps> = ({
 
                 {/* Step Content Panels */}
                 <div className="flex-1 min-h-0 flex flex-col overflow-hidden">
+                    {step === 'DETAILS' && (
+                        <Step1PackDetails
+                            job={job}
+                            destSite={destSite}
+                            totalItems={totalItems}
+                            totalUnits={totalUnits}
+                            hasColdItems={hasColdItems}
+                            hasFragileItems={hasFragileItems}
+                            expectedWeightKg={expectedWeightKg}
+                            getProduct={getProduct}
+                            getItemMeasureQty={getItemMeasureQty}
+                            onAdvanceToScanning={() => {
+                                if (job.status === 'Pending') onStartPack(job);
+                                setStep('ITEMS');
+                            }}
+                            onStartPack={onStartPack}
+                            resolveOrderRef={resolveOrderRef}
+                            t={t}
+                        />
+                    )}
+
                     {step === 'ITEMS' && (
                         <Step1PackItems
                             job={job}
@@ -344,95 +382,19 @@ export const PackJobModal: React.FC<PackJobModalProps> = ({
                 </div>
 
                 {/* Bottom Navigation Toolbar */}
-                <div className="p-3 md:p-4 border-t border-[var(--theme-border)] bg-[var(--theme-bg-card)] flex items-center justify-between gap-3 shrink-0">
-                    {/* Back Button */}
-                    <div>
-                        {step === 'ITEMS' ? (
-                            <button
-                                type="button"
-                                onClick={onClose}
-                                className="min-h-[44px] px-4 md:px-5 rounded-xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] font-semibold text-xs uppercase tracking-wider transition-colors active:scale-95 cursor-pointer touch-manipulation"
-                            >
-                                {t('warehouse.dismiss') || 'Dismiss'}
-                            </button>
-                        ) : (
-                            <button
-                                type="button"
-                                onClick={() => {
-                                    if (step === 'FINISH') setStep('WEIGH');
-                                    else if (step === 'WEIGH') setStep('BOX');
-                                    else if (step === 'BOX') setStep('ITEMS');
-                                }}
-                                className="min-h-[44px] px-4 md:px-5 rounded-xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-[var(--theme-text-primary)] font-semibold text-xs uppercase tracking-wider flex items-center gap-2 hover:border-[var(--theme-accent)]/30 transition-colors active:scale-95 cursor-pointer touch-manipulation"
-                            >
-                                <ArrowLeft size={16} />
-                                <span>Back</span>
-                            </button>
-                        )}
-                    </div>
-
-                    {/* Next / Action Button */}
-                    <div className="flex items-center gap-2">
-                        {step === 'ITEMS' && (
-                            <button
-                                type="button"
-                                onClick={() => {
-                                    if (!isFullyPacked) {
-                                        if (confirm('Some items are not yet verified. Proceed to carton selection anyway?')) {
-                                            setStep('BOX');
-                                        }
-                                    } else {
-                                        setStep('BOX');
-                                    }
-                                }}
-                                className="min-h-[44px] px-5 md:px-7 rounded-xl bg-[var(--theme-accent)] hover:opacity-90 text-white font-semibold text-xs md:text-sm uppercase tracking-wider flex items-center gap-2 shadow-sm transition-all active:scale-95 cursor-pointer touch-manipulation"
-                            >
-                                <span>Carton & Prep</span>
-                                <ArrowRight size={16} />
-                            </button>
-                        )}
-
-                        {step === 'BOX' && (
-                            <button
-                                type="button"
-                                onClick={() => setStep('WEIGH')}
-                                className="min-h-[44px] px-5 md:px-7 rounded-xl bg-[var(--theme-accent)] hover:opacity-90 text-white font-semibold text-xs md:text-sm uppercase tracking-wider flex items-center gap-2 shadow-sm transition-all active:scale-95 cursor-pointer touch-manipulation"
-                            >
-                                <span>Weigh & Seal</span>
-                                <ArrowRight size={16} />
-                            </button>
-                        )}
-
-                        {step === 'WEIGH' && (
-                            <button
-                                type="button"
-                                onClick={() => setStep('FINISH')}
-                                className="min-h-[44px] px-5 md:px-7 rounded-xl bg-[var(--theme-accent)] hover:opacity-90 text-white font-semibold text-xs md:text-sm uppercase tracking-wider flex items-center gap-2 shadow-sm transition-all active:scale-95 cursor-pointer touch-manipulation"
-                            >
-                                <span>Label & Finish</span>
-                                <ArrowRight size={16} />
-                            </button>
-                        )}
-
-                        {step === 'FINISH' && (
-                            <button
-                                type="button"
-                                onClick={handleFinalComplete}
-                                disabled={isSubmitting}
-                                className="min-h-[44px] px-6 md:px-8 rounded-xl bg-green-600 hover:bg-green-500 text-white font-bold text-xs md:text-sm uppercase tracking-wider flex items-center gap-2 shadow-md transition-all active:scale-95 cursor-pointer touch-manipulation disabled:opacity-50"
-                            >
-                                {isSubmitting ? (
-                                    <Loader2 size={16} className="animate-spin" />
-                                ) : (
-                                    <>
-                                        <CheckCircle size={16} />
-                                        <span>Complete & Seal</span>
-                                    </>
-                                )}
-                            </button>
-                        )}
-                    </div>
-                </div>
+                <PackJobFooter
+                    step={step}
+                    setStep={setStep}
+                    onClose={onClose}
+                    job={job}
+                    onStartPack={onStartPack}
+                    isFullyPacked={isFullyPacked}
+                    handleFinalComplete={handleFinalComplete}
+                    isSubmitting={isSubmitting}
+                    canDelete={canDelete}
+                    onDeleteJob={onDeleteJob}
+                    t={t}
+                />
             </div>
         </div>
     );

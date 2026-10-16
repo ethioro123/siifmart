@@ -1,5 +1,5 @@
 import React from 'react';
-import { Navigation, Truck, Clock, Trash2, Box, User as UserIcon } from 'lucide-react';
+import { Navigation, Truck, Clock, Box, User as UserIcon } from 'lucide-react';
 import { WMSJob, Site, User } from '../../../../types';
 
 interface DocksOutboundDeparturesProps {
@@ -8,7 +8,7 @@ interface DocksOutboundDeparturesProps {
     employees: User[];
     user: User | null;
     formatJobId: (job: WMSJob) => string;
-    handleDelete: (e: React.MouseEvent, jobId: string) => Promise<void>;
+    handleDelete?: (e: React.MouseEvent, jobId: string) => Promise<void>;
     t: (key: string) => string;
 }
 
@@ -18,7 +18,6 @@ export const DocksOutboundDepartures: React.FC<DocksOutboundDeparturesProps> = (
     employees,
     user,
     formatJobId,
-    handleDelete,
     t,
 }) => {
     return (
@@ -65,15 +64,6 @@ export const DocksOutboundDepartures: React.FC<DocksOutboundDeparturesProps> = (
                                             <span className="text-[11px] font-mono text-[var(--theme-text-muted)] bg-[var(--theme-bg-card)] px-2 py-0.5 rounded-full border border-[var(--theme-border)]">
                                                 #{formatJobId(job)}
                                             </span>
-                                            {['super_admin', 'warehouse_manager', 'operations_manager', 'regional_manager'].includes(user?.role as string) && (
-                                                <button
-                                                    onClick={(e) => handleDelete(e, job.id)}
-                                                    className="w-8 h-8 rounded-lg bg-[var(--theme-bg-card)] border border-[var(--theme-border)] text-red-500 hover:text-white hover:bg-red-500 hover:border-red-500 transition-colors flex items-center justify-center shrink-0 touch-manipulation"
-                                                    title="Delete Job"
-                                                >
-                                                    <Trash2 size={13} />
-                                                </button>
-                                            )}
                                         </div>
                                     </div>
                                     

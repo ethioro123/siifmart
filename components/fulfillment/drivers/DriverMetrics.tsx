@@ -29,14 +29,28 @@ export const DriverMetrics: React.FC<DriverMetricsProps> = ({
     );
     const employeeId = currentEmployee?.id || user?.id;
 
-    const shouldInclude = (j: WMSJob) => 
-        (j.type === 'DISPATCH' || j.type === 'TRANSFER' || j.type === 'DRIVER') && 
-        (canSeeGlobalQueue ? !!j.assignedTo : j.assignedTo === employeeId);
+    const shouldInclude = (j: WMSJob) => {
+        if (j.type !== 'DISPATCH' && j.type !== 'TRANSFER' && j.type !== 'DRIVER') return false;
+        if (j.status === 'Cancelled' || j.transferStatus === 'Cancelled' || j.transferStatus === 'Rejected') return false;
+        if (j.type === 'TRANSFER') {
+            const allCurrentJobs = [...filteredJobs, ...historicalJobs];
+            const hasChildDispatch = allCurrentJobs.some(d =>
+                d.type === 'DISPATCH' && (d.orderRef === j.id || d.orderRef === j.jobNumber) && d.status !== 'Cancelled'
+            );
+            if (hasChildDispatch) return false;
+        }
+        return canSeeGlobalQueue ? !!j.assignedTo : j.assignedTo === employeeId;
+    };
 
     const stats = {
         completed: historicalJobs.filter(j => shouldInclude(j) && j.status === 'Completed').length,
         active: filteredJobs.filter(j => shouldInclude(j) && j.status !== 'Completed').length,
-        items: [...filteredJobs, ...historicalJobs].filter(j => shouldInclude(j)).reduce((sum, j) => sum + (j.items || j.lineItems?.length || 0), 0)
+        items: [...filteredJobs, ...historicalJobs].filter(j => shouldInclude(j)).reduce((sum, j) => {
+            const units = (j.lineItems && Array.isArray(j.lineItems) && j.lineItems.length > 0)
+                ? j.lineItems.reduce((acc: number, it: any) => acc + (it.packedQty || it.expectedQty || it.quantity || it.pickedQty || 1), 0)
+                : (j.items || (j as any).items_count || 0);
+            return sum + units;
+        }, 0)
     };
 
     const totalJobs = stats.completed + stats.active;

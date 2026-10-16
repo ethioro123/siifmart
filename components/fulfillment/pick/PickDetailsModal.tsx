@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, Calendar, User, Package, Box, MapPin, ArrowRight, Undo2, FileEdit } from 'lucide-react';
+import { X, Calendar, User, Package, Box, MapPin, ArrowRight, Undo2, FileEdit, Trash2 } from 'lucide-react';
 import { WMSJob, Product } from '../../../types';
 import { useFulfillment } from '../FulfillmentContext';
 import { formatDateTime } from '../../../utils/formatting';
@@ -17,6 +17,7 @@ interface PickDetailsModalProps {
     products?: Product[];
     sites?: any[];
     onReturn?: (job: WMSJob) => void;
+    onDeleteJob?: (jobId: string) => void;
 }
 
 export const PickDetailsModal: React.FC<PickDetailsModalProps> = ({
@@ -26,11 +27,20 @@ export const PickDetailsModal: React.FC<PickDetailsModalProps> = ({
     employees,
     products,
     sites = [],
-    onReturn
+    onReturn,
+    onDeleteJob
 }) => {
     const { t } = useLanguage();
     const { user, jobs, wmsJobsService, addNotification, refreshData } = useFulfillment();
     const [amendModalOpen, setAmendModalOpen] = useState(false);
+
+    const canDelete = ['super_admin', 'warehouse_manager', 'operations_manager', 'regional_manager'].includes(user?.role || '');
+
+    const handleDelete = () => {
+        if (!window.confirm(t('warehouse.confirmDeleteJob') || 'Are you sure you want to delete this job? This action cannot be undone.')) return;
+        onDeleteJob?.(selectedItem.id);
+        onClose();
+    };
 
     // Resolve User Name: prioritize completion author for completed jobs
     const isCompleted = (selectedItem.status || '').toLowerCase() === 'completed';
@@ -248,8 +258,10 @@ export const PickDetailsModal: React.FC<PickDetailsModalProps> = ({
                                                 )}
                                                 <div>
                                                     {(() => {
-                                                        const expected = item.expectedQty || (item as any).quantity || 0;
-                                                        const picked = item.pickedQty !== undefined && item.pickedQty !== null ? item.pickedQty : 0;
+                                                        const expected = item.expectedQty || (item as any).quantity || item.orderedQty || 0;
+                                                        const picked = item.pickedQty !== undefined && item.pickedQty !== null 
+                                                            ? item.pickedQty 
+                                                            : ((data.status === 'Completed' || item.status === 'Picked' || item.status === 'Completed') ? expected : 0);
                                                         const packDesc = formatPackagingDescription(productInfo, expected);
                                                         const unitDef = getSellUnit(productInfo?.unit || item.unit);
                                                         const unitLabel = unitDef.category === 'count' && unitDef.code !== 'UNIT' ? unitDef.shortLabel : 'pk';
@@ -297,6 +309,16 @@ export const PickDetailsModal: React.FC<PickDetailsModalProps> = ({
                             >
                                 <FileEdit size={14} />
                                 {t('warehouse.picking.amendQuantities')}
+                            </button>
+                        )}
+                        {canDelete && onDeleteJob && (
+                            <button
+                                onClick={handleDelete}
+                                className="flex items-center justify-center gap-1.5 px-4 py-2.5 bg-red-500/10 hover:bg-red-500/20 text-red-600 dark:text-red-400 border border-red-500/20 rounded-xl font-semibold uppercase tracking-wider text-xs transition-colors min-h-[44px]"
+                                title={t('common.delete') || 'Delete Job'}
+                            >
+                                <Trash2 size={14} />
+                                {t('common.delete') || 'Delete'}
                             </button>
                         )}
                     </div>

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Package, AlertTriangle, Clock, List, Box, ChevronRight, Trash2, Zap } from 'lucide-react';
+import { Package, AlertTriangle, Clock, List, Box, ChevronRight, Zap } from 'lucide-react';
 import { Pagination } from '../../shared';
 import { SortDropdown } from '../FulfillmentShared';
 import { WMSJob, Site } from '../../../types';
@@ -20,8 +20,6 @@ interface PackListProps {
 export const PackList: React.FC<PackListProps> = ({
     filteredPackJobs, paginatedPackJobs, sites, setSelectedPackJob, packCurrentPage, setPackCurrentPage, packJobsTotalPages, PACK_ITEMS_PER_PAGE, packSortBy, setPackSortBy, isPackSortDropdownOpen, setIsPackSortDropdownOpen, t
 }) => {
-    const { deleteJob } = useFulfillment(); const { user } = useStore();
-    const handleDelete = async (e: React.MouseEvent, jobId: string) => { e.stopPropagation(); if (window.confirm(t('warehouse.packing.deleteConfirm'))) await deleteJob(jobId); };
 
     return (
         <div className="flex flex-col h-full bg-[var(--theme-bg-app)] text-[var(--theme-text-primary)] transition-colors duration-200">
@@ -47,7 +45,11 @@ export const PackList: React.FC<PackListProps> = ({
                         {paginatedPackJobs.map(job => {
                             const lineItems = job.lineItems || [];
                             const totalItems = lineItems.length;
-                            const packedItems = lineItems.filter(i => i.status === 'Picked' || i.status === 'Completed').length;
+                            const packedItems = lineItems.filter(i =>
+                                job.status === 'Completed' ||
+                                (i as any).packed === true ||
+                                ((i as any).packedQty !== undefined && (i as any).packedQty >= (i.expectedQty || 1) - 0.001)
+                            ).length;
                             const progress = totalItems > 0 ? (packedItems / totalItems) * 100 : 0;
                             const destSite = sites.find(s => s.id === job.destSiteId);
                             const isActive = job.status === 'In-Progress';
@@ -119,16 +121,6 @@ export const PackList: React.FC<PackListProps> = ({
 
                                         {/* Right actions */}
                                         <div className="flex items-center gap-2 shrink-0">
-                                            {['super_admin', 'warehouse_manager'].includes(user?.role as string) && (
-                                                <button
-                                                    aria-label={t('warehouse.driverHub.cancel')}
-                                                    title={t('warehouse.driverHub.cancel')}
-                                                    onClick={(e) => handleDelete(e, job.id)}
-                                                    className="w-11 h-11 min-h-[44px] min-w-[44px] rounded-xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-red-500 hover:text-red-600 flex items-center justify-center active:scale-95 transition-transform touch-manipulation"
-                                                >
-                                                    <Trash2 size={15} />
-                                                </button>
-                                            )}
                                             <ChevronRight size={18} className="text-[var(--theme-text-secondary)]" />
                                         </div>
                                     </div>

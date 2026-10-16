@@ -161,7 +161,7 @@ export const useJobActions = (deps: UseJobActionsDeps) => {
         }
     }, [jobs, jobAssignments, setJobs, setJobAssignments, addNotification, queryClient]);
 
-    const updateJobItem = useCallback(async (jobId: string, itemId: number, status: JobItem['status'], qty: number, location?: string) => {
+    const updateJobItem = useCallback(async (jobId: string, itemId: number, status: JobItem['status'], qty: number, location?: string, extra?: Partial<JobItem>) => {
         logger.debug('useJobActions', `📝 [updateJobItem] Job=${jobId}, ItemIdx=${itemId}, Status=${status}, Qty=${qty}, Location=${location}`);
         try {
             const job = jobs.find(j => j.id === jobId);
@@ -174,11 +174,15 @@ export const useJobActions = (deps: UseJobActionsDeps) => {
             const updatedLineItems = [...job.lineItems];
             if (updatedLineItems[itemId]) {
                 const oldStatus = updatedLineItems[itemId].status;
+                const isPack = job.type === 'PACK';
                 updatedLineItems[itemId] = {
                     ...updatedLineItems[itemId],
                     status,
-                    pickedQty: qty,
-                    location: location || updatedLineItems[itemId].location
+                    pickedQty: isPack ? (updatedLineItems[itemId].pickedQty || qty) : qty,
+                    packedQty: isPack ? qty : (extra?.packedQty ?? updatedLineItems[itemId].packedQty),
+                    packed: isPack ? (qty >= (updatedLineItems[itemId].expectedQty || 1) - 0.001) : (extra?.packed ?? updatedLineItems[itemId].packed),
+                    location: location || updatedLineItems[itemId].location,
+                    ...(extra || {})
                 };
                 logger.debug('useJobActions', `📝 [updateJobItem] Updated item ${itemId}: ${oldStatus} -> ${status}, loc=${updatedLineItems[itemId].location}`);
             } else {

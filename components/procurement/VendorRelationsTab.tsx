@@ -4,6 +4,8 @@ import { procurementGovernanceService } from '../../services/procurement-governa
 import type { VendorScorecard, VendorContract, FarmerProgram } from '../../types/procurement-zero-trust';
 import { useStore } from '../../contexts/CentralStore';
 import { formatDateTime } from '../../utils/formatting';
+import { AddVendorContractModal } from './AddVendorContractModal';
+import { AddFarmerProgramModal } from './AddFarmerProgramModal';
 
 interface VendorRelationsTabProps {
   countryCode: string;
@@ -18,10 +20,11 @@ export const VendorRelationsTab: React.FC<VendorRelationsTabProps> = ({ countryC
   const [scorecards, setScorecards] = useState<VendorScorecard[]>([]);
   const [contracts, setContracts] = useState<VendorContract[]>([]);
   const [farmers, setFarmers] = useState<FarmerProgram[]>([]);
-  const [authorizedContractIds, setAuthorizedContractIds] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
 
   const [showAddModal, setShowAddModal] = useState(false);
+  const [showContractModal, setShowContractModal] = useState(false);
+  const [showFarmerModal, setShowFarmerModal] = useState(false);
   const [selectedSupplierId, setSelectedSupplierId] = useState('');
   const [period, setPeriod] = useState('2026-Q3');
   const [qualityScore, setQualityScore] = useState(95);
@@ -82,6 +85,20 @@ export const VendorRelationsTab: React.FC<VendorRelationsTabProps> = ({ countryC
     }
   };
 
+  const handleAuthorizeContract = async (contract: VendorContract) => {
+    try {
+      await procurementGovernanceService.authorizeContract({
+        contractId: contract.id,
+        signedOffBy: user?.name || user?.email || 'Authorized Manager',
+        signedOffRole: user?.role || 'procurement_manager'
+      });
+      showToast(`Master agreement ${contract.contractNumber} authorized and signed off.`, 'success');
+      loadData();
+    } catch (err: any) {
+      showToast(err.message || 'Failed to authorize contract', 'error');
+    }
+  };
+
   return (
     <div className="space-y-6">
       {/* Top Header Card */}
@@ -137,6 +154,24 @@ export const VendorRelationsTab: React.FC<VendorRelationsTabProps> = ({ countryC
               className="h-10 px-4 rounded-full bg-[var(--theme-primary)] text-[var(--theme-primary-text)] font-semibold text-xs active:scale-[0.98] transition-all flex items-center gap-1.5 shadow-sm cursor-pointer"
             >
               <Plus size={15} strokeWidth={2} /> New Scorecard
+            </button>
+          )}
+
+          {subTab === 'contracts' && (
+            <button
+              onClick={() => setShowContractModal(true)}
+              className="h-10 px-4 rounded-full bg-[var(--theme-primary)] text-[var(--theme-primary-text)] font-semibold text-xs active:scale-[0.98] transition-all flex items-center gap-1.5 shadow-sm cursor-pointer"
+            >
+              <Plus size={15} strokeWidth={2} /> New Master Contract
+            </button>
+          )}
+
+          {subTab === 'farmers' && (
+            <button
+              onClick={() => setShowFarmerModal(true)}
+              className="h-10 px-4 rounded-full bg-[var(--theme-primary)] text-[var(--theme-primary-text)] font-semibold text-xs active:scale-[0.98] transition-all flex items-center gap-1.5 shadow-sm cursor-pointer"
+            >
+              <Plus size={15} strokeWidth={2} /> New Farmer Program
             </button>
           )}
         </div>
@@ -208,7 +243,6 @@ export const VendorRelationsTab: React.FC<VendorRelationsTabProps> = ({ countryC
             ) : (
               contracts.map(c => {
                 const sup = suppliers.find(s => s.id === c.supplierId);
-                const isAuthorized = authorizedContractIds.includes(c.id);
                 return (
                   <div key={c.id} className="p-5 flex items-center justify-between hover:bg-[var(--theme-bg-subtle)]/50 transition-colors">
                     <div>
@@ -218,21 +252,23 @@ export const VendorRelationsTab: React.FC<VendorRelationsTabProps> = ({ countryC
                     <div className="flex items-center gap-3">
                       <div className="text-right">
                         <span className={`px-2.5 py-0.5 rounded-full text-xs font-semibold border ${
-                          isAuthorized || c.status === 'Active'
+                          c.status === 'Active'
                             ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20'
                             : 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20'
                         }`}>
-                          {isAuthorized ? 'Signed Off & Active' : c.status}
+                          {c.status}
                         </span>
                         <p className="text-[11px] text-[var(--theme-text-secondary)] font-mono font-medium mt-1">Expires: {c.endDate}</p>
+                        {c.signedOffBy && c.signedOffAt && (
+                          <p className="text-[10px] text-emerald-600 dark:text-emerald-400 font-mono font-medium">
+                            Authorized by {c.signedOffBy}
+                          </p>
+                        )}
                       </div>
-                      {isManager && !isAuthorized && c.status !== 'Active' && (
+                      {isManager && c.status !== 'Active' && (
                         <button
                           type="button"
-                          onClick={() => {
-                            setAuthorizedContractIds(prev => [...prev, c.id]);
-                            showToast(`Master agreement ${c.contractNumber} authorized and signed off.`, 'success');
-                          }}
+                          onClick={() => handleAuthorizeContract(c)}
                           className="h-8 px-3 rounded-full bg-[#0071E3] hover:bg-[#0077ED] text-white font-semibold text-xs transition-all flex items-center gap-1 active:scale-[0.98] cursor-pointer shrink-0 shadow-sm"
                         >
                           <Check size={13} /> Sign Off
@@ -364,6 +400,23 @@ export const VendorRelationsTab: React.FC<VendorRelationsTabProps> = ({ countryC
           </div>
         </div>
       )}
+
+      {/* New Master Contract Modal */}
+      <AddVendorContractModal
+        isOpen={showContractModal}
+        onClose={() => setShowContractModal(false)}
+        onSuccess={loadData}
+        countryCode={countryCode}
+        suppliers={suppliers}
+      />
+
+      {/* New Farmer Cooperative Program Modal */}
+      <AddFarmerProgramModal
+        isOpen={showFarmerModal}
+        onClose={() => setShowFarmerModal(false)}
+        onSuccess={loadData}
+        countryCode={countryCode}
+      />
     </div>
   );
 };

@@ -21,7 +21,8 @@ export const PickTab: React.FC = () => {
     const {
         filteredJobs, user, historicalJobs, employees, sites, products, jobs,
         resolveOrderRef, handleStartJob, setSelectedJob, selectedJob, setIsDetailsOpen, isDetailsOpen,
-        completeJob, updateJobItem, isSubmitting, addNotification, wmsJobsService, loadHistoricalJobs
+        completeJob, updateJobItem, isSubmitting, addNotification, wmsJobsService, loadHistoricalJobs,
+        deleteJob
     } = useFulfillment();
 
     const { t } = useLanguage();
@@ -155,6 +156,22 @@ export const PickTab: React.FC = () => {
         };
 
         // Update selectedJob immediately so currentScannerItem useMemo advances to the next item
+        setSelectedJob({ ...selectedJob, lineItems: updatedLineItems });
+    };
+
+    const handleUpdateItemPick = async (item: any, qty: number) => {
+        if (!selectedJob) return;
+        const itemIndex = selectedJob.lineItems?.findIndex((i: any) => i.id === item.id || i.sku === item.sku || i === item) ?? -1;
+        if (itemIndex === -1) return;
+        const expected = item.expectedQty || (item as any).quantity || 1;
+        const newStatus = qty >= expected ? 'Picked' : 'In-Progress';
+        await updateJobItem(selectedJob.id, itemIndex, newStatus as any, qty);
+        const updatedLineItems = [...(selectedJob.lineItems || [])];
+        updatedLineItems[itemIndex] = {
+            ...updatedLineItems[itemIndex],
+            status: newStatus as any,
+            pickedQty: qty
+        };
         setSelectedJob({ ...selectedJob, lineItems: updatedLineItems });
     };
 
@@ -299,6 +316,8 @@ export const PickTab: React.FC = () => {
                         isSubmitting={isSubmitting}
                         currentItem={currentScannerItem}
                         resolveOrderRef={resolveOrderRef}
+                        onUpdateItemPick={handleUpdateItemPick}
+                        onDeleteJob={deleteJob}
                     />
 
                     {isScannerOpen && (
@@ -329,6 +348,7 @@ export const PickTab: React.FC = () => {
                             products={products}
                             sites={sites}
                             onReturn={(job) => setReturnJob(job)}
+                            onDeleteJob={deleteJob}
                         />
                     )}
 

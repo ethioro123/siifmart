@@ -1,5 +1,5 @@
 import React from 'react';
-import { X, Calendar, User, Box, PackageCheck, Printer, ScanBarcode, ArrowRight, MapPin } from 'lucide-react';
+import { X, Calendar, User, Box, PackageCheck, Printer, ScanBarcode, ArrowRight, MapPin, Trash2 } from 'lucide-react';
 import { WMSJob } from '../../../types';
 import { useFulfillment } from '../FulfillmentContext';
 import { formatDateTime } from '../../../utils/formatting';
@@ -15,6 +15,7 @@ interface PutawayDetailsModalProps {
     employees: any[];
     sites?: any[];
     t: (key: string) => string;
+    onDeleteJob?: (jobId: string) => void;
 }
 
 export const PutawayDetailsModal: React.FC<PutawayDetailsModalProps> = ({
@@ -23,10 +24,18 @@ export const PutawayDetailsModal: React.FC<PutawayDetailsModalProps> = ({
     resolveOrderRef,
     employees,
     sites = [],
-    t
+    t,
+    onDeleteJob
 }) => {
     const { user } = useStore();
     const { allProducts } = useFulfillment();
+    const canDelete = ['super_admin', 'warehouse_manager', 'operations_manager', 'regional_manager'].includes(user?.role || '');
+
+    const handleDelete = () => {
+        if (!window.confirm(t('warehouse.putaway.deleteJobConfirm') || 'Are you sure you want to delete this job?')) return;
+        onDeleteJob?.(selectedItem.id);
+        onClose();
+    };
     const isCompleted = (selectedItem.status || '').toLowerCase() === 'completed';
     // Resolve User Name: prioritize actual completion author for completed jobs
     const completedUserId = selectedItem.completedBy || (selectedItem as any).completed_by;
@@ -161,10 +170,22 @@ export const PutawayDetailsModal: React.FC<PutawayDetailsModalProps> = ({
                 </div>
 
                 {/* Footer Controls */}
-                <div className="p-4 md:p-6 border-t border-[var(--theme-border)] bg-[var(--theme-bg-subtle)] flex justify-end relative z-20 shrink-0">
+                <div className="p-4 md:p-6 border-t border-[var(--theme-border)] bg-[var(--theme-bg-subtle)] flex justify-between items-center relative z-20 shrink-0">
+                    <div>
+                        {canDelete && onDeleteJob && (
+                            <button
+                                onClick={handleDelete}
+                                className="flex items-center gap-1.5 md:gap-2 px-3.5 md:px-4 py-2.5 min-h-[44px] bg-red-500/10 hover:bg-red-500/20 text-red-600 dark:text-red-400 border border-red-500/20 rounded-xl font-semibold uppercase tracking-wider text-xs transition-colors"
+                                title={t('common.delete') || 'Delete Job'}
+                            >
+                                <Trash2 size={14} />
+                                <span>{t('common.delete') || 'Delete'}</span>
+                            </button>
+                        )}
+                    </div>
                     <button
                         onClick={onClose}
-                        className="w-full md:w-auto px-8 py-3 rounded-xl border border-[var(--theme-border)] bg-[var(--theme-bg-card)] hover:bg-[var(--theme-bg-subtle)] text-[var(--theme-text-primary)] text-xs uppercase tracking-wider font-semibold min-h-[44px] transition-colors"
+                        className="px-8 py-3 rounded-xl border border-[var(--theme-border)] bg-[var(--theme-bg-card)] hover:bg-[var(--theme-bg-subtle)] text-[var(--theme-text-primary)] text-xs uppercase tracking-wider font-semibold min-h-[44px] transition-colors"
                     >
                         {t('warehouse.dismiss')}
                     </button>

@@ -11,6 +11,7 @@ interface TransferLineItemRowProps {
     selectedJob: WMSJob;
     onResolveDiscrepancy?: (job: WMSJob, item: any, index: number) => void;
     t: (key: string) => string;
+    isBlindExpected?: boolean;
 }
 
 export const TransferLineItemRow: React.FC<TransferLineItemRowProps> = ({
@@ -19,7 +20,8 @@ export const TransferLineItemRow: React.FC<TransferLineItemRowProps> = ({
     product,
     selectedJob,
     onResolveDiscrepancy,
-    t
+    t,
+    isBlindExpected = false
 }) => {
     const itemQty = item.expectedQty || item.quantity || item.pickedQty || 0;
     const itemSku = item.sku || product?.sku || 'N/A';
@@ -69,9 +71,15 @@ export const TransferLineItemRow: React.FC<TransferLineItemRowProps> = ({
             <div className="flex items-center gap-4 sm:gap-6 shrink-0">
                 <div className="text-right">
                     <span className="text-[11px] text-[var(--theme-text-secondary)] font-medium uppercase tracking-wider block">
-                        {t('warehouse.expected')}
+                        {t('warehouse.expected')}{isBlindExpected && !showReceived ? ' (Blind)' : ''}
                     </span>
-                    <TransferQtyDisplay qty={itemQty} size={product?.size || item.size} unit={itemUnit} t={t} />
+                    {isBlindExpected && !showReceived ? (
+                        <span className="text-xs font-mono font-bold text-amber-600 dark:text-amber-400 tracking-widest">
+                            *** Blind
+                        </span>
+                    ) : (
+                        <TransferQtyDisplay qty={itemQty} size={product?.size || item.size} unit={itemUnit} t={t} />
+                    )}
                 </div>
 
                 {showReceived && (
@@ -98,3 +106,4 @@ export const TransferLineItemRow: React.FC<TransferLineItemRowProps> = ({
 };
 
 export default TransferLineItemRow;
+

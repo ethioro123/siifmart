@@ -60,10 +60,10 @@ export const PickHeader: React.FC<PickHeaderProps> = ({
                     </div>
 
                     {/* View Switcher Segmented Control */}
-                    <div className="bg-[var(--theme-bg-subtle)] p-1 rounded-xl border border-[var(--theme-border)] flex items-center shrink-0 min-h-[44px]">
+                    <div className="bg-[var(--theme-bg-subtle)] p-1 rounded-xl border border-[var(--theme-border)] flex items-center shrink-0 min-h-[44px] w-full sm:w-auto">
                         <button
                             onClick={() => setViewMode('Process')}
-                            className={`px-4 sm:px-5 py-2 rounded-lg text-xs font-semibold uppercase tracking-wider min-h-[36px] transition-colors ${
+                            className={`flex-1 sm:flex-initial px-4 sm:px-5 py-2 rounded-lg text-xs font-semibold uppercase tracking-wider min-h-[36px] transition-colors ${
                                 viewMode === 'Process'
                                     ? 'bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)] shadow-sm'
                                     : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)]'
@@ -73,7 +73,7 @@ export const PickHeader: React.FC<PickHeaderProps> = ({
                         </button>
                         <button
                             onClick={() => setViewMode('History')}
-                            className={`px-4 sm:px-5 py-2 rounded-lg text-xs font-semibold uppercase tracking-wider min-h-[36px] transition-colors ${
+                            className={`flex-1 sm:flex-initial px-4 sm:px-5 py-2 rounded-lg text-xs font-semibold uppercase tracking-wider min-h-[36px] transition-colors ${
                                 viewMode === 'History'
                                     ? 'bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)] shadow-sm'
                                     : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)]'
@@ -90,11 +90,11 @@ export const PickHeader: React.FC<PickHeaderProps> = ({
                             { count: inProgressCount, label: t('warehouse.inProgress'), color: 'text-[var(--theme-accent)]' },
                             { count: completedCount, label: t('warehouse.completed'), color: 'text-emerald-500' }
                         ].map((stat, i) => (
-                            <div key={i} className="bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3 py-2 text-center sm:text-left min-w-[70px]">
-                                <p className={`text-base sm:text-lg font-mono font-bold tabular-nums leading-none mb-1 ${stat.color}`}>
+                            <div key={i} className="bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-2 sm:px-3 py-2 text-center sm:text-left min-w-0">
+                                <p className={`text-sm sm:text-lg font-mono font-bold tabular-nums leading-none mb-1 ${stat.color}`}>
                                     {stat.count}
                                 </p>
-                                <p className="text-[11px] text-[var(--theme-text-secondary)] font-semibold uppercase tracking-wider truncate">
+                                <p className="text-[9.5px] sm:text-[11px] text-[var(--theme-text-secondary)] font-semibold uppercase tracking-tight sm:tracking-wider leading-none">
                                     {stat.label}
                                 </p>
                             </div>

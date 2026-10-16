@@ -14,6 +14,7 @@ import { POItemExpandedDetails } from './POItemExpandedDetails';
 import { POPrintView, generatePOHTML } from './POPrintView';
 import { printHtmlContent } from '../../utils/printHelper';
 import { logger } from '../../utils/logger';
+import { POApprovalModal } from './POApprovalModal';
 
 interface ViewPOModalProps {
     isOpen: boolean;
@@ -28,6 +29,10 @@ export const ViewPOModal: React.FC<ViewPOModalProps> = ({ isOpen, onClose, po, o
     const { user, showToast } = useStore();
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [expandedItems, setExpandedItems] = useState<Record<number, boolean>>({});
+    const [approvalModal, setApprovalModal] = useState<{ isOpen: boolean; mode: 'approve' | 'reject' }>({
+        isOpen: false,
+        mode: 'approve'
+    });
 
     const site = po?.siteId ? sites.find(s => s.id === po.siteId) : undefined;
     const currencySymbol = po?.currency || site?.currency || (site?.country === 'KE' ? 'KSh' : getCountryProfile(settings?.country || 'ET').currencySymbol);
@@ -62,62 +67,48 @@ export const ViewPOModal: React.FC<ViewPOModalProps> = ({ isOpen, onClose, po, o
     const canApprove = isAuthorizedApprover && (!isCreator || isCEO);
     const canFullDelete = isCEO || isOperationalDirector;
 
-    const handleApprovePO = async () => {
+    const handleOpenApprove = () => {
         if (isCreator && !isCEO) {
             showToast('Zero-Trust Violation: You cannot approve a PO you created yourself.', 'error');
             return;
         }
-
-        const reason = window.prompt(
-            "Enter structured approval reason code:\n1: STANDARD_REPLENISHMENT\n2: EMERGENCY_STOCK_OUT\n3: DIRECT_FARMER_PURCHASE\n4: PROMOTIONAL_STOCKING",
-            "STANDARD_REPLENISHMENT"
-        );
-        if (!reason) return;
-
-        setIsSubmitting(true);
-        try {
-            await purchaseOrdersService.approve({
-                poId: po.id,
-                approverId: user?.id || (user as any)?.employeeId || 'USR',
-                approverName: user?.name || 'Authorized Manager',
-                approverRole: user?.role || 'procurement_manager',
-                reasonCode: reason.trim() as any,
-                notes: 'Approved via PO Inspector modal'
-            });
-            showToast(`PO ${formatPONumber(po)} approved successfully`, 'success');
-            onSuccess();
-            onClose();
-        } catch (error: any) {
-            logger.error('ViewPOModal', 'Error approving PO:', error);
-            showToast(error.message || 'Failed to approve PO', 'error');
-        } finally {
-            setIsSubmitting(false);
-        }
+        setApprovalModal({ isOpen: true, mode: 'approve' });
     };
 
-    const handleRejectPO = async () => {
-        const reason = window.prompt(
-            "Enter rejection reason:\n(PRICE_UNFAVORABLE / BUDGET_OVERRUN / EXCESSIVE_STOCK_ON_HAND / SPECIFICATION_MISMATCH)",
-            "SPECIFICATION_MISMATCH"
-        );
-        if (!reason) return;
+    const handleOpenReject = () => {
+        setApprovalModal({ isOpen: true, mode: 'reject' });
+    };
 
+    const handleConfirmAction = async (reasonCode: string, notes: string) => {
         setIsSubmitting(true);
         try {
-            await purchaseOrdersService.reject({
-                poId: po.id,
-                rejectorId: user?.id || (user as any)?.employeeId || 'USR',
-                rejectorName: user?.name || 'Authorized Manager',
-                rejectorRole: user?.role || 'procurement_manager',
-                reasonCode: (reason.trim().toUpperCase().replace(/\s+/g, '_')) as any,
-                notes: reason
-            });
-            showToast(`PO ${formatPONumber(po)} rejected`, 'info');
+            if (approvalModal.mode === 'approve') {
+                await purchaseOrdersService.approve({
+                    poId: po.id,
+                    approverId: user?.id || (user as any)?.employeeId || 'USR',
+                    approverName: user?.name || 'Authorized Manager',
+                    approverRole: user?.role || 'procurement_manager',
+                    reasonCode: reasonCode as any,
+                    notes: notes || 'Approved via PO Inspector modal'
+                });
+                showToast(`PO ${formatPONumber(po)} approved successfully`, 'success');
+            } else {
+                await purchaseOrdersService.reject({
+                    poId: po.id,
+                    rejectorId: user?.id || (user as any)?.employeeId || 'USR',
+                    rejectorName: user?.name || 'Authorized Manager',
+                    rejectorRole: user?.role || 'procurement_manager',
+                    reasonCode: reasonCode as any,
+                    notes: notes || 'Rejected via PO Inspector modal'
+                });
+                showToast(`PO ${formatPONumber(po)} rejected`, 'info');
+            }
+            setApprovalModal({ isOpen: false, mode: 'approve' });
             onSuccess();
             onClose();
         } catch (error: any) {
-            logger.error('ViewPOModal', 'Error rejecting PO:', error);
-            showToast(error.message || 'Failed to reject PO', 'error');
+            logger.error('ViewPOModal', `Error during PO ${approvalModal.mode}:`, error);
+            showToast(error.message || `Failed to ${approvalModal.mode} PO`, 'error');
         } finally {
             setIsSubmitting(false);
         }
@@ -391,7 +382,7 @@ export const ViewPOModal: React.FC<ViewPOModalProps> = ({ isOpen, onClose, po, o
                         canApprove ? (
                             <div className="grid grid-cols-2 gap-3">
                                 <button
-                                    onClick={handleApprovePO}
+                                    onClick={handleOpenApprove}
                                     disabled={isSubmitting}
                                     className={`h-11 px-5 bg-[var(--theme-primary)] hover:opacity-90 active:scale-[0.98] text-[var(--theme-primary-text)] font-semibold text-sm rounded-full transition-all flex items-center justify-center gap-2 shadow-sm ${isSubmitting ? 'opacity-50 cursor-not-allowed' : ''}`}
                                 >
@@ -400,7 +391,7 @@ export const ViewPOModal: React.FC<ViewPOModalProps> = ({ isOpen, onClose, po, o
                                 </button>
                                 {user?.role === 'super_admin' && (
                                     <button
-                                        onClick={handleRejectPO}
+                                        onClick={handleOpenReject}
                                         className="h-11 px-5 bg-red-500/10 hover:bg-red-500/20 text-red-500 font-semibold text-sm rounded-full border border-red-500/30 transition-all flex items-center justify-center gap-2 active:scale-[0.98]"
                                     >
                                         <XCircle size={16} /> Reject
@@ -485,6 +476,16 @@ export const ViewPOModal: React.FC<ViewPOModalProps> = ({ isOpen, onClose, po, o
             </div>
             {/* === BRAND NEW DEDICATED PRINT UI (Highly efficient invoice layout) === */}
             <POPrintView po={po} sites={sites} user={user} allProducts={allProducts} settings={settings} />
+
+            {/* Dedicated Reason-Code PO Approval / Rejection Modal */}
+            <POApprovalModal
+                isOpen={approvalModal.isOpen}
+                onClose={() => setApprovalModal(prev => ({ ...prev, isOpen: false }))}
+                mode={approvalModal.mode}
+                po={po}
+                onConfirm={handleConfirmAction}
+                isSubmitting={isSubmitting}
+            />
         </Modal>
     );
 };

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Package, AlertTriangle, MapPin, Clock, List, ArrowRight, ChevronRight, Trash2 } from 'lucide-react';
+import { Package, AlertTriangle, MapPin, Clock, List, ArrowRight, ChevronRight } from 'lucide-react';
 import Pagination from '../../shared/Pagination';
 import { SortDropdown, isUUID } from '../FulfillmentShared';
 import { WMSJob, Employee, Site } from '../../../types';
@@ -58,13 +58,6 @@ export const PickList: React.FC<PickListProps> = ({
     const { deleteJob } = useFulfillment();
     const { user } = useStore();
     const isMobile = useIsMobile();
-
-    const handleDelete = async (e: React.MouseEvent, jobId: string) => {
-        e.stopPropagation();
-        if (window.confirm(t('warehouse.picking.jobDeleteConfirmPrompt'))) {
-            await deleteJob(jobId);
-        }
-    };
 
     return (
         <>
@@ -226,16 +219,6 @@ export const PickList: React.FC<PickListProps> = ({
                                                     }`}>
                                                         {job.status === 'In-Progress' ? t('warehouse.activeLabel') : job.priority}
                                                     </span>
-
-                                                    {['super_admin', 'warehouse_manager', 'operations_manager', 'regional_manager'].includes(user?.role as string) && (
-                                                        <button
-                                                            onClick={(e) => handleDelete(e, job.id)}
-                                                            className="w-8 h-8 rounded-lg border border-[var(--theme-border)] bg-[var(--theme-bg-subtle)] text-red-500 hover:bg-red-500 hover:text-white transition-colors flex items-center justify-center shrink-0 min-h-[32px] min-w-[32px]"
-                                                            title="Delete Job"
-                                                        >
-                                                            <Trash2 size={13} />
-                                                        </button>
-                                                    )}
                                                 </div>
                                             </div>
 

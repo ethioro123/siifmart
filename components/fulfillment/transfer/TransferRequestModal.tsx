@@ -241,20 +241,31 @@ export const TransferRequestModal: React.FC<TransferRequestModalProps> = ({
         <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/80 p-3 sm:p-4 md:p-6 lg:p-8 animate-in fade-in duration-200">
             <div className="w-full h-full max-w-[1700px] max-h-[96vh] md:max-h-[92vh] flex flex-col">
                 <div className="flex-1 bg-[var(--theme-bg-card)] rounded-2xl md:rounded-3xl border border-[var(--theme-border)] shadow-2xl flex flex-col overflow-hidden relative">
-                    <div className="p-4 md:p-5 border-b border-[var(--theme-border)] flex justify-between items-center bg-[var(--theme-bg-subtle)] shrink-0">
-                        <div>
-                            <h2 className="text-lg md:text-xl font-bold text-[var(--theme-text-primary)] flex items-center gap-2 tracking-tight">
-                                <Truck className="text-primary" />
-                                {t('warehouse.createTransferRequest')}
-                            </h2>
-                            <p className="text-[var(--theme-text-secondary)] text-xs font-semibold uppercase tracking-wider mt-0.5">{t('warehouse.requestManageTransfers')}</p>
-                        </div>
-                        <div className="flex items-center gap-3">
-                            {renderTabs()}
+                    <div className="p-3.5 sm:p-4 md:p-5 border-b border-[var(--theme-border)] flex flex-col md:flex-row md:items-center justify-between gap-3 bg-[var(--theme-bg-subtle)] shrink-0">
+                        <div className="flex items-center justify-between gap-2">
+                            <div className="min-w-0 flex-1">
+                                <h2 className="text-base sm:text-lg md:text-xl font-bold text-[var(--theme-text-primary)] flex items-center gap-2 tracking-tight">
+                                    <Truck className="text-primary shrink-0" size={20} />
+                                    <span className="truncate">{t('warehouse.createTransferRequest')}</span>
+                                </h2>
+                                <p className="text-[var(--theme-text-secondary)] text-[11px] sm:text-xs font-semibold uppercase tracking-wider mt-0.5 truncate">{t('warehouse.requestManageTransfers')}</p>
+                            </div>
                             <button
                                 onClick={onClose}
                                 aria-label={t('warehouse.dismiss')}
-                                className="min-h-[44px] min-w-[44px] flex items-center justify-center bg-[var(--theme-bg-card)] hover:bg-[var(--theme-bg-subtle)] rounded-xl text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] transition-colors border border-[var(--theme-border)] shadow-xs touch-manipulation"
+                                className="md:hidden min-h-[40px] min-w-[40px] flex items-center justify-center bg-[var(--theme-bg-card)] hover:bg-[var(--theme-bg-subtle)] rounded-xl text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] transition-colors border border-[var(--theme-border)] shadow-xs touch-manipulation shrink-0"
+                            >
+                                <X size={16} />
+                            </button>
+                        </div>
+                        <div className="flex items-center gap-3 w-full md:w-auto">
+                            <div className="flex-1 md:flex-none w-full">
+                                {renderTabs()}
+                            </div>
+                            <button
+                                onClick={onClose}
+                                aria-label={t('warehouse.dismiss')}
+                                className="hidden md:flex min-h-[44px] min-w-[44px] items-center justify-center bg-[var(--theme-bg-card)] hover:bg-[var(--theme-bg-subtle)] rounded-xl text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] transition-colors border border-[var(--theme-border)] shadow-xs touch-manipulation shrink-0"
                             >
                                 <X size={16} />
                             </button>

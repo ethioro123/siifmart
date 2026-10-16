@@ -36,11 +36,11 @@ export const PackJobItemCard: React.FC<PackJobItemCardProps> = ({
     const product = getProductForItem(item, job, products);
     const measureQty = getItemMeasureQtyShared(item, job, products, product);
     const requiredAmount = measureQty || item.expectedQty || 1;
-    const isDone = item.status === 'Completed' || item.status === 'Picked' || (item as any).packed === true || (item.pickedQty || 0) >= requiredAmount - 0.001;
+    const packed = (item as any).packedQty ?? 0;
+    const isDone = job.status === 'Completed' || (item as any).packed === true || packed >= requiredAmount - 0.001;
     const isScanningThis = scannedItemIndex === idx;
 
     const expected = item.expectedQty || (item as any).quantity || 0;
-    const picked = item.pickedQty || 0;
     const packDesc = formatPackagingDescription(product, expected);
     const unitDef = getSellUnit(product?.unit || item.unit);
     const unitLabel = unitDef.category === 'count' && unitDef.code !== 'UNIT' ? unitDef.shortLabel : 'pk';
@@ -114,7 +114,7 @@ export const PackJobItemCard: React.FC<PackJobItemCardProps> = ({
                 <div className="flex items-center justify-between sm:justify-end gap-2.5 pt-2 sm:pt-0 border-t sm:border-0 border-[var(--theme-border)]/60 shrink-0">
                     <div className="text-left sm:text-right">
                         <span className={`text-xs font-mono tabular-nums font-semibold ${isDone ? 'text-green-600 dark:text-green-400' : 'text-[var(--theme-text-primary)]'}`}>
-                            {picked} <span className="text-[var(--theme-text-secondary)] font-normal">/ {expected} {unitLabel}</span>
+                            {packed} <span className="text-[var(--theme-text-secondary)] font-normal">/ {expected} {unitLabel}</span>
                         </span>
                         {packDesc && (
                             <span className="text-[11px] text-[var(--theme-text-secondary)] font-medium uppercase block leading-none mt-0.5">

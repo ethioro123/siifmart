@@ -41,12 +41,12 @@ export const TransferHeader: React.FC<TransferHeaderProps> = ({
                     </div>
                 </div>
 
-                <div className="flex items-center gap-2.5 w-full md:w-auto justify-between md:justify-end">
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 w-full md:w-auto">
                     {/* View Mode Segmented Control */}
-                    <div className="bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] p-1 rounded-xl flex items-center">
+                    <div className="bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] p-1 rounded-xl flex items-center justify-center">
                         <button
                             onClick={() => setViewMode('Process')}
-                            className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold uppercase tracking-wider transition-colors min-h-[36px] ${
+                            className={`flex-1 sm:flex-initial px-3.5 py-1.5 rounded-lg text-xs font-semibold uppercase tracking-wider transition-colors min-h-[36px] ${
                                 viewMode === 'Process'
                                     ? 'bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)] shadow-sm'
                                     : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)]'
@@ -56,7 +56,7 @@ export const TransferHeader: React.FC<TransferHeaderProps> = ({
                         </button>
                         <button
                             onClick={() => setViewMode('History')}
-                            className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold uppercase tracking-wider transition-colors min-h-[36px] ${
+                            className={`flex-1 sm:flex-initial px-3.5 py-1.5 rounded-lg text-xs font-semibold uppercase tracking-wider transition-colors min-h-[36px] ${
                                 viewMode === 'History'
                                     ? 'bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)] shadow-sm'
                                     : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)]'
@@ -73,7 +73,7 @@ export const TransferHeader: React.FC<TransferHeaderProps> = ({
                             setTransferCenterTab(isHQ ? 'smart' : isWarehouse ? 'bulk' : 'request');
                             setShowTransferCenter(true);
                         }}
-                        className="px-4 py-2 bg-[var(--theme-accent)] hover:opacity-90 text-white font-semibold rounded-xl transition-opacity flex items-center gap-2 shadow-sm min-h-[44px]"
+                        className="px-4 py-2 bg-[var(--theme-accent)] hover:opacity-90 text-white font-semibold rounded-xl transition-opacity flex items-center justify-center gap-2 shadow-sm min-h-[44px] whitespace-nowrap"
                     >
                         <Truck size={16} />
                         <span>{t('warehouse.transferCenter')}</span>

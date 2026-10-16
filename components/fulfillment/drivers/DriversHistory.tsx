@@ -33,8 +33,16 @@ export const DriversHistory: React.FC<DriversHistoryProps> = ({
         
         const filteredByTypeAndRole = historicalJobs.filter((j: WMSJob) => {
             const isTypeMatch = (j.type === 'DISPATCH' || j.type === 'TRANSFER' || j.type === 'DRIVER');
+            if (!isTypeMatch) return false;
+            if (j.status === 'Cancelled' || j.transferStatus === 'Cancelled' || j.transferStatus === 'Rejected') return false;
+            if (j.type === 'TRANSFER') {
+                const hasChildDispatch = historicalJobs.some(d =>
+                    d.type === 'DISPATCH' && (d.orderRef === j.id || d.orderRef === j.jobNumber) && d.status !== 'Cancelled'
+                );
+                if (hasChildDispatch) return false;
+            }
             const isRoleMatch = canSeeGlobalQueue ? true : j.assignedTo === employeeId;
-            return isTypeMatch && isRoleMatch;
+            return isRoleMatch;
         });
 
         const mapped = filteredByTypeAndRole.map(j => {

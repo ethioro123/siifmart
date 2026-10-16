@@ -90,25 +90,29 @@ export const PackScanner: React.FC<PackScannerProps> = ({
     };
 
     const totalItems = job.lineItems?.length || 0;
-    // Items are "done" if: Completed, already Picked (verified in Pick phase), or packed in this session
+    // Items are "done" only if job is Completed, item.packed is true, or item.packedQty meets expected
     const packedItems = useMemo(() =>
-        job.lineItems?.filter(i =>
-            i.status === 'Completed' ||
-            i.status === 'Picked' ||
-            (i as any).packed === true
-        ) || [],
-        [job.lineItems]
+        job.lineItems?.filter(i => {
+            if (job.status === 'Completed') return true;
+            if ((i as any).packed === true) return true;
+            const measureQty = getItemMeasureQty(i);
+            const required = measureQty || i.expectedQty || 1;
+            return ((i as any).packedQty || 0) >= required - 0.001;
+        }) || [],
+        [job.lineItems, job.status]
     );
     const isFullyPacked = packedItems.length === totalItems && totalItems > 0;
 
-    // Next item needing Pack-phase verification: only Pending or In-Progress items
+    // Next item needing Pack-phase verification
     const nextUnpackedItem = useMemo(() =>
-        job.lineItems?.find(i =>
-            i.status !== 'Completed' &&
-            i.status !== 'Picked' &&
-            !(i as any).packed
-        ),
-        [job.lineItems]
+        job.lineItems?.find(i => {
+            if (job.status === 'Completed') return false;
+            if ((i as any).packed === true) return false;
+            const measureQty = getItemMeasureQty(i);
+            const required = measureQty || i.expectedQty || 1;
+            return ((i as any).packedQty || 0) < required - 0.001;
+        }),
+        [job.lineItems, job.status]
     );
 
     useEffect(() => {
@@ -147,12 +151,10 @@ export const PackScanner: React.FC<PackScannerProps> = ({
             if (job.lineItems) {
                 for (let index = 0; index < job.lineItems.length; index++) {
                     const item = job.lineItems[index];
-                    // Skip items already picked/completed — only scan Pending/In-Progress items
-                    if (
-                        item.status === 'Completed' ||
-                        item.status === 'Picked' ||
-                        (item as any).packed === true
-                    ) continue;
+                    const measureQty = getItemMeasureQty(item);
+                    const required = measureQty || item.expectedQty || 1;
+                    const isItemDone = job.status === 'Completed' || (item as any).packed === true || ((item as any).packedQty || 0) >= required - 0.001;
+                    if (isItemDone) continue;
 
                     const product = getProduct(item);
                     const normItemSku = item.sku ? normalizeSku(item.sku) : '';

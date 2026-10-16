@@ -72,6 +72,20 @@ export const CustomsImportTab: React.FC<CustomsImportTabProps> = ({ countryCode 
     }
   };
 
+  const handleAuthorizeRelease = async (declaration: CustomsDeclaration) => {
+    try {
+      await procurementGovernanceService.authorizeCustomsRelease({
+        declarationId: declaration.id,
+        clearedBy: user?.name || user?.email || 'Authorized Manager',
+        clearedByRole: user?.role || 'procurement_manager'
+      });
+      showToast(`Customs clearance for declaration ${declaration.declarationNumber} authorized and released.`, 'success');
+      loadData();
+    } catch (err: any) {
+      showToast(err.message || 'Failed to authorize release', 'error');
+    }
+  };
+
   return (
     <div className="space-y-6">
       {/* Header Container */}
@@ -121,7 +135,7 @@ export const CustomsImportTab: React.FC<CustomsImportTabProps> = ({ countryCode 
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
           {declarations.map(d => {
-            const isCleared = clearedDeclarationIds.includes(d.id) || d.customsStatus === 'Cleared';
+            const isCleared = d.customsStatus === 'Cleared';
             return (
               <div key={d.id} className="p-6 rounded-3xl bg-[var(--theme-bg-panel)] border border-[var(--theme-border)] shadow-sm space-y-4 hover:border-[var(--theme-accent)]/50 transition-all">
                 <div className="flex items-start justify-between gap-3">
@@ -166,16 +180,20 @@ export const CustomsImportTab: React.FC<CustomsImportTabProps> = ({ countryCode 
                 </div>
 
                 <div className="flex items-center justify-between pt-1">
-                  <p className="text-[10px] text-[var(--theme-text-secondary)] font-mono font-medium">
-                    Filed by {d.specialistName || 'Customs Specialist'} on {formatDateTime(d.createdAt)}
-                  </p>
+                  <div>
+                    <p className="text-[10px] text-[var(--theme-text-secondary)] font-mono font-medium">
+                      Filed by {d.specialistName || 'Customs Specialist'} on {formatDateTime(d.createdAt)}
+                    </p>
+                    {d.clearedAt && d.clearedBy && (
+                      <p className="text-[10px] text-emerald-600 dark:text-emerald-400 font-mono font-semibold">
+                        Released by {d.clearedBy} on {formatDateTime(d.clearedAt)}
+                      </p>
+                    )}
+                  </div>
                   {isManager && !isCleared && (
                     <button
                       type="button"
-                      onClick={() => {
-                        setClearedDeclarationIds(prev => [...prev, d.id]);
-                        showToast(`Customs clearance for declaration ${d.declarationNumber} authorized and signed off.`, 'success');
-                      }}
+                      onClick={() => handleAuthorizeRelease(d)}
                       className="h-8 px-3 rounded-full bg-[#0071E3] hover:bg-[#0077ED] text-white font-semibold text-xs transition-all flex items-center gap-1 active:scale-[0.98] cursor-pointer shadow-sm shrink-0"
                     >
                       <Check size={13} /> Authorize Release

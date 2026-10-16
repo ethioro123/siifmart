@@ -17,30 +17,41 @@ export const SmartReplenishHeader: React.FC<SmartReplenishHeaderProps> = ({
     onClose
 }) => {
     return (
-        <div className="py-3 px-4 md:px-6 border-b border-[var(--theme-border)] bg-[var(--theme-bg-subtle)] flex flex-row items-center justify-between gap-4 relative z-10 shrink-0">
+        <div className="py-3 px-4 md:px-6 border-b border-[var(--theme-border)] bg-[var(--theme-bg-subtle)] flex flex-col md:flex-row md:items-center justify-between gap-3 relative z-10 shrink-0">
             {/* Title & Brand */}
-            <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center shrink-0 shadow-xs">
-                    <Layers className="text-primary" size={20} />
-                </div>
-                <div>
-                    <div className="flex items-center gap-2">
-                        <h2 className="text-base md:text-lg font-bold text-[var(--theme-text-primary)] tracking-tight">
-                            Distribution <span className="text-primary">Hub</span>
-                        </h2>
-                        <span className="hidden sm:inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-primary/10 border border-primary/20 text-[11px] font-semibold text-primary uppercase tracking-wider">
-                            <Sparkles size={11} /> Smart Replenish
-                        </span>
+            <div className="flex items-center justify-between gap-3">
+                <div className="flex items-center gap-3 min-w-0 flex-1">
+                    <div className="w-10 h-10 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center shrink-0 shadow-xs">
+                        <Layers className="text-primary" size={20} />
                     </div>
-                    <p className="text-[11px] text-[var(--theme-text-secondary)] font-medium uppercase tracking-wider hidden md:block">
-                        Multi-Store Stock Rebalancing & Transfer Deployment
-                    </p>
+                    <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-2">
+                            <h2 className="text-base md:text-lg font-bold text-[var(--theme-text-primary)] tracking-tight truncate">
+                                Distribution <span className="text-primary">Hub</span>
+                            </h2>
+                            <span className="hidden sm:inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-primary/10 border border-primary/20 text-[11px] font-semibold text-primary uppercase tracking-wider shrink-0">
+                                <Sparkles size={11} /> Smart Replenish
+                            </span>
+                        </div>
+                        <p className="text-[11px] text-[var(--theme-text-secondary)] font-medium uppercase tracking-wider hidden md:block truncate">
+                            Multi-Store Stock Rebalancing & Transfer Deployment
+                        </p>
+                    </div>
                 </div>
+                {/* Mobile Close Button */}
+                <button
+                    onClick={onClose}
+                    aria-label="Close modal"
+                    title="Close modal"
+                    className="md:hidden min-h-[40px] min-w-[40px] rounded-xl bg-[var(--theme-bg-card)] hover:bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] flex items-center justify-center transition-all shrink-0 active:scale-95 shadow-xs touch-manipulation text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)]"
+                >
+                    <X size={16} />
+                </button>
             </div>
 
             {/* Mode Tabs & Metrics */}
-            <div className="flex items-center gap-3 md:gap-4">
-                <div className="flex items-center bg-[var(--theme-bg-card)] p-1 rounded-xl border border-[var(--theme-border)] shrink-0">
+            <div className="flex items-center gap-3 md:gap-4 w-full md:w-auto">
+                <div className="flex-1 md:flex-none flex items-center bg-[var(--theme-bg-card)] p-1 rounded-xl border border-[var(--theme-border)] shrink-0 w-full md:w-auto">
                     {renderTabs()}
                 </div>
 
@@ -68,12 +79,12 @@ export const SmartReplenishHeader: React.FC<SmartReplenishHeaderProps> = ({
                     )}
                 </div>
 
-                {/* Close Button */}
+                {/* Desktop Close Button */}
                 <button
                     onClick={onClose}
                     aria-label="Close modal"
                     title="Close modal"
-                    className="min-h-[44px] min-w-[44px] rounded-xl bg-[var(--theme-bg-card)] hover:bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] flex items-center justify-center transition-all group shrink-0 active:scale-95 shadow-xs touch-manipulation text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)]"
+                    className="hidden md:flex min-h-[44px] min-w-[44px] rounded-xl bg-[var(--theme-bg-card)] hover:bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] items-center justify-center transition-all group shrink-0 active:scale-95 shadow-xs touch-manipulation text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)]"
                 >
                     <X size={18} />
                 </button>

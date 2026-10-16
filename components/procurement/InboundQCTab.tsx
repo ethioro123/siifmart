@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { ShieldCheck, Thermometer, Plus, Box, Clock, Check } from 'lucide-react';
 import { procurementGovernanceService } from '../../services/procurement-governance.service';
+import { purchaseOrdersService } from '../../services/purchase-orders.service';
 import type { InboundQCInspection } from '../../types/procurement-zero-trust';
 import { useStore } from '../../contexts/CentralStore';
 import { formatDateTime } from '../../utils/formatting';
@@ -14,9 +15,9 @@ export const InboundQCTab: React.FC<InboundQCTabProps> = ({ countryCode }) => {
   const isManager = Boolean(user?.role && ['procurement_manager', 'regional_manager', 'operations_manager', 'super_admin', 'CEO', 'ceo'].includes(user.role));
 
   const [inspections, setInspections] = useState<InboundQCInspection[]>([]);
-  const [waivedInspectionIds, setWaivedInspectionIds] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
+  const [availablePOs, setAvailablePOs] = useState<{ id: string; poNumber: string; supplierName: string }[]>([]);
 
   const [poNumber, setPoNumber] = useState('');
   const [sampleSize, setSampleSize] = useState(10);
@@ -41,7 +42,16 @@ export const InboundQCTab: React.FC<InboundQCTabProps> = ({ countryCode }) => {
 
   useEffect(() => {
     loadData();
-  }, [loadData]);
+    purchaseOrdersService.getAll(undefined, 30, 0, { countryCode })
+      .then(res => {
+        setAvailablePOs((res.data || []).map(p => ({
+          id: p.id,
+          poNumber: p.poNumber || p.id,
+          supplierName: p.supplierName || 'Vendor'
+        })));
+      })
+      .catch(() => {});
+  }, [loadData, countryCode]);
 
   const handleCreate = async () => {
     if (!poNumber || !poNumber.trim()) {
@@ -77,6 +87,25 @@ export const InboundQCTab: React.FC<InboundQCTabProps> = ({ countryCode }) => {
       loadData();
     } catch (e: any) {
       showToast(e.message || 'Failed to record QC inspection', 'error');
+    }
+  };
+
+  const handleSignOffWaiver = async (qc: InboundQCInspection) => {
+    const reason = window.prompt("Enter supervisory waiver rationale for this dock variance:", "Authorized conditional acceptance per QA check");
+    if (!reason) return;
+
+    try {
+      await procurementGovernanceService.signOffQCWaiver({
+        inspectionId: qc.id,
+        supervisorName: user?.name || user?.email || 'Authorized Manager',
+        supervisorRole: user?.role || 'procurement_manager',
+        waiverReason: reason.trim(),
+        newDisposition: 'Conditionally Accepted'
+      });
+      showToast(`Supervisory disposition sign-off recorded for PO ${qc.poNumber}.`, 'success');
+      loadData();
+    } catch (err: any) {
+      showToast(err.message || 'Failed to sign off waiver', 'error');
     }
   };
 
@@ -129,7 +158,7 @@ export const InboundQCTab: React.FC<InboundQCTabProps> = ({ countryCode }) => {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
           {inspections.map(qc => {
-            const isWaived = waivedInspectionIds.includes(qc.id);
+            const isWaived = Boolean(qc.supervisorWaivedBy || qc.disposition === 'Conditionally Accepted');
             const effectiveDisposition = isWaived ? 'Conditionally Accepted' : qc.disposition;
             const hasIssue = qc.discrepancyFound || qc.disposition !== 'Accepted';
             return (
@@ -174,16 +203,20 @@ export const InboundQCTab: React.FC<InboundQCTabProps> = ({ countryCode }) => {
                 )}
 
                 <div className="flex items-center justify-between pt-1">
-                  <p className="text-[10px] text-[var(--theme-text-secondary)] font-mono font-medium">
-                    Inspector: {qc.inspectorName}
-                  </p>
-                  {isManager && hasIssue && !isWaived && (
+                  <div>
+                    <p className="text-[10px] text-[var(--theme-text-secondary)] font-mono font-medium">
+                      Inspector: {qc.inspectorName}
+                    </p>
+                    {qc.supervisorWaivedAt && qc.supervisorWaivedBy && (
+                      <p className="text-[10px] text-amber-600 dark:text-amber-400 font-mono font-semibold">
+                        Waiver signed by {qc.supervisorWaivedBy} on {formatDateTime(qc.supervisorWaivedAt)}
+                      </p>
+                    )}
+                  </div>
+                  {isManager && hasIssue && !qc.supervisorWaivedBy && (
                     <button
                       type="button"
-                      onClick={() => {
-                        setWaivedInspectionIds(prev => [...prev, qc.id]);
-                        showToast(`Supervisory disposition sign-off recorded for PO ${qc.poNumber}.`, 'success');
-                      }}
+                      onClick={() => handleSignOffWaiver(qc)}
                       className="h-8 px-3 rounded-full bg-[#0071E3] hover:bg-[#0077ED] text-white font-semibold text-xs transition-all flex items-center gap-1 active:scale-[0.98] cursor-pointer shadow-sm shrink-0"
                     >
                       <Check size={13} /> Sign Off Waiver
@@ -202,10 +235,26 @@ export const InboundQCTab: React.FC<InboundQCTabProps> = ({ countryCode }) => {
             <h3 className="text-lg font-bold tracking-tight text-[var(--theme-text-primary)]">Record Inbound Dock Inspection</h3>
             <div className="space-y-4">
               <div>
-                <label className="text-[11px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider block mb-1.5">PO Number *</label>
+                <label className="text-[11px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider block mb-1.5">Purchase Order *</label>
+                {availablePOs.length > 0 && (
+                  <select
+                    value={availablePOs.some(p => p.poNumber === poNumber) ? poNumber : ''}
+                    onChange={e => {
+                      if (e.target.value) setPoNumber(e.target.value);
+                    }}
+                    className="w-full h-11 px-3 rounded-2xl border border-[var(--theme-border)] bg-[var(--theme-bg-subtle)] text-xs text-[var(--theme-text-primary)] font-semibold mb-2 focus:outline-none focus:border-[var(--theme-accent)] cursor-pointer"
+                  >
+                    <option value="">-- Select Arriving PO --</option>
+                    {availablePOs.map(p => (
+                      <option key={p.id} value={p.poNumber} className="bg-[var(--theme-bg-panel)] text-[var(--theme-text-primary)]">
+                        {p.poNumber} — {p.supplierName}
+                      </option>
+                    ))}
+                  </select>
+                )}
                 <input
                   type="text"
-                  placeholder="e.g. PO-2026-0042"
+                  placeholder="Or enter custom PO number (e.g. PO-2026-0042)"
                   value={poNumber}
                   onChange={e => setPoNumber(e.target.value)}
                   className="w-full h-11 px-3.5 rounded-2xl border border-[var(--theme-border)] bg-[var(--theme-bg-subtle)] text-xs text-[var(--theme-text-primary)] font-semibold placeholder:text-[var(--theme-text-secondary)]/70 focus:outline-none focus:border-[var(--theme-accent)]"

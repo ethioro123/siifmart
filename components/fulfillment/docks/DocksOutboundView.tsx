@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Upload, Truck, X, User as UserIcon, Package, Navigation, Trash2 } from 'lucide-react';
+import { Upload, Truck, X, User as UserIcon, Package, Navigation } from 'lucide-react';
 import { WMSJob, Site, User, Product } from '../../../types';
 import { DocksOutboundHistory } from './DocksOutboundHistory';
 import { useFulfillment } from '../FulfillmentContext';
@@ -197,15 +197,6 @@ export const DocksOutboundView: React.FC<DocksOutboundViewProps> = ({
                                                                 {destSite ? destSite.name : 'In-Transport'}
                                                             </p>
                                                         </div>
-                                                        {['super_admin', 'warehouse_manager'].includes(user?.role as string) && (
-                                                            <button
-                                                                onClick={(e) => handleDelete(e, assignedJob.id)}
-                                                                className="w-7 h-7 rounded-lg bg-[var(--theme-bg-card)] border border-[var(--theme-border)] text-red-500 hover:text-white hover:bg-red-500 hover:border-red-500 transition-colors flex items-center justify-center shrink-0 touch-manipulation"
-                                                                title="Delete Job"
-                                                            >
-                                                                <Trash2 size={12} />
-                                                            </button>
-                                                        )}
                                                     </div>
 
                                                     <div className="grid grid-cols-2 gap-2 mb-4">

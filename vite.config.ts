@@ -1,10 +1,28 @@
 import path from 'path';
+import https from 'https';
+import dns from 'dns';
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import { VitePWA } from 'vite-plugin-pwa';
 import tailwindcss from '@tailwindcss/vite';
 import electron from 'vite-plugin-electron';
 import renderer from 'vite-plugin-electron-renderer';
+
+// Custom HTTPS agent that resolves Supabase to its reachable Cloudflare IPv4 edge (172.64.149.246)
+// when the local mobile hotspot / ISP DNS64 returns unreachable IPv6 addresses.
+const supabaseAgent = new https.Agent({
+  keepAlive: true,
+  lookup: (hostname, options, callback) => {
+    if (hostname.endsWith('.supabase.co')) {
+      const opts = typeof options === 'object' && options !== null ? options : {};
+      if ((opts as any).all) {
+        return callback(null, [{ address: '172.64.149.246', family: 4 }] as any);
+      }
+      return callback(null, '172.64.149.246', 4);
+    }
+    return dns.lookup(hostname, options as any, callback as any);
+  }
+});
 
 export default defineConfig(() => {
   const isElectron = process.env.ELECTRON === 'true' || process.env.npm_lifecycle_event?.includes('electron');
@@ -15,6 +33,16 @@ export default defineConfig(() => {
     server: {
       port: 3000,
       host: '0.0.0.0',
+      proxy: {
+        '/supabase-proxy': {
+          target: 'https://zdgzpxvorwinugjufkvb.supabase.co',
+          changeOrigin: true,
+          secure: true,
+          ws: true,
+          agent: supabaseAgent,
+          rewrite: (p) => p.replace(/^\/supabase-proxy/, ''),
+        },
+      },
       watch: {
         // Use polling to prevent rapid file change detection
         usePolling: true,

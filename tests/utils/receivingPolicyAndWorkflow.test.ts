@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import {
     resolveReceivingPolicy,
+    resolveFulfillmentScanningPolicy,
     maxReceivable,
     buildOverReceiveMessage
 } from '../../utils/receivingPolicy';
@@ -102,4 +103,34 @@ describe('Receiving Policy, Blind Verification & Price Tag Strategy', () => {
         expect(cleanSku('KE FD 001')).toBe('KEFD001');
         expect(cleanSku(undefined)).toBe('');
     });
+
+    it('resolves fulfillment scanning quantity-entry policy per country with Zero-Trust defaults', () => {
+        const defaultPolicy = resolveFulfillmentScanningPolicy(undefined, 'ET');
+        expect(defaultPolicy.requirePickQuantityEntry).toBe(true);
+        expect(defaultPolicy.requirePutawayQuantityEntry).toBe(true);
+
+        const partitionedSettings: Partial<SystemConfig> = {
+            country: 'ET',
+            countryConfigs: {
+                ET: {
+                    requirePickQuantityEntry: true,
+                    requirePutawayQuantityEntry: true
+                },
+                KE: {
+                    requirePickQuantityEntry: false,
+                    requirePutawayQuantityEntry: true
+                }
+            } as any
+        };
+
+        expect(resolveFulfillmentScanningPolicy(partitionedSettings, 'ET')).toEqual({
+            requirePickQuantityEntry: true,
+            requirePutawayQuantityEntry: true
+        });
+        expect(resolveFulfillmentScanningPolicy(partitionedSettings, 'KE')).toEqual({
+            requirePickQuantityEntry: false,
+            requirePutawayQuantityEntry: true
+        });
+    });
 });
+

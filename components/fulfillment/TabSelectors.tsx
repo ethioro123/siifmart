@@ -51,27 +51,6 @@ export const MobileTabSelector: React.FC<TabSelectorProps> = ({
                 </div>
             </button>
 
-            {/* Quick 1-Tap Horizontal Tab Strip for Mobile Portrait */}
-            <div className="flex items-center gap-1.5 overflow-x-auto pb-1 mt-2 no-scrollbar touch-pan-x -mx-1 px-1">
-                {visibleTabs.map((tab) => {
-                    const isActive = activeTab === tab;
-                    return (
-                        <button
-                            key={tab}
-                            type="button"
-                            onClick={() => setActiveTab(tab)}
-                            className={`px-3.5 py-2 rounded-xl text-xs font-medium whitespace-nowrap min-h-[44px] transition-all shrink-0 touch-manipulation active:scale-[0.98] ${
-                                isActive
-                                    ? 'bg-[var(--theme-accent)] text-white font-semibold shadow-xs'
-                                    : 'bg-[var(--theme-bg-card)] text-[var(--theme-text-secondary)] border border-[var(--theme-border)] hover:text-[var(--theme-text-primary)] active:bg-[var(--theme-bg-subtle)]'
-                            }`}
-                        >
-                            {t(`warehouse.tabs.${tab.toLowerCase()}`)}
-                        </button>
-                    );
-                })}
-            </div>
-
             {/* Mobile Dropdown Grid */}
             {isMobileTabMenuOpen && (
                 <>

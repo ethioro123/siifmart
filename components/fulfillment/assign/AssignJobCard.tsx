@@ -1,8 +1,7 @@
 import React from 'react';
-import { ArrowRight, Eye, Clock, Trash2, Sparkles } from 'lucide-react';
+import { ArrowRight, Eye, Clock, Sparkles } from 'lucide-react';
 import { WMSJob, Site, Employee } from '../../../types';
 import { formatJobId, formatOrderRef } from '../../../utils/jobIdFormatter';
-import { useFulfillment } from '../FulfillmentContext';
 import { useStore } from '../../../contexts/CentralStore';
 
 interface AssignJobCardProps {
@@ -28,15 +27,7 @@ export const AssignJobCard: React.FC<AssignJobCardProps> = ({
     employees,
     t
 }) => {
-    const { deleteJob } = useFulfillment();
     const { user } = useStore();
-
-    const handleDelete = async (e: React.MouseEvent, jobId: string) => {
-        e.stopPropagation();
-        if (window.confirm('Are you sure you want to permanently delete this job?')) {
-            await deleteJob(jobId);
-        }
-    };
 
     // Calculate estimated duration
     let estimatedDuration = 15;
@@ -124,15 +115,6 @@ export const AssignJobCard: React.FC<AssignJobCardProps> = ({
                     >
                         <Eye size={14} />
                     </button>
-                    {['super_admin', 'warehouse_manager'].includes(user?.role as string) && (
-                        <button
-                            onClick={(e) => handleDelete(e, job.id)}
-                            className="w-8 h-8 bg-[var(--theme-bg-subtle)] hover:bg-red-500 hover:text-white border border-[var(--theme-border)] hover:border-red-500 text-red-500 rounded-lg transition-colors flex items-center justify-center touch-manipulation"
-                            title="Delete Job"
-                        >
-                            <Trash2 size={13} />
-                        </button>
-                    )}
                 </div>
             </div>
 

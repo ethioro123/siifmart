@@ -65,7 +65,7 @@ export interface VendorContract {
   contractNumber: string;
   title: string;
   contractType: string;
-  status: 'Active' | 'Expired' | 'Pending Renewal' | 'Terminated';
+  status: 'Active' | 'Expired' | 'Pending Renewal' | 'Terminated' | 'Pending Sign-Off';
   startDate: string;
   endDate: string;
   paymentTerms: string;
@@ -73,6 +73,9 @@ export interface VendorContract {
   agreedMarginPct?: number;
   notes?: string;
   createdBy?: string;
+  signedOffBy?: string;
+  signedOffAt?: string;
+  signedOffRole?: string;
   createdAt: string;
 }
 
@@ -108,6 +111,8 @@ export interface CustomsDeclaration {
   currency: string;
   eta?: string;
   clearedAt?: string;
+  clearedBy?: string;
+  clearedByRole?: string;
   associatedPoNumbers?: string[];
   specialistId?: string;
   specialistName?: string;
@@ -135,5 +140,8 @@ export interface InboundQCInspection {
   discrepancyDetails?: string;
   disposition: 'Accepted' | 'Conditionally Accepted' | 'Rejected' | 'Quarantined';
   supervisorNotes?: string;
+  supervisorWaivedBy?: string;
+  supervisorWaivedAt?: string;
+  supervisorWaivedReason?: string;
   createdAt: string;
 }

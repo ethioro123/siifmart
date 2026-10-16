@@ -69,18 +69,193 @@ describe('Dynamic Pack Job Step-by-Step Workflow', () => {
     });
 
     describe('Step Advancement Rules', () => {
-        it('determines the initial step based on completion state', () => {
-            const getInitialStep = (isFullyPacked: boolean) => (isFullyPacked ? 'BOX' : 'ITEMS');
-            expect(getInitialStep(false)).toBe('ITEMS');
-            expect(getInitialStep(true)).toBe('BOX');
+        it('always opens directly to DETAILS on job launch', () => {
+            const getInitialStep = () => 'DETAILS';
+            expect(getInitialStep()).toBe('DETAILS');
         });
 
-        it('progresses logically through the 4 packing stages', () => {
-            const flow = ['ITEMS', 'BOX', 'WEIGH', 'FINISH'];
-            expect(flow[0]).toBe('ITEMS');
-            expect(flow[1]).toBe('BOX');
-            expect(flow[2]).toBe('WEIGH');
-            expect(flow[3]).toBe('FINISH');
+        it('progresses logically through the 5 packing stages', () => {
+            const flow = ['DETAILS', 'ITEMS', 'BOX', 'WEIGH', 'FINISH'];
+            expect(flow[0]).toBe('DETAILS');
+            expect(flow[1]).toBe('ITEMS');
+            expect(flow[2]).toBe('BOX');
+            expect(flow[3]).toBe('WEIGH');
+            expect(flow[4]).toBe('FINISH');
+        });
+
+        it('strictly gates step accessibility: BOX, WEIGH, FINISH locked until ITEMS are fully scanned', () => {
+            const isStepAccessible = (
+                stepId: 'DETAILS' | 'ITEMS' | 'BOX' | 'WEIGH' | 'FINISH',
+                isFullyPacked: boolean,
+                hasBoxSelected: boolean,
+                hasWeightEntered: boolean
+            ): boolean => {
+                if (stepId === 'DETAILS' || stepId === 'ITEMS') return true;
+                if (stepId === 'BOX') return isFullyPacked;
+                if (stepId === 'WEIGH') return isFullyPacked && hasBoxSelected;
+                if (stepId === 'FINISH') return isFullyPacked && hasBoxSelected && hasWeightEntered;
+                return false;
+            };
+
+            // Unscanned state
+            expect(isStepAccessible('DETAILS', false, false, false)).toBe(true);
+            expect(isStepAccessible('ITEMS', false, false, false)).toBe(true);
+            expect(isStepAccessible('BOX', false, false, false)).toBe(false);
+            expect(isStepAccessible('WEIGH', false, false, false)).toBe(false);
+            expect(isStepAccessible('FINISH', false, false, false)).toBe(false);
+
+            // Fully scanned state unlocks BOX
+            expect(isStepAccessible('BOX', true, false, false)).toBe(true);
+            expect(isStepAccessible('WEIGH', true, false, false)).toBe(false);
+
+            // Box selected unlocks WEIGH
+            expect(isStepAccessible('WEIGH', true, true, false)).toBe(true);
+            expect(isStepAccessible('FINISH', true, true, false)).toBe(false);
+
+            // Weight audited unlocks FINISH
+            expect(isStepAccessible('FINISH', true, true, true)).toBe(true);
+        });
+
+        it('does not treat items with status Picked as packed in Pack phase', () => {
+            const isItemPacked = (item: any, isJobCompleted: boolean = false) => {
+                if (isJobCompleted) return true;
+                if (item.packed === true) return true;
+                const required = item.expectedQty || 1;
+                const packedQty = item.packedQty ?? 0;
+                return packedQty >= required - 0.001;
+            };
+
+            // Item picked in the pick phase (status = 'Picked', pickedQty = 5, but not yet packed)
+            const pickedFromPickPhase = {
+                sku: 'ET-COFFEE-01',
+                expectedQty: 5,
+                pickedQty: 5,
+                status: 'Picked' as const,
+                packed: false,
+                packedQty: 0
+            };
+
+            expect(isItemPacked(pickedFromPickPhase)).toBe(false);
+
+            // Item scanned and packed in pack phase
+            const packedInPackPhase = {
+                ...pickedFromPickPhase,
+                packed: true,
+                packedQty: 5
+            };
+
+            expect(isItemPacked(packedInPackPhase)).toBe(true);
+        });
+
+        it('guards step indicator from jumping ahead without scanning all items', () => {
+            const isStepAccessible = (stepId: string, isFullyPacked: boolean, hasBoxSelected: boolean, hasWeightEntered: boolean) => {
+                if (stepId === 'ITEMS') return true;
+                if (stepId === 'BOX') return isFullyPacked;
+                if (stepId === 'WEIGH') return isFullyPacked && hasBoxSelected;
+                if (stepId === 'FINISH') return isFullyPacked && hasBoxSelected && hasWeightEntered;
+                return false;
+            };
+
+            // When items are not yet packed:
+            expect(isStepAccessible('ITEMS', false, false, false)).toBe(true);
+            expect(isStepAccessible('BOX', false, false, false)).toBe(false);
+            expect(isStepAccessible('WEIGH', false, false, false)).toBe(false);
+            expect(isStepAccessible('FINISH', false, false, false)).toBe(false);
+
+            // Once all items are scanned & verified:
+            expect(isStepAccessible('BOX', true, false, false)).toBe(true);
+            expect(isStepAccessible('WEIGH', true, true, false)).toBe(true);
+            expect(isStepAccessible('FINISH', true, true, true)).toBe(true);
+        });
+    });
+
+    describe('Pack Details Quantity Resolution', () => {
+        const resolvePackDetailsQuantities = (item: any, jobStatus: string = 'Completed') => {
+            const isJobCompleted = (jobStatus || '').toLowerCase() === 'completed';
+            const isItemPacked = isJobCompleted || (item as any).packed === true;
+
+            const expected = item.expectedQty || (item as any).quantity || item.orderedQty || 
+                (item.packedQty ? item.packedQty : (item.pickedQty || 0));
+
+            const packed = (item.packedQty !== undefined && item.packedQty !== null)
+                ? item.packedQty
+                : (isItemPacked ? expected : (item.pickedQty !== undefined && item.pickedQty !== null ? item.pickedQty : 0));
+
+            const isShortPicked = item.orderedQty && item.orderedQty > expected;
+            const isUnderpacked = isJobCompleted && packed < expected;
+
+            return { expected, packed, isShortPicked, isUnderpacked, display: `${packed} / ${expected}` };
+        };
+
+        it('correctly displays 53 / 53 when an item was packed with pickedQty = 0 (RTPA1Y regression)', () => {
+            const item = {
+                sku: 'KEEL001',
+                name: 'Amazon Kindle',
+                packed: true,
+                status: 'Completed',
+                packedQty: 53,
+                pickedQty: 0,
+                orderedQty: 53,
+                expectedQty: 53
+            };
+
+            const result = resolvePackDetailsQuantities(item, 'Completed');
+            expect(result.expected).toBe(53);
+            expect(result.packed).toBe(53);
+            expect(result.display).toBe('53 / 53');
+            expect(result.isUnderpacked).toBe(false);
+            expect(result.isShortPicked).toBeFalsy();
+        });
+
+        it('correctly displays 200 / 200 for Wanchi Tuna when packed without discrepancy', () => {
+            const item = {
+                sku: 'TS001',
+                name: 'Wanchi Tuna',
+                packed: true,
+                status: 'Completed',
+                packedQty: 200,
+                pickedQty: 0,
+                orderedQty: 200,
+                expectedQty: 200
+            };
+
+            const result = resolvePackDetailsQuantities(item, 'Completed');
+            expect(result.expected).toBe(200);
+            expect(result.packed).toBe(200);
+            expect(result.display).toBe('200 / 200');
+            expect(result.isUnderpacked).toBe(false);
+        });
+
+        it('falls back to expected quantity if packedQty is omitted on a completed job', () => {
+            const item = {
+                sku: 'KEGR001',
+                name: 'Juma Ugali Flour',
+                status: 'Completed',
+                expectedQty: 88
+            };
+
+            const result = resolvePackDetailsQuantities(item, 'Completed');
+            expect(result.expected).toBe(88);
+            expect(result.packed).toBe(88);
+            expect(result.display).toBe('88 / 88');
+        });
+
+        it('identifies genuine underpack when actual packed count is less than required', () => {
+            const item = {
+                sku: 'KEEL001',
+                name: 'Amazon Kindle',
+                packed: true,
+                status: 'Completed',
+                packedQty: 40,
+                expectedQty: 53
+            };
+
+            const result = resolvePackDetailsQuantities(item, 'Completed');
+            expect(result.expected).toBe(53);
+            expect(result.packed).toBe(40);
+            expect(result.display).toBe('40 / 53');
+            expect(result.isUnderpacked).toBe(true);
         });
     });
 });
+

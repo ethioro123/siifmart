@@ -3,6 +3,8 @@ import { Download, Plus, Check, Truck, AlertTriangle } from 'lucide-react';
 import { PurchaseOrder } from '../../../types';
 import Modal from '../../Modal';
 import { DocksHistory } from './DocksHistory';
+import { useData } from '../../../contexts/DataContext';
+import { resolveReceivingPolicy } from '../../../utils/receivingPolicy';
 
 interface DockStatus {
     status: 'Empty' | 'Occupied' | 'Maintenance';
@@ -47,6 +49,9 @@ export const DocksInboundView: React.FC<DocksInboundViewProps> = ({
     viewMode,
     t
 }) => {
+    const { settings, effectiveCountry } = useData();
+    const isBlindReceiving = resolveReceivingPolicy(settings, effectiveCountry).blind;
+
     return (
         <div className="flex flex-col lg:flex-row gap-4 sm:gap-6 flex-1 min-h-0 overflow-y-auto lg:overflow-hidden pr-1">
             {viewMode === 'Process' ? (
@@ -183,7 +188,9 @@ export const DocksInboundView: React.FC<DocksInboundViewProps> = ({
                                     <thead className="bg-[var(--theme-bg-card)] border-b border-[var(--theme-border)]">
                                         <tr>
                                             <th className="px-4 py-2.5 text-[11px] text-[var(--theme-text-muted)] font-semibold uppercase tracking-wider">Item / SKU</th>
-                                            <th className="px-4 py-2.5 text-[11px] text-[var(--theme-text-muted)] font-semibold uppercase tracking-wider text-right">Qty</th>
+                                            <th className="px-4 py-2.5 text-[11px] text-[var(--theme-text-muted)] font-semibold uppercase tracking-wider text-right">
+                                                {isBlindReceiving ? 'Qty (Blind)' : 'Qty'}
+                                            </th>
                                         </tr>
                                     </thead>
                                     <tbody className="divide-y divide-[var(--theme-border)]">
@@ -194,7 +201,11 @@ export const DocksInboundView: React.FC<DocksInboundViewProps> = ({
                                                     <p className="text-[11px] text-[var(--theme-text-muted)] font-mono">{item.sku || 'NO SKU'}</p>
                                                 </td>
                                                 <td className="px-4 py-2.5 text-right text-xs font-mono font-bold tabular-nums text-primary">
-                                                    {item.quantity}
+                                                    {isBlindReceiving ? (
+                                                        <span className="text-amber-600 dark:text-amber-400">*** Blind</span>
+                                                    ) : (
+                                                        item.quantity
+                                                    )}
                                                 </td>
                                             </tr>
                                         ))}

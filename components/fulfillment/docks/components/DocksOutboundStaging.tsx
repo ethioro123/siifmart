@@ -1,5 +1,5 @@
 import React from 'react';
-import { Package, Box, Truck, User as UserIcon, Trash2 } from 'lucide-react';
+import { Package, Box, Truck, User as UserIcon } from 'lucide-react';
 import { WMSJob, Site, User } from '../../../../types';
 
 interface DocksOutboundStagingProps {
@@ -13,7 +13,7 @@ interface DocksOutboundStagingProps {
     setSelectedJob: (job: WMSJob | null) => void;
     setIsDetailsOpen: (val: boolean) => void;
     formatJobId: (job: WMSJob) => string;
-    handleDelete: (e: React.MouseEvent, jobId: string) => Promise<void>;
+    handleDelete?: (e: React.MouseEvent, jobId: string) => Promise<void>;
     checkControlAccess: (actionName: string) => boolean;
     wmsJobsService: any;
     refreshData: () => Promise<void>;
@@ -32,7 +32,6 @@ export const DocksOutboundStaging: React.FC<DocksOutboundStagingProps> = ({
     setSelectedJob,
     setIsDetailsOpen,
     formatJobId,
-    handleDelete,
     checkControlAccess,
     wmsJobsService,
     refreshData,
@@ -123,15 +122,6 @@ export const DocksOutboundStaging: React.FC<DocksOutboundStagingProps> = ({
                                     <div className="flex sm:flex-col items-center sm:items-end justify-between w-full sm:w-auto gap-2 shrink-0" onClick={e => e.stopPropagation()}>
                                         <div className="flex items-center gap-2">
                                             <span className="text-[11px] text-[var(--theme-text-muted)] font-mono font-medium tabular-nums">{job.items || job.lineItems?.length || 0} Units</span>
-                                            {['super_admin', 'warehouse_manager', 'operations_manager', 'regional_manager'].includes(user?.role as string) && (
-                                                <button
-                                                    onClick={(e) => handleDelete(e, job.id)}
-                                                    className="w-8 h-8 rounded-lg bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-red-500 hover:text-white hover:bg-red-500 hover:border-red-500 transition-colors flex items-center justify-center shrink-0 touch-manipulation"
-                                                    title="Delete Job"
-                                                >
-                                                    <Trash2 size={13} />
-                                                </button>
-                                            )}
                                         </div>
 
                                         {/* Space-Saving Dock Select Dropdown */}

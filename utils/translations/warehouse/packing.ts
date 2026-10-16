@@ -78,7 +78,7 @@ export const packing: TranslationBlock = {
     ret: { en: 'RET', am: 'ተመላሽ', or: 'DEEB' },
     unknownSource: { en: 'Unknown Source', am: 'ያልታወቀ ምንጭ', or: 'Madda Hin Beekamne' },
     unknownDestination: { en: 'Unknown Destination', am: 'ያልታወቀ መድረሻ', or: 'Gara Hin Beekamne' },
-    reqPkd: { en: 'Req / Pkd', am: 'የተጠየቀ / የታሸገ', or: 'Gaf / Saamame' },
+    reqPkd: { en: 'Pkd / Req', am: 'የታሸገ / የተጠየቀ', or: 'Saamame / Gaf' },
     returnItems: { en: 'Return Items', am: 'ዕቃዎችን መልስ', or: 'Meeshalee Deebisi' },
     itemNotFoundInPackMission: { en: 'Item not found in this Pack mission.', am: 'እቃው በዚህ የማሸግ ስራ ውስጥ አልተገኘም።', or: 'Meeshaan hojii saamuu kana keessatti hin argamne.' },
     pastingNotAllowed: { en: 'Pasting not allowed.', am: 'መለጠፍ አይፈቀድም።', or: 'Makuun hin heyamamu.' },

@@ -68,7 +68,8 @@ export const PackModalsContainer: React.FC<PackModalsContainerProps> = ({
         generateTrackingNumber,
         setEarnedPoints,
         setShowPointsPopup,
-        refreshData
+        refreshData,
+        deleteJob
     } = useFulfillment();
 
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -99,17 +100,20 @@ export const PackModalsContainer: React.FC<PackModalsContainerProps> = ({
         }
 
         const expectedQty = item.expectedQty || 1;
-        const newStatus = casesQty >= expectedQty ? 'Picked' : 'In-Progress';
+        const isPacked = casesQty >= expectedQty - 0.001;
+        const newStatus = isPacked ? 'Picked' : 'In-Progress';
 
         // Optimistic Update
-        await updateJobItem(selectedPackJob.id, itemIndex, newStatus, casesQty);
+        await updateJobItem(selectedPackJob.id, itemIndex, newStatus, casesQty, undefined, {
+            packed: isPacked,
+            packedQty: casesQty
+        });
 
         const updatedLineItems = [...(selectedPackJob.lineItems || [])];
         updatedLineItems[itemIndex] = {
             ...updatedLineItems[itemIndex],
             status: newStatus as any,
-            pickedQty: casesQty,
-            packed: casesQty >= expectedQty,
+            packed: isPacked,
             packedQty: casesQty
         };
 
@@ -128,16 +132,19 @@ export const PackModalsContainer: React.FC<PackModalsContainerProps> = ({
         const casesQty = qty;
 
         const expectedQty = item.expectedQty || 1;
-        const newStatus = casesQty >= expectedQty - 0.001 ? 'Picked' : 'In-Progress';
+        const isPacked = casesQty >= expectedQty - 0.001;
+        const newStatus = isPacked ? 'Picked' : 'In-Progress';
 
-        await updateJobItem(selectedPackJob.id, itemIndex, newStatus, casesQty);
+        await updateJobItem(selectedPackJob.id, itemIndex, newStatus, casesQty, undefined, {
+            packed: isPacked,
+            packedQty: casesQty
+        });
 
         const updatedLineItems = [...(selectedPackJob.lineItems || [])];
         updatedLineItems[itemIndex] = {
             ...updatedLineItems[itemIndex],
             status: newStatus as any,
-            pickedQty: casesQty,
-            packed: casesQty >= expectedQty - 0.001,
+            packed: isPacked,
             packedQty: casesQty
         };
 
@@ -195,9 +202,16 @@ export const PackModalsContainer: React.FC<PackModalsContainerProps> = ({
                         user={user}
                         sites={sites}
                         products={filteredProducts}
-                        onStartPack={() => {
-                            setIsPackModalOpen(false);
-                            setIsScannerOpen(true);
+                        onStartPack={async (jobToStart) => {
+                            const target = jobToStart || selectedPackJob;
+                            if (target && target.status === 'Pending') {
+                                try {
+                                    await wmsJobsService.update(target.id, { status: 'In-Progress' });
+                                    setSelectedPackJob(prev => prev ? { ...prev, status: 'In-Progress' } : prev);
+                                } catch (e) {
+                                    logger.error('Fulfillment', 'startPack', e);
+                                }
+                            }
                         }}
                         onUpdateItemQty={handleUpdateItemQty}
                         onCompleteJob={handleCompleteJob}
@@ -210,13 +224,17 @@ export const PackModalsContainer: React.FC<PackModalsContainerProps> = ({
                         }}
                         onPrintItemLabel={(item, product, boxSize) => handlePrintItemLabel(selectedPackJob, item, product, boxSize)}
                         onFlagDiscrepancy={() => setIsDiscrepancyModalOpen(true)}
+                        onDeleteJob={deleteJob}
                     />
 
                     {isScannerOpen && (
                         <PackScanner
                             job={selectedPackJob}
                             products={filteredProducts}
-                            onClose={() => setIsScannerOpen(false)}
+                            onClose={() => {
+                                setIsScannerOpen(false);
+                                setIsPackModalOpen(true);
+                            }}
                             onConfirmPack={handleScanConfirmPack}
                             onCompleteJob={handleScannerComplete}
                             isProcessing={isSubmitting || isPrinting}
@@ -253,6 +271,7 @@ export const PackModalsContainer: React.FC<PackModalsContainerProps> = ({
                     products={products}
                     onReturn={(job) => setReturnJob(job)}
                     onReprintLabel={handleReprintLabel}
+                    onDeleteJob={deleteJob}
                 />
             )}
 

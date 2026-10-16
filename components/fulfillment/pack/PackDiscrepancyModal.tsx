@@ -72,8 +72,8 @@ export const PackDiscrepancyModal: React.FC<PackDiscrepancyModalProps> = ({
                 index: idx,
                 name: item.name || item.productName || 'Unknown',
                 sku: item.sku || '',
-                expected: item.pickedQty ?? item.expectedQty ?? 0,
-                actualCount: String(item.pickedQty ?? item.expectedQty ?? 0),
+                expected: item.expectedQty || item.pickedQty || 0,
+                actualCount: String(item.packedQty !== undefined && item.packedQty !== null ? item.packedQty : (item.expectedQty || item.pickedQty || 0)),
             }))
         );
     }, [isOpen, job]);
@@ -137,6 +137,7 @@ export const PackDiscrepancyModal: React.FC<PackDiscrepancyModalProps> = ({
                 return {
                     ...item,
                     pickedQty: actual,
+                    packedQty: actual,
                     packDiscrepancy: actual !== line.expected ? {
                         expected: line.expected,
                         actual,

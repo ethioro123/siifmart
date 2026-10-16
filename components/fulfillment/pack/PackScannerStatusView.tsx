@@ -93,7 +93,7 @@ export const PackScannerStatusView: React.FC<PackScannerStatusViewProps> = ({
                                 <div key={idx} className="flex justify-between items-center text-xs">
                                     <span className="text-[var(--theme-text-primary)] font-medium truncate">{item.name}</span>
                                     <span className="text-green-600 dark:text-green-400 font-mono tabular-nums font-semibold shrink-0 ml-2">
-                                        {item.pickedQty || 0} / {item.expectedQty || 1}
+                                        {(item.packedQty !== undefined ? item.packedQty : (item.pickedQty || item.expectedQty || 1))} / {item.expectedQty || 1}
                                     </span>
                                 </div>
                             ))}
@@ -165,11 +165,11 @@ export const PackScannerStatusView: React.FC<PackScannerStatusViewProps> = ({
                             <div>
                                 <span className="text-[11px] text-[var(--theme-text-secondary)] font-semibold uppercase tracking-wider block leading-none mb-1">{t('warehouse.packed') || 'Packed'}</span>
                                 <span className="text-2xl font-mono tabular-nums font-bold text-[var(--theme-accent)] leading-none">
-                                    {matchedItem.pickedQty || 0}
+                                    {matchedItem.packedQty !== undefined ? matchedItem.packedQty : (matchedItem.pickedQty || 0)}
                                 </span>
-                                {formatPackagingDescription(matchedProduct, matchedItem.pickedQty || 0) && (
+                                {formatPackagingDescription(matchedProduct, matchedItem.packedQty !== undefined ? matchedItem.packedQty : (matchedItem.pickedQty || 0)) && (
                                     <span className="text-[11px] font-mono text-[var(--theme-accent)] block mt-1">
-                                        ({formatPackagingDescription(matchedProduct, matchedItem.pickedQty || 0)})
+                                        ({formatPackagingDescription(matchedProduct, matchedItem.packedQty !== undefined ? matchedItem.packedQty : (matchedItem.pickedQty || 0))})
                                     </span>
                                 )}
                             </div>

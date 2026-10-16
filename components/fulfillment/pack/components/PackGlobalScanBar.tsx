@@ -61,7 +61,7 @@ export const PackGlobalScanBar: React.FC<PackGlobalScanBarProps> = ({
                         aria-label="Scan Product Barcode"
                         title="Scan Product Barcode"
                         className="flex-1 bg-transparent text-[var(--theme-text-primary)] text-base font-mono tracking-wider outline-none placeholder:text-[var(--theme-text-secondary)] disabled:opacity-50"
-                        placeholder={t('warehouse.scanBarcode')}
+                        placeholder="Scan Order Barcode, Job #, or Product SKU to Pack..."
                         autoComplete="off"
                     />
                     {scanInput && (

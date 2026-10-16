@@ -6,6 +6,8 @@ import { supabase } from '../../../lib/supabase';
 import { productsService } from '../../../services/products.service';
 import { systemLogsService } from '../../../services/system-logs.service';
 import { useLanguage } from '../../../contexts/LanguageContext';
+import { useData } from '../../../contexts/DataContext';
+import { resolveReceivingPolicy } from '../../../utils/receivingPolicy';
 import { logger } from '../../../utils/logger';
 import { canDeleteTransferManifest, isTransferManager } from '../../../utils/transferGovernance';
 import { TransferLineItemRow } from './TransferLineItemRow';
@@ -45,12 +47,17 @@ export const TransferJobDetails: React.FC<TransferJobDetailsProps> = ({
     onResolveDiscrepancy
 }) => {
     const { t } = useLanguage();
+    const { settings, effectiveCountry } = useData();
+    const isBlindReceiving = resolveReceivingPolicy(settings, effectiveCountry).blind;
     const [loading, setLoading] = useState<'approve' | 'reject' | 'delete' | null>(null);
 
     if (!selectedJob || !isDetailsOpen || ['PICK', 'PACK', 'DISPATCH'].includes(selectedJob.type)) return null;
 
     const isManager = isTransferManager(user);
     const transferStatus = selectedJob.transferStatus || selectedJob.status || 'Requested';
+    const isAlreadyReceived = transferStatus === 'Received' || selectedJob.status === 'Completed';
+    const isInboundDestination = !activeSite || selectedJob.destSiteId === activeSite.id;
+    const isBlindInbound = isBlindReceiving && !isAlreadyReceived && isInboundDestination && ['In-Transit', 'Shipped', 'Delivered', 'Partially Delivered'].includes(transferStatus);
     const deletionPerm = canDeleteTransferManifest(selectedJob, user);
 
     const handleApprove = async () => {
@@ -309,6 +316,7 @@ export const TransferJobDetails: React.FC<TransferJobDetailsProps> = ({
                                     selectedJob={selectedJob}
                                     onResolveDiscrepancy={onResolveDiscrepancy}
                                     t={t}
+                                    isBlindExpected={isBlindInbound}
                                 />
                             );
                         })}
@@ -375,7 +383,9 @@ export const TransferJobDetails: React.FC<TransferJobDetailsProps> = ({
                                         productId: item.productId || item.product_id || item.id,
                                         productName: item.name || item.productName || item.product_name,
                                         expectedQty: item.expectedQty ?? item.quantity ?? 0,
-                                        receivedQty: item.deliveredQty !== undefined ? item.deliveredQty : (item.receivedQty !== undefined ? item.receivedQty : (item.expectedQty ?? item.quantity ?? 0)),
+                                        receivedQty: isBlindReceiving
+                                            ? (item.receivedQty !== undefined ? item.receivedQty : 0)
+                                            : (item.deliveredQty !== undefined ? item.deliveredQty : (item.receivedQty !== undefined ? item.receivedQty : (item.expectedQty ?? item.quantity ?? 0))),
                                         condition: (item.condition as any) || 'Good'
                                     }));
                                     setActiveTransferJob(selectedJob);

@@ -1,13 +1,15 @@
-import React from 'react';
+import React, { useState, useMemo, useRef, useEffect } from 'react';
 import {
-    X, Package, Box, MapPin, CheckCircle, ArrowRight,
-    Info, Barcode, Loader2
+    X, Package, MapPin, CheckCircle, ArrowRight, ArrowLeft, Loader2, Lock, Trash2
 } from 'lucide-react';
 import { WMSJob, User, Site, Product, Employee } from '../../../types';
 import { formatJobId } from '../../../utils/jobIdFormatter';
 import { useLanguage } from '../../../contexts/LanguageContext';
-import { formatProductSize, formatPackagingDescription, getSellUnit } from '../../../utils/units';
 import { sortPickItemsByOptimalRoute } from '../../../utils/fulfillmentRoute';
+import { PickStepIndicator, PickStep } from './steps/PickStepIndicator';
+import { Step1PickRoute } from './steps/Step1PickRoute';
+import { Step2PickCollect } from './steps/Step2PickCollect';
+import { Step3PickStaging } from './steps/Step3PickStaging';
 
 export const formatBeautifulLocation = (loc: string | undefined, theme: 'purple' | 'cyan' | 'woody' = 'woody', t?: (key: string) => string) => {
     if (!loc || loc === 'PENDING') {
@@ -50,6 +52,8 @@ interface PickJobModalProps {
     isSubmitting: boolean;
     currentItem?: any;
     resolveOrderRef: (ref?: string) => string;
+    onUpdateItemPick?: (item: any, qty: number) => void;
+    onDeleteJob?: (jobId: string) => void;
 }
 
 export const PickJobModal: React.FC<PickJobModalProps> = ({
@@ -64,9 +68,13 @@ export const PickJobModal: React.FC<PickJobModalProps> = ({
     onCompleteJob,
     isSubmitting,
     currentItem,
-    resolveOrderRef
+    resolveOrderRef,
+    onUpdateItemPick,
+    onDeleteJob,
 }) => {
     const { t } = useLanguage();
+
+    const [step, setStep] = useState<PickStep>('ROUTE');
 
     const getProduct = (item: any) => {
         const targetSiteId = job?.siteId || (job as any)?.site_id;
@@ -97,9 +105,14 @@ export const PickJobModal: React.FC<PickJobModalProps> = ({
         return isDone || (i.pickedQty || 0) >= requiredAmount;
     }).length || 0;
     const progressPercent = totalItems > 0 ? (completedItems / totalItems) * 100 : 0;
+    const isFullyPicked = completedItems === totalItems && totalItems > 0;
     const isCompleted = job?.status === 'Completed';
 
-    const sortedLineItems = React.useMemo(() => {
+    const totalUnits = useMemo(() => {
+        return (job?.lineItems || []).reduce((sum, item) => sum + (item.expectedQty || (item as any).quantity || 1), 0);
+    }, [job?.lineItems]);
+
+    const sortedLineItems = useMemo(() => {
         if (!job?.lineItems) return [];
         return sortPickItemsByOptimalRoute(job.lineItems, (item) => {
             const prod = getProduct(item);
@@ -107,294 +120,218 @@ export const PickJobModal: React.FC<PickJobModalProps> = ({
         });
     }, [job?.lineItems, products]);
 
+    // Auto-select initial step on open
+    const prevOpenRef = useRef(false);
+    useEffect(() => {
+        if (isOpen && !prevOpenRef.current) {
+            if (isFullyPicked || isCompleted) {
+                setStep('STAGING');
+            } else {
+                setStep('ROUTE');
+            }
+        }
+        prevOpenRef.current = isOpen;
+    }, [isOpen, isFullyPicked, isCompleted]);
+
+    const handleItemPickUpdate = (item: any, qty: number) => {
+        if (onUpdateItemPick) {
+            onUpdateItemPick(item, qty);
+        } else {
+            onStartPick(job);
+        }
+    };
+
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 z-[150] flex items-center justify-center p-2 sm:p-4 bg-black/60 overflow-y-auto animate-in fade-in duration-200">
-            <div className="bg-[var(--theme-bg-card)] w-full max-w-4xl max-h-[92dvh] rounded-3xl border border-[var(--theme-border)] shadow-2xl flex flex-col overflow-hidden animate-in zoom-in-95 duration-200 relative">
+        <div className="fixed inset-0 z-[150] flex items-center justify-center p-2 sm:p-4 bg-black/70 overflow-x-hidden">
+            <div className="bg-[var(--theme-bg-card)] w-full max-w-4xl h-[92dvh] md:h-[88vh] rounded-3xl border border-[var(--theme-border)] shadow-2xl flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-200 relative">
                 {/* Header */}
-                <div className="p-4 sm:p-6 border-b border-[var(--theme-border)] bg-[var(--theme-bg-card)] shrink-0 z-10">
-                    <div className="flex justify-between items-start">
-                        <div className="flex items-center gap-3 sm:gap-4 min-w-0">
-                            <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-[var(--theme-accent)]/10 border border-[var(--theme-accent)]/20 flex items-center justify-center text-[var(--theme-accent)] shrink-0">
-                                <Package size={24} strokeWidth={1.75} />
+                <div className="p-4 sm:p-5 border-b border-[var(--theme-border)] bg-[var(--theme-bg-card)] shrink-0 z-10 flex justify-between items-start">
+                    <div className="flex items-center gap-3 sm:gap-4 min-w-0">
+                        <div className={`w-11 h-11 sm:w-13 sm:h-13 rounded-2xl flex items-center justify-center shrink-0 border ${
+                            isFullyPicked
+                                ? 'bg-green-500/10 border-green-500/30 text-green-600 dark:text-green-400'
+                                : 'bg-[var(--theme-accent)]/10 border-[var(--theme-accent)]/20 text-[var(--theme-accent)]'
+                        }`}>
+                            <Package size={22} />
+                        </div>
+                        <div className="min-w-0">
+                            <div className="flex items-center gap-2 mb-1 flex-wrap">
+                                <h2 className="text-base sm:text-xl font-bold text-[var(--theme-text-primary)] tracking-tight uppercase truncate font-mono">
+                                    {formatJobId(job)}
+                                </h2>
+                                <span className="px-2 py-0.5 rounded-full text-[11px] font-semibold uppercase tracking-wider border border-[var(--theme-border)] bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)]">
+                                    {job.priority || 'Normal'}
+                                </span>
                             </div>
-                            <div className="min-w-0">
-                                <div className="flex items-center gap-2 sm:gap-3 mb-1 flex-wrap">
-                                    <h2 className="text-lg sm:text-2xl font-bold text-[var(--theme-text-primary)] tracking-tight uppercase truncate font-mono">
-                                        {formatJobId(job)}
-                                    </h2>
-                                </div>
-                                <div className="flex items-center gap-2 sm:gap-3 text-[11px] text-[var(--theme-text-secondary)] font-medium uppercase tracking-wider flex-wrap">
-                                    <span className="flex items-center gap-1.5 font-mono bg-[var(--theme-bg-subtle)] px-2.5 py-0.5 rounded-lg border border-[var(--theme-border)] text-[var(--theme-text-primary)]">
-                                        <MapPin size={11} className="text-[var(--theme-accent)]" />
-                                        {sourceSite?.name || t('warehouse.thisWarehouse')}
+                            <div className="flex items-center gap-2 sm:gap-3 text-xs text-[var(--theme-text-secondary)] font-medium uppercase tracking-wider flex-wrap">
+                                <span className="flex items-center gap-1 text-[var(--theme-text-primary)]">
+                                    <MapPin size={12} className="text-[var(--theme-accent)]" />
+                                    {sourceSite?.name || 'Warehouse'}
+                                </span>
+                                {job.orderRef && (
+                                    <span className="font-mono text-[11px]">
+                                        Ref: {resolveOrderRef(job.orderRef)}
                                     </span>
-                                    {job.orderRef && (
-                                        <span className="font-mono">
-                                            Ref: {resolveOrderRef(job.orderRef)}
-                                        </span>
-                                    )}
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className="flex items-center gap-2">
-                            <span className={`px-2.5 py-1 rounded-full text-[11px] font-semibold uppercase tracking-wider border ${
-                                job.priority === 'Critical' ? 'bg-red-500/10 text-red-500 border-red-500/20' :
-                                job.priority === 'High' ? 'bg-amber-500/10 text-amber-500 border-amber-500/20' :
-                                'bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] border-[var(--theme-accent)]/20'
-                            }`}>
-                                {job.priority || 'Normal'}
-                            </span>
-                            <button
-                                onClick={onClose}
-                                className="w-10 h-10 rounded-xl bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-border)] flex items-center justify-center text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] transition-colors shrink-0"
-                                aria-label={t('warehouse.dismiss')}
-                            >
-                                <X size={18} />
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                {/* Content */}
-                <div className="p-4 sm:p-6 overflow-y-auto space-y-4 sm:space-y-6 flex-1 custom-scrollbar bg-[var(--theme-bg-subtle)]">
-                    {/* Metrics Strip */}
-                    <div className="grid grid-cols-3 gap-2 sm:gap-3">
-                        <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] p-3 rounded-2xl min-w-0">
-                            <span className="text-[11px] text-[var(--theme-text-secondary)] font-semibold uppercase tracking-wider block mb-1 truncate">{t('warehouse.progress')}</span>
-                            <div className="flex items-center justify-between text-xs sm:text-sm font-bold text-[var(--theme-text-primary)] mb-1.5">
-                                <span className="font-mono">{Math.round(progressPercent)}%</span>
-                                <span className="text-[11px] font-mono text-[var(--theme-text-secondary)]">{completedItems}/{totalItems}</span>
-                            </div>
-                            <div className="w-full h-1.5 bg-[var(--theme-bg-subtle)] rounded-full overflow-hidden border border-[var(--theme-border)]">
-                                <div
-                                    className={`h-full transition-all duration-500 ${progressPercent >= 100 ? 'bg-emerald-500' : 'bg-[var(--theme-accent)]'}`}
-                                    style={{ width: `${progressPercent}%` }}
-                                />
-                            </div>
-                        </div>
-
-                        <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] p-3 rounded-2xl min-w-0">
-                            <span className="text-[11px] text-[var(--theme-text-secondary)] font-semibold uppercase tracking-wider block mb-1 truncate">{t('warehouse.status')}</span>
-                            <div className="flex items-center gap-1.5 mt-1">
-                                <div className={`w-2 h-2 rounded-full shrink-0 ${isCompleted ? 'bg-emerald-500' : 'bg-[var(--theme-accent)]'}`} />
-                                <span className={`text-xs sm:text-base font-bold uppercase tracking-tight truncate ${isCompleted ? 'text-emerald-500' : 'text-[var(--theme-text-primary)]'}`}>
-                                    {job.status}
-                                </span>
-                            </div>
-                        </div>
-
-                        <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] p-3 rounded-2xl min-w-0">
-                            <span className="text-[11px] text-[var(--theme-text-secondary)] font-semibold uppercase tracking-wider block mb-1 truncate">{t('warehouse.items')}</span>
-                            <div className="flex items-center gap-1.5 mt-1 min-w-0">
-                                <Box size={14} className="text-[var(--theme-accent)] shrink-0" />
-                                <span className="text-xs sm:text-base font-mono font-bold text-[var(--theme-text-primary)] truncate">
-                                    {totalItems} {totalItems === 1 ? t('warehouse.itemSingular') : t('warehouse.itemPlural')}
-                                </span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div>
-                        <div className="flex items-center justify-between mb-3 shrink-0">
-                            <h3 className="font-semibold text-[var(--theme-text-primary)] flex items-center gap-2 text-xs uppercase tracking-wider">
-                                <Box size={14} className="text-[var(--theme-accent)]" />
-                                <span>{t('warehouse.pickJobs')} (Smart Route Sequence)</span>
-                            </h3>
-                            <span className="text-[11px] font-semibold text-[var(--theme-text-secondary)] bg-[var(--theme-bg-card)] px-2.5 py-1 rounded-xl border border-[var(--theme-border)] uppercase font-mono">
-                                {totalItems} {t('warehouse.itemPlural')}
-                            </span>
-                        </div>
-
-                        <div className="space-y-3">
-                            {sortedLineItems.map((item, idx) => {
-                                const product = getProduct(item);
-                                const isDone = item.status === 'Completed' || item.status === 'Picked';
-
-                                return (
-                                    <div
-                                        key={idx}
-                                        className={`bg-[var(--theme-bg-card)] border rounded-2xl p-4 sm:p-5 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 transition-colors ${
-                                            isDone ? 'border-emerald-500/30' : 'border-[var(--theme-border)]'
-                                        }`}
-                                    >
-                                        <div className="flex items-center gap-3 sm:gap-4 w-full md:w-auto">
-                                            {/* Stop sequence badge */}
-                                            <div className="flex items-center justify-center shrink-0 w-8 h-8 rounded-xl bg-[var(--theme-accent)]/10 border border-[var(--theme-accent)]/20 text-[var(--theme-accent)] font-mono text-[11px] font-bold">
-                                                #{idx + 1}
-                                            </div>
-
-                                            <div className="relative w-14 h-14 rounded-xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] flex items-center justify-center overflow-hidden shrink-0">
-                                                {product?.image ? (
-                                                    <img src={product.image} alt={item.name} className="w-full h-full object-cover" />
-                                                ) : (
-                                                    <div className="w-full h-full flex items-center justify-center text-[var(--theme-text-secondary)] opacity-40">
-                                                        <Package size={22} strokeWidth={1.5} />
-                                                    </div>
-                                                )}
-                                                {isDone && (
-                                                    <div className="absolute inset-0 bg-emerald-500/20 flex items-center justify-center">
-                                                        <div className="p-1 bg-[var(--theme-bg-card)] rounded-full border border-emerald-500/40">
-                                                            <CheckCircle size={16} className="text-emerald-500" />
-                                                        </div>
-                                                    </div>
-                                                )}
-                                            </div>
-
-                                            <div className="min-w-0">
-                                                <h4 className={`text-sm font-semibold tracking-tight mb-1 truncate ${isDone ? 'line-through text-[var(--theme-text-secondary)]' : 'text-[var(--theme-text-primary)]'}`}>
-                                                    {item.name || product?.name || t('warehouse.picking.unknownSKU')}
-                                                </h4>
-                                                <div className="flex flex-col md:flex-row md:items-center gap-1.5 md:gap-2">
-                                                    <span className="text-[11px] font-mono font-semibold text-[var(--theme-text-secondary)] bg-[var(--theme-bg-subtle)] px-2 py-0.5 rounded-md border border-[var(--theme-border)] uppercase tracking-wider w-fit">
-                                                        {item.sku || product?.sku || t('warehouse.picking.noSKUCaps')}
-                                                    </span>
-                                                    {formatProductSize(product || item) && (
-                                                        <span className="text-[11px] font-mono font-semibold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-md border border-emerald-500/20 uppercase tracking-wider w-fit">
-                                                            {formatProductSize(product || item)}
-                                                        </span>
-                                                    )}
-                                                    {product?.barcode && (
-                                                        <div className="flex items-center gap-1 text-[11px] text-[var(--theme-text-secondary)] font-mono">
-                                                            <Barcode size={12} className="opacity-50" />
-                                                            {product.barcode}
-                                                        </div>
-                                                    )}
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <div className="flex flex-col xl:flex-row items-stretch xl:items-center justify-between xl:justify-end gap-3 xl:gap-6 pt-3 xl:pt-0 border-t xl:border-t-0 border-[var(--theme-border)] w-full xl:w-auto shrink-0">
-                                            <div className="text-left md:text-right flex flex-col items-start md:items-end">
-                                                <span className="text-[11px] text-[var(--theme-text-secondary)] font-semibold uppercase tracking-wider block mb-1">{t('warehouse.selectedStorageLocation')}</span>
-                                                <div className="flex items-center gap-1.5">
-                                                    <span className="w-1.5 h-1.5 rounded-full bg-[var(--theme-accent)]" />
-                                                    {formatBeautifulLocation(product?.location, 'woody', t)}
-                                                </div>
-                                            </div>
-
-                                            <div className="flex items-center justify-between md:justify-end gap-4 md:gap-6 w-full md:w-auto md:min-w-[160px]">
-                                                <div className="text-left md:text-right">
-                                                    <span className="text-[11px] text-[var(--theme-text-secondary)] font-semibold uppercase tracking-wider block mb-1">{t('warehouse.expected')}</span>
-                                                    {(() => {
-                                                        const expected = item.expectedQty || (item as any).quantity || 0;
-                                                        const packDesc = formatPackagingDescription(product, expected);
-                                                        const unitDef = getSellUnit(product?.unit || item.unit);
-                                                        const unitLabel = unitDef.category === 'count' && unitDef.code !== 'UNIT' ? unitDef.shortLabel : 'pk';
-
-                                                        return (
-                                                            <div className="flex flex-col items-start md:items-end">
-                                                                <span className="text-base font-mono font-bold text-[var(--theme-text-primary)] tabular-nums">
-                                                                    {expected} <span className="text-[11px] text-[var(--theme-text-secondary)] font-semibold uppercase">{unitLabel}</span>
-                                                                </span>
-                                                                {packDesc && (
-                                                                    <span className="text-[11px] font-mono text-[var(--theme-text-secondary)]">
-                                                                        ({packDesc})
-                                                                    </span>
-                                                                )}
-                                                            </div>
-                                                        );
-                                                    })()}
-                                                </div>
-
-                                                {isDone ? (
-                                                    <div className="text-right border-l border-[var(--theme-border)] pl-4">
-                                                        <span className="text-[11px] text-emerald-500 font-semibold uppercase tracking-wider block mb-1">{t('warehouse.picking')}</span>
-                                                        {(() => {
-                                                            const picked = item.pickedQty !== undefined && item.pickedQty !== null ? item.pickedQty : 0;
-                                                            const packDesc = formatPackagingDescription(product, picked);
-                                                            const unitDef = getSellUnit(product?.unit || item.unit);
-                                                            const unitLabel = unitDef.category === 'count' && unitDef.code !== 'UNIT' ? unitDef.shortLabel : 'pk';
-
-                                                            return (
-                                                                <div className="flex flex-col items-end">
-                                                                    <span className="text-base font-mono font-bold text-emerald-500 tabular-nums">
-                                                                        {picked} <span className="text-[11px] text-emerald-500/80 font-semibold uppercase">{unitLabel}</span>
-                                                                    </span>
-                                                                    {packDesc && (
-                                                                        <span className="text-[11px] font-mono text-emerald-500/80">
-                                                                            ({packDesc})
-                                                                        </span>
-                                                                    )}
-                                                                </div>
-                                                            );
-                                                        })()}
-                                                    </div>
-                                                ) : (
-                                                    <button
-                                                        onClick={(e) => { e.stopPropagation(); onStartPick(job); }}
-                                                        disabled={isSubmitting}
-                                                        className="px-4 py-2 rounded-xl bg-[var(--theme-accent)] hover:opacity-90 text-white font-semibold text-xs uppercase tracking-wider transition-colors min-h-[40px]"
-                                                    >
-                                                        {t('warehouse.pickJobs').split(' ')[0]}
-                                                    </button>
-                                                )}
-                                            </div>
-                                        </div>
-                                    </div>
-                                );
-                            })}
-                        </div>
-                    </div>
-                </div>
-
-                {/* Footer */}
-                <div className="p-4 sm:p-5 border-t border-[var(--theme-border)] bg-[var(--theme-bg-card)] flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3 shrink-0 z-20">
-                    <div className="hidden md:flex items-center gap-3">
-                        <div className="flex flex-col">
-                            <span className="text-[11px] text-[var(--theme-text-secondary)] font-semibold uppercase tracking-wider mb-0.5">
-                                {isCompleted ? (t('warehouse.completedBy') || 'Completed By') : (t('warehouse.assignedTo') || 'Assigned To')}
-                            </span>
-                            <span className="text-xs font-semibold text-[var(--theme-text-primary)] uppercase tracking-wide">
-                                {(() => {
-                                    const targetUserId = (isCompleted && (job.completedBy || (job as any).completed_by))
-                                        ? (job.completedBy || (job as any).completed_by)
-                                        : job.assignedTo;
-                                    if (!targetUserId) return isCompleted ? 'System' : (t('warehouse.putaway.unassigned') || 'Unassigned');
-                                    const emp = employees.find(e => e.id === targetUserId || e.name === targetUserId || (e as any).email === targetUserId || e.code === targetUserId);
-                                    return emp?.name || targetUserId;
-                                })()}
-                            </span>
-                        </div>
-                    </div>
-
-                    <div className="flex flex-col-reverse md:flex-row items-stretch md:items-center gap-3">
-                        <button
-                            onClick={onClose}
-                            className="px-6 py-3 rounded-xl border border-[var(--theme-border)] bg-[var(--theme-bg-card)] hover:bg-[var(--theme-bg-subtle)] text-[var(--theme-text-primary)] text-xs font-semibold uppercase tracking-wider min-h-[44px] transition-colors"
-                        >
-                            {t('warehouse.dismiss')}
-                        </button>
-
-                        {job.status !== 'Completed' && (
-                            <>
-                                {progressPercent >= 100 ? (
-                                    <button
-                                        onClick={() => onCompleteJob(job)}
-                                        disabled={isSubmitting}
-                                        className="px-8 py-3 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl font-semibold text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-2 disabled:opacity-40 min-h-[44px]"
-                                    >
-                                        {isSubmitting ? <Loader2 size={16} className="animate-spin" /> : <><CheckCircle size={16} /> {t('warehouse.completed')}</>}
-                                    </button>
-                                ) : (
-                                    <button
-                                        onClick={() => onStartPick(job)}
-                                        disabled={isSubmitting}
-                                        className="px-8 py-3 rounded-xl bg-[var(--theme-accent)] hover:opacity-90 text-white text-xs font-semibold uppercase tracking-wider flex items-center justify-center gap-2 min-h-[44px] transition-all"
-                                    >
-                                        {isSubmitting ? (
-                                            <Loader2 size={16} className="animate-spin" />
-                                        ) : (
-                                            <>
-                                                <span>{job.status === 'In-Progress' ? t('warehouse.continueArrow') : t('warehouse.startArrow')}</span>
-                                                <ArrowRight size={16} />
-                                            </>
-                                        )}
-                                    </button>
                                 )}
-                            </>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button
+                        type="button"
+                        onClick={onClose}
+                        className="w-10 h-10 rounded-xl bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-border)] flex items-center justify-center text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] transition-colors shrink-0"
+                        aria-label={t('warehouse.dismiss')}
+                    >
+                        <X size={18} />
+                    </button>
+                </div>
+
+                {/* Step Indicator */}
+                <PickStepIndicator
+                    currentStep={step}
+                    setStep={setStep}
+                    isFullyPicked={isFullyPicked}
+                    t={t}
+                />
+
+                {/* Step Content */}
+                <div className="flex-1 min-h-0 flex flex-col overflow-hidden">
+                    {step === 'ROUTE' && (
+                        <Step1PickRoute
+                            job={job}
+                            sortedLineItems={sortedLineItems}
+                            sourceSite={sourceSite}
+                            totalItems={totalItems}
+                            totalUnits={totalUnits}
+                            getProduct={getProduct}
+                            onAdvanceToCollect={() => setStep('COLLECT')}
+                            onStartPick={onStartPick}
+                            t={t}
+                        />
+                    )}
+
+                    {step === 'COLLECT' && (
+                        <Step2PickCollect
+                            job={job}
+                            products={products}
+                            sortedLineItems={sortedLineItems}
+                            totalItems={totalItems}
+                            completedItems={completedItems}
+                            progressPercent={progressPercent}
+                            isFullyPicked={isFullyPicked}
+                            getProduct={getProduct}
+                            onUpdateItemPick={handleItemPickUpdate}
+                            onStartPick={onStartPick}
+                            onAdvanceToStaging={() => setStep('STAGING')}
+                            t={t}
+                        />
+                    )}
+
+                    {step === 'STAGING' && (
+                        <Step3PickStaging
+                            job={job}
+                            sourceSite={sourceSite}
+                            totalItems={totalItems}
+                            completedItems={completedItems}
+                            isSubmitting={isSubmitting}
+                            onCompleteJob={onCompleteJob}
+                            resolveOrderRef={resolveOrderRef}
+                            t={t}
+                        />
+                    )}
+                </div>
+
+                {/* Bottom Navigation Toolbar */}
+                <div className="p-3 md:p-4 border-t border-[var(--theme-border)] bg-[var(--theme-bg-card)] flex items-center justify-between gap-3 shrink-0">
+                    <div className="flex items-center gap-2">
+                        {step === 'ROUTE' ? (
+                            <button
+                                type="button"
+                                onClick={onClose}
+                                className="min-h-[44px] px-4 md:px-5 rounded-xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] font-semibold text-xs uppercase tracking-wider transition-colors active:scale-95 cursor-pointer touch-manipulation"
+                            >
+                                {t('warehouse.dismiss') || 'Dismiss'}
+                            </button>
+                        ) : (
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    if (step === 'STAGING') setStep('COLLECT');
+                                    else if (step === 'COLLECT') setStep('ROUTE');
+                                }}
+                                className="min-h-[44px] px-4 md:px-5 rounded-xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-[var(--theme-text-primary)] font-semibold text-xs uppercase tracking-wider flex items-center gap-2 hover:border-[var(--theme-accent)]/30 transition-colors active:scale-95 cursor-pointer touch-manipulation"
+                            >
+                                <ArrowLeft size={16} />
+                                <span>Back</span>
+                            </button>
+                        )}
+
+                        {['super_admin', 'warehouse_manager', 'operations_manager', 'regional_manager'].includes(user?.role as string) && onDeleteJob && (
+                            <button
+                                type="button"
+                                onClick={async () => {
+                                    if (confirm(t('warehouse.picking.jobDeleteConfirmPrompt') || 'Are you sure you want to delete this pick job?')) {
+                                        await onDeleteJob(job.id);
+                                        onClose();
+                                    }
+                                }}
+                                className="min-h-[44px] px-3.5 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-600 dark:text-red-400 border border-red-500/20 font-semibold text-xs uppercase tracking-wider flex items-center gap-1.5 transition-colors active:scale-95 cursor-pointer touch-manipulation"
+                                title="Delete Job"
+                            >
+                                <Trash2 size={14} />
+                                <span>Delete</span>
+                            </button>
+                        )}
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                        {step === 'ROUTE' && (
+                            <button
+                                type="button"
+                                onClick={() => setStep('COLLECT')}
+                                className="min-h-[44px] px-5 md:px-7 rounded-xl bg-[var(--theme-accent)] hover:opacity-90 text-white font-semibold text-xs md:text-sm uppercase tracking-wider flex items-center gap-2 shadow-sm transition-all active:scale-95 cursor-pointer touch-manipulation"
+                            >
+                                <span>Start Scanning & Pick</span>
+                                <ArrowRight size={16} />
+                            </button>
+                        )}
+
+                        {step === 'COLLECT' && (
+                            <button
+                                type="button"
+                                disabled={!isFullyPicked}
+                                onClick={() => setStep('STAGING')}
+                                className={`min-h-[44px] px-5 md:px-7 rounded-xl font-semibold text-xs md:text-sm uppercase tracking-wider flex items-center gap-2 shadow-sm transition-all touch-manipulation ${
+                                    isFullyPicked
+                                        ? 'bg-[var(--theme-accent)] hover:opacity-90 text-white cursor-pointer active:scale-95'
+                                        : 'bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-[var(--theme-text-muted)] cursor-not-allowed opacity-50'
+                                }`}
+                            >
+                                {!isFullyPicked && <Lock size={14} className="text-[var(--theme-text-muted)]" />}
+                                <span>{isFullyPicked ? 'Staging Handover' : 'Pick All Items to Proceed'}</span>
+                                <ArrowRight size={16} />
+                            </button>
+                        )}
+
+                        {step === 'STAGING' && (
+                            <button
+                                type="button"
+                                onClick={() => onCompleteJob(job)}
+                                disabled={isSubmitting}
+                                className="min-h-[44px] px-6 md:px-8 rounded-xl bg-green-600 hover:bg-green-500 text-white font-bold text-xs md:text-sm uppercase tracking-wider flex items-center gap-2 shadow-md transition-all active:scale-95 cursor-pointer touch-manipulation disabled:opacity-50"
+                            >
+                                {isSubmitting ? (
+                                    <Loader2 size={16} className="animate-spin" />
+                                ) : (
+                                    <>
+                                        <CheckCircle size={16} />
+                                        <span>Complete Mission</span>
+                                    </>
+                                )}
+                            </button>
                         )}
                     </div>
                 </div>
@@ -402,3 +339,5 @@ export const PickJobModal: React.FC<PickJobModalProps> = ({
         </div>
     );
 };
+
+export default PickJobModal;

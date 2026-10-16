@@ -155,46 +155,65 @@ export const PackTab: React.FC = () => {
 
     // --- HANDLERS ---
 
-    // GLOBAL SCAN: Scan a barcode → find the matching Pack job → auto-pack all items → show confirmation
+    // GLOBAL SCAN: Scan an Order Ref, Job Number, Tracking Number, or Item Barcode → launch scanning mode
     const handleGlobalScan = async (e: React.FormEvent) => {
         e.preventDefault();
-        const barcode = scanInput.trim().toUpperCase();
-        if (!barcode || isScanning) return;
+        const scanCode = scanInput.trim().toUpperCase();
+        if (!scanCode || isScanning) return;
 
         setScanError('');
         setScanSuccess('');
         setIsScanning(true);
 
         try {
-            // 1. Find a pending/in-progress PACK job that contains this SKU or barcode
             const pendingPackJobs = filteredJobs.filter(j =>
                 j.type === 'PACK' && (j.status === 'Pending' || j.status === 'In-Progress')
             );
 
-            let matchedJob: WMSJob | null = null;
+            const cleanCode = scanCode.replace(/[-\s]/g, '');
 
-            for (const job of pendingPackJobs) {
-                const hasMatch = job.lineItems?.some((item: any) => {
-                    // Match by item SKU
-                    if (item.sku?.toUpperCase() === barcode) return true;
-                    // Match by product barcode or SKU from products list
-                    const product = filteredProducts.find(p =>
-                        (p.id === item.productId || p.sku === item.sku) &&
-                        (p.siteId === job.siteId || p.site_id === (job as any).site_id)
-                    );
-                    if (product && (product.barcode?.toUpperCase() === barcode || product.sku?.toUpperCase() === barcode)) return true;
-                    return false;
-                });
+            // 1. Priority match: Order Reference, Job Number, Tracking Number, or Job ID
+            let matchedJob = pendingPackJobs.find(j => {
+                const cleanJobId = formatJobId(j).toUpperCase().replace(/[-\s]/g, '');
+                const rawJobId = (j.id || '').toUpperCase().replace(/[-\s]/g, '');
+                const jobNum = (j.jobNumber || (j as any).job_number || '').toUpperCase().replace(/[-\s]/g, '');
+                const orderRef = (j.orderRef || '').toUpperCase().replace(/[-\s]/g, '');
+                const tracking = (j.trackingNumber || '').toUpperCase().replace(/[-\s]/g, '');
 
-                if (hasMatch) {
-                    matchedJob = job;
-                    break;
+                return (
+                    (cleanJobId && cleanJobId === cleanCode) ||
+                    (rawJobId && rawJobId === cleanCode) ||
+                    (jobNum && jobNum === cleanCode) ||
+                    (orderRef && orderRef === cleanCode) ||
+                    (tracking && tracking === cleanCode) ||
+                    (j.orderRef && j.orderRef.toUpperCase() === scanCode) ||
+                    (j.jobNumber && j.jobNumber.toUpperCase() === scanCode)
+                );
+            });
+
+            // 2. Secondary match: Item SKU or item product barcode inside the job
+            if (!matchedJob) {
+                for (const job of pendingPackJobs) {
+                    const hasMatch = job.lineItems?.some((item: any) => {
+                        if (item.sku?.toUpperCase() === scanCode) return true;
+                        const product = filteredProducts.find(p =>
+                            (p.id === item.productId || p.sku === item.sku) &&
+                            (p.siteId === job.siteId || p.site_id === (job as any).site_id)
+                        );
+                        if (product && (product.barcode?.toUpperCase() === scanCode || product.sku?.toUpperCase() === scanCode)) return true;
+                        return false;
+                    });
+
+                    if (hasMatch) {
+                        matchedJob = job;
+                        break;
+                    }
                 }
             }
 
             if (!matchedJob) {
                 playBeep('error');
-                setScanError(`No Pack job found for barcode: ${barcode}`);
+                setScanError(`No Pack job found for scan: ${scanCode}`);
                 setScanInput('');
                 setTimeout(() => setScanError(''), 3000);
                 setIsScanning(false);
@@ -212,21 +231,21 @@ export const PackTab: React.FC = () => {
                 await wmsJobsService.update(matchedJob.id, { trackingNumber: trackingNum });
             }
 
-            // 3. Refresh job and show confirmation
             const refreshedJob = filteredJobs.find(j => j.id === matchedJob!.id);
-            const jobForModal = {
+            const jobForScanner = {
                 ...(refreshedJob || matchedJob),
                 trackingNumber: trackingNum,
                 status: 'In-Progress' as const
             };
 
             playBeep('success');
-            setScanSuccess(`Matched Job: ${formatJobId(matchedJob)}`);
+            setScanSuccess(`Matched: ${formatJobId(matchedJob)}`);
             setScanInput('');
 
-            // Show confirmation modal
-            setSelectedPackJob(jobForModal as WMSJob);
+            // Open in Job Modal (starts on Job Details overview)
+            setSelectedPackJob(jobForScanner as WMSJob);
             setIsPackModalOpen(true);
+            setIsScannerOpen(false);
 
             setTimeout(() => setScanSuccess(''), 3000);
         } catch (err: any) {
@@ -238,7 +257,7 @@ export const PackTab: React.FC = () => {
         }
     };
 
-    // Also allow opening a job manually by tapping
+    // Open Job Modal on Details step
     const handleStartJob = async (job: WMSJob) => {
         let trackingNum = job.trackingNumber;
         if (!trackingNum) {
@@ -246,18 +265,14 @@ export const PackTab: React.FC = () => {
             await wmsJobsService.update(job.id, { trackingNumber: trackingNum });
         }
 
-        const jobForModal = {
+        const jobData = {
             ...job,
             trackingNumber: trackingNum,
-            status: job.status === 'Pending' ? 'In-Progress' : job.status
         };
 
-        setSelectedPackJob(jobForModal as WMSJob);
+        setSelectedPackJob(jobData as WMSJob);
         setIsPackModalOpen(true);
-        if (job.status === 'Pending') {
-            await wmsJobsService.update(job.id, { status: 'In-Progress' });
-            addNotification('info', `Started: ${formatJobId(job)}`);
-        }
+        setIsScannerOpen(false);
     };
 
     return (
@@ -282,6 +297,16 @@ export const PackTab: React.FC = () => {
                 <div className="flex-1 overflow-hidden flex flex-col">
                     {viewMode === 'Process' ? (
                         <>
+                            <PackGlobalScanBar
+                                scanInput={scanInput}
+                                setScanInput={setScanInput}
+                                isScanning={isScanning}
+                                scanSuccess={scanSuccess}
+                                scanError={scanError}
+                                onSubmit={handleGlobalScan}
+                                t={t}
+                            />
+
                             <div className="flex-1 overflow-hidden">
                                 <PackList
                                     filteredPackJobs={filteredPackJobs}
