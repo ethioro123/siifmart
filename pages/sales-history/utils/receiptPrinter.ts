@@ -5,11 +5,11 @@ import { printHtmlContent } from '../../../utils/printHelper';
 
 export const triggerReceiptPrint = (selectedSale: SaleRecord, settings: any, sites: Site[], currencySymbol: string = CURRENCY_SYMBOL) => {
       const {
-         storeName = 'SIIFMART',
+         storeName = 'SiifMart',
          logoUrl,
          posReceiptLogo,
          posReceiptShowLogo = true,
-         posReceiptHeader = 'SIIFMART RETAIL',
+         posReceiptHeader = 'SiifMart Retail',
          posReceiptFooter = 'Thank you for shopping with us!',
          posReceiptAddress,
          posReceiptPhone,
@@ -21,13 +21,13 @@ export const triggerReceiptPrint = (selectedSale: SaleRecord, settings: any, sit
          posReceiptQRLink = 'https://siifmart.com/feedback',
          posReceiptWidth = '80mm',
          posReceiptFont = 'sans-serif',
-         slogan
+         slogan = 'Little Grocery • Big Care'
       } = settings;
 
       const saleSite = sites.find(s => s.id === selectedSale.siteId);
-      const displayStoreName = storeName || saleSite?.name || 'SIIFMART';
-      const displayLogo = posReceiptLogo || logoUrl;
-      const displayHeader = posReceiptHeader || 'SIIFMART RETAIL';
+      const displayStoreName = storeName || saleSite?.name || 'SiifMart';
+      const displayLogo = posReceiptLogo || logoUrl || '/brand/siifmart-emblem-light.png';
+      const displayHeader = posReceiptHeader || 'SiifMart Retail';
       const displaySlogan = slogan && slogan !== displayHeader ? slogan : '';
       const is80mm = posReceiptWidth === '80mm';
       const paperWidth = is80mm ? '80mm' : '58mm';

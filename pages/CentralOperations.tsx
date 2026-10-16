@@ -461,7 +461,7 @@ export default function CentralOperations() {
                     </div>
                     <div>
                         <h4 className="text-sm font-bold text-[var(--theme-text-primary)]">
-                            SIIFMART Central Operations Suite
+                            SiifMart Central Operations Suite
                         </h4>
                         <p className="text-xs text-[var(--theme-text-secondary)]">
                             Download native desktop workstation or generate periodic operational intelligence reports

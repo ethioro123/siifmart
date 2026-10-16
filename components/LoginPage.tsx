@@ -101,11 +101,11 @@ export default function LoginPage() {
       <div className="max-w-[440px] w-full bg-white/85 dark:bg-[#18201B]/60 border border-[#E2DCCE] dark:border-emerald-950/20 rounded-[32px] p-8 sm:p-10 relative z-10 shadow-[0_24px_80px_-12px_rgba(34,50,38,0.06)] dark:shadow-[0_32px_96px_-12px_rgba(5,8,6,0.65)] lg:backdrop-blur-2xl transition-all duration-300">
         
         {/* Header Branding section */}
-        <div className="flex flex-col items-center justify-center mb-8">
-          <div className="mb-2 select-none">
-            <Logo size={40} />
+        <div className="flex flex-col items-center justify-center mb-6">
+          <div className="mb-2 select-none flex flex-col items-center">
+            <Logo size={48} variant="stacked" />
           </div>
-          <p className="text-[10px] text-[var(--theme-text-secondary)] uppercase tracking-[0.25em] font-bold mt-2 select-none text-center px-4">
+          <p className="text-[10px] text-[var(--theme-text-secondary)] uppercase tracking-[0.25em] font-bold mt-1 select-none text-center px-4">
             {mode === 'login' ? (settings?.slogan || 'Operations Access Portal') : 'Security Recovery'}
           </p>
         </div>
@@ -220,7 +220,7 @@ export default function LoginPage() {
         )}
 
         <div className="mt-8 pt-6 border-t border-[#E2DCCE]/40 dark:border-white/[0.04] text-center select-none">
-          <p className="text-[10px] text-[#4D6E56] dark:text-[#7A9E83] font-semibold tracking-wider uppercase">SiifMart Operations v3.5.9</p>
+          <p className="text-[10px] text-[#4D6E56] dark:text-[#7A9E83] font-semibold tracking-wider uppercase">SiifMart Operations v3.6.0</p>
         </div>
       </div>
     </div>

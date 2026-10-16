@@ -2,7 +2,7 @@ import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
   appId: 'com.siifmart.app',
-  appName: 'SIIFMART',
+  appName: 'SiifMart',
   webDir: 'dist',
   server: {
     androidScheme: 'https',

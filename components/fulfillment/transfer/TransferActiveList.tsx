@@ -23,7 +23,7 @@ export const TransferActiveList: React.FC<TransferActiveListProps> = ({
     t
 }) => {
     // Local State filters
-    const [transferStatusFilter, setTransferStatusFilter] = useState<'ALL' | 'Requested' | 'Picking' | 'Picked' | 'Packed' | 'Shipped' | 'In-Transit' | 'Delivered' | 'Received'>('ALL');
+    const [transferStatusFilter, setTransferStatusFilter] = useState<'ALL' | 'Draft' | 'Requested' | 'Picking' | 'Picked' | 'Packed' | 'Shipped' | 'In-Transit' | 'Delivered' | 'Received'>('ALL');
     const [transferSortBy, setTransferSortBy] = useState<'date' | 'items' | 'site' | 'priority'>('date');
     const [transferCurrentPage, setTransferCurrentPage] = useState(1);
     const TRANSFER_ITEMS_PER_PAGE = 10;
@@ -44,6 +44,7 @@ export const TransferActiveList: React.FC<TransferActiveListProps> = ({
                 if (effStatus === 'Received') return false;
 
                 if (typeof transferStatusFilter === 'undefined' || transferStatusFilter === 'ALL') return true;
+                if (transferStatusFilter === 'Draft') return effStatus === 'Draft' || (j.status as any) === 'Draft';
                 if (transferStatusFilter === 'Picking') return effStatus === 'Picking' || effStatus === 'Picked';
                 if (transferStatusFilter === 'In-Transit') return effStatus === 'In-Transit' || effStatus === 'Shipped';
                 return effStatus === transferStatusFilter;
@@ -171,6 +172,7 @@ export const TransferActiveList: React.FC<TransferActiveListProps> = ({
                         className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl px-3 py-2 text-xs font-semibold text-[var(--theme-text-primary)] focus:border-[var(--theme-accent)] outline-none min-h-[44px] transition-colors shadow-sm"
                     >
                         <option value="ALL">{t('warehouse.allTransfers')}</option>
+                        <option value="Draft">Draft</option>
                         <option value="Requested">{t('warehouse.requested')}</option>
                         <option value="Picking">{t('warehouse.picking')}</option>
                         <option value="Packed">{t('warehouse.packed')}</option>

@@ -98,9 +98,9 @@ export default defineConfig(() => {
           registerType: 'autoUpdate',
           includeAssets: ['favicon.svg', 'robots.txt'],
           manifest: {
-            name: 'SiifMart WMS',
+            name: 'SiifMart Retail & Warehouse',
             short_name: 'SiifMart',
-            description: 'Warehouse Management System',
+            description: 'SiifMart Retail & Warehouse Management System',
             theme_color: '#000000',
             background_color: '#000000',
             display: 'standalone',

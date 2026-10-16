@@ -126,7 +126,6 @@ export const useJobActions = (deps: UseJobActionsDeps) => {
                     try {
                         const updatedParent = await wmsJobsService.update(parentJob.id, {
                             assignedTo: employee.id,
-                            carrierName: employee.name,
                             deliveryMethod: 'Internal'
                         });
                         setJobs(prev => prev.map(j => j.id === parentJob.id ? { ...j, ...updatedParent } : j));
@@ -175,8 +174,7 @@ export const useJobActions = (deps: UseJobActionsDeps) => {
                 if (parentJob) {
                     try {
                         const updatedParent = await wmsJobsService.update(parentJob.id, {
-                            assignedTo: '',
-                            carrierName: ''
+                            assignedTo: ''
                         });
                         setJobs(prev => prev.map(j => j.id === parentJob.id ? { ...j, ...updatedParent } : j));
                     } catch (syncErr: any) {

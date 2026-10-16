@@ -6,17 +6,17 @@ export function setupAppMenu(mainWindow: BrowserWindow): void {
     const template: Electron.MenuItemConstructorOptions[] = [
         // App Menu (macOS only)
         ...(isMac ? [{
-            label: 'SIIFMART',
+            label: 'SiifMart',
             submenu: [
-                { label: 'About SIIFMART', role: 'about' as const },
+                { label: 'About SiifMart', role: 'about' as const },
                 { type: 'separator' as const },
                 { role: 'services' as const },
                 { type: 'separator' as const },
-                { label: 'Hide SIIFMART', role: 'hide' as const },
+                { label: 'Hide SiifMart', role: 'hide' as const },
                 { role: 'hideOthers' as const },
                 { role: 'unhide' as const },
                 { type: 'separator' as const },
-                { label: 'Quit SIIFMART', role: 'quit' as const }
+                { label: 'Quit SiifMart', role: 'quit' as const }
             ]
         }] : []),
 
@@ -95,7 +95,7 @@ export function setupAppMenu(mainWindow: BrowserWindow): void {
             role: 'help' as const,
             submenu: [
                 {
-                    label: 'SIIFMART Documentation',
+                    label: 'SiifMart Documentation',
                     click: async () => {
                         await shell.openExternal('https://siifmart.com/docs');
                     }

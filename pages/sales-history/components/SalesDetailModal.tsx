@@ -113,12 +113,12 @@ export const SalesDetailModal: React.FC<SalesDetailModalProps> = ({
                                 {/* Receipt Header */}
                                 <div className="text-center border-b border-black/10 pb-4 border-dashed mb-4">
                                     <h2 className="text-lg font-bold uppercase tracking-tight leading-none mb-1">
-                                        {settings?.storeName || sites.find(s => s.id === selectedSale.siteId)?.name || 'SIIFMART'}
+                                        {settings?.storeName || sites.find(s => s.id === selectedSale.siteId)?.name || 'SiifMart'}
                                     </h2>
                                     <p className="text-[11px] font-semibold uppercase tracking-wider text-black/70">
-                                        {settings?.posReceiptHeader || 'SIIFMART RETAIL'}
+                                        {settings?.posReceiptHeader || 'SiifMart Retail'}
                                     </p>
-                                    {settings?.slogan && settings.slogan !== (settings?.posReceiptHeader || 'SIIFMART RETAIL') && (
+                                    {settings?.slogan && settings.slogan !== (settings?.posReceiptHeader || 'SiifMart Retail') && (
                                         <p className="text-[11px] italic text-black/60 mt-0.5">
                                             {settings.slogan}
                                         </p>

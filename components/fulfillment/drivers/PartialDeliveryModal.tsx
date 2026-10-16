@@ -5,6 +5,7 @@ import {
 } from 'lucide-react';
 import { WMSJob, User, Product, Site } from '../../../types';
 import { formatJobId } from '../../../utils/jobIdFormatter';
+import { logger } from '../../../utils/logger';
 
 type RejectReason = 'customer_refused' | 'damaged_in_transit' | 'address_not_found' | 'partial_acceptance' | 'other';
 
@@ -52,6 +53,7 @@ export const PartialDeliveryModal: React.FC<PartialDeliveryModalProps> = ({
     products,
     sites,
     wmsJobsService,
+    adjustStockMutation,
     addNotification,
     refreshData,
     refreshJobs,
@@ -167,6 +169,42 @@ export const PartialDeliveryModal: React.FC<PartialDeliveryModalProps> = ({
                         transferStatus: finalTransferStatus,
                         deliveredAt: new Date().toISOString(),
                     } as any);
+                }
+            }
+
+            // 3. Return undelivered units back to source warehouse inventory
+            if (hasUndelivered && adjustStockMutation) {
+                const sourceSiteId = job.sourceSiteId || (job as any).source_site_id;
+                if (sourceSiteId) {
+                    for (const line of lines) {
+                        const parsed = parseInt(line.delivered);
+                        const deliveredQty = isNaN(parsed) ? line.dispatched : parsed;
+                        const undeliveredQty = line.dispatched - deliveredQty;
+                        if (undeliveredQty > 0) {
+                            try {
+                                const sourceProduct = products.find(p =>
+                                    (p.sku === line.sku || p.id === line.productId) &&
+                                    (p.siteId === sourceSiteId || (p as any).site_id === sourceSiteId)
+                                ) || products.find(p => p.sku === line.sku || p.id === line.productId);
+
+                                const targetProdId = sourceProduct?.id || line.productId;
+                                if (targetProdId) {
+                                    await adjustStockMutation.mutateAsync({
+                                        productId: targetProdId,
+                                        productName: line.name,
+                                        productSku: line.sku,
+                                        siteId: sourceSiteId,
+                                        quantity: undeliveredQty,
+                                        type: 'IN',
+                                        reason: `Undelivered return from ${formatJobId(job)} (${dynamicReasons.find(r => r.id === rejectReason)?.label || rejectReason})`,
+                                        canApprove: true
+                                    });
+                                }
+                            } catch (stockErr) {
+                                logger.warn('PartialDeliveryModal', `Failed to return undelivered stock to warehouse: ${String(stockErr)}`);
+                            }
+                        }
+                    }
                 }
             }
 

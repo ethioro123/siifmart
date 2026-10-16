@@ -1,7 +1,7 @@
 {
   "appId": "com.siifmart.app",
-  "productName": "SIIFMART",
-  "copyright": "Copyright © 2026 SIIFMART",
+  "productName": "SiifMart",
+  "copyright": "Copyright © 2026 SiifMart",
   "directories": {
     "output": "release"
   },
@@ -47,7 +47,7 @@
     "allowToChangeInstallationDirectory": true,
     "createDesktopShortcut": true,
     "createStartMenuShortcut": true,
-    "shortcutName": "SIIFMART WMS & POS"
+    "shortcutName": "SiifMart WMS & POS"
   },
   "linux": {
     "icon": "build/icon.png",

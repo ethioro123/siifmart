@@ -50,7 +50,7 @@ export const TransferReceiving: React.FC<TransferReceivingProps> = ({
 
     // Delivering driver lookup
     const assignedDriver = employees.find(e => e.id === activeTransferJob.assignedTo);
-    const driverName = activeTransferJob.carrierName || activeTransferJob.carrier || assignedDriver?.name || 'Assigned Driver / Courier';
+    const driverName = (activeTransferJob as any).carrierName || (activeTransferJob as any).carrier || assignedDriver?.name || 'Assigned Driver / Courier';
 
     const handleConfirmReceipt = async (discrepancyDetails?: { hasDiscrepancy: boolean; discrepancyCount: number; driverAcknowledged: boolean }) => {
         if (!activeTransferJob) return;
@@ -61,7 +61,7 @@ export const TransferReceiving: React.FC<TransferReceivingProps> = ({
 
             // Preserve verified received quantities and condition statuses
             const updatedLineItems = (activeTransferJob.lineItems || []).map((li: any, idx: number) => {
-                const recItem = transferReceiveItems.find(ri => ri.productId === li.productId || ri.sku === li.sku || ri.id === li.id)
+                const recItem = transferReceiveItems.find((ri: any) => ri.productId === li.productId || ri.sku === li.sku || ri.id === li.id)
                     || transferReceiveItems[idx];
                 return {
                     ...li,
@@ -231,14 +231,25 @@ export const TransferReceiving: React.FC<TransferReceivingProps> = ({
             try {
                 const putawayItems = transferReceiveItems
                     .filter(i => (i.receivedQty || 0) > 0)
-                    .map(i => ({
-                        productId: i.productId,
-                        name: i.name || 'Received Product',
-                        sku: i.sku || i.productId,
-                        expectedQty: i.receivedQty || 0,
-                        pickedQty: 0,
-                        status: 'Pending' as const
-                    }));
+                    .map((i: any) => {
+                        const matchingLineItem = (activeTransferJob.lineItems || []).find((li: any) => li.productId === i.productId || li.sku === i.sku);
+                        return {
+                            productId: i.productId,
+                            name: i.name || i.productName || matchingLineItem?.name || 'Received Product',
+                            sku: i.sku || matchingLineItem?.sku || i.productId,
+                            price: (matchingLineItem as any)?.price || (matchingLineItem as any)?.retailPrice || 0,
+                            retailPrice: (matchingLineItem as any)?.retailPrice || (matchingLineItem as any)?.price || 0,
+                            costPrice: (matchingLineItem as any)?.costPrice || (matchingLineItem as any)?.cost || 0,
+                            category: matchingLineItem?.category || 'General',
+                            brand: matchingLineItem?.brand || '',
+                            unit: matchingLineItem?.unit || i.unit || 'pcs',
+                            size: matchingLineItem?.size || i.size || '',
+                            barcode: matchingLineItem?.barcode || i.barcode || '',
+                            expectedQty: i.receivedQty || 0,
+                            pickedQty: 0,
+                            status: 'Pending' as const
+                        };
+                    });
 
                 if (putawayItems.length > 0 && destSiteId) {
                     await wmsJobsService.create({

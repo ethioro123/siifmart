@@ -8,7 +8,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 // Explicitly set Application Name for macOS Menu Bar & Task Manager
-app.setName('SIIFMART');
+app.setName('SiifMart');
 if (process.platform === 'win32') {
     app.setAppUserModelId('com.siifmart.app');
 }
@@ -42,7 +42,7 @@ function createWindow(): void {
         minWidth: 1024,
         minHeight: 700,
         backgroundColor: '#151D18',
-        title: 'SIIFMART',
+        title: 'SiifMart',
         icon: path.join(__dirname, '../public/icon.png'),
         show: false, // Wait until ready-to-show to prevent white flash
         webPreferences: {

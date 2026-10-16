@@ -362,7 +362,7 @@ export const OutboundJobModal: React.FC<OutboundJobModalProps> = ({
                                                     shippedAt: now
                                                 } as any);
                                             } catch (e) {
-                                                logger.warn('OutboundJobModal', 'Failed to sync pickup to parent transfer:', e);
+                                                logger.warn('OutboundJobModal', `Failed to sync pickup to parent transfer: ${e instanceof Error ? e.message : String(e)}`);
                                             }
                                         }
                                     } finally {
@@ -414,7 +414,7 @@ export const OutboundJobModal: React.FC<OutboundJobModalProps> = ({
                                                                 deliveredAt: now
                                                             } as any);
                                                         } catch (e) {
-                                                            logger.warn('OutboundJobModal', 'Failed to sync delivery to parent transfer:', e);
+                                                            logger.warn('OutboundJobModal', `Failed to sync delivery to parent transfer: ${e instanceof Error ? e.message : String(e)}`);
                                                         }
                                                     }
                                                 } finally {
