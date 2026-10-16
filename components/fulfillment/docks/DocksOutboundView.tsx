@@ -237,7 +237,7 @@ export const DocksOutboundView: React.FC<DocksOutboundViewProps> = ({
                                                                         addNotification('alert', 'Toggle Failed');
                                                                     }
                                                                 }}
-                                                                className={`flex-1 py-1 text-[11px] font-semibold rounded-lg transition-colors min-h-[32px] touch-manipulation ${assignedJob.deliveryMethod !== 'External' ? 'bg-primary text-white shadow-xs' : 'text-[var(--theme-text-muted)] hover:text-[var(--theme-text-primary)]'}`}
+                                                                className={`flex-1 py-1 text-[11px] font-semibold rounded-lg transition-colors min-h-[32px] touch-manipulation cursor-pointer ${assignedJob.deliveryMethod !== 'External' ? 'bg-[var(--theme-primary)] text-[var(--theme-primary-text)] shadow-xs' : 'text-[var(--theme-text-muted)] hover:text-[var(--theme-text-primary)]'}`}
                                                             >
                                                                 INTERNAL
                                                             </button>
@@ -261,7 +261,7 @@ export const DocksOutboundView: React.FC<DocksOutboundViewProps> = ({
                                                                         addNotification('alert', 'Toggle Failed');
                                                                     }
                                                                 }}
-                                                                className={`flex-1 py-1 text-[11px] font-semibold rounded-lg transition-colors min-h-[32px] touch-manipulation ${assignedJob.deliveryMethod === 'External' ? 'bg-primary text-white shadow-xs' : 'text-[var(--theme-text-muted)] hover:text-[var(--theme-text-primary)]'}`}
+                                                                className={`flex-1 py-1 text-[11px] font-semibold rounded-lg transition-colors min-h-[32px] touch-manipulation cursor-pointer ${assignedJob.deliveryMethod === 'External' ? 'bg-[var(--theme-primary)] text-[var(--theme-primary-text)] shadow-xs' : 'text-[var(--theme-text-muted)] hover:text-[var(--theme-text-primary)]'}`}
                                                             >
                                                                 EXTERNAL
                                                             </button>
@@ -294,6 +294,12 @@ export const DocksOutboundView: React.FC<DocksOutboundViewProps> = ({
                                                                                     externalCarrierName: carrierName,
                                                                                     assignedBy: user?.name || 'Unknown'
                                                                                 } as any);
+                                                                                if (assignedJob.orderRef) {
+                                                                                    const parentJob = jobs.find(j => (j.id === assignedJob.orderRef || j.jobNumber === assignedJob.orderRef) && j.type === 'TRANSFER');
+                                                                                    if (parentJob) {
+                                                                                        await wmsJobsService.update(parentJob.id, { externalCarrierName: carrierName } as any);
+                                                                                    }
+                                                                                }
                                                                                 await refreshData();
                                                                             } catch (err) {
                                                                                 addNotification('alert', 'Save Failed');
@@ -333,6 +339,12 @@ export const DocksOutboundView: React.FC<DocksOutboundViewProps> = ({
                                                                                         assignedTo: driverId,
                                                                                         assignedBy: user?.name || 'Unknown'
                                                                                     } as any);
+                                                                                    if (assignedJob.orderRef) {
+                                                                                        const parentJob = jobs.find(j => (j.id === assignedJob.orderRef || j.jobNumber === assignedJob.orderRef) && j.type === 'TRANSFER');
+                                                                                        if (parentJob) {
+                                                                                            await wmsJobsService.update(parentJob.id, { assignedTo: driverId } as any);
+                                                                                        }
+                                                                                    }
                                                                                     await refreshData();
                                                                                     addNotification('success', `Assigned to Warehouse Driver`);
                                                                                 } catch (err) {
@@ -360,18 +372,33 @@ export const DocksOutboundView: React.FC<DocksOutboundViewProps> = ({
                                                                 onClick={async (e) => {
                                                                     e.stopPropagation();
                                                                     if (!checkControlAccess('Departure controls')) return;
+                                                                    if (assignedJob.deliveryMethod === 'External') {
+                                                                        if (!assignedJob.externalCarrierName || !assignedJob.externalCarrierName.trim()) {
+                                                                            addNotification('alert', 'Please enter a courier/carrier name before marking departure.');
+                                                                            return;
+                                                                        }
+                                                                    } else if (!assignedJob.assignedTo) {
+                                                                        addNotification('alert', 'Please assign a driver before marking departure.');
+                                                                        return;
+                                                                    }
                                                                     try {
+                                                                        const departureTime = new Date().toISOString();
                                                                         await wmsJobsService.update(assignedJob.id, {
                                                                             status: 'In-Progress',
                                                                             transferStatus: 'Shipped',
                                                                             location: 'In-Transit',
-                                                                            shippedAt: new Date().toISOString(),
+                                                                            shippedAt: departureTime,
                                                                             assignedBy: user?.name || 'System'
                                                                         } as any);
                                                                         if (assignedJob.orderRef) {
                                                                             const parentJob = jobs.find(j => (j.id === assignedJob.orderRef || j.jobNumber === assignedJob.orderRef) && j.type === 'TRANSFER');
-                                                                            await wmsJobsService.update(parentJob ? parentJob.id : assignedJob.orderRef, { 
+                                                                            const parentId = parentJob ? parentJob.id : assignedJob.orderRef;
+                                                                            await wmsJobsService.update(parentId, { 
                                                                                 transferStatus: 'Shipped',
+                                                                                shippedAt: departureTime,
+                                                                                assignedTo: assignedJob.assignedTo || parentJob?.assignedTo,
+                                                                                deliveryMethod: assignedJob.deliveryMethod,
+                                                                                externalCarrierName: assignedJob.externalCarrierName,
                                                                                 assignedBy: user?.name || 'System'
                                                                             } as any);
                                                                         }
@@ -381,7 +408,7 @@ export const DocksOutboundView: React.FC<DocksOutboundViewProps> = ({
                                                                         addNotification('alert', 'Status Update Failed');
                                                                     }
                                                                 }}
-                                                                className="w-full min-h-[44px] bg-primary hover:bg-primary/90 text-white text-xs font-semibold uppercase tracking-wider py-2 rounded-xl flex items-center justify-center gap-2 transition-colors active:scale-[0.98] shadow-sm touch-manipulation"
+                                                                className="w-full min-h-[44px] bg-[var(--theme-primary)] hover:opacity-90 text-[var(--theme-primary-text)] text-xs font-semibold uppercase tracking-wider py-2 rounded-xl flex items-center justify-center gap-2 transition-colors active:scale-[0.98] shadow-sm touch-manipulation cursor-pointer"
                                                             >
                                                                 <Navigation size={14} /> Mark Departure
                                                             </button>

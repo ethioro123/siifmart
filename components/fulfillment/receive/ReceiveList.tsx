@@ -69,15 +69,15 @@ export const ReceiveList: React.FC<ReceiveListProps> = ({
 
     if (filteredReceiveOrdersLength === 0) {
         return (
-            <div className="flex flex-col items-center justify-center py-16 text-center space-y-4 bg-[var(--theme-bg-card)] border border-dashed border-[var(--theme-border)] rounded-2xl shadow-[var(--shadow-sm)]">
-                <div className="w-16 h-16 rounded-2xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] flex items-center justify-center text-[var(--theme-text-secondary)]">
-                    <Package size={32} />
+            <div className="flex flex-col items-center justify-center py-6 sm:py-16 text-center space-y-2 sm:space-y-4 bg-[var(--theme-bg-card)] border border-dashed border-[var(--theme-border)] rounded-xl sm:rounded-2xl shadow-xs">
+                <div className="w-10 h-10 sm:w-16 sm:h-16 rounded-xl sm:rounded-2xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] flex items-center justify-center text-[var(--theme-text-secondary)]">
+                    <Package size={20} className="sm:w-8 sm:h-8" />
                 </div>
                 <div>
-                    <p className="text-sm font-semibold text-[var(--theme-text-primary)]">
+                    <p className="text-xs sm:text-sm font-semibold text-[var(--theme-text-primary)]">
                         {t('warehouse.noApprovedManifests')}
                     </p>
-                    <p className="text-xs text-[var(--theme-text-secondary)] font-medium mt-1">
+                    <p className="text-[11px] sm:text-xs text-[var(--theme-text-secondary)] font-medium mt-0.5 sm:mt-1">
                         {t('warehouse.approvedManifestsWillAppear')}
                     </p>
                 </div>
@@ -86,8 +86,8 @@ export const ReceiveList: React.FC<ReceiveListProps> = ({
     }
 
     return (
-        <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar space-y-4 pb-6">
-            <div className="grid grid-cols-1 gap-4">
+        <div className="flex-1 overflow-y-auto pr-1 sm:pr-2 custom-scrollbar space-y-2 sm:space-y-4 pb-6">
+            <div className="grid grid-cols-1 gap-2 sm:gap-4">
                 {paginatedReceiveOrders.map(po => {
                     const poJobs = jobs.filter(j => (j.orderRef === po.id || (po.po_number && j.orderRef === po.po_number) || (po.poNumber && j.orderRef === po.poNumber)) && j.type === 'PUTAWAY');
                     const receivedMaps = buildPOJobsReceivedMap(poJobs);
@@ -99,15 +99,15 @@ export const ReceiveList: React.FC<ReceiveListProps> = ({
                     return (
                         <div
                             key={po.id}
-                            className={`group bg-[var(--theme-bg-card)] p-4 sm:p-5 md:p-6 rounded-2xl border transition-all shadow-[var(--shadow-sm)] ${
+                            className={`group bg-[var(--theme-bg-card)] p-2.5 sm:p-5 md:p-6 rounded-xl sm:rounded-2xl border transition-all shadow-xs ${
                                 allItemsReceived
                                     ? 'border-emerald-500/40 dark:border-emerald-500/30 ring-1 ring-emerald-500/20'
                                     : 'border-[var(--theme-border)] hover:border-[var(--theme-border-strong)]'
                             }`}
                         >
-                            <div className="flex flex-col sm:flex-row justify-between items-start gap-3 md:gap-4 mb-5">
-                                <div className="flex items-center gap-3.5 flex-1 min-w-0">
-                                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 border transition-all ${
+                            <div className="flex flex-col sm:flex-row justify-between items-start gap-2 md:gap-4 mb-2 sm:mb-5">
+                                <div className="flex items-center gap-2.5 sm:gap-3.5 flex-1 min-w-0">
+                                    <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl flex items-center justify-center shrink-0 border transition-all ${
                                         allItemsReceived
                                             ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20'
                                             : 'bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] border-[var(--theme-border)]'
@@ -162,13 +162,13 @@ export const ReceiveList: React.FC<ReceiveListProps> = ({
                                     return (
                                         <div
                                             key={item.productId || idx}
-                                            className={`p-4 rounded-xl border transition-all ${
+                                            className={`p-2.5 sm:p-4 rounded-xl border transition-all ${
                                                 isComplete
                                                     ? 'bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] opacity-75'
                                                     : 'bg-[var(--theme-bg-card)] border-[var(--theme-border)] hover:border-[var(--theme-border-strong)] shadow-[var(--shadow-sm)]'
                                             }`}
                                         >
-                                            <div className="flex flex-col gap-4">
+                                            <div className="flex flex-col gap-2.5 sm:gap-4">
                                                 <div className="flex justify-between items-start gap-3">
                                                     <div className="flex-1 min-w-0">
                                                         <p className={`text-xs font-semibold tracking-tight truncate ${
@@ -262,7 +262,7 @@ export const ReceiveList: React.FC<ReceiveListProps> = ({
                                                             packQuantity: item.packQuantity || product?.packQuantity || 1,
                                                             poNumber: po.poNumber || po.po_number
                                                         })}
-                                                        className="w-full h-10 bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-subtle)]/80 text-[var(--theme-text-primary)] border border-[var(--theme-border)] text-xs font-semibold rounded-xl flex items-center justify-center gap-2 transition-all cursor-pointer touch-manipulation active:scale-[0.98]"
+                                                        className="w-full h-8 sm:h-10 bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-subtle)]/80 text-[var(--theme-text-primary)] border border-[var(--theme-border)] text-xs font-semibold rounded-xl flex items-center justify-center gap-2 transition-all cursor-pointer touch-manipulation active:scale-[0.98]"
                                                     >
                                                         <Printer size={14} className="text-[var(--theme-text-secondary)]" />
                                                         {t('warehouse.reprintLabel')}
@@ -304,7 +304,7 @@ export const ReceiveList: React.FC<ReceiveListProps> = ({
                                                                 setIsSplitReceiving(true);
                                                             }}
                                                             disabled={isSubmitting}
-                                                            className="w-full h-11 bg-[var(--theme-accent)] hover:opacity-90 text-white text-xs font-semibold rounded-xl flex items-center justify-center gap-2 shadow-[var(--shadow-sm)] active:scale-[0.98] transition-all cursor-pointer touch-manipulation disabled:opacity-50 disabled:cursor-not-allowed"
+                                                            className="w-full h-8 sm:h-11 bg-[var(--theme-accent)] hover:opacity-90 text-white text-xs font-semibold rounded-xl flex items-center justify-center gap-2 shadow-[var(--shadow-sm)] active:scale-[0.98] transition-all cursor-pointer touch-manipulation disabled:opacity-50 disabled:cursor-not-allowed"
                                                         >
                                                             {isSubmitting ? (
                                                                 <Loader2 size={16} className="animate-spin" />

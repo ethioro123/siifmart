@@ -119,6 +119,23 @@ export const useJobActions = (deps: UseJobActionsDeps) => {
                 assignedBy: source || user?.name || 'System'
             });
 
+            // If this is a DISPATCH job linked to a parent TRANSFER job (orderRef), synchronize assignedTo & carrier to parent TRANSFER job!
+            if (job.type === 'DISPATCH' && job.orderRef) {
+                const parentJob = jobs.find(j => j.id === job.orderRef || (j as any).transferNumber === job.orderRef || j.jobNumber === job.orderRef);
+                if (parentJob) {
+                    try {
+                        const updatedParent = await wmsJobsService.update(parentJob.id, {
+                            assignedTo: employee.id,
+                            carrierName: employee.name,
+                            deliveryMethod: 'Internal'
+                        });
+                        setJobs(prev => prev.map(j => j.id === parentJob.id ? { ...j, ...updatedParent } : j));
+                    } catch (syncErr: any) {
+                        logger.warn('useJobActions', `Failed to sync driver assignment to parent transfer job: ${syncErr?.message || String(syncErr)}`);
+                    }
+                }
+            }
+
             setJobs(prev => prev.map(j => j.id === jobId ? updatedJob : j));
             queryClient.invalidateQueries({ queryKey: ['jobs'] });
             addNotification('success', getTranslation('warehouse.jobAssigned').replace('{name}', employee.name));
@@ -126,7 +143,7 @@ export const useJobActions = (deps: UseJobActionsDeps) => {
             logger.error('useJobActions', 'Failed to assign job:', error);
             addNotification('alert', getTranslation('warehouse.jobAssignFailed'));
         }
-    }, [jobs, jobAssignments, employees, setJobs, setJobAssignments, addNotification, queryClient]);
+    }, [jobs, jobAssignments, employees, user, setJobs, setJobAssignments, addNotification, queryClient]);
 
     const unassignJob = useCallback(async (jobId: string) => {
         try {
@@ -152,6 +169,22 @@ export const useJobActions = (deps: UseJobActionsDeps) => {
                 assignedBy: user?.name || 'System' // [NEW] Track dispatcher
             });
 
+            // If this is a DISPATCH job linked to a parent TRANSFER job, clear driver on parent transfer job
+            if (job.type === 'DISPATCH' && job.orderRef) {
+                const parentJob = jobs.find(j => j.id === job.orderRef || (j as any).transferNumber === job.orderRef || j.jobNumber === job.orderRef);
+                if (parentJob) {
+                    try {
+                        const updatedParent = await wmsJobsService.update(parentJob.id, {
+                            assignedTo: '',
+                            carrierName: ''
+                        });
+                        setJobs(prev => prev.map(j => j.id === parentJob.id ? { ...j, ...updatedParent } : j));
+                    } catch (syncErr: any) {
+                        logger.warn('useJobActions', `Failed to clear driver assignment on parent transfer job: ${syncErr?.message || String(syncErr)}`);
+                    }
+                }
+            }
+
             setJobs(prev => prev.map(j => j.id === jobId ? updatedJob : j));
             queryClient.invalidateQueries({ queryKey: ['jobs'] });
             addNotification('success', 'Job unassigned and returned to queue');
@@ -159,7 +192,7 @@ export const useJobActions = (deps: UseJobActionsDeps) => {
             logger.error('useJobActions', 'Failed to unassign job:', error);
             addNotification('alert', 'Failed to unassign job');
         }
-    }, [jobs, jobAssignments, setJobs, setJobAssignments, addNotification, queryClient]);
+    }, [jobs, jobAssignments, user, setJobs, setJobAssignments, addNotification, queryClient]);
 
     const updateJobItem = useCallback(async (jobId: string, itemId: number, status: JobItem['status'], qty: number, location?: string, extra?: Partial<JobItem>) => {
         logger.debug('useJobActions', `📝 [updateJobItem] Job=${jobId}, ItemIdx=${itemId}, Status=${status}, Qty=${qty}, Location=${location}`);

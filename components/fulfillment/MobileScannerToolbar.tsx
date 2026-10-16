@@ -134,9 +134,9 @@ export default function MobileScannerToolbar({
                                         key={sv.id}
                                         type="button"
                                         onClick={() => onSubViewChange?.(sv.id)}
-                                        className={`px-3 py-1.5 min-h-[38px] rounded-lg text-xs font-semibold uppercase tracking-wider transition-colors flex items-center gap-1 touch-manipulation ${
+                                        className={`px-3 py-1.5 min-h-[38px] rounded-lg text-xs font-semibold uppercase tracking-wider transition-colors flex items-center gap-1 touch-manipulation cursor-pointer ${
                                             isActive
-                                                ? 'bg-primary text-white shadow-sm'
+                                                ? 'bg-[var(--theme-primary)] text-[var(--theme-primary-text)] shadow-sm'
                                                 : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)]'
                                         }`}
                                     >
@@ -144,7 +144,7 @@ export default function MobileScannerToolbar({
                                         <span>{sv.label}</span>
                                         {sv.count !== undefined && (
                                             <span className={`px-1.5 py-0.2 rounded-full text-[11px] font-mono tabular-nums ${
-                                                isActive ? 'bg-white/20 text-white' : 'bg-[var(--theme-bg-card)] text-[var(--theme-text-muted)]'
+                                                isActive ? 'bg-[var(--theme-primary-text)]/15 text-[var(--theme-primary-text)]' : 'bg-[var(--theme-bg-card)] text-[var(--theme-text-muted)]'
                                             }`}>
                                                 {sv.count}
                                             </span>
@@ -163,16 +163,16 @@ export default function MobileScannerToolbar({
                         <button
                             type="button"
                             onClick={() => setIsMenuOpen(!isMenuOpen)}
-                            className={`min-h-[44px] min-w-[44px] px-2.5 py-1.5 rounded-xl border flex items-center justify-center gap-1 text-xs font-semibold uppercase tracking-wider transition-colors touch-manipulation ${
+                            className={`min-h-[44px] min-w-[44px] px-2.5 py-1.5 rounded-xl border flex items-center justify-center gap-1 text-xs font-semibold uppercase tracking-wider transition-colors touch-manipulation cursor-pointer ${
                                 isMenuOpen || activeFilterCount > 0
-                                    ? 'bg-primary text-white border-primary shadow-sm'
+                                    ? 'bg-[var(--theme-primary)] text-[var(--theme-primary-text)] border-[var(--theme-primary)] shadow-sm'
                                     : 'bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] border-[var(--theme-border)] hover:text-[var(--theme-text-primary)]'
                             }`}
                             aria-label="Toggle filters and options"
                         >
                             <SlidersHorizontal size={14} />
                             {activeFilterCount > 0 && (
-                                <span className="w-4 h-4 rounded-full bg-white text-primary text-[11px] font-bold flex items-center justify-center">
+                                <span className="w-4 h-4 rounded-full bg-[var(--theme-primary-text)] text-[var(--theme-primary)] text-[11px] font-bold flex items-center justify-center">
                                     {activeFilterCount}
                                 </span>
                             )}
@@ -258,8 +258,8 @@ export default function MobileScannerToolbar({
                                             key={i}
                                             type="button"
                                             onClick={() => f.onClick()}
-                                            className={`px-3.5 py-2 min-h-[38px] rounded-xl text-xs font-semibold uppercase tracking-wider transition-colors touch-manipulation ${f.isActive
-                                                ? 'bg-primary text-white border border-primary shadow-sm'
+                                            className={`px-3.5 py-2 min-h-[38px] rounded-xl text-xs font-semibold uppercase tracking-wider transition-colors touch-manipulation cursor-pointer ${f.isActive
+                                                ? 'bg-[var(--theme-primary)] text-[var(--theme-primary-text)] border border-[var(--theme-primary)] shadow-sm'
                                                 : 'bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] border border-[var(--theme-border)] hover:text-[var(--theme-text-primary)]'
                                                 }`}
                                         >
@@ -280,8 +280,8 @@ export default function MobileScannerToolbar({
                                             key={opt.id}
                                             type="button"
                                             onClick={() => onSortChange?.(opt.id)}
-                                            className={`px-3.5 py-2 min-h-[38px] rounded-xl text-xs font-semibold uppercase tracking-wider transition-colors touch-manipulation ${sortValue === opt.id
-                                                ? 'bg-primary text-white border border-primary shadow-sm'
+                                            className={`px-3.5 py-2 min-h-[38px] rounded-xl text-xs font-semibold uppercase tracking-wider transition-colors touch-manipulation cursor-pointer ${sortValue === opt.id
+                                                ? 'bg-[var(--theme-primary)] text-[var(--theme-primary-text)] border border-[var(--theme-primary)] shadow-sm'
                                                 : 'bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] border border-[var(--theme-border)] hover:text-[var(--theme-text-primary)]'
                                                 }`}
                                         >

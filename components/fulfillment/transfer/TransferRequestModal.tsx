@@ -188,6 +188,13 @@ export const TransferRequestModal: React.FC<TransferRequestModalProps> = ({
                     name: p?.name || '',
                     unit: p?.unit || 'pcs',
                     size: p?.size || '0',
+                    price: p?.price ?? 0,
+                    retailPrice: p?.price ?? 0,
+                    costPrice: (p as any)?.costPrice ?? (p as any)?.cost ?? 0,
+                    category: p?.category || 'General',
+                    brand: p?.brand || '',
+                    barcode: p?.barcode || '',
+                    image: p?.image || '',
                     expectedQty,
                     receivedQty: 0,
                     status: 'Pending',
@@ -412,7 +419,7 @@ export const TransferRequestModal: React.FC<TransferRequestModalProps> = ({
                                 <button
                                     onClick={handleCreateTransfer}
                                     disabled={isSubmitting}
-                                    className="min-h-[44px] px-6 py-2.5 bg-primary hover:opacity-90 text-white rounded-xl font-bold text-xs uppercase tracking-wider transition-all shadow-xs disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 active:scale-95 cursor-pointer touch-manipulation"
+                                    className="min-h-[44px] px-6 py-2.5 bg-[var(--theme-primary)] hover:opacity-90 text-[var(--theme-primary-text)] rounded-xl font-bold text-xs uppercase tracking-wider transition-all shadow-xs disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 active:scale-95 cursor-pointer touch-manipulation"
                                 >
                                     {isSubmitting ? 'Confirming...' : t('warehouse.confirm')}
                                     <ArrowRight size={16} />
@@ -429,7 +436,7 @@ export const TransferRequestModal: React.FC<TransferRequestModalProps> = ({
                                 <button
                                     onClick={handleReviewRequest}
                                     disabled={transferItems.length === 0}
-                                    className="min-h-[44px] px-6 py-2.5 bg-primary hover:opacity-90 text-white rounded-xl font-bold text-xs uppercase tracking-wider transition-all shadow-xs disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 touch-manipulation"
+                                    className="min-h-[44px] px-6 py-2.5 bg-[var(--theme-primary)] hover:opacity-90 text-[var(--theme-primary-text)] rounded-xl font-bold text-xs uppercase tracking-wider transition-all shadow-xs disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 cursor-pointer touch-manipulation"
                                 >
                                     {t('warehouse.transferRequest')}
                                     <ArrowRight size={16} />

@@ -59,7 +59,7 @@ export const ScannerNavStep: React.FC<ScannerNavStepProps> = ({
                 />
                 <button
                     onClick={() => handleLocationScan(locationSearch)}
-                    className="mt-4 min-h-[44px] bg-primary text-white font-semibold w-full py-3.5 text-base rounded-xl hover:opacity-90 active:scale-95 transition-all touch-manipulation"
+                    className="mt-4 min-h-[44px] bg-[var(--theme-primary)] text-[var(--theme-primary-text)] font-semibold w-full py-3.5 text-base rounded-xl hover:opacity-90 active:scale-95 transition-all touch-manipulation cursor-pointer"
                 >
                     {t('warehouse.confirmLocation')}
                 </button>

@@ -143,6 +143,18 @@ export const PackTab: React.FC = () => {
 
     const packJobsTotalPages = Math.ceil(filteredPackJobs.length / PACK_ITEMS_PER_PAGE);
 
+    const packStats = useMemo(() => {
+        let pending = 0;
+        let active = 0;
+        filteredJobs.forEach(j => {
+            if (j.type === 'PACK') {
+                if (j.status === 'Pending') pending++;
+                else if (j.status === 'In-Progress') active++;
+            }
+        });
+        return { pending, active };
+    }, [filteredJobs]);
+
     const paginatedPackJobs = useMemo(() => {
         const start = (packCurrentPage - 1) * PACK_ITEMS_PER_PAGE;
         return filteredPackJobs.slice(start, start + PACK_ITEMS_PER_PAGE);
@@ -291,6 +303,7 @@ export const PackTab: React.FC = () => {
                     setIsPackSortDropdownOpen={setIsPackSortDropdownOpen}
                     packSearch={packSearch}
                     setPackSearch={setPackSearch}
+                    filteredJobsCount={packStats}
                     t={t}
                 />
 

@@ -39,7 +39,7 @@ export function usePutawayStock() {
     }) => {
         try {
             const ts = params.timestamp || new Date().toISOString();
-            logger.debug('Fulfillment', '📦 putawayStock called:');
+            logger.debug('Fulfillment', 'putawayStock called:');
 
             // Country policy: PO retail price goes live only when stock reaches the shelf (default)
             if (params.type === 'IN' && params.retailPrice && params.retailPrice > 0
@@ -54,11 +54,11 @@ export function usePutawayStock() {
             let destProductId = destProduct?.id;
 
             if (destProduct) {
-                logger.debug('Fulfillment', `✅ Found existing product at ${params.location} (ID: ${destProduct.id}). Updating stock...`);
+                logger.debug('Fulfillment', `Found existing product at ${params.location} (ID: ${destProduct.id}). Updating stock...`);
                 // Update existing
                 await productsService.adjustStock(destProduct.id, params.quantity, 'IN', `Putaway to ${params.location}`, user?.name || 'System', params.expiryDate, params.batchNumber, ts);
             } else {
-                logger.debug('Fulfillment', `ℹ️ No product found at ${params.location}. Creating or recycling record...`);
+                logger.debug('Fulfillment', `No product found at ${params.location}. Creating or recycling record...`);
                 // Create new
                 // Need source details. Use sourceProductId if available, or fetch by SKU.
                 let sourceProduct: any;
@@ -71,11 +71,22 @@ export function usePutawayStock() {
                     sourceProduct = await productsService.getBySKU(params.sku, params.siteId);
                 }
 
+                if (!sourceProduct || !sourceProduct.price || sourceProduct.price <= 0) {
+                    try {
+                        const template = await productsService.getBySKU(params.sku);
+                        if (template && (template.price > 0 || !sourceProduct)) {
+                            sourceProduct = sourceProduct
+                                ? { ...template, ...sourceProduct, price: template.price || sourceProduct.price, costPrice: template.costPrice || sourceProduct.costPrice, category: (template.category && template.category !== 'Uncategorized') ? template.category : sourceProduct.category }
+                                : template;
+                        }
+                    } catch (e) { }
+                }
+
                 // [FIX] Handle custom products that only exist as PO Items
                 if (!sourceProduct && params.sourceProductId) {
                     const poItem = orders?.flatMap(o => o.lineItems || []).find(i => i.id === params.sourceProductId || i.productId === params.sourceProductId);
                     if (poItem) {
-                        logger.debug('Fulfillment', `ℹ️ Found PO Item matching ID. Creating initial product definition for ${params.sku}`);
+                        logger.debug('Fulfillment', `Found PO Item matching ID. Creating initial product definition for ${params.sku}`);
                         sourceProduct = {
                             name: poItem.productName || params.sku,
                             sku: poItem.sku || params.sku,
@@ -120,7 +131,7 @@ export function usePutawayStock() {
                 }
 
                 if (placeholderRecord) {
-                    logger.debug('Fulfillment', `♻️ Recycling placeholder product ${placeholderRecord.id} from '${placeholderRecord.location}' to '${params.location}'`);
+                    logger.debug('Fulfillment', `Recycling placeholder product ${placeholderRecord.id} from '${placeholderRecord.location}' to '${params.location}'`);
 
                     // Update the existing placeholder to be the real record
                     const updates: Partial<Product> = {
@@ -130,6 +141,17 @@ export function usePutawayStock() {
                     };
                     if (params.expiryDate || placeholderRecord.expiryDate) updates.expiryDate = params.expiryDate || placeholderRecord.expiryDate;
                     if (params.batchNumber || placeholderRecord.batchNumber) updates.batchNumber = params.batchNumber || placeholderRecord.batchNumber;
+
+                    // Sync pricing and category if missing or zero on placeholder
+                    if ((!placeholderRecord.price || placeholderRecord.price <= 0) && (params.retailPrice || sourceProduct?.price)) {
+                        updates.price = params.retailPrice || sourceProduct?.price;
+                    }
+                    if ((!placeholderRecord.costPrice || placeholderRecord.costPrice <= 0) && (sourceProduct?.costPrice)) {
+                        updates.costPrice = sourceProduct.costPrice;
+                    }
+                    if ((!placeholderRecord.category || placeholderRecord.category === 'Uncategorized') && (params.category || sourceProduct?.category) && (params.category !== 'Uncategorized' || sourceProduct?.category !== 'Uncategorized')) {
+                        updates.category = (params.category && params.category !== 'Uncategorized') ? params.category : sourceProduct?.category;
+                    }
 
                     // Sync PO line item details if missing on placeholder
                     if (!placeholderRecord.size && params.size) updates.size = params.size;

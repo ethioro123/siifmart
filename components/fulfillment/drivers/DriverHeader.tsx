@@ -11,6 +11,7 @@ interface DriverHeaderProps {
     setViewMode: (mode: 'Active' | 'History') => void;
     isSubmitting: boolean;
     refreshData: () => Promise<void>;
+    activeCount?: number;
 }
 
 export const DriverHeader: React.FC<DriverHeaderProps> = ({
@@ -20,23 +21,31 @@ export const DriverHeader: React.FC<DriverHeaderProps> = ({
     viewMode,
     setViewMode,
     isSubmitting,
-    refreshData
+    refreshData,
+    activeCount
 }) => {
     return (
-        <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-3 sm:p-4 shadow-xs flex flex-col sm:flex-row items-stretch sm:items-center justify-between sticky top-0 z-40 gap-3">
-            <div className="flex items-center justify-between gap-3 min-w-0">
-                <div className="flex items-center gap-3 min-w-0 flex-1">
-                    <div className="p-2.5 bg-primary/10 rounded-xl border border-primary/20 shrink-0 text-primary">
-                        <Truck size={20} />
+        <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-2 sm:p-4 shadow-xs flex flex-col sm:flex-row items-stretch sm:items-center justify-between sticky top-0 z-40 gap-2 sm:gap-3 mb-2">
+            <div className="flex items-center justify-between gap-2 min-w-0">
+                <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
+                    <div className="w-7 h-7 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl bg-[var(--theme-primary)]/10 border border-[var(--theme-primary)]/20 text-[var(--theme-primary)] flex items-center justify-center shrink-0">
+                        <Truck size={15} className="sm:w-[18px] sm:h-[18px]" />
                     </div>
                     <div className="min-w-0 flex-1">
-                        <div className="flex items-center gap-2">
-                            <h2 className="text-sm sm:text-base font-bold text-[var(--theme-text-primary)] tracking-tight leading-tight truncate">
+                        <div className="flex items-center gap-1.5 sm:gap-2">
+                            <h2 className="text-xs sm:text-base font-bold text-[var(--theme-text-primary)] tracking-tight leading-tight truncate">
                                 {t('warehouse.driverHub.driverTitle')} {t('warehouse.driverHub.hubTitle')}
                             </h2>
-                            <div className="w-2 h-2 rounded-full bg-emerald-500 shrink-0" />
+                            {activeCount !== undefined ? (
+                                <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 shrink-0">
+                                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                                    {activeCount} Active
+                                </span>
+                            ) : (
+                                <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-emerald-500 shrink-0" />
+                            )}
                         </div>
-                        <p className="text-[11px] text-[var(--theme-text-secondary)] font-medium uppercase tracking-wider mt-0.5 truncate">
+                        <p className="hidden sm:block text-xs text-[var(--theme-text-secondary)] font-medium mt-0.5 truncate">
                             {user?.name || t('warehouse.driverFallback')} • {activeSite?.name || t('warehouse.centralOpsArea')}
                         </p>
                     </div>
@@ -46,19 +55,19 @@ export const DriverHeader: React.FC<DriverHeaderProps> = ({
                     disabled={isSubmitting}
                     aria-label="Refresh Data"
                     title="Refresh Data"
-                    className="sm:hidden min-h-[40px] min-w-[40px] bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card)] rounded-xl text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] transition-colors border border-[var(--theme-border)] shadow-xs flex items-center justify-center shrink-0 touch-manipulation"
+                    className="sm:hidden min-h-[34px] min-w-[34px] bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card)] rounded-full text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] transition-colors border border-[var(--theme-border)] shadow-xs flex items-center justify-center shrink-0 touch-manipulation"
                 >
-                    <RefreshCw size={16} className={isSubmitting ? 'animate-spin text-primary' : ''} />
+                    <RefreshCw size={14} className={isSubmitting ? 'animate-spin text-[var(--theme-primary)]' : ''} />
                 </button>
             </div>
 
             <div className="flex items-center gap-2 w-full sm:w-auto">
-                <div className="bg-[var(--theme-bg-subtle)] p-1 rounded-xl border border-[var(--theme-border)] flex gap-1 w-full sm:w-auto flex-1 sm:flex-initial">
+                <div className="bg-[var(--theme-bg-subtle)] p-0.5 sm:p-1 rounded-full border border-[var(--theme-border)] flex gap-1 w-full sm:w-auto flex-1 sm:flex-initial">
                     <button
                         onClick={() => setViewMode('Active')}
-                        className={`flex-1 sm:flex-initial min-h-[40px] sm:min-h-[44px] px-3.5 py-1.5 rounded-lg text-xs font-semibold uppercase tracking-wider transition-all touch-manipulation flex items-center justify-center whitespace-nowrap ${
+                        className={`flex-1 sm:flex-initial min-h-[34px] sm:min-h-[44px] px-3 sm:px-4 py-1 sm:py-2 rounded-full text-xs font-semibold transition-all touch-manipulation flex items-center justify-center whitespace-nowrap cursor-pointer ${
                             viewMode === 'Active'
-                                ? 'bg-primary text-white shadow-xs'
+                                ? 'bg-[var(--theme-primary)] text-[var(--theme-primary-text)] shadow-xs'
                                 : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-card)]'
                         }`}
                     >
@@ -66,9 +75,9 @@ export const DriverHeader: React.FC<DriverHeaderProps> = ({
                     </button>
                     <button
                         onClick={() => setViewMode('History')}
-                        className={`flex-1 sm:flex-initial min-h-[40px] sm:min-h-[44px] px-3.5 py-1.5 rounded-lg text-xs font-semibold uppercase tracking-wider transition-all touch-manipulation flex items-center justify-center whitespace-nowrap ${
+                        className={`flex-1 sm:flex-initial min-h-[34px] sm:min-h-[44px] px-3 sm:px-4 py-1 sm:py-2 rounded-full text-xs font-semibold transition-all touch-manipulation flex items-center justify-center whitespace-nowrap cursor-pointer ${
                             viewMode === 'History'
-                                ? 'bg-primary text-white shadow-xs'
+                                ? 'bg-[var(--theme-primary)] text-[var(--theme-primary-text)] shadow-xs'
                                 : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-card)]'
                         }`}
                     >
@@ -80,9 +89,9 @@ export const DriverHeader: React.FC<DriverHeaderProps> = ({
                     disabled={isSubmitting}
                     aria-label="Refresh Data"
                     title="Refresh Data"
-                    className="hidden sm:flex min-h-[44px] min-w-[44px] bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card)] rounded-xl text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] transition-colors border border-[var(--theme-border)] shadow-xs items-center justify-center shrink-0 touch-manipulation"
+                    className="hidden sm:flex min-h-[44px] min-w-[44px] bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card)] rounded-full text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] transition-colors border border-[var(--theme-border)] shadow-xs items-center justify-center shrink-0 touch-manipulation"
                 >
-                    <RefreshCw size={16} className={isSubmitting ? 'animate-spin text-primary' : ''} />
+                    <RefreshCw size={16} className={isSubmitting ? 'animate-spin text-[var(--theme-primary)]' : ''} />
                 </button>
             </div>
         </div>

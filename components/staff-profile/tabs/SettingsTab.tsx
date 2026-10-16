@@ -313,7 +313,7 @@ export default function SettingsTab({
                                 ? 'bg-emerald-600 text-white'
                                 : governanceResult.requiresApproval && !isCEO
                                     ? 'bg-amber-500 hover:bg-amber-600 text-black'
-                                    : 'bg-[var(--theme-primary)] hover:opacity-95 text-white'
+                                    : 'bg-[var(--theme-primary)] hover:opacity-90 text-[var(--theme-primary-text)]'
                         }`}
                     >
                         {isSaving ? (

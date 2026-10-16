@@ -6,6 +6,7 @@ import Pagination from '../../shared/Pagination';
 import { formatJobId } from '../../../utils/jobIdFormatter';
 import { isUUID } from '../FulfillmentShared';
 import Protected from '../../Protected';
+import { useIsMobile } from '../../../hooks/useIsMobile';
 
 interface PutawayListProps {
     sortedPutawayJobs: WMSJob[];
@@ -44,15 +45,17 @@ export const PutawayList: React.FC<PutawayListProps> = ({
     onShowDetails,
     t
 }) => {
+    const isMobile = useIsMobile();
+
     if (sortedPutawayJobs.length === 0) {
         return (
-            <div className="col-span-full flex flex-col items-center justify-center py-16 text-center space-y-4 rounded-2xl border border-dashed border-[var(--theme-border)] bg-[var(--theme-bg-card)]">
-                <div className="w-14 h-14 rounded-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] flex items-center justify-center text-[var(--theme-text-secondary)]">
-                    <Box size={28} />
+            <div className="col-span-full flex flex-col items-center justify-center py-6 sm:py-16 text-center space-y-2 sm:space-y-4 rounded-xl sm:rounded-2xl border border-dashed border-[var(--theme-border)] bg-[var(--theme-bg-card)]">
+                <div className="w-10 h-10 sm:w-14 sm:h-14 rounded-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] flex items-center justify-center text-[var(--theme-text-secondary)]">
+                    <Box size={20} className="sm:w-7 sm:h-7" />
                 </div>
                 <div>
-                    <p className="text-[var(--theme-text-primary)] font-semibold uppercase tracking-wider text-sm">{t('warehouse.putaway.noJobsFound')}</p>
-                    <p className="text-[var(--theme-text-secondary)] font-medium text-xs mt-1">{t('warehouse.putaway.noJobsMatchingFilters')}</p>
+                    <p className="text-[var(--theme-text-primary)] font-semibold uppercase tracking-wider text-xs sm:text-sm">{t('warehouse.putaway.noJobsFound')}</p>
+                    <p className="text-[var(--theme-text-secondary)] font-medium text-[11px] sm:text-xs mt-0.5 sm:mt-1">{t('warehouse.putaway.noJobsMatchingFilters')}</p>
                 </div>
             </div>
         );
@@ -60,7 +63,7 @@ export const PutawayList: React.FC<PutawayListProps> = ({
 
     return (
         <>
-            <div className="col-span-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="col-span-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-4">
                 {paginatedPutawayJobs.map(job => {
                     const completedItems = job.lineItems?.filter(item => item.status === 'Completed').length || 0;
                     const progress = job.lineItems ? (completedItems / job.lineItems.length) * 100 : 0;
@@ -68,6 +71,54 @@ export const PutawayList: React.FC<PutawayListProps> = ({
                     const isJobDone = job.status === 'Completed';
                     const workerId = isJobDone ? (job.completedBy || (job as any).completed_by || job.assignedTo) : job.assignedTo;
                     const workerLabel = isJobDone ? (t('warehouse.completedBy') || 'Completed By') : (t('warehouse.assignedTo') || 'Assigned To');
+
+                    if (isMobile) {
+                        return (
+                            <div
+                                key={job.id}
+                                className={`flex items-center gap-2.5 bg-[var(--theme-bg-card)] border rounded-xl p-2.5 min-h-[48px] active:scale-[0.98] transition-transform cursor-pointer shadow-xs ${
+                                    isCritical 
+                                        ? 'border-red-500/40' 
+                                        : job.status === 'In-Progress' 
+                                            ? 'border-[var(--theme-accent)]/50' 
+                                            : 'border-[var(--theme-border)]'
+                                }`}
+                                onClick={() => handleStartJob(job)}
+                            >
+                                <div className={`w-9 h-9 rounded-lg flex items-center justify-center text-xs font-bold font-mono shrink-0 border ${
+                                    progress >= 100 
+                                        ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-500' 
+                                        : 'bg-[var(--theme-accent)]/10 border-[var(--theme-accent)]/20 text-[var(--theme-accent)]'
+                                }`}>
+                                    {Math.round(progress)}%
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                    <div className="flex items-center gap-1.5">
+                                        <span className="text-xs font-bold text-[var(--theme-text-primary)] font-mono tracking-wide uppercase truncate">
+                                            {formatJobId(job)}
+                                        </span>
+                                        {isCritical && (
+                                            <span className="bg-red-500 text-white text-[10px] font-semibold px-1 rounded-full uppercase shrink-0">
+                                                !
+                                            </span>
+                                        )}
+                                        {job.status === 'In-Progress' && (
+                                            <span className="inline-flex items-center gap-1 bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] text-[10px] font-semibold px-1.5 py-0.2 rounded-full uppercase border border-[var(--theme-accent)]/20 shrink-0">
+                                                <span className="w-1.5 h-1.5 rounded-full bg-[var(--theme-accent)]" />
+                                                Active
+                                            </span>
+                                        )}
+                                    </div>
+                                    <div className="flex items-center gap-1.5 text-[10px] text-[var(--theme-text-secondary)] font-medium uppercase tracking-wider truncate mt-0.5 font-mono">
+                                        <span>{job.items || job.lineItems?.length || 0} items</span>
+                                        <span className="opacity-40">•</span>
+                                        <span className="truncate">{((job as any).zone || job.location || 'ZONE A').toUpperCase()}</span>
+                                    </div>
+                                </div>
+                                <ChevronRight size={15} className="text-[var(--theme-text-secondary)] shrink-0" />
+                            </div>
+                        );
+                    }
 
                     return (
                         <div key={job.id} className={`group p-4 sm:p-5 rounded-2xl bg-[var(--theme-bg-card)] border border-[var(--theme-border)] relative overflow-hidden transition-all shadow-[var(--shadow-sm)] ${isCritical ? 'border-red-500/40' : ''}`}>

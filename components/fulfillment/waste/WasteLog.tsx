@@ -135,7 +135,7 @@ export const WasteLog: React.FC<WasteLogProps> = ({
 
                     <button
                         onClick={handleAddToBasket}
-                        className="w-full min-h-[44px] py-3 bg-primary hover:opacity-90 text-white font-bold rounded-xl transition-all flex items-center justify-center gap-2 shadow-xs touch-manipulation active:scale-[0.99]"
+                        className="w-full min-h-[44px] py-3 bg-[var(--theme-primary)] hover:opacity-90 text-[var(--theme-primary-text)] font-bold rounded-xl transition-all flex items-center justify-center gap-2 shadow-xs touch-manipulation active:scale-[0.99] cursor-pointer"
                     >
                         <Plus size={18} /> Add to Basket
                     </button>

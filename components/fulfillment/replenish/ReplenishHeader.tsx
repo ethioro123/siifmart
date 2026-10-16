@@ -53,9 +53,21 @@ export const ReplenishHeader: React.FC<ReplenishHeaderProps> = ({
     const alertCount = filteredProducts.filter(p => p.stock < (p.minStock || 10)).length;
 
     return (
-        <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-4 sm:p-5 shadow-sm">
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-                <div className="flex items-center gap-3">
+        <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-2 sm:p-5 shadow-xs mb-2">
+            {/* Mobile compact top row */}
+            <div className="flex sm:hidden items-center justify-between gap-2 mb-2">
+                <div className="flex items-center gap-1.5 min-w-0">
+                    <RefreshCw size={14} className="text-[var(--theme-accent)] shrink-0" />
+                    <span className="text-xs font-bold text-[var(--theme-text-primary)] truncate">Replenish</span>
+                    <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[10px] font-semibold bg-amber-500/10 text-amber-500 border border-amber-500/20 shrink-0">
+                        <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
+                        {alertCount} Alerts
+                    </span>
+                </div>
+            </div>
+
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-2 sm:gap-4">
+                <div className="hidden sm:flex items-center gap-3">
                     <div className="w-10 h-10 rounded-xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] flex items-center justify-center text-[var(--theme-accent)] shrink-0">
                         <RefreshCw size={20} />
                     </div>
@@ -69,15 +81,15 @@ export const ReplenishHeader: React.FC<ReplenishHeaderProps> = ({
                     </div>
                 </div>
 
-                <div className="flex flex-wrap items-center gap-2.5 w-full md:w-auto">
+                <div className="flex flex-wrap items-center gap-2 w-full md:w-auto">
                     {/* View Mode Segmented Control */}
                     {setViewMode && (
-                        <div className="bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] p-1 rounded-xl flex items-center">
+                        <div className="bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] p-0.5 sm:p-1 rounded-lg sm:rounded-xl flex items-center">
                             <button
                                 onClick={() => setViewMode('Process')}
-                                className={`px-3 py-1.5 rounded-lg text-xs font-semibold uppercase tracking-wider transition-colors min-h-[36px] ${
+                                className={`px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-md sm:rounded-lg text-xs font-semibold uppercase tracking-wider transition-colors min-h-[30px] sm:min-h-[36px] ${
                                     viewMode === 'Process'
-                                        ? 'bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)] shadow-sm'
+                                        ? 'bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)] shadow-xs'
                                         : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)]'
                                 }`}
                             >
@@ -85,9 +97,9 @@ export const ReplenishHeader: React.FC<ReplenishHeaderProps> = ({
                             </button>
                             <button
                                 onClick={() => setViewMode('History')}
-                                className={`px-3 py-1.5 rounded-lg text-xs font-semibold uppercase tracking-wider transition-colors min-h-[36px] ${
+                                className={`px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-md sm:rounded-lg text-xs font-semibold uppercase tracking-wider transition-colors min-h-[30px] sm:min-h-[36px] ${
                                     viewMode === 'History'
-                                        ? 'bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)] shadow-sm'
+                                        ? 'bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)] shadow-xs'
                                         : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)]'
                                 }`}
                             >

@@ -60,28 +60,28 @@ export const DriverMetrics: React.FC<DriverMetricsProps> = ({
         <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-4 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-xs overflow-hidden">
             <div className="grid grid-cols-3 gap-3 md:gap-6 w-full sm:w-auto">
                 <div className="text-center px-2">
-                    <p className="text-[11px] text-[var(--theme-text-secondary)] font-semibold uppercase tracking-wider mb-1">{t('warehouse.driverHub.totalJobs')}</p>
+                    <p className="text-xs text-[var(--theme-text-secondary)] font-medium mb-1">{t('warehouse.driverHub.totalJobs')}</p>
                     <p className="text-base sm:text-xl font-bold font-mono text-[var(--theme-text-primary)] tabular-nums leading-none">{totalJobs}</p>
                 </div>
                 <div className="text-center px-2 border-x border-[var(--theme-border)]">
-                    <p className="text-[11px] text-emerald-600 dark:text-emerald-400 font-semibold uppercase tracking-wider mb-1">{t('warehouse.driverHub.done')}</p>
+                    <p className="text-xs text-emerald-600 dark:text-emerald-400 font-medium mb-1">{t('warehouse.driverHub.done')}</p>
                     <p className="text-base sm:text-xl font-bold font-mono text-emerald-600 dark:text-emerald-400 tabular-nums leading-none">{stats.completed}</p>
                 </div>
                 <div className="text-center px-2">
-                    <p className="text-[11px] text-primary font-semibold uppercase tracking-wider mb-1">{t('warehouse.driverHub.units')}</p>
-                    <p className="text-base sm:text-xl font-bold font-mono text-primary tabular-nums leading-none">{stats.items}</p>
+                    <p className="text-xs text-[var(--theme-primary)] font-medium mb-1">{t('warehouse.driverHub.units')}</p>
+                    <p className="text-base sm:text-xl font-bold font-mono text-[var(--theme-primary)] tabular-nums leading-none">{stats.items}</p>
                 </div>
             </div>
             
             <div className="w-full sm:w-auto flex items-center justify-between sm:justify-start gap-4 pt-3 sm:pt-0 border-t sm:border-none border-[var(--theme-border)]">
                 <div className="text-left sm:text-right">
-                    <div className="flex items-center gap-2 mb-1 justify-start sm:justify-end">
-                        <span className="text-[11px] text-[var(--theme-text-secondary)] font-semibold uppercase tracking-wider">{t('warehouse.driverHub.shiftProgress')}</span>
-                        <span className="text-[11px] font-mono font-bold text-[var(--theme-text-primary)] tabular-nums">{progressPct}%</span>
+                    <div className="flex items-center gap-2 mb-1.5 justify-start sm:justify-end">
+                        <span className="text-xs text-[var(--theme-text-secondary)] font-medium">{t('warehouse.driverHub.shiftProgress')}</span>
+                        <span className="text-xs font-mono font-bold text-[var(--theme-text-primary)] tabular-nums">{progressPct}%</span>
                     </div>
                     <div className="h-2 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-full w-24 sm:w-32 overflow-hidden">
                         <div
-                            className="h-full bg-primary rounded-full transition-all"
+                            className="h-full bg-[var(--theme-primary)] rounded-full transition-all"
                             style={{ width: `${progressPct}%` }}
                         />
                     </div>

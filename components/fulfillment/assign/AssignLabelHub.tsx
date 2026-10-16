@@ -96,11 +96,38 @@ export const AssignLabelHub: React.FC<AssignLabelHubProps> = ({
     };
 
     return (
-        <div className="pb-12 space-y-6">
+        <div className="pb-12 space-y-3 sm:space-y-6">
             {/* LEFT PANEL: PRINTING HUB */}
             <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl overflow-hidden relative">
-                <div className="p-6">
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+                <div className="p-3 sm:p-6">
+                    {/* Mobile compact header */}
+                    <div className="flex sm:hidden items-center justify-between gap-2 w-full mb-3">
+                        <div className="flex items-center gap-1.5 min-w-0">
+                            <Printer size={15} className="text-[var(--theme-accent)] shrink-0" />
+                            <span className="text-xs font-bold text-[var(--theme-text-primary)] truncate">Labels</span>
+                            <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[10px] font-semibold bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] border border-[var(--theme-accent)]/20 shrink-0">
+                                <span className="w-1.5 h-1.5 rounded-full bg-[var(--theme-accent)]" />
+                                {labelMode}
+                            </span>
+                        </div>
+                        <div className="flex bg-[var(--theme-bg-subtle)] p-0.5 rounded-lg border border-[var(--theme-border)] shrink-0">
+                            <button
+                                onClick={() => { setLabelMode('PRODUCT'); setLabelSize('MEDIUM'); }}
+                                className={`px-2.5 py-1 min-h-[30px] rounded-md text-[11px] font-semibold transition-colors touch-manipulation flex items-center justify-center ${labelMode === 'PRODUCT' ? 'bg-[var(--theme-accent)] text-white shadow-xs' : 'text-[var(--theme-text-secondary)]'}`}
+                            >
+                                Products
+                            </button>
+                            <button
+                                onClick={() => { setLabelMode('BAY'); setLabelSize('MEDIUM'); }}
+                                className={`px-2.5 py-1 min-h-[30px] rounded-md text-[11px] font-semibold transition-colors touch-manipulation flex items-center justify-center ${labelMode === 'BAY' ? 'bg-[var(--theme-accent)] text-white shadow-xs' : 'text-[var(--theme-text-secondary)]'}`}
+                            >
+                                Bays
+                            </button>
+                        </div>
+                    </div>
+
+                    {/* Desktop header */}
+                    <div className="hidden sm:flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
                         <div>
                             <h3 className="text-lg sm:text-xl font-bold text-[var(--theme-text-primary)] flex items-center gap-2.5 sm:gap-3">
                                 <div className="p-2 bg-[var(--theme-accent)]/10 rounded-xl shrink-0">
@@ -126,7 +153,7 @@ export const AssignLabelHub: React.FC<AssignLabelHubProps> = ({
                         </div>
                     </div>
 
-                    <div className="space-y-6">
+                    <div className="space-y-4 sm:space-y-6">
                         {/* Format & Size Selection */}
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div className="space-y-2">

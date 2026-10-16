@@ -261,9 +261,9 @@ export const TransferTab: React.FC<TransferTabProps> = ({
             {(activeSite?.type === 'HQ' || activeSite?.type === 'Administration' || ['super_admin', 'admin', 'warehouse_manager', 'operations_manager', 'regional_manager'].includes(user?.role || '')) && (
                 <button
                     onClick={() => { setTransferCenterTab('smart'); }}
-                    className={`min-h-[36px] flex-1 flex items-center justify-center gap-1.5 px-2 sm:px-3 py-1.5 rounded-lg text-[11px] sm:text-xs font-semibold uppercase tracking-wider transition-all touch-manipulation whitespace-nowrap ${
+                    className={`min-h-[36px] flex-1 flex items-center justify-center gap-1.5 px-2 sm:px-3 py-1.5 rounded-lg text-[11px] sm:text-xs font-semibold uppercase tracking-wider transition-all touch-manipulation whitespace-nowrap cursor-pointer ${
                         transferCenterTab === 'smart'
-                            ? 'bg-primary text-white shadow-xs'
+                            ? 'bg-[var(--theme-primary)] text-[var(--theme-primary-text)] shadow-xs'
                             : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-card)]'
                     }`}
                 >
@@ -274,9 +274,9 @@ export const TransferTab: React.FC<TransferTabProps> = ({
             {(activeSite?.type === 'HQ' || activeSite?.type === 'Administration' || activeSite?.type === 'Warehouse' || activeSite?.type === 'Distribution Center' || ['super_admin', 'admin', 'warehouse_manager', 'operations_manager', 'regional_manager'].includes(user?.role || '')) && (
                 <button
                     onClick={() => setTransferCenterTab('bulk')}
-                    className={`min-h-[36px] flex-1 flex items-center justify-center gap-1.5 px-2 sm:px-3 py-1.5 rounded-lg text-[11px] sm:text-xs font-semibold uppercase tracking-wider transition-all touch-manipulation whitespace-nowrap ${
+                    className={`min-h-[36px] flex-1 flex items-center justify-center gap-1.5 px-2 sm:px-3 py-1.5 rounded-lg text-[11px] sm:text-xs font-semibold uppercase tracking-wider transition-all touch-manipulation whitespace-nowrap cursor-pointer ${
                         transferCenterTab === 'bulk'
-                            ? 'bg-primary text-white shadow-xs'
+                            ? 'bg-[var(--theme-primary)] text-[var(--theme-primary-text)] shadow-xs'
                             : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-card)]'
                     }`}
                 >
@@ -286,9 +286,9 @@ export const TransferTab: React.FC<TransferTabProps> = ({
             )}
             <button
                 onClick={() => setTransferCenterTab('request')}
-                className={`min-h-[36px] flex-1 flex items-center justify-center gap-1.5 px-2 sm:px-3 py-1.5 rounded-lg text-[11px] sm:text-xs font-semibold uppercase tracking-wider transition-all touch-manipulation whitespace-nowrap ${
+                className={`min-h-[36px] flex-1 flex items-center justify-center gap-1.5 px-2 sm:px-3 py-1.5 rounded-lg text-[11px] sm:text-xs font-semibold uppercase tracking-wider transition-all touch-manipulation whitespace-nowrap cursor-pointer ${
                     transferCenterTab === 'request'
-                        ? 'bg-primary text-white shadow-xs'
+                        ? 'bg-[var(--theme-primary)] text-[var(--theme-primary-text)] shadow-xs'
                         : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-card)]'
                 }`}
             >

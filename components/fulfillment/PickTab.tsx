@@ -251,7 +251,7 @@ export const PickTab: React.FC = () => {
     }, [filteredPickJobs, pickCurrentPage]);
 
     return (
-        <div className="flex-1 flex flex-col gap-6 px-4">
+        <div className="flex-1 flex flex-col gap-2 sm:gap-6 px-1 sm:px-4">
             <PickHeader
                 pendingCount={filteredJobs.filter(j => j.type === 'PICK' && j.status === 'Pending').length}
                 inProgressCount={filteredJobs.filter(j => j.type === 'PICK' && j.status === 'In-Progress').length}

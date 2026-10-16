@@ -101,7 +101,7 @@ export const DockAssignModal: React.FC<DockAssignModalProps> = ({
                                             await onAssignJobToDock(job.id, targetDock);
                                             onClose();
                                         }}
-                                        className="min-h-[44px] px-3.5 py-2 rounded-xl bg-primary hover:bg-primary/90 text-white text-[11px] font-semibold uppercase tracking-wider flex items-center gap-1.5 transition-colors shrink-0 shadow-sm disabled:opacity-50 active:scale-[0.98] touch-manipulation"
+                                        className="min-h-[44px] px-3.5 py-2 rounded-xl bg-[var(--theme-primary)] hover:opacity-90 text-[var(--theme-primary-text)] text-[11px] font-semibold uppercase tracking-wider flex items-center gap-1.5 transition-colors shrink-0 shadow-sm disabled:opacity-50 active:scale-[0.98] touch-manipulation cursor-pointer"
                                     >
                                         <span>Load {targetDock}</span>
                                         <ArrowRight size={13} />

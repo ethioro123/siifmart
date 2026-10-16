@@ -178,8 +178,10 @@ export const DriverTab: React.FC<DriverTabProps> = ({
         }
     };
 
+    const activeJobsCount = filteredJobs.filter(j => j.status !== 'Completed').length;
+
     return (
-        <div className="flex-1 overflow-y-auto space-y-4 pr-1 custom-scrollbar pb-12">
+        <div className="flex-1 overflow-y-auto space-y-2 sm:space-y-4 pr-1 custom-scrollbar pb-12">
             {/* COMPACT DRIVER HEADER */}
             <DriverHeader
                 t={t}
@@ -190,21 +192,22 @@ export const DriverTab: React.FC<DriverTabProps> = ({
                 setViewMode={setViewMode}
                 isSubmitting={isSubmitting}
                 refreshData={refreshData}
+                activeCount={activeJobsCount}
             />
 
             {/* HYPER-OPTIMIZED MOBILE DASHBOARD */}
             {viewMode === 'Active' ? (
-                <div className="flex flex-col gap-4">
+                <div className="flex flex-col gap-2 sm:gap-4">
                     {/* MOBILE COLLAPSIBLE TOGGLE */}
                     <button
                         onClick={() => setShowControlCenter(!showControlCenter)}
-                        className="flex md:hidden items-center justify-between w-full p-3.5 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl shadow-sm hover:bg-[var(--theme-bg-subtle)] transition-colors text-xs font-semibold uppercase tracking-wider text-[var(--theme-text-primary)] min-h-[44px] touch-manipulation"
+                        className="flex md:hidden items-center justify-between w-full p-2.5 sm:p-3.5 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl shadow-xs hover:bg-[var(--theme-bg-subtle)] transition-colors text-xs font-semibold text-[var(--theme-text-primary)] min-h-[36px] touch-manipulation"
                     >
                         <div className="flex items-center gap-2">
-                            <Activity size={15} className="text-primary" />
+                            <Activity size={14} className="text-[var(--theme-primary)]" />
                             <span>Shift Summary & Actions</span>
                         </div>
-                        <ChevronDown size={15} className={`text-[var(--theme-text-muted)] transition-transform duration-300 ${showControlCenter ? 'rotate-180' : ''}`} />
+                        <ChevronDown size={14} className={`text-[var(--theme-text-muted)] transition-transform duration-300 ${showControlCenter ? 'rotate-180' : ''}`} />
                     </button>
 
                     {/* METRICS, TOOLS & SEARCH CONTAINER */}
@@ -230,8 +233,8 @@ export const DriverTab: React.FC<DriverTabProps> = ({
 
                         {/* GLOBAL SEARCH */}
                         <div className="relative w-full">
-                            <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
-                                <Search className="h-4 w-4 text-primary" />
+                            <div className="absolute inset-y-0 left-3.5 flex items-center pointer-events-none">
+                                <Search className="h-4 w-4 text-[var(--theme-primary)]" />
                             </div>
                             <input
                                 type="text"
@@ -240,14 +243,14 @@ export const DriverTab: React.FC<DriverTabProps> = ({
                                 title="Search Missions"
                                 value={globalSearch}
                                 onChange={(e) => setGlobalSearch(e.target.value)}
-                                className="w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl pl-10 pr-10 py-2.5 text-xs text-[var(--theme-text-primary)] placeholder:text-[var(--theme-text-muted)] focus:outline-none focus:border-primary shadow-sm transition-colors min-h-[44px]"
+                                className="w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl pl-10 pr-10 py-2.5 text-xs text-[var(--theme-text-primary)] placeholder:text-[var(--theme-text-muted)] focus:outline-none focus:border-[var(--theme-primary)] focus:ring-1 focus:ring-[var(--theme-primary)]/20 shadow-xs transition-colors min-h-[44px]"
                             />
                             {globalSearch && (
                                 <button 
                                     onClick={() => setGlobalSearch('')}
                                     aria-label="Clear search"
                                     title="Clear search"
-                                    className="absolute inset-y-0 right-3 flex items-center text-[var(--theme-text-muted)] hover:text-[var(--theme-text-primary)] transition-colors"
+                                    className="absolute inset-y-0 right-3 flex items-center text-[var(--theme-text-muted)] hover:text-[var(--theme-text-primary)] transition-colors p-1"
                                 >
                                     <X size={15} />
                                 </button>

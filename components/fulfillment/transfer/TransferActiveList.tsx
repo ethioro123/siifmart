@@ -32,7 +32,7 @@ export const TransferActiveList: React.FC<TransferActiveListProps> = ({
     // Filter Logic
     const filteredOngoingTransfers = useMemo(() => {
         return filteredJobs
-            .filter(j => j.type === 'TRANSFER' && j.status !== 'Cancelled' && j.transferStatus !== 'Received' && (j.status !== 'Completed' || j.transferStatus === 'Delivered' || j.transferStatus === 'Partially Delivered'))
+            .filter(j => j.type === 'TRANSFER' && j.status !== 'Cancelled' && (j.status as string) !== 'Rejected' && j.transferStatus !== 'Received' && j.transferStatus !== 'Rejected' && j.transferStatus !== 'Cancelled' && (j.status !== 'Completed' || j.transferStatus === 'Delivered' || j.transferStatus === 'Partially Delivered'))
             .filter(j => {
                 let effStatus = j.transferStatus || 'Requested';
                 const child = filteredJobs.find(d => d.type === 'DISPATCH' && (d.orderRef === j.id || d.orderRef === j.jobNumber) && d.status !== 'Cancelled');

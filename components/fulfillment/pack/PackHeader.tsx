@@ -13,6 +13,10 @@ interface PackHeaderProps {
     setPackSortBy: (val: 'priority' | 'date' | 'items') => void;
     isPackSortDropdownOpen: boolean;
     setIsPackSortDropdownOpen: (val: boolean) => void;
+    filteredJobsCount?: {
+        pending: number;
+        active: number;
+    };
     packSearch: string;
     setPackSearch: (val: string) => void;
     t: (key: string) => string;
@@ -20,12 +24,13 @@ interface PackHeaderProps {
 
 export const PackHeader: React.FC<PackHeaderProps> = ({
     viewMode, setViewMode, packJobFilter, setPackJobFilter, isPackFilterDropdownOpen, setIsPackFilterDropdownOpen,
-    packSortBy, setPackSortBy, isPackSortDropdownOpen, setIsPackSortDropdownOpen, packSearch, setPackSearch, t
+    packSortBy, setPackSortBy, isPackSortDropdownOpen, setIsPackSortDropdownOpen, packSearch, setPackSearch, t,
+    filteredJobsCount
 }) => {
     return (
-        <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-4 sm:p-6 mb-4 shadow-sm">
-            {/* Title row */}
-            <div className="flex items-center gap-4 mb-5">
+        <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl sm:rounded-2xl p-2.5 sm:p-6 mb-2 sm:mb-4 shadow-sm">
+            {/* Title row — hidden on mobile to maximize screen real estate */}
+            <div className="hidden sm:flex items-center gap-4 mb-5">
                 <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-[var(--theme-accent)]/10 border border-[var(--theme-accent)]/20 flex items-center justify-center text-[var(--theme-accent)] shrink-0">
                     <Package size={24} strokeWidth={1.75} />
                 </div>
@@ -36,13 +41,13 @@ export const PackHeader: React.FC<PackHeaderProps> = ({
             </div>
 
             {/* Controls row */}
-            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full">
-                <div className="flex items-center gap-2.5 shrink-0 flex-wrap sm:flex-nowrap">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3 w-full">
+                <div className="flex items-center justify-between sm:justify-start gap-2 shrink-0">
                     {/* View mode toggle */}
-                    <div className="bg-[var(--theme-bg-subtle)] p-1 rounded-xl border border-[var(--theme-border)] flex gap-1 shrink-0 min-h-[44px] items-center">
+                    <div className="bg-[var(--theme-bg-subtle)] p-0.5 sm:p-1 rounded-xl border border-[var(--theme-border)] flex gap-1 shrink-0 min-h-[38px] sm:min-h-[44px] items-center">
                         <button
                             onClick={() => setViewMode('Process')}
-                            className={`px-4 py-2 rounded-lg text-xs font-semibold uppercase tracking-wider transition-colors min-h-[36px] ${
+                            className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs font-semibold uppercase tracking-wider transition-colors min-h-[32px] sm:min-h-[36px] ${
                                 viewMode === 'Process' ? 'bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)] shadow-sm' : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)]'
                             }`}
                         >
@@ -50,7 +55,7 @@ export const PackHeader: React.FC<PackHeaderProps> = ({
                         </button>
                         <button
                             onClick={() => setViewMode('History')}
-                            className={`px-4 py-2 rounded-lg text-xs font-semibold uppercase tracking-wider transition-colors min-h-[36px] ${
+                            className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs font-semibold uppercase tracking-wider transition-colors min-h-[32px] sm:min-h-[36px] ${
                                 viewMode === 'History' ? 'bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)] shadow-sm' : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)]'
                             }`}
                         >
@@ -58,15 +63,29 @@ export const PackHeader: React.FC<PackHeaderProps> = ({
                         </button>
                     </div>
 
+                    {/* Mobile Dot Numbers */}
+                    {filteredJobsCount && (
+                        <div className="flex sm:hidden items-center gap-2 px-2.5 py-1 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl text-[11px] font-mono shrink-0">
+                            <span className="inline-flex items-center gap-1 text-emerald-500 font-bold" title="Active">
+                                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                                {filteredJobsCount.active}
+                            </span>
+                            <span className="inline-flex items-center gap-1 text-amber-500 font-bold" title="Pending">
+                                <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
+                                {filteredJobsCount.pending}
+                            </span>
+                        </div>
+                    )}
+
                     {/* Filter dropdown */}
                     <div className="relative shrink-0">
                         <button
                             onClick={() => setIsPackFilterDropdownOpen(!isPackFilterDropdownOpen)}
-                            className="flex items-center gap-1.5 px-3.5 py-2.5 bg-[var(--theme-bg-card)] rounded-xl border border-[var(--theme-border)] text-xs font-semibold text-[var(--theme-text-primary)] uppercase tracking-wider transition-colors min-h-[44px]"
+                            className="flex items-center gap-1.5 px-3 py-1.5 sm:px-3.5 sm:py-2.5 bg-[var(--theme-bg-card)] rounded-xl border border-[var(--theme-border)] text-xs font-semibold text-[var(--theme-text-primary)] uppercase tracking-wider transition-colors min-h-[38px] sm:min-h-[44px]"
                         >
-                            <Filter size={14} className={packJobFilter !== 'all' ? 'text-[var(--theme-accent)]' : 'text-[var(--theme-text-secondary)]'} />
-                            <span className="inline truncate max-w-[90px]">{packJobFilter === 'all' ? t('warehouse.allStatus') : packJobFilter}</span>
-                            <ChevronDown size={14} className={`transition-transform duration-200 text-[var(--theme-text-secondary)] ${isPackFilterDropdownOpen ? 'rotate-180' : ''}`} />
+                            <Filter size={13} className={packJobFilter !== 'all' ? 'text-[var(--theme-accent)]' : 'text-[var(--theme-text-secondary)]'} />
+                            <span className="inline truncate max-w-[80px] sm:max-w-[90px]">{packJobFilter === 'all' ? t('warehouse.allStatus') : packJobFilter}</span>
+                            <ChevronDown size={13} className={`transition-transform duration-200 text-[var(--theme-text-secondary)] ${isPackFilterDropdownOpen ? 'rotate-180' : ''}`} />
                         </button>
                         {isPackFilterDropdownOpen && (
                             <>

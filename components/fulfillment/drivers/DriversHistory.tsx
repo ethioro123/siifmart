@@ -107,17 +107,17 @@ export const DriversHistory: React.FC<DriversHistoryProps> = ({
     const paginatedHistory = useMemo(() => filteredHistory.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE), [filteredHistory, currentPage]);
 
     return (
-        <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-4 sm:p-6 mb-6 shadow-sm">
+        <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-4 sm:p-6 mb-6 shadow-xs">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
                 <div className="flex items-center gap-3">
-                    <div className="p-2.5 bg-primary/10 rounded-xl border border-primary/20">
-                        <HistoryIcon size={20} className="text-primary" />
+                    <div className="w-10 h-10 rounded-2xl bg-[var(--theme-primary)]/10 text-[var(--theme-primary)] border border-[var(--theme-primary)]/20 flex items-center justify-center shrink-0">
+                        <HistoryIcon size={18} />
                     </div>
                     <div>
-                        <h4 className="text-lg sm:text-xl font-bold text-[var(--theme-text-primary)] uppercase tracking-tight">{t('warehouse.driverHub.jobHistory')}</h4>
+                        <h4 className="text-base sm:text-lg font-bold text-[var(--theme-text-primary)] tracking-tight">{t('warehouse.driverHub.jobHistory')}</h4>
                         <div className="flex items-center gap-2 mt-0.5">
-                            <div className="w-1.5 h-1.5 rounded-full bg-primary" />
-                            <p className="text-[11px] text-[var(--theme-text-muted)] uppercase font-medium tracking-wider">{t('warehouse.driverHub.pastAssignments')}</p>
+                            <div className="w-1.5 h-1.5 rounded-full bg-[var(--theme-primary)]" />
+                            <p className="text-xs text-[var(--theme-text-secondary)] font-medium">{t('warehouse.driverHub.pastAssignments')}</p>
                         </div>
                     </div>
                 </div>
@@ -132,7 +132,7 @@ export const DriversHistory: React.FC<DriversHistoryProps> = ({
                         title={t('warehouse.driverHub.searchHistory')}
                         value={searchQuery}
                         onChange={(e) => { setSearchQuery(e.target.value); setCurrentPage(1); }}
-                        className="w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl pl-10 pr-3.5 py-2.5 text-xs text-[var(--theme-text-primary)] focus:outline-none focus:border-primary transition-colors font-mono uppercase tracking-wider placeholder:text-[var(--theme-text-muted)] min-h-[44px]"
+                        className="w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl pl-10 pr-3.5 py-2.5 text-xs text-[var(--theme-text-primary)] focus:outline-none focus:border-[var(--theme-primary)] focus:ring-1 focus:ring-[var(--theme-primary)]/20 transition-colors placeholder:text-[var(--theme-text-muted)] min-h-[44px]"
                     />
                 </div>
             </div>
@@ -146,25 +146,25 @@ export const DriversHistory: React.FC<DriversHistoryProps> = ({
                                 <div
                                     key={job.id}
                                     onClick={() => { setSelectedJob(job); setIsDetailsOpen(true); }}
-                                    className="flex flex-col md:flex-row items-start md:items-center gap-3 md:gap-6 bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card)] border border-[var(--theme-border)] hover:border-primary/30 rounded-xl p-3.5 sm:p-4 transition-colors cursor-pointer shadow-sm w-full min-h-[52px] touch-manipulation"
+                                    className="flex flex-col md:flex-row items-start md:items-center gap-3 md:gap-6 bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card)] border border-[var(--theme-border)] hover:border-[var(--theme-primary)]/30 rounded-2xl p-4 transition-colors cursor-pointer shadow-xs w-full min-h-[52px] touch-manipulation"
                                 >
                                     <div className="w-full md:w-44 flex flex-col justify-center shrink-0">
-                                        <span className="text-xs font-mono font-medium text-primary uppercase tracking-wider">{formatJobId(job)}</span>
-                                        <p className="text-[11px] text-[var(--theme-text-muted)] font-medium mt-0.5">{formatDateTime(job.updatedAt || job.createdAt)}</p>
+                                        <span className="text-xs font-mono font-semibold text-[var(--theme-primary)]">#{formatJobId(job)}</span>
+                                        <p className="text-xs text-[var(--theme-text-secondary)] mt-0.5">{formatDateTime(job.updatedAt || job.createdAt)}</p>
                                     </div>
 
                                     <div className="hidden md:block h-10 w-px bg-[var(--theme-border)]" />
 
                                     <div className="flex-1 flex items-center gap-3 min-w-0 w-full">
-                                        <div className="p-2.5 bg-[var(--theme-bg-card)] rounded-xl border border-[var(--theme-border)] shrink-0">
+                                        <div className="w-8 h-8 rounded-xl bg-[var(--theme-bg-card)] border border-[var(--theme-border)] flex items-center justify-center shrink-0">
                                             <Package size={16} className="text-[var(--theme-text-muted)]" />
                                         </div>
                                         <div className="min-w-0 flex-1">
-                                            <p className="text-[11px] text-[var(--theme-text-muted)] font-medium uppercase tracking-wider mb-0.5">{t('warehouse.driverHub.destination')}</p>
-                                            <h6 className="text-sm font-semibold text-[var(--theme-text-primary)] uppercase tracking-tight break-words">{destSite?.name || t('warehouse.driverHub.customer')}</h6>
-                                            <div className="flex items-center gap-1.5 mt-1 text-[11px] text-[var(--theme-text-secondary)]">
-                                                <UserCheck size={12} className="text-primary shrink-0" />
-                                                <span className="font-medium break-words leading-tight">
+                                            <p className="text-[11px] text-[var(--theme-text-secondary)] font-medium mb-0.5">{t('warehouse.driverHub.destination')}</p>
+                                            <h6 className="text-sm font-semibold text-[var(--theme-text-primary)] tracking-tight truncate">{destSite?.name || t('warehouse.driverHub.customer')}</h6>
+                                            <div className="flex items-center gap-1.5 mt-1 text-xs text-[var(--theme-text-secondary)]">
+                                                <UserCheck size={13} className="text-[var(--theme-primary)] shrink-0" />
+                                                <span className="truncate">
                                                     Delivered By: {job.resolvedUser?.name || 'Driver'}{job.resolvedUser?.displayId ? ` (${job.resolvedUser.displayId})` : ''}
                                                 </span>
                                             </div>
@@ -173,25 +173,25 @@ export const DriversHistory: React.FC<DriversHistoryProps> = ({
 
                                     <div className="flex flex-wrap items-center gap-3 sm:gap-4 w-full md:w-auto justify-between md:justify-end border-t md:border-t-0 border-[var(--theme-border)] pt-2.5 md:pt-0 mt-1 md:mt-0">
                                         <div className="text-left md:text-right">
-                                            <p className="text-[11px] text-[var(--theme-text-muted)] font-medium uppercase tracking-wider mb-0.5">{t('warehouse.driverHub.totalItems')}</p>
+                                            <p className="text-[11px] text-[var(--theme-text-secondary)] font-medium mb-0.5">{t('warehouse.driverHub.totalItems')}</p>
                                             <div className="flex items-center gap-1.5 justify-start md:justify-end">
                                                 <span className="text-base font-bold font-mono tabular-nums text-[var(--theme-text-primary)]">{job.items || 0}</span>
-                                                <span className="text-[11px] text-[var(--theme-text-muted)] uppercase font-medium tracking-wider">{t('warehouse.driverHub.units')}</span>
+                                                <span className="text-xs text-[var(--theme-text-secondary)]">{t('warehouse.driverHub.units')}</span>
                                             </div>
                                         </div>
 
-                                        <div className="flex items-center gap-2 bg-green-500/10 border border-green-500/20 px-3 py-1.5 rounded-xl">
-                                            <div className="w-2 h-2 rounded-full bg-green-500" />
-                                            <span className="text-[11px] text-green-600 dark:text-green-400 uppercase font-semibold tracking-wider">{t('warehouse.driverHub.delivered')}</span>
+                                        <div className="flex items-center gap-1.5 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-1 rounded-full">
+                                            <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                                            <span className="text-xs text-emerald-600 dark:text-emerald-400 font-semibold">{t('warehouse.driverHub.delivered')}</span>
                                         </div>
 
                                         {job.status === 'Completed' && (
                                             <button
                                                 onClick={(e) => { e.stopPropagation(); setReturnJob(job); }}
-                                                className="flex items-center gap-1.5 bg-amber-500/10 hover:bg-amber-500/20 px-3 py-2 rounded-xl border border-amber-500/20 transition-colors text-amber-600 dark:text-amber-400 shadow-sm active:scale-[0.98] min-h-[44px] touch-manipulation"
+                                                className="flex items-center gap-1.5 bg-amber-500/10 hover:bg-amber-500/20 px-3.5 py-2 rounded-xl border border-amber-500/20 transition-all text-amber-600 dark:text-amber-400 shadow-xs active:scale-[0.98] min-h-[44px] touch-manipulation font-semibold text-xs"
                                             >
-                                                <Undo2 size={13} />
-                                                <span className="text-[11px] font-semibold uppercase tracking-wider">{t('warehouse.driverHub.return')}</span>
+                                                <Undo2 size={14} />
+                                                <span>{t('warehouse.driverHub.return')}</span>
                                             </button>
                                         )}
                                     </div>

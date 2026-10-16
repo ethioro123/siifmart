@@ -310,7 +310,7 @@ export function DiscrepancyResolutionModal({
                                             <div className={`p-2 rounded-xl bg-[var(--theme-bg-subtle)] ${a.color}`}>
                                                 <a.icon size={18} />
                                             </div>
-                                            {a.id === resolutionAction && <div className="bg-primary text-white text-[11px] font-semibold px-2 py-0.5 rounded-md">SELECTED</div>}
+                                            {a.id === resolutionAction && <div className="bg-[var(--theme-primary)] text-[var(--theme-primary-text)] text-[11px] font-semibold px-2 py-0.5 rounded-md">SELECTED</div>}
                                         </div>
                                         <div>
                                             <div className="font-semibold text-[var(--theme-text-primary)] text-xs">{a.label}</div>
@@ -425,7 +425,7 @@ export function DiscrepancyResolutionModal({
                                 <Button variant="secondary" onClick={() => setStep('DETAILS')} className="flex-1">Back</Button>
                                 <button
                                     onClick={handleSubmit}
-                                    className="flex-[2] min-h-[44px] bg-primary text-white font-semibold rounded-xl flex items-center justify-center gap-2 hover:opacity-90 active:scale-95 transition-all touch-manipulation text-xs"
+                                    className="flex-[2] min-h-[44px] bg-[var(--theme-primary)] text-[var(--theme-primary-text)] font-semibold rounded-xl flex items-center justify-center gap-2 hover:opacity-90 active:scale-95 transition-all touch-manipulation text-xs cursor-pointer"
                                     disabled={isSubmitting}
                                 >
                                     <CheckCircle size={16} /> Confirm & Submit

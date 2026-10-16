@@ -102,8 +102,8 @@ export const AssignAvailableWorkers: React.FC<AssignAvailableWorkersProps> = ({
                                                 setDispatchEmployeeFilter(role);
                                                 setIsEmployeeRoleDropdownOpen(false);
                                             }}
-                                            className={`w-full text-left px-3 py-2 rounded-xl text-xs font-semibold min-h-[38px] flex items-center touch-manipulation transition-colors ${dispatchEmployeeFilter === role
-                                                ? 'bg-primary text-white shadow-sm'
+                                            className={`w-full text-left px-3 py-2 rounded-xl text-xs font-semibold min-h-[38px] flex items-center touch-manipulation transition-colors cursor-pointer ${dispatchEmployeeFilter === role
+                                                ? 'bg-[var(--theme-primary)] text-[var(--theme-primary-text)] shadow-sm'
                                                 : 'text-[var(--theme-text-secondary)] hover:bg-[var(--theme-bg-subtle)] hover:text-[var(--theme-text-primary)]'
                                                 }`}
                                         >
@@ -235,8 +235,8 @@ export const AssignAvailableWorkers: React.FC<AssignAvailableWorkersProps> = ({
                                                     className={`min-h-[44px] min-w-[44px] px-3 py-2 rounded-xl border transition-colors flex items-center justify-center touch-manipulation ${!selectedJob || !eligibility.eligible
                                                         ? 'bg-[var(--theme-bg-subtle)] text-[var(--theme-text-muted)] border-[var(--theme-border)] cursor-not-allowed opacity-50'
                                                         : roleMatch
-                                                            ? 'bg-primary text-white border-primary shadow-sm hover:opacity-90 active:scale-95'
-                                                            : 'bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)] border-[var(--theme-border)] hover:bg-[var(--theme-bg-subtle)] active:scale-95'
+                                                            ? 'bg-[var(--theme-primary)] text-[var(--theme-primary-text)] border-[var(--theme-primary)] shadow-sm hover:opacity-90 active:scale-95 cursor-pointer'
+                                                            : 'bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)] border-[var(--theme-border)] hover:bg-[var(--theme-bg-subtle)] active:scale-95 cursor-pointer'
                                                         }`}
                                                     title={
                                                         !selectedJob

@@ -63,14 +63,14 @@ export const AssignPendingJobs: React.FC<AssignPendingJobsProps> = ({
     const activeJobsToday = filteredJobs;
     const historicalJobsToday = (historicalJobs || []).filter(j => isToday(j.completedAt || j.completed_at || j.createdAt || j.created_at));
 
-    const wmsJobTypes = ['ALL', 'PICK', 'PACK', 'PUTAWAY', 'RECEIVE', 'COUNT', 'REPLENISH'];
+    const wmsJobTypes = ['ALL', 'PICK', 'PACK', 'PUTAWAY', 'RECEIVE', 'COUNT', 'REPLENISH', 'DISPATCH'];
     const nonCompleted = ['pending', 'in-progress', 'assigned', 'accepted'];
 
     // 1. Get raw WMS active jobs
     const baseWmsJobs = activeJobsToday.filter(j => 
         nonCompleted.includes(j.status?.toLowerCase() || '') &&
         j.type !== 'TRANSFER' &&
-        ['PICK', 'PACK', 'PUTAWAY', 'RECEIVE', 'COUNT', 'REPLENISH'].includes(j.type?.toUpperCase() || '')
+        ['PICK', 'PACK', 'PUTAWAY', 'RECEIVE', 'COUNT', 'REPLENISH', 'DISPATCH'].includes(j.type?.toUpperCase() || '')
     );
 
     // Helper to count jobs for each tab under current active filters
@@ -112,7 +112,7 @@ export const AssignPendingJobs: React.FC<AssignPendingJobsProps> = ({
     let completedWmsJobs = historicalJobsToday.filter(j => 
         j.status?.toLowerCase() === 'completed' && 
         j.type !== 'TRANSFER' &&
-        ['PICK', 'PACK', 'PUTAWAY', 'RECEIVE', 'COUNT', 'REPLENISH'].includes(j.type?.toUpperCase() || '')
+        ['PICK', 'PACK', 'PUTAWAY', 'RECEIVE', 'COUNT', 'REPLENISH', 'DISPATCH'].includes(j.type?.toUpperCase() || '')
     );
 
     if (assignJobFilter !== 'ALL') {
@@ -218,9 +218,9 @@ export const AssignPendingJobs: React.FC<AssignPendingJobsProps> = ({
                     )}
                     <button
                         onClick={() => setIsAdvancedOpen(!isAdvancedOpen)}
-                        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold uppercase tracking-wider border transition-colors min-h-[38px] touch-manipulation ${
+                        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold uppercase tracking-wider border transition-colors min-h-[38px] touch-manipulation cursor-pointer ${
                             isAdvancedOpen 
-                                ? 'bg-primary text-white border-primary shadow-sm' 
+                                ? 'bg-[var(--theme-primary)] text-[var(--theme-primary-text)] border-[var(--theme-primary)] shadow-sm' 
                                 : 'bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] border-[var(--theme-border)] hover:bg-[var(--theme-bg-card)]'
                         }`}
                     >
@@ -239,16 +239,16 @@ export const AssignPendingJobs: React.FC<AssignPendingJobsProps> = ({
                         <button
                             key={type}
                             onClick={() => setAssignJobFilter(type)}
-                            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold uppercase tracking-wider whitespace-nowrap min-h-[38px] transition-colors touch-manipulation ${
+                            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold uppercase tracking-wider whitespace-nowrap min-h-[38px] transition-colors touch-manipulation cursor-pointer ${
                                 isActive
-                                    ? 'bg-primary text-white shadow-sm'
+                                    ? 'bg-[var(--theme-primary)] text-[var(--theme-primary-text)] shadow-sm'
                                     : 'text-[var(--theme-text-secondary)] hover:bg-[var(--theme-bg-card)]'
                             }`}
                         >
                             <span>{type}</span>
                             <span className={`px-2 py-0.5 rounded-full text-[11px] font-mono tabular-nums font-semibold ${
                                 isActive 
-                                    ? 'bg-white/20 text-white' 
+                                    ? 'bg-[var(--theme-primary-text)]/15 text-[var(--theme-primary-text)]' 
                                     : 'bg-[var(--theme-bg-card)] text-[var(--theme-text-muted)]'
                             }`}>
                                 {count}
@@ -292,9 +292,9 @@ export const AssignPendingJobs: React.FC<AssignPendingJobsProps> = ({
                                     <button
                                         key={p}
                                         onClick={() => setDispatchPriorityFilter(p)}
-                                        className={`flex-1 min-h-[38px] py-1.5 px-2 rounded-xl text-[11px] font-semibold uppercase tracking-wider border transition-colors touch-manipulation ${
+                                        className={`flex-1 min-h-[38px] py-1.5 px-2 rounded-xl text-[11px] font-semibold uppercase tracking-wider border transition-colors touch-manipulation cursor-pointer ${
                                             dispatchPriorityFilter === p
-                                                ? 'bg-primary text-white border-primary shadow-sm'
+                                                ? 'bg-[var(--theme-primary)] text-[var(--theme-primary-text)] border-[var(--theme-primary)] shadow-sm'
                                                 : 'bg-[var(--theme-bg-card)] text-[var(--theme-text-secondary)] border-[var(--theme-border)] hover:bg-[var(--theme-bg-app)]'
                                         }`}
                                     >
@@ -314,9 +314,9 @@ export const AssignPendingJobs: React.FC<AssignPendingJobsProps> = ({
                                     <button
                                         key={a}
                                         onClick={() => setAssignmentFilter(a)}
-                                        className={`flex-1 min-h-[38px] py-1.5 px-2 rounded-xl text-[11px] font-semibold uppercase tracking-wider border transition-colors touch-manipulation ${
+                                        className={`flex-1 min-h-[38px] py-1.5 px-2 rounded-xl text-[11px] font-semibold uppercase tracking-wider border transition-colors touch-manipulation cursor-pointer ${
                                             assignmentFilter === a
-                                                ? 'bg-primary text-white border-primary shadow-sm'
+                                                ? 'bg-[var(--theme-primary)] text-[var(--theme-primary-text)] border-[var(--theme-primary)] shadow-sm'
                                                 : 'bg-[var(--theme-bg-card)] text-[var(--theme-text-secondary)] border-[var(--theme-border)] hover:bg-[var(--theme-bg-app)]'
                                         }`}
                                     >
@@ -355,9 +355,9 @@ export const AssignPendingJobs: React.FC<AssignPendingJobsProps> = ({
                                     <button
                                         key={size.id}
                                         onClick={() => setJobSizeFilter(size.id as any)}
-                                        className={`flex-1 min-h-[38px] py-1.5 px-1 rounded-xl text-[11px] font-semibold uppercase tracking-wider border transition-colors touch-manipulation ${
+                                        className={`flex-1 min-h-[38px] py-1.5 px-1 rounded-xl text-[11px] font-semibold uppercase tracking-wider border transition-colors touch-manipulation cursor-pointer ${
                                             jobSizeFilter === size.id
-                                                ? 'bg-primary text-white border-primary shadow-sm'
+                                                ? 'bg-[var(--theme-primary)] text-[var(--theme-primary-text)] border-[var(--theme-primary)] shadow-sm'
                                                 : 'bg-[var(--theme-bg-card)] text-[var(--theme-text-secondary)] border-[var(--theme-border)] hover:bg-[var(--theme-bg-app)]'
                                         }`}
                                     >

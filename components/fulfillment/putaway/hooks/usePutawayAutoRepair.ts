@@ -51,7 +51,12 @@ export function usePutawayAutoRepair(
                             continue;
                         }
 
-                        const globalTemplate = allProducts.find(p => p.sku?.replace(/[- ]/g, '').toLowerCase() === sku.replace(/[- ]/g, '').toLowerCase());
+                        let globalTemplate: Product | null | undefined = allProducts.find(p => p.sku?.replace(/[- ]/g, '').toLowerCase() === sku.replace(/[- ]/g, '').toLowerCase());
+                        if (!globalTemplate) {
+                            try {
+                                globalTemplate = await productsService.getBySKU(sku);
+                            } catch (e) { }
+                        }
 
                         try {
                             logger.info('usePutawayAutoRepair', `Auto-creating missing product placeholder for SKU ${sku} in site ${targetSiteId}`);
@@ -61,9 +66,9 @@ export function usePutawayAutoRepair(
                                 sku: sku,
                                 barcode: item.barcode || globalTemplate?.barcode || '',
                                 barcodes: globalTemplate?.barcodes || [],
-                                price: item.retailPrice || globalTemplate?.price || 0,
-                                costPrice: item.cost || globalTemplate?.costPrice || 0,
-                                category: item.category || globalTemplate?.category || 'Uncategorized',
+                                price: item.retailPrice || (item as any).price || globalTemplate?.price || 0,
+                                costPrice: item.cost || (item as any).costPrice || (item as any).cost || globalTemplate?.costPrice || 0,
+                                category: (item.category && item.category !== 'Uncategorized') ? item.category : (globalTemplate?.category || 'Uncategorized'),
                                 status: 'active',
                                 stock: 0,
                                 location: 'On Order',

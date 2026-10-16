@@ -44,13 +44,14 @@ export const ReceiveHeader: React.FC<ReceiveHeaderProps> = ({
     const scanOnlyHandlers = useScanOnly(setScanVal);
 
     return (
-        <div className="space-y-4 shrink-0">
-            {/* Global Scan Input for Active Receive */}
-            <div className="p-4 md:p-5 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl shadow-[var(--shadow-sm)] shrink-0 relative overflow-hidden">
-                <div className="flex flex-col sm:flex-row gap-3">
+        <div className="space-y-1.5 sm:space-y-4 shrink-0 mb-1.5 sm:mb-2">
+            {/* UNIFIED RECEIVE HEADER CARD */}
+            <div className="p-2 sm:p-4 md:p-5 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl sm:rounded-2xl shadow-xs shrink-0 relative overflow-hidden">
+                {/* Global Scan Input */}
+                <div className="flex gap-1.5 sm:gap-3 mb-2 sm:mb-4">
                     <div className="flex-1 relative group">
-                        <div className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--theme-text-secondary)] pointer-events-none">
-                            <Scan size={20} />
+                        <div className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--theme-text-secondary)] pointer-events-none">
+                            <Scan size={16} className="sm:w-5 sm:h-5" />
                         </div>
                         <input
                             ref={scanInputRef}
@@ -72,7 +73,7 @@ export const ReceiveHeader: React.FC<ReceiveHeaderProps> = ({
                             aria-label={t('warehouse.scanBarcodeOrSku')}
                             title={t('warehouse.scanBarcodeOrSku')}
                             placeholder={t('warehouse.scanBarcodeOrSku')}
-                            className="w-full h-12 pl-12 pr-4 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] hover:border-[var(--theme-border-strong)] rounded-xl text-[var(--theme-text-primary)] font-mono text-sm focus:border-[var(--theme-accent)] focus:ring-2 focus:ring-[var(--theme-accent-muted)] focus:outline-none transition-colors placeholder:text-[var(--theme-text-secondary)]/60"
+                            className="w-full h-9 sm:h-12 pl-9 sm:pl-12 pr-3 sm:pr-4 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] hover:border-[var(--theme-border-strong)] rounded-lg sm:rounded-xl text-[var(--theme-text-primary)] font-mono text-xs sm:text-sm focus:border-[var(--theme-accent)] focus:ring-2 focus:ring-[var(--theme-accent-muted)] focus:outline-none transition-colors placeholder:text-[var(--theme-text-secondary)]/60"
                         />
                     </div>
                     <button
@@ -86,10 +87,10 @@ export const ReceiveHeader: React.FC<ReceiveHeaderProps> = ({
                             }
                         }}
                         disabled={isSubmitting}
-                        className="h-12 px-6 sm:px-8 bg-[var(--theme-accent)] hover:opacity-90 text-white font-semibold text-xs tracking-wide rounded-xl transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shrink-0 min-w-[100px] touch-manipulation cursor-pointer"
+                        className="h-9 sm:h-12 px-3 sm:px-8 bg-[var(--theme-accent)] hover:opacity-90 text-white font-semibold text-xs tracking-wide rounded-lg sm:rounded-xl transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-1 sm:gap-2 shrink-0 touch-manipulation cursor-pointer"
                     >
                         {isSubmitting ? (
-                            <Loader2 size={16} className="animate-spin" />
+                            <Loader2 size={14} className="animate-spin" />
                         ) : (
                             <>
                                 <span className="hidden sm:inline">{t('warehouse.submitScan')}</span>
@@ -98,110 +99,68 @@ export const ReceiveHeader: React.FC<ReceiveHeaderProps> = ({
                         )}
                     </button>
                 </div>
-            </div>
 
-            {/* UNRESOLVED ITEMS QUEUE */}
-            {unresolvedScans.length > 0 && (
-                <div className="bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-2xl p-4 md:p-5 shrink-0 shadow-[var(--shadow-sm)]">
-                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-3 md:mb-4">
-                        <div className="flex items-center gap-3">
-                            <div className="w-8 h-8 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 flex items-center justify-center shrink-0">
-                                <AlertTriangle size={16} />
+                {/* Controls row */}
+                <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-2">
+                    {/* Left: Mobile Dot Indicator / Desktop title */}
+                    <div className="flex items-center justify-between sm:justify-start gap-2">
+                        <div className="hidden md:flex items-center gap-3">
+                            <div className="w-9 h-9 rounded-xl bg-[var(--theme-accent-muted)] text-[var(--theme-accent)] border border-[var(--theme-accent)]/20 flex items-center justify-center shrink-0">
+                                <Truck size={18} />
                             </div>
-                            <div className="flex flex-col">
-                                <span className="text-[11px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider leading-none mb-1">
-                                    {t('warehouse.unresolvedBarcodes')}
-                                </span>
-                                <span className="inline-flex items-center gap-2">
-                                    <span className="text-sm font-semibold text-[var(--theme-text-primary)]">
-                                        {t('warehouse.scanDiagnostics')}
-                                    </span>
-                                    <span className="px-2 py-0.5 bg-amber-500/10 text-amber-600 dark:text-amber-400 text-[11px] font-semibold rounded-full border border-amber-500/20 font-mono tabular-nums">
-                                        {unresolvedScans.length}
-                                    </span>
-                                </span>
+                            <div>
+                                <h3 className="text-sm md:text-base font-semibold text-[var(--theme-text-primary)] tracking-tight">
+                                    {t('warehouse.receivingQueue')}
+                                </h3>
                             </div>
                         </div>
-                        <button
-                            type="button"
-                            onClick={() => setUnresolvedScans([])}
-                            className="text-xs text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] font-medium transition-colors hover:underline cursor-pointer"
-                        >
-                            {t('warehouse.clearAllScans')}
-                        </button>
-                    </div>
-                    <div className="flex flex-wrap gap-2">
-                        {unresolvedScans.map((scan, idx) => (
-                            <div
-                                key={idx}
-                                className="px-3.5 py-2.5 rounded-xl border border-[var(--theme-border)] bg-[var(--theme-bg-card)] hover:border-[var(--theme-border-strong)] cursor-pointer transition-colors shadow-[var(--shadow-sm)] flex items-center gap-3 min-h-[44px] max-w-full overflow-hidden"
-                                onClick={() => {
-                                    if (filteredReceiveOrders.length === 1) {
-                                        setReceivingPO(filteredReceiveOrders[0]);
-                                    } else if (filteredReceiveOrders.length > 0 && receiveSearch) {
-                                        setReceivingPO(filteredReceiveOrders[0]);
-                                    }
-                                    setResolvingBarcode({ barcode: scan.barcode, qty: scan.qty });
-                                    setResolutionSearch('');
-                                    setResolutionMode('map');
-                                }}
-                                aria-label={`Resolve barcode ${scan.barcode}`}
-                            >
-                                <div className="flex flex-col">
-                                    <span className="text-[11px] font-semibold text-[var(--theme-text-primary)] font-mono truncate max-w-[120px] sm:max-w-none">
-                                        {scan.barcode}
-                                    </span>
-                                    <span className="text-[11px] text-[var(--theme-text-secondary)] font-medium mt-0.5">
-                                        {t('warehouse.qtyLabel')}: {scan.qty}
-                                    </span>
-                                </div>
-                                <div className="flex items-center gap-1.5">
-                                    <div className="w-8 text-center font-mono font-semibold text-[var(--theme-text-primary)] text-sm tabular-nums" aria-live="polite">
-                                        {scan.qty}
-                                    </div>
-                                </div>
-                                <button
-                                    type="button"
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        setUnresolvedScans(prev => prev.filter((_, i) => i !== idx));
-                                    }}
-                                    className="p-1.5 hover:bg-[var(--theme-bg-subtle)] rounded-lg text-[var(--theme-text-secondary)] hover:text-rose-500 transition-colors flex items-center justify-center cursor-pointer"
-                                    title={t('warehouse.removeScan')}
-                                >
-                                    <X size={14} />
-                                </button>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            )}
 
-            {/* RECEIVE INTELLIGENCE HEADER */}
-            <div className="p-4 md:p-5 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl shadow-[var(--shadow-sm)] relative overflow-hidden">
-                <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 relative z-10">
-                    <div className="hidden md:flex items-center gap-3.5">
-                        <div className="w-10 h-10 rounded-xl bg-[var(--theme-accent-muted)] text-[var(--theme-accent)] border border-[var(--theme-accent)]/20 flex items-center justify-center shrink-0">
-                            <Truck size={20} />
+                        {/* Mobile dot indicator */}
+                        <div className="flex items-center gap-1.5 min-w-0 sm:hidden">
+                            <Truck size={13} className="text-[var(--theme-accent)] shrink-0" />
+                            <span className="text-xs font-bold text-[var(--theme-text-primary)]">Queue</span>
+                            <span className="inline-flex items-center gap-1 px-1.5 py-0.2 rounded-full text-[10px] font-semibold bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 shrink-0">
+                                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                                {filteredReceiveOrders.length}
+                            </span>
                         </div>
-                        <div>
-                            <h3 className="text-base md:text-lg font-semibold text-[var(--theme-text-primary)] tracking-tight">
-                                {t('warehouse.receivingQueue')}
-                            </h3>
-                            <p className="text-xs text-[var(--theme-text-secondary)] font-medium mt-0.5">
-                                {t('warehouse.approvedPOsWillAppear')}
-                            </p>
-                        </div>
-                    </div>
-                    <div className="flex flex-col sm:flex-row gap-3 w-full lg:w-auto items-stretch sm:items-center">
-                        {/* VIEW MODE TOGGLE */}
-                        <div className="p-1 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl flex items-center select-none">
+
+                        {/* View Mode Toggle on mobile sits inline */}
+                        <div className="p-0.5 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-lg flex items-center select-none shrink-0 sm:hidden">
                             <button
                                 type="button"
                                 onClick={() => setViewMode('Process')}
-                                className={`px-4 py-2 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+                                className={`px-2 py-0.5 rounded-md text-[11px] font-semibold transition-all cursor-pointer min-h-[26px] flex items-center justify-center ${
                                     viewMode === 'Process'
-                                        ? 'bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)] shadow-[var(--shadow-sm)]'
+                                        ? 'bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)] shadow-xs'
+                                        : 'text-[var(--theme-text-secondary)]'
+                                }`}
+                            >
+                                {t('warehouse.process')}
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => setViewMode('History')}
+                                className={`px-2 py-0.5 rounded-md text-[11px] font-semibold transition-all cursor-pointer min-h-[26px] flex items-center justify-center ${
+                                    viewMode === 'History'
+                                        ? 'bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)] shadow-xs'
+                                        : 'text-[var(--theme-text-secondary)]'
+                                }`}
+                            >
+                                {t('warehouse.history')}
+                            </button>
+                        </div>
+                    </div>
+
+                    {/* Desktop View Mode + Search */}
+                    <div className="flex items-center gap-2">
+                        <div className="hidden sm:flex p-1 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl items-center select-none">
+                            <button
+                                type="button"
+                                onClick={() => setViewMode('Process')}
+                                className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+                                    viewMode === 'Process'
+                                        ? 'bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)] shadow-xs'
                                         : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)]'
                                 }`}
                             >
@@ -210,9 +169,9 @@ export const ReceiveHeader: React.FC<ReceiveHeaderProps> = ({
                             <button
                                 type="button"
                                 onClick={() => setViewMode('History')}
-                                className={`px-4 py-2 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+                                className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
                                     viewMode === 'History'
-                                        ? 'bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)] shadow-[var(--shadow-sm)]'
+                                        ? 'bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)] shadow-xs'
                                         : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)]'
                                 }`}
                             >
@@ -221,42 +180,30 @@ export const ReceiveHeader: React.FC<ReceiveHeaderProps> = ({
                         </div>
 
                         {viewMode === 'Process' && (
-                            <>
-                                <div className="relative flex-1 sm:flex-none">
-                                    <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none text-[var(--theme-text-secondary)]">
-                                        <Search size={16} />
-                                    </div>
-                                    <input
-                                        type="text"
-                                        placeholder={t('warehouse.searchManifestSupplier')}
-                                        aria-label={t('warehouse.searchManifestSupplier')}
-                                        title={t('warehouse.searchManifestSupplier')}
-                                        value={receiveSearch}
-                                        onChange={(e) => setReceiveSearch(e.target.value)}
-                                        className="w-full sm:w-64 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] hover:border-[var(--theme-border-strong)] rounded-xl py-2 pl-9 pr-8 text-xs text-[var(--theme-text-primary)] placeholder:[var(--theme-text-secondary)]/60 focus:outline-none focus:border-[var(--theme-accent)] focus:ring-2 focus:ring-[var(--theme-accent-muted)] transition-colors"
-                                    />
-                                    {receiveSearch && (
-                                        <button
-                                            type="button"
-                                            onClick={() => setReceiveSearch('')}
-                                            className="absolute inset-y-0 right-2.5 flex items-center text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] transition-colors cursor-pointer"
-                                            title="Clear search"
-                                        >
-                                            <X size={14} />
-                                        </button>
-                                    )}
+                            <div className="relative flex-1 sm:flex-initial">
+                                <div className="absolute inset-y-0 left-2.5 flex items-center pointer-events-none text-[var(--theme-text-secondary)]">
+                                    <Search size={13} />
                                 </div>
-                                <div className="hidden md:flex">
-                                    <div className="px-4 py-2 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl flex flex-col justify-center">
-                                        <p className="text-[11px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider mb-0.5">
-                                            {t('warehouse.pendingManifests')}
-                                        </p>
-                                        <p className="text-lg font-semibold text-[var(--theme-text-primary)] font-mono tabular-nums leading-none">
-                                            {orders.filter(o => o.status === 'Approved').reduce((sum, o) => sum + (o.lineItems?.length || 0), 0)}
-                                        </p>
-                                    </div>
-                                </div>
-                            </>
+                                <input
+                                    type="text"
+                                    placeholder={t('warehouse.searchManifestSupplier')}
+                                    aria-label={t('warehouse.searchManifestSupplier')}
+                                    title={t('warehouse.searchManifestSupplier')}
+                                    value={receiveSearch}
+                                    onChange={(e) => setReceiveSearch(e.target.value)}
+                                    className="w-full sm:w-56 min-h-[30px] sm:min-h-0 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-lg sm:rounded-xl py-1 pl-7 sm:pl-8 pr-7 text-xs text-[var(--theme-text-primary)] placeholder:[var(--theme-text-secondary)]/60 focus:outline-none focus:border-[var(--theme-accent)] transition-colors"
+                                />
+                                {receiveSearch && (
+                                    <button
+                                        type="button"
+                                        onClick={() => setReceiveSearch('')}
+                                        className="absolute inset-y-0 right-2 flex items-center text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] transition-colors cursor-pointer"
+                                        title="Clear search"
+                                    >
+                                        <X size={12} />
+                                    </button>
+                                )}
+                            </div>
                         )}
                     </div>
                 </div>

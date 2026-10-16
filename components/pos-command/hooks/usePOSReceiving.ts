@@ -74,6 +74,12 @@ export const usePOSReceiving = ({
         const isDone = ['delivered', 'completed', 'received'].includes(rawStat);
         const isDeparted = ['shipped', 'intransit', 'dispatched', 'delivered', 'completed', 'received'].includes(rawStat) || !!shippedAt;
 
+        // 0. Rejected or Cancelled transfers cannot be received
+        if (['rejected', 'cancelled'].includes(rawStat) || (job && ['Cancelled', 'Rejected'].includes(job.status))) {
+            addNotification('alert', 'This transfer has been rejected or cancelled and cannot be received.');
+            return;
+        }
+
         // 1. Internal Driver: POS cannot receive until internal driver marks delivery complete
         if (!isExt && !isDone) {
             addNotification('alert', t('posCommand.awaitingDriverDeliveryMsg') || 'Internal driver must mark delivery complete before POS receiving can begin.');

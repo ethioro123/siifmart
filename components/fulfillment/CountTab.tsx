@@ -38,7 +38,7 @@ export const CountTab: React.FC<CountTabProps> = ({
     }[]>([]);
 
     return (
-        <div className="flex-1 overflow-y-auto space-y-4">
+        <div className="flex-1 overflow-y-auto space-y-2 sm:space-y-4">
             {/* Header */}
             <CountHeader
                 countViewMode={countViewMode}

@@ -22,29 +22,29 @@ export const DriverScanner: React.FC<DriverScannerProps> = ({
     setSelectedJob
 }) => {
     return (
-        <div className="fixed inset-0 z-[100] bg-black/95 flex flex-col items-center justify-center p-6 overflow-x-hidden">
+        <div className="fixed inset-0 z-[100] bg-black/80 flex flex-col items-center justify-center p-6 overflow-x-hidden animate-in fade-in duration-200">
             <button
                 onClick={() => setDriverScannerOpen(false)}
                 title={t('warehouse.misc.closeScanner')}
-                className="absolute top-4 right-4 sm:top-10 sm:right-10 min-w-[44px] min-h-[44px] flex items-center justify-center bg-white/10 hover:bg-white/20 rounded-full text-white transition-colors shrink-0 touch-manipulation"
+                className="absolute top-4 right-4 sm:top-8 sm:right-8 w-10 h-10 min-w-[44px] min-h-[44px] flex items-center justify-center bg-white/10 hover:bg-white/20 rounded-full text-white transition-colors shrink-0 touch-manipulation"
             >
-                <X size={22} />
+                <X size={20} />
             </button>
  
-            <div className="w-full max-w-lg space-y-6 sm:space-y-8 text-center">
+            <div className="w-full max-w-sm space-y-6 text-center">
                 <div className="relative inline-block">
-                    <div className="w-48 h-48 xs:w-56 xs:h-56 sm:w-64 sm:h-64 border-2 border-dashed border-primary/50 rounded-3xl flex items-center justify-center relative overflow-hidden bg-black/40">
-                        <div className="absolute left-0 w-full h-1 bg-primary/70 animate-[scan_2s_infinite]" />
-                        <QrCode className="text-primary opacity-20 w-24 h-24 sm:w-[120px] sm:h-[120px]" />
+                    <div className="w-52 h-52 sm:w-60 sm:h-60 border-2 border-dashed border-[var(--theme-primary)]/50 rounded-3xl flex items-center justify-center relative overflow-hidden bg-black/40">
+                        <div className="absolute left-0 w-full h-1 bg-[var(--theme-primary)]/80 animate-[scan_2s_infinite]" />
+                        <QrCode className="text-[var(--theme-primary)] opacity-20 w-24 h-24 sm:w-28 sm:h-28" />
                     </div>
                 </div>
  
                 <div>
                     <h3 className="text-xl sm:text-2xl font-bold text-white tracking-tight">{t('warehouse.driverHub.readyToScan')}</h3>
-                    <p className="text-gray-400 font-semibold uppercase tracking-wider text-[11px] sm:text-xs mt-2">{t('warehouse.driverHub.scanPrompt')}</p>
+                    <p className="text-gray-300 text-xs mt-1.5">{t('warehouse.driverHub.scanPrompt')}</p>
                 </div>
  
-                <div className="grid grid-cols-1 gap-3 sm:gap-4">
+                <div className="grid grid-cols-1 gap-2.5">
                     <button
                         onClick={async () => {
                             if (selectedJob) {
@@ -87,13 +87,13 @@ export const DriverScanner: React.FC<DriverScannerProps> = ({
                             setDriverScannerOpen(false);
                             setSelectedJob(null);
                         }}
-                        className="w-full min-h-[48px] py-3.5 sm:py-4 bg-primary text-white font-bold uppercase tracking-wider rounded-2xl hover:opacity-90 transition-all active:scale-[0.99] text-xs sm:text-sm shadow-xs touch-manipulation cursor-pointer"
+                        className="w-full min-h-[44px] py-3 bg-[var(--theme-primary)] text-[var(--theme-primary-text)] font-semibold rounded-xl hover:opacity-90 transition-all active:scale-[0.98] text-xs sm:text-sm shadow-sm touch-manipulation cursor-pointer"
                     >
                         {t('warehouse.driverHub.completeDeliveryBtn')}
                     </button>
                     <button
                         onClick={() => setDriverScannerOpen(false)}
-                        className="w-full min-h-[48px] py-3.5 sm:py-4 bg-white/5 text-white font-semibold uppercase tracking-wider rounded-2xl border border-white/10 hover:bg-white/10 transition-colors text-xs sm:text-sm touch-manipulation"
+                        className="w-full min-h-[44px] py-3 bg-white/10 text-white font-semibold rounded-xl border border-white/20 hover:bg-white/15 transition-colors text-xs sm:text-sm touch-manipulation"
                     >
                         {t('warehouse.driverHub.abortScan')}
                     </button>

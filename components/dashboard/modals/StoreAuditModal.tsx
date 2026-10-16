@@ -205,7 +205,7 @@ export const StoreAuditModal: React.FC<StoreAuditModalProps> = ({
                                     onClick={() => setAuditType(t.id as StoreAuditType)}
                                     className={`px-3 py-2 text-xs rounded-xl font-semibold border transition-all text-center active:scale-[0.98] ${
                                         auditType === t.id
-                                            ? 'bg-[var(--theme-primary)] text-white border-transparent shadow-sm'
+                                            ? 'bg-[var(--theme-primary)] text-[var(--theme-primary-text)] border-transparent shadow-sm'
                                             : 'bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] border-[var(--theme-border)] hover:border-[var(--theme-border-strong)]'
                                     }`}
                                 >
@@ -410,7 +410,7 @@ export const StoreAuditModal: React.FC<StoreAuditModalProps> = ({
                         <button
                             type="submit"
                             disabled={isSubmitting || !managerCoSigned}
-                            className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[var(--theme-primary)] hover:opacity-90 disabled:opacity-50 text-white text-xs font-semibold transition-all shadow-sm active:scale-98"
+                            className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[var(--theme-primary)] hover:opacity-90 disabled:opacity-50 text-[var(--theme-primary-text)] text-xs font-semibold transition-all shadow-sm active:scale-98 cursor-pointer"
                         >
                             <ClipboardCheck size={16} />
                             <span>{isSubmitting ? 'Recording Audit...' : 'Submit & Sign Off Audit'}</span>

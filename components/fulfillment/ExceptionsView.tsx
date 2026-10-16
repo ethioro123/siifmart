@@ -125,7 +125,7 @@ export function ExceptionsView({ activeSite, onResolve }: ExceptionsViewProps) {
                                     <td className="p-3.5 text-right">
                                         <button
                                             onClick={() => onResolve(d.job, d.item, d.index)}
-                                            className="px-4 py-2 min-h-[44px] bg-primary text-white font-semibold text-xs rounded-xl hover:opacity-90 active:scale-95 transition-all uppercase tracking-wider touch-manipulation"
+                                            className="px-4 py-2 min-h-[44px] bg-[var(--theme-primary)] text-[var(--theme-primary-text)] font-semibold text-xs rounded-xl hover:opacity-90 active:scale-95 transition-all uppercase tracking-wider touch-manipulation cursor-pointer"
                                         >
                                             Resolve
                                         </button>

@@ -10,6 +10,7 @@ import { useFulfillment } from '../FulfillmentContext';
 import { CustodyHandshakeModal } from './CustodyHandshakeModal';
 import { useData } from '../../../contexts/DataContext';
 import { resolveReceivingPolicy } from '../../../utils/receivingPolicy';
+import { productsService } from '../../../services/supabase.service';
 
 interface TransferReceivingProps {
     activeTransferJob: WMSJob;
@@ -49,7 +50,7 @@ export const TransferReceiving: React.FC<TransferReceivingProps> = ({
 
     // Delivering driver lookup
     const assignedDriver = employees.find(e => e.id === activeTransferJob.assignedTo);
-    const driverName = assignedDriver?.name || 'Assigned Driver / Courier';
+    const driverName = activeTransferJob.carrierName || activeTransferJob.carrier || assignedDriver?.name || 'Assigned Driver / Courier';
 
     const handleConfirmReceipt = async (discrepancyDetails?: { hasDiscrepancy: boolean; discrepancyCount: number; driverAcknowledged: boolean }) => {
         if (!activeTransferJob) return;
@@ -58,10 +59,23 @@ export const TransferReceiving: React.FC<TransferReceivingProps> = ({
             const hasDiscrepancy = !!discrepancyDetails?.hasDiscrepancy;
             const discrepancyCount = discrepancyDetails?.discrepancyCount || 0;
 
+            // Preserve verified received quantities and condition statuses
+            const updatedLineItems = (activeTransferJob.lineItems || []).map((li: any, idx: number) => {
+                const recItem = transferReceiveItems.find(ri => ri.productId === li.productId || ri.sku === li.sku || ri.id === li.id)
+                    || transferReceiveItems[idx];
+                return {
+                    ...li,
+                    receivedQty: recItem ? (recItem.receivedQty ?? 0) : (li.receivedQty ?? li.quantity ?? 0),
+                    condition: recItem?.condition || 'Good',
+                    status: recItem && (recItem.receivedQty || 0) < (li.expectedQty || li.quantity || 0) ? 'Short' : 'Received'
+                };
+            });
+
             // Update job status to Received with Chain of Custody audit details
             await wmsJobsService.update(activeTransferJob.id, {
                 transferStatus: 'Received',
                 status: 'Completed',
+                lineItems: updatedLineItems,
                 hasDiscrepancy,
                 discrepancyDetails: hasDiscrepancy
                     ? `Chain of Custody Discrepancy: ${discrepancyCount} units variance. Certified by ${user?.name || 'Receiver'}`
@@ -125,39 +139,72 @@ export const TransferReceiving: React.FC<TransferReceivingProps> = ({
             const destSiteId = activeTransferJob.destSiteId || activeTransferJob.dest_site_id || activeSite?.id;
             for (const item of transferReceiveItems) {
                 if ((item.receivedQty || 0) > 0) {
+                    const itemSku = (item as any).sku || '';
+                    const itemName = item.productName || (item as any).name || '';
+                    const itemUnit = (item as any).unit || 'pcs';
+                    const itemSize = (item as any).size || '';
+
                     // Find the source product first to get the SKU
-                    const sourceProduct = allProducts.find(p => p.id === item.productId || (item.barcode && p.barcode === item.barcode))
+                    let sourceProduct: Product | null | undefined = allProducts.find(p => p.id === item.productId || (item.barcode && p.barcode === item.barcode))
                         || products.find(p => p.id === item.productId || (item.barcode && p.barcode === item.barcode));
+
+                    if (!sourceProduct) {
+                        try {
+                            if (item.productId) {
+                                sourceProduct = await productsService.getById(item.productId);
+                            }
+                            if (!sourceProduct && itemSku) {
+                                sourceProduct = await productsService.getBySKU(itemSku);
+                            }
+                        } catch (e: any) {
+                            logger.warn('TransferReceiving', `Failed to fetch source product fallback for SKU ${itemSku}: ${e?.message || String(e)}`);
+                        }
+                    }
+
                     // Try to find the product record at the destination site by SKU
-                    const destProduct = sourceProduct ? (
+                    let destProduct: Product | null | undefined = sourceProduct ? (
                         allProducts.find(p => 
-                            p.sku === sourceProduct.sku && 
+                            p.sku === sourceProduct?.sku && 
                             (p.siteId === destSiteId || (p as any).site_id === destSiteId)
                         ) || products.find(p => 
-                            p.sku === sourceProduct.sku && 
+                            p.sku === sourceProduct?.sku && 
                             (p.siteId === destSiteId || (p as any).site_id === destSiteId)
                         )
                     ) : undefined;
+
+                    if (!destProduct && (sourceProduct?.sku || itemSku) && destSiteId) {
+                        try {
+                            destProduct = await productsService.getBySKU(sourceProduct?.sku || itemSku, destSiteId);
+                        } catch (e) { }
+                    }
                     
                     let targetProductId = destProduct?.id;
                     
                     // If product doesn't exist at destination site, auto-create/clone it for destination site
-                    if (!destProduct && sourceProduct && addProduct) {
+                    if (!destProduct && addProduct) {
+                        const effectivePrice = sourceProduct?.price ?? (item as any).retailPrice ?? (item as any).price ?? 0;
+                        const effectiveCost = (sourceProduct as any)?.costPrice || (sourceProduct as any)?.cost || (item as any).costPrice || (item as any).cost || 0;
+                        const effectiveCategory = (sourceProduct?.category && sourceProduct.category !== 'Uncategorized')
+                            ? sourceProduct.category
+                            : ((item as any).category && (item as any).category !== 'Uncategorized' ? (item as any).category : 'General');
+
                         try {
                             const newProd = await addProduct({
-                                name: sourceProduct.name,
-                                sku: sourceProduct.sku,
-                                barcode: sourceProduct.barcode,
-                                price: sourceProduct.price,
-                                costPrice: (sourceProduct as any).costPrice || (sourceProduct as any).cost || 0,
+                                name: sourceProduct?.name || itemName || `Item ${itemSku}`,
+                                sku: sourceProduct?.sku || itemSku,
+                                barcode: sourceProduct?.barcode || item.barcode || '',
+                                price: effectivePrice,
+                                costPrice: effectiveCost,
                                 stock: 0,
-                                unit: sourceProduct.unit || 'pcs',
+                                unit: sourceProduct?.unit || itemUnit,
                                 siteId: destSiteId,
                                 site_id: destSiteId,
-                                category: sourceProduct.category || 'General',
-                                productId: sourceProduct.productId || sourceProduct.id,
-                                countryCode: (sourceProduct as any).countryCode || (sourceProduct as any).country_code,
-                                country_code: (sourceProduct as any).countryCode || (sourceProduct as any).country_code,
+                                category: effectiveCategory,
+                                brand: sourceProduct?.brand || (item as any).brand || '',
+                                size: sourceProduct?.size || itemSize,
+                                productId: sourceProduct?.productId || sourceProduct?.id || item.productId,
+                                countryCode: (sourceProduct as any)?.countryCode || (sourceProduct as any)?.country_code,
+                                country_code: (sourceProduct as any)?.countryCode || (sourceProduct as any)?.country_code,
                             } as any);
                             targetProductId = newProd?.id;
                         } catch (err) {
@@ -178,6 +225,39 @@ export const TransferReceiving: React.FC<TransferReceivingProps> = ({
                         });
                     }
                 }
+            }
+
+            // Auto-create PUTAWAY job at destination store for shelving received goods
+            try {
+                const putawayItems = transferReceiveItems
+                    .filter(i => (i.receivedQty || 0) > 0)
+                    .map(i => ({
+                        productId: i.productId,
+                        name: i.name || 'Received Product',
+                        sku: i.sku || i.productId,
+                        expectedQty: i.receivedQty || 0,
+                        pickedQty: 0,
+                        status: 'Pending' as const
+                    }));
+
+                if (putawayItems.length > 0 && destSiteId) {
+                    await wmsJobsService.create({
+                        type: 'PUTAWAY',
+                        status: 'Pending',
+                        siteId: destSiteId,
+                        site_id: destSiteId,
+                        priority: activeTransferJob.priority || 'Normal',
+                        items: Math.ceil(putawayItems.reduce((acc, i) => acc + i.expectedQty, 0)),
+                        lineItems: putawayItems,
+                        location: 'Receiving Dock',
+                        orderRef: activeTransferJob.orderRef || activeTransferJob.jobNumber || activeTransferJob.id,
+                        createdBy: user?.name || 'System',
+                        countryCode: activeTransferJob.countryCode || (activeTransferJob as any).country_code,
+                        country_code: activeTransferJob.countryCode || (activeTransferJob as any).country_code
+                    } as any);
+                }
+            } catch (putawayErr) {
+                logger.warn('TransferReceiving', `Failed to auto-create Putaway job: ${String(putawayErr)}`);
             }
 
             // If discrepancy occurred, dispatch event to penalize gamification accuracy & log audit
@@ -312,12 +392,20 @@ export const TransferReceiving: React.FC<TransferReceivingProps> = ({
                                             <input
                                                 id={`received-qty-${idx}`}
                                                 type="number"
+                                                min="0"
+                                                placeholder="0"
                                                 step={product?.unit && getSellUnit(product.unit).allowDecimal ? '0.01' : '1'}
-                                                value={item.receivedQty}
+                                                value={item.receivedQty === 0 ? '' : item.receivedQty}
+                                                onFocus={(e) => e.target.select()}
                                                 onChange={(e) => {
                                                     const newItems = [...transferReceiveItems];
                                                     const unitDef = getSellUnit(product?.unit);
-                                                    newItems[idx].receivedQty = unitDef.allowDecimal ? parseFloat(e.target.value) || 0 : parseInt(e.target.value) || 0;
+                                                    const rawVal = e.target.value;
+                                                    if (rawVal.trim() === '') {
+                                                        newItems[idx].receivedQty = 0;
+                                                    } else {
+                                                        newItems[idx].receivedQty = unitDef.allowDecimal ? parseFloat(rawVal) || 0 : parseInt(rawVal, 10) || 0;
+                                                    }
                                                     setTransferReceiveItems(newItems);
                                                 }}
                                                 className="w-full min-h-[44px] bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl px-3 py-2 text-sm text-[var(--theme-text-primary)] focus:border-primary focus:outline-none touch-manipulation font-mono tabular-nums"
@@ -351,7 +439,7 @@ export const TransferReceiving: React.FC<TransferReceivingProps> = ({
                 <div className="pt-4 border-t border-[var(--theme-border)] mt-2">
                     <button
                         onClick={() => setIsHandshakeModalOpen(true)}
-                        className="w-full min-h-[44px] py-3.5 bg-primary text-white hover:opacity-90 rounded-xl text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 shadow-sm transition-all touch-manipulation active:scale-[0.99]"
+                        className="w-full min-h-[44px] py-3.5 bg-[var(--theme-primary)] text-[var(--theme-primary-text)] hover:opacity-90 rounded-xl text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 shadow-sm transition-all touch-manipulation active:scale-[0.99] cursor-pointer"
                     >
                         <ShieldCheck size={16} />
                         Review & Sign Digital Handshake (Chain of Custody)

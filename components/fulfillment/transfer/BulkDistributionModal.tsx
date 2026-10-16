@@ -141,6 +141,14 @@ export const BulkDistributionModal: React.FC<BulkDistributionModalProps> = ({
                                 sku: product?.sku || '',
                                 name: product?.name || '',
                                 image: product?.image || '',
+                                price: product?.price ?? 0,
+                                retailPrice: product?.price ?? 0,
+                                costPrice: (product as any)?.costPrice ?? (product as any)?.cost ?? 0,
+                                category: product?.category || 'General',
+                                brand: product?.brand || '',
+                                unit: product?.unit || 'pcs',
+                                size: product?.size || '',
+                                barcode: product?.barcode || '',
                                 expectedQty: allocation.quantity,
                                 pickedQty: 0,
                                 status: 'Pending'
@@ -215,6 +223,14 @@ export const BulkDistributionModal: React.FC<BulkDistributionModalProps> = ({
                                 sku: product?.sku || '',
                                 name: product?.name || '',
                                 image: product?.image || '',
+                                price: product?.price ?? 0,
+                                retailPrice: product?.price ?? 0,
+                                costPrice: (product as any)?.costPrice ?? (product as any)?.cost ?? 0,
+                                category: product?.category || 'General',
+                                brand: product?.brand || '',
+                                unit: product?.unit || 'pcs',
+                                size: product?.size || '',
+                                barcode: product?.barcode || '',
                                 expectedQty: item.quantity,
                                 pickedQty: 0,
                                 status: 'Pending'
@@ -457,7 +473,7 @@ export const BulkDistributionModal: React.FC<BulkDistributionModalProps> = ({
                             }
                             className={`min-h-[44px] px-6 py-2.5 rounded-xl font-bold uppercase tracking-wider transition-all flex items-center gap-2 text-xs shadow-xs touch-manipulation ${((bulkDistributionMode === 'single' && bulkDistributionProductId && bulkDistributionAllocations.filter(a => a.quantity > 0).length > 0) ||
                                 (bulkDistributionMode === 'wave' && waveProducts.length > 0 && waveProducts.some(wp => wp.allocations.some(a => a.quantity > 0))))
-                                ? 'bg-primary text-white hover:opacity-90 active:scale-95 cursor-pointer'
+                                ? 'bg-[var(--theme-primary)] text-[var(--theme-primary-text)] hover:opacity-90 active:scale-95 cursor-pointer'
                                 : 'bg-[var(--theme-bg-card)] text-[var(--theme-text-secondary)] opacity-50 cursor-not-allowed border border-[var(--theme-border)]'
                                 }`}
                         >

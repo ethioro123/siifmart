@@ -46,8 +46,8 @@ export const SortDropdown = <T extends string>({
                                 onChange(option.id);
                                 setIsOpen(false);
                             }}
-                            className={`w-full text-left px-4 py-2.5 rounded-xl text-xs font-semibold transition-colors flex items-center justify-between group uppercase tracking-wider min-h-[44px] touch-manipulation ${value === option.id
-                                ? 'bg-primary text-white cursor-default shadow-sm'
+                            className={`w-full text-left px-4 py-2.5 rounded-xl text-xs font-semibold transition-colors flex items-center justify-between group uppercase tracking-wider min-h-[44px] touch-manipulation cursor-pointer ${value === option.id
+                                ? 'bg-[var(--theme-primary)] text-[var(--theme-primary-text)] cursor-default shadow-sm'
                                 : 'text-[var(--theme-text-secondary)] hover:bg-[var(--theme-bg-subtle)] hover:text-[var(--theme-text-primary)]'
                                 }`}
                         >

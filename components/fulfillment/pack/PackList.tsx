@@ -59,9 +59,9 @@ export const PackList: React.FC<PackListProps> = ({
                                 <div
                                     key={job.id}
                                     onClick={() => setSelectedPackJob(job)}
-                                    className={`relative bg-[var(--theme-bg-card)] border rounded-2xl overflow-hidden cursor-pointer active:scale-[0.99] transition-all duration-150 shadow-sm min-h-[56px] touch-manipulation ${
+                                    className={`relative bg-[var(--theme-bg-card)] border rounded-xl sm:rounded-2xl overflow-hidden cursor-pointer active:scale-[0.99] transition-all duration-150 shadow-xs min-h-[48px] sm:min-h-[56px] touch-manipulation ${
                                         isCritical ? 'border-red-500/40' :
-                                        isActive ? 'border-[var(--theme-accent)] shadow-[var(--theme-accent)]/10 shadow-md' :
+                                        isActive ? 'border-[var(--theme-accent)] shadow-[var(--theme-accent)]/10 shadow-xs' :
                                         'border-[var(--theme-border)] hover:border-[var(--theme-accent)]/40'
                                     }`}
                                 >
@@ -69,44 +69,51 @@ export const PackList: React.FC<PackListProps> = ({
                                     {isCritical && <div className="absolute left-0 top-0 bottom-0 w-1 bg-red-500" />}
                                     {isActive && !isCritical && <div className="absolute left-0 top-0 bottom-0 w-1 bg-[var(--theme-accent)]" />}
 
-                                    <div className={`flex items-center gap-3.5 px-3.5 sm:px-4 py-3.5 ${isCritical || isActive ? 'pl-4 sm:pl-5' : ''}`}>
-                                        {/* Icon */}
-                                        <div className={`w-11 h-11 rounded-xl flex items-center justify-center shrink-0 ${
-                                            isActive ? 'bg-[var(--theme-accent)]/10 text-[var(--theme-accent)]' :
-                                            'bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)]'
+                                    <div className={`flex items-center gap-2.5 sm:gap-3.5 p-2.5 sm:px-4 sm:py-3.5 ${isCritical || isActive ? 'pl-3.5 sm:pl-5' : ''}`}>
+                                        {/* Icon with progress on mobile */}
+                                        <div className={`w-9 h-9 sm:w-11 sm:h-11 rounded-lg sm:rounded-xl flex items-center justify-center shrink-0 border ${
+                                            progress >= 100
+                                                ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-500'
+                                                : isActive
+                                                    ? 'bg-[var(--theme-accent)]/10 border-[var(--theme-accent)]/20 text-[var(--theme-accent)]'
+                                                    : 'bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] text-[var(--theme-text-secondary)]'
                                         }`}>
-                                            <Package size={20} />
+                                            <span className="sm:hidden font-mono text-xs font-bold">{Math.round(progress)}%</span>
+                                            <Package size={20} className="hidden sm:block" />
                                         </div>
 
                                         {/* Main content */}
                                         <div className="flex-1 min-w-0">
-                                            <div className="flex items-center gap-2 mb-1">
-                                                <span className="text-sm font-semibold text-[var(--theme-text-primary)] font-mono uppercase tracking-wider truncate">
+                                            <div className="flex items-center gap-1.5 sm:gap-2 mb-0.5 sm:mb-1">
+                                                <span className="text-xs sm:text-sm font-semibold text-[var(--theme-text-primary)] font-mono uppercase tracking-wider truncate">
                                                     {formatJobId(job)}
                                                 </span>
                                                 {isCritical && (
-                                                    <span className="flex items-center gap-1 bg-red-500/10 text-red-500 text-[11px] font-semibold px-2 py-0.5 rounded-full uppercase border border-red-500/20 shrink-0">
+                                                    <span className="flex items-center gap-1 bg-red-500/10 text-red-500 text-[10px] sm:text-[11px] font-semibold px-1.5 sm:px-2 py-0.2 sm:py-0.5 rounded-full uppercase border border-red-500/20 shrink-0">
                                                         <Zap size={10} /> Urgent
                                                     </span>
                                                 )}
                                                 {isActive && !isCritical && (
-                                                    <span className="bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] text-[11px] font-semibold px-2 py-0.5 rounded-full uppercase border border-[var(--theme-accent)]/20 shrink-0">
+                                                    <span className="inline-flex items-center gap-1 bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] text-[10px] sm:text-[11px] font-semibold px-1.5 sm:px-2 py-0.2 sm:py-0.5 rounded-full uppercase border border-[var(--theme-accent)]/20 shrink-0">
+                                                        <span className="w-1.5 h-1.5 rounded-full bg-[var(--theme-accent)]" />
                                                         Active
                                                     </span>
                                                 )}
                                             </div>
-                                            <div className="flex items-center gap-2 text-[11px] text-[var(--theme-text-secondary)] font-medium truncate">
-                                                <span className="font-mono tabular-nums">{totalItems} {totalItems === 1 ? t('warehouse.itemSingular') : t('warehouse.itemPlural')}</span>
+                                            <div className="flex items-center gap-1.5 text-[10px] sm:text-[11px] text-[var(--theme-text-secondary)] font-medium truncate font-mono">
+                                                <span>{totalItems} {totalItems === 1 ? t('warehouse.itemSingular') : t('warehouse.itemPlural')}</span>
                                                 {destSite?.name && (
                                                     <>
-                                                        <span className="w-1 h-1 rounded-full bg-[var(--theme-text-secondary)]/40 shrink-0" />
+                                                        <span className="opacity-40">•</span>
                                                         <span className="truncate">{destSite.name}</span>
                                                     </>
                                                 )}
+                                                <span className="opacity-40">•</span>
+                                                <span>{packedItems}/{totalItems}</span>
                                             </div>
 
-                                            {/* Compact progress bar */}
-                                            <div className="mt-2.5 flex items-center gap-2.5">
+                                            {/* Compact progress bar on desktop */}
+                                            <div className="hidden sm:flex mt-2.5 items-center gap-2.5">
                                                 <div className="flex-1 h-1.5 bg-[var(--theme-bg-subtle)] rounded-full overflow-hidden">
                                                     <div
                                                         ref={el => { if (el) el.style.width = `${progress}%`; }}
@@ -121,7 +128,7 @@ export const PackList: React.FC<PackListProps> = ({
 
                                         {/* Right actions */}
                                         <div className="flex items-center gap-2 shrink-0">
-                                            <ChevronRight size={18} className="text-[var(--theme-text-secondary)]" />
+                                            <ChevronRight size={15} className="text-[var(--theme-text-secondary)] sm:w-[18px] sm:h-[18px]" />
                                         </div>
                                     </div>
                                 </div>

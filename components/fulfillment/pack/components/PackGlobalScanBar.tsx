@@ -32,23 +32,23 @@ export const PackGlobalScanBar: React.FC<PackGlobalScanBarProps> = ({
     }, []);
 
     return (
-        <div className="px-4 pb-4 text-left">
+        <div className="px-1 sm:px-4 pb-1.5 sm:pb-4 text-left">
             <form onSubmit={onSubmit} className="relative group">
-                <div className={`relative flex items-center gap-3 bg-[var(--theme-bg-card)] border-2 rounded-2xl px-4 py-3 transition-colors ${
+                <div className={`relative flex items-center gap-2 sm:gap-3 bg-[var(--theme-bg-card)] border sm:border-2 rounded-xl sm:rounded-2xl px-3 sm:px-4 py-1.5 sm:py-3 transition-colors ${
                     scanSuccess
                         ? 'border-green-500/50 bg-green-500/5'
                         : scanError
                             ? 'border-red-500/50 bg-red-500/5'
-                            : 'border-[var(--theme-border)] focus-within:border-[var(--theme-accent)] shadow-sm'
+                            : 'border-[var(--theme-border)] focus-within:border-[var(--theme-accent)] shadow-xs'
                 }`}>
                     {isScanning ? (
-                        <Loader2 size={22} className="text-[var(--theme-accent)] animate-spin shrink-0" />
+                        <Loader2 size={16} className="text-[var(--theme-accent)] animate-spin shrink-0 sm:w-[22px] sm:h-[22px]" />
                     ) : scanSuccess ? (
-                        <CheckCircle size={22} className="text-green-500 shrink-0" />
+                        <CheckCircle size={16} className="text-green-500 shrink-0 sm:w-[22px] sm:h-[22px]" />
                     ) : scanError ? (
-                        <X size={22} className="text-red-500 shrink-0" />
+                        <X size={16} className="text-red-500 shrink-0 sm:w-[22px] sm:h-[22px]" />
                     ) : (
-                        <ScanLine size={22} className="text-[var(--theme-accent)] shrink-0" />
+                        <ScanLine size={16} className="text-[var(--theme-accent)] shrink-0 sm:w-[22px] sm:h-[22px]" />
                     )}
                     <input
                         ref={scanInputRef}
@@ -60,15 +60,15 @@ export const PackGlobalScanBar: React.FC<PackGlobalScanBarProps> = ({
                         disabled={isScanning}
                         aria-label="Scan Product Barcode"
                         title="Scan Product Barcode"
-                        className="flex-1 bg-transparent text-[var(--theme-text-primary)] text-base font-mono tracking-wider outline-none placeholder:text-[var(--theme-text-secondary)] disabled:opacity-50"
-                        placeholder="Scan Order Barcode, Job #, or Product SKU to Pack..."
+                        className="flex-1 bg-transparent text-[var(--theme-text-primary)] text-xs sm:text-base font-mono tracking-wider outline-none placeholder:text-[var(--theme-text-secondary)] disabled:opacity-50"
+                        placeholder="Scan Order, Job #, or SKU..."
                         autoComplete="off"
                     />
                     {scanInput && (
                         <button
                             type="submit"
                             disabled={isScanning}
-                            className="px-5 py-2.5 min-h-[44px] bg-[var(--theme-accent)] hover:opacity-90 text-white rounded-xl font-semibold text-xs uppercase tracking-wider transition-opacity active:scale-95 disabled:opacity-50 cursor-pointer"
+                            className="px-3 sm:px-5 py-1.5 sm:py-2.5 min-h-[32px] sm:min-h-[44px] bg-[var(--theme-accent)] hover:opacity-90 text-white rounded-lg sm:rounded-xl font-semibold text-xs uppercase tracking-wider transition-opacity active:scale-95 disabled:opacity-50 cursor-pointer"
                         >
                             {t('warehouse.auxiliary.go')}
                         </button>
@@ -76,7 +76,7 @@ export const PackGlobalScanBar: React.FC<PackGlobalScanBarProps> = ({
                 </div>
                 {/* Status Messages */}
                 {(scanSuccess || scanError) && (
-                    <div className={`absolute -bottom-6 left-4 text-xs font-semibold tracking-wide ${scanSuccess ? 'text-green-500' : 'text-red-500'}`}>
+                    <div className={`absolute -bottom-5 sm:-bottom-6 left-3 sm:left-4 text-[10px] sm:text-xs font-semibold tracking-wide ${scanSuccess ? 'text-green-500' : 'text-red-500'}`}>
                         {scanSuccess || scanError}
                     </div>
                 )}

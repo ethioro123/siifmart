@@ -91,7 +91,7 @@ export const ReturnsProcess: React.FC<ReturnsProcessProps> = ({
                         />
                         <button
                             onClick={handleFindOrder}
-                            className="min-h-[44px] px-6 bg-primary hover:opacity-90 text-white font-bold rounded-xl transition-all shadow-xs touch-manipulation active:scale-[0.99] text-xs uppercase tracking-wider"
+                            className="min-h-[44px] px-6 bg-[var(--theme-primary)] hover:opacity-90 text-[var(--theme-primary-text)] font-bold rounded-xl transition-all shadow-xs touch-manipulation active:scale-[0.99] text-xs uppercase tracking-wider cursor-pointer"
                         >
                             Find
                         </button>
@@ -239,7 +239,7 @@ export const ReturnsProcess: React.FC<ReturnsProcessProps> = ({
                         <button
                             disabled={returnItems.length === 0}
                             onClick={() => setReturnStep('Review')}
-                            className={`min-h-[44px] px-8 py-2.5 rounded-xl font-bold flex items-center gap-2 text-xs uppercase tracking-wider transition-all touch-manipulation ${returnItems.length > 0 ? 'bg-primary hover:opacity-90 text-white shadow-xs active:scale-[0.99]' : 'bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] opacity-50 cursor-not-allowed border border-[var(--theme-border)]'}`}
+                            className={`min-h-[44px] px-8 py-2.5 rounded-xl font-bold flex items-center gap-2 text-xs uppercase tracking-wider transition-all touch-manipulation cursor-pointer ${returnItems.length > 0 ? 'bg-[var(--theme-primary)] hover:opacity-90 text-[var(--theme-primary-text)] shadow-xs active:scale-[0.99]' : 'bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] opacity-50 cursor-not-allowed border border-[var(--theme-border)]'}`}
                         >
                             Review Return <ArrowRight size={16} />
                         </button>
@@ -364,13 +364,13 @@ export const ReturnsProcess: React.FC<ReturnsProcessProps> = ({
                                             setReturnStep('Complete');
                                             addNotification('success', 'Return processed successfully');
                                         }}
-                                        className="w-full min-h-[44px] py-3 bg-primary hover:opacity-90 text-white font-bold rounded-xl transition-all shadow-xs touch-manipulation active:scale-[0.99] text-xs uppercase tracking-wider"
+                                        className="w-full min-h-[44px] py-3 bg-[var(--theme-primary)] hover:opacity-90 text-[var(--theme-primary-text)] font-bold rounded-xl transition-all shadow-xs touch-manipulation active:scale-[0.99] text-xs uppercase tracking-wider cursor-pointer"
                                     >
                                         Process Refund
                                     </button>
                                     <button
                                         onClick={() => setReturnStep('Select')}
-                                        className="w-full min-h-[44px] py-2 text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] font-semibold text-xs uppercase tracking-wider transition-colors touch-manipulation"
+                                        className="w-full min-h-[44px] py-2 text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] font-semibold text-xs uppercase tracking-wider transition-colors touch-manipulation cursor-pointer"
                                     >
                                         Back to Selection
                                     </button>
@@ -398,7 +398,7 @@ export const ReturnsProcess: React.FC<ReturnsProcessProps> = ({
                                 window.print();
                                 addNotification('info', 'Printing Receipt...');
                             }}
-                            className="min-h-[44px] px-6 py-2.5 bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)] font-semibold rounded-xl border border-[var(--theme-border)] flex items-center gap-2 text-xs uppercase tracking-wider transition-all touch-manipulation shadow-xs"
+                            className="min-h-[44px] px-6 py-2.5 bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)] font-semibold rounded-xl border border-[var(--theme-border)] flex items-center gap-2 text-xs uppercase tracking-wider transition-all touch-manipulation shadow-xs cursor-pointer"
                         >
                             <Printer size={16} /> Print Receipt
                         </button>
@@ -409,7 +409,7 @@ export const ReturnsProcess: React.FC<ReturnsProcessProps> = ({
                                 setReturnSearch('');
                                 setReturnStep('Search');
                             }}
-                            className="min-h-[44px] px-6 py-2.5 bg-primary hover:opacity-90 text-white font-bold rounded-xl shadow-xs text-xs uppercase tracking-wider transition-all touch-manipulation active:scale-[0.99]"
+                            className="min-h-[44px] px-6 py-2.5 bg-[var(--theme-primary)] hover:opacity-90 text-[var(--theme-primary-text)] font-bold rounded-xl shadow-xs text-xs uppercase tracking-wider transition-all touch-manipulation active:scale-[0.99] cursor-pointer"
                         >
                             New Return
                         </button>

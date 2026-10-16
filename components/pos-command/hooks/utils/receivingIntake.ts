@@ -46,22 +46,37 @@ export const processReceivingStockIntake = async ({
                     updated_by: receiverName
                 } as any);
             } else {
-                const templateProduct = itemSku
+                let templateProduct = itemSku
                     ? allProducts.find(p => p.sku?.trim()?.toUpperCase() === itemSku)
                     : null;
+
+                if (!templateProduct && itemSku) {
+                    try {
+                        templateProduct = await productsService.getBySKU(itemSku);
+                    } catch (e) { }
+                }
+
+                const effectivePrice = (item as any).retailPrice || (item as any).price || templateProduct?.price || 0;
+                const effectiveCost = (item as any)?.costPrice || (item as any)?.cost || (templateProduct as any)?.costPrice || (templateProduct as any)?.cost || 0;
+                const effectiveCategory = (item.category && item.category !== 'Uncategorized' && item.category !== t('posCommand.uncategorized'))
+                    ? item.category
+                    : ((templateProduct?.category && templateProduct.category !== 'Uncategorized') ? templateProduct.category : t('posCommand.uncategorized'));
 
                 try {
                     await addProduct({
                         name: item.name || templateProduct?.name || t('posCommand.newProduct'),
                         sku: item.sku,
-                        price: templateProduct?.price || 0,
-                        costPrice: (templateProduct as any)?.costPrice || (templateProduct as any)?.cost || 0,
+                        price: effectivePrice,
+                        costPrice: effectiveCost,
                         stock: item.receivedQty,
-                        unit: templateProduct?.unit || 'pcs',
+                        unit: item.unit || templateProduct?.unit || 'pcs',
                         siteId: destSiteId,
-                        category: templateProduct?.category || t('posCommand.uncategorized'),
+                        category: effectiveCategory,
+                        brand: item.brand || templateProduct?.brand || '',
+                        size: item.size || templateProduct?.size || '',
+                        barcode: item.barcode || templateProduct?.barcode || '',
                         minStockLevel: 5,
-                        image: templateProduct?.image || '',
+                        image: item.image || templateProduct?.image || '',
                         productId: templateProduct?.productId || templateProduct?.id,
                         createdBy: receiverName,
                         posReceivedBy: receiverName,

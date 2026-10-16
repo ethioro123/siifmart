@@ -222,8 +222,8 @@ export const CustodyHandshakeModal: React.FC<CustodyHandshakeModalProps> = ({
                         disabled={!canSubmit || isSubmitting}
                         className={`min-h-[44px] flex-1 py-2.5 px-4 rounded-xl text-xs font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-2 shadow-sm touch-manipulation ${canSubmit && !isSubmitting
                             ? hasDiscrepancy 
-                                ? 'bg-amber-600 hover:bg-amber-500 text-white active:scale-[0.99]'
-                                : 'bg-primary hover:opacity-90 text-white active:scale-[0.99]'
+                                ? 'bg-amber-600 hover:bg-amber-500 text-white active:scale-[0.99] cursor-pointer'
+                                : 'bg-[var(--theme-primary)] hover:opacity-90 text-[var(--theme-primary-text)] active:scale-[0.99] cursor-pointer'
                             : 'bg-[var(--theme-bg-card)] text-[var(--theme-text-secondary)] opacity-50 cursor-not-allowed border border-[var(--theme-border)]'
                         }`}
                     >

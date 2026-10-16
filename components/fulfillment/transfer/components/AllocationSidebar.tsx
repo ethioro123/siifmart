@@ -181,7 +181,7 @@ export const AllocationSidebar: React.FC<AllocationSidebarProps> = ({
                                                 <button
                                                     onClick={() => addToDistDraft(source, allocQty)}
                                                     disabled={distHubLoading}
-                                                    className="flex-1 min-h-[44px] py-2 px-3 bg-primary hover:opacity-90 text-white text-[11px] font-bold uppercase tracking-wider rounded-xl transition-all active:scale-[0.99] shadow-xs flex items-center justify-center gap-1.5 touch-manipulation"
+                                                    className="flex-1 min-h-[44px] py-2 px-3 bg-[var(--theme-primary)] hover:opacity-90 text-[var(--theme-primary-text)] text-[11px] font-bold uppercase tracking-wider rounded-xl transition-all active:scale-[0.99] shadow-xs flex items-center justify-center gap-1.5 touch-manipulation cursor-pointer"
                                                 >
                                                     <Plus size={14} />
                                                     Stage to Manifest
@@ -335,7 +335,7 @@ export const AllocationSidebar: React.FC<AllocationSidebarProps> = ({
                         disabled={dbDraftJobs.length === 0 || distHubLoading}
                         className={`w-full min-h-[44px] py-3 rounded-xl font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-2 text-xs shadow-xs touch-manipulation ${
                             dbDraftJobs.length > 0
-                                ? 'bg-primary hover:opacity-90 text-white cursor-pointer active:scale-[0.99]'
+                                ? 'bg-[var(--theme-primary)] hover:opacity-90 text-[var(--theme-primary-text)] cursor-pointer active:scale-[0.99]'
                                 : 'bg-[var(--theme-bg-card)] text-[var(--theme-text-secondary)] opacity-50 cursor-not-allowed border border-[var(--theme-border)]'
                         }`}
                     >

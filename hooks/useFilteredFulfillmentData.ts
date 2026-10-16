@@ -85,9 +85,14 @@ export const useFilteredFulfillmentData = ({
             );
             const employeeId = currentEmployee?.id || user.id;
 
+            const isDriver = (user.role || '').toLowerCase() === 'driver';
             roleFiltered = baseFiltered.filter(j => {
                 const isAssignedToMe = (j.assignedTo === employeeId);
-                return isAssignedToMe;
+                const isAvailableForDriver = isDriver && !j.assignedTo &&
+                    (j.type === 'DISPATCH' || j.type === 'TRANSFER' || j.type === 'DRIVER') &&
+                    j.status !== 'Completed' && j.status !== 'Cancelled' &&
+                    ['Packed', 'Approved', 'Ready', 'In-Transit', 'Shipped'].includes(j.transferStatus || '');
+                return isAssignedToMe || isAvailableForDriver;
             });
             const driverJobsAfterRole = roleFiltered.filter(j => j.type === 'DISPATCH' || j.type === 'TRANSFER' || j.type === 'DRIVER');
             logger.debug('useFilteredFulfillmentData', `Role [${user.role}] restricted to ${roleFiltered.length} assigned jobs (${driverJobsAfterRole.length} driver jobs) for employee ${employeeId}.`);

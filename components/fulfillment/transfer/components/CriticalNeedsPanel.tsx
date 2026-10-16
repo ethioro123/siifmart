@@ -108,9 +108,9 @@ export const CriticalNeedsPanel: React.FC<CriticalNeedsPanelProps> = ({
                 <div className="flex items-center gap-1 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl p-1 self-start">
                     <button
                         onClick={() => setFilterStatus('ALL')}
-                        className={`min-h-[36px] px-3 py-1 rounded-lg text-[11px] font-semibold uppercase tracking-wider transition-all touch-manipulation ${
+                        className={`min-h-[36px] px-3 py-1 rounded-lg text-[11px] font-semibold uppercase tracking-wider transition-all touch-manipulation cursor-pointer ${
                             filterStatus === 'ALL'
-                                ? 'bg-primary text-white shadow-xs'
+                                ? 'bg-[var(--theme-primary)] text-[var(--theme-primary-text)] shadow-xs'
                                 : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)]'
                         }`}
                     >

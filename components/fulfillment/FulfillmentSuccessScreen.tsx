@@ -69,7 +69,7 @@ export const FulfillmentSuccessScreen: React.FC<FulfillmentSuccessScreenProps> =
                     <div className="flex flex-col w-full gap-3">
                         <button
                             onClick={onClose}
-                            className="w-full min-h-[44px] bg-primary text-white font-semibold rounded-xl flex items-center justify-center gap-2 py-3 hover:opacity-90 active:scale-95 transition-all touch-manipulation text-sm"
+                            className="w-full min-h-[44px] bg-[var(--theme-primary)] text-[var(--theme-primary-text)] font-semibold rounded-xl flex items-center justify-center gap-2 py-3 hover:opacity-90 active:scale-95 transition-all touch-manipulation text-sm cursor-pointer"
                         >
                             Back to Missions
                             <ArrowLeft size={16} />

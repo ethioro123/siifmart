@@ -60,12 +60,18 @@ export const ReceivingPendingList: React.FC = () => {
             const transferStatus = String((t as any).transferStatus || '').toLowerCase().replace(/[-_]/g, '');
             const jobStatus = String((t as any).status || '').toLowerCase().replace(/[-_]/g, '');
 
+            // Exclude already received or completed transfers
             if (['received', 'completed'].includes(transferStatus)) return false;
 
-            // Needs to be in-transit, dispatched, pending, delivered or in-progress
+            // Exclude rejected, cancelled, draft, or unapproved transfers
+            if (['rejected', 'cancelled', 'draft'].includes(transferStatus)) return false;
+            if (['cancelled', 'rejected', 'completed'].includes(jobStatus)) return false;
+
+            // Only shipments that are ready or in-transit/delivered should appear in store receiving
             return (
-                ['intransit', 'dispatched', 'pending', 'pendingdispatch', 'delivered', 'partiallydelivered'].includes(transferStatus) ||
-                ['inprogress', 'pending', 'staged', 'delivered'].includes(jobStatus)
+                ['intransit', 'dispatched', 'delivered', 'partiallydelivered', 'shipped'].includes(transferStatus) ||
+                (jobStatus === 'pending' && ['intransit', 'dispatched', 'shipped', 'delivered'].includes(transferStatus)) ||
+                ['staged', 'delivered'].includes(jobStatus)
             );
         }).sort((a, b) => new Date((b as any).createdAt || 0).getTime() - new Date((a as any).createdAt || 0).getTime());
     }, [transfers, wmsTransferJobs, activeSite]);

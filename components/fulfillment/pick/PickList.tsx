@@ -82,7 +82,7 @@ export const PickList: React.FC<PickListProps> = ({
             <div className="flex-1 overflow-y-auto">
                 {filteredPickJobs.length > 0 ? (
                     <>
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 pb-20 md:pb-0">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-4 pb-20 md:pb-0">
                             {paginatedPickJobs.sort((a, b) => {
                                 switch (pickSortBy) {
                                     case 'priority': {
@@ -113,7 +113,7 @@ export const PickList: React.FC<PickListProps> = ({
                                     return (
                                         <div
                                             key={job.id}
-                                            className={`flex items-center gap-3 bg-[var(--theme-bg-card)] border rounded-2xl p-3.5 min-h-[52px] active:scale-[0.98] transition-transform cursor-pointer shadow-sm ${
+                                            className={`flex items-center gap-2.5 bg-[var(--theme-bg-card)] border rounded-xl p-2.5 min-h-[48px] active:scale-[0.98] transition-transform cursor-pointer shadow-xs ${
                                                 job.priority === 'Critical' 
                                                     ? 'border-red-500/40' 
                                                     : job.status === 'In-Progress' 
@@ -122,7 +122,7 @@ export const PickList: React.FC<PickListProps> = ({
                                             }`}
                                             onClick={() => handleStartJob(job)}
                                         >
-                                            <div className={`w-11 h-11 rounded-xl flex items-center justify-center text-xs font-bold font-mono shrink-0 border ${
+                                            <div className={`w-9 h-9 rounded-lg flex items-center justify-center text-xs font-bold font-mono shrink-0 border ${
                                                 progress >= 100 
                                                     ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-500' 
                                                     : 'bg-[var(--theme-accent)]/10 border-[var(--theme-accent)]/20 text-[var(--theme-accent)]'
@@ -130,32 +130,33 @@ export const PickList: React.FC<PickListProps> = ({
                                                 {Math.round(progress)}%
                                             </div>
                                             <div className="flex-1 min-w-0">
-                                                <div className="flex items-center gap-2">
-                                                    <span className="text-sm font-bold text-[var(--theme-text-primary)] font-mono tracking-wide uppercase truncate">
+                                                <div className="flex items-center gap-1.5">
+                                                    <span className="text-xs font-bold text-[var(--theme-text-primary)] font-mono tracking-wide uppercase truncate">
                                                         {formatJobId(job)}
                                                     </span>
                                                     {job.priority === 'Critical' && (
-                                                        <span className="bg-red-500 text-white text-[11px] font-semibold px-1.5 py-0.5 rounded-full uppercase shrink-0">
+                                                        <span className="bg-red-500 text-white text-[10px] font-semibold px-1 rounded-full uppercase shrink-0">
                                                             !
                                                         </span>
                                                     )}
                                                     {job.status === 'In-Progress' && (
-                                                        <span className="bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] text-[11px] font-semibold px-2 py-0.5 rounded-full uppercase border border-[var(--theme-accent)]/20 shrink-0">
+                                                        <span className="inline-flex items-center gap-1 bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] text-[10px] font-semibold px-1.5 py-0.2 rounded-full uppercase border border-[var(--theme-accent)]/20 shrink-0">
+                                                            <span className="w-1.5 h-1.5 rounded-full bg-[var(--theme-accent)]" />
                                                             Active
                                                         </span>
                                                     )}
                                                 </div>
-                                                <div className="flex items-center gap-2 text-[11px] text-[var(--theme-text-secondary)] font-medium uppercase tracking-wider truncate mt-0.5 font-mono">
+                                                <div className="flex items-center gap-1.5 text-[10px] text-[var(--theme-text-secondary)] font-medium uppercase tracking-wider truncate mt-0.5 font-mono">
                                                     <span>{totalItems} {t('warehouse.itemPlural')}</span>
                                                     {lineItems[0]?.sku && (
                                                         <>
-                                                            <span className="opacity-40">/</span>
+                                                            <span className="opacity-40">•</span>
                                                             <span className="truncate">{lineItems[0].sku}</span>
                                                         </>
                                                     )}
                                                 </div>
                                             </div>
-                                            <ChevronRight size={18} className="text-[var(--theme-text-secondary)] shrink-0" />
+                                            <ChevronRight size={15} className="text-[var(--theme-text-secondary)] shrink-0" />
                                         </div>
                                     );
                                 }

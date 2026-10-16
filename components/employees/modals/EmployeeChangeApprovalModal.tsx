@@ -130,7 +130,7 @@ export const EmployeeChangeApprovalModal: React.FC<EmployeeChangeApprovalModalPr
                                 onClick={() => setFilterStatus(status)}
                                 className={`px-3 py-1 rounded-lg text-xs font-bold capitalize transition-all cursor-pointer ${
                                     filterStatus === status
-                                        ? 'bg-[var(--theme-primary)] text-white'
+                                        ? 'bg-[var(--theme-primary)] text-[var(--theme-primary-text)]'
                                         : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)]'
                                 }`}
                             >

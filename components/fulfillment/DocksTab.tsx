@@ -125,45 +125,55 @@ export const DocksTab: React.FC<DocksTabProps> = ({
     };
 
     return (
-        <div className="flex flex-col h-full gap-4 sm:gap-6">
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+        <div className="flex flex-col h-full gap-2 sm:gap-4">
+            <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-2">
                 {/* DOCK CATEGORY SWITCHER (INBOUND / OUTBOUND) */}
-                <div className="flex items-center gap-1.5 bg-[var(--theme-bg-subtle)] p-1 rounded-2xl border border-[var(--theme-border)] shadow-xs">
+                <div className="flex items-center gap-1 bg-[var(--theme-bg-subtle)] p-0.5 sm:p-1 rounded-xl sm:rounded-2xl border border-[var(--theme-border)] shadow-xs">
                     <button
                         onClick={() => setDockCategory('INBOUND')}
-                        className={`flex items-center gap-2 px-3.5 sm:px-4 py-2 min-h-[44px] rounded-xl text-xs font-semibold uppercase tracking-wider transition-colors touch-manipulation ${
+                        className={`flex-1 sm:flex-initial flex items-center justify-center gap-1.5 px-3 sm:px-4 py-1.5 sm:py-2 min-h-[34px] sm:min-h-[44px] rounded-lg sm:rounded-xl text-xs font-semibold uppercase tracking-wider transition-colors touch-manipulation cursor-pointer ${
                             dockCategory === 'INBOUND'
-                                ? 'bg-primary text-white shadow-xs'
+                                ? 'bg-[var(--theme-primary)] text-[var(--theme-primary-text)] shadow-xs'
                                 : 'text-[var(--theme-text-muted)] hover:text-[var(--theme-text-primary)]'
                         }`}
                     >
-                        <Download size={14} />
-                        <span>Inbound Receiving Docks</span>
+                        <Download size={13} className="sm:w-3.5 sm:h-3.5" />
+                        <span className="hidden sm:inline">Inbound Receiving Docks</span>
+                        <span className="sm:hidden">Inbound</span>
+                        <span className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[10px] font-mono ${
+                            dockCategory === 'INBOUND'
+                                ? 'bg-[var(--theme-primary-text)]/15 text-[var(--theme-primary-text)]'
+                                : 'bg-[var(--theme-text-muted)]/15 text-[var(--theme-text-primary)]'
+                        }`}>
+                            <span className="w-1 h-1 rounded-full bg-emerald-400" />
+                            {inboundQueue.length}
+                        </span>
                     </button>
                     <button
                         onClick={() => setDockCategory('OUTBOUND')}
-                        className={`flex items-center gap-2 px-3.5 sm:px-4 py-2 min-h-[44px] rounded-xl text-xs font-semibold uppercase tracking-wider transition-colors touch-manipulation ${
+                        className={`flex-1 sm:flex-initial flex items-center justify-center gap-1.5 px-3 sm:px-4 py-1.5 sm:py-2 min-h-[34px] sm:min-h-[44px] rounded-lg sm:rounded-xl text-xs font-semibold uppercase tracking-wider transition-colors touch-manipulation cursor-pointer ${
                             dockCategory === 'OUTBOUND'
-                                ? 'bg-primary text-white shadow-xs'
+                                ? 'bg-[var(--theme-primary)] text-[var(--theme-primary-text)] shadow-xs'
                                 : 'text-[var(--theme-text-muted)] hover:text-[var(--theme-text-primary)]'
                         }`}
                     >
-                        <Upload size={14} />
-                        <span>Outbound Shipping Docks</span>
+                        <Upload size={13} className="sm:w-3.5 sm:h-3.5" />
+                        <span className="hidden sm:inline">Outbound Shipping Docks</span>
+                        <span className="sm:hidden">Outbound</span>
                     </button>
                 </div>
 
                 {/* VIEW MODE TOGGLE */}
-                <div className="bg-[var(--theme-bg-subtle)] p-1 rounded-xl border border-[var(--theme-border)] flex shadow-xs">
+                <div className="bg-[var(--theme-bg-subtle)] p-0.5 sm:p-1 rounded-lg sm:rounded-xl border border-[var(--theme-border)] flex shadow-xs self-end sm:self-auto w-full sm:w-auto">
                     <button
                         onClick={() => setViewMode('Process')}
-                        className={`px-3.5 py-1.5 min-h-[38px] rounded-lg text-xs font-semibold uppercase tracking-wider transition-colors touch-manipulation ${viewMode === 'Process' ? 'bg-primary text-white shadow-xs' : 'text-[var(--theme-text-muted)] hover:text-[var(--theme-text-primary)]'}`}
+                        className={`flex-1 sm:flex-initial px-3 sm:px-3.5 py-1 sm:py-1.5 min-h-[30px] sm:min-h-[38px] rounded-md sm:rounded-lg text-xs font-semibold uppercase tracking-wider transition-colors touch-manipulation cursor-pointer flex items-center justify-center ${viewMode === 'Process' ? 'bg-[var(--theme-primary)] text-[var(--theme-primary-text)] shadow-xs' : 'text-[var(--theme-text-muted)] hover:text-[var(--theme-text-primary)]'}`}
                     >
                         Process
                     </button>
                     <button
                         onClick={() => setViewMode('History')}
-                        className={`px-3.5 py-1.5 min-h-[38px] rounded-lg text-xs font-semibold uppercase tracking-wider transition-colors touch-manipulation ${viewMode === 'History' ? 'bg-primary text-white shadow-xs' : 'text-[var(--theme-text-muted)] hover:text-[var(--theme-text-primary)]'}`}
+                        className={`flex-1 sm:flex-initial px-3 sm:px-3.5 py-1 sm:py-1.5 min-h-[30px] sm:min-h-[38px] rounded-md sm:rounded-lg text-xs font-semibold uppercase tracking-wider transition-colors touch-manipulation cursor-pointer flex items-center justify-center ${viewMode === 'History' ? 'bg-[var(--theme-primary)] text-[var(--theme-primary-text)] shadow-xs' : 'text-[var(--theme-text-muted)] hover:text-[var(--theme-text-primary)]'}`}
                     >
                         History
                     </button>

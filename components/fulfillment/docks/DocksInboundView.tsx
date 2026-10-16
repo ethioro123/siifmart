@@ -134,7 +134,7 @@ export const DocksInboundView: React.FC<DocksInboundViewProps> = ({
                                                             e.stopPropagation();
                                                             quickConfirmUnload(dock);
                                                         }}
-                                                        className="w-full min-h-[44px] px-3 py-2 bg-primary hover:bg-primary/90 text-white text-[11px] font-semibold uppercase tracking-wider rounded-xl shadow-sm transition-colors active:scale-[0.98] whitespace-nowrap flex items-center justify-center gap-1.5 touch-manipulation"
+                                                        className="w-full min-h-[44px] px-3 py-2 bg-[var(--theme-primary)] hover:opacity-90 text-[var(--theme-primary-text)] text-[11px] font-semibold uppercase tracking-wider rounded-xl shadow-sm transition-colors active:scale-[0.98] whitespace-nowrap flex items-center justify-center gap-1.5 touch-manipulation cursor-pointer"
                                                     >
                                                         <Check size={13} />
                                                         Confirm Unload
@@ -222,7 +222,7 @@ export const DocksInboundView: React.FC<DocksInboundViewProps> = ({
                                 </button>
                                 <button
                                     onClick={confirmUnloadAndReceive}
-                                    className="flex-1 min-h-[44px] py-2.5 rounded-xl bg-primary hover:bg-primary/90 text-white text-xs font-semibold uppercase tracking-wider transition-colors active:scale-[0.98] flex items-center justify-center gap-2 shadow-sm touch-manipulation"
+                                    className="flex-1 min-h-[44px] py-2.5 rounded-xl bg-[var(--theme-primary)] hover:opacity-90 text-[var(--theme-primary-text)] text-xs font-semibold uppercase tracking-wider transition-colors active:scale-[0.98] flex items-center justify-center gap-2 shadow-sm touch-manipulation cursor-pointer"
                                 >
                                     <Download size={15} />
                                     Confirm Unload & Receive
@@ -261,7 +261,7 @@ export const DocksInboundView: React.FC<DocksInboundViewProps> = ({
 
                                     <button
                                         onClick={() => setSelectedQueueVessel(selectedQueueVessel?.id === vessel.id ? null : vessel)}
-                                        className={`w-full min-h-[44px] py-2.5 rounded-xl text-[11px] font-semibold uppercase tracking-wider transition-colors active:scale-[0.98] border touch-manipulation ${selectedQueueVessel?.id === vessel.id ? 'bg-primary text-white border-primary hover:bg-primary/90' : 'bg-[var(--theme-bg-card)] border-[var(--theme-border)] text-primary hover:bg-primary/10'} `}
+                                        className={`w-full min-h-[44px] py-2.5 rounded-xl text-[11px] font-semibold uppercase tracking-wider transition-colors active:scale-[0.98] border touch-manipulation cursor-pointer ${selectedQueueVessel?.id === vessel.id ? 'bg-[var(--theme-primary)] text-[var(--theme-primary-text)] border-[var(--theme-primary)] hover:opacity-90' : 'bg-[var(--theme-bg-card)] border-[var(--theme-border)] text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-subtle)]'} `}
                                     >
                                         {selectedQueueVessel?.id === vessel.id ? 'Cancel Selection' : t('warehouse.docks.assignDock')}
                                     </button>

@@ -55,7 +55,7 @@ export const AssignHeader: React.FC<AssignHeaderProps> = ({
                         </button>
                         <button
                             onClick={() => autoAssignJobs()}
-                            className="flex-1 sm:flex-none min-h-[44px] flex items-center justify-center gap-2 px-3.5 py-2 bg-primary hover:bg-primary/90 text-white rounded-xl font-semibold text-xs uppercase tracking-wider transition-colors active:scale-[0.98] shadow-sm touch-manipulation"
+                            className="flex-1 sm:flex-none min-h-[44px] flex items-center justify-center gap-2 px-3.5 py-2 bg-[var(--theme-primary)] hover:opacity-90 text-[var(--theme-primary-text)] rounded-xl font-semibold text-xs uppercase tracking-wider transition-colors active:scale-[0.98] shadow-sm touch-manipulation cursor-pointer"
                         >
                             <Sparkles size={14} />
                             <span>Auto-Assign</span>
@@ -69,7 +69,7 @@ export const AssignHeader: React.FC<AssignHeaderProps> = ({
                     <div className="relative">
                         <button
                             onClick={() => setIsAssignFilterDropdownOpen(!isAssignFilterDropdownOpen)}
-                            className="min-h-[44px] flex items-center gap-2 px-3.5 py-2 bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl text-xs font-semibold text-[var(--theme-text-primary)] transition-colors whitespace-nowrap touch-manipulation"
+                            className="min-h-[44px] flex items-center gap-2 px-3.5 py-2 bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl text-xs font-semibold text-[var(--theme-text-primary)] transition-colors whitespace-nowrap touch-manipulation cursor-pointer"
                         >
                             <Filter size={14} className={assignJobFilter !== 'ALL' || dispatchPriorityFilter !== 'ALL' ? 'text-primary' : 'text-[var(--theme-text-muted)]'} />
                             <span>FILTER: {assignJobFilter === 'ALL' ? 'ALL JOBS' : assignJobFilter} {dispatchPriorityFilter !== 'ALL' ? `(${dispatchPriorityFilter})` : ''}</span>
@@ -92,9 +92,9 @@ export const AssignHeader: React.FC<AssignHeaderProps> = ({
                                                             setAssignJobFilter(type as any);
                                                             setIsAssignFilterDropdownOpen(false);
                                                         }}
-                                                        className={`min-h-[36px] text-left px-2.5 py-1.5 rounded-lg text-[11px] font-semibold transition-colors touch-manipulation ${
+                                                        className={`min-h-[36px] text-left px-2.5 py-1.5 rounded-lg text-[11px] font-semibold transition-colors touch-manipulation cursor-pointer ${
                                                             assignJobFilter === type
-                                                                ? 'bg-primary text-white'
+                                                                ? 'bg-[var(--theme-primary)] text-[var(--theme-primary-text)]'
                                                                 : 'text-[var(--theme-text-secondary)] hover:bg-[var(--theme-bg-subtle)] hover:text-[var(--theme-text-primary)]'
                                                         }`}
                                                     >
@@ -115,9 +115,9 @@ export const AssignHeader: React.FC<AssignHeaderProps> = ({
                                                             setDispatchPriorityFilter(priority as any);
                                                             setIsAssignFilterDropdownOpen(false);
                                                         }}
-                                                        className={`min-h-[36px] text-left px-2.5 py-1.5 rounded-lg text-[11px] font-semibold transition-colors touch-manipulation ${
+                                                        className={`min-h-[36px] text-left px-2.5 py-1.5 rounded-lg text-[11px] font-semibold transition-colors touch-manipulation cursor-pointer ${
                                                             dispatchPriorityFilter === priority
-                                                                ? 'bg-primary text-white'
+                                                                ? 'bg-[var(--theme-primary)] text-[var(--theme-primary-text)]'
                                                                 : priority === 'Critical'
                                                                     ? 'text-red-500 hover:bg-red-500/10'
                                                                     : priority === 'High'

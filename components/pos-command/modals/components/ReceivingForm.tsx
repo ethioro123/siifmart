@@ -6,6 +6,7 @@ import { useStore } from '../../../../contexts/CentralStore';
 import { useLanguage } from '../../../../contexts/LanguageContext';
 import { formatJobId } from '../../../../utils/jobIdFormatter';
 import { isWeightBased, isVolumeBased } from '../../../../utils/units';
+import { ReceivingItemQtyInput } from './ReceivingItemQtyInput';
 
 export const ReceivingForm: React.FC = () => {
     const { t } = useLanguage();
@@ -121,7 +122,6 @@ export const ReceivingForm: React.FC = () => {
                         onPaste={(e) => e.preventDefault()}
                         onKeyDown={handleKeyDown}
                         onChange={(e) => setTransferScanBarcode(e.target.value)}
-                        onBlur={() => setTimeout(() => inputRef.current?.focus(), 150)}
                         placeholder="Scan barcode with hardware scanner (Manual typing & paste disabled)..."
                         className="w-full bg-[var(--theme-input-bg)] border border-[var(--theme-border)] rounded-2xl px-4 py-3 text-[var(--theme-text-primary)] font-mono text-xs outline-none transition-all placeholder:text-[var(--theme-text-muted)] focus:border-[var(--theme-border-focus)] shadow-2xs"
                     />
@@ -183,24 +183,15 @@ export const ReceivingForm: React.FC = () => {
                                                     onClick={() => handleUpdateTransferItem(index, 'receivedQty', Math.max(0, item.receivedQty - (isWeightVol ? sizeNum : 1)))}
                                                     className="w-7 h-7 bg-[var(--theme-bg-subtle)] hover:bg-rose-500/10 text-[var(--theme-text-primary)] hover:text-rose-500 rounded-xl flex items-center justify-center transition-all active:scale-95 border border-[var(--theme-border)] hover:border-rose-500/30 cursor-pointer text-xs font-bold"
                                                 >-</button>
-                                                <input
+                                                <ReceivingItemQtyInput
                                                     title={t('posCommand.receivedQty') || "Received Quantity"}
-                                                    placeholder="0"
-                                                    type="number"
-                                                    min="0"
-                                                    step={isWeightVol ? "any" : "1"}
-                                                    value={isWeightVol ? (item.receivedQty / sizeNum) : item.receivedQty}
-                                                    onChange={(e) => {
-                                                        const val = parseFloat(e.target.value) || 0;
-                                                        handleUpdateTransferItem(index, 'receivedQty', isWeightVol ? val * sizeNum : Math.round(val));
-                                                    }}
-                                                    className={`w-14 bg-[var(--theme-input-bg)] border rounded-xl text-center font-mono py-1 text-xs focus:outline-none transition-all ${
-                                                        isOverReceived && isCentralHQOnly
-                                                            ? 'border-amber-500/50 text-amber-500 bg-amber-500/10'
-                                                            : isFullyReceived && isCentralHQOnly
-                                                                ? 'border-emerald-500/50 text-emerald-500 bg-emerald-500/10'
-                                                                : 'border-[var(--theme-border)] text-[var(--theme-text-primary)] focus:border-[var(--theme-border-focus)]'
-                                                    }`}
+                                                    receivedQty={item.receivedQty}
+                                                    sizeNum={sizeNum}
+                                                    isWeightVol={isWeightVol}
+                                                    onChange={(rawQty) => handleUpdateTransferItem(index, 'receivedQty', rawQty)}
+                                                    isOverReceived={isOverReceived}
+                                                    isFullyReceived={isFullyReceived}
+                                                    isCentralHQOnly={isCentralHQOnly}
                                                 />
                                                 <button
                                                     onClick={() => handleUpdateTransferItem(index, 'receivedQty', item.receivedQty + (isWeightVol ? sizeNum : 1))}

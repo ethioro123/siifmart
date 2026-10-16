@@ -60,7 +60,7 @@ export const PutawayHeader: React.FC<PutawayHeaderProps> = ({
 }) => {
     const isMobile = useIsMobile();
     return (
-        <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-4 md:p-6 relative overflow-hidden shadow-[var(--shadow-sm)]">
+        <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl md:rounded-2xl p-2.5 md:p-6 mb-2 md:mb-4 relative overflow-hidden shadow-[var(--shadow-sm)]">
             {/* DESKTOP: Full header with title + stats */}
             <div className="hidden md:flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6 relative z-10">
                 <div className="flex items-center gap-4">
@@ -93,37 +93,49 @@ export const PutawayHeader: React.FC<PutawayHeaderProps> = ({
 
             {isMobile ? (
                 /* MOBILE: Compact bar */
-                <div className="flex flex-col gap-3 relative z-10 mt-2">
-                    {/* View mode toggle + sync on top row */}
+                <div className="flex flex-col gap-2 relative z-10">
+                    {/* View mode toggle + dot numbers + sync on top row */}
                     <div className="flex items-center justify-between gap-2">
-                        <div className="p-1 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl flex items-center shrink-0">
+                        <div className="p-0.5 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl flex items-center shrink-0">
                             <button
                                 onClick={() => setViewMode('Process')}
-                                className={`px-4 py-2 rounded-lg text-xs font-semibold transition-all min-h-[36px] ${viewMode === 'Process' ? 'bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)] shadow-sm' : 'text-[var(--theme-text-secondary)]'}`}
+                                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all min-h-[32px] ${viewMode === 'Process' ? 'bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)] shadow-sm' : 'text-[var(--theme-text-secondary)]'}`}
                             >
                                 {t('warehouse.putaway.process')}
                             </button>
                             <button
                                 onClick={() => setViewMode('History')}
-                                className={`px-4 py-2 rounded-lg text-xs font-semibold transition-all min-h-[36px] ${viewMode === 'History' ? 'bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)] shadow-sm' : 'text-[var(--theme-text-secondary)]'}`}
+                                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all min-h-[32px] ${viewMode === 'History' ? 'bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)] shadow-sm' : 'text-[var(--theme-text-secondary)]'}`}
                             >
                                 {t('warehouse.putaway.history')}
                             </button>
                         </div>
 
+                        {/* Mobile Dot Numbers */}
+                        <div className="flex items-center gap-2 px-2.5 py-1 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl text-[11px] font-mono shrink-0">
+                            <span className="inline-flex items-center gap-1 text-emerald-500 font-bold" title="Active">
+                                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                                {filteredJobsCount.active}
+                            </span>
+                            <span className="inline-flex items-center gap-1 text-amber-500 font-bold" title="Pending">
+                                <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
+                                {filteredJobsCount.pending}
+                            </span>
+                        </div>
+
                         <button
                             onClick={() => refreshData()}
                             disabled={isSubmitting}
-                            className="p-2.5 rounded-xl border border-[var(--theme-border)] bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)] min-h-[44px] min-w-[44px] flex items-center justify-center transition-colors shrink-0"
+                            className="p-1.5 rounded-xl border border-[var(--theme-border)] bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)] min-h-[34px] min-w-[34px] flex items-center justify-center transition-colors shrink-0"
                             title={t('warehouse.putaway.syncOperations')}
                         >
-                            <RefreshCw size={18} className={isSubmitting ? 'animate-spin' : ''} />
+                            <RefreshCw size={15} className={isSubmitting ? 'animate-spin' : ''} />
                         </button>
                     </div>
 
                     {/* Full-width Search row */}
                     <div className="relative w-full">
-                        <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--theme-text-secondary)]" size={16} />
+                        <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--theme-text-secondary)] pointer-events-none" size={15} />
                         <input
                             type="text"
                             placeholder={`${t('warehouse.putaway.search')}`}
@@ -131,7 +143,7 @@ export const PutawayHeader: React.FC<PutawayHeaderProps> = ({
                             title={t('warehouse.putaway.search')}
                             value={putawaySearch}
                             onChange={(e) => setPutawaySearch(e.target.value)}
-                            className="w-full pl-10 pr-4 py-2.5 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl text-xs md:text-sm font-mono text-[var(--theme-text-primary)] min-h-[44px] focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                            className="w-full pl-9 pr-4 py-1.5 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl text-xs font-mono text-[var(--theme-text-primary)] min-h-[38px] focus:outline-none focus:ring-2 focus:ring-blue-500/20"
                         />
                     </div>
 

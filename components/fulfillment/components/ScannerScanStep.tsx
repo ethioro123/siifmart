@@ -134,7 +134,7 @@ export const ScannerScanStep: React.FC<ScannerScanStepProps> = ({
                     <button
                         disabled={isProcessingScan || !scannedItem.trim()}
                         onClick={handleInitialBarcodeSubmit}
-                        className="w-full mt-4 min-h-[44px] bg-primary text-white font-semibold py-3.5 text-base rounded-xl flex items-center justify-center gap-2 disabled:opacity-50 hover:opacity-90 active:scale-95 transition-all touch-manipulation"
+                        className="w-full mt-4 min-h-[44px] bg-[var(--theme-primary)] text-[var(--theme-primary-text)] font-semibold py-3.5 text-base rounded-xl flex items-center justify-center gap-2 disabled:opacity-50 hover:opacity-90 active:scale-95 transition-all touch-manipulation cursor-pointer"
                     >
                         {isProcessingScan ? <RefreshCw className="animate-spin" size={18} /> : <CheckCircle size={18} />}
                         {t('warehouse.confirm')}
@@ -208,7 +208,7 @@ export const ScannerScanStep: React.FC<ScannerScanStepProps> = ({
                     <button
                         disabled={isProcessingScan || enteredQty <= 0}
                         onClick={handleConfirmQuantity}
-                        className="w-full mt-2 min-h-[44px] bg-primary text-white font-semibold py-3.5 text-sm uppercase tracking-wider rounded-xl flex items-center justify-center gap-2 disabled:opacity-50 hover:opacity-90 active:scale-95 transition-all touch-manipulation"
+                        className="w-full mt-2 min-h-[44px] bg-[var(--theme-primary)] text-[var(--theme-primary-text)] font-semibold py-3.5 text-sm uppercase tracking-wider rounded-xl flex items-center justify-center gap-2 disabled:opacity-50 hover:opacity-90 active:scale-95 transition-all touch-manipulation cursor-pointer"
                     >
                         {isProcessingScan ? <RefreshCw className="animate-spin" size={16} /> : <CheckCircle size={16} />}
                         Confirm Pick of {enteredQty} Units
