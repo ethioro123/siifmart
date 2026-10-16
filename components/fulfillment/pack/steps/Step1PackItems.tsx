@@ -14,7 +14,7 @@ interface Step1PackItemsProps {
     isFullyPacked: boolean;
     scanInput: string;
     setScanInput: (val: string) => void;
-    scanInputRef: React.RefObject<HTMLInputElement>;
+    scanInputRef: React.RefObject<HTMLInputElement | null>;
     scanError: string;
     handleScanItem: (e: React.FormEvent) => void;
     scannedItemIndex: number | null;
