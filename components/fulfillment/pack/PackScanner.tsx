@@ -307,28 +307,64 @@ export const PackScanner: React.FC<PackScannerProps> = ({
                         {!isFullyPacked && (
                             <>
                                 {step === 'CONFIRM_QTY' ? (
-                                    <div className="relative flex items-stretch w-full bg-[var(--theme-bg-card)] border-2 border-[var(--theme-accent)] rounded-xl overflow-hidden shadow-sm focus-within:border-[var(--theme-accent)] z-10">
-                                        <input
-                                            ref={qtyRef}
-                                            type="number"
-                                            inputMode="decimal"
-                                            pattern="[0-9]*"
-                                            aria-label="Confirm quantity"
-                                            title="Confirm quantity"
-                                            value={qtyVal}
-                                            onChange={(e) => setQtyVal(e.target.value)}
-                                            className="flex-1 bg-transparent py-2.5 px-3 text-center text-2xl md:text-3xl font-mono tabular-nums font-bold text-[var(--theme-text-primary)] placeholder:text-[var(--theme-text-secondary)]/30 outline-none"
-                                            placeholder="QTY"
-                                            autoFocus
-                                            onFocus={(e) => e.target.select()}
-                                        />
-                                        <div className="bg-[var(--theme-bg-subtle)] text-[var(--theme-accent)] border-l border-[var(--theme-border)] px-3.5 py-2.5 text-xs font-mono font-bold uppercase flex items-center justify-center shrink-0">
-                                            {(() => {
-                                                const unitDef = getSellUnit(selectedUnit);
-                                                const sizeStr = matchedProduct?.size || matchedItem?.size;
-                                                const isWeightVol = (unitDef.category === 'weight' || unitDef.category === 'volume') && !!sizeStr;
-                                                return isWeightVol ? `packs (${sizeStr}${unitDef.shortLabel})` : unitDef.shortLabel.toUpperCase();
-                                            })()}
+                                    <div className="space-y-2">
+                                        <div className="relative flex items-stretch w-full bg-[var(--theme-bg-card)] border-2 border-[var(--theme-accent)] rounded-xl overflow-hidden shadow-sm focus-within:border-[var(--theme-accent)] z-10">
+                                            <input
+                                                ref={qtyRef}
+                                                type="number"
+                                                inputMode="decimal"
+                                                pattern="[0-9]*"
+                                                aria-label="Confirm quantity"
+                                                title="Confirm quantity"
+                                                value={qtyVal}
+                                                onChange={(e) => setQtyVal(e.target.value)}
+                                                className="flex-1 bg-transparent py-2.5 px-3 text-center text-2xl md:text-3xl font-mono tabular-nums font-bold text-[var(--theme-text-primary)] placeholder:text-[var(--theme-text-secondary)]/30 outline-none"
+                                                placeholder="QTY"
+                                                autoFocus
+                                                onFocus={(e) => e.target.select()}
+                                            />
+                                            <div className="bg-[var(--theme-bg-subtle)] text-[var(--theme-accent)] border-l border-[var(--theme-border)] px-3.5 py-2.5 text-xs font-mono font-bold uppercase flex items-center justify-center shrink-0">
+                                                {(() => {
+                                                    const unitDef = getSellUnit(selectedUnit);
+                                                    const sizeStr = matchedProduct?.size || matchedItem?.size;
+                                                    const isWeightVol = (unitDef.category === 'weight' || unitDef.category === 'volume') && !!sizeStr;
+                                                    return isWeightVol ? `packs (${sizeStr}${unitDef.shortLabel})` : unitDef.shortLabel.toUpperCase();
+                                                })()}
+                                            </div>
+                                        </div>
+
+                                        {/* Rapid Thumb Stepper Pills */}
+                                        <div className="flex items-center gap-2">
+                                            <button
+                                                type="button"
+                                                onClick={() => {
+                                                    const cur = parseFloat(qtyVal) || 0;
+                                                    setQtyVal(String(cur + 1));
+                                                }}
+                                                className="flex-1 py-2 rounded-xl bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-subtle)]/80 border border-[var(--theme-border)] text-[var(--theme-text-primary)] font-mono text-xs font-bold transition-all active:scale-95 touch-manipulation min-h-[38px]"
+                                            >
+                                                +1
+                                            </button>
+                                            <button
+                                                type="button"
+                                                onClick={() => {
+                                                    const cur = parseFloat(qtyVal) || 0;
+                                                    setQtyVal(String(cur + 5));
+                                                }}
+                                                className="flex-1 py-2 rounded-xl bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-subtle)]/80 border border-[var(--theme-border)] text-[var(--theme-text-primary)] font-mono text-xs font-bold transition-all active:scale-95 touch-manipulation min-h-[38px]"
+                                            >
+                                                +5
+                                            </button>
+                                            <button
+                                                type="button"
+                                                onClick={() => {
+                                                    const expected = matchedItem?.expectedQty || 1;
+                                                    setQtyVal(String(expected));
+                                                }}
+                                                className="flex-1 py-2 rounded-xl bg-[var(--theme-accent)]/10 hover:bg-[var(--theme-accent)]/20 border border-[var(--theme-accent)]/30 text-[var(--theme-accent)] font-mono text-xs font-bold transition-all active:scale-95 touch-manipulation min-h-[38px]"
+                                            >
+                                                Pack All ({matchedItem?.expectedQty || 1})
+                                            </button>
                                         </div>
                                     </div>
                                 ) : (

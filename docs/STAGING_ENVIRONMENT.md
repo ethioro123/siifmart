@@ -1,0 +1,16 @@
+# Using the staging project
+
+The separate `SIIFMART Staging` Supabase project is on the Free plan in the same region as production. It has its own Auth users and database. No production records were copied.
+
+## Current status
+
+The app's staging environment is connected locally, and `npm run dev:staging` displays a visible staging warning. The new database is still empty. Production has more applied migrations than the repository contains, so do not create test employees until the current schema and security policies have been copied to staging as a schema-only snapshot. Do not apply the repository migrations blindly or copy production rows.
+
+## After the schema has been installed
+
+1. Add only synthetic test records and test accounts in staging.
+2. Start the app with `npm run dev:staging` and verify the amber `Staging environment · Test data only` warning is visible.
+3. Test employee creation, approval, site assignment, account creation, and credential handover there.
+4. Create real employees in production through the app's normal employee workflow.
+
+The local credentials live in the ignored `.env.staging.local` file. Never use a service-role key in the app. Supabase Free projects may pause after a week of inactivity and are subject to Free plan quotas.

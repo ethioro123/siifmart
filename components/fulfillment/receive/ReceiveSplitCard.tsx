@@ -104,6 +104,29 @@ export const ReceiveSplitCard: React.FC<ReceiveSplitCardProps> = ({
                             aria-label="Quantity"
                             placeholder="0"
                         />
+                        <div className="flex items-center gap-1.5 pt-1">
+                            <button
+                                type="button"
+                                onClick={() => onUpdateVariant({ quantity: (variant.quantity || 0) + 1 })}
+                                className="flex-1 py-1 px-2 rounded-lg bg-[var(--theme-bg-app)] hover:bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-[var(--theme-text-primary)] font-mono text-xs font-bold transition-all active:scale-95 touch-manipulation min-h-[32px]"
+                            >
+                                +1
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => onUpdateVariant({ quantity: (variant.quantity || 0) + 5 })}
+                                className="flex-1 py-1 px-2 rounded-lg bg-[var(--theme-bg-app)] hover:bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-[var(--theme-text-primary)] font-mono text-xs font-bold transition-all active:scale-95 touch-manipulation min-h-[32px]"
+                            >
+                                +5
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => onUpdateVariant({ quantity: (variant.quantity || 0) + 10 })}
+                                className="flex-1 py-1 px-2 rounded-lg bg-[var(--theme-bg-app)] hover:bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-[var(--theme-text-primary)] font-mono text-xs font-bold transition-all active:scale-95 touch-manipulation min-h-[32px]"
+                            >
+                                +10
+                            </button>
+                        </div>
                     </div>
                     <div className="space-y-1.5">
                         <label className="text-[11px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider pl-0.5">{t('warehouse.condition')}</label>

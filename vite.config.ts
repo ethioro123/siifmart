@@ -1,7 +1,7 @@
 import path from 'path';
 import https from 'https';
 import dns from 'dns';
-import { defineConfig } from 'vite';
+import { defineConfig, loadEnv } from 'vite';
 import react from '@vitejs/plugin-react';
 import { VitePWA } from 'vite-plugin-pwa';
 import tailwindcss from '@tailwindcss/vite';
@@ -32,7 +32,26 @@ process.on('uncaughtException', (err: any) => {
   console.error('Unhandled server exception:', err);
 });
 
-export default defineConfig(() => {
+export default defineConfig(({ mode }) => {
+  const modeEnv = loadEnv(mode, process.cwd(), 'VITE_');
+  const supabaseUrl = modeEnv.VITE_SUPABASE_URL;
+  if (!supabaseUrl) {
+    throw new Error(`VITE_SUPABASE_URL must be set for the ${mode} environment.`);
+  }
+
+  const targetUrl = new URL(supabaseUrl);
+  if (targetUrl.protocol !== 'https:' || !targetUrl.hostname.endsWith('.supabase.co')) {
+    throw new Error('VITE_SUPABASE_URL must be an HTTPS Supabase project URL.');
+  }
+
+  // Refuse to run staging against the same project configured for normal local development.
+  if (mode === 'staging') {
+    const developmentUrl = loadEnv('development', process.cwd(), 'VITE_').VITE_SUPABASE_URL;
+    if (developmentUrl && new URL(developmentUrl).hostname === targetUrl.hostname) {
+      throw new Error('Staging cannot use the same Supabase project as local development.');
+    }
+  }
+
   const isElectron = process.env.ELECTRON === 'true' || process.env.npm_lifecycle_event?.includes('electron');
   const isCapacitor = process.env.CAPACITOR === 'true' || process.env.npm_lifecycle_event?.includes('android');
 
@@ -43,7 +62,7 @@ export default defineConfig(() => {
       host: '0.0.0.0',
       proxy: {
         '/supabase-proxy': {
-          target: 'https://zdgzpxvorwinugjufkvb.supabase.co',
+          target: targetUrl.origin,
           changeOrigin: true,
           secure: true,
           ws: true,

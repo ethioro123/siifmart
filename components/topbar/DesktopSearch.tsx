@@ -1,5 +1,6 @@
 import React from 'react';
 import { Search, X, Package, FileText, ShoppingCart, Users, Layout, ArrowRight, Activity } from 'lucide-react';
+import { getEmployeeJobTitle } from '../../utils/roles';
 
 interface DesktopSearchProps {
    searchValue: string;
@@ -282,7 +283,7 @@ export function DesktopSearch({
                                        {e.name}
                                     </p>
                                     <p className="text-[10px] text-[var(--theme-text-muted)] truncate">
-                                       {e.role} • {e.email}
+                                       {getEmployeeJobTitle(e)} • {e.email}
                                     </p>
                                  </div>
                                  <ArrowRight size={14} className="text-[var(--theme-text-muted)] group-hover:text-[var(--theme-text-primary)] transition-all -translate-x-1 group-hover:translate-x-0 shrink-0" />

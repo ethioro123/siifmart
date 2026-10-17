@@ -1,9 +1,9 @@
 import React from 'react';
 import { Employee } from '../../../types';
-import { ROLE_LABELS } from '../types';
 import { getRoleReportingMeta, HIERARCHY_LEVEL_CONFIGS } from '../hooks/orgReportingLines';
 import { MapPin, Users, CreditCard, ExternalLink, ChevronRight, ShieldCheck } from 'lucide-react';
 import { formatDisplayEmployeeId } from '../../../utils/employeeIdGenerator';
+import { getEmployeeJobTitle } from '../../../utils/roles';
 
 interface OrgMatrixCardProps {
     employee: Employee;
@@ -25,7 +25,7 @@ export const OrgMatrixCard: React.FC<OrgMatrixCardProps> = ({
     onOpenIdCard
 }) => {
     const roleKey = employee.role || 'pos';
-    const roleTitle = ROLE_LABELS[roleKey] || roleKey;
+    const roleTitle = getEmployeeJobTitle(employee);
     const meta = getRoleReportingMeta(roleKey);
     const levelConfig = HIERARCHY_LEVEL_CONFIGS[meta.level];
 

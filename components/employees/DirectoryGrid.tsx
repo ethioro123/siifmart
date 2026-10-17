@@ -1,7 +1,7 @@
 import React from 'react';
 import { Loader2, User, AlertTriangle, MapPin } from 'lucide-react';
 import { Employee, Site, UserRole } from '../../types';
-import { SYSTEM_ROLES, canViewLocation } from '../../utils/roles';
+import { SYSTEM_ROLES, canViewLocation, getEmployeeJobTitle } from '../../utils/roles';
 import { evaluateGeofence, formatSiteAssignment } from '../../utils/geofence';
 import WorkforceScopeBadge from './WorkforceScopeBadge';
 
@@ -82,7 +82,7 @@ export default function DirectoryGrid({
                            )}
                         </div>
                         <p className="text-xs font-medium text-[var(--theme-text-secondary)] mt-0.5 truncate">
-                           {roleConfig.label}
+                           {getEmployeeJobTitle(employee) || roleConfig.label}
                         </p>
                         <div className="mt-1"><WorkforceScopeBadge employee={employee} /></div>
                         

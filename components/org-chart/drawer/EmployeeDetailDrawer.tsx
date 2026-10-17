@@ -1,9 +1,10 @@
 import React from 'react';
 import { Employee, Site } from '../../../types';
-import { ROLE_LABELS, DEPT_COLORS } from '../types';
+import { DEPT_COLORS } from '../types';
 import { getRoleDept } from '../hooks/useOrgTreeLayout';
 import { X, Mail, Phone, MapPin, Award, Calendar, Shield, ExternalLink, Copy, Check, CreditCard, UserCheck, AlertCircle } from 'lucide-react';
 import { formatDisplayEmployeeId } from '../../../utils/employeeIdGenerator';
+import { getEmployeeJobTitle } from '../../../utils/roles';
 
 interface EmployeeDetailDrawerProps {
     employee: Employee | null;
@@ -30,7 +31,7 @@ export const EmployeeDetailDrawer: React.FC<EmployeeDetailDrawerProps> = ({
     if (!employee) return null;
 
     const isOnline = onlineIds ? onlineIds.has(employee.id) : false;
-    const roleTitle = ROLE_LABELS[employee.role] || employee.role;
+    const roleTitle = getEmployeeJobTitle(employee);
     const dept = getRoleDept(employee.role, employee.department);
     const deptColors = DEPT_COLORS[dept] || DEPT_COLORS.support;
     const siteObj = sites.find(s => s.id === (employee.siteId || employee.site_id));

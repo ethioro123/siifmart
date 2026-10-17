@@ -4,7 +4,7 @@ import { Employee, UserRole } from '../types';
 import QRCode from 'qrcode';
 import { X, Printer, Shield, MapPin, Building, CreditCard } from 'lucide-react';
 import Logo from './Logo';
-import { formatRole } from '../utils/formatting';
+import { getEmployeeJobTitle } from '../utils/roles';
 import { logger } from '../utils/logger';
 import { printHtmlContent } from '../utils/printHelper';
 import { formatDisplayEmployeeId } from '../utils/employeeIdGenerator';
@@ -140,8 +140,8 @@ export default function EmployeeIDCard({ employee, siteCode, onClose }: Employee
                             <span className="text-gray-900 dark:text-white font-medium">{employee.name}</span>
                         </div>
                         <div className="flex justify-between text-sm">
-                            <span className="text-gray-500 dark:text-gray-400">Role:</span>
-                            <span className="text-gray-900 dark:text-white font-medium capitalize">{formatRole(employee.role)}</span>
+                            <span className="text-gray-500 dark:text-gray-400">Job Title:</span>
+                            <span className="text-gray-900 dark:text-white font-medium">{getEmployeeJobTitle(employee)}</span>
                         </div>
                         <div className="flex justify-between text-sm">
                             <span className="text-gray-500 dark:text-gray-400">Employee ID:</span>
@@ -227,7 +227,7 @@ export default function EmployeeIDCard({ employee, siteCode, onClose }: Employee
                                 <p
                                     className="text-xs font-bold uppercase tracking-wider mb-2 truncate text-[var(--role-color)]"
                                 >
-                                    {formatRole(employee.role)}
+                                    {getEmployeeJobTitle(employee)}
                                 </p>
 
                                 <div className="space-y-1">

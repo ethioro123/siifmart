@@ -1,7 +1,7 @@
 import React from 'react';
 import { Camera, Building, CreditCard, MessageSquare, Key, AlertTriangle, Trash2, User, UserCheck, ShieldCheck } from 'lucide-react';
 import { Employee } from '../../types';
-import { formatRole } from '../../utils/formatting';
+import { getEmployeeJobTitle } from '../../utils/roles';
 import { formatDisplayEmployeeId } from '../../utils/employeeIdGenerator';
 
 interface StaffProfileHeaderProps {
@@ -86,7 +86,7 @@ export default function StaffProfileHeader({
                             <div className="flex flex-wrap items-center justify-center md:justify-start gap-2 mt-2">
                                 <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-blue-500/10 text-[var(--theme-accent)] border border-blue-500/20">
                                     <ShieldCheck size={13} />
-                                    {formatRole(employee.role)}
+                                    {getEmployeeJobTitle(employee)}
                                 </span>
                                 <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] border border-[var(--theme-border)]">
                                     <Building size={13} className="text-[var(--theme-text-muted)]" />

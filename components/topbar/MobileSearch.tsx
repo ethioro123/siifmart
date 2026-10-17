@@ -1,5 +1,6 @@
 import React from 'react';
 import { Search, X, Package, FileText, ShoppingCart, Users, Zap, Layout, ArrowRight, Activity } from 'lucide-react';
+import { getEmployeeJobTitle } from '../../utils/roles';
 
 interface MobileSearchProps {
    isMobileSearchVisible: boolean;
@@ -229,7 +230,7 @@ export function MobileSearch({
                                  </div>
                                  <div className="flex-1 min-w-0">
                                     <p className="text-sm font-semibold text-[var(--theme-text-primary)] truncate">{e.name}</p>
-                                    <p className="text-xs text-[var(--theme-text-muted)] truncate">{e.role} • {e.email}</p>
+                                    <p className="text-xs text-[var(--theme-text-muted)] truncate">{getEmployeeJobTitle(e)} • {e.email}</p>
                                  </div>
                               </button>
                            ))}

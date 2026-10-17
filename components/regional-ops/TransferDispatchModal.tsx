@@ -4,6 +4,7 @@ import {
   Building2, Navigation, AlertCircle
 } from 'lucide-react';
 import type { TransferRecord, Employee, Site } from '../../types';
+import { getEmployeeJobTitle } from '../../utils/roles';
 
 interface TransferDispatchModalProps {
   transfer: TransferRecord;
@@ -181,7 +182,7 @@ export const TransferDispatchModal: React.FC<TransferDispatchModalProps> = ({
                   <option value="">-- Choose Assigned Driver --</option>
                   {verifiedDrivers.map(d => (
                     <option key={d.id} value={d.id}>
-                      {d.name} ({d.code || d.role}) {d.siteId ? `• Assigned Site: ${d.siteId}` : ''}
+                      {d.name} ({d.code || getEmployeeJobTitle(d)}) {d.siteId ? `• Assigned Site: ${d.siteId}` : ''}
                     </option>
                   ))}
                 </select>

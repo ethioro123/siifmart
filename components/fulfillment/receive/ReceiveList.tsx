@@ -262,7 +262,7 @@ export const ReceiveList: React.FC<ReceiveListProps> = ({
                                                             packQuantity: item.packQuantity || product?.packQuantity || 1,
                                                             poNumber: po.poNumber || po.po_number
                                                         })}
-                                                        className="w-full h-8 sm:h-10 bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-subtle)]/80 text-[var(--theme-text-primary)] border border-[var(--theme-border)] text-xs font-semibold rounded-xl flex items-center justify-center gap-2 transition-all cursor-pointer touch-manipulation active:scale-[0.98]"
+                                                        className="w-full min-h-[44px] bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-subtle)]/80 text-[var(--theme-text-primary)] border border-[var(--theme-border)] text-xs font-semibold rounded-xl flex items-center justify-center gap-2 transition-all cursor-pointer touch-manipulation active:scale-[0.98]"
                                                     >
                                                         <Printer size={14} className="text-[var(--theme-text-secondary)]" />
                                                         {t('warehouse.reprintLabel')}
@@ -304,7 +304,7 @@ export const ReceiveList: React.FC<ReceiveListProps> = ({
                                                                 setIsSplitReceiving(true);
                                                             }}
                                                             disabled={isSubmitting}
-                                                            className="w-full h-8 sm:h-11 bg-[var(--theme-accent)] hover:opacity-90 text-white text-xs font-semibold rounded-xl flex items-center justify-center gap-2 shadow-[var(--shadow-sm)] active:scale-[0.98] transition-all cursor-pointer touch-manipulation disabled:opacity-50 disabled:cursor-not-allowed"
+                                                            className="w-full min-h-[44px] sm:min-h-[48px] bg-[var(--theme-accent)] hover:opacity-90 text-white text-xs font-semibold rounded-xl flex items-center justify-center gap-2 shadow-[var(--shadow-sm)] active:scale-[0.98] transition-all cursor-pointer touch-manipulation disabled:opacity-50 disabled:cursor-not-allowed"
                                                         >
                                                             {isSubmitting ? (
                                                                 <Loader2 size={16} className="animate-spin" />

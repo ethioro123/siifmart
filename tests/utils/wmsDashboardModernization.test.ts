@@ -58,7 +58,7 @@ describe('WMS Dashboard Apple HIG & Guidelines Compliance', () => {
         const mainPath = path.resolve(__dirname, '../../pages/WMSDashboard.tsx');
         const content = fs.readFileSync(mainPath, 'utf-8');
         expect(content).toContain('getCountryProfile(activeCountry)');
-        expect(content).toContain('{countryProfile.name} ({activeCountry})');
+        expect(content).toContain('countryProfile={countryProfile}');
     });
 
     it('verifies Apple HIG concentric radii and theme tokens', () => {

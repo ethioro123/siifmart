@@ -3,7 +3,7 @@ import Modal from '../../Modal';
 import { Printer, Download, Building, ShieldCheck, CheckCircle2 } from 'lucide-react';
 import { Employee } from '../../../types';
 import { PayslipRecord } from '../../../utils/employeeProfileData';
-import { formatRole } from '../../../utils/formatting';
+import { getEmployeeJobTitle } from '../../../utils/roles';
 import { formatDisplayEmployeeId } from '../../../utils/employeeIdGenerator';
 
 interface PayslipModalProps {
@@ -68,8 +68,8 @@ export const PayslipModal: React.FC<PayslipModalProps> = ({
                         <span className="font-mono font-bold text-[#1E3F27] dark:text-[#EAE5D9]">{formatDisplayEmployeeId(employee)}</span>
                     </div>
                     <div>
-                        <span className="text-stone-400 text-[10px] uppercase font-bold block">Role</span>
-                        <span className="font-bold text-[#1E3F27] dark:text-[#EAE5D9]">{formatRole(employee.role)}</span>
+                        <span className="text-stone-400 text-[10px] uppercase font-bold block">Job Title</span>
+                        <span className="font-bold text-[#1E3F27] dark:text-[#EAE5D9]">{getEmployeeJobTitle(employee)}</span>
                     </div>
                     <div>
                         <span className="text-stone-400 text-[10px] uppercase font-bold block">Pay Period</span>

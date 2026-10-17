@@ -101,84 +101,63 @@ export const PackScannerStatusView: React.FC<PackScannerStatusViewProps> = ({
                     </div>
                 </div>
             ) : step === 'CONFIRM_QTY' && matchedItem ? (
-                /* CONFIRM QUANTITY VIEW — Rich Full-Detail Product Card */
+                /* CONFIRM QUANTITY VIEW — Streamlined Glanceable Product Card */
                 <div className="z-10 mb-3 w-full max-w-md">
-                    <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-4 shadow-sm flex flex-col gap-3 text-left">
-                        {/* Header: Thumbnail + Name + Category + SKU */}
-                        <div className="flex items-start gap-3.5">
-                            <div className="w-16 h-16 rounded-xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] flex items-center justify-center overflow-hidden shrink-0">
+                    <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-3 sm:p-4 shadow-sm flex flex-col gap-2.5 text-left">
+                        {/* Header: Thumbnail + Name + SKU/Barcode */}
+                        <div className="flex items-center gap-3">
+                            <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] flex items-center justify-center overflow-hidden shrink-0">
                                 {matchedProduct?.image ? (
                                     <img src={matchedProduct.image} alt="" className="w-full h-full object-cover" />
                                 ) : (
-                                    <Package size={28} className="text-[var(--theme-text-secondary)]/50" />
+                                    <Package size={22} className="text-[var(--theme-text-secondary)]/50" />
                                 )}
                             </div>
                             <div className="min-w-0 flex-1">
-                                <h3 className="text-[var(--theme-text-primary)] text-base font-semibold leading-snug truncate uppercase">{matchedItem.name}</h3>
-                                <div className="flex items-center gap-2 mt-1 flex-wrap">
+                                <h3 className="text-[var(--theme-text-primary)] text-sm sm:text-base font-semibold leading-snug truncate uppercase">{matchedItem.name}</h3>
+                                <div className="flex items-center gap-2 mt-0.5 flex-wrap">
                                     <span className="text-[11px] font-mono tabular-nums font-semibold text-[var(--theme-accent)] bg-[var(--theme-bg-subtle)] px-2 py-0.5 rounded border border-[var(--theme-border)] uppercase">
                                         SKU: {matchedItem.sku}
                                     </span>
                                     {matchedProduct?.barcode && (
                                         <span className="text-[11px] font-mono text-[var(--theme-text-secondary)] font-medium uppercase tracking-wider">
-                                            BARCODE: {matchedProduct.barcode}
+                                            {matchedProduct.barcode}
                                         </span>
                                     )}
                                 </div>
                             </div>
                         </div>
 
-                        {/* Specs Grid */}
-                        <div className="grid grid-cols-3 gap-2 pt-2.5 border-t border-[var(--theme-border)] text-xs">
-                            <div className="bg-[var(--theme-bg-subtle)] p-2 rounded-xl border border-[var(--theme-border)]">
-                                <span className="text-[11px] text-[var(--theme-text-secondary)] font-semibold uppercase tracking-wider block leading-none mb-1">Category</span>
-                                <span className="text-[var(--theme-text-primary)] font-medium truncate block">{matchedProduct?.category || 'Pantry & Dry Goods'}</span>
-                            </div>
-                            <div className="bg-[var(--theme-bg-subtle)] p-2 rounded-xl border border-[var(--theme-border)]">
-                                <span className="text-[11px] text-[var(--theme-text-secondary)] font-semibold uppercase tracking-wider block leading-none mb-1">Unit / Size</span>
-                                <span className="text-[var(--theme-text-primary)] font-medium truncate block">
-                                    {formatProductSize(matchedProduct) || matchedItem.unit || 'Unit'}
-                                </span>
-                            </div>
-                            <div className="bg-[var(--theme-bg-subtle)] p-2 rounded-xl border border-[var(--theme-border)]">
-                                <span className="text-[11px] text-[var(--theme-text-secondary)] font-semibold uppercase tracking-wider block leading-none mb-1">Location</span>
-                                <span className="text-[var(--theme-text-primary)] font-medium truncate block">
-                                    {(matchedProduct as any)?.shelf || (matchedProduct as any)?.location || 'On Order'}
-                                </span>
-                            </div>
-                        </div>
-
-                        {/* Expected vs Packed Large Number Banner */}
-                        <div className="bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] p-3 rounded-xl flex items-center justify-around text-center">
-                            <div>
-                                <span className="text-[11px] text-[var(--theme-text-secondary)] font-semibold uppercase tracking-wider block leading-none mb-1">{t('warehouse.expected')}</span>
-                                <span className="text-2xl font-mono tabular-nums font-bold text-[var(--theme-text-primary)] leading-none">
+                        {/* Streamlined Specs & Telemetry Bar */}
+                        <div className="bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] px-3 py-2 rounded-xl flex items-center justify-between text-xs">
+                            <div className="flex items-center gap-2">
+                                <span className="text-[11px] text-[var(--theme-text-secondary)] font-semibold uppercase tracking-wider">Expected:</span>
+                                <span className="font-mono tabular-nums font-bold text-sm text-[var(--theme-text-primary)]">
                                     {matchedItem.expectedQty || 1}
                                 </span>
                                 {formatPackagingDescription(matchedProduct, matchedItem.expectedQty || 1) && (
-                                    <span className="text-[11px] font-mono text-[var(--theme-text-secondary)] block mt-1">
+                                    <span className="text-[10px] font-mono text-[var(--theme-text-secondary)] hidden sm:inline">
                                         ({formatPackagingDescription(matchedProduct, matchedItem.expectedQty || 1)})
                                     </span>
                                 )}
                             </div>
-                            <div className="text-[var(--theme-text-secondary)] text-lg font-bold">&rarr;</div>
-                            <div>
-                                <span className="text-[11px] text-[var(--theme-text-secondary)] font-semibold uppercase tracking-wider block leading-none mb-1">{t('warehouse.packed') || 'Packed'}</span>
-                                <span className="text-2xl font-mono tabular-nums font-bold text-[var(--theme-accent)] leading-none">
+                            <div className="h-3 w-px bg-[var(--theme-border)]" />
+                            <div className="flex items-center gap-2">
+                                <span className="text-[11px] text-[var(--theme-text-secondary)] font-semibold uppercase tracking-wider">Packed:</span>
+                                <span className="font-mono tabular-nums font-bold text-sm text-[var(--theme-accent)]">
                                     {matchedItem.packedQty !== undefined ? matchedItem.packedQty : (matchedItem.pickedQty || 0)}
                                 </span>
-                                {formatPackagingDescription(matchedProduct, matchedItem.packedQty !== undefined ? matchedItem.packedQty : (matchedItem.pickedQty || 0)) && (
-                                    <span className="text-[11px] font-mono text-[var(--theme-accent)] block mt-1">
-                                        ({formatPackagingDescription(matchedProduct, matchedItem.packedQty !== undefined ? matchedItem.packedQty : (matchedItem.pickedQty || 0))})
-                                    </span>
-                                )}
+                            </div>
+                            <div className="h-3 w-px bg-[var(--theme-border)]" />
+                            <div className="text-[11px] text-[var(--theme-text-secondary)] font-medium truncate max-w-[90px] sm:max-w-none">
+                                {formatProductSize(matchedProduct) || matchedItem.unit || 'Unit'}
                             </div>
                         </div>
 
                         {/* Warnings / Flags */}
                         {matchedItem.orderedQty && matchedItem.orderedQty > (matchedItem.expectedQty || 0) && (
-                            <div className="bg-amber-500/10 border border-amber-500/20 px-3 py-1.5 rounded-lg text-amber-500 text-[11px] font-semibold flex items-center gap-1.5">
-                                <AlertTriangle size={14} /> Short Picked — Originally ordered: {matchedItem.orderedQty}
+                            <div className="bg-amber-500/10 border border-amber-500/20 px-2.5 py-1 rounded-lg text-amber-500 text-[11px] font-semibold flex items-center gap-1.5">
+                                <AlertTriangle size={13} /> Short Picked ({matchedItem.orderedQty} ordered)
                             </div>
                         )}
                     </div>

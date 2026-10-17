@@ -56,6 +56,7 @@ import { getRoleDashboardRoute } from './utils/roleDashboard';
 import { useData } from './contexts/DataContext';
 import { systemConfigService } from './services/supabase.service';
 import { initializeAvatarsBucket } from './services/imageStorage.service';
+import StagingEnvironmentBanner from './components/StagingEnvironmentBanner';
 
 export default function App() {
   useCapacitor();
@@ -194,6 +195,7 @@ export default function App() {
 
   return (
     <Router>
+      <StagingEnvironmentBanner />
       {!user ? (
         <LoginPage />
       ) : (

@@ -11,6 +11,7 @@ import { CustodyHandshakeModal } from './CustodyHandshakeModal';
 import { useData } from '../../../contexts/DataContext';
 import { resolveReceivingPolicy } from '../../../utils/receivingPolicy';
 import { productsService, transfersService } from '../../../services/supabase.service';
+import { TransferReceiveItemCard } from './TransferReceiveItemCard';
 
 interface TransferReceivingProps {
     activeTransferJob: WMSJob;
@@ -353,87 +354,19 @@ export const TransferReceiving: React.FC<TransferReceivingProps> = ({
                     {transferReceiveItems.map((item, idx) => {
                         const product = allProducts.find(p => p.id === item.productId) || products.find(p => p.id === item.productId);
                         return (
-                            <div key={idx} className="bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl p-4 flex gap-4">
-                                <div className="w-16 h-16 bg-[var(--theme-bg-card)] rounded-lg flex items-center justify-center shrink-0 border border-[var(--theme-border)]">
-                                    {product?.image ? (
-                                        <img src={product.image} alt={product.name} className="w-full h-full object-cover rounded-lg" />
-                                    ) : (
-                                        <Box className="text-[var(--theme-text-secondary)]" size={24} />
-                                    )}
-                                </div>
-                                <div className="flex-1 min-w-0">
-                                    <div className="flex justify-between items-start mb-2">
-                                        <div>
-                                            <h4 className="font-bold text-[var(--theme-text-primary)] truncate text-sm">{product?.name || 'Unknown Item'}</h4>
-                                            <p className="text-[11px] text-[var(--theme-text-secondary)] font-mono">{product?.sku}</p>
-                                        </div>
-                                        <div className="text-right">
-                                            <span className="text-[11px] text-[var(--theme-text-secondary)] uppercase font-semibold tracking-wider">
-                                                {t('warehouse.expected')}{isBlindReceiving ? ' (Blind)' : ''}
-                                            </span>
-                                            <p className="font-mono text-[var(--theme-text-primary)] font-bold tabular-nums">
-                                                {isBlindReceiving ? (
-                                                    <span className="text-amber-500 font-mono tracking-widest font-bold">***</span>
-                                                ) : (
-                                                    <>
-                                                        {item.expectedQty}
-                                                        {product?.unit && getSellUnit(product.unit).code !== 'UNIT' && (
-                                                            <span className="text-[11px] text-[var(--theme-text-secondary)] font-medium ml-1 uppercase">{getSellUnit(product.unit).shortLabel}</span>
-                                                        )}
-                                                    </>
-                                                )}
-                                            </p>
-                                        </div>
-                                    </div>
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-3">
-                                        <div>
-                                            <label htmlFor={`received-qty-${idx}`} className="text-[11px] text-[var(--theme-text-secondary)] uppercase font-semibold mb-1 block">
-                                                {t('warehouse.received')}{product?.unit && getSellUnit(product.unit).code !== 'UNIT' ? ` (${getSellUnit(product.unit).shortLabel})` : ''}
-                                            </label>
-                                            <input
-                                                id={`received-qty-${idx}`}
-                                                type="number"
-                                                min="0"
-                                                placeholder="0"
-                                                step={product?.unit && getSellUnit(product.unit).allowDecimal ? '0.01' : '1'}
-                                                value={item.receivedQty === 0 ? '' : item.receivedQty}
-                                                onFocus={(e) => e.target.select()}
-                                                onChange={(e) => {
-                                                    const newItems = [...transferReceiveItems];
-                                                    const unitDef = getSellUnit(product?.unit);
-                                                    const rawVal = e.target.value;
-                                                    if (rawVal.trim() === '') {
-                                                        newItems[idx].receivedQty = 0;
-                                                    } else {
-                                                        newItems[idx].receivedQty = unitDef.allowDecimal ? parseFloat(rawVal) || 0 : parseInt(rawVal, 10) || 0;
-                                                    }
-                                                    setTransferReceiveItems(newItems);
-                                                }}
-                                                className="w-full min-h-[44px] bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl px-3 py-2 text-sm text-[var(--theme-text-primary)] focus:border-primary focus:outline-none touch-manipulation font-mono tabular-nums"
-                                                aria-label={`Received quantity for ${product?.name || 'item'}`}
-                                            />
-                                        </div>
-                                        <div>
-                                            <label htmlFor={`condition-${idx}`} className="text-[11px] text-[var(--theme-text-secondary)] uppercase font-semibold mb-1 block">{t('warehouse.returnCondition')}</label>
-                                            <select
-                                                id={`condition-${idx}`}
-                                                value={item.condition}
-                                                onChange={(e) => {
-                                                    const newItems = [...transferReceiveItems];
-                                                    newItems[idx].condition = e.target.value as any;
-                                                    setTransferReceiveItems(newItems);
-                                                }}
-                                                className="w-full min-h-[44px] bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl px-3 py-2 text-sm text-[var(--theme-text-primary)] focus:border-primary focus:outline-none touch-manipulation"
-                                                aria-label={`Condition for ${product?.name || 'item'}`}
-                                            >
-                                                <option value="Good">{t('warehouse.good')}</option>
-                                                <option value="Damaged">Damaged</option>
-                                                <option value="Short">Short / Missing</option>
-                                            </select>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+                            <TransferReceiveItemCard
+                                key={idx}
+                                item={item}
+                                idx={idx}
+                                product={product}
+                                isBlindReceiving={isBlindReceiving}
+                                onUpdateItem={(targetIdx, updates) => {
+                                    const newItems = [...transferReceiveItems];
+                                    newItems[targetIdx] = { ...newItems[targetIdx], ...updates };
+                                    setTransferReceiveItems(newItems);
+                                }}
+                                t={t}
+                            />
                         );
                     })}
                 </div>

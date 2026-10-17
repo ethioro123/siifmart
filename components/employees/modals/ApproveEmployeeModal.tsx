@@ -2,6 +2,7 @@ import React from 'react';
 import { UserCheck, CheckCircle2, ShieldCheck, AlertCircle } from 'lucide-react';
 import Modal from '../../Modal';
 import { Employee } from '../../../types';
+import { getEmployeeJobTitle } from '../../../utils/roles';
 import { useStore } from '../../../contexts/CentralStore';
 import { canEmployRole } from '../../../utils/roles';
 
@@ -44,7 +45,7 @@ export default function ApproveEmployeeModal({
                             Authorize & Activate Talent
                         </h3>
                         <p className="text-xs text-[var(--theme-text-secondary)] mt-1 max-w-sm mx-auto">
-                            Ratifying <strong className="text-[var(--theme-text-primary)] font-semibold">{employee.name}</strong> will activate system access for role <span className="font-mono font-semibold text-[#0071E3] dark:text-[#2997FF]">{employee.role}</span>.
+                            Ratifying <strong className="text-[var(--theme-text-primary)] font-semibold">{employee.name}</strong> will activate the <span className="font-semibold text-[#0071E3] dark:text-[#2997FF]">{getEmployeeJobTitle(employee)}</span> position and its assigned system access.
                         </p>
                     </div>
                 </div>
@@ -68,7 +69,7 @@ export default function ApproveEmployeeModal({
                         <div>
                             <p className="font-semibold">Dual-Control Constraint</p>
                             <p className="text-[11px] opacity-90 mt-0.5">
-                                You cannot approve onboarding for a role equal to or above your level ({employee.role}). Approval must be executed by a higher managerial checker.
+                                You cannot approve onboarding for a role equal to or above your level ({getEmployeeJobTitle(employee)}). Approval must be executed by a higher managerial checker.
                             </p>
                         </div>
                     </div>

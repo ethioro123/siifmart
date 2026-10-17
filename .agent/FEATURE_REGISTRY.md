@@ -1,6 +1,6 @@
 # Feature Registry
-# This file tracks all features implemented in the project.
-# AI assistants MUST update this file when implementing new features or fixing significant bugs.
+# This file records selected implementation history; it is not a source of current policy.
+# Update it for new features or significant fixes, and verify the current code before relying on older notes.
 
 ## Active Features
 
@@ -30,17 +30,16 @@
 - **Pattern**: All service update methods should follow this allowlist pattern (see RULES.md "Service Field Mapping")
 
 ### Gamification System - Premium Aesthetic Redesign
-- **Status**: ✅ COMPLETED (2026-07-09)
-- Redesigned Warehouse and POS gamification settings tabs from cyber-neon to sand/emerald/amber theme
+- **Status**: Historical (2026-07-09); verify current implementation
+- Earlier redesign note. Its palette is superseded by the current semantic-token and accessibility standards in `docs/APPLE_DESIGN_GUIDE.md`.
 - **Files Modified**: `WarehouseTab.tsx`, `POSTab.tsx`, `POSRoleDistributionList.tsx`, `POSPointRulesList.tsx`
-- **Design Tokens**: `#2C5E3B`, `#A9CBA2`, `#EAE5D9`, amber-600/500
 
 ---
 
 ## How to Use This Registry
 
 ### For AI Assistants:
-1. **Before modifying a feature**: Check this registry to understand what exists
+1. **Before modifying a feature**: Check this registry for history, then verify current code and policy
 2. **After implementing a feature**: Add an entry with date, description, and affected files
 3. **Before reverting/restoring code**: Check if the file contains registered features
 4. **After fixing a significant bug**: Document the root cause and fix pattern

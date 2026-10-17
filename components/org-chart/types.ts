@@ -1,4 +1,5 @@
 import { UserRole, Employee } from '../../types';
+import { SYSTEM_ROLES } from '../../utils/roles';
 
 export interface HierarchyNode {
     role: string;
@@ -19,54 +20,10 @@ export const DEPT_COLORS: Record<string, { bg: string; bgDark: string; border: s
 };
 
 export const ROLE_LABELS: Record<string, string> = {
-    super_admin: 'CEO',
-    regional_manager: 'Regional Manager',
-    operations_manager: 'Operations Manager',
-    finance_manager: 'Finance Manager',
-    hr_manager: 'HR Manager',
-    procurement_manager: 'Procurement Manager',
-    supply_chain_manager: 'Supply Chain Mgr',
-    merchandising_manager: 'Merchandising Manager',
-    store_manager: 'Store Manager',
-    warehouse_manager: 'Warehouse Manager',
-    logistics_manager: 'Logistics Manager',
-    inventory_manager: 'Inventory Manager',
-    security_manager: 'Security Manager',
-    dispatch_manager: 'Dispatch Manager',
-    assistant_manager: 'Asst. Manager',
-    shift_lead: 'Shift Lead',
-    cashier: 'Cashier',
-    sales_associate: 'Sales Associate',
-    stock_clerk: 'Stock Clerk',
-    customer_service: 'Customer Service',
-    auditor: 'Auditor',
-    it_support: 'IT Support',
-    picker: 'Picker',
-    packer: 'Packer',
-    receiver: 'Receiver',
-    driver: 'Driver',
-    forklift_operator: 'Forklift Op.',
-    inventory_specialist: 'Inventory Spec.',
-    buyer: 'Sourcing Buyer',
-    demand_planner: 'Demand Planner',
-    replenishment_planner: 'Replenishment Planner',
-    fleet_maintenance_supervisor: 'Fleet Maint. Supervisor',
-    admin: 'Admin (Legacy)',
+    ...Object.fromEntries(SYSTEM_ROLES.map(({ id, label }) => [id, label])),
+    ceo: 'Chief Executive Officer',
+    CEO: 'Chief Executive Officer',
     manager: 'Manager',
-    hr: 'HR',
-    pos: 'POS Staff',
-    dispatcher: 'Dispatcher',
-    cs_manager: 'CS Manager',
-    store_supervisor: 'Store Supervisor',
-    returns_clerk: 'Returns Clerk',
-    merchandiser: 'Merchandiser',
-    loss_prevention: 'Loss Prevention',
-    accountant: 'Accountant',
-    data_analyst: 'Data Analyst',
-    training_coordinator: 'Training Coord.',
-    payroll_specialist: 'Payroll Specialist',
-    talent_recruiter: 'Talent Recruiter',
-    store_operations_auditor: 'Store Operations Auditor',
 };
 
 export const CARD_SIZES: Record<string, { width: number; height: number; level: number }> = {

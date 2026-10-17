@@ -18,8 +18,8 @@ export default function StepRole({
         <div className="space-y-4 animate-in fade-in slide-in-from-right-4">
             <div className="flex items-center justify-between">
                 <div>
-                    <h4 className="text-sm font-bold text-[#1E3F27] dark:text-[#EAE5D9]">Select System Access Role</h4>
-                    <p className="text-xs text-stone-500 dark:text-stone-400">Filtered strictly by your hierarchy authority and facility domain</p>
+                    <h4 className="text-sm font-bold text-[#1E3F27] dark:text-[#EAE5D9]">Select Job Title and Access Profile</h4>
+                    <p className="text-xs text-stone-500 dark:text-stone-400">The title is standardized; the selected role controls system permissions.</p>
                 </div>
                 <span className="text-xs font-mono font-bold px-2.5 py-1 rounded-full bg-stone-100 dark:bg-white/5 border border-[#E2DCCE] dark:border-white/10 text-stone-600 dark:text-stone-300">
                     {availableRoles.length} Roles Authorized

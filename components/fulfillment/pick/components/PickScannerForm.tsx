@@ -58,33 +58,69 @@ export const PickScannerForm: React.FC<PickScannerFormProps> = ({
             {currentItem && (
                 <>
                     {step === 'QUANTITY' ? (
-                        <div className="flex gap-2 items-center w-full">
-                            <input
-                                ref={qtyRef}
-                                type="number"
-                                inputMode="decimal"
-                                pattern="[0-9]*"
-                                aria-label="Pick quantity"
-                                title="Pick quantity"
-                                value={qtyVal}
-                                onChange={(e) => setQtyVal(e.target.value)}
-                                className="flex-1 bg-[var(--theme-bg-card)] border-2 rounded-2xl py-4 sm:py-5 px-4 text-center text-3xl sm:text-4xl font-mono font-bold text-[var(--theme-text-primary)] placeholder:text-[var(--theme-text-secondary)] focus:outline-none focus:border-[var(--theme-accent)] border-[var(--theme-border)] shadow-sm"
-                                placeholder="QTY"
-                                autoFocus
-                                onFocus={(e) => e.target.select()}
-                            />
-                            <select
-                                value={selectedUnit}
-                                onChange={(e) => setSelectedUnit(e.target.value)}
-                                className="bg-[var(--theme-bg-card)] border-2 border-[var(--theme-border)] text-[var(--theme-text-primary)] font-semibold rounded-2xl px-4 py-4 sm:py-5 text-sm uppercase focus:outline-none focus:border-[var(--theme-accent)] cursor-pointer"
-                                aria-label="Select unit"
-                            >
-                                {SELL_UNITS.map(u => (
-                                    <option key={u.code} value={u.code}>
-                                        {u.shortLabel.toUpperCase()}
-                                    </option>
-                                ))}
-                            </select>
+                        <div className="space-y-2.5">
+                            <div className="flex gap-2 items-center w-full">
+                                <input
+                                    ref={qtyRef}
+                                    type="number"
+                                    inputMode="decimal"
+                                    pattern="[0-9]*"
+                                    aria-label="Pick quantity"
+                                    title="Pick quantity"
+                                    value={qtyVal}
+                                    onChange={(e) => setQtyVal(e.target.value)}
+                                    className="flex-1 bg-[var(--theme-bg-card)] border-2 rounded-xl py-3 sm:py-4 px-3 text-center text-2xl sm:text-3xl font-mono font-bold text-[var(--theme-text-primary)] placeholder:text-[var(--theme-text-secondary)] focus:outline-none focus:border-[var(--theme-accent)] border-[var(--theme-border)] shadow-xs"
+                                    placeholder="QTY"
+                                    autoFocus
+                                    onFocus={(e) => e.target.select()}
+                                />
+                                <select
+                                    value={selectedUnit}
+                                    onChange={(e) => setSelectedUnit(e.target.value)}
+                                    className="bg-[var(--theme-bg-card)] border-2 border-[var(--theme-border)] text-[var(--theme-text-primary)] font-semibold rounded-xl px-3 py-3 sm:py-4 text-xs sm:text-sm uppercase focus:outline-none focus:border-[var(--theme-accent)] cursor-pointer"
+                                    aria-label="Select unit"
+                                >
+                                    {SELL_UNITS.map(u => (
+                                        <option key={u.code} value={u.code}>
+                                            {u.shortLabel.toUpperCase()}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+
+                            {/* Rapid Thumb Stepper Pills */}
+                            <div className="flex items-center gap-2">
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        const cur = parseFloat(qtyVal) || 0;
+                                        setQtyVal(String(cur + 1));
+                                    }}
+                                    className="flex-1 py-2 rounded-xl bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-subtle)]/80 border border-[var(--theme-border)] text-[var(--theme-text-primary)] font-mono text-xs font-bold transition-all active:scale-95 touch-manipulation min-h-[38px]"
+                                >
+                                    +1
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        const cur = parseFloat(qtyVal) || 0;
+                                        setQtyVal(String(cur + 5));
+                                    }}
+                                    className="flex-1 py-2 rounded-xl bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-subtle)]/80 border border-[var(--theme-border)] text-[var(--theme-text-primary)] font-mono text-xs font-bold transition-all active:scale-95 touch-manipulation min-h-[38px]"
+                                >
+                                    +5
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        const expected = currentItem?.expectedQty || 1;
+                                        setQtyVal(expected.toString());
+                                    }}
+                                    className="flex-1 py-2 rounded-xl bg-[var(--theme-accent)]/10 hover:bg-[var(--theme-accent)]/20 border border-[var(--theme-accent)]/30 text-[var(--theme-accent)] font-mono text-xs font-bold transition-all active:scale-95 touch-manipulation min-h-[38px]"
+                                >
+                                    All ({currentItem?.expectedQty || 1})
+                                </button>
+                            </div>
                         </div>
                     ) : (
                         <input
@@ -96,7 +132,7 @@ export const PickScannerForm: React.FC<PickScannerFormProps> = ({
                             onChange={(e) => setInputVal(e.target.value)}
                             onKeyDown={scanOnlyHandlers.onKeyDown}
                             onPaste={scanOnlyHandlers.onPaste}
-                            className="w-full bg-[var(--theme-bg-card)] border-2 rounded-2xl py-4 sm:py-5 px-4 text-center text-xl sm:text-2xl font-mono font-bold text-[var(--theme-text-primary)] placeholder:text-[var(--theme-text-secondary)] focus:outline-none border-[var(--theme-border)] focus:border-[var(--theme-accent)] transition-colors"
+                            className="w-full bg-[var(--theme-bg-card)] border-2 rounded-xl py-3 sm:py-4 px-3 text-center text-lg sm:text-xl font-mono font-bold text-[var(--theme-text-primary)] placeholder:text-[var(--theme-text-secondary)] focus:outline-none border-[var(--theme-border)] focus:border-[var(--theme-accent)] transition-colors shadow-xs"
                             placeholder={step === 'LOCATION' ? t('warehouse.picking.scan15DigitBarcode') : t('warehouse.picking.scanSkuBarcode')}
                             autoFocus
                             disabled={isProcessing}
@@ -112,8 +148,8 @@ export const PickScannerForm: React.FC<PickScannerFormProps> = ({
                     )}
 
                     {step === 'QUANTITY' && (
-                        <div className="text-center animate-in fade-in duration-200 space-y-3">
-                            <p className="text-xs font-semibold uppercase tracking-wider text-[var(--theme-text-secondary)]">
+                        <div className="text-center animate-in fade-in duration-200 space-y-2">
+                            <p className="text-[11px] font-semibold uppercase tracking-wider text-[var(--theme-text-secondary)]">
                                 {t('warehouse.expected')}: {(() => {
                                     const expected = currentItem?.expectedQty || 1;
                                     const packDesc = formatPackagingDescription(currentProduct, expected);
@@ -134,16 +170,16 @@ export const PickScannerForm: React.FC<PickScannerFormProps> = ({
                                             if (formElem) formElem.requestSubmit();
                                         }, 50);
                                     }}
-                                    className="w-full py-3.5 px-6 rounded-xl bg-[var(--theme-accent)] hover:opacity-90 text-white font-semibold text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-2 cursor-pointer min-h-[44px]"
+                                    className="w-full py-3 px-4 rounded-xl bg-[var(--theme-accent)] hover:opacity-90 text-white font-semibold text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-2 cursor-pointer min-h-[44px] shadow-xs active:scale-[0.98] touch-manipulation"
                                 >
                                     <CheckCircle size={16} />
-                                    Confirm Full Pick ({(() => {
+                                    <span>Confirm Full Pick ({(() => {
                                         const expected = currentItem.expectedQty || 1;
                                         const packDesc = formatPackagingDescription(currentProduct, expected);
                                         const unitDef = getSellUnit(currentProduct?.unit || currentItem?.unit);
                                         const unitLabel = unitDef.category === 'count' && unitDef.code !== 'UNIT' ? unitDef.shortLabel : 'pk';
                                         return packDesc ? `${expected} ${unitLabel} (${packDesc})` : `${expected} ${unitLabel}`;
-                                    })()})
+                                    })()})</span>
                                 </button>
                             )}
                         </div>

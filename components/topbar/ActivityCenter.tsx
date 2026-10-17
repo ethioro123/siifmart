@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Bell, X, CheckCircle2, AlertTriangle, Info, Clock, Trash2, Layout, CheckSquare, ListTodo, Plus, Send, Calendar, UserPlus, Activity } from 'lucide-react';
 import { formatRelativeTime } from '../../utils/formatting';
+import { getEmployeeJobTitle } from '../../utils/roles';
 
 interface ActivityCenterProps {
    notifRef: React.RefObject<HTMLDivElement | null>;
@@ -275,7 +276,7 @@ export function ActivityCenter({
                                           >
                                              <option value="">Select employee...</option>
                                              {visibleEmployees.map(emp => (
-                                                <option key={emp.id} value={emp.id}>{emp.name} ({emp.role})</option>
+                                                <option key={emp.id} value={emp.id}>{emp.name} ({getEmployeeJobTitle(emp)})</option>
                                              ))}
                                           </select>
                                        </div>

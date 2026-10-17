@@ -398,6 +398,7 @@ export const PutawayScanner: React.FC<PutawayScannerProps> = ({
                         <PutawayScannerQuantityCard
                             currentItem={currentItem}
                             scannedSku={scannedSku}
+                            onSetQty={setInputVal}
                         />
                     )}
 

@@ -1,6 +1,7 @@
 import React from 'react';
 import { FileText, Trash2, ArrowRight, Plus, X, Clock, Paperclip, Building2, CheckCircle2 } from 'lucide-react';
 import { EmployeeDraft } from '../../../utils/employeeDrafts';
+import { getJobTitleForRole } from '../../../utils/roles';
 
 interface EmployeeDraftsDrawerProps {
     isOpen: boolean;
@@ -134,7 +135,7 @@ export const EmployeeDraftsDrawer: React.FC<EmployeeDraftsDrawerProps> = ({
                                                     </span>
                                                 )}
                                                 <span className="px-2 py-0.5 rounded-md text-[10px] font-extrabold uppercase tracking-wide bg-[var(--theme-bg-subtle)] text-[#2C5E3B] dark:text-[#A9CBA2] border border-[var(--theme-border)] shrink-0">
-                                                    {String(draft.role || 'Staff').replace(/_/g, ' ')}
+                                                    {getJobTitleForRole(draft.role || 'Staff')}
                                                 </span>
                                             </div>
 

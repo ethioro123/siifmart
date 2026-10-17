@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { ClipboardCheck, Layers, ChevronDown, ChevronUp, X, RefreshCw } from 'lucide-react';
 import { Employee, WMSJob } from '../../../types';
 import { formatJobId } from '../../../utils/jobIdFormatter';
+import { getEmployeeJobTitle } from '../../../utils/roles';
 import { useFulfillmentData } from '../FulfillmentDataProvider';
 
 interface AssignActiveMatrixProps {
@@ -103,7 +104,7 @@ export const AssignActiveMatrix: React.FC<AssignActiveMatrixProps> = ({
                                 {/* Name + Role */}
                                 <div className="min-w-0 flex-1">
                                     <p className="text-xs font-semibold text-[var(--theme-text-primary)] truncate leading-tight">{employee.name}</p>
-                                    <p className="text-[11px] text-[var(--theme-text-muted)] font-medium uppercase tracking-wider mt-0.5">{employee.role}</p>
+                                    <p className="text-[11px] text-[var(--theme-text-muted)] font-medium uppercase tracking-wider mt-0.5">{getEmployeeJobTitle(employee)}</p>
                                 </div>
 
                                 {/* Job count badge */}

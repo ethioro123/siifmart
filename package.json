@@ -9,6 +9,7 @@
   "main": "dist-electron/main.js",
   "scripts": {
     "dev": "vite",
+    "dev:staging": "vite --mode staging",
     "dev:safe": "npm run auto-save & vite",
     "auto-save": "./scripts/auto-save-daemon.sh",
     "backup": "./scripts/pre-ai-backup.sh",

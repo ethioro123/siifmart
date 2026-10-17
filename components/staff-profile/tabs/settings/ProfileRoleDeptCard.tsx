@@ -1,7 +1,7 @@
 import React from 'react';
 import { Shield, Briefcase, Building, DollarSign, UserCheck, Star, ChevronDown, DollarSign as FinanceIcon } from 'lucide-react';
 import { Employee, UserRole } from '../../../../types';
-import { SYSTEM_ROLES } from '../../../../utils/roles';
+import { getEmployeeJobTitle, SYSTEM_ROLES } from '../../../../utils/roles';
 import { formatRole } from '../../../../utils/formatting';
 
 const DEPARTMENTS = [
@@ -109,7 +109,7 @@ export const ProfileRoleDeptCard: React.FC<ProfileRoleDeptCardProps> = ({
                     </div>
                 ) : (
                     <div className={readOnlyClasses}>
-                        <p className="text-xs font-bold text-[var(--theme-text-primary)]">{formatRole(employee.role)}</p>
+                        <p className="text-xs font-bold text-[var(--theme-text-primary)]">{getEmployeeJobTitle(employee)}</p>
                         <Shield size={15} className="text-blue-500" />
                     </div>
                 )}

@@ -340,105 +340,110 @@ export const OutboundJobModal: React.FC<OutboundJobModalProps> = ({
                 {/* --- FOOTER ACTION BAR --- */}
                 <div className="p-4 sm:p-5 border-t border-[var(--theme-border)] bg-[var(--theme-bg-subtle)] shrink-0">
                     <div className="flex flex-row items-center justify-center gap-3 w-full">
+                        {(() => {
+                            const isOutboundMission = job.type === 'DISPATCH' || job.type === 'DRIVER' || (isDriverView && job.type === 'TRANSFER');
+                            const isManagerRole = ['super_admin', 'admin', 'manager', 'regional_manager', 'operations_manager', 'warehouse_manager', 'dispatcher'].includes((user?.role || '').toLowerCase());
+                            const isAssignedDriver = !job.assignedTo || job.assignedTo === user?.id || (job as any).assigned_to === user?.id;
+                            const canOperateDelivery = isManagerRole || (user?.role === 'driver' && isAssignedDriver);
 
-                        {/* STEP 1: PICKUP */}
-                        {job.type === 'DISPATCH' && job.transferStatus !== 'In-Transit' && job.transferStatus !== 'Shipped' && job.transferStatus !== 'Delivered' && job.transferStatus !== 'Received' && job.status !== 'Completed' && (
-                            <button
-                                onClick={async () => {
-                                    setIsSubmitting(true);
-                                    try {
-                                        const now = new Date().toISOString();
-                                        await onUpdateJob(job.id, {
-                                            status: 'In-Progress' as any,
-                                            transferStatus: 'In-Transit',
-                                            shippedAt: now
-                                        });
-
-                                        if (job.orderRef) {
-                                            try {
-                                                const { wmsJobsService } = await import('../services/supabase.service');
-                                                await wmsJobsService.update(job.orderRef, {
-                                                    transferStatus: 'In-Transit',
-                                                    shippedAt: now
-                                                } as any);
-                                            } catch (e) {
-                                                logger.warn('OutboundJobModal', `Failed to sync pickup to parent transfer: ${e instanceof Error ? e.message : String(e)}`);
-                                            }
-                                        }
-                                    } finally {
-                                        setIsSubmitting(false);
-                                    }
-                                }}
-                                disabled={isSubmitting}
-                                className="min-h-[44px] h-11 w-full bg-[var(--theme-primary)] hover:opacity-90 text-[var(--theme-primary-text)] rounded-xl font-semibold text-xs flex items-center justify-center gap-2 shadow-sm transition-all active:scale-[0.98] disabled:opacity-50 touch-manipulation cursor-pointer"
-                            >
-                                <Truck size={16} />
-                                Pick Up Shipment
-                            </button>
-                        )}
-
-                        {/* STEP 2: DELIVERED */}
-                        {job.type === 'DISPATCH' && (job.transferStatus === 'In-Transit' || job.transferStatus === 'Shipped') && (
-                            (() => {
-                                const isAssignedDriver = !job.assignedTo || job.assignedTo === user?.id || (job as any).assigned_to === user?.id;
-                                const isManagerRole = ['super_admin', 'admin', 'manager', 'regional_manager', 'operations_manager', 'warehouse_manager'].includes((user?.role || '').toLowerCase());
-                                const canCompleteJob = isAssignedDriver || isManagerRole;
-
-                                return (
-                                    <>
-                                        <button
-                                            onClick={handleNavigate}
-                                            className="min-h-[44px] h-11 px-5 border border-[var(--theme-border)] bg-[var(--theme-bg-card)] hover:bg-[var(--theme-bg-subtle)] text-[var(--theme-text-primary)] rounded-xl flex items-center gap-1.5 font-semibold text-xs transition-all active:scale-[0.98] touch-manipulation"
-                                        >
-                                            <Navigation size={14} className="text-[var(--theme-primary)]" />
-                                            Navigate
-                                        </button>
+                            return (
+                                <>
+                                    {/* STEP 1: PICKUP */}
+                                    {isOutboundMission && job.transferStatus !== 'In-Transit' && job.transferStatus !== 'Shipped' && job.transferStatus !== 'Delivered' && job.transferStatus !== 'Received' && job.status !== 'Completed' && (
                                         <button
                                             onClick={async () => {
-                                                if (!canCompleteJob) return;
+                                                if (!canOperateDelivery) return;
                                                 setIsSubmitting(true);
                                                 try {
                                                     const now = new Date().toISOString();
                                                     await onUpdateJob(job.id, {
-                                                        status: 'Completed' as any,
-                                                        transferStatus: 'Delivered',
-                                                        deliveredAt: now,
-                                                        receivedBy: user?.name || 'Driver'
-                                                    } as any);
+                                                        status: 'In-Progress' as any,
+                                                        transferStatus: 'In-Transit',
+                                                        assignedTo: job.assignedTo || user?.id,
+                                                        shippedAt: now
+                                                    });
 
                                                     if (job.orderRef) {
                                                         try {
                                                             const { wmsJobsService } = await import('../services/supabase.service');
                                                             await wmsJobsService.update(job.orderRef, {
-                                                                transferStatus: 'Delivered',
-                                                                deliveredAt: now
+                                                                transferStatus: 'In-Transit',
+                                                                assignedTo: job.assignedTo || user?.id,
+                                                                shippedAt: now
                                                             } as any);
                                                         } catch (e) {
-                                                            logger.warn('OutboundJobModal', `Failed to sync delivery to parent transfer: ${e instanceof Error ? e.message : String(e)}`);
+                                                            logger.warn('OutboundJobModal', `Failed to sync pickup to parent transfer: ${e instanceof Error ? e.message : String(e)}`);
                                                         }
                                                     }
                                                 } finally {
                                                     setIsSubmitting(false);
                                                 }
                                             }}
-                                            disabled={isSubmitting || !canCompleteJob}
-                                            className={`min-h-[44px] h-11 flex-1 rounded-xl font-semibold text-xs shadow-sm transition-all flex items-center justify-center gap-2 active:scale-[0.98] disabled:opacity-50 touch-manipulation ${canCompleteJob ? 'bg-emerald-600 hover:bg-emerald-700 text-white' : 'bg-[var(--theme-bg-card)] text-[var(--theme-text-muted)] cursor-not-allowed border border-[var(--theme-border)]'}`}
-                                            title={canCompleteJob ? "Complete Delivery" : "Only the assigned driver or manager can complete this delivery"}
+                                            disabled={isSubmitting || !canOperateDelivery}
+                                            className="min-h-[44px] h-11 w-full bg-[var(--theme-primary)] hover:opacity-90 text-[var(--theme-primary-text)] rounded-xl font-semibold text-xs flex items-center justify-center gap-2 shadow-sm transition-all active:scale-[0.98] disabled:opacity-50 touch-manipulation cursor-pointer"
                                         >
-                                            <CheckCircle size={16} />
-                                            {canCompleteJob ? 'Confirm Delivery' : 'Assigned to Driver'}
+                                            <Truck size={16} />
+                                            {canOperateDelivery ? 'Pick Up Shipment' : 'Assigned to Another Driver'}
                                         </button>
-                                    </>
-                                );
-                            })()
-                        )}
+                                    )}
 
-                        {/* DONE — Completed status badge */}
-                        {job.type === 'DISPATCH' && (job.transferStatus === 'Delivered' || job.transferStatus === 'Received' || job.status === 'Completed') && (
-                            <div className="min-h-[44px] h-11 w-full bg-emerald-500/10 border border-emerald-500/20 rounded-xl text-xs font-semibold text-emerald-600 dark:text-emerald-400 flex items-center justify-center gap-2">
-                                <CheckCircle size={16} /> Delivery Complete
-                            </div>
-                        )}
+                                    {/* STEP 2: DELIVERED */}
+                                    {isOutboundMission && (job.transferStatus === 'In-Transit' || job.transferStatus === 'Shipped') && (
+                                        <>
+                                            <button
+                                                onClick={handleNavigate}
+                                                className="min-h-[44px] h-11 px-5 border border-[var(--theme-border)] bg-[var(--theme-bg-card)] hover:bg-[var(--theme-bg-subtle)] text-[var(--theme-text-primary)] rounded-xl flex items-center gap-1.5 font-semibold text-xs transition-all active:scale-[0.98] touch-manipulation"
+                                            >
+                                                <Navigation size={14} className="text-[var(--theme-primary)]" />
+                                                Navigate
+                                            </button>
+                                            <button
+                                                onClick={async () => {
+                                                    if (!canOperateDelivery) return;
+                                                    setIsSubmitting(true);
+                                                    try {
+                                                        const now = new Date().toISOString();
+                                                        await onUpdateJob(job.id, {
+                                                            status: 'Completed' as any,
+                                                            transferStatus: 'Delivered',
+                                                            deliveredAt: now,
+                                                            receivedBy: user?.name || 'Driver'
+                                                        } as any);
+
+                                                        if (job.orderRef) {
+                                                            try {
+                                                                const { wmsJobsService } = await import('../services/supabase.service');
+                                                                await wmsJobsService.update(job.orderRef, {
+                                                                    transferStatus: 'Delivered',
+                                                                    deliveredAt: now
+                                                                } as any);
+                                                            } catch (e) {
+                                                                logger.warn('OutboundJobModal', `Failed to sync delivery to parent transfer: ${e instanceof Error ? e.message : String(e)}`);
+                                                            }
+                                                        }
+                                                    } finally {
+                                                        setIsSubmitting(false);
+                                                    }
+                                                }}
+                                                disabled={isSubmitting || !canOperateDelivery}
+                                                className={`min-h-[44px] h-11 flex-1 rounded-xl font-semibold text-xs shadow-sm transition-all flex items-center justify-center gap-2 active:scale-[0.98] disabled:opacity-50 touch-manipulation ${canOperateDelivery ? 'bg-emerald-600 hover:bg-emerald-700 text-white' : 'bg-[var(--theme-bg-card)] text-[var(--theme-text-muted)] cursor-not-allowed border border-[var(--theme-border)]'}`}
+                                                title={canOperateDelivery ? "Complete Delivery" : "Only the assigned driver or manager can complete this delivery"}
+                                            >
+                                                <CheckCircle size={16} />
+                                                {canOperateDelivery ? 'Confirm Delivery' : 'Assigned to Driver'}
+                                            </button>
+                                        </>
+                                    )}
+
+                                    {/* DONE — Completed status badge */}
+                                    {isOutboundMission && (job.transferStatus === 'Delivered' || job.transferStatus === 'Received' || job.status === 'Completed') && (
+                                        <div className="min-h-[44px] h-11 w-full bg-emerald-500/10 border border-emerald-500/20 rounded-xl text-xs font-semibold text-emerald-600 dark:text-emerald-400 flex items-center justify-center gap-2">
+                                            <CheckCircle size={16} /> Delivery Complete
+                                        </div>
+                                    )}
+                                </>
+                            );
+                        })()}
 
                         {/* CLOSE */}
                         <button

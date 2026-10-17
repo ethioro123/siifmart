@@ -1,6 +1,6 @@
 # SIIFMART Troubleshooting Guide
 
-> Common issues, their root causes, and where to fix them.
+> Start with the observed error and verify the actual query, types, schema, and authorization path before changing code. Historical patterns are clues, not proof.
 
 ## Data & State Issues
 
@@ -8,7 +8,7 @@
 |---------|-------------|----------------|-------------|
 | Data not refreshing after mutation | Missing query invalidation | Hook in `/hooks/` | Add `queryClient.invalidateQueries()` in `onSuccess` |
 | Stale data showing | React Query cache | `contexts/DataContext.tsx`, hook | Check `staleTime` and invalidation |
-| Data from wrong site | Missing site filter | Component rendering data | Add `.filter(item => item.siteId === currentSiteId)` |
+| Data from wrong site/country | Missing or incorrect trusted scope | Query/service and RLS policy | Verify authorized site and country scope at the database/server boundary; client filtering alone is insufficient |
 | Offline data out of sync | IndexedDB stale | `services/db/pos.db.ts`, `hooks/usePosSync.ts` | Check sync logic |
 
 ## Authentication & Permissions
@@ -18,7 +18,7 @@
 | Can't access a page | Role not allowed | `utils/permissions.ts`, `App.tsx` route guards | Add role to permission check |
 | Permission denied on action | RBAC check failing | `services/permissions.service.ts` | Check role hierarchy (L1-L4) |
 | Session expired | Token refresh failing | `hooks/useSessionManager.ts`, `services/auth.service.ts` | Check Supabase token refresh |
-| RLS blocking query | Policy mismatch | `/migrations/`, Supabase dashboard | Update RLS policy |
+| RLS blocking query | Policy, grant, role, or JWT scope mismatch | Migration, Supabase schema/policies, service | Identify the failing operation and role; update only the needed policy after review |
 
 ## POS Issues
 
@@ -57,11 +57,11 @@
 
 | Symptom | Likely Cause | Files to Check | Fix Pattern |
 |---------|-------------|----------------|-------------|
-| Page freezes after aesthetic update | `backdrop-blur` on scrollable/re-rendered elements | Component CSS classes | Replace `backdrop-blur-xl` with solid `bg-` color on lists, cards, modals |
-| Janky scrolling on mobile | `transition-all` or animating layout properties | Component CSS classes | Use `transition: transform 150ms, opacity 150ms` — never `transition-all` |
-| Buttons hard to tap | Touch targets too small | Component sizing classes | Ensure all interactive elements are ≥44×44px |
-| Slow initial load on mobile | Modals/charts eagerly imported | POS/Fulfillment page imports | Lazy-load modals with `React.lazy()`, defer chart libs |
-| UI unresponsive during search | Missing debounce on input | Search input `onChange` handler | Add `setTimeout` or `useDeferredValue` with ≥300ms delay |
+| Page freezes after UI change | Large render work, image decoding, blur, or memory growth | Profiled route/component | Measure on representative hardware; remove the confirmed bottleneck while preserving legibility |
+| Janky scrolling on mobile | Excessive DOM work, layout/paint, or long tasks | Browser profiler and component | Reduce measured work; avoid frequent layout animation and unnecessary render churn |
+| Buttons hard to tap | Small target or obstructed action | Rendered control and layout | Increase target size and confirm keyboard/focus behavior |
+| Slow initial load on mobile | Large route bundle or blocking requests | Bundle report and network trace | Defer optional code and bound initial data based on measured impact |
+| UI unresponsive during search | Expensive filtering/network work per keystroke | Search handler and profiler | Debounce remote/expensive work; keep small local filtering immediate |
 
 ## Supabase API Errors
 
@@ -70,26 +70,19 @@
 | PATCH/POST returns **400 Bad Request** | Sending unknown column names (camelCase fields not mapped to snake_case) | Relevant `.service.ts` `update()` method | Switch from `{ ...object }` spread to explicit allowlist. See RULES.md "Service Field Mapping" |
 | POST returns **400** with "null value violates not-null constraint" | Missing a NOT NULL column in the insert payload | `.service.ts` `create()` method, `/schemas/db-schema.md` | Check the schema registry for NOT NULL columns and add them to the insert |
 | "column X does not exist" in logs | New TS field added but service mapper not updated | `.service.ts` mapper function, `update()` allowlist | Add the field to both the `mapRow()` (read) and `update()` allowlist (write) |
-| INSERT returns **403 Forbidden** | Chaining `.select('*')` after `.insert()` triggers SELECT RLS policy | `.service.ts` insert method | Remove `.select('*')` or use `.select('id, created_at')` with minimal columns |
+| INSERT with returned representation is denied | Chained `.select()` also requires SELECT access and may trigger SELECT RLS/column grants | `.service.ts` insert method and RLS/grants | Omit the returned representation if unused; otherwise verify the actor may select the returned columns and rows |
 | RLS blocking query | Policy mismatch | `/migrations/`, Supabase dashboard | Update RLS policy |
 | Insert returns 409 Conflict | Unique constraint violation | Migration that created the constraint | Check unique columns (code, site_number, barcode) |
 
 ### First Response to Any Supabase 400/403/500 Error
 
-> **ALWAYS probe the live schema before editing service code.** Migration files may not match the live DB.
+> **Verify the live schema and operation before editing service code.** Migration files may not match the live DB. Keep introspection read-only and use the approved Supabase connection or schema registry.
 
-**Step 1 — Identify the actual columns:**
-```typescript
-// In a scratch script, authenticate and probe:
-const cols = ['id', 'user_id', 'user_name', 'action', 'details', ...];
-for (const col of cols) {
-    const r = await supabase.from('table_name').select(col).limit(1);
-    console.log(`${col}: ${r.error ? '❌' : '✅'}`);
-}
-```
+**Step 1 — Identify the actual operation and columns:**
+Compare the exact request projection, filters, joins, role, and returned error with generated types or a read-only schema inspection. Do not probe guessed columns by issuing arbitrary production reads.
 
-**Step 2 — Map ALL mismatches in one pass:**
-Compare what the service sends vs what the live DB expects. Fix ALL column mismatches together — don't fix them one-by-one (each round costs a deploy/test cycle).
+**Step 2 — Isolate the root cause:**
+Compare the service's allowlisted payload and projection with the confirmed schema and RLS policies. Change only proven mismatches; avoid bundling unrelated fixes.
 
 **Step 3 — Update the schema registry:**
 After confirming the fix, update `/schemas/db-schema.md` with the actual columns so the next developer doesn't repeat the same probe.
@@ -107,21 +100,7 @@ After confirming the fix, update `/schemas/db-schema.md` with the actual columns
 ## Quick Diagnostic Commands
 
 ```bash
-# Type check the project
 npx tsc --noEmit
-
-# Find files over 500 lines
-find . -name '*.tsx' -o -name '*.ts' | grep -v node_modules | grep -v dist | xargs wc -l | sort -rn | head -20
-
-# Find console.log statements
-grep -rn 'console.log' --include='*.ts' --include='*.tsx' . | grep -v node_modules | grep -v dist
-
-# Find `any` type usage
-grep -rn ': any' --include='*.ts' --include='*.tsx' . | grep -v node_modules | grep -v dist | head -20
-
-# Check git status
-git status
-
-# Run file size lint
 npm run lint:size
+git status --short
 ```

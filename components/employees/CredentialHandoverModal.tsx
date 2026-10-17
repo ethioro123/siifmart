@@ -7,7 +7,7 @@ import Modal from '../Modal';
 import { Employee } from '../../types';
 import { useStore } from '../../contexts/CentralStore';
 import { useData } from '../../contexts/DataContext';
-import { isManagerialRole } from '../../utils/roles';
+import { getEmployeeJobTitle, isManagerialRole } from '../../utils/roles';
 import { parseEmployeeCode, formatDisplayEmployeeId } from '../../utils/employeeIdGenerator';
 import { employeesService } from '../../services/employees.service';
 import { logger } from '../../utils/logger';
@@ -71,7 +71,7 @@ export function CredentialHandoverModal({
 SIIF MART - STAFF ACCESS CREDENTIALS
 ====================================
 Employee Name: ${employee.name}
-Role: ${employee.role.toUpperCase()}
+Job Title: ${getEmployeeJobTitle(employee)}
 Facility: ${assignedSite?.name || 'Local Site'} (${assignedSite?.type || 'Branch'})
 Staff ID: ${formatDisplayEmployeeId(employee, sites)}
 
@@ -137,7 +137,7 @@ Authorized by Site Management
                             </div>
                             <div className="flex items-center gap-2 text-xs text-[var(--theme-text-secondary)] mt-0.5">
                                 <span className="font-semibold uppercase tracking-wider text-[11px] text-[#0071E3] dark:text-[#2997FF]">
-                                    {employee.role.replace('_', ' ')}
+                                    {getEmployeeJobTitle(employee)}
                                 </span>
                                 <span>•</span>
                                 <span className="flex items-center gap-1">

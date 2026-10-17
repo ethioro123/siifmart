@@ -162,14 +162,18 @@ export const TransferTab: React.FC<TransferTabProps> = ({
         setIsSubmitting(true);
         try {
             const itemIndex = selectedJob.lineItems.findIndex(i => i.status === 'Pending');
-            if (itemIndex === -1) return;
+            if (itemIndex === -1) {
+                setIsProcessingScan(false);
+                setIsSubmitting(false);
+                return;
+            }
 
             const item = selectedJob.lineItems[itemIndex];
             if (item) {
                 const originalIdx = (item as any).originalIndex;
                 const updateTargetIndex = typeof originalIdx === 'number' ? originalIdx : itemIndex;
 
-                const scanJobTypes: string[] = ['PICK', 'PACK', 'PUTAWAY'];
+                const scanJobTypes: string[] = ['PICK', 'PACK', 'PUTAWAY', 'TRANSFER'];
                 if (scanJobTypes.includes(selectedJob.type) && scannedItem && scannedItem.trim()) {
                     const scannedValue = scannedItem.trim().toUpperCase();
                     const product = allProducts.find(p => p.id === item.productId || p.sku === item.sku) || products.find(p => p.id === item.productId || p.sku === item.sku);
@@ -232,6 +236,10 @@ export const TransferTab: React.FC<TransferTabProps> = ({
                 updatedJob.lineItems[itemIndex] = { ...item, status: statusToRecord, pickedQty: qtyToRecord };
                 setSelectedJob(updatedJob);
 
+                setScannedItem('');
+                setIsProcessingScan(false);
+                setIsSubmitting(false);
+
                 const isJobDone = updatedJob.lineItems.every(i => i.status === 'Picked' || i.status === 'Short' || i.status === 'Discontinued');
                 if (isJobDone) {
                     setTimeout(async () => {
@@ -242,15 +250,12 @@ export const TransferTab: React.FC<TransferTabProps> = ({
                         setSelectedJob(null);
                         refreshData();
                     }, 500);
-                } else {
-                    setScannedItem('');
-                    setIsProcessingScan(false);
-                    setIsSubmitting(false);
                 }
             }
         } catch (err) {
             logger.error('TransferTab', 'Scan Error:', err);
             addNotification('error', 'Failed to process scan');
+            setScannedItem('');
             setIsProcessingScan(false);
             setIsSubmitting(false);
         }

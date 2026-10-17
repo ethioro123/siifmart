@@ -1,10 +1,11 @@
 import React from 'react';
 import { Trophy, Target, Zap, Award, Store, UserCheck, Star, Plus, Package, CheckCircle, Clock, TrendingUp } from 'lucide-react';
 import { CURRENCY_SYMBOL } from '../../../constants';
-import { formatCompactNumber, formatRole } from '../../../utils/formatting';
+import { formatCompactNumber } from '../../../utils/formatting';
 import { calculateBonus } from '../../WorkerPointsDisplay';
 import { calculateStoreBonus } from '../../StoreBonusDisplay';
 import { Employee, DEFAULT_POS_BONUS_TIERS, DEFAULT_POS_ROLE_DISTRIBUTION, DEFAULT_BONUS_TIERS } from '../../../types';
+import { getEmployeeJobTitle } from '../../../utils/roles';
 
 interface GamificationTabProps {
     employee: Employee;
@@ -152,8 +153,8 @@ export default function GamificationTab({
                             <div className="w-10 h-10 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center mx-auto mb-3 text-purple-500">
                                 <UserCheck size={20} />
                             </div>
-                            <p className="text-lg font-bold text-[var(--theme-text-primary)] capitalize">{formatRole(employee.role)}</p>
-                            <p className="text-[11px] text-[var(--theme-text-secondary)] uppercase font-semibold tracking-wider mt-1">Role Type</p>
+                            <p className="text-lg font-bold text-[var(--theme-text-primary)]">{getEmployeeJobTitle(employee)}</p>
+                            <p className="text-[11px] text-[var(--theme-text-secondary)] uppercase font-semibold tracking-wider mt-1">Job Title</p>
                         </div>
                         <div className="bg-[var(--theme-bg-card)] p-5 rounded-2xl border border-[var(--theme-border)] text-center shadow-xs group hover:border-[var(--theme-accent)]/30 transition-colors">
                             <div className="w-10 h-10 rounded-xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center mx-auto mb-3 text-cyan-500">

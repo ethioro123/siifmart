@@ -102,7 +102,7 @@ export const getRoleHierarchy = (role: UserRole | string): number => {
         'super_admin': 100,
         'CEO': 100,
         'ceo': 100,
-        'admin': 95, // Assistant CEO & Enterprise Deputy
+        'admin': 95, // System administration access
 
         // Level 2: Directors & Regional
         'operations_manager': 95,

@@ -6,6 +6,7 @@ import { useData } from '../../../contexts/DataContext';
 import { useStore } from '../../../contexts/CentralStore';
 import { salaryRequestsService } from '../../../services/salary-requests.service';
 import type { Employee } from '../../../types';
+import { getEmployeeJobTitle } from '../../../utils/roles';
 
 interface AdjustSalaryModalProps {
     isOpen: boolean;
@@ -155,7 +156,7 @@ export default function AdjustSalaryModal({
                     <div>
                         <p className="text-xs text-stone-500 uppercase font-bold tracking-wider">Employee</p>
                         <p className="text-sm font-bold text-stone-900 dark:text-white">{employee.name}</p>
-                        <p className="text-xs text-stone-500 capitalize">{employee.role.replace(/_/g, ' ')} • {employee.department}</p>
+                        <p className="text-xs text-stone-500">{getEmployeeJobTitle(employee)} • {employee.department}</p>
                     </div>
                     <div className="text-right">
                         <p className="text-xs text-stone-500 uppercase font-bold tracking-wider">Current Base</p>

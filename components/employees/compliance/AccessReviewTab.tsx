@@ -3,6 +3,7 @@ import { Shield, Landmark, Search, Clock, ChevronLeft, ChevronRight } from 'luci
 import { useData } from '../../../contexts/DataContext';
 import { useStore } from '../../../contexts/CentralStore';
 import { hrAnalyticsService } from '../../../services/hr-analytics.service';
+import { formatRole } from '../../../utils/formatting';
 
 const PAGE_SIZE = 25;
 
@@ -194,7 +195,7 @@ export default function AccessReviewTab() {
                     >
                         <option value="All">All Roles ({accessRecords.length})</option>
                         {availableRoles.map(role => (
-                            <option key={role} value={role}>{role}</option>
+                            <option key={role} value={role}>{formatRole(role)}</option>
                         ))}
                     </select>
                 </div>
@@ -240,7 +241,7 @@ export default function AccessReviewTab() {
                                                 <p className="text-[11px] text-[var(--theme-text-secondary)] font-mono">{rec.email}</p>
                                             </td>
                                             <td className="py-3.5 px-4 font-mono font-medium text-[var(--theme-text-primary)]">
-                                                {rec.role}
+                                                {formatRole(rec.role)}
                                             </td>
                                             <td className="py-3.5 px-4 font-mono tabular-nums text-[var(--theme-text-secondary)]">
                                                 {rec.last_login_at ? (

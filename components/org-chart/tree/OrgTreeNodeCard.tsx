@@ -2,6 +2,7 @@ import React from 'react';
 import { OrgLayoutNode, ROLE_LABELS, DEPT_COLORS } from '../types';
 import { ChevronDown, ChevronRight, MapPin, ShieldCheck, User } from 'lucide-react';
 import { formatDisplayEmployeeId } from '../../../utils/employeeIdGenerator';
+import { getEmployeeJobTitle } from '../../../utils/roles';
 
 interface OrgTreeNodeCardProps {
     layoutNode: OrgLayoutNode;
@@ -20,7 +21,7 @@ export const OrgTreeNodeCard: React.FC<OrgTreeNodeCardProps> = ({
 }) => {
     const { node, isCollapsed, hasChildren, isSearchMatch } = layoutNode;
     const emp = node.employee;
-    const roleLabel = ROLE_LABELS[node.role] || node.role;
+    const roleLabel = emp ? getEmployeeJobTitle(emp) : (ROLE_LABELS[node.role] || node.role);
     const deptConfig = DEPT_COLORS[node.department] || DEPT_COLORS.support;
 
     const isOnline = onlineIds ? (emp?.id ? onlineIds.has(emp.id) : false) : false;

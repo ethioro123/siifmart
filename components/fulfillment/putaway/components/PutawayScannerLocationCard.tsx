@@ -57,7 +57,7 @@ export const PutawayScannerLocationCard: React.FC<PutawayScannerLocationCardProp
             </p>
 
             {/* Main Location Box */}
-            <div className={`w-full px-5 sm:px-6 py-5 rounded-2xl border transition-colors ${
+            <div className={`w-full px-4 sm:px-6 py-3.5 sm:py-5 rounded-2xl border transition-colors ${
                 recommendation?.type === 'ASSIGNED'
                     ? 'bg-amber-500/10 border-amber-500/30 text-amber-600 dark:text-amber-400'
                     : recommendation?.type === 'SUGGESTED'
@@ -66,28 +66,28 @@ export const PutawayScannerLocationCard: React.FC<PutawayScannerLocationCardProp
             }`}>
                 <p className={`font-mono font-bold whitespace-nowrap leading-none tracking-wider ${
                     isStrictlyValid
-                        ? 'text-4xl sm:text-5xl text-[var(--theme-accent)]'
+                        ? 'text-3xl sm:text-5xl text-[var(--theme-accent)]'
                         : locStr.length > 10
-                            ? 'text-2xl sm:text-3xl'
-                            : 'text-4xl sm:text-5xl'
+                            ? 'text-xl sm:text-3xl'
+                            : 'text-3xl sm:text-5xl'
                 }`}>
                     {locStr}
                 </p>
 
                 {/* Zone / Aisle / Bay breakdown */}
                 {parts && (
-                    <div className="grid grid-cols-3 gap-2 mt-4 pt-4 border-t border-[var(--theme-border)]">
-                        <div className="bg-[var(--theme-bg-subtle)] p-2 rounded-xl border border-[var(--theme-border)] flex flex-col items-center justify-center">
-                            <span className="text-[11px] font-semibold uppercase tracking-wider text-[var(--theme-text-secondary)]">{t('warehouse.putaway.zone')}</span>
-                            <span className="text-base font-bold font-mono text-[var(--theme-text-primary)]">{parts.zone}</span>
+                    <div className="flex items-center justify-around gap-1.5 sm:gap-2 mt-2.5 pt-2.5 border-t border-[var(--theme-border)]">
+                        <div className="flex-1 bg-[var(--theme-bg-subtle)] py-1 px-1.5 rounded-lg sm:rounded-xl border border-[var(--theme-border)] flex flex-col items-center justify-center">
+                            <span className="text-[10px] sm:text-[11px] font-semibold uppercase tracking-wider text-[var(--theme-text-secondary)]">{t('warehouse.putaway.zone')}</span>
+                            <span className="text-xs sm:text-base font-bold font-mono text-[var(--theme-text-primary)]">{parts.zone}</span>
                         </div>
-                        <div className="bg-[var(--theme-bg-subtle)] p-2 rounded-xl border border-[var(--theme-border)] flex flex-col items-center justify-center">
-                            <span className="text-[11px] font-semibold uppercase tracking-wider text-[var(--theme-text-secondary)]">{t('warehouse.putaway.aisle')}</span>
-                            <span className="text-base font-bold font-mono text-[var(--theme-text-primary)]">{parts.aisle}</span>
+                        <div className="flex-1 bg-[var(--theme-bg-subtle)] py-1 px-1.5 rounded-lg sm:rounded-xl border border-[var(--theme-border)] flex flex-col items-center justify-center">
+                            <span className="text-[10px] sm:text-[11px] font-semibold uppercase tracking-wider text-[var(--theme-text-secondary)]">{t('warehouse.putaway.aisle')}</span>
+                            <span className="text-xs sm:text-base font-bold font-mono text-[var(--theme-text-primary)]">{parts.aisle}</span>
                         </div>
-                        <div className="bg-[var(--theme-bg-subtle)] p-2 rounded-xl border border-[var(--theme-border)] flex flex-col items-center justify-center">
-                            <span className="text-[11px] font-semibold uppercase tracking-wider text-[var(--theme-text-secondary)]">{t('warehouse.putaway.bay')}</span>
-                            <span className="text-base font-bold font-mono text-[var(--theme-text-primary)]">{parts.bin}</span>
+                        <div className="flex-1 bg-[var(--theme-bg-subtle)] py-1 px-1.5 rounded-lg sm:rounded-xl border border-[var(--theme-border)] flex flex-col items-center justify-center">
+                            <span className="text-[10px] sm:text-[11px] font-semibold uppercase tracking-wider text-[var(--theme-text-secondary)]">{t('warehouse.putaway.bay')}</span>
+                            <span className="text-xs sm:text-base font-bold font-mono text-[var(--theme-text-primary)]">{parts.bin}</span>
                         </div>
                     </div>
                 )}

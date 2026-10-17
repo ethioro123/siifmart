@@ -4,6 +4,7 @@ import { disciplinaryService } from '../../../services/disciplinary.service';
 import type { DisciplinaryType, DisciplinarySeverity } from '../../../types/hr-advanced';
 import type { Employee } from '../../../types';
 import { useStore } from '../../../contexts/CentralStore';
+import { getEmployeeJobTitle } from '../../../utils/roles';
 
 interface IssueNoticeModalProps {
     isOpen: boolean;
@@ -135,7 +136,7 @@ export function IssueNoticeModal({
                             <option value="">Select Employee...</option>
                             {employees.map(emp => (
                                 <option key={emp.id} value={emp.id}>
-                                    {emp.name} ({emp.code || emp.id.slice(0, 8)}) — {emp.role} {emp.siteId ? `[${emp.siteId}]` : ''}
+                                    {emp.name} ({emp.code || emp.id.slice(0, 8)}) — {getEmployeeJobTitle(emp)} {emp.siteId ? `[${emp.siteId}]` : ''}
                                 </option>
                             ))}
                         </select>

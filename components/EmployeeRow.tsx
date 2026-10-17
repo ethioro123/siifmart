@@ -3,6 +3,7 @@ import React from 'react';
 import { MapPin, ChevronRight, AlertTriangle } from 'lucide-react';
 import { Employee, Site, WorkerPoints, UserRole } from '../types';
 import { formatRole } from '../utils/formatting';
+import { getEmployeeJobTitle } from '../utils/roles';
 import { canViewLocation } from '../utils/roles';
 import { evaluateGeofence, formatSiteAssignment } from '../utils/geofence';
 import WorkforceScopeBadge from './employees/WorkforceScopeBadge';
@@ -83,7 +84,7 @@ export default function EmployeeRow({
                     {employee.name}
                 </h4>
                 <p className="text-xs font-medium text-[var(--theme-text-secondary)] mt-0.5 truncate">
-                    {roleConfig?.label || formatRole(employee.role)}
+                    {getEmployeeJobTitle(employee) || roleConfig?.label || formatRole(employee.role)}
                 </p>
                 <div className="mt-1"><WorkforceScopeBadge employee={employee} /></div>
             </div>

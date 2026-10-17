@@ -1,6 +1,7 @@
 import React from 'react';
 import { User, Briefcase, DollarSign, Key, IdCard, FileText, CheckCircle2, ShieldCheck, Award } from 'lucide-react';
 import { Site } from '../../../types';
+import { getJobTitleForRole } from '../../../utils/roles';
 
 import { isDirectOnboardingAuthorized } from '../../../utils/employeeOnboardingGovernance';
 
@@ -82,8 +83,8 @@ export default function StepReview({
                     </h4>
                     <div className="space-y-2 text-xs">
                         <div className="flex justify-between">
-                            <span className="text-stone-500">Assigned Role:</span>
-                            <span className="text-[#2C5E3B] dark:text-[#A9CBA2] font-bold uppercase">{String(newEmpData.role || 'Staff').replace(/_/g, ' ')}</span>
+                            <span className="text-stone-500">Job Title:</span>
+                            <span className="text-[#2C5E3B] dark:text-[#A9CBA2] font-bold">{getJobTitleForRole(newEmpData.role)}</span>
                         </div>
                         <div className="flex justify-between">
                             <span className="text-stone-500">Department:</span>
@@ -212,7 +213,7 @@ export default function StepReview({
                             {newEmpData.firstName} {newEmpData.lastName}
                         </h4>
                         <p className="text-xs text-stone-500 dark:text-stone-400 font-medium">
-                            {String(newEmpData.role || 'Staff').replace(/_/g, ' ')} • {assignedSite?.name || 'HQ'}
+                            {getJobTitleForRole(newEmpData.role)} • {assignedSite?.name || 'HQ'}
                         </p>
                     </div>
                 </div>

@@ -15,6 +15,7 @@ import { payrollRunsService } from '../../services/payroll-runs.service';
 import type { PayrollRun } from '../../types';
 import SalaryApprovalQueueModal from '../employees/SalaryApprovalQueueModal';
 import { PayrollSummaryCard } from './payroll/PayrollSummaryCard';
+import { getEmployeeJobTitle } from '../../utils/roles';
 
 export const PayrollTab: React.FC = () => {
     const {
@@ -226,7 +227,7 @@ export const PayrollTab: React.FC = () => {
                                                 </td>
                                                 <td className="p-4">
                                                     <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wider bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] border border-[var(--theme-border)]">
-                                                        {emp.role}
+                                                        {getEmployeeJobTitle(emp)}
                                                     </span>
                                                 </td>
                                                 <td className="p-4 text-[11px] text-[var(--theme-text-secondary)]">

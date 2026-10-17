@@ -14,7 +14,7 @@ export const PutawayScannerStatusOrb: React.FC<PutawayScannerStatusOrbProps> = (
 }) => {
     return (
         <div
-            className={`w-16 h-16 sm:w-20 sm:h-20 rounded-2xl border-2 flex items-center justify-center mb-3 sm:mb-4 transition-all duration-300 shrink-0 ${
+            className={`w-11 h-11 sm:w-16 sm:h-16 rounded-xl sm:rounded-2xl border-2 flex items-center justify-center mb-2 sm:mb-4 transition-all duration-300 shrink-0 ${
                 showSuccess
                     ? 'border-emerald-500 bg-emerald-500/10'
                     : showError
@@ -27,13 +27,13 @@ export const PutawayScannerStatusOrb: React.FC<PutawayScannerStatusOrbProps> = (
             }`}
         >
             {showSuccess ? (
-                <CheckCircle size={32} className="text-emerald-500" />
+                <CheckCircle size={22} className="text-emerald-500 sm:w-8 sm:h-8" />
             ) : showError ? (
-                <AlertTriangle size={32} className="text-rose-500" />
+                <AlertTriangle size={22} className="text-rose-500 sm:w-8 sm:h-8" />
             ) : step === 'LOCATION' ? (
-                <MapIcon size={32} className="text-[var(--theme-accent)]" />
+                <MapIcon size={22} className="text-[var(--theme-accent)] sm:w-8 sm:h-8" />
             ) : (
-                <Box size={32} className="text-emerald-500" />
+                <Box size={22} className="text-emerald-500 sm:w-8 sm:h-8" />
             )}
         </div>
     );

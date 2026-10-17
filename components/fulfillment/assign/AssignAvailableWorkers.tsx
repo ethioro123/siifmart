@@ -5,6 +5,7 @@ import { Protected } from '../../Protected';
 import { useFulfillment } from '../FulfillmentContext';
 import { logger } from '../../../utils/logger';
 import { canWorkerPerformJob, getJobAssignmentEligibility, isDeliveryJob, isFloorWorkerRole } from '../../../utils/fulfillmentRoles';
+import { getEmployeeJobTitle } from '../../../utils/roles';
 
 interface AssignAvailableWorkersProps {
     filteredEmployees: Employee[];
@@ -196,7 +197,7 @@ export const AssignAvailableWorkers: React.FC<AssignAvailableWorkersProps> = ({
                                                 {/* Workload Progress Bar */}
                                                 <div className="space-y-1.5">
                                                     <div className="flex justify-between items-center text-[11px] font-mono tabular-nums uppercase font-semibold tracking-wider">
-                                                        <span className="text-[var(--theme-text-muted)]">{employee.role}</span>
+                                                        <span className="text-[var(--theme-text-muted)]">{getEmployeeJobTitle(employee)}</span>
                                                         <span className="text-[var(--theme-text-secondary)]">
                                                             {workloadCount} {t('warehouse.active')}
                                                         </span>

@@ -61,28 +61,68 @@ export const MobileTabSelector: React.FC<TabSelectorProps> = ({
     };
     const currentActiveCount = getTabActiveCount(activeTab);
 
+    const CORE_TABS: OpTab[] = ['RECEIVE', 'PUTAWAY', 'PICK', 'PACK'];
+    const otherTabs = visibleTabs.filter(t => !CORE_TABS.includes(t));
+    const isCoreActive = CORE_TABS.includes(activeTab);
+    const otherActiveCount = otherTabs.reduce((acc, tab) => acc + getTabActiveCount(tab), 0);
+
     return (
-        <div className="md:hidden relative z-[60] mb-1.5">
-            <button
-                onClick={() => setIsMobileTabMenuOpen(!isMobileTabMenuOpen)}
-                className="w-full bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl px-3 py-1.5 min-h-[38px] flex items-center justify-between shadow-xs touch-manipulation active:scale-[0.99] transition-all"
-            >
-                <div className="flex items-center gap-2 min-w-0 flex-1">
-                    <div className="w-6 h-6 rounded-lg bg-[var(--theme-accent)]/10 flex items-center justify-center text-[var(--theme-accent)] border border-[var(--theme-accent)]/20 shrink-0">
-                        <Layout size={13} />
-                    </div>
-                    <span className="text-xs font-bold text-[var(--theme-text-primary)] tracking-tight uppercase truncate">
-                        {t(`warehouse.tabs.${activeTab.toLowerCase()}`)}
-                    </span>
-                    <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] font-mono text-[10px] font-bold border border-[var(--theme-accent)]/20 shrink-0">
-                        <span className="w-1.5 h-1.5 rounded-full bg-[var(--theme-accent)] animate-pulse" />
-                        {currentActiveCount}
-                    </span>
-                </div>
-                <div className={`w-6 h-6 rounded-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] flex items-center justify-center transition-transform duration-200 shrink-0 ml-2 ${isMobileTabMenuOpen ? 'rotate-180 text-[var(--theme-accent)]' : 'text-[var(--theme-text-secondary)]'}`}>
-                    <ChevronDown size={13} />
-                </div>
-            </button>
+        <div className="md:hidden relative z-[60] mb-2 space-y-1.5">
+            {/* 1-Tap Core Operational Segments (Receive, Putaway, Pick, Pack) */}
+            <div className="flex items-center gap-1 overflow-x-auto no-scrollbar p-1 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-2xl">
+                {CORE_TABS.filter(t => visibleTabs.includes(t)).map(tab => {
+                    const isActive = activeTab === tab;
+                    const count = getTabActiveCount(tab);
+                    return (
+                        <button
+                            key={tab}
+                            type="button"
+                            onClick={() => {
+                                setActiveTab(tab);
+                                setIsMobileTabMenuOpen(false);
+                            }}
+                            className={`flex-1 min-w-[70px] min-h-[38px] px-2 py-1.5 rounded-xl text-xs font-semibold uppercase tracking-tight flex items-center justify-center gap-1.5 transition-all touch-manipulation active:scale-[0.97] ${
+                                isActive
+                                    ? 'bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)] shadow-xs border border-[var(--theme-border)] font-bold'
+                                    : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)]'
+                            }`}
+                        >
+                            <span>{t(`warehouse.tabs.${tab.toLowerCase()}`)}</span>
+                            {count > 0 && (
+                                <span className={`text-[10px] font-mono px-1.5 py-0.2 rounded-full font-bold ${
+                                    isActive
+                                        ? 'bg-[var(--theme-accent)] text-white'
+                                        : 'bg-[var(--theme-bg-card)] text-[var(--theme-text-secondary)] border border-[var(--theme-border)]'
+                                }`}>
+                                    {count}
+                                </span>
+                            )}
+                        </button>
+                    );
+                })}
+
+                {/* More / Secondary Tabs Pill */}
+                {otherTabs.length > 0 && (
+                    <button
+                        type="button"
+                        onClick={() => setIsMobileTabMenuOpen(!isMobileTabMenuOpen)}
+                        className={`min-h-[38px] px-2.5 py-1.5 rounded-xl text-xs font-semibold uppercase tracking-tight flex items-center justify-center gap-1 transition-all touch-manipulation active:scale-[0.97] shrink-0 border ${
+                            !isCoreActive
+                                ? 'bg-[var(--theme-accent)] text-white border-[var(--theme-accent)] shadow-xs font-bold'
+                                : 'bg-[var(--theme-bg-card)] text-[var(--theme-text-secondary)] border-[var(--theme-border)]'
+                        }`}
+                        title="More Operations"
+                    >
+                        <span>{!isCoreActive ? t(`warehouse.tabs.${activeTab.toLowerCase()}`) : 'More'}</span>
+                        {otherActiveCount > 0 && isCoreActive && (
+                            <span className="text-[10px] font-mono px-1 py-0.2 rounded-full bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] font-bold">
+                                {otherActiveCount}
+                            </span>
+                        )}
+                        <ChevronDown size={13} className={`transition-transform duration-200 ${isMobileTabMenuOpen ? 'rotate-180' : ''}`} />
+                    </button>
+                )}
+            </div>
 
             {/* Mobile Dropdown Grid */}
             {isMobileTabMenuOpen && (
