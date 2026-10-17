@@ -4,6 +4,7 @@ import { systemLogsService } from './system-logs.service';
 import { employeesService } from './employees.service';
 import { SYSTEM_ROLES } from '../utils/roles';
 import { logger } from '../utils/logger';
+import { createAuthAccountForNewHire } from '../utils/employeeAuthHelper';
 
 import {
     getLocalReqs,
@@ -409,10 +410,34 @@ export const recruitmentService = {
         const joinDate = now.split('T')[0];
 
         const assignedCode = await employeesService.getNextCode(candidate.country_code);
+        const numericPin = assignedCode.replace(/\D/g, '').slice(-4) || '1234';
+        const defaultPwd = `SiifMart@${numericPin}`;
+        let employeeId = typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : `emp-${Date.now()}`;
+
+        try {
+            const nameParts = candidate.name.trim().split(' ');
+            const authRes = await createAuthAccountForNewHire({
+                signupEmail: candidate.email.toLowerCase(),
+                password: defaultPwd,
+                firstName: nameParts[0] || 'Staff',
+                lastName: nameParts.slice(1).join(' ') || 'Member',
+                role: finalRole,
+                siteId: targetSiteId,
+                employeeCode: assignedCode,
+                fallbackEmployeeId: employeeId
+            });
+            employeeId = authRes.employeeId;
+            if (typeof window !== 'undefined') {
+                localStorage.setItem(`siifmart_temp_pwd_${employeeId}`, defaultPwd);
+                localStorage.setItem(`siifmart_temp_pwd_by_code_${assignedCode.toLowerCase()}`, defaultPwd);
+            }
+        } catch (e) {
+            logger.warn('recruitmentService', 'Failed to provision auth user during hire activation', { error: String(e) });
+        }
 
         // Provision into public.employees
         const newEmployee = await employeesService.create({
-            id: typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : `emp-${Date.now()}`,
+            id: employeeId,
             code: assignedCode,
             name: candidate.name,
             email: candidate.email.toLowerCase(),

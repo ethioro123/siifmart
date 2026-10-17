@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useMemo } from 'react';
+import React, { createContext, useContext, useState, useMemo, useCallback } from 'react';
 import { useStore } from '../../contexts/CentralStore';
 import { useData } from '../../contexts/DataContext';
 import { useFulfillmentData } from '../fulfillment/FulfillmentDataProvider';
@@ -159,6 +159,11 @@ export const POSCommandProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     const [discrepancyReason, setDiscrepancyReason] = useState('');
     const [isSubmittingShift, setIsSubmittingShift] = useState(false);
 
+    const refreshAfterReceiving = useCallback(
+        () => refreshData(['products', 'orders', 'sales', 'movements']),
+        [refreshData]
+    );
+
     // Pagination
     const [txPage, setTxPage] = useState(1);
     const TX_PER_PAGE = 5;
@@ -172,7 +177,7 @@ export const POSCommandProvider: React.FC<{ children: React.ReactNode }> = ({ ch
         jobs,
         addProduct,
         adjustStock,
-        refreshData,
+        refreshData: refreshAfterReceiving,
         refreshJobs,
         addNotification,
         formatJobId,

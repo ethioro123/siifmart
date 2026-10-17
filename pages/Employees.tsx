@@ -71,27 +71,21 @@ export default function Employees() {
       try {
          const pending = await salaryRequestsService.getPending(activeSite?.id, effectiveCountry);
          setPendingSalaryCount(pending.length);
-      } catch {
-         // Fallback
-      }
+      } catch { /* Fallback */ }
    }, [activeSite?.id, effectiveCountry]);
 
    const refreshPendingChanges = useCallback(async () => {
       try {
          const pending = await employeeChangesService.getPending(undefined, effectiveCountry);
          setPendingChangeCount(pending.length);
-      } catch {
-         // Fallback
-      }
+      } catch { /* Fallback */ }
    }, [effectiveCountry]);
 
    const refreshPendingQuotas = useCallback(async () => {
       try {
          const pending = await headcountQuotaService.getQuotaRequests(effectiveCountry || 'ET', undefined, 'PENDING');
          setPendingQuotaCount(pending.length);
-      } catch {
-         // Fallback
-      }
+      } catch { /* Fallback */ }
    }, [effectiveCountry]);
 
    const refreshPayrollRun = useCallback(async () => {
@@ -104,30 +98,36 @@ export default function Employees() {
    }, [activeSite?.id, effectiveCountry]);
 
    const scopedSites = React.useMemo(() => {
-      const targetRegion = (filterRegion !== 'All' ? filterRegion : null) || activeRegionCode || user?.regionCode;
+      const targetRegion = (filterRegion !== 'All' ? filterRegion : null) || activeRegionCode || user?.regionCode || (user as any)?.region_code;
       if (targetRegion) {
          return sites.filter(s => s.regionCode === targetRegion || (s as any).region_code === targetRegion);
       }
       return sites;
-   }, [sites, filterRegion, activeRegionCode, user?.regionCode]);
-
-   const isHQScope = !user?.regionCode && !activeRegionCode && filterRegion === 'All';
+   }, [sites, filterRegion, activeRegionCode, user?.regionCode, (user as any)?.region_code]);
 
    const [pendingRecruits, setPendingRecruits] = useState<Employee[]>(() => {
       const targetSiteIds = new Set(scopedSites.map(s => s.id));
-      return employees.filter(e => e.status === 'Pending Approval' && (targetSiteIds.has(e.siteId) || (isHQScope && !e.siteId)));
+      return employees.filter(e => {
+         if (e.status !== 'Pending Approval') return false;
+         const matchesCountry = !e.country || e.country === effectiveCountry || Boolean(effectiveCountry && e.code?.startsWith(effectiveCountry));
+         return matchesCountry && targetSiteIds.has(e.siteId);
+      });
    });
 
    const refreshPendingRecruits = useCallback(async () => {
       try {
          const targetSiteIds = scopedSites.map(s => s.id);
-         const recruits = await employeesService.getPendingApproval(effectiveCountry, targetSiteIds, isHQScope);
+         const recruits = await employeesService.getPendingApproval(effectiveCountry, targetSiteIds, false);
          setPendingRecruits(recruits);
       } catch {
          const targetSiteIds = new Set(scopedSites.map(s => s.id));
-         setPendingRecruits(employees.filter(e => e.status === 'Pending Approval' && (targetSiteIds.has(e.siteId) || (isHQScope && !e.siteId))));
+         setPendingRecruits(employees.filter(e => {
+            if (e.status !== 'Pending Approval') return false;
+            const matchesCountry = !e.country || e.country === effectiveCountry || Boolean(effectiveCountry && e.code?.startsWith(effectiveCountry));
+            return matchesCountry && targetSiteIds.has(e.siteId);
+         }));
       }
-   }, [scopedSites, effectiveCountry, employees, isHQScope]);
+   }, [scopedSites, effectiveCountry, employees]);
 
    useEffect(() => {
       refreshPendingSalary();
@@ -135,14 +135,12 @@ export default function Employees() {
       refreshPendingQuotas();
       refreshPayrollRun();
       refreshPendingRecruits();
-      const handleCreated = () => { refreshPendingSalary(); refreshPendingChanges(); refreshPendingQuotas(); refreshPendingRecruits(); };
-      const handleApproved = () => { refreshPendingSalary(); refreshPendingChanges(); refreshPendingQuotas(); refreshPendingRecruits(); };
-      const handleRejected = () => { refreshPendingSalary(); refreshPendingChanges(); refreshPendingQuotas(); refreshPendingRecruits(); };
+      const handleRefresh = () => { refreshPendingSalary(); refreshPendingChanges(); refreshPendingQuotas(); refreshPendingRecruits(); };
       const handlePayrollUpdated = () => refreshPayrollRun();
 
       const events: [string, () => void][] = [
-         ['salary:request-created', handleCreated], ['salary:request-approved', handleApproved], ['salary:request-rejected', handleRejected],
-         ['employee:created', handleCreated], ['employee:updated', handleCreated], ['employee:approved', handleApproved],
+         ['salary:request-created', handleRefresh], ['salary:request-approved', handleRefresh], ['salary:request-rejected', handleRefresh],
+         ['employee:created', handleRefresh], ['employee:updated', handleRefresh], ['employee:approved', handleRefresh],
          ['employee-change:updated', refreshPendingChanges], ['payroll:updated', handlePayrollUpdated], ['payroll:disbursed', handlePayrollUpdated]
       ];
       events.forEach(([ev, fn]) => window.addEventListener(ev, fn));
@@ -151,16 +149,20 @@ export default function Employees() {
 
    useEffect(() => {
       const targetSiteIds = new Set(scopedSites.map(s => s.id));
-      const fromContext = employees.filter(e => e.status === 'Pending Approval' && (targetSiteIds.has(e.siteId) || (isHQScope && !e.siteId)));
+      const fromContext = employees.filter(e => {
+         if (e.status !== 'Pending Approval') return false;
+         const matchesCountry = !e.country || e.country === effectiveCountry || Boolean(effectiveCountry && e.code?.startsWith(effectiveCountry));
+         return matchesCountry && targetSiteIds.has(e.siteId);
+      });
       if (fromContext.length > 0) {
          setPendingRecruits(prev => {
             const map = new Map<string, Employee>();
-            prev.filter(p => targetSiteIds.has(p.siteId) || (isHQScope && !p.siteId)).forEach(p => map.set(p.id, p));
+            prev.filter(p => targetSiteIds.has(p.siteId)).forEach(p => map.set(p.id, p));
             fromContext.forEach(p => map.set(p.id, p));
             return Array.from(map.values()).filter(p => p.status === 'Pending Approval');
          });
       }
-   }, [employees, scopedSites, isHQScope]);
+   }, [employees, scopedSites, effectiveCountry]);
 
    const handleCertifyPayrollAsHR = async () => {
       if (!pendingPayrollRun) return;

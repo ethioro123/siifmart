@@ -294,7 +294,7 @@ export function ProductForm({
                     isOpen={isSmartUnitModalOpen}
                     onClose={() => setIsSmartUnitModalOpen(false)}
                     onSaveSuccess={async () => {
-                        await refreshData();
+                        await refreshData(['products', 'movements']);
                     }}
                 />
             )}

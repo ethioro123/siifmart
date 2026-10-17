@@ -190,18 +190,21 @@ class CashDropsService {
      * Authorize transit of safe drop bags to armored vehicle / bank
      */
     async transferSafeToBank(dropIds: string[], bankManifest: string, manager: { id: string; name: string }): Promise<void> {
-        try {
-            await supabase
-                .from('pos_cash_drops')
-                .update({
-                    status: 'transferred_to_bank',
-                    notes: `Transferred to armored bank carrier. Manifest #${bankManifest} signed by ${manager.name}`,
-                    updated_at: new Date().toISOString()
-                })
-                .in('id', dropIds);
-        } catch {
-            this.localCache = this.localCache.map(d => dropIds.includes(d.id) ? { ...d, status: 'transferred_to_bank' } : d);
+        const { error } = await supabase
+            .from('pos_cash_drops')
+            .update({
+                status: 'transferred_to_bank',
+                notes: `Transferred to armored bank carrier. Manifest #${bankManifest} signed by ${manager.name}`,
+                updated_at: new Date().toISOString()
+            })
+            .in('id', dropIds);
+
+        if (error) {
+            logger.error('cashDropsService', 'Failed to transfer safe drops to bank:', error);
+            throw new Error(error.message || 'Failed to authorize bank transfer');
         }
+
+        this.localCache = this.localCache.map(d => dropIds.includes(d.id) ? { ...d, status: 'transferred_to_bank' } : d);
     }
 }
 

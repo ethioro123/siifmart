@@ -278,7 +278,7 @@ export default function Inventory() {
                 siteId: activeSite?.id || '',
                 canApprove: canApprove
             });
-            setIsDeleteModalOpen(false); setProductToDelete(null); fetchProducts(); refreshData();
+            setIsDeleteModalOpen(false); setProductToDelete(null); fetchProducts(); refreshData(['products', 'movements']);
         } catch (e) { }
     };
 
@@ -300,7 +300,7 @@ export default function Inventory() {
                 siteId: editingProduct.siteId || activeSite?.id || '',
                 canApprove: canApprove
             });
-            setIsAdjustModalOpen(false); setEditingProduct(null); fetchProducts(); refreshData();
+            setIsAdjustModalOpen(false); setEditingProduct(null); fetchProducts(); refreshData(['products', 'movements']);
         } catch (e) { }
     };
 
@@ -323,16 +323,16 @@ export default function Inventory() {
     });
 
     const handleApproveProduct = async (product: Product) => {
-        try { await approveRequestMutation.mutateAsync(makePendingChange(product)); refreshData(); } catch (e) { }
+        try { await approveRequestMutation.mutateAsync(makePendingChange(product)); refreshData(['products', 'movements']); } catch (e) { }
     };
     const handleRejectProduct = async (product: Product, reason: string) => {
-        try { await rejectRequestMutation.mutateAsync({ change: makePendingChange(product), reason }); refreshData(); } catch (e) { }
+        try { await rejectRequestMutation.mutateAsync({ change: makePendingChange(product), reason }); refreshData(['products', 'movements']); } catch (e) { }
     };
     const handleApproveChange = async (change: PendingInventoryChange) => {
-        try { await approveRequestMutation.mutateAsync(change); loadPendingRequests(); refreshData(); } catch (e) { }
+        try { await approveRequestMutation.mutateAsync(change); loadPendingRequests(); refreshData(['products', 'movements']); } catch (e) { }
     };
     const handleRejectChange = async (change: PendingInventoryChange, reason: string) => {
-        try { await rejectRequestMutation.mutateAsync({ change, reason }); loadPendingRequests(); refreshData(); } catch (e) { }
+        try { await rejectRequestMutation.mutateAsync({ change, reason }); loadPendingRequests(); refreshData(['products', 'movements']); } catch (e) { }
     };
     const handleBulkCleanup = () => {
         if (confirm(`Reject all ${pendingChanges.length} pending requests?`)) {
@@ -450,7 +450,7 @@ export default function Inventory() {
                         }
                         setIsProductModalOpen(false);
                         fetchProducts();
-                        refreshData();
+                        refreshData(['products', 'movements']);
                     } catch (error: any) {
                         logger.error('Inventory', 'Failed to save product:', error);
                         addNotification('alert', error.message || 'Failed to save product');

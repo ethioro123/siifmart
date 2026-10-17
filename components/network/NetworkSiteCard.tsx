@@ -52,7 +52,7 @@ export const NetworkSiteCard: React.FC<NetworkSiteCardProps> = ({
     // RULE 10: On-demand lazy load site products only when card is expanded
     React.useEffect(() => {
         if (!isExpanded) return;
-        productsService.getAll(site.id, 25, 0).then(res => {
+        productsService.getAll(site.id, 25, 0, undefined, undefined, false).then(res => {
             if (res.data && res.data.length > 0) {
                 setFetchedSiteProducts(res.data);
             }

@@ -4,6 +4,35 @@ import { RoleSegregationRule, ROLE_SEGREGATION_RULES } from './roleSegregationRu
 export type { RoleSegregationRule };
 export { ROLE_SEGREGATION_RULES };
 
+export const REGIONAL_WORKFORCE_ROLES = [
+    'regional_manager',
+    'regional_procurement_lead',
+    'regional_finance_officer',
+    'regional_hr_officer',
+    'regional_logistics_lead',
+    'regional_security_supervisor'
+] as const;
+
+export function isRegionalWorkforceRole(role?: string | null): boolean {
+    return REGIONAL_WORKFORCE_ROLES.includes(
+        (role || '').trim().toLowerCase() as typeof REGIONAL_WORKFORCE_ROLES[number]
+    );
+}
+
+export function resolveEmployeeScopeLevel(
+    role?: string | null,
+    siteRegionCode?: string | null
+): 'HQ' | 'REGIONAL' {
+    if (isRegionalWorkforceRole(role)) return 'REGIONAL';
+
+    const normalizedRole = (role || '').trim().toLowerCase();
+    if (['super_admin', 'ceo', 'admin', 'operations_manager'].includes(normalizedRole)) {
+        return 'HQ';
+    }
+
+    return siteRegionCode ? 'REGIONAL' : 'HQ';
+}
+
 /**
  * AUTOMATIC ROLE SEGREGATION SYSTEM
  * 
@@ -150,7 +179,7 @@ export function validateRegionalBoundary(
     targetSite: { regionCode?: string; region_code?: string } | undefined
 ): string | null {
     if (!creatorRole || !creatorRegionCode) return null;
-    const isRegional = ['regional_manager', 'regional_hr_officer', 'regional_procurement_lead', 'regional_finance_officer', 'regional_logistics_lead', 'regional_security_supervisor'].includes(creatorRole);
+    const isRegional = isRegionalWorkforceRole(creatorRole);
     if (!isRegional) return null;
 
     if (!targetSite) {

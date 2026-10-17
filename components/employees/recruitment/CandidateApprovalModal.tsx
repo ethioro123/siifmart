@@ -94,7 +94,7 @@ export const CandidateApprovalModal: React.FC<CandidateApprovalModalProps> = ({
                 requisition?.department || 'Operations'
             );
             showToast(`Synaptic Activation Complete: ${newEmp.name} enrolled as ${newEmp.code}!`, 'success');
-            if (refreshData) refreshData();
+            if (refreshData) refreshData(['employees']);
             onSuccess();
             onClose();
         } catch (err: any) {

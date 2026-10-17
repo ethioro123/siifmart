@@ -60,6 +60,8 @@ export interface Employee {
   country?: string;
   country_code?: string;
   name: string;
+  jobTitle?: string;
+  job_title?: string;
   age?: number;
   dateOfBirth?: string;
   role: UserRole;

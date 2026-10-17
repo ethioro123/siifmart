@@ -114,6 +114,11 @@ export const FulfillmentContent: React.FC = () => {
 
     const { relocateProduct } = useData();
 
+    const refreshOperationalData = async () => {
+        await refreshData();
+        refreshJobs();
+    };
+
     const canAccessTab = (tab: OpTab) => {
         const allowedRoles = TAB_PERMISSIONS[tab];
         return allowedRoles.includes(user?.role || '');
@@ -167,7 +172,7 @@ export const FulfillmentContent: React.FC = () => {
                     user={user}
                     t={t}
                     addNotification={addNotification}
-                    refreshData={async () => { await refreshData(); refreshJobs(); }}
+                    refreshData={refreshOperationalData}
                     setActiveTab={setActiveTab}
                     setReceivingPO={setReceivingPO}
                     purchaseOrdersService={purchaseOrdersService}
@@ -233,7 +238,7 @@ export const FulfillmentContent: React.FC = () => {
                 orders={orders}
                 isSubmitting={isSubmitting}
                 setIsSubmitting={setIsSubmitting}
-                refreshData={refreshData}
+                refreshData={refreshOperationalData}
                 setSelectedJob={setSelectedJob}
                 setIsDetailsOpen={setIsDetailsOpen}
                 isDetailsOpen={isDetailsOpen}
@@ -262,7 +267,7 @@ export const FulfillmentContent: React.FC = () => {
                         orders={orders}
                         isSubmitting={isSubmitting}
                         setIsSubmitting={setIsSubmitting}
-                        refreshData={refreshData}
+                        refreshData={refreshOperationalData}
                         handleStartJob={handleStartJob}
                         selectedJob={selectedJob}
                         setSelectedJob={setSelectedJob}
@@ -334,7 +339,7 @@ export const FulfillmentContent: React.FC = () => {
                         orders={orders}
                         t={t}
                         addNotification={addNotification}
-                        refreshData={async () => { await refreshData(); refreshJobs(); }}
+                        refreshData={refreshOperationalData}
                         wmsJobsService={wmsJobsService}
                         productsService={productsService}
                         adjustStockMutation={adjustStockMutation}
@@ -345,11 +350,11 @@ export const FulfillmentContent: React.FC = () => {
                         isDetailsOpen={isDetailsOpen}
                         updateJobItem={async (jobId: string, itemIndex: number, status: string, quantity: number) => {
                             await wmsJobsService.updateJobItem(jobId, itemIndex, status, quantity);
-                            await refreshData();
+                            await refreshOperationalData();
                         }}
                         completeJob={async (jobId: string, userName: string, skipValidation: boolean, items: any[]) => {
                             await wmsJobsService.completeJob(jobId, { user: userName, skipValidation, items });
-                            await refreshData();
+                            await refreshOperationalData();
                         }}
                         relocateProductMutation={async (params: any) => {
                             // params might be { productId, newLocation, user } or similar based on context.

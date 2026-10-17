@@ -54,6 +54,11 @@ export const TransferReceiving: React.FC<TransferReceivingProps> = ({
 
     const handleConfirmReceipt = async (discrepancyDetails?: { hasDiscrepancy: boolean; discrepancyCount: number; driverAcknowledged: boolean }) => {
         if (!activeTransferJob) return;
+        if (activeTransferJob.transferStatus === 'Received' || activeTransferJob.status === 'Completed') {
+            addNotification('alert', 'This shipment has already been received and completed.');
+            return;
+        }
+        const appliedStockAdjustments: { productId: string; previousStock: number }[] = [];
         try {
             setIsSubmittingReceipt(true);
             const hasDiscrepancy = !!discrepancyDetails?.hasDiscrepancy;
@@ -132,6 +137,7 @@ export const TransferReceiving: React.FC<TransferReceivingProps> = ({
                     }
 
                     if (targetProductId) {
+                        const previousStock = Number(destProduct?.stock || 0);
                         await adjustStockMutation.mutateAsync({
                             productId: targetProductId,
                             productName: destProduct?.name || sourceProduct?.name || item.productName || 'Unknown',
@@ -142,6 +148,7 @@ export const TransferReceiving: React.FC<TransferReceivingProps> = ({
                             reason: `Transfer Receipt ${activeTransferJob.orderRef || activeTransferJob.jobNumber || activeTransferJob.id}`,
                             canApprove: true
                         });
+                        appliedStockAdjustments.push({ productId: targetProductId, previousStock });
                     }
                 }
             }
@@ -293,6 +300,15 @@ export const TransferReceiving: React.FC<TransferReceivingProps> = ({
             setTransferReceiveItems([]);
             await refreshData();
         } catch (err) {
+            if (appliedStockAdjustments.length > 0) {
+                for (const applied of appliedStockAdjustments) {
+                    try {
+                        await productsService.update(applied.productId, { stock: applied.previousStock } as any);
+                    } catch (revErr) {
+                        logger.error('TransferReceiving', `Rollback stock failed for ${applied.productId}`, revErr as Error);
+                    }
+                }
+            }
             logger.error('TransferReceiving', 'Failed to receive transfer:', err);
             addNotification('alert', 'Failed to receive items');
         } finally {

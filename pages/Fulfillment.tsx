@@ -61,6 +61,10 @@ export default function WarehouseOperations() {
 
     const { workerPoints, getWorkerPoints, getLeaderboard } = useGamification();
 
+    const refreshOperationalData = async () => {
+        await refreshData(['products', 'orders', 'movements']);
+    };
+
     const adjustStockMutation = useAdjustStockMutation();
     const relocateProductMutation = useRelocateProductMutation();
 
@@ -279,7 +283,7 @@ export default function WarehouseOperations() {
         getWorkerPoints,
         getLeaderboard,
         jobAssignments,
-        refreshData,
+        refreshData: refreshOperationalData,
         addNotification,
         receivePO,
         receivePOSplit,

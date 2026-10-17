@@ -20,10 +20,10 @@ export const productsService = {
     handleAutoReplenish,
     updatePriceBySku,
 
-    async getAll(siteId?: string, limit?: number, offset?: number, filters?: any, sort?: { key: string, direction: 'asc' | 'desc' }) {
+    async getAll(siteId?: string, limit?: number, offset?: number, filters?: any, sort?: { key: string, direction: 'asc' | 'desc' }, includeExactCount: boolean = true) {
         let query = supabase
             .from('products')
-            .select('*', { count: 'exact' });
+            .select('*', includeExactCount ? { count: 'exact' } : undefined);
 
         if (sort && sort.key) {
             let column = sort.key;

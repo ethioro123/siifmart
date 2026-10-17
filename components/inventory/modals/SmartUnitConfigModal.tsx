@@ -186,7 +186,7 @@ export const SmartUnitConfigModal: React.FC<SmartUnitConfigModalProps> = ({
             }
 
             if (onSaveSuccess) onSaveSuccess();
-            await refreshData();
+            await refreshData(['products']);
             onClose();
         } catch (error: any) {
             logger.error('SmartUnitConfigModal', 'Failed to update unit config', error);

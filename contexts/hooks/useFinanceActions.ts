@@ -91,7 +91,7 @@ export function useFinanceActions(deps: UseFinanceActionsDeps) {
         } catch (error) {
             logger.error('useFinanceActions', 'Failed to adjust stock:', error);
             addNotification('alert', 'Failed to adjust stock');
-            queries.refetchAll();
+            queries.refetchAll(['products', 'movements']);
         }
     }, [products, activeSiteId, activeSite, addNotification, logSystemEvent, queries]);
 

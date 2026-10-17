@@ -79,12 +79,14 @@ export function OnboardTalentModal({ isOpen, onClose, onSuccess }: OnboardTalent
 
     const handleFinalSubmitWithCallback = async () => {
         const rawPwd = wizard.newEmpData.password;
-        const empName = `${wizard.newEmpData.firstName}_${wizard.newEmpData.lastName}`;
+        const empNameUnder = `${wizard.newEmpData.firstName}_${wizard.newEmpData.lastName}`.toLowerCase();
+        const empNameSpace = `${wizard.newEmpData.firstName} ${wizard.newEmpData.lastName}`.toLowerCase();
         const error = await wizard.handleFinalSubmit();
         if (!error) {
             if (rawPwd && typeof window !== 'undefined') {
                 try {
-                    localStorage.setItem(`siifmart_temp_pwd_by_name_${empName.toLowerCase()}`, rawPwd);
+                    localStorage.setItem(`siifmart_temp_pwd_by_name_${empNameUnder}`, rawPwd);
+                    localStorage.setItem(`siifmart_temp_pwd_by_name_${empNameSpace}`, rawPwd);
                 } catch {
                     // ignore
                 }

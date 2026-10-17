@@ -71,7 +71,7 @@ export const POSModals: React.FC = () => {
                     setSearchTerm(''); // Clear search input
                     // Note: Notification will be handled within UnknownBarcodeModal or calling component
                     // Trigger a data refresh to pull the new alias
-                    refreshData();
+                    refreshData(['products']);
                 }}
                 products={products}
             />

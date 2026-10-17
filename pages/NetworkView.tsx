@@ -29,7 +29,7 @@ export default function NetworkInventory() {
         }
         const timer = setTimeout(async () => {
             try {
-                const res = await productsService.getAll(undefined, 25, 0, { search: searchTerm.trim() });
+                const res = await productsService.getAll(undefined, 25, 0, { search: searchTerm.trim() }, undefined, false);
                 setServerSearchResults(res.data || []);
             } catch {
                 // Fall back to local cache

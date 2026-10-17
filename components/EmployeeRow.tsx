@@ -5,6 +5,7 @@ import { Employee, Site, WorkerPoints, UserRole } from '../types';
 import { formatRole } from '../utils/formatting';
 import { canViewLocation } from '../utils/roles';
 import { evaluateGeofence, formatSiteAssignment } from '../utils/geofence';
+import WorkforceScopeBadge from './employees/WorkforceScopeBadge';
 
 interface RoleConfigLike {
     label: string;
@@ -84,6 +85,7 @@ export default function EmployeeRow({
                 <p className="text-xs font-medium text-[var(--theme-text-secondary)] mt-0.5 truncate">
                     {roleConfig?.label || formatRole(employee.role)}
                 </p>
+                <div className="mt-1"><WorkforceScopeBadge employee={employee} /></div>
             </div>
 
             {/* Location */}

@@ -48,7 +48,7 @@ export const CreatePOModal: React.FC<CreatePOModalProps> = ({
     useEffect(() => {
         if (isOpen && contextSuppliers.length === 0 && localSuppliers.length === 0) {
             logger.debug('CreatePOModal', 'Suppliers empty from context, fetching directly...');
-            suppliersService.getAll(50, 0, activeCountry).then(res => {
+            suppliersService.getAll(50, 0, activeCountry, false).then(res => {
                 logger.debug('CreatePOModal', 'Direct supplier fetch returned:');
                 setLocalSuppliers(res.data);
             }).catch(err => logger.error('CreatePOModal', 'Direct supplier fetch failed', err as Error));
@@ -58,7 +58,7 @@ export const CreatePOModal: React.FC<CreatePOModalProps> = ({
     const [localProducts, setLocalProducts] = useState<Product[]>([]);
     useEffect(() => {
         if (isOpen && (!allProducts || allProducts.length === 0) && localProducts.length === 0) {
-            productsService.getAll(undefined, 50).then(res => {
+            productsService.getAll(undefined, 50, 0, undefined, undefined, false).then(res => {
                 setLocalProducts((res.data || []) as Product[]);
             }).catch(err => logger.error('CreatePOModal', 'Direct products fetch failed', err as Error));
         }

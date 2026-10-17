@@ -13,6 +13,8 @@ import { usePresence } from '../hooks/useRealtime';
 import { logger } from '../utils/logger';
 import { fetchLoginLocation } from '../utils/geolocationHelper';
 import { evaluateGeofence } from '../utils/geofence';
+import { getDeviceDetails } from '../utils/deviceHelper';
+import { formatRole } from '../utils/formatting';
 interface ToastMessage {
   id: string;
   message: string;
@@ -131,24 +133,6 @@ export function StoreProvider({ children }: { children: ReactNode }) {
             const employeeData = await employeesService.getById(profile.id);
             const currentHistory = Array.isArray(employeeData.loginHistory) ? employeeData.loginHistory : [];
 
-            // Helper to get simplified device/OS details
-            const getDeviceDetails = (): string => {
-              if (typeof window === 'undefined' || !navigator) return 'Unknown Device';
-              const ua = navigator.userAgent;
-              let browser = 'Unknown Browser';
-              let os = 'Unknown OS';
-              if (ua.includes('Windows')) os = 'Windows';
-              else if (ua.includes('Macintosh')) os = 'macOS';
-              else if (ua.includes('Linux')) os = 'Linux';
-              else if (ua.includes('Android')) os = 'Android';
-              else if (ua.includes('iPhone') || ua.includes('iPad')) os = 'iOS';
-              if (ua.includes('Firefox')) browser = 'Firefox';
-              else if (ua.includes('Chrome')) browser = 'Chrome';
-              else if (ua.includes('Safari')) browser = 'Safari';
-              else if (ua.includes('Edge')) browser = 'Edge';
-              return `${browser} on ${os}`;
-            };
-
             const device = getDeviceDetails();
             const timestamp = new Date().toISOString();
 
@@ -174,12 +158,19 @@ export function StoreProvider({ children }: { children: ReactNode }) {
           name: profile.name,
           role: mappedRole as UserRole,
           avatar: profile.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(profile.name)}&background=0D8ABC&color=fff`,
-          title: rawRole.charAt(0).toUpperCase() + rawRole.slice(1),
+          title: profile.jobTitle || formatRole(rawRole),
+          jobTitle: profile.jobTitle || formatRole(rawRole),
           siteId: profile.siteId,
           employeeId: (profile as any).employeeId || profile.id,
           code: (profile as any).code || '',
           email: profile.email,
-          loginLocation: location
+          loginLocation: location,
+          regionCode: (profile as any).regionCode || (profile as any).region_code,
+          region_code: (profile as any).region_code || (profile as any).regionCode,
+          scopeLevel: (profile as any).scopeLevel || (profile as any).scope_level,
+          scope_level: (profile as any).scope_level || (profile as any).scopeLevel,
+          country: (profile as any).country_code,
+          country_code: (profile as any).country_code
         });
 
         // Audit log security event with location details only when presetLocation is provided (new sign-in)
@@ -227,19 +218,27 @@ export function StoreProvider({ children }: { children: ReactNode }) {
 
   // Initialize
   useEffect(() => {
+    let profileSyncTimeout: ReturnType<typeof setTimeout> | null = null;
     checkSession();
 
     // Listen for auth changes
     const { data: { subscription } } = authService.onAuthStateChange(
-      async (event, session) => {
+      (event, session) => {
         logger.debug('CentralStore', 'Auth state changed:');
         if (event === 'SIGNED_IN' && session?.user) {
-          try {
-            await syncUserProfile();
-          } catch (e) {
-            logger.error('CentralStore', 'Auto sign-in profile sync failed due to geolocation lock:', e);
-          }
+          // Supabase invokes this callback while holding its auth lock. Defer
+          // profile reads until after the callback returns to avoid deadlocking
+          // getSession() and other auth operations during startup.
+          if (profileSyncTimeout) clearTimeout(profileSyncTimeout);
+          profileSyncTimeout = setTimeout(() => {
+            profileSyncTimeout = null;
+            void syncUserProfile().catch(error => {
+              logger.error('CentralStore', 'Auto sign-in profile sync failed:', error);
+            });
+          }, 0);
         } else if (event === 'SIGNED_OUT') {
+          if (profileSyncTimeout) clearTimeout(profileSyncTimeout);
+          profileSyncTimeout = null;
           setUser(null);
           try {
             sessionStorage.removeItem('siifmart_login_location');
@@ -249,6 +248,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     );
 
     return () => {
+      if (profileSyncTimeout) clearTimeout(profileSyncTimeout);
       subscription.unsubscribe();
     };
   }, []);

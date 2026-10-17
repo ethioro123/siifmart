@@ -117,7 +117,7 @@ export interface DataContextType {
   logSystemEvent: (action: string, details: string | Record<string, any>, user?: string, module?: SystemLog['module'], options?: any) => Promise<any> | void;
   exportSystemData: () => string;
   resetData: () => void;
-  refreshData: () => Promise<void>;
+  refreshData: (scopes?: RefreshDataScope[]) => Promise<void>;
 
   // Merchandising
   addPromotion: (promo: Promotion) => void;
@@ -145,3 +145,16 @@ export interface DataContextType {
   calculateWorkerBonusShare?: (...args: any[]) => any;
   updatePromotion?: (promo: Partial<Promotion> & { id: string }) => void;
 }
+
+export type RefreshDataScope =
+  | 'products'
+  | 'employees'
+  | 'orders'
+  | 'sales'
+  | 'customers'
+  | 'suppliers'
+  | 'movements'
+  | 'storePoints'
+  | 'tasks'
+  | 'expenses'
+  | 'shifts';

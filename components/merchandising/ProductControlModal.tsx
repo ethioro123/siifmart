@@ -186,7 +186,7 @@ export const ProductControlModal: React.FC<Props> = ({ product, isOpen, onClose,
                 }
             }
 
-            await refreshData();
+            await refreshData(['products']);
             onSaved?.();
         } catch (err: any) {
             logger.error('ProductControlModal', 'Failed to save unit config', err);
@@ -286,7 +286,7 @@ export const ProductControlModal: React.FC<Props> = ({ product, isOpen, onClose,
                 }
             }
 
-            await refreshData();
+            await refreshData(['products']);
             onSaved?.();
         } catch (err: any) {
             logger.error('ProductControlModal', 'Failed to save pricing', err);
@@ -351,7 +351,7 @@ export const ProductControlModal: React.FC<Props> = ({ product, isOpen, onClose,
                 showToast('Stock policies saved', 'success');
             }
 
-            await refreshData();
+            await refreshData(['products']);
             onSaved?.();
         } catch (err: any) {
             logger.error('ProductControlModal', 'Failed to save stock policies', err);

@@ -1,7 +1,8 @@
 import { supabase } from '../lib/supabase';
+import { isRegionalWorkforceRole, resolveEmployeeScopeLevel } from '../utils/roleSegregation';
 import type { Employee } from '../types';
 import type { Country } from '../utils/localization';
-import { getRoleHierarchy, MANAGERIAL_ROLES } from '../utils/roles';
+import { getEmployeeJobTitle, getJobTitleForRole, getRoleHierarchy, MANAGERIAL_ROLES } from '../utils/roles';
 import { formatEmployeeCode, parseEmployeeCode, normalizeCountryCode } from '../utils/employeeIdGenerator';
 
 export interface EmployeeFilters {
@@ -19,6 +20,7 @@ interface RawDbEmployee {
     site_id?: string;
     name: string;
     role: string;
+    job_title?: string;
     email: string;
     phone: string;
     status: string;
@@ -58,6 +60,8 @@ function mapDbEmployeeToEmployee(e: RawDbEmployee): Employee {
         siteId: e.site_id || '',
         site_id: e.site_id,
         role: e.role as Employee['role'],
+        jobTitle: e.job_title || getJobTitleForRole(e.role),
+        job_title: e.job_title || getJobTitleForRole(e.role),
         status: e.status as Employee['status'],
         joinDate: e.join_date || (e.created_at ? e.created_at.split('T')[0] : e.created_at) || 'N/A',
         performanceScore: e.performance_score ?? 0,
@@ -295,26 +299,14 @@ export const employeesService = {
     async create(employee: Omit<Employee, 'created_at' | 'updated_at'>) {
         const isCEO = employee.role === 'ceo' || employee.role === 'super_admin' || (employee.role as string) === 'CEO';
         if (!isCEO && (!employee.siteId || !employee.siteId.trim())) {
-            throw new Error('Workplace facility ID assignment is mandatory. Every employee must be tied to an operating facility ID, except the CEO.');
+            throw new Error('Workplace location is mandatory. Every employee must be tied to an operating facility ID, except the CEO.');
         }
 
-        // Default scope is HQ (country-wide). Region is only bound for explicit REGIONAL workers.
-        const isExplicitRegionalRole = [
-            'regional_manager',
-            'regional_procurement_lead',
-            'regional_finance_officer',
-            'regional_hr_officer',
-            'regional_logistics_lead',
-            'regional_security_supervisor'
-        ].includes(employee.role as string);
+        // Regional roles and workers assigned to regional facilities are region-scoped.
+        const isExplicitRegionalRole = isRegionalWorkforceRole(employee.role as string);
 
-        const scopeLevel = (employee.scopeLevel === 'REGIONAL' || isExplicitRegionalRole)
-            ? 'REGIONAL'
-            : (employee.scopeLevel || 'HQ');
-        let resolvedRegionCode: string | null = scopeLevel === 'REGIONAL'
-            ? ((employee as any).region_code || employee.regionCode || null)
-            : null;
-        if (scopeLevel === 'REGIONAL' && !resolvedRegionCode && employee.siteId) {
+        let assignedRegionCode: string | null = (employee as any).region_code || employee.regionCode || null;
+        if (!assignedRegionCode && employee.siteId && (!employee.scopeLevel || isExplicitRegionalRole)) {
             try {
                 const { data: siteRow } = await supabase
                     .from('sites')
@@ -322,12 +314,16 @@ export const employeesService = {
                     .eq('id', employee.siteId)
                     .maybeSingle();
                 if (siteRow?.region_code) {
-                    resolvedRegionCode = siteRow.region_code;
+                    assignedRegionCode = siteRow.region_code;
                 }
             } catch {
                 // Non-blocking fallback
             }
         }
+        const scopeLevel = isExplicitRegionalRole
+            ? 'REGIONAL'
+            : (employee.scopeLevel || resolveEmployeeScopeLevel(employee.role as string, assignedRegionCode));
+        const resolvedRegionCode: string | null = scopeLevel === 'REGIONAL' ? assignedRegionCode : null;
 
         let currentCode = employee.code;
 
@@ -339,6 +335,7 @@ export const employeesService = {
                 region_code: resolvedRegionCode,
                 scope_level: scopeLevel,
                 name: employee.name,
+                job_title: getEmployeeJobTitle(employee),
                 role: employee.role,
                 email: employee.email.toLowerCase(),
                 phone: employee.phone,
@@ -389,6 +386,8 @@ export const employeesService = {
         const FIELD_MAP: Record<string, string> = {
             name: 'name',
             role: 'role',
+            jobTitle: 'job_title',
+            job_title: 'job_title',
             email: 'email',
             phone: 'phone',
             status: 'status',
@@ -429,6 +428,9 @@ export const employeesService = {
                 dbUpdates[dbCol] = (updates as Record<string, unknown>)[tsKey];
             }
         }
+        if (updates.role !== undefined && updates.jobTitle === undefined && updates.job_title === undefined) {
+            dbUpdates.job_title = getJobTitleForRole(updates.role as string);
+        }
 
         try {
             const { data, error } = await supabase
@@ -449,6 +451,7 @@ export const employeesService = {
                 delete dbUpdates.emergency_contact;
                 delete dbUpdates.address;
                 delete dbUpdates.scope_level;
+                delete dbUpdates.job_title;
                 const { data, error: retryError } = await supabase
                     .from('employees')
                     .update(dbUpdates)

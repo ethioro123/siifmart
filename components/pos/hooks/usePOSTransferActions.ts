@@ -123,7 +123,7 @@ export const usePOSTransferActions = ({
             setSelectedTransferForReceiving(null);
             setTransferReceivingItems([]);
             setIsReceivingModalOpen(false);
-            await refreshData();
+            await refreshData(['products', 'movements']);
         } catch (e) {
             addNotification('alert', 'Failed to confirm receiving.');
         } finally {

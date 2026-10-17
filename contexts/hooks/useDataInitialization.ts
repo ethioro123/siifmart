@@ -1,5 +1,6 @@
 import React, { useEffect, useCallback } from 'react';
-import { sitesService, systemConfigService, productsService, salesService, purchaseOrdersService, employeesService, suppliersService } from '../../services/supabase.service';
+import { useQueryClient } from '@tanstack/react-query';
+import { sitesService, systemConfigService, productsService, salesService, purchaseOrdersService } from '../../services/supabase.service';
 import { setGlobalTimezone } from '../../utils/formatting';
 import { DEFAULT_CONFIG } from '../DataContextDefaults';
 import { setCurrencySymbol } from '../../constants/categories';
@@ -50,6 +51,7 @@ export function useDataInitialization({
   addNotification,
   queries
 }: UseDataInitializationProps) {
+  const queryClient = useQueryClient();
 
   // --- SYNC USER'S SITE ---
   const userSiteSyncRef = React.useRef<boolean>(false);
@@ -92,7 +94,11 @@ export function useDataInitialization({
 
   const loadSites = useCallback(async () => {
     try {
-      const loadedSites = await sitesService.getAll();
+      const loadedSites = await queryClient.fetchQuery({
+        queryKey: ['sites'],
+        queryFn: () => sitesService.getAll(),
+        staleTime: 5 * 60 * 1000
+      });
 
       // Ensure active country has its Administration HQ provisioned
       const activeCountry = (settings?.country || 'ET') as Country;
@@ -169,7 +175,7 @@ export function useDataInitialization({
         setTimeout(loadSites, 5000);
       }
     }
-  }, [setSites, addNotification, setLoadError]);
+  }, [setSites, addNotification, setLoadError, queryClient]);
 
   const loadSettings = useCallback(async () => {
     try {
@@ -207,19 +213,19 @@ export function useDataInitialization({
       const canSwitchSites = ['super_admin', 'ceo', 'admin', 'auditor', 'procurement_manager', 'buyer', 'supply_chain_manager', 'merchandising_manager'].includes(normalizedRole);
 
       // RULE 10: Lists/history default to 25 records on boot
-      const [allProds, allSls, allOrds, allEmps, allSupps] = await Promise.all([
-        canSwitchSites ? productsService.getAll(undefined, 25).then(res => res.data) : Promise.resolve([]),
+      const [allProds, allSls, allOrds] = await Promise.all([
+        canSwitchSites ? productsService.getAll(undefined, 25, 0, undefined, undefined, false).then(res => res.data) : Promise.resolve([]),
         canSwitchSites ? salesService.getAll(undefined, 25).then(res => res.data) : Promise.resolve([]),
-        canSwitchSites ? purchaseOrdersService.getAll(undefined, 25).then(res => res.data) : Promise.resolve([]),
-        employeesService.getAll(undefined, true),
-        suppliersService.getAll(25).then(res => res.data)
+        canSwitchSites ? purchaseOrdersService.getAll(undefined, 25).then(res => res.data) : Promise.resolve([])
       ]);
 
       setAllProducts(allProds);
       setAllSales(allSls);
       setAllOrders(allOrds);
-      setEmployees(allEmps);
-      setSuppliers(allSupps);
+      // These are loaded once by the active-site React Query below. Preserve any
+      // cached/session values here instead of issuing duplicate, unscoped reads.
+      setEmployees(current => current);
+      setSuppliers(current => current);
 
       if (!activeSiteId) {
         setIsDataInitialLoading(false);
@@ -277,9 +283,9 @@ export function useDataInitialization({
     }
   }, [settings.timezone]);
 
-  const refreshData = useCallback(async () => {
+  const refreshData = useCallback(async (scopes?: import('../DataContextTypes').RefreshDataScope[]) => {
     if (activeSiteId) {
-      queries.refetchAll();
+      await queries.refetchAll(scopes);
     } else {
       await loadGlobalData();
     }

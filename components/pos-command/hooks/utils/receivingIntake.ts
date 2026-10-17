@@ -11,10 +11,33 @@ interface ProcessReceivingStockParams {
     t: (key: string) => string;
 }
 
+export interface AppliedStockItem {
+    productId: string;
+    previousStock: number;
+    addedQty: number;
+}
+
 export interface ReceivingStockIntakeResult {
     success: boolean;
     failedItems: string[];
+    appliedItems: AppliedStockItem[];
 }
+
+export const rollbackReceivingStockIntake = async (appliedItems: AppliedStockItem[]) => {
+    if (!appliedItems || appliedItems.length === 0) return;
+    try {
+        const { productsService } = await import('../../../../services/supabase.service');
+        for (const item of appliedItems) {
+            try {
+                await productsService.update(item.productId, {
+                    stock: item.previousStock
+                } as any);
+            } catch (err) {
+                logger.error('receivingIntake', `Rollback stock failed for ${item.productId}`, err as Error);
+            }
+        }
+    } catch { }
+};
 
 export const processReceivingStockIntake = async ({
     destSiteId,
@@ -27,8 +50,9 @@ export const processReceivingStockIntake = async ({
     t
 }: ProcessReceivingStockParams): Promise<ReceivingStockIntakeResult> => {
     const failedItems: string[] = [];
+    const appliedItems: AppliedStockItem[] = [];
 
-    if (!destSiteId) return { success: true, failedItems: [] };
+    if (!destSiteId) return { success: true, failedItems: [], appliedItems: [] };
 
     const { productsService } = await import('../../../../services/supabase.service');
 
@@ -43,7 +67,8 @@ export const processReceivingStockIntake = async ({
                 : null;
 
             if (destProduct) {
-                const newStock = (destProduct.stock || 0) + item.receivedQty;
+                const prevStock = Number(destProduct.stock || 0);
+                const newStock = prevStock + item.receivedQty;
                 try {
                     await productsService.update(destProduct.id, {
                         stock: newStock,
@@ -51,6 +76,11 @@ export const processReceivingStockIntake = async ({
                         pos_received_at: timestampStr,
                         updated_by: receiverName
                     } as any);
+                    appliedItems.push({
+                        productId: destProduct.id,
+                        previousStock: prevStock,
+                        addedQty: item.receivedQty
+                    });
                 } catch (updateErr) {
                     logger.error('receivingIntake', `Failed to update stock for ${item.sku}:`, updateErr as Error);
                     failedItems.push(item.sku || item.name || 'Unknown Item');
@@ -106,6 +136,7 @@ export const processReceivingStockIntake = async ({
 
     return {
         success: failedItems.length === 0,
-        failedItems
+        failedItems,
+        appliedItems
     };
 };

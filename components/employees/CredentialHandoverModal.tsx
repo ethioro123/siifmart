@@ -48,10 +48,12 @@ export function CredentialHandoverModal({
     // Resolve saved password or standard initial password pattern across multiple identifier keys
     const codeKey = (employee.code || '').toLowerCase();
     const nameKey = (employee.name || '').toLowerCase();
+    const nameUnderscore = nameKey.replace(/\s+/g, '_');
     const savedPassword = typeof window !== 'undefined'
         ? (localStorage.getItem(`siifmart_temp_pwd_${employee.id}`) ||
            (codeKey ? localStorage.getItem(`siifmart_temp_pwd_by_code_${codeKey}`) : null) ||
-           (nameKey ? localStorage.getItem(`siifmart_temp_pwd_by_name_${nameKey}`) : null))
+           (nameKey ? localStorage.getItem(`siifmart_temp_pwd_by_name_${nameKey}`) : null) ||
+           (nameUnderscore ? localStorage.getItem(`siifmart_temp_pwd_by_name_${nameUnderscore}`) : null))
         : null;
     const initialPassword = savedPassword || `SiifMart@${numericPin}`;
     const portalUrl = typeof window !== 'undefined' ? window.location.origin : 'https://siifmart.com';

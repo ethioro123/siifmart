@@ -1,3 +1,5 @@
+import { getJobTitleForRole } from './roles';
+
 /**
  * Format a number to a compact string representation (K, M, B, T).
  * 
@@ -192,17 +194,7 @@ export const formatRelativeTime = (date: string | Date | undefined | null): stri
  * Handles specific overrides (e.g. super_admin -> CEO) and general formatting.
  */
 export const formatRole = (role: string | undefined): string => {
-    if (!role) return '';
-
-    // Explicit Overrides
-    if (role === 'super_admin') return 'CEO';
-    if (role === 'admin') return 'Assistant CEO';
-
-    // General Formatting: replace underscores with spaces and capitalize words
-    // e.g. "warehouse_manager" -> "Warehouse Manager"
-    return role
-        .replace(/_/g, ' ')
-        .replace(/\b\w/g, char => char.toUpperCase());
+    return getJobTitleForRole(role);
 };
 
 /**
@@ -241,3 +233,4 @@ export const maskPhoneNumber = (phone: string | undefined | null): string => {
     const end = clean.slice(-4);
     return `${start}••••${end}`;
 };
+

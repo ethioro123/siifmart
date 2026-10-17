@@ -3,10 +3,10 @@ import type { Supplier } from '../types';
 import { logger } from '../utils/logger';
 
 export const suppliersService = {
-    async getAll(limit: number = 50, offset: number = 0, countryCode?: string) {
+    async getAll(limit: number = 50, offset: number = 0, countryCode?: string, includeExactCount: boolean = true) {
         let query = supabase
             .from('suppliers')
-            .select('*', { count: 'exact' });
+            .select('*', includeExactCount ? { count: 'exact' } : undefined);
 
         if (countryCode) {
             query = query.eq('country_code', countryCode);
@@ -22,7 +22,7 @@ export const suppliersService = {
                 logger.warn('SuppliersService', 'country_code column not on suppliers table, retrying unpartitioned');
                 const fallback = await supabase
                     .from('suppliers')
-                    .select('*', { count: 'exact' })
+                    .select('*', includeExactCount ? { count: 'exact' } : undefined)
                     .order('created_at', { ascending: false })
                     .range(offset, offset + limit - 1);
                 if (fallback.error) throw fallback.error;

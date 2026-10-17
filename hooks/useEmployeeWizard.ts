@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Employee, Site, UserRole } from '../types';
-import { autoSelectSiteForRole, getRecommendedDepartment, validateRoleSiteAssignment, getRoleLocationDescription, canRoleBeAtSiteType, validateRegionalBoundary } from '../utils/roleSegregation';
-import { SYSTEM_ROLES, canEmployRole, getRoleHierarchy } from '../utils/roles';
+import { autoSelectSiteForRole, getRecommendedDepartment, validateRoleSiteAssignment, getRoleLocationDescription, canRoleBeAtSiteType, validateRegionalBoundary, isRegionalWorkforceRole, resolveEmployeeScopeLevel } from '../utils/roleSegregation';
+import { SYSTEM_ROLES, canEmployRole, getJobTitleForRole, getRoleHierarchy } from '../utils/roles';
 import { logger } from '../utils/logger';
 import { employeesService } from '../services/employees.service';
 import { formatEmployeeCode, parseEmployeeCode, normalizeCountryCode, generateEmployeeEmail } from '../utils/employeeIdGenerator';
@@ -321,6 +321,11 @@ export function useEmployeeWizard({
          const validatedSiteId = newEmpData.siteId.trim();
          const assignedSite = sites.find(s => s.id === validatedSiteId);
          const targetCountry = normalizeCountryCode(getSiteCountryId(assignedSite) || activeSite?.country || 'ET');
+         const siteRegionCode = assignedSite?.region_code || (assignedSite as any)?.regionCode || undefined;
+         const scopeLevel = resolveEmployeeScopeLevel(newEmpData.role, siteRegionCode);
+         const assignedRegionCode = scopeLevel === 'REGIONAL'
+            ? siteRegionCode
+            : undefined;
 
          let maxCodeNumber = targetCountry === 'ET' ? 39 : 0;
          if (Array.isArray(employees)) {
@@ -374,9 +379,11 @@ export function useEmployeeWizard({
             id: employeeId,
             code: employeeCode,
             siteId: validatedSiteId,
-            regionCode: assignedSite?.region_code || (assignedSite as any)?.regionCode || undefined,
-            region_code: assignedSite?.region_code || (assignedSite as any)?.regionCode || undefined,
+            regionCode: assignedRegionCode,
+            region_code: assignedRegionCode,
+            scopeLevel,
             name: `${newEmpData.firstName} ${newEmpData.lastName}`,
+            jobTitle: getJobTitleForRole(newEmpData.role),
             role: newEmpData.role,
             email: signupEmail,
             phone: newEmpData.phone || 'N/A',

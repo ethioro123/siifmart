@@ -136,7 +136,7 @@ export const ProductDetailsModal: React.FC<ProductDetailsModalProps> = ({ produc
             await deleteProduct(product.id);
             showToast('Product successfully deleted', 'success');
             onClose();
-            await refreshData();
+            await refreshData(['products', 'movements']);
         } catch (error: any) {
             showToast(error.message || 'Failed to delete product', 'error');
         }
@@ -411,7 +411,7 @@ export const ProductDetailsModal: React.FC<ProductDetailsModalProps> = ({ produc
                                                 showToast('Threshold change submitted for CEO approval', 'info');
                                             }
                                             setIsEditingThresholds(false);
-                                            await refreshData();
+                                            await refreshData(['products', 'movements']);
                                         } catch (err: any) {
                                             showToast(err?.message || 'Failed to save thresholds', 'error');
                                         } finally {

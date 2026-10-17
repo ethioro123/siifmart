@@ -11,6 +11,7 @@ import {
     StockMovement, TransferRecord, JobAssignment, WorkerPoints, StorePoints,
     EmployeeTask, StaffSchedule, BarcodeApproval, WarehouseZone, ExpenseRecord, SystemLog, ShiftRecord
 } from '../types';
+import type { RefreshDataScope } from '../contexts/DataContextTypes';
 
 
 // Query Keys
@@ -66,14 +67,15 @@ export const useDataQueries = ({ siteId, enabled, onProgress }: UseDataQueriesPr
             {
                 queryKey: DATA_KEYS.products(siteId),
                 // RULE 10: Shelf limit of 25 items on initial load; subsequent items loaded via pagination/search
-                queryFn: trackProgress('products', () => productsService.getAll(siteId, 25).then(res => res.data)),
+                queryFn: trackProgress('products', () => productsService.getAll(siteId, 25, 0, undefined, undefined, false).then(res => res.data)),
                 enabled: enabled && !!siteId,
                 staleTime: 1000 * 60 * 10, // 10 mins
             },
             {
                 queryKey: DATA_KEYS.employees(siteId),
                 queryFn: trackProgress('employees', () => employeesService.getAll(siteId, !siteId)),
-                enabled: enabled,
+                enabled: enabled && !!siteId,
+                retry: 1,
                 staleTime: 1000 * 60 * 30, // 30 mins (infrequently changing roster)
             }
         ]
@@ -102,8 +104,9 @@ export const useDataQueries = ({ siteId, enabled, onProgress }: UseDataQueriesPr
             },
             {
                 queryKey: DATA_KEYS.suppliers(),
-                queryFn: trackProgress('suppliers', () => suppliersService.getAll(25).then(res => res.data)),
-                enabled: enabled,
+                queryFn: trackProgress('suppliers', () => suppliersService.getAll(25, 0, undefined, false).then(res => res.data)),
+                enabled: enabled && !!siteId,
+                retry: 1,
                 staleTime: 1000 * 60 * 60, // 60 mins
             }
         ]
@@ -142,7 +145,7 @@ export const useDataQueries = ({ siteId, enabled, onProgress }: UseDataQueriesPr
             {
                 queryKey: DATA_KEYS.shifts(siteId),
                 queryFn: trackProgress('shifts', () => shiftsService.getAll(siteId, 25).catch(() => [])),
-                enabled: enabled,
+                enabled: enabled && !!siteId,
                 staleTime: 1000 * 60 * 10,
             }
         ]
@@ -181,10 +184,25 @@ export const useDataQueries = ({ siteId, enabled, onProgress }: UseDataQueriesPr
         // Meta
         isLoadingCritical: criticalQueries.some(q => q.isLoading),
         isErrorCritical: criticalQueries.some(q => q.isError),
-        refetchAll: () => {
-            criticalQueries.forEach(q => q.refetch());
-            secondaryQueries.forEach(q => q.refetch());
-            tertiaryQueries.forEach(q => q.refetch());
+        refetchAll: (scopes?: RefreshDataScope[]) => {
+            const requested = scopes ? new Set(scopes) : null;
+            const refetch = (scope: RefreshDataScope, query: UseQueryResult<unknown, Error>) => {
+                if (!requested || requested.has(scope)) return query.refetch();
+                return Promise.resolve();
+            };
+            return Promise.all([
+                refetch('products', criticalQueries[0]),
+                refetch('employees', criticalQueries[1]),
+                refetch('orders', secondaryQueries[0]),
+                refetch('sales', secondaryQueries[1]),
+                refetch('customers', secondaryQueries[2]),
+                refetch('suppliers', secondaryQueries[3]),
+                refetch('movements', tertiaryQueries[0]),
+                refetch('storePoints', tertiaryQueries[1]),
+                refetch('tasks', tertiaryQueries[2]),
+                refetch('expenses', tertiaryQueries[3]),
+                refetch('shifts', tertiaryQueries[4]),
+            ]);
         }
     };
 };

@@ -23,11 +23,21 @@ export const RequisitionModal: React.FC<RequisitionModalProps> = ({
     const allowedRoles = recruitmentService.getAllowedRolesForManager(user?.role || '');
     const userRoleLevel = recruitmentService.getUserRoleLevel(user?.role || '');
     const isSiteManager = userRoleLevel === 3;
+    const isRegional = ['regional_manager', 'regional_hr_officer', 'regional_procurement_lead', 'regional_finance_officer', 'regional_logistics_lead', 'regional_security_supervisor'].includes(user?.role || '');
+    const userRegion = user?.regionCode || (user as any)?.region_code || activeSite?.regionCode || (activeSite as any)?.region_code;
+
+    const availableSites = React.useMemo(() => {
+        const countrySites = sites.filter(s => !s.country || s.country === country);
+        if (isRegional && userRegion) {
+            return countrySites.filter(s => s.regionCode === userRegion || (s as any).region_code === userRegion);
+        }
+        return countrySites;
+    }, [sites, country, isRegional, userRegion]);
 
     // Default site locked for site managers
     const defaultSiteId = isSiteManager 
         ? (user?.siteId || activeSite?.id || '') 
-        : (activeSite?.id || sites[0]?.id || '');
+        : (availableSites[0]?.id || activeSite?.id || sites[0]?.id || '');
 
     const [siteId, setSiteId] = useState(defaultSiteId);
     const [title, setTitle] = useState('');
@@ -117,7 +127,7 @@ export const RequisitionModal: React.FC<RequisitionModalProps> = ({
                                     onChange={(e) => setSiteId(e.target.value)}
                                     className="bg-transparent font-semibold text-[var(--theme-text-primary)] outline-none cursor-pointer"
                                 >
-                                    {sites.filter(s => !s.country || s.country === country).map(s => (
+                                    {availableSites.map(s => (
                                         <option key={s.id} value={s.id} className="bg-[var(--theme-bg-panel)]">
                                             {s.name} ({s.code})
                                         </option>

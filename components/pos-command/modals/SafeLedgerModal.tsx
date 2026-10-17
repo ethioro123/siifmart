@@ -63,8 +63,8 @@ export const SafeLedgerModal: React.FC<SafeLedgerModalProps> = ({ isOpen, onClos
             setIsTransferModalOpen(false);
             loadDrops();
             setSelectedDrops([]);
-        } catch {
-            addNotification('alert', 'Failed to transfer safe drops.');
+        } catch (err: any) {
+            addNotification('alert', err?.message || 'Failed to transfer safe drops.');
         } finally {
             setIsTransferring(false);
         }

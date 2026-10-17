@@ -61,7 +61,7 @@ export const InventoryProductModal: React.FC<InventoryProductModalProps> = ({
             await deleteProduct(editingProduct.id);
             showToast('Product successfully deleted', 'success');
             onClose();
-            await refreshData();
+            await refreshData(['products', 'movements']);
         } catch (error: any) {
             showToast(error.message || 'Failed to delete product', 'error');
         }

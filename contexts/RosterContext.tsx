@@ -1,4 +1,5 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useEffect, ReactNode, useCallback } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { StaffSchedule } from '../types';
 import { schedulesService } from '../services/supabase.service';
 import { useData } from './DataContext';
@@ -17,34 +18,37 @@ const RosterContext = createContext<RosterContextType | undefined>(undefined);
 export const RosterProvider = ({ children }: { children: ReactNode }) => {
     const { activeSite, addNotification } = useData();
     const activeSiteId = activeSite?.id;
-    const [schedules, setSchedules] = useState<StaffSchedule[]>([]);
+    const queryClient = useQueryClient();
+    const scheduleQueryKey = ['schedules', activeSiteId];
+    const { data: schedules = [] } = useQuery({
+        queryKey: scheduleQueryKey,
+        queryFn: () => schedulesService.getAll(activeSiteId as string),
+        enabled: Boolean(activeSiteId),
+        staleTime: 5 * 60 * 1000
+    });
 
-    const loadSchedules = async () => {
+    const loadSchedules = useCallback(async () => {
         if (!activeSiteId) return;
         try {
-            const data = await schedulesService.getAll(activeSiteId);
-            setSchedules(data);
+            await queryClient.invalidateQueries({ queryKey: scheduleQueryKey, exact: true });
         } catch (error) {
             logger.error('RosterContext', 'Failed to load schedules', error as Error);
         }
-    };
+    }, [activeSiteId, queryClient]);
 
     useEffect(() => {
-        loadSchedules();
-
         const handleRosterUpdate = () => {
             loadSchedules();
         };
 
         window.addEventListener('roster-updated', handleRosterUpdate);
         return () => window.removeEventListener('roster-updated', handleRosterUpdate);
-    }, [activeSiteId]);
+    }, [activeSiteId, loadSchedules]);
 
     const addSchedule = async (schedule: StaffSchedule, user: string) => {
         try {
             await schedulesService.create(schedule);
-            setSchedules(prev => [...prev, schedule]);
-            window.dispatchEvent(new CustomEvent('roster-updated'));
+            queryClient.setQueryData<StaffSchedule[]>(scheduleQueryKey, current => [...(current || []), schedule]);
             addNotification('success', 'Shift added');
         } catch (error) {
             logger.error('RosterContext', 'caught error', error as Error);
@@ -55,8 +59,9 @@ export const RosterProvider = ({ children }: { children: ReactNode }) => {
     const updateSchedule = async (id: string, updates: Partial<StaffSchedule>, user: string) => {
         try {
             await schedulesService.update(id, updates);
-            setSchedules(prev => prev.map(s => s.id === id ? { ...s, ...updates } : s));
-            window.dispatchEvent(new CustomEvent('roster-updated'));
+            queryClient.setQueryData<StaffSchedule[]>(scheduleQueryKey, current =>
+                (current || []).map(s => s.id === id ? { ...s, ...updates } : s)
+            );
             addNotification('success', 'Shift updated');
         } catch (error) {
             logger.error('RosterContext', 'caught error', error as Error);
@@ -67,8 +72,9 @@ export const RosterProvider = ({ children }: { children: ReactNode }) => {
     const deleteSchedule = async (id: string, user: string) => {
         try {
             await schedulesService.delete(id);
-            setSchedules(prev => prev.filter(s => s.id !== id));
-            window.dispatchEvent(new CustomEvent('roster-updated'));
+            queryClient.setQueryData<StaffSchedule[]>(scheduleQueryKey, current =>
+                (current || []).filter(s => s.id !== id)
+            );
             addNotification('success', 'Shift deleted');
         } catch (error) {
             logger.error('RosterContext', 'caught error', error as Error);

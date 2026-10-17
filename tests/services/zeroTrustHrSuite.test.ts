@@ -6,22 +6,37 @@ import { employeeDocumentsService } from '../../services/employee-documents.serv
 import { hasPermission } from '../../services/permissions.service';
 import { calculateNetSalary, getEmployeeLeaveRequests } from '../../utils/employeeProfileData';
 
+let inMemoryDocs: any[] = [];
+
 vi.mock('../../lib/supabase', () => {
-  const chainable: any = {};
-  chainable.select = vi.fn().mockReturnValue(chainable);
-  chainable.insert = vi.fn().mockReturnValue(chainable);
-  chainable.update = vi.fn().mockReturnValue(chainable);
-  chainable.delete = vi.fn().mockReturnValue(chainable);
-  chainable.eq = vi.fn().mockReturnValue(chainable);
-  chainable.order = vi.fn().mockReturnValue(chainable);
-  chainable.single = vi.fn().mockResolvedValue({ data: null, error: { message: 'Offline mock' } });
-  chainable.limit = vi.fn().mockResolvedValue({ data: null, error: { message: 'Offline mock' } });
-  chainable.then = (onfulfilled: any, onrejected: any) =>
+  const docChainable: any = {};
+  docChainable.select = vi.fn().mockReturnValue(docChainable);
+  docChainable.insert = vi.fn().mockImplementation((records: any[]) => {
+    if (Array.isArray(records)) records.forEach(r => inMemoryDocs.push(r));
+    return docChainable;
+  });
+  docChainable.eq = vi.fn().mockReturnValue(docChainable);
+  docChainable.order = vi.fn().mockImplementation(() => Promise.resolve({ data: inMemoryDocs, error: null }));
+  docChainable.single = vi.fn().mockImplementation(() => Promise.resolve({ data: inMemoryDocs[inMemoryDocs.length - 1] || null, error: null }));
+
+  const defaultChainable: any = {};
+  defaultChainable.select = vi.fn().mockReturnValue(defaultChainable);
+  defaultChainable.insert = vi.fn().mockReturnValue(defaultChainable);
+  defaultChainable.update = vi.fn().mockReturnValue(defaultChainable);
+  defaultChainable.delete = vi.fn().mockReturnValue(defaultChainable);
+  defaultChainable.eq = vi.fn().mockReturnValue(defaultChainable);
+  defaultChainable.order = vi.fn().mockReturnValue(defaultChainable);
+  defaultChainable.single = vi.fn().mockResolvedValue({ data: null, error: { message: 'Offline mock' } });
+  defaultChainable.limit = vi.fn().mockResolvedValue({ data: null, error: { message: 'Offline mock' } });
+  defaultChainable.then = (onfulfilled: any, onrejected: any) =>
     Promise.resolve({ data: null, error: { message: 'Offline mock' } }).then(onfulfilled, onrejected);
 
   return {
     supabase: {
-      from: vi.fn().mockReturnValue(chainable)
+      from: vi.fn().mockImplementation((table: string) => {
+        if (table === 'employee_documents') return docChainable;
+        return defaultChainable;
+      })
     }
   };
 });
@@ -31,7 +46,7 @@ describe('Zero-Trust HR Suite Tests', () => {
     if (typeof localStorage !== 'undefined') {
       localStorage.clear();
     }
-    vi.restoreAllMocks();
+    inMemoryDocs = [];
   });
 
   describe('Finding 1 & 6: Leave Requests & Statutory Policies', () => {

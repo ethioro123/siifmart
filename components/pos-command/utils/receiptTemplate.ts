@@ -81,9 +81,10 @@ export function generateZReportReceiptHtml(
     const cashSales = Number(shift.cashSales ?? summary?.cash ?? 0);
     const cardSales = Number(shift.cardSales ?? summary?.card ?? 0);
     const mobileSales = Number(shift.mobileSales ?? summary?.mobile ?? 0);
+    const cashDrops = Number(shift.cashDrops ?? shift.cash_drops ?? summary?.drops ?? 0);
     const totalSales = cashSales + cardSales + mobileSales;
 
-    const expectedCash = Number(shift.expectedCash ?? (openingFloat + cashSales));
+    const expectedCash = Number(shift.expectedCash ?? Math.max(0, (openingFloat + cashSales - cashDrops)));
     const actualCash = Number(shift.actualCash ?? 0);
     const variance = Number(shift.variance ?? (actualCash - expectedCash));
     const isVariance = Math.abs(variance) > 0.01;
@@ -141,6 +142,7 @@ export function generateZReportReceiptHtml(
 
         <div class="flex justify-between py-1"><span>Opening Float:</span><span>${CURRENCY_SYMBOL} ${openingFloat.toLocaleString()}</span></div>
         <div class="flex justify-between py-1"><span>(+) Cash Collected:</span><span>${CURRENCY_SYMBOL} ${cashSales.toLocaleString()}</span></div>
+        ${cashDrops > 0 ? `<div class="flex justify-between py-1" style="color: #c00;"><span>(-) Safe Cash Drops:</span><span>${CURRENCY_SYMBOL} ${cashDrops.toLocaleString()}</span></div>` : ''}
         <div class="flex justify-between py-1 font-bold"><span>(=) Expected Cash:</span><span>${CURRENCY_SYMBOL} ${expectedCash.toLocaleString()}</span></div>
         <div class="flex justify-between py-1 font-bold"><span>(x) Counted Cash:</span><span>${CURRENCY_SYMBOL} ${actualCash.toLocaleString()}</span></div>
 

@@ -37,6 +37,7 @@ export interface User {
   role: UserRole;
   avatar: string;
   title: string;
+  jobTitle?: string;
   siteId?: string;
   email?: string;
   employeeId?: string;

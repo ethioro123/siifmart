@@ -28,10 +28,16 @@ export interface UserProfile {
     email: string;
     role: UserRole;
     name: string;
+    jobTitle?: string;
     siteId?: string;
     avatar_url?: string;
     employeeId?: string;
     code?: string;
+    regionCode?: string;
+    region_code?: string;
+    scopeLevel?: 'HQ' | 'REGIONAL';
+    scope_level?: 'HQ' | 'REGIONAL';
+    country_code?: string;
 }
 
 // ============================================================================
@@ -198,11 +204,17 @@ export const authService = {
                 id: user.id,
                 email: user.email!,
                 name: employee.name,
+                jobTitle: employee.jobTitle || employee.job_title,
                 role: employee.role as UserRole,
                 siteId: employee.siteId || employee.site_id,
                 avatar_url: employee.avatar,
                 employeeId: employee.id,
-                code: employee.code
+                code: employee.code,
+                regionCode: employee.regionCode || (employee as any).region_code,
+                region_code: employee.regionCode || (employee as any).region_code,
+                scopeLevel: employee.scopeLevel || (employee as any).scope_level,
+                scope_level: employee.scopeLevel || (employee as any).scope_level,
+                country_code: employee.country || (employee as any).country_code
             };
         } catch (error) {
             console.warn('AuthService: Error getting auth user', error);

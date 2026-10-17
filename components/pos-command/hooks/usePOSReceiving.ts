@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { isWeightBased, isVolumeBased } from '../../../utils/units';
 import { logger } from '../../../utils/logger';
 import { repairShipmentInventoryHelper } from './utils/receivingRepair';
-import { processReceivingStockIntake } from './utils/receivingIntake';
+import { processReceivingStockIntake, rollbackReceivingStockIntake, ReceivingStockIntakeResult } from './utils/receivingIntake';
 
 interface UsePOSReceivingProps {
     user: any;
@@ -251,6 +251,7 @@ export const usePOSReceiving = ({
         }
 
         setIsConfirmingReceive(true);
+        let intakeResult: ReceivingStockIntakeResult | null = null;
         try {
             const { wmsJobsService } = await import('../../../services/supabase.service');
             const selectedId = selectedTransferForReceiving;
@@ -295,6 +296,9 @@ export const usePOSReceiving = ({
 
             const finalTransfer = transferJob || transfer;
             if (!finalTransfer) throw new Error('Transfer not found');
+            if (finalTransfer.transferStatus === 'Received' || finalTransfer.status === 'Completed') {
+                throw new Error('This shipment has already been received and completed.');
+            }
 
             const rawLineItems = finalTransfer.lineItems || finalTransfer.items || [];
             const updatedLineItems = rawLineItems.map((item: any) => {
@@ -321,7 +325,7 @@ export const usePOSReceiving = ({
 
             // 1. Process and verify stock intake BEFORE marking transfer completed
             if (destSiteId) {
-                const intakeResult = await processReceivingStockIntake({
+                intakeResult = await processReceivingStockIntake({
                     destSiteId,
                     transferReceivingItems,
                     allProducts,
@@ -422,6 +426,9 @@ export const usePOSReceiving = ({
             addNotification('success', t('posCommand.shipmentReceivedSuccess'));
             setSelectedTransferForReceiving(null);
         } catch (err: any) {
+            if (intakeResult?.appliedItems?.length) {
+                await rollbackReceivingStockIntake(intakeResult.appliedItems);
+            }
             logger.error('usePOSReceiving', 'Error confirming receipt:', err);
             addNotification('alert', `${t('posCommand.failedToFinalize')} ${err.message}`);
         } finally {

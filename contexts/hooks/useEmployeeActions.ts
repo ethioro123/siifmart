@@ -102,22 +102,19 @@ export function useEmployeeActions(deps: UseEmployeeActionsDeps) {
                 reconciliationStatus: 'Pending'
             };
 
-            // 1. Optimistic local state update
-            setShifts(prev => [shift, ...prev.filter(s => !(s.status === 'Open' && (s.cashierId === cashierId || s.counterNumber === resolvedCounter || s.counter_number === resolvedCounter)))]);
+            // 1. Persist directly to Supabase
+            await shiftsService.create(shift);
 
-            // 2. Persist directly to Supabase with resilient fallback
-            try {
-                await shiftsService.create(shift);
-            } catch (dbErr) {
-                logger.warn('useEmployeeActions', `Supabase shift insert error (operating optimistically): ${dbErr}`);
-            }
+            // 2. State update only after successful persistence
+            setShifts(prev => [shift, ...prev.filter(s => !(s.status === 'Open' && (s.cashierId === cashierId || s.counterNumber === resolvedCounter || s.counter_number === resolvedCounter)))]);
 
             const staffBadge = cashierCode ? `${cashierCode} (${staffName})` : staffName;
             addNotification('success', `Shift started on ${resolvedCounter} for ${staffBadge} with ${openingFloat.toLocaleString()} float`);
             logSystemEvent('Start Shift', `Started shift ${formattedShiftNumber} on ${resolvedCounter} for ${staffBadge} with float ${openingFloat}`, staffName, 'HR');
         } catch (error) {
             logger.error('useEmployeeActions', 'Failed to start shift:', error as Error);
-            addNotification('alert', 'Failed to start shift');
+            addNotification('alert', 'Failed to start shift in database');
+            throw error;
         }
     }, [activeSiteId, activeSite?.id, employees, shifts, addNotification, logSystemEvent, setShifts]);
 
@@ -133,17 +130,18 @@ export function useEmployeeActions(deps: UseEmployeeActionsDeps) {
                 closedBy: staffName
             };
 
-            // 1. Optimistic local state update
-            setShifts(prev => prev.map(s => s.id === shift.id ? closedShift : s));
-
-            // 2. Persist directly to Supabase
+            // 1. Persist directly to Supabase first
             await shiftsService.update(shift.id, closedShift);
+
+            // 2. State update only after successful persistence
+            setShifts(prev => prev.map(s => s.id === shift.id ? closedShift : s));
 
             addNotification('success', 'Shift closed & submitted for HQ audit');
             logSystemEvent('Close Shift', `Closed shift for ${staffName}. Variance: ${closedShift.variance || 0}`, staffName, 'HR');
         } catch (error) {
             logger.error('useEmployeeActions', 'Failed to close shift:', error as Error);
             addNotification('alert', 'Failed to close shift in database');
+            throw error;
         }
     }, [employees, addNotification, logSystemEvent, setShifts]);
 

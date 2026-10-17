@@ -22,14 +22,15 @@ export default function StepIdentity({
     const [showPassword, setShowPassword] = useState(false);
     const isHQ = ['super_admin', 'admin', 'CEO', 'hr_manager', 'hr', 'operations_manager', 'finance_manager'].includes(user?.role || '');
     const isRegional = ['regional_manager', 'regional_hr_officer', 'regional_procurement_lead', 'regional_finance_officer', 'regional_logistics_lead', 'regional_security_supervisor'].includes(user?.role || '');
+    const effectiveRegion = user?.regionCode || (user as any)?.region_code || activeSite?.regionCode || (activeSite as any)?.region_code;
 
     const selectableSites = React.useMemo(() => {
         if (isHQ) return sites;
-        if (isRegional && user?.regionCode) {
-            return sites.filter(s => s.regionCode === user.regionCode || (s as any).region_code === user.regionCode);
+        if (isRegional && effectiveRegion) {
+            return sites.filter(s => s.regionCode === effectiveRegion || (s as any).region_code === effectiveRegion);
         }
         return sites.filter(s => s.id === (newEmpData.siteId || activeSite?.id));
-    }, [isHQ, isRegional, sites, user?.regionCode, newEmpData.siteId, activeSite?.id]);
+    }, [isHQ, isRegional, sites, effectiveRegion, newEmpData.siteId, activeSite?.id]);
 
     const canAssignSites = isHQ || (isRegional && selectableSites.length > 0);
 

@@ -28,7 +28,15 @@ export const CandidateModal: React.FC<CandidateModalProps> = ({
     const allowedRoles = recruitmentService.getAllowedRolesForManager(user?.role || '');
     const userRoleLevel = recruitmentService.getUserRoleLevel(user?.role || '');
     const isSiteManager = userRoleLevel === 3;
-    const defaultSiteId = isSiteManager ? (user?.siteId || activeSite?.id || '') : (activeSite?.id || '');
+    const isRegional = ['regional_manager', 'regional_hr_officer', 'regional_procurement_lead', 'regional_finance_officer', 'regional_logistics_lead', 'regional_security_supervisor'].includes(user?.role || '');
+    const userRegion = user?.regionCode || (user as any)?.region_code || activeSite?.regionCode || (activeSite as any)?.region_code;
+    const regionalSites = isRegional && userRegion 
+        ? sites.filter(s => s.regionCode === userRegion || (s as any).region_code === userRegion)
+        : sites;
+
+    const defaultSiteId = isSiteManager 
+        ? (user?.siteId || activeSite?.id || '') 
+        : (isRegional ? (regionalSites.find(s => s.id === activeSite?.id)?.id || regionalSites[0]?.id || '') : (activeSite?.id || ''));
 
     const [reqId, setReqId] = useState(selectedReqId || '');
     const [name, setName] = useState('');

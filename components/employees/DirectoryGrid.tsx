@@ -3,6 +3,7 @@ import { Loader2, User, AlertTriangle, MapPin } from 'lucide-react';
 import { Employee, Site, UserRole } from '../../types';
 import { SYSTEM_ROLES, canViewLocation } from '../../utils/roles';
 import { evaluateGeofence, formatSiteAssignment } from '../../utils/geofence';
+import WorkforceScopeBadge from './WorkforceScopeBadge';
 
 interface DirectoryGridProps {
    displayedEmployees: Employee[];
@@ -83,6 +84,7 @@ export default function DirectoryGrid({
                         <p className="text-xs font-medium text-[var(--theme-text-secondary)] mt-0.5 truncate">
                            {roleConfig.label}
                         </p>
+                        <div className="mt-1"><WorkforceScopeBadge employee={employee} /></div>
                         
                         {/* Site Scoping / Unassigned Warning */}
                         {siteInfo.isWarning ? (

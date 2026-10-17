@@ -10,6 +10,7 @@ import { logger } from '../../utils/logger';
 import { findCountryAdminSite } from '../../utils/countryAdmin';
 import { setCurrencySymbol } from '../../constants/categories';
 import { regionsService } from '../../services/regions.service';
+import { useQuery } from '@tanstack/react-query';
 
 function getSiteCountry(s: Site): Country {
   if (s.country) return s.country;
@@ -87,18 +88,12 @@ export function useCountryScoping({
     return null;
   });
 
-  const [regions, setRegions] = useState<Region[]>([]);
-
-  // Fetch regions for effective sovereign country
-  useEffect(() => {
-    let isMounted = true;
-    regionsService.getRegions(effectiveCountry).then(data => {
-      if (isMounted) setRegions(data);
-    }).catch(err => {
-      logger.warn('useCountryScoping', 'Failed to load regions for country:', err);
-    });
-    return () => { isMounted = false; };
-  }, [effectiveCountry]);
+  // Cache country-specific region data across route/provider remounts.
+  const { data: regions = [] } = useQuery<Region[]>({
+    queryKey: ['regions', effectiveCountry],
+    queryFn: () => regionsService.getRegions(effectiveCountry),
+    staleTime: 10 * 60 * 1000
+  });
 
   // Sync regional lock for regional users or reset on country change for HQ
   useEffect(() => {
