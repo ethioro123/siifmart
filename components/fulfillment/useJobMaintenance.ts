@@ -204,8 +204,73 @@ export const useJobMaintenance = (deps: UseJobMaintenanceDeps) => {
             }
         }
 
-        if (fixedPOs > 0 || fixedNumbers > 0 || fixedGhosts > 0) {
-            addNotification('success', `Maintenance Complete: Fixed ${fixedPOs} POs, synced ${fixedNumbers} job numbers, and cleaned ${fixedGhosts} ghost jobs.`);
+        // 4. Auto-Heal Missing RECEIVE Jobs for Approved / Partially Received POs
+        const eligiblePOs = orders.filter(o => o.status === 'Approved' || o.status === 'Partially Received');
+        let restoredInboundJobs = 0;
+
+        for (const po of eligiblePOs) {
+            const hasInboundJob = jobs.some(j => 
+                j.type === 'RECEIVE' && 
+                ['Pending', 'In-Progress'].includes(j.status || '') &&
+                (j.orderRef === po.id || (po.poNumber && j.jobNumber === po.poNumber) || (po.po_number && j.jobNumber === po.po_number))
+            );
+
+            if (!hasInboundJob && po.lineItems && po.lineItems.length > 0) {
+                const hasPendingItems = po.lineItems.some(li => {
+                    const expected = li.quantity || 0;
+                    const received = li.receivedQty || 0;
+                    return received < expected;
+                });
+
+                if (hasPendingItems) {
+                    logger.debug('useJobMaintenance', `[Auto-Fix] Restoring missing RECEIVE job for PO ${po.poNumber || po.id}`);
+                    const jobItems = po.lineItems.map((item: any) => ({
+                        productId: item.productId || 'UNKNOWN',
+                        name: item.productName || 'Unknown Item',
+                        sku: item.sku || '',
+                        image: item.image || '',
+                        brand: item.brand || '',
+                        size: item.size || '',
+                        unit: item.unit || '',
+                        category: item.category || '',
+                        expectedQty: item.quantity || 0,
+                        pickedQty: 0,
+                        receivedQty: item.receivedQty || 0,
+                        status: (item.receivedQty || 0) >= (item.quantity || 0) ? ('Completed' as const) : ('Pending' as const)
+                    }));
+
+                    let priority: any = po.priority || 'Normal';
+                    if (priority === 'Urgent') priority = 'Critical';
+                    if (priority === 'Low') priority = 'Normal';
+
+                    const targetCountry = po.countryCode || (po as any).country_code || (po.currency === 'KSh' || po.currency === 'KES' ? 'KE' : undefined) || activeSite?.country || 'ET';
+
+                    try {
+                        const created = await wmsJobsService.create({
+                            siteId: po.siteId || activeSite?.id || '',
+                            countryCode: targetCountry,
+                            country_code: targetCountry,
+                            type: 'RECEIVE',
+                            priority,
+                            status: 'Pending',
+                            items: jobItems.length,
+                            lineItems: jobItems,
+                            orderRef: po.id,
+                            jobNumber: po.poNumber || po.po_number || po.id,
+                            location: 'INBOUND_DOCK'
+                        } as any);
+
+                        setJobs(prev => [created, ...prev]);
+                        restoredInboundJobs++;
+                    } catch (e) {
+                        logger.error('useJobMaintenance', `Failed to restore missing RECEIVE job for PO ${po.id}`, e as Error);
+                    }
+                }
+            }
+        }
+
+        if (fixedPOs > 0 || fixedNumbers > 0 || fixedGhosts > 0 || restoredInboundJobs > 0) {
+            addNotification('success', `Maintenance Complete: Fixed ${fixedPOs} POs, synced ${fixedNumbers} job numbers, cleaned ${fixedGhosts} ghost jobs, and restored ${restoredInboundJobs} missing inbound tasks.`);
             refreshJobs();
         } else {
             addNotification('info', 'All jobs look healthy.');

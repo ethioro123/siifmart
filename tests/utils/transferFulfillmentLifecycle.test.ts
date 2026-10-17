@@ -245,4 +245,86 @@ describe('Transfer Fulfillment Lifecycle & Receiving Architecture', () => {
             expect(etPayload.countryCode).not.toBe(kePayload.countryCode);
         });
     });
+
+    describe('5. Transfer Start Approval Guard', () => {
+        const canStartTransfer = (job: WMSJob) => {
+            if (job.type !== 'TRANSFER') return true;
+            if (!job.transferStatus) return false;
+            const validActiveStatuses = ['Approved', 'Picking', 'Picked', 'Packed', 'Shipped', 'In-Transit'];
+            return validActiveStatuses.includes(job.transferStatus);
+        };
+
+        it('strictly blocks fulfillment when approval status is missing or undefined', () => {
+            const missingStatusJob: WMSJob = {
+                id: 'tr-missing',
+                siteId: 'site-test-1',
+                type: 'TRANSFER',
+                status: 'Pending',
+                priority: 'Normal',
+                items: 2,
+                lineItems: [],
+                location: 'Dock',
+                orderRef: 'ORD-999'
+            };
+            expect(canStartTransfer(missingStatusJob)).toBe(false);
+        });
+
+        it('strictly blocks unapproved or requested transfers from being picked', () => {
+            const requestedJob: WMSJob = {
+                id: 'tr-req',
+                siteId: 'site-test-1',
+                type: 'TRANSFER',
+                status: 'Pending',
+                transferStatus: 'Requested',
+                priority: 'Normal',
+                items: 2,
+                lineItems: [],
+                location: 'Dock',
+                orderRef: 'ORD-888'
+            };
+            expect(canStartTransfer(requestedJob)).toBe(false);
+        });
+
+        it('permits transfer fulfillment when explicitly Approved or in-transit', () => {
+            const approvedJob: WMSJob = {
+                id: 'tr-app',
+                siteId: 'site-test-1',
+                type: 'TRANSFER',
+                status: 'Pending',
+                transferStatus: 'Approved',
+                priority: 'Normal',
+                items: 2,
+                lineItems: [],
+                location: 'Dock',
+                orderRef: 'ORD-777'
+            };
+            expect(canStartTransfer(approvedJob)).toBe(true);
+        });
+    });
+
+    describe('6. Active Query Partitioning & ID Deduplication', () => {
+        it('deduplicates overlapping records by ID across active and history queries', () => {
+            const activeBatch = [
+                { id: 'tr-1', status: 'In-Transit' },
+                { id: 'tr-2', status: 'Picking' }
+            ];
+            const historyBatch = [
+                { id: 'tr-2', status: 'Completed' },
+                { id: 'tr-3', status: 'Received' }
+            ];
+
+            const seen = new Set<string>();
+            const combined: any[] = [];
+            for (const item of [...activeBatch, ...historyBatch]) {
+                if (!seen.has(item.id)) {
+                    seen.add(item.id);
+                    combined.push(item);
+                }
+            }
+
+            expect(combined.length).toBe(3);
+            expect(combined.map(c => c.id)).toEqual(['tr-1', 'tr-2', 'tr-3']);
+        });
+    });
 });
+

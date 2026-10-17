@@ -140,3 +140,27 @@ export function autoSelectSiteForRole(
 
     return matchingSite?.id || null;
 }
+
+/**
+ * Validate that an employee assignment respects the creator's regional boundary
+ */
+export function validateRegionalBoundary(
+    creatorRole: string | undefined,
+    creatorRegionCode: string | undefined,
+    targetSite: { regionCode?: string; region_code?: string } | undefined
+): string | null {
+    if (!creatorRole || !creatorRegionCode) return null;
+    const isRegional = ['regional_manager', 'regional_hr_officer', 'regional_procurement_lead', 'regional_finance_officer', 'regional_logistics_lead', 'regional_security_supervisor'].includes(creatorRole);
+    if (!isRegional) return null;
+
+    if (!targetSite) {
+        return `Regional Boundary Error: Target facility not found. You can only assign staff to a facility within your region (${creatorRegionCode}).`;
+    }
+
+    const siteRegion = targetSite.regionCode || targetSite.region_code;
+    if (siteRegion && siteRegion !== creatorRegionCode) {
+        return `Regional Boundary Error: Unauthorized facility assignment. You are restricted to region "${creatorRegionCode}", but the chosen facility belongs to "${siteRegion}".`;
+    }
+
+    return null;
+}

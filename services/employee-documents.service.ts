@@ -3,36 +3,6 @@ import type { EmployeeDocumentRecord, DocumentType } from '../types/hr-zero-trus
 import { systemLogsService } from './system-logs.service';
 import { logger } from '../utils/logger';
 
-const LOCAL_STORAGE_KEY = 'siifmart_employee_docs_backup';
-
-let inMemoryDocs: EmployeeDocumentRecord[] = [];
-
-const getLocalBackup = (): EmployeeDocumentRecord[] => {
-    try {
-        if (typeof localStorage !== 'undefined') {
-            const raw = localStorage.getItem(LOCAL_STORAGE_KEY);
-            if (raw) return JSON.parse(raw);
-        }
-    } catch {
-        // Fallback
-    }
-    return inMemoryDocs;
-};
-
-const saveLocalBackup = (docs: EmployeeDocumentRecord[]): void => {
-    const map = new Map<string, EmployeeDocumentRecord>();
-    for (const d of inMemoryDocs) map.set(d.id, d);
-    for (const d of docs) map.set(d.id, d);
-    inMemoryDocs = Array.from(map.values());
-    try {
-        if (typeof localStorage !== 'undefined') {
-            localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(inMemoryDocs));
-        }
-    } catch {
-        // Quota safety
-    }
-};
-
 const mapDBToDoc = (row: any): EmployeeDocumentRecord => ({
     id: row.id,
     country_code: (row.country_code || 'ET').toUpperCase(),
@@ -61,16 +31,15 @@ export const employeeDocumentsService = {
                 .order('created_at', { ascending: false });
 
             if (error) {
-                logger.warn('employeeDocumentsService', 'Supabase fetch error, fallback to local', { message: error.message });
-                return getLocalBackup().filter(d => d.employee_id === employeeId);
+                logger.warn('employeeDocumentsService', 'Supabase fetch error', { message: error.message });
+                // Never leak cached documents across users or on RLS permission denial
+                return [];
             }
 
-            const mapped = (data || []).map(mapDBToDoc);
-            saveLocalBackup(mapped);
-            return mapped;
+            return (data || []).map(mapDBToDoc);
         } catch (err) {
-            logger.warn('employeeDocumentsService', 'Exception fetching docs, fallback to local', { error: String(err) });
-            return getLocalBackup().filter(d => d.employee_id === employeeId);
+            logger.warn('employeeDocumentsService', 'Exception fetching docs', { error: String(err) });
+            return [];
         }
     },
 
@@ -114,14 +83,14 @@ export const employeeDocumentsService = {
                 .single();
 
             if (error) {
-                logger.warn('employeeDocumentsService', 'Supabase insert error, saved locally', { message: error.message });
-                saveLocalBackup([newDoc]);
+                logger.warn('employeeDocumentsService', 'Supabase insert error', { message: error.message });
+                throw error;
             } else if (dbData) {
-                saveLocalBackup([mapDBToDoc(dbData)]);
+                return mapDBToDoc(dbData);
             }
         } catch (err) {
-            logger.warn('employeeDocumentsService', 'Exception inserting doc, saved locally', { error: String(err) });
-            saveLocalBackup([newDoc]);
+            logger.warn('employeeDocumentsService', 'Exception inserting doc', { error: String(err) });
+            throw err;
         }
 
         // Synaptic Neural Mesh: Audit log
@@ -159,14 +128,6 @@ export const employeeDocumentsService = {
             logger.warn('employeeDocumentsService', 'Exception deleting doc', { error: String(err) });
         }
 
-        inMemoryDocs = inMemoryDocs.filter(d => d.id !== id);
-        try {
-            if (typeof localStorage !== 'undefined') {
-                localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(inMemoryDocs));
-            }
-        } catch {
-            // Safe
-        }
 
         // Synaptic Neural Mesh: Audit log
         try {

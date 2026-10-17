@@ -114,7 +114,7 @@ export default function Logo({
       />
       <span 
         style={{ fontSize }}
-        className="font-serif font-bold tracking-tight leading-none inline-flex items-baseline"
+        className="brand-wordmark font-semibold tracking-[-0.055em] leading-none inline-flex items-baseline"
       >
         {effectiveStoreName.toUpperCase() === 'SIIFMART' ? (
           <>

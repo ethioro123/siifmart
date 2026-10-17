@@ -103,7 +103,7 @@ export default function LoginPage() {
         {/* Header Branding section */}
         <div className="flex flex-col items-center justify-center mb-6">
           <div className="mb-2 select-none flex flex-col items-center">
-            <Logo size={48} variant="stacked" />
+            <Logo size={42} className="justify-center" />
           </div>
           <p className="text-[10px] text-[var(--theme-text-secondary)] uppercase tracking-[0.25em] font-bold mt-1 select-none text-center px-4">
             {mode === 'login' ? (settings?.slogan || 'Operations Access Portal') : 'Security Recovery'}
@@ -220,7 +220,7 @@ export default function LoginPage() {
         )}
 
         <div className="mt-8 pt-6 border-t border-[#E2DCCE]/40 dark:border-white/[0.04] text-center select-none">
-          <p className="text-[10px] text-[#4D6E56] dark:text-[#7A9E83] font-semibold tracking-wider uppercase">SiifMart Operations v3.6.0</p>
+          <p className="text-[10px] text-[#4D6E56] dark:text-[#7A9E83] font-semibold tracking-wider uppercase">SiifMart Operations v3.6.1</p>
         </div>
       </div>
     </div>

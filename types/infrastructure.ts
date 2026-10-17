@@ -288,6 +288,12 @@ export interface TransferRecord {
   createdAt?: string;
   requestedBy: string;
   approvedBy?: string;
+  approved_by?: string;
+  approved_at?: string;
+  approvedByRole?: string;
+  approved_by_role?: string;
+  approvalNotes?: string;
+  approval_notes?: string;
   items: TransferItem[];
   notes?: string;
   jobNumber?: string;

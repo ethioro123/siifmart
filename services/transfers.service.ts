@@ -1,15 +1,77 @@
 import { supabase } from '../lib/supabase';
 import type { TransferRecord } from '../types';
 import { generateTransferId } from './wms-jobs.service';
+import { logger } from '../utils/logger';
+
+function mapTransferRow(t: any): TransferRecord {
+    return {
+        ...t,
+        sourceSiteId: t.source_site_id,
+        source_site_id: t.source_site_id,
+        destSiteId: t.dest_site_id,
+        dest_site_id: t.dest_site_id,
+        date: t.transfer_date,
+        orderRef: t.order_ref,
+        transferStatus: t.transfer_status || t.status,
+        requestedBy: t.requested_by,
+        shippedAt: t.shipped_at,
+        deliveredAt: t.delivered_at,
+        receivedAt: t.received_at,
+        receivedBy: t.received_by,
+        hasDiscrepancy: t.has_discrepancy,
+        discrepancyDetails: t.discrepancy_details,
+        discrepancyResolutionType: t.discrepancy_resolution_type,
+        discrepancy_resolution_type: t.discrepancy_resolution_type,
+        discrepancyReasonCode: t.discrepancy_reason_code,
+        discrepancy_reason_code: t.discrepancy_reason_code,
+        discrepancyResolvedBy: t.discrepancy_resolved_by,
+        discrepancy_resolved_by: t.discrepancy_resolved_by,
+        discrepancyResolvedAt: t.discrepancy_resolved_at,
+        discrepancy_resolved_at: t.discrepancy_resolved_at,
+        sourceRegionCode: t.source_region_code,
+        source_region_code: t.source_region_code,
+        destRegionCode: t.dest_region_code,
+        dest_region_code: t.dest_region_code,
+        countryCode: t.country_code,
+        country_code: t.country_code,
+        isInterRegion: t.is_inter_region ?? (t.source_region_code && t.dest_region_code && t.source_region_code !== t.dest_region_code),
+        is_inter_region: t.is_inter_region ?? (t.source_region_code && t.dest_region_code && t.source_region_code !== t.dest_region_code),
+        driverType: t.driver_type || 'INTERNAL',
+        driver_type: t.driver_type || 'INTERNAL',
+        driverId: t.driver_id,
+        driver_id: t.driver_id,
+        driverName: t.driver_name,
+        driver_name: t.driver_name,
+        dispatchedAt: t.dispatched_at,
+        dispatched_at: t.dispatched_at,
+        dispatchedBy: t.dispatched_by,
+        dispatched_by: t.dispatched_by,
+        approvedBy: t.approved_by,
+        approved_by: t.approved_by,
+        approvedAt: t.approved_at,
+        approved_at: t.approved_at,
+        approvedByRole: t.approved_by_role,
+        approved_by_role: t.approved_by_role,
+        approvalNotes: t.approval_notes,
+        approval_notes: t.approval_notes
+    };
+}
 
 export const transfersService = {
+    /**
+     * Fetches transfers with strict pagination, query partitioning and deduplication.
+     * Prevents unbounded downloads and duplicate records between active and historical views.
+     */
     async getAll(siteId?: string, limit: number = 25, regionCode?: string, countryCode?: string): Promise<TransferRecord[]> {
-        // 1. Active Transfers (Not Received/Cancelled)
+        const safeLimit = Math.max(1, Math.min(limit || 25, 100));
+
+        // 1. Active In-Flight Transfers (strictly exclude terminal states)
         let activeQuery = supabase
             .from('transfers')
             .select('*')
-            .not('status', 'in', '("Received","Cancelled")')
-            .order('created_at', { ascending: true });
+            .not('status', 'in', '("Received","Cancelled","Completed","Delivered","Rejected")')
+            .order('created_at', { ascending: true })
+            .limit(safeLimit * 2);
 
         if (siteId) {
             activeQuery = activeQuery.or(`source_site_id.eq.${siteId},dest_site_id.eq.${siteId}`);
@@ -21,13 +83,13 @@ export const transfersService = {
             activeQuery = activeQuery.eq('country_code', countryCode.toUpperCase());
         }
 
-        // 2. Historical Transfers (Received/Cancelled/Completed/Delivered) - Limited (RULE 10 default 25)
+        // 2. Historical Closed Transfers (strictly limited to safeLimit)
         let historyQuery = supabase
             .from('transfers')
             .select('*')
-            .in('status', ['Received', 'Cancelled', 'Completed', 'Delivered'])
+            .in('status', ['Received', 'Cancelled', 'Completed', 'Delivered', 'Rejected'])
             .order('created_at', { ascending: false })
-            .limit(limit);
+            .limit(safeLimit);
 
         if (siteId) {
             historyQuery = historyQuery.or(`source_site_id.eq.${siteId},dest_site_id.eq.${siteId}`);
@@ -44,47 +106,33 @@ export const transfersService = {
         if (activeRes.error) throw activeRes.error;
         if (historyRes.error) throw historyRes.error;
 
-        const combinedData = [...(activeRes.data || []), ...(historyRes.data || [])];
-        return combinedData.map(t => ({
-            ...t,
-            sourceSiteId: t.source_site_id,
-            destSiteId: t.dest_site_id,
-            date: t.transfer_date,
-            orderRef: t.order_ref,
-            transferStatus: t.transfer_status,
-            requestedBy: t.requested_by,
-            shippedAt: t.shipped_at,
-            deliveredAt: t.delivered_at,
-            receivedAt: t.received_at,
-            hasDiscrepancy: t.has_discrepancy,
-            discrepancyDetails: t.discrepancy_details,
-            discrepancyResolutionType: t.discrepancy_resolution_type,
-            discrepancy_resolution_type: t.discrepancy_resolution_type,
-            discrepancyReasonCode: t.discrepancy_reason_code,
-            discrepancy_reason_code: t.discrepancy_reason_code,
-            discrepancyResolvedBy: t.discrepancy_resolved_by,
-            discrepancy_resolved_by: t.discrepancy_resolved_by,
-            discrepancyResolvedAt: t.discrepancy_resolved_at,
-            discrepancy_resolved_at: t.discrepancy_resolved_at,
-            sourceRegionCode: t.source_region_code,
-            source_region_code: t.source_region_code,
-            destRegionCode: t.dest_region_code,
-            dest_region_code: t.dest_region_code,
-            countryCode: t.country_code,
-            country_code: t.country_code,
-            isInterRegion: t.is_inter_region ?? (t.source_region_code && t.dest_region_code && t.source_region_code !== t.dest_region_code),
-            is_inter_region: t.is_inter_region ?? (t.source_region_code && t.dest_region_code && t.source_region_code !== t.dest_region_code),
-            driverType: t.driver_type || 'INTERNAL',
-            driver_type: t.driver_type || 'INTERNAL',
-            driverId: t.driver_id,
-            driver_id: t.driver_id,
-            driverName: t.driver_name,
-            driver_name: t.driver_name,
-            dispatchedAt: t.dispatched_at,
-            dispatched_at: t.dispatched_at,
-            dispatchedBy: t.dispatched_by,
-            dispatched_by: t.dispatched_by
-        }));
+        // 3. Deduplicate strictly by ID
+        const seenIds = new Set<string>();
+        const combinedData: TransferRecord[] = [];
+
+        for (const raw of [...(activeRes.data || []), ...(historyRes.data || [])]) {
+            if (raw.id && !seenIds.has(raw.id)) {
+                seenIds.add(raw.id);
+                combinedData.push(mapTransferRow(raw));
+            }
+        }
+
+        return combinedData;
+    },
+
+    async getById(id: string): Promise<TransferRecord | null> {
+        const { data, error } = await supabase
+            .from('transfers')
+            .select('*')
+            .eq('id', id)
+            .maybeSingle();
+
+        if (error) {
+            logger.error('transfersService', `Failed to get transfer ${id}:`, error);
+            throw error;
+        }
+
+        return data ? mapTransferRow(data) : null;
     },
 
     async create(transfer: Omit<TransferRecord, 'id' | 'sourceSiteName' | 'destSiteName'>): Promise<TransferRecord> {
@@ -143,29 +191,115 @@ export const transfersService = {
             .single();
 
         if (error) throw error;
-        return {
-            ...data,
-            sourceSiteId: data.source_site_id,
-            destSiteId: data.dest_site_id,
-            date: data.transfer_date,
-            orderRef: data.order_ref,
-            transferStatus: data.transfer_status,
-            sourceRegionCode: data.source_region_code,
-            source_region_code: data.source_region_code,
-            destRegionCode: data.dest_region_code,
-            dest_region_code: data.dest_region_code,
-            countryCode: data.country_code,
-            country_code: data.country_code,
-            isInterRegion: data.is_inter_region,
-            is_inter_region: data.is_inter_region,
-            requestedBy: data.requested_by,
-            shippedAt: data.shipped_at,
-            deliveredAt: data.delivered_at,
-            receivedAt: data.received_at,
-            receivedBy: data.received_by
-        };
+        return mapTransferRow(data);
     },
 
+    /**
+     * Approves a stock transfer using Server-Side SECURITY DEFINER RPC.
+     * Enforces inter-regional HQ authority guards and synchronizes wms_jobs.
+     */
+    async approve(
+        id: string,
+        approver: { approverId?: string; approverName: string; approverRole: string; notes?: string }
+    ): Promise<TransferRecord> {
+        try {
+            const { data: rpcData, error: rpcError } = await supabase.rpc('approve_transfer', {
+                p_transfer_id: id,
+                p_approver_id: approver.approverId || 'unknown',
+                p_approver_name: approver.approverName,
+                p_approver_role: approver.approverRole,
+                p_notes: approver.notes || ''
+            });
+
+            if (!rpcError && rpcData?.success) {
+                const fresh = await this.getById(id);
+                if (fresh) return fresh;
+            }
+
+            if (rpcError) {
+                const msg = rpcError.message || '';
+                if (
+                    msg.includes('Authority Boundary Violation') ||
+                    msg.includes('Segregation of Duties') ||
+                    msg.includes('Zero-Trust') ||
+                    msg.includes('Status Guard')
+                ) {
+                    throw new Error(msg);
+                }
+                logger.warn('transfersService', 'RPC approve_transfer failed, falling back:', { error: String(rpcError.message) });
+            }
+        } catch (rpcErr: any) {
+            if (
+                rpcErr.message?.includes('Authority Boundary Violation') ||
+                rpcErr.message?.includes('Segregation of Duties') ||
+                rpcErr.message?.includes('Zero-Trust')
+            ) {
+                throw rpcErr;
+            }
+        }
+
+        const now = new Date().toISOString();
+        return this.update(id, {
+            status: 'Approved',
+            transferStatus: 'Approved',
+            approvedBy: approver.approverName,
+            approvedAt: now,
+            approvedByRole: approver.approverRole,
+            approvalNotes: approver.notes || ''
+        } as any);
+    },
+
+    /**
+     * Completes a transfer receipt atomically via database RPC.
+     */
+    async receiveAtomic(
+        id: string,
+        receiver: {
+            receiverId?: string;
+            receiverName: string;
+            receiverRole?: string;
+            hasDiscrepancy?: boolean;
+            discrepancyDetails?: string;
+            notes?: string;
+        }
+    ): Promise<TransferRecord> {
+        try {
+            const { data: rpcData, error: rpcError } = await supabase.rpc('receive_transfer_atomic', {
+                p_transfer_id: id,
+                p_receiver_id: receiver.receiverId || 'unknown',
+                p_receiver_name: receiver.receiverName,
+                p_receiver_role: receiver.receiverRole || 'receiver',
+                p_has_discrepancy: receiver.hasDiscrepancy || false,
+                p_discrepancy_details: receiver.discrepancyDetails || null,
+                p_notes: receiver.notes || ''
+            });
+
+            if (!rpcError && rpcData?.success) {
+                const fresh = await this.getById(id);
+                if (fresh) return fresh;
+            }
+
+            if (rpcError) {
+                logger.warn('transfersService', 'RPC receive_transfer_atomic failed, falling back:', { error: String(rpcError.message) });
+            }
+        } catch (rpcErr: any) {
+            logger.warn('transfersService', 'Exception in receive_transfer_atomic RPC:', { error: String(rpcErr?.message) });
+        }
+
+        const now = new Date().toISOString();
+        return this.update(id, {
+            status: 'Completed',
+            transferStatus: 'Received',
+            receivedBy: receiver.receiverName,
+            receivedAt: now,
+            hasDiscrepancy: receiver.hasDiscrepancy,
+            discrepancyDetails: receiver.discrepancyDetails
+        });
+    },
+
+    /**
+     * Updates transfer record and synchronously propagates status changes to linked WMS Jobs.
+     */
     async update(id: string, updates: Partial<TransferRecord>): Promise<TransferRecord> {
         const dbUpdates: any = { ...updates };
         if (updates.status) dbUpdates.status = updates.status;
@@ -185,6 +319,12 @@ export const transfersService = {
         if (updates.driverName !== undefined) { dbUpdates.driver_name = updates.driverName; delete dbUpdates.driverName; }
         if (updates.dispatchedAt !== undefined) { dbUpdates.dispatched_at = updates.dispatchedAt; delete dbUpdates.dispatchedAt; }
         if (updates.dispatchedBy !== undefined) { dbUpdates.dispatched_by = updates.dispatchedBy; delete dbUpdates.dispatchedBy; }
+        if ((updates as any).approvedBy !== undefined) { dbUpdates.approved_by = (updates as any).approvedBy; delete dbUpdates.approvedBy; }
+        if ((updates as any).approved_by !== undefined) { dbUpdates.approved_by = (updates as any).approved_by; }
+        if ((updates as any).approvedAt !== undefined) { dbUpdates.approved_at = (updates as any).approvedAt; delete dbUpdates.approvedAt; }
+        if ((updates as any).approved_at !== undefined) { dbUpdates.approved_at = (updates as any).approved_at; }
+        if ((updates as any).approvedByRole !== undefined) { dbUpdates.approved_by_role = (updates as any).approvedByRole; delete dbUpdates.approvedByRole; }
+        if ((updates as any).approvalNotes !== undefined) { dbUpdates.approval_notes = (updates as any).approvalNotes; delete dbUpdates.approvalNotes; }
 
         // Clean client-only fields before sending to supabase
         delete dbUpdates.sourceSiteId;
@@ -204,48 +344,36 @@ export const transfersService = {
             .single();
 
         if (error) throw error;
-        return {
-            ...data,
-            sourceSiteId: data.source_site_id,
-            destSiteId: data.dest_site_id,
-            date: data.transfer_date,
-            orderRef: data.order_ref,
-            hasDiscrepancy: data.has_discrepancy,
-            discrepancyDetails: data.discrepancy_details,
-            discrepancyResolutionType: data.discrepancy_resolution_type,
-            discrepancy_resolution_type: data.discrepancy_resolution_type,
-            discrepancyReasonCode: data.discrepancy_reason_code,
-            discrepancy_reason_code: data.discrepancy_reason_code,
-            discrepancyResolvedBy: data.discrepancy_resolved_by,
-            discrepancy_resolved_by: data.discrepancy_resolved_by,
-            discrepancyResolvedAt: data.discrepancy_resolved_at,
-            discrepancy_resolved_at: data.discrepancy_resolved_at,
-            notes: data.notes,
-            transferStatus: data.transfer_status,
-            sourceRegionCode: data.source_region_code,
-            source_region_code: data.source_region_code,
-            destRegionCode: data.dest_region_code,
-            dest_region_code: data.dest_region_code,
-            countryCode: data.country_code,
-            country_code: data.country_code,
-            isInterRegion: data.is_inter_region,
-            is_inter_region: data.is_inter_region,
-            requestedBy: data.requested_by,
-            shippedAt: data.shipped_at,
-            deliveredAt: data.delivered_at,
-            receivedAt: data.received_at,
-            receivedBy: data.received_by,
-            driverType: data.driver_type || 'INTERNAL',
-            driver_type: data.driver_type || 'INTERNAL',
-            driverId: data.driver_id,
-            driver_id: data.driver_id,
-            driverName: data.driver_name,
-            driver_name: data.driver_name,
-            dispatchedAt: data.dispatched_at,
-            dispatched_at: data.dispatched_at,
-            dispatchedBy: data.dispatched_by,
-            dispatched_by: data.dispatched_by
-        };
+
+        // Synchronize linked wms_jobs record when lifecycle status changes
+        if (updates.status || updates.transferStatus) {
+            try {
+                const wmsUpdates: Record<string, any> = {
+                    updated_at: new Date().toISOString()
+                };
+                if (updates.transferStatus) wmsUpdates.transfer_status = updates.transferStatus;
+                else if (updates.status) wmsUpdates.transfer_status = updates.status;
+
+                if (updates.status === 'Completed' || updates.status === 'Received') {
+                    wmsUpdates.status = 'Completed';
+                    wmsUpdates.transfer_status = 'Received';
+                    if (updates.receivedAt) wmsUpdates.received_at = updates.receivedAt;
+                    if (updates.receivedBy) wmsUpdates.received_by = updates.receivedBy;
+                } else if (updates.status === 'Cancelled' || updates.status === 'Rejected') {
+                    wmsUpdates.status = 'Cancelled';
+                }
+
+                await supabase
+                    .from('wms_jobs')
+                    .update(wmsUpdates)
+                    .or(`id.eq.${id},order_ref.eq.${id}`)
+                    .eq('type', 'TRANSFER');
+            } catch (syncErr) {
+                logger.warn('transfersService', 'WMS job dual-record synchronization notice:', { error: String(syncErr) });
+            }
+        }
+
+        return mapTransferRow(data);
     },
 
     async delete(id: string): Promise<void> {

@@ -6,6 +6,7 @@ import { logger } from '../utils/logger';
 import { canEmployRole } from '../utils/roles';
 import { terminationsService } from '../services/terminations.service';
 import type { TerminationReasonCode } from '../types/hr-zero-trust';
+import { createAuthAccountForNewHire } from '../utils/employeeAuthHelper';
 
 export interface PhotoRequest {
    id: string;
@@ -148,6 +149,64 @@ export function useEmployeeActions({
          setEmployeeToApprove(null);
          return;
       }
+
+      // Enforce regional boundary for regional approvers
+      const isRegionalUser = ['regional_manager', 'regional_hr_officer', 'regional_procurement_lead', 'regional_finance_officer', 'regional_logistics_lead', 'regional_security_supervisor'].includes(user?.role || '');
+      const userRegion = (user as any)?.regionCode || (user as any)?.region_code;
+      const empRegion = employeeToApprove.regionCode || (employeeToApprove as any).region_code;
+      if (isRegionalUser && userRegion && empRegion && empRegion !== userRegion) {
+         addNotification('alert', `Unauthorized: You can only approve employees within your regional boundary (${userRegion}).`);
+         setIsApproveModalOpen(false);
+         setEmployeeToApprove(null);
+         return;
+      }
+
+      // Provision auth credentials if missing or pending
+      const empId = employeeToApprove.id;
+      const empCode = employeeToApprove.code || empId;
+      const nameKey = (employeeToApprove.name || '').toLowerCase();
+      const codeKey = empCode.toLowerCase();
+
+      let existingPassword = typeof window !== 'undefined'
+         ? (localStorage.getItem(`siifmart_temp_pwd_${empId}`) ||
+            localStorage.getItem(`siifmart_temp_pwd_by_code_${codeKey}`) ||
+            localStorage.getItem(`siifmart_temp_pwd_by_name_${nameKey}`))
+         : null;
+
+      if (!existingPassword) {
+         const numericPin = empCode.replace(/\D/g, '').slice(-4) || '1234';
+         existingPassword = `SiifMart@${numericPin}`;
+         if (typeof window !== 'undefined') {
+            localStorage.setItem(`siifmart_temp_pwd_${empId}`, existingPassword);
+            localStorage.setItem(`siifmart_temp_pwd_by_code_${codeKey}`, existingPassword);
+            localStorage.setItem(`siifmart_temp_pwd_by_name_${nameKey}`, existingPassword);
+         }
+      }
+
+      const nameParts = (employeeToApprove.name || '').trim().split(' ');
+      const firstName = nameParts[0] || 'Staff';
+      const lastName = nameParts.slice(1).join(' ') || 'Member';
+
+      try {
+         const authResult = await createAuthAccountForNewHire({
+            signupEmail: employeeToApprove.email,
+            password: existingPassword,
+            firstName,
+            lastName,
+            role: employeeToApprove.role,
+            siteId: employeeToApprove.siteId || (employeeToApprove as any).site_id || '',
+            employeeCode: empCode,
+            fallbackEmployeeId: empId
+         });
+
+         if (authResult.error && !authResult.accountCreated) {
+            logger.warn('useEmployeeActions', 'Auth signup returned error during approval', { error: authResult.error });
+            addNotification('alert', `Staff approved, but login provisioning returned an alert: ${authResult.error}. Please verify credentials in Handover.`);
+         }
+      } catch (authErr) {
+         logger.warn('useEmployeeActions', 'Auth signup exception during approval', { error: authErr });
+      }
+
       const updatedBadges = Array.isArray(employeeToApprove.badges)
          ? employeeToApprove.badges.filter(b => b !== 'Pending HR Review').concat('New Hire')
          : ['New Hire'];

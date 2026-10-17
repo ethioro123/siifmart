@@ -24,6 +24,14 @@ const supabaseAgent = new https.Agent({
   }
 });
 
+// Guard against network disconnects/sleep killing the Vite dev server process
+process.on('uncaughtException', (err: any) => {
+  if (err?.code === 'ENETUNREACH' || err?.code === 'ETIMEDOUT' || err?.code === 'ECONNRESET' || err?.code === 'EADDRNOTAVAIL') {
+    return;
+  }
+  console.error('Unhandled server exception:', err);
+});
+
 export default defineConfig(() => {
   const isElectron = process.env.ELECTRON === 'true' || process.env.npm_lifecycle_event?.includes('electron');
   const isCapacitor = process.env.CAPACITOR === 'true' || process.env.npm_lifecycle_event?.includes('android');

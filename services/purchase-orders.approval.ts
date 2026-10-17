@@ -131,49 +131,82 @@ export const purchaseOrdersApprovalService = {
     }
 
     // 3. Auto-Trigger WMS Inbound Receiving Job for the approved PO
-    try {
-      const { count } = await supabase
-        .from('wms_jobs')
-        .select('*', { count: 'exact', head: true })
-        .eq('order_ref', poId)
-        .eq('type', 'RECEIVE');
+    let jobCreationError: Error | null = null;
+    const maxAttempts = 2;
+    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+      try {
+        const { count } = await supabase
+          .from('wms_jobs')
+          .select('*', { count: 'exact', head: true })
+          .eq('order_ref', poId)
+          .eq('type', 'RECEIVE');
 
-      if (!count || count === 0) {
-        const jobItems = (currentPO.lineItems || []).map((item: any) => ({
-          productId: item.productId || 'UNKNOWN',
-          name: item.productName || 'Unknown Item',
-          sku: item.sku || '',
-          image: item.image || '',
-          brand: item.brand || '',
-          size: item.size || '',
-          unit: item.unit || '',
-          category: item.category || '',
-          expectedQty: item.quantity || 0,
-          pickedQty: 0,
-          receivedQty: 0,
-          status: 'Pending'
-        }));
+        if (!count || count === 0) {
+          const jobItems = (currentPO.lineItems || []).map((item: any) => ({
+            productId: item.productId || 'UNKNOWN',
+            name: item.productName || 'Unknown Item',
+            sku: item.sku || '',
+            image: item.image || '',
+            brand: item.brand || '',
+            size: item.size || '',
+            unit: item.unit || '',
+            category: item.category || '',
+            expectedQty: item.quantity || 0,
+            pickedQty: 0,
+            receivedQty: 0,
+            status: 'Pending'
+          }));
 
-        let priority: any = currentPO.priority || 'Normal';
-        if (priority === 'Urgent') priority = 'Critical';
-        if (priority === 'Low') priority = 'Normal';
+          let priority: any = currentPO.priority || 'Normal';
+          if (priority === 'Urgent') priority = 'Critical';
+          if (priority === 'Low') priority = 'Normal';
 
-        await wmsJobsService.create({
-          siteId: currentPO.siteId,
-          countryCode: (currentPO as any).country_code || (currentPO as any).countryCode || 'ET',
-          type: 'RECEIVE',
-          priority,
-          status: 'Pending',
-          items: jobItems.length,
-          lineItems: jobItems,
-          orderRef: poId,
-          jobNumber: currentPO.po_number || currentPO.id,
-          location: 'INBOUND_DOCK',
-          sourceSiteId: undefined
+          await wmsJobsService.create({
+            siteId: currentPO.siteId,
+            countryCode: (currentPO as any).country_code || (currentPO as any).countryCode || 'ET',
+            type: 'RECEIVE',
+            priority,
+            status: 'Pending',
+            items: jobItems.length,
+            lineItems: jobItems,
+            orderRef: poId,
+            jobNumber: currentPO.po_number || currentPO.id,
+            location: 'INBOUND_DOCK',
+            sourceSiteId: undefined
+          });
+        }
+        jobCreationError = null;
+        break;
+      } catch (jobErr) {
+        jobCreationError = jobErr as Error;
+        logger.warn('PurchaseOrdersApproval', `Attempt ${attempt}/${maxAttempts} to initialize inbound receiving task failed`, {
+          error: jobErr instanceof Error ? jobErr.message : String(jobErr)
         });
+        if (attempt < maxAttempts) {
+          await new Promise(res => setTimeout(res, 250));
+        }
       }
-    } catch (jobErr) {
-      logger.error('PurchaseOrdersApproval', 'Failed to auto-create WMS receiving job', jobErr as Error);
+    }
+
+    if (jobCreationError) {
+      logger.error('PurchaseOrdersApproval', 'Failed to auto-create WMS receiving job after retries', jobCreationError);
+      try {
+        await systemLogsService.create({
+          action: 'WMS_RECEIVING_JOB_INIT_FAILED',
+          module: 'Procurement',
+          user_name: approverName,
+          site_id: currentPO.siteId,
+          country_code: (currentPO as any).country_code || (currentPO as any).countryCode || 'ET',
+          entity_type: 'purchase_order',
+          entity_id: poId,
+          details: {
+            poNumber: currentPO.po_number || poId,
+            error: jobCreationError.message
+          }
+        });
+      } catch { }
+
+      throw new Error(`PO ${currentPO.po_number || poId} was approved, but the inbound warehouse receiving task failed to initialize: ${jobCreationError.message}. Please run Job Maintenance to generate the receiving job.`);
     }
 
     return await getById(poId);

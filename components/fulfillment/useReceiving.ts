@@ -257,9 +257,6 @@ export const useReceiving = (deps: UseReceivingDeps) => {
             const results = await Promise.all(jobPromises);
             const newJobs = results.map(r => r.job);
 
-            // Update local state
-            setJobs(prev => [...prev, ...newJobs]);
-
             // Persist received line items and stamp receiver
             const updatedLineItems = (po.lineItems || []).map((li, idx) => {
                 const processed = itemsToProcess.find(it => it.index === idx);
@@ -281,8 +278,14 @@ export const useReceiving = (deps: UseReceivingDeps) => {
                     receivedBy: actionUser?.name || po.receivedBy
                 });
             } catch (err) {
-                logger.warn('useReceiving', 'Could not sync line items on PO', { error: err instanceof Error ? err.message : JSON.stringify(err) });
+                // Roll back created jobs so the PO and jobs never diverge (prevents duplicate putaway jobs on retry)
+                await Promise.all(newJobs.map(j => j?.id ? wmsJobsService.delete(j.id).catch(() => null) : null));
+                logger.error('useReceiving', 'Could not sync line items on PO; rolled back putaway jobs', err as Error);
+                throw new Error('Failed to record received items on purchase order. Putaway jobs rolled back — please retry.');
             }
+
+            // Update local state ONLY after persistence succeeds
+            setJobs(prev => [...prev, ...newJobs]);
 
             // Refresh PO details
             const updatedPO = await purchaseOrdersService.getById(poId);

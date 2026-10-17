@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Employee, Site, UserRole } from '../types';
-import { autoSelectSiteForRole, getRecommendedDepartment, validateRoleSiteAssignment, getRoleLocationDescription, canRoleBeAtSiteType } from '../utils/roleSegregation';
+import { autoSelectSiteForRole, getRecommendedDepartment, validateRoleSiteAssignment, getRoleLocationDescription, canRoleBeAtSiteType, validateRegionalBoundary } from '../utils/roleSegregation';
 import { SYSTEM_ROLES, canEmployRole, getRoleHierarchy } from '../utils/roles';
 import { logger } from '../utils/logger';
 import { employeesService } from '../services/employees.service';
@@ -44,6 +44,15 @@ interface UseEmployeeWizardProps {
 }
 
 const DEPARTMENTS = ['Retail Operations', 'Logistics & Warehouse', 'Finance', 'Management', 'Human Resources', 'Security', 'Transport', 'Procurement'];
+
+const ROLE_POOLS: Partial<Record<UserRole, UserRole[]>> = {
+   store_manager: ['assistant_manager', 'shift_lead', 'cashier', 'sales_associate', 'stock_clerk', 'customer_service', 'pos', 'cs_manager', 'store_supervisor', 'merchandiser'],
+   warehouse_manager: ['assistant_manager', 'shift_lead', 'picker', 'packer', 'receiver', 'driver', 'forklift_operator', 'inventory_specialist', 'dispatcher'],
+   dispatch_manager: ['driver', 'dispatcher'],
+   logistics_manager: ['assistant_manager', 'shift_lead', 'fleet_maintenance_supervisor', 'driver', 'dispatcher'],
+   inventory_manager: ['assistant_manager', 'shift_lead', 'replenishment_planner', 'inventory_specialist', 'stock_clerk', 'receiver'],
+   security_manager: ['loss_prevention']
+};
 
 export function useEmployeeWizard({
    user,
@@ -99,34 +108,8 @@ export function useEmployeeWizard({
          return SYSTEM_ROLES.filter(r => canEmployRole(user.role, r.id)).map(r => r.id);
       }
 
-      if (user.role === 'store_manager') {
-         const storePool: UserRole[] = ['assistant_manager', 'shift_lead', 'cashier', 'sales_associate', 'stock_clerk', 'customer_service', 'pos', 'cs_manager', 'store_supervisor', 'merchandiser'];
-         return storePool.filter(roleId => canEmployRole(user.role, roleId));
-      }
-
-      if (user.role === 'warehouse_manager') {
-         const warehousePool: UserRole[] = ['assistant_manager', 'shift_lead', 'picker', 'packer', 'receiver', 'driver', 'forklift_operator', 'inventory_specialist', 'dispatcher'];
-         return warehousePool.filter(roleId => canEmployRole(user.role, roleId));
-      }
-
-      if (user.role === 'dispatch_manager') {
-         const dispatchPool: UserRole[] = ['driver', 'dispatcher'];
-         return dispatchPool.filter(roleId => canEmployRole(user.role, roleId));
-      }
-
-      if (user.role === 'logistics_manager') {
-         const logisticsPool: UserRole[] = ['assistant_manager', 'shift_lead', 'fleet_maintenance_supervisor', 'driver', 'dispatcher'];
-         return logisticsPool.filter(roleId => canEmployRole(user.role, roleId));
-      }
-
-      if (user.role === 'inventory_manager') {
-         const inventoryPool: UserRole[] = ['assistant_manager', 'shift_lead', 'replenishment_planner', 'inventory_specialist', 'stock_clerk', 'receiver'];
-         return inventoryPool.filter(roleId => canEmployRole(user.role, roleId));
-      }
-
-      if (user.role === 'security_manager') {
-         const securityPool: UserRole[] = ['loss_prevention'];
-         return securityPool.filter(roleId => canEmployRole(user.role, roleId));
+      if (ROLE_POOLS[user.role]) {
+         return ROLE_POOLS[user.role]!.filter(roleId => canEmployRole(user.role, roleId));
       }
 
       return [];
@@ -191,11 +174,17 @@ export function useEmployeeWizard({
    };
 
    const handleRoleChange = (newRole: UserRole) => {
+      const isRegional = ['regional_manager', 'regional_hr_officer', 'regional_procurement_lead', 'regional_finance_officer', 'regional_logistics_lead', 'regional_security_supervisor'].includes(user?.role || '');
+      const userRegion = (user as any)?.regionCode || (user as any)?.region_code;
+      const candidateSites = isRegional && userRegion
+         ? sites.filter(s => s.regionCode === userRegion || (s as any).region_code === userRegion)
+         : sites;
+
       const currentSite = sites.find(s => s.id === newEmpData.siteId);
       let nextSiteId = newEmpData.siteId;
 
       if (!currentSite || !canRoleBeAtSiteType(newRole, currentSite.type)) {
-         const autoSiteId = autoSelectSiteForRole(newRole, sites);
+         const autoSiteId = autoSelectSiteForRole(newRole, candidateSites);
          if (autoSiteId) {
             nextSiteId = autoSiteId;
          }
@@ -208,6 +197,7 @@ export function useEmployeeWizard({
    };
 
    const handleWizardNext = () => {
+      const userRegion = (user as any)?.regionCode || (user as any)?.region_code;
       if (addStep === 1) {
          if (!newEmpData.firstName.trim()) {
             addNotification('alert', 'First Name is required.');
@@ -226,6 +216,11 @@ export function useEmployeeWizard({
             addNotification('alert', 'The selected workplace location does not exist. Please select a valid location.');
             return;
          }
+         const regErr = validateRegionalBoundary(user?.role, userRegion, targetSite);
+         if (regErr) {
+            addNotification('alert', regErr);
+            return;
+         }
       }
       if (addStep === 2) {
          if (!newEmpData.siteId || !newEmpData.siteId.trim()) {
@@ -235,6 +230,11 @@ export function useEmployeeWizard({
          const selectedSite = sites.find(s => s.id === newEmpData.siteId);
          if (!selectedSite) {
             addNotification('alert', 'Assigned workplace location does not exist in the system.');
+            return;
+         }
+         const regErr = validateRegionalBoundary(user?.role, userRegion, selectedSite);
+         if (regErr) {
+            addNotification('alert', regErr);
             return;
          }
          const validationError = validateRoleSiteAssignment(newEmpData.role, selectedSite.type);
@@ -266,6 +266,14 @@ export function useEmployeeWizard({
          const errorMsg = 'Invalid workplace location. The assigned location does not exist in the system.';
          addNotification('alert', errorMsg);
          return errorMsg;
+      }
+
+      const userRegion = (user as any)?.regionCode || (user as any)?.region_code;
+      const regErr = validateRegionalBoundary(user?.role, userRegion, selectedSite);
+      if (regErr) {
+         setIsSubmitting(false);
+         addNotification('alert', regErr);
+         return regErr;
       }
 
       const creatableRoles = getCreatableRoles();
@@ -357,6 +365,9 @@ export function useEmployeeWizard({
             });
             employeeId = authRes.employeeId;
             signupEmail = authRes.finalEmail;
+            if (authRes.error && !authRes.accountCreated) {
+               addNotification('alert', `Staff created, but login credentials had an alert: ${authRes.error}`);
+            }
          }
 
          const newEmp: Employee = {
@@ -390,6 +401,12 @@ export function useEmployeeWizard({
 
          const result = addEmployee(newEmp);
          if (result instanceof Promise) await result;
+
+         if (typeof window !== 'undefined' && newEmpData.password) {
+            localStorage.setItem(`siifmart_temp_pwd_${employeeId}`, newEmpData.password);
+            localStorage.setItem(`siifmart_temp_pwd_by_code_${employeeCode.toLowerCase()}`, newEmpData.password);
+            localStorage.setItem(`siifmart_temp_pwd_by_name_${newEmp.name.toLowerCase()}`, newEmpData.password);
+         }
 
          if (typeof window !== 'undefined') {
             window.dispatchEvent(new CustomEvent('employee:created', { detail: { employee: newEmp } }));

@@ -300,6 +300,33 @@ export const wmsJobsService = {
             .single();
 
         if (error) throw error;
+
+        // Synchronize linked transfers record when lifecycle status changes on a TRANSFER job
+        if ((updates.status || updates.transferStatus) && (data?.type === 'TRANSFER' || data?.order_ref)) {
+            try {
+                const transferUpdates: Record<string, any> = {
+                    updated_at: new Date().toISOString()
+                };
+                if (updates.transferStatus) transferUpdates.transfer_status = updates.transferStatus;
+                if (updates.status === 'Completed' || updates.transferStatus === 'Received') {
+                    transferUpdates.status = 'Completed';
+                    transferUpdates.transfer_status = 'Received';
+                    if (updates.receivedAt) transferUpdates.received_at = updates.receivedAt;
+                    if (updates.receivedBy) transferUpdates.received_by = updates.receivedBy;
+                } else if (updates.status === 'Cancelled') {
+                    transferUpdates.status = 'Cancelled';
+                }
+
+                const targetRef = data?.order_ref || id;
+                await supabase
+                    .from('transfers')
+                    .update(transferUpdates)
+                    .or(`id.eq.${targetRef},order_ref.eq.${targetRef}`);
+            } catch (syncErr) {
+                logger.warn('wmsJobsService', 'Linked transfer dual-record synchronization notice:', { error: String(syncErr) });
+            }
+        }
+
         return mapWmsJobRow(data);
     },
 

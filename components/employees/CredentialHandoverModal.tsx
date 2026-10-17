@@ -9,6 +9,8 @@ import { useStore } from '../../contexts/CentralStore';
 import { useData } from '../../contexts/DataContext';
 import { isManagerialRole } from '../../utils/roles';
 import { parseEmployeeCode, formatDisplayEmployeeId } from '../../utils/employeeIdGenerator';
+import { employeesService } from '../../services/employees.service';
+import { logger } from '../../utils/logger';
 
 interface CredentialHandoverModalProps {
     employee: Employee | null;
@@ -43,9 +45,15 @@ export function CredentialHandoverModal({
     const parsed = parseEmployeeCode(employee.code || employee.id);
     const numericPin = parsed?.seq ? String(parsed.seq).padStart(4, '0') : (employee.code?.replace(/\D/g, '').slice(-4) || '1234');
     
-    // Resolve saved password or standard initial password pattern
-    const savedPasswordKey = `siifmart_temp_pwd_${employee.id}`;
-    const initialPassword = (typeof window !== 'undefined' ? localStorage.getItem(savedPasswordKey) : null) || `SiifMart@${numericPin}`;
+    // Resolve saved password or standard initial password pattern across multiple identifier keys
+    const codeKey = (employee.code || '').toLowerCase();
+    const nameKey = (employee.name || '').toLowerCase();
+    const savedPassword = typeof window !== 'undefined'
+        ? (localStorage.getItem(`siifmart_temp_pwd_${employee.id}`) ||
+           (codeKey ? localStorage.getItem(`siifmart_temp_pwd_by_code_${codeKey}`) : null) ||
+           (nameKey ? localStorage.getItem(`siifmart_temp_pwd_by_name_${nameKey}`) : null))
+        : null;
+    const initialPassword = savedPassword || `SiifMart@${numericPin}`;
     const portalUrl = typeof window !== 'undefined' ? window.location.origin : 'https://siifmart.com';
 
     const handleCopy = (text: string, fieldName: string) => {
@@ -88,9 +96,14 @@ Authorized by Site Management
         window.print();
     };
 
-    const handleMarkComplete = () => {
+    const handleMarkComplete = async () => {
         if (typeof window !== 'undefined') {
             localStorage.setItem(`siifmart_credentials_handed_over_${employee.id}`, new Date().toISOString());
+        }
+        try {
+            await employeesService.markCredentialsHandedOver(employee.id, user?.name || user?.role || 'Manager');
+        } catch (err) {
+            logger.warn('CredentialHandoverModal', 'Failed to persist handover to database', { error: err });
         }
         addNotification('success', `Credentials handed over to ${employee.name}. Staff member is ready for duty.`);
         onHandoverComplete?.(employee.id);

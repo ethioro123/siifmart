@@ -28,7 +28,7 @@ export const RegionalTransferDesk: React.FC<RegionalTransferDeskProps> = ({
   currencySymbol
 }) => {
   const { user } = useStore();
-  const { addNotification } = useData();
+  const { addNotification, effectiveCountry } = useData();
   const [transfers, setTransfers] = useState<TransferRecord[]>([]);
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState<'active' | 'completed'>('active');
@@ -40,7 +40,7 @@ export const RegionalTransferDesk: React.FC<RegionalTransferDeskProps> = ({
     const fetchTransfers = async () => {
       setLoading(true);
       try {
-        const data = await transfersService.getAll(undefined, 50, regionCode);
+        const data = await transfersService.getAll(undefined, 50, regionCode, effectiveCountry);
         if (isMounted) setTransfers(data || []);
       } catch (err) {
         logger.error('RegionalTransferDesk', 'Failed to load regional transfers', err);
@@ -50,7 +50,7 @@ export const RegionalTransferDesk: React.FC<RegionalTransferDeskProps> = ({
     };
     fetchTransfers();
     return () => { isMounted = false; };
-  }, [regionCode]);
+  }, [regionCode, effectiveCountry]);
 
   const activeTransfers = transfers.filter(t => !['Received', 'Completed', 'Cancelled'].includes(t.status));
   const completedTransfers = transfers.filter(t => ['Received', 'Completed'].includes(t.status));
@@ -68,9 +68,11 @@ export const RegionalTransferDesk: React.FC<RegionalTransferDeskProps> = ({
     }
 
     try {
-      await transfersService.update(transferId, {
-        status: 'Approved',
-        approvedBy: user?.name || (isHQUser ? 'Corporate Logistics' : 'Regional Manager')
+      await transfersService.approve(transferId, {
+        approverId: user?.id || user?.employeeId || 'unknown',
+        approverName: user?.name || (isHQUser ? 'Corporate Logistics' : 'Regional Manager'),
+        approverRole: user?.role || (isHQUser ? 'operations_manager' : 'regional_manager'),
+        notes: isInterRegional ? 'HQ Inter-Regional Authorization' : 'Autonomous Regional Approval'
       });
       setTransfers(prev => prev.map(t => t.id === transferId ? { ...t, status: 'Approved', approvedBy: user?.name } : t));
       addNotification?.('success', isInterRegional ? 'Inter-regional transfer authorized by Corporate Logistics.' : 'Intra-regional transfer approved autonomously.');

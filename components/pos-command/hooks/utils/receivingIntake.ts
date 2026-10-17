@@ -11,6 +11,11 @@ interface ProcessReceivingStockParams {
     t: (key: string) => string;
 }
 
+export interface ReceivingStockIntakeResult {
+    success: boolean;
+    failedItems: string[];
+}
+
 export const processReceivingStockIntake = async ({
     destSiteId,
     transferReceivingItems,
@@ -20,10 +25,10 @@ export const processReceivingStockIntake = async ({
     addProduct,
     addNotification,
     t
-}: ProcessReceivingStockParams): Promise<void> => {
+}: ProcessReceivingStockParams): Promise<ReceivingStockIntakeResult> => {
     const failedItems: string[] = [];
 
-    if (!destSiteId) return;
+    if (!destSiteId) return { success: true, failedItems: [] };
 
     const { productsService } = await import('../../../../services/supabase.service');
 
@@ -39,12 +44,17 @@ export const processReceivingStockIntake = async ({
 
             if (destProduct) {
                 const newStock = (destProduct.stock || 0) + item.receivedQty;
-                await productsService.update(destProduct.id, {
-                    stock: newStock,
-                    pos_received_by: receiverName,
-                    pos_received_at: timestampStr,
-                    updated_by: receiverName
-                } as any);
+                try {
+                    await productsService.update(destProduct.id, {
+                        stock: newStock,
+                        pos_received_by: receiverName,
+                        pos_received_at: timestampStr,
+                        updated_by: receiverName
+                    } as any);
+                } catch (updateErr) {
+                    logger.error('receivingIntake', `Failed to update stock for ${item.sku}:`, updateErr as Error);
+                    failedItems.push(item.sku || item.name || 'Unknown Item');
+                }
             } else {
                 let templateProduct = itemSku
                     ? allProducts.find(p => p.sku?.trim()?.toUpperCase() === itemSku)
@@ -83,14 +93,19 @@ export const processReceivingStockIntake = async ({
                         posReceivedAt: timestampStr
                     } as any);
                 } catch (err) {
-                    logger.error('usePOSReceiving', 'Failed to auto-create product:', err);
-                    failedItems.push(item.sku || item.name);
+                    logger.error('usePOSReceiving', 'Failed to auto-create product:', err as Error);
+                    failedItems.push(item.sku || item.name || 'Unknown Item');
                 }
             }
         }
     }
 
     if (failedItems.length > 0) {
-        addNotification('alert', `Failed to create: ${failedItems.join(', ')}. Please add manually.`);
+        addNotification('alert', `Failed to process stock for: ${failedItems.join(', ')}.`);
     }
+
+    return {
+        success: failedItems.length === 0,
+        failedItems
+    };
 };

@@ -316,15 +316,42 @@ export const usePOSReceiving = ({
 
             const timestampStr = new Date().toISOString();
             const receiverName = user?.name || t('posCommand.posUser');
-
             const targetTransferId = transferJob?.id || selectedId;
+            const destSiteId = transfer.destSiteId || activeSite?.id;
+
+            // 1. Process and verify stock intake BEFORE marking transfer completed
+            if (destSiteId) {
+                const intakeResult = await processReceivingStockIntake({
+                    destSiteId,
+                    transferReceivingItems,
+                    allProducts,
+                    receiverName,
+                    timestampStr,
+                    addProduct,
+                    addNotification,
+                    t
+                });
+                if (!intakeResult.success && intakeResult.failedItems.length > 0) {
+                    throw new Error(`Inventory intake failed for: ${intakeResult.failedItems.join(', ')}. Receipt halted to prevent inventory drift.`);
+                }
+            }
+
+            const hasDiscrepancies = transferReceivingItems.some(i => {
+                const sizeNum = i.productSize || 0;
+                const isWV = sizeNum > 0 && (isWeightBased(i.unit || '') || isVolumeBased(i.unit || ''));
+                const rawExpected = isWV ? (i.displayExpectedQty || i.expectedQty) * sizeNum : (i.displayExpectedQty || i.expectedQty);
+                return i.receivedQty !== rawExpected;
+            });
+
+            // 2. Update WMS job with verified quantities
             try {
                 await wmsJobsService.update(targetTransferId, {
                     transferStatus: 'Received',
                     receivedAt: timestampStr,
                     receivedBy: receiverName,
                     status: 'Completed',
-                    lineItems: updatedLineItems
+                    lineItems: updatedLineItems,
+                    hasDiscrepancy: hasDiscrepancies
                 } as any);
             } catch (updateErr: any) {
                 logger.error('usePOSReceiving', `Failed to update TRANSFER job ${targetTransferId}:`, updateErr);
@@ -363,39 +390,16 @@ export const usePOSReceiving = ({
                 }
             }
 
-            // Sync transfer status to transfers table if record exists there
+            // 3. Sync transfer status atomically to transfers table
             try {
                 const { transfersService } = await import('../../../services/transfers.service');
-                await transfersService.update(targetTransferId, {
-                    transferStatus: 'Received',
-                    status: 'Received',
-                    receivedAt: timestampStr,
-                    receivedBy: receiverName
+                await transfersService.receiveAtomic(targetTransferId, {
+                    receiverName,
+                    hasDiscrepancy: hasDiscrepancies
                 });
             } catch {
                 // If record was only in wms_jobs, transfersService update failure is safe to ignore
             }
-
-            const destSiteId = transfer.destSiteId || activeSite?.id;
-            if (destSiteId) {
-                await processReceivingStockIntake({
-                    destSiteId,
-                    transferReceivingItems,
-                    allProducts,
-                    receiverName,
-                    timestampStr,
-                    addProduct,
-                    addNotification,
-                    t
-                });
-            }
-
-            const hasDiscrepancies = transferReceivingItems.some(i => {
-                const sizeNum = i.productSize || 0;
-                const isWV = sizeNum > 0 && (isWeightBased(i.unit || '') || isVolumeBased(i.unit || ''));
-                const rawExpected = isWV ? (i.displayExpectedQty || i.expectedQty) * sizeNum : (i.displayExpectedQty || i.expectedQty);
-                return i.receivedQty !== rawExpected;
-            });
             setReceivingSummary({
                 orderRef: transfer.orderRef || selectedId,
                 jobNumber: transfer.jobNumber || (transfer as any).job_number,

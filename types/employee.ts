@@ -99,6 +99,10 @@ export interface Employee {
   onboarding_tier?: string;
   quotaStatus?: 'WITHIN_QUOTA' | 'EXCEEDED_QUOTA';
   quota_status?: string;
+  credentialsHandedOverAt?: string;
+  credentials_handed_over_at?: string;
+  credentialsHandedOverBy?: string;
+  credentials_handed_over_by?: string;
 }
 
 export interface FacilityHeadcountQuota {

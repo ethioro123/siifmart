@@ -83,7 +83,11 @@ function mapDbEmployeeToEmployee(e: RawDbEmployee): Employee {
         onboardingTier: (e as any).onboarding_tier || (e as any).onboardingTier,
         onboarding_tier: (e as any).onboarding_tier || (e as any).onboardingTier,
         quotaStatus: (e as any).quota_status || (e as any).quotaStatus,
-        quota_status: (e as any).quota_status || (e as any).quotaStatus
+        quota_status: (e as any).quota_status || (e as any).quotaStatus,
+        credentialsHandedOverAt: (e as any).credentials_handed_over_at || (e as any).credentialsHandedOverAt,
+        credentials_handed_over_at: (e as any).credentials_handed_over_at || (e as any).credentialsHandedOverAt,
+        credentialsHandedOverBy: (e as any).credentials_handed_over_by || (e as any).credentialsHandedOverBy,
+        credentials_handed_over_by: (e as any).credentials_handed_over_by || (e as any).credentialsHandedOverBy
     } as Employee;
 }
 
@@ -107,7 +111,7 @@ export const employeesService = {
         return (data as RawDbEmployee[]).map(mapDbEmployeeToEmployee);
     },
 
-    async getPendingApproval(country?: string, countrySiteIds?: string[]): Promise<Employee[]> {
+    async getPendingApproval(country?: string, countrySiteIds?: string[], allowUnassigned: boolean = false): Promise<Employee[]> {
         let query = supabase
             .from('employees')
             .select('*')
@@ -117,9 +121,15 @@ export const employeesService = {
         if (country) {
             if (country === 'ET') {
                 if (countrySiteIds && countrySiteIds.length > 0) {
-                    query = query.or(`site_id.in.(${countrySiteIds.join(',')}),site_id.is.null`);
-                } else {
+                    if (allowUnassigned) {
+                        query = query.or(`site_id.in.(${countrySiteIds.join(',')}),site_id.is.null`);
+                    } else {
+                        query = query.in('site_id', countrySiteIds);
+                    }
+                } else if (allowUnassigned) {
                     query = query.is('site_id', null);
+                } else {
+                    return [];
                 }
             } else {
                 if (countrySiteIds && countrySiteIds.length > 0) {
@@ -133,6 +143,17 @@ export const employeesService = {
         const { data, error } = await query;
         if (error) throw error;
         return (data as RawDbEmployee[]).map(mapDbEmployeeToEmployee);
+    },
+
+    async markCredentialsHandedOver(employeeId: string, handedOverBy: string): Promise<void> {
+        const timestamp = new Date().toISOString();
+        await supabase
+            .from('employees')
+            .update({
+                credentials_handed_over_at: timestamp,
+                credentials_handed_over_by: handedOverBy
+            })
+            .eq('id', employeeId);
     },
 
     async getPaginated(

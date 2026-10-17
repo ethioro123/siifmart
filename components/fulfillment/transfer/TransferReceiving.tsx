@@ -10,7 +10,7 @@ import { useFulfillment } from '../FulfillmentContext';
 import { CustodyHandshakeModal } from './CustodyHandshakeModal';
 import { useData } from '../../../contexts/DataContext';
 import { resolveReceivingPolicy } from '../../../utils/receivingPolicy';
-import { productsService } from '../../../services/supabase.service';
+import { productsService, transfersService } from '../../../services/supabase.service';
 
 interface TransferReceivingProps {
     activeTransferJob: WMSJob;
@@ -59,84 +59,11 @@ export const TransferReceiving: React.FC<TransferReceivingProps> = ({
             const hasDiscrepancy = !!discrepancyDetails?.hasDiscrepancy;
             const discrepancyCount = discrepancyDetails?.discrepancyCount || 0;
 
-            // Preserve verified received quantities and condition statuses
-            const updatedLineItems = (activeTransferJob.lineItems || []).map((li: any, idx: number) => {
-                const recItem = transferReceiveItems.find((ri: any) => ri.productId === li.productId || ri.sku === li.sku || ri.id === li.id)
-                    || transferReceiveItems[idx];
-                return {
-                    ...li,
-                    receivedQty: recItem ? (recItem.receivedQty ?? 0) : (li.receivedQty ?? li.quantity ?? 0),
-                    condition: recItem?.condition || 'Good',
-                    status: recItem && (recItem.receivedQty || 0) < (li.expectedQty || li.quantity || 0) ? 'Short' : 'Received'
-                };
-            });
-
-            // Update job status to Received with Chain of Custody audit details
-            await wmsJobsService.update(activeTransferJob.id, {
-                transferStatus: 'Received',
-                status: 'Completed',
-                lineItems: updatedLineItems,
-                hasDiscrepancy,
-                discrepancyDetails: hasDiscrepancy
-                    ? `Chain of Custody Discrepancy: ${discrepancyCount} units variance. Certified by ${user?.name || 'Receiver'}`
-                    : undefined,
-                receivedAt: new Date().toISOString(),
-                receivedBy: user?.name || 'Receiver'
-            } as any);
-
-            // Also complete the child DISPATCH job if exists
-            try {
-                const { data: dispatchJobs } = await supabase
-                    .from('wms_jobs')
-                    .select('id')
-                    .or(`order_ref.eq.${activeTransferJob.id},order_ref.eq.${activeTransferJob.jobNumber}`);
-
-                if (dispatchJobs && dispatchJobs.length > 0) {
-                    for (const dj of dispatchJobs) {
-                        await wmsJobsService.update(dj.id, {
-                            status: 'Completed',
-                            transferStatus: 'Received',
-                            receivedAt: new Date().toISOString()
-                        });
-                    }
-                }
-            } catch (err) {
-                logger.warn('TransferReceiving', `Failed to complete child DISPATCH job: ${String(err)}`);
-            }
-
-            // Also complete the transfers table record if exists
-            try {
-                const isUUID = (val?: string) => val ? /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(val.trim()) : false;
-                const idsToQuery = [];
-                if (activeTransferJob.id && isUUID(activeTransferJob.id)) {
-                    idsToQuery.push(`id.eq.${activeTransferJob.id}`);
-                }
-                if (activeTransferJob.orderRef && isUUID(activeTransferJob.orderRef)) {
-                    idsToQuery.push(`id.eq.${activeTransferJob.orderRef}`);
-                }
-
-                if (idsToQuery.length > 0) {
-                    const { data: transferRecord } = await supabase
-                        .from('transfers')
-                        .select('id')
-                        .or(idsToQuery.join(','));
-
-                    if (transferRecord && transferRecord.length > 0) {
-                        const { transfersService } = await import('../../../services/supabase.service');
-                        for (const tr of transferRecord) {
-                            await transfersService.update(tr.id, {
-                                status: 'Completed',
-                                receivedAt: new Date().toISOString()
-                            });
-                        }
-                    }
-                }
-            } catch (err) {
-                logger.warn('TransferReceiving', `Failed to complete transfers table record: ${String(err)}`);
-            }
-
-            // Process stock adjustments at destination site
             const destSiteId = activeTransferJob.destSiteId || activeTransferJob.dest_site_id || activeSite?.id;
+            const timestamp = new Date().toISOString();
+            const receiverName = user?.name || 'Receiver';
+
+            // 1. Process stock intake at destination site BEFORE marking transfer complete
             for (const item of transferReceiveItems) {
                 if ((item.receivedQty || 0) > 0) {
                     const itemSku = (item as any).sku || '';
@@ -144,32 +71,23 @@ export const TransferReceiving: React.FC<TransferReceivingProps> = ({
                     const itemUnit = (item as any).unit || 'pcs';
                     const itemSize = (item as any).size || '';
 
-                    // Find the source product first to get the SKU
+                    // Find source product to get product details
                     let sourceProduct: Product | null | undefined = allProducts.find(p => p.id === item.productId || (item.barcode && p.barcode === item.barcode))
                         || products.find(p => p.id === item.productId || (item.barcode && p.barcode === item.barcode));
 
                     if (!sourceProduct) {
                         try {
-                            if (item.productId) {
-                                sourceProduct = await productsService.getById(item.productId);
-                            }
-                            if (!sourceProduct && itemSku) {
-                                sourceProduct = await productsService.getBySKU(itemSku);
-                            }
+                            if (item.productId) sourceProduct = await productsService.getById(item.productId);
+                            if (!sourceProduct && itemSku) sourceProduct = await productsService.getBySKU(itemSku);
                         } catch (e: any) {
-                            logger.warn('TransferReceiving', `Failed to fetch source product fallback for SKU ${itemSku}: ${e?.message || String(e)}`);
+                            logger.warn('TransferReceiving', `Source product lookup notice for SKU ${itemSku}: ${e?.message || String(e)}`);
                         }
                     }
 
-                    // Try to find the product record at the destination site by SKU
+                    // Look up existing destination product record
                     let destProduct: Product | null | undefined = sourceProduct ? (
-                        allProducts.find(p => 
-                            p.sku === sourceProduct?.sku && 
-                            (p.siteId === destSiteId || (p as any).site_id === destSiteId)
-                        ) || products.find(p => 
-                            p.sku === sourceProduct?.sku && 
-                            (p.siteId === destSiteId || (p as any).site_id === destSiteId)
-                        )
+                        allProducts.find(p => p.sku === sourceProduct?.sku && (p.siteId === destSiteId || (p as any).site_id === destSiteId))
+                        || products.find(p => p.sku === sourceProduct?.sku && (p.siteId === destSiteId || (p as any).site_id === destSiteId))
                     ) : undefined;
 
                     if (!destProduct && (sourceProduct?.sku || itemSku) && destSiteId) {
@@ -180,7 +98,7 @@ export const TransferReceiving: React.FC<TransferReceivingProps> = ({
                     
                     let targetProductId = destProduct?.id;
                     
-                    // If product doesn't exist at destination site, auto-create/clone it for destination site
+                    // Auto-create destination product if it doesn't exist
                     if (!destProduct && addProduct) {
                         const effectivePrice = sourceProduct?.price ?? (item as any).retailPrice ?? (item as any).price ?? 0;
                         const effectiveCost = (sourceProduct as any)?.costPrice || (sourceProduct as any)?.cost || (item as any).costPrice || (item as any).cost || 0;
@@ -208,7 +126,8 @@ export const TransferReceiving: React.FC<TransferReceivingProps> = ({
                             } as any);
                             targetProductId = newProd?.id;
                         } catch (err) {
-                            logger.warn('TransferReceiving', `Failed to auto-create destination product via addProduct: ${String(err)}`);
+                            logger.error('TransferReceiving', 'Failed to auto-create destination product', err as Error);
+                            throw new Error(`Failed to create inventory item ${itemSku} at destination site.`);
                         }
                     }
 
@@ -227,48 +146,103 @@ export const TransferReceiving: React.FC<TransferReceivingProps> = ({
                 }
             }
 
-            // Auto-create PUTAWAY job at destination store for shelving received goods
-            try {
-                const putawayItems = transferReceiveItems
-                    .filter(i => (i.receivedQty || 0) > 0)
-                    .map((i: any) => {
-                        const matchingLineItem = (activeTransferJob.lineItems || []).find((li: any) => li.productId === i.productId || li.sku === i.sku);
-                        return {
-                            productId: i.productId,
-                            name: i.name || i.productName || matchingLineItem?.name || 'Received Product',
-                            sku: i.sku || matchingLineItem?.sku || i.productId,
-                            price: (matchingLineItem as any)?.price || (matchingLineItem as any)?.retailPrice || 0,
-                            retailPrice: (matchingLineItem as any)?.retailPrice || (matchingLineItem as any)?.price || 0,
-                            costPrice: (matchingLineItem as any)?.costPrice || (matchingLineItem as any)?.cost || 0,
-                            category: matchingLineItem?.category || 'General',
-                            brand: matchingLineItem?.brand || '',
-                            unit: matchingLineItem?.unit || i.unit || 'pcs',
-                            size: matchingLineItem?.size || i.size || '',
-                            barcode: matchingLineItem?.barcode || i.barcode || '',
-                            expectedQty: i.receivedQty || 0,
-                            pickedQty: 0,
-                            status: 'Pending' as const
-                        };
-                    });
+            // 2. Auto-create PUTAWAY job at destination store (must finish before completing transfer)
+            const putawayItems = transferReceiveItems
+                .filter(i => (i.receivedQty || 0) > 0)
+                .map((i: any) => {
+                    const matchingLineItem = (activeTransferJob.lineItems || []).find((li: any) => li.productId === i.productId || li.sku === i.sku);
+                    return {
+                        productId: i.productId,
+                        name: i.name || i.productName || matchingLineItem?.name || 'Received Product',
+                        sku: i.sku || matchingLineItem?.sku || i.productId,
+                        price: (matchingLineItem as any)?.price || (matchingLineItem as any)?.retailPrice || 0,
+                        retailPrice: (matchingLineItem as any)?.retailPrice || (matchingLineItem as any)?.price || 0,
+                        costPrice: (matchingLineItem as any)?.costPrice || (matchingLineItem as any)?.cost || 0,
+                        category: matchingLineItem?.category || 'General',
+                        brand: matchingLineItem?.brand || '',
+                        unit: matchingLineItem?.unit || i.unit || 'pcs',
+                        size: matchingLineItem?.size || i.size || '',
+                        barcode: matchingLineItem?.barcode || i.barcode || '',
+                        expectedQty: i.receivedQty || 0,
+                        pickedQty: 0,
+                        status: 'Pending' as const
+                    };
+                });
 
-                if (putawayItems.length > 0 && destSiteId) {
-                    await wmsJobsService.create({
-                        type: 'PUTAWAY',
-                        status: 'Pending',
-                        siteId: destSiteId,
-                        site_id: destSiteId,
-                        priority: activeTransferJob.priority || 'Normal',
-                        items: Math.ceil(putawayItems.reduce((acc, i) => acc + i.expectedQty, 0)),
-                        lineItems: putawayItems,
-                        location: 'Receiving Dock',
-                        orderRef: activeTransferJob.orderRef || activeTransferJob.jobNumber || activeTransferJob.id,
-                        createdBy: user?.name || 'System',
-                        countryCode: activeTransferJob.countryCode || (activeTransferJob as any).country_code,
-                        country_code: activeTransferJob.countryCode || (activeTransferJob as any).country_code
-                    } as any);
+            if (putawayItems.length > 0 && destSiteId) {
+                await wmsJobsService.create({
+                    type: 'PUTAWAY',
+                    status: 'Pending',
+                    siteId: destSiteId,
+                    site_id: destSiteId,
+                    priority: activeTransferJob.priority || 'Normal',
+                    items: Math.ceil(putawayItems.reduce((acc, i) => acc + i.expectedQty, 0)),
+                    lineItems: putawayItems,
+                    location: 'Receiving Dock',
+                    orderRef: activeTransferJob.orderRef || activeTransferJob.jobNumber || activeTransferJob.id,
+                    createdBy: receiverName,
+                    countryCode: activeTransferJob.countryCode || (activeTransferJob as any).country_code,
+                    country_code: activeTransferJob.countryCode || (activeTransferJob as any).country_code
+                } as any);
+            }
+
+            // 3. Preserve verified received quantities and condition statuses
+            const updatedLineItems = (activeTransferJob.lineItems || []).map((li: any, idx: number) => {
+                const recItem = transferReceiveItems.find((ri: any) => ri.productId === li.productId || ri.sku === li.sku || ri.id === li.id)
+                    || transferReceiveItems[idx];
+                return {
+                    ...li,
+                    receivedQty: recItem ? (recItem.receivedQty ?? 0) : (li.receivedQty ?? li.quantity ?? 0),
+                    condition: recItem?.condition || 'Good',
+                    status: recItem && (recItem.receivedQty || 0) < (li.expectedQty || li.quantity || 0) ? 'Short' : 'Received'
+                };
+            });
+
+            // 4. Update WMS job status to Completed/Received
+            await wmsJobsService.update(activeTransferJob.id, {
+                transferStatus: 'Received',
+                status: 'Completed',
+                lineItems: updatedLineItems,
+                hasDiscrepancy,
+                discrepancyDetails: hasDiscrepancy
+                    ? `Chain of Custody Discrepancy: ${discrepancyCount} units variance. Certified by ${receiverName}`
+                    : undefined,
+                receivedAt: timestamp,
+                receivedBy: receiverName
+            } as any);
+
+            // Complete child DISPATCH job if exists
+            try {
+                const { data: dispatchJobs } = await supabase
+                    .from('wms_jobs')
+                    .select('id')
+                    .or(`order_ref.eq.${activeTransferJob.id},order_ref.eq.${activeTransferJob.jobNumber}`);
+
+                if (dispatchJobs && dispatchJobs.length > 0) {
+                    for (const dj of dispatchJobs) {
+                        await wmsJobsService.update(dj.id, {
+                            status: 'Completed',
+                            transferStatus: 'Received',
+                            receivedAt: timestamp
+                        });
+                    }
                 }
-            } catch (putawayErr) {
-                logger.warn('TransferReceiving', `Failed to auto-create Putaway job: ${String(putawayErr)}`);
+            } catch (err) {
+                logger.warn('TransferReceiving', `Failed to complete child DISPATCH job: ${String(err)}`);
+            }
+
+            // 5. Complete transfers table record atomically
+            const targetTransferId = activeTransferJob.orderRef || activeTransferJob.id;
+            if (targetTransferId) {
+                try {
+                    await transfersService.receiveAtomic(targetTransferId, {
+                        receiverName,
+                        hasDiscrepancy,
+                        discrepancyDetails: hasDiscrepancy ? `${discrepancyCount} units variance` : undefined
+                    });
+                } catch (syncErr) {
+                    logger.warn('TransferReceiving', `Transfers atomic receive notice: ${String(syncErr)}`);
+                }
             }
 
             // If discrepancy occurred, dispatch event to penalize gamification accuracy & log audit

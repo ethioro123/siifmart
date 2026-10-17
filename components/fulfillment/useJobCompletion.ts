@@ -13,6 +13,7 @@ import {
 import { QueryClient } from '@tanstack/react-query';
 import { logger } from '../../utils/logger';
 import { calculateWarehousePoints } from '../../utils/warehouseGamification';
+import { checkAndSyncPOCompletion } from './receive/utils/poCompletionHelper';
 
 // Helper for translations
 const getTranslation = (path: string): string => {
@@ -227,59 +228,21 @@ export const useJobCompletion = (deps: UseJobCompletionDeps) => {
                 if (job.location) {
                     logger.debug('useJobCompletion', 'ℹ️ Bulk Putaway Update skipped in favor of granular item scanning/relocation.');
                 } else {
-                    logger.debug('useJobCompletion', 'ℹ️ Job has no target location. Relying on individual item scans.');
+                    logger.debug('useJobCompletion', 'Job has no target location. Relying on individual item scans.');
                 }
 
                 // CHECK IF ALL PUTAWAY JOBS FOR THIS PO ARE COMPLETE
                 stage('Check PO Completion');
                 if (job.orderRef) {
-                    const allPutawayJobsForPO = jobs
-                        .filter(j => j.orderRef === job!.orderRef && j.type === 'PUTAWAY')
-                        .map(j => j.id === jobId ? { ...j, status: 'Completed' as const } : j);
-
-                    const allPutawayJobsComplete = allPutawayJobsForPO.length > 0 &&
-                        allPutawayJobsForPO.every(j => j.status === 'Completed');
-
-                    if (allPutawayJobsComplete) {
-                        logger.debug('useJobCompletion', `✅ All PUTAWAY jobs for PO ${job.orderRef} are complete. Updating PO status to 'Received'...`);
-
-                        const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(job.orderRef || '');
-
-                        if (isUUID) {
-                            try {
-                                const updatedPo = await purchaseOrdersService.receive(job.orderRef, false);
-                                if (updatedPo) {
-                                    setOrders(prev => prev.map(o => o.id === job!.orderRef ? updatedPo : o));
-                                    setAllOrders(prev => prev.map(o => o.id === job!.orderRef ? updatedPo : o));
-                                    addNotification('success', getTranslation('warehouse.poFullyReceived').replace('{id}', updatedPo.poNumber || job!.orderRef || ''));
-                                }
-                            } catch (err) {
-                                logger.error('useJobCompletion', `❌ Failed to update PO status for ${job.orderRef}:`, err);
-                            }
-                        } else {
-                            logger.debug('useJobCompletion', `ℹ️ PO Ref ${job.orderRef} is not a UUID. Attempting lookup by PO Number...`);
-                            const poByNumber = allOrders.find(o => o.poNumber === job!.orderRef || o.po_number === job!.orderRef);
-
-                            if (poByNumber && poByNumber.id) {
-                                try {
-                                    logger.debug('useJobCompletion', `✅ Found PO UUID ${poByNumber.id} for ref ${job.orderRef}. Updating status...`);
-                                    const updatedPo = await purchaseOrdersService.receive(poByNumber.id, false);
-                                    if (updatedPo) {
-                                        setOrders(prev => prev.map(o => o.id === poByNumber.id ? updatedPo : o));
-                                        setAllOrders(prev => prev.map(o => o.id === poByNumber.id ? updatedPo : o));
-                                        addNotification('success', `PO ${updatedPo.poNumber} fully received!`);
-                                    }
-                                } catch (err) {
-                                    logger.error('useJobCompletion', `❌ Failed to update PO status by number ${job.orderRef}:`, err);
-                                }
-                            } else {
-                                logger.warn('useJobCompletion', `⚠️ PO ID ${job.orderRef} is not a valid UUID and not found in local orders. Skipping backend update.`);
-                                setOrders(prev => prev.map(o => o.id === job!.orderRef ? { ...o, status: 'Received' } : o));
-                                setAllOrders(prev => prev.map(o => o.id === job!.orderRef ? { ...o, status: 'Received' } : o));
-                                addNotification('success', getTranslation('warehouse.poReceivedLocalOnly').replace('{id}', job.orderRef || ''));
-                            }
-                        }
-                    }
+                    await checkAndSyncPOCompletion({
+                        job,
+                        jobs,
+                        allOrders,
+                        setOrders,
+                        setAllOrders,
+                        addNotification,
+                        getTranslation
+                    });
                 }
             }
 

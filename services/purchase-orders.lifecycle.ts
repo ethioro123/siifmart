@@ -3,15 +3,24 @@ import type { PurchaseOrder } from '../types';
 import { wmsJobsService } from './wms-jobs.service';
 import { getById } from './purchase-orders.read';
 import { logger } from '../utils/logger';
+import { convertToSellableUnits } from '../components/procurement/utils';
 
 export const purchaseOrdersLifecycleService = {
     async receive(id: string, shouldCreateJob = true): Promise<PurchaseOrder | null> {
         const po = await getById(id);
         if (!po) throw new Error('Purchase Order not found');
 
+        const lineItems = po.lineItems || [];
+        const isAllReceived = lineItems.length > 0 && lineItems.every((li: any) => {
+            const expectedSellable = convertToSellableUnits(li.quantity, li);
+            return (li.receivedQty || 0) >= expectedSellable;
+        });
+
+        const targetStatus = isAllReceived ? 'Received' : 'Partially Received';
+
         const { error } = await supabase
             .from('purchase_orders')
-            .update({ status: 'Received', updated_at: new Date().toISOString() })
+            .update({ status: targetStatus, updated_at: new Date().toISOString() })
             .eq('id', id);
 
         if (error) {

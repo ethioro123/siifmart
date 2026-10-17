@@ -20,7 +20,18 @@ export default function StepIdentity({
     activeSite
 }: StepIdentityProps) {
     const [showPassword, setShowPassword] = useState(false);
-    const canAssignAnySite = ['super_admin', 'admin', 'hr', 'hr_manager', 'operations_manager', 'regional_manager', 'finance_manager'].includes(user?.role || '');
+    const isHQ = ['super_admin', 'admin', 'CEO', 'hr_manager', 'hr', 'operations_manager', 'finance_manager'].includes(user?.role || '');
+    const isRegional = ['regional_manager', 'regional_hr_officer', 'regional_procurement_lead', 'regional_finance_officer', 'regional_logistics_lead', 'regional_security_supervisor'].includes(user?.role || '');
+
+    const selectableSites = React.useMemo(() => {
+        if (isHQ) return sites;
+        if (isRegional && user?.regionCode) {
+            return sites.filter(s => s.regionCode === user.regionCode || (s as any).region_code === user.regionCode);
+        }
+        return sites.filter(s => s.id === (newEmpData.siteId || activeSite?.id));
+    }, [isHQ, isRegional, sites, user?.regionCode, newEmpData.siteId, activeSite?.id]);
+
+    const canAssignSites = isHQ || (isRegional && selectableSites.length > 0);
 
     return (
         <div className="space-y-5 animate-in fade-in slide-in-from-right-4">
@@ -145,7 +156,7 @@ export default function StepIdentity({
                 <label className="text-xs text-[#2C5E3B] dark:text-[#A9CBA2] uppercase font-bold mb-1.5 flex items-center gap-1.5">
                     <MapPin size={14} /> Assigned Workplace Facility ID <span className="text-rose-500">*</span>
                 </label>
-                {canAssignAnySite ? (
+                {canAssignSites ? (
                     <div>
                         <select
                             className={`w-full bg-white dark:bg-black/30 border ${
@@ -156,7 +167,7 @@ export default function StepIdentity({
                             aria-label="Assign Workplace Facility ID"
                         >
                             <option value="" disabled className="text-stone-400">-- Select Workplace Facility (Mandatory) --</option>
-                            {sites.map(s => (
+                            {selectableSites.map(s => (
                                 <option key={s.id} value={s.id} className="text-black">
                                     {s.name} [{s.code}] ({s.type})
                                 </option>

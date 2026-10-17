@@ -51,6 +51,7 @@ export function NewHireHandoverBanner({ className = '' }: NewHireHandoverBannerP
 
             // Check if already handed over or dismissed
             if (dismissedIds.includes(emp.id)) return false;
+            if (emp.credentialsHandedOverAt || (emp as any).credentials_handed_over_at) return false;
             if (typeof window !== 'undefined' && localStorage.getItem(`siifmart_credentials_handed_over_${emp.id}`)) {
                 return false;
             }
@@ -74,7 +75,6 @@ export function NewHireHandoverBanner({ className = '' }: NewHireHandoverBannerP
         if (typeof window !== 'undefined') {
             try {
                 localStorage.setItem('siifmart_dismissed_handover_ids', JSON.stringify(next));
-                localStorage.setItem(`siifmart_credentials_handed_over_${empId}`, new Date().toISOString());
             } catch {
                 // ignore
             }
