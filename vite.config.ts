@@ -41,6 +41,18 @@ export default defineConfig(() => {
           ws: true,
           agent: supabaseAgent,
           rewrite: (p) => p.replace(/^\/supabase-proxy/, ''),
+          configure: (proxy) => {
+            proxy.on('error', (err, _req, res) => {
+              if (res && 'writeHead' in res && !(res as any).headersSent) {
+                try {
+                  res.writeHead(502, { 'Content-Type': 'application/json' });
+                  res.end(JSON.stringify({ error: 'Proxy error', code: (err as any).code }));
+                } catch {
+                  // Ignore
+                }
+              }
+            });
+          },
         },
       },
       watch: {
