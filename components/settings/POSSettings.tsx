@@ -49,6 +49,7 @@ export default function POSSettings() {
         requireShiftClosure: boolean;
         posDailyRevenueTarget?: number;
         posDailyTxTarget?: number;
+        taxOnSelling: boolean;
     }>({
         posTerminalId: '',
         posRegisterMode: 'cashier',
@@ -56,7 +57,8 @@ export default function POSSettings() {
         posBlockNegativeStock: true,
         requireShiftClosure: true,
         posDailyRevenueTarget: 50000,
-        posDailyTxTarget: 50
+        posDailyTxTarget: 50,
+        taxOnSelling: false,
     });
 
     const [payments, setPayments] = useState({
@@ -103,7 +105,8 @@ export default function POSSettings() {
                 posBlockNegativeStock: countryPartition?.posBlockNegativeStock ?? (isCountryActive ? settings.posBlockNegativeStock : undefined) ?? true,
                 requireShiftClosure: countryPartition?.requireShiftClosure ?? (isCountryActive ? settings.requireShiftClosure : undefined) ?? true,
                 posDailyRevenueTarget: countryPartition?.posDailyRevenueTarget ?? (isCountryActive ? settings.posDailyRevenueTarget : undefined) ?? 50000,
-                posDailyTxTarget: countryPartition?.posDailyTxTarget ?? (isCountryActive ? settings.posDailyTxTarget : undefined) ?? 50
+                posDailyTxTarget: countryPartition?.posDailyTxTarget ?? (isCountryActive ? settings.posDailyTxTarget : undefined) ?? 50,
+                taxOnSelling: countryPartition?.taxOnSelling ?? (isCountryActive ? settings.taxOnSelling : undefined) ?? false
             });
 
             setPayments({

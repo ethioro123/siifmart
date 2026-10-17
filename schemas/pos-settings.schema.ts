@@ -40,6 +40,7 @@ export const POSWorkflowSchema = z.object({
   requireShiftClosure: z.boolean().default(true),
   posDailyRevenueTarget: z.number().nonnegative('Daily revenue target cannot be negative').optional(),
   posDailyTxTarget: z.number().int().nonnegative('Daily transaction target cannot be negative').optional(),
+  taxOnSelling: z.boolean().default(false),
   targetCountry: z.enum(['ET', 'KE', 'UG', 'RW', 'TZ']).default('ET'),
 });
 

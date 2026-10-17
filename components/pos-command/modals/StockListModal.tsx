@@ -8,8 +8,10 @@ import { CURRENCY_SYMBOL } from '../../../constants';
 import { formatPriceValue } from '../../../utils/formatting';
 import { ProductDetailsModal } from '../../inventory/ProductDetailsModal';
 import LabelPrintModal from '../../LabelPrintModal';
-import { getSellUnit, formatProductSize, formatStockDisplay } from '../../../utils/units';
+import { getSellUnit, formatStockDisplay } from '../../../utils/units';
 import { formatProductDisplayName } from '../../procurement/utils';
+import { resolveSmartProductAttributes } from '../../../utils/groceryAttributes';
+import { SmartProductAttributeStrip } from '../../SmartProductAttributeStrip';
 import {
     Printer, TrendingUp, Package, CheckCheck,
     AlertTriangle, AlertCircle, Sparkles, X, Search, Tag, Scale
@@ -77,8 +79,19 @@ export const StockListModal: React.FC = () => {
     const filteredProducts = useMemo(() => {
         return siteProducts.filter((p: any) => {
             if (selectedCategory !== 'ALL_CATEGORIES' && p.category !== selectedCategory) return false;
-            const matchesSearch = !stockSearch.trim() || p.name.toLowerCase().includes(stockSearch.toLowerCase()) || p.sku.toLowerCase().includes(stockSearch.toLowerCase()) || (p.barcode && p.barcode.toLowerCase().includes(stockSearch.toLowerCase()));
-            if (!matchesSearch) return false;
+            const q = stockSearch.trim().toLowerCase();
+            if (q) {
+                const profile = resolveSmartProductAttributes(p);
+                const matchesSearch =
+                    p.name.toLowerCase().includes(q) ||
+                    p.sku.toLowerCase().includes(q) ||
+                    (p.barcode && p.barcode.toLowerCase().includes(q)) ||
+                    (profile.brand && profile.brand.toLowerCase().includes(q)) ||
+                    profile.subcategory.toLowerCase().includes(q) ||
+                    (profile.physicalForm && profile.physicalForm.toLowerCase().includes(q)) ||
+                    profile.packBadge.toLowerCase().includes(q);
+                if (!matchesSearch) return false;
+            }
             const threshold = p.minStock !== undefined && p.minStock !== null && p.minStock > 0 ? p.minStock : 10;
             const stockVal = p.stock || 0;
             const flags = getUpdateFlags(p, lastSeenUpdates);
@@ -181,6 +194,7 @@ export const StockListModal: React.FC = () => {
                         <tbody className="divide-y divide-[var(--theme-border)]">
                             {paginatedProducts.map(product => {
                                 const flags = getUpdateFlags(product, lastSeenUpdates);
+                                const profile = resolveSmartProductAttributes(product, undefined, CURRENCY_SYMBOL);
                                 return (
                                     <tr key={product.id} onClick={() => setSelectedProduct(product)} className="hover:bg-[var(--theme-bg-card-hover)] transition-colors cursor-pointer">
                                         <td className="p-3">
@@ -191,11 +205,8 @@ export const StockListModal: React.FC = () => {
                                                         {flags.isUnseen && <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-bold bg-amber-500/10 text-amber-500 border border-amber-500/20 uppercase shrink-0"><span className="w-1.5 h-1.5 rounded-full bg-amber-500" />Updated</span>}
                                                     </div>
                                                     <div className="flex flex-wrap items-center gap-1.5 mt-1">
-                                                        <span className="text-xs text-[var(--theme-text-secondary)] font-mono font-bold">{product.sku}</span>
-                                                        {product.brand && !formatProductDisplayName(product).toLowerCase().startsWith(product.brand.toLowerCase()) && (
-                                                            <span className="text-[9px] font-bold text-[var(--theme-text-secondary)] bg-[var(--theme-bg-subtle)] px-1.5 py-0.5 rounded border border-[var(--theme-border)] uppercase">{product.brand}</span>
-                                                        )}
-                                                        {formatProductSize(product) && <span className="text-[9px] font-bold text-amber-500 bg-amber-500/10 px-1.5 py-0.5 rounded border border-amber-500/30 font-mono">{formatProductSize(product)}</span>}
+                                                        <span className="text-[11px] text-[var(--theme-text-secondary)] font-mono font-bold bg-[var(--theme-bg-subtle)] px-2 py-0.5 rounded-full border border-[var(--theme-border)]">{product.sku}</span>
+                                                        <SmartProductAttributeStrip item={product} maxPills={5} showDomainSpecs={true} />
                                                     </div>
                                                 </div>
                                                 {(flags.priceUpdated || flags.stockUpdated) && (
@@ -206,8 +217,18 @@ export const StockListModal: React.FC = () => {
                                                 )}
                                             </div>
                                         </td>
-                                        <td className="p-3 text-[var(--theme-text-secondary)]">{product.category || t('posCommand.uncategorized')}</td>
-                                        <td className="p-3 text-right font-medium text-[var(--theme-text-primary)] font-mono">{CURRENCY_SYMBOL} {formatPriceValue(product.price)}</td>
+                                        <td className="p-3">
+                                            <div className="text-xs font-semibold text-[var(--theme-text-primary)]">{product.category || t('posCommand.uncategorized')}</div>
+                                            {profile.subcategory && profile.subcategory.toLowerCase() !== (product.category || '').toLowerCase() && (
+                                                <div className="text-[11px] text-[var(--theme-text-secondary)] mt-0.5">{profile.subcategory}</div>
+                                            )}
+                                        </td>
+                                        <td className="p-3 text-right">
+                                            <div className="font-semibold text-[var(--theme-text-primary)] font-mono tabular-nums">{CURRENCY_SYMBOL} {formatPriceValue(product.price)}</div>
+                                            {profile.unitPriceEquivalent && (
+                                                <div className="text-[11px] text-[var(--theme-text-secondary)] font-mono tabular-nums mt-0.5">{profile.unitPriceEquivalent}</div>
+                                            )}
+                                        </td>
                                         <td className="p-3 text-right">
                                             {(() => {
                                                 const threshold = product.minStock !== undefined && product.minStock !== null && product.minStock > 0 ? product.minStock : 10;
@@ -216,7 +237,14 @@ export const StockListModal: React.FC = () => {
                                                 let colorClass = 'text-[var(--theme-text-primary)]';
                                                 if (isOutOfStock) colorClass = 'text-rose-500';
                                                 else if (isLowStock) colorClass = 'text-amber-500';
-                                                return <div className={`font-mono font-bold text-xs ${colorClass}`}>{formatStockDisplay(stockVal, product)}</div>;
+                                                return (
+                                                    <div>
+                                                        <div className={`font-mono font-bold text-xs tabular-nums ${colorClass}`}>{formatStockDisplay(stockVal, product)}</div>
+                                                        {profile.stockBreakdown && (
+                                                            <div className="text-[11px] text-[var(--theme-text-secondary)] font-medium mt-0.5 whitespace-nowrap">({profile.stockBreakdown})</div>
+                                                        )}
+                                                    </div>
+                                                );
                                             })()}
                                         </td>
                                         <td className="p-3 text-center"><span className="text-[10px] font-bold font-mono text-[var(--theme-text-secondary)] uppercase bg-[var(--theme-bg-subtle)] px-2 py-0.5 rounded border border-[var(--theme-border)]">{getSellUnit(product.unit).shortLabel}</span></td>

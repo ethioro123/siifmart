@@ -18,6 +18,7 @@ import { ProductLocationBreakdown } from './components/ProductLocationBreakdown'
 import { ProductProfileHeader } from './components/ProductProfileHeader';
 import { parseBatchNumber } from '../../utils/batchNumber';
 import { SmartUnitConfigModal } from './modals/SmartUnitConfigModal';
+import { resolveSmartProductAttributes } from '../../utils/groceryAttributes';
 
 interface ProductDetailsModalProps {
     product: Product | null;
@@ -249,35 +250,44 @@ export const ProductDetailsModal: React.FC<ProductDetailsModalProps> = ({ produc
                         </button>
                     </div>
 
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                        <DetailField label="SKU" value={product.sku} icon={Hash} />
-                        <DetailField label="Barcodes" value={barcodeList.length > 0 ? <span className="font-mono">{barcodeList.join(', ')}</span> : null} icon={ScanBarcode} />
-                        <DetailField label="Category" value={product.category} icon={Tag} />
-                        <DetailField label="Sell Unit" value={unitObj ? `${unitObj.label} (${unitObj.shortLabel})` : product.unit} icon={Package} />
-                        <DetailField label="Size / Weight" value={formatProductSize(product)} icon={Box} />
-                        <DetailField label="Variant" value={customAttrs?.identity?.variant} icon={Tag} />
-                        <DetailField
-                            label="Batch / Lot No"
-                            value={product.batchNumber ? (
-                                <span className="flex flex-col">
-                                    <span className="font-mono">{product.batchNumber}</span>
-                                    {(() => {
-                                        const parsed = parseBatchNumber(product.batchNumber);
-                                        if (parsed.isStandard && parsed.formattedDate) {
-                                            return <span className="text-[11px] text-[var(--theme-text-secondary)] font-semibold">Rcvd {parsed.formattedDate}</span>;
-                                        }
-                                        return null;
-                                    })()}
-                                </span>
-                            ) : null}
-                            icon={Layers}
-                        />
-                        <DetailField label="Expiry Date" value={product.expiryDate ? `${new Date(product.expiryDate).toLocaleDateString()}${expiryAlert ? ` (${expiryAlert})` : ''}` : null} icon={Calendar} colorClass={expiryColor || undefined} />
-                        <DetailField label="Shelf Position" value={product.shelfPosition} icon={Layers} />
-                        <DetailField label="Storage Location" value={product.location} icon={Building2} />
-                        <DetailField label="Date Registered" value={product.createdAt || (product as any).created_at ? new Date(product.createdAt || (product as any).created_at).toLocaleDateString() : null} icon={Clock} />
-                        {(product as any).salesVelocity && <DetailField label="Sales Velocity" value={(product as any).salesVelocity} icon={TrendingUp} />}
-                    </div>
+                    {(() => {
+                        const smartProfile = resolveSmartProductAttributes(product, allProducts, activeCurrency);
+                        return (
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                                <DetailField label="SKU" value={product.sku} icon={Hash} />
+                                <DetailField label="Barcodes" value={barcodeList.length > 0 ? <span className="font-mono">{barcodeList.join(', ')}</span> : null} icon={ScanBarcode} />
+                                <DetailField label="Brand" value={smartProfile.brand} icon={Building2} highlight={Boolean(smartProfile.brand)} />
+                                <DetailField label="Department / Subcat" value={smartProfile.subcategory ? `${product.category} › ${smartProfile.subcategory}` : product.category} icon={Tag} />
+                                <DetailField label="Net Content / Size" value={smartProfile.netContent || formatProductSize(product)} icon={Box} highlight={Boolean(smartProfile.netContent)} />
+                                <DetailField label="Physical Form" value={smartProfile.physicalForm} icon={Layers} />
+                                <DetailField label="Sell Unit" value={unitObj ? `${unitObj.label} (${unitObj.shortLabel})` : product.unit} icon={Package} />
+                                <DetailField label="Wholesale Pack" value={smartProfile.packBadge} icon={Package} highlight />
+                                <DetailField label="Variant" value={smartProfile.variant} icon={Tag} />
+                                <DetailField label="Stock Breakdown" value={smartProfile.stockBreakdown} icon={Box} highlight={Boolean(smartProfile.stockBreakdown)} />
+                                <DetailField
+                                    label="Batch / Lot No"
+                                    value={product.batchNumber ? (
+                                        <span className="flex flex-col">
+                                            <span className="font-mono">{product.batchNumber}</span>
+                                            {(() => {
+                                                const parsed = parseBatchNumber(product.batchNumber);
+                                                if (parsed.isStandard && parsed.formattedDate) {
+                                                    return <span className="text-[11px] text-[var(--theme-text-secondary)] font-semibold">Rcvd {parsed.formattedDate}</span>;
+                                                }
+                                                return null;
+                                            })()}
+                                        </span>
+                                    ) : null}
+                                    icon={Layers}
+                                />
+                                <DetailField label="Expiry Date" value={product.expiryDate ? `${new Date(product.expiryDate).toLocaleDateString()}${expiryAlert ? ` (${expiryAlert})` : ''}` : null} icon={Calendar} colorClass={expiryColor || undefined} />
+                                <DetailField label="Shelf Position" value={product.shelfPosition} icon={Layers} />
+                                <DetailField label="Storage Location" value={product.location} icon={Building2} />
+                                <DetailField label="Date Registered" value={product.createdAt || (product as any).created_at ? new Date(product.createdAt || (product as any).created_at).toLocaleDateString() : null} icon={Clock} />
+                                {(product as any).salesVelocity && <DetailField label="Sales Velocity" value={(product as any).salesVelocity} icon={TrendingUp} />}
+                            </div>
+                        );
+                    })()}
                 </div>
 
                 <div className="bg-[var(--theme-bg-card)] p-5 rounded-2xl border border-[var(--theme-border)] space-y-4 shadow-xs">
@@ -285,23 +295,29 @@ export const ProductDetailsModal: React.FC<ProductDetailsModalProps> = ({ produc
                         <DollarSign size={14} className="text-[var(--theme-text-secondary)]" />
                         <h3 className="text-xs font-bold uppercase tracking-wider text-[var(--theme-text-primary)]">Financial & Pricing Details</h3>
                     </div>
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                        <DetailField label="Retail Price" value={`${activeCurrency} ${formatPriceValue(product.price)}`} icon={DollarSign} />
-                        <DetailField label="Promo Price" value={salePrice > 0 ? `${activeCurrency} ${formatPriceValue(salePrice)}` : null} icon={Tag} highlight />
-                        <DetailField label="Discount" value={salePrice > 0 && discountPct > 0 ? `${discountPct.toFixed(1)}%` : null} icon={Percent} highlight />
-                        {compPrice > 0 && <DetailField label="Competitor Price" value={`${activeCurrency} ${formatPriceValue(compPrice)}`} icon={compDiff > 0 ? TrendingDown : TrendingUp} colorClass={compDiff > 0 ? 'text-red-500' : 'text-emerald-500'} />}
-                        {showCostPrice && (
-                            <>
-                                <DetailField label="Cost Price (COGS)" value={cost > 0 ? `${activeCurrency} ${formatPriceValue(cost)}` : null} icon={Lock} colorClass="text-[var(--theme-text-muted)]" />
-                                <DetailField label="Gross Profit" value={grossProfit > 0 ? `${activeCurrency} ${grossProfit.toFixed(2)}` : null} icon={TrendingUp} />
-                                <DetailField label="Gross Margin" value={marginPct > 0 ? `${marginPct.toFixed(1)}%` : null} icon={Percent} />
-                                <DetailField label="Markup Rate" value={markupPct > 0 ? `${markupPct.toFixed(1)}%` : null} icon={Percent} />
-                            </>
-                        )}
-                    </div>
+                    {(() => {
+                        const smartProfile = resolveSmartProductAttributes(product, allProducts, activeCurrency);
+                        return (
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                                <DetailField label="Retail Price" value={`${activeCurrency} ${formatPriceValue(product.price)}`} icon={DollarSign} />
+                                <DetailField label="Unit Price Equiv." value={smartProfile.unitPriceLabel} icon={Tag} highlight={Boolean(smartProfile.unitPriceLabel)} />
+                                <DetailField label="Promo Price" value={salePrice > 0 ? `${activeCurrency} ${formatPriceValue(salePrice)}` : null} icon={Tag} highlight />
+                                <DetailField label="Discount" value={salePrice > 0 && discountPct > 0 ? `${discountPct.toFixed(1)}%` : null} icon={Percent} highlight />
+                                {compPrice > 0 && <DetailField label="Competitor Price" value={`${activeCurrency} ${formatPriceValue(compPrice)}`} icon={compDiff > 0 ? TrendingDown : TrendingUp} colorClass={compDiff > 0 ? 'text-red-500' : 'text-emerald-500'} />}
+                                {showCostPrice && (
+                                    <>
+                                        <DetailField label="Cost Price (COGS)" value={cost > 0 ? `${activeCurrency} ${formatPriceValue(cost)}` : null} icon={Lock} colorClass="text-[var(--theme-text-muted)]" />
+                                        <DetailField label="Gross Profit" value={grossProfit > 0 ? `${activeCurrency} ${grossProfit.toFixed(2)}` : null} icon={TrendingUp} />
+                                        <DetailField label="Gross Margin" value={marginPct > 0 ? `${marginPct.toFixed(1)}%` : null} icon={Percent} />
+                                        <DetailField label="Markup Rate" value={markupPct > 0 ? `${markupPct.toFixed(1)}%` : null} icon={Percent} />
+                                    </>
+                                )}
+                            </div>
+                        );
+                    })()}
                 </div>
 
-                <ProductAttributesPanel product={product} />
+                <ProductAttributesPanel product={product} currencySymbol={activeCurrency} />
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="bg-[var(--theme-bg-card)] p-5 rounded-2xl border border-[var(--theme-border)] space-y-4 shadow-xs">

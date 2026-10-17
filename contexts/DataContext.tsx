@@ -129,16 +129,19 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
     onProgress: onQueryProgress
   });
 
-  // Sync React Query data to local state
+  // Sync React Query products to local state only when products query data changes
   useEffect(() => {
     if (queries.products.data) {
-      // Apply sanitization
       const finalProducts = queries.products.data.map(p =>
         p.category?.toLowerCase() === 'alcohol' ? { ...p, category: 'Beverages' } : p
       );
       setProducts(finalProducts);
       if (activeSiteId) posDB.cacheProducts(activeSiteId, finalProducts);
     }
+  }, [queries.products.data, activeSiteId]);
+
+  // Sync remaining React Query data to local state
+  useEffect(() => {
     if (queries.employees.data) setEmployees(queries.employees.data);
     if (queries.orders.data) setOrders(queries.orders.data);
     if (queries.sales.data) {
@@ -160,12 +163,11 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
     if (queries.systemLogs.data) setSystemLogs(queries.systemLogs.data);
     if (queries.shifts.data) setShifts(queries.shifts.data);
 
-    // If query hook is managing loading, sync it
     if (!queries.isLoadingCritical && isDataInitialLoading) {
       setIsDataInitialLoading(false);
     }
   }, [
-    queries.products.data, queries.employees.data, queries.orders.data, queries.sales.data,
+    queries.employees.data, queries.orders.data, queries.sales.data,
     queries.storePoints.data, queries.tasks.data, queries.expenses.data,
     queries.systemLogs.data, queries.suppliers.data, queries.customers.data,
     queries.movements.data, queries.shifts.data, queries.isLoadingCritical, activeSiteId, sites
@@ -258,7 +260,7 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
 
   const saleActions = useSaleActions({
     activeSite, settings, products, sites, employees, customers, storePoints,
-    setSales, setAllSales, setProducts, setCustomers,
+    setSales, setAllSales, setProducts, setAllProducts, setCustomers,
     addNotification, logSystemEvent, triggerSync, posCheckQueue,
     awardStorePoints: gamificationActions.awardStorePoints
   });

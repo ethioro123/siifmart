@@ -5,7 +5,8 @@ import { CURRENCY_SYMBOL } from '../../../constants';
 import { formatPriceValue } from '../../../utils/formatting';
 import { formatStockDisplay, getSellUnit } from '../../../utils/units';
 import { formatProductDisplayName } from '../../procurement/utils';
-import { ItemAttributeBadges } from '../../fulfillment/ItemAttributeBadges';
+import { SmartProductAttributeStrip } from '../../SmartProductAttributeStrip';
+import { resolveSmartProductAttributes } from '../../../utils/groceryAttributes';
 
 interface ProductProfileHeaderProps {
     product: Product;
@@ -24,7 +25,7 @@ export const ProductProfileHeader: React.FC<ProductProfileHeaderProps> = ({
     const marginPct = price > 0 ? (grossProfit / price) * 100 : 0;
     const totalAssetValue = (product.stock || 0) * price;
 
-    const brandAlreadyInName = product.brand && product.name.toLowerCase().startsWith(product.brand.toLowerCase());
+    const smart = resolveSmartProductAttributes(product, undefined, currencySymbol);
     const sellUnit = product.unit ? getSellUnit(product.unit) : null;
 
     // Determine status badge
@@ -71,7 +72,7 @@ export const ProductProfileHeader: React.FC<ProductProfileHeaderProps> = ({
                         {/* Meta Tags Row */}
                         <div className="flex flex-wrap items-center gap-2">
                             <span className="px-2.5 py-0.5 rounded-lg text-[11px] font-bold uppercase tracking-wider bg-[var(--theme-pill-bg)] text-[var(--theme-text-primary)] border border-[var(--theme-pill-border)]">
-                                {product.category || 'General Catalog'}
+                                {smart.subcategory ? `${product.category} › ${smart.subcategory}` : (product.category || 'General Catalog')}
                             </span>
                             <span className="px-2.5 py-0.5 rounded-lg text-[11px] font-mono font-bold uppercase tracking-wider bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] border border-[var(--theme-border)]">
                                 SKU: {product.sku}
@@ -96,8 +97,15 @@ export const ProductProfileHeader: React.FC<ProductProfileHeaderProps> = ({
                             )}
                         </div>
 
-                        {/* Category Logistics & Physical Badges */}
-                        <ItemAttributeBadges item={product} className="pt-1" />
+                        {/* Smart Grocery Attribute Pills */}
+                        <SmartProductAttributeStrip
+                            item={product}
+                            currencySymbol={currencySymbol}
+                            maxPills={7}
+                            showDomainSpecs={true}
+                            showUnitPrice={true}
+                            className="pt-1"
+                        />
                     </div>
                 </div>
             </div>
@@ -117,11 +125,15 @@ export const ProductProfileHeader: React.FC<ProductProfileHeaderProps> = ({
                             /{sellUnit?.shortLabel || 'unit'}
                         </span>
                     </div>
-                    {product.salePrice && product.salePrice > 0 && (
+                    {product.salePrice && product.salePrice > 0 ? (
                         <span className="inline-block mt-1 text-[11px] font-bold text-amber-600 dark:text-amber-300 font-mono">
                             Promo: {currencySymbol} {formatPriceValue(product.salePrice)}
                         </span>
-                    )}
+                    ) : smart.unitPriceLabel ? (
+                        <span className="inline-block mt-1 text-[11px] font-semibold text-[var(--theme-text-secondary)] font-mono">
+                            Equiv: {smart.unitPriceLabel}
+                        </span>
+                    ) : null}
                 </div>
 
                 {/* 2. Stock Level */}
@@ -135,7 +147,7 @@ export const ProductProfileHeader: React.FC<ProductProfileHeaderProps> = ({
                         </span>
                     </div>
                     <span className="text-[11px] font-semibold text-[var(--theme-text-primary)] uppercase block mt-1 tracking-wide">
-                        {product.packQuantity && product.packQuantity > 1 ? `Pack of ${product.packQuantity}` : 'Single Unit'}
+                        {smart.stockBreakdown || smart.packBadge}
                     </span>
                 </div>
 

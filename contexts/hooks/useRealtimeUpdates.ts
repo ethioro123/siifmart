@@ -127,12 +127,15 @@ export function useRealtimeUpdates({
         }
       },
       onStockChange: (_event, payload) => {
-        // When a stock movement occurs, adjust the product's stock count in state
+        // Product stock quantities are authoritatively synchronized via the `products`
+        // table UPDATE event (`onProductChange`). Applying `stock_movements` audit
+        // log deltas on top of `onProductChange` causes double/triple stock deductions.
         if (payload?.product_id && typeof payload?.quantity === 'number') {
-          const prodId = payload.product_id;
-          const qtyDelta = payload.type === 'OUT' ? -payload.quantity : payload.quantity;
-          setProducts(prev => prev.map(p => p.id === prodId ? { ...p, stock: (p.stock || 0) + qtyDelta } : p));
-          setAllProducts(prev => prev.map(p => p.id === prodId ? { ...p, stock: (p.stock || 0) + qtyDelta } : p));
+          logger.debug('useRealtimeUpdates', 'Stock movement logged', {
+            productId: payload.product_id,
+            type: payload.type,
+            quantity: payload.quantity
+          });
         }
       },
       onCustomerChange: (event, payload) => {

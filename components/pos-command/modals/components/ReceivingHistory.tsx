@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Clock } from 'lucide-react';
+import React, { useState, useEffect, useMemo } from 'react';
+import { Clock, Loader2 } from 'lucide-react';
 import { usePOSCommand } from '../../POSCommandContext';
 import { useData } from '../../../../contexts/DataContext';
 import { useFulfillmentData } from '../../../fulfillment/FulfillmentDataProvider';
@@ -7,21 +7,45 @@ import { useLanguage } from '../../../../contexts/LanguageContext';
 import { formatDateTime } from '../../../../utils/formatting';
 import { formatJobId } from '../../../../utils/jobIdFormatter';
 import Pagination from '../../../shared/Pagination';
+import { logger } from '../../../../utils/logger';
 
 export const ReceivingHistory: React.FC = () => {
     const { t } = useLanguage();
     const { activeSite, allProducts } = useData();
-    const { jobs, transfers } = useFulfillmentData();
+    const { jobs, transfers, historicalJobs, loadHistoricalJobs } = useFulfillmentData();
     const { setReceivingSummary } = usePOSCommand();
     const [currentPage, setCurrentPage] = useState(1);
+    const [isLoading, setIsLoading] = useState(false);
     const ITEMS_PER_PAGE = 8;
 
-    const wmsTransferJobs = React.useMemo(() => {
-        return jobs
+    useEffect(() => {
+        let isMounted = true;
+        setIsLoading(true);
+        loadHistoricalJobs(200)
+            .catch(err => {
+                logger.error('ReceivingHistory', 'Failed to load historical jobs', err);
+            })
+            .finally(() => {
+                if (isMounted) setIsLoading(false);
+            });
+        return () => {
+            isMounted = false;
+        };
+    }, [loadHistoricalJobs]);
+
+    const combinedJobs = useMemo(() => {
+        const map = new Map<string, any>();
+        for (const j of historicalJobs || []) map.set(j.id, j);
+        for (const j of jobs || []) map.set(j.id, j);
+        return Array.from(map.values());
+    }, [jobs, historicalJobs]);
+
+    const wmsTransferJobs = useMemo(() => {
+        return combinedJobs
             .filter(j => j.type === 'TRANSFER' || j.type === 'DISPATCH')
             .filter(j => {
                 if (j.type === 'TRANSFER') return true;
-                return !jobs.some(p => p.type === 'TRANSFER' && (p.id === j.orderRef || p.jobNumber === j.orderRef));
+                return !combinedJobs.some(p => p.type === 'TRANSFER' && (p.id === j.orderRef || p.jobNumber === j.orderRef));
             })
             .map(j => ({
                 id: j.id,
@@ -35,11 +59,12 @@ export const ReceivingHistory: React.FC = () => {
                 jobNumber: j.jobNumber,
                 createdAt: j.createdAt,
                 assignedTo: j.assignedTo,
-                receivedAt: (j as any).receivedAt || (j as any).received_at || null
+                receivedAt: (j as any).receivedAt || (j as any).received_at || (j as any).completedAt || (j as any).completed_at || null,
+                updatedAt: j.updatedAt
             }));
-    }, [jobs]);
+    }, [combinedJobs]);
 
-    const historyItems = React.useMemo(() => {
+    const historyItems = useMemo(() => {
         const allTransferSources = [
             ...(transfers || []),
             ...wmsTransferJobs.filter(wj =>
@@ -50,7 +75,14 @@ export const ReceivingHistory: React.FC = () => {
         return allTransferSources.filter(t => {
             if (String(t.destSiteId) !== String(activeSite?.id)) return false;
             const transferStatus = String((t as any).transferStatus || '').toLowerCase();
+            const jobStatus = String((t as any).status || '').toLowerCase();
             const hasExplicitReceivedAt = Boolean((t as any).receivedAt || (t as any).received_at);
+
+            // Exclude cancelled or rejected transfers from receiving history
+            if (['rejected', 'cancelled'].includes(transferStatus) || ['rejected', 'cancelled'].includes(jobStatus)) {
+                return false;
+            }
+
             return transferStatus === 'received' || (hasExplicitReceivedAt && transferStatus !== 'delivered');
         }).sort((a, b) => {
             const dateA = new Date((a as any).receivedAt || (a as any).updatedAt || 0).getTime();
@@ -61,6 +93,15 @@ export const ReceivingHistory: React.FC = () => {
 
     const totalPages = Math.max(1, Math.ceil(historyItems.length / ITEMS_PER_PAGE));
     const paginatedItems = historyItems.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
+
+    if (isLoading && historyItems.length === 0) {
+        return (
+            <div className="text-center py-12 text-[var(--theme-text-muted)] flex flex-col items-center justify-center">
+                <Loader2 size={32} className="animate-spin mb-3 text-[var(--theme-text-secondary)]" />
+                <p className="text-sm font-medium">{t('common.loading') || 'Loading history...'}</p>
+            </div>
+        );
+    }
 
     if (historyItems.length === 0) {
         return (

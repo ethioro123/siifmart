@@ -24,9 +24,13 @@ import {
 } from 'lucide-react';
 import { getPOItemCategorySpecsSummary } from './categoryAttributes';
 import { getPOItemPhysicalSummary } from './physicalUtils';
+import { resolveSmartProductAttributes } from '../../utils/groceryAttributes';
+import { Product } from '../../types';
 
 interface POItemExpandedDetailsProps {
     item: any;
+    allProducts?: Product[];
+    currencySymbol?: string;
 }
 
 const getDomainIcon = (iconType: string) => {
@@ -51,16 +55,23 @@ const getDomainIcon = (iconType: string) => {
     }
 };
 
-export const POItemExpandedDetails: React.FC<POItemExpandedDetailsProps> = ({ item }) => {
-    const summary = getPOItemCategorySpecsSummary(item);
+export const POItemExpandedDetails: React.FC<POItemExpandedDetailsProps> = ({
+    item,
+    allProducts,
+    currencySymbol = 'ETB'
+}) => {
+    const smart = resolveSmartProductAttributes(item, allProducts, currencySymbol);
+    const summary = getPOItemCategorySpecsSummary({
+        ...item,
+        category: smart.category,
+        subcategory: smart.subcategory
+    });
     const DomainIcon = getDomainIcon(summary.iconType);
     const attrs = item.customAttributes || item.custom_attributes || {};
 
     const physical = attrs.physical || {};
     const storage = attrs.storage || {};
     const packaging = attrs.packaging || {};
-    const commercial = attrs.commercial || {};
-    const descriptive = attrs.descriptive || {};
 
     const physSummary = getPOItemPhysicalSummary(item);
     const domainId = physSummary.domainId;
@@ -72,11 +83,11 @@ export const POItemExpandedDetails: React.FC<POItemExpandedDetailsProps> = ({ it
                 icon: Shirt,
                 colorClass: 'text-indigo-500',
                 rows: [
-                    { label: 'Size / Fitment:', value: physSummary.sizeOrVolume || (attrs.categorySpecific?.apparelSize) },
-                    { label: 'Colorway:', value: physical.color || physSummary.colorOrFinish },
-                    { label: 'Material / Fiber:', value: physSummary.materialOrContainer || physical.form },
+                    { label: 'Size / Fitment:', value: physSummary.sizeOrVolume || attrs.categorySpecific?.apparelSize || smart.netContent },
+                    { label: 'Colorway:', value: physical.color || physSummary.colorOrFinish || smart.color },
+                    { label: 'Material / Fiber:', value: physSummary.materialOrContainer || physical.form || smart.physicalForm },
                     { label: 'Garment Wt:', value: physical.netWeight ? `${physical.netWeight} ${physical.sizeType || 'g'}` : null },
-                    { label: 'Dimensions:', value: physical.dims }
+                    { label: 'Dimensions:', value: physical.dims || smart.dimensions }
                 ].filter(r => r.value)
             };
         }
@@ -86,10 +97,10 @@ export const POItemExpandedDetails: React.FC<POItemExpandedDetailsProps> = ({ it
                 icon: Coffee,
                 colorClass: 'text-cyan-500',
                 rows: [
-                    { label: 'Net Volume:', value: physical.netWeight ? `${physical.netWeight} ${physical.sizeType || 'ml'}` : null },
-                    { label: 'Container:', value: physSummary.materialOrContainer || physical.form },
-                    { label: 'Gross Wt:', value: physical.grossWeight ? (/[a-zA-Z]/.test(physical.grossWeight) ? physical.grossWeight : `${physical.grossWeight} kg`) : null },
-                    { label: 'Bottle Height:', value: physical.dims }
+                    { label: 'Net Volume:', value: physical.netWeight ? `${physical.netWeight} ${physical.sizeType || 'ml'}` : smart.netContent },
+                    { label: 'Container:', value: physSummary.materialOrContainer || smart.packagingMaterial || physical.form },
+                    { label: 'Gross Wt:', value: physical.grossWeight ? (/[a-zA-Z]/.test(physical.grossWeight) ? physical.grossWeight : `${physical.grossWeight} kg`) : smart.grossWeight },
+                    { label: 'Bottle Height:', value: physical.dims || smart.dimensions }
                 ].filter(r => r.value)
             };
         }
@@ -99,10 +110,10 @@ export const POItemExpandedDetails: React.FC<POItemExpandedDetailsProps> = ({ it
                 icon: Cpu,
                 colorClass: 'text-sky-500',
                 rows: [
-                    { label: 'Dimensions:', value: physical.dims },
-                    { label: 'Device Wt:', value: physical.netWeight ? `${physical.netWeight} ${physical.sizeType || 'g'}` : null },
-                    { label: 'Color / Finish:', value: physical.color },
-                    { label: 'Gross Wt:', value: physical.grossWeight ? (/[a-zA-Z]/.test(physical.grossWeight) ? physical.grossWeight : `${physical.grossWeight} kg`) : null }
+                    { label: 'Dimensions:', value: physical.dims || smart.dimensions },
+                    { label: 'Device Wt:', value: physical.netWeight ? `${physical.netWeight} ${physical.sizeType || 'g'}` : smart.netContent },
+                    { label: 'Color / Finish:', value: physical.color || smart.color },
+                    { label: 'Gross Wt:', value: physical.grossWeight ? (/[a-zA-Z]/.test(physical.grossWeight) ? physical.grossWeight : `${physical.grossWeight} kg`) : smart.grossWeight }
                 ].filter(r => r.value)
             };
         }
@@ -112,9 +123,9 @@ export const POItemExpandedDetails: React.FC<POItemExpandedDetailsProps> = ({ it
                 icon: UtensilsCrossed,
                 colorClass: 'text-amber-500',
                 rows: [
-                    { label: 'Dimensions:', value: physical.dims },
-                    { label: 'Capacity:', value: physSummary.sizeOrVolume || physical.capacity },
-                    { label: 'Material:', value: physSummary.materialOrContainer || physical.material || physical.form },
+                    { label: 'Dimensions:', value: physical.dims || smart.dimensions },
+                    { label: 'Capacity:', value: physSummary.sizeOrVolume || physical.capacity || smart.netContent },
+                    { label: 'Material:', value: physSummary.materialOrContainer || physical.material || smart.packagingMaterial || physical.form },
                     { label: 'Item Weight:', value: physical.netWeight ? `${physical.netWeight} ${physical.sizeType || 'g'}` : null }
                 ].filter(r => r.value)
             };
@@ -124,21 +135,23 @@ export const POItemExpandedDetails: React.FC<POItemExpandedDetailsProps> = ({ it
             icon: Scale,
             colorClass: 'text-emerald-500',
             rows: [
-                { label: 'Net Weight:', value: physical.netWeight ? `${physical.netWeight} ${physical.sizeType || physical.unit || ''}` : null },
-                { label: 'Gross Weight:', value: physical.grossWeight ? (/[a-zA-Z]/.test(physical.grossWeight) ? physical.grossWeight : `${physical.grossWeight} kg`) : null },
-                { label: 'Form:', value: physical.form },
-                { label: 'Dimensions:', value: physical.dims },
-                { label: 'Color:', value: physical.color }
+                { label: 'Net Content:', value: physical.netWeight ? `${physical.netWeight} ${physical.sizeType || physical.unit || ''}` : smart.netContent },
+                { label: 'Gross Weight:', value: physical.grossWeight ? (/[a-zA-Z]/.test(physical.grossWeight) ? physical.grossWeight : `${physical.grossWeight} kg`) : smart.grossWeight },
+                { label: 'Form:', value: physical.form || smart.physicalForm },
+                { label: 'Dimensions:', value: physical.dims || smart.dimensions },
+                { label: 'Color:', value: physical.color || smart.color }
             ].filter(r => r.value)
         };
     };
 
     const physicalGroup = getPhysicalSpecsRows();
-    const hasPhysical = physicalGroup.rows.length > 0;
-    const hasStorage = !!(storage.type || storage.isPerishable || storage.isHazardous || storage.isFragile || storage.stackLimit || storage.isLightSensitive);
-    const hasPackaging = !!(packaging.packageType || packaging.packQty || packaging.caseSize || packaging.material);
-    const hasCommercial = !!(commercial.sellBy || commercial.priceType || commercial.isWeighted || commercial.isReturnable !== undefined);
-    const hasDescriptive = !!(descriptive.scent || descriptive.flavor || descriptive.usage || descriptive.keyFeatures);
+    const mergedSpecs = [
+        ...(smart.brand ? [{ label: 'Brand', value: smart.brand }] : []),
+        ...(smart.subcategory ? [{ label: 'Subcategory', value: smart.subcategory }] : []),
+        ...(smart.variant ? [{ label: 'Variant', value: smart.variant }] : []),
+        ...(smart.unitPriceLabel ? [{ label: 'Unit Price Equiv.', value: smart.unitPriceLabel }] : []),
+        ...smart.domainSpecs
+    ];
 
     return (
         <div className="space-y-3.5 py-1">
@@ -153,16 +166,16 @@ export const POItemExpandedDetails: React.FC<POItemExpandedDetailsProps> = ({ it
                             {summary.domainTitle}
                         </span>
                     </div>
-                    <span className="text-[10px] font-semibold text-[var(--theme-text-secondary)] bg-[var(--theme-bg-app)] border border-[var(--theme-border)] px-2 py-0.5 rounded-full flex items-center gap-1">
+                    <span className="text-[11px] font-semibold text-[var(--theme-text-secondary)] bg-[var(--theme-bg-app)] border border-[var(--theme-border)] px-2 py-0.5 rounded-full flex items-center gap-1">
                         <SlidersHorizontal size={10} className="text-[var(--theme-accent)]" /> {summary.badgeLabel}
                     </span>
                 </div>
 
-                {summary.specs.length > 0 ? (
+                {mergedSpecs.length > 0 ? (
                     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2.5 pt-1">
-                        {summary.specs.map((spec, idx) => (
+                        {mergedSpecs.map((spec, idx) => (
                             <div key={idx} className="bg-[var(--theme-bg-app)] border border-[var(--theme-border)] rounded-xl p-2 flex flex-col justify-between">
-                                <span className="text-[10px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-tight">
+                                <span className="text-[11px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-tight">
                                     {spec.label}
                                 </span>
                                 <span className="text-xs font-bold text-[var(--theme-text-primary)] mt-0.5 truncate">
@@ -181,109 +194,96 @@ export const POItemExpandedDetails: React.FC<POItemExpandedDetailsProps> = ({ it
             {/* GS1 Secondary Attribute Layers */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                 {/* Physical Specifications */}
-                {hasPhysical && (
-                    <div className="p-3 bg-[var(--theme-bg-subtle)] rounded-xl border border-[var(--theme-border)] space-y-1.5">
-                        <div className="flex items-center gap-1.5 text-[10px] font-bold text-[var(--theme-text-secondary)] uppercase tracking-wider">
-                            <physicalGroup.icon size={11} className={physicalGroup.colorClass} />
-                            <span>{physicalGroup.title}</span>
-                        </div>
-                        <div className="space-y-1 text-xs">
-                            {physicalGroup.rows.map((row, idx) => (
-                                <div key={idx} className={`flex justify-between ${idx < physicalGroup.rows.length - 1 ? 'border-b border-[var(--theme-border-subtle)] pb-0.5' : ''}`}>
-                                    <span className="text-[var(--theme-text-secondary)]">{row.label}</span>
-                                    <span className="font-semibold text-[var(--theme-text-primary)]">{row.value}</span>
-                                </div>
-                            ))}
-                        </div>
+                <div className="p-3 bg-[var(--theme-bg-subtle)] rounded-xl border border-[var(--theme-border)] space-y-1.5">
+                    <div className="flex items-center gap-1.5 text-[11px] font-bold text-[var(--theme-text-secondary)] uppercase tracking-wider">
+                        <physicalGroup.icon size={11} className={physicalGroup.colorClass} />
+                        <span>{physicalGroup.title}</span>
                     </div>
-                )}
+                    <div className="space-y-1 text-xs">
+                        {physicalGroup.rows.map((row, idx) => (
+                            <div key={idx} className={`flex justify-between ${idx < physicalGroup.rows.length - 1 ? 'border-b border-[var(--theme-border-subtle)] pb-0.5' : ''}`}>
+                                <span className="text-[var(--theme-text-secondary)]">{row.label}</span>
+                                <span className="font-semibold text-[var(--theme-text-primary)]">{row.value}</span>
+                            </div>
+                        ))}
+                    </div>
+                </div>
 
                 {/* Storage & Cold Chain Protocols */}
-                {hasStorage && (
-                    <div className="p-3 bg-[var(--theme-bg-subtle)] rounded-xl border border-[var(--theme-border)] space-y-1.5">
-                        <div className="flex items-center gap-1.5 text-[10px] font-bold text-[var(--theme-text-secondary)] uppercase tracking-wider">
-                            <Thermometer size={11} className="text-cyan-500" />
-                            <span>Storage & Handling</span>
-                        </div>
-                        <div className="space-y-1 text-xs">
-                            {storage.inboundQcDirective && (
-                                <div className="flex justify-between border-b border-[var(--theme-border-subtle)] pb-0.5">
-                                    <span className="text-[var(--theme-text-secondary)]">Inbound QC:</span>
-                                    <span className="font-semibold text-emerald-600 dark:text-emerald-400 truncate max-w-[150px]" title={storage.inboundQcDirective}>
-                                        {storage.inboundQcDirective}
-                                    </span>
-                                </div>
-                            )}
-                            {storage.type && (
-                                <div className="flex justify-between border-b border-[var(--theme-border-subtle)] pb-0.5">
-                                    <span className="text-[var(--theme-text-secondary)]">Storage Mode:</span>
-                                    <span className="font-semibold text-[var(--theme-text-primary)]">{storage.type}</span>
-                                </div>
-                            )}
-                            {storage.isPerishable && (
-                                <div className="flex justify-between border-b border-[var(--theme-border-subtle)] pb-0.5">
-                                    <span className="text-[var(--theme-text-secondary)]">Perishable:</span>
-                                    <span className="font-bold text-amber-500">Yes ({storage.shelfLifeDays ? `${storage.shelfLifeDays} days` : 'Cold Chain'})</span>
-                                </div>
-                            )}
-                            {storage.isHazardous && (
-                                <div className="flex justify-between border-b border-[var(--theme-border-subtle)] pb-0.5">
-                                    <span className="text-[var(--theme-text-secondary)]">Hazard Class:</span>
-                                    <span className="font-bold text-rose-500 flex items-center gap-1"><AlertTriangle size={11} /> Hazardous</span>
-                                </div>
-                            )}
-                            {storage.isFragile && (
-                                <div className="flex justify-between border-b border-[var(--theme-border-subtle)] pb-0.5">
-                                    <span className="text-[var(--theme-text-secondary)]">Fragile:</span>
-                                    <span className="font-bold text-amber-500">Handle With Care</span>
-                                </div>
-                            )}
-                            {storage.stackLimit && (
-                                <div className="flex justify-between">
-                                    <span className="text-[var(--theme-text-secondary)]">Stack Limit:</span>
-                                    <span className="font-semibold text-[var(--theme-text-primary)]">Max {storage.stackLimit} High</span>
-                                </div>
-                            )}
-                        </div>
+                <div className="p-3 bg-[var(--theme-bg-subtle)] rounded-xl border border-[var(--theme-border)] space-y-1.5">
+                    <div className="flex items-center gap-1.5 text-[11px] font-bold text-[var(--theme-text-secondary)] uppercase tracking-wider">
+                        <Thermometer size={11} className="text-cyan-500" />
+                        <span>Storage & Handling</span>
                     </div>
-                )}
+                    <div className="space-y-1 text-xs">
+                        <div className="flex justify-between border-b border-[var(--theme-border-subtle)] pb-0.5">
+                            <span className="text-[var(--theme-text-secondary)]">Storage Mode:</span>
+                            <span className="font-semibold text-[var(--theme-text-primary)]">{storage.type || smart.storageType}</span>
+                        </div>
+                        {(storage.inboundQcDirective || smart.inboundQcDirective) && (
+                            <div className="flex justify-between border-b border-[var(--theme-border-subtle)] pb-0.5">
+                                <span className="text-[var(--theme-text-secondary)]">Inbound QC:</span>
+                                <span className="font-semibold text-emerald-600 dark:text-emerald-400 truncate max-w-[160px]" title={storage.inboundQcDirective || smart.inboundQcDirective || ''}>
+                                    {storage.inboundQcDirective || smart.inboundQcDirective}
+                                </span>
+                            </div>
+                        )}
+                        {(storage.isPerishable ?? smart.isPerishable) && (
+                            <div className="flex justify-between border-b border-[var(--theme-border-subtle)] pb-0.5">
+                                <span className="text-[var(--theme-text-secondary)]">Perishable:</span>
+                                <span className="font-bold text-amber-500">Yes ({storage.shelfLifeDays ? `${storage.shelfLifeDays} days` : 'FEFO Tracked'})</span>
+                            </div>
+                        )}
+                        {(storage.isHazardous ?? smart.isHazardous) && (
+                            <div className="flex justify-between border-b border-[var(--theme-border-subtle)] pb-0.5">
+                                <span className="text-[var(--theme-text-secondary)]">Hazard Class:</span>
+                                <span className="font-bold text-rose-500 flex items-center gap-1"><AlertTriangle size={11} /> Hazardous</span>
+                            </div>
+                        )}
+                        {(storage.isFragile ?? smart.isFragile) && (
+                            <div className="flex justify-between border-b border-[var(--theme-border-subtle)] pb-0.5">
+                                <span className="text-[var(--theme-text-secondary)]">Fragile:</span>
+                                <span className="font-bold text-amber-500">Handle With Care</span>
+                            </div>
+                        )}
+                        {storage.stackLimit && (
+                            <div className="flex justify-between">
+                                <span className="text-[var(--theme-text-secondary)]">Stack Limit:</span>
+                                <span className="font-semibold text-[var(--theme-text-primary)]">Max {storage.stackLimit} High</span>
+                            </div>
+                        )}
+                    </div>
+                </div>
 
                 {/* Packaging & Hierarchy */}
-                {hasPackaging && (
-                    <div className="p-3 bg-[var(--theme-bg-subtle)] rounded-xl border border-[var(--theme-border)] space-y-1.5">
-                        <div className="flex items-center gap-1.5 text-[10px] font-bold text-[var(--theme-text-secondary)] uppercase tracking-wider">
-                            <Package size={11} className="text-amber-500" />
-                            <span>Packaging Architecture</span>
-                        </div>
-                        <div className="space-y-1 text-xs">
-                            {packaging.packageType && (
-                                <div className="flex justify-between border-b border-[var(--theme-border-subtle)] pb-0.5">
-                                    <span className="text-[var(--theme-text-secondary)]">Package Type:</span>
-                                    <span className="font-semibold text-[var(--theme-text-primary)]">{packaging.packageType}</span>
-                                </div>
-                            )}
-                            {packaging.packQty && (
-                                <div className="flex justify-between border-b border-[var(--theme-border-subtle)] pb-0.5">
-                                    <span className="text-[var(--theme-text-secondary)]">Pack Qty:</span>
-                                    <span className="font-semibold text-[var(--theme-text-primary)]">{packaging.packQty} units</span>
-                                </div>
-                            )}
-                            {packaging.caseSize && (
-                                <div className="flex justify-between border-b border-[var(--theme-border-subtle)] pb-0.5">
-                                    <span className="text-[var(--theme-text-secondary)]">Case Size:</span>
-                                    <span className="font-semibold text-[var(--theme-text-primary)]">{packaging.caseSize} packs/case</span>
-                                </div>
-                            )}
-                            {packaging.material && (
-                                <div className="flex justify-between">
-                                    <span className="text-[var(--theme-text-secondary)]">Material:</span>
-                                    <span className="font-semibold text-[var(--theme-text-primary)]">{packaging.material}</span>
-                                </div>
-                            )}
-                        </div>
+                <div className="p-3 bg-[var(--theme-bg-subtle)] rounded-xl border border-[var(--theme-border)] space-y-1.5">
+                    <div className="flex items-center gap-1.5 text-[11px] font-bold text-[var(--theme-text-secondary)] uppercase tracking-wider">
+                        <Package size={11} className="text-amber-500" />
+                        <span>Packaging Architecture</span>
                     </div>
-                )}
+                    <div className="space-y-1 text-xs">
+                        <div className="flex justify-between border-b border-[var(--theme-border-subtle)] pb-0.5">
+                            <span className="text-[var(--theme-text-secondary)]">Hierarchy:</span>
+                            <span className="font-semibold text-[var(--theme-text-primary)]">{smart.packagingLevel}</span>
+                        </div>
+                        <div className="flex justify-between border-b border-[var(--theme-border-subtle)] pb-0.5">
+                            <span className="text-[var(--theme-text-secondary)]">Container:</span>
+                            <span className="font-semibold text-[var(--theme-text-primary)]">{packaging.packageType || smart.packageType}</span>
+                        </div>
+                        <div className="flex justify-between border-b border-[var(--theme-border-subtle)] pb-0.5">
+                            <span className="text-[var(--theme-text-secondary)]">Multiplier:</span>
+                            <span className="font-semibold text-[var(--theme-text-primary)] font-mono">{smart.packBadge}</span>
+                        </div>
+                        {(packaging.material || smart.packagingMaterial) && (
+                            <div className="flex justify-between">
+                                <span className="text-[var(--theme-text-secondary)]">Material:</span>
+                                <span className="font-semibold text-[var(--theme-text-primary)]">{packaging.material || smart.packagingMaterial}</span>
+                            </div>
+                        )}
+                    </div>
+                </div>
             </div>
         </div>
     );
 };
+

@@ -12,6 +12,8 @@ import { Protected } from '../../Protected';
 import { useStore } from '../../../contexts/CentralStore';
 import { canViewCostPrice } from '../../../utils/roles';
 import { formatProductDisplayName } from '../../procurement/utils';
+import { SmartProductAttributeStrip } from '../../SmartProductAttributeStrip';
+import { resolveSmartProductAttributes } from '../../../utils/groceryAttributes';
 
 interface InventoryDesktopTableProps {
     products: Product[];
@@ -202,48 +204,20 @@ export const InventoryDesktopTable: React.FC<InventoryDesktopTableProps> = ({
                                             <span className="text-[11px] font-medium text-[var(--theme-text-secondary)] bg-[var(--theme-bg-subtle)] px-2 py-0.5 rounded-md border border-[var(--theme-border)] uppercase tracking-wider">
                                                 {product.category}
                                             </span>
-                                            {formatProductSize(product) && (
-                                                <span className="text-[11px] font-semibold font-mono text-[#34C759] bg-[#34C759]/10 px-2 py-0.5 rounded-md border border-[#34C759]/25 uppercase tracking-wider">
-                                                    {formatProductSize(product)}
-                                                </span>
-                                            )}
-                                            {formatPackagingDescription(product) && (
-                                                <span className="text-[11px] font-semibold font-mono text-[#2997FF] bg-[#2997FF]/10 px-2 py-0.5 rounded-md border border-[#2997FF]/25 uppercase tracking-wider">
-                                                    {formatPackagingDescription(product)}
-                                                </span>
-                                            )}
-                                            {(() => {
-                                                const customAttrs = product.customAttributes || (product as any).custom_attributes;
-                                                const storageType = customAttrs?.storage?.type;
-                                                const isPerishable = customAttrs?.storage?.isPerishable;
-                                                const isHazardous = customAttrs?.storage?.isHazardous;
-
-                                                return (
-                                                    <>
-                                                        {storageType && storageType !== 'Ambient' && (
-                                                            <span className="text-[11px] font-semibold text-cyan-600 dark:text-cyan-400 bg-cyan-500/10 px-2 py-0.5 rounded-md border border-cyan-500/25 uppercase tracking-wider">
-                                                                {storageType}
-                                                            </span>
-                                                        )}
-                                                        {isHazardous && (
-                                                            <span className="text-[11px] font-semibold text-rose-600 dark:text-rose-400 bg-rose-500/10 px-2 py-0.5 rounded-md border border-rose-500/25 uppercase tracking-wider">
-                                                                Hazard
-                                                            </span>
-                                                        )}
-                                                        {isPerishable && (!storageType || storageType === 'Ambient') && (
-                                                            <span className="text-[11px] font-semibold text-amber-600 dark:text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded-md border border-amber-500/25 uppercase tracking-wider">
-                                                                Perishable
-                                                            </span>
-                                                        )}
-                                                    </>
-                                                );
-                                            })()}
                                             {product.approvalStatus === 'pending' && (
                                                 <span className="inline-flex items-center gap-1 text-[11px] font-semibold bg-[#FF9F0A]/10 text-[#FF9F0A] px-2 py-0.5 rounded-md border border-[#FF9F0A]/20 uppercase tracking-wider">
                                                     <Clock size={11} className="shrink-0" /> Review
                                                 </span>
                                             )}
                                         </div>
+                                        <SmartProductAttributeStrip
+                                            item={product}
+                                            currencySymbol={currencySymbol}
+                                            maxPills={5}
+                                            showDomainSpecs={true}
+                                            showUnitPrice={false}
+                                            className="mt-1.5 max-w-md"
+                                        />
                                     </div>
                                 </div>
                             </td>

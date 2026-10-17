@@ -3,6 +3,7 @@ import { POItem } from '../../types';
 import { formatCompactNumber } from '../../utils/formatting';
 import { Package, Trash2, Edit3, FileText, Check, X } from 'lucide-react';
 import { formatPOItemDescription, getPOItemPackagingSummary, getPOItemPhysicalSummary, getPOItemCategorySpecsSummary } from './utils';
+import { SmartProductAttributeStrip } from '../SmartProductAttributeStrip';
 
 interface POItemsTableProps {
     items: POItem[];
@@ -59,7 +60,7 @@ export const POItemsTable: React.FC<POItemsTableProps> = ({
             <div className="relative bg-[var(--theme-bg-panel)] rounded-2xl overflow-x-auto border border-[var(--theme-border)] shadow-sm">
                 <table className="w-full text-left border-collapse min-w-[700px]">
                     <thead>
-                        <tr className="bg-[var(--theme-bg-subtle)] border-b border-[var(--theme-border)] text-[10px] text-[var(--theme-text-secondary)] uppercase tracking-wider font-bold">
+                        <tr className="bg-[var(--theme-bg-subtle)] border-b border-[var(--theme-border)] text-[11px] text-[var(--theme-text-secondary)] uppercase tracking-wider font-bold">
                             <th className="p-4 pl-6">Product Details</th>
                             <th className="p-4 text-left w-40">Packaging</th>
                             <th className="p-4 text-right w-28">Sellable Qty</th>
@@ -77,7 +78,7 @@ export const POItemsTable: React.FC<POItemsTableProps> = ({
                                 <tr key={i} className="hover:bg-[var(--theme-bg-subtle)] transition-colors group/row">
                                     <td className="p-4 pl-6">
                                         <div className="flex items-center gap-4">
-                                            <div className="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center border border-emerald-500/20 text-emerald-600 dark:text-emerald-400">
+                                            <div className="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 shrink-0">
                                                 <Package size={18} />
                                             </div>
                                             <div>
@@ -85,23 +86,31 @@ export const POItemsTable: React.FC<POItemsTableProps> = ({
                                                     {formatPOItemDescription(item)}
                                                 </div>
                                                 <div className="text-xs text-[var(--theme-text-secondary)] font-mono mt-0.5 flex items-center gap-2 flex-wrap">
-                                                    <span className="bg-[var(--theme-bg-subtle)] px-2 py-0.5 rounded-md text-[10px] border border-[var(--theme-border)] font-bold">{item.sku}</span>
+                                                    <span className="bg-[var(--theme-bg-subtle)] px-2 py-0.5 rounded-md text-[11px] border border-[var(--theme-border)] font-bold">{item.sku}</span>
                                                     {item.identityType === 'new' && (
-                                                        <span className="text-[9px] px-2 py-0.5 border border-amber-500/30 rounded-md bg-amber-500/10 text-amber-700 dark:text-amber-400 font-semibold tracking-widest">
+                                                        <span className="text-[11px] px-2 py-0.5 border border-amber-500/30 rounded-md bg-amber-500/10 text-amber-700 dark:text-amber-400 font-semibold tracking-widest">
                                                             CUSTOM
                                                         </span>
                                                     )}
                                                     {phys.specBadge && (
-                                                        <span className="bg-[var(--theme-bg-subtle)] px-2 py-0.5 rounded-md text-[10px] border border-[var(--theme-border)] text-[var(--theme-text-secondary)] font-medium">
+                                                        <span className="bg-[var(--theme-bg-subtle)] px-2 py-0.5 rounded-md text-[11px] border border-[var(--theme-border)] text-[var(--theme-text-secondary)] font-medium">
                                                             {phys.specBadge}
                                                         </span>
                                                     )}
                                                     {catSpecs.summaryText && (
-                                                        <span className="bg-[var(--theme-bg-subtle)] px-2 py-0.5 rounded-md text-[10px] border border-[var(--theme-border)] text-[var(--theme-text-primary)] font-medium">
+                                                        <span className="bg-[var(--theme-bg-subtle)] px-2 py-0.5 rounded-md text-[11px] border border-[var(--theme-border)] text-[var(--theme-text-primary)] font-medium">
                                                             {catSpecs.summaryText}
                                                         </span>
                                                     )}
                                                 </div>
+                                                <SmartProductAttributeStrip
+                                                    item={item}
+                                                    currencySymbol={currencySymbol}
+                                                    maxPills={5}
+                                                    showDomainSpecs={true}
+                                                    showUnitPrice={false}
+                                                    className="mt-1.5"
+                                                />
                                             </div>
                                         </div>
                                     </td>

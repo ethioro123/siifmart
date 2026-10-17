@@ -138,17 +138,17 @@ export const triggerReceiptPrint = (selectedSale: SaleRecord, settings: any, sit
                  </div>
                  <div class="space-y-1 text-right mb-4">
                     <div class="flex justify-between text-[10px] opacity-60"><span>Subtotal</span><span>${selectedSale.subtotal.toLocaleString()}</span></div>
-                    ${selectedSale.taxBreakdown ? selectedSale.taxBreakdown.map(rule => `
+                    ${(selectedSale.tax > 0 && selectedSale.taxBreakdown && selectedSale.taxBreakdown.length > 0) ? selectedSale.taxBreakdown.map(rule => `
                       <div class="flex justify-between text-[10px] opacity-60">
                         <span>${rule.name} (${rule.rate}%)</span>
                         <span>${rule.amount.toLocaleString()}</span>
                       </div>
-                    `).join('') : `
+                    `).join('') : (selectedSale.tax > 0) ? `
                       <div class="flex justify-between text-[10px] opacity-60">
                         <span>Tax</span>
                         <span>${selectedSale.tax.toLocaleString()}</span>
                       </div>
-                    `}
+                    ` : ''}
                     ${(selectedSale.subtotal + selectedSale.tax - selectedSale.total) > 0.01 ? `
                       <div class="flex justify-between text-[10px] opacity-60">
                         <span>Discount</span>

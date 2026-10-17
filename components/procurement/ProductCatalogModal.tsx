@@ -5,6 +5,10 @@ import { Package, Search, Plus } from 'lucide-react';
 import { useData } from '../../contexts/DataContext';
 import { useStore } from '../../contexts/CentralStore';
 import { getCountryProfile } from '../../utils/localization';
+import { formatProductDisplayName } from './utils';
+import { formatStockDisplay } from '../../utils/units';
+import { resolveSmartProductAttributes } from '../../utils/groceryAttributes';
+import { SmartProductAttributeStrip } from '../SmartProductAttributeStrip';
 
 interface ProductCatalogModalProps {
     isOpen: boolean;
@@ -28,10 +32,17 @@ export const ProductCatalogModal: React.FC<ProductCatalogModalProps> = ({ isOpen
         // Search
         if (catalogSearch.trim()) {
             const q = catalogSearch.toLowerCase();
-            filtered = filtered.filter(p =>
-                p.name.toLowerCase().includes(q) ||
-                (p.sku && p.sku.toLowerCase().includes(q))
-            );
+            filtered = filtered.filter(p => {
+                const smart = resolveSmartProductAttributes(p);
+                return (
+                    p.name.toLowerCase().includes(q) ||
+                    Boolean(p.sku && p.sku.toLowerCase().includes(q)) ||
+                    Boolean(smart.brand && smart.brand.toLowerCase().includes(q)) ||
+                    Boolean(smart.subcategory && smart.subcategory.toLowerCase().includes(q)) ||
+                    Boolean(smart.netContent && smart.netContent.toLowerCase().includes(q)) ||
+                    Boolean(smart.packBadge && smart.packBadge.toLowerCase().includes(q))
+                );
+            });
         }
 
         // Category
@@ -88,7 +99,7 @@ export const ProductCatalogModal: React.FC<ProductCatalogModalProps> = ({ isOpen
                         <Search className="absolute left-3.5 top-1/2 transform -translate-y-1/2 text-[var(--theme-text-secondary)] pointer-events-none" size={16} />
                         <input
                             type="text"
-                            placeholder="Search products by title, brand, or SKU..."
+                            placeholder="Search products by title, brand, size, pack, or SKU..."
                             value={catalogSearch}
                             onChange={(e) => setCatalogSearch(e.target.value)}
                             className="w-full h-11 pl-10 pr-4 rounded-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-xs text-[var(--theme-text-primary)] placeholder-[var(--theme-text-secondary)]/70 focus:outline-none focus:border-[var(--theme-accent)] transition-all font-medium"
@@ -157,63 +168,79 @@ export const ProductCatalogModal: React.FC<ProductCatalogModalProps> = ({ isOpen
 
                 {/* Products Grid */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5 max-h-[480px] overflow-y-auto pr-1">
-                    {filteredCatalogProducts.map(product => (
-                        <div key={product.id} className="p-4 rounded-2xl bg-[var(--theme-bg-subtle)]/60 border border-[var(--theme-border)] hover:border-[var(--theme-accent)]/50 transition-all flex flex-col justify-between group">
-                            <div className="flex items-start gap-3">
-                                {product.image && !product.image.includes('placeholder.com') ? (
-                                    <img
-                                        src={product.image}
-                                        alt={product.name}
-                                        className="w-14 h-14 rounded-xl object-cover bg-black/20 shrink-0"
-                                        onError={(e) => {
-                                            e.currentTarget.style.display = 'none';
-                                        }}
-                                    />
-                                ) : (
-                                    <div className="w-14 h-14 rounded-xl bg-[var(--theme-bg-panel)] border border-[var(--theme-border)] flex items-center justify-center shrink-0 text-[var(--theme-text-secondary)]">
-                                        <Package size={22} strokeWidth={1.5} />
-                                    </div>
-                                )}
-                                <div className="flex-1 min-w-0">
-                                    <div className="flex justify-between items-start gap-1">
-                                        <h4 className="text-[var(--theme-text-primary)] font-bold text-xs truncate pr-1 group-hover:text-[var(--theme-accent)] transition-colors">{product.name}</h4>
-                                        {(product.stock || 0) <= (product.minStock || 10) && (
-                                            <span className={`text-[10px] px-2 py-0.5 rounded-full font-semibold uppercase tracking-wider shrink-0 ${
-                                                (product.stock || 0) === 0 ? 'bg-rose-500/10 text-rose-500 border border-rose-500/20' : 'bg-amber-500/10 text-amber-500 border border-amber-500/20'
-                                            }`}>
-                                                {(product.stock || 0) === 0 ? 'Out' : 'Low'}
-                                            </span>
-                                        )}
-                                    </div>
-                                    <p className="text-[11px] font-mono text-[var(--theme-text-secondary)] mt-0.5">SKU: {product.sku || product.id}</p>
-                                    <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-2 text-xs">
-                                         <div className="flex items-center gap-1 font-mono">
-                                             <span className="text-[10px] text-[var(--theme-text-secondary)] uppercase font-semibold">Retail</span>
-                                             <span className="text-[var(--theme-text-primary)] font-bold tabular-nums">{currencySymbol} {product.price.toLocaleString()}</span>
-                                         </div>
-                                         <div className="flex items-center gap-1 font-mono border-l border-[var(--theme-border)] pl-3">
-                                             <span className="text-[10px] text-[var(--theme-text-secondary)] uppercase font-semibold">Cost</span>
-                                             <span className="text-emerald-600 dark:text-emerald-400 font-bold tabular-nums">
-                                                 {currencySymbol} {(product.costPrice || (product.price * 0.7)).toLocaleString()}
-                                             </span>
-                                         </div>
-                                         <div className="text-[10px] text-[var(--theme-text-secondary)] font-mono border-l border-[var(--theme-border)] pl-3">
-                                             Stock: <span className="text-[var(--theme-text-primary)] font-bold tabular-nums">{product.stock || 0}</span>
-                                         </div>
+                    {filteredCatalogProducts.map(product => {
+                        const smart = resolveSmartProductAttributes(product, allProducts, currencySymbol);
+                        return (
+                            <div key={product.id} className="p-4 rounded-2xl bg-[var(--theme-bg-subtle)]/60 border border-[var(--theme-border)] hover:border-[var(--theme-accent)]/50 transition-all flex flex-col justify-between group">
+                                <div className="flex items-start gap-3">
+                                    {product.image && !product.image.includes('placeholder.com') ? (
+                                        <img
+                                            src={product.image}
+                                            alt={product.name}
+                                            className="w-14 h-14 rounded-xl object-cover bg-black/20 shrink-0"
+                                            onError={(e) => {
+                                                e.currentTarget.style.display = 'none';
+                                            }}
+                                        />
+                                    ) : (
+                                        <div className="w-14 h-14 rounded-xl bg-[var(--theme-bg-panel)] border border-[var(--theme-border)] flex items-center justify-center shrink-0 text-[var(--theme-text-secondary)]">
+                                            <Package size={22} strokeWidth={1.5} />
+                                        </div>
+                                    )}
+                                    <div className="flex-1 min-w-0">
+                                        <div className="flex justify-between items-start gap-1">
+                                            <h4 className="text-[var(--theme-text-primary)] font-bold text-xs truncate pr-1 group-hover:text-[var(--theme-accent)] transition-colors">
+                                                {formatProductDisplayName(product) || product.name}
+                                            </h4>
+                                            {(product.stock || 0) <= (product.minStock || 10) && (
+                                                <span className={`text-[11px] px-2 py-0.5 rounded-full font-semibold uppercase tracking-wider shrink-0 ${
+                                                    (product.stock || 0) === 0 ? 'bg-rose-500/10 text-rose-500 border border-rose-500/20' : 'bg-amber-500/10 text-amber-500 border border-amber-500/20'
+                                                }`}>
+                                                    {(product.stock || 0) === 0 ? 'Out' : 'Low'}
+                                                </span>
+                                            )}
+                                        </div>
+                                        <p className="text-[11px] font-mono text-[var(--theme-text-secondary)] mt-0.5">
+                                            SKU: {product.sku || product.id} · {smart.subcategory ? `${product.category} › ${smart.subcategory}` : product.category}
+                                        </p>
+                                        <SmartProductAttributeStrip
+                                            item={product}
+                                            currencySymbol={currencySymbol}
+                                            maxPills={5}
+                                            showDomainSpecs={true}
+                                            showUnitPrice={true}
+                                            className="mt-1.5"
+                                        />
+                                        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-2 text-xs">
+                                             <div className="flex items-center gap-1 font-mono">
+                                                 <span className="text-[11px] text-[var(--theme-text-secondary)] uppercase font-semibold">Retail</span>
+                                                 <span className="text-[var(--theme-text-primary)] font-bold tabular-nums">{currencySymbol} {product.price.toLocaleString()}</span>
+                                             </div>
+                                             <div className="flex items-center gap-1 font-mono border-l border-[var(--theme-border)] pl-3">
+                                                 <span className="text-[11px] text-[var(--theme-text-secondary)] uppercase font-semibold">Cost</span>
+                                                 <span className="text-emerald-600 dark:text-emerald-400 font-bold tabular-nums">
+                                                     {currencySymbol} {(product.costPrice || (product.price * 0.7)).toLocaleString()}
+                                                 </span>
+                                             </div>
+                                             <div className="text-[11px] text-[var(--theme-text-secondary)] font-mono border-l border-[var(--theme-border)] pl-3">
+                                                 Stock: <span className="text-[var(--theme-text-primary)] font-bold tabular-nums">{formatStockDisplay(product.stock || 0, product)}</span>
+                                                 {smart.stockBreakdown && <span className="text-[var(--theme-text-muted)] ml-1">({smart.stockBreakdown})</span>}
+                                             </div>
+                                        </div>
                                     </div>
                                 </div>
+                                <button
+                                    onClick={() => {
+                                        onAddToPO(product);
+                                        showToast(`Added "${product.name}" to PO`, 'info');
+                                    }}
+                                    className="w-full mt-3 h-9 bg-[var(--theme-primary)] text-[var(--theme-primary-text)] font-semibold text-xs rounded-full transition-all active:scale-[0.98] shadow-sm flex items-center justify-center gap-1.5 cursor-pointer"
+                                >
+                                    <Plus size={14} strokeWidth={2} /> Add to Order
+                                </button>
                             </div>
-                            <button
-                                onClick={() => {
-                                    onAddToPO(product);
-                                    showToast(`Added "${product.name}" to PO`, 'info');
-                                }}
-                                className="w-full mt-3 h-9 bg-[var(--theme-primary)] text-[var(--theme-primary-text)] font-semibold text-xs rounded-full transition-all active:scale-[0.98] shadow-sm flex items-center justify-center gap-1.5 cursor-pointer"
-                            >
-                                <Plus size={14} strokeWidth={2} /> Add to Order
-                            </button>
-                        </div>
-                    ))}
+                        );
+                    })}
                 </div>
 
                 {filteredCatalogProducts.length === 0 && (

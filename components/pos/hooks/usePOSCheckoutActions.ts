@@ -300,7 +300,7 @@ export const usePOSCheckoutActions = ({
           </div>
           <div class="space-y-1 text-right mb-4">
             <div class="flex justify-between text-[10px] opacity-60"><span>Subtotal</span><span>${CURRENCY_SYMBOL}${(lastSale?.subtotal || 0).toLocaleString()}</span></div>
-            ${(lastSale?.taxBreakdown || []).length > 0 ? (lastSale?.taxBreakdown || []).map(rule => `<div class="flex justify-between text-[10px] opacity-60"><span>${rule.name} (${rule.rate}%)</span><span>${CURRENCY_SYMBOL}${rule.amount.toLocaleString()}</span></div>`).join('') : `<div class="flex justify-between text-[10px] opacity-60"><span>Standard Tax (0%)</span><span>${CURRENCY_SYMBOL}0</span></div>`}
+            ${(lastSale?.taxBreakdown || []).length > 0 ? (lastSale?.taxBreakdown || []).map(rule => `<div class="flex justify-between text-[10px] opacity-60"><span>${rule.name} (${rule.rate}%)</span><span>${CURRENCY_SYMBOL}${rule.amount.toLocaleString()}</span></div>`).join('') : (lastSale?.tax && lastSale.tax > 0) ? `<div class="flex justify-between text-[10px] opacity-60"><span>Tax</span><span>${CURRENCY_SYMBOL}${lastSale.tax.toLocaleString()}</span></div>` : ''}
             <div class="flex justify-between font-black text-base border-t-black pt-2 mt-2"><span>TOTAL</span> <span>${CURRENCY_SYMBOL}${(lastSale?.total || 0).toLocaleString()}</span></div>
           </div>
           <div class="text-[10px] font-bold border-t-dashed pt-4 mb-4">

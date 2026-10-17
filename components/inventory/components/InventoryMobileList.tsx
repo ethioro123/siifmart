@@ -9,6 +9,7 @@ import { useStore } from '../../../contexts/CentralStore';
 import { canViewCostPrice } from '../../../utils/roles';
 import { Protected } from '../../Protected';
 import { formatProductDisplayName } from '../../procurement/utils';
+import { SmartProductAttributeStrip } from '../../SmartProductAttributeStrip';
 
 interface InventoryMobileListProps {
     products: Product[];
@@ -98,12 +99,15 @@ export const InventoryMobileList: React.FC<InventoryMobileListProps> = ({
                                     <span className="text-[11px] font-medium text-[var(--theme-text-secondary)] bg-[var(--theme-bg-subtle)] px-2 py-0.5 rounded-md border border-[var(--theme-border)] uppercase">
                                         {product.category}
                                     </span>
-                                    {formatProductSize(product) && (
-                                        <span className="text-[11px] font-semibold font-mono text-[#34C759] bg-[#34C759]/10 px-2 py-0.5 rounded-md border border-[#34C759]/20">
-                                            {formatProductSize(product)}
-                                        </span>
-                                    )}
                                 </div>
+                                <SmartProductAttributeStrip
+                                    item={product}
+                                    currencySymbol={currencySymbol}
+                                    maxPills={4}
+                                    showDomainSpecs={true}
+                                    showUnitPrice={false}
+                                    className="mt-1"
+                                />
                             </div>
                             {/* Status Badge */}
                             <div className={`flex flex-col items-end text-[11px] font-bold font-mono tabular-nums px-2.5 py-1 rounded-xl shadow-xs ${colorClasses}`}>

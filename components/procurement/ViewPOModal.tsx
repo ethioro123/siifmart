@@ -6,11 +6,11 @@ import { CheckCircle, XCircle, Printer, Edit3, Trash2, Package, Loader2, MapPin,
 import { useData } from '../../contexts/DataContext';
 import { useStore } from '../../contexts/CentralStore';
 import { purchaseOrdersService } from '../../services/supabase.service';
-import { formatCompactNumber } from '../../utils/formatting';
-import { formatDateTime } from '../../utils/formatting';
+import { formatCompactNumber, formatDateTime } from '../../utils/formatting';
 import { formatPONumber } from '../../utils/jobIdFormatter';
 import { formatPOItemDescription, getPOItemPackagingSummary } from './utils';
 import { POItemExpandedDetails } from './POItemExpandedDetails';
+import { SmartProductAttributeStrip } from '../SmartProductAttributeStrip';
 import { POPrintView, generatePOHTML } from './POPrintView';
 import { printHtmlContent } from '../../utils/printHelper';
 import { logger } from '../../utils/logger';
@@ -269,24 +269,15 @@ export const ViewPOModal: React.FC<ViewPOModalProps> = ({ isOpen, onClose, po, o
                                                 <td className="p-4 text-[var(--theme-text-secondary)] text-xs font-mono font-semibold">{item.sku || allProducts?.find(p => p.id === item.productId)?.sku || allProducts?.find(p => p.name === item.productName)?.sku || '—'}</td>
                                                 <td className="p-4">
                                                     <div className="text-[var(--theme-text-primary)] font-bold tracking-tight text-sm break-words leading-tight max-w-[360px]">{formatPOItemDescription(item)}</div>
-                                                    <div className="flex items-center gap-1.5 mt-1 flex-wrap">
-                                                        {item.productId?.startsWith('CUSTOM') && (
-                                                            <span className="inline-block text-[10px] bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 px-1.5 py-0.5 rounded font-semibold tracking-widest uppercase italic">Custom Resource</span>
-                                                        )}
-                                                        {pkg.packBadge && (
-                                                            <span className="inline-flex items-center gap-1 text-[9px] bg-amber-500/10 border border-amber-500/20 text-amber-700 dark:text-amber-400 px-1.5 py-0.5 rounded font-semibold tracking-wider uppercase">
-                                                                <Package size={11} className="shrink-0" /> {pkg.packBadge}
-                                                            </span>
-                                                        )}
-                                                    </div>
+                                                    <SmartProductAttributeStrip item={item} catalogProducts={allProducts} currencySymbol={currencySymbol} maxPills={5} showDomainSpecs={true} showUnitPrice={false} className="mt-1" />
                                                 </td>
                                                 <td className="p-4">
                                                     <div className="text-xs font-bold text-[var(--theme-text-primary)] flex items-center gap-1">
-                                                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-amber-500/10 border border-amber-500/20 text-amber-700 dark:text-amber-400 text-[10px] font-semibold uppercase">
+                                                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-amber-500/10 border border-amber-500/20 text-amber-700 dark:text-amber-400 text-[11px] font-semibold uppercase">
                                                             <Package size={11} className="shrink-0" /> {pkg.packBadge || pkg.manifestUnitName}
                                                         </span>
                                                     </div>
-                                                    <div className="text-[10px] text-[var(--theme-text-secondary)] font-medium mt-1">
+                                                    <div className="text-[11px] text-[var(--theme-text-secondary)] font-medium mt-1">
                                                         {pkg.packDetail}
                                                     </div>
                                                 </td>
@@ -295,11 +286,11 @@ export const ViewPOModal: React.FC<ViewPOModalProps> = ({ isOpen, onClose, po, o
                                                         {pkg.sellableQty.toLocaleString()} <span className="text-[11px] font-medium text-[var(--theme-text-secondary)]">{pkg.sellUnitLabel}</span>
                                                     </div>
                                                     {pkg.hasMultiplier ? (
-                                                        <div className="text-[10px] text-[var(--theme-text-secondary)] font-medium whitespace-nowrap mt-0.5">
+                                                        <div className="text-[11px] text-[var(--theme-text-secondary)] font-medium whitespace-nowrap mt-0.5">
                                                             {item.quantity} {pkg.manifestUnitName.toLowerCase()} ({pkg.unitsPerOrderUnit} {pkg.sellUnitLabel}/{pkg.manifestUnitName.replace(/s$/, '').toLowerCase()})
                                                         </div>
                                                     ) : (
-                                                        <div className="text-[10px] text-[var(--theme-text-secondary)] font-medium">
+                                                        <div className="text-[11px] text-[var(--theme-text-secondary)] font-medium">
                                                             (individual units)
                                                         </div>
                                                     )}
@@ -309,7 +300,7 @@ export const ViewPOModal: React.FC<ViewPOModalProps> = ({ isOpen, onClose, po, o
                                                         {formatCompactNumber(item.unitCost, { currency: currencySymbol })}{pkg.hasMultiplier ? ` /${pkg.manifestUnitName.replace(/s$/, '').toLowerCase()}` : ''}
                                                     </div>
                                                     {pkg.hasMultiplier && (
-                                                        <div className="text-[10px] text-[var(--theme-text-secondary)] font-mono">
+                                                        <div className="text-[11px] text-[var(--theme-text-secondary)] font-mono">
                                                             ~{formatCompactNumber(pkg.costPerSellableUnit, { currency: currencySymbol })}/{pkg.sellUnitLabel}
                                                         </div>
                                                     )}
@@ -319,10 +310,10 @@ export const ViewPOModal: React.FC<ViewPOModalProps> = ({ isOpen, onClose, po, o
                                                     {expandedItems[i] ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
                                                 </td>
                                             </tr>
-                                            {expandedItems[i] && item.customAttributes && (
+                                            {expandedItems[i] && (
                                                 <tr className="bg-[var(--theme-bg-subtle)]">
                                                     <td colSpan={8} className="p-4 pl-12">
-                                                        <POItemExpandedDetails item={item} />
+                                                        <POItemExpandedDetails item={item} allProducts={allProducts} currencySymbol={currencySymbol} />
                                                     </td>
                                                 </tr>
                                             )}

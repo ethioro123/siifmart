@@ -23,6 +23,9 @@ export const usePosSync = (onSyncComplete?: (count: number) => void): UsePosSync
     const [isOnline, setIsOnline] = useState<boolean>(navigator.onLine);
     const [latencyMs, setLatencyMs] = useState<number | null>(null);
     const isSyncingRef = useRef<boolean>(false);
+    const processedSaleIdsRef = useRef<Set<string>>(new Set());
+    const onSyncCompleteRef = useRef(onSyncComplete);
+    onSyncCompleteRef.current = onSyncComplete;
 
     // Active heartbeat to verify genuine internet reachability and measure latency
     const pingServer = useCallback(async (): Promise<boolean> => {
@@ -108,7 +111,17 @@ export const usePosSync = (onSyncComplete?: (count: number) => void): UsePosSync
                 try {
                     if (op.type === 'CREATE_SALE') {
                         const salePayload = op.payload;
-                        const { items, ...saleData } = salePayload;
+                        const saleId = salePayload?.id;
+
+                        if (saleId && processedSaleIdsRef.current.has(saleId)) {
+                            if (op.id) await posDB.removeOperation(op.id);
+                            continue;
+                        }
+                        if (saleId) {
+                            processedSaleIdsRef.current.add(saleId);
+                        }
+
+                        const { items, pointsRedeemed, loyaltyRate, enableLoyalty, ...saleData } = salePayload;
 
                         // 1. Send sale to Supabase
                         await salesService.create(saleData, items);
@@ -122,27 +135,29 @@ export const usePosSync = (onSyncComplete?: (count: number) => void): UsePosSync
                                         p_quantity: item.quantity,
                                         p_site_id: salePayload.siteId || salePayload.site_id || null,
                                         p_product_name: item.name || '',
-                                        p_reason: `POS Sale (Offline Sync) — Receipt ${salePayload.receiptNumber || salePayload.id}`,
+                                        p_reason: `POS Sale — Receipt ${salePayload.receiptNumber || salePayload.id}`,
                                         p_performed_by: salePayload.cashierName || 'System',
                                         p_sale_date: salePayload.date || new Date().toISOString()
                                     });
                                     if (rpcErr) {
-                                        logger.warn('usePosSync', `⚠️ Stock decrement failed for ${item.name || item.id}`);
+                                        logger.warn('usePosSync', `Stock decrement failed for ${item.name || item.id}`);
                                     }
                                 } catch (stockErr) {
-                                    logger.warn('usePosSync', `⚠️ Stock decrement failed for ${item.name || item.id}`);
+                                    logger.warn('usePosSync', `Stock decrement failed for ${item.name || item.id}`);
                                 }
                             }
                         }
 
                         // 3. Customer loyalty points reconciliation
-                        if (salePayload.customerId && salePayload.total) {
+                        if (salePayload.customerId && salePayload.total && enableLoyalty !== false) {
                             try {
                                 const customer = await customersService.getById(salePayload.customerId);
                                 if (customer) {
-                                    const loyaltyRate = 100; // 1 point per 100 spent
-                                    const earned = Math.floor(salePayload.total / loyaltyRate);
-                                    const updatedPoints = (customer.loyaltyPoints || 0) + earned;
+                                    const rate = typeof loyaltyRate === 'number' && loyaltyRate > 0 ? loyaltyRate : 100;
+                                    const baseAmount = typeof salePayload.subtotal === 'number' ? salePayload.subtotal : salePayload.total;
+                                    const earned = Math.floor(baseAmount / rate);
+                                    const redeemed = typeof pointsRedeemed === 'number' ? pointsRedeemed : 0;
+                                    const updatedPoints = Math.max(0, (customer.loyaltyPoints || 0) + earned - redeemed);
                                     await customersService.update(salePayload.customerId, {
                                         loyaltyPoints: updatedPoints,
                                         totalSpent: (customer.totalSpent || 0) + salePayload.total,
@@ -160,6 +175,9 @@ export const usePosSync = (onSyncComplete?: (count: number) => void): UsePosSync
                     successfulSyncs++;
 
                 } catch (err: any) {
+                    if (op.type === 'CREATE_SALE' && op.payload?.id && !(err?.code === '23505' || err?.message?.includes('duplicate key'))) {
+                        processedSaleIdsRef.current.delete(op.payload.id);
+                    }
                     logger.error('usePosSync', `Failed to sync POS op ${op.id}`, err);
 
                     // If it's a duplicate key or constraint error, gracefully remove
@@ -179,8 +197,8 @@ export const usePosSync = (onSyncComplete?: (count: number) => void): UsePosSync
             setSyncStatus(remaining.length === 0 ? 'synced' : 'error');
             setLastSyncedAt(new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
 
-            if (successfulSyncs > 0 && remaining.length === 0 && onSyncComplete) {
-                onSyncComplete(successfulSyncs);
+            if (successfulSyncs > 0 && remaining.length === 0 && onSyncCompleteRef.current) {
+                onSyncCompleteRef.current(successfulSyncs);
             }
 
         } catch (err: any) {
@@ -193,7 +211,7 @@ export const usePosSync = (onSyncComplete?: (count: number) => void): UsePosSync
         } finally {
             isSyncingRef.current = false;
         }
-    }, [pingServer, onSyncComplete]);
+    }, [pingServer]);
 
     // Effect: Network Listeners & Periodic Sync
     useEffect(() => {

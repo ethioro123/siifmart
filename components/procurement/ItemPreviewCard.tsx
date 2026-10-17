@@ -4,6 +4,7 @@ import { Info, Package, Scale, Thermometer, Tag, AlertTriangle, SlidersHorizonta
 import { formatPackBadge, formatPOItemDescription } from './utils';
 import { getSellUnit } from '../../utils/units';
 import { getCategorySpecGroup } from './categoryAttributes';
+import { resolveSmartProductAttributes } from '../../utils/groceryAttributes';
 
 interface ItemPreviewCardProps {
     name: string;
@@ -16,6 +17,7 @@ interface ItemPreviewCardProps {
     cost?: number;
     retailPrice?: number;
     image?: string;
+    sku?: string;
     currencySymbol?: string;
     customAttributes?: any;
     orderUnitName?: string;
@@ -33,6 +35,7 @@ export const ItemPreviewCard: React.FC<ItemPreviewCardProps> = ({
     cost,
     retailPrice,
     image,
+    sku,
     currencySymbol = 'ETB',
     customAttributes,
     orderUnitName = 'Case',
@@ -45,6 +48,12 @@ export const ItemPreviewCard: React.FC<ItemPreviewCardProps> = ({
     const costPerSellUnit = effectiveCost > 0 ? effectiveCost / unitsPerOrder : 0;
     const sellUnitDef = getSellUnit(unit);
     const sellUnitLabel = sellUnitDef.shortLabel || 'ea';
+
+    const smart = resolveSmartProductAttributes(
+        { name, brand, size, unit, category, description, price: effectiveRetail, costPrice: costPerSellUnit, sku, customAttributes, packQuantity: unitsPerOrder },
+        undefined,
+        currencySymbol
+    );
 
     // Margin calculations
     let marginPct: number | null = null;
@@ -101,14 +110,14 @@ export const ItemPreviewCard: React.FC<ItemPreviewCardProps> = ({
     // Filter active items per group (GS1 / Walmart Item 360 Architecture)
     const packagingAttrs = [
         { label: 'Level', value: packagingLevel === 'single' ? 'Single Unit (1:1)' : packagingLevel === 'two_tier' ? '2-Tier Master Case' : packagingLevel === 'bale' ? 'Bulk Bale' : 'Master Case' },
-        { label: 'Container', value: customAttributes?.packaging?.packageType || (packagingLevel === 'single' ? 'Retail Box' : 'Case') },
-        { label: 'Multiplier', value: isBulkOrder ? `×${unitsPerOrder} ${sellUnitLabel}` : '1:1 Each' },
-        { label: 'Material', value: customAttributes?.packaging?.material },
+        { label: 'Container', value: customAttributes?.packaging?.packageType || smart.packageType || (packagingLevel === 'single' ? 'Retail Box' : 'Case') },
+        { label: 'Multiplier', value: isBulkOrder ? `×${unitsPerOrder} ${sellUnitLabel}` : smart.packBadge },
+        { label: 'Material', value: customAttributes?.packaging?.material || smart.packagingMaterial },
         { label: 'Breakable', value: customAttributes?.packaging?.isBreakable, isAlert: true, icon: AlertTriangle }
     ].filter(a => a.value !== null && a.value !== undefined && a.value !== '' && a.value !== false);
 
     // Dynamic category-specific specifications
-    const specGroup = getCategorySpecGroup(category, customAttributes?.identity?.subcategory);
+    const specGroup = getCategorySpecGroup(category, customAttributes?.identity?.subcategory || smart.subcategory || undefined);
     const domainId = specGroup.id;
     const phys = customAttributes?.physical || {};
     const catSpec = customAttributes?.categorySpecific || {};
@@ -122,9 +131,9 @@ export const ItemPreviewCard: React.FC<ItemPreviewCardProps> = ({
                 icon: Shirt,
                 colorClass: 'text-indigo-500',
                 attrs: [
-                    { label: 'Size', value: catSpec.apparelSize || ident.variant || (phys.sizeType && !['g', 'kg', 'ml', 'L'].includes(phys.sizeType) ? phys.sizeType : null) },
-                    { label: 'Colorway', value: phys.color },
-                    { label: 'Material', value: catSpec.fabricMaterial || (phys.form && !['Solid', 'Liquid'].includes(phys.form) ? phys.form : null) },
+                    { label: 'Size', value: catSpec.apparelSize || ident.variant || smart.netContent || (phys.sizeType && !['g', 'kg', 'ml', 'L'].includes(phys.sizeType) ? phys.sizeType : null) },
+                    { label: 'Colorway', value: phys.color || smart.color },
+                    { label: 'Material', value: catSpec.fabricMaterial || (phys.form && !['Solid', 'Liquid'].includes(phys.form) ? phys.form : smart.physicalForm) },
                     { label: 'Net Weight', value: phys.netWeight ? `${phys.netWeight} ${phys.sizeType || 'g'}`.trim() : null }
                 ]
             };
@@ -135,10 +144,10 @@ export const ItemPreviewCard: React.FC<ItemPreviewCardProps> = ({
                 icon: Droplets,
                 colorClass: 'text-cyan-500',
                 attrs: [
-                    { label: 'Volume', value: phys.netWeight ? `${phys.netWeight} ${phys.sizeType || 'ml'}`.trim() : null },
-                    { label: 'Container', value: catSpec.containerType || (phys.form && !['Liquid', 'Solid'].includes(phys.form) ? phys.form : null) },
+                    { label: 'Volume', value: phys.netWeight ? `${phys.netWeight} ${phys.sizeType || 'ml'}`.trim() : smart.netContent },
+                    { label: 'Container', value: catSpec.containerType || (phys.form && !['Liquid', 'Solid'].includes(phys.form) ? phys.form : smart.packagingMaterial) },
                     { label: 'Gross Wt', value: phys.grossWeight ? (/[a-zA-Z]/.test(phys.grossWeight) ? phys.grossWeight : `${phys.grossWeight} kg`) : null },
-                    { label: 'Height', value: phys.dims }
+                    { label: 'Height', value: phys.dims || smart.dimensions }
                 ]
             };
         }
@@ -148,9 +157,9 @@ export const ItemPreviewCard: React.FC<ItemPreviewCardProps> = ({
                 icon: Cpu,
                 colorClass: 'text-sky-500',
                 attrs: [
-                    { label: 'Dimensions', value: phys.dims },
-                    { label: 'Device Wt', value: phys.netWeight ? `${phys.netWeight} ${phys.sizeType || 'g'}`.trim() : null },
-                    { label: 'Finish', value: phys.color },
+                    { label: 'Dimensions', value: phys.dims || smart.dimensions },
+                    { label: 'Device Wt', value: phys.netWeight ? `${phys.netWeight} ${phys.sizeType || 'g'}`.trim() : smart.netContent },
+                    { label: 'Finish', value: phys.color || smart.color },
                     { label: 'Gross Wt', value: phys.grossWeight ? (/[a-zA-Z]/.test(phys.grossWeight) ? phys.grossWeight : `${phys.grossWeight} kg`) : null }
                 ]
             };
@@ -161,9 +170,9 @@ export const ItemPreviewCard: React.FC<ItemPreviewCardProps> = ({
                 icon: UtensilsCrossed,
                 colorClass: 'text-amber-500',
                 attrs: [
-                    { label: 'Dimensions', value: phys.dims },
-                    { label: 'Capacity', value: catSpec.capacity || phys.capacity },
-                    { label: 'Material', value: catSpec.material || (phys.form && !['Solid', 'Liquid'].includes(phys.form) ? phys.form : null) },
+                    { label: 'Dimensions', value: phys.dims || smart.dimensions },
+                    { label: 'Capacity', value: catSpec.capacity || phys.capacity || smart.netContent },
+                    { label: 'Material', value: catSpec.material || (phys.form && !['Solid', 'Liquid'].includes(phys.form) ? phys.form : smart.packagingMaterial) },
                     { label: 'Weight', value: phys.netWeight ? `${phys.netWeight} ${phys.sizeType || 'g'}`.trim() : null }
                 ]
             };
@@ -173,11 +182,11 @@ export const ItemPreviewCard: React.FC<ItemPreviewCardProps> = ({
             icon: Scale,
             colorClass: 'text-emerald-500',
             attrs: [
-                { label: 'Net Content', value: phys.netWeight ? `${phys.netWeight} ${phys.sizeType || unit || ''}`.trim() : null },
+                { label: 'Net Content', value: phys.netWeight ? `${phys.netWeight} ${phys.sizeType || unit || ''}`.trim() : smart.netContent },
                 { label: 'Gross Wt', value: phys.grossWeight ? (/[a-zA-Z]/.test(phys.grossWeight) ? phys.grossWeight : `${phys.grossWeight} kg`) : null },
-                { label: 'Form', value: phys.form },
-                { label: 'Dimensions', value: phys.dims },
-                { label: 'Color', value: phys.color }
+                { label: 'Form', value: phys.form || smart.physicalForm },
+                { label: 'Dimensions', value: phys.dims || smart.dimensions },
+                { label: 'Color', value: phys.color || smart.color }
             ]
         };
     };
@@ -190,9 +199,9 @@ export const ItemPreviewCard: React.FC<ItemPreviewCardProps> = ({
             let val = catSpec[f.key];
             if (val === undefined || val === null || val === '') {
                 if (f.key === 'modelNumber') val = ident.modelNumber;
-                if (f.key === 'variantStyle') val = ident.variant;
+                if (f.key === 'variantStyle') val = ident.variant || smart.variant;
                 if (f.key === 'shelfLifeDays') val = customAttributes?.storage?.shelfLifeDays;
-                if (f.key === 'scentFragrance') val = customAttributes?.descriptive?.scent;
+                if (f.key === 'scentFragrance') val = customAttributes?.descriptive?.scent || smart.scent;
             }
             return {
                 label: f.label.replace(/\s*\(.*\)/, '').replace(/\s*\/.*$/, '').trim(),
@@ -201,27 +210,28 @@ export const ItemPreviewCard: React.FC<ItemPreviewCardProps> = ({
         })
         .filter(a => {
             if (a.value === null || a.value === undefined || a.value === '' || a.value === false) return false;
-            // Prevent redundant duplicates already displayed in the physical section
             const isDup = physicalAttrs.some(p => p.label.toLowerCase() === a.label.toLowerCase() || (a.label.toLowerCase() === 'size' && p.label.toLowerCase() === 'size'));
             return !isDup;
         });
 
     const storageAttrs = [
-        { label: 'Condition', value: customAttributes?.storage?.type },
-        { label: 'Inbound QC', value: customAttributes?.storage?.inboundQcDirective },
-        { label: 'Perishable', value: customAttributes?.storage?.isPerishable ? 'Perishable' : null, isAlert: true, icon: AlertTriangle },
-        { label: 'Hazard', value: customAttributes?.storage?.isHazardous ? 'Hazardous Material' : null, isAlert: true, icon: AlertTriangle },
-        { label: 'Fragile', value: customAttributes?.storage?.isFragile ? 'Fragile' : null, isAlert: true, icon: AlertTriangle },
+        { label: 'Condition', value: customAttributes?.storage?.type || smart.storageType },
+        { label: 'Inbound QC', value: customAttributes?.storage?.inboundQcDirective || smart.inboundQcDirective },
+        { label: 'Perishable', value: (customAttributes?.storage?.isPerishable ?? smart.isPerishable) ? 'Perishable' : null, isAlert: true, icon: AlertTriangle },
+        { label: 'Hazard', value: (customAttributes?.storage?.isHazardous ?? smart.isHazardous) ? 'Hazardous Material' : null, isAlert: true, icon: AlertTriangle },
+        { label: 'Fragile', value: (customAttributes?.storage?.isFragile ?? smart.isFragile) ? 'Fragile' : null, isAlert: true, icon: AlertTriangle },
         { label: 'Light Sensitive', value: customAttributes?.storage?.isLightSensitive ? 'Light Sensitive' : null },
         { label: 'Stack Limit', value: customAttributes?.storage?.stackLimit ? `Max ${customAttributes.storage.stackLimit} high` : null }
     ].filter(a => a.value !== null && a.value !== undefined && a.value !== '' && a.value !== false);
 
     const commercialAttrs = [
-        { label: 'Sell By', value: customAttributes?.commercial?.sellBy },
-        { label: 'Price Type', value: customAttributes?.commercial?.priceType },
+        { label: 'Sell By', value: customAttributes?.commercial?.sellBy || (smart.isWeighted ? 'Weight' : 'Unit') },
+        { label: 'Price Type', value: customAttributes?.commercial?.priceType || 'Fixed' },
+        { label: 'Halal', value: smart.isHalal ? 'Halal Certified' : null },
+        { label: 'Traceability', value: smart.requiresSerial ? 'Serial Tracked' : smart.requiresBatch ? 'Batch / FEFO' : null },
         { label: 'Returnable', value: customAttributes?.commercial?.isReturnable !== undefined ? (customAttributes.commercial.isReturnable ? 'Returnable' : 'Non-Returnable') : null },
         { label: 'Bundle', value: customAttributes?.commercial?.isBundleEligible ? 'Bundle Eligible' : null },
-        { label: 'Weighted', value: customAttributes?.commercial?.isWeighted ? 'Scale Weighted' : null }
+        { label: 'Weighted', value: (customAttributes?.commercial?.isWeighted ?? smart.isWeighted) ? 'Scale Weighted' : null }
     ].filter(a => a.value !== null && a.value !== undefined && a.value !== '' && a.value !== false);
 
     return (
@@ -230,18 +240,23 @@ export const ItemPreviewCard: React.FC<ItemPreviewCardProps> = ({
             <div className="flex flex-col sm:flex-row justify-between items-start gap-3 border-b border-[var(--theme-border-subtle)] pb-3.5">
                 <div>
                     <h3 className="text-base font-bold text-[var(--theme-text-primary)] leading-tight tracking-tight">
-                        {brand && <span className="text-[var(--theme-accent)] font-semibold">{brand} </span>}
+                        {(brand || smart.brand) && <span className="text-[var(--theme-accent)] font-semibold">{brand || smart.brand} </span>}
                         {name || 'Item Name'}
                     </h3>
                     <p className="text-[11px] text-[var(--theme-text-secondary)] mt-1 font-mono uppercase font-semibold flex items-center gap-1.5 flex-wrap">
-                        {customAttributes?.identity?.variant && (
+                        {sku && (
                             <span className="bg-[var(--theme-bg-panel)] px-2 py-0.5 rounded border border-[var(--theme-border)] text-[var(--theme-text-primary)]">
-                                {customAttributes.identity.variant}
+                                {sku}
+                            </span>
+                        )}
+                        {(customAttributes?.identity?.variant || smart.variant) && (
+                            <span className="bg-[var(--theme-bg-panel)] px-2 py-0.5 rounded border border-[var(--theme-border)] text-[var(--theme-text-primary)]">
+                                {customAttributes?.identity?.variant || smart.variant}
                             </span>
                         )}
                         <span>{category || 'Category'}</span>
-                        {customAttributes?.identity?.subcategory && (
-                            <span>• {customAttributes.identity.subcategory}</span>
+                        {(customAttributes?.identity?.subcategory || smart.subcategory) && (
+                            <span>· {customAttributes?.identity?.subcategory || smart.subcategory}</span>
                         )}
                     </p>
                 </div>
@@ -251,13 +266,18 @@ export const ItemPreviewCard: React.FC<ItemPreviewCardProps> = ({
                     <div className="text-left sm:text-right whitespace-nowrap flex flex-col items-start sm:items-end gap-1 font-mono">
                         {effectiveRetail > 0 && (
                             <div className="flex items-center gap-1.5">
-                                <span className="text-[10px] uppercase font-bold text-[var(--theme-text-secondary)]">Retail:</span>
+                                <span className="text-[11px] uppercase font-bold text-[var(--theme-text-secondary)]">Retail:</span>
                                 <span className="text-sm font-bold text-[var(--theme-text-primary)] tabular-nums">
                                     {currencySymbol} {formatPriceValue(effectiveRetail)}{' '}
-                                    <span className="text-[10px] font-semibold text-[var(--theme-text-secondary)] font-sans">
+                                    <span className="text-[11px] font-semibold text-[var(--theme-text-secondary)] font-sans">
                                         /{sellUnitLabel}
                                     </span>
                                 </span>
+                                {smart.unitPriceLabel && (
+                                    <span className="text-[11px] font-semibold text-[var(--theme-text-muted)]">
+                                        ({smart.unitPriceLabel})
+                                    </span>
+                                )}
                             </div>
                         )}
                         {effectiveCost > 0 && (

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Monitor, UserCheck, ShoppingBag, ShieldAlert, Lock, Save, DollarSign, Target, AlertTriangle } from 'lucide-react';
+import { Monitor, UserCheck, ShoppingBag, ShieldAlert, Lock, Save, DollarSign, Target, AlertTriangle, Percent } from 'lucide-react';
 import Button from '../shared/Button';
 import { GlassCard, SectionHeader, InputGroup, RadioCard, ToggleRow } from './POSSettingsUI';
 
@@ -12,6 +12,7 @@ interface POSStationTabProps {
     requireShiftClosure: boolean;
     posDailyRevenueTarget?: number;
     posDailyTxTarget?: number;
+    taxOnSelling: boolean;
   };
   setWorkflow: React.Dispatch<React.SetStateAction<{
     posTerminalId: string;
@@ -21,6 +22,7 @@ interface POSStationTabProps {
     requireShiftClosure: boolean;
     posDailyRevenueTarget?: number;
     posDailyTxTarget?: number;
+    taxOnSelling: boolean;
   }>>;
   isSavingWorkflow: boolean;
   handleSaveSection: (section: 'workflow' | 'payments' | 'branding') => void;
@@ -140,6 +142,15 @@ export function POSStationTab({
             warning={!isHQAdmin ? 'HQ Admin required to disable' : undefined}
             icon={Lock}
             help="Forces cashiers to generate a Z-Report (Shift Closure) before they can log out of the station."
+          />
+          {/* ── SALES TAX / VAT AT POS (CONFIG-GATED) ── */}
+          <ToggleRow
+            label="Sales Tax / VAT"
+            sub="Calculate tax at checkout"
+            checked={workflow.taxOnSelling}
+            onChange={() => setWorkflow(prev => ({ ...prev, taxOnSelling: !prev.taxOnSelling }))}
+            icon={Percent}
+            help="When OFF, POS checkout will not apply or display tax. When ON, tax is calculated using the country or store tax rules."
           />
         </div>
 

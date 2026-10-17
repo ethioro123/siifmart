@@ -199,9 +199,16 @@ export const POSProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     }, [storeBonus, user?.role, settings.posRoleDistribution]);
 
     // Math
+    const activeCountry = (activeSite?.country || settings.country || 'ET') as string;
+    const isSalesTaxEnabled = Boolean(
+        settings.countryConfigs?.[activeCountry]?.taxOnSelling ?? settings.taxOnSelling
+    );
     const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-    const siteTaxRules = getTaxForSite(activeSite?.id);
+    const siteTaxRules = isSalesTaxEnabled ? getTaxForSite(activeSite?.id) : [];
     const taxResults = (() => {
+        if (!isSalesTaxEnabled) {
+            return { total: 0, breakdown: [] };
+        }
         let runningTotalTax = 0;
         let currentBase = subtotal;
         const breakdown: any[] = [];

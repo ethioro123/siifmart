@@ -21,6 +21,7 @@ interface UseSaleActionsDeps {
     setSales: React.Dispatch<React.SetStateAction<SaleRecord[]>>;
     setAllSales: React.Dispatch<React.SetStateAction<SaleRecord[]>>;
     setProducts: React.Dispatch<React.SetStateAction<Product[]>>;
+    setAllProducts?: React.Dispatch<React.SetStateAction<Product[]>>;
     setCustomers: React.Dispatch<React.SetStateAction<Customer[]>>;
     addNotification: (type: 'alert' | 'success' | 'info', message: string) => void;
     logSystemEvent: (action: string, details: string, user: string, module: SystemLog['module']) => void;
@@ -32,7 +33,7 @@ interface UseSaleActionsDeps {
 export function useSaleActions(deps: UseSaleActionsDeps) {
     const {
         activeSite, settings, products, customers,
-        setSales, setAllSales, setProducts, setCustomers,
+        setSales, setAllSales, setProducts, setAllProducts, setCustomers,
         addNotification, triggerSync, awardStorePoints, posCheckQueue
     } = deps;
 
@@ -93,22 +94,106 @@ export function useSaleActions(deps: UseSaleActionsDeps) {
                 receiptNumber: receiptNumber || `TX-${Date.now()}`
             };
 
-            // 1. Offline Save
+            // 1. Offline Save & Queue for Single Authoritative Sync
             await posDB.saveSale(saleRecord);
-            await posDB.enqueueOperation('CREATE_SALE', saleRecord);
+            const queued = await posDB.enqueueOperation('CREATE_SALE', {
+                ...saleRecord,
+                pointsRedeemed: pointsRedeemed || 0,
+                loyaltyRate: settings.loyaltyPointsRate || 0,
+                enableLoyalty: settings.enableLoyalty !== false
+            });
             posCheckQueue();
 
-            // 2. Optimistic Update
+            // 2. Optimistic Sale Record Update
             const uiSaleRecord: SaleRecord = { ...saleRecord, items: cart };
             setSales(prev => [uiSaleRecord, ...prev]);
             setAllSales(prev => [uiSaleRecord, ...prev]);
 
-            // 3. Trigger Sync (if online)
-            if (navigator.onLine) {
+            // 3. Optimistic Stock Decrement & Alerts (Single pass per product)
+            const qtyByProductId = new Map<string, number>();
+            for (const item of cart) {
+                qtyByProductId.set(item.id, (qtyByProductId.get(item.id) || 0) + item.quantity);
+            }
+
+            setProducts(prev => prev.map(p => {
+                const soldQty = qtyByProductId.get(p.id);
+                if (soldQty === undefined) return p;
+                const newStock = Math.max(0, p.stock - soldQty);
+                const newStatus = newStock === 0 ? 'out_of_stock' : newStock < settings.lowStockThreshold ? 'low_stock' : 'active';
+                return { ...p, stock: newStock, status: newStatus as any };
+            }));
+
+            setAllProducts?.(prev => prev.map(p => {
+                const soldQty = qtyByProductId.get(p.id);
+                if (soldQty === undefined) return p;
+                const newStock = Math.max(0, p.stock - soldQty);
+                const newStatus = newStock === 0 ? 'out_of_stock' : newStock < settings.lowStockThreshold ? 'low_stock' : 'active';
+                return { ...p, stock: newStock, status: newStatus as any };
+            }));
+
+            for (const [productId, soldQty] of qtyByProductId.entries()) {
+                const product = products.find(p => p.id === productId);
+                if (product) {
+                    const newStock = Math.max(0, product.stock - soldQty);
+                    const newStatus = newStock === 0 ? 'out_of_stock' : newStock < settings.lowStockThreshold ? 'low_stock' : 'active';
+                    logger.debug('useSaleActions', 'Stock update:', { productId, name: product.name, oldStock: product.stock, newStock, newStatus });
+
+                    // Only perform direct DB stock write if posDB queue is unavailable;
+                    // otherwise `usePosSync` executes `pos_decrement_stock` atomically once.
+                    if (!queued && navigator.onLine) {
+                        try {
+                            await productsService.update(productId, { stock: newStock, status: newStatus });
+                        } catch (e) {
+                            logger.error('useSaleActions', 'Fallback stock update failed', e);
+                        }
+                    }
+
+                    if (newStock <= settings.lowStockThreshold && newStock > 0) {
+                        addNotification('alert', `Low Stock: ${product.name} (${newStock} remaining)`);
+                    } else if (newStock === 0) {
+                        addNotification('alert', `Out of Stock: ${product.name}`);
+                    }
+                }
+            }
+
+            // 4. Loyalty Points (Optimistic local calculation; DB write handled by usePosSync unless queue unavailable)
+            if (customerId && settings.enableLoyalty !== false) {
+                const customer = customers.find(c => c.id === customerId);
+                if (customer) {
+                    const loyaltyRate = settings.loyaltyPointsRate || 0;
+                    const pointsEarned = loyaltyRate > 0 ? Math.floor(subtotal / loyaltyRate) : 0;
+                    const currentPoints = customer.loyaltyPoints || 0;
+                    const redeemed = pointsRedeemed || 0;
+                    const newLoyaltyPoints = Math.max(0, currentPoints + pointsEarned - redeemed);
+                    const newTotalSpent = (customer.totalSpent || 0) + total;
+
+                    setCustomers(prev => prev.map(c =>
+                        c.id === customerId ? { ...c, loyaltyPoints: newLoyaltyPoints, totalSpent: newTotalSpent, lastVisit: new Date().toISOString() } : c
+                    ));
+
+                    if (!queued && navigator.onLine) {
+                        try {
+                            await customersService.update(customerId, {
+                                loyaltyPoints: newLoyaltyPoints,
+                                totalSpent: newTotalSpent,
+                                lastVisit: new Date().toISOString()
+                            });
+                        } catch (e) {
+                            logger.warn('useSaleActions', 'Fallback loyalty sync failed', { error: String(e) });
+                        }
+                    }
+                }
+            }
+
+            // 5. Fallback direct sale creation if IDB queue was unavailable, otherwise triggerSync
+            if (!queued && navigator.onLine) {
+                const { items, ...saleData } = saleRecord;
+                await salesService.create(saleData as any, items);
+            } else if (navigator.onLine) {
                 triggerSync();
             }
 
-            // 4. Gamification Logic
+            // 6. Gamification Logic
             let pointsResult = null;
             const siteBonusAllowed = activeSite?.bonusEnabled !== false && (activeSite as any)?.bonus_enabled !== false;
             if (settings.posBonusEnabled !== false && siteBonusAllowed && activeSite?.id) {
@@ -153,66 +238,6 @@ export function useSaleActions(deps: UseSaleActionsDeps) {
                 }
             }
 
-            // 5. Loyalty Points (Optimistic local calculation + online sync)
-            if (customerId && settings.enableLoyalty !== false) {
-                const customer = customers.find(c => c.id === customerId);
-                if (customer) {
-                    const loyaltyRate = settings.loyaltyPointsRate || 0;
-                    const pointsEarned = loyaltyRate > 0 ? Math.floor(subtotal / loyaltyRate) : 0;
-                    const currentPoints = customer.loyaltyPoints || 0;
-                    const redeemed = pointsRedeemed || 0;
-                    const newLoyaltyPoints = Math.max(0, currentPoints + pointsEarned - redeemed);
-                    const newTotalSpent = (customer.totalSpent || 0) + total;
-
-                    setCustomers(prev => prev.map(c =>
-                        c.id === customerId ? { ...c, loyaltyPoints: newLoyaltyPoints, totalSpent: newTotalSpent, lastVisit: new Date().toISOString() } : c
-                    ));
-
-                    if (navigator.onLine) {
-                        try {
-                            await customersService.update(customerId, {
-                                loyaltyPoints: newLoyaltyPoints,
-                                totalSpent: newTotalSpent,
-                                lastVisit: new Date().toISOString()
-                            });
-                        } catch (e) {
-                            logger.warn('useSaleActions', "Online loyalty sync failed, queued for background sync", { error: String(e) });
-                        }
-                    }
-                }
-            }
-
-            // 6. Stock Decrement & Alerts
-            for (const item of cart) {
-                const product = products.find(p => p.id === item.id);
-                if (product) {
-                    const newStock = Math.max(0, product.stock - item.quantity);
-                    const newStatus = newStock === 0 ? 'out_of_stock' : newStock < settings.lowStockThreshold ? 'low_stock' : 'active';
-
-                    logger.debug('useSaleActions', '📦 Stock update:', { productId: item.id, name: product.name, oldStock: product.stock, newStock, newStatus });
-
-                    setProducts(prev => prev.map(p =>
-                        p.id === item.id ? { ...p, stock: newStock, status: newStatus as any } : p
-                    ));
-
-                    if (navigator.onLine) {
-                        try {
-                            await productsService.update(item.id, { stock: newStock, status: newStatus });
-                        } catch (e) {
-                            logger.error('useSaleActions', 'Stock update failed (will retry)', e);
-                        }
-                    } else {
-                        logger.warn('useSaleActions', '⚠️ Offline: Transfer stock update skipped (Strict Online Mode)');
-                    }
-
-                    if (newStock <= settings.lowStockThreshold && newStock > 0) {
-                        addNotification('alert', `Low Stock: ${product.name} (${newStock} remaining)`);
-                    } else if (newStock === 0) {
-                        addNotification('alert', `Out of Stock: ${product.name}`);
-                    }
-                }
-            }
-
             audioFeedback.playSaleComplete();
             addNotification('success', 'Sale processed successfully');
             return { saleId, pointsResult };
@@ -224,7 +249,8 @@ export function useSaleActions(deps: UseSaleActionsDeps) {
         }
     }, [
         activeSite, settings, addNotification, triggerSync, products,
-        customers, awardStorePoints
+        customers, awardStorePoints, posCheckQueue, setProducts, setAllProducts,
+        setSales, setAllSales, setCustomers
     ]);
 
     const processReturn = useCallback(async (saleId: string, items: ReturnItem[], totalRefund: number, user: string) => {

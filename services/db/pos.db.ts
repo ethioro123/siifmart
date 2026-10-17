@@ -253,8 +253,8 @@ class POSDBService {
     // SYNC QUEUE OPERATIONS
     // ═══════════════════════════════════════════════════════════════
 
-    async enqueueOperation(type: 'CREATE_SALE', payload: any) {
-        if (DISABLE_IDB || this.disabled) return;
+    async enqueueOperation(type: 'CREATE_SALE', payload: any): Promise<boolean> {
+        if (DISABLE_IDB || this.disabled) return false;
         try {
             const db = await this.getDB();
             await db.add('sync_queue', {
@@ -264,8 +264,10 @@ class POSDBService {
                 status: 'PENDING',
                 retryCount: 0
             });
+            return true;
         } catch (err) {
             console.warn('POSDB: Gracefully skipping enqueueOperation due to DB error');
+            return false;
         }
     }
 

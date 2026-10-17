@@ -36,7 +36,7 @@ const ALLOWED_FIELDS: Record<POSSection, (keyof SystemConfig)[]> = {
   workflow: [
     'posTerminalId', 'posRegisterMode', 'posGuestCheckout',
     'posBlockNegativeStock', 'requireShiftClosure',
-    'posDailyRevenueTarget', 'posDailyTxTarget',
+    'posDailyRevenueTarget', 'posDailyTxTarget', 'taxOnSelling',
   ],
   payments: [
     'payment_cash', 'payment_card', 'payment_mobile_money',

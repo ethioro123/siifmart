@@ -11,6 +11,7 @@ import { POItemOrderDetails } from './POItemOrderDetails';
 import { CatalogItemSection } from './CatalogItemSection';
 import { POItemFormActions } from './POItemFormActions';
 import { isConsumableCategory, getPOItemCategorySpecsSummary } from './utils';
+import { resolveSmartProductAttributes } from '../../utils/groceryAttributes';
 import type { Country } from '../../utils/localization';
 
 const createDefaultCustomAttributes = () => ({
@@ -147,26 +148,25 @@ export const POItemForm: React.FC<POItemFormProps> = ({
     };
 
     const handleSelectCatalogProduct = (p: Product) => {
+        const smart = resolveSmartProductAttributes(p, products, currencySymbol);
         setSelectedMainCategory(p.category || '');
-        setCustomItemBrand(p.brand || '');
+        setCustomItemBrand(smart.brand || p.brand || '');
         setCustomItemName(p.name);
-        setCustomItemSize(p.size || '');
+        setCustomItemSize(smart.netContent || p.size || '');
         setCustomItemUnit(p.unit || '');
         setCustomItemImage(p.image || '');
 
-        const pAttrs = p.customAttributes || (p as any).custom_attributes;
-        if (pAttrs) {
-            setCustomAttributes((prev: any) => ({
-                ...prev,
-                identity: { ...prev.identity, ...(pAttrs.identity || {}) },
-                physical: { ...prev.physical, ...(pAttrs.physical || {}) },
-                packaging: { ...prev.packaging, ...(pAttrs.packaging || {}) },
-                storage: { ...prev.storage, ...(pAttrs.storage || {}) },
-                commercial: { ...prev.commercial, ...(pAttrs.commercial || {}) },
-                descriptive: { ...prev.descriptive, ...(pAttrs.descriptive || {}) },
-                categorySpecific: { ...prev.categorySpecific, ...(pAttrs.categorySpecific || {}) },
-            }));
-        }
+        const pAttrs = p.customAttributes || (p as any).custom_attributes || {};
+        setCustomAttributes((prev: any) => ({
+            ...prev,
+            identity: { ...prev.identity, subcategory: smart.subcategory || '', variant: smart.variant || '', ...(pAttrs.identity || {}) },
+            physical: { ...prev.physical, form: smart.physicalForm || '', ...(pAttrs.physical || {}) },
+            packaging: { ...prev.packaging, material: smart.packagingMaterial || '', packageType: smart.packageType || '', packQty: String(smart.packQty || 1), ...(pAttrs.packaging || {}) },
+            storage: { ...prev.storage, type: smart.storageType, isPerishable: smart.isPerishable, isFragile: smart.isFragile, inboundQcDirective: smart.inboundQcDirective || '', ...(pAttrs.storage || {}) },
+            commercial: { ...prev.commercial, isHalal: smart.isHalal, requiresBatchTracking: smart.requiresBatch, requiresSerialTracking: smart.requiresSerial, ...(pAttrs.commercial || {}) },
+            descriptive: { ...prev.descriptive, ...(pAttrs.descriptive || {}) },
+            categorySpecific: { ...prev.categorySpecific, ...(pAttrs.categorySpecific || {}) },
+        }));
     };
 
     const handleAddItem = async () => {
@@ -356,18 +356,19 @@ export const POItemForm: React.FC<POItemFormProps> = ({
             </div>
 
             {/* ─── Preview Banner ────────────────────────── */}
-            {productType === 'new' && (
+            {(productType === 'new' || Boolean(selectedCatalogProduct)) && (
                 <div className="mb-6 relative z-10">
                     <ItemPreviewCard
-                        name={customItemName}
-                        brand={customItemBrand}
-                        size={customItemSize}
-                        unit={customItemUnit}
-                        category={selectedMainCategory}
-                        description=""
+                        name={productType === 'catalog' && selectedCatalogProduct ? selectedCatalogProduct.name : customItemName}
+                        brand={customItemBrand || selectedCatalogProduct?.brand || ''}
+                        size={customItemSize || selectedCatalogProduct?.size || ''}
+                        unit={customItemUnit || selectedCatalogProduct?.unit || ''}
+                        category={selectedMainCategory || selectedCatalogProduct?.category || ''}
+                        description={selectedCatalogProduct?.description || ''}
                         cost={currentCost}
                         retailPrice={currentRetailPrice}
-                        image={customItemImage}
+                        image={customItemImage || selectedCatalogProduct?.image || ''}
+                        sku={selectedCatalogProduct?.sku}
                         currencySymbol={currencySymbol}
                         customAttributes={customAttributes}
                         orderUnitName={orderUnitName}
