@@ -186,12 +186,26 @@ export function evaluateEmployeeProfileChanges(
 
 /**
  * Checks if a specific manager or executive has the authority to approve a change request.
+ * Enforces regional sovereign boundary: Regional managers can ONLY approve requests within their assigned region.
  */
 export function canApproveChangeRequest(
     userRole: string,
-    authority: ApprovingAuthority
+    authority: ApprovingAuthority,
+    context?: {
+        userRegionCode?: string;
+        targetRegionCode?: string;
+    }
 ): boolean {
     if (isSovereignCEO(userRole)) return true; // CEO can approve ANY request
+
+    // Regional Boundary Guard: Regional managers are locked to their own region
+    if (userRole === 'regional_manager') {
+        if (context?.userRegionCode && context?.targetRegionCode) {
+            if (context.userRegionCode.toLowerCase().trim() !== context.targetRegionCode.toLowerCase().trim()) {
+                return false;
+            }
+        }
+    }
 
     switch (authority) {
         case 'Finance Department':

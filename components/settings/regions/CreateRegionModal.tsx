@@ -31,6 +31,8 @@ export const CreateRegionModal: React.FC<CreateRegionModalProps> = ({
     const [regionalManagerId, setRegionalManagerId] = useState('');
     const [monthlyBudget, setMonthlyBudget] = useState('5000000');
     const [autonomousLimit, setAutonomousLimit] = useState('150000');
+    const [monthlyExpenseBudget, setMonthlyExpenseBudget] = useState('500000');
+    const [autonomousExpenseLimit, setAutonomousExpenseLimit] = useState('25000');
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     if (!isOpen) return null;
@@ -78,6 +80,8 @@ export const CreateRegionModal: React.FC<CreateRegionModalProps> = ({
 
         const parsedBudget = Number(monthlyBudget);
         const parsedLimit = Number(autonomousLimit);
+        const parsedExpenseBudget = Number(monthlyExpenseBudget);
+        const parsedExpenseLimit = Number(autonomousExpenseLimit);
 
         if (isNaN(parsedBudget) || parsedBudget < 0) {
             addNotification('alert', 'Monthly budget must be a positive number');
@@ -86,6 +90,16 @@ export const CreateRegionModal: React.FC<CreateRegionModalProps> = ({
 
         if (isNaN(parsedLimit) || parsedLimit < 0) {
             addNotification('alert', 'Autonomous PO limit must be a positive number');
+            return;
+        }
+
+        if (isNaN(parsedExpenseBudget) || parsedExpenseBudget < 0) {
+            addNotification('alert', 'Monthly expense budget must be a positive number');
+            return;
+        }
+
+        if (isNaN(parsedExpenseLimit) || parsedExpenseLimit < 0) {
+            addNotification('alert', 'Autonomous expense limit must be a positive number');
             return;
         }
 
@@ -101,6 +115,8 @@ export const CreateRegionModal: React.FC<CreateRegionModalProps> = ({
                 regional_manager_id: regionalManagerId || undefined,
                 monthly_procurement_budget: parsedBudget,
                 autonomous_po_limit: parsedLimit,
+                monthly_expense_budget: parsedExpenseBudget,
+                autonomous_expense_limit: parsedExpenseLimit,
                 status: 'active'
             };
 
@@ -287,10 +303,41 @@ export const CreateRegionModal: React.FC<CreateRegionModalProps> = ({
                             </div>
                         </div>
 
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1 border-t border-[var(--theme-border)]/50">
+                            <div>
+                                <label className="block text-[11px] font-medium text-[var(--theme-text-primary)] mb-1">
+                                    Monthly Expense Budget ({currency})
+                                </label>
+                                <input
+                                    type="number"
+                                    min="0"
+                                    step="5000"
+                                    value={monthlyExpenseBudget}
+                                    onChange={(e) => setMonthlyExpenseBudget(e.target.value)}
+                                    placeholder="500000"
+                                    className="w-full px-3 py-2 text-xs font-mono bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl text-[var(--theme-text-primary)] focus:outline-none focus:border-[#0071E3]"
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-[11px] font-medium text-[var(--theme-text-primary)] mb-1">
+                                    Autonomous Expense Limit ({currency})
+                                </label>
+                                <input
+                                    type="number"
+                                    min="0"
+                                    step="1000"
+                                    value={autonomousExpenseLimit}
+                                    onChange={(e) => setAutonomousExpenseLimit(e.target.value)}
+                                    placeholder="25000"
+                                    className="w-full px-3 py-2 text-xs font-mono bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl text-[var(--theme-text-primary)] focus:outline-none focus:border-[#0071E3]"
+                                />
+                            </div>
+                        </div>
+
                         <div className="flex items-start gap-1.5 text-[11px] text-[var(--theme-text-secondary)] pt-1">
                             <ShieldAlert size={13} className="shrink-0 text-[#0071E3] dark:text-[#2997FF] mt-0.5" />
                             <span>
-                                Orders exceeding this autonomous limit automatically require 4-eyes approval from National HQ before issuance.
+                                Orders or expenses exceeding regional autonomous limits automatically require 4-eyes approval from National HQ before issuance.
                             </span>
                         </div>
                     </div>

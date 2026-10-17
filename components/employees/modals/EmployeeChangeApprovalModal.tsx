@@ -152,7 +152,15 @@ export const EmployeeChangeApprovalModal: React.FC<EmployeeChangeApprovalModalPr
                 ) : (
                     <div className="space-y-3 max-h-[60vh] overflow-y-auto pr-1">
                         {filteredRequests.map(req => {
-                            const userCanApprove = isCEO || req.requiredApprovers.some(auth => canApproveChangeRequest(user?.role || '', auth));
+                            const targetEmp = employees.find(e => e.id === req.employeeId);
+                            const targetRegion = targetEmp?.regionCode || targetEmp?.region_code;
+                            const userRegion = user?.regionCode || user?.region_code;
+                            const userCanApprove = isCEO || req.requiredApprovers.some(auth => 
+                                canApproveChangeRequest(user?.role || '', auth, {
+                                    userRegionCode: userRegion,
+                                    targetRegionCode: targetRegion
+                                })
+                            );
                             const isBusy = actionId === req.id;
 
                             return (

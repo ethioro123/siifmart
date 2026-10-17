@@ -173,11 +173,17 @@ export const RegionCard: React.FC<RegionCardProps> = ({
                         )}
                     </div>
 
-                    {/* Autonomous PO Threshold */}
+                    {/* Autonomous Spending Thresholds */}
                     <div className="mt-3 pt-2.5 border-t border-[var(--theme-border)] flex items-center justify-between text-[11px]">
                         <span className="text-[var(--theme-text-secondary)]">Autonomous PO Limit:</span>
                         <span className="font-mono font-medium text-[var(--theme-text-primary)]">
                             {autonomousLimit > 0 ? `${autonomousLimit.toLocaleString()} ${currency}` : '0 (HQ Approval Required)'}
+                        </span>
+                    </div>
+                    <div className="mt-1.5 pt-1.5 border-t border-[var(--theme-border)]/40 flex items-center justify-between text-[11px]">
+                        <span className="text-[var(--theme-text-secondary)]">Autonomous Expense Limit:</span>
+                        <span className="font-mono font-medium text-[var(--theme-text-primary)]">
+                            {(region.autonomous_expense_limit ?? 25000) > 0 ? `${(region.autonomous_expense_limit ?? 25000).toLocaleString()} ${currency}` : '0 (HQ Approval Required)'}
                         </span>
                     </div>
                 </div>

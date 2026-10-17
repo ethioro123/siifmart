@@ -88,6 +88,8 @@ export interface Region {
   regional_manager_id?: string;
   monthly_procurement_budget?: number;
   autonomous_po_limit?: number;
+  monthly_expense_budget?: number;
+  autonomous_expense_limit?: number;
   status: 'active' | 'suspended' | 'planning';
   created_at?: string;
   updated_at?: string;

@@ -29,6 +29,8 @@ export const EditRegionModal: React.FC<EditRegionModalProps> = ({
     const [regionalManagerId, setRegionalManagerId] = useState(region.regional_manager_id || '');
     const [monthlyBudget, setMonthlyBudget] = useState(String(region.monthly_procurement_budget ?? 0));
     const [autonomousLimit, setAutonomousLimit] = useState(String(region.autonomous_po_limit ?? 150000));
+    const [monthlyExpenseBudget, setMonthlyExpenseBudget] = useState(String(region.monthly_expense_budget ?? 0));
+    const [autonomousExpenseLimit, setAutonomousExpenseLimit] = useState(String(region.autonomous_expense_limit ?? 25000));
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     // Initial assigned sites state
@@ -70,14 +72,26 @@ export const EditRegionModal: React.FC<EditRegionModalProps> = ({
         e.preventDefault();
         const parsedBudget = Number(monthlyBudget);
         const parsedLimit = Number(autonomousLimit);
+        const parsedExpenseBudget = Number(monthlyExpenseBudget);
+        const parsedExpenseLimit = Number(autonomousExpenseLimit);
 
         if (isNaN(parsedBudget) || parsedBudget < 0) {
-            addNotification('alert', 'Monthly budget must be a positive number');
+            addNotification('alert', 'Monthly procurement budget must be a positive number');
             return;
         }
 
         if (isNaN(parsedLimit) || parsedLimit < 0) {
             addNotification('alert', 'Autonomous PO limit must be a positive number');
+            return;
+        }
+
+        if (isNaN(parsedExpenseBudget) || parsedExpenseBudget < 0) {
+            addNotification('alert', 'Monthly expense budget must be a positive number');
+            return;
+        }
+
+        if (isNaN(parsedExpenseLimit) || parsedExpenseLimit < 0) {
+            addNotification('alert', 'Autonomous expense limit must be a positive number');
             return;
         }
 
@@ -90,6 +104,8 @@ export const EditRegionModal: React.FC<EditRegionModalProps> = ({
                 regional_manager_id: regionalManagerId || null,
                 monthly_procurement_budget: parsedBudget,
                 autonomous_po_limit: parsedLimit,
+                monthly_expense_budget: parsedExpenseBudget,
+                autonomous_expense_limit: parsedExpenseLimit,
                 status
             };
 
@@ -255,10 +271,39 @@ export const EditRegionModal: React.FC<EditRegionModalProps> = ({
                             </div>
                         </div>
 
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1 border-t border-[var(--theme-border)]/50">
+                            <div>
+                                <label className="block text-[11px] font-medium text-[var(--theme-text-primary)] mb-1">
+                                    Monthly Expense Budget ({region.default_currency || 'KES'})
+                                </label>
+                                <input
+                                    type="number"
+                                    min="0"
+                                    step="5000"
+                                    value={monthlyExpenseBudget}
+                                    onChange={(e) => setMonthlyExpenseBudget(e.target.value)}
+                                    className="w-full px-3 py-2 text-xs font-mono bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl text-[var(--theme-text-primary)] focus:outline-none focus:border-[#0071E3]"
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-[11px] font-medium text-[var(--theme-text-primary)] mb-1">
+                                    Autonomous Expense Limit ({region.default_currency || 'KES'})
+                                </label>
+                                <input
+                                    type="number"
+                                    min="0"
+                                    step="1000"
+                                    value={autonomousExpenseLimit}
+                                    onChange={(e) => setAutonomousExpenseLimit(e.target.value)}
+                                    className="w-full px-3 py-2 text-xs font-mono bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl text-[var(--theme-text-primary)] focus:outline-none focus:border-[#0071E3]"
+                                />
+                            </div>
+                        </div>
+
                         <div className="flex items-start gap-1.5 text-[11px] text-[var(--theme-text-secondary)]">
                             <ShieldAlert size={13} className="shrink-0 text-[#0071E3] dark:text-[#2997FF] mt-0.5" />
                             <span>
-                                Set Autonomous PO Limit to 0 to require HQ sign-off on all regional purchases, or raise it to expand regional autonomy.
+                                Setting autonomous limits to 0 mandates National HQ sign-off on all regional transactions. Raising limits expands decentralized autonomy.
                             </span>
                         </div>
                     </div>

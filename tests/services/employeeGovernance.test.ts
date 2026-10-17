@@ -186,5 +186,22 @@ describe('Zero-Trust Employee Governance & Cross-Department Approvals', () => {
             expect(canApproveChangeRequest('hr_manager', 'Finance Department')).toBe(false);
             expect(canApproveChangeRequest('cashier', 'Finance Department')).toBe(false);
         });
+
+        it('enforces regional boundary: Regional Manager can only approve requests in their assigned region', () => {
+            expect(canApproveChangeRequest('regional_manager', 'Operations Management', {
+                userRegionCode: 'ke_nairobi',
+                targetRegionCode: 'ke_nairobi'
+            })).toBe(true);
+
+            expect(canApproveChangeRequest('regional_manager', 'Operations Management', {
+                userRegionCode: 'ke_nairobi',
+                targetRegionCode: 'ke_mombasa'
+            })).toBe(false);
+
+            expect(canApproveChangeRequest('super_admin', 'Operations Management', {
+                userRegionCode: 'ke_nairobi',
+                targetRegionCode: 'ke_mombasa'
+            })).toBe(true);
+        });
     });
 });

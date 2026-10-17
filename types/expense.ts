@@ -58,6 +58,16 @@ export interface ExpenseRecord {
     escalationReason?: string;
     escalation_reason?: string;
 
+    // Regional Governance & HQ Escalation
+    regionCode?: string;
+    region_code?: string;
+    requiresHqApproval?: boolean;
+    requires_hq_approval?: boolean;
+    hqApprovedBy?: string;
+    hq_approved_by?: string;
+    hqApprovedAt?: string;
+    hq_approved_at?: string;
+
     createdAt?: string;
     created_at?: string;
     updatedAt?: string;

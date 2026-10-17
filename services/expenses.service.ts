@@ -43,6 +43,14 @@ function mapExpenseRow(e: any): ExpenseRecord {
         escalated_to_ceo: Boolean(e.escalated_to_ceo),
         escalationReason: e.escalation_reason,
         escalation_reason: e.escalation_reason,
+        regionCode: e.region_code,
+        region_code: e.region_code,
+        requiresHqApproval: Boolean(e.requires_hq_approval),
+        requires_hq_approval: Boolean(e.requires_hq_approval),
+        hqApprovedBy: e.hq_approved_by,
+        hq_approved_by: e.hq_approved_by,
+        hqApprovedAt: e.hq_approved_at,
+        hq_approved_at: e.hq_approved_at,
         createdAt: e.created_at,
         created_at: e.created_at,
         updatedAt: e.updated_at,
@@ -135,6 +143,7 @@ export const expensesService = {
 
         const dbExpense = {
             site_id: expense.siteId || expense.site_id,
+            region_code: expense.regionCode || expense.region_code || null,
             country_code: expense.countryCode || expense.country_code || 'ET',
             expense_date: expense.date || expense.expense_date || new Date().toISOString().split('T')[0],
             category: expense.category,
@@ -175,7 +184,7 @@ export const expensesService = {
 
     async approve(
         id: string,
-        approver: { id: string; name: string; role: string }
+        approver: { id: string; name: string; role: string; notes?: string }
     ) {
         const existing = await this.getById(id);
         if (!existing) {
@@ -190,6 +199,44 @@ export const expensesService = {
         // CEO Escalation Governance: Exceeds threshold requires CEO
         if (existing.escalatedToCeo && !['CEO', 'ceo', 'super_admin'].includes(approver.role)) {
             throw new Error('Executive Authorization required: This expense exceeds the sovereign threshold and requires CEO approval.');
+        }
+
+        // Server-Side Security Definer RPC Execution
+        try {
+            const { data: rpcData, error: rpcError } = await supabase.rpc('approve_expense', {
+                p_expense_id: id,
+                p_approver_id: approver.id,
+                p_approver_name: approver.name,
+                p_approver_role: approver.role,
+                p_notes: approver.notes || ''
+            });
+
+            if (!rpcError && rpcData?.success) {
+                const fresh = await this.getById(id);
+                if (fresh) return fresh;
+            }
+
+            if (rpcError) {
+                const msg = rpcError.message || '';
+                if (
+                    msg.includes('Maker-Checker') ||
+                    msg.includes('Executive Authorization') ||
+                    msg.includes('Autonomous Cap Exceeded') ||
+                    msg.includes('Segregation of Duties') ||
+                    msg.includes('Zero-Trust')
+                ) {
+                    throw new Error(msg);
+                }
+                logger.warn('expensesService', 'RPC approve_expense warning, attempting direct path:', { error: String(rpcError.message) });
+            }
+        } catch (rpcErr: any) {
+            if (
+                rpcErr.message?.includes('Maker-Checker') ||
+                rpcErr.message?.includes('Executive Authorization') ||
+                rpcErr.message?.includes('Autonomous Cap Exceeded')
+            ) {
+                throw rpcErr;
+            }
         }
 
         const now = new Date().toISOString();

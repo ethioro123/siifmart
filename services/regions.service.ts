@@ -19,6 +19,8 @@ export interface CreateRegionInput {
     regional_manager_id?: string;
     monthly_procurement_budget?: number;
     autonomous_po_limit?: number;
+    monthly_expense_budget?: number;
+    autonomous_expense_limit?: number;
     status?: 'active' | 'suspended' | 'planning';
 }
 
@@ -29,6 +31,8 @@ export interface UpdateRegionInput {
     regional_manager_id?: string | null;
     monthly_procurement_budget?: number;
     autonomous_po_limit?: number;
+    monthly_expense_budget?: number;
+    autonomous_expense_limit?: number;
     status?: 'active' | 'suspended' | 'planning';
 }
 
@@ -65,6 +69,8 @@ export const regionsService = {
                     regional_manager_id,
                     monthly_procurement_budget,
                     autonomous_po_limit,
+                    monthly_expense_budget,
+                    autonomous_expense_limit,
                     status,
                     created_at,
                     updated_at
@@ -95,6 +101,8 @@ export const regionsService = {
                 regional_manager_id: r.regional_manager_id,
                 monthly_procurement_budget: Number(r.monthly_procurement_budget || 0),
                 autonomous_po_limit: Number(r.autonomous_po_limit || 150000),
+                monthly_expense_budget: Number(r.monthly_expense_budget || 0),
+                autonomous_expense_limit: Number(r.autonomous_expense_limit || 25000),
                 status: r.status || 'active',
                 created_at: r.created_at,
                 updated_at: r.updated_at
@@ -123,6 +131,8 @@ export const regionsService = {
                     regional_manager_id,
                     monthly_procurement_budget,
                     autonomous_po_limit,
+                    monthly_expense_budget,
+                    autonomous_expense_limit,
                     status,
                     created_at,
                     updated_at
@@ -148,6 +158,8 @@ export const regionsService = {
                 regional_manager_id: data.regional_manager_id,
                 monthly_procurement_budget: Number(data.monthly_procurement_budget || 0),
                 autonomous_po_limit: Number(data.autonomous_po_limit || 150000),
+                monthly_expense_budget: Number(data.monthly_expense_budget || 0),
+                autonomous_expense_limit: Number(data.autonomous_expense_limit || 25000),
                 status: data.status || 'active',
                 created_at: data.created_at,
                 updated_at: data.updated_at
@@ -174,6 +186,8 @@ export const regionsService = {
                 regional_manager_id: input.regional_manager_id || null,
                 monthly_procurement_budget: input.monthly_procurement_budget ?? 0,
                 autonomous_po_limit: input.autonomous_po_limit ?? 150000,
+                monthly_expense_budget: input.monthly_expense_budget ?? 0,
+                autonomous_expense_limit: input.autonomous_expense_limit ?? 25000,
                 status: input.status || 'active',
                 created_at: new Date().toISOString(),
                 updated_at: new Date().toISOString()
@@ -193,7 +207,9 @@ export const regionsService = {
             return {
                 ...data,
                 monthly_procurement_budget: Number(data.monthly_procurement_budget || 0),
-                autonomous_po_limit: Number(data.autonomous_po_limit || 150000)
+                autonomous_po_limit: Number(data.autonomous_po_limit || 150000),
+                monthly_expense_budget: Number(data.monthly_expense_budget || 0),
+                autonomous_expense_limit: Number(data.autonomous_expense_limit || 25000)
             };
         } catch (err) {
             logger.error('regionsService', 'Exception in createRegion', err as Error);
@@ -217,6 +233,8 @@ export const regionsService = {
             if (updates.regional_manager_id !== undefined) allowedUpdates.regional_manager_id = updates.regional_manager_id;
             if (updates.monthly_procurement_budget !== undefined) allowedUpdates.monthly_procurement_budget = updates.monthly_procurement_budget;
             if (updates.autonomous_po_limit !== undefined) allowedUpdates.autonomous_po_limit = updates.autonomous_po_limit;
+            if (updates.monthly_expense_budget !== undefined) allowedUpdates.monthly_expense_budget = updates.monthly_expense_budget;
+            if (updates.autonomous_expense_limit !== undefined) allowedUpdates.autonomous_expense_limit = updates.autonomous_expense_limit;
             if (updates.status !== undefined) allowedUpdates.status = updates.status;
 
             const { error } = await supabase
