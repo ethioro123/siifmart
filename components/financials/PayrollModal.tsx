@@ -77,8 +77,9 @@ export const PayrollModal: React.FC = () => {
   const userName = user?.name || user?.email || 'User';
 
   const isSuperAdminOrCeo = userRole === 'super_admin' || userRole === 'ceo';
-  const isHR = isSuperAdminOrCeo || ['hr', 'hr_manager'].includes(userRole);
-  const isFinance = isSuperAdminOrCeo || ['finance_manager', 'accountant'].includes(userRole);
+  const isHR = isSuperAdminOrCeo || ['hr', 'hr_manager', 'admin'].includes(userRole);
+  const isFinance = isSuperAdminOrCeo || ['finance_manager', 'accountant', 'admin'].includes(userRole);
+  const isRegionalHR = userRole === 'regional_hr_officer';
 
   const isHrSigned = Boolean(activeRun?.hrApprovedBy);
   const isFinanceSigned = Boolean(activeRun?.financeApprovedBy);

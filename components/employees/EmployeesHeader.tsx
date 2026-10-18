@@ -30,8 +30,11 @@ export const EmployeesHeader: React.FC<EmployeesHeaderProps> = ({
 }) => {
    const isChecker = [
       'hr_manager', 
+      'regional_hr_officer',
+      'hr',
       'operations_manager', 
       'regional_manager', 
+      'admin',
       'super_admin', 
       'CEO',
       'ceo'

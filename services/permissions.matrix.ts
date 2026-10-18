@@ -239,7 +239,7 @@ export const ACTION_PERMISSIONS: Record<UserRole, Permission[]> = {
 
     regional_hr_officer: [
         'dashboard.view',
-        'employees.view', 'employees.create', 'employees.edit', 'employees.manage_attendance', 'employees.view_salary'
+        'employees.view', 'employees.create', 'employees.edit', 'employees.approve', 'employees.manage_attendance', 'employees.view_salary', 'employees.propose_salary'
     ],
 
     regional_logistics_lead: [

@@ -31,19 +31,19 @@ export default function SalaryApprovalQueueModal({
     const [rejectError, setRejectError] = useState<string>('');
 
     const country = (effectiveCountry || 'ET').toUpperCase();
-    const canApprove = ['CEO', 'ceo', 'super_admin', 'finance_manager'].includes(user?.role || '');
+    const canApprove = ['CEO', 'ceo', 'super_admin', 'admin', 'finance_manager'].includes(user?.role || '');
 
     const loadRequests = useCallback(async () => {
         setIsLoading(true);
         try {
-            const data = await salaryRequestsService.getAll(activeSite?.id, country);
+            const data = await salaryRequestsService.getAll(undefined, country);
             setRequests(data);
         } catch {
             // Handled in service fallback
         } finally {
             setIsLoading(false);
         }
-    }, [activeSite?.id, country]);
+    }, [country]);
 
     useEffect(() => {
         if (isOpen) {

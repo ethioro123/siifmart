@@ -193,21 +193,20 @@ export const payrollRunsService = {
       updatedAt: now
     };
 
-    try {
-      const { error } = await supabase
-        .from('payroll_runs')
-        .update({
-          hr_approved_by: signatoryName,
-          hr_approved_by_role: signatoryRole,
-          hr_approved_at: now,
-          hr_notes: notes || target.hrNotes || null,
-          status: nextStatus,
-          updated_at: now
-        })
-        .eq('id', runId);
-      if (error) throw error;
-    } catch (error) {
-      logger.warn('payrollRunsService', 'Remote signAsHR failed, persisting locally:', { error: String(error) });
+    const { error } = await supabase
+      .from('payroll_runs')
+      .update({
+        hr_approved_by: signatoryName,
+        hr_approved_by_role: signatoryRole,
+        hr_approved_at: now,
+        hr_notes: notes || target.hrNotes || null,
+        status: nextStatus,
+        updated_at: now
+      })
+      .eq('id', runId);
+    if (error) {
+      logger.error('payrollRunsService', 'Remote signAsHR failed:', error as Error);
+      throw new Error(`Failed to record HR certification on server: ${error.message || 'Database error'}`);
     }
 
     saveLocalBackup([updated]);
@@ -261,21 +260,20 @@ export const payrollRunsService = {
       updatedAt: now
     };
 
-    try {
-      const { error } = await supabase
-        .from('payroll_runs')
-        .update({
-          finance_approved_by: signatoryName,
-          finance_approved_by_role: signatoryRole,
-          finance_approved_at: now,
-          finance_notes: notes || target.financeNotes || null,
-          status: nextStatus,
-          updated_at: now
-        })
-        .eq('id', runId);
-      if (error) throw error;
-    } catch (error) {
-      logger.warn('payrollRunsService', 'Remote signAsFinance failed, persisting locally:', { error: String(error) });
+    const { error } = await supabase
+      .from('payroll_runs')
+      .update({
+        finance_approved_by: signatoryName,
+        finance_approved_by_role: signatoryRole,
+        finance_approved_at: now,
+        finance_notes: notes || target.financeNotes || null,
+        status: nextStatus,
+        updated_at: now
+      })
+      .eq('id', runId);
+    if (error) {
+      logger.error('payrollRunsService', 'Remote signAsFinance failed:', error as Error);
+      throw new Error(`Failed to record Finance authorization on server: ${error.message || 'Database error'}`);
     }
 
     saveLocalBackup([updated]);
@@ -316,20 +314,19 @@ export const payrollRunsService = {
       updatedAt: now
     };
 
-    try {
-      const { error } = await supabase
-        .from('payroll_runs')
-        .update({
-          disbursed_by: disbursedBy,
-          disbursed_at: now,
-          expense_id: expenseId || target.expenseId || null,
-          status: 'disbursed',
-          updated_at: now
-        })
-        .eq('id', runId);
-      if (error) throw error;
-    } catch (error) {
-      logger.warn('payrollRunsService', 'Remote disburse failed, persisting locally:', { error: String(error) });
+    const { error } = await supabase
+      .from('payroll_runs')
+      .update({
+        disbursed_by: disbursedBy,
+        disbursed_at: now,
+        expense_id: expenseId || target.expenseId || null,
+        status: 'disbursed',
+        updated_at: now
+      })
+      .eq('id', runId);
+    if (error) {
+      logger.error('payrollRunsService', 'Remote disburse failed:', error as Error);
+      throw new Error(`Failed to record payroll disbursement on server: ${error.message || 'Database error'}`);
     }
 
     saveLocalBackup([updated]);
@@ -370,21 +367,20 @@ export const payrollRunsService = {
       updatedAt: now
     };
 
-    try {
-      const { error } = await supabase
-        .from('payroll_runs')
-        .update({
-          status: 'rejected',
-          rejected_by: rejectedBy,
-          rejected_by_role: role,
-          rejected_at: now,
-          rejection_reason: reason,
-          updated_at: now
-        })
-        .eq('id', runId);
-      if (error) throw error;
-    } catch (error) {
-      logger.warn('payrollRunsService', 'Remote reject failed, persisting locally:', { error: String(error) });
+    const { error } = await supabase
+      .from('payroll_runs')
+      .update({
+        status: 'rejected',
+        rejected_by: rejectedBy,
+        rejected_by_role: role,
+        rejected_at: now,
+        rejection_reason: reason,
+        updated_at: now
+      })
+      .eq('id', runId);
+    if (error) {
+      logger.error('payrollRunsService', 'Remote reject failed:', error as Error);
+      throw new Error(`Failed to record payroll rejection on server: ${error.message || 'Database error'}`);
     }
 
     saveLocalBackup([updated]);
@@ -406,7 +402,12 @@ export const payrollRunsService = {
   _clearCache(): void {
     inMemoryBackup = [];
     if (typeof localStorage !== 'undefined') {
-      localStorage.removeItem(LOCAL_STORAGE_KEY);
+      try {
+        localStorage.removeItem(LOCAL_STORAGE_KEY);
+      } catch {
+        // Safe ignore
+      }
     }
   }
 };
+

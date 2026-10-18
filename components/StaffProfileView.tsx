@@ -57,7 +57,7 @@ export default function StaffProfileView(props: StaffProfileViewProps) {
     const canViewPayroll = hasPermission(user?.role, 'VIEW_PAYROLL') || isOwnProfile;
     const canTerminate = (user?.role === 'super_admin' || user?.role === 'hr' || user?.role === 'hr_manager' || user?.role === 'regional_manager' || user?.role === 'operations_manager') && userRoleLevel > targetRoleLevel && !isOwnProfile;
     const canDelete = user?.role === 'super_admin' && userRoleLevel > targetRoleLevel && !isOwnProfile;
-    const canApprove = (user?.role === 'super_admin' || user?.role === 'hr' || user?.role === 'hr_manager' || user?.role === 'admin' || user?.role === 'regional_manager' || user?.role === 'operations_manager') &&
+    const canApprove = (user?.role === 'super_admin' || user?.role === 'CEO' || user?.role === 'ceo' || user?.role === 'admin' || user?.role === 'hr' || user?.role === 'hr_manager' || user?.role === 'regional_hr_officer' || user?.role === 'regional_manager' || user?.role === 'operations_manager') &&
         canEmployRole(user?.role, employee.role) &&
         employee.status === 'Pending Approval' &&
         !isOwnProfile;

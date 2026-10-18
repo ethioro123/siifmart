@@ -66,17 +66,17 @@ export const PERMISSIONS = {
 
     // Employees
     ACCESS_EMPLOYEES: ['super_admin', 'admin', 'regional_manager', 'operations_manager', 'hr', 'hr_manager', 'warehouse_manager', 'store_manager', 'assistant_manager', 'shift_lead', 'store_supervisor', 'security_manager', 'logistics_manager', 'inventory_manager', 'training_coordinator', 'payroll_specialist', 'talent_recruiter', 'fleet_maintenance_supervisor', 'regional_hr_officer'],
-    ADD_EMPLOYEE: ['super_admin', 'admin', 'hr', 'hr_manager', 'talent_recruiter', 'operations_manager', 'regional_manager'],
-    EDIT_EMPLOYEE: ['super_admin', 'admin', 'hr', 'hr_manager', 'it_support', 'payroll_specialist', 'talent_recruiter'],
+    ADD_EMPLOYEE: ['super_admin', 'admin', 'hr', 'hr_manager', 'talent_recruiter', 'operations_manager', 'regional_manager', 'regional_hr_officer'],
+    EDIT_EMPLOYEE: ['super_admin', 'admin', 'hr', 'hr_manager', 'it_support', 'payroll_specialist', 'talent_recruiter', 'regional_hr_officer'],
     DELETE_EMPLOYEE: ['super_admin'],
     TERMINATE_EMPLOYEE: ['super_admin', 'hr', 'hr_manager'],
     MANAGE_SHIFTS: ['super_admin', 'regional_manager', 'operations_manager', 'hr', 'store_manager', 'assistant_manager', 'shift_lead', 'warehouse_manager', 'dispatcher', 'store_supervisor'],
-    VIEW_SALARY: ['super_admin', 'CEO', 'ceo', 'hr', 'hr_manager', 'finance_manager', 'payroll_specialist'],
-    PROPOSE_SALARY: ['super_admin', 'CEO', 'ceo', 'hr', 'hr_manager', 'payroll_specialist'],
+    VIEW_SALARY: ['super_admin', 'CEO', 'ceo', 'hr', 'hr_manager', 'finance_manager', 'payroll_specialist', 'regional_hr_officer'],
+    PROPOSE_SALARY: ['super_admin', 'CEO', 'ceo', 'hr', 'hr_manager', 'payroll_specialist', 'regional_hr_officer'],
     APPROVE_SALARY: ['super_admin', 'CEO', 'ceo', 'finance_manager'],
     RESET_PASSWORD: ['super_admin', 'admin', 'it_support'],
     CREATE_LOGIN_ACCOUNT: ['super_admin', 'admin', 'it_support'],
-    APPROVE_EMPLOYEE: ['super_admin', 'admin', 'hr', 'hr_manager', 'regional_manager', 'operations_manager'],
+    APPROVE_EMPLOYEE: ['super_admin', 'admin', 'hr', 'hr_manager', 'regional_manager', 'operations_manager', 'regional_hr_officer'],
 
     // Procurement
     ACCESS_PROCUREMENT: ['super_admin', 'admin', 'regional_manager', 'operations_manager', 'procurement_manager', 'supply_chain_manager', 'buyer', 'demand_planner', 'vendor_relations_manager', 'customs_import_specialist', 'replenishment_planner', 'credit_control_officer', 'inbound_qc_inspector', 'regional_procurement_lead'],

@@ -69,10 +69,10 @@ export default function Employees() {
 
    const refreshPendingSalary = useCallback(async () => {
       try {
-         const pending = await salaryRequestsService.getPending(activeSite?.id, effectiveCountry);
+         const pending = await salaryRequestsService.getPending(undefined, effectiveCountry);
          setPendingSalaryCount(pending.length);
       } catch { /* Fallback */ }
-   }, [activeSite?.id, effectiveCountry]);
+   }, [effectiveCountry]);
 
    const refreshPendingChanges = useCallback(async () => {
       try {

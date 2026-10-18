@@ -122,7 +122,7 @@ export const PayrollFinanceCard: React.FC<PayrollFinanceCardProps> = ({
             )
           ) : (
             <p className="text-xs text-[var(--theme-text-secondary)] italic">
-              Awaiting sign-off by Finance Department (finance_manager).
+              Awaiting authorization by Finance Department (finance_manager, accountant, or Country Managing Director).
             </p>
           )}
         </div>

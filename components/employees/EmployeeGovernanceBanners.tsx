@@ -103,11 +103,18 @@ export const EmployeeGovernanceBanners: React.FC<EmployeeGovernanceBannersProps>
                         Monthly Payroll Cycle ({pendingPayrollRun.period}) Awaiting HR Certification
                      </h4>
                      <p className="text-xs text-[var(--theme-text-secondary)] mt-0.5">
-                        Zero-Trust Multi-Department Governance: Staff roster, active attendance, and leave deductions must be certified by HR before release.
+                        {userRole === 'regional_hr_officer'
+                           ? 'Division of Responsibility: Regional HR continuously audits branch headcount, attendance, and leave. Country-wide payroll cycle certification is finalized at Country HQ / Managing Director.'
+                           : 'Zero-Trust Multi-Department Governance: Staff roster, active attendance, and leave deductions must be certified by HQ HR or Managing Director before release.'}
                      </p>
                   </div>
                </div>
                <div className="flex items-center gap-2 shrink-0">
+                  {userRole === 'regional_hr_officer' && (
+                     <span className="text-[11px] font-semibold text-[#0071E3] dark:text-[#2997FF] bg-[#0071E3]/10 px-2.5 py-1 rounded-full border border-[#0071E3]/20">
+                        Regional Audit Verified
+                     </span>
+                  )}
                   <button
                      type="button"
                      onClick={onNavigateFinance}
@@ -115,7 +122,7 @@ export const EmployeeGovernanceBanners: React.FC<EmployeeGovernanceBannersProps>
                   >
                      Details in Financials
                   </button>
-                  {canViewAll && (userRole === 'hr' || userRole === 'hr_manager' || userRole === 'super_admin') && (
+                  {canViewAll && (userRole === 'hr' || userRole === 'hr_manager' || userRole === 'admin' || userRole === 'super_admin') && (
                      <button
                         type="button"
                         onClick={onCertifyPayroll}

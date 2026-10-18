@@ -122,7 +122,7 @@ export const PayrollHrCard: React.FC<PayrollHrCardProps> = ({
             )
           ) : (
             <p className="text-xs text-[var(--theme-text-secondary)] italic">
-              Awaiting sign-off by HR Department (hr_manager or hr).
+              Awaiting certification by Country HQ HR (hr_manager, hr, or Country Managing Director).
             </p>
           )}
         </div>
