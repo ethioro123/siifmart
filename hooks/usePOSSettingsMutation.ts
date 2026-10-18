@@ -168,7 +168,7 @@ export function usePOSSettingsMutation() {
         });
 
       if (logError) {
-        logger.error('usePOSSettingsMutation', `Audit log failed for ${section}: ${logError.message}`);
+        logger.error('usePOSSettingsMutation', `Audit log failed for ${section}`, logError);
         throw new Error(`Security Exception: Mandatory audit logging failed (${logError.message}). POS settings save halted.`);
       }
     },

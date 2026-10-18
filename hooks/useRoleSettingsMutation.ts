@@ -119,7 +119,7 @@ export function useRoleSettingsMutation() {
       });
 
       if (logError) {
-        logger.error('useRoleSettingsMutation', `Mandatory audit log failed: ${logError.message}`);
+        logger.error('useRoleSettingsMutation', 'Mandatory audit log failed', logError);
         throw new Error(`Security Exception: Mandatory audit logging failed (${logError.message}). Role policy change halted.`);
       }
     },
