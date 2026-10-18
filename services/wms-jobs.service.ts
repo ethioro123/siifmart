@@ -30,6 +30,16 @@ export const generateTransferId = (): string => {
 const WMS_JOB_COLUMNS = 'id, country_code, site_id, type, priority, status, items_count, assigned_to, location, order_ref, completed_at, completed_by, created_at, updated_at, line_items, source_site_id, dest_site_id, transfer_status, requested_by, approved_by, job_number, delivery_method, tracking_number, external_carrier_name, assigned_by, notes, has_discrepancy, discrepancy_details, shipped_at, delivered_at, received_at, received_by';
 
 export const wmsJobsService = {
+    async createPackAfterCompletedPick(pickJobId: string): Promise<WMSJob> {
+        const { data, error } = await supabase
+            .rpc('create_pack_job_after_completed_pick', { p_pick_job_id: pickJobId })
+            .single();
+
+        if (error) throw error;
+        if (!data) throw new Error('PACK job creation returned no job');
+        return mapWmsJobRow(data);
+    },
+
     async getById(id: string) {
         // Fetch job using JSONB line_items (Standardized Architecture)
         const { data, error } = await supabase

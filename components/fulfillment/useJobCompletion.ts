@@ -57,6 +57,8 @@ export const useJobCompletion = (deps: UseJobCompletionDeps) => {
 
     const completeJob = useCallback(async (jobId: string, employeeName: string, skipValidation = false, optimisticLineItems?: any[], timestamp?: string) => {
         let pointsResult = null;
+        let completionPersisted = false;
+        let isPickCompletion = false;
         const stage = (name: string) => logger.debug('useJobCompletion', `[ST-PACK] 🕒 Stage: ${name} (Job: ${jobId})`);
         console.time(`completeJob-${jobId}`);
 
@@ -64,6 +66,7 @@ export const useJobCompletion = (deps: UseJobCompletionDeps) => {
             stage('Start');
             logger.debug('useJobCompletion', `🏁 completeJob called for: ${jobId} (skipValidation: ${skipValidation})`);
             let job = jobs.find(j => j.id === jobId);
+            isPickCompletion = job?.type === 'PICK';
 
             // Fix: For PUTAWAY, if location is missing in local state (race condition), fetch fresh from DB
             if (job && job.type === 'PUTAWAY' && !job.location) {
@@ -142,6 +145,7 @@ export const useJobCompletion = (deps: UseJobCompletionDeps) => {
                 });
             }
             logger.debug('useJobCompletion', `💾 Database updated for job ${jobId}`);
+            completionPersisted = true;
 
             // CLEANUP: Update assignment record to 'Completed' so it drops from active workload matrix
             try {
@@ -268,21 +272,7 @@ export const useJobCompletion = (deps: UseJobCompletionDeps) => {
                     if (existingPackJob) {
                         logger.warn('useJobCompletion', `⚠️ PACK job already exists for ${job.orderRef}. Skipping creation.`);
                     } else {
-                        const packJob = await wmsJobsService.create({
-                            siteId: job.siteId,
-                            site_id: job.site_id,
-                            type: 'PACK',
-                            priority: job.priority,
-                            status: 'Pending',
-                            items: packItems.length,
-                            lineItems: packItems,
-                            location: 'Packing Station 1',
-                            orderRef: job.orderRef,
-                            sourceSiteId: job.sourceSiteId,
-                            destSiteId: job.destSiteId,
-                            jobNumber: job.jobNumber,
-                            notes: job.notes?.includes('[STRICT_SCAN]') ? '[STRICT_SCAN]' : undefined
-                        });
+                        const packJob = await wmsJobsService.createPackAfterCompletedPick(job.id);
                         setJobs(prev => prev.find(j => j.id === packJob.id) ? prev : [packJob, ...prev]);
                     }
                 } else {
@@ -441,7 +431,9 @@ export const useJobCompletion = (deps: UseJobCompletionDeps) => {
         } catch (error) {
             logger.error('useJobCompletion', `❌ completeJob failed for ${jobId}:`, error);
             console.timeEnd(`completeJob-${jobId}`);
-            addNotification('alert', getTranslation('warehouse.jobCompleteFailed'));
+            addNotification('alert', completionPersisted && isPickCompletion
+                ? 'Picking is saved, but the packing job could not be created. A warehouse manager needs to create the PACK job before fulfillment continues.'
+                : getTranslation('warehouse.jobCompleteFailed'));
             throw error;
         }
     }, [jobs, sales, employees, user, allOrders, allProducts, setJobs, setTransfers, setOrders, setAllOrders, setSales, addNotification, adjustStock, queryClient]);

@@ -37,6 +37,7 @@
 | Stock mismatch after receive | Quantity error | `hooks/useAdjustStockMutation.ts` | Verify adjustment math |
 | Wrong assignee showing | Field mapping | `services/wms-jobs.service.ts` | Check snake_case → camelCase |
 | **42P17: infinite recursion in `wms_jobs` RLS** | The WMS job policy reads assignments while the assignment policy reads WMS jobs | `/migrations/`, live RLS policies | Break the policy cycle with a private, actor-scoped assignment helper; keep country/site predicates on the job row |
+| **PICK completes but PACK is missing (403 on `wms_jobs`)** | Browser insert of the chained PACK row is rejected by WMS row-level security | `create_pack_job_after_completed_pick` migration, `services/wms-jobs.service.ts`, `components/fulfillment/useJobCompletion.ts` | Use the authenticated, idempotent PICK-to-PACK RPC; verify that the completing employee and site/country scope match |
 
 ## Inventory Issues
 

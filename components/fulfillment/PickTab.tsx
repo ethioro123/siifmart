@@ -91,7 +91,12 @@ export const PickTab: React.FC = () => {
         if (!latestJob) return;
         setIsJobModalOpen(false);
         setIsScannerOpen(false);
-        await completeJob(latestJob.id, user?.name || 'Worker', false, latestJob.lineItems);
+        try {
+            await completeJob(latestJob.id, user?.name || 'Worker', false, latestJob.lineItems);
+        } catch (error) {
+            logger.error('PickTab', 'PICK completion follow-up failed; see the completion notification for next steps.', error);
+            return;
+        }
         
         // Show Success Screen
         setCompletedJobInfo({

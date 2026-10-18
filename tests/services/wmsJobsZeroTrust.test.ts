@@ -17,6 +17,7 @@ vi.mock('../../lib/supabase', () => {
     const mockLimit = vi.fn();
     const mockMaybeSingle = vi.fn();
     const mockSingle = vi.fn();
+    const mockRpc = vi.fn();
 
     const queryBuilder: any = {
         select: mockSelect,
@@ -49,15 +50,41 @@ vi.mock('../../lib/supabase', () => {
 
     return {
         supabase: {
-            from: vi.fn(() => queryBuilder)
+            from: vi.fn(() => queryBuilder),
+            rpc: mockRpc
         },
-        mockQueryBuilder: queryBuilder
+        mockQueryBuilder: queryBuilder,
+        mockRpc
     };
 });
 
 describe('WMS Jobs Zero-Trust Architecture & Country Scoping', () => {
     beforeEach(() => {
         vi.clearAllMocks();
+    });
+
+    it('creates a PACK through the completed-PICK database function and maps the returned row', async () => {
+        const { mockRpc } = await import('../../lib/supabase') as any;
+        const packRow = {
+            id: 'pack-1',
+            site_id: 'site-et-1',
+            country_code: 'ET',
+            type: 'PACK',
+            priority: 'Normal',
+            status: 'Pending',
+            items_count: 2,
+            assigned_to: 'employee-1',
+            line_items: []
+        };
+        mockRpc.mockReturnValueOnce({
+            single: vi.fn().mockResolvedValue({ data: packRow, error: null })
+        });
+
+        const created = await wmsJobsService.createPackAfterCompletedPick('pick-1');
+
+        expect(mockRpc).toHaveBeenCalledWith('create_pack_job_after_completed_pick', { p_pick_job_id: 'pick-1' });
+        expect(created.id).toBe('pack-1');
+        expect(created.type).toBe('PACK');
     });
 
     describe('Tenant Isolation & Country-Code Scoping', () => {

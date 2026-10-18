@@ -4,6 +4,12 @@
 
 ## Active Features
 
+### Secure PICK-to-PACK Handoff (2026-10-19)
+- Completing a PICK creates its PACK through an idempotent database function that verifies the authenticated employee, active WMS role, completed-by identity, and country/site scope. The resulting PACK is assigned to that employee so the operation can load under WMS row-level security. Failed handoffs state that PICK persisted and are caught by the scanner handler.
+- **Files**: `migrations/20261019_create_pack_after_completed_pick.sql`, `services/wms-jobs.service.ts`, `components/fulfillment/useJobCompletion.ts`, `components/fulfillment/PickTab.tsx`, `tests/services/wmsJobsZeroTrust.test.ts`
+- **Database**: Applied to Staging (`utykzifrblpyxlvlknsm`)
+- **Root Cause**: The client attempted a direct insert into `wms_jobs` after persisting the completed PICK; RLS rejected the follow-up job and the scanner handler left an unhandled rejection.
+
 ### SKU-Identity Product Labels and Country-Scoped Worker IDs (2026-10-19)
 - Product label barcodes and human-readable codes now use the product SKU consistently across label preview, batch printing, shelf tags, and inbound putaway labels. Catalog barcodes remain available as scan aliases, not as the printed product identity.
 - Employee code allocation uses an atomic country-specific database sequence so RLS-filtered site lists and concurrent hires cannot issue IDs from a stale local maximum.
