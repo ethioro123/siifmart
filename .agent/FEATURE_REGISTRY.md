@@ -4,6 +4,11 @@
 
 ## Active Features
 
+### Mobile User Menu Refresh (2026-10-18)
+- Expands the mobile account panel to a safe-area-aware, scrollable card with a clearer identity header, visible close control, larger touch targets, and more readable performance and job summaries. Desktop placement remains a compact anchored menu.
+- **Files**: `components/topbar/UserMenu.tsx`
+- **Database**: None
+
 ### Accurate Session Warning Messages (2026-10-18)
 - MFA requirements now show a verification warning instead of a false zero-minute expiry message. Genuine token expiry warnings use a positive, rounded-up minute count and are suppressed after token expiry.
 - **Files**: `hooks/useSessionManager.ts`, `contexts/CentralStore.tsx`
