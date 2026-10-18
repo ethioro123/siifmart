@@ -1,6 +1,7 @@
 import React from 'react';
 import { Scan, X, Truck, Loader2 } from 'lucide-react';
 import { PurchaseOrder } from '../../../types';
+import { FulfillmentHeaderMetrics } from '../FulfillmentHeaderMetrics';
 
 interface ReceiveHeaderProps {
     scanInputRef: React.RefObject<HTMLInputElement | null>;
@@ -12,6 +13,11 @@ interface ReceiveHeaderProps {
     setViewMode: (val: 'Process' | 'History') => void;
     t: (key: string) => string;
     isSubmitting: boolean;
+    receiveStats?: {
+        pending: number;
+        active: number;
+        completed: number;
+    };
     // Backwards-compatible optional props
     unresolvedScans?: Array<{ barcode: string; scannedAt: Date; qty: number; suggestions?: string[] }>;
     setUnresolvedScans?: React.Dispatch<React.SetStateAction<Array<{ barcode: string; scannedAt: Date; qty: number; suggestions?: string[] }>>>;
@@ -31,7 +37,8 @@ export const ReceiveHeader: React.FC<ReceiveHeaderProps> = ({
     viewMode,
     setViewMode,
     t,
-    isSubmitting
+    isSubmitting,
+    receiveStats
 }) => {
     const handleSubmit = () => {
         if (isSubmitting) return;
@@ -123,6 +130,20 @@ export const ReceiveHeader: React.FC<ReceiveHeaderProps> = ({
                             </span>
                         </div>
                     </div>
+
+                    {/* Desktop Center: Apple Design Metrics */}
+                    {receiveStats && (
+                        <FulfillmentHeaderMetrics
+                            pending={receiveStats.pending}
+                            active={receiveStats.active}
+                            completed={receiveStats.completed}
+                            labels={{
+                                pending: t('warehouse.pending') || 'Pending',
+                                active: t('warehouse.inProgress') || 'In Progress',
+                                completed: t('warehouse.completed') || 'Completed'
+                            }}
+                        />
+                    )}
 
                     {/* Right: View Mode Toggle */}
                     <div className="p-0.5 sm:p-1 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-lg sm:rounded-xl flex items-center select-none shrink-0">

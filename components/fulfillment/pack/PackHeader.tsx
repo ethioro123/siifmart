@@ -1,6 +1,7 @@
 import React from 'react';
 import { Package, Filter, ChevronDown, CheckCircle, AlertTriangle, Clock, List, Search, X, ScanLine, Loader2 } from 'lucide-react';
 import { SortDropdown } from '../../shared';
+import { FulfillmentHeaderMetrics } from '../FulfillmentHeaderMetrics';
 
 interface PackHeaderProps {
     viewMode: 'Process' | 'History';
@@ -16,6 +17,7 @@ interface PackHeaderProps {
     filteredJobsCount?: {
         pending: number;
         active: number;
+        completed?: number;
     };
     packSearch: string;
     setPackSearch: (val: string) => void;
@@ -34,14 +36,29 @@ export const PackHeader: React.FC<PackHeaderProps> = ({
     return (
         <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl sm:rounded-2xl p-2.5 sm:p-5 mb-1.5 sm:mb-4 shadow-xs">
             {/* Title row — hidden on mobile to maximize screen real estate */}
-            <div className="hidden sm:flex items-center gap-4 mb-4">
-                <div className="w-12 h-12 rounded-2xl bg-[var(--theme-accent)]/10 border border-[var(--theme-accent)]/20 flex items-center justify-center text-[var(--theme-accent)] shrink-0">
-                    <Package size={22} strokeWidth={1.75} />
+            <div className="hidden sm:flex items-center justify-between gap-4 mb-4">
+                <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 rounded-2xl bg-[var(--theme-accent)]/10 border border-[var(--theme-accent)]/20 flex items-center justify-center text-[var(--theme-accent)] shrink-0">
+                        <Package size={22} strokeWidth={1.75} />
+                    </div>
+                    <div>
+                        <h2 className="text-xl font-bold text-[var(--theme-text-primary)] uppercase tracking-tight">{t('warehouse.tabs.pack')}</h2>
+                        <p className="text-xs font-medium text-[var(--theme-text-secondary)] uppercase tracking-wider mt-0.5">{t('warehouse.packDesc')}</p>
+                    </div>
                 </div>
-                <div>
-                    <h2 className="text-xl font-bold text-[var(--theme-text-primary)] uppercase tracking-tight">{t('warehouse.tabs.pack')}</h2>
-                    <p className="text-xs font-medium text-[var(--theme-text-secondary)] uppercase tracking-wider mt-0.5">{t('warehouse.packDesc')}</p>
-                </div>
+
+                {filteredJobsCount && (
+                    <FulfillmentHeaderMetrics
+                        pending={filteredJobsCount.pending}
+                        active={filteredJobsCount.active}
+                        completed={filteredJobsCount.completed ?? 0}
+                        labels={{
+                            pending: t('warehouse.pending') || 'Pending',
+                            active: t('warehouse.inProgress') || 'In Progress',
+                            completed: t('warehouse.completed') || 'Completed'
+                        }}
+                    />
+                )}
             </div>
 
             {/* Controls row */}

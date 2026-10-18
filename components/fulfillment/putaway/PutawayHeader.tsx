@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Layers, Search, AlertTriangle, Clock, List, RefreshCw, Smartphone, CheckCircle, Loader2 } from 'lucide-react';
 import { SortDropdown } from '../FulfillmentShared';
+import { FulfillmentHeaderMetrics } from '../FulfillmentHeaderMetrics';
 
 /** Returns true when viewport < 768 px (md breakpoint). SSR-safe. */
 function useIsMobile(): boolean {
@@ -21,7 +22,8 @@ interface PutawayHeaderProps {
     filteredJobsCount: {
         pending: number;
         active: number;
-        inboundItems: number;
+        completed?: number;
+        inboundItems?: number;
     };
     putawaySearch: string;
     setPutawaySearch: (val: string) => void;
@@ -76,19 +78,16 @@ export const PutawayHeader: React.FC<PutawayHeaderProps> = ({
                     </div>
                 </div>
 
-                <div className="grid grid-cols-4 gap-2.5 md:gap-3 w-auto">
-                    {[
-                        { label: t('warehouse.putaway.pending'), value: filteredJobsCount.pending },
-                        { label: t('warehouse.putaway.active'), value: filteredJobsCount.active },
-                        { label: t('warehouse.putaway.totalItems'), value: filteredJobsCount.inboundItems },
-                        { label: t('warehouse.putaway.system'), value: 'ONLINE' }
-                    ].map((stat, i) => (
-                        <div key={i} className="px-4 py-2 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl transition-colors">
-                            <p className="text-[11px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider mb-0.5">{stat.label}</p>
-                            <p className="text-sm md:text-base font-mono font-bold tabular-nums text-[var(--theme-text-primary)]">{stat.value}</p>
-                        </div>
-                    ))}
-                </div>
+                <FulfillmentHeaderMetrics
+                    pending={filteredJobsCount.pending}
+                    active={filteredJobsCount.active}
+                    completed={filteredJobsCount.completed ?? 0}
+                    labels={{
+                        pending: t('warehouse.putaway.pending') || 'Pending',
+                        active: t('warehouse.putaway.active') || 'In Progress',
+                        completed: t('warehouse.completed') || 'Completed'
+                    }}
+                />
             </div>
 
             {isMobile ? (

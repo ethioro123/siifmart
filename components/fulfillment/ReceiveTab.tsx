@@ -288,6 +288,18 @@ export const ReceiveTab: React.FC = () => {
         setReprintItem(null);
     };
 
+    const receiveStats = useMemo(() => {
+        let pending = 0, active = 0, completed = 0;
+        orders.forEach(o => {
+            if (o.status === 'Approved' || o.status === 'Partially Received') pending++;
+            else if (o.status === 'Received') completed++;
+        });
+        jobs.forEach(j => {
+            if (j.type === 'RECEIVE' && j.status === 'In-Progress') active++;
+        });
+        return { pending, active, completed };
+    }, [orders, jobs]);
+
     // --- RENDER ---
     return (
         <div className="flex-1 overflow-hidden flex flex-col space-y-4 md:space-y-6">
@@ -308,6 +320,7 @@ export const ReceiveTab: React.FC = () => {
                 orders={orders}
                 t={t}
                 isSubmitting={isSubmitting}
+                receiveStats={receiveStats}
             />
 
             {/* CONTENT AREA */}

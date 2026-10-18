@@ -19,22 +19,11 @@ import { usePutawayAutoRepair } from './putaway/hooks/usePutawayAutoRepair';
 import { formatJobId } from '../../utils/jobIdFormatter';
 
 interface PutawayTabProps {
-    filteredJobs: WMSJob[];
-    historicalJobs: WMSJob[];
-    employees: Employee[];
-    user: any;
-    orders: any[];
-    isSubmitting: boolean;
-    setIsSubmitting: (v: boolean) => void;
-    refreshData: () => void;
-    handleStartJob: (job: WMSJob) => void;
-    selectedJob: WMSJob | null;
-    setSelectedJob: (job: any) => void;
-    setIsDetailsOpen: (open: boolean) => void;
-    isDetailsOpen: boolean;
-    resolveOrderRef: (ref?: string) => string;
-    sites: any[];
-    loadHistoricalJobs?: (limit?: number) => Promise<void>;
+    filteredJobs: WMSJob[]; historicalJobs: WMSJob[]; employees: Employee[]; user: any; orders: any[];
+    isSubmitting: boolean; setIsSubmitting: (v: boolean) => void; refreshData: () => void;
+    handleStartJob: (job: WMSJob) => void; selectedJob: WMSJob | null; setSelectedJob: (job: any) => void;
+    setIsDetailsOpen: (open: boolean) => void; isDetailsOpen: boolean; resolveOrderRef: (ref?: string) => string;
+    sites: any[]; loadHistoricalJobs?: (limit?: number) => Promise<void>;
 }
 
 const PUTAWAY_ITEMS_PER_PAGE = 10;
@@ -149,11 +138,9 @@ export const PutawayTab: React.FC<PutawayTabProps> = ({
             if (putawaySortBy === 'priority') {
                 const priorityOrder: Record<string, number> = { 'Critical': 0, 'High': 1, 'Normal': 2 };
                 return (priorityOrder[a.priority] || 2) - (priorityOrder[b.priority] || 2);
-            } else if (putawaySortBy === 'items') {
-                return b.items - a.items;
-            } else {
-                return new Date(b.id).getTime() - new Date(a.id).getTime();
             }
+            if (putawaySortBy === 'items') return b.items - a.items;
+            return new Date(b.id).getTime() - new Date(a.id).getTime();
         });
     }, [filteredJobs, putawayStatusFilter, putawaySearch, putawaySortBy, orders, employees]);
 
@@ -164,14 +151,20 @@ export const PutawayTab: React.FC<PutawayTabProps> = ({
         return sortedPutawayJobs.slice(start, start + PUTAWAY_ITEMS_PER_PAGE);
     }, [sortedPutawayJobs, safePutawayCurrentPage]);
 
-    const filteredJobsCount = {
-        pending: filteredJobs.filter(j => (j.type === 'PUTAWAY' || j.type === 'REPLENISH') && j.status === 'Pending').length,
-        active: filteredJobs.filter(j => (j.type === 'PUTAWAY' || j.type === 'REPLENISH') && j.status === 'In-Progress').length,
-        inboundItems: filteredJobs.filter(j => (j.type === 'PUTAWAY' || j.type === 'REPLENISH') && j.status !== 'Completed').reduce((sum, j) => {
-            const lineItemsSum = j.lineItems?.reduce((acc, li) => acc + (li.expectedQty || 0), 0) || 0;
-            return sum + Math.max(j.items || 0, lineItemsSum);
-        }, 0),
-    };
+    const filteredJobsCount = useMemo(() => {
+        let pending = 0, active = 0, completed = 0, inboundItems = 0;
+        filteredJobs.forEach(j => {
+            if (j.type !== 'PUTAWAY' && j.type !== 'REPLENISH') return;
+            if (j.status === 'Pending') pending++;
+            else if (j.status === 'In-Progress') active++;
+            else if (j.status === 'Completed') completed++;
+            if (j.status !== 'Completed') {
+                const lineItemsSum = j.lineItems?.reduce((acc, li) => acc + (li.expectedQty || 0), 0) || 0;
+                inboundItems += Math.max(j.items || 0, lineItemsSum);
+            }
+        });
+        return { pending, active, completed, inboundItems };
+    }, [filteredJobs]);
 
     // --- ACTIVE JOB HELPERS ---
     const currentItem = useMemo(() => {

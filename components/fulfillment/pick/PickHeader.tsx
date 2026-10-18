@@ -1,5 +1,6 @@
 import React from 'react';
 import { Package, Search } from 'lucide-react';
+import { FulfillmentHeaderMetrics } from '../FulfillmentHeaderMetrics';
 
 interface PickHeaderProps {
     pendingCount: number;
@@ -93,22 +94,16 @@ export const PickHeader: React.FC<PickHeaderProps> = ({
                     </div>
 
                     {/* Desktop Stats Dashboard */}
-                    <div className="hidden sm:grid grid-cols-3 gap-2 w-auto shrink-0">
-                        {[
-                            { count: pendingCount, label: t('warehouse.pending'), color: 'text-amber-500' },
-                            { count: inProgressCount, label: t('warehouse.inProgress'), color: 'text-[var(--theme-accent)]' },
-                            { count: completedCount, label: t('warehouse.completed'), color: 'text-emerald-500' }
-                        ].map((stat, i) => (
-                            <div key={i} className="bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-2.5 sm:px-3 py-1.5 sm:py-2 text-center sm:text-left min-w-[70px]">
-                                <p className={`text-sm sm:text-lg font-mono font-bold tabular-nums leading-none mb-1 ${stat.color}`}>
-                                    {stat.count}
-                                </p>
-                                <p className="text-[10px] sm:text-[11px] text-[var(--theme-text-secondary)] font-semibold uppercase tracking-tight sm:tracking-wider leading-none">
-                                    {stat.label}
-                                </p>
-                            </div>
-                        ))}
-                    </div>
+                    <FulfillmentHeaderMetrics
+                        pending={pendingCount}
+                        active={inProgressCount}
+                        completed={completedCount}
+                        labels={{
+                            pending: t('warehouse.pending'),
+                            active: t('warehouse.inProgress'),
+                            completed: t('warehouse.completed')
+                        }}
+                    />
                 </div>
             </div>
         </div>
