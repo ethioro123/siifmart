@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import type { UserRole } from '../../types';
 import { hasPermission } from '../../utils/permissions';
 import { getVisibleFulfillmentTabs } from '../../utils/fulfillmentTabPermissions';
+import { FLOOR_WORKER_ROLES } from '../../utils/fulfillmentRoles';
 
 const FULFILLMENT_ROUTE_ROLES = [
     'super_admin', 'admin', 'warehouse_manager', 'operations_manager', 'dispatch_manager',
@@ -17,9 +18,9 @@ describe('Fulfillment tab permissions', () => {
     });
 
     it.each([
-        ['receiver', ['RECEIVE', 'PUTAWAY', 'PICK', 'PACK', 'TRANSFER']],
+        ['receiver', ['RECEIVE', 'PUTAWAY', 'PICK', 'PACK']],
         ['forklift_operator', ['RECEIVE', 'PUTAWAY', 'PICK', 'PACK']],
-        ['inventory_specialist', ['RECEIVE', 'PUTAWAY', 'PICK', 'PACK', 'TRANSFER', 'REPLENISH', 'COUNT', 'WASTE', 'RETURNS', 'LABELS']],
+        ['inventory_specialist', ['RECEIVE', 'PUTAWAY', 'PICK', 'PACK', 'REPLENISH', 'COUNT', 'WASTE', 'RETURNS', 'LABELS']],
         ['driver', ['RECEIVE', 'PUTAWAY', 'PICK', 'PACK', 'DRIVER']],
         ['inbound_qc_inspector', ['RECEIVE', 'PUTAWAY', 'PICK', 'PACK']],
         ['stock_clerk', ['RECEIVE', 'PUTAWAY', 'PICK', 'PACK', 'COUNT', 'REPLENISH', 'LABELS']],
@@ -36,14 +37,16 @@ describe('Fulfillment tab permissions', () => {
         expect(getVisibleFulfillmentTabs(' Driver ')).toEqual(['RECEIVE', 'PUTAWAY', 'PICK', 'PACK', 'DRIVER']);
     });
 
-    it('keeps floor workers out of driver and transfer tabs unless specifically authorized', () => {
-        expect(getVisibleFulfillmentTabs('picker')).not.toContain('DRIVER');
-        expect(getVisibleFulfillmentTabs('picker')).not.toContain('TRANSFER');
-        expect(getVisibleFulfillmentTabs('receiver')).toContain('TRANSFER');
+    it.each(FLOOR_WORKER_ROLES)('keeps floor worker %s out of the transfer tab', role => {
+        expect(getVisibleFulfillmentTabs(role)).not.toContain('TRANSFER');
     });
 
-    it('keeps transfer available to warehouse managers', () => {
-        expect(getVisibleFulfillmentTabs('warehouse_manager')).toContain('TRANSFER');
+    it('keeps floor workers out of the driver tab', () => {
+        expect(getVisibleFulfillmentTabs('picker')).not.toContain('DRIVER');
+    });
+
+    it.each(['warehouse_manager', 'dispatch_manager', 'supply_chain_manager', 'regional_logistics_lead', 'replenishment_planner'])('%s retains authorized transfer access', role => {
+        expect(getVisibleFulfillmentTabs(role)).toContain('TRANSFER');
     });
 
     it.each(FULFILLMENT_ROUTE_ROLES)('%s has WMS route access and at least one Fulfillment tab', role => {

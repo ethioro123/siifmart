@@ -5,7 +5,7 @@
 ## Active Features
 
 ### Fulfillment Role-Specific Tab Permissions (2026-10-19)
-- Floor workers can access the shared Receive, Putaway, Pick, and Pack operations; only drivers receive the Driver tab, while Transfer and specialist tabs remain limited to their authorized roles. WMS roles missing the Fulfillment sidebar or explicit route permission were added, and all route roles have a non-empty role-appropriate tab set. Fleet maintenance also gets read-only inventory access needed for its WMS duties. Fulfillment content checks the selected tab and returns to an allowed tab if the role changes.
+- Floor workers can access the shared Receive, Putaway, Pick, and Pack operations; only drivers receive the Driver tab, and Transfer is reserved for warehouse management and explicitly authorized planning or leadership roles. Other specialist tabs remain limited to their authorized roles. WMS roles missing the Fulfillment sidebar or explicit route permission were added, and all route roles have a non-empty role-appropriate tab set. Fleet maintenance also gets read-only inventory access needed for its WMS duties. Fulfillment content checks the selected tab and returns to an allowed tab if the role changes.
 - **Files**: `utils/fulfillmentTabPermissions.ts`, `components/fulfillment/FulfillmentContent.tsx`, `components/Sidebar.tsx`, `utils/permissions.ts`, `services/permissions.matrix.ts`
 - **Root Cause**: Floor worker roles were spread across tabs without distinction by responsibility; some WMS titles lacked navigation or explicit route access; tab bodies rendered from selected state without an access check.
 
