@@ -5,19 +5,17 @@ import { logger } from '../utils/logger';
 
 const LOCAL_STORAGE_KEY = 'siifmart_payroll_runs_backup';
 
-let inMemoryBackup: PayrollRun[] = [];
-
-const getLocalBackup = (): PayrollRun[] => {
+// Security Cleanup: Purge any legacy unencrypted sensitive payroll records from browser storage
+if (typeof localStorage !== 'undefined') {
   try {
-    if (typeof localStorage !== 'undefined') {
-      const raw = localStorage.getItem(LOCAL_STORAGE_KEY);
-      if (raw) return JSON.parse(raw);
-    }
+    localStorage.removeItem(LOCAL_STORAGE_KEY);
   } catch {
-    // fallback
+    // Safe ignore
   }
-  return inMemoryBackup;
-};
+}
+
+// In-memory session cache only (transient read cache, never written to disk)
+let inMemoryBackup: PayrollRun[] = [];
 
 const saveLocalBackup = (runs: PayrollRun[]): void => {
   const map = new Map<string, PayrollRun>();
@@ -28,14 +26,8 @@ const saveLocalBackup = (runs: PayrollRun[]): void => {
     map.set(r.id, r);
   }
   inMemoryBackup = Array.from(map.values());
-  try {
-    if (typeof localStorage !== 'undefined') {
-      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(inMemoryBackup));
-    }
-  } catch {
-    // Ignore storage quota
-  }
 };
+
 
 const mapDBToPayrollRun = (row: any): PayrollRun => ({
   id: row.id,
@@ -84,14 +76,14 @@ export const payrollRunsService = {
 
       const mapped = (data || []).map(mapDBToPayrollRun);
       saveLocalBackup(mapped);
+      return mapped;
     } catch (error) {
-      logger.warn('payrollRunsService', 'Remote fetch failed, using local store:', { error: String(error) });
+      logger.error('payrollRunsService', 'Remote fetch failed for payroll runs:', error as Error);
+      let results = inMemoryBackup;
+      if (siteId && siteId !== 'ALL') results = results.filter(r => !r.siteId || r.siteId === siteId);
+      if (countryCode) results = results.filter(r => r.countryCode.toUpperCase() === countryCode.toUpperCase());
+      return results.sort((a, b) => new Date(b.initiatedAt || 0).getTime() - new Date(a.initiatedAt || 0).getTime());
     }
-
-    let results = getLocalBackup();
-    if (siteId && siteId !== 'ALL') results = results.filter(r => !r.siteId || r.siteId === siteId);
-    if (countryCode) results = results.filter(r => r.countryCode.toUpperCase() === countryCode.toUpperCase());
-    return results.sort((a, b) => new Date(b.initiatedAt || 0).getTime() - new Date(a.initiatedAt || 0).getTime());
   },
 
   async getLatestRun(siteId?: string, countryCode?: string, period?: string): Promise<PayrollRun | null> {
@@ -144,11 +136,10 @@ export const payrollRunsService = {
       updated_at: now
     };
 
-    try {
-      const { error } = await supabase.from('payroll_runs').insert(dbRecord);
-      if (error) throw error;
-    } catch (error) {
-      logger.warn('payrollRunsService', 'Remote create failed, saving locally:', { error: String(error) });
+    const { error } = await supabase.from('payroll_runs').insert(dbRecord);
+    if (error) {
+      logger.error('payrollRunsService', 'Remote create payroll run failed:', error as Error);
+      throw new Error(`Failed to create payroll run on server: ${error.message || 'Database error'}`);
     }
 
     saveLocalBackup([newRecord]);
