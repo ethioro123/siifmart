@@ -4,6 +4,12 @@
 
 ## Active Features
 
+### SKU-Identity Product Labels and Country-Scoped Worker IDs (2026-10-19)
+- Product label barcodes and human-readable codes now use the product SKU consistently across label preview, batch printing, shelf tags, and inbound putaway labels. Catalog barcodes remain available as scan aliases, not as the printed product identity.
+- Employee code allocation uses an atomic country-specific database sequence so RLS-filtered site lists and concurrent hires cannot issue IDs from a stale local maximum.
+- **Files**: `components/LabelPrintModal.tsx`, `components/fulfillment/ReceiveTab.tsx`, `components/fulfillment/assign/AssignLabelHub.tsx`, `services/employees.service.ts`, `hooks/useEmployeeWizard.ts`, `utils/labels/ProductLabelGenerator.ts`, `utils/labels/InboundPutawayLabelGenerator.ts`, `utils/labels/ShelfTagGenerator.ts`, `migrations/20261019_employee_id_sequence_allocator.sql`
+- **Database**: Added private `public.employee_id_sequences` and authorized `reserve_next_employee_code(text)` RPC. Applied to production; staging remains unchanged.
+
 ### WMS Worker Sovereign Landing Page (2026-10-19)
 - All WMS workers and operators now land directly on their primary working tab upon opening Fulfillment (Pickers -> Pick, Packers -> Pack, Drivers -> Driver, Forklift Operators -> Putaway, Receivers & QC -> Receive, Stock Clerks & Inventory Specialists -> Count, Replenishment Planners -> Replenish, Returns Clerks -> Returns, Dispatchers -> Assign, Warehouse Managers -> Docks) instead of defaulting to Receive.
 - Synced the active operational tab with URL search parameters (`/wms-ops?tab=...`), preserving active state across reloads.

@@ -280,24 +280,15 @@ export const employeesService = {
 
     async getNextCode(countryCode?: string): Promise<string> {
         const country = normalizeCountryCode(countryCode || 'ET');
-        let maxCodeNumber = country === 'ET' ? 39 : 0; // Baseline known employee codes in database
-        const { data, error } = await supabase
-            .from('employees')
-            .select('code')
-            .like('code', `${country}-SIIF%`)
-            .order('code', { ascending: false })
-            .limit(1000);
+        const { data, error } = await supabase.rpc('reserve_next_employee_code', {
+            p_country_code: country
+        });
 
         if (error) throw error;
-        if (data && Array.isArray(data)) {
-            data.forEach((emp: { code?: string }) => {
-                const parsed = parseEmployeeCode(emp.code, country);
-                if (parsed && parsed.country === country && parsed.seq > maxCodeNumber) {
-                    maxCodeNumber = parsed.seq;
-                }
-            });
+        if (typeof data !== 'string' || !parseEmployeeCode(data, country)) {
+            throw new Error('Employee ID sequence returned an invalid code');
         }
-        return formatEmployeeCode(country, maxCodeNumber + 1);
+        return data;
     },
 
     async create(employee: Omit<Employee, 'created_at' | 'updated_at'>) {
