@@ -6,6 +6,8 @@ import { formatDisplaySiteId } from '../../utils/siteIdGenerator';
 import { getCountryProfile } from '../../utils/localization';
 
 interface POSupplierLogisticsProps {
+    poDelivery: { tempReq: 'Ambient' | 'Chilled' | 'Frozen'; shelfLife: string; dockSlot: string };
+    setPoDelivery: React.Dispatch<React.SetStateAction<POSupplierLogisticsProps['poDelivery']>>;
     // Supplier State
     isManualVendor: boolean;
     setIsManualVendor: (val: boolean) => void;
@@ -30,6 +32,7 @@ interface POSupplierLogisticsProps {
 }
 
 export const POSupplierLogistics: React.FC<POSupplierLogisticsProps> = ({
+    poDelivery, setPoDelivery,
     isManualVendor, setIsManualVendor,
     newPOSupplier, setNewPOSupplier,
     manualVendorName, setManualVendorName,
@@ -291,6 +294,40 @@ export const POSupplierLogistics: React.FC<POSupplierLogisticsProps> = ({
                                 </select>
                                 <ChevronDown size={14} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[var(--theme-text-secondary)] pointer-events-none" />
                             </div>
+                        </div>
+                    </div>
+                    <div className="grid grid-cols-3 gap-3">
+                        <div className="space-y-1.5">
+                            <label className="text-[10px] text-[var(--theme-text-primary)] uppercase font-semibold tracking-wider block ml-1">Required temperature</label>
+                            <select
+                                className="w-full h-10 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3 text-xs text-[var(--theme-text-primary)] focus:border-[var(--theme-accent)] outline-none"
+                                value={poDelivery.tempReq}
+                                onChange={e => setPoDelivery(prev => ({ ...prev, tempReq: e.target.value as typeof prev.tempReq }))}
+                            >
+                                <option value="Ambient">Ambient</option>
+                                <option value="Chilled">Chilled</option>
+                                <option value="Frozen">Frozen</option>
+                            </select>
+                        </div>
+                        <div className="space-y-1.5">
+                            <label className="text-[10px] text-[var(--theme-text-primary)] uppercase font-semibold tracking-wider block ml-1">Minimum shelf life</label>
+                            <input
+                                type="text"
+                                placeholder="e.g. 180 days"
+                                className="w-full h-10 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3 text-xs text-[var(--theme-text-primary)] focus:border-[var(--theme-accent)] outline-none"
+                                value={poDelivery.shelfLife}
+                                onChange={e => setPoDelivery(prev => ({ ...prev, shelfLife: e.target.value }))}
+                            />
+                        </div>
+                        <div className="space-y-1.5">
+                            <label className="text-[10px] text-[var(--theme-text-primary)] uppercase font-semibold tracking-wider block ml-1">Dock slot</label>
+                            <input
+                                type="text"
+                                placeholder="e.g. DOCK-A02"
+                                className="w-full h-10 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-3 text-xs text-[var(--theme-text-primary)] focus:border-[var(--theme-accent)] outline-none"
+                                value={poDelivery.dockSlot}
+                                onChange={e => setPoDelivery(prev => ({ ...prev, dockSlot: e.target.value }))}
+                            />
                         </div>
                     </div>
                 </div>

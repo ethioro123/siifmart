@@ -66,6 +66,9 @@ describe('Purchase Order Draft Auto-Save & Recovery', () => {
             newPOSupplier: 'sup-101',
             destinationSiteIds: ['wh-addis-1'],
             expectedDate: '2026-10-15',
+            tempReq: 'Chilled',
+            shelfLife: '7 days',
+            dockSlot: 'DOCK-A02',
             poPriority: 'High',
             quantityDistribution: 'per-store',
             newPOItems: sampleItems,
@@ -99,6 +102,9 @@ describe('Purchase Order Draft Auto-Save & Recovery', () => {
         expect(retrieved.data.poPriority).toBe('High');
         expect(retrieved.data.poNotes).toBe('Urgent warehouse replenishment for holiday demand');
         expect(retrieved.data.destinationSiteIds).toEqual(['wh-addis-1']);
+        expect(retrieved.data.tempReq).toBe('Chilled');
+        expect(retrieved.data.shelfLife).toBe('7 days');
+        expect(retrieved.data.dockSlot).toBe('DOCK-A02');
     });
 
     it('enforces multi-country tenant isolation: Ethiopian draft is never loaded in Kenyan context', () => {
@@ -111,6 +117,9 @@ describe('Purchase Order Draft Auto-Save & Recovery', () => {
                 newPOSupplier: '',
                 destinationSiteIds: ['wh-addis-1'],
                 expectedDate: '2026-10-20',
+                tempReq: 'Ambient',
+                shelfLife: '',
+                dockSlot: '',
                 poPriority: 'Normal',
                 quantityDistribution: 'per-store',
                 newPOItems: sampleItems,

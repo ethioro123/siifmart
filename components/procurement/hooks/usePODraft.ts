@@ -8,6 +8,9 @@ export interface PODraftPayload {
     newPOSupplier: string;
     destinationSiteIds: string[];
     expectedDate: string;
+    tempReq: 'Ambient' | 'Chilled' | 'Frozen';
+    shelfLife: string;
+    dockSlot: string;
     poPriority: 'Normal' | 'High' | 'Urgent' | 'Low';
     quantityDistribution: string;
     newPOItems: POItem[];

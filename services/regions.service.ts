@@ -8,6 +8,7 @@ import { supabase } from '../lib/supabase';
 import type { Region } from '../types';
 import { logger } from '../utils/logger';
 import { normalizeCountryCode } from '../utils/siteIdGenerator';
+import { getCountryProfile } from '../utils/localization';
 
 export interface CreateRegionInput {
     code: string;
@@ -23,6 +24,7 @@ export interface CreateRegionInput {
     monthly_expense_budget?: number;
     autonomous_expense_limit?: number;
     status?: 'active' | 'suspended' | 'planning';
+    change_reason?: string;
 }
 
 export interface UpdateRegionInput {
@@ -35,6 +37,7 @@ export interface UpdateRegionInput {
     monthly_expense_budget?: number;
     autonomous_expense_limit?: number;
     status?: 'active' | 'suspended' | 'planning';
+    change_reason?: string;
 }
 
 export interface RegionBudgetStatus {
@@ -141,7 +144,7 @@ export const regionsService = {
 
             if (error) {
                 logger.error('regionsService', `Error fetching region ${code}`, error);
-                return null;
+                throw error;
             }
 
             if (!data) return null;
@@ -165,7 +168,7 @@ export const regionsService = {
             };
         } catch (err) {
             logger.error('regionsService', `Critical failure in getRegionByCode ${code}`, err as Error);
-            return null;
+            throw err;
         }
     },
 
@@ -174,6 +177,8 @@ export const regionsService = {
      */
     async createRegion(input: CreateRegionInput): Promise<Region> {
         try {
+            const changeReason = input.change_reason?.trim();
+            if (!changeReason) throw new Error('A reason is required when creating a region');
             const payload = {
                 code: input.code.toLowerCase().trim(),
                 name: input.name.trim(),
@@ -188,28 +193,23 @@ export const regionsService = {
                 monthly_expense_budget: input.monthly_expense_budget ?? 0,
                 autonomous_expense_limit: input.autonomous_expense_limit ?? 25000,
                 status: input.status || 'active',
+                last_change_reason: changeReason,
                 created_at: new Date().toISOString(),
                 updated_at: new Date().toISOString()
             };
 
-            const { data, error } = await supabase
-                .from('regions')
-                .insert([payload])
-                .select()
-                .single();
+            const { data, error } = await supabase.rpc('create_region_with_admin_hub', {
+                p_region: payload
+            });
 
             if (error) {
                 logger.error('regionsService', 'Failed to create region', error);
                 throw error;
             }
 
-            return {
-                ...data,
-                monthly_procurement_budget: Number(data.monthly_procurement_budget || 0),
-                autonomous_po_limit: Number(data.autonomous_po_limit || 150000),
-                monthly_expense_budget: Number(data.monthly_expense_budget || 0),
-                autonomous_expense_limit: Number(data.autonomous_expense_limit || 25000)
-            };
+            const created = await this.getRegionByCode(typeof data === 'string' ? data : payload.code);
+            if (!created) throw new Error('The region was created but could not be loaded');
+            return created;
         } catch (err) {
             logger.error('regionsService', 'Exception in createRegion', err as Error);
             throw err;
@@ -222,8 +222,11 @@ export const regionsService = {
      */
     async updateRegion(code: string, updates: UpdateRegionInput): Promise<boolean> {
         try {
-            const allowedUpdates: Record<string, any> = {
-                updated_at: new Date().toISOString()
+            const changeReason = updates.change_reason?.trim();
+            if (!changeReason) throw new Error('A reason is required when changing regional settings');
+            const allowedUpdates: Record<string, string | number | null> = {
+                updated_at: new Date().toISOString(),
+                last_change_reason: changeReason
             };
 
             if (updates.name !== undefined) allowedUpdates.name = updates.name.trim();
@@ -236,20 +239,41 @@ export const regionsService = {
             if (updates.autonomous_expense_limit !== undefined) allowedUpdates.autonomous_expense_limit = updates.autonomous_expense_limit;
             if (updates.status !== undefined) allowedUpdates.status = updates.status;
 
-            const { error } = await supabase
+            const { data, error } = await supabase
                 .from('regions')
                 .update(allowedUpdates)
-                .eq('code', code);
+                .eq('code', code)
+                .select('code')
+                .maybeSingle();
 
             if (error) {
                 logger.error('regionsService', `Failed to update region ${code}`, error);
                 throw error;
             }
 
+            if (!data) throw new Error(`Region ${code} was not updated; it may be outside your authorized scope`);
             return true;
         } catch (err) {
             logger.error('regionsService', `Exception in updateRegion ${code}`, err as Error);
             throw err;
+        }
+    },
+
+    async updateRegionAndSiteAssignments(
+        code: string,
+        updates: UpdateRegionInput,
+        toAssign: string[],
+        toUnassign: string[]
+    ): Promise<void> {
+        const { error } = await supabase.rpc('update_region_and_site_assignments', {
+            p_code: code,
+            p_updates: updates,
+            p_to_assign: toAssign,
+            p_to_unassign: toUnassign
+        });
+        if (error) {
+            logger.error('regionsService', `Failed to atomically update region ${code}`, error);
+            throw error;
         }
     },
 
@@ -279,16 +303,29 @@ export const regionsService = {
 
             if (siteIds.length > 0) {
                 // 2. Calculate beginning of current calendar month
-                const now = new Date();
-                const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().slice(0, 10);
+                const timezone = getCountryProfile(region.country).timezone;
+                const dateParts = new Intl.DateTimeFormat('en-CA', {
+                    timeZone: timezone,
+                    year: 'numeric',
+                    month: '2-digit',
+                    day: '2-digit'
+                }).formatToParts(new Date());
+                const datePart = (type: 'year' | 'month' | 'day') => dateParts.find(part => part.type === type)?.value;
+                const year = datePart('year');
+                const month = datePart('month');
+                if (!year || !month) throw new Error(`Unable to determine the ${region.country} business date`);
+                const startOfMonth = `${year}-${month}-01`;
+                const nextMonthDate = new Date(Date.UTC(Number(year), Number(month), 1));
+                const endOfMonth = `${nextMonthDate.getUTCFullYear()}-${String(nextMonthDate.getUTCMonth() + 1).padStart(2, '0')}-01`;
 
                 // 3. Query purchase orders for these sites within the current month
                 const { data: poData, error: poErr } = await supabase
                     .from('purchase_orders')
-                    .select('total_amount, status')
+                    .select('total_amount')
                     .in('site_id', siteIds)
                     .gte('order_date', startOfMonth)
-                    .not('status', 'in', '("cancelled","rejected")');
+                    .lt('order_date', endOfMonth)
+                    .in('status', ['Approved', 'Ordered', 'Partially Received', 'Received']);
 
                 if (poErr) {
                     logger.error('regionsService', 'Failed to fetch PO spend for region budget check', poErr);
@@ -305,7 +342,7 @@ export const regionsService = {
             return {
                 regionCode: region.code,
                 regionName: region.name,
-                currency: region.default_currency || 'KES',
+                currency: region.default_currency || getCountryProfile(region.country).currencyCode,
                 monthlyBudget,
                 autonomousPoLimit: Number(region.autonomous_po_limit || 150000),
                 currentMonthSpend,
@@ -325,16 +362,19 @@ export const regionsService = {
      */
     async assignSiteToRegion(siteId: string, regionCode: string | null): Promise<boolean> {
         try {
-            const { error } = await supabase
+            const { data, error } = await supabase
                 .from('sites')
                 .update({ region_code: regionCode })
-                .eq('id', siteId);
+                .eq('id', siteId)
+                .select('id')
+                .maybeSingle();
 
             if (error) {
                 logger.error('regionsService', `Failed to assign site ${siteId} to region ${regionCode}`, error);
                 throw error;
             }
 
+            if (!data) throw new Error(`Site ${siteId} was not updated; it may be outside your authorized scope`);
             return true;
         } catch (err) {
             logger.error('regionsService', `Exception in assignSiteToRegion`, err as Error);

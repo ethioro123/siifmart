@@ -92,6 +92,7 @@ export const CreatePOModal: React.FC<CreatePOModalProps> = ({
     const [expectedDate, setExpectedDate] = useState('');
     const [poPriority, setPoPriority] = useState<'Normal' | 'High' | 'Urgent' | 'Low'>('Normal');
     const [quantityDistribution, setQuantityDistribution] = useState('per-store');
+    const [poDelivery, setPoDelivery] = useState<{ tempReq: 'Ambient' | 'Chilled' | 'Frozen'; shelfLife: string; dockSlot: string }>({ tempReq: 'Ambient', shelfLife: '', dockSlot: '' });
 
     // Totals & Notes
     const [poNotes, setPoNotes] = useState('');
@@ -143,6 +144,7 @@ export const CreatePOModal: React.FC<CreatePOModalProps> = ({
         setDestinationSiteIds([]);
         setIsSiteDropdownOpen(false);
         setExpectedDate('');
+        setPoDelivery({ tempReq: 'Ambient', shelfLife: '', dockSlot: '' });
         setQuantityDistribution('per-store');
         setFullEditingIndex(null);
     };
@@ -178,6 +180,7 @@ export const CreatePOModal: React.FC<CreatePOModalProps> = ({
                 const validWh = countryWarehouses.find(s => s.id === editingPO.siteId);
                 setDestinationSiteIds(validWh ? [editingPO.siteId] : (countryWarehouses[0] ? [countryWarehouses[0].id] : []));
                 setExpectedDate(editingPO.expectedDelivery || '');
+                setPoDelivery({ tempReq: editingPO.tempReq || 'Ambient', shelfLife: editingPO.shelfLife || '', dockSlot: editingPO.dockSlot || '' });
                 setPoPriority(editingPO.priority as any || 'Normal');
                 setPaymentTerms(editingPO.paymentTerms || '');
                 setShippingCost(editingPO.shippingCost || 0);
@@ -204,6 +207,7 @@ export const CreatePOModal: React.FC<CreatePOModalProps> = ({
                     const validSites = (d.destinationSiteIds || []).filter(id => countryWarehouses.some(w => w.id === id));
                     setDestinationSiteIds(validSites.length > 0 ? validSites : (countryWarehouses[0] ? [countryWarehouses[0].id] : []));
                     setExpectedDate(d.expectedDate || '');
+                    setPoDelivery({ tempReq: d.tempReq || 'Ambient', shelfLife: d.shelfLife || '', dockSlot: d.dockSlot || '' });
                     setPoPriority(d.poPriority || 'Normal');
                     setQuantityDistribution(d.quantityDistribution || 'per-store');
                     setNewPOItems(d.newPOItems || []);
@@ -248,6 +252,7 @@ export const CreatePOModal: React.FC<CreatePOModalProps> = ({
                 newPOSupplier,
                 destinationSiteIds,
                 expectedDate,
+                ...poDelivery,
                 poPriority,
                 quantityDistribution,
                 newPOItems,
@@ -263,7 +268,7 @@ export const CreatePOModal: React.FC<CreatePOModalProps> = ({
         return () => clearTimeout(timer);
     }, [
         isOpen, isEditMode, enableAutoSave, isManualVendor, manualVendorName,
-        newPOSupplier, destinationSiteIds, expectedDate, poPriority,
+        newPOSupplier, destinationSiteIds, expectedDate, poDelivery, poPriority,
         quantityDistribution, newPOItems, poNotes, paymentTerms, incoterms,
         shippingCost, discountRate, taxRate, allSuppliers, saveDraft
     ]);
@@ -354,6 +359,7 @@ export const CreatePOModal: React.FC<CreatePOModalProps> = ({
                 vendorId,
                 vendorName,
                 expectedDate,
+                ...poDelivery,
                 poNotes,
                 paymentTerms,
                 incoterms,
@@ -436,6 +442,8 @@ export const CreatePOModal: React.FC<CreatePOModalProps> = ({
                     setQuantityDistribution={setQuantityDistribution}
                     expectedDate={expectedDate}
                     setExpectedDate={setExpectedDate}
+                    poDelivery={poDelivery}
+                    setPoDelivery={setPoDelivery}
                     poPriority={poPriority}
                     setPoPriority={setPoPriority}
                 />

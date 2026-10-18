@@ -5,6 +5,7 @@ import {
 } from 'lucide-react';
 import type { Region, Site, Employee } from '../../../types';
 import { regionsService, RegionBudgetStatus } from '../../../services/regions.service';
+import { getCountryProfile } from '../../../utils/localization';
 
 interface RegionCardProps {
     region: Region;
@@ -66,7 +67,7 @@ export const RegionCard: React.FC<RegionCardProps> = ({
     // Find Regional Manager
     const regionalManager = employees.find(e => e.id === region.regional_manager_id);
 
-    const currency = region.default_currency || 'KES';
+    const currency = region.default_currency || getCountryProfile(region.country).currencyCode;
     const monthlyBudget = region.monthly_procurement_budget ?? 0;
     const autonomousLimit = region.autonomous_po_limit ?? 150000;
     const currentSpend = budgetStatus?.currentMonthSpend ?? 0;

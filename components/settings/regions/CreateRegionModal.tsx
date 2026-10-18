@@ -1,12 +1,10 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { X, Building2, MapPin, DollarSign, ShieldAlert, Check } from 'lucide-react';
 import type { Site, Employee } from '../../../types';
 import type { CreateRegionInput } from '../../../services/regions.service';
 import { useCreateRegionMutation } from '../../../hooks/useRegionMutations';
 import { normalizeCountryCode } from '../../../utils/siteIdGenerator';
-import { getCountryProfile } from '../../../utils/localization';
-import { useStore } from '../../../contexts/CentralStore';
-import { canSwitchCountry } from '../../../utils/userCountry';
+import { getCountryProfile, Country } from '../../../utils/localization';
 
 interface CreateRegionModalProps {
     isOpen: boolean;
@@ -29,49 +27,51 @@ export const CreateRegionModal: React.FC<CreateRegionModalProps> = ({
     employees,
     addNotification
 }) => {
-    const { user } = useStore();
-    const canSwitch = canSwitchCountry(user);
     const createRegionMutation = useCreateRegionMutation();
-    const normCountry = normalizeCountryCode(country);
-
-    const [selectedCountry, setSelectedCountry] = useState<string>(normCountry);
-    const [currencyState, setCurrencyState] = useState<string>(currency);
+    const selectedCountry = normalizeCountryCode(country) as Country;
     const [name, setName] = useState('');
     const [code, setCode] = useState('');
     const [city, setCity] = useState('');
     const [adminHubSiteId, setAdminHubSiteId] = useState('');
     const [regionalManagerId, setRegionalManagerId] = useState('');
-    const [monthlyBudget, setMonthlyBudget] = useState('5000000');
-    const [autonomousLimit, setAutonomousLimit] = useState('150000');
-    const [monthlyExpenseBudget, setMonthlyExpenseBudget] = useState('500000');
-    const [autonomousExpenseLimit, setAutonomousExpenseLimit] = useState('25000');
+    const [monthlyBudget, setMonthlyBudget] = useState('0');
+    const [autonomousLimit, setAutonomousLimit] = useState('0');
+    const [monthlyExpenseBudget, setMonthlyExpenseBudget] = useState('0');
+    const [autonomousExpenseLimit, setAutonomousExpenseLimit] = useState('0');
+    const [changeReason, setChangeReason] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const activeProfile = getCountryProfile(selectedCountry);
+
+    useEffect(() => {
+        if (!isOpen) return;
+        setName('');
+        setCode('');
+        setCity('');
+        setAdminHubSiteId('');
+        setRegionalManagerId('');
+        setMonthlyBudget('0');
+        setAutonomousLimit('0');
+        setMonthlyExpenseBudget('0');
+        setAutonomousExpenseLimit('0');
+        setChangeReason('');
+    }, [isOpen, selectedCountry]);
 
     if (!isOpen) return null;
 
-    const activeProfile = getCountryProfile(selectedCountry as any);
-
     // Filter sites to current sovereign country
-    const countrySites = sites.filter(s => normalizeCountryCode(s.country) === selectedCountry);
+    const countrySites = sites.filter(s => s.country && normalizeCountryCode(s.country) === selectedCountry);
 
-    // Filter potential regional managers
     const countryEmployees = employees.filter(e => {
-        const empCountry = normalizeCountryCode(e.country || e.country_code);
-        return empCountry === selectedCountry;
+        const employeeCountry = e.country || e.country_code;
+        if (!employeeCountry) return false;
+        const empCountry = normalizeCountryCode(employeeCountry);
+        const isRegionalManager = e.role?.toLowerCase().replace(/[\s-]+/g, '_') === 'regional_manager';
+        const isActive = !e.status || ['active', 'enabled'].includes(e.status.toLowerCase());
+        return empCountry === selectedCountry && isRegionalManager && isActive;
     });
 
-    const handleCountryChange = (newCountry: string) => {
-        const norm = normalizeCountryCode(newCountry);
-        setSelectedCountry(norm);
-        const prof = getCountryProfile(norm as any);
-        setCurrencyState(prof.currency);
-        setAdminHubSiteId('');
-        setRegionalManagerId('');
-        const cleanSlug = name
-            ? name.toUpperCase().replace(/[^A-Z0-9]/g, '_').replace(/_+/g, '_').slice(0, 15)
-            : '';
-        setCode(cleanSlug ? `${norm}-${cleanSlug}` : `${norm}-`);
-    };
+    const currencyCode = activeProfile.currencyCode;
+    const administrationSites = countrySites.filter(s => ['administration', 'administrative'].includes(s.type?.toLowerCase()));
 
     const handleGenerateCode = (regionName: string) => {
         setName(regionName);
@@ -95,28 +95,32 @@ export const CreateRegionModal: React.FC<CreateRegionModalProps> = ({
             addNotification('alert', 'Territorial code is required');
             return;
         }
+        if (!changeReason.trim()) {
+            addNotification('alert', 'Please provide a reason for creating this region');
+            return;
+        }
 
         const parsedBudget = Number(monthlyBudget);
         const parsedLimit = Number(autonomousLimit);
         const parsedExpenseBudget = Number(monthlyExpenseBudget);
         const parsedExpenseLimit = Number(autonomousExpenseLimit);
 
-        if (isNaN(parsedBudget) || parsedBudget < 0) {
+        if (!Number.isFinite(parsedBudget) || parsedBudget < 0) {
             addNotification('alert', 'Monthly budget must be a positive number');
             return;
         }
 
-        if (isNaN(parsedLimit) || parsedLimit < 0) {
+        if (!Number.isFinite(parsedLimit) || parsedLimit < 0) {
             addNotification('alert', 'Autonomous PO limit must be a positive number');
             return;
         }
 
-        if (isNaN(parsedExpenseBudget) || parsedExpenseBudget < 0) {
+        if (!Number.isFinite(parsedExpenseBudget) || parsedExpenseBudget < 0) {
             addNotification('alert', 'Monthly expense budget must be a positive number');
             return;
         }
 
-        if (isNaN(parsedExpenseLimit) || parsedExpenseLimit < 0) {
+        if (!Number.isFinite(parsedExpenseLimit) || parsedExpenseLimit < 0) {
             addNotification('alert', 'Autonomous expense limit must be a positive number');
             return;
         }
@@ -128,14 +132,15 @@ export const CreateRegionModal: React.FC<CreateRegionModalProps> = ({
                 code: code.trim().toUpperCase(),
                 country: selectedCountry,
                 city: city.trim() || undefined,
-                default_currency: currencyState,
+                default_currency: currencyCode,
                 admin_hub_site_id: adminHubSiteId || undefined,
                 regional_manager_id: regionalManagerId || undefined,
                 monthly_procurement_budget: parsedBudget,
                 autonomous_po_limit: parsedLimit,
                 monthly_expense_budget: parsedExpenseBudget,
                 autonomous_expense_limit: parsedExpenseLimit,
-                status: 'active'
+                status: 'active',
+                change_reason: changeReason.trim()
             };
 
             await createRegionMutation.mutateAsync(payload);
@@ -208,8 +213,8 @@ export const CreateRegionModal: React.FC<CreateRegionModalProps> = ({
                         </div>
                     </div>
 
-                    {/* City & Sovereign Market */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {/* City */}
+                    <div>
                         <div>
                             <label className="block text-xs font-medium text-[var(--theme-text-primary)] mb-1">
                                 Principal City / Capital
@@ -225,23 +230,6 @@ export const CreateRegionModal: React.FC<CreateRegionModalProps> = ({
                                 />
                             </div>
                         </div>
-                        <div>
-                            <label className="block text-xs font-medium text-[var(--theme-text-primary)] mb-1">
-                                Sovereign Jurisdiction
-                            </label>
-                            <select
-                                value={selectedCountry}
-                                onChange={(e) => handleCountryChange(e.target.value)}
-                                disabled={!canSwitch}
-                                className="w-full px-3 py-2 text-xs bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl text-[var(--theme-text-primary)] focus:outline-none focus:border-[#0071E3] disabled:opacity-60"
-                            >
-                                <option value="ET">Ethiopia (ET) • ETB</option>
-                                <option value="KE">Kenya (KE) • KES</option>
-                                <option value="UG">Uganda (UG) • UGX</option>
-                                <option value="RW">Rwanda (RW) • RWF</option>
-                                <option value="TZ">Tanzania (TZ) • TZS</option>
-                            </select>
-                        </div>
                     </div>
 
                     {/* Administrative Hub Site */}
@@ -255,7 +243,7 @@ export const CreateRegionModal: React.FC<CreateRegionModalProps> = ({
                             className="w-full px-3 py-2 text-xs bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl text-[var(--theme-text-primary)] focus:outline-none focus:border-[#0071E3]"
                         >
                             <option value="">Designate Later / Virtual Office</option>
-                            {countrySites.map(s => (
+                            {administrationSites.map(s => (
                                 <option key={s.id} value={s.id}>
                                     {s.name} ({s.code}) - {s.type}
                                 </option>
@@ -282,6 +270,21 @@ export const CreateRegionModal: React.FC<CreateRegionModalProps> = ({
                         </select>
                     </div>
 
+                    <div>
+                        <label className="block text-xs font-medium text-[var(--theme-text-primary)] mb-1">
+                            Reason for creating this region *
+                        </label>
+                        <textarea
+                            value={changeReason}
+                            onChange={(e) => setChangeReason(e.target.value)}
+                            required
+                            maxLength={500}
+                            rows={2}
+                            placeholder="Record the business reason for this change"
+                            className="w-full px-3 py-2 text-xs bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl text-[var(--theme-text-primary)] focus:outline-none focus:border-[#0071E3]"
+                        />
+                    </div>
+
                     {/* Dynamic Budget & Dynamic PO Controls (HQ Centralized Limit) */}
                     <div className="p-3.5 bg-[var(--theme-bg-subtle)] rounded-xl border border-[var(--theme-border)] space-y-3">
                         <div className="flex items-center gap-2">
@@ -297,7 +300,7 @@ export const CreateRegionModal: React.FC<CreateRegionModalProps> = ({
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                             <div>
                                 <label className="block text-[11px] font-medium text-[var(--theme-text-primary)] mb-1">
-                                    Monthly Procurement Budget ({currencyState})
+                                    Monthly Procurement Budget ({currency})
                                 </label>
                                 <input
                                     type="number"
@@ -311,7 +314,7 @@ export const CreateRegionModal: React.FC<CreateRegionModalProps> = ({
                             </div>
                             <div>
                                 <label className="block text-[11px] font-medium text-[var(--theme-text-primary)] mb-1">
-                                    Autonomous PO Limit ({currencyState})
+                                    Autonomous PO Limit ({currency})
                                 </label>
                                 <input
                                     type="number"
@@ -328,7 +331,7 @@ export const CreateRegionModal: React.FC<CreateRegionModalProps> = ({
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1 border-t border-[var(--theme-border)]/50">
                             <div>
                                 <label className="block text-[11px] font-medium text-[var(--theme-text-primary)] mb-1">
-                                    Monthly Expense Budget ({currencyState})
+                                    Monthly Expense Budget ({currency})
                                 </label>
                                 <input
                                     type="number"
@@ -342,7 +345,7 @@ export const CreateRegionModal: React.FC<CreateRegionModalProps> = ({
                             </div>
                             <div>
                                 <label className="block text-[11px] font-medium text-[var(--theme-text-primary)] mb-1">
-                                    Autonomous Expense Limit ({currencyState})
+                                    Autonomous Expense Limit ({currency})
                                 </label>
                                 <input
                                     type="number"

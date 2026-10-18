@@ -7,7 +7,6 @@ import { useStore } from '../../contexts/CentralStore';
 import { useData } from '../../contexts/DataContext';
 import { getCountryProfile, Country } from '../../utils/localization';
 import { normalizeCountryCode } from '../../utils/siteIdGenerator';
-import { canSwitchCountry } from '../../utils/userCountry';
 import type { Region } from '../../types';
 import { regionsService } from '../../services/regions.service';
 import { RegionCard } from './regions/RegionCard';
@@ -25,21 +24,13 @@ export default function RegionsSettingsTab() {
         addNotification
     } = useData();
 
-    const isCeo = canSwitchCountry(user);
     const isHQExecutive = useMemo(() => {
         const r = (user?.role || '').toLowerCase().trim();
-        return ['super_admin', 'ceo', 'operations_manager', 'finance_manager', 'admin'].includes(r);
+        return ['super_admin', 'ceo', 'operations_manager', 'finance_manager'].includes(r);
     }, [user?.role]);
 
     const activeCountry: Country = (effectiveCountry || settings?.country || 'ET') as Country;
-    const [viewCountry, setViewCountry] = useState<Country>(activeCountry);
-
-    // Sync viewCountry whenever activeCountry changes
-    useEffect(() => {
-        setViewCountry(activeCountry);
-    }, [activeCountry]);
-
-    const selectedCountry: Country = isCeo ? viewCountry : activeCountry;
+    const selectedCountry = activeCountry;
     const countryProfile = getCountryProfile(selectedCountry);
     const currency = countryProfile.currency || 'KES';
 
@@ -97,13 +88,16 @@ export default function RegionsSettingsTab() {
     // Country-scoped sites
     const countrySites = useMemo(() => {
         const normSelected = normalizeCountryCode(selectedCountry);
-        return sites.filter(s => normalizeCountryCode(s.country) === normSelected);
+        return sites.filter(s => Boolean(s.country) && normalizeCountryCode(s.country) === normSelected);
     }, [sites, selectedCountry]);
 
     // Country-scoped employees
     const countryEmployees = useMemo(() => {
         const normSelected = normalizeCountryCode(selectedCountry);
-        return employees.filter(e => normalizeCountryCode(e.country || e.country_code) === normSelected);
+        return employees.filter(e => {
+            const employeeCountry = e.country || e.country_code;
+            return Boolean(employeeCountry) && normalizeCountryCode(employeeCountry) === normSelected;
+        });
     }, [employees, selectedCountry]);
 
     // KPI Metrics
@@ -133,32 +127,6 @@ export default function RegionsSettingsTab() {
                     </p>
                 </div>
                 <div className="flex flex-wrap items-center gap-2">
-                    {isCeo && (
-                        <div className="flex items-center gap-1 p-1 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl overflow-x-auto">
-                            {([
-                                { code: 'ET', flag: '🇪🇹', name: 'Ethiopia' },
-                                { code: 'KE', flag: '🇰🇪', name: 'Kenya' },
-                                { code: 'UG', flag: '🇺🇬', name: 'Uganda' },
-                                { code: 'RW', flag: '🇷🇼', name: 'Rwanda' },
-                                { code: 'TZ', flag: '🇹🇿', name: 'Tanzania' }
-                            ] as const).map(c => (
-                                <button
-                                    key={c.code}
-                                    type="button"
-                                    onClick={() => setViewCountry(c.code as Country)}
-                                    className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold transition-all cursor-pointer whitespace-nowrap ${
-                                        selectedCountry === c.code
-                                            ? 'bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)] shadow-xs border border-[var(--theme-border)]'
-                                            : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)]'
-                                    }`}
-                                    title={c.name}
-                                >
-                                    <span>{c.flag}</span>
-                                    <span>{c.code}</span>
-                                </button>
-                            ))}
-                        </div>
-                    )}
                     <button
                         type="button"
                         onClick={loadRegions}

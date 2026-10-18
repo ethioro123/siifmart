@@ -4,6 +4,7 @@ import type { Region, Site, Employee } from '../../../types';
 import type { UpdateRegionInput } from '../../../services/regions.service';
 import { useUpdateRegionMutation } from '../../../hooks/useRegionMutations';
 import { normalizeCountryCode } from '../../../utils/siteIdGenerator';
+import { getCountryProfile } from '../../../utils/localization';
 
 interface EditRegionModalProps {
     isOpen: boolean;
@@ -34,6 +35,7 @@ export const EditRegionModal: React.FC<EditRegionModalProps> = ({
     const [autonomousLimit, setAutonomousLimit] = useState(String(region.autonomous_po_limit ?? 150000));
     const [monthlyExpenseBudget, setMonthlyExpenseBudget] = useState(String(region.monthly_expense_budget ?? 0));
     const [autonomousExpenseLimit, setAutonomousExpenseLimit] = useState(String(region.autonomous_expense_limit ?? 25000));
+    const [changeReason, setChangeReason] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     // Initial assigned sites state
@@ -48,13 +50,19 @@ export const EditRegionModal: React.FC<EditRegionModalProps> = ({
     const normRegionCountry = normalizeCountryCode(region.country);
 
     // Filter sites to region's country
-    const countrySites = sites.filter(s => normalizeCountryCode(s.country) === normRegionCountry);
+    const countrySites = sites.filter(s => Boolean(s.country) && normalizeCountryCode(s.country) === normRegionCountry);
 
     // Filter employees to region's country
     const countryEmployees = employees.filter(e => {
-        const empCountry = normalizeCountryCode(e.country || e.country_code);
-        return empCountry === normRegionCountry;
+        const employeeCountry = e.country || e.country_code;
+        if (!employeeCountry) return false;
+        const empCountry = normalizeCountryCode(employeeCountry);
+        const isRegionalManager = e.role?.toLowerCase().replace(/[\s-]+/g, '_') === 'regional_manager';
+        const isActive = !e.status || ['active', 'enabled'].includes(e.status.toLowerCase());
+        return empCountry === normRegionCountry && isRegionalManager && isActive;
     });
+    const administrationSites = countrySites.filter(s => ['administration', 'administrative'].includes(s.type?.toLowerCase()));
+    const currency = region.default_currency || getCountryProfile(normRegionCountry).currencyCode;
 
     const toggleSite = (siteId: string) => {
         setAssignedSiteIds(prev =>
@@ -64,27 +72,31 @@ export const EditRegionModal: React.FC<EditRegionModalProps> = ({
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        if (!changeReason.trim()) {
+            addNotification('alert', 'Please provide a reason for changing regional settings');
+            return;
+        }
         const parsedBudget = Number(monthlyBudget);
         const parsedLimit = Number(autonomousLimit);
         const parsedExpenseBudget = Number(monthlyExpenseBudget);
         const parsedExpenseLimit = Number(autonomousExpenseLimit);
 
-        if (isNaN(parsedBudget) || parsedBudget < 0) {
+        if (!Number.isFinite(parsedBudget) || parsedBudget < 0) {
             addNotification('alert', 'Monthly procurement budget must be a positive number');
             return;
         }
 
-        if (isNaN(parsedLimit) || parsedLimit < 0) {
+        if (!Number.isFinite(parsedLimit) || parsedLimit < 0) {
             addNotification('alert', 'Autonomous PO limit must be a positive number');
             return;
         }
 
-        if (isNaN(parsedExpenseBudget) || parsedExpenseBudget < 0) {
+        if (!Number.isFinite(parsedExpenseBudget) || parsedExpenseBudget < 0) {
             addNotification('alert', 'Monthly expense budget must be a positive number');
             return;
         }
 
-        if (isNaN(parsedExpenseLimit) || parsedExpenseLimit < 0) {
+        if (!Number.isFinite(parsedExpenseLimit) || parsedExpenseLimit < 0) {
             addNotification('alert', 'Autonomous expense limit must be a positive number');
             return;
         }
@@ -100,7 +112,8 @@ export const EditRegionModal: React.FC<EditRegionModalProps> = ({
                 autonomous_po_limit: parsedLimit,
                 monthly_expense_budget: parsedExpenseBudget,
                 autonomous_expense_limit: parsedExpenseLimit,
-                status
+                status,
+                change_reason: changeReason.trim()
             };
 
             const toAssign: string[] = [];
@@ -185,7 +198,7 @@ export const EditRegionModal: React.FC<EditRegionModalProps> = ({
                             </label>
                             <select
                                 value={status}
-                                onChange={(e) => setStatus(e.target.value as any)}
+                                onChange={(e) => setStatus(e.target.value as 'active' | 'suspended' | 'planning')}
                                 className="w-full px-3 py-2 text-xs bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl text-[var(--theme-text-primary)] focus:outline-none focus:border-[#0071E3]"
                             >
                                 <option value="active">Active</option>
@@ -207,7 +220,7 @@ export const EditRegionModal: React.FC<EditRegionModalProps> = ({
                                 className="w-full px-3 py-2 text-xs bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl text-[var(--theme-text-primary)] focus:outline-none focus:border-[#0071E3]"
                             >
                                 <option value="">No Hub Designated</option>
-                                {countrySites.map(s => (
+                                {administrationSites.map(s => (
                                     <option key={s.id} value={s.id}>
                                         {s.name} ({s.code})
                                     </option>
@@ -234,6 +247,22 @@ export const EditRegionModal: React.FC<EditRegionModalProps> = ({
                     </div>
 
                     {/* Dynamic Central HQ Budget & Autonomous Spending Limit */}
+                    <div>
+                        <label className="block text-xs font-medium text-[var(--theme-text-primary)] mb-1">
+                            Reason for this change *
+                        </label>
+                        <textarea
+                            value={changeReason}
+                            onChange={(e) => setChangeReason(e.target.value)}
+                            required
+                            maxLength={500}
+                            rows={2}
+                            placeholder="Record why these settings are changing"
+                            className="w-full px-3 py-2 text-xs bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl text-[var(--theme-text-primary)] focus:outline-none focus:border-[#0071E3]"
+                        />
+                    </div>
+
+                    {/* Dynamic Central HQ Budget & Autonomous Spending Limit */}
                     <div className="p-3.5 bg-[var(--theme-bg-subtle)] rounded-xl border border-[var(--theme-border)] space-y-3">
                         <div className="flex items-center gap-2">
                             <DollarSign size={15} className="text-[#0071E3] dark:text-[#2997FF]" />
@@ -245,7 +274,7 @@ export const EditRegionModal: React.FC<EditRegionModalProps> = ({
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                             <div>
                                 <label className="block text-[11px] font-medium text-[var(--theme-text-primary)] mb-1">
-                                    Monthly Procurement Budget ({region.default_currency || 'KES'})
+                                    Monthly Procurement Budget ({currency})
                                 </label>
                                 <input
                                     type="number"
@@ -258,7 +287,7 @@ export const EditRegionModal: React.FC<EditRegionModalProps> = ({
                             </div>
                             <div>
                                 <label className="block text-[11px] font-medium text-[var(--theme-text-primary)] mb-1">
-                                    Autonomous PO Limit ({region.default_currency || 'KES'})
+                                    Autonomous PO Limit ({currency})
                                 </label>
                                 <input
                                     type="number"
@@ -274,7 +303,7 @@ export const EditRegionModal: React.FC<EditRegionModalProps> = ({
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1 border-t border-[var(--theme-border)]/50">
                             <div>
                                 <label className="block text-[11px] font-medium text-[var(--theme-text-primary)] mb-1">
-                                    Monthly Expense Budget ({region.default_currency || 'KES'})
+                                    Monthly Expense Budget ({currency})
                                 </label>
                                 <input
                                     type="number"
@@ -287,7 +316,7 @@ export const EditRegionModal: React.FC<EditRegionModalProps> = ({
                             </div>
                             <div>
                                 <label className="block text-[11px] font-medium text-[var(--theme-text-primary)] mb-1">
-                                    Autonomous Expense Limit ({region.default_currency || 'KES'})
+                                    Autonomous Expense Limit ({currency})
                                 </label>
                                 <input
                                     type="number"

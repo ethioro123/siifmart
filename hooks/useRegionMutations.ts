@@ -47,6 +47,7 @@ export function useCreateRegionMutation() {
     },
     onSuccess: (newRegion) => {
       queryClient.invalidateQueries({ queryKey: ['regions'] });
+      queryClient.invalidateQueries({ queryKey: ['sites'] });
       logger.info('useRegionMutations', `Region ${newRegion.code} provisioned successfully`);
     },
     onError: (err) => {
@@ -66,48 +67,15 @@ export function useUpdateRegionMutation() {
     mutationFn: async (params: UpdateRegionWithSitesParams): Promise<RegionMutationResult> => {
       const { code, updates, siteAllocations } = params;
       logger.info('useRegionMutations', `Updating region ${code}`);
-
-      // 1. Update region governance settings and limits
-      const updated = await regionsService.updateRegion(code, updates);
-      if (!updated) {
-        throw new Error(`Failed to update settings for region ${code}`);
-      }
-
-      // 2. Process site allocations if provided
-      if (siteAllocations) {
-        const { toAssign, toUnassign, allSites = [] } = siteAllocations;
-        const siteNameMap = new Map<string, string>();
-        allSites.forEach(s => siteNameMap.set(s.id, s.name));
-
-        const tasks: { siteId: string; regionCode: string | null; name: string }[] = [
-          ...toAssign.map(id => ({ siteId: id, regionCode: code, name: siteNameMap.get(id) || id })),
-          ...toUnassign.map(id => ({ siteId: id, regionCode: null, name: siteNameMap.get(id) || id }))
-        ];
-
-        if (tasks.length > 0) {
-          const results = await Promise.allSettled(
-            tasks.map(t => regionsService.assignSiteToRegion(t.siteId, t.regionCode))
-          );
-
-          const failedSites: string[] = [];
-          results.forEach((res, idx) => {
-            if (res.status === 'rejected' || (res.status === 'fulfilled' && !res.value)) {
-              failedSites.push(tasks[idx].name);
-            }
-          });
-
-          if (failedSites.length > 0) {
-            logger.warn('useRegionMutations', `Partial failure updating sites for region ${code}`, { failedSites });
-            throw new Error(
-              `Region settings updated, but failed to reassign site(s): ${failedSites.join(', ')}. Please retry site allocation.`
-            );
-          }
-        }
-      }
-
+      await regionsService.updateRegionAndSiteAssignments(
+        code,
+        updates,
+        siteAllocations?.toAssign ?? [],
+        siteAllocations?.toUnassign ?? []
+      );
       return { success: true };
     },
-    onSuccess: () => {
+    onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ['regions'] });
       queryClient.invalidateQueries({ queryKey: ['sites'] });
     },
