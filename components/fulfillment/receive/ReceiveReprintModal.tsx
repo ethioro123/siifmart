@@ -1,5 +1,6 @@
 import React from 'react';
 import { X, Printer, Minus, Plus, RefreshCw, Box, Tags, Eye, EyeOff, LayoutTemplate, ScanLine, QrCode, Info } from 'lucide-react';
+import { BarcodeLabelPreviewCard } from '../assign/BarcodeLabelPreviewCard';
 
 interface ReceiveReprintModalProps {
     reprintItem: {
@@ -225,6 +226,29 @@ export const ReceiveReprintModal: React.FC<ReceiveReprintModalProps> = ({
                                 </span>
                             </div>
                         )}
+                    </div>
+
+                    {/* Live Barcode Preview */}
+                    <div className="space-y-2">
+                        <div className="flex items-center justify-between">
+                            <label className="text-[11px] text-[var(--theme-text-secondary)] uppercase font-semibold tracking-wider flex items-center gap-2">
+                                <ScanLine size={14} /> Barcode Preview
+                            </label>
+                            <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-bold uppercase tracking-wider">
+                                Ready to Scan
+                            </span>
+                        </div>
+                        <div className="bg-[var(--theme-bg-subtle)] p-3 rounded-2xl border border-[var(--theme-border)]">
+                            <BarcodeLabelPreviewCard
+                                type="PRODUCT"
+                                title={reprintItem.name}
+                                code={reprintItem.sku}
+                                format={reprintFormat === 'QR' ? 'QR' : reprintFormat === 'Both' ? 'Both' : 'BARCODE'}
+                                size={reprintSize}
+                                price={reprintOptions.showPrice ? reprintItem.price : undefined}
+                                category={reprintOptions.showCategory ? reprintItem.category : undefined}
+                            />
+                        </div>
                     </div>
                 </div>
 
