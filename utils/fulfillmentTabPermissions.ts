@@ -1,6 +1,21 @@
 import type { OpTab } from '../components/fulfillment/FulfillmentContext';
 
-const PICKER_PACKER_TABS: OpTab[] = ['RECEIVE', 'PUTAWAY', 'PICK', 'PACK'];
+const WORKER_TAB_ACCESS: Record<string, OpTab[]> = {
+    picker: ['RECEIVE', 'PUTAWAY', 'PICK', 'PACK'],
+    packer: ['RECEIVE', 'PUTAWAY', 'PICK', 'PACK'],
+    receiver: ['RECEIVE', 'PUTAWAY', 'TRANSFER'],
+    forklift_operator: ['PUTAWAY'],
+    inventory_specialist: ['TRANSFER', 'REPLENISH', 'COUNT', 'WASTE', 'RETURNS', 'LABELS'],
+    driver: ['DRIVER'],
+    inbound_qc_inspector: ['RECEIVE'],
+    replenishment_planner: ['TRANSFER', 'REPLENISH'],
+    returns_clerk: ['RETURNS'],
+    stock_clerk: ['PUTAWAY', 'COUNT', 'REPLENISH', 'LABELS'],
+    dispatch_manager: ['DOCKS', 'DRIVER', 'TRANSFER', 'ASSIGN'],
+    dispatcher: ['DOCKS', 'DRIVER', 'TRANSFER', 'ASSIGN'],
+    fleet_maintenance_supervisor: ['DOCKS', 'DRIVER', 'ASSIGN'],
+    regional_logistics_lead: ['DOCKS', 'RECEIVE', 'PUTAWAY', 'TRANSFER', 'PICK', 'PACK', 'REPLENISH', 'COUNT', 'WASTE', 'RETURNS', 'DRIVER', 'ASSIGN', 'LABELS'],
+};
 
 const TAB_PERMISSIONS: Record<OpTab, string[]> = {
     RECEIVE: ['super_admin', 'admin', 'manager', 'regional_manager', 'operations_manager', 'warehouse_manager', 'dispatcher', 'logistics_manager', 'inventory_manager', 'picker', 'packer', 'receiver', 'inventory_specialist', 'forklift_operator', 'driver', 'inbound_qc_inspector'],
@@ -19,8 +34,10 @@ const TAB_PERMISSIONS: Record<OpTab, string[]> = {
 };
 
 export function getVisibleFulfillmentTabs(role?: string | null): OpTab[] {
-    if (role === 'picker' || role === 'packer') return [...PICKER_PACKER_TABS];
+    const normalizedRole = role?.trim().toLowerCase() ?? '';
+    const workerTabs = WORKER_TAB_ACCESS[normalizedRole];
+    if (workerTabs) return [...workerTabs];
 
     return (Object.keys(TAB_PERMISSIONS) as OpTab[])
-        .filter(tab => TAB_PERMISSIONS[tab].includes(role ?? ''));
+        .filter(tab => TAB_PERMISSIONS[tab].includes(normalizedRole));
 }

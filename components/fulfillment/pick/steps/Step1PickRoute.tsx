@@ -1,5 +1,5 @@
 import React from 'react';
-import { Route, MapPin, Box, ArrowRight, Scan, Clock, Sparkles } from 'lucide-react';
+import { Route, Box } from 'lucide-react';
 import { WMSJob, Site, Product } from '../../../../types';
 import { formatBeautifulLocation } from '../PickJobModal';
 
@@ -10,8 +10,8 @@ interface Step1PickRouteProps {
     totalItems: number;
     totalUnits: number;
     getProduct: (item: any) => Product | undefined;
-    onAdvanceToCollect: () => void;
-    onStartPick: (job: WMSJob) => void;
+    onAdvanceToCollect?: () => void;
+    onStartPick?: (job: WMSJob) => void;
     t: (key: string) => string;
 }
 
@@ -22,8 +22,6 @@ export const Step1PickRoute: React.FC<Step1PickRouteProps> = ({
     totalItems,
     totalUnits,
     getProduct,
-    onAdvanceToCollect,
-    onStartPick,
     t,
 }) => {
     return (
