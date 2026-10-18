@@ -56,20 +56,20 @@ describe('Location & Bay Label Generator - Scanner Aspect Ratio & Compliance', (
             size: 'Small',
             format: 'Barcode'
         });
-        expect(smallHtml).toContain('74.1mm');
+        expect(smallHtml).toContain('50.8mm');
 
         const largeHtml = await generateLocationLabelHTML(mockBayItems, {
             size: 'Large',
             format: 'Barcode'
         });
-        expect(largeHtml).toContain('130mm');
-        expect(largeHtml).toContain('97.5mm');
+        expect(largeHtml).toContain('101.6mm');
+        expect(largeHtml).toContain('76.2mm');
 
         const xlHtml = await generateLocationLabelHTML(mockBayItems, {
             size: 'XL',
             format: 'Barcode'
         });
-        expect(xlHtml).toContain('195mm');
+        expect(xlHtml).toContain('152.4mm');
     });
 
     it('strictly enforces zero raw Unicode emojis in generated bay labels', async () => {

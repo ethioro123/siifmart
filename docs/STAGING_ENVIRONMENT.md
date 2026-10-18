@@ -4,7 +4,7 @@ The separate `SIIFMART Staging` Supabase project is on the Free plan in the same
 
 ## Current status
 
-The app's staging environment is connected locally, and `npm run dev:staging` displays a visible staging warning. The new database is still empty. Production has more applied migrations than the repository contains, so do not create test employees until the current schema and security policies have been copied to staging as a schema-only snapshot. Do not apply the repository migrations blindly or copy production rows.
+The app's staging environment is connected locally, and `npm run dev:staging` displays a visible staging warning. The new database is still empty. Production has more applied migrations than the repository contains. Before a database change, inspect the target project's live schema and migration history, save the complete SQL in `/migrations/YYYYMMDD_description.sql`, then automatically apply it to the repository-linked project (or staging when the task targets staging). Do not bulk-copy production records; staging test accounts and data must be synthetic.
 
 ## After the schema has been installed
 

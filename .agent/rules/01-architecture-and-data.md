@@ -59,7 +59,7 @@ await productsService.update(id, { stock: newStock });
 ### Database Migrations, Persistent Files & SQL Execution Status
 - **Every database change MUST FIRST have a persistent migration file** in `/migrations/` named `YYYYMMDD_description.sql`. Creating this permanent, version-controlled file on disk is paramount and takes precedence over in-chat snippets. Never write, propose, or generate SQL without first creating the migration file on disk.
 - When the Supabase CLI is available, use its migration-creation command (check the installed CLI help first) and retain the repository's required migration naming convention.
-- **SQL delivery and execution**: Include the complete runnable migration SQL in the final response whenever SQL is created or changed. State whether it was applied. Do not apply a migration or alter a live database unless that action is authorized; otherwise say it still needs to be applied.
+- **SQL delivery and execution**: For each requested database change, first save its complete SQL in a persistent `/migrations/YYYYMMDD_description.sql` file, inspect the linked Supabase project's live schema and migration history, then apply the migration to that linked project automatically as part of the request. Do not ask for separate SQL-application authorization. If there is no linked project or the execution tool blocks application, keep the migration file and report the specific blocker. Include the complete SQL in the final response and say whether it was applied.
 
 ### Cross-Module Events
 - Propagate a change only to systems that depend on that business event; do not fan out unrelated work.

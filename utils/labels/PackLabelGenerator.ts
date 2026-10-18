@@ -1,7 +1,8 @@
 import { generateBarcodeSVG } from '../barcodeGenerator';
 import { generateQRCode } from '../qrCodeGenerator';
 import { formatOrderRef } from '../jobIdFormatter';
-import { LabelSize, LabelFormat, SIZE_CSS } from './types';
+import { LabelSize, LabelFormat, SIZE_CSS, normalizeLabelSize } from './types';
+import { escapeHtml } from './escapeHtml';
 
 export interface PackLabelData {
     orderRef: string;
@@ -45,30 +46,15 @@ export const generatePackLabelHTML = async (
     }
 ): Promise<string> => {
     const { size, format } = options;
-
-    // Normalize size - properly handle XL
-    const normalizedSize = (s: string): LabelSize => {
-        const lower = s.toLowerCase();
-        if (lower === 'small') return 'Small';
-        if (lower === 'medium') return 'Medium';
-        if (lower === 'large') return 'Large';
-        if (lower === 'xl' || lower === 'extra large' || lower === 'thermal cool box') return 'XL';
-        return 'XL'; // Default to XL for pack labels
-    };
-
-
-    // Normalize format
+    const validSize = normalizeLabelSize(size as string);
     const normalizedFormat = (f: string): LabelFormat => {
-        const lower = f.toLowerCase();
+        const lower = (f || '').toLowerCase();
         if (lower === 'barcode') return 'Barcode';
         if (lower === 'qr') return 'QR';
-        if (lower === 'both') return 'Both';
-        return 'Both'; // Default to Both for pack labels
+        return 'Both';
     };
-
-    const validSize = normalizedSize(size);
-    const validFormat = normalizedFormat(format);
-    const css = SIZE_CSS[validSize];
+    const validFormat = normalizedFormat(format as string);
+    const css = SIZE_CSS[validSize] || SIZE_CSS.XL;
 
     // Format the order reference for display (convert UUID to short ID)
     const formattedOrderRef = formatOrderRef(data.orderRef);
