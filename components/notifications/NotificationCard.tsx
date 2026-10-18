@@ -1,6 +1,6 @@
-import React, { useEffect, useRef, useCallback } from 'react';
+import React, { useEffect, useRef, useCallback, useState } from 'react';
 import { motion, useAnimationControls } from 'framer-motion';
-import { AlertTriangle, CheckCircle2, Info, X, ShieldAlert } from 'lucide-react';
+import { AlertTriangle, CheckCircle2, Info, X, ShieldAlert, ChevronDown, FileText } from 'lucide-react';
 import type { NotificationToastItem } from '../../services/notification-bus';
 
 interface NotificationCardProps {
@@ -16,13 +16,13 @@ export function inferCardMeta(type: string, message: string): {
 } {
   const lower = (message || '').toLowerCase();
 
-  // Security / RBAC / Permission
+  // Recognize concrete failure signals and avoid advice that assumes app behavior.
   if (lower.includes('permission') || lower.includes('denied') || lower.includes('forbidden') || lower.includes('unauthorized') || lower.includes('role restriction')) {
     return {
       title: 'Access Restricted',
       badge: 'SECURITY',
       subtitle: 'What went wrong:',
-      tip: 'This operation requires higher managerial authorization or a dual-signoff.'
+      tip: 'Check that you are signed in with the role and site access required for this action.'
     };
   }
 
@@ -32,7 +32,7 @@ export function inferCardMeta(type: string, message: string): {
       title: 'Barcode Conflict Flagged',
       badge: 'CONFLICT',
       subtitle: 'What went wrong:',
-      tip: 'This barcode is already assigned to another catalog SKU. Barcodes must be uniquely mapped.'
+      tip: 'Check the existing product record before changing the barcode assignment.'
     };
   }
 
@@ -42,7 +42,7 @@ export function inferCardMeta(type: string, message: string): {
       title: 'Barcode Validation Alert',
       badge: 'BARCODE',
       subtitle: 'What went wrong:',
-      tip: 'Verify barcode symbology, checksum digit, or catalog assignment.'
+      tip: 'Rescan the label and check that its barcode is complete and readable.'
     };
   }
 
@@ -52,7 +52,7 @@ export function inferCardMeta(type: string, message: string): {
       title: 'Duplicate SKU Detected',
       badge: 'DUPLICATE',
       subtitle: 'What went wrong:',
-      tip: 'A product with this SKU already exists in this market catalog.'
+      tip: 'Open the matching product record to confirm whether it is the item you need.'
     };
   }
 
@@ -62,28 +62,73 @@ export function inferCardMeta(type: string, message: string): {
       title: 'Inventory Alert',
       badge: 'INVENTORY',
       subtitle: 'What went wrong:',
-      tip: 'Verify current on-hand balance or submit an HQ replenishment request.'
+      tip: 'Review the latest stock balance and the quantity requested before trying again.'
     };
   }
 
-  // Pricing / Margins
+  // Pricing / cost input
   if (lower.includes('price') || lower.includes('cost') || lower.includes('margin')) {
     return {
-      title: 'Pricing Restriction',
+      title: lower.includes('margin') ? 'Margin Check' : 'Pricing Issue',
       badge: 'PRICING',
       subtitle: 'What went wrong:',
-      tip: 'Ensure pricing is strictly positive and adheres to corporate landed margin rules.'
+      tip: 'Check the entered amount, currency, and any pricing limits shown on this screen.'
     };
   }
 
 
   // Network / Connection
-  if (lower.includes('network') || lower.includes('offline') || lower.includes('timeout') || lower.includes('connection')) {
+  if (lower.includes('network') || lower.includes('offline') || lower.includes('connection') || (lower.includes('timeout') && !lower.includes('statement timeout') && !lower.includes('database') && !lower.includes('supabase') && !lower.includes('pgrst'))) {
     return {
       title: 'Connection Notice',
       badge: 'NETWORK',
       subtitle: 'What went wrong:',
-      tip: 'SIIFMART offline mode is maintaining your session. Changes will sync upon reconnect.'
+      tip: 'Check your connection, then retry. Confirm whether the action completed before submitting it again.'
+    };
+  }
+
+  if (lower.includes('57014') || lower.includes('statement timeout') || lower.includes('database') || lower.includes('supabase') || lower.includes('pgrst') || lower.includes('query timed out')) {
+    return {
+      title: 'Data Service Issue',
+      badge: 'DATA',
+      subtitle: 'What went wrong:',
+      tip: 'Wait briefly and retry. If it continues, share this message with your support or system administrator.'
+    };
+  }
+
+  if (lower.includes('session') || lower.includes('token expired') || lower.includes('sign in') || lower.includes('login')) {
+    return {
+      title: 'Sign-in Needed',
+      badge: 'ACCOUNT',
+      subtitle: 'What happened:',
+      tip: 'Sign in again to continue. If you were saving work, check whether it was saved before repeating the action.'
+    };
+  }
+
+  if (lower.includes('required') || lower.includes('invalid') || lower.includes('validation') || lower.includes('must be')) {
+    return {
+      title: 'Check the Entered Information',
+      badge: 'INPUT',
+      subtitle: 'What needs attention:',
+      tip: 'Review the highlighted fields and correct the value before submitting again.'
+    };
+  }
+
+  if (lower.includes('not found') || lower.includes('no longer exists') || lower.includes('missing record')) {
+    return {
+      title: 'Record Not Found',
+      badge: 'RECORD',
+      subtitle: 'What happened:',
+      tip: 'Refresh the list and check that the record is still available to your account.'
+    };
+  }
+
+  if (lower.includes('save') || lower.includes('update') || lower.includes('create') || lower.includes('submit') || lower.includes('failed')) {
+    return {
+      title: 'Could Not Complete Action',
+      badge: 'ACTION',
+      subtitle: 'What went wrong:',
+      tip: 'Check the details and try again. If it repeats, share the message with your support or system administrator.'
     };
   }
 
@@ -121,56 +166,45 @@ export function inferCardMeta(type: string, message: string): {
 
 const THEMES = {
   error: {
-    border: 'border-rose-500/40 dark:border-rose-400/40',
-    glow: 'shadow-[0_18px_50px_-12px_rgba(244,63,94,0.45)]',
-    rail: 'bg-gradient-to-b from-rose-400 to-red-600',
-    iconBg: 'bg-rose-500/15 text-rose-600 dark:text-rose-300 ring-1 ring-rose-500/30',
-    badgeBg: 'bg-rose-500/15 text-rose-700 dark:text-rose-300',
-    titleColor: 'text-rose-950 dark:text-rose-50',
-    explanationBg: 'bg-rose-50/80 dark:bg-rose-500/10 border-rose-200/70 dark:border-rose-400/20',
-    subtitleColor: 'text-rose-600 dark:text-rose-300',
-    progress: 'bg-gradient-to-r from-rose-500 to-red-600',
+    border: 'border-red-300 dark:border-red-900/70', rail: 'bg-red-600',
+    iconBg: 'bg-red-100 text-red-700 dark:bg-red-950 dark:text-red-300',
+    badgeBg: 'bg-red-100 text-red-800 dark:bg-red-950 dark:text-red-200',
+    titleColor: 'text-stone-950 dark:text-white',
+    explanationBg: 'bg-red-50 dark:bg-red-950/40 border-red-200 dark:border-red-900',
+    subtitleColor: 'text-red-800 dark:text-red-200', progress: 'bg-red-600',
     Icon: ShieldAlert
   },
   warning: {
-    border: 'border-amber-500/40 dark:border-amber-400/40',
-    glow: 'shadow-[0_18px_50px_-12px_rgba(245,158,11,0.4)]',
-    rail: 'bg-gradient-to-b from-amber-400 to-orange-600',
-    iconBg: 'bg-amber-500/15 text-amber-600 dark:text-amber-300 ring-1 ring-amber-500/30',
-    badgeBg: 'bg-amber-500/15 text-amber-700 dark:text-amber-300',
-    titleColor: 'text-amber-950 dark:text-amber-50',
-    explanationBg: 'bg-amber-50/80 dark:bg-amber-500/10 border-amber-200/70 dark:border-amber-400/20',
-    subtitleColor: 'text-amber-600 dark:text-amber-300',
-    progress: 'bg-gradient-to-r from-amber-500 to-orange-600',
+    border: 'border-amber-300 dark:border-amber-900/70', rail: 'bg-amber-500',
+    iconBg: 'bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-200',
+    badgeBg: 'bg-amber-100 text-amber-900 dark:bg-amber-950 dark:text-amber-100',
+    titleColor: 'text-stone-950 dark:text-white',
+    explanationBg: 'bg-amber-50 dark:bg-amber-950/40 border-amber-200 dark:border-amber-900',
+    subtitleColor: 'text-amber-900 dark:text-amber-200', progress: 'bg-amber-500',
     Icon: AlertTriangle
   },
   success: {
-    border: 'border-emerald-500/40 dark:border-emerald-400/40',
-    glow: 'shadow-[0_18px_50px_-12px_rgba(16,185,129,0.4)]',
-    rail: 'bg-gradient-to-b from-emerald-400 to-teal-600',
-    iconBg: 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-300 ring-1 ring-emerald-500/30',
-    badgeBg: 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-300',
-    titleColor: 'text-emerald-950 dark:text-emerald-50',
-    explanationBg: 'bg-emerald-50/80 dark:bg-emerald-500/10 border-emerald-200/70 dark:border-emerald-400/20',
-    subtitleColor: 'text-emerald-600 dark:text-emerald-300',
-    progress: 'bg-gradient-to-r from-emerald-500 to-teal-600',
+    border: 'border-emerald-300 dark:border-emerald-900/70', rail: 'bg-emerald-600',
+    iconBg: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-200',
+    badgeBg: 'bg-emerald-100 text-emerald-900 dark:bg-emerald-950 dark:text-emerald-100',
+    titleColor: 'text-stone-950 dark:text-white',
+    explanationBg: 'bg-emerald-50 dark:bg-emerald-950/40 border-emerald-200 dark:border-emerald-900',
+    subtitleColor: 'text-emerald-900 dark:text-emerald-200', progress: 'bg-emerald-600',
     Icon: CheckCircle2
   },
   info: {
-    border: 'border-sky-500/40 dark:border-sky-400/40',
-    glow: 'shadow-[0_18px_50px_-12px_rgba(14,165,233,0.4)]',
-    rail: 'bg-gradient-to-b from-sky-400 to-indigo-600',
-    iconBg: 'bg-sky-500/15 text-sky-600 dark:text-sky-300 ring-1 ring-sky-500/30',
-    badgeBg: 'bg-sky-500/15 text-sky-700 dark:text-sky-300',
-    titleColor: 'text-sky-950 dark:text-sky-50',
-    explanationBg: 'bg-sky-50/80 dark:bg-sky-500/10 border-sky-200/70 dark:border-sky-400/20',
-    subtitleColor: 'text-sky-600 dark:text-sky-300',
-    progress: 'bg-gradient-to-r from-sky-500 to-indigo-600',
+    border: 'border-sky-300 dark:border-sky-900/70', rail: 'bg-sky-600',
+    iconBg: 'bg-sky-100 text-sky-800 dark:bg-sky-950 dark:text-sky-200',
+    badgeBg: 'bg-sky-100 text-sky-900 dark:bg-sky-950 dark:text-sky-100',
+    titleColor: 'text-stone-950 dark:text-white',
+    explanationBg: 'bg-sky-50 dark:bg-sky-950/40 border-sky-200 dark:border-sky-900',
+    subtitleColor: 'text-sky-900 dark:text-sky-200', progress: 'bg-sky-600',
     Icon: Info
   }
 } as const;
 
 export const NotificationCard: React.FC<NotificationCardProps> = ({ item, onDismiss }) => {
+  const [detailsOpen, setDetailsOpen] = useState(false);
   const isError = item.type === 'error' || item.type === 'alert';
   const isWarning = item.type === 'warning';
   const isSuccess = item.type === 'success';
@@ -218,9 +252,18 @@ export const NotificationCard: React.FC<NotificationCardProps> = ({ item, onDism
   }, [controls]);
 
   useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.hidden) pause();
+      else resume();
+    };
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
+  }, [pause, resume]);
+
+  useEffect(() => {
     remainingRef.current = duration;
     pausedRef.current = true; // let resume() perform the initial start
-    resume();
+    if (!document.hidden) resume();
     return clearTimer;
   }, [duration, resume]);
 
@@ -239,15 +282,18 @@ export const NotificationCard: React.FC<NotificationCardProps> = ({ item, onDism
       aria-live={isError ? 'assertive' : 'polite'}
       onMouseEnter={pause}
       onMouseLeave={resume}
-      onFocus={pause}
-      onBlur={resume}
-      className={`pointer-events-auto relative w-full overflow-hidden rounded-2xl border ${theme.border} ${theme.glow} bg-white/90 dark:bg-[#12161A]/90 backdrop-blur-xl pl-5 pr-3.5 pt-3.5 pb-4 select-text`}
+      onFocusCapture={pause}
+      onBlurCapture={event => {
+        const nextTarget = event.relatedTarget;
+        if (!(nextTarget instanceof Node) || !event.currentTarget.contains(nextTarget)) resume();
+      }}
+      className={`pointer-events-auto relative w-full overflow-hidden rounded-2xl border ${theme.border} bg-white dark:bg-stone-950 shadow-xl shadow-stone-950/10 pl-4 pr-2.5 pt-3.5 pb-4 sm:pl-5 sm:pr-3.5 select-text`}
     >
       {/* Accent rail */}
-      <span className={`absolute left-0 top-0 bottom-0 w-1.5 ${theme.rail}`} aria-hidden="true" />
+      <span className={`absolute left-0 top-0 bottom-0 w-1 ${theme.rail}`} aria-hidden="true" />
 
       <div className="flex items-start gap-3">
-        <div className={`relative shrink-0 p-2 rounded-xl ${theme.iconBg}`}>
+        <div className={`relative mt-0.5 shrink-0 rounded-xl p-2.5 ${theme.iconBg}`} aria-hidden="true">
           <IconComponent size={18} />
           {isError && (
             <span className="absolute -top-1 -right-1 flex h-2.5 w-2.5" aria-hidden="true">
@@ -259,41 +305,62 @@ export const NotificationCard: React.FC<NotificationCardProps> = ({ item, onDism
 
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2">
-            <span className={`text-[9px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded-md ${theme.badgeBg}`}>
+            <span className={`rounded-full px-2 py-1 text-[10px] font-bold uppercase tracking-wider ${theme.badgeBg}`}>
               {meta.badge}
             </span>
           </div>
-          <h4 className={`mt-1 text-sm font-extrabold tracking-tight leading-snug ${theme.titleColor}`}>
+          <h4 className={`mt-1.5 text-[15px] font-bold tracking-tight leading-snug ${theme.titleColor}`}>
             {displayTitle}
           </h4>
 
           {showExplanation ? (
             <div className={`mt-2 rounded-xl border p-2.5 ${theme.explanationBg}`}>
-              <p className={`text-[10px] font-black uppercase tracking-wider mb-0.5 ${theme.subtitleColor}`}>
+              <p className={`mb-1 text-[11px] font-bold uppercase tracking-wide ${theme.subtitleColor}`}>
                 {meta.subtitle}
               </p>
-              <p className="text-[13px] font-semibold text-stone-900 dark:text-stone-100 leading-relaxed break-words">
+              <p className="text-sm font-medium text-stone-900 dark:text-stone-100 leading-relaxed break-words">
                 {item.message}
               </p>
             </div>
           ) : (
-            <p className="mt-1 text-[13px] font-medium text-stone-700 dark:text-stone-200 leading-relaxed break-words">
+            <p className="mt-1.5 text-sm font-medium text-stone-700 dark:text-stone-200 leading-relaxed break-words">
               {item.message}
             </p>
           )}
 
           {tipText && (
-            <p className="mt-2 text-[11px] text-stone-600 dark:text-stone-400 font-medium leading-normal">
-              💡 {tipText}
-            </p>
+            <div className="mt-2.5 flex gap-2 rounded-lg bg-stone-100 px-3 py-2 dark:bg-white/5">
+              <span className="shrink-0 text-[11px] font-bold uppercase tracking-wide text-stone-500 dark:text-stone-400">Next step</span>
+              <p className="text-xs font-medium leading-relaxed text-stone-700 dark:text-stone-300">{tipText}</p>
+            </div>
+          )}
+
+          {item.details && (
+            <div className="mt-2">
+              <button
+                type="button"
+                onClick={() => setDetailsOpen(open => !open)}
+                aria-expanded={detailsOpen}
+                className="inline-flex min-h-11 items-center gap-2 rounded-lg px-2 text-xs font-semibold text-stone-600 hover:bg-stone-100 dark:text-stone-300 dark:hover:bg-white/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+              >
+                <FileText size={14} aria-hidden="true" />
+                {detailsOpen ? 'Hide technical details' : 'Show technical details'}
+                <ChevronDown size={14} className={`transition-transform ${detailsOpen ? 'rotate-180' : ''}`} aria-hidden="true" />
+              </button>
+              {detailsOpen && (
+                <pre className="mt-1 max-h-32 overflow-auto whitespace-pre-wrap break-words rounded-lg bg-stone-100 p-2.5 text-xs leading-relaxed text-stone-700 dark:bg-black/30 dark:text-stone-300">
+                  {item.details}
+                </pre>
+              )}
+            </div>
           )}
         </div>
 
         <button
           type="button"
           onClick={() => dismissRef.current(item.id)}
-          className="shrink-0 p-1.5 rounded-lg text-stone-500 dark:text-stone-400 hover:text-stone-900 dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/10 transition-colors cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-stone-400"
-          title="Dismiss (Esc)"
+          className="-mr-1 -mt-1 flex h-11 w-11 shrink-0 items-center justify-center rounded-xl text-stone-500 hover:text-stone-900 hover:bg-stone-100 dark:text-stone-400 dark:hover:text-white dark:hover:bg-white/10 transition-colors cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+          title="Dismiss notification"
           aria-label="Dismiss notification"
         >
           <X size={15} />
@@ -301,7 +368,7 @@ export const NotificationCard: React.FC<NotificationCardProps> = ({ item, onDism
       </div>
 
       {/* Countdown progress: pauses on hover/focus, resumes where it left off */}
-      <div className="absolute bottom-0 left-0 right-0 h-1 bg-black/5 dark:bg-white/10" aria-hidden="true">
+      <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-stone-200 dark:bg-white/10" aria-hidden="true">
         <motion.div
           className={`h-full origin-left will-change-transform ${theme.progress}`}
           initial={{ scaleX: 1 }}

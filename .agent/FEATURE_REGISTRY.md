@@ -4,6 +4,12 @@
 
 ## Active Features
 
+### Notification Cards - Clearer Issue Guidance and Responsive Presentation (2026-10-18)
+- Error notifications now recognize common account, permission, barcode, duplicate SKU, inventory, pricing, validation, missing-record, connection, and data-service signals. Guidance avoids claiming that unsaved work will sync or assuming a specific approval path.
+- Notifications expose optional technical details on demand, use clearer status hierarchy, fit mobile safe areas, and honor reduced-motion preferences. Auto-dismiss pauses while the page is hidden.
+- **Files**: `components/notifications/NotificationCard.tsx`, `components/notifications/NotificationContainer.tsx`
+- **Root Cause**: Generic string heuristics offered unverified recovery promises, while optional diagnostic details were not visible and mobile placement/motion ignored device preferences.
+
 ### Mobile User Menu Refresh (2026-10-18)
 - Expands the mobile account panel to a safe-area-aware, scrollable card with a clearer identity header, visible close control, larger touch targets, and more readable performance and job summaries. Desktop placement remains a compact anchored menu.
 - **Files**: `components/topbar/UserMenu.tsx`

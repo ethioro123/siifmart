@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import { notificationBus, NotificationToastItem } from '../../services/notification-bus';
 import { NotificationCard } from './NotificationCard';
 
@@ -18,6 +18,7 @@ interface NotificationContainerProps {
 
 export const NotificationContainer: React.FC<NotificationContainerProps> = ({ toasts, onRemoveToast }) => {
   const [items, setItems] = useState<NotificationToastItem[]>([]);
+  const reduceMotion = useReducedMotion();
 
   const handleDismiss = useCallback((id: string) => {
     setItems(prev => prev.filter(item => item.id !== id));
@@ -90,18 +91,19 @@ export const NotificationContainer: React.FC<NotificationContainerProps> = ({ to
 
   return (
     <div
+      role="region"
       aria-label="System Notifications"
-      className="fixed top-20 right-4 sm:right-6 z-[999999] pointer-events-none flex flex-col gap-3 max-w-[420px] w-[calc(100vw-2rem)] sm:w-[420px]"
+      className="fixed inset-x-3 top-[calc(env(safe-area-inset-top)+4.5rem)] z-[999999] pointer-events-none mx-auto flex max-h-[calc(100dvh-6rem)] w-auto max-w-[420px] flex-col gap-2.5 overflow-y-auto pb-2 sm:inset-x-auto sm:right-6 sm:top-20 sm:mx-0 sm:w-[420px] sm:gap-3"
     >
       <AnimatePresence mode="popLayout" initial={false}>
         {items.map(item => (
           <motion.div
             key={item.id}
             layout="position"
-            initial={{ opacity: 0, x: 48, scale: 0.96 }}
+            initial={reduceMotion ? { opacity: 0 } : { opacity: 0, x: 48, scale: 0.96 }}
             animate={{ opacity: 1, x: 0, scale: 1 }}
-            exit={{ opacity: 0, x: 64, scale: 0.96, transition: { duration: 0.18, ease: 'easeIn' } }}
-            transition={{ type: 'spring', stiffness: 380, damping: 32, mass: 0.8 }}
+            exit={reduceMotion ? { opacity: 0, transition: { duration: 0.01 } } : { opacity: 0, x: 64, scale: 0.96, transition: { duration: 0.18, ease: 'easeIn' } }}
+            transition={reduceMotion ? { duration: 0.01 } : { type: 'spring', stiffness: 380, damping: 32, mass: 0.8 }}
             drag="x"
             dragDirectionLock
             dragConstraints={{ left: 0, right: 0 }}
