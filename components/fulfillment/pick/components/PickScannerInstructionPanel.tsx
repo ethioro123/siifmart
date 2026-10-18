@@ -32,14 +32,14 @@ export const PickScannerInstructionPanel: React.FC<PickScannerInstructionPanelPr
         const targetLoc = currentItem?.location || currentProduct?.location || '';
         const scannedLocationBarcode = extractLocationBarcodeFromScan(inputVal);
         return (
-            <div className="text-center z-10 mb-4 sm:mb-6 w-full max-w-full px-2">
-                <div className="text-center mb-4 sm:mb-6">
-                    <p className="text-[var(--theme-text-secondary)] text-base sm:text-lg font-bold uppercase tracking-wider mb-3">
+            <div className="text-center z-10 mb-2 sm:mb-6 w-full max-w-full px-2">
+                <div className="text-center mb-2 sm:mb-6">
+                    <p className="text-[var(--theme-text-secondary)] text-sm sm:text-lg font-bold uppercase tracking-wider mb-2">
                         {t('warehouse.picking.goToSourceBay')}
                     </p>
 
-                    <div className="block w-full mx-auto px-4 sm:px-8 py-5 sm:py-7 rounded-3xl border bg-[var(--theme-accent)]/10 border-[var(--theme-accent)]/30 text-[var(--theme-accent)] max-w-2xl">
-                        <p className="text-sm sm:text-base font-bold uppercase tracking-widest text-[var(--theme-text-secondary)] mb-2">Pick from this location</p>
+                    <div className="block w-full mx-auto px-4 sm:px-8 py-3 sm:py-7 rounded-2xl sm:rounded-3xl border bg-[var(--theme-accent)]/10 border-[var(--theme-accent)]/30 text-[var(--theme-accent)] max-w-2xl">
+                        <p className="text-xs sm:text-base font-bold uppercase tracking-widest text-[var(--theme-text-secondary)] mb-1 sm:mb-2">Pick from this location</p>
                         <p className="font-mono font-bold tracking-wide break-words text-4xl sm:text-6xl md:text-7xl leading-tight">
                             {scannedLocationBarcode
                                 ? decodeLocation(scannedLocationBarcode)
@@ -53,16 +53,16 @@ export const PickScannerInstructionPanel: React.FC<PickScannerInstructionPanelPr
 
     if (step === 'QUANTITY') {
         return (
-            <div className="text-center z-10 mb-4 sm:mb-6 w-full max-w-2xl px-2">
-                <p className="text-amber-600 dark:text-amber-400 text-sm sm:text-base uppercase tracking-wider font-bold">{t('warehouse.picking.shortPickEnterQty')}</p>
+            <div className="text-center z-10 mb-1 sm:mb-6 w-full max-w-2xl px-2">
+                <p className="text-amber-600 dark:text-amber-400 text-xs sm:text-base uppercase tracking-wider font-bold">{t('warehouse.picking.shortPickEnterQty')}</p>
                 <ProductIdentity item={currentItem} product={currentProduct} />
-                <p className="text-[var(--theme-text-secondary)] text-sm sm:text-base mt-4">{t('warehouse.expected')}: <span className="text-[var(--theme-text-primary)] font-bold text-2xl sm:text-3xl tabular-nums">
+                <p className="text-[var(--theme-text-secondary)] text-sm sm:text-base mt-2">{t('warehouse.expected')}: <span className="text-[var(--theme-text-primary)] font-bold text-xl sm:text-3xl tabular-nums">
                     {(() => {
                         const expected = currentItem?.expectedQty || 1;
                         const packDesc = formatPackagingDescription(currentProduct, expected);
                         const unitDef = getSellUnit(currentProduct?.unit || currentItem?.unit);
                         const unitLabel = unitDef.category === 'count' && unitDef.code !== 'UNIT' ? unitDef.shortLabel : 'pk';
-                        return <>{expected} {unitLabel} {packDesc ? <span className="block text-sm font-mono font-medium text-[var(--theme-text-secondary)]">{packDesc}</span> : null}</>;
+                        return <>{expected} {unitLabel} {packDesc ? <span className="text-xs sm:text-sm font-mono font-medium text-[var(--theme-text-secondary)]">({packDesc})</span> : null}</>;
                     })()}
                 </span></p>
             </div>
@@ -70,12 +70,12 @@ export const PickScannerInstructionPanel: React.FC<PickScannerInstructionPanelPr
     }
 
     return (
-        <div className="text-center z-10 mb-4 sm:mb-6 w-full max-w-full px-2">
-            <p className="text-[var(--theme-text-secondary)] text-base sm:text-lg font-semibold">{isItemMatched ? t('warehouse.picking.confirmItemPick') : t('warehouse.picking.scanProductToPick')}</p>
+        <div className="text-center z-10 mb-1 sm:mb-6 w-full max-w-full px-2">
+            <p className="text-[var(--theme-text-secondary)] text-sm sm:text-lg font-semibold">{isItemMatched ? t('warehouse.picking.confirmItemPick') : t('warehouse.picking.scanProductToPick')}</p>
             <ProductIdentity item={currentItem} product={currentProduct} matched={isItemMatched} />
-            <div className="mt-4 rounded-2xl border border-[var(--theme-border)] bg-[var(--theme-bg-card)] px-5 py-4 shadow-sm inline-flex flex-col items-center min-w-[min(100%,16rem)]">
+            <div className="mt-2 inline-flex flex-wrap items-center justify-center gap-x-2 rounded-xl border border-[var(--theme-border)] bg-[var(--theme-bg-card)] px-3 py-1.5 shadow-sm">
                 <span className="text-xs sm:text-sm font-bold uppercase tracking-wider text-[var(--theme-text-secondary)]">{t('warehouse.expected')}</span>
-                <span className="font-bold text-[var(--theme-text-primary)] text-3xl sm:text-4xl tabular-nums mt-1">{(() => {
+                <span className="font-bold text-[var(--theme-text-primary)] text-xl sm:text-3xl tabular-nums">{(() => {
                 const expected = currentItem?.expectedQty || 1;
                 const packDesc = formatPackagingDescription(currentProduct, expected);
                 const unitDef = getSellUnit(currentProduct?.unit || currentItem?.unit);
@@ -85,16 +85,16 @@ export const PickScannerInstructionPanel: React.FC<PickScannerInstructionPanelPr
                 {(() => {
                     const expected = currentItem?.expectedQty || 1;
                     return formatPackagingDescription(currentProduct, expected)
-                        ? <span className="text-sm font-mono text-[var(--theme-text-secondary)] mt-1">{formatPackagingDescription(currentProduct, expected)}</span>
+                        ? <span className="text-xs sm:text-sm font-mono text-[var(--theme-text-secondary)]">{formatPackagingDescription(currentProduct, expected)}</span>
                         : null;
                 })()}
             </div>
             {!isItemMatched && (currentItem?.expectedQty || 1) > 0 && (
-                <div className="mt-3">
+                <div className="mt-2 sm:mt-3">
                     <button
                         type="button"
                         onClick={() => setShortPickMode(!shortPickMode)}
-                        className={`min-h-[44px] px-4 py-2.5 rounded-xl text-xs font-semibold uppercase tracking-wider transition-colors border flex items-center justify-center gap-1.5 mx-auto ${shortPickMode
+                        className={`min-h-[40px] px-3 py-2 rounded-xl text-xs font-semibold uppercase tracking-wider transition-colors border flex items-center justify-center gap-1.5 mx-auto ${shortPickMode
                             ? 'bg-amber-500/10 border-amber-500/30 text-amber-600 dark:text-amber-400'
                             : 'bg-[var(--theme-bg-card)] border-[var(--theme-border)] text-[var(--theme-text-secondary)] hover:text-amber-600 hover:border-amber-400/40'
                             }`}
@@ -109,23 +109,23 @@ export const PickScannerInstructionPanel: React.FC<PickScannerInstructionPanelPr
 };
 
 const ProductIdentity: React.FC<{ item: any; product?: Product; matched?: boolean }> = ({ item, product, matched = false }) => (
-    <div className="mt-3 sm:mt-5 mx-auto w-full max-w-2xl rounded-3xl border border-[var(--theme-border)] bg-[var(--theme-bg-card)] p-4 sm:p-6 shadow-sm">
-        <div className="flex flex-col items-center gap-3 sm:gap-4">
-            <div className="w-24 h-24 sm:w-32 sm:h-32 rounded-2xl overflow-hidden border border-[var(--theme-border)] bg-[var(--theme-bg-subtle)] flex items-center justify-center shrink-0">
+    <div className="mt-2 sm:mt-5 mx-auto w-full max-w-2xl rounded-2xl sm:rounded-3xl border border-[var(--theme-border)] bg-[var(--theme-bg-card)] p-3 sm:p-6 shadow-sm">
+        <div className="flex items-center gap-3 sm:gap-4 text-left">
+            <div className="w-16 h-16 sm:w-32 sm:h-32 rounded-xl sm:rounded-2xl overflow-hidden border border-[var(--theme-border)] bg-[var(--theme-bg-subtle)] flex items-center justify-center shrink-0">
                 {product?.image
                     ? <img src={product.image} alt="" className="w-full h-full object-contain" />
-                    : <Package size={48} className="text-[var(--theme-text-secondary)]" aria-hidden="true" />}
+                    : <Package size={30} className="text-[var(--theme-text-secondary)] sm:w-12 sm:h-12" aria-hidden="true" />}
             </div>
             <div className="w-full min-w-0">
-                <h2 className={`text-2xl sm:text-4xl md:text-5xl leading-tight font-bold break-words ${matched ? 'text-emerald-600 dark:text-emerald-400' : 'text-[var(--theme-text-primary)]'}`}>
+                <h2 className={`text-xl sm:text-4xl md:text-5xl leading-tight font-bold break-words line-clamp-2 ${matched ? 'text-emerald-600 dark:text-emerald-400' : 'text-[var(--theme-text-primary)]'}`}>
                     {item?.name || product?.name || 'Unknown product'}
                 </h2>
-                <div className="mt-3 flex flex-wrap items-center justify-center gap-2">
-                    <span className="inline-flex min-h-10 items-center rounded-lg bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] px-3 text-base sm:text-lg font-mono font-bold text-[var(--theme-accent)] break-all">
+                <div className="mt-2 flex flex-wrap items-center gap-1.5">
+                    <span className="inline-flex min-h-8 items-center rounded-lg bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] px-2.5 text-xs sm:text-lg font-mono font-bold text-[var(--theme-accent)] break-all">
                         {item?.sku || product?.sku || 'No SKU'}
                     </span>
                     {formatProductSize(product || item) && (
-                        <span className="inline-flex min-h-10 items-center rounded-lg bg-emerald-500/10 border border-emerald-500/20 px-3 text-sm sm:text-base font-semibold text-emerald-700 dark:text-emerald-400">
+                        <span className="inline-flex min-h-8 items-center rounded-lg bg-emerald-500/10 border border-emerald-500/20 px-2.5 text-xs sm:text-base font-semibold text-emerald-700 dark:text-emerald-400">
                             {formatProductSize(product || item)}
                         </span>
                     )}

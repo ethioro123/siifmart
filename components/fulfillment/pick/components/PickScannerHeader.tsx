@@ -17,7 +17,6 @@ interface PickScannerHeaderProps {
     successMsg: string;
     errorMsg: string;
     job: any;
-    getProduct: (item: any) => any;
     getItemMeasureQty: (item: any, productInfo?: any) => any;
     t: (key: string) => string;
 }
@@ -35,7 +34,6 @@ export const PickScannerHeader: React.FC<PickScannerHeaderProps> = ({
     successMsg,
     errorMsg,
     job,
-    getProduct,
     getItemMeasureQty,
     t,
 }) => {
@@ -44,8 +42,6 @@ export const PickScannerHeader: React.FC<PickScannerHeaderProps> = ({
         return (
             <PickScannerSummary
                 job={job}
-                getProduct={getProduct}
-                getItemMeasureQty={getItemMeasureQty}
                 t={t}
             />
         );
@@ -56,7 +52,7 @@ export const PickScannerHeader: React.FC<PickScannerHeaderProps> = ({
     return (
         <>
             {/* Status Icon */}
-            <div className={`w-16 h-16 sm:w-20 sm:h-20 rounded-2xl border-2 flex items-center justify-center mb-3 sm:mb-4 transition-all duration-300 z-10 shrink-0 ${
+            <div className={`w-12 h-12 sm:w-20 sm:h-20 rounded-2xl border-2 flex items-center justify-center mb-2 sm:mb-4 transition-all duration-300 z-10 shrink-0 ${
                 showSuccess
                     ? 'border-emerald-500 bg-emerald-500/10'
                     : showError
@@ -66,13 +62,13 @@ export const PickScannerHeader: React.FC<PickScannerHeaderProps> = ({
                     : 'border-emerald-500 bg-emerald-500/10'
             }`}>
                 {showSuccess ? (
-                    <CheckCircle size={32} className="text-emerald-500 sm:w-8 sm:h-8" />
+                    <CheckCircle size={24} className="text-emerald-500 sm:w-8 sm:h-8" />
                 ) : showError ? (
-                    <AlertTriangle size={32} className="text-rose-500 sm:w-8 sm:h-8" />
+                    <AlertTriangle size={24} className="text-rose-500 sm:w-8 sm:h-8" />
                 ) : step === 'LOCATION' ? (
-                    <MapIcon size={32} className="text-[var(--theme-accent)] sm:w-8 sm:h-8" />
+                    <MapIcon size={24} className="text-[var(--theme-accent)] sm:w-8 sm:h-8" />
                 ) : (
-                    <Package size={32} className="text-emerald-500 sm:w-8 sm:h-8" />
+                    <Package size={24} className="text-emerald-500 sm:w-8 sm:h-8" />
                 )}
             </div>
 

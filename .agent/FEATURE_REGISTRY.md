@@ -18,8 +18,8 @@
 - **Database**: None
 
 ### Floor-Friendly Picking Scan Flow (2026-10-19)
-- Enlarged the current product identity, source location, expected quantity, scan entry, quantity controls, and primary actions for clear use on handheld devices. Added a product image/placeholder and improved picked-item feedback and collection-list readability.
-- **Files**: `components/fulfillment/pick/PickScanner.tsx`, `components/fulfillment/pick/steps/Step2PickCollect.tsx`, `components/fulfillment/pick/components/PickScannerHeader.tsx`, `components/fulfillment/pick/components/PickScannerInstructionPanel.tsx`, `components/fulfillment/pick/components/PickScannerForm.tsx`, `components/fulfillment/pick/components/PickScannerSubmitButton.tsx`, `components/fulfillment/pick/components/PickScannerPickedList.tsx`
+- Scanner content now fits the handheld viewport without an internal vertical scroll; duplicate picked history and redundant quantity confirmation are removed. Product scans require an exact current-line SKU or barcode, and location scans require a valid app label code for the assigned bay. The app's location QR payload and official location URL remain accepted.
+- **Files**: `components/fulfillment/pick/PickScanner.tsx`, `components/fulfillment/pick/steps/Step2PickCollect.tsx`, `components/fulfillment/pick/components/PickScannerHeader.tsx`, `components/fulfillment/pick/components/PickScannerInstructionPanel.tsx`, `components/fulfillment/pick/components/PickScannerForm.tsx`, `components/fulfillment/pick/components/PickScannerSubmitButton.tsx`, `components/fulfillment/pick/components/PickScannerSummary.tsx`, `utils/locationEncoder.ts`, `utils/pickScanValidation.ts`, `tests/utils/pickScanValidation.test.ts`
 - **Database**: None
 
 ### Guided Pick Scanning (2026-10-19)

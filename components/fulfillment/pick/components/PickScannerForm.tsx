@@ -1,6 +1,6 @@
 import React from 'react';
-import { RotateCcw, CheckCircle } from 'lucide-react';
-import { SELL_UNITS, getSellUnit, formatPackagingDescription } from '../../../../utils/units';
+import { RotateCcw } from 'lucide-react';
+import { SELL_UNITS } from '../../../../utils/units';
 import { extractLocationBarcodeFromScan, decodeLocation } from '../../../../utils/locationEncoder';
 import { PickScannerSubmitButton } from './PickScannerSubmitButton';
 
@@ -54,11 +54,11 @@ export const PickScannerForm: React.FC<PickScannerFormProps> = ({
     t,
 }) => {
     return (
-        <form onSubmit={handleScan} className="w-full max-w-2xl relative z-20 space-y-4">
+        <form onSubmit={handleScan} className="w-full max-w-2xl relative z-20 space-y-2.5">
             {currentItem && (
                 <>
                     {step === 'QUANTITY' ? (
-                        <div className="space-y-2.5">
+                        <div className="space-y-2">
                             <div className="flex gap-2 items-center w-full">
                                 <input
                                     ref={qtyRef}
@@ -69,7 +69,7 @@ export const PickScannerForm: React.FC<PickScannerFormProps> = ({
                                     title="Pick quantity"
                                     value={qtyVal}
                                     onChange={(e) => setQtyVal(e.target.value)}
-                                    className="flex-1 min-h-[76px] bg-[var(--theme-bg-card)] border-2 rounded-2xl py-4 px-3 text-center text-4xl sm:text-5xl font-mono font-bold text-[var(--theme-text-primary)] placeholder:text-[var(--theme-text-secondary)] focus:outline-none focus:border-[var(--theme-accent)] border-[var(--theme-border)] shadow-xs"
+                                    className="flex-1 min-h-[68px] bg-[var(--theme-bg-card)] border-2 rounded-2xl py-3 px-3 text-center text-4xl sm:text-5xl font-mono font-bold text-[var(--theme-text-primary)] placeholder:text-[var(--theme-text-secondary)] focus:outline-none focus:border-[var(--theme-accent)] border-[var(--theme-border)] shadow-xs"
                                     placeholder="QTY"
                                     autoFocus
                                     onFocus={(e) => e.target.select()}
@@ -96,7 +96,7 @@ export const PickScannerForm: React.FC<PickScannerFormProps> = ({
                                         const cur = parseFloat(qtyVal) || 0;
                                         setQtyVal(String(cur + 1));
                                     }}
-                                    className="flex-1 py-3 rounded-xl bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-subtle)]/80 border border-[var(--theme-border)] text-[var(--theme-text-primary)] font-mono text-lg font-bold transition-all active:scale-95 touch-manipulation min-h-[52px]"
+                                    className="flex-1 py-2 rounded-xl bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-subtle)]/80 border border-[var(--theme-border)] text-[var(--theme-text-primary)] font-mono text-base font-bold transition-all active:scale-95 touch-manipulation min-h-[44px]"
                                 >
                                     +1
                                 </button>
@@ -106,7 +106,7 @@ export const PickScannerForm: React.FC<PickScannerFormProps> = ({
                                         const cur = parseFloat(qtyVal) || 0;
                                         setQtyVal(String(cur + 5));
                                     }}
-                                    className="flex-1 py-3 rounded-xl bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-subtle)]/80 border border-[var(--theme-border)] text-[var(--theme-text-primary)] font-mono text-lg font-bold transition-all active:scale-95 touch-manipulation min-h-[52px]"
+                                    className="flex-1 py-2 rounded-xl bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-subtle)]/80 border border-[var(--theme-border)] text-[var(--theme-text-primary)] font-mono text-base font-bold transition-all active:scale-95 touch-manipulation min-h-[44px]"
                                 >
                                     +5
                                 </button>
@@ -116,7 +116,7 @@ export const PickScannerForm: React.FC<PickScannerFormProps> = ({
                                         const expected = currentItem?.expectedQty || 1;
                                         setQtyVal(expected.toString());
                                     }}
-                                    className="flex-1 py-3 rounded-xl bg-[var(--theme-accent)]/10 hover:bg-[var(--theme-accent)]/20 border border-[var(--theme-accent)]/30 text-[var(--theme-accent)] font-mono text-lg font-bold transition-all active:scale-95 touch-manipulation min-h-[52px]"
+                                    className="flex-1 py-2 rounded-xl bg-[var(--theme-accent)]/10 hover:bg-[var(--theme-accent)]/20 border border-[var(--theme-accent)]/30 text-[var(--theme-accent)] font-mono text-base font-bold transition-all active:scale-95 touch-manipulation min-h-[44px]"
                                 >
                                     All ({currentItem?.expectedQty || 1})
                                 </button>
@@ -154,48 +154,11 @@ export const PickScannerForm: React.FC<PickScannerFormProps> = ({
                         </div>
                     )}
 
-                    {step === 'QUANTITY' && (
-                        <div className="text-center animate-in fade-in duration-200 space-y-2">
-                            <p className="text-base font-bold tracking-wide text-[var(--theme-text-secondary)]">
-                                {t('warehouse.expected')}: {(() => {
-                                    const expected = currentItem?.expectedQty || 1;
-                                    const packDesc = formatPackagingDescription(currentProduct, expected);
-                                    const unitDef = getSellUnit(currentProduct?.unit || currentItem?.unit);
-                                    const unitLabel = unitDef.category === 'count' && unitDef.code !== 'UNIT' ? unitDef.shortLabel : 'pk';
-                                    return <>{expected} {unitLabel} {packDesc ? `(${packDesc})` : ''}</>;
-                                })()}
-                            </p>
-
-                            {currentItem && (
-                                <button
-                                    type="button"
-                                    onClick={(e) => {
-                                        const expected = currentItem.expectedQty || 1;
-                                        setQtyVal(expected.toString());
-                                        setTimeout(() => {
-                                            const formElem = (e.target as HTMLElement).closest('form');
-                                            if (formElem) formElem.requestSubmit();
-                                        }, 50);
-                                    }}
-                                    className="w-full py-4 px-4 rounded-2xl bg-[var(--theme-accent)] hover:opacity-90 text-white font-bold text-lg uppercase tracking-wide transition-all flex items-center justify-center gap-2 cursor-pointer min-h-[60px] shadow-xs active:scale-[0.98] touch-manipulation"
-                                >
-                                    <CheckCircle size={16} />
-                                    <span>Confirm Full Pick ({(() => {
-                                        const expected = currentItem.expectedQty || 1;
-                                        const packDesc = formatPackagingDescription(currentProduct, expected);
-                                        const unitDef = getSellUnit(currentProduct?.unit || currentItem?.unit);
-                                        const unitLabel = unitDef.category === 'count' && unitDef.code !== 'UNIT' ? unitDef.shortLabel : 'pk';
-                                        return packDesc ? `${expected} ${unitLabel} (${packDesc})` : `${expected} ${unitLabel}`;
-                                    })()})</span>
-                                </button>
-                            )}
-                        </div>
-                    )}
                 </>
             )}
 
             {isProcessing && (
-                <div className="absolute right-4 top-1/2 -translate-y-1/2">
+            <div className="absolute right-4 top-1/2 -translate-y-1/2">
                     <RotateCcw className="animate-spin text-[var(--theme-text-secondary)]" size={20} />
                 </div>
             )}

@@ -258,9 +258,7 @@ export const extractLocationBarcodeFromScan = (scan: string): string | null => {
     return code && isLocationBarcode(code) ? code : null;
 };
 
-/**
- * Extract raw SKU/Barcode from rich JSON or URL QR scans
- */
+/** Extracts the product code from the app's structured product QR payload. */
 export const extractSkuFromScan = (val: string): string => {
     if (!val) return '';
     const trimmed = val.trim();
@@ -271,16 +269,6 @@ export const extractSkuFromScan = (val: string): string => {
                 if ('sku' in parsed && typeof parsed.sku === 'string' && parsed.sku.trim()) return parsed.sku.trim();
                 if ('barcode' in parsed && typeof parsed.barcode === 'string' && parsed.barcode.trim()) return parsed.barcode.trim();
             }
-        } catch (e) {
-            // ignore
-        }
-    }
-    if (trimmed.includes('http')) {
-        try {
-            const url = new URL(trimmed);
-            const pathParts = url.pathname.split('/');
-            const lastPart = pathParts[pathParts.length - 1];
-            if (lastPart) return lastPart;
         } catch (e) {
             // ignore
         }

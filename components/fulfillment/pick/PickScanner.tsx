@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect, useMemo } from 'react';
-import { CheckCircle, Map as MapIcon, X, AlertTriangle, Package } from 'lucide-react';
+import { X } from 'lucide-react';
 import { WMSJob, Product } from '../../../types';
 import { playBeep } from '../../../utils/audioUtils';
 import { normalizeLocation } from '../../../utils/locationTracking';
@@ -10,11 +10,7 @@ import { isWeightBased, isVolumeBased, getSellUnit, getEffectivePackageSize, SEL
 import { useLanguage } from '../../../contexts/LanguageContext';
 import { useData } from '../../../contexts/DataContext';
 import { validateCrossBorderSku } from '../../../utils/skuValidation';
-import { matchesExpectedPickItemScan } from '../../../utils/pickScanValidation';
-import { PickScannerPickedList } from './components/PickScannerPickedList';
-import { PickScannerSummary } from './components/PickScannerSummary';
-import { PickScannerInstructionPanel } from './components/PickScannerInstructionPanel';
-import { PickScannerSubmitButton } from './components/PickScannerSubmitButton';
+import { matchesExpectedPickItemScan, matchesExpectedPickLocationScan } from '../../../utils/pickScanValidation';
 import { PickScannerHeader } from './components/PickScannerHeader';
 import { PickScannerForm } from './components/PickScannerForm';
 
@@ -134,9 +130,8 @@ export const PickScanner: React.FC<PickScannerProps> = ({
             const product = currentItem ? getProduct(currentItem) : undefined;
             return !!currentItem && matchesExpectedPickItemScan(inputVal, currentItem.sku, product?.barcode);
         }
-        const barcode = extractLocationBarcodeFromScan(inputVal);
-        if (!barcode) return false;
-        return !expectedPrefix || extractPrefixFromBarcode(barcode) === expectedPrefix.trim();
+        const expectedLocation = currentItem?.location || currentProduct?.location;
+        return matchesExpectedPickLocationScan(inputVal, expectedLocation, expectedPrefix);
     }, [inputVal, qtyVal, step, currentItem, currentProduct, expectedPrefix, products, job]);
 
     const totalItems = job.lineItems?.length || 0;
@@ -375,7 +370,7 @@ export const PickScanner: React.FC<PickScannerProps> = ({
 
             {/* Main View */}
             <div className="flex-1 min-h-0 relative w-full overflow-hidden flex flex-col">
-                <div className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden flex flex-col items-center px-3 py-3 sm:p-6 pb-4 w-full max-w-full custom-scrollbar">
+                <div className="flex-1 min-h-0 overflow-hidden flex flex-col items-center justify-center px-2 py-2 sm:p-6 w-full max-w-full">
                     {/* Header & Status Instruction View */}
                     <PickScannerHeader
                         showSuccess={showSuccess}
@@ -390,24 +385,10 @@ export const PickScanner: React.FC<PickScannerProps> = ({
                         successMsg={successMsg}
                         errorMsg={errorMsg}
                         job={job}
-                        getProduct={getProduct}
                         getItemMeasureQty={getItemMeasureQty}
                         t={t}
                     />
 
-                    {/* PICKED SO FAR (Only while active picking) */}
-                    {!!currentItem && (
-                        <PickScannerPickedList
-                            job={job}
-                            getProduct={getProduct}
-                            getItemMeasureQty={getItemMeasureQty}
-                            t={t}
-                        />
-                    )}
-
-                    <p className="mt-4 sm:mt-8 text-[var(--theme-text-secondary)] text-[10px] sm:text-[11px] font-medium z-10 text-center">
-                        {t('warehouse.picking.checksumVerifiedInfo')}
-                    </p>
                 </div>
                 <div className="shrink-0 border-t border-[var(--theme-border)] bg-[var(--theme-bg-card)] px-3 pt-3 pb-[max(env(safe-area-inset-bottom),0.75rem)] sm:px-6 sm:py-4">
                     <div className="mx-auto w-full max-w-2xl">
