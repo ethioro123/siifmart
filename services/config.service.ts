@@ -16,11 +16,13 @@ export const systemConfigService = {
 
         try {
             // First attempt to read via server-side sanitized RPC (enforces national boundaries)
-            const { data: rpcData, error: rpcError } = await supabase
-                .rpc('get_sanitized_system_config');
+            if (typeof (supabase as any)?.rpc === 'function') {
+                const { data: rpcData, error: rpcError } = await supabase
+                    .rpc('get_sanitized_system_config');
 
-            if (!rpcError && rpcData && typeof rpcData === 'object' && Object.keys(rpcData).length > 0) {
-                return this._mapSettings(rpcData);
+                if (!rpcError && rpcData && typeof rpcData === 'object' && Object.keys(rpcData).length > 0) {
+                    return this._mapSettings(rpcData);
+                }
             }
 
             const { data, error } = await supabase
