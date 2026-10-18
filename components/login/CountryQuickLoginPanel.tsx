@@ -6,6 +6,9 @@ import { checkIsLocalhost } from './KenyanQuickLogin';
 export interface StagingQuickAccount {
   name: string;
   role: string;
+  roleId: string;
+  level: number;
+  levelTag: string;
   code: string;
   email: string;
   password: string;
@@ -30,6 +33,7 @@ export function CountryQuickLoginPanel({
 }: CountryQuickLoginPanelProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [facilityFilter, setFacilityFilter] = useState<'ALL' | 'HQ' | 'DC' | 'STORE'>('ALL');
+  const [levelFilter, setLevelFilter] = useState<'ALL' | 2 | 3 | 4>('ALL');
   const isLocalhost = checkIsLocalhost();
 
   const accounts = useMemo(() => {
@@ -41,14 +45,19 @@ export function CountryQuickLoginPanel({
   const filteredGroups = useMemo(() => {
     const q = searchQuery.toLowerCase().trim();
     const matches = accounts.filter(acc => {
+      // Facility filter
       if (facilityFilter === 'HQ' && acc.siteType !== 'HQ' && acc.siteType !== 'Administration') return false;
       if (facilityFilter === 'DC' && acc.siteType !== 'Warehouse') return false;
       if (facilityFilter === 'STORE' && acc.siteType !== 'Store') return false;
+
+      // Hierarchy level filter
+      if (levelFilter !== 'ALL' && acc.level !== levelFilter) return false;
 
       if (!q) return true;
       return (
         acc.name.toLowerCase().includes(q) ||
         acc.role.toLowerCase().includes(q) ||
+        (acc.roleId && acc.roleId.toLowerCase().includes(q)) ||
         acc.siteName.toLowerCase().includes(q) ||
         acc.code.toLowerCase().includes(q) ||
         acc.email.toLowerCase().includes(q)
@@ -68,7 +77,7 @@ export function CountryQuickLoginPanel({
       groups[acc.siteCode].accounts.push(acc);
     }
     return Object.values(groups);
-  }, [accounts, searchQuery, facilityFilter]);
+  }, [accounts, searchQuery, facilityFilter, levelFilter]);
 
   if (!isLocalhost) {
     return null;
@@ -88,13 +97,27 @@ export function CountryQuickLoginPanel({
     }
   };
 
+  const getLevelBadgeStyle = (level: number) => {
+    switch (level) {
+      case 1:
+        return 'bg-purple-500/10 dark:bg-purple-500/20 text-purple-700 dark:text-purple-300 border border-purple-500/30';
+      case 2:
+        return 'bg-indigo-500/10 dark:bg-indigo-500/20 text-indigo-700 dark:text-indigo-300 border border-indigo-500/30';
+      case 3:
+        return 'bg-amber-500/10 dark:bg-amber-500/20 text-amber-700 dark:text-amber-300 border border-amber-500/30';
+      case 4:
+      default:
+        return 'bg-teal-500/10 dark:bg-teal-500/20 text-teal-700 dark:text-teal-300 border border-teal-500/30';
+    }
+  };
+
   const isEthiopia = country === 'ET';
   const badgeColor = isEthiopia
     ? 'bg-amber-500/10 dark:bg-amber-500/20 text-amber-700 dark:text-amber-300 border-amber-500/30'
     : 'bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border-emerald-500/30';
 
   return (
-    <div className="w-full lg:w-[330px] xl:w-[360px] bg-white/80 dark:bg-[#18201B]/55 border border-[#E2DCCE] dark:border-emerald-950/20 rounded-[28px] p-5 shadow-[0_16px_50px_-10px_rgba(34,50,38,0.04)] dark:shadow-[0_20px_60px_-10px_rgba(5,8,6,0.5)] lg:backdrop-blur-xl flex flex-col h-[680px] max-h-[85vh] transition-all duration-300">
+    <div className="w-full lg:w-[340px] xl:w-[370px] bg-white/80 dark:bg-[#18201B]/55 border border-[#E2DCCE] dark:border-emerald-950/20 rounded-[28px] p-4 sm:p-5 shadow-[0_16px_50px_-10px_rgba(34,50,38,0.04)] dark:shadow-[0_20px_60px_-10px_rgba(5,8,6,0.5)] lg:backdrop-blur-xl flex flex-col h-[700px] max-h-[88vh] transition-all duration-300">
       {/* Header */}
       <div className="flex items-center justify-between pb-3 border-b border-[#E2DCCE]/50 dark:border-white/[0.06]">
         <div className="flex items-center gap-2">
@@ -115,16 +138,16 @@ export function CountryQuickLoginPanel({
           type="text"
           value={searchQuery}
           onChange={e => setSearchQuery(e.target.value)}
-          placeholder={`Search ${isEthiopia ? 'Ethiopia' : 'Kenya'} roles (e.g. cashier, picker)...`}
+          placeholder={`Search ${isEthiopia ? 'Ethiopia' : 'Kenya'} roles (e.g. cashier, picker, operations_manager)...`}
           className="w-full pl-8 pr-3 py-1.5 text-xs rounded-xl bg-stone-100/70 dark:bg-black/30 border border-[#E2DCCE]/60 dark:border-white/[0.06] focus:outline-none focus:border-[#2C5E3B] dark:focus:border-[#A9CBA2] text-stone-800 dark:text-stone-100 placeholder:text-stone-400"
         />
       </div>
 
       {/* Facility Filter Tabs */}
-      <div className="flex items-center gap-1 mb-2">
+      <div className="flex items-center gap-1 mb-1.5">
         {(
           [
-            { key: 'ALL', label: 'All (42)' },
+            { key: 'ALL', label: 'All Sites' },
             { key: 'HQ', label: 'HQ (17)' },
             { key: 'DC', label: 'DC (13)' },
             { key: 'STORE', label: 'Store (12)' },
@@ -140,6 +163,34 @@ export function CountryQuickLoginPanel({
                 active
                   ? 'bg-[#224429] dark:bg-[#EAE5D9] text-[#FAF8F5] dark:text-[#1E3B24]'
                   : 'bg-stone-100 dark:bg-white/[0.05] text-stone-600 dark:text-stone-300 hover:bg-stone-200 dark:hover:bg-white/[0.08]'
+              }`}
+            >
+              {tab.label}
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Hierarchy Level Filter Tabs */}
+      <div className="flex items-center gap-1 mb-2.5">
+        {(
+          [
+            { key: 'ALL', label: 'All Ranks' },
+            { key: 2, label: 'L2 Director' },
+            { key: 3, label: 'L3 Lead' },
+            { key: 4, label: 'L4 Staff' },
+          ] as const
+        ).map(tab => {
+          const active = levelFilter === tab.key;
+          return (
+            <button
+              key={tab.key}
+              type="button"
+              onClick={() => setLevelFilter(tab.key)}
+              className={`flex-1 py-0.5 text-[9px] font-semibold rounded-md transition-colors cursor-pointer text-center border ${
+                active
+                  ? 'bg-stone-800 dark:bg-stone-200 text-white dark:text-stone-900 border-transparent'
+                  : 'bg-transparent text-stone-500 dark:text-stone-400 border-stone-200 dark:border-white/[0.08] hover:bg-stone-100 dark:hover:bg-white/[0.04]'
               }`}
             >
               {tab.label}
@@ -167,22 +218,32 @@ export function CountryQuickLoginPanel({
                 </span>
               </div>
 
-              <div className="space-y-1">
+              <div className="space-y-1.5">
                 {site.accounts.map(acc => (
                   <button
                     key={acc.email}
                     type="button"
                     disabled={disabled}
                     onClick={() => onSelectAccount(acc.email, acc.password)}
-                    className="w-full p-2 text-left bg-white/60 dark:bg-white/[0.02] hover:bg-stone-50 dark:hover:bg-white/[0.06] border border-[#E2DCCE]/50 dark:border-white/[0.05] hover:border-[#2C5E3B] dark:hover:border-[#A9CBA2] rounded-xl transition-all duration-150 flex items-center justify-between group active:scale-[0.98] cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="w-full p-2.5 text-left bg-white/60 dark:bg-white/[0.02] hover:bg-stone-50 dark:hover:bg-white/[0.06] border border-[#E2DCCE]/50 dark:border-white/[0.05] hover:border-[#2C5E3B] dark:hover:border-[#A9CBA2] rounded-xl transition-all duration-150 flex items-center justify-between group active:scale-[0.98] cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     <div className="flex flex-col min-w-0 pr-2">
-                      <span className="text-[11px] font-semibold text-[#1E3F27] dark:text-[#EAE5D9] group-hover:text-[#2C5E3B] dark:group-hover:text-white transition-colors truncate">
-                        {acc.name}
-                      </span>
-                      <span className="text-[9px] font-medium text-[#4D6E56] dark:text-[#A9CBA2] truncate">
-                        {acc.role}
-                      </span>
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-[11px] font-semibold text-[#1E3F27] dark:text-[#EAE5D9] group-hover:text-[#2C5E3B] dark:group-hover:text-white transition-colors truncate">
+                          {acc.name}
+                        </span>
+                        <span className={`text-[8px] font-bold px-1.5 py-0.2 rounded-md shrink-0 ${getLevelBadgeStyle(acc.level)}`}>
+                          L{acc.level}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-1 mt-0.5">
+                        <span className="text-[10px] font-semibold text-[#2C5E3B] dark:text-[#A9CBA2] truncate">
+                          {acc.role}
+                        </span>
+                        <span className="text-[8px] font-mono text-stone-400 dark:text-stone-500 truncate">
+                          ({acc.roleId})
+                        </span>
+                      </div>
                     </div>
                     <div className="flex items-center gap-1.5 shrink-0">
                       <span className="text-[8px] font-mono tabular-nums text-stone-400 dark:text-stone-500">
