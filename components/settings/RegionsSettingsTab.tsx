@@ -7,6 +7,7 @@ import { useStore } from '../../contexts/CentralStore';
 import { useData } from '../../contexts/DataContext';
 import { getCountryProfile, Country } from '../../utils/localization';
 import { normalizeCountryCode } from '../../utils/siteIdGenerator';
+import { canSwitchCountry } from '../../utils/userCountry';
 import type { Region } from '../../types';
 import { regionsService } from '../../services/regions.service';
 import { RegionCard } from './regions/RegionCard';
@@ -24,13 +25,22 @@ export default function RegionsSettingsTab() {
         addNotification
     } = useData();
 
+    const isCeo = canSwitchCountry(user);
     const isHQExecutive = useMemo(() => {
         const r = (user?.role || '').toLowerCase().trim();
         return ['super_admin', 'ceo', 'operations_manager', 'finance_manager', 'admin'].includes(r);
     }, [user?.role]);
 
     const activeCountry: Country = (effectiveCountry || settings?.country || 'ET') as Country;
-    const countryProfile = getCountryProfile(activeCountry);
+    const [viewCountry, setViewCountry] = useState<Country>(activeCountry);
+
+    // Sync viewCountry whenever activeCountry changes
+    useEffect(() => {
+        setViewCountry(activeCountry);
+    }, [activeCountry]);
+
+    const selectedCountry: Country = isCeo ? viewCountry : activeCountry;
+    const countryProfile = getCountryProfile(selectedCountry);
     const currency = countryProfile.currency || 'KES';
 
     const [regions, setRegions] = useState<Region[]>([]);

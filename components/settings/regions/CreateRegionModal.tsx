@@ -126,9 +126,9 @@ export const CreateRegionModal: React.FC<CreateRegionModalProps> = ({
             const payload: CreateRegionInput = {
                 name: name.trim(),
                 code: code.trim().toUpperCase(),
-                country: normCountry,
+                country: selectedCountry,
                 city: city.trim() || undefined,
-                default_currency: currency,
+                default_currency: currencyState,
                 admin_hub_site_id: adminHubSiteId || undefined,
                 regional_manager_id: regionalManagerId || undefined,
                 monthly_procurement_budget: parsedBudget,
@@ -163,7 +163,7 @@ export const CreateRegionModal: React.FC<CreateRegionModalProps> = ({
                                 Provision Operational Region
                             </h3>
                             <p className="text-[11px] text-[var(--theme-text-secondary)]">
-                                Establish decentralized administrative authority for {countryProfile.name || normCountry}
+                                Establish decentralized administrative authority for {activeProfile.name || selectedCountry}
                             </p>
                         </div>
                     </div>
@@ -229,10 +229,18 @@ export const CreateRegionModal: React.FC<CreateRegionModalProps> = ({
                             <label className="block text-xs font-medium text-[var(--theme-text-primary)] mb-1">
                                 Sovereign Jurisdiction
                             </label>
-                            <div className="px-3 py-2 text-xs bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl text-[var(--theme-text-secondary)] flex items-center justify-between">
-                                <span>{countryProfile.name || normCountry}</span>
-                                <span className="font-mono text-[10px] font-semibold text-[var(--theme-text-primary)]">{currency}</span>
-                            </div>
+                            <select
+                                value={selectedCountry}
+                                onChange={(e) => handleCountryChange(e.target.value)}
+                                disabled={!canSwitch}
+                                className="w-full px-3 py-2 text-xs bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl text-[var(--theme-text-primary)] focus:outline-none focus:border-[#0071E3] disabled:opacity-60"
+                            >
+                                <option value="ET">Ethiopia (ET) • ETB</option>
+                                <option value="KE">Kenya (KE) • KES</option>
+                                <option value="UG">Uganda (UG) • UGX</option>
+                                <option value="RW">Rwanda (RW) • RWF</option>
+                                <option value="TZ">Tanzania (TZ) • TZS</option>
+                            </select>
                         </div>
                     </div>
 
@@ -289,7 +297,7 @@ export const CreateRegionModal: React.FC<CreateRegionModalProps> = ({
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                             <div>
                                 <label className="block text-[11px] font-medium text-[var(--theme-text-primary)] mb-1">
-                                    Monthly Procurement Budget ({currency})
+                                    Monthly Procurement Budget ({currencyState})
                                 </label>
                                 <input
                                     type="number"
@@ -303,7 +311,7 @@ export const CreateRegionModal: React.FC<CreateRegionModalProps> = ({
                             </div>
                             <div>
                                 <label className="block text-[11px] font-medium text-[var(--theme-text-primary)] mb-1">
-                                    Autonomous PO Limit ({currency})
+                                    Autonomous PO Limit ({currencyState})
                                 </label>
                                 <input
                                     type="number"
@@ -320,7 +328,7 @@ export const CreateRegionModal: React.FC<CreateRegionModalProps> = ({
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1 border-t border-[var(--theme-border)]/50">
                             <div>
                                 <label className="block text-[11px] font-medium text-[var(--theme-text-primary)] mb-1">
-                                    Monthly Expense Budget ({currency})
+                                    Monthly Expense Budget ({currencyState})
                                 </label>
                                 <input
                                     type="number"
@@ -334,7 +342,7 @@ export const CreateRegionModal: React.FC<CreateRegionModalProps> = ({
                             </div>
                             <div>
                                 <label className="block text-[11px] font-medium text-[var(--theme-text-primary)] mb-1">
-                                    Autonomous Expense Limit ({currency})
+                                    Autonomous Expense Limit ({currencyState})
                                 </label>
                                 <input
                                     type="number"
