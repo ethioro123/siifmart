@@ -4,6 +4,7 @@ import type { Site, Employee } from '../../../types';
 import type { CreateRegionInput } from '../../../services/regions.service';
 import { useCreateRegionMutation } from '../../../hooks/useRegionMutations';
 import { normalizeCountryCode } from '../../../utils/siteIdGenerator';
+import { getCountryProfile } from '../../../utils/localization';
 
 interface CreateRegionModalProps {
     isOpen: boolean;
@@ -41,6 +42,7 @@ export const CreateRegionModal: React.FC<CreateRegionModalProps> = ({
     if (!isOpen) return null;
 
     const normCountry = normalizeCountryCode(country);
+    const countryProfile = getCountryProfile(normCountry as any);
 
     // Filter sites to current sovereign country
     const countrySites = sites.filter(s => normalizeCountryCode(s.country) === normCountry);
@@ -53,13 +55,13 @@ export const CreateRegionModal: React.FC<CreateRegionModalProps> = ({
 
     const handleGenerateCode = (regionName: string) => {
         setName(regionName);
-        if (!code || code.startsWith(`${country.toLowerCase()}_`)) {
+        if (!code || code.startsWith(`${normCountry}-`)) {
             const cleanSlug = regionName
-                .toLowerCase()
-                .replace(/[^a-z0-9]/g, '_')
+                .toUpperCase()
+                .replace(/[^A-Z0-9]/g, '_')
                 .replace(/_+/g, '_')
                 .slice(0, 15);
-            setCode(`${country.toLowerCase()}_${cleanSlug}`);
+            setCode(`${normCountry}-${cleanSlug}`);
         }
     };
 
