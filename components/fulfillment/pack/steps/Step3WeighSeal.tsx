@@ -1,5 +1,5 @@
 import React from 'react';
-import { Scale, Lock, Check, AlertTriangle, ArrowRight, Sparkles, Hash } from 'lucide-react';
+import { Scale, Lock, Check, AlertTriangle, Sparkles, Hash } from 'lucide-react';
 
 interface Step3WeighSealProps {
     scaleWeight: string;
@@ -12,7 +12,6 @@ interface Step3WeighSealProps {
     sealSerialNumber: string;
     setSealSerialNumber: (val: string) => void;
     boxSize: string;
-    onAdvanceToFinish: () => void;
     t: (key: string) => string;
 }
 
@@ -27,7 +26,6 @@ export const Step3WeighSeal: React.FC<Step3WeighSealProps> = ({
     sealSerialNumber,
     setSealSerialNumber,
     boxSize,
-    onAdvanceToFinish,
     t,
 }) => {
     const actualWeightNum = parseFloat(scaleWeight || '0');
@@ -166,17 +164,6 @@ export const Step3WeighSeal: React.FC<Step3WeighSealProps> = ({
                 </div>
             )}
 
-            {/* Advance to Final Step */}
-            <div className="flex justify-end pt-2">
-                <button
-                    type="button"
-                    onClick={onAdvanceToFinish}
-                    className="min-h-[44px] px-6 py-2.5 rounded-xl bg-[var(--theme-accent)] hover:opacity-90 text-white font-semibold text-xs md:text-sm uppercase tracking-wider flex items-center gap-2 shadow-sm transition-all active:scale-95 cursor-pointer touch-manipulation"
-                >
-                    <span>Step 4: Label & Handover</span>
-                    <ArrowRight size={16} />
-                </button>
-            </div>
         </div>
     );
 };

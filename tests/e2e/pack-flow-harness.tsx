@@ -40,7 +40,6 @@ const Harness = () => {
                 sites={[]}
                 products={[product]}
                 onStartPack={async () => setJob(current => ({ ...current, status: 'In-Progress' }))}
-                onUpdateItemQty={() => undefined}
                 onCompleteJob={() => undefined}
                 onPrintLabel={() => undefined}
                 isSubmitting={false}

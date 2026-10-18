@@ -20,8 +20,14 @@ test('PACK opens its full-screen scanner from the bottom job action and returns 
     await expect(page.getByText('Review parcel destination, handling directives, and cargo manifest before scanning.')).toHaveCount(0);
 
     await page.locator('button[aria-label]').first().click();
-    await expect(page.getByLabel('Scan or enter barcode')).toBeVisible();
+    await expect(page.getByLabel('Scan barcode')).toHaveCount(0);
+    await expect(page.getByText('Camera Scan')).toHaveCount(0);
     await expect(page.getByText('Playwright Test Milk')).toBeVisible();
+    const resumeAction = page.getByRole('button', { name: 'Resume Item Scanning' });
+    await expect(resumeAction).toBeVisible();
+    await resumeAction.click();
+    await expect(page.getByText('Pack this item')).toBeVisible();
+    await expect(page.getByLabel('Scan barcode')).toBeVisible();
     await expect(page.getByText('Review parcel destination, handling directives, and cargo manifest before scanning.')).toHaveCount(0);
     expect(browserErrors).toEqual([]);
 });

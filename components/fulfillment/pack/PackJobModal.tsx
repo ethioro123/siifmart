@@ -22,7 +22,6 @@ interface PackJobModalProps {
     sites: Site[];
     products: Product[];
     onStartPack: (job: WMSJob) => void | Promise<void>;
-    onUpdateItemQty: (itemIndex: number, qty: number) => void;
     onCompleteJob: (boxDetails: any) => void;
     onPrintLabel: (boxDetails: any) => void;
     isSubmitting: boolean;
@@ -41,7 +40,6 @@ export const PackJobModal: React.FC<PackJobModalProps> = ({
     sites,
     products,
     onStartPack,
-    onUpdateItemQty,
     onCompleteJob,
     onPrintLabel,
     isSubmitting,
@@ -84,20 +82,6 @@ export const PackJobModal: React.FC<PackJobModalProps> = ({
     const [sealSerialNumber, setSealSerialNumber] = useState('');
     const [scaleWeight, setScaleWeight] = useState('');
     const [hasIcePack, setHasIcePack] = useState(false);
-
-    // Item-level Scanning State
-    const [scanInput, setScanInput] = useState('');
-    const [scannedItemIndex, setScannedItemIndex] = useState<number | null>(null);
-    const [confirmQty, setConfirmQty] = useState('');
-    const [scanError, setScanError] = useState('');
-    const scanInputRef = useRef<HTMLInputElement>(null);
-
-    useEffect(() => {
-        if (isOpen && step === 'ITEMS' && !scannedItemIndex) {
-            const timer = setTimeout(() => scanInputRef.current?.focus(), 150);
-            return () => clearTimeout(timer);
-        }
-    }, [isOpen, step, scannedItemIndex]);
 
     const getProduct = (item: any) => getProductForItem(item, job, products);
     const getItemMeasureQty = (item: any, product?: any) => getItemMeasureQtyShared(item, job, products, product);
@@ -163,59 +147,6 @@ export const PackJobModal: React.FC<PackJobModalProps> = ({
         }
         prevOpenRef.current = isOpen;
     }, [isOpen, isFullyPacked, recommendedBoxSize, hasColdItems, hasFragileItems]);
-
-    // Handle inline item scan
-    const handleScanItem = (e: React.FormEvent) => {
-        e.preventDefault();
-        const barcode = scanInput.trim().toUpperCase();
-        if (!barcode) return;
-
-        let foundIndex = -1;
-
-        job?.lineItems?.forEach((item, index) => {
-            const measureQty = getItemMeasureQty(item);
-            const requiredAmount = measureQty || item.expectedQty || 1;
-            const isItemPacked = job?.status === 'Completed' || (item as any).packed === true || ((item as any).packedQty ?? 0) >= requiredAmount - 0.001;
-            if (isItemPacked) return;
-            const product = getProduct(item);
-            if (
-                item.sku?.toUpperCase() === barcode ||
-                product?.sku?.toUpperCase() === barcode ||
-                product?.barcode?.toUpperCase() === barcode
-            ) {
-                foundIndex = index;
-            }
-        });
-
-        if (foundIndex > -1) {
-            setScannedItemIndex(foundIndex);
-            const item = job.lineItems![foundIndex];
-            const expected = item.expectedQty || 1;
-            const measureQty = getItemMeasureQty(item);
-            if (measureQty) {
-                setConfirmQty(measureQty.toString());
-            } else {
-                setConfirmQty(expected.toString());
-            }
-            setScanError('');
-        } else {
-            setScanError(t('warehouse.packing.itemNotFoundInPackMission') || 'Item not found in this pack job');
-            setTimeout(() => setScanError(''), 2000);
-        }
-        setScanInput('');
-    };
-
-    const submitQtyConfirm = () => {
-        if (scannedItemIndex === null) return;
-        const qtyRaw = parseFloat(confirmQty) || 0;
-
-        if (qtyRaw > 0) {
-            onUpdateItemQty(scannedItemIndex, qtyRaw);
-        }
-        setScannedItemIndex(null);
-        setConfirmQty('');
-        setTimeout(() => scanInputRef.current?.focus(), 100);
-    };
 
     const boxDetails = {
         boxSize,
@@ -310,20 +241,7 @@ export const PackJobModal: React.FC<PackJobModalProps> = ({
                             completedItems={completedItems}
                             progressPercent={progressPercent}
                             isFullyPacked={isFullyPacked}
-                            scanInput={scanInput}
-                            setScanInput={setScanInput}
-                            scanInputRef={scanInputRef}
-                            scanError={scanError}
-                            handleScanItem={handleScanItem}
-                            scannedItemIndex={scannedItemIndex}
-                            setScannedItemIndex={setScannedItemIndex}
-                            confirmQty={confirmQty}
-                            setConfirmQty={setConfirmQty}
-                            submitQtyConfirm={submitQtyConfirm}
                             onPrintItemLabel={onPrintItemLabel}
-                            onOpenScanner={onOpenScanner}
-                            onAdvanceToBox={() => setStep('BOX')}
-                            t={t}
                         />
                     )}
 
@@ -340,7 +258,6 @@ export const PackJobModal: React.FC<PackJobModalProps> = ({
                             hasIcePack={hasIcePack}
                             setHasIcePack={setHasIcePack}
                             expectedWeightKg={expectedWeightKg}
-                            onAdvanceToWeigh={() => setStep('WEIGH')}
                             t={t}
                         />
                     )}
@@ -357,7 +274,6 @@ export const PackJobModal: React.FC<PackJobModalProps> = ({
                             sealSerialNumber={sealSerialNumber}
                             setSealSerialNumber={setSealSerialNumber}
                             boxSize={boxSize}
-                            onAdvanceToFinish={() => setStep('FINISH')}
                             t={t}
                         />
                     )}
@@ -376,7 +292,6 @@ export const PackJobModal: React.FC<PackJobModalProps> = ({
                             hasFragileItems={hasFragileItems}
                             isSubmitting={isSubmitting}
                             onPrintLabel={() => onPrintLabel(boxDetails)}
-                            onCompleteJob={handleFinalComplete}
                             onFlagDiscrepancy={onFlagDiscrepancy}
                             t={t}
                         />

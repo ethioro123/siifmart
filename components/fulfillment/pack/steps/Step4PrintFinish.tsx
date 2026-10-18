@@ -1,5 +1,5 @@
 import React from 'react';
-import { Printer, CheckCircle, AlertTriangle, Box, Scale, MapPin, Hash, ShieldCheck, Tag, Snowflake, Lock, Loader2 } from 'lucide-react';
+import { Printer, AlertTriangle, Box, Scale, MapPin, Hash, ShieldCheck, Tag, Snowflake, Lock } from 'lucide-react';
 import { WMSJob, Site } from '../../../../types';
 import { BoxSizeType, PackingMaterialsState } from './Step2BoxPrep';
 
@@ -16,7 +16,6 @@ interface Step4PrintFinishProps {
     hasFragileItems: boolean | undefined;
     isSubmitting: boolean;
     onPrintLabel: () => void;
-    onCompleteJob: () => void;
     onFlagDiscrepancy?: () => void;
     t: (key: string) => string;
 }
@@ -34,7 +33,6 @@ export const Step4PrintFinish: React.FC<Step4PrintFinishProps> = ({
     hasFragileItems,
     isSubmitting,
     onPrintLabel,
-    onCompleteJob,
     onFlagDiscrepancy,
     t,
 }) => {
@@ -168,22 +166,6 @@ export const Step4PrintFinish: React.FC<Step4PrintFinishProps> = ({
                         <span>{t('warehouse.printLabel') || 'Print Shipping Label'}</span>
                     </button>
 
-                    {/* Complete & Seal Button */}
-                    <button
-                        type="button"
-                        onClick={onCompleteJob}
-                        disabled={isSubmitting}
-                        className="flex-1 min-h-[52px] px-6 py-3 rounded-2xl bg-green-600 hover:bg-green-500 text-white font-bold text-xs md:text-sm uppercase tracking-wider flex items-center justify-center gap-2.5 shadow-md hover:shadow-lg transition-all active:scale-95 cursor-pointer touch-manipulation disabled:opacity-50"
-                    >
-                        {isSubmitting ? (
-                            <Loader2 size={18} className="animate-spin" />
-                        ) : (
-                            <>
-                                <CheckCircle size={18} />
-                                <span>Complete & Seal Order</span>
-                            </>
-                        )}
-                    </button>
                 </div>
 
                 {/* Flag Discrepancy Link */}

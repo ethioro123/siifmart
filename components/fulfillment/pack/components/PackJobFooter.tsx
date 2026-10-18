@@ -1,5 +1,5 @@
 import React from 'react';
-import { ArrowLeft, ArrowRight, CheckCircle, Loader2, Lock, Trash2 } from 'lucide-react';
+import { ArrowLeft, ArrowRight, CheckCircle, Loader2, ScanLine, Trash2 } from 'lucide-react';
 import { WMSJob } from '../../../../types';
 import { PackStep } from '../steps/PackStepIndicator';
 
@@ -92,17 +92,11 @@ export const PackJobFooter: React.FC<PackJobFooterProps> = ({
                 {step === 'ITEMS' && (
                     <button
                         type="button"
-                        disabled={!isFullyPacked}
-                        onClick={() => setStep('BOX')}
-                        className={`min-h-[44px] px-5 md:px-7 rounded-xl font-semibold text-xs md:text-sm uppercase tracking-wider flex items-center gap-2 shadow-sm transition-all touch-manipulation ${
-                            isFullyPacked
-                                ? 'bg-[var(--theme-accent)] hover:opacity-90 text-white cursor-pointer active:scale-95'
-                                : 'bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-[var(--theme-text-muted)] cursor-not-allowed opacity-50'
-                        }`}
+                        onClick={() => isFullyPacked ? setStep('BOX') : void onAdvanceToScanning()}
+                        className="min-h-[44px] px-4 sm:px-5 md:px-7 rounded-xl bg-[var(--theme-accent)] hover:opacity-90 text-white font-semibold text-xs md:text-sm uppercase tracking-wider flex items-center gap-2 shadow-sm transition-all active:scale-95 touch-manipulation cursor-pointer"
                     >
-                        {!isFullyPacked && <Lock size={14} className="text-[var(--theme-text-muted)]" />}
-                        <span>{isFullyPacked ? 'Carton & Prep' : 'Scan All Items to Proceed'}</span>
-                        <ArrowRight size={16} />
+                        {isFullyPacked ? <ArrowRight size={16} /> : <ScanLine size={16} />}
+                        <span>{isFullyPacked ? 'Carton & Prep' : 'Resume Item Scanning'}</span>
                     </button>
                 )}
 

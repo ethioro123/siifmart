@@ -1,5 +1,5 @@
 import React from 'react';
-import { Box, Snowflake, Layers, Tag, Check, ShieldAlert, ArrowUp, Lock, Sparkles, ArrowRight } from 'lucide-react';
+import { Box, Snowflake, Layers, Tag, Check, ShieldAlert, ArrowUp, Lock, Sparkles } from 'lucide-react';
 import { WMSJob } from '../../../../types';
 
 export type BoxSizeType = 'Small' | 'Medium' | 'Large' | 'Extra Large' | 'Poly Mailer' | 'Thermal Cool Box';
@@ -23,7 +23,6 @@ interface Step2BoxPrepProps {
     hasIcePack: boolean;
     setHasIcePack: (val: boolean) => void;
     expectedWeightKg: number;
-    onAdvanceToWeigh: () => void;
     t: (key: string) => string;
 }
 
@@ -39,7 +38,6 @@ export const Step2BoxPrep: React.FC<Step2BoxPrepProps> = ({
     hasIcePack,
     setHasIcePack,
     expectedWeightKg,
-    onAdvanceToWeigh,
     t,
 }) => {
     const boxOptions: Array<{ size: BoxSizeType; label: string; code: string; desc: string }> = [
@@ -303,17 +301,6 @@ export const Step2BoxPrep: React.FC<Step2BoxPrepProps> = ({
                 </div>
             </div>
 
-            {/* Quick Next Step Action */}
-            <div className="flex justify-end pt-2">
-                <button
-                    type="button"
-                    onClick={onAdvanceToWeigh}
-                    className="min-h-[44px] px-6 py-2.5 rounded-xl bg-[var(--theme-accent)] hover:opacity-90 text-white font-semibold text-xs md:text-sm uppercase tracking-wider flex items-center gap-2 shadow-sm transition-all active:scale-95 cursor-pointer touch-manipulation"
-                >
-                    <span>Step 3: Weigh & Seal</span>
-                    <ArrowRight size={16} />
-                </button>
-            </div>
         </div>
     );
 };

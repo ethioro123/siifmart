@@ -8,7 +8,6 @@ import { ReturnToWarehouseModal } from '../../returns/ReturnToWarehouseModal';
 import { FulfillmentSuccessScreen } from '../../FulfillmentSuccessScreen';
 import { WMSJob } from '../../../../types';
 import { wmsJobsService, inventoryRequestsService } from '../../../../services/supabase.service';
-import { isWeightBased, isVolumeBased } from '../../../../utils/units';
 import { logger } from '../../../../utils/logger';
 import { usePackLabelPrint } from '../hooks/usePackLabelPrint';
 
@@ -52,7 +51,6 @@ export const PackModalsContainer: React.FC<PackModalsContainerProps> = ({
     setViewMode
 }) => {
     const {
-        filteredJobs,
         historicalJobs,
         sites,
         filteredProducts,
@@ -82,44 +80,6 @@ export const PackModalsContainer: React.FC<PackModalsContainerProps> = ({
         generateTrackingNumber,
         addNotification
     });
-
-    const handleUpdateItemQty = async (itemIndex: number, qty: number) => {
-        if (!selectedPackJob) return;
-
-        const item = selectedPackJob.lineItems![itemIndex];
-        const product = products.find(p => (p.id === item.productId || p.sku === item.sku) && (p.siteId === selectedPackJob.siteId || p.site_id === selectedPackJob.siteId));
-        
-        let casesQty = qty;
-        if (product) {
-            const unit = product.unit;
-            const isWeightVol = isWeightBased(unit) || isVolumeBased(unit);
-            const sizeNum = product.size ? parseFloat(product.size as string) : 0;
-            if (isWeightVol && sizeNum > 0) {
-                casesQty = qty / sizeNum;
-            }
-        }
-
-        const expectedQty = item.expectedQty || 1;
-        const isPacked = casesQty >= expectedQty - 0.001;
-        const newStatus = isPacked ? 'Picked' : 'In-Progress';
-
-        // Optimistic Update
-        await updateJobItem(selectedPackJob.id, itemIndex, newStatus, casesQty, undefined, {
-            packed: isPacked,
-            packedQty: casesQty
-        });
-
-        const updatedLineItems = [...(selectedPackJob.lineItems || [])];
-        updatedLineItems[itemIndex] = {
-            ...updatedLineItems[itemIndex],
-            status: newStatus as any,
-            packed: isPacked,
-            packedQty: casesQty
-        };
-
-        const updatedJob = filteredJobs.find(j => j.id === selectedPackJob.id);
-        if (updatedJob) setSelectedPackJob({ ...updatedJob, lineItems: updatedLineItems, trackingNumber: selectedPackJob.trackingNumber });
-    };
 
     // Handler for scanner confirm pack (scan-to-verify per item)
     const handleScanConfirmPack = async (itemIndex: number, qty: number) => {
@@ -215,7 +175,6 @@ export const PackModalsContainer: React.FC<PackModalsContainerProps> = ({
                                 }
                             }
                         }}
-                        onUpdateItemQty={handleUpdateItemQty}
                         onCompleteJob={handleCompleteJob}
                         onPrintLabel={(boxDetails) => handlePrintLabel(selectedPackJob, boxDetails)}
                         isSubmitting={isSubmitting || isPrinting}
