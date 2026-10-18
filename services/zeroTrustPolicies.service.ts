@@ -150,3 +150,89 @@ export function validatePasswordAgainstPolicy(
 
     return { valid: true };
 }
+
+/**
+ * Evaluates whether the user is permitted to operate at the current time
+ * based on the Zero-Trust time restriction policy.
+ * Frontline shift roles (cashier, warehouse, store_manager) with time_restriction=true
+ * are only permitted during operational hours (06:00 - 22:00 local time).
+ */
+export function checkTimeRestriction(userRole?: string): { allowed: boolean; reason?: string } {
+    if (!userRole) return { allowed: true };
+    const norm = userRole.toLowerCase().trim().replace(/[\s-]/g, '_');
+    if (norm === 'super_admin' || norm === 'ceo') return { allowed: true };
+
+    const policy = getActiveRolePolicy(userRole);
+    if (!policy.time_restriction) return { allowed: true };
+
+    const currentHour = new Date().getHours();
+    // Authorized operational hours: 06:00 (6 AM) to 22:00 (10 PM)
+    if (currentHour < 6 || currentHour >= 22) {
+        return {
+            allowed: false,
+            reason: `Zero-Trust Policy: Access denied for role "${userRole}" outside authorized operational shift hours (06:00 - 22:00). Current time is ${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}.`
+        };
+    }
+
+    return { allowed: true };
+}
+
+/**
+ * Evaluates network / IP restrictions based on the Zero-Trust role policy.
+ * Ensures terminals assigned to constrained roles connect through trusted networks/endpoints.
+ */
+export function checkIpRestriction(userRole?: string, hostOrIp?: string): { allowed: boolean; reason?: string } {
+    if (!userRole) return { allowed: true };
+    const norm = userRole.toLowerCase().trim().replace(/[\s-]/g, '_');
+    if (norm === 'super_admin' || norm === 'ceo') return { allowed: true };
+
+    const policy = getActiveRolePolicy(userRole);
+    if (!policy.ip_restriction) return { allowed: true };
+
+    const host = hostOrIp || (typeof window !== 'undefined' ? window.location.hostname : 'localhost');
+    const isTrustedNetwork =
+        host === 'localhost' ||
+        host === '127.0.0.1' ||
+        host.startsWith('192.168.') ||
+        host.startsWith('10.') ||
+        host.startsWith('172.') ||
+        host.endsWith('.internal') ||
+        host.endsWith('.siifmart.com') ||
+        host.includes('preview') ||
+        host.includes('supabase');
+
+    if (!isTrustedNetwork) {
+        return {
+            allowed: false,
+            reason: `Zero-Trust Network Guard: Access for role "${userRole}" is restricted to authorized store / corporate networks.`
+        };
+    }
+
+    return { allowed: true };
+}
+
+/**
+ * Evaluates whether Multi-Factor Authentication is required for the user's role.
+ */
+export function checkMfaRequirement(userRole?: string, authUser?: any): { required: boolean; satisfied: boolean; reason?: string } {
+    if (!userRole) return { required: false, satisfied: true };
+    const norm = userRole.toLowerCase().trim().replace(/[\s-]/g, '_');
+
+    const policy = getActiveRolePolicy(userRole);
+    if (!policy.mfa_required) return { required: false, satisfied: true };
+
+    // Check if session or user has AAL2 / MFA verified
+    const isAal2 = authUser?.app_metadata?.aal === 'aal2';
+    const hasVerifiedFactor = Array.isArray(authUser?.factors) && authUser.factors.some((f: any) => f.status === 'verified');
+    const isMfaActive = isAal2 || hasVerifiedFactor || authUser?.user_metadata?.mfa_verified === true;
+
+    if (!isMfaActive) {
+        return {
+            required: true,
+            satisfied: false,
+            reason: `Zero-Trust Governance: Role "${userRole}" requires Multi-Factor Authentication (MFA). Please ensure MFA is configured.`
+        };
+    }
+
+    return { required: true, satisfied: true };
+}
