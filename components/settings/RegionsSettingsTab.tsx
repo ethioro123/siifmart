@@ -57,7 +57,7 @@ export default function RegionsSettingsTab() {
         setIsLoading(true);
         setLoadError(null);
         try {
-            const list = await regionsService.getRegions(activeCountry);
+            const list = await regionsService.getRegions(selectedCountry);
             setRegions(list);
         } catch (err) {
             const msg = err instanceof Error ? err.message : 'Failed to load regional administrations';
@@ -67,7 +67,7 @@ export default function RegionsSettingsTab() {
         } finally {
             setIsLoading(false);
         }
-    }, [activeCountry, addNotification]);
+    }, [selectedCountry, addNotification]);
 
     useEffect(() => {
         loadRegions();
@@ -96,9 +96,15 @@ export default function RegionsSettingsTab() {
 
     // Country-scoped sites
     const countrySites = useMemo(() => {
-        const normActive = normalizeCountryCode(activeCountry);
-        return sites.filter(s => normalizeCountryCode(s.country) === normActive);
-    }, [sites, activeCountry]);
+        const normSelected = normalizeCountryCode(selectedCountry);
+        return sites.filter(s => normalizeCountryCode(s.country) === normSelected);
+    }, [sites, selectedCountry]);
+
+    // Country-scoped employees
+    const countryEmployees = useMemo(() => {
+        const normSelected = normalizeCountryCode(selectedCountry);
+        return employees.filter(e => normalizeCountryCode(e.country || e.country_code) === normSelected);
+    }, [employees, selectedCountry]);
 
     // KPI Metrics
     const totalRegionalBudget = useMemo(() => {
@@ -126,7 +132,33 @@ export default function RegionsSettingsTab() {
                         Establish regional administrative units with delegated procurement, finance, and logistics authority under National HQ command.
                     </p>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex flex-wrap items-center gap-2">
+                    {isCeo && (
+                        <div className="flex items-center gap-1 p-1 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl overflow-x-auto">
+                            {([
+                                { code: 'ET', flag: '🇪🇹', name: 'Ethiopia' },
+                                { code: 'KE', flag: '🇰🇪', name: 'Kenya' },
+                                { code: 'UG', flag: '🇺🇬', name: 'Uganda' },
+                                { code: 'RW', flag: '🇷🇼', name: 'Rwanda' },
+                                { code: 'TZ', flag: '🇹🇿', name: 'Tanzania' }
+                            ] as const).map(c => (
+                                <button
+                                    key={c.code}
+                                    type="button"
+                                    onClick={() => setViewCountry(c.code as Country)}
+                                    className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold transition-all cursor-pointer whitespace-nowrap ${
+                                        selectedCountry === c.code
+                                            ? 'bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)] shadow-xs border border-[var(--theme-border)]'
+                                            : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)]'
+                                    }`}
+                                    title={c.name}
+                                >
+                                    <span>{c.flag}</span>
+                                    <span>{c.code}</span>
+                                </button>
+                            ))}
+                        </div>
+                    )}
                     <button
                         type="button"
                         onClick={loadRegions}
@@ -293,7 +325,7 @@ export default function RegionsSettingsTab() {
                             key={region.code}
                             region={region}
                             sites={countrySites}
-                            employees={employees}
+                            employees={countryEmployees}
                             onEdit={(r) => setEditingRegion(r)}
                             canManageGovernance={isHQExecutive}
                         />
@@ -306,10 +338,10 @@ export default function RegionsSettingsTab() {
                 isOpen={isCreateModalOpen}
                 onClose={() => setIsCreateModalOpen(false)}
                 onCreated={handleCreatedOrUpdated}
-                country={activeCountry}
+                country={selectedCountry}
                 currency={currency}
                 sites={countrySites}
-                employees={employees}
+                employees={countryEmployees}
                 addNotification={addNotification}
             />
 
@@ -321,7 +353,7 @@ export default function RegionsSettingsTab() {
                     onUpdated={handleCreatedOrUpdated}
                     region={editingRegion}
                     sites={countrySites}
-                    employees={employees}
+                    employees={countryEmployees}
                     addNotification={addNotification}
                 />
             )}
