@@ -47,14 +47,12 @@ describe('Transfer Manifest Governance & Deletion Lifecycle', () => {
                 'CEO',
                 'admin',
                 'warehouse_manager',
-                'store_manager',
                 'operations_manager',
                 'supply_chain_manager',
                 'logistics_manager',
                 'regional_manager',
                 'inventory_manager',
-                'dispatch_manager',
-                'assistant_manager'
+                'regional_logistics_lead'
             ];
 
             for (const role of managerRoles) {
@@ -63,8 +61,8 @@ describe('Transfer Manifest Governance & Deletion Lifecycle', () => {
             }
         });
 
-        it('denies non-manager floor staff from managerial override', () => {
-            const floorRoles = ['cashier', 'picker', 'packer', 'receiver', 'stock_clerk', 'sales_associate', 'driver'];
+        it('denies non-approver roles from transfer approval authority', () => {
+            const floorRoles = ['cashier', 'picker', 'packer', 'receiver', 'stock_clerk', 'sales_associate', 'driver', 'inventory_specialist', 'replenishment_planner', 'dispatcher', 'dispatch_manager', 'assistant_manager', 'store_manager'];
 
             for (const role of floorRoles) {
                 const user = { id: 'u2', name: 'Staff Alice', role: role as any, avatar: '', title: '' };

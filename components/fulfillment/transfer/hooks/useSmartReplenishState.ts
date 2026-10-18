@@ -3,6 +3,7 @@ import { WMSJob, Product, Site, User } from '../../../../types';
 import { getTransferQuantityConfig, normalizeTransferEntry, toTransferMeasureQuantity } from '../transferQuantity';
 import { logisticsZonesService } from '../../../../services/supabase.service';
 import { logger } from '../../../../utils/logger';
+import { isTransferManager } from '../../../../utils/transferGovernance';
 
 interface UseSmartReplenishStateProps {
     isOpen: boolean;
@@ -380,6 +381,11 @@ export const useSmartReplenishState = ({
     };
 
     const submitDistTransfers = async () => {
+        if (!isTransferManager(user)) {
+            addNotification('alert', 'Only a warehouse manager or higher can approve transfer deployments. Your manifests remain saved as drafts.');
+            return;
+        }
+
         if (settings?.enforceRegionalZoning && user?.role !== 'super_admin') {
             const hasCrossZoneDraft = dbDraftJobs.some(draft => {
                 const sourceSiteObj = sites.find(s => s.id === draft.sourceSiteId);

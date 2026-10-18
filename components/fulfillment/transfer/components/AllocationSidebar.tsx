@@ -5,6 +5,7 @@ import {
 import { formatTransferStock, getTransferQuantityConfig, toTransferMeasureQuantity } from '../transferQuantity';
 import { Site, Product, User } from '../../../../types';
 import { logger } from '../../../../utils/logger';
+import { isTransferManager } from '../../../../utils/transferGovernance';
 
 interface AllocationSidebarProps {
     distHubSelectedSku: string;
@@ -56,6 +57,7 @@ export const AllocationSidebar: React.FC<AllocationSidebarProps> = ({
     getZoneName,
     distHubLowStockItems
 }) => {
+    const canAuthorizeTransfers = isTransferManager(user);
     const selectedProduct = distHubLowStockItems.find(p => p.sku === distHubSelectedSku);
     const destSiteObj = sites.find(s => s.id === distHubSelectedDestSite);
 
@@ -334,7 +336,7 @@ export const AllocationSidebar: React.FC<AllocationSidebarProps> = ({
 
                 {/* Primary Authorization Bar */}
                 <div className="p-3.5 border-t border-[var(--theme-border)] bg-[var(--theme-bg-subtle)] shrink-0">
-                    <button
+                    {canAuthorizeTransfers ? <button
                         onClick={submitDistTransfers}
                         disabled={dbDraftJobs.length === 0 || distHubLoading}
                         className={`w-full min-h-[44px] py-3 rounded-xl font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-2 text-xs shadow-xs touch-manipulation ${
@@ -349,7 +351,7 @@ export const AllocationSidebar: React.FC<AllocationSidebarProps> = ({
                             <Send size={15} />
                         )}
                         <span>{distHubLoading ? 'Deploying Transfers...' : `Authorize Deployment (${dbDraftJobs.length})`}</span>
-                    </button>
+                    </button> : <p className="text-center text-xs font-medium text-[var(--theme-text-secondary)]">Drafts are saved for warehouse manager approval.</p>}
                 </div>
             </div>
         </div>

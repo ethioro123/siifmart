@@ -4,6 +4,11 @@
 
 ## Active Features
 
+### Guided Pick Scanning (2026-10-19)
+- The primary pick action now opens the scanner directly. The scanner keeps the current step and item progress visible, anchors scan controls for mobile use, and carries validated barcode scans through to the matching pick line. The alternate entry point is labeled as a guided scanner.
+- **Files**: `components/fulfillment/pick/PickJobModal.tsx`, `components/fulfillment/pick/PickScanner.tsx`, `components/fulfillment/pick/steps/Step2PickCollect.tsx`, `components/fulfillment/pick/components/PickScannerHeader.tsx`, `components/fulfillment/pick/components/PickScannerForm.tsx`, `components/fulfillment/pick/components/PickScannerSubmitButton.tsx`
+- **Root Cause**: The primary action stopped at a pick list, the scanner showed an incorrect step label, mobile controls scrolled out of view, and validated barcodes were passed to the parent in a format its lookup did not consistently accept.
+
 ### Fulfillment Role-Specific Tab Permissions (2026-10-19)
 - Floor workers can access the shared Receive, Putaway, Pick, and Pack operations; only drivers receive the Driver tab, and Transfer is reserved for warehouse management and explicitly authorized planning or leadership roles. Other specialist tabs remain limited to their authorized roles. WMS roles missing the Fulfillment sidebar or explicit route permission were added, and all route roles have a non-empty role-appropriate tab set. Fleet maintenance also gets read-only inventory access needed for its WMS duties. Fulfillment content checks the selected tab and returns to an allowed tab if the role changes.
 - **Files**: `utils/fulfillmentTabPermissions.ts`, `components/fulfillment/FulfillmentContent.tsx`, `components/Sidebar.tsx`, `utils/permissions.ts`, `services/permissions.matrix.ts`

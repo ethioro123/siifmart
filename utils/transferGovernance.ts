@@ -1,5 +1,4 @@
 import type { WMSJob, User } from '../types';
-import { isManagerialRole } from './roles';
 
 /**
  * Manifest statuses that are permissible for deletion.
@@ -38,16 +37,13 @@ export const TRANSFER_MANAGER_ROLES = [
     'super_admin',
     'ceo',
     'admin',
-    'warehouse_manager',
-    'store_manager',
+    'regional_manager',
     'operations_manager',
+    'warehouse_manager',
     'supply_chain_manager',
     'logistics_manager',
-    'regional_logistics_lead',
-    'regional_manager',
     'inventory_manager',
-    'dispatch_manager',
-    'assistant_manager'
+    'regional_logistics_lead'
 ] as const;
 
 /**
@@ -69,8 +65,8 @@ export const isTransferStatusDeletable = (status?: string | null): boolean => {
  */
 export const isTransferManager = (user?: User | null): boolean => {
     if (!user || !user.role) return false;
-    const role = user.role.toLowerCase();
-    return TRANSFER_MANAGER_ROLES.includes(role as any) || isManagerialRole(user.role);
+    const role = user.role.trim().toLowerCase();
+    return TRANSFER_MANAGER_ROLES.includes(role as any);
 };
 
 /**

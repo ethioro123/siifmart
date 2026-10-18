@@ -4,7 +4,7 @@ import { FLOOR_WORKER_ROLES } from './fulfillmentRoles';
 const CORE_FLOOR_TABS: OpTab[] = ['RECEIVE', 'PUTAWAY', 'PICK', 'PACK'];
 
 const FLOOR_WORKER_EXTRA_TABS: Record<string, OpTab[]> = {
-    inventory_specialist: ['REPLENISH', 'COUNT', 'WASTE', 'RETURNS', 'LABELS'],
+    inventory_specialist: ['TRANSFER', 'REPLENISH', 'COUNT', 'WASTE', 'RETURNS', 'LABELS'],
     stock_clerk: ['COUNT', 'REPLENISH', 'LABELS'],
 };
 

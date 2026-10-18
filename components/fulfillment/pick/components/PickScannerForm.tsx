@@ -126,8 +126,12 @@ export const PickScannerForm: React.FC<PickScannerFormProps> = ({
                         <input
                             ref={inputRef}
                             type="text"
+                            inputMode="none"
                             aria-label="Scan barcode"
                             title="Scan barcode"
+                            autoComplete="off"
+                            autoCorrect="off"
+                            spellCheck={false}
                             value={inputVal}
                             onChange={(e) => setInputVal(e.target.value)}
                             onKeyDown={scanOnlyHandlers.onKeyDown}
@@ -197,6 +201,7 @@ export const PickScannerForm: React.FC<PickScannerFormProps> = ({
             <PickScannerSubmitButton
                 step={step}
                 inputVal={inputVal}
+                qtyVal={qtyVal}
                 currentItem={currentItem}
                 isItemMatched={isItemMatched}
                 isStrictlyValid={isStrictlyValid}

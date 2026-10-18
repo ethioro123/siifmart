@@ -3,6 +3,7 @@ import type { UserRole } from '../../types';
 import { hasPermission } from '../../utils/permissions';
 import { getVisibleFulfillmentTabs } from '../../utils/fulfillmentTabPermissions';
 import { FLOOR_WORKER_ROLES } from '../../utils/fulfillmentRoles';
+import { isTransferManager } from '../../utils/transferGovernance';
 
 const FULFILLMENT_ROUTE_ROLES = [
     'super_admin', 'admin', 'warehouse_manager', 'operations_manager', 'dispatch_manager',
@@ -20,7 +21,7 @@ describe('Fulfillment tab permissions', () => {
     it.each([
         ['receiver', ['RECEIVE', 'PUTAWAY', 'PICK', 'PACK']],
         ['forklift_operator', ['RECEIVE', 'PUTAWAY', 'PICK', 'PACK']],
-        ['inventory_specialist', ['RECEIVE', 'PUTAWAY', 'PICK', 'PACK', 'REPLENISH', 'COUNT', 'WASTE', 'RETURNS', 'LABELS']],
+        ['inventory_specialist', ['RECEIVE', 'PUTAWAY', 'PICK', 'PACK', 'TRANSFER', 'REPLENISH', 'COUNT', 'WASTE', 'RETURNS', 'LABELS']],
         ['driver', ['RECEIVE', 'PUTAWAY', 'PICK', 'PACK', 'DRIVER']],
         ['inbound_qc_inspector', ['RECEIVE', 'PUTAWAY', 'PICK', 'PACK']],
         ['stock_clerk', ['RECEIVE', 'PUTAWAY', 'PICK', 'PACK', 'COUNT', 'REPLENISH', 'LABELS']],
@@ -37,8 +38,13 @@ describe('Fulfillment tab permissions', () => {
         expect(getVisibleFulfillmentTabs(' Driver ')).toEqual(['RECEIVE', 'PUTAWAY', 'PICK', 'PACK', 'DRIVER']);
     });
 
-    it.each(FLOOR_WORKER_ROLES)('keeps floor worker %s out of the transfer tab', role => {
+    it.each(FLOOR_WORKER_ROLES.filter(role => role !== 'inventory_specialist'))('keeps floor worker %s out of the transfer tab', role => {
         expect(getVisibleFulfillmentTabs(role)).not.toContain('TRANSFER');
+    });
+
+    it('lets inventory specialists prepare transfers without approval authority', () => {
+        expect(getVisibleFulfillmentTabs('inventory_specialist')).toContain('TRANSFER');
+        expect(isTransferManager({ id: 'inv-1', name: 'Inventory Specialist', role: 'inventory_specialist', avatar: '', title: '' })).toBe(false);
     });
 
     it('keeps floor workers out of the driver tab', () => {

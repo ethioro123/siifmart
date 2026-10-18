@@ -8,6 +8,7 @@ import { logger } from '../../../utils/logger';
 import { SingleProductAllocation } from './components/SingleProductAllocation';
 import { WaveDistributionAllocations } from './components/WaveDistributionAllocations';
 import { buildTransferLineItem } from './transferQuantity';
+import { isTransferManager } from '../../../utils/transferGovernance';
 
 interface BulkDistributionModalProps {
     isOpen: boolean;
@@ -39,6 +40,7 @@ export const BulkDistributionModal: React.FC<BulkDistributionModalProps> = ({
     renderTabs
 }) => {
     const { settings } = useData();
+    const canApproveTransfers = isTransferManager(user);
     const isRestricted = !['super_admin', 'admin'].includes(user?.role || '') && !!user?.siteId;
     const [logisticsZones, setLogisticsZones] = useState<any[]>([]);
 
@@ -175,13 +177,15 @@ export const BulkDistributionModal: React.FC<BulkDistributionModalProps> = ({
                             items: 1,
                             lineItems: [transferLineItem],
                             orderRef: `${Date.now()}`,
-                            transferStatus: 'Approved',
+                            transferStatus: canApproveTransfers ? 'Approved' : 'Requested',
                             requestedBy: user?.name || 'System',
+                            approvedBy: canApproveTransfers ? user?.name : undefined,
                             jobNumber: undefined
                         };
 
                         const createdBulkJob = await wmsJobsService.create(transferJob);
-                        const pickJob: any = {
+                        if (canApproveTransfers) {
+                            const pickJob: any = {
                             site_id: actualSourceSite,
                             siteId: actualSourceSite,
                             type: 'PICK',
@@ -196,7 +200,8 @@ export const BulkDistributionModal: React.FC<BulkDistributionModalProps> = ({
                             }],
                             jobNumber: createdBulkJob.job_number
                         };
-                        await wmsJobsService.create(pickJob);
+                            await wmsJobsService.create(pickJob);
+                        }
                         createdJobs++;
                     }
                 }
@@ -240,13 +245,15 @@ export const BulkDistributionModal: React.FC<BulkDistributionModalProps> = ({
                             return buildTransferLineItem(product, item.quantity);
                         }),
                         orderRef: `${Date.now()}`,
-                        transferStatus: 'Approved',
+                        transferStatus: canApproveTransfers ? 'Approved' : 'Requested',
                         requestedBy: user?.name || 'System',
+                        approvedBy: canApproveTransfers ? user?.name : undefined,
                         jobNumber: undefined
                     };
 
                     const createdWaveJob = await wmsJobsService.create(transferJob);
-                    const pickJob: any = {
+                    if (canApproveTransfers) {
+                        const pickJob: any = {
                         site_id: actualSourceSite,
                         siteId: actualSourceSite,
                         type: 'PICK',
@@ -272,7 +279,8 @@ export const BulkDistributionModal: React.FC<BulkDistributionModalProps> = ({
                         }),
                         jobNumber: createdWaveJob.jobNumber || createdWaveJob.job_number
                     };
-                    await wmsJobsService.create(pickJob);
+                        await wmsJobsService.create(pickJob);
+                    }
                     createdJobs++;
                 }
             }
@@ -284,7 +292,9 @@ export const BulkDistributionModal: React.FC<BulkDistributionModalProps> = ({
                 'Inventory'
             );
 
-            addNotification('success', `Created ${createdJobs} distribution transfers!`);
+            addNotification('success', canApproveTransfers
+                ? `Created and authorized ${createdJobs} distribution transfers!`
+                : `Submitted ${createdJobs} distribution transfers for warehouse manager approval.`);
             onClose();
             setBulkDistributionAllocations([]);
             setWaveProducts([]);
@@ -482,7 +492,7 @@ export const BulkDistributionModal: React.FC<BulkDistributionModalProps> = ({
                                 }`}
                         >
                             <Truck size={16} />
-                            Create Distribution
+                            {canApproveTransfers ? 'Create Distribution' : 'Submit for Approval'}
                         </button>
                     </div>
                 </div>

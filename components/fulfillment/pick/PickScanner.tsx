@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect, useMemo } from 'react';
-import { ArrowLeft, Box, CheckCircle, Map as MapIcon, X, Maximize2, RotateCcw, Info, AlertTriangle, Package } from 'lucide-react';
+import { CheckCircle, Map as MapIcon, X, AlertTriangle, Package } from 'lucide-react';
 import { WMSJob, Product } from '../../../types';
 import { playBeep } from '../../../utils/audioUtils';
 import { normalizeLocation } from '../../../utils/locationTracking';
@@ -130,9 +130,16 @@ export const PickScanner: React.FC<PickScannerProps> = ({
     }, [inputVal, step, expectedPrefix, isProcessing]);
 
     const isStrictlyValid = useMemo(() => {
+        if (step === 'QUANTITY') return Number.isFinite(Number(qtyVal)) && Number(qtyVal) > 0;
         if (step !== 'LOCATION') return inputVal.trim().length > 0;
         return isLocationBarcode(inputVal.trim().toUpperCase());
-    }, [inputVal, step]);
+    }, [inputVal, qtyVal, step]);
+
+    const totalItems = job.lineItems?.length || 0;
+    const completedItems = job.lineItems?.filter((item: any) =>
+        item.status === 'Completed' || item.status === 'Picked'
+    ).length || 0;
+    const currentItemNumber = currentItem ? Math.min(completedItems + 1, totalItems) : totalItems;
 
     const handleScan = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -295,7 +302,9 @@ export const PickScanner: React.FC<PickScannerProps> = ({
         if (isSubmitting) return;
         setIsSubmitting(true);
         try {
-            await onScanItem(barcode, quantity);
+            // Pass the catalog SKU after barcode validation so encoded labels
+            // and UPCs resolve to the same trusted pick line in the parent.
+            await onScanItem(currentItem?.sku || barcode, quantity);
             const itemName = currentItem?.name || 'Item';
             setSuccessMsg(`Picked ${quantity || 1}x ${itemName}`);
             setShowSuccess(true);
@@ -309,7 +318,7 @@ export const PickScanner: React.FC<PickScannerProps> = ({
                 setMatchedBarcode('');
                 setStep('LOCATION'); 
                 scanOnlyHandlers.reset();
-            }, 1500);
+            }, 800);
         } catch (err: any) {
             playBeep('error');
             setErrorMsg(err.message || 'Error saving pick');
@@ -328,35 +337,46 @@ export const PickScanner: React.FC<PickScannerProps> = ({
     return (
         <div className="fixed inset-0 z-[200] bg-[var(--theme-bg-app)] flex flex-col overflow-hidden max-w-full">
             {/* Top Bar */}
-            <div className="p-3.5 sm:p-4 bg-[var(--theme-bg-card)] border-b border-[var(--theme-border)] flex justify-between items-center text-[var(--theme-text-primary)] shrink-0">
-                <div className="flex items-center gap-2 sm:gap-3 min-w-0">
-                    <button
-                        onClick={onClose}
-                        className="p-2 -ml-1 text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center shrink-0"
-                        aria-label={t('warehouse.dismiss')}
-                    >
-                        <X size={20} />
-                    </button>
-                    <div className="min-w-0">
-                        <h3 className="font-bold text-base sm:text-lg uppercase tracking-tight truncate">
-                            {step === 'LOCATION' ? t('warehouse.putaway.confirmLocation') : t('warehouse.scanProductBarcode')}
-                        </h3>
-                        <p className="text-[11px] text-[var(--theme-accent)] font-mono font-semibold truncate">
-                            JOB: {formatJobId(job)}
-                        </p>
+            <div className="px-3 py-2.5 sm:p-4 bg-[var(--theme-bg-card)] border-b border-[var(--theme-border)] text-[var(--theme-text-primary)] shrink-0">
+                <div className="flex justify-between items-center gap-2">
+                    <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+                        <button
+                            onClick={onClose}
+                            className="p-2 -ml-1 text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center shrink-0"
+                            aria-label={t('warehouse.dismiss')}
+                        >
+                            <X size={20} />
+                        </button>
+                        <div className="min-w-0">
+                            <h3 className="font-bold text-sm sm:text-lg tracking-tight truncate">
+                                {step === 'LOCATION'
+                                    ? t('warehouse.picking.goToSourceBay')
+                                    : step === 'QUANTITY'
+                                        ? t('warehouse.confirmQty')
+                                        : t('warehouse.picking.scanProductToPick')}
+                            </h3>
+                            <p className="text-[11px] text-[var(--theme-accent)] font-mono font-semibold truncate">
+                                JOB: {formatJobId(job)}
+                            </p>
+                        </div>
+                    </div>
+                    <div className="flex items-center gap-2 shrink-0">
+                        <span className="text-[10px] sm:text-[11px] font-semibold bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] px-2.5 py-1.5 rounded-full text-[var(--theme-text-secondary)] whitespace-nowrap">
+                            {currentItem ? `${currentItemNumber}/${totalItems} · ` : ''}{step === 'LOCATION' ? '1/3' : step === 'ITEM' ? '2/3' : '3/3'}
+                        </span>
                     </div>
                 </div>
-                <div className="flex items-center gap-2 shrink-0">
-                    <span className="text-[11px] font-semibold bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] px-3 py-1 rounded-full text-[var(--theme-text-secondary)]">
-                        {step === 'LOCATION' ? 'STEP 1/3' : step === 'ITEM' ? 'STEP 2/3' : 'STEP 3/3'}
-                    </span>
+                <div className="mt-2 h-1.5 rounded-full bg-[var(--theme-bg-subtle)] overflow-hidden" role="progressbar" aria-label="Pick mission progress" aria-valuenow={completedItems} aria-valuemin={0} aria-valuemax={totalItems}>
+                    <div
+                        ref={el => el?.style.setProperty('--progress', `${totalItems ? (completedItems / totalItems) * 100 : 0}%`)}
+                        className="w-dynamic h-full rounded-full bg-[var(--theme-accent)] transition-[width] duration-300"
+                    />
                 </div>
             </div>
 
             {/* Main View */}
-            <div className="flex-1 relative w-full overflow-hidden flex flex-col">
-                {/* Scrollable Content Container */}
-                <div className="absolute inset-0 overflow-y-auto overflow-x-hidden flex flex-col items-center p-4 sm:p-6 pb-32 w-full max-w-full custom-scrollbar">
+            <div className="flex-1 min-h-0 relative w-full overflow-hidden flex flex-col">
+                <div className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden flex flex-col items-center px-3 py-3 sm:p-6 pb-4 w-full max-w-full custom-scrollbar">
                     {/* Header & Status Instruction View */}
                     <PickScannerHeader
                         showSuccess={showSuccess}
@@ -376,32 +396,6 @@ export const PickScanner: React.FC<PickScannerProps> = ({
                         t={t}
                     />
 
-                    {/* Input & Action Form */}
-                    <PickScannerForm
-                        step={step}
-                        inputVal={inputVal}
-                        setInputVal={setInputVal}
-                        qtyVal={qtyVal}
-                        setQtyVal={setQtyVal}
-                        selectedUnit={selectedUnit}
-                        setSelectedUnit={setSelectedUnit}
-                        currentItem={currentItem}
-                        currentProduct={currentProduct}
-                        isItemMatched={isItemMatched}
-                        isStrictlyValid={isStrictlyValid}
-                        isProcessing={isProcessing}
-                        handleScan={handleScan}
-                        getItemMeasureQty={getItemMeasureQty}
-                        scanOnlyHandlers={scanOnlyHandlers}
-                        lastKeyTime={lastKeyTime}
-                        inputRef={inputRef}
-                        qtyRef={qtyRef}
-                        playBeep={playBeep}
-                        setErrorMsg={setErrorMsg}
-                        setShowError={setShowError}
-                        t={t}
-                    />
-
                     {/* PICKED SO FAR (Only while active picking) */}
                     {!!currentItem && (
                         <PickScannerPickedList
@@ -412,9 +406,37 @@ export const PickScanner: React.FC<PickScannerProps> = ({
                         />
                     )}
 
-                    <p className="mt-8 text-[var(--theme-text-secondary)] text-[11px] font-mono font-medium uppercase tracking-widest z-10 text-center opacity-60">
+                    <p className="mt-4 sm:mt-8 text-[var(--theme-text-secondary)] text-[10px] sm:text-[11px] font-medium z-10 text-center">
                         {t('warehouse.picking.checksumVerifiedInfo')}
                     </p>
+                </div>
+                <div className="shrink-0 border-t border-[var(--theme-border)] bg-[var(--theme-bg-card)] px-3 pt-3 pb-[max(env(safe-area-inset-bottom),0.75rem)] sm:px-6 sm:py-4">
+                    <div className="mx-auto w-full max-w-xl">
+                        <PickScannerForm
+                            step={step}
+                            inputVal={inputVal}
+                            setInputVal={setInputVal}
+                            qtyVal={qtyVal}
+                            setQtyVal={setQtyVal}
+                            selectedUnit={selectedUnit}
+                            setSelectedUnit={setSelectedUnit}
+                            currentItem={currentItem}
+                            currentProduct={currentProduct}
+                            isItemMatched={isItemMatched}
+                            isStrictlyValid={isStrictlyValid}
+                            isProcessing={isProcessing || isSubmitting}
+                            handleScan={handleScan}
+                            getItemMeasureQty={getItemMeasureQty}
+                            scanOnlyHandlers={scanOnlyHandlers}
+                            lastKeyTime={lastKeyTime}
+                            inputRef={inputRef}
+                            qtyRef={qtyRef}
+                            playBeep={playBeep}
+                            setErrorMsg={setErrorMsg}
+                            setShowError={setShowError}
+                            t={t}
+                        />
+                    </div>
                 </div>
             </div>
         </div>

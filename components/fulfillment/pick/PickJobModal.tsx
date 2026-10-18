@@ -301,12 +301,11 @@ export const PickJobModal: React.FC<PickJobModalProps> = ({
                         {step === 'ROUTE' && (
                             <button
                                 type="button"
-                                onClick={() => setStep('COLLECT')}
-                                className="min-h-[44px] px-4 sm:px-7 rounded-xl bg-[var(--theme-accent)] hover:opacity-90 text-white font-semibold text-xs md:text-sm uppercase tracking-wider flex items-center gap-2 shadow-sm transition-all active:scale-95 cursor-pointer touch-manipulation"
+                                onClick={() => onStartPick(job)}
+                                className="min-h-[48px] px-4 sm:px-7 rounded-xl bg-[var(--theme-accent)] hover:opacity-90 text-white font-semibold text-xs md:text-sm uppercase tracking-wider flex items-center gap-2 shadow-sm transition-all active:scale-95 cursor-pointer touch-manipulation"
                             >
-                                <span className="hidden sm:inline">Start Scanning & Pick</span>
-                                <span className="sm:hidden">Start Pick</span>
-                                <ArrowRight size={16} />
+                                <Package size={16} />
+                                <span>Start Scanning</span>
                             </button>
                         )}
 

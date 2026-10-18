@@ -146,11 +146,11 @@ export const Step2PickCollect: React.FC<Step2PickCollectProps> = ({
                         <button
                             type="button"
                             onClick={() => onStartPick(job)}
-                            title="Open Camera Scanner"
-                            className="min-h-[44px] px-3 bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card)] border border-[var(--theme-border)] hover:border-[var(--theme-accent)]/30 rounded-xl text-xs font-semibold uppercase tracking-wider text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] flex items-center gap-1.5 shrink-0 transition-colors touch-manipulation cursor-pointer"
+                            title="Open guided pick scanner"
+                            className="min-h-[44px] px-3 bg-[var(--theme-accent)] hover:opacity-90 border border-[var(--theme-accent)] rounded-xl text-xs font-semibold tracking-wide text-white flex items-center gap-1.5 shrink-0 transition-colors touch-manipulation cursor-pointer"
                         >
                             <Scan size={15} />
-                            <span className="hidden md:inline">Camera Scan</span>
+                            <span>Guided Scanner</span>
                         </button>
                     </div>
                 </div>

@@ -4,6 +4,7 @@ import { RotateCcw, CheckCircle } from 'lucide-react';
 interface PickScannerSubmitButtonProps {
     step: 'LOCATION' | 'ITEM' | 'QUANTITY';
     inputVal: string;
+    qtyVal: string;
     currentItem: any;
     isItemMatched: boolean;
     isStrictlyValid: boolean;
@@ -14,24 +15,28 @@ interface PickScannerSubmitButtonProps {
 export const PickScannerSubmitButton: React.FC<PickScannerSubmitButtonProps> = ({
     step,
     inputVal,
+    qtyVal,
     currentItem,
     isItemMatched,
     isStrictlyValid,
     isProcessing,
     t,
 }) => {
+    const hasValue = step === 'QUANTITY' ? qtyVal.trim().length > 0 : inputVal.trim().length > 0;
+    const isReady = !currentItem || hasValue;
+
     return (
         <button
             type="submit"
-            disabled={(step === 'LOCATION' && !inputVal.trim() && !!currentItem) || isProcessing}
+            disabled={!isReady || isProcessing}
             className={`w-full py-3.5 sm:py-4 px-4 min-h-[48px] rounded-xl flex items-center justify-center gap-2 transition-colors border text-xs sm:text-sm font-semibold uppercase tracking-wider ${
-                ((!inputVal.trim() && !isItemMatched && !!currentItem)) || isProcessing
+                (!isReady || isProcessing)
                     ? 'bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] text-[var(--theme-text-secondary)] opacity-60 cursor-not-allowed'
                     : (!currentItem)
                     ? 'bg-emerald-600 hover:bg-emerald-500 border-emerald-500 text-white'
                     : (isItemMatched)
                     ? 'bg-emerald-600 hover:bg-emerald-500 border-emerald-500 text-white'
-                    : !isStrictlyValid
+                    : hasValue && !isStrictlyValid
                     ? 'bg-rose-500/10 border-rose-500/30 text-rose-500'
                     : 'bg-[var(--theme-accent)] hover:opacity-90 border-[var(--theme-accent)] text-white'
             }`}
