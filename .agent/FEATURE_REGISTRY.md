@@ -4,6 +4,13 @@
 
 ## Active Features
 
+### WMS Worker Sovereign Landing Page (2026-10-19)
+- All WMS workers and operators now land directly on their primary working tab upon opening Fulfillment (Pickers -> Pick, Packers -> Pack, Drivers -> Driver, Forklift Operators -> Putaway, Receivers & QC -> Receive, Stock Clerks & Inventory Specialists -> Count, Replenishment Planners -> Replenish, Returns Clerks -> Returns, Dispatchers -> Assign, Warehouse Managers -> Docks) instead of defaulting to Receive.
+- Synced the active operational tab with URL search parameters (`/wms-ops?tab=...`), preserving active state across reloads.
+- Mobile segmented controls dynamically elevate the worker's main working tab into the primary 1-tap quick buttons, eliminating unnecessary menu navigation on mobile scanners.
+- **Files**: `utils/fulfillmentTabPermissions.ts`, `pages/Fulfillment.tsx`, `components/fulfillment/FulfillmentContent.tsx`, `components/fulfillment/TabSelectors.tsx`, `tests/utils/fulfillmentTabPermissions.test.ts`
+- **Database**: None
+
 ### Floor-Friendly Picking Scan Flow (2026-10-19)
 - Enlarged the current product identity, source location, expected quantity, scan entry, quantity controls, and primary actions for clear use on handheld devices. Added a product image/placeholder and improved picked-item feedback and collection-list readability.
 - **Files**: `components/fulfillment/pick/PickScanner.tsx`, `components/fulfillment/pick/steps/Step2PickCollect.tsx`, `components/fulfillment/pick/components/PickScannerHeader.tsx`, `components/fulfillment/pick/components/PickScannerInstructionPanel.tsx`, `components/fulfillment/pick/components/PickScannerForm.tsx`, `components/fulfillment/pick/components/PickScannerSubmitButton.tsx`, `components/fulfillment/pick/components/PickScannerPickedList.tsx`
