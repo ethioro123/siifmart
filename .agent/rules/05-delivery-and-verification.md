@@ -41,8 +41,11 @@
 2. Use kebab-case: `feature-name.service.ts`
 3. Place in `/services/`
 
-### Versioning & GitHub Pushing
-- Before a release push, follow the project's release/versioning process and verify the displayed application version. Do not change the version for local edits that are not being released.
+### Auto-Committing, Versioning & GitHub Pushing
+- **Auto-commit every verified change**: After completing any code, migration, or configuration change and passing `npx tsc --noEmit` (plus relevant unit/regression tests and the 500-line check), automatically stage the files created or modified for the task and run `git commit` with a concise Conventional Commits message (`feat:`, `fix:`, `refactor:`, `chore:`, `test:`, `docs:`).
+- **Scope commits safely**: Only stage files belonging to the current task unless the user asks to include pre-existing uncommitted work. Never stage `.env*`, credentials, or secret files.
+- **Local commit by default**: Always commit locally so work is never lost, and report the resulting commit hash in your final response. Do not run `git push` unless the user explicitly asks to push or release.
+- **Release versioning**: Before a release push, follow the project's release/versioning process and verify the displayed application version. Do not change the version for local edits that are not being released.
 
 ---
 

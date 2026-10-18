@@ -9,7 +9,8 @@ This is the entry point for SIIFMART-specific work. Keep these rules consistent 
 3. Inspect the relevant code, types, schema, tests, and existing patterns before deciding on a fix. For Supabase errors, confirm the live schema or authoritative types before changing queries.
 4. Make the smallest complete change. Avoid speculative refactors and unmeasured performance work.
 5. For code changes, run the required type check and the narrowest relevant regression checks. Report checks that could not be run and why.
-6. Finish with a plain-language summary of the user-visible result and verification. Do not dump code or diffs.
+6. Automatically stage and commit all verified changes for the current task using a descriptive Conventional Commits message (preserving unrelated pre-existing changes and never staging secrets). Do not push to remote unless requested.
+7. Finish with a plain-language summary of the user-visible result, verification, and commit details. Do not dump code or diffs.
 
 ## Invariants
 
