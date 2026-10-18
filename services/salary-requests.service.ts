@@ -64,11 +64,11 @@ export const salaryRequestsService = {
             }
 
             // RULE 10: 25-record shelf limit
-            let query = supabase.from('salary_requests').select('*').limit(limit);
+            let query = supabase.from('salary_requests').select('*');
             if (shouldFilterSite && siteId) query = query.eq('site_id', siteId);
             if (countryCode) query = query.eq('country_code', countryCode.toUpperCase());
 
-            const { data, error } = await query.order('requested_at', { ascending: false });
+            const { data, error } = await query.order('requested_at', { ascending: false }).limit(limit);
             if (error) throw error;
 
             const mapped = (data || []).map(mapDBToSalaryRequest);

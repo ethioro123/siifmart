@@ -67,11 +67,11 @@ export const payrollRunsService = {
   async getAll(siteId?: string, countryCode?: string, limit: number = 25): Promise<PayrollRun[]> {
     try {
       // RULE 10: 25-record shelf limit
-      let query = supabase.from('payroll_runs').select('*').limit(limit);
+      let query = supabase.from('payroll_runs').select('*');
       if (siteId && siteId !== 'ALL') query = query.eq('site_id', siteId);
       if (countryCode) query = query.eq('country_code', countryCode.toUpperCase());
 
-      const { data, error } = await query.order('created_at', { ascending: false });
+      const { data, error } = await query.order('created_at', { ascending: false }).limit(limit);
       if (error) throw error;
 
       const mapped = (data || []).map(mapDBToPayrollRun);

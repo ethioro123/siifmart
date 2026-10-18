@@ -7,6 +7,7 @@ import { hasPermission } from '../../services/permissions.service';
 import { calculateNetSalary, getEmployeeLeaveRequests } from '../../utils/employeeProfileData';
 
 let inMemoryDocs: any[] = [];
+let inMemoryLeaves: any[] = [];
 
 vi.mock('../../lib/supabase', () => {
   const docChainable: any = {};
@@ -18,6 +19,47 @@ vi.mock('../../lib/supabase', () => {
   docChainable.eq = vi.fn().mockReturnValue(docChainable);
   docChainable.order = vi.fn().mockImplementation(() => Promise.resolve({ data: inMemoryDocs, error: null }));
   docChainable.single = vi.fn().mockImplementation(() => Promise.resolve({ data: inMemoryDocs[inMemoryDocs.length - 1] || null, error: null }));
+
+  const leaveChainable: any = {};
+  leaveChainable.select = vi.fn().mockReturnValue(leaveChainable);
+  leaveChainable.insert = vi.fn().mockImplementation((record: any) => {
+    const rec = { id: `LR-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`, ...record };
+    inMemoryLeaves.push(rec);
+    return {
+      select: vi.fn().mockReturnValue({
+        single: vi.fn().mockResolvedValue({ data: rec, error: null })
+      }),
+      then: (onfulfilled: any) => Promise.resolve({ data: rec, error: null }).then(onfulfilled)
+    };
+  });
+  leaveChainable.update = vi.fn().mockImplementation((updates: any) => {
+    return {
+      eq: vi.fn().mockImplementation((col: string, val: any) => {
+        const idx = inMemoryLeaves.findIndex(r => r[col] === val || r.id === val);
+        if (idx !== -1) {
+          inMemoryLeaves[idx] = { ...inMemoryLeaves[idx], ...updates };
+        }
+        return {
+          select: vi.fn().mockReturnValue({
+            single: vi.fn().mockResolvedValue({ data: inMemoryLeaves[idx] || updates, error: null })
+          }),
+          then: (onfulfilled: any) => Promise.resolve({ data: inMemoryLeaves[idx] || updates, error: null }).then(onfulfilled)
+        };
+      })
+    };
+  });
+  leaveChainable.eq = vi.fn().mockImplementation((col: string, val: any) => {
+    const filtered = inMemoryLeaves.filter(r => r[col] === val || r.id === val);
+    return {
+      eq: vi.fn().mockReturnValue({
+        order: vi.fn().mockResolvedValue({ data: filtered, error: null })
+      }),
+      order: vi.fn().mockResolvedValue({ data: filtered, error: null }),
+      single: vi.fn().mockResolvedValue({ data: filtered[0] || null, error: null }),
+      then: (onfulfilled: any) => Promise.resolve({ data: filtered, error: null }).then(onfulfilled)
+    };
+  });
+  leaveChainable.order = vi.fn().mockImplementation(() => Promise.resolve({ data: inMemoryLeaves, error: null }));
 
   const defaultChainable: any = {};
   defaultChainable.select = vi.fn().mockReturnValue(defaultChainable);
@@ -35,6 +77,7 @@ vi.mock('../../lib/supabase', () => {
     supabase: {
       from: vi.fn().mockImplementation((table: string) => {
         if (table === 'employee_documents') return docChainable;
+        if (table === 'leave_requests') return leaveChainable;
         return defaultChainable;
       })
     }
@@ -47,6 +90,8 @@ describe('Zero-Trust HR Suite Tests', () => {
       localStorage.clear();
     }
     inMemoryDocs = [];
+    inMemoryLeaves = [];
+    (leaveRequestsService as any)._clearCache();
   });
 
   describe('Finding 1 & 6: Leave Requests & Statutory Policies', () => {

@@ -1,40 +1,51 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { payrollRunsService } from '../../services/payroll-runs.service';
 
+let inMemoryPayrollDb: any[] = [];
+
 vi.mock('../../lib/supabase', () => ({
   supabase: {
-    from: vi.fn().mockReturnValue({
-      select: vi.fn().mockReturnValue({
-        order: vi.fn().mockReturnValue({
-          limit: vi.fn().mockResolvedValue({ data: null, error: { message: 'Offline mock' } })
+    from: vi.fn().mockImplementation((table: string) => {
+      let filtered = [...inMemoryPayrollDb];
+      const chainable: any = {
+        select: vi.fn().mockImplementation(() => chainable),
+        eq: vi.fn().mockImplementation((col: string, val: any) => {
+          filtered = filtered.filter(r => r[col] === val || r.id === val);
+          return chainable;
         }),
-        eq: vi.fn().mockReturnValue({
-          single: vi.fn().mockResolvedValue({ data: null, error: { message: 'Offline mock' } })
+        insert: vi.fn().mockImplementation((record: any) => {
+          inMemoryPayrollDb.push(record);
+          return Promise.resolve({ data: record, error: null });
+        }),
+        update: vi.fn().mockImplementation((updates: any) => {
+          return {
+            eq: vi.fn().mockImplementation((col: string, val: any) => {
+              const idx = inMemoryPayrollDb.findIndex(r => r[col] === val || r.id === val);
+              if (idx !== -1) {
+                inMemoryPayrollDb[idx] = { ...inMemoryPayrollDb[idx], ...updates };
+              }
+              return Promise.resolve({ data: inMemoryPayrollDb[idx] || updates, error: null });
+            })
+          };
+        }),
+        order: vi.fn().mockImplementation(() => {
+          return {
+            limit: vi.fn().mockResolvedValue({ data: [...filtered], error: null })
+          };
         })
-      }),
-      insert: vi.fn().mockReturnValue({
-        select: vi.fn().mockReturnValue({
-          single: vi.fn().mockResolvedValue({ data: null, error: { message: 'Offline mock' } })
-        })
-      }),
-      update: vi.fn().mockReturnValue({
-        eq: vi.fn().mockReturnValue({
-          select: vi.fn().mockReturnValue({
-            single: vi.fn().mockResolvedValue({ data: null, error: { message: 'Offline mock' } })
-          })
-        })
-      })
+      };
+      return chainable;
     })
   }
 }));
 
 describe('Zero-Trust Multi-Department Payroll Approval Service', () => {
   beforeEach(() => {
+    inMemoryPayrollDb = [];
     if (typeof localStorage !== 'undefined') {
       localStorage.clear();
     }
     (payrollRunsService as any)._clearCache();
-    vi.restoreAllMocks();
   });
 
   it('initiates a new payroll run with pending status', async () => {

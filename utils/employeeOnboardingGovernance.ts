@@ -52,9 +52,9 @@ export const getOnboardingSubmitLabel = (
 ): string => {
     const isDirect = isDirectOnboardingAuthorized(role, candidateRole, isQuotaApproved);
     if (isSubmitting) {
-        return isDirect ? 'Activating Employee...' : 'Submitting to HR...';
+        return isDirect ? (isQuotaApproved ? 'Activating Employee...' : 'Creating Employee...') : 'Submitting to HR...';
     }
-    return isDirect ? 'Activate Frontline Worker' : 'Submit to HR for Approval';
+    return isDirect ? (isQuotaApproved ? 'Activate Frontline Worker' : 'Confirm & Onboard Talent') : 'Submit to HR for Approval';
 };
 
 /**
@@ -66,7 +66,7 @@ export const getOnboardingModalTitle = (
     isQuotaApproved: boolean = false
 ): string => {
     const isDirect = isDirectOnboardingAuthorized(role, candidateRole, isQuotaApproved);
-    return isDirect ? 'Onboard Talent (Fast-Track Active)' : 'Draft Candidate (HR Approval)';
+    return isDirect ? (isQuotaApproved ? 'Onboard Talent (Fast-Track Active)' : 'Onboard Talent') : 'Draft Candidate (HR Approval)';
 };
 
 /**

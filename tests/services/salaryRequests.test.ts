@@ -4,36 +4,69 @@ import { authService } from '../../services/auth.service';
 import { hasPermission } from '../../utils/permissions';
 import { CONFLICTING_DUTIES } from '../../services/permissions.service';
 
+let inMemoryDb: any[] = [];
+
 vi.mock('../../lib/supabase', () => ({
     supabase: {
-        from: vi.fn().mockReturnValue({
-            select: vi.fn().mockReturnValue({
-                order: vi.fn().mockReturnValue({
-                    limit: vi.fn().mockResolvedValue({ data: null, error: { message: 'Mocked offline' } })
-                }),
-                eq: vi.fn().mockReturnValue({
-                    single: vi.fn().mockResolvedValue({ data: null, error: { message: 'Mocked offline' } })
-                })
-            }),
-            insert: vi.fn().mockReturnValue({
-                select: vi.fn().mockReturnValue({
-                    single: vi.fn().mockResolvedValue({ data: null, error: { message: 'Mocked offline' } })
-                })
-            }),
-            update: vi.fn().mockReturnValue({
-                eq: vi.fn().mockReturnValue({
+        from: vi.fn().mockImplementation((_table: string) => {
+            const createQuery = (conditions: { col: string; val: any }[] = [], limitVal?: number) => {
+                const getFiltered = () => {
+                    let rows = [...inMemoryDb];
+                    for (const c of conditions) {
+                        rows = rows.filter(r => r[c.col] === c.val || (c.col === 'id' && r.id === c.val));
+                    }
+                    if (limitVal !== undefined) rows = rows.slice(0, limitVal);
+                    return rows;
+                };
+
+                const builder: any = {
+                    select: vi.fn(() => builder),
+                    eq: vi.fn((col: string, val: any) => createQuery([...conditions, { col, val }], limitVal)),
+                    limit: vi.fn((l: number) => createQuery(conditions, l)),
+                    order: vi.fn(() => builder),
+                    single: vi.fn(() => {
+                        const rows = getFiltered();
+                        return Promise.resolve({ data: rows[0] || null, error: rows[0] ? null : { message: 'Not found' } });
+                    }),
+                    maybeSingle: vi.fn(() => {
+                        const rows = getFiltered();
+                        return Promise.resolve({ data: rows[0] || null, error: null });
+                    }),
+                    then: (onfulfilled: any) => Promise.resolve({ data: getFiltered(), error: null }).then(onfulfilled)
+                };
+                return builder;
+            };
+
+            const root: any = createQuery();
+            root.insert = vi.fn().mockImplementation((record: any) => {
+                const rec = { id: record.id || `SR-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`, ...record };
+                inMemoryDb.push(rec);
+                return {
                     select: vi.fn().mockReturnValue({
-                        single: vi.fn().mockResolvedValue({ data: null, error: { message: 'Mocked offline' } })
+                        single: vi.fn().mockResolvedValue({ data: rec, error: null })
+                    }),
+                    then: (onfulfilled: any) => Promise.resolve({ data: rec, error: null }).then(onfulfilled)
+                };
+            });
+            root.update = vi.fn().mockImplementation((updates: any) => {
+                return {
+                    eq: vi.fn().mockImplementation((col: string, val: any) => {
+                        const idx = inMemoryDb.findIndex(r => r[col] === val || r.id === val);
+                        if (idx !== -1) {
+                            inMemoryDb[idx] = { ...inMemoryDb[idx], ...updates };
+                        }
+                        return Promise.resolve({ data: inMemoryDb[idx] || updates, error: null });
                     })
-                })
-            })
+                };
+            });
+            return root;
         })
     }
 }));
 
 describe('Dual-Control Salary Approval Queue (SOP-GOV-018 & Zero-Trust SoD)', () => {
     beforeEach(() => {
-        // Clear local storage and in-memory cache
+        inMemoryDb = [];
         if (typeof localStorage !== 'undefined') {
             localStorage.clear();
         }

@@ -244,5 +244,9 @@ export const leaveRequestsService = {
         }
 
         return true;
+    },
+
+    _clearCache(): void {
+        inMemoryBackup = [];
     }
 };
