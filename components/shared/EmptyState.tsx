@@ -14,18 +14,18 @@ export default function EmptyState({ icon, title, description, action }: EmptySt
     return (
         <div className="flex flex-col items-center justify-center py-16 px-4 text-center">
             {icon && (
-                <div className="text-gray-600 mb-4 opacity-50">
+                <div className="text-[var(--theme-text-muted)] mb-4">
                     {icon}
                 </div>
             )}
-            <h3 className="text-lg font-bold text-white mb-2">{title}</h3>
+            <h3 className="text-lg font-semibold tracking-tight text-[var(--theme-text-primary)] mb-2">{title}</h3>
             {description && (
-                <p className="text-sm text-gray-500 mb-6 max-w-md">{description}</p>
+                <p className="text-sm text-[var(--theme-text-secondary)] mb-6 max-w-md">{description}</p>
             )}
             {action && (
                 <button
                     onClick={action.onClick}
-                    className="px-6 py-2.5 bg-cyber-primary text-black font-bold rounded-lg hover:bg-cyber-accent transition-colors shadow-[0_0_20px_rgba(0,255,157,0.2)]"
+                    className="px-5 py-2.5 bg-[var(--theme-primary)] text-[var(--theme-primary-text)] font-semibold rounded-xl hover:bg-[var(--theme-primary-hover)] transition-all shadow-sm cursor-pointer active:scale-[0.99]"
                 >
                     {action.label}
                 </button>

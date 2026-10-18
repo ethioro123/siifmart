@@ -166,39 +166,39 @@ export function inferCardMeta(type: string, message: string): {
 
 const THEMES = {
   error: {
-    border: 'border-red-300 dark:border-red-900/70', rail: 'bg-red-600',
-    iconBg: 'bg-red-100 text-red-700 dark:bg-red-950 dark:text-red-300',
-    badgeBg: 'bg-red-100 text-red-800 dark:bg-red-950 dark:text-red-200',
-    titleColor: 'text-stone-950 dark:text-white',
-    explanationBg: 'bg-red-50 dark:bg-red-950/40 border-red-200 dark:border-red-900',
-    subtitleColor: 'text-red-800 dark:text-red-200', progress: 'bg-red-600',
+    border: 'border-[var(--theme-status-danger-border)]', rail: 'bg-[var(--theme-status-danger)]',
+    iconBg: 'bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)]',
+    badgeBg: 'bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] border border-[var(--theme-status-danger-border)]',
+    titleColor: 'text-[var(--theme-text-primary)]',
+    explanationBg: 'bg-[var(--theme-bg-subtle)] border border-[var(--theme-status-danger-border)]',
+    subtitleColor: 'text-[var(--theme-status-danger-text)]', progress: 'bg-[var(--theme-status-danger)]',
     Icon: ShieldAlert
   },
   warning: {
-    border: 'border-amber-300 dark:border-amber-900/70', rail: 'bg-amber-500',
-    iconBg: 'bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-200',
-    badgeBg: 'bg-amber-100 text-amber-900 dark:bg-amber-950 dark:text-amber-100',
-    titleColor: 'text-stone-950 dark:text-white',
-    explanationBg: 'bg-amber-50 dark:bg-amber-950/40 border-amber-200 dark:border-amber-900',
-    subtitleColor: 'text-amber-900 dark:text-amber-200', progress: 'bg-amber-500',
+    border: 'border-[var(--theme-status-warning-border)]', rail: 'bg-[var(--theme-status-warning)]',
+    iconBg: 'bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)]',
+    badgeBg: 'bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] border border-[var(--theme-status-warning-border)]',
+    titleColor: 'text-[var(--theme-text-primary)]',
+    explanationBg: 'bg-[var(--theme-bg-subtle)] border border-[var(--theme-status-warning-border)]',
+    subtitleColor: 'text-[var(--theme-status-warning-text)]', progress: 'bg-[var(--theme-status-warning)]',
     Icon: AlertTriangle
   },
   success: {
-    border: 'border-emerald-300 dark:border-emerald-900/70', rail: 'bg-emerald-600',
-    iconBg: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-200',
-    badgeBg: 'bg-emerald-100 text-emerald-900 dark:bg-emerald-950 dark:text-emerald-100',
-    titleColor: 'text-stone-950 dark:text-white',
-    explanationBg: 'bg-emerald-50 dark:bg-emerald-950/40 border-emerald-200 dark:border-emerald-900',
-    subtitleColor: 'text-emerald-900 dark:text-emerald-200', progress: 'bg-emerald-600',
+    border: 'border-[var(--theme-status-success-border)]', rail: 'bg-[var(--theme-status-success)]',
+    iconBg: 'bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)]',
+    badgeBg: 'bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] border border-[var(--theme-status-success-border)]',
+    titleColor: 'text-[var(--theme-text-primary)]',
+    explanationBg: 'bg-[var(--theme-bg-subtle)] border border-[var(--theme-status-success-border)]',
+    subtitleColor: 'text-[var(--theme-status-success-text)]', progress: 'bg-[var(--theme-status-success)]',
     Icon: CheckCircle2
   },
   info: {
-    border: 'border-sky-300 dark:border-sky-900/70', rail: 'bg-sky-600',
-    iconBg: 'bg-sky-100 text-sky-800 dark:bg-sky-950 dark:text-sky-200',
-    badgeBg: 'bg-sky-100 text-sky-900 dark:bg-sky-950 dark:text-sky-100',
-    titleColor: 'text-stone-950 dark:text-white',
-    explanationBg: 'bg-sky-50 dark:bg-sky-950/40 border-sky-200 dark:border-sky-900',
-    subtitleColor: 'text-sky-900 dark:text-sky-200', progress: 'bg-sky-600',
+    border: 'border-[var(--theme-status-info-border)]', rail: 'bg-[var(--theme-status-info)]',
+    iconBg: 'bg-[var(--theme-status-info-bg)] text-[var(--theme-status-info-text)]',
+    badgeBg: 'bg-[var(--theme-status-info-bg)] text-[var(--theme-status-info-text)] border border-[var(--theme-status-info-border)]',
+    titleColor: 'text-[var(--theme-text-primary)]',
+    explanationBg: 'bg-[var(--theme-bg-subtle)] border border-[var(--theme-status-info-border)]',
+    subtitleColor: 'text-[var(--theme-status-info-text)]', progress: 'bg-[var(--theme-status-info)]',
     Icon: Info
   }
 } as const;
@@ -287,7 +287,7 @@ export const NotificationCard: React.FC<NotificationCardProps> = ({ item, onDism
         const nextTarget = event.relatedTarget;
         if (!(nextTarget instanceof Node) || !event.currentTarget.contains(nextTarget)) resume();
       }}
-      className={`pointer-events-auto relative w-full overflow-hidden rounded-2xl border ${theme.border} bg-white dark:bg-stone-950 shadow-xl shadow-stone-950/10 pl-4 pr-2.5 pt-3.5 pb-4 sm:pl-5 sm:pr-3.5 select-text`}
+      className={`pointer-events-auto relative w-full overflow-hidden rounded-2xl border ${theme.border} bg-[var(--theme-bg-card)] shadow-xl shadow-black/20 pl-4 pr-2.5 pt-3.5 pb-4 sm:pl-5 sm:pr-3.5 select-text`}
     >
       {/* Accent rail */}
       <span className={`absolute left-0 top-0 bottom-0 w-1 ${theme.rail}`} aria-hidden="true" />

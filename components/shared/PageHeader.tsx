@@ -9,11 +9,11 @@ interface PageHeaderProps {
 
 export default function PageHeader({ title, subtitle, actions, stats }: PageHeaderProps) {
     return (
-        <div className="bg-cyber-gray border border-white/5 rounded-2xl p-6 mb-6">
+        <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-3xl p-6 mb-6 shadow-sm">
             <div className="flex justify-between items-start mb-4">
                 <div>
-                    <h1 className="text-2xl font-bold text-white mb-1">{title}</h1>
-                    {subtitle && <p className="text-sm text-gray-400">{subtitle}</p>}
+                    <h1 className="text-2xl font-bold tracking-tight text-[var(--theme-text-primary)] mb-1">{title}</h1>
+                    {subtitle && <p className="text-sm text-[var(--theme-text-secondary)]">{subtitle}</p>}
                 </div>
                 {actions && <div className="flex gap-3">{actions}</div>}
             </div>

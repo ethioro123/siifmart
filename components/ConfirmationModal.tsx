@@ -49,19 +49,19 @@ export default function ConfirmationModal({
 
   const variantStyles = {
     danger: {
-      icon: 'text-red-400',
-      button: 'bg-red-500/20 hover:bg-red-500/30 text-red-400 border-red-500/50',
-      border: 'border-red-500/20'
+      icon: 'text-[var(--theme-status-danger-text)]',
+      button: 'bg-[var(--theme-status-danger-bg)] hover:opacity-90 text-[var(--theme-status-danger-text)] border border-[var(--theme-status-danger-border)]',
+      border: 'border-[var(--theme-status-danger-border)]'
     },
     warning: {
-      icon: 'text-yellow-400',
-      button: 'bg-yellow-500/20 hover:bg-yellow-500/30 text-yellow-400 border-yellow-500/50',
-      border: 'border-yellow-500/20'
+      icon: 'text-[var(--theme-status-warning-text)]',
+      button: 'bg-[var(--theme-status-warning-bg)] hover:opacity-90 text-[var(--theme-status-warning-text)] border border-[var(--theme-status-warning-border)]',
+      border: 'border-[var(--theme-status-warning-border)]'
     },
     info: {
-      icon: 'text-blue-400',
-      button: 'bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 border-blue-500/50',
-      border: 'border-blue-500/20'
+      icon: 'text-[var(--theme-status-info-text)]',
+      button: 'bg-[var(--theme-status-info-bg)] hover:opacity-90 text-[var(--theme-status-info-text)] border border-[var(--theme-status-info-border)]',
+      border: 'border-[var(--theme-status-info-border)]'
     }
   };
 
@@ -77,32 +77,32 @@ export default function ConfirmationModal({
         <div className="flex gap-3 justify-end">
           <button
             onClick={handleClose}
-            className="px-4 py-2 rounded-lg bg-white/5 hover:bg-white/10 text-gray-300 font-bold transition-colors"
+            className="px-4 py-2 rounded-xl bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-border)] text-[var(--theme-text-primary)] font-semibold border border-[var(--theme-border)] transition-colors cursor-pointer"
           >
             {cancelText}
           </button>
           <button
             onClick={handleConfirm}
-            className={`px-4 py-2 rounded-lg font-bold transition-colors border ${styles.button}`}
+            className={`px-4 py-2 rounded-xl font-semibold transition-all cursor-pointer ${styles.button}`}
           >
             {confirmText}
           </button>
         </div>
       }
     >
-      <div className={`p-4 rounded-xl border ${styles.border} bg-black/20 mb-4`}>
+      <div className={`p-4 rounded-2xl border ${styles.border} bg-[var(--theme-bg-subtle)] mb-4`}>
         <div className="flex items-start gap-3">
           <AlertTriangle className={`${styles.icon} flex-shrink-0 mt-0.5`} size={20} />
           <div className="flex-1">
-            <p className="text-white text-sm whitespace-pre-line">{message}</p>
+            <p className="text-[var(--theme-text-primary)] text-sm whitespace-pre-line">{message}</p>
           </div>
         </div>
       </div>
 
       {requireText && (
         <div className="space-y-2">
-          <label className="text-sm text-gray-300 font-bold block">
-            Type <span className="text-cyber-primary font-mono">{requireText}</span> to confirm:
+          <label className="text-sm text-[var(--theme-text-secondary)] font-medium block">
+            Type <span className="text-[var(--theme-primary)] font-mono font-bold">{requireText}</span> to confirm:
           </label>
           <input
             type="text"
@@ -116,12 +116,12 @@ export default function ConfirmationModal({
                 handleConfirm();
               }
             }}
-            className="w-full bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-white text-sm focus:border-cyber-primary focus:ring-1 focus:ring-cyber-primary outline-none font-mono"
+            className="w-full bg-[var(--theme-input-bg)] border border-[var(--theme-input-border)] rounded-xl px-3.5 py-2 text-[var(--theme-text-primary)] text-sm focus:border-[var(--theme-primary)] outline-none font-mono transition-colors"
             placeholder={requireText}
             autoFocus
           />
           {error && (
-            <p className="text-red-400 text-xs">{error}</p>
+            <p className="text-[var(--theme-status-danger-text)] text-xs">{error}</p>
           )}
         </div>
       )}

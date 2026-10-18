@@ -243,24 +243,21 @@
 .stroke-\[\#2C5E3B\] { stroke: var(--theme-primary) !important; }
 
 /* --------------------------------------------------------------------------
-   5. Residual Emerald Neutralization to Neutral Elegance Swatches
+   5. Residual Emerald & Success Normalization to Calm Apple HIG Palette
    -------------------------------------------------------------------------- */
 .text-emerald-400,
 .dark\:text-emerald-400:where(.dark, .dark *),
 .dark\:text-emerald-300:where(.dark, .dark *),
-.dark\:text-emerald-200:where(.dark, .dark *) {
-  color: var(--theme-primary) !important;
+.dark\:text-emerald-200:where(.dark, .dark *),
+.text-emerald-500 {
+  color: var(--theme-status-success-text) !important;
 }
 
 .text-emerald-600,
 .text-emerald-700,
 .text-emerald-800,
 .text-emerald-900 {
-  color: var(--theme-brand-walnut) !important;
-}
-
-.text-emerald-500 {
-  color: var(--theme-accent) !important;
+  color: var(--theme-status-success-text) !important;
 }
 
 .bg-emerald-500\/10,
@@ -269,7 +266,7 @@
 .dark\:bg-emerald-500\/20:where(.dark, .dark *),
 .bg-emerald-500\/5,
 .dark\:bg-emerald-500\/5:where(.dark, .dark *) {
-  background-color: var(--theme-pill-bg) !important;
+  background-color: var(--theme-status-success-bg) !important;
 }
 
 .border-emerald-500\/20,
@@ -277,7 +274,7 @@
 .border-emerald-500\/30,
 .dark\:border-emerald-500\/20:where(.dark, .dark *),
 .dark\:border-emerald-500\/25:where(.dark, .dark *) {
-  border-color: var(--theme-border-mocha) !important;
+  border-color: var(--theme-status-success-border) !important;
 }
 
 /* --------------------------------------------------------------------------

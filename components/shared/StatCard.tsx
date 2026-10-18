@@ -21,31 +21,31 @@ export default function StatCard({
     onClick
 }: StatCardProps) {
     const colorClasses = {
-        primary: 'text-cyber-primary',
-        blue: 'text-blue-400',
-        green: 'text-green-400',
-        yellow: 'text-yellow-400',
-        red: 'text-red-400',
+        primary: 'text-[var(--theme-text-primary)]',
+        blue: 'text-[var(--theme-status-info-text)]',
+        green: 'text-[var(--theme-status-success-text)]',
+        yellow: 'text-[var(--theme-status-warning-text)]',
+        red: 'text-[var(--theme-status-danger-text)]',
         purple: 'text-purple-400',
-        gray: 'text-gray-400'
+        gray: 'text-[var(--theme-text-secondary)]'
     };
 
     return (
         <div
-            className={`bg-black/20 rounded-lg p-4 border border-white/5 ${onClick ? 'cursor-pointer hover:bg-black/30 transition-colors' : ''
+            className={`bg-[var(--theme-bg-card)] rounded-2xl p-4 border border-[var(--theme-border)] shadow-sm ${onClick ? 'cursor-pointer hover:bg-[var(--theme-bg-card-hover)] transition-colors' : ''
                 }`}
             onClick={onClick}
         >
             <div className="flex items-center justify-between mb-2">
-                <p className="text-[10px] text-gray-500 uppercase font-bold tracking-wide">{label}</p>
-                {icon && <div className="text-gray-500">{icon}</div>}
+                <p className="text-[11px] text-[var(--theme-text-secondary)] uppercase font-semibold tracking-wider">{label}</p>
+                {icon && <div className="text-[var(--theme-text-muted)]">{icon}</div>}
             </div>
             <div className="flex items-end justify-between">
-                <p className={`text-2xl font-mono font-bold ${colorClasses[color]}`}>
+                <p className={`text-2xl font-mono font-bold tracking-tight ${colorClasses[color]}`}>
                     {value}
                 </p>
                 {trend && (
-                    <span className={`text-xs font-bold ${trend.isPositive ? 'text-green-400' : 'text-red-400'
+                    <span className={`text-xs font-semibold ${trend.isPositive ? 'text-[var(--theme-status-success-text)]' : 'text-[var(--theme-status-danger-text)]'
                         }`}>
                         {trend.isPositive ? '↑' : '↓'} {Math.abs(trend.value)}%
                     </span>

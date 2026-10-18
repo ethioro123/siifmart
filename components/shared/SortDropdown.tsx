@@ -21,17 +21,17 @@ const SortDropdown = <T extends string>({
     <div className="relative">
         <button
             onClick={() => setIsOpen(!isOpen)}
-            className="flex items-center gap-2 px-3 py-2 bg-black/40 backdrop-blur-md rounded-xl border border-white/10 text-[10px] font-black text-gray-400 hover:text-white transition-all whitespace-nowrap uppercase tracking-widest"
+            className="flex items-center gap-2 px-3 py-2 bg-[var(--theme-bg-card)] rounded-xl border border-[var(--theme-border)] text-xs font-semibold text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-card-hover)] transition-all whitespace-nowrap cursor-pointer shadow-xs"
         >
-            <ListFilter size={14} className={value !== options[0].id ? 'text-cyber-primary' : ''} />
-            <span>{label}: {options.find(o => o.id === value)?.label.toUpperCase() || value.toUpperCase()}</span>
-            <ChevronDown size={14} className={`transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`} />
+            <ListFilter size={14} className={value !== options[0].id ? 'text-[var(--theme-primary)]' : 'text-[var(--theme-text-muted)]'} />
+            <span>{label}: {options.find(o => o.id === value)?.label || value}</span>
+            <ChevronDown size={14} className={`transition-transform duration-200 text-[var(--theme-text-muted)] ${isOpen ? 'rotate-180' : ''}`} />
         </button>
 
         {isOpen && (
             <>
                 <div className="fixed inset-0 z-[50]" onClick={() => setIsOpen(false)} />
-                <div className="absolute top-full right-0 mt-2 w-48 bg-[#0a0a0b]/95 backdrop-blur-xl border border-white/10 rounded-2xl p-2 shadow-2xl z-[51] animate-in fade-in slide-in-from-top-2 duration-200">
+                <div className="absolute top-full right-0 mt-2 w-48 bg-[var(--theme-bg-panel)] border border-[var(--theme-border)] rounded-2xl p-1.5 shadow-[var(--shadow-modal)] z-[51] animate-in fade-in slide-in-from-top-2 duration-150">
                     {options.map((option) => (
                         <button
                             key={option.id}
@@ -39,7 +39,7 @@ const SortDropdown = <T extends string>({
                                 onChange(option.id);
                                 setIsOpen(false);
                             }}
-                            className={`w-full text-left px-4 py-3 text-xs font-bold transition-colors flex items-center gap-2 rounded-xl mb-1 last:mb-0 ${value === option.id ? 'bg-cyber-primary text-black' : 'text-gray-400 hover:bg-white/5 hover:text-white'}`}
+                            className={`w-full text-left px-3.5 py-2.5 text-xs font-semibold transition-colors flex items-center gap-2 rounded-xl mb-0.5 last:mb-0 cursor-pointer ${value === option.id ? 'bg-[var(--theme-primary)] text-[var(--theme-primary-text)] shadow-xs' : 'text-[var(--theme-text-secondary)] hover:bg-[var(--theme-bg-subtle)] hover:text-[var(--theme-text-primary)]'}`}
                         >
                             {option.icon}
                             {option.label}

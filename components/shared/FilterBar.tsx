@@ -23,23 +23,23 @@ export default function FilterBar({
     showClearButton = false
 }: FilterBarProps) {
     return (
-        <div className="bg-cyber-gray border border-white/5 rounded-2xl p-4 space-y-3">
+        <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-4 space-y-3 shadow-sm">
             {/* Search Bar */}
             <div className="flex items-center gap-3">
                 {onSearchChange && (
-                    <div className="flex items-center bg-black/30 border border-white/10 rounded-xl px-4 py-2 flex-1">
-                        <Search className="w-4 h-4 text-gray-400" />
+                    <div className="flex items-center bg-[var(--theme-input-bg)] border border-[var(--theme-input-border)] focus-within:border-[var(--theme-border-focus)] rounded-xl px-4 py-2 flex-1 transition-colors">
+                        <Search className="w-4 h-4 text-[var(--theme-text-muted)]" />
                         <input
                             type="text"
                             placeholder={searchPlaceholder}
-                            className="bg-transparent border-none ml-3 flex-1 text-white outline-none placeholder-gray-500 text-sm"
+                            className="bg-transparent border-none ml-3 flex-1 text-[var(--theme-text-primary)] outline-none placeholder-[var(--theme-text-muted)] text-sm"
                             value={searchValue}
                             onChange={(e) => onSearchChange(e.target.value)}
                         />
                         {searchValue && (
                             <button
                                 onClick={() => onSearchChange('')}
-                                className="text-gray-400 hover:text-white transition-colors"
+                                className="text-[var(--theme-text-muted)] hover:text-[var(--theme-text-primary)] transition-colors cursor-pointer"
                             >
                                 <X size={16} />
                             </button>
@@ -47,7 +47,7 @@ export default function FilterBar({
                     </div>
                 )}
                 {resultCount !== undefined && (
-                    <div className="text-xs text-gray-400 font-mono whitespace-nowrap">
+                    <div className="text-xs text-[var(--theme-text-secondary)] font-mono whitespace-nowrap">
                         {resultCount} {resultCount === 1 ? 'item' : 'items'}
                     </div>
                 )}
@@ -57,12 +57,12 @@ export default function FilterBar({
             {/* Filters Row */}
             {filters && (
                 <div className="flex items-center gap-3 flex-wrap">
-                    <span className="text-xs text-gray-500 font-bold uppercase">Filters:</span>
+                    <span className="text-xs text-[var(--theme-text-secondary)] font-semibold uppercase tracking-wider">Filters:</span>
                     {filters}
                     {showClearButton && onClearFilters && (
                         <button
                             onClick={onClearFilters}
-                            className="text-xs text-gray-400 hover:text-white underline transition-colors"
+                            className="text-xs text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] underline transition-colors cursor-pointer"
                         >
                             Clear All
                         </button>

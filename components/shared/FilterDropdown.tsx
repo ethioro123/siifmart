@@ -21,16 +21,16 @@ export default function FilterDropdown({
             <select
                 value={value}
                 onChange={(e) => onChange(e.target.value)}
-                className="appearance-none bg-white/5 border border-white/10 rounded-lg pl-3 pr-8 py-2 text-xs font-bold text-white outline-none cursor-pointer hover:bg-white/10 transition-colors"
+                className="appearance-none bg-[var(--theme-input-bg)] border border-[var(--theme-border)] rounded-xl pl-3 pr-8 py-2 text-xs font-semibold text-[var(--theme-text-primary)] outline-none cursor-pointer hover:bg-[var(--theme-bg-card-hover)] focus:border-[var(--theme-primary)] transition-colors"
                 aria-label={label}
             >
                 {options.map((option) => (
-                    <option key={option.value} value={option.value}>
+                    <option key={option.value} value={option.value} className="bg-[var(--theme-bg-panel)] text-[var(--theme-text-primary)]">
                         {option.label}
                     </option>
                 ))}
             </select>
-            <ChevronDown size={12} className="absolute right-2 top-2.5 text-gray-400 pointer-events-none" />
+            <ChevronDown size={12} className="absolute right-2.5 top-3 text-[var(--theme-text-muted)] pointer-events-none" />
         </div>
     );
 }

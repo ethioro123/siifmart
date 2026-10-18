@@ -17,25 +17,25 @@ interface TabSystemProps {
 
 export default function TabSystem({ tabs, activeTab, onChange, className = '' }: TabSystemProps) {
     return (
-        <div className={`flex gap-2 bg-black/30 p-1 rounded-xl border border-white/5 ${className}`}>
+        <div className={`flex gap-1.5 bg-[var(--theme-bg-subtle)] p-1 rounded-2xl border border-[var(--theme-border)] ${className}`}>
             {tabs.map((tab) => (
                 <button
                     key={tab.id}
                     onClick={() => !tab.disabled && onChange(tab.id)}
                     disabled={tab.disabled}
-                    className={`flex-1 px-4 py-2.5 rounded-lg font-bold text-sm transition-all flex items-center justify-center gap-2 ${activeTab === tab.id
-                            ? 'bg-cyber-primary text-black shadow-[0_0_20px_rgba(0,255,157,0.3)]'
+                    className={`flex-1 px-4 py-2 rounded-xl font-semibold text-xs transition-all flex items-center justify-center gap-2 cursor-pointer ${activeTab === tab.id
+                            ? 'bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)] border border-[var(--theme-border)] shadow-sm'
                             : tab.disabled
-                                ? 'text-gray-600 cursor-not-allowed'
-                                : 'text-gray-400 hover:text-white hover:bg-white/5'
+                                ? 'text-[var(--theme-text-muted)] cursor-not-allowed opacity-50'
+                                : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-card-hover)]'
                         }`}
                 >
-                    {tab.icon && <span className="text-lg">{tab.icon}</span>}
+                    {tab.icon && <span className="text-base">{tab.icon}</span>}
                     <span>{tab.label}</span>
                     {tab.badge !== undefined && (
-                        <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-bold ${activeTab === tab.id
-                                ? 'bg-black/20 text-black'
-                                : 'bg-white/10 text-gray-400'
+                        <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold ${activeTab === tab.id
+                                ? 'bg-[var(--theme-bg-subtle)] text-[var(--theme-text-primary)]'
+                                : 'bg-[var(--theme-bg-subtle)] text-[var(--theme-text-muted)]'
                             }`}>
                             {tab.badge}
                         </span>
