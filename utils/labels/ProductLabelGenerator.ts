@@ -5,7 +5,7 @@ import { escapeHtml } from './escapeHtml';
 import { getProductLabelStyles } from './productLabelStyles';
 
 export interface ProductLabelItem {
-    value: string;           // Canonical barcode/scan value
+    value: string;           // Legacy fallback when a SKU is unavailable
     label: string;           // Product display name
     sku?: string;            // Explicit human-readable SKU
     barcode?: string;        // Explicit manufacturer barcode
@@ -87,7 +87,9 @@ export const generateUnifiedBatchLabelsHTML = async (
             : '';
 
         const itemCurrency = item.currency || batchCurrency;
-        const itemCode = (item.value || item.sku || '').trim();
+        // SKU is the product identity. Barcode aliases may be stored in the
+        // catalog, but product labels must encode and display the SKU.
+        const itemCode = (item.sku || item.value || '').trim();
         const itemSkuDisplay = (item.sku || item.value || '').trim();
         const itemPriceFormatted = item.price !== undefined && item.price !== null && item.price !== ''
             ? `${itemCurrency} ${typeof item.price === 'number' ? item.price.toFixed(2) : item.price}`
@@ -108,7 +110,7 @@ export const generateUnifiedBatchLabelsHTML = async (
             return `<div class="label" style="width:${css.width};height:${css.height};display:flex;align-items:center;justify-content:center;color:red;font-size:10px;">AWAITING SKU</div>`;
         }
 
-        const barcodeFormat = resolveBarcodeFormat(item.barcodeType, itemCode);
+        const barcodeFormat = resolveBarcodeFormat(undefined, itemCode);
         const nameEscaped = escapeHtml(item.label);
         const skuEscaped = escapeHtml(itemSkuDisplay);
         const catEscaped = escapeHtml(item.category);

@@ -40,6 +40,7 @@ import { productsService } from '../../services/supabase.service'; // Needed for
 import { inventoryRequestsService } from '../../services/supabase.service'; // Needed for CountTab, ReturnsTab
 import { generatePackLabelHTML } from '../../utils/labels/PackLabelGenerator'; // Needed for DocksTab
 import { getVisibleFulfillmentTabs, getDefaultFulfillmentTab } from '../../utils/fulfillmentTabPermissions';
+import { logger } from '../../utils/logger';
 
 export const FulfillmentContent: React.FC = () => {
     const {
@@ -104,6 +105,7 @@ export const FulfillmentContent: React.FC = () => {
     const visibleTabs = useMemo(() => {
         return getVisibleFulfillmentTabs(user?.role);
     }, [user?.role]);
+    const canAccessTab = (tab: OpTab) => visibleTabs.includes(tab);
 
     const defaultTab = useMemo(() => getDefaultFulfillmentTab(user?.role), [user?.role]);
 

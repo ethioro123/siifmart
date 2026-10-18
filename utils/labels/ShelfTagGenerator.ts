@@ -42,7 +42,7 @@ export const generateShelfTagsHTML = (
             : item.regularPrice;
         const hasDiscount = item.isOnSale && item.salePrice && item.salePrice > 0 && item.salePrice < item.regularPrice;
         const isHalal = isProductHalal(item);
-        const barcodeVal = (item.barcode || item.sku || '').trim();
+        const barcodeVal = item.sku.trim();
         const barcodeSvg = barcodeVal ? generateBarcodeSVG(barcodeVal, {
             format: 'CODE128',
             width: 1.1,

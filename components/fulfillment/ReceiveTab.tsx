@@ -209,7 +209,7 @@ export const ReceiveTab: React.FC = () => {
                 const lpnItems: InboundPutawayLabelItem[] = printItems.map(item => {
                     const matchedProd = (products || []).find((p: Product) => p.sku === item.sku || p.barcode === item.sku) ||
                                         (allProducts || []).find((p: Product) => p.sku === item.sku || p.barcode === item.sku);
-                    const canonicalBarcode = item.barcode || matchedProd?.barcode || item.sku;
+                    const canonicalBarcode = item.sku || matchedProd?.sku || '';
                     return {
                         sku: item.sku,
                         productName: item.name,
@@ -241,7 +241,7 @@ export const ReceiveTab: React.FC = () => {
                 const labelsToPrint = printItems.map(item => {
                     const matchedProd = (products || []).find((p: Product) => p.sku === item.sku || p.barcode === item.sku) ||
                                         (allProducts || []).find((p: Product) => p.sku === item.sku || p.barcode === item.sku);
-                    const canonicalBarcode = item.barcode || matchedProd?.barcode || item.sku;
+                    const canonicalBarcode = item.sku || matchedProd?.sku || '';
                     const canonicalFormat = item.barcodeType || matchedProd?.barcodeType;
                     return {
                         value: canonicalBarcode,

@@ -4,7 +4,7 @@ import { autoSelectSiteForRole, getRecommendedDepartment, validateRoleSiteAssign
 import { SYSTEM_ROLES, canEmployRole, getJobTitleForRole, getRoleHierarchy } from '../utils/roles';
 import { logger } from '../utils/logger';
 import { employeesService } from '../services/employees.service';
-import { formatEmployeeCode, parseEmployeeCode, normalizeCountryCode, generateEmployeeEmail } from '../utils/employeeIdGenerator';
+import { normalizeCountryCode, generateEmployeeEmail } from '../utils/employeeIdGenerator';
 import { getSiteCountryId } from '../utils/siteIdGenerator';
 import { isDirectOnboardingAuthorized, persistCandidateDocuments } from '../utils/employeeOnboardingGovernance';
 import { saveEmployeeDraft } from '../utils/employeeDrafts';
@@ -330,31 +330,7 @@ export function useEmployeeWizard({
             ? siteRegionCode
             : undefined;
 
-         let maxCodeNumber = targetCountry === 'ET' ? 39 : 0;
-         if (Array.isArray(employees)) {
-            employees.forEach(emp => {
-               const parsed = parseEmployeeCode(emp.code);
-               if (parsed && parsed.country === targetCountry && parsed.seq > maxCodeNumber) {
-                  maxCodeNumber = parsed.seq;
-               }
-            });
-         }
-         try {
-            const nextDbCode = await employeesService.getNextCode(targetCountry);
-            const parsed = parseEmployeeCode(nextDbCode);
-            if (parsed && parsed.country === targetCountry && parsed.seq > maxCodeNumber) {
-               maxCodeNumber = parsed.seq - 1;
-            }
-         } catch (e) {
-            logger.warn('useEmployeeWizard', 'Failed to fetch next DB employee code, using local max', { error: String(e) });
-         }
-
-         let nextCodeNumber = maxCodeNumber + 1;
-         let employeeCode = formatEmployeeCode(targetCountry, nextCodeNumber);
-         while (employees.some(emp => emp.code?.toUpperCase() === employeeCode.toUpperCase())) {
-            nextCodeNumber++;
-            employeeCode = formatEmployeeCode(targetCountry, nextCodeNumber);
-         }
+         const employeeCode = await employeesService.getNextCode(targetCountry);
 
          let signupEmail = generateEmployeeEmail(employeeCode);
          let employeeId: string = crypto.randomUUID();

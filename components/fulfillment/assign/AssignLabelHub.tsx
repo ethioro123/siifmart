@@ -108,7 +108,7 @@ export const AssignLabelHub: React.FC<AssignLabelHubProps> = ({
 
     const handlePrintProduct = async () => {
         if (!searchSku.trim()) return;
-        const canonicalCode = (matchedProduct?.barcode || matchedProduct?.sku || searchSku).trim();
+        const canonicalCode = (matchedProduct?.sku || searchSku).trim();
         const labelHTML = await generateUnifiedBatchLabelsHTML([{
             value: canonicalCode,
             sku: matchedProduct?.sku || searchSku.trim(),
@@ -138,7 +138,7 @@ export const AssignLabelHub: React.FC<AssignLabelHubProps> = ({
     const activePreviewData = labelMode === 'PRODUCT' ? {
         type: 'PRODUCT' as const,
         title: matchedProduct?.name || (searchSku.trim() ? 'Manual Product Entry' : 'Awaiting SKU'),
-        code: (matchedProduct?.barcode || matchedProduct?.sku || searchSku).trim(),
+        code: (matchedProduct?.sku || searchSku).trim(),
         format: labelFormat,
         size: labelSize,
         price: matchedProduct?.price,
@@ -379,7 +379,7 @@ export const AssignLabelHub: React.FC<AssignLabelHubProps> = ({
                                             <BarcodeLabelPreviewCard
                                                 type="PRODUCT"
                                                 title={matchedProduct ? matchedProduct.name : searchSku}
-                                                code={(matchedProduct?.barcode || matchedProduct?.sku || searchSku).trim()}
+                                                code={(matchedProduct?.sku || searchSku).trim()}
                                                 format={labelFormat}
                                                 size={labelSize}
                                                 price={matchedProduct?.price}

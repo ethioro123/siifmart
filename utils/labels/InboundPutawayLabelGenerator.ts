@@ -56,7 +56,7 @@ export const generateInboundPutawayLabelHTML = async (
     const cardsHtmlArray: string[] = [];
 
     for (const item of items) {
-        const barcodeVal = item.barcode?.trim() || item.sku.trim();
+        const barcodeVal = item.sku.trim();
         const barcodeSvg = generateBarcodeSVG(barcodeVal, {
             width: 1.4,
             height: validSize === 'Small' ? 32 : 46,

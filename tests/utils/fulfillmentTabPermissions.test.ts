@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import type { UserRole } from '../../types';
 import { hasPermission } from '../../utils/permissions';
-import { getVisibleFulfillmentTabs } from '../../utils/fulfillmentTabPermissions';
+import { getVisibleFulfillmentTabs, getDefaultFulfillmentTab } from '../../utils/fulfillmentTabPermissions';
 import { FLOOR_WORKER_ROLES } from '../../utils/fulfillmentRoles';
 import { isTransferManager } from '../../utils/transferGovernance';
 
@@ -62,5 +62,39 @@ describe('Fulfillment tab permissions', () => {
 
     it('does not expose tabs to an unrecognized role', () => {
         expect(getVisibleFulfillmentTabs('unknown_role')).toEqual([]);
+    });
+
+    describe('WMS Worker Sovereign Landing Page (Default Tab)', () => {
+        it.each([
+            ['picker', 'PICK'],
+            ['packer', 'PACK'],
+            ['receiver', 'RECEIVE'],
+            ['inbound_qc_inspector', 'RECEIVE'],
+            ['forklift_operator', 'PUTAWAY'],
+            ['driver', 'DRIVER'],
+            ['stock_clerk', 'COUNT'],
+            ['inventory_specialist', 'COUNT'],
+            ['returns_clerk', 'RETURNS'],
+            ['replenishment_planner', 'REPLENISH'],
+            ['dispatcher', 'ASSIGN'],
+            ['dispatch_manager', 'ASSIGN'],
+            ['fleet_maintenance_supervisor', 'DRIVER'],
+            ['warehouse_manager', 'DOCKS'],
+            ['logistics_manager', 'DOCKS'],
+        ])('routes %s directly to their main working tab %s', (role, expectedTab) => {
+            expect(getDefaultFulfillmentTab(role)).toBe(expectedTab);
+        });
+
+        it('normalizes role casing and whitespace for default tab resolution', () => {
+            expect(getDefaultFulfillmentTab('  Picker  ')).toBe('PICK');
+            expect(getDefaultFulfillmentTab('PACKER')).toBe('PACK');
+            expect(getDefaultFulfillmentTab('Driver')).toBe('DRIVER');
+        });
+
+        it('falls back safely to RECEIVE for unrecognized or empty role', () => {
+            expect(getDefaultFulfillmentTab('unknown_role')).toBe('RECEIVE');
+            expect(getDefaultFulfillmentTab(null)).toBe('RECEIVE');
+            expect(getDefaultFulfillmentTab(undefined)).toBe('RECEIVE');
+        });
     });
 });

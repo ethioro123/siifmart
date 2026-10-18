@@ -6,16 +6,6 @@ import { printHtmlContent } from '../utils/printHelper';
 import { useData } from '../contexts/DataContext';
 import { generateUnifiedBatchLabelsHTML } from '../utils/labels/ProductLabelGenerator';
 
-// Map internal barcode types to react-barcode formats
-const getBarcodeFormat = (type?: string): any => {
-    switch (type) {
-        case 'EAN-13': return 'EAN13';
-        case 'UPC-A': return 'UPC';
-        case 'CODE39': return 'CODE39';
-        case 'CODE128': default: return 'CODE128';
-    }
-};
-
 type LabelSize = 'small' | 'medium' | 'large';
 
 interface LabelData {
@@ -101,7 +91,7 @@ export default function LabelPrintModal({ isOpen, onClose, labels, onPrint }: La
     const handlePrint = async () => {
         if (activeLabels.length === 0) return;
         const items = activeLabels.map(l => ({
-            value: (l.product.barcode || l.product.sku || '').trim(),
+            value: (l.product.sku || '').trim(),
             label: l.product.name,
             sku: l.product.sku,
             barcode: l.product.barcode,
@@ -280,10 +270,10 @@ export default function LabelPrintModal({ isOpen, onClose, labels, onPrint }: La
                                             {labelData.product.name}
                                         </div>
                                         <div className="py-2 flex flex-col items-center justify-center">
-                                            {(labelData.product.barcode || labelData.product.sku) ? (
+                                            {labelData.product.sku ? (
                                                 <Barcode
-                                                    value={labelData.product.barcode || labelData.product.sku}
-                                                    format={getBarcodeFormat(labelData.product.barcodeType || 'CODE128')}
+                                                    value={labelData.product.sku}
+                                                    format="CODE128"
                                                     displayValue={false}
                                                     height={22}
                                                     width={1.2}

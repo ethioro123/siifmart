@@ -281,23 +281,21 @@ export const employeesService = {
     async getNextCode(countryCode?: string): Promise<string> {
         const country = normalizeCountryCode(countryCode || 'ET');
         let maxCodeNumber = country === 'ET' ? 39 : 0; // Baseline known employee codes in database
-        try {
-            const { data } = await supabase
-                .from('employees')
-                .select('code')
-                .order('code', { ascending: false })
-                .limit(100);
+        const { data, error } = await supabase
+            .from('employees')
+            .select('code')
+            .like('code', `${country}-SIIF%`)
+            .order('code', { ascending: false })
+            .limit(1000);
 
-            if (data && Array.isArray(data)) {
-                data.forEach((emp: { code?: string }) => {
-                    const parsed = parseEmployeeCode(emp.code);
-                    if (parsed && parsed.country === country) {
-                        if (parsed.seq > maxCodeNumber) maxCodeNumber = parsed.seq;
-                    }
-                });
-            }
-        } catch {
-            // fallback gracefully
+        if (error) throw error;
+        if (data && Array.isArray(data)) {
+            data.forEach((emp: { code?: string }) => {
+                const parsed = parseEmployeeCode(emp.code, country);
+                if (parsed && parsed.country === country && parsed.seq > maxCodeNumber) {
+                    maxCodeNumber = parsed.seq;
+                }
+            });
         }
         return formatEmployeeCode(country, maxCodeNumber + 1);
     },
