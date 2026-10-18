@@ -8,6 +8,10 @@ import {
     checkMfaRequirement,
 } from '../services/zeroTrustPolicies.service';
 
+export type SessionWarning =
+    | { type: 'expiry'; minutesLeft: number }
+    | { type: 'mfa_required'; message: string };
+
 /**
  * Session Manager Hook (Enhanced with Zero-Trust Inactivity Enforcement)
  * - Auto-refresh sessions
@@ -17,7 +21,7 @@ import {
  * - Visibility API integration
  */
 export function useSessionManager(
-    onSessionWarning?: (minutesLeft: number) => void,
+    onSessionWarning?: (warning: SessionWarning) => void,
     onSessionTimeout?: () => void,
     userRole?: string
 ) {
@@ -82,7 +86,10 @@ export function useSessionManager(
                     if (mfaCheck.required && !mfaCheck.satisfied && !hasWarned) {
                         logger.warn('useSessionManager', mfaCheck.reason || 'MFA requirement not satisfied');
                         setHasWarned(true);
-                        onSessionWarning?.(0);
+                        onSessionWarning?.({
+                            type: 'mfa_required',
+                            message: 'Your role requires multi-factor authentication, but this session has not completed verification.'
+                        });
                     }
                     mfaCheckedForRef.current = mfaCheckKey;
                 }
@@ -91,7 +98,7 @@ export function useSessionManager(
                 const idleRemainingMs = timeoutMs - idleDuration;
                 if (idleRemainingMs <= 60000 && idleRemainingMs > 0 && !hasWarned) {
                     setHasWarned(true);
-                    onSessionWarning?.(1);
+                    onSessionWarning?.({ type: 'expiry', minutesLeft: 1 });
                 }
 
                 // 3. JWT Token Expiration Check
@@ -100,11 +107,11 @@ export function useSessionManager(
                     const timeUntilExpiry = expiresAt.getTime() - now;
 
                     // Warn user if token expires in less than configured warning threshold
-                    if (timeUntilExpiry < APP_CONFIG.SESSION_EXPIRY_WARNING_TIME && !hasWarned) {
-                        const minutesLeft = Math.floor(timeUntilExpiry / 60000);
+                    if (timeUntilExpiry > 0 && timeUntilExpiry < APP_CONFIG.SESSION_EXPIRY_WARNING_TIME && !hasWarned) {
+                        const minutesLeft = Math.max(1, Math.ceil(timeUntilExpiry / 60000));
                         logger.warn('useSessionManager', `Session token expires in ${minutesLeft} minutes`);
                         setHasWarned(true);
-                        onSessionWarning?.(minutesLeft);
+                        onSessionWarning?.({ type: 'expiry', minutesLeft });
                     }
 
                     // Reset warning flag if session was refreshed

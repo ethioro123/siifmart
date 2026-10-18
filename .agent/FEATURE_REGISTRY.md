@@ -4,6 +4,11 @@
 
 ## Active Features
 
+### Accurate Session Warning Messages (2026-10-18)
+- MFA requirements now show a verification warning instead of a false zero-minute expiry message. Genuine token expiry warnings use a positive, rounded-up minute count and are suppressed after token expiry.
+- **Files**: `hooks/useSessionManager.ts`, `contexts/CentralStore.tsx`
+- **Database**: None
+
 ### Mobile Web Deployment Recovery (2026-10-18)
 - Prevents a stale service-worker or mobile browser asset cache from causing repeat reloads after a deployment. A chunk failure now clears only SIIFMART Workbox caches and retries once; HTML navigations no longer use an unversioned runtime cache.
 - **Files**: `index.tsx`, `vite.config.ts`

@@ -2,7 +2,7 @@ import React, { createContext, useContext, useState, useEffect, useCallback, Rea
 import { authService } from '../services/auth.service';
 import { UserRole, User } from '../types';
 import { employeesService } from '../services/employees.service';
-import { useSessionManager } from '../hooks/useSessionManager';
+import { useSessionManager, type SessionWarning } from '../hooks/useSessionManager';
 import { useDataRefresh } from '../hooks/useDataRefresh';
 import { useNetworkStatus } from '../hooks/useNetworkStatus';
 import { systemLogsService } from '../services/local-logs.service';
@@ -54,13 +54,21 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
 
   // Session warning handler
-  const handleSessionWarning = (minutesLeft: number) => {
+  const showToast = useCallback((message: string, type: 'info' | 'warning' | 'error' | 'success' = 'info', duration?: number, title?: string) => {
+    const id = typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random()}`;
+    setToasts(prev => [...prev, { id, message, type, duration, title }]);
+  }, []);
+
+  const handleSessionWarning = useCallback((warning: SessionWarning) => {
+    const message = warning.type === 'mfa_required'
+      ? warning.message
+      : `Your session will expire in ${warning.minutesLeft} minute${warning.minutesLeft !== 1 ? 's' : ''}. Please save your work.`;
     showToast(
-      `Your session will expire in ${minutesLeft} minute${minutesLeft !== 1 ? 's' : ''}. Please save your work.`,
+      message,
       'warning',
       APP_CONFIG.TOAST_WARNING_DURATION
     );
-  };
+  }, [showToast]);
 
   const handleSessionTimeout = useCallback(() => {
     showToast('Session expired due to inactivity per Zero-Trust role security policy.', 'warning');
@@ -403,11 +411,6 @@ export function StoreProvider({ children }: { children: ReactNode }) {
 
   const toggleSidebar = () => {
     setIsSidebarOpen(prev => !prev);
-  };
-
-  const showToast = (message: string, type: 'info' | 'warning' | 'error' | 'success' = 'info', duration?: number, title?: string) => {
-    const id = typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random()}`;
-    setToasts(prev => [...prev, { id, message, type, duration, title }]);
   };
 
   const removeToast = (id: string) => {
