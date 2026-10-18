@@ -84,6 +84,13 @@
   - Includes: completedBy, completedAt, assignedTo, orderRef, etc.
   - File: `services/supabase.service.ts` (wmsJobsService)
 
+### WMS RLS and Audit Actor Hardening (2026-10-19)
+- Removed the recursive policy dependency between WMS jobs and job assignments using a private helper scoped to the authenticated actor; site and country checks remain on WMS job rows.
+- Bound client-created system log actors to the verified auth user/employee ID before the insert policy runs.
+- **Root Cause Fixed**: The WMS SELECT/UPDATE policies queried `job_assignments`, whose policies queried `wms_jobs`; the audit service supplied a display name where the RLS policy required an actor ID.
+- **Database**: `wms_jobs`, `job_assignments`, `system_logs`; migration applied to SIIFMART Staging.
+- **Regression Verification**: Authenticated WMS and assignment reads, update policy planning, and a rollback-only system log insert completed without recursion or RLS rejection.
+
 ### Fulfilment Transfer Units (2026-10-18)
 - Standardized transfer, bulk distribution, Smart Replenish, picking, and receiving quantity labels and precision against product unit and package attributes.
 - Kept measured quantities alongside stock-unit quantities through the WMS job line-item JSON and mapper; measured receipts convert back to inventory stock units before applying stock.

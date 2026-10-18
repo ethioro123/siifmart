@@ -36,6 +36,7 @@
 | Scanner not reading | Parser issue | `components/fulfillment/ScannerInterface.tsx` | Check barcode format |
 | Stock mismatch after receive | Quantity error | `hooks/useAdjustStockMutation.ts` | Verify adjustment math |
 | Wrong assignee showing | Field mapping | `services/wms-jobs.service.ts` | Check snake_case → camelCase |
+| **42P17: infinite recursion in `wms_jobs` RLS** | The WMS job policy reads assignments while the assignment policy reads WMS jobs | `/migrations/`, live RLS policies | Break the policy cycle with a private, actor-scoped assignment helper; keep country/site predicates on the job row |
 
 ## Inventory Issues
 
@@ -72,6 +73,7 @@
 | "column X does not exist" in logs | New TS field added but service mapper not updated | `.service.ts` mapper function, `update()` allowlist | Add the field to both the `mapRow()` (read) and `update()` allowlist (write) |
 | INSERT with returned representation is denied | Chained `.select()` also requires SELECT access and may trigger SELECT RLS/column grants | `.service.ts` insert method and RLS/grants | Omit the returned representation if unused; otherwise verify the actor may select the returned columns and rows |
 | RLS blocking query | Policy mismatch | `/migrations/`, Supabase dashboard | Update RLS policy |
+| **403 on `system_logs` insert** | Audit actor is a display name instead of the signed-in user or employee ID | Audit trigger and `system_logs` insert policy | Bind `performed_by` from the verified auth identity in a BEFORE INSERT trigger; keep site scope enforced |
 | Insert returns 409 Conflict | Unique constraint violation | Migration that created the constraint | Check unique columns (code, site_number, barcode) |
 
 ### First Response to Any Supabase 400/403/500 Error
