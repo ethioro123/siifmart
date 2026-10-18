@@ -76,7 +76,7 @@ export function useSessionManager(
                 // 2. Zero-Trust Operational Time Restriction
                 const timeCheck = checkTimeRestriction(userRole);
                 if (!timeCheck.allowed) {
-                    logger.warn('useSessionManager', timeCheck.reason);
+                    logger.warn('useSessionManager', timeCheck.reason || 'Operational time restriction violated');
                     onSessionTimeout?.();
                     return;
                 }
@@ -84,7 +84,7 @@ export function useSessionManager(
                 // 3. Zero-Trust Network / Geo-IP Restriction
                 const ipCheck = checkIpRestriction(userRole);
                 if (!ipCheck.allowed) {
-                    logger.warn('useSessionManager', ipCheck.reason);
+                    logger.warn('useSessionManager', ipCheck.reason || 'Network IP restriction violated');
                     onSessionTimeout?.();
                     return;
                 }
@@ -92,7 +92,7 @@ export function useSessionManager(
                 // 4. Zero-Trust MFA Requirement Check
                 const mfaCheck = checkMfaRequirement(userRole, session.user);
                 if (mfaCheck.required && !mfaCheck.satisfied && !hasWarned) {
-                    logger.warn('useSessionManager', mfaCheck.reason);
+                    logger.warn('useSessionManager', mfaCheck.reason || 'MFA requirement not satisfied');
                     setHasWarned(true);
                     onSessionWarning?.(0);
                 }

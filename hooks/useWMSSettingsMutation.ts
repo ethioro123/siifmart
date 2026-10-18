@@ -118,7 +118,7 @@ export function useWMSSettingsMutation() {
         });
 
       if (logError) {
-        logger.error('useWMSSettingsMutation', `Audit log failed for ${section}: ${logError.message}`);
+        logger.error('useWMSSettingsMutation', `Audit log failed for ${section}`, logError);
         throw new Error(`Security Exception: Mandatory audit logging failed (${logError.message}). WMS settings save halted.`);
       }
     },
