@@ -24,6 +24,10 @@ export default function SalaryApprovalQueueModal({
     const [requests, setRequests] = useState<SalaryChangeRequest[]>([]);
     const [isLoading, setIsLoading] = useState<boolean>(true);
     const [processingId, setProcessingId] = useState<string | null>(null);
+    const [page, setPage] = useState<number>(1);
+    const [hasMore, setHasMore] = useState<boolean>(false);
+    const [pendingCount, setPendingCount] = useState<number>(0);
+    const PAGE_SIZE = 25;
 
     // Reject state
     const [rejectingId, setRejectingId] = useState<string | null>(null);
@@ -36,14 +40,35 @@ export default function SalaryApprovalQueueModal({
     const loadRequests = useCallback(async () => {
         setIsLoading(true);
         try {
-            const data = await salaryRequestsService.getAll(undefined, country);
-            setRequests(data);
+            const offset = (page - 1) * PAGE_SIZE;
+            const fetchLimit = PAGE_SIZE + 1;
+            const data = activeTab === 'pending'
+                ? await salaryRequestsService.getPending(undefined, country, fetchLimit, offset)
+                : await salaryRequestsService.getHistory(undefined, country, fetchLimit, offset);
+
+            if (data.length > PAGE_SIZE) {
+                setHasMore(true);
+                setRequests(data.slice(0, PAGE_SIZE));
+            } else {
+                setHasMore(false);
+                setRequests(data);
+            }
+
+            const pendingList = await salaryRequestsService.getPending(undefined, country, 100, 0);
+            setPendingCount(pendingList.length);
         } catch {
             // Handled in service fallback
         } finally {
             setIsLoading(false);
         }
-    }, [country]);
+    }, [country, activeTab, page]);
+
+    const handleTabChange = (tab: 'pending' | 'history') => {
+        if (tab !== activeTab) {
+            setActiveTab(tab);
+            setPage(1);
+        }
+    };
 
     useEffect(() => {
         if (isOpen) {
@@ -126,9 +151,7 @@ export default function SalaryApprovalQueueModal({
         }
     };
 
-    const pendingRequests = requests.filter(r => r.status === 'pending');
-    const historyRequests = requests.filter(r => r.status !== 'pending');
-    const displayedRequests = activeTab === 'pending' ? pendingRequests : historyRequests;
+    const displayedRequests = requests;
 
     return (
         <Modal isOpen={isOpen} onClose={onClose} title="Salary Approval Queue" size="lg">
@@ -151,7 +174,7 @@ export default function SalaryApprovalQueueModal({
                     <div className="flex bg-stone-100 dark:bg-black/40 p-1 rounded-xl border border-stone-200 dark:border-white/10 shrink-0">
                         <button
                             type="button"
-                            onClick={() => setActiveTab('pending')}
+                            onClick={() => handleTabChange('pending')}
                             className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-colors cursor-pointer flex items-center gap-1.5 ${
                                 activeTab === 'pending'
                                     ? 'bg-white dark:bg-stone-800 text-stone-900 dark:text-white shadow-xs'
@@ -160,15 +183,15 @@ export default function SalaryApprovalQueueModal({
                         >
                             <Clock size={14} />
                             <span>Pending</span>
-                            {pendingRequests.length > 0 && (
+                            {pendingCount > 0 && (
                                 <span className="px-1.5 py-0.2 rounded-full text-[10px] bg-amber-500 text-white font-mono">
-                                    {pendingRequests.length}
+                                    {pendingCount}
                                 </span>
                             )}
                         </button>
                         <button
                             type="button"
-                            onClick={() => setActiveTab('history')}
+                            onClick={() => handleTabChange('history')}
                             className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-colors cursor-pointer flex items-center gap-1.5 ${
                                 activeTab === 'history'
                                     ? 'bg-white dark:bg-stone-800 text-stone-900 dark:text-white shadow-xs'
@@ -352,8 +375,31 @@ export default function SalaryApprovalQueueModal({
                     </div>
                 )}
 
-                {/* Footer */}
-                <div className="flex justify-end pt-3 border-t border-stone-200 dark:border-white/10">
+                {/* Footer & Pagination */}
+                <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-3 border-t border-stone-200 dark:border-white/10">
+                    <div className="flex items-center gap-2">
+                        <span className="text-xs text-stone-500 font-mono">
+                            Page {page} {requests.length > 0 ? `(${((page - 1) * PAGE_SIZE) + 1}–${((page - 1) * PAGE_SIZE) + requests.length})` : ''}
+                        </span>
+                        <div className="flex items-center gap-1">
+                            <button
+                                type="button"
+                                disabled={page <= 1 || isLoading}
+                                onClick={() => setPage(p => Math.max(1, p - 1))}
+                                className="px-2.5 py-1 text-xs rounded-lg border border-stone-200 dark:border-white/10 bg-stone-50 dark:bg-stone-900 text-stone-700 dark:text-stone-300 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-stone-100 transition-colors cursor-pointer"
+                            >
+                                Prev
+                            </button>
+                            <button
+                                type="button"
+                                disabled={!hasMore || isLoading}
+                                onClick={() => setPage(p => p + 1)}
+                                className="px-2.5 py-1 text-xs rounded-lg border border-stone-200 dark:border-white/10 bg-stone-50 dark:bg-stone-900 text-stone-700 dark:text-stone-300 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-stone-100 transition-colors cursor-pointer"
+                            >
+                                Next
+                            </button>
+                        </div>
+                    </div>
                     <button
                         type="button"
                         onClick={onClose}

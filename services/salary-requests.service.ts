@@ -40,7 +40,13 @@ const mapDBToSalaryRequest = (row: any): SalaryChangeRequest => ({
 });
 
 export const salaryRequestsService = {
-    async getAll(siteId?: string, countryCode?: string, limit: number = 25): Promise<SalaryChangeRequest[]> {
+    async getAll(
+        siteId?: string, 
+        countryCode?: string, 
+        limit: number = 25,
+        offset: number = 0,
+        status?: 'pending' | 'approved' | 'rejected'
+    ): Promise<SalaryChangeRequest[]> {
         try {
             let shouldFilterSite = Boolean(siteId && siteId !== 'All' && siteId !== 'all');
             if (shouldFilterSite && siteId) {
@@ -63,16 +69,26 @@ export const salaryRequestsService = {
                 }
             }
 
-            // RULE 10: 25-record shelf limit
+            // RULE 10: 25-record shelf limit with bounded pagination
             let query = supabase.from('salary_requests').select('*');
             if (shouldFilterSite && siteId) query = query.eq('site_id', siteId);
             if (countryCode) query = query.eq('country_code', countryCode.toUpperCase());
+            if (status) query = query.eq('status', status);
 
-            const { data, error } = await query.order('requested_at', { ascending: false }).limit(limit);
+            query = query.order('requested_at', { ascending: false });
+            if (offset > 0) {
+                query = query.range(offset, offset + limit - 1);
+            } else {
+                query = query.limit(limit);
+            }
+
+            const { data, error } = await query;
             if (error) throw error;
 
             const mapped = (data || []).map(mapDBToSalaryRequest);
-            inMemoryBackup = mapped;
+            if (offset === 0 && !status) {
+                inMemoryBackup = mapped;
+            }
             return mapped;
         } catch (error) {
             logger.error('salaryRequestsService', 'Remote fetch failed for salary requests:', error as Error);
@@ -85,13 +101,19 @@ export const salaryRequestsService = {
                 }
             }
             if (countryCode) results = results.filter(r => r.countryCode.toUpperCase() === countryCode.toUpperCase());
-            return results.sort((a, b) => new Date(b.requestedAt).getTime() - new Date(a.requestedAt).getTime());
+            if (status) results = results.filter(r => r.status === status);
+            const sorted = results.sort((a, b) => new Date(b.requestedAt).getTime() - new Date(a.requestedAt).getTime());
+            return sorted.slice(offset, offset + limit);
         }
     },
 
-    async getPending(siteId?: string, countryCode?: string): Promise<SalaryChangeRequest[]> {
-        const all = await this.getAll(siteId, countryCode);
-        return all.filter(r => r.status === 'pending');
+    async getPending(siteId?: string, countryCode?: string, limit: number = 25, offset: number = 0): Promise<SalaryChangeRequest[]> {
+        return this.getAll(siteId, countryCode, limit, offset, 'pending');
+    },
+
+    async getHistory(siteId?: string, countryCode?: string, limit: number = 25, offset: number = 0): Promise<SalaryChangeRequest[]> {
+        const all = await this.getAll(siteId, countryCode, limit + offset, 0);
+        return all.filter(r => r.status !== 'pending').slice(offset, offset + limit);
     },
 
     async create(request: Omit<SalaryChangeRequest, 'id'>): Promise<SalaryChangeRequest> {

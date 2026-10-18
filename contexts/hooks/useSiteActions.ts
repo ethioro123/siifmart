@@ -30,15 +30,8 @@ export function useSiteActions(deps: UseSiteActionsDeps) {
         try {
             const savedSettings = await systemConfigService.updateSettings(newSettings, user);
             
-            // Persist to local state & storage on confirmed server save
+            // Persist to local React state on confirmed server save
             setSettings(savedSettings);
-            try {
-                if (typeof window !== 'undefined') {
-                    localStorage.setItem('siifmart_system_config', JSON.stringify(savedSettings));
-                }
-            } catch (e) {
-                logger.error('useSiteActions', 'Failed to save settings to localStorage', e as Error);
-            }
 
             if (savedSettings.currency === 'KES' || savedSettings.currency === 'KSh' || savedSettings.country === 'KE') {
                 setCurrencySymbol('KSh');
@@ -53,13 +46,6 @@ export function useSiteActions(deps: UseSiteActionsDeps) {
         } catch (error: any) {
             // Rollback optimistic state on server failure
             setSettings(previousSettings);
-            try {
-                if (typeof window !== 'undefined') {
-                    localStorage.setItem('siifmart_system_config', JSON.stringify(previousSettings));
-                }
-            } catch {
-                // Ignore storage error
-            }
 
             logger.error('useSiteActions', 'Failed to persist settings to database', error as Error);
             addNotification('alert', `Failed to save settings: ${error?.message || 'Server error'}`);

@@ -43,16 +43,12 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
 
   // --- STATE ---
   const [settings, setSettings] = useState<SystemConfig>(() => {
-    // PERSISTENCE: Try to load from localStorage
-    try {
-      if (typeof window !== 'undefined') {
-        const saved = localStorage.getItem('siifmart_system_config');
-        if (saved) {
-          return { ...DEFAULT_CONFIG, ...JSON.parse(saved) };
-        }
+    if (typeof window !== 'undefined') {
+      try {
+        localStorage.removeItem('siifmart_system_config');
+      } catch {
+        // Safe ignore
       }
-    } catch (e) {
-      logger.error('DataContext', 'Failed to load settings from localStorage', e);
     }
     return DEFAULT_CONFIG;
   });

@@ -130,11 +130,7 @@ export default function Employees() {
    }, [scopedSites, effectiveCountry, employees]);
 
    useEffect(() => {
-      refreshPendingSalary();
-      refreshPendingChanges();
-      refreshPendingQuotas();
-      refreshPayrollRun();
-      refreshPendingRecruits();
+      [refreshPendingSalary, refreshPendingChanges, refreshPendingQuotas, refreshPayrollRun, refreshPendingRecruits].forEach(fn => fn());
       const handleRefresh = () => { refreshPendingSalary(); refreshPendingChanges(); refreshPendingQuotas(); refreshPendingRecruits(); };
       const handlePayrollUpdated = () => refreshPayrollRun();
 
@@ -167,16 +163,22 @@ export default function Employees() {
    const handleCertifyPayrollAsHR = async () => {
       if (!pendingPayrollRun) return;
       try {
-         await payrollRunsService.signAsHR(
-            pendingPayrollRun.id,
-            user?.name || 'HR Officer',
-            user?.role || 'hr',
-            'HR verified active staff roster, leaves, and attendance telemetry.'
-         );
+         await payrollRunsService.signAsHR(pendingPayrollRun.id, user?.name || 'HR Officer', user?.role || 'hr', 'HR verified active staff roster, leaves, and attendance telemetry.');
          addNotification('success', `Roster certified for ${pendingPayrollRun.period}. Handed off to Finance.`);
          refreshPayrollRun();
       } catch (err: any) {
          addNotification('alert', err.message || 'Certification failed');
+      }
+   };
+
+   const handleAttestRegionalPayroll = async () => {
+      if (!pendingPayrollRun) return;
+      try {
+         await payrollRunsService.attestAsRegionalHR(pendingPayrollRun.id, user?.name || 'Regional HR', user?.role || 'regional_hr_officer', 'Regional HR audited regional headcount, active roster, and leave telemetry.');
+         addNotification('success', `Regional audit attested for ${pendingPayrollRun.period}. Recorded on payroll run.`);
+         refreshPayrollRun();
+      } catch (err: any) {
+         addNotification('alert', err.message || 'Regional attestation failed');
       }
    };
 
@@ -308,6 +310,7 @@ export default function Employees() {
             canViewAll={canViewAll}
             userRole={user?.role}
             onCertifyPayroll={handleCertifyPayrollAsHR}
+            onAttestRegionalPayroll={handleAttestRegionalPayroll}
             onNavigateFinance={() => navigate('/finance')}
             pendingRecruitsCount={pendingRecruits.length}
             filterStatus={filterStatus}

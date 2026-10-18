@@ -1,241 +1,28 @@
 import { supabase } from '../lib/supabase';
 import type { SystemConfig } from '../types';
 import { getEffectiveCountry, getCountryProfile, COUNTRY_LEGAL_DEFAULTS } from '../utils/localization';
-
-// Columns confirmed to exist on the remote Supabase system_config table via schema probe.
-// Any update payload MUST be filtered through this allowlist to prevent PostgREST PGRST204 errors.
-const LIVE_SYSTEM_CONFIG_COLUMNS = new Set([
-    'accounting_method',
-    'bin_scan',
-    'brand_color',
-    'country_configs',
-    'created_at',
-    'currency',
-    'cycle_count_strategy',
-    'date_format',
-    'default_credit_limit',
-    'default_vat_rate',
-    'enable_loyalty',
-    'enable_wms',
-    'enforce_regional_zoning',
-    'expense_approval_limit',
-    'fefo_rotation',
-    'fiscal_year_start',
-    'id',
-    'language',
-    'legal_business_name',
-    'logo_url',
-    'low_stock_threshold',
-    'max_petty_cash',
-    'multi_currency',
-    'number_format',
-    'over_receive_tolerance_pct',
-    'payment_card',
-    'payment_cash',
-    'payment_mobile_money',
-    'payment_store_credit',
-    'picking_method',
-    'po_price_apply_at',
-    'pos_auto_print',
-    'pos_block_negative_stock',
-    'pos_digital_receipts',
-    'pos_guest_checkout',
-    'pos_receipt_address',
-    'pos_receipt_email',
-    'pos_receipt_enable_qr',
-    'pos_receipt_font',
-    'pos_receipt_footer',
-    'pos_receipt_header',
-    'pos_receipt_logo',
-    'pos_receipt_phone',
-    'pos_receipt_policy',
-    'pos_receipt_qr_link',
-    'pos_receipt_show_logo',
-    'pos_receipt_social_handle',
-    'pos_receipt_tax_id',
-    'pos_receipt_width',
-    'pos_register_mode',
-    'pos_terminal_id',
-    'print_price_tag_at',
-    'putaway_logic',
-    'qc_block_on_failure',
-    'qc_sampling_rate',
-    'receiving_logic',
-    'registered_address',
-    'max_cycle_count_recounts',
-    'pack_weight_tolerance_pct',
-    'require_expiry',
-    'require_pack_carton_weight',
-    'require_pack_security_seal',
-    'require_pick_quantity_entry',
-    'require_putaway_quantity_entry',
-    'require_second_counter_on_variance',
-    'require_shift_closure',
-    'reserve_stock_buffer',
-    'role_permissions',
-    'role_policies',
-    'rotation_policy',
-    'scale_ip_address',
-    'scanner_com_port',
-    'slogan',
-    'store_name',
-    'strict_scanning',
-    'support_contact',
-    'support_phone',
-    'tax_inclusive',
-    'tax_jurisdictions',
-    'tax_on_purchasing',
-    'tax_on_selling',
-    'tax_rate',
-    'tax_vat_number',
-    'timezone',
-    'updated_at',
-    'updated_by',
-    'webhook_customer_signup',
-    'webhook_inventory_low',
-    'webhook_order_created',
-    'withholding_tax'
-]);
-
-// Map TypeScript camelCase property names to PostgreSQL snake_case column names
-const FIELD_TO_DB_MAP: Record<string, string> = {
-    storeName: 'store_name',
-    slogan: 'slogan',
-    logoUrl: 'logo_url',
-    brandColor: 'brand_color',
-    legalBusinessName: 'legal_business_name',
-    taxVatNumber: 'tax_vat_number',
-    registeredAddress: 'registered_address',
-    supportContact: 'support_contact',
-    supportPhone: 'support_phone',
-    country: 'country',
-    currency: 'currency',
-    timezone: 'timezone',
-    dateFormat: 'date_format',
-    numberFormat: 'number_format',
-    language: 'language',
-    taxRate: 'tax_rate',
-    defaultVatRate: 'default_vat_rate',
-    taxAuthority: 'tax_authority',
-    complianceStandard: 'compliance_standard',
-    eTimsEnabled: 'e_tims_enabled',
-    countryConfigs: 'country_configs',
-    rolePolicies: 'role_policies',
-    rolePermissions: 'role_permissions',
-    lowStockThreshold: 'low_stock_threshold',
-    fefoRotation: 'fefo_rotation',
-    binScan: 'bin_scan',
-    enableLoyalty: 'enable_loyalty',
-    enableWMS: 'enable_wms',
-    multiCurrency: 'multi_currency',
-    requireShiftClosure: 'require_shift_closure',
-    posTerminalId: 'pos_terminal_id',
-    posRegisterMode: 'pos_register_mode',
-    posGuestCheckout: 'pos_guest_checkout',
-    posBlockNegativeStock: 'pos_block_negative_stock',
-    posDigitalReceipts: 'pos_digital_receipts',
-    posAutoPrint: 'pos_auto_print',
-    payment_cash: 'payment_cash',
-    payment_card: 'payment_card',
-    payment_mobile_money: 'payment_mobile_money',
-    payment_store_credit: 'payment_store_credit',
-    fiscalYearStart: 'fiscal_year_start',
-    accountingMethod: 'accounting_method',
-    taxInclusive: 'tax_inclusive',
-    taxOnSelling: 'tax_on_selling',
-    taxOnPurchasing: 'tax_on_purchasing',
-    withholdingTax: 'withholding_tax',
-    maxPettyCash: 'max_petty_cash',
-    expenseApprovalLimit: 'expense_approval_limit',
-    defaultCreditLimit: 'default_credit_limit',
-    receivingLogic: 'receiving_logic',
-    qcSamplingRate: 'qc_sampling_rate',
-    qcBlockOnFailure: 'qc_block_on_failure',
-    putawayLogic: 'putaway_logic',
-    requirePutawayQuantityEntry: 'require_putaway_quantity_entry',
-    overReceiveTolerancePct: 'over_receive_tolerance_pct',
-    poPriceApplyAt: 'po_price_apply_at',
-    printPriceTagAt: 'print_price_tag_at',
-    rotationPolicy: 'rotation_policy',
-    requireExpiry: 'require_expiry',
-    cycleCountStrategy: 'cycle_count_strategy',
-    maxCycleCountRecounts: 'max_cycle_count_recounts',
-    requireSecondCounterOnVariance: 'require_second_counter_on_variance',
-    pickingMethod: 'picking_method',
-    strictScanning: 'strict_scanning',
-    requirePickQuantityEntry: 'require_pick_quantity_entry',
-    requirePackSecuritySeal: 'require_pack_security_seal',
-    requirePackCartonWeight: 'require_pack_carton_weight',
-    packWeightTolerancePct: 'pack_weight_tolerance_pct',
-    reserveStockBuffer: 'reserve_stock_buffer',
-    webhookOrderCreated: 'webhook_order_created',
-    webhookInventoryLow: 'webhook_inventory_low',
-    webhookCustomerSignup: 'webhook_customer_signup',
-    scaleIpAddress: 'scale_ip_address',
-    scannerComPort: 'scanner_com_port',
-    posReceiptLogo: 'pos_receipt_logo',
-    posReceiptShowLogo: 'pos_receipt_show_logo',
-    posReceiptHeader: 'pos_receipt_header',
-    posReceiptFooter: 'pos_receipt_footer',
-    posReceiptAddress: 'pos_receipt_address',
-    posReceiptPhone: 'pos_receipt_phone',
-    posReceiptEmail: 'pos_receipt_email',
-    posReceiptTaxId: 'pos_receipt_tax_id',
-    posReceiptPolicy: 'pos_receipt_policy',
-    posReceiptSocialHandle: 'pos_receipt_social_handle',
-    posReceiptEnableQR: 'pos_receipt_enable_qr',
-    posReceiptQRLink: 'pos_receipt_qr_link',
-    posReceiptWidth: 'pos_receipt_width',
-    posReceiptFont: 'pos_receipt_font',
-    taxJurisdictions: 'tax_jurisdictions',
-    exchangeRates: 'exchange_rates',
-    bonusEnabled: 'bonus_enabled',
-    bonusTiers: 'bonus_tiers',
-    bonusPayoutFrequency: 'bonus_payout_frequency',
-    warehousePointsEligibleRoles: 'warehouse_points_eligible_roles',
-    warehousePointRules: 'warehouse_point_rules',
-    posBonusEnabled: 'pos_bonus_enabled',
-    posBonusTiers: 'pos_bonus_tiers',
-    posBonusPayoutFrequency: 'pos_bonus_payout_frequency',
-    posRoleDistribution: 'pos_role_distribution',
-    posPointRules: 'pos_point_rules',
-    enforceRegionalZoning: 'enforce_regional_zoning',
-    mpesaTillEnabled: 'mpesa_till_enabled',
-    mpesaTillNumber: 'mpesa_till_number',
-    mpesaTillName: 'mpesa_till_name',
-    mpesaStkEnabled: 'mpesa_stk_enabled',
-    mpesaStkShortcode: 'mpesa_stk_shortcode',
-    mpesaPasskey: 'mpesa_passkey',
-    mpesaConsumerKey: 'mpesa_consumer_key',
-    mpesaConsumerSecret: 'mpesa_consumer_secret',
-    mpesaEnvironment: 'mpesa_environment',
-    mpesaPaybillEnabled: 'mpesa_paybill_enabled',
-    mpesaPaybillNumber: 'mpesa_paybill_number',
-    mpesaPaybillAccount: 'mpesa_paybill_account',
-    airtelMoneyEnabled: 'airtel_money_enabled',
-    airtelTillNumber: 'airtel_till_number',
-    airtelMerchantName: 'airtel_merchant_name',
-    telebirrEnabled: 'telebirr_enabled',
-    telebirrMerchantId: 'telebirr_merchant_id',
-    cbeBirrEnabled: 'cbe_birr_enabled',
-    cbeBirrMerchantCode: 'cbe_birr_merchant_code'
-};
+import { LIVE_SYSTEM_CONFIG_COLUMNS, FIELD_TO_DB_MAP } from './config-schema';
 
 export const systemConfigService = {
     async getSettings(): Promise<SystemConfig> {
-        let localOverrides: Partial<SystemConfig> | undefined;
-        try {
-            if (typeof window !== 'undefined') {
-                const saved = localStorage.getItem('siifmart_system_config');
-                if (saved) {
-                    localOverrides = JSON.parse(saved);
-                }
+        // Zero-Trust Security: Purge any legacy unencrypted configuration/secrets from browser storage
+        if (typeof localStorage !== 'undefined') {
+            try {
+                localStorage.removeItem('siifmart_system_config');
+            } catch {
+                // Safe ignore
             }
-        } catch {
-            // Non-blocking localStorage read error
         }
 
         try {
+            // First attempt to read via server-side sanitized RPC (enforces national boundaries)
+            const { data: rpcData, error: rpcError } = await supabase
+                .rpc('get_sanitized_system_config');
+
+            if (!rpcError && rpcData && typeof rpcData === 'object' && Object.keys(rpcData).length > 0) {
+                return this._mapSettings(rpcData);
+            }
+
             const { data, error } = await supabase
                 .from('system_config')
                 .select('*')
@@ -250,13 +37,13 @@ export const systemConfigService = {
             // If no record found, return the default mapped object
             if (!data) {
                 console.warn('⚠️ No system_config record found. Using default application settings.');
-                return this._mapSettings({}, localOverrides);
+                return this._mapSettings({});
             }
 
-            return this._mapSettings(data, localOverrides);
+            return this._mapSettings(data);
         } catch (err) {
             console.warn('⚠️ Settings load failed, using fallback logic:', err);
-            return this._mapSettings({}, localOverrides);
+            return this._mapSettings({});
         }
     },
 

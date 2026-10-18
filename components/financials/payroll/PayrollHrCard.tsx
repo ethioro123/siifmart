@@ -70,6 +70,27 @@ export const PayrollHrCard: React.FC<PayrollHrCardProps> = ({
         )}
       </div>
 
+      {activeRun.regionalAttestedBy && (
+        <div className="mb-3 p-2.5 rounded-xl bg-blue-500/5 border border-blue-500/20 text-xs">
+          <div className="flex justify-between items-center text-[11px]">
+            <span className="text-[#0071E3] dark:text-[#2997FF] font-semibold flex items-center gap-1">
+              <CheckCircle2 size={12} /> Regional HR Audit Attested
+            </span>
+            <span className="font-mono text-[var(--theme-text-secondary)] text-[10px]">
+              {activeRun.regionalAttestedAt ? new Date(String(activeRun.regionalAttestedAt)).toLocaleDateString() : ''}
+            </span>
+          </div>
+          <p className="text-[11px] text-[var(--theme-text-primary)] mt-1">
+            Attested by <strong>{activeRun.regionalAttestedBy}</strong> ({activeRun.regionalAttestedByRole || 'Regional HR'})
+          </p>
+          {activeRun.regionalNotes && (
+            <p className="text-[10px] text-[var(--theme-text-secondary)] italic mt-0.5">
+              "{activeRun.regionalNotes}"
+            </p>
+          )}
+        </div>
+      )}
+
       {isHrSigned ? (
         <div className="mt-3 p-3 bg-[var(--theme-bg-subtle)] rounded-xl text-xs space-y-1.5 border border-[var(--theme-border)]">
           <div className="flex justify-between text-xs">

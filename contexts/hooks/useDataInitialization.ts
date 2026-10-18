@@ -191,15 +191,9 @@ export function useDataInitialization({
       }
     } catch (error: any) {
       logger.error('useDataInitialization', '❌ Failed to load system settings:', error?.message || error);
-      try {
-        const saved = localStorage.getItem('siifmart_system_config');
-        if (saved) {
-          const parsed = JSON.parse(saved);
-          setSettings({ ...DEFAULT_CONFIG, ...parsed });
-          const prof = getCountryProfile(parsed.country || parsed.currency);
-          setCurrencySymbol(prof.currencySymbol);
-        }
-      } catch (e) {}
+      setSettings(DEFAULT_CONFIG);
+      const prof = getCountryProfile(DEFAULT_CONFIG.country);
+      setCurrencySymbol(prof.currencySymbol);
     }
   }, [setSettings]);
 

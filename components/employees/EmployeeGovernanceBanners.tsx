@@ -12,6 +12,7 @@ interface EmployeeGovernanceBannersProps {
    userRole?: string;
    onCertifyPayroll: () => void;
    onNavigateFinance: () => void;
+   onAttestRegionalPayroll?: () => void;
    pendingRecruitsCount?: number;
    filterStatus?: string;
    onFilterPendingRecruits?: () => void;
@@ -30,6 +31,7 @@ export const EmployeeGovernanceBanners: React.FC<EmployeeGovernanceBannersProps>
    userRole,
    onCertifyPayroll,
    onNavigateFinance,
+   onAttestRegionalPayroll,
    pendingRecruitsCount = 0,
    filterStatus = 'All',
    onFilterPendingRecruits,
@@ -110,11 +112,24 @@ export const EmployeeGovernanceBanners: React.FC<EmployeeGovernanceBannersProps>
                   </div>
                </div>
                <div className="flex items-center gap-2 shrink-0">
-                  {userRole === 'regional_hr_officer' && (
-                     <span className="text-[11px] font-semibold text-[#0071E3] dark:text-[#2997FF] bg-[#0071E3]/10 px-2.5 py-1 rounded-full border border-[#0071E3]/20">
-                        Regional Audit Verified
+                  {pendingPayrollRun.regionalAttestedBy ? (
+                     <span
+                        className="text-[11px] font-semibold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-full border border-emerald-500/20 flex items-center gap-1"
+                        title={`Attested by ${pendingPayrollRun.regionalAttestedBy} (${pendingPayrollRun.regionalAttestedByRole || 'Regional HR'})`}
+                     >
+                        <ShieldCheck size={12} />
+                        <span>Regional Audit Attested</span>
                      </span>
-                  )}
+                  ) : userRole === 'regional_hr_officer' && onAttestRegionalPayroll ? (
+                     <button
+                        type="button"
+                        onClick={onAttestRegionalPayroll}
+                        className="h-9 px-3.5 rounded-xl bg-[#0071E3] dark:bg-[#2997FF] hover:opacity-95 text-white font-semibold text-xs transition-all cursor-pointer flex items-center gap-1.5 active:scale-[0.98]"
+                     >
+                        <ShieldCheck size={14} />
+                        <span>Attest Regional Audit</span>
+                     </button>
+                  ) : null}
                   <button
                      type="button"
                      onClick={onNavigateFinance}

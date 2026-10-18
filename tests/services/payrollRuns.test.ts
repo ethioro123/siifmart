@@ -268,4 +268,33 @@ describe('Zero-Trust Multi-Department Payroll Approval Service', () => {
     expect(etRuns.some(r => r.currency === 'KSh')).toBe(false);
     expect(keRuns.some(r => r.currency === 'ETB')).toBe(false);
   });
+
+  it('records regional HR audit attestation on payroll run', async () => {
+    const run = await payrollRunsService.create({
+      period: 'October 2026',
+      countryCode: 'ET',
+      siteId: 'SITE-0001',
+      employeeCount: 15,
+      currency: 'ETB',
+      totalGrossSalaries: 180000,
+      totalBonuses: 12000,
+      totalDeductions: 0,
+      totalNetPayout: 192000,
+      status: 'pending_verification',
+      initiatedBy: 'Accountant Abebe',
+      initiatedByRole: 'finance_manager'
+    });
+
+    const attested = await payrollRunsService.attestAsRegionalHR(
+      run.id,
+      'Regional Officer Yohannes',
+      'regional_hr_officer',
+      'Audited site headcounts, attendance and approved leaves.'
+    );
+
+    expect(attested.regionalAttestedBy).toBe('Regional Officer Yohannes');
+    expect(attested.regionalAttestedByRole).toBe('regional_hr_officer');
+    expect(attested.regionalAttestedAt).toBeDefined();
+    expect(attested.regionalNotes).toContain('Audited site headcounts');
+  });
 });

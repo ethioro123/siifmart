@@ -1,10 +1,12 @@
 import React, { useState, useMemo } from 'react';
-import { Printer, Package, Layers, Layout, Info, CheckCircle } from 'lucide-react';
+import { Printer, Package, Layers, Layout, Info, CheckCircle, Eye } from 'lucide-react';
 import { generateUnifiedBatchLabelsHTML } from '../../../utils/labels/ProductLabelGenerator';
 import { generateLocationLabelHTML } from '../../../utils/labels/LocationLabelGenerator';
 import { encodeLocation, extractSitePrefix } from '../../../utils/locationEncoder';
 import { Product, WarehouseZone, Site } from '../../../types';
 import { printHtmlContent } from '../../../utils/printHelper';
+import { BarcodeLabelPreviewCard } from './BarcodeLabelPreviewCard';
+import { BarcodeLabelPreviewModal } from './BarcodeLabelPreviewModal';
 
 // Label size presets - Refined for WMS
 const LABEL_SIZES = {
@@ -39,6 +41,10 @@ export const AssignLabelHub: React.FC<AssignLabelHubProps> = ({
     // Product Search State
     const [searchSku, setSearchSku] = useState('');
     const [printQty, setPrintQty] = useState(1);
+    const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+
+    // Multi-country currency sovereignty (ETB vs KES)
+    const activeCurrency = activeSite?.currency || (activeSite?.country === 'KE' ? 'KSh' : 'ETB');
 
     const matchedProduct = useMemo(() => {
         if (!searchSku.trim()) return null;
@@ -72,15 +78,15 @@ export const AssignLabelHub: React.FC<AssignLabelHubProps> = ({
         return encodeLocation(humanLabel, prefix) || humanLabel;
     };
 
-    const handlePrintLocation = async () => {
-        const aislePad = bayConfig.aisle.padStart(2, '0');
-        const bayPad = bayConfig.bay.padStart(2, '0');
-        const humanLabel = `${bayConfig.zone}-${aislePad}-${bayPad}`;
-        const barcode = getBarcode(bayConfig.zone, bayConfig.aisle, bayConfig.bay);
+    const aislePad = bayConfig.aisle.padStart(2, '0');
+    const bayPad = bayConfig.bay.padStart(2, '0');
+    const humanLocationLabel = `${bayConfig.zone}-${aislePad}-${bayPad}`;
+    const locationBarcode = getBarcode(bayConfig.zone, bayConfig.aisle, bayConfig.bay);
 
+    const handlePrintLocation = async () => {
         const labelHTML = await generateLocationLabelHTML([{
-            humanLabel,
-            barcode,
+            humanLabel: humanLocationLabel,
+            barcode: locationBarcode,
             zone: bayConfig.zone,
             aisle: aislePad,
             bay: bayPad,
@@ -92,7 +98,49 @@ export const AssignLabelHub: React.FC<AssignLabelHubProps> = ({
         });
 
         printHtmlContent(labelHTML);
-        addNotification('success', `Location label ${humanLabel} ready!`);
+        addNotification('success', `Location label ${humanLocationLabel} ready!`);
+    };
+
+    const handlePrintProduct = async () => {
+        if (!searchSku.trim()) return;
+        const labelHTML = await generateUnifiedBatchLabelsHTML([{
+            value: matchedProduct?.sku || searchSku.trim(),
+            label: matchedProduct?.name || 'Manual Product Entry',
+            quantity: printQty,
+            price: matchedProduct?.price?.toString(),
+            category: matchedProduct?.category
+        }], {
+            size: labelSize,
+            format: labelFormat === 'QR' ? 'QR' : 'Barcode',
+            showPrice: true,
+            showCategory: true
+        });
+
+        printHtmlContent(labelHTML);
+        addNotification('success', `${printQty} Product label${printQty > 1 ? 's' : ''} ready!`);
+    };
+
+    const activePreviewData = labelMode === 'PRODUCT' ? {
+        type: 'PRODUCT' as const,
+        title: matchedProduct?.name || (searchSku.trim() ? 'Manual Product Entry' : 'Awaiting SKU'),
+        code: matchedProduct?.sku || searchSku.trim(),
+        format: labelFormat,
+        size: labelSize,
+        price: matchedProduct?.price,
+        currency: activeCurrency,
+        category: matchedProduct?.category
+    } : {
+        type: 'BAY' as const,
+        title: humanLocationLabel,
+        humanLabel: humanLocationLabel,
+        code: locationBarcode,
+        format: labelFormat,
+        size: labelSize,
+        siteName: activeSite?.name,
+        siteCode: activeSite?.code,
+        zone: bayConfig.zone,
+        aisle: aislePad,
+        bay: bayPad
     };
 
     return (
@@ -238,42 +286,55 @@ export const AssignLabelHub: React.FC<AssignLabelHubProps> = ({
                                 </div>
 
                                 {/* LIVE PREVIEW */}
-                                <div className="bg-[var(--theme-bg-subtle)] rounded-2xl border border-[var(--theme-border)] p-5 relative overflow-hidden">
-                                    <div className="absolute top-0 right-0 p-3 flex gap-2">
-                                        <div className="text-[11px] font-mono tabular-nums bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] px-2.5 py-1 rounded border border-[var(--theme-accent)]/20 font-semibold uppercase tracking-wider">15-DIGIT PROTOCOL</div>
+                                <div className="bg-[var(--theme-bg-subtle)] rounded-2xl border border-[var(--theme-border)] p-4 sm:p-5 relative overflow-hidden space-y-3">
+                                    <div className="flex items-center justify-between">
+                                        <div className="text-xs text-[var(--theme-text-muted)] uppercase font-semibold flex items-center gap-2">
+                                            Live Location Preview
+                                            <span className="text-[11px] text-[var(--theme-accent)] font-bold animate-pulse">LIVE</span>
+                                        </div>
+                                        <button
+                                            type="button"
+                                            onClick={() => setIsPreviewOpen(true)}
+                                            className="text-xs font-semibold text-[var(--theme-accent)] hover:underline flex items-center gap-1.5 touch-manipulation"
+                                        >
+                                            <Eye size={13} />
+                                            <span>Expand 1:1 Preview</span>
+                                        </button>
                                     </div>
 
-                                    <div className="flex items-center gap-6">
-                                        <div className="flex-1">
-                                            <div className="text-xs text-[var(--theme-text-muted)] uppercase font-semibold mb-2 flex items-center gap-2">
-                                                Live Preview
-                                                <span className="text-[11px] text-[var(--theme-accent)] font-bold animate-pulse">LIVE</span>
-                                            </div>
-                                            <div className="text-3xl font-black text-[var(--theme-accent)] tracking-[6px] mb-2 font-mono tabular-nums">
-                                                {bayConfig.zone}-{bayConfig.aisle.padStart(2, '0')}-{bayConfig.bay.padStart(2, '0')}
-                                            </div>
-                                            <div className="flex items-center gap-3 text-xs">
-                                                <span className="text-[var(--theme-text-secondary)]">ZONE <span className="text-[var(--theme-text-primary)] font-bold">{bayConfig.zone}</span></span>
-                                                <span className="text-[var(--theme-border)]">|</span>
-                                                <span className="text-[var(--theme-text-secondary)]">AISLE <span className="text-[var(--theme-text-primary)] font-bold">{bayConfig.aisle.padStart(2, '0')}</span></span>
-                                                <span className="text-[var(--theme-border)]">|</span>
-                                                <span className="text-[var(--theme-text-secondary)]">BAY <span className="text-[var(--theme-text-primary)] font-bold">{bayConfig.bay.padStart(2, '0')}</span></span>
-                                            </div>
-                                            <div className="mt-2 text-xs font-mono tabular-nums text-[var(--theme-text-muted)] tracking-wider">
-                                                {getBarcode(bayConfig.zone, bayConfig.aisle, bayConfig.bay)}
-                                            </div>
-                                        </div>
-                                    </div>
+                                    <BarcodeLabelPreviewCard
+                                        type="BAY"
+                                        title={humanLocationLabel}
+                                        humanLabel={humanLocationLabel}
+                                        code={locationBarcode}
+                                        format={labelFormat}
+                                        size={labelSize}
+                                        siteName={activeSite?.name}
+                                        siteCode={activeSite?.code}
+                                        zone={bayConfig.zone}
+                                        aisle={aislePad}
+                                        bay={bayPad}
+                                    />
                                 </div>
 
-                                {/* GENERATE BUTTON */}
-                                <button
-                                    onClick={handlePrintLocation}
-                                    className="w-full min-h-[44px] py-3.5 bg-[var(--theme-accent)] text-white font-semibold text-sm rounded-xl flex items-center justify-center gap-3 hover:opacity-90 active:scale-[0.98] transition-all touch-manipulation"
-                                >
-                                    <Printer size={18} />
-                                    GENERATE LOCATION LABEL
-                                </button>
+                                {/* ACTION BUTTONS */}
+                                <div className="flex flex-col sm:flex-row gap-3">
+                                    <button
+                                        type="button"
+                                        onClick={() => setIsPreviewOpen(true)}
+                                        className="px-5 py-3.5 bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card)] border border-[var(--theme-border)] text-[var(--theme-text-primary)] font-semibold text-xs rounded-xl flex items-center justify-center gap-2 hover:opacity-90 active:scale-[0.98] transition-all touch-manipulation min-h-[44px]"
+                                    >
+                                        <Eye size={16} className="text-[var(--theme-accent)]" />
+                                        <span>QUICK PREVIEW</span>
+                                    </button>
+                                    <button
+                                        onClick={handlePrintLocation}
+                                        className="flex-1 min-h-[44px] py-3.5 bg-[var(--theme-accent)] text-white font-semibold text-xs sm:text-sm rounded-xl flex items-center justify-center gap-2 hover:opacity-90 active:scale-[0.98] transition-all touch-manipulation"
+                                    >
+                                        <Printer size={18} />
+                                        <span>GENERATE LOCATION LABEL</span>
+                                    </button>
+                                </div>
                             </div>
                         ) : (
                             /* PRODUCT LOGIC */
@@ -295,37 +356,68 @@ export const AssignLabelHub: React.FC<AssignLabelHubProps> = ({
                                     )}
                                 </div>
 
-                                {/* Matched Product Summary */}
+                                {/* Matched Product Summary & Live Preview */}
                                 {searchSku.trim() && (
-                                    <div className={`p-4 rounded-2xl border transition-colors ${matchedProduct ? 'bg-[var(--theme-accent)]/5 border-[var(--theme-accent)]/20' : 'bg-amber-500/5 border-amber-500/20'}`}>
-                                        <div className="flex justify-between items-start">
-                                            <div>
-                                                <h4 className={`text-sm font-semibold mb-1 ${matchedProduct ? 'text-[var(--theme-text-primary)]' : 'text-amber-700 dark:text-amber-400'}`}>
-                                                    {matchedProduct ? matchedProduct.name : 'Unknown Product / Manual Entry'}
-                                                </h4>
-                                                <div className="flex gap-3 text-xs font-mono tabular-nums tracking-wider">
-                                                    <span className="text-[var(--theme-text-secondary)]">SKU: <span className="text-[var(--theme-text-primary)] font-bold">{matchedProduct ? matchedProduct.sku : searchSku}</span></span>
-                                                    {matchedProduct?.price && (
-                                                        <span className="text-[var(--theme-text-secondary)]">Price: <span className="text-[var(--theme-accent)] font-bold">${matchedProduct.price.toFixed(2)}</span></span>
-                                                    )}
+                                    <div className="space-y-3">
+                                        <div className={`p-4 rounded-2xl border transition-colors ${matchedProduct ? 'bg-[var(--theme-accent)]/5 border-[var(--theme-accent)]/20' : 'bg-amber-500/5 border-amber-500/20'}`}>
+                                            <div className="flex justify-between items-start">
+                                                <div>
+                                                    <h4 className={`text-sm font-semibold mb-1 ${matchedProduct ? 'text-[var(--theme-text-primary)]' : 'text-amber-700 dark:text-amber-400'}`}>
+                                                        {matchedProduct ? matchedProduct.name : 'Unknown Product / Manual Entry'}
+                                                    </h4>
+                                                    <div className="flex gap-3 text-xs font-mono tabular-nums tracking-wider">
+                                                        <span className="text-[var(--theme-text-secondary)]">SKU: <span className="text-[var(--theme-text-primary)] font-bold">{matchedProduct ? matchedProduct.sku : searchSku}</span></span>
+                                                        {matchedProduct?.price && (
+                                                            <span className="text-[var(--theme-text-secondary)]">Price: <span className="text-[var(--theme-accent)] font-bold">{activeCurrency} {matchedProduct.price.toFixed(2)}</span></span>
+                                                        )}
+                                                    </div>
                                                 </div>
+                                                {matchedProduct?.category && (
+                                                    <span className="px-2 py-1 bg-[var(--theme-bg-subtle)] rounded border border-[var(--theme-border)] text-xs text-[var(--theme-text-secondary)] font-semibold uppercase tracking-wider">
+                                                        {matchedProduct.category}
+                                                    </span>
+                                                )}
                                             </div>
-                                            {matchedProduct?.category && (
-                                                <span className="px-2 py-1 bg-[var(--theme-bg-subtle)] rounded border border-[var(--theme-border)] text-xs text-[var(--theme-text-secondary)] font-semibold uppercase tracking-wider">
-                                                    {matchedProduct.category}
+                                        </div>
+
+                                        {/* Inline Live Barcode Preview Card */}
+                                        <div className="bg-[var(--theme-bg-subtle)] p-3 sm:p-4 rounded-2xl border border-[var(--theme-border)] space-y-2">
+                                            <div className="flex items-center justify-between">
+                                                <span className="text-xs font-bold uppercase tracking-wider text-[var(--theme-text-secondary)] flex items-center gap-1.5">
+                                                    <Eye size={13} className="text-[var(--theme-accent)]" /> Live Barcode Preview
                                                 </span>
-                                            )}
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setIsPreviewOpen(true)}
+                                                    className="text-xs font-semibold text-[var(--theme-accent)] hover:underline flex items-center gap-1 touch-manipulation"
+                                                >
+                                                    <Eye size={12} />
+                                                    <span>Expand 1:1 Preview</span>
+                                                </button>
+                                            </div>
+                                            <BarcodeLabelPreviewCard
+                                                type="PRODUCT"
+                                                title={matchedProduct ? matchedProduct.name : searchSku}
+                                                code={matchedProduct?.sku || searchSku.trim()}
+                                                format={labelFormat}
+                                                size={labelSize}
+                                                price={matchedProduct?.price}
+                                                currency={activeCurrency}
+                                                category={matchedProduct?.category}
+                                            />
                                         </div>
                                     </div>
                                 )}
 
-                                <div className="flex gap-4">
-                                    <div className="w-1/3 flex flex-col justify-center bg-[var(--theme-bg-subtle)] rounded-2xl border border-[var(--theme-border)] relative overflow-hidden group">
+                                <div className="flex flex-col sm:flex-row gap-3">
+                                    <div className="w-full sm:w-1/3 flex flex-col justify-center bg-[var(--theme-bg-subtle)] rounded-2xl border border-[var(--theme-border)] relative overflow-hidden group">
                                         <div className="text-center text-[11px] text-[var(--theme-text-muted)] font-semibold uppercase tracking-wider pt-2">PRINT QTY</div>
                                         <div className="flex items-center justify-between px-3 py-2">
                                             <button
+                                                type="button"
                                                 onClick={() => setPrintQty(Math.max(1, printQty - 1))}
                                                 className="min-h-[44px] min-w-[44px] flex items-center justify-center text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-card)] rounded-xl transition-colors font-bold text-lg touch-manipulation"
+                                                aria-label="Decrease quantity"
                                             >-</button>
                                             <input
                                                 title="Quantity"
@@ -334,38 +426,39 @@ export const AssignLabelHub: React.FC<AssignLabelHubProps> = ({
                                                 onChange={(e) => setPrintQty(Math.max(1, parseInt(e.target.value) || 1))}
                                             />
                                             <button
+                                                type="button"
                                                 onClick={() => setPrintQty(printQty + 1)}
                                                 className="min-h-[44px] min-w-[44px] flex items-center justify-center text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-card)] rounded-xl transition-colors font-bold text-lg touch-manipulation"
+                                                aria-label="Increase quantity"
                                             >+</button>
                                         </div>
                                     </div>
-                                    <button
-                                        disabled={!searchSku.trim()}
-                                        onClick={async () => {
-                                            const labelHTML = await generateUnifiedBatchLabelsHTML([{
-                                                value: matchedProduct?.sku || searchSku.trim(),
-                                                label: matchedProduct?.name || 'Manual Product Entry',
-                                                quantity: printQty,
-                                                price: matchedProduct?.price?.toString(),
-                                                category: matchedProduct?.category
-                                            }], {
-                                                size: labelSize,
-                                                format: labelFormat === 'QR' ? 'QR' : 'Barcode',
-                                                showPrice: true,
-                                                showCategory: true
-                                            });
 
-                                            printHtmlContent(labelHTML);
-                                            addNotification('success', `${printQty} Product label${printQty > 1 ? 's' : ''} ready!`);
-                                        }}
-                                        className={`flex-1 min-h-[44px] py-3.5 font-semibold rounded-2xl transition-all flex items-center justify-center gap-3 text-xs touch-manipulation ${searchSku.trim()
-                                            ? 'bg-[var(--theme-accent)] text-white hover:opacity-90 active:scale-[0.98]'
-                                            : 'bg-[var(--theme-bg-subtle)] text-[var(--theme-text-muted)] cursor-not-allowed border border-[var(--theme-border)]'
-                                            }`}
-                                    >
-                                        <Printer size={18} />
-                                        PRINT PRODUCT {labelFormat === 'QR' ? 'QR' : 'BARCODE'}
-                                    </button>
+                                    <div className="flex-1 flex gap-2 sm:gap-3">
+                                        <button
+                                            type="button"
+                                            disabled={!searchSku.trim()}
+                                            onClick={() => setIsPreviewOpen(true)}
+                                            className={`px-4 sm:px-5 py-3.5 font-semibold rounded-2xl transition-all flex items-center justify-center gap-2 text-xs touch-manipulation min-h-[44px] ${searchSku.trim()
+                                                ? 'bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)] border border-[var(--theme-border)] active:scale-[0.98]'
+                                                : 'bg-[var(--theme-bg-subtle)] text-[var(--theme-text-muted)] cursor-not-allowed border border-[var(--theme-border)] opacity-60'
+                                                }`}
+                                        >
+                                            <Eye size={16} className={searchSku.trim() ? "text-[var(--theme-accent)]" : ""} />
+                                            <span>QUICK PREVIEW</span>
+                                        </button>
+                                        <button
+                                            disabled={!searchSku.trim()}
+                                            onClick={handlePrintProduct}
+                                            className={`flex-1 min-h-[44px] py-3.5 font-semibold rounded-2xl transition-all flex items-center justify-center gap-2 text-xs touch-manipulation ${searchSku.trim()
+                                                ? 'bg-[var(--theme-accent)] text-white hover:opacity-90 active:scale-[0.98]'
+                                                : 'bg-[var(--theme-bg-subtle)] text-[var(--theme-text-muted)] cursor-not-allowed border border-[var(--theme-border)]'
+                                                }`}
+                                        >
+                                            <Printer size={18} />
+                                            <span>PRINT PRODUCT {labelFormat === 'QR' ? 'QR' : 'BARCODE'}</span>
+                                        </button>
+                                    </div>
                                 </div>
 
                                 <div className="p-4 bg-[var(--theme-bg-subtle)] rounded-2xl border border-dashed border-[var(--theme-border)] flex items-center gap-4">
@@ -382,6 +475,17 @@ export const AssignLabelHub: React.FC<AssignLabelHubProps> = ({
                     </div>
                 </div>
             </div>
+
+            {/* QUICK PREVIEW MODAL */}
+            <BarcodeLabelPreviewModal
+                isOpen={isPreviewOpen}
+                onClose={() => setIsPreviewOpen(false)}
+                previewData={activePreviewData}
+                quantity={labelMode === 'PRODUCT' ? printQty : 1}
+                onQuantityChange={labelMode === 'PRODUCT' ? setPrintQty : undefined}
+                onFormatChange={setLabelFormat}
+                onPrint={labelMode === 'PRODUCT' ? handlePrintProduct : handlePrintLocation}
+            />
         </div>
     );
 };

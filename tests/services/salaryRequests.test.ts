@@ -9,20 +9,22 @@ let inMemoryDb: any[] = [];
 vi.mock('../../lib/supabase', () => ({
     supabase: {
         from: vi.fn().mockImplementation((_table: string) => {
-            const createQuery = (conditions: { col: string; val: any }[] = [], limitVal?: number) => {
+            const createQuery = (conditions: { col: string; val: any }[] = [], limitVal?: number, offsetVal: number = 0) => {
                 const getFiltered = () => {
                     let rows = [...inMemoryDb];
                     for (const c of conditions) {
                         rows = rows.filter(r => r[c.col] === c.val || (c.col === 'id' && r.id === c.val));
                     }
+                    if (offsetVal > 0) rows = rows.slice(offsetVal);
                     if (limitVal !== undefined) rows = rows.slice(0, limitVal);
                     return rows;
                 };
 
                 const builder: any = {
                     select: vi.fn(() => builder),
-                    eq: vi.fn((col: string, val: any) => createQuery([...conditions, { col, val }], limitVal)),
-                    limit: vi.fn((l: number) => createQuery(conditions, l)),
+                    eq: vi.fn((col: string, val: any) => createQuery([...conditions, { col, val }], limitVal, offsetVal)),
+                    limit: vi.fn((l: number) => createQuery(conditions, l, offsetVal)),
+                    range: vi.fn((from: number, to: number) => createQuery(conditions, to - from + 1, from)),
                     order: vi.fn(() => builder),
                     single: vi.fn(() => {
                         const rows = getFiltered();
@@ -235,6 +237,33 @@ describe('Dual-Control Salary Approval Queue (SOP-GOV-018 & Zero-Trust SoD)', ()
 
             expect(keList.some(r => r.id === keReq.id)).toBe(true);
             expect(keList.some(r => r.id === etReq.id)).toBe(false);
+        });
+
+        it('supports bounded pagination and status-specific queries beyond 25 records', async () => {
+            for (let i = 1; i <= 30; i++) {
+                await salaryRequestsService.create({
+                    employeeId: `emp-page-${i}`,
+                    employeeName: `Worker ${i}`,
+                    currentSalary: 10000 + i * 100,
+                    proposedSalary: 12000 + i * 100,
+                    currency: 'ETB',
+                    countryCode: 'ET',
+                    reason: `Adjustment ${i}`,
+                    status: 'pending',
+                    requestedBy: 'HR Lead',
+                    requestedByRole: 'hr',
+                    requestedAt: new Date(Date.now() - i * 1000).toISOString()
+                });
+            }
+
+            const page1 = await salaryRequestsService.getPending(undefined, 'ET', 25, 0);
+            expect(page1.length).toBe(25);
+
+            const page2 = await salaryRequestsService.getPending(undefined, 'ET', 25, 25);
+            expect(page2.length).toBe(5);
+
+            const page1Ids = new Set(page1.map(r => r.id));
+            expect(page2.every(r => !page1Ids.has(r.id))).toBe(true);
         });
     });
 });

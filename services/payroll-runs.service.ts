@@ -44,6 +44,10 @@ const mapDBToPayrollRun = (row: any): PayrollRun => ({
   initiatedBy: row.initiated_by || '',
   initiatedByRole: row.initiated_by_role || '',
   initiatedAt: row.initiated_at || new Date().toISOString(),
+  regionalAttestedBy: row.regional_attested_by || undefined,
+  regionalAttestedByRole: row.regional_attested_by_role || undefined,
+  regionalAttestedAt: row.regional_attested_at || undefined,
+  regionalNotes: row.regional_notes || undefined,
   hrApprovedBy: row.hr_approved_by || undefined,
   hrApprovedByRole: row.hr_approved_by_role || undefined,
   hrApprovedAt: row.hr_approved_at || undefined,
@@ -215,6 +219,57 @@ export const payrollRunsService = {
       user_name: signatoryName,
       action: 'PAYROLL_HR_CERTIFIED',
       details: `HR certified payroll run ${target.period} (${target.employeeCount} staff). Signed by ${signatoryName} [${signatoryRole}]. Next status: ${nextStatus}`,
+      module: 'Payroll'
+    });
+
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('payroll:updated', { detail: updated }));
+    }
+
+    return updated;
+  },
+
+  async attestAsRegionalHR(
+    runId: string,
+    signatoryName: string,
+    signatoryRole: string,
+    notes?: string
+  ): Promise<PayrollRun> {
+    const runs = await this.getAll();
+    const target = runs.find(r => r.id === runId);
+    if (!target) throw new Error(`Payroll run ${runId} not found`);
+
+    const now = new Date().toISOString();
+    const updated: PayrollRun = {
+      ...target,
+      regionalAttestedBy: signatoryName,
+      regionalAttestedByRole: signatoryRole,
+      regionalAttestedAt: now,
+      regionalNotes: notes || target.regionalNotes,
+      updatedAt: now
+    };
+
+    const { error } = await supabase
+      .from('payroll_runs')
+      .update({
+        regional_attested_by: signatoryName,
+        regional_attested_by_role: signatoryRole,
+        regional_attested_at: now,
+        regional_notes: notes || target.regionalNotes || null,
+        updated_at: now
+      })
+      .eq('id', runId);
+    if (error) {
+      logger.error('payrollRunsService', 'Remote attestAsRegionalHR failed:', error as Error);
+      throw new Error(`Failed to record Regional HR attestation on server: ${error.message || 'Database error'}`);
+    }
+
+    saveLocalBackup([updated]);
+
+    await systemLogsService.create({
+      user_name: signatoryName,
+      action: 'PAYROLL_REGIONAL_HR_ATTESTED',
+      details: `Regional HR attested payroll roster for ${target.period} (${target.employeeCount} staff). Signed by ${signatoryName} [${signatoryRole}].`,
       module: 'Payroll'
     });
 

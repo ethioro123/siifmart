@@ -42,6 +42,16 @@ export interface PayrollRun {
   initiatedAt?: string;
   initiated_at?: string;
 
+  // Regional HR Attestation (Roster, Headcount, Leave & Attendance continuous audit)
+  regionalAttestedBy?: string;
+  regional_attested_by?: string;
+  regionalAttestedByRole?: string;
+  regional_attested_by_role?: string;
+  regionalAttestedAt?: string;
+  regional_attested_at?: string;
+  regionalNotes?: string;
+  regional_notes?: string;
+
   // HR Verification (Department 1: Headcount, Attendance, Leaves)
   hrApprovedBy?: string;
   hr_approved_by?: string;
