@@ -21,7 +21,7 @@ interface PackJobModalProps {
     user: User | null;
     sites: Site[];
     products: Product[];
-    onStartPack: (job: WMSJob) => void;
+    onStartPack: (job: WMSJob) => void | Promise<void>;
     onUpdateItemQty: (itemIndex: number, qty: number) => void;
     onCompleteJob: (boxDetails: any) => void;
     onPrintLabel: (boxDetails: any) => void;
@@ -64,6 +64,16 @@ export const PackJobModal: React.FC<PackJobModalProps> = ({
             setStep('DETAILS');
         }
     }, [isOpen, job?.id]);
+
+    const handleStartScanning = async () => {
+        try {
+            if (job.status === 'Pending') await onStartPack(job);
+            setStep('ITEMS');
+            if (onOpenScanner) onOpenScanner();
+        } catch {
+            // Keep the worker on job details when the status update fails.
+        }
+    };
 
     // Box and Materials State
     const [boxSize, setBoxSize] = useState<BoxSizeType>('Medium');
@@ -289,11 +299,7 @@ export const PackJobModal: React.FC<PackJobModalProps> = ({
                             expectedWeightKg={expectedWeightKg}
                             getProduct={getProduct}
                             getItemMeasureQty={getItemMeasureQty}
-                            onAdvanceToScanning={() => {
-                                if (job.status === 'Pending') onStartPack(job);
-                                setStep('ITEMS');
-                            }}
-                            onStartPack={onStartPack}
+                            onAdvanceToScanning={handleStartScanning}
                             resolveOrderRef={resolveOrderRef}
                             t={t}
                         />
@@ -387,7 +393,7 @@ export const PackJobModal: React.FC<PackJobModalProps> = ({
                     setStep={setStep}
                     onClose={onClose}
                     job={job}
-                    onStartPack={onStartPack}
+                    onAdvanceToScanning={handleStartScanning}
                     isFullyPacked={isFullyPacked}
                     handleFinalComplete={handleFinalComplete}
                     isSubmitting={isSubmitting}

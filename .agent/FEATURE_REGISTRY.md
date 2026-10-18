@@ -4,6 +4,11 @@
 
 ## Active Features
 
+### Floor-Friendly PACK Scanner (2026-10-19)
+- Opening a PACK from job details starts the full-screen scanner after the job is moved to In-Progress. The scanner keeps the job modal at its item step underneath so workers return directly to carton and label steps. Product identity and required quantities are large and glanceable, the scanner fits without vertical scrolling, scans must match a line in the job, and only the exact required quantity can be confirmed.
+- **Files**: `components/fulfillment/pack/PackJobModal.tsx`, `components/fulfillment/pack/PackScanner.tsx`, `components/fulfillment/pack/PackScannerStatusView.tsx`, `components/fulfillment/pack/components/PackJobFooter.tsx`, `components/fulfillment/pack/steps/Step1PackDetails.tsx`, `components/fulfillment/pack/components/PackModalsContainer.tsx`, `utils/packScanValidation.ts`, `tests/utils/packScanValidation.test.ts`
+- **Database**: None
+
 ### Secure PICK-to-PACK Handoff (2026-10-19)
 - Completing a PICK creates its PACK through an idempotent database function that verifies the authenticated employee, active WMS role, completed-by identity, and country/site scope. The resulting PACK is assigned to that employee so the operation can load under WMS row-level security. Failed handoffs state that PICK persisted and are caught by the scanner handler.
 - **Files**: `migrations/20261019_create_pack_after_completed_pick.sql`, `services/wms-jobs.service.ts`, `components/fulfillment/useJobCompletion.ts`, `components/fulfillment/PickTab.tsx`, `tests/services/wmsJobsZeroTrust.test.ts`

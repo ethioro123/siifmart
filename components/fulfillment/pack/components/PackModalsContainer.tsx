@@ -210,6 +210,8 @@ export const PackModalsContainer: React.FC<PackModalsContainerProps> = ({
                                     setSelectedPackJob(prev => prev ? { ...prev, status: 'In-Progress' } : prev);
                                 } catch (e) {
                                     logger.error('Fulfillment', 'startPack', e);
+                                    addNotification('alert', 'Could not start this packing job. Check your connection and try again.');
+                                    throw e;
                                 }
                             }
                         }}
@@ -219,7 +221,6 @@ export const PackModalsContainer: React.FC<PackModalsContainerProps> = ({
                         isSubmitting={isSubmitting || isPrinting}
                         resolveOrderRef={resolveOrderRef}
                         onOpenScanner={() => {
-                            setIsPackModalOpen(false);
                             setIsScannerOpen(true);
                         }}
                         onPrintItemLabel={(item, product, boxSize) => handlePrintItemLabel(selectedPackJob, item, product, boxSize)}
@@ -233,7 +234,6 @@ export const PackModalsContainer: React.FC<PackModalsContainerProps> = ({
                             products={filteredProducts}
                             onClose={() => {
                                 setIsScannerOpen(false);
-                                setIsPackModalOpen(true);
                             }}
                             onConfirmPack={handleScanConfirmPack}
                             onCompleteJob={handleScannerComplete}

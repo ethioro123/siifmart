@@ -8,7 +8,7 @@ interface PackJobFooterProps {
     setStep: (step: PackStep) => void;
     onClose: () => void;
     job: WMSJob;
-    onStartPack: (job: WMSJob) => void;
+    onAdvanceToScanning: () => void | Promise<void>;
     isFullyPacked: boolean;
     handleFinalComplete: () => void;
     isSubmitting: boolean;
@@ -22,7 +22,7 @@ export const PackJobFooter: React.FC<PackJobFooterProps> = ({
     setStep,
     onClose,
     job,
-    onStartPack,
+    onAdvanceToScanning,
     isFullyPacked,
     handleFinalComplete,
     isSubmitting,
@@ -81,10 +81,7 @@ export const PackJobFooter: React.FC<PackJobFooterProps> = ({
                 {step === 'DETAILS' && (
                     <button
                         type="button"
-                        onClick={() => {
-                            if (job.status === 'Pending') onStartPack(job);
-                            setStep('ITEMS');
-                        }}
+                        onClick={() => void onAdvanceToScanning()}
                         className="min-h-[44px] px-5 md:px-7 rounded-xl bg-[var(--theme-accent)] hover:opacity-90 text-white font-semibold text-xs md:text-sm uppercase tracking-wider flex items-center gap-2 shadow-sm transition-all active:scale-95 cursor-pointer touch-manipulation"
                     >
                         <span>Start Scanning & Pack</span>

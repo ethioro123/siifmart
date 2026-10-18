@@ -14,8 +14,7 @@ interface Step1PackDetailsProps {
     expectedWeightKg: number;
     getProduct: (item: any) => Product | undefined;
     getItemMeasureQty: (item: any, product?: any) => number | null | undefined;
-    onAdvanceToScanning: () => void;
-    onStartPack: (job: WMSJob) => void;
+    onAdvanceToScanning: () => void | Promise<void>;
     resolveOrderRef: (ref?: string) => string;
     t: (key: string) => string;
 }
@@ -31,7 +30,6 @@ export const Step1PackDetails: React.FC<Step1PackDetailsProps> = ({
     getProduct,
     getItemMeasureQty,
     onAdvanceToScanning,
-    onStartPack,
     resolveOrderRef,
     t,
 }) => {
@@ -69,10 +67,7 @@ export const Step1PackDetails: React.FC<Step1PackDetailsProps> = ({
                 <div className="flex items-center gap-2 w-full sm:w-auto shrink-0">
                     <button
                         type="button"
-                        onClick={() => {
-                            if (job.status === 'Pending') onStartPack(job);
-                            onAdvanceToScanning();
-                        }}
+                        onClick={() => void onAdvanceToScanning()}
                         className="w-full sm:w-auto min-h-[44px] px-6 py-2 rounded-xl bg-[var(--theme-accent)] hover:opacity-90 text-white font-semibold text-xs md:text-sm uppercase tracking-wider flex items-center justify-center gap-2 shadow-sm transition-all active:scale-95 cursor-pointer touch-manipulation"
                     >
                         <span>Start Scanning & Pack</span>
