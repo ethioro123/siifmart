@@ -7,6 +7,7 @@
 import { supabase } from '../lib/supabase';
 import type { Region } from '../types';
 import { logger } from '../utils/logger';
+import { normalizeCountryCode } from '../utils/siteIdGenerator';
 
 export interface CreateRegionInput {
     code: string;
@@ -77,9 +78,7 @@ export const regionsService = {
                 `);
 
             if (countryCodeOrName) {
-                const normalized = countryCodeOrName.toUpperCase() === 'KENYA' ? 'KE'
-                    : countryCodeOrName.toUpperCase() === 'ETHIOPIA' ? 'ET'
-                    : countryCodeOrName.trim().toUpperCase();
+                const normalized = normalizeCountryCode(countryCodeOrName);
                 query = query.eq('country', normalized);
             }
 
@@ -109,7 +108,7 @@ export const regionsService = {
             }));
         } catch (err) {
             logger.error('regionsService', 'Critical failure in getRegions', err as Error);
-            return [];
+            throw err;
         }
     },
 
@@ -173,12 +172,12 @@ export const regionsService = {
     /**
      * Provision a new operational region under Main HQ governance.
      */
-    async createRegion(input: CreateRegionInput): Promise<Region | null> {
+    async createRegion(input: CreateRegionInput): Promise<Region> {
         try {
             const payload = {
                 code: input.code.toLowerCase().trim(),
                 name: input.name.trim(),
-                country: input.country,
+                country: normalizeCountryCode(input.country),
                 city: input.city || null,
                 default_currency: input.default_currency,
                 default_language: input.default_language || 'en',
@@ -213,7 +212,7 @@ export const regionsService = {
             };
         } catch (err) {
             logger.error('regionsService', 'Exception in createRegion', err as Error);
-            return null;
+            throw err;
         }
     },
 
@@ -244,13 +243,13 @@ export const regionsService = {
 
             if (error) {
                 logger.error('regionsService', `Failed to update region ${code}`, error);
-                return false;
+                throw error;
             }
 
             return true;
         } catch (err) {
             logger.error('regionsService', `Exception in updateRegion ${code}`, err as Error);
-            return false;
+            throw err;
         }
     },
 
@@ -271,6 +270,7 @@ export const regionsService = {
 
             if (sitesErr) {
                 logger.error('regionsService', `Failed to fetch sites for region ${regionCode}`, sitesErr);
+                throw new Error(`Unable to fetch sites for region budget: ${sitesErr.message}`);
             }
 
             const siteIds = (sitesData || []).map(s => s.id);
@@ -292,6 +292,7 @@ export const regionsService = {
 
                 if (poErr) {
                     logger.error('regionsService', 'Failed to fetch PO spend for region budget check', poErr);
+                    throw new Error(`Unable to fetch PO spend for region budget: ${poErr.message}`);
                 } else if (poData) {
                     currentMonthSpend = poData.reduce((sum, po) => sum + Number(po.total_amount || 0), 0);
                 }
@@ -315,7 +316,7 @@ export const regionsService = {
             };
         } catch (err) {
             logger.error('regionsService', `Exception in getRegionBudgetStatus ${regionCode}`, err as Error);
-            return null;
+            throw err;
         }
     },
 
@@ -331,13 +332,13 @@ export const regionsService = {
 
             if (error) {
                 logger.error('regionsService', `Failed to assign site ${siteId} to region ${regionCode}`, error);
-                return false;
+                throw error;
             }
 
             return true;
         } catch (err) {
             logger.error('regionsService', `Exception in assignSiteToRegion`, err as Error);
-            return false;
+            throw err;
         }
     }
 };

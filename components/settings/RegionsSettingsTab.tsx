@@ -3,8 +3,10 @@ import {
     Building2, Plus, Search, Shield, Globe,
     Sliders, Store, DollarSign, Filter, RefreshCw
 } from 'lucide-react';
+import { useStore } from '../../contexts/CentralStore';
 import { useData } from '../../contexts/DataContext';
 import { getCountryProfile, Country } from '../../utils/localization';
+import { normalizeCountryCode } from '../../utils/siteIdGenerator';
 import type { Region } from '../../types';
 import { regionsService } from '../../services/regions.service';
 import { RegionCard } from './regions/RegionCard';
@@ -12,6 +14,7 @@ import { CreateRegionModal } from './regions/CreateRegionModal';
 import { EditRegionModal } from './regions/EditRegionModal';
 
 export default function RegionsSettingsTab() {
+    const { user } = useStore();
     const {
         sites,
         employees,
@@ -21,12 +24,18 @@ export default function RegionsSettingsTab() {
         addNotification
     } = useData();
 
+    const isHQExecutive = useMemo(() => {
+        const r = (user?.role || '').toLowerCase().trim();
+        return ['super_admin', 'ceo', 'operations_manager', 'finance_manager', 'admin'].includes(r);
+    }, [user?.role]);
+
     const activeCountry: Country = (effectiveCountry || settings?.country || 'ET') as Country;
     const countryProfile = getCountryProfile(activeCountry);
     const currency = countryProfile.currency || 'KES';
 
     const [regions, setRegions] = useState<Region[]>([]);
     const [isLoading, setIsLoading] = useState<boolean>(true);
+    const [loadError, setLoadError] = useState<string | null>(null);
     const [searchQuery, setSearchQuery] = useState<string>('');
     const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'suspended' | 'planning'>('all');
 
@@ -36,11 +45,15 @@ export default function RegionsSettingsTab() {
 
     const loadRegions = useCallback(async () => {
         setIsLoading(true);
+        setLoadError(null);
         try {
             const list = await regionsService.getRegions(activeCountry);
             setRegions(list);
-        } catch {
-            addNotification('alert', 'Failed to load regional administrations');
+        } catch (err) {
+            const msg = err instanceof Error ? err.message : 'Failed to load regional administrations';
+            setLoadError(msg);
+            setRegions([]);
+            addNotification('alert', msg);
         } finally {
             setIsLoading(false);
         }
@@ -73,13 +86,8 @@ export default function RegionsSettingsTab() {
 
     // Country-scoped sites
     const countrySites = useMemo(() => {
-        return sites.filter(s => {
-            const sCountry = s.country?.toUpperCase();
-            return (
-                (activeCountry === 'KE' && (sCountry === 'KE' || sCountry === 'KENYA')) ||
-                (activeCountry === 'ET' && (sCountry === 'ET' || sCountry === 'ETHIOPIA'))
-            );
-        });
+        const normActive = normalizeCountryCode(activeCountry);
+        return sites.filter(s => normalizeCountryCode(s.country) === normActive);
     }, [sites, activeCountry]);
 
     // KPI Metrics
@@ -117,14 +125,16 @@ export default function RegionsSettingsTab() {
                     >
                         <RefreshCw size={15} className={isLoading ? 'animate-spin' : ''} />
                     </button>
-                    <button
-                        type="button"
-                        onClick={() => setIsCreateModalOpen(true)}
-                        className="flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold bg-[#0071E3] text-white hover:bg-[#0071E3]/90 transition-all cursor-pointer shadow-xs"
-                    >
-                        <Plus size={15} />
-                        <span>Provision Region</span>
-                    </button>
+                    {isHQExecutive && (
+                        <button
+                            type="button"
+                            onClick={() => setIsCreateModalOpen(true)}
+                            className="flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold bg-[#0071E3] text-white hover:bg-[#0071E3]/90 transition-all cursor-pointer shadow-xs"
+                        >
+                            <Plus size={15} />
+                            <span>Provision Region</span>
+                        </button>
+                    )}
                 </div>
             </div>
 
@@ -223,6 +233,25 @@ export default function RegionsSettingsTab() {
                     <Building2 size={28} className="mx-auto mb-2 text-[var(--theme-text-secondary)] animate-pulse" />
                     Loading regional governance structure...
                 </div>
+            ) : loadError ? (
+                <div className="border border-red-500/20 bg-red-500/5 rounded-2xl p-10 text-center">
+                    <div className="w-12 h-12 rounded-2xl bg-red-500/10 border border-red-500/20 flex items-center justify-center text-[#FF3B30] mx-auto mb-3">
+                        <Shield size={24} />
+                    </div>
+                    <h3 className="text-sm font-semibold text-[var(--theme-text-primary)]">
+                        Unable to Load Regional Administrations
+                    </h3>
+                    <p className="text-xs text-[var(--theme-text-secondary)] mt-1 max-w-md mx-auto">
+                        {loadError}
+                    </p>
+                    <button
+                        type="button"
+                        onClick={loadRegions}
+                        className="mt-4 px-4 py-2 rounded-xl text-xs font-semibold bg-[#0071E3] text-white hover:bg-[#0071E3]/90 transition-all cursor-pointer shadow-xs"
+                    >
+                        Retry Connection
+                    </button>
+                </div>
             ) : filteredRegions.length === 0 ? (
                 <div className="border border-dashed border-[var(--theme-border)] rounded-2xl p-12 text-center">
                     <div className="w-12 h-12 rounded-2xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] flex items-center justify-center text-[var(--theme-text-secondary)] mx-auto mb-3">
@@ -236,7 +265,7 @@ export default function RegionsSettingsTab() {
                             ? 'Try clearing your search query or adjusting the status filter.'
                             : 'All sites are currently governed directly by Central National HQ. Provision a regional administration to delegate procurement and workforce operations.'}
                     </p>
-                    {!searchQuery && (
+                    {!searchQuery && isHQExecutive && (
                         <button
                             type="button"
                             onClick={() => setIsCreateModalOpen(true)}
@@ -256,6 +285,7 @@ export default function RegionsSettingsTab() {
                             sites={countrySites}
                             employees={employees}
                             onEdit={(r) => setEditingRegion(r)}
+                            canManageGovernance={isHQExecutive}
                         />
                     ))}
                 </div>

@@ -92,6 +92,7 @@ export function useCountryScoping({
   const { data: regions = [] } = useQuery<Region[]>({
     queryKey: ['regions', effectiveCountry],
     queryFn: () => regionsService.getRegions(effectiveCountry),
+    enabled: Boolean(user),
     staleTime: 10 * 60 * 1000
   });
 

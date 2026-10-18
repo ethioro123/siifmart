@@ -4,7 +4,8 @@ import { useStore } from '../contexts/CentralStore';
 import { useData } from '../contexts/DataContext';
 import { getUserRegion } from '../utils/userCountry';
 import type { Region, Site, Employee, SaleRecord, PurchaseOrder, TransferRecord, ShiftRecord, Product } from '../types';
-import type { Country } from '../utils/localization';
+import { Country, getCountryProfile } from '../utils/localization';
+import { normalizeCountryCode } from '../utils/siteIdGenerator';
 
 export interface OverrideVelocityBreach {
   siteId: string;
@@ -109,16 +110,13 @@ export function useRegionalOperationsData(): RegionalOperationsData {
 
   // Sovereign Country & Currency
   const activeCountry = (effectiveCountry || settings?.country || 'ET') as Country;
-  const currencySymbol = activeCountry === 'KE' ? 'KES' : 'ETB';
+  const countryProfile = getCountryProfile(activeCountry);
+  const currencySymbol = countryProfile.currencySymbol || countryProfile.currencyCode || 'KES';
 
   // Enforce zero cross-border leakage on regions list
   const sovereignRegions = useMemo(() => {
-    return regions.filter(r => {
-      const rCountry = (r.country || '').toUpperCase();
-      if (activeCountry === 'KE') return rCountry === 'KENYA' || rCountry === 'KE';
-      if (activeCountry === 'ET') return rCountry === 'ETHIOPIA' || rCountry === 'ET';
-      return rCountry === activeCountry;
-    });
+    const normActive = normalizeCountryCode(activeCountry);
+    return regions.filter(r => normalizeCountryCode(r.country) === normActive);
   }, [regions, activeCountry]);
 
   // Resolve Territorial Lock
@@ -138,7 +136,7 @@ export function useRegionalOperationsData(): RegionalOperationsData {
     if (lockedUserRegion) return lockedUserRegion;
     if (isHQExecutive && urlRegionParam) return urlRegionParam;
     if (isHQExecutive && activeRegionCode) return activeRegionCode;
-    return sovereignRegions[0]?.code || (activeCountry === 'KE' ? 'KE-NRB' : 'ET-ADD');
+    return sovereignRegions[0]?.code || `${normalizeCountryCode(activeCountry)}-REG01`;
   }, [lockedUserRegion, isHQExecutive, urlRegionParam, activeRegionCode, sovereignRegions, activeCountry]);
 
   const isAuditInspection = Boolean(isHQExecutive && !lockedUserRegion);

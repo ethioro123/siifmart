@@ -82,19 +82,20 @@ export function canSwitchRegion(user: { role?: string; title?: string } | null |
 }
 
 /**
- * Resolve user's regional lock. Only workers with scopeLevel === 'REGIONAL' are region-locked;
- * everyone else (default 'HQ') has country-wide authority and returns null.
+ * Resolve user's regional lock. HQ Executive roles with country-wide authority return null.
+ * Regional and branch floor staff are locked to their region or site's region.
  */
 export function getUserRegion(
     user: { role?: string; regionCode?: string; region_code?: string; scopeLevel?: string; siteId?: string; id?: string; employeeId?: string } | null | undefined,
     sites?: Array<{ id: string; regionCode?: string; region_code?: string; code?: string }>,
-    employees?: Array<{ id: string; regionCode?: string; region_code?: string; scopeLevel?: string; siteId?: string; site_id?: string }>
+    employees?: Array<{ id: string; regionCode?: string; region_code?: string; scopeLevel?: string; siteId?: string; site_id?: string; role?: string }>
 ): string | null {
     if (!user) return null;
 
+    // HQ Executive roles have country-wide authority and are never locked to a single region
+    if (canSwitchRegion(user)) return null;
+
     const emp = employees?.find(e => e.id === user.employeeId || e.id === user.id);
-    const scope = emp?.scopeLevel ?? user.scopeLevel ?? 'HQ';
-    if (scope !== 'REGIONAL') return null;
 
     // 1. Employee profile region_code
     const empRegion = emp?.regionCode || emp?.region_code;
@@ -105,8 +106,9 @@ export function getUserRegion(
     if (userRegion) return userRegion;
 
     // 3. Fallback to user's assigned site's region
-    if (user.siteId && sites && sites.length > 0) {
-        const site = sites.find(s => s.id === user.siteId || s.code === user.siteId);
+    const siteId = user.siteId || emp?.siteId || emp?.site_id;
+    if (siteId && sites && sites.length > 0) {
+        const site = sites.find(s => s.id === siteId || s.code === siteId);
         const siteRegion = site?.regionCode || site?.region_code;
         if (siteRegion) return siteRegion;
     }

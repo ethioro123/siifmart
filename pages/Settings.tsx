@@ -84,7 +84,7 @@ export default function SettingsPage() {
                     {isRegionalStaff ? (
                         <>
                             <p className="text-[11px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider mb-2 px-2">Regional Operational Config</p>
-                            <Protected permission="MANAGE_WAREHOUSE">
+                            <Protected permission="ACCESS_REGIONAL_OPS">
                                 <TabButton id="regions" icon={Network} label="Regional Administration" />
                             </Protected>
                             <Protected permission="MANAGE_WAREHOUSE">
@@ -109,7 +109,7 @@ export default function SettingsPage() {
                             <Protected permission="MANAGE_WAREHOUSE">
                                 <TabButton id="locations" icon={MapPin} label="Locations & Sites" />
                             </Protected>
-                            <Protected permission="MANAGE_WAREHOUSE">
+                            <Protected permission="ACCESS_REGIONAL_OPS">
                                 <TabButton id="regions" icon={Network} label="Regional Administration" />
                             </Protected>
                             <Protected permission="MANAGE_WAREHOUSE">
@@ -188,7 +188,7 @@ export default function SettingsPage() {
                         </Protected>
                     )}
                     {activeTab === 'regions' && (
-                        <Protected permission="MANAGE_WAREHOUSE">
+                        <Protected permission="ACCESS_REGIONAL_OPS">
                             <RegionsSettingsTab />
                         </Protected>
                     )}

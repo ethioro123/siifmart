@@ -1,14 +1,16 @@
 import React, { useState } from 'react';
 import { X, Building2, MapPin, DollarSign, ShieldAlert, Check } from 'lucide-react';
 import type { Site, Employee } from '../../../types';
-import { regionsService, CreateRegionInput } from '../../../services/regions.service';
+import type { CreateRegionInput } from '../../../services/regions.service';
+import { useCreateRegionMutation } from '../../../hooks/useRegionMutations';
+import { normalizeCountryCode } from '../../../utils/siteIdGenerator';
 
 interface CreateRegionModalProps {
     isOpen: boolean;
     onClose: () => void;
     onCreated: () => void;
-    country: string; // 'KE' or 'ET'
-    currency: string; // 'KES' or 'ETB'
+    country: string; // 'KE', 'ET', 'UG', 'RW', 'TZ'
+    currency: string; // 'KES', 'ETB', etc.
     sites: Site[];
     employees: Employee[];
     addNotification: (type: 'alert' | 'success' | 'info', message: string) => void;
@@ -24,6 +26,7 @@ export const CreateRegionModal: React.FC<CreateRegionModalProps> = ({
     employees,
     addNotification
 }) => {
+    const createRegionMutation = useCreateRegionMutation();
     const [name, setName] = useState('');
     const [code, setCode] = useState('');
     const [city, setCity] = useState('');
@@ -37,22 +40,15 @@ export const CreateRegionModal: React.FC<CreateRegionModalProps> = ({
 
     if (!isOpen) return null;
 
+    const normCountry = normalizeCountryCode(country);
+
     // Filter sites to current sovereign country
-    const countrySites = sites.filter(s => {
-        const sCountry = s.country?.toUpperCase();
-        return (
-            (country === 'KE' && (sCountry === 'KE' || sCountry === 'KENYA')) ||
-            (country === 'ET' && (sCountry === 'ET' || sCountry === 'ETHIOPIA'))
-        );
-    });
+    const countrySites = sites.filter(s => normalizeCountryCode(s.country) === normCountry);
 
     // Filter potential regional managers
     const countryEmployees = employees.filter(e => {
-        const eCountry = (e.country || e.country_code)?.toUpperCase();
-        return (
-            (country === 'KE' && (eCountry === 'KE' || eCountry === 'KENYA')) ||
-            (country === 'ET' && (eCountry === 'ET' || eCountry === 'ETHIOPIA'))
-        );
+        const empCountry = normalizeCountryCode(e.country || e.country_code);
+        return empCountry === normCountry;
     });
 
     const handleGenerateCode = (regionName: string) => {
@@ -108,7 +104,7 @@ export const CreateRegionModal: React.FC<CreateRegionModalProps> = ({
             const payload: CreateRegionInput = {
                 name: name.trim(),
                 code: code.trim().toLowerCase(),
-                country: country === 'KE' ? 'Kenya' : 'Ethiopia',
+                country: normCountry,
                 city: city.trim() || undefined,
                 default_currency: currency,
                 admin_hub_site_id: adminHubSiteId || undefined,
@@ -120,14 +116,10 @@ export const CreateRegionModal: React.FC<CreateRegionModalProps> = ({
                 status: 'active'
             };
 
-            const created = await regionsService.createRegion(payload);
-            if (created) {
-                addNotification('success', `Region "${name}" provisioned successfully`);
-                onCreated();
-                onClose();
-            } else {
-                addNotification('alert', 'Failed to provision region. Check territorial code uniqueness.');
-            }
+            await createRegionMutation.mutateAsync(payload);
+            addNotification('success', `Region "${name}" provisioned successfully`);
+            onCreated();
+            onClose();
         } catch (err) {
             addNotification('alert', `Error: ${err instanceof Error ? err.message : 'Failed to provision region'}`);
         } finally {

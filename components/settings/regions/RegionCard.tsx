@@ -11,28 +11,38 @@ interface RegionCardProps {
     sites: Site[];
     employees: Employee[];
     onEdit: (region: Region) => void;
+    canManageGovernance?: boolean;
 }
 
 export const RegionCard: React.FC<RegionCardProps> = ({
     region,
     sites,
     employees,
-    onEdit
+    onEdit,
+    canManageGovernance = false
 }) => {
     const [budgetStatus, setBudgetStatus] = useState<RegionBudgetStatus | null>(null);
     const [isLoadingBudget, setIsLoadingBudget] = useState<boolean>(true);
+    const [budgetError, setBudgetError] = useState<boolean>(false);
 
     useEffect(() => {
         let isMounted = true;
         async function fetchBudget() {
             setIsLoadingBudget(true);
+            setBudgetError(false);
             try {
                 const status = await regionsService.getRegionBudgetStatus(region.code);
                 if (isMounted) {
-                    setBudgetStatus(status);
+                    if (!status) {
+                        setBudgetError(true);
+                    } else {
+                        setBudgetStatus(status);
+                    }
                 }
             } catch {
-                // Non-blocking fallback
+                if (isMounted) {
+                    setBudgetError(true);
+                }
             } finally {
                 if (isMounted) {
                     setIsLoadingBudget(false);
@@ -132,46 +142,68 @@ export const RegionCard: React.FC<RegionCardProps> = ({
 
                 {/* Live Procurement Budget & Threshold Controls */}
                 <div className="bg-[var(--theme-bg-subtle)] rounded-xl p-3.5 border border-[var(--theme-border)] mb-4">
-                    <div className="flex items-center justify-between text-xs mb-1.5">
-                        <span className="font-semibold text-[var(--theme-text-primary)]">
-                            Monthly Procurement Budget
-                        </span>
-                        <span className="text-[11px] text-[var(--theme-text-secondary)] font-mono">
-                            {isLoadingBudget ? 'Calculating...' : `${currentSpend.toLocaleString()} / ${monthlyBudget.toLocaleString()} ${currency}`}
-                        </span>
-                    </div>
+                    {budgetError || (!isLoadingBudget && !budgetStatus) ? (
+                        <div>
+                            <div className="flex items-center justify-between text-xs mb-1.5">
+                                <span className="font-semibold text-[var(--theme-text-primary)]">
+                                    Monthly Procurement Budget
+                                </span>
+                                <span className="inline-flex items-center gap-1 text-[11px] font-medium text-[#FF9500] bg-[#FF9500]/10 px-2 py-0.5 rounded border border-[#FF9500]/20">
+                                    <AlertTriangle size={12} />
+                                    Spend Unverified
+                                </span>
+                            </div>
+                            <div className="w-full h-2 bg-[var(--theme-border)] rounded-full overflow-hidden">
+                                <div className="h-full bg-[#FF9500]/30 w-full" />
+                            </div>
+                            <div className="mt-2 text-[11px] text-[var(--theme-text-secondary)]">
+                                Budget Cap: {monthlyBudget.toLocaleString()} {currency} (Live purchase order spend could not be verified)
+                            </div>
+                        </div>
+                    ) : (
+                        <>
+                            <div className="flex items-center justify-between text-xs mb-1.5">
+                                <span className="font-semibold text-[var(--theme-text-primary)]">
+                                    Monthly Procurement Budget
+                                </span>
+                                <span className="text-[11px] text-[var(--theme-text-secondary)] font-mono">
+                                    {isLoadingBudget ? 'Calculating...' : `${currentSpend.toLocaleString()} / ${monthlyBudget.toLocaleString()} ${currency}`}
+                                </span>
+                            </div>
 
-                    {/* Progress Bar */}
-                    <div className="w-full h-2 bg-[var(--theme-border)] rounded-full overflow-hidden">
-                        <div
-                            className={`h-full transition-all duration-300 ${
-                                isOverBudget
-                                    ? 'bg-[#FF3B30]'
-                                    : isNearCap
-                                    ? 'bg-[#FF9500]'
-                                    : 'bg-[#34C759]'
-                            }`}
-                            style={{ width: `${Math.min(100, Math.max(0, percentUsed))}%` }}
-                        />
-                    </div>
+                            {/* Progress Bar */}
+                            <div className="w-full h-2 bg-[var(--theme-border)] rounded-full overflow-hidden">
+                                <div
+                                    className={`h-full transition-all duration-300 ${
+                                        isOverBudget
+                                            ? 'bg-[#FF3B30]'
+                                            : isNearCap
+                                            ? 'bg-[#FF9500]'
+                                            : 'bg-[#34C759]'
+                                    }`}
+                                    style={{ width: `${Math.min(100, Math.max(0, percentUsed))}%` }}
+                                />
+                            </div>
 
-                    <div className="flex items-center justify-between mt-2 text-[11px]">
-                        <span className="text-[var(--theme-text-secondary)]">
-                            {percentUsed.toFixed(1)}% utilized this calendar month
-                        </span>
-                        {isOverBudget && (
-                            <span className="flex items-center gap-1 text-[#FF3B30] font-medium">
-                                <AlertTriangle size={12} />
-                                Over Budget Cap
-                            </span>
-                        )}
-                        {!isOverBudget && isNearCap && (
-                            <span className="flex items-center gap-1 text-[#FF9500] font-medium">
-                                <AlertTriangle size={12} />
-                                Near Budget Cap (85%+)
-                            </span>
-                        )}
-                    </div>
+                            <div className="flex items-center justify-between mt-2 text-[11px]">
+                                <span className="text-[var(--theme-text-secondary)]">
+                                    {percentUsed.toFixed(1)}% utilized this calendar month
+                                </span>
+                                {isOverBudget && (
+                                    <span className="flex items-center gap-1 text-[#FF3B30] font-medium">
+                                        <AlertTriangle size={12} />
+                                        Over Budget Cap
+                                    </span>
+                                )}
+                                {!isOverBudget && isNearCap && (
+                                    <span className="flex items-center gap-1 text-[#FF9500] font-medium">
+                                        <AlertTriangle size={12} />
+                                        Near Budget Cap (85%+)
+                                    </span>
+                                )}
+                            </div>
+                        </>
+                    )}
 
                     {/* Autonomous Spending Thresholds */}
                     <div className="mt-3 pt-2.5 border-t border-[var(--theme-border)] flex items-center justify-between text-[11px]">
@@ -202,14 +234,21 @@ export const RegionCard: React.FC<RegionCardProps> = ({
 
             {/* Actions */}
             <div className="pt-3 border-t border-[var(--theme-border)] flex items-center justify-end gap-2">
-                <button
-                    type="button"
-                    onClick={() => onEdit(region)}
-                    className="flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-[var(--theme-bg-subtle)] text-[var(--theme-text-primary)] hover:bg-[#0071E3] hover:text-white transition-all cursor-pointer border border-[var(--theme-border)]"
-                >
-                    <Sliders size={14} />
-                    <span>Governance & Limits</span>
-                </button>
+                {canManageGovernance ? (
+                    <button
+                        type="button"
+                        onClick={() => onEdit(region)}
+                        className="flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-[var(--theme-bg-subtle)] text-[var(--theme-text-primary)] hover:bg-[#0071E3] hover:text-white transition-all cursor-pointer border border-[var(--theme-border)]"
+                    >
+                        <Sliders size={14} />
+                        <span>Governance & Limits</span>
+                    </button>
+                ) : (
+                    <span className="text-[11px] text-[var(--theme-text-secondary)] italic flex items-center gap-1.5">
+                        <ShieldAlert size={13} className="text-[var(--theme-text-secondary)]" />
+                        HQ Executive Governance Locked
+                    </span>
+                )}
             </div>
         </div>
     );

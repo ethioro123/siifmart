@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
 import { X, Building2, DollarSign, ShieldAlert, Check, Store, CheckSquare, Square } from 'lucide-react';
 import type { Region, Site, Employee } from '../../../types';
-import { regionsService, UpdateRegionInput } from '../../../services/regions.service';
+import type { UpdateRegionInput } from '../../../services/regions.service';
+import { useUpdateRegionMutation } from '../../../hooks/useRegionMutations';
+import { normalizeCountryCode } from '../../../utils/siteIdGenerator';
 
 interface EditRegionModalProps {
     isOpen: boolean;
@@ -22,6 +24,7 @@ export const EditRegionModal: React.FC<EditRegionModalProps> = ({
     employees,
     addNotification
 }) => {
+    const updateRegionMutation = useUpdateRegionMutation();
     const [name, setName] = useState(region.name);
     const [city, setCity] = useState(region.city || '');
     const [status, setStatus] = useState<'active' | 'suspended' | 'planning'>(region.status || 'active');
@@ -42,24 +45,15 @@ export const EditRegionModal: React.FC<EditRegionModalProps> = ({
 
     if (!isOpen) return null;
 
+    const normRegionCountry = normalizeCountryCode(region.country);
+
     // Filter sites to region's country
-    const countrySites = sites.filter(s => {
-        const sCountry = s.country?.toUpperCase();
-        const rCountry = region.country?.toUpperCase();
-        return (
-            (rCountry?.includes('KE') && (sCountry === 'KE' || sCountry === 'KENYA')) ||
-            (rCountry?.includes('ET') && (sCountry === 'ET' || sCountry === 'ETHIOPIA'))
-        );
-    });
+    const countrySites = sites.filter(s => normalizeCountryCode(s.country) === normRegionCountry);
 
     // Filter employees to region's country
     const countryEmployees = employees.filter(e => {
-        const eCountry = (e.country || e.country_code)?.toUpperCase();
-        const rCountry = region.country?.toUpperCase();
-        return (
-            (rCountry?.includes('KE') && (eCountry === 'KE' || eCountry === 'KENYA')) ||
-            (rCountry?.includes('ET') && (eCountry === 'ET' || eCountry === 'ETHIOPIA'))
-        );
+        const empCountry = normalizeCountryCode(e.country || e.country_code);
+        return empCountry === normRegionCountry;
     });
 
     const toggleSite = (siteId: string) => {
@@ -109,22 +103,28 @@ export const EditRegionModal: React.FC<EditRegionModalProps> = ({
                 status
             };
 
-            const updated = await regionsService.updateRegion(region.code, updateInput);
-            if (!updated) {
-                throw new Error('Failed to update region settings');
-            }
-
-            // Sync site allocations
+            const toAssign: string[] = [];
+            const toUnassign: string[] = [];
             for (const site of countrySites) {
                 const wasAssigned = site.regionCode === region.code || site.region_code === region.code;
                 const isNowAssigned = assignedSiteIds.includes(site.id);
 
                 if (!wasAssigned && isNowAssigned) {
-                    await regionsService.assignSiteToRegion(site.id, region.code);
+                    toAssign.push(site.id);
                 } else if (wasAssigned && !isNowAssigned) {
-                    await regionsService.assignSiteToRegion(site.id, null);
+                    toUnassign.push(site.id);
                 }
             }
+
+            await updateRegionMutation.mutateAsync({
+                code: region.code,
+                updates: updateInput,
+                siteAllocations: {
+                    toAssign,
+                    toUnassign,
+                    allSites: countrySites
+                }
+            });
 
             addNotification('success', `Region "${name}" updated successfully`);
             onUpdated();

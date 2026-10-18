@@ -125,7 +125,7 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
   });
   const queries = useDataQueries({
     siteId: activeSiteId,
-    enabled: navigator.onLine,
+    enabled: navigator.onLine && Boolean(user),
     onProgress: onQueryProgress
   });
 

@@ -5,3 +5,4 @@ export * from './useAdjustStockMutation';
 export * from './useBarcodeApprovalMutations';
 export * from './useInventoryRequestMutations';
 export * from './useRelocateProductMutation';
+export * from './useRegionMutations';

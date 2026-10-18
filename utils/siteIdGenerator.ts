@@ -20,7 +20,13 @@ import type { Site } from '../types';
 export function normalizeCountryCode(country?: string | null): string {
     if (!country) return 'ET';
     const clean = country.trim().toUpperCase();
-    return clean || 'ET';
+    if (clean === 'KENYA' || clean === 'KE') return 'KE';
+    if (clean === 'ETHIOPIA' || clean === 'ET') return 'ET';
+    if (clean === 'UGANDA' || clean === 'UG') return 'UG';
+    if (clean === 'RWANDA' || clean === 'RW') return 'RW';
+    if (clean === 'TANZANIA' || clean === 'TZ') return 'TZ';
+    if (clean.length === 2) return clean;
+    return 'ET';
 }
 
 /**
