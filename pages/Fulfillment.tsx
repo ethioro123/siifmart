@@ -30,7 +30,8 @@ import { useFilteredFulfillmentData } from '../hooks/useFilteredFulfillmentData'
 import { useFulfillmentActions } from '../hooks/useFulfillmentActions';
 import { usePutawayStock } from '../components/fulfillment/receive/hooks/usePutawayStock';
 import { logger } from '../utils/logger';
-
+import { useSearchParams } from 'react-router-dom';
+import { getDefaultFulfillmentTab, getVisibleFulfillmentTabs } from '../utils/fulfillmentTabPermissions';
 
 type OpTab = 'DOCKS' | 'RECEIVE' | 'PUTAWAY' | 'PICK' | 'PACK' | 'REPLENISH' | 'COUNT' | 'WASTE' | 'RETURNS' | 'ASSIGN' | 'LABELS' | 'TRANSFER' | 'DRIVER';
 
@@ -159,15 +160,49 @@ export default function WarehouseOperations() {
     // NOT derived from filteredJobs (which only contains active jobs).
 
 
-    // TAB-LEVEL ACCESS CONTROL
+    // TAB-LEVEL ACCESS CONTROL & WORKER SOVEREIGN LANDING
+    const [searchParams, setSearchParams] = useSearchParams();
 
+    const visibleTabs = useMemo(() => {
+        return getVisibleFulfillmentTabs(user?.role);
+    }, [user?.role]);
 
-    // Get list of tabs user can access
-    // Set default tab to first visible tab
-    const [activeTab, setActiveTab] = useState<OpTab>('RECEIVE'); // Default, will update or use state logic if needed
-    // Actually, setActiveTab should be set initially based on role?
-    // For now we rely on FulfillmentContext or just default.
-    // FulfillmentContent handles visibility.
+    const defaultRoleTab = useMemo(() => {
+        return getDefaultFulfillmentTab(user?.role);
+    }, [user?.role]);
+
+    const resolveInitialTab = (): OpTab => {
+        const queryTab = (searchParams.get('tab') || '').toUpperCase() as OpTab;
+        if (queryTab && visibleTabs.includes(queryTab)) {
+            return queryTab;
+        }
+        if (visibleTabs.includes(defaultRoleTab)) {
+            return defaultRoleTab;
+        }
+        return visibleTabs[0] ?? 'RECEIVE';
+    };
+
+    const [activeTab, setActiveTab] = useState<OpTab>(resolveInitialTab);
+
+    // Keep active tab synchronized when role changes or when URL search param updates
+    useEffect(() => {
+        const queryTab = (searchParams.get('tab') || '').toUpperCase() as OpTab;
+        if (queryTab && visibleTabs.includes(queryTab)) {
+            if (activeTab !== queryTab) setActiveTab(queryTab);
+        } else if (!visibleTabs.includes(activeTab)) {
+            const nextTab = visibleTabs.includes(defaultRoleTab) ? defaultRoleTab : (visibleTabs[0] ?? 'RECEIVE');
+            setActiveTab(nextTab);
+        }
+    }, [user?.role, user?.id, searchParams, visibleTabs, defaultRoleTab]);
+
+    const handleSelectTab = (tab: OpTab) => {
+        setActiveTab(tab);
+        setSearchParams(prev => {
+            const next = new URLSearchParams(prev);
+            next.set('tab', tab);
+            return next;
+        }, { replace: true });
+    };
 
     const [selectedJob, setSelectedJob] = useState<WMSJob | null>(null);
     const [isDetailsOpen, setIsDetailsOpen] = useState(false);
@@ -314,7 +349,7 @@ export default function WarehouseOperations() {
         needsSiteSelection,
         handleStartJob,
         activeTab,
-        setActiveTab,
+        setActiveTab: handleSelectTab,
         selectedJob,
         setSelectedJob,
         isDetailsOpen,

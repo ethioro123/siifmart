@@ -105,12 +105,12 @@ export const Step2PickCollect: React.FC<Step2PickCollectProps> = ({
             <div className="p-3 md:p-4 border-b border-[var(--theme-border)] bg-[var(--theme-bg-card)] shrink-0 space-y-3">
                 <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5">
                     {/* Live Progress Pill */}
-                    <div className="flex items-center gap-3 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] px-3.5 py-2 rounded-xl shrink-0">
+                    <div className="flex items-center gap-3 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] px-4 py-3 rounded-xl shrink-0">
                         <div className="flex items-center gap-1.5">
-                            <span className="text-xs font-mono font-bold text-[var(--theme-text-primary)]">
+                            <span className="text-base font-mono font-bold text-[var(--theme-text-primary)]">
                                 {completedItems} / {totalItems}
                             </span>
-                            <span className="text-xs font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider">
+                            <span className="text-xs sm:text-sm font-bold text-[var(--theme-text-secondary)] uppercase tracking-wider">
                                 {t('warehouse.picked') || 'Picked'}
                             </span>
                         </div>
@@ -123,7 +123,7 @@ export const Step2PickCollect: React.FC<Step2PickCollectProps> = ({
                                 }`}
                             />
                         </div>
-                        <span className="text-xs font-mono font-bold text-[var(--theme-accent)]">
+                        <span className="text-sm font-mono font-bold text-[var(--theme-accent)]">
                             {Math.round(progressPercent)}%
                         </span>
                     </div>
@@ -138,7 +138,7 @@ export const Step2PickCollect: React.FC<Step2PickCollectProps> = ({
                                 placeholder="Scan SKU / barcode..."
                                 value={scanInput}
                                 onChange={(e) => setScanInput(e.target.value)}
-                                className="w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] focus:border-[var(--theme-accent)] rounded-xl py-2 pl-9 pr-3 text-xs md:text-sm font-mono text-[var(--theme-text-primary)] placeholder:text-[var(--theme-text-secondary)] outline-none min-h-[44px]"
+                            className="w-full bg-[var(--theme-bg-subtle)] border-2 border-[var(--theme-border)] focus:border-[var(--theme-accent)] rounded-xl py-3 pl-11 pr-3 text-base sm:text-lg font-mono font-semibold text-[var(--theme-text-primary)] placeholder:text-[var(--theme-text-secondary)] outline-none min-h-[56px]"
                             />
                             <Barcode size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--theme-text-secondary)]" />
                         </form>
@@ -147,7 +147,7 @@ export const Step2PickCollect: React.FC<Step2PickCollectProps> = ({
                             type="button"
                             onClick={() => onStartPick(job)}
                             title="Open guided pick scanner"
-                            className="min-h-[44px] px-3 bg-[var(--theme-accent)] hover:opacity-90 border border-[var(--theme-accent)] rounded-xl text-xs font-semibold tracking-wide text-white flex items-center gap-1.5 shrink-0 transition-colors touch-manipulation cursor-pointer"
+                            className="min-h-[56px] px-4 bg-[var(--theme-accent)] hover:opacity-90 border border-[var(--theme-accent)] rounded-xl text-sm font-bold tracking-wide text-white flex items-center gap-2 shrink-0 transition-colors touch-manipulation cursor-pointer"
                         >
                             <Scan size={15} />
                             <span>Guided Scanner</span>
@@ -172,10 +172,10 @@ export const Step2PickCollect: React.FC<Step2PickCollectProps> = ({
                             <Sparkles size={18} />
                         </div>
                         <div>
-                            <p className="text-xs md:text-sm font-bold text-green-700 dark:text-green-300 uppercase tracking-tight">
+                            <p className="text-base md:text-lg font-bold text-green-700 dark:text-green-300 tracking-tight">
                                 All {totalItems} items collected!
                             </p>
-                            <span className="text-[11px] text-green-600 dark:text-green-400">
+                            <span className="text-sm text-green-600 dark:text-green-400">
                                 Proceed to staging drop-off and tote manifest handover.
                             </span>
                         </div>
@@ -204,34 +204,34 @@ export const Step2PickCollect: React.FC<Step2PickCollectProps> = ({
                     return (
                         <div
                             key={idx}
-                            className={`p-3.5 rounded-2xl border flex flex-col sm:flex-row sm:items-center justify-between gap-3 transition-colors ${
+                            className={`p-4 sm:p-5 rounded-2xl border flex flex-col sm:flex-row sm:items-center justify-between gap-4 transition-colors ${
                                 isDone
                                     ? 'bg-green-500/5 border-green-500/20'
                                     : 'bg-[var(--theme-bg-card)] border-[var(--theme-border)] shadow-sm'
                             }`}
                         >
-                            <div className="flex items-center gap-3 min-w-0 flex-1">
-                                <div className="w-11 h-11 rounded-xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] flex items-center justify-center shrink-0 overflow-hidden">
+                            <div className="flex items-center gap-4 min-w-0 flex-1">
+                                <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] flex items-center justify-center shrink-0 overflow-hidden">
                                     {prod?.image ? (
                                         <img src={prod.image} alt={item.name} className="w-full h-full object-cover" />
                                     ) : (
-                                        <Package size={20} className="text-[var(--theme-text-secondary)]" />
+                                        <Package size={30} className="text-[var(--theme-text-secondary)]" />
                                     )}
                                 </div>
                                 <div className="min-w-0 flex-1">
                                     <div className="flex items-center gap-2">
-                                        <h4 className={`text-xs font-bold uppercase truncate ${
+                                        <h4 className={`text-lg sm:text-xl font-bold leading-tight break-words ${
                                             isDone ? 'line-through text-[var(--theme-text-secondary)]' : 'text-[var(--theme-text-primary)]'
                                         }`}>
                                             {item.name || prod?.name || 'Unknown SKU'}
                                         </h4>
                                     </div>
-                                    <div className="flex flex-wrap items-center gap-1.5 mt-1">
-                                        <span className="text-[11px] font-mono text-[var(--theme-text-secondary)] bg-[var(--theme-bg-subtle)] px-2 py-0.5 rounded border border-[var(--theme-border)]">
+                                    <div className="flex flex-wrap items-center gap-2 mt-2">
+                                        <span className="text-sm font-mono font-semibold text-[var(--theme-text-secondary)] bg-[var(--theme-bg-subtle)] px-2.5 py-1 rounded-lg border border-[var(--theme-border)]">
                                             {item.sku || prod?.sku}
                                         </span>
                                         {formatProductSize(prod || item) && (
-                                            <span className="text-[11px] font-mono text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">
+                                            <span className="text-sm font-mono font-semibold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-lg border border-emerald-500/20">
                                                 {formatProductSize(prod || item)}
                                             </span>
                                         )}
@@ -240,8 +240,8 @@ export const Step2PickCollect: React.FC<Step2PickCollectProps> = ({
                                 </div>
                             </div>
 
-                            <div className="flex items-center justify-between sm:justify-end gap-2.5 pt-2 sm:pt-0 border-t sm:border-0 border-[var(--theme-border)]/60 shrink-0">
-                                <span className={`text-xs font-mono font-bold ${
+                            <div className="flex items-center justify-between sm:justify-end gap-3 pt-3 sm:pt-0 border-t sm:border-0 border-[var(--theme-border)]/60 shrink-0">
+                                <span className={`text-lg font-mono font-bold tabular-nums ${
                                     isDone ? 'text-green-600 dark:text-green-400' : 'text-[var(--theme-text-primary)]'
                                 }`}>
                                     {picked} / {expected} {unitDef.shortLabel}
@@ -256,20 +256,20 @@ export const Step2PickCollect: React.FC<Step2PickCollectProps> = ({
                                         aria-label={`Enter picked quantity for ${item.name || prod?.name || 'item'}`}
                                         value={qtyDrafts[idx] ?? (picked > 0 ? String(picked) : '')}
                                         onChange={(e) => setQtyDrafts(prev => ({ ...prev, [idx]: e.target.value }))}
-                                        className="w-16 min-h-[38px] px-2.5 py-1 rounded-xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] focus:border-[var(--theme-accent)] text-xs font-mono font-bold text-center text-[var(--theme-text-primary)] outline-none tabular-nums"
+                                        className="w-24 min-h-[52px] px-2.5 py-2 rounded-xl bg-[var(--theme-bg-subtle)] border-2 border-[var(--theme-border)] focus:border-[var(--theme-accent)] text-lg font-mono font-bold text-center text-[var(--theme-text-primary)] outline-none tabular-nums"
                                     />
                                 )}
 
                                 {isDone ? (
-                                    <span className="px-3 py-1.5 rounded-xl bg-green-500/10 border border-green-500/20 text-green-600 dark:text-green-400 text-xs font-semibold uppercase flex items-center gap-1">
-                                        <CheckCircle size={13} />
+                                    <span className="px-4 py-2 rounded-xl bg-green-500/10 border border-green-500/20 text-green-600 dark:text-green-400 text-sm font-bold uppercase flex items-center gap-2">
+                                        <CheckCircle size={17} />
                                         <span>Picked</span>
                                     </span>
                                 ) : (
                                     <button
                                         type="button"
                                         onClick={() => handleConfirmLinePick(item, idx, expected)}
-                                        className="min-h-[38px] px-4 py-1.5 rounded-xl bg-[var(--theme-accent)] hover:opacity-90 text-white font-semibold text-xs uppercase tracking-wider flex items-center gap-1.5 active:scale-95 transition-all cursor-pointer touch-manipulation"
+                                        className="min-h-[52px] px-5 py-2 rounded-xl bg-[var(--theme-accent)] hover:opacity-90 text-white font-bold text-base uppercase tracking-wider flex items-center gap-2 active:scale-95 transition-all cursor-pointer touch-manipulation"
                                     >
                                         <span>Pick</span>
                                         <ArrowRight size={13} />

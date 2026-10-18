@@ -355,18 +355,18 @@ export const PickScanner: React.FC<PickScannerProps> = ({
                                         ? t('warehouse.confirmQty')
                                         : t('warehouse.picking.scanProductToPick')}
                             </h3>
-                            <p className="text-[11px] text-[var(--theme-accent)] font-mono font-semibold truncate">
+                            <p className="text-sm text-[var(--theme-accent)] font-mono font-bold truncate">
                                 JOB: {formatJobId(job)}
                             </p>
                         </div>
                     </div>
                     <div className="flex items-center gap-2 shrink-0">
-                        <span className="text-[10px] sm:text-[11px] font-semibold bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] px-2.5 py-1.5 rounded-full text-[var(--theme-text-secondary)] whitespace-nowrap">
+                        <span className="text-xs sm:text-sm font-bold bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] px-3 py-2 rounded-full text-[var(--theme-text-secondary)] whitespace-nowrap">
                             {currentItem ? `${currentItemNumber}/${totalItems} · ` : ''}{step === 'LOCATION' ? '1/3' : step === 'ITEM' ? '2/3' : '3/3'}
                         </span>
                     </div>
                 </div>
-                <div className="mt-2 h-1.5 rounded-full bg-[var(--theme-bg-subtle)] overflow-hidden" role="progressbar" aria-label="Pick mission progress" aria-valuenow={completedItems} aria-valuemin={0} aria-valuemax={totalItems}>
+                <div className="mt-3 h-2.5 rounded-full bg-[var(--theme-bg-subtle)] overflow-hidden" role="progressbar" aria-label="Pick mission progress" aria-valuenow={completedItems} aria-valuemin={0} aria-valuemax={totalItems}>
                     <div
                         ref={el => el?.style.setProperty('--progress', `${totalItems ? (completedItems / totalItems) * 100 : 0}%`)}
                         className="w-dynamic h-full rounded-full bg-[var(--theme-accent)] transition-[width] duration-300"
@@ -411,7 +411,7 @@ export const PickScanner: React.FC<PickScannerProps> = ({
                     </p>
                 </div>
                 <div className="shrink-0 border-t border-[var(--theme-border)] bg-[var(--theme-bg-card)] px-3 pt-3 pb-[max(env(safe-area-inset-bottom),0.75rem)] sm:px-6 sm:py-4">
-                    <div className="mx-auto w-full max-w-xl">
+                    <div className="mx-auto w-full max-w-2xl">
                         <PickScannerForm
                             step={step}
                             inputVal={inputVal}

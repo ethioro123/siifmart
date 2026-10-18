@@ -47,3 +47,31 @@ export function getVisibleFulfillmentTabs(role?: string | null): OpTab[] {
     return (Object.keys(TAB_PERMISSIONS) as OpTab[])
         .filter(tab => TAB_PERMISSIONS[tab].includes(normalizedRole));
 }
+
+export const ROLE_DEFAULT_TABS: Record<string, OpTab> = {
+    picker: 'PICK',
+    packer: 'PACK',
+    receiver: 'RECEIVE',
+    inbound_qc_inspector: 'RECEIVE',
+    forklift_operator: 'PUTAWAY',
+    driver: 'DRIVER',
+    stock_clerk: 'COUNT',
+    inventory_specialist: 'COUNT',
+    returns_clerk: 'RETURNS',
+    replenishment_planner: 'REPLENISH',
+    dispatcher: 'ASSIGN',
+    dispatch_manager: 'ASSIGN',
+    fleet_maintenance_supervisor: 'DRIVER',
+    warehouse_manager: 'DOCKS',
+    logistics_manager: 'DOCKS',
+};
+
+export function getDefaultFulfillmentTab(role?: string | null): OpTab {
+    const normalizedRole = role?.trim().toLowerCase() ?? '';
+    const preferred = ROLE_DEFAULT_TABS[normalizedRole];
+    const visible = getVisibleFulfillmentTabs(role);
+    if (preferred && visible.includes(preferred)) {
+        return preferred;
+    }
+    return visible[0] ?? 'RECEIVE';
+}

@@ -39,8 +39,7 @@ import { purchaseOrdersService } from '../../services/supabase.service'; // Need
 import { productsService } from '../../services/supabase.service'; // Needed for TransferTab
 import { inventoryRequestsService } from '../../services/supabase.service'; // Needed for CountTab, ReturnsTab
 import { generatePackLabelHTML } from '../../utils/labels/PackLabelGenerator'; // Needed for DocksTab
-import { logger } from '../../utils/logger';
-import { getVisibleFulfillmentTabs } from '../../utils/fulfillmentTabPermissions';
+import { getVisibleFulfillmentTabs, getDefaultFulfillmentTab } from '../../utils/fulfillmentTabPermissions';
 
 export const FulfillmentContent: React.FC = () => {
     const {
@@ -106,13 +105,13 @@ export const FulfillmentContent: React.FC = () => {
         return getVisibleFulfillmentTabs(user?.role);
     }, [user?.role]);
 
-    const canAccessTab = (tab: OpTab) => visibleTabs.includes(tab);
+    const defaultTab = useMemo(() => getDefaultFulfillmentTab(user?.role), [user?.role]);
 
     useEffect(() => {
         if (!visibleTabs.includes(activeTab)) {
-            setActiveTab(visibleTabs[0] ?? 'RECEIVE');
+            setActiveTab(visibleTabs.includes(defaultTab) ? defaultTab : (visibleTabs[0] ?? 'RECEIVE'));
         }
-    }, [activeTab, setActiveTab, visibleTabs]);
+    }, [activeTab, setActiveTab, visibleTabs, defaultTab]);
 
     const isMobile = useIsMobile();
 

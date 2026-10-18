@@ -54,7 +54,7 @@ export const PickScannerHeader: React.FC<PickScannerHeaderProps> = ({
     return (
         <>
             {/* Status Icon */}
-            <div className={`w-12 h-12 sm:w-20 sm:h-20 rounded-2xl border-2 flex items-center justify-center mb-2 sm:mb-4 transition-all duration-300 z-10 shrink-0 ${
+            <div className={`w-16 h-16 sm:w-20 sm:h-20 rounded-2xl border-2 flex items-center justify-center mb-3 sm:mb-4 transition-all duration-300 z-10 shrink-0 ${
                 showSuccess
                     ? 'border-emerald-500 bg-emerald-500/10'
                     : showError
@@ -64,18 +64,18 @@ export const PickScannerHeader: React.FC<PickScannerHeaderProps> = ({
                     : 'border-emerald-500 bg-emerald-500/10'
             }`}>
                 {showSuccess ? (
-                    <CheckCircle size={26} className="text-emerald-500 sm:w-8 sm:h-8" />
+                    <CheckCircle size={32} className="text-emerald-500 sm:w-8 sm:h-8" />
                 ) : showError ? (
-                    <AlertTriangle size={26} className="text-rose-500 sm:w-8 sm:h-8" />
+                    <AlertTriangle size={32} className="text-rose-500 sm:w-8 sm:h-8" />
                 ) : step === 'LOCATION' ? (
-                    <MapIcon size={26} className="text-[var(--theme-accent)] sm:w-8 sm:h-8" />
+                    <MapIcon size={32} className="text-[var(--theme-accent)] sm:w-8 sm:h-8" />
                 ) : (
-                    <Package size={26} className="text-emerald-500 sm:w-8 sm:h-8" />
+                    <Package size={32} className="text-emerald-500 sm:w-8 sm:h-8" />
                 )}
             </div>
 
             {/* Instruction Header */}
-            <h1 className={`text-lg sm:text-2xl md:text-3xl font-bold text-[var(--theme-text-primary)] text-center uppercase tracking-tight mb-1 sm:mb-2 z-10 transition-colors px-2 max-w-full ${
+            <h1 className={`text-xl sm:text-2xl md:text-3xl font-bold text-[var(--theme-text-primary)] text-center uppercase tracking-tight mb-1 sm:mb-2 z-10 transition-colors px-2 max-w-full ${
                 isLocationBarcode(inputVal.trim().toUpperCase()) ? 'text-[var(--theme-accent)]' : showError ? 'text-rose-500' : ''
             }`}>
                 {showSuccess ? t('warehouse.picking.successCaps') : showError ? t('warehouse.picking.errorCaps') : step === 'LOCATION' ? (isLocationBarcode(inputVal.trim().toUpperCase()) ? t('warehouse.picking.locationIdentified') : t('warehouse.scanLocation')) : step === 'QUANTITY' ? t('warehouse.confirmQty') : t('warehouse.scanSkuToConfirm')}
@@ -83,11 +83,11 @@ export const PickScannerHeader: React.FC<PickScannerHeaderProps> = ({
 
             {showSuccess ? (
                 <div className="text-center z-10 mb-6 animate-in fade-in duration-200">
-                    <p className="text-emerald-500 text-lg font-bold uppercase tracking-wider">{successMsg}</p>
+                    <p className="text-emerald-600 dark:text-emerald-400 text-2xl sm:text-3xl font-bold tracking-tight">{successMsg}</p>
                 </div>
             ) : showError ? (
                 <div className="text-center z-10 mb-6 animate-in fade-in duration-200">
-                    <p className="text-rose-500 text-lg font-bold uppercase tracking-wider">{errorMsg}</p>
+                    <p className="text-rose-600 dark:text-rose-400 text-xl sm:text-2xl font-bold tracking-tight">{errorMsg}</p>
                 </div>
             ) : (
                 <PickScannerInstructionPanel

@@ -5,6 +5,7 @@ import { OpTab } from './FulfillmentContext';
 import WorkerPointsDisplay, { PointsEarnedPopup } from '../WorkerPointsDisplay';
 import { useStore } from '../../contexts/CentralStore';
 import { useGamification } from '../../contexts/GamificationContext';
+import { getDefaultFulfillmentTab } from '../../utils/fulfillmentTabPermissions';
 
 interface TabSelectorProps {
     activeTab: OpTab;
@@ -61,16 +62,47 @@ export const MobileTabSelector: React.FC<TabSelectorProps> = ({
     };
     const currentActiveCount = getTabActiveCount(activeTab);
 
-    const CORE_TABS: OpTab[] = ['RECEIVE', 'PUTAWAY', 'PICK', 'PACK'];
-    const otherTabs = visibleTabs.filter(t => !CORE_TABS.includes(t));
-    const isCoreActive = CORE_TABS.includes(activeTab);
+    const { user } = useStore();
+    const defaultTab = getDefaultFulfillmentTab(user?.role);
+
+    const quickTabs = React.useMemo(() => {
+        const primary: OpTab[] = [];
+        const leadTab = visibleTabs.includes(activeTab)
+            ? activeTab
+            : (visibleTabs.includes(defaultTab) ? defaultTab : visibleTabs[0]);
+        if (leadTab) primary.push(leadTab);
+
+        if (visibleTabs.includes(defaultTab) && !primary.includes(defaultTab)) {
+            primary.push(defaultTab);
+        }
+
+        const preferredFillers: OpTab[] = ['PICK', 'PACK', 'PUTAWAY', 'RECEIVE', 'COUNT', 'DRIVER'];
+        for (const tab of preferredFillers) {
+            if (primary.length >= 4) break;
+            if (visibleTabs.includes(tab) && !primary.includes(tab)) {
+                primary.push(tab);
+            }
+        }
+
+        for (const tab of visibleTabs) {
+            if (primary.length >= 4) break;
+            if (!primary.includes(tab)) {
+                primary.push(tab);
+            }
+        }
+
+        return primary;
+    }, [visibleTabs, activeTab, defaultTab]);
+
+    const otherTabs = visibleTabs.filter(t => !quickTabs.includes(t));
+    const isQuickActive = quickTabs.includes(activeTab);
     const otherActiveCount = otherTabs.reduce((acc, tab) => acc + getTabActiveCount(tab), 0);
 
     return (
         <div className="md:hidden relative z-[60] mb-1 space-y-1">
-            {/* 1-Tap Core Operational Segments (Receive, Putaway, Pick, Pack) */}
+            {/* 1-Tap Core Operational Segments */}
             <div className="flex items-center gap-1 overflow-x-auto no-scrollbar p-0.5 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl">
-                {CORE_TABS.filter(t => visibleTabs.includes(t)).map(tab => {
+                {quickTabs.map(tab => {
                     const isActive = activeTab === tab;
                     const count = getTabActiveCount(tab);
                     return (
@@ -107,14 +139,14 @@ export const MobileTabSelector: React.FC<TabSelectorProps> = ({
                         type="button"
                         onClick={() => setIsMobileTabMenuOpen(!isMobileTabMenuOpen)}
                         className={`min-h-[38px] px-2.5 py-1.5 rounded-xl text-xs font-semibold uppercase tracking-tight flex items-center justify-center gap-1 transition-all touch-manipulation active:scale-[0.97] shrink-0 border ${
-                            !isCoreActive
+                            !isQuickActive
                                 ? 'bg-[var(--theme-accent)] text-white border-[var(--theme-accent)] shadow-xs font-bold'
                                 : 'bg-[var(--theme-bg-card)] text-[var(--theme-text-secondary)] border-[var(--theme-border)]'
                         }`}
                         title="More Operations"
                     >
-                        <span>{!isCoreActive ? t(`warehouse.tabs.${activeTab.toLowerCase()}`) : 'More'}</span>
-                        {otherActiveCount > 0 && isCoreActive && (
+                        <span>{!isQuickActive ? t(`warehouse.tabs.${activeTab.toLowerCase()}`) : 'More'}</span>
+                        {otherActiveCount > 0 && isQuickActive && (
                             <span className="text-[10px] font-mono px-1 py-0.2 rounded-full bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] font-bold">
                                 {otherActiveCount}
                             </span>

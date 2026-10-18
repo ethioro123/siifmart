@@ -1,5 +1,5 @@
 import React from 'react';
-import { AlertTriangle } from 'lucide-react';
+import { AlertTriangle, Package } from 'lucide-react';
 import { Product } from '../../../../types';
 import { isLocationBarcode, decodeLocation } from '../../../../utils/locationEncoder';
 import { normalizeLocation } from '../../../../utils/locationTracking';
@@ -33,16 +33,13 @@ export const PickScannerInstructionPanel: React.FC<PickScannerInstructionPanelPr
         return (
             <div className="text-center z-10 mb-4 sm:mb-6 w-full max-w-full px-2">
                 <div className="text-center mb-4 sm:mb-6">
-                    <p className="text-[var(--theme-text-secondary)] text-xs sm:text-sm font-semibold uppercase tracking-wider mb-2">
+                    <p className="text-[var(--theme-text-secondary)] text-base sm:text-lg font-bold uppercase tracking-wider mb-3">
                         {t('warehouse.picking.goToSourceBay')}
                     </p>
 
-                    <div className="inline-block px-5 sm:px-8 py-3.5 sm:py-4 rounded-2xl border bg-[var(--theme-accent)]/10 border-[var(--theme-accent)]/30 text-[var(--theme-accent)] max-w-full">
-                        <p className={`font-mono font-bold tracking-wider break-words ${
-                            isLocationBarcode(inputVal.trim().toUpperCase()) 
-                                ? 'text-2xl sm:text-4xl md:text-5xl text-[var(--theme-accent)]' 
-                                : ((targetLoc.length || 0) > 10 ? 'text-lg sm:text-xl md:text-2xl' : 'text-2xl sm:text-3xl md:text-4xl')
-                        }`}>
+                    <div className="block w-full mx-auto px-4 sm:px-8 py-5 sm:py-7 rounded-3xl border bg-[var(--theme-accent)]/10 border-[var(--theme-accent)]/30 text-[var(--theme-accent)] max-w-2xl">
+                        <p className="text-sm sm:text-base font-bold uppercase tracking-widest text-[var(--theme-text-secondary)] mb-2">Pick from this location</p>
+                        <p className="font-mono font-bold tracking-wide break-words text-4xl sm:text-6xl md:text-7xl leading-tight">
                             {isLocationBarcode(inputVal.trim().toUpperCase())
                                 ? decodeLocation(inputVal.trim().toUpperCase())
                                 : (normalizeLocation(inputVal) || targetLoc || t('warehouse.picking.unknownBay'))}
@@ -55,17 +52,16 @@ export const PickScannerInstructionPanel: React.FC<PickScannerInstructionPanelPr
 
     if (step === 'QUANTITY') {
         return (
-            <div className="text-center z-10 mb-4 sm:mb-6 w-full max-w-full px-2">
-                <p className="text-amber-600 dark:text-amber-400 text-sm sm:text-base uppercase tracking-wider font-semibold">{t('warehouse.picking.shortPickEnterQty')}</p>
-                <p className="text-[var(--theme-text-primary)] text-lg sm:text-xl font-bold mt-1 break-words max-w-sm mx-auto">{currentItem?.name}</p>
-                <p className="text-[var(--theme-accent)] font-mono text-base break-all">{currentItem?.sku}</p>
-                <p className="text-[var(--theme-text-secondary)] text-xs sm:text-sm mt-1">{t('warehouse.expected')}: <span className="text-[var(--theme-text-primary)] font-bold">
+            <div className="text-center z-10 mb-4 sm:mb-6 w-full max-w-2xl px-2">
+                <p className="text-amber-600 dark:text-amber-400 text-sm sm:text-base uppercase tracking-wider font-bold">{t('warehouse.picking.shortPickEnterQty')}</p>
+                <ProductIdentity item={currentItem} product={currentProduct} />
+                <p className="text-[var(--theme-text-secondary)] text-sm sm:text-base mt-4">{t('warehouse.expected')}: <span className="text-[var(--theme-text-primary)] font-bold text-2xl sm:text-3xl tabular-nums">
                     {(() => {
                         const expected = currentItem?.expectedQty || 1;
                         const packDesc = formatPackagingDescription(currentProduct, expected);
                         const unitDef = getSellUnit(currentProduct?.unit || currentItem?.unit);
                         const unitLabel = unitDef.category === 'count' && unitDef.code !== 'UNIT' ? unitDef.shortLabel : 'pk';
-                        return <>{expected} {unitLabel} {packDesc ? <span className="text-xs font-mono text-[var(--theme-text-secondary)]">({packDesc})</span> : null}</>;
+                        return <>{expected} {unitLabel} {packDesc ? <span className="block text-sm font-mono font-medium text-[var(--theme-text-secondary)]">{packDesc}</span> : null}</>;
                     })()}
                 </span></p>
             </div>
@@ -74,26 +70,24 @@ export const PickScannerInstructionPanel: React.FC<PickScannerInstructionPanelPr
 
     return (
         <div className="text-center z-10 mb-4 sm:mb-6 w-full max-w-full px-2">
-            <p className="text-[var(--theme-text-secondary)] text-sm sm:text-base font-medium">{isItemMatched ? t('warehouse.picking.confirmItemPick') : t('warehouse.picking.scanProductToPick')}</p>
-            <p className={`text-lg sm:text-xl font-bold mt-1 break-words max-w-sm mx-auto transition-colors ${isItemMatched ? 'text-emerald-500' : 'text-[var(--theme-text-primary)]'}`}>
-                {currentItem?.name}
-            </p>
-            <div className="flex items-center justify-center gap-2 mt-1">
-                <p className="text-[var(--theme-accent)] font-mono text-base break-all">{currentItem?.sku}</p>
-                {formatProductSize(currentProduct || currentItem) && (
-                    <span className="text-[11px] font-mono font-semibold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-md border border-emerald-500/20">
-                        {formatProductSize(currentProduct || currentItem)}
-                    </span>
-                )}
-            </div>
-            <span className="font-semibold text-[var(--theme-text-primary)] text-xs sm:text-sm mt-1 block">{(() => {
+            <p className="text-[var(--theme-text-secondary)] text-base sm:text-lg font-semibold">{isItemMatched ? t('warehouse.picking.confirmItemPick') : t('warehouse.picking.scanProductToPick')}</p>
+            <ProductIdentity item={currentItem} product={currentProduct} matched={isItemMatched} />
+            <div className="mt-4 rounded-2xl border border-[var(--theme-border)] bg-[var(--theme-bg-card)] px-5 py-4 shadow-sm inline-flex flex-col items-center min-w-[min(100%,16rem)]">
+                <span className="text-xs sm:text-sm font-bold uppercase tracking-wider text-[var(--theme-text-secondary)]">{t('warehouse.expected')}</span>
+                <span className="font-bold text-[var(--theme-text-primary)] text-3xl sm:text-4xl tabular-nums mt-1">{(() => {
                 const expected = currentItem?.expectedQty || 1;
                 const packDesc = formatPackagingDescription(currentProduct, expected);
                 const unitDef = getSellUnit(currentProduct?.unit || currentItem?.unit);
                 const unitLabel = unitDef.category === 'count' && unitDef.code !== 'UNIT' ? unitDef.shortLabel : 'pk';
-
-                return <>{expected} <span className="text-[11px] uppercase text-[var(--theme-text-secondary)] font-semibold ml-0.5">{unitLabel}</span> {packDesc ? <span className="text-[11px] font-mono text-[var(--theme-text-secondary)] ml-1">({packDesc})</span> : null}</>;
+                return <>{expected} <span className="text-base uppercase text-[var(--theme-text-secondary)] font-semibold ml-0.5">{unitLabel}</span></>;
             })()}</span>
+                {(() => {
+                    const expected = currentItem?.expectedQty || 1;
+                    return formatPackagingDescription(currentProduct, expected)
+                        ? <span className="text-sm font-mono text-[var(--theme-text-secondary)] mt-1">{formatPackagingDescription(currentProduct, expected)}</span>
+                        : null;
+                })()}
+            </div>
             {!isItemMatched && (currentItem?.expectedQty || 1) > 0 && (
                 <div className="mt-3">
                     <button
@@ -112,3 +106,30 @@ export const PickScannerInstructionPanel: React.FC<PickScannerInstructionPanelPr
         </div>
     );
 };
+
+const ProductIdentity: React.FC<{ item: any; product?: Product; matched?: boolean }> = ({ item, product, matched = false }) => (
+    <div className="mt-3 sm:mt-5 mx-auto w-full max-w-2xl rounded-3xl border border-[var(--theme-border)] bg-[var(--theme-bg-card)] p-4 sm:p-6 shadow-sm">
+        <div className="flex flex-col items-center gap-3 sm:gap-4">
+            <div className="w-24 h-24 sm:w-32 sm:h-32 rounded-2xl overflow-hidden border border-[var(--theme-border)] bg-[var(--theme-bg-subtle)] flex items-center justify-center shrink-0">
+                {product?.image
+                    ? <img src={product.image} alt="" className="w-full h-full object-contain" />
+                    : <Package size={48} className="text-[var(--theme-text-secondary)]" aria-hidden="true" />}
+            </div>
+            <div className="w-full min-w-0">
+                <h2 className={`text-2xl sm:text-4xl md:text-5xl leading-tight font-bold break-words ${matched ? 'text-emerald-600 dark:text-emerald-400' : 'text-[var(--theme-text-primary)]'}`}>
+                    {item?.name || product?.name || 'Unknown product'}
+                </h2>
+                <div className="mt-3 flex flex-wrap items-center justify-center gap-2">
+                    <span className="inline-flex min-h-10 items-center rounded-lg bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] px-3 text-base sm:text-lg font-mono font-bold text-[var(--theme-accent)] break-all">
+                        {item?.sku || product?.sku || 'No SKU'}
+                    </span>
+                    {formatProductSize(product || item) && (
+                        <span className="inline-flex min-h-10 items-center rounded-lg bg-emerald-500/10 border border-emerald-500/20 px-3 text-sm sm:text-base font-semibold text-emerald-700 dark:text-emerald-400">
+                            {formatProductSize(product || item)}
+                        </span>
+                    )}
+                </div>
+            </div>
+        </div>
+    </div>
+);

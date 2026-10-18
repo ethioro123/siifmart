@@ -4,6 +4,11 @@
 
 ## Active Features
 
+### Floor-Friendly Picking Scan Flow (2026-10-19)
+- Enlarged the current product identity, source location, expected quantity, scan entry, quantity controls, and primary actions for clear use on handheld devices. Added a product image/placeholder and improved picked-item feedback and collection-list readability.
+- **Files**: `components/fulfillment/pick/PickScanner.tsx`, `components/fulfillment/pick/steps/Step2PickCollect.tsx`, `components/fulfillment/pick/components/PickScannerHeader.tsx`, `components/fulfillment/pick/components/PickScannerInstructionPanel.tsx`, `components/fulfillment/pick/components/PickScannerForm.tsx`, `components/fulfillment/pick/components/PickScannerSubmitButton.tsx`, `components/fulfillment/pick/components/PickScannerPickedList.tsx`
+- **Database**: None
+
 ### Guided Pick Scanning (2026-10-19)
 - The primary pick action now opens the scanner directly. The scanner keeps the current step and item progress visible, anchors scan controls for mobile use, and carries validated barcode scans through to the matching pick line. The alternate entry point is labeled as a guided scanner.
 - **Files**: `components/fulfillment/pick/PickJobModal.tsx`, `components/fulfillment/pick/PickScanner.tsx`, `components/fulfillment/pick/steps/Step2PickCollect.tsx`, `components/fulfillment/pick/components/PickScannerHeader.tsx`, `components/fulfillment/pick/components/PickScannerForm.tsx`, `components/fulfillment/pick/components/PickScannerSubmitButton.tsx`

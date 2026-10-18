@@ -29,7 +29,7 @@ export const PickScannerSubmitButton: React.FC<PickScannerSubmitButtonProps> = (
         <button
             type="submit"
             disabled={!isReady || isProcessing}
-            className={`w-full py-3.5 sm:py-4 px-4 min-h-[48px] rounded-xl flex items-center justify-center gap-2 transition-colors border text-xs sm:text-sm font-semibold uppercase tracking-wider ${
+            className={`w-full py-4 sm:py-5 px-4 min-h-[64px] rounded-2xl flex items-center justify-center gap-3 transition-colors border text-base sm:text-lg font-bold uppercase tracking-wide ${
                 (!isReady || isProcessing)
                     ? 'bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] text-[var(--theme-text-secondary)] opacity-60 cursor-not-allowed'
                     : (!currentItem)
@@ -44,9 +44,9 @@ export const PickScannerSubmitButton: React.FC<PickScannerSubmitButtonProps> = (
             {isProcessing ? (
                 <RotateCcw size={18} className="animate-spin shrink-0" />
             ) : (
-                <CheckCircle size={18} className="shrink-0" />
+                <CheckCircle size={22} className="shrink-0" />
             )}
-            <span className="truncate">
+            <span className="text-center leading-snug">
                 {isProcessing
                     ? t('warehouse.picking.validating')
                     : !currentItem
