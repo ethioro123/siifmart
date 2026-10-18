@@ -9,7 +9,7 @@ import {
 } from '../services/zeroTrustPolicies.service';
 
 export type SessionWarning =
-    | { type: 'expiry'; minutesLeft: number }
+    | { type: 'inactivity'; minutesLeft: number }
     | { type: 'mfa_required'; message: string };
 
 /**
@@ -98,26 +98,13 @@ export function useSessionManager(
                 const idleRemainingMs = timeoutMs - idleDuration;
                 if (idleRemainingMs <= 60000 && idleRemainingMs > 0 && !hasWarned) {
                     setHasWarned(true);
-                    onSessionWarning?.({ type: 'expiry', minutesLeft: 1 });
+                    onSessionWarning?.({ type: 'inactivity', minutesLeft: 1 });
                 }
 
-                // 3. JWT Token Expiration Check
-                if (session.expires_at) {
-                    const expiresAt = new Date(session.expires_at * 1000);
-                    const timeUntilExpiry = expiresAt.getTime() - now;
-
-                    // Warn user if token expires in less than configured warning threshold
-                    if (timeUntilExpiry > 0 && timeUntilExpiry < APP_CONFIG.SESSION_EXPIRY_WARNING_TIME && !hasWarned) {
-                        const minutesLeft = Math.max(1, Math.ceil(timeUntilExpiry / 60000));
-                        logger.warn('useSessionManager', `Session token expires in ${minutesLeft} minutes`);
-                        setHasWarned(true);
-                        onSessionWarning?.({ type: 'expiry', minutesLeft });
-                    }
-
-                    // Reset warning flag if session was refreshed
-                    if (timeUntilExpiry > APP_CONFIG.SESSION_EXPIRY_WARNING_TIME && idleRemainingMs > 60000) {
-                        setHasWarned(false);
-                    }
+                // Supabase refreshes short-lived access tokens automatically. Only warn about
+                // the app's own inactivity timeout, which can sign the user out.
+                if (idleRemainingMs > 60000 && hasWarned) {
+                    setHasWarned(false);
                 }
             } catch (error) {
                 logger.error('useSessionManager', 'Session check failed:', error);

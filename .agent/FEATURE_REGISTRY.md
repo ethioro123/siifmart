@@ -10,7 +10,7 @@
 - **Database**: None
 
 ### Accurate Session Warning Messages (2026-10-18)
-- MFA requirements now show a verification warning instead of a false zero-minute expiry message. Genuine token expiry warnings use a positive, rounded-up minute count and are suppressed after token expiry.
+- MFA requirements now show a verification warning instead of a false expiry message. Short-lived access tokens no longer trigger a misleading countdown because Supabase refreshes them automatically; only the app's inactivity sign-out warns users to save work.
 - **Files**: `hooks/useSessionManager.ts`, `contexts/CentralStore.tsx`
 - **Database**: None
 

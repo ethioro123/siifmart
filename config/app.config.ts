@@ -7,8 +7,6 @@ export const APP_CONFIG = {
     // Session Management
     SESSION_REFRESH_INTERVAL: 30 * 60 * 1000, // 30 minutes
     SESSION_EXPIRY_CHECK_INTERVAL: 5 * 60 * 1000, // 5 minutes
-    SESSION_EXPIRY_WARNING_TIME: 5 * 60 * 1000, // Warn 5 minutes before expiry
-
     // Data Refresh
     DATA_REFRESH_INTERVAL: 5 * 60 * 1000, // 5 minutes
     DATA_REFRESH_RETRY_DELAY: 1000, // 1 second

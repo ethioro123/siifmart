@@ -62,7 +62,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const handleSessionWarning = useCallback((warning: SessionWarning) => {
     const message = warning.type === 'mfa_required'
       ? warning.message
-      : `Your session will expire in ${warning.minutesLeft} minute${warning.minutesLeft !== 1 ? 's' : ''}. Please save your work.`;
+      : `You’ll be signed out in ${warning.minutesLeft} minute${warning.minutesLeft !== 1 ? 's' : ''} due to inactivity. Please save your work.`;
     showToast(
       message,
       'warning',
