@@ -1,16 +1,18 @@
 import type { OpTab } from '../components/fulfillment/FulfillmentContext';
+import { FLOOR_WORKER_ROLES } from './fulfillmentRoles';
 
-const WORKER_TAB_ACCESS: Record<string, OpTab[]> = {
-    picker: ['RECEIVE', 'PUTAWAY', 'PICK', 'PACK'],
-    packer: ['RECEIVE', 'PUTAWAY', 'PICK', 'PACK'],
-    receiver: ['RECEIVE', 'PUTAWAY', 'TRANSFER'],
-    forklift_operator: ['PUTAWAY'],
+const CORE_FLOOR_TABS: OpTab[] = ['RECEIVE', 'PUTAWAY', 'PICK', 'PACK'];
+
+const FLOOR_WORKER_EXTRA_TABS: Record<string, OpTab[]> = {
+    receiver: ['TRANSFER'],
     inventory_specialist: ['TRANSFER', 'REPLENISH', 'COUNT', 'WASTE', 'RETURNS', 'LABELS'],
-    driver: ['DRIVER'],
-    inbound_qc_inspector: ['RECEIVE'],
+    stock_clerk: ['COUNT', 'REPLENISH', 'LABELS'],
+};
+
+const SPECIALIST_TAB_ACCESS: Record<string, OpTab[]> = {
+    driver: [...CORE_FLOOR_TABS, 'DRIVER'],
     replenishment_planner: ['TRANSFER', 'REPLENISH'],
     returns_clerk: ['RETURNS'],
-    stock_clerk: ['PUTAWAY', 'COUNT', 'REPLENISH', 'LABELS'],
     dispatch_manager: ['DOCKS', 'DRIVER', 'TRANSFER', 'ASSIGN'],
     dispatcher: ['DOCKS', 'DRIVER', 'TRANSFER', 'ASSIGN'],
     fleet_maintenance_supervisor: ['DOCKS', 'DRIVER', 'ASSIGN'],
@@ -35,8 +37,12 @@ const TAB_PERMISSIONS: Record<OpTab, string[]> = {
 
 export function getVisibleFulfillmentTabs(role?: string | null): OpTab[] {
     const normalizedRole = role?.trim().toLowerCase() ?? '';
-    const workerTabs = WORKER_TAB_ACCESS[normalizedRole];
-    if (workerTabs) return [...workerTabs];
+    if (FLOOR_WORKER_ROLES.some(workerRole => workerRole === normalizedRole)) {
+        return [...CORE_FLOOR_TABS, ...(FLOOR_WORKER_EXTRA_TABS[normalizedRole] ?? [])];
+    }
+
+    const specialistTabs = SPECIALIST_TAB_ACCESS[normalizedRole];
+    if (specialistTabs) return [...specialistTabs];
 
     return (Object.keys(TAB_PERMISSIONS) as OpTab[])
         .filter(tab => TAB_PERMISSIONS[tab].includes(normalizedRole));

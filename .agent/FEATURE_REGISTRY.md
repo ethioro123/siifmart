@@ -5,7 +5,7 @@
 ## Active Features
 
 ### Fulfillment Role-Specific Tab Permissions (2026-10-19)
-- Fulfillment navigation is role-specific across floor workers, drivers, dispatch, inventory, receiving, quality inspection, returns, replenishment, and logistics leadership. Picker and packer accounts see Receive, Putaway, Pick, and Pack; other operational roles see tabs aligned to their defined duties. Fulfillment content checks the selected tab against the role's allowed tab list and returns to an allowed tab if the role changes.
+- Floor workers can access the shared Receive, Putaway, Pick, and Pack operations; only drivers receive the Driver tab, while Transfer and specialist tabs remain limited to their authorized roles. Fulfillment content checks the selected tab against the role's allowed tab list and returns to an allowed tab if the role changes.
 - **Files**: `utils/fulfillmentTabPermissions.ts`, `components/fulfillment/FulfillmentContent.tsx`
 - **Root Cause**: Floor worker roles were spread across tabs without distinction by responsibility, and tab bodies rendered from selected state without an access check.
 
