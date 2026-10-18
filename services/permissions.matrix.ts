@@ -426,6 +426,7 @@ export const ACTION_PERMISSIONS: Record<UserRole, Permission[]> = {
 
     fleet_maintenance_supervisor: [
         'dashboard.view',
+        'inventory.view',
         'warehouse.view',
         'warehouse.view_tasks',
         'warehouse.dispatch',

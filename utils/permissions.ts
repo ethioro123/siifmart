@@ -42,7 +42,7 @@ export const PERMISSIONS = {
     VIEW_ALL_TRANSACTIONS: ['super_admin', 'regional_manager', 'operations_manager', 'store_manager', 'assistant_manager', 'shift_lead', 'auditor', 'finance_manager', 'store_supervisor', 'treasury_officer', 'store_operations_auditor'],
 
     // Inventory - Strictly Warehouse & Distribution Center Only
-    ACCESS_INVENTORY: ['super_admin', 'admin', 'regional_manager', 'operations_manager', 'procurement_manager', 'warehouse_manager', 'dispatcher', 'auditor', 'inventory_specialist', 'inventory_manager', 'demand_planner', 'inbound_qc_inspector', 'replenishment_planner', 'store_operations_auditor', 'regional_procurement_lead', 'regional_logistics_lead'],
+    ACCESS_INVENTORY: ['super_admin', 'admin', 'regional_manager', 'operations_manager', 'procurement_manager', 'warehouse_manager', 'dispatcher', 'auditor', 'inventory_specialist', 'inventory_manager', 'demand_planner', 'inbound_qc_inspector', 'replenishment_planner', 'store_operations_auditor', 'regional_procurement_lead', 'regional_logistics_lead', 'fleet_maintenance_supervisor'],
     ADD_PRODUCT: ['super_admin', 'admin', 'warehouse_manager'],
     EDIT_PRODUCT: ['super_admin', 'admin', 'warehouse_manager'],
     DELETE_PRODUCT: ['super_admin'],
