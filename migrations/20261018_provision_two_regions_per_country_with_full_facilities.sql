@@ -1,21 +1,63 @@
 -- ============================================================================
 -- Migration: 20261018_provision_two_regions_per_country_with_full_facilities.sql
--- Purpose: Provision 2 complete operational regions in BOTH Ethiopia (ET) and
---          Kenya (KE) — 4 regions total (ET-ADD, ET-ADA, KE-NRB, KE-MBA).
---          Each region is equipped with:
---            - 1 Regional Administration Hub ('Administration')
---            - 1 Distribution Center ('Distribution Center')
---            - 1 Warehouse ('Warehouse')
---            - 1 Online Store ('Dark Store')
---            - 3 Retail Stores ('Store')
---          Includes supply-chain replenishment links (replenishment_source_id +
---          site_replenishment_sources) and seeds the 5 canonical master products
---          across all newly provisioned operational sites.
+-- Purpose:
+--   1. Fix public.bind_system_log_actor() referencing non-existent column
+--      employees.full_name (should be employees.name) which blocked region
+--      audit logging in public.system_logs.
+--   2. Provision 2 complete operational regions in BOTH Ethiopia (ET) and
+--      Kenya (KE) — 4 regions total (ET-ADD, ET-ADA, KE-NRB, KE-MBA).
+--      Each region is equipped with:
+--        - 1 Regional Administration Hub ('Administration')
+--        - 1 Distribution Center ('Distribution Center')
+--        - 1 Warehouse ('Warehouse')
+--        - 1 Online Store ('Dark Store')
+--        - 3 Retail Stores ('Store')
+--   3. Configure supply-chain replenishment links (replenishment_source_id +
+--      site_replenishment_sources) and seed the 5 canonical master products
+--      across all newly provisioned operational sites.
 -- ============================================================================
 
 BEGIN;
 
--- 1. Remove unused empty region ET-DIR so Ethiopia has cleanly 2 active regions (ET-ADD, ET-ADA)
+-- 0. Fix bind_system_log_actor() trigger helper to query employees.name instead of full_name
+CREATE OR REPLACE FUNCTION public.bind_system_log_actor()
+ RETURNS trigger
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO 'public', 'pg_temp'
+AS $function$
+DECLARE
+    v_uid text;
+    v_email text;
+    v_emp_id text;
+    v_emp_name text;
+BEGIN
+    v_uid := (SELECT auth.uid())::text;
+    v_email := (SELECT auth.jwt()->>'email');
+
+    SELECT id::text, name INTO v_emp_id, v_emp_name
+    FROM public.employees
+    WHERE (v_uid IS NOT NULL AND id::text = v_uid)
+       OR (v_email IS NOT NULL AND lower(email) = lower(v_email))
+    LIMIT 1;
+
+    IF v_uid IS NOT NULL THEN
+        NEW.performed_by := COALESCE(NEW.performed_by, v_emp_id, v_uid);
+    END IF;
+
+    IF v_emp_name IS NOT NULL AND (NEW.user_name IS NULL OR NEW.user_name = '') THEN
+        NEW.user_name := v_emp_name;
+    END IF;
+
+    IF NEW.created_at IS NULL THEN
+        NEW.created_at := now();
+    END IF;
+
+    RETURN NEW;
+END;
+$function$;
+
+-- 1. Remove unused empty region ET-DIR if it has no sites or employees
 DELETE FROM public.regions
 WHERE code = 'ET-DIR'
   AND NOT EXISTS (SELECT 1 FROM public.sites WHERE region_code = 'ET-DIR')
@@ -47,6 +89,7 @@ ON CONFLICT (code) DO UPDATE SET
   updated_at = now();
 
 -- 3. Upsert all Regional Administration Hubs, Distribution Centers, Warehouses, Online Stores, and 3 Retail Stores per region
+--    Uses ON CONFLICT (code) and non-colliding site_number values (101..128) for newly inserted rows
 INSERT INTO public.sites (
   id, code, name, type, address, status, country, currency,
   region, region_code, site_number, barcode_prefix,
@@ -57,48 +100,47 @@ VALUES
   -- ==========================================================================
   -- ETHIOPIA — REGION 1: ET-ADD (Addis Ababa Central Region)
   -- ==========================================================================
-  ('bb0425bc-3119-449a-a685-b871e552bee9', 'ET-ADD',        'Addis Ababa Regional Administration', 'Administration',      'Bole Road, Addis Ababa',          'Active', 'ET', 'ETB', 'Addis Ababa Central Region', 'ET-ADD', 19, '1019', 500,   0, true, true, 'NEAREST', false),
-  ('a1111111-1111-4000-8000-000000000001', 'ET-ADD-DC-01',  'Addis Ababa Distribution Center',     'Distribution Center', 'Akaki Kality, Addis Ababa',       'Active', 'ET', 'ETB', 'Addis Ababa Central Region', 'ET-ADD', 1,  '1001', 50000, 0, true, true, 'NEAREST', true),
-  ('a1111111-1111-4000-8000-000000000005', 'ET-ADD-WH-01',  'Kality Storage Warehouse',            'Warehouse',           'Kality Industrial, Addis Ababa',  'Active', 'ET', 'ETB', 'Addis Ababa Central Region', 'ET-ADD', 5,  '1005', 25000, 0, true, true, 'NEAREST', true),
-  ('a1111111-1111-4000-8000-000000000006', 'ET-ADD-ONL-01', 'Addis Ababa Online Store',            'Dark Store',          'Kazanchis Digital Hub, Addis',    'Active', 'ET', 'ETB', 'Addis Ababa Central Region', 'ET-ADD', 6,  '1006', 8000,  0, true, true, 'NEAREST', true),
-  ('a1111111-1111-4000-8000-000000000002', 'ET-ADD-STR-01', 'Bole Supermarket',                    'Store',               'Bole Medhanealem, Addis Ababa',   'Active', 'ET', 'ETB', 'Addis Ababa Central Region', 'ET-ADD', 2,  '1002', 5000,  6, true, true, 'NEAREST', false),
-  ('a1111111-1111-4000-8000-000000000011', 'ET-ADD-STR-02', 'Piassa Heritage Supermarket',         'Store',               'Arada Piassa Avenue, Addis Ababa','Active', 'ET', 'ETB', 'Addis Ababa Central Region', 'ET-ADD', 21, '1021', 5000,  4, true, true, 'NEAREST', false),
-  ('a1111111-1111-4000-8000-000000000012', 'ET-ADD-STR-03', 'CMC Summit Supermarket',              'Store',               'CMC Michael Roundabout, Addis',   'Active', 'ET', 'ETB', 'Addis Ababa Central Region', 'ET-ADD', 22, '1022', 5000,  4, true, true, 'NEAREST', false),
+  ('bb0425bc-3119-449a-a685-b871e552bee9', 'ET-ADD',        'Addis Ababa Regional Administration', 'Administration',      'Bole Road, Addis Ababa',          'Active', 'ET', 'ETB', 'Addis Ababa Central Region', 'ET-ADD', 101, '1019', 500,   0, true, true, 'NEAREST', false),
+  ('a1111111-1111-4000-8000-000000000001', 'ET-ADD-DC-01',  'Addis Ababa Distribution Center',     'Distribution Center', 'Akaki Kality, Addis Ababa',       'Active', 'ET', 'ETB', 'Addis Ababa Central Region', 'ET-ADD', 102, '1001', 50000, 0, true, true, 'NEAREST', true),
+  ('a1111111-1111-4000-8000-000000000005', 'ET-ADD-WH-01',  'Kality Storage Warehouse',            'Warehouse',           'Kality Industrial, Addis Ababa',  'Active', 'ET', 'ETB', 'Addis Ababa Central Region', 'ET-ADD', 103, '1005', 25000, 0, true, true, 'NEAREST', true),
+  ('a1111111-1111-4000-8000-000000000006', 'ET-ADD-ONL-01', 'Addis Ababa Online Store',            'Dark Store',          'Kazanchis Digital Hub, Addis',    'Active', 'ET', 'ETB', 'Addis Ababa Central Region', 'ET-ADD', 104, '1006', 8000,  0, true, true, 'NEAREST', true),
+  ('a1111111-1111-4000-8000-000000000002', 'ET-ADD-STR-01', 'Bole Supermarket',                    'Store',               'Bole Medhanealem, Addis Ababa',   'Active', 'ET', 'ETB', 'Addis Ababa Central Region', 'ET-ADD', 105, '1002', 5000,  6, true, true, 'NEAREST', false),
+  ('c1111111-1111-4000-8000-000000000106', 'ET-ADD-STR-02', 'Piassa Heritage Supermarket',         'Store',               'Arada Piassa Avenue, Addis Ababa','Active', 'ET', 'ETB', 'Addis Ababa Central Region', 'ET-ADD', 106, '1021', 5000,  4, true, true, 'NEAREST', false),
+  ('c1111111-1111-4000-8000-000000000107', 'ET-ADD-STR-03', 'CMC Summit Supermarket',              'Store',               'CMC Michael Roundabout, Addis',   'Active', 'ET', 'ETB', 'Addis Ababa Central Region', 'ET-ADD', 107, '1022', 5000,  4, true, true, 'NEAREST', false),
 
   -- ==========================================================================
   -- ETHIOPIA — REGION 2: ET-ADA (Adama Oromia Region)
   -- ==========================================================================
-  ('bb0425bc-3119-449a-a685-b871e552beea', 'ET-ADA',        'Adama Regional Administration',       'Administration',      'Adama Main Boulevard, Adama',     'Active', 'ET', 'ETB', 'Adama Oromia Region',        'ET-ADA', 23, '1023', 500,   0, true, true, 'NEAREST', false),
-  ('a1111111-1111-4000-8000-000000000021', 'ET-ADA-DC-01',  'Adama Central Distribution Center',   'Distribution Center', 'Adama Expressway Dry Port, Adama','Active', 'ET', 'ETB', 'Adama Oromia Region',        'ET-ADA', 24, '1024', 45000, 0, true, true, 'NEAREST', true),
-  ('a1111111-1111-4000-8000-000000000022', 'ET-ADA-WH-01',  'Adama Industrial Warehouse',          'Warehouse',           'Boku Industrial Park, Adama',     'Active', 'ET', 'ETB', 'Adama Oromia Region',        'ET-ADA', 25, '1025', 22000, 0, true, true, 'NEAREST', true),
-  ('a1111111-1111-4000-8000-000000000023', 'ET-ADA-ONL-01', 'Adama Online Store',                  'Dark Store',          'Adama Post Office Hub, Adama',    'Active', 'ET', 'ETB', 'Adama Oromia Region',        'ET-ADA', 26, '1026', 6000,  0, true, true, 'NEAREST', true),
-  ('a1111111-1111-4000-8000-000000000024', 'ET-ADA-STR-01', 'Adama Central Supermarket',           'Store',               'Franco Intersection, Adama',      'Active', 'ET', 'ETB', 'Adama Oromia Region',        'ET-ADA', 27, '1027', 4500,  4, true, true, 'NEAREST', false),
-  ('a1111111-1111-4000-8000-000000000025', 'ET-ADA-STR-02', 'Bishoftu Lakefront Supermarket',      'Store',               'Bishoftu Main Road, Oromia',      'Active', 'ET', 'ETB', 'Adama Oromia Region',        'ET-ADA', 28, '1028', 4500,  4, true, true, 'NEAREST', false),
-  ('a1111111-1111-4000-8000-000000000026', 'ET-ADA-STR-03', 'Mojo Gateway Supermarket',            'Store',               'Mojo Town Center, Oromia',        'Active', 'ET', 'ETB', 'Adama Oromia Region',        'ET-ADA', 29, '1029', 4500,  4, true, true, 'NEAREST', false),
+  ('bb0425bc-3119-449a-a685-b871e552beea', 'ET-ADA',        'Adama Regional Administration',       'Administration',      'Adama Main Boulevard, Adama',     'Active', 'ET', 'ETB', 'Adama Oromia Region',        'ET-ADA', 108, '1023', 500,   0, true, true, 'NEAREST', false),
+  ('c1111111-1111-4000-8000-000000000109', 'ET-ADA-DC-01',  'Adama Central Distribution Center',   'Distribution Center', 'Adama Expressway Dry Port, Adama','Active', 'ET', 'ETB', 'Adama Oromia Region',        'ET-ADA', 109, '1024', 45000, 0, true, true, 'NEAREST', true),
+  ('c1111111-1111-4000-8000-000000000110', 'ET-ADA-WH-01',  'Adama Industrial Warehouse',          'Warehouse',           'Boku Industrial Park, Adama',     'Active', 'ET', 'ETB', 'Adama Oromia Region',        'ET-ADA', 110, '1025', 22000, 0, true, true, 'NEAREST', true),
+  ('c1111111-1111-4000-8000-000000000111', 'ET-ADA-ONL-01', 'Adama Online Store',                  'Dark Store',          'Adama Post Office Hub, Adama',    'Active', 'ET', 'ETB', 'Adama Oromia Region',        'ET-ADA', 111, '1026', 6000,  0, true, true, 'NEAREST', true),
+  ('c1111111-1111-4000-8000-000000000112', 'ET-ADA-STR-01', 'Adama Central Supermarket',           'Store',               'Franco Intersection, Adama',      'Active', 'ET', 'ETB', 'Adama Oromia Region',        'ET-ADA', 112, '1027', 4500,  4, true, true, 'NEAREST', false),
+  ('c1111111-1111-4000-8000-000000000113', 'ET-ADA-STR-02', 'Bishoftu Lakefront Supermarket',      'Store',               'Bishoftu Main Road, Oromia',      'Active', 'ET', 'ETB', 'Adama Oromia Region',        'ET-ADA', 113, '1028', 4500,  4, true, true, 'NEAREST', false),
+  ('c1111111-1111-4000-8000-000000000114', 'ET-ADA-STR-03', 'Mojo Gateway Supermarket',            'Store',               'Mojo Town Center, Oromia',        'Active', 'ET', 'ETB', 'Adama Oromia Region',        'ET-ADA', 114, '1029', 4500,  4, true, true, 'NEAREST', false),
 
   -- ==========================================================================
   -- KENYA — REGION 1: KE-NRB (Nairobi Central Region)
   -- ==========================================================================
-  ('6c38f106-4590-4ff3-ae68-b9ab657fff8e', 'KE-NRB',        'Nairobi Region Administration',       'Administration',      'Westlands Road, Nairobi',         'Active', 'KE', 'KES', 'Nairobi Central Region',     'KE-NRB', 13, '2013', 500,   0, true, true, 'NEAREST', false),
-  ('a1111111-1111-4000-8000-000000000003', 'KE-NRB-DC-01',  'Nairobi Distribution Center',         'Distribution Center', 'Embakasi North ICD, Nairobi',     'Active', 'KE', 'KES', 'Nairobi Central Region',     'KE-NRB', 3,  '2001', 50000, 0, true, true, 'NEAREST', true),
-  ('a1111111-1111-4000-8000-000000000007', 'KE-NRB-WH-01',  'Eastleigh Storage Warehouse',         'Warehouse',           'First Avenue Eastleigh, Nairobi', 'Active', 'KE', 'KES', 'Nairobi Central Region',     'KE-NRB', 7,  '2007', 25000, 0, true, true, 'NEAREST', true),
-  ('a1111111-1111-4000-8000-000000000008', 'KE-NRB-ONL-01', 'Nairobi Online Store',                'Dark Store',          'Kilimani Digital Hub, Nairobi',   'Active', 'KE', 'KES', 'Nairobi Central Region',     'KE-NRB', 8,  '2008', 8000,  0, true, true, 'NEAREST', true),
-  ('a1111111-1111-4000-8000-000000000004', 'KE-NRB-STR-01', 'Westlands Supermarket',               'Store',               'Waiyaki Way, Westlands, Nairobi', 'Active', 'KE', 'KES', 'Nairobi Central Region',     'KE-NRB', 4,  '2002', 5000,  6, true, true, 'NEAREST', false),
-  ('a1111111-1111-4000-8000-000000000031', 'KE-NRB-STR-02', 'Kilimani Junction Supermarket',       'Store',               'Ngong Road, Kilimani, Nairobi',   'Active', 'KE', 'KES', 'Nairobi Central Region',     'KE-NRB', 31, '2031', 5000,  4, true, true, 'NEAREST', false),
-  ('a1111111-1111-4000-8000-000000000032', 'KE-NRB-STR-03', 'Karen Crossroads Supermarket',        'Store',               'Langata Road, Karen, Nairobi',    'Active', 'KE', 'KES', 'Nairobi Central Region',     'KE-NRB', 32, '2032', 5000,  4, true, true, 'NEAREST', false),
+  ('6c38f106-4590-4ff3-ae68-b9ab657fff8e', 'KE-NRB',        'Nairobi Region Administration',       'Administration',      'Westlands Road, Nairobi',         'Active', 'KE', 'KES', 'Nairobi Central Region',     'KE-NRB', 115, '2013', 500,   0, true, true, 'NEAREST', false),
+  ('a1111111-1111-4000-8000-000000000003', 'KE-NRB-DC-01',  'Nairobi Distribution Center',         'Distribution Center', 'Embakasi North ICD, Nairobi',     'Active', 'KE', 'KES', 'Nairobi Central Region',     'KE-NRB', 116, '2001', 50000, 0, true, true, 'NEAREST', true),
+  ('a1111111-1111-4000-8000-000000000007', 'KE-NRB-WH-01',  'Eastleigh Storage Warehouse',         'Warehouse',           'First Avenue Eastleigh, Nairobi', 'Active', 'KE', 'KES', 'Nairobi Central Region',     'KE-NRB', 117, '2007', 25000, 0, true, true, 'NEAREST', true),
+  ('a1111111-1111-4000-8000-000000000008', 'KE-NRB-ONL-01', 'Nairobi Online Store',                'Dark Store',          'Kilimani Digital Hub, Nairobi',   'Active', 'KE', 'KES', 'Nairobi Central Region',     'KE-NRB', 118, '2008', 8000,  0, true, true, 'NEAREST', true),
+  ('a1111111-1111-4000-8000-000000000004', 'KE-NRB-STR-01', 'Westlands Supermarket',               'Store',               'Waiyaki Way, Westlands, Nairobi', 'Active', 'KE', 'KES', 'Nairobi Central Region',     'KE-NRB', 119, '2002', 5000,  6, true, true, 'NEAREST', false),
+  ('c1111111-1111-4000-8000-000000000120', 'KE-NRB-STR-02', 'Kilimani Junction Supermarket',       'Store',               'Ngong Road, Kilimani, Nairobi',   'Active', 'KE', 'KES', 'Nairobi Central Region',     'KE-NRB', 120, '2031', 5000,  4, true, true, 'NEAREST', false),
+  ('c1111111-1111-4000-8000-000000000121', 'KE-NRB-STR-03', 'Karen Crossroads Supermarket',        'Store',               'Langata Road, Karen, Nairobi',    'Active', 'KE', 'KES', 'Nairobi Central Region',     'KE-NRB', 121, '2032', 5000,  4, true, true, 'NEAREST', false),
 
   -- ==========================================================================
   -- KENYA — REGION 2: KE-MBA (Mombasa Coastal Region)
   -- ==========================================================================
-  ('6c38f106-4590-4ff3-ae68-b9ab657fff8f', 'KE-MBA',        'Mombasa Region Administration',       'Administration',      'Moi Avenue, Mombasa',             'Active', 'KE', 'KES', 'Mombasa Coastal Region',     'KE-MBA', 33, '2033', 500,   0, true, true, 'NEAREST', false),
-  ('a1111111-1111-4000-8000-000000000041', 'KE-MBA-DC-01',  'Mombasa Coastal Distribution Center', 'Distribution Center', 'Miritini Logistics Park, Mombasa','Active', 'KE', 'KES', 'Mombasa Coastal Region',     'KE-MBA', 34, '2034', 45000, 0, true, true, 'NEAREST', true),
-  ('a1111111-1111-4000-8000-000000000042', 'KE-MBA-WH-01',  'Changamwe Port Warehouse',            'Warehouse',           'Changamwe Industrial, Mombasa',   'Active', 'KE', 'KES', 'Mombasa Coastal Region',     'KE-MBA', 35, '2035', 22000, 0, true, true, 'NEAREST', true),
-  ('a1111111-1111-4000-8000-000000000043', 'KE-MBA-ONL-01', 'Mombasa Online Store',                'Dark Store',          'Nyali Bridge Digital Hub, MBA',   'Active', 'KE', 'KES', 'Mombasa Coastal Region',     'KE-MBA', 36, '2036', 6000,  0, true, true, 'NEAREST', true),
-  ('a1111111-1111-4000-8000-000000000044', 'KE-MBA-STR-01', 'Nyali Cinemax Supermarket',           'Store',               'Links Road, Nyali, Mombasa',      'Active', 'KE', 'KES', 'Mombasa Coastal Region',     'KE-MBA', 37, '2037', 4500,  4, true, true, 'NEAREST', false),
-  ('a1111111-1111-4000-8000-000000000045', 'KE-MBA-STR-02', 'Bamburi Beach Supermarket',           'Store',               'Malindi Road, Bamburi, Mombasa',  'Active', 'KE', 'KES', 'Mombasa Coastal Region',     'KE-MBA', 38, '2038', 4500,  4, true, true, 'NEAREST', false),
-  ('a1111111-1111-4000-8000-000000000046', 'KE-MBA-STR-03', 'Diani Coast Supermarket',             'Store',               'Beach Road, Diani, Kwale',        'Active', 'KE', 'KES', 'Mombasa Coastal Region',     'KE-MBA', 39, '2039', 4500,  4, true, true, 'NEAREST', false)
-ON CONFLICT (id) DO UPDATE SET
-  code = EXCLUDED.code,
+  ('6c38f106-4590-4ff3-ae68-b9ab657fff8f', 'KE-MBA',        'Mombasa Region Administration',       'Administration',      'Moi Avenue, Mombasa',             'Active', 'KE', 'KES', 'Mombasa Coastal Region',     'KE-MBA', 122, '2033', 500,   0, true, true, 'NEAREST', false),
+  ('c1111111-1111-4000-8000-000000000123', 'KE-MBA-DC-01',  'Mombasa Coastal Distribution Center', 'Distribution Center', 'Miritini Logistics Park, Mombasa','Active', 'KE', 'KES', 'Mombasa Coastal Region',     'KE-MBA', 123, '2034', 45000, 0, true, true, 'NEAREST', true),
+  ('c1111111-1111-4000-8000-000000000124', 'KE-MBA-WH-01',  'Changamwe Port Warehouse',            'Warehouse',           'Changamwe Industrial, Mombasa',   'Active', 'KE', 'KES', 'Mombasa Coastal Region',     'KE-MBA', 124, '2035', 22000, 0, true, true, 'NEAREST', true),
+  ('c1111111-1111-4000-8000-000000000125', 'KE-MBA-ONL-01', 'Mombasa Online Store',                'Dark Store',          'Nyali Bridge Digital Hub, MBA',   'Active', 'KE', 'KES', 'Mombasa Coastal Region',     'KE-MBA', 125, '2036', 6000,  0, true, true, 'NEAREST', true),
+  ('c1111111-1111-4000-8000-000000000126', 'KE-MBA-STR-01', 'Nyali Cinemax Supermarket',           'Store',               'Links Road, Nyali, Mombasa',      'Active', 'KE', 'KES', 'Mombasa Coastal Region',     'KE-MBA', 126, '2037', 4500,  4, true, true, 'NEAREST', false),
+  ('c1111111-1111-4000-8000-000000000127', 'KE-MBA-STR-02', 'Bamburi Beach Supermarket',           'Store',               'Malindi Road, Bamburi, Mombasa',  'Active', 'KE', 'KES', 'Mombasa Coastal Region',     'KE-MBA', 127, '2038', 4500,  4, true, true, 'NEAREST', false),
+  ('c1111111-1111-4000-8000-000000000128', 'KE-MBA-STR-03', 'Diani Coast Supermarket',             'Store',               'Beach Road, Diani, Kwale',        'Active', 'KE', 'KES', 'Mombasa Coastal Region',     'KE-MBA', 128, '2039', 4500,  4, true, true, 'NEAREST', false)
+ON CONFLICT (code) DO UPDATE SET
   name = EXCLUDED.name,
   type = EXCLUDED.type,
   address = EXCLUDED.address,
@@ -107,8 +149,7 @@ ON CONFLICT (id) DO UPDATE SET
   currency = EXCLUDED.currency,
   region = EXCLUDED.region,
   region_code = EXCLUDED.region_code,
-  site_number = EXCLUDED.site_number,
-  barcode_prefix = EXCLUDED.barcode_prefix,
+  barcode_prefix = COALESCE(public.sites.barcode_prefix, EXCLUDED.barcode_prefix),
   capacity = EXCLUDED.capacity,
   terminal_count = EXCLUDED.terminal_count,
   bonus_enabled = EXCLUDED.bonus_enabled,
@@ -119,56 +160,75 @@ ON CONFLICT (id) DO UPDATE SET
 
 -- 4. Link Regional Administration Hubs and Regional Managers on public.regions
 UPDATE public.regions
-SET admin_hub_site_id = 'bb0425bc-3119-449a-a685-b871e552bee9',
-    regional_manager_id = (SELECT id FROM public.employees WHERE id = 'e1000000-0000-4000-8000-000000000024' AND role = 'regional_manager'),
+SET admin_hub_site_id = (SELECT id FROM public.sites WHERE code = 'ET-ADD'),
+    regional_manager_id = COALESCE(
+      regional_manager_id,
+      (SELECT id FROM public.employees WHERE id = 'e1000000-0000-4000-8000-000000000024' AND role = 'regional_manager')
+    ),
     last_change_reason = 'Linked Addis Ababa Regional Administration hub and regional manager'
 WHERE code = 'ET-ADD';
 
 UPDATE public.regions
-SET admin_hub_site_id = 'bb0425bc-3119-449a-a685-b871e552beea',
+SET admin_hub_site_id = (SELECT id FROM public.sites WHERE code = 'ET-ADA'),
     last_change_reason = 'Linked Adama Regional Administration hub'
 WHERE code = 'ET-ADA';
 
 UPDATE public.regions
-SET admin_hub_site_id = '6c38f106-4590-4ff3-ae68-b9ab657fff8e',
-    regional_manager_id = (SELECT id FROM public.employees WHERE id = 'e2000000-0000-4000-8000-000000000024' AND role = 'regional_manager'),
+SET admin_hub_site_id = (SELECT id FROM public.sites WHERE code = 'KE-NRB'),
+    regional_manager_id = COALESCE(
+      regional_manager_id,
+      (SELECT id FROM public.employees WHERE id = 'e2000000-0000-4000-8000-000000000024' AND role = 'regional_manager')
+    ),
     last_change_reason = 'Linked Nairobi Region Administration hub and regional manager'
 WHERE code = 'KE-NRB';
 
 UPDATE public.regions
-SET admin_hub_site_id = '6c38f106-4590-4ff3-ae68-b9ab657fff8f',
+SET admin_hub_site_id = (SELECT id FROM public.sites WHERE code = 'KE-MBA'),
     last_change_reason = 'Linked Mombasa Region Administration hub'
 WHERE code = 'KE-MBA';
 
 -- 5. Configure Supply Chain Replenishment Topology (DC -> Warehouse -> Stores & Online Store)
--- 5a. Update primary replenishment_source_id on sites
--- Warehouses replenished by their Regional Distribution Center:
-UPDATE public.sites SET replenishment_source_id = 'a1111111-1111-4000-8000-000000000001' WHERE id = 'a1111111-1111-4000-8000-000000000005'; -- ET-ADD WH <- DC
-UPDATE public.sites SET replenishment_source_id = 'a1111111-1111-4000-8000-000000000021' WHERE id = 'a1111111-1111-4000-8000-000000000022'; -- ET-ADA WH <- DC
-UPDATE public.sites SET replenishment_source_id = 'a1111111-1111-4000-8000-000000000003' WHERE id = 'a1111111-1111-4000-8000-000000000007'; -- KE-NRB WH <- DC
-UPDATE public.sites SET replenishment_source_id = 'a1111111-1111-4000-8000-000000000041' WHERE id = 'a1111111-1111-4000-8000-000000000042'; -- KE-MBA WH <- DC
+-- 5a. Warehouses replenished by their Regional Distribution Center:
+UPDATE public.sites
+SET replenishment_source_id = (SELECT id FROM public.sites WHERE code = 'ET-ADD-DC-01')
+WHERE code = 'ET-ADD-WH-01';
 
--- Stores & Online Stores replenished primarily by their Regional Warehouse:
-UPDATE public.sites SET replenishment_source_id = 'a1111111-1111-4000-8000-000000000005'
+UPDATE public.sites
+SET replenishment_source_id = (SELECT id FROM public.sites WHERE code = 'ET-ADA-DC-01')
+WHERE code = 'ET-ADA-WH-01';
+
+UPDATE public.sites
+SET replenishment_source_id = (SELECT id FROM public.sites WHERE code = 'KE-NRB-DC-01')
+WHERE code = 'KE-NRB-WH-01';
+
+UPDATE public.sites
+SET replenishment_source_id = (SELECT id FROM public.sites WHERE code = 'KE-MBA-DC-01')
+WHERE code = 'KE-MBA-WH-01';
+
+-- 5b. Stores & Online Stores replenished primarily by their Regional Warehouse:
+UPDATE public.sites
+SET replenishment_source_id = (SELECT id FROM public.sites WHERE code = 'ET-ADD-WH-01')
 WHERE region_code = 'ET-ADD' AND type IN ('Store', 'Dark Store');
 
-UPDATE public.sites SET replenishment_source_id = 'a1111111-1111-4000-8000-000000000022'
+UPDATE public.sites
+SET replenishment_source_id = (SELECT id FROM public.sites WHERE code = 'ET-ADA-WH-01')
 WHERE region_code = 'ET-ADA' AND type IN ('Store', 'Dark Store');
 
-UPDATE public.sites SET replenishment_source_id = 'a1111111-1111-4000-8000-000000000007'
+UPDATE public.sites
+SET replenishment_source_id = (SELECT id FROM public.sites WHERE code = 'KE-NRB-WH-01')
 WHERE region_code = 'KE-NRB' AND type IN ('Store', 'Dark Store');
 
-UPDATE public.sites SET replenishment_source_id = 'a1111111-1111-4000-8000-000000000042'
+UPDATE public.sites
+SET replenishment_source_id = (SELECT id FROM public.sites WHERE code = 'KE-MBA-WH-01')
 WHERE region_code = 'KE-MBA' AND type IN ('Store', 'Dark Store');
 
--- 5b. Populate public.site_replenishment_sources join table (Warehouse + DC sources)
+-- 5c. Populate public.site_replenishment_sources join table (Warehouse + DC sources)
 INSERT INTO public.site_replenishment_sources (site_id, source_site_id)
 SELECT s.id, s.replenishment_source_id
 FROM public.sites s
 WHERE s.replenishment_source_id IS NOT NULL
 ON CONFLICT DO NOTHING;
 
--- Also allow Stores & Online Stores to pull directly from their regional Distribution Center as secondary source
 INSERT INTO public.site_replenishment_sources (site_id, source_site_id)
 SELECT s.id, dc.id
 FROM public.sites s
