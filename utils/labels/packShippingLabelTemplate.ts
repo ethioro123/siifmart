@@ -10,6 +10,7 @@ interface PackShippingLabelTemplateData {
     itemCount: number;
     packageNumber: number;
     totalPackages: number;
+    lineItems: Array<{ name: string; sku: string; quantity: string; unit: string }>;
     qr: string;
     barcode: string;
     handlingHtml: string;
@@ -44,6 +45,18 @@ export const buildPackShippingLabel = (data: PackShippingLabelTemplateData): str
             <span>PARCEL ${data.packageNumber} OF ${data.totalPackages}</span>
             <span>JOB ${data.orderRef}</span>
         </div>
+
+        <section class="packed-contents" aria-label="Packed contents">
+            <div class="contents-heading"><span>PACKED CONTENTS</span><span>QTY</span></div>
+            <div class="contents-list">
+                ${data.lineItems.map(item => `
+                    <div class="contents-row">
+                        <span class="contents-name" title="${item.name}">${item.name}${item.sku ? `<small>${item.sku}</small>` : ''}</span>
+                        <span class="contents-quantity">${item.quantity}${item.unit && !item.quantity.toLowerCase().includes(item.unit.toLowerCase()) ? ` ${item.unit}` : ''}</span>
+                    </div>
+                `).join('')}
+            </div>
+        </section>
 
         <div class="tracking-block">
             <div class="barcode">${data.barcode}</div>
@@ -140,17 +153,57 @@ export const packShippingLabelStyles = `
         font-weight: 700;
         letter-spacing: .3px;
     }
+    .packed-contents { min-height: 0; }
+    .contents-heading {
+        display: flex;
+        justify-content: space-between;
+        padding-bottom: 3px;
+        border-bottom: 1px solid #111;
+        font-size: 8px;
+        font-weight: 800;
+        letter-spacing: .7px;
+    }
+    .contents-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+        min-height: 19px;
+        padding: 2px 0;
+        border-bottom: 1px solid #ddd;
+        font-size: 10px;
+        line-height: 1.15;
+    }
+    .contents-name {
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        font-weight: 600;
+    }
+    .contents-name small {
+        margin-left: 5px;
+        color: #555;
+        font-size: 8px;
+        font-weight: 600;
+    }
+    .contents-quantity {
+        flex: 0 0 auto;
+        white-space: nowrap;
+        font-weight: 800;
+        text-align: right;
+    }
     .tracking-block {
         margin-top: auto;
         text-align: center;
     }
     .barcode {
-        height: 58px;
+        height: 46px;
         display: flex;
         justify-content: center;
         align-items: center;
     }
-    .barcode svg { height: 56px; width: auto; max-width: 100%; display: block; }
+    .barcode svg { height: 44px; width: auto; max-width: 100%; display: block; }
     .tracking-number {
         margin-top: 3px;
         font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;

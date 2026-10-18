@@ -39,17 +39,23 @@ test('renders a realistic PACK shipping label within one 4 × 6 page', async ({ 
     await expect(label).toBeVisible();
     await expect(label.getByText('JOB VYUU9')).toBeVisible();
     await expect(label.getByText('5 ITEMS')).toBeVisible();
-    await expect(label.getByText('Full Cream UHT Fresh Milk 1L')).toHaveCount(0);
+    await expect(label.getByText('PACKED CONTENTS')).toBeVisible();
+    await expect(label.getByText('Full Cream UHT Fresh Milk 1L')).toBeVisible();
+    await expect(label.getByText('ETDY001')).toBeVisible();
+    await expect(label.getByText('38 pk')).toBeVisible();
+    await expect(label.getByText('43 pk')).toBeVisible();
     const metrics = await label.evaluate(element => {
         const content = element.firstElementChild as HTMLElement;
         return {
             width: element.getBoundingClientRect().width,
             height: element.getBoundingClientRect().height,
             contentHeight: content.getBoundingClientRect().height,
+            contentScrollHeight: content.scrollHeight,
             scrollHeight: element.scrollHeight,
         };
     });
     expect(metrics.height).toBeLessThanOrEqual(576);
+    expect(metrics.contentScrollHeight).toBeLessThanOrEqual(metrics.contentHeight);
     expect(metrics.scrollHeight).toBeLessThanOrEqual(576);
     await page.emulateMedia({ media: 'print' });
     await label.screenshot({ path: testInfo.outputPath('pack-label-output.png') });

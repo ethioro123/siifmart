@@ -331,6 +331,12 @@ export const generatePackLabelHTML = async (
             itemCount: data.itemCount,
             packageNumber: data.packageNumber || 1,
             totalPackages: data.totalPackages || 1,
+            lineItems: safeLineItems.map(item => ({
+                name: item.name,
+                sku: item.sku,
+                quantity: item.quantity,
+                unit: item.unit
+            })),
             qr: showQR ? qr : '',
             barcode,
             handlingHtml: handlingHTML

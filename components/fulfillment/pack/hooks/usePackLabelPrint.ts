@@ -26,6 +26,16 @@ export const usePackLabelPrint = (deps: UsePackLabelPrintDeps) => {
     const [isPrinting, setIsPrinting] = useState(false);
 
     const getLabelQtyAndUnit = (item: any, product?: any) => {
+        const packed = item.packedQty;
+        if (packed !== undefined && packed !== null) {
+            const packDesc = formatPackagingDescription(product, packed);
+            const unitDef = getSellUnit(product?.unit || item.unit);
+            const unitLabel = unitDef.category === 'count' && unitDef.code !== 'UNIT' ? unitDef.shortLabel : 'pk';
+            return {
+                quantity: packDesc ? `${packed} ${unitLabel} (${packDesc})` : `${packed} ${unitLabel}`,
+                unit: unitLabel
+            };
+        }
         if ((item as any).requestedMeasureQty !== undefined && (item as any).requestedMeasureQty !== null) {
             return {
                 quantity: `${(item as any).requestedMeasureQty}`,
