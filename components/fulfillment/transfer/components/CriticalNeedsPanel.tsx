@@ -2,6 +2,7 @@ import React from 'react';
 import { RefreshCw, X, Search, Store, AlertTriangle, AlertCircle, ArrowUpRight } from 'lucide-react';
 import { ProgressBar } from '../../../shared/ProgressBar';
 import { Site } from '../../../../types';
+import { formatTransferStock, getTransferQuantityConfig } from '../transferQuantity';
 
 interface CriticalNeedsPanelProps {
     filteredItems: any[];
@@ -156,7 +157,9 @@ export const CriticalNeedsPanel: React.FC<CriticalNeedsPanelProps> = ({
                             const stockRatio = item.stock / (item.minStock || 1);
                             const isCritical = stockRatio <= 0.3;
                             const siteName = sites.find(s => s.id === (item.siteId || item.site_id))?.name || 'Local Store';
-                            const deficit = Math.max(0, (item.minStock * 2) - item.stock);
+                            const targetStock = item.maxStock > 0 ? item.maxStock * 0.7 : item.minStock * 2;
+                            const deficit = Math.max(0, targetStock - item.stock);
+                            const quantityUnit = getTransferQuantityConfig(item).quantityLabel;
 
                             return (
                                 <button
@@ -199,7 +202,7 @@ export const CriticalNeedsPanel: React.FC<CriticalNeedsPanelProps> = ({
                                                 Deficit Gap
                                             </span>
                                             <div className="px-2.5 py-1 bg-amber-50 dark:bg-amber-500/15 border border-amber-200 dark:border-amber-500/30 text-amber-800 dark:text-amber-300 rounded-lg text-xs font-mono font-bold tabular-nums">
-                                                +{deficit} units
+                                                +{deficit} {quantityUnit}
                                             </div>
                                         </div>
                                     </div>
@@ -209,11 +212,11 @@ export const CriticalNeedsPanel: React.FC<CriticalNeedsPanelProps> = ({
                                         <div className="flex items-center gap-2 text-xs font-mono font-semibold text-[var(--theme-text-secondary)] tabular-nums">
                                             <span className="text-[11px] text-[var(--theme-text-secondary)] uppercase tracking-wider">Current:</span>
                                             <span className={isCritical ? 'text-red-500 font-bold' : 'text-amber-500 font-bold'}>
-                                                {item.stock}
+                                                {formatTransferStock(item.stock, item)}
                                             </span>
                                             <span className="text-[var(--theme-text-secondary)] opacity-50">/</span>
                                             <span className="text-[var(--theme-text-secondary)] text-[11px]">
-                                                {item.minStock} min
+                                                {item.minStock} {quantityUnit} min
                                             </span>
                                         </div>
 

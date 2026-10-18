@@ -1,6 +1,7 @@
 import React from 'react';
 import { Truck, AlertTriangle } from 'lucide-react';
 import { Site, Product } from '../../../../types';
+import { getTransferQuantityConfig } from '../transferQuantity';
 
 interface TransferRequestReviewProps {
     t: (key: string) => string;
@@ -16,7 +17,6 @@ interface TransferRequestReviewProps {
     availableProducts?: Product[];
     products?: Product[];
     getZoneName: (zoneId?: string) => string;
-    getSellUnit: (unit: string) => any;
 }
 
 export const TransferRequestReview: React.FC<TransferRequestReviewProps> = ({
@@ -33,7 +33,6 @@ export const TransferRequestReview: React.FC<TransferRequestReviewProps> = ({
     availableProducts = [],
     products = [],
     getZoneName,
-    getSellUnit
 }) => {
     const actualSourceSite = transferSourceSite || activeSite?.id;
     const sourceSiteObj = sites.find(s => s.id === actualSourceSite);
@@ -86,13 +85,10 @@ export const TransferRequestReview: React.FC<TransferRequestReviewProps> = ({
                         const prod = availableProducts.find(p => p.id === item.productId)
                             || products.find(p => p.id === item.productId)
                             || allProducts.find(p => p.id === item.productId);
-                        const unitDef = getSellUnit(prod?.unit || '');
-                        let displayQty = `${item.quantity} `;
-                        if (item.isMeasure) {
-                            displayQty = `${item.quantity} ${unitDef.shortLabel}`;
-                        } else {
-                            displayQty = `${item.quantity} ${t('warehouse.itemPlural')}`;
-                        }
+                        const unitConfig = getTransferQuantityConfig(prod);
+                        const displayQty = `${item.quantity} ${item.isMeasure && unitConfig.isPackagedMeasure
+                            ? unitConfig.unit.shortLabel
+                            : unitConfig.quantityLabel}`;
 
                         return (
                             <div key={idx} className="flex justify-between items-center bg-[var(--theme-bg-card)] p-3 rounded-xl border border-[var(--theme-border)]">

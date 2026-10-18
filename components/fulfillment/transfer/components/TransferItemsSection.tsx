@@ -2,7 +2,7 @@ import React from 'react';
 import { Plus, Trash2, ArrowRight } from 'lucide-react';
 import { Product } from '../../../../types';
 import { ProductSelector } from '../ProductSelector';
-import { getSellUnit } from '../../../../utils/units';
+import { formatTransferStock, getTransferQuantityConfig, getTransferRemainingStock, normalizeTransferEntry } from '../transferQuantity';
 
 interface TransferItemsSectionProps {
     t: (key: string) => string;
@@ -60,17 +60,12 @@ export const TransferItemsSection: React.FC<TransferItemsSectionProps> = ({
                     const prod = findProduct(item.productId);
                     const sourceStockItem = findSourceStock(prod?.sku) || prod;
                     const rawStock = sourceStockItem?.stock || 0;
-                    const unitDef = getSellUnit(sourceStockItem?.unit || prod?.unit || '');
-                    const sizeStr = sourceStockItem?.size || prod?.size;
-                    const isWeightVol = (unitDef.category === 'weight' || unitDef.category === 'volume') && !!sizeStr;
-                    const displayStock = rawStock;
-                    const deduction = item.quantity;
-                    const displayRemaining = displayStock - deduction;
-                    const unitLabel = isWeightVol
-                        ? ` packs (${sizeStr}${unitDef.shortLabel})`
-                        : unitDef.code !== 'UNIT'
-                        ? ` ${unitDef.shortLabel}`
-                        : '';
+                    const unitProduct = sourceStockItem || prod;
+                    const unitConfig = getTransferQuantityConfig(unitProduct);
+                    const displayRemaining = getTransferRemainingStock(rawStock, item.quantity, unitProduct, item.isMeasure);
+                    const remainingDisplay = item.isMeasure && unitConfig.isPackagedMeasure
+                        ? `${displayRemaining.toLocaleString()} ${unitConfig.unit.shortLabel}`
+                        : formatTransferStock(displayRemaining, unitProduct);
                     const isWarning = displayRemaining < 0;
 
                     return (
@@ -90,27 +85,28 @@ export const TransferItemsSection: React.FC<TransferItemsSectionProps> = ({
                                                 : 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20'
                                         }`}
                                     >
-                                        Source: {displayStock.toLocaleString()}{unitLabel} <ArrowRight size={10} /> Rem:{' '}
-                                        {displayRemaining.toLocaleString()}{unitLabel}
+                                        Source: {formatTransferStock(rawStock, unitProduct)} <ArrowRight size={10} /> Rem:{' '}
+                                        {remainingDisplay}
                                     </span>
                                 </div>
                             </div>
                             <div className="flex items-center gap-2 shrink-0">
-                                <span className="text-xs text-[var(--theme-text-secondary)]">Qty:</span>
+                                    <span className="text-xs text-[var(--theme-text-secondary)]">Qty ({item.isMeasure && unitConfig.isPackagedMeasure ? unitConfig.unit.shortLabel : unitConfig.quantityLabel}):</span>
                                 <div className="flex gap-1">
                                     <input
                                         type="number"
-                                        min="1"
+                                        min={item.isMeasure && unitConfig.isPackagedMeasure ? unitConfig.unit.step : unitConfig.min}
+                                        step={item.isMeasure && unitConfig.isPackagedMeasure ? unitConfig.unit.step : unitConfig.step}
                                         value={item.quantity}
                                         onChange={(e) => {
                                             const newItems = [...transferItems];
-                                            newItems[idx].quantity = parseFloat(e.target.value) || 1;
+                                            newItems[idx].quantity = normalizeTransferEntry(e.target.value, unitProduct, item.isMeasure);
                                             setTransferItems(newItems);
                                         }}
                                         className="w-16 min-h-[44px] bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-2 py-1 text-sm text-[var(--theme-text-primary)] text-center font-mono font-bold focus:border-primary focus:outline-none touch-manipulation tabular-nums"
                                         aria-label={`Quantity for ${prod?.name || 'item'}`}
                                     />
-                                    {isWeightVol && (
+                                    {unitConfig.isPackagedMeasure && (
                                         <select
                                             value={item.isMeasure ? 'measure' : 'units'}
                                             onChange={(e) => {
@@ -121,8 +117,8 @@ export const TransferItemsSection: React.FC<TransferItemsSectionProps> = ({
                                             className="min-h-[44px] bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl px-2 py-1 text-[11px] font-semibold uppercase text-[var(--theme-text-primary)] focus:border-primary focus:outline-none ml-1 cursor-pointer hover:bg-[var(--theme-bg-card)] transition-colors touch-manipulation"
                                             aria-label="Select unit format"
                                         >
-                                            <option value="units">Units</option>
-                                            <option value="measure">{unitDef.shortLabel}</option>
+                                            <option value="units">{unitConfig.quantityLabel}</option>
+                                            <option value="measure">{unitConfig.unit.shortLabel}</option>
                                         </select>
                                     )}
                                 </div>

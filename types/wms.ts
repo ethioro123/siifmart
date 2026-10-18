@@ -36,6 +36,8 @@ export interface JobItem {
   description?: string;
   minStock?: number;
   maxStock?: number;
+  requestedMeasureQty?: number;
+  isMeasure?: boolean;
 }
 
 export interface WMSJob {

@@ -31,6 +31,7 @@ export const TransferLineItemRow: React.FC<TransferLineItemRowProps> = ({
     const expectedMeasure = isWeightVol
         ? (item.requestedMeasureQty !== undefined ? item.requestedMeasureQty : (itemQty * sizeNum))
         : itemQty;
+    const showsPhysicalMeasure = item.requestedMeasureQty !== undefined || (isWeightVol && !product?.size && !item.size);
     const showReceived = item.receivedQty !== undefined &&
         ['Received', 'Delivered', 'Completed'].some(s => s === selectedJob.transferStatus || s === selectedJob.status);
     const hasDiscrepancy = showReceived && item.receivedQty !== expectedMeasure;
@@ -78,7 +79,7 @@ export const TransferLineItemRow: React.FC<TransferLineItemRowProps> = ({
                             *** Blind
                         </span>
                     ) : (
-                        <TransferQtyDisplay qty={itemQty} size={product?.size || item.size} unit={itemUnit} t={t} />
+                        <TransferQtyDisplay qty={showsPhysicalMeasure ? expectedMeasure : itemQty} size={product?.size || item.size} unit={itemUnit} measureQty={showsPhysicalMeasure} t={t} />
                     )}
                 </div>
 
@@ -87,7 +88,7 @@ export const TransferLineItemRow: React.FC<TransferLineItemRowProps> = ({
                         <span className={`text-[11px] font-medium uppercase tracking-wider block ${hasDiscrepancy ? 'text-red-500' : 'text-green-600 dark:text-green-400'}`}>
                             {t('warehouse.received')}
                         </span>
-                        <TransferQtyDisplay qty={item.receivedQty} size={product?.size || item.size} unit={itemUnit} color={hasDiscrepancy ? 'red' : 'green'} t={t} />
+                        <TransferQtyDisplay qty={item.receivedQty} size={product?.size || item.size} unit={itemUnit} measureQty={showsPhysicalMeasure} color={hasDiscrepancy ? 'red' : 'green'} t={t} />
                     </div>
                 )}
 

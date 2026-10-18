@@ -29,7 +29,10 @@ export const mapWmsJobRow = (row: any): WMSJob => {
             batchNumber: item.batchNumber || item.batch_number,
             condition: item.condition,
             packQuantity: item.packQuantity || item.pack_quantity,
+            packageType: item.packageType || item.package_type,
             customAttributes: item.customAttributes || item.custom_attributes,
+            requestedMeasureQty: item.requestedMeasureQty !== undefined ? item.requestedMeasureQty : item.requested_measure_qty,
+            isMeasure: item.isMeasure !== undefined ? item.isMeasure : item.is_measure,
             minStock: item.minStock || item.min_stock,
             maxStock: item.maxStock || item.max_stock,
             retailPrice: item.retailPrice || item.retail_price

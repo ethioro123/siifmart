@@ -2,7 +2,7 @@ import React from 'react';
 import {
     Warehouse, ShoppingBag, AlertTriangle, Trash2, ArrowRight, Plus, Minus, RefreshCw, Send, Package, Sparkles, X
 } from 'lucide-react';
-import { getSellUnit } from '../../../../utils/units';
+import { formatTransferStock, getTransferQuantityConfig, toTransferMeasureQuantity } from '../transferQuantity';
 import { Site, Product, User } from '../../../../types';
 import { logger } from '../../../../utils/logger';
 
@@ -117,7 +117,8 @@ export const AllocationSidebar: React.FC<AllocationSidebarProps> = ({
                             ) : (
                                 distHubAvailableSources.map(source => {
                                     const isWarehouse = source.site?.type === 'Warehouse' || source.site?.type === 'Distribution Center';
-                                    const allocQty = distHubAllocQty[source.id] || Math.min(10, source.stock);
+                                    const allocQty = distHubAllocQty[source.id] ?? Math.min(10, source.stock);
+                                    const quantityConfig = getTransferQuantityConfig(source);
                                     const isCrossZone = destSiteObj && source.site && (destSiteObj.logisticsZoneId || '') !== (source.site.logisticsZoneId || '');
 
                                     return (
@@ -143,7 +144,7 @@ export const AllocationSidebar: React.FC<AllocationSidebarProps> = ({
 
                                                 <div className="text-right shrink-0 bg-[var(--theme-bg-subtle)] px-2.5 py-1 rounded-xl border border-[var(--theme-border)]">
                                                     <span className="text-[11px] text-[var(--theme-text-secondary)] font-semibold uppercase tracking-wider block leading-none mb-0.5">Available</span>
-                                                    <span className="text-xs font-mono font-bold text-primary tabular-nums">{source.stock}</span>
+                                                    <span className="text-xs font-mono font-bold text-primary tabular-nums">{formatTransferStock(source.stock, source)}</span>
                                                 </div>
                                             </div>
 
@@ -161,12 +162,15 @@ export const AllocationSidebar: React.FC<AllocationSidebarProps> = ({
                                                     </button>
                                                     <input
                                                         type="number"
+                                                        min="0"
+                                                        step={quantityConfig.step}
                                                         className="w-12 bg-transparent text-center font-mono font-bold text-[var(--theme-text-primary)] text-xs focus:ring-0 focus:outline-none touch-manipulation tabular-nums"
                                                         value={allocQty}
-                                                        aria-label="Allocation quantity"
-                                                        title="Allocation quantity"
+                                                        aria-label={`Allocation quantity in ${quantityConfig.quantityLabel}`}
+                                                        title={`Allocation quantity in ${quantityConfig.quantityLabel}`}
                                                         onChange={(e) => handleQtyChange(source.id, parseFloat(e.target.value), source.stock)}
                                                     />
+                                                    <span className="px-1 text-[10px] text-[var(--theme-text-secondary)]">{quantityConfig.quantityLabel}</span>
                                                     <button
                                                         onClick={() => incrementQty(source.id, source.stock)}
                                                         className="min-h-[36px] min-w-[36px] flex items-center justify-center hover:bg-[var(--theme-bg-card)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] rounded-lg transition-colors active:scale-95 touch-manipulation"
@@ -180,7 +184,7 @@ export const AllocationSidebar: React.FC<AllocationSidebarProps> = ({
                                                 {/* Stage to Manifest Button */}
                                                 <button
                                                     onClick={() => addToDistDraft(source, allocQty)}
-                                                    disabled={distHubLoading}
+                                                    disabled={distHubLoading || allocQty <= 0}
                                                     className="flex-1 min-h-[44px] py-2 px-3 bg-[var(--theme-primary)] hover:opacity-90 text-[var(--theme-primary-text)] text-[11px] font-bold uppercase tracking-wider rounded-xl transition-all active:scale-[0.99] shadow-xs flex items-center justify-center gap-1.5 touch-manipulation cursor-pointer"
                                                 >
                                                     <Plus size={14} />
@@ -270,11 +274,11 @@ export const AllocationSidebar: React.FC<AllocationSidebarProps> = ({
                                         {(draft.lineItems || []).map((item: any, idx: number) => {
                                             const product = allProducts.find(p => p.id === item.productId || p.sku === item.sku);
                                             const resolvedSize = product?.size || allProducts.find(p => p.sku === item.sku && p.size && parseFloat(p.size) > 0)?.size;
-                                            const unitDef = getSellUnit(item.unit || product?.unit || '');
-                                            const sizeNum = parseFloat(resolvedSize || '0');
-                                            const isWeightVol = (unitDef.category === 'weight' || unitDef.category === 'volume') && sizeNum > 0;
+                                            const transferProduct = { ...product, ...item, size: resolvedSize };
+                                            const itemConfig = getTransferQuantityConfig(transferProduct);
+                                            const isWeightVol = itemConfig.unit.category === 'weight' || itemConfig.unit.category === 'volume';
                                             const physicalMeasure = isWeightVol
-                                                ? ((item as any).requestedMeasureQty !== undefined ? (item as any).requestedMeasureQty : (item.expectedQty * sizeNum))
+                                                ? (item.requestedMeasureQty !== undefined ? item.requestedMeasureQty : toTransferMeasureQuantity(item.expectedQty, transferProduct))
                                                 : null;
 
                                             return (
@@ -287,7 +291,7 @@ export const AllocationSidebar: React.FC<AllocationSidebarProps> = ({
                                                             <span className="text-[var(--theme-text-secondary)] font-mono text-[11px]">{item.sku}</span>
                                                             {physicalMeasure !== null && (
                                                                 <span className="text-[11px] font-bold text-amber-500 font-mono">
-                                                                    ({physicalMeasure} {unitDef.shortLabel})
+                                                                    ({physicalMeasure} {itemConfig.unit.shortLabel})
                                                                 </span>
                               )}
                                                         </div>
@@ -296,12 +300,12 @@ export const AllocationSidebar: React.FC<AllocationSidebarProps> = ({
                                                     <div className="flex items-center gap-1.5 shrink-0">
                                                         <input
                                                             type="number"
-                                                            min={isWeightVol ? "0.01" : "1"}
-                                                            step={isWeightVol ? "0.01" : "1"}
+                                                            min={itemConfig.step}
+                                                            step={itemConfig.step}
                                                             className="w-16 min-h-[36px] bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-lg px-1.5 py-0.5 text-center text-[var(--theme-text-primary)] text-xs font-mono font-bold focus:border-primary focus:outline-none touch-manipulation tabular-nums"
                                                             value={item.expectedQty}
-                                                            aria-label="Replenish quantity"
-                                                            title="Replenish quantity"
+                                                            aria-label={`Replenish quantity in ${itemConfig.quantityLabel}`}
+                                                            title={`Replenish quantity in ${itemConfig.quantityLabel}`}
                                                             onChange={(e) => {
                                                                 const val = parseFloat(e.target.value);
                                                                 if (!isNaN(val) && val > 0) {

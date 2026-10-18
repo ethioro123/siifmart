@@ -78,6 +78,14 @@
   - Includes: completedBy, completedAt, assignedTo, orderRef, etc.
   - File: `services/supabase.service.ts` (wmsJobsService)
 
+### Fulfilment Transfer Units (2026-10-18)
+- Standardized transfer, bulk distribution, Smart Replenish, picking, and receiving quantity labels and precision against product unit and package attributes.
+- Kept measured quantities alongside stock-unit quantities through the WMS job line-item JSON and mapper; measured receipts convert back to inventory stock units before applying stock.
+- **Root Cause Fixed**: Transfer allocation screens hardcoded generic integer units, inconsistent package-size conversion mixed stock counts with physical measures, and pick completion used package quantity as the measured-pick denominator.
+- **Files Modified**: `components/fulfillment/transfer/`, `components/fulfillment/useJobCompletion.ts`, `services/wms-jobs.mapper.ts`, `types/product.ts`, `types/wms.ts`
+- **Database**: No schema change; transfer unit details remain in `wms_jobs.line_items` JSON.
+- **Regression Coverage**: `tests/utils/transferQuantity.test.ts`
+
 ### Sites Service - Allowlist Update Pattern
 - **Status**: ✅ FIXED (2026-07-09)
 - Rewrote `sitesService.update()` from dangerous `{ ...object }` spread + denylist to explicit allowlist

@@ -382,10 +382,17 @@ export const TransferJobDetails: React.FC<TransferJobDetailsProps> = ({
                                         id: item.id,
                                         productId: item.productId || item.product_id || item.id,
                                         productName: item.name || item.productName || item.product_name,
-                                        expectedQty: item.expectedQty ?? item.quantity ?? 0,
+                                        expectedQty: item.requestedMeasureQty ?? item.expectedQty ?? item.quantity ?? 0,
                                         receivedQty: isBlindReceiving
                                             ? (item.receivedQty !== undefined ? item.receivedQty : 0)
-                                            : (item.deliveredQty !== undefined ? item.deliveredQty : (item.receivedQty !== undefined ? item.receivedQty : (item.expectedQty ?? item.quantity ?? 0))),
+                                            : (item.deliveredQty !== undefined ? item.deliveredQty : (item.receivedQty !== undefined ? item.receivedQty : (item.requestedMeasureQty ?? item.expectedQty ?? item.quantity ?? 0))),
+                                        unit: item.unit,
+                                        size: item.size,
+                                        packQuantity: item.packQuantity,
+                                        packageType: item.packageType,
+                                        customAttributes: item.customAttributes,
+                                        requestedMeasureQty: item.requestedMeasureQty,
+                                        sku: item.sku,
                                         condition: (item.condition as any) || 'Good'
                                     }));
                                     setActiveTransferJob(selectedJob);

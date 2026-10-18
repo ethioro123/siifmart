@@ -385,6 +385,13 @@ export interface ReceivingItem {
   verifiedCount?: number; // Scanned quantity
   manualCount?: number;   // Typed quantity
   barcode?: string;       // Barcode used for verification
+  sku?: string;
+  unit?: string;
+  size?: string;
+  packQuantity?: number;
+  packageType?: string;
+  customAttributes?: any;
+  requestedMeasureQty?: number;
 }
 
 export interface POReceivingInput {

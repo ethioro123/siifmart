@@ -1,14 +1,16 @@
 import React from 'react';
+import { getTransferPackageSizeLabel } from './transferQuantity';
 
 interface TransferQtyDisplayProps {
     qty: number;
     size?: string | number | null;
     unit?: any;
     color?: 'red' | 'green';
+    measureQty?: boolean;
     t: (key: string) => string;
 }
 
-export const TransferQtyDisplay: React.FC<TransferQtyDisplayProps> = ({ qty, size, unit, color, t }) => {
+export const TransferQtyDisplay: React.FC<TransferQtyDisplayProps> = ({ qty, size, unit, color, t, measureQty = false }) => {
     const textColor = color === 'red'
         ? 'text-red-600 dark:text-red-400'
         : color === 'green'
@@ -17,10 +19,11 @@ export const TransferQtyDisplay: React.FC<TransferQtyDisplayProps> = ({ qty, siz
     const isWeightVol = unit && (unit.category === 'weight' || unit.category === 'volume');
 
     let unitLabel = unit?.code !== 'UNIT' ? unit?.shortLabel : (qty === 1 ? t('warehouse.itemSingular') : t('warehouse.itemPlural'));
-    if (isWeightVol && size) {
-        unitLabel = `packs (${size}${unit.shortLabel})`;
-    } else if (isWeightVol) {
-        unitLabel = `packs (${unit.shortLabel})`;
+    if (measureQty || (isWeightVol && !size)) {
+        unitLabel = unit?.shortLabel;
+    } else if (isWeightVol && size) {
+        const packageSize = getTransferPackageSizeLabel({ unit: unit.code, size: String(size) });
+        unitLabel = `packs (${packageSize || unit.shortLabel})`;
     }
 
     return (

@@ -14,6 +14,7 @@ import { QueryClient } from '@tanstack/react-query';
 import { logger } from '../../utils/logger';
 import { calculateWarehousePoints } from '../../utils/warehouseGamification';
 import { checkAndSyncPOCompletion } from './receive/utils/poCompletionHelper';
+import { toTransferStockQuantity } from './transfer/transferQuantity';
 
 // Helper for translations
 const getTranslation = (path: string): string => {
@@ -322,18 +323,9 @@ export const useJobCompletion = (deps: UseJobCompletionDeps) => {
                                 let deductUnits = item.pickedQty;
 
                                 // EXACT MEASURE DEDUCTION OVERRIDE
-                                if ((item as any).requestedMeasureQty) {
+                                if ((item as any).requestedMeasureQty !== undefined && (item as any).requestedMeasureQty !== null) {
                                     const product = allProducts.find((p: Product) => p.id === productId);
-                                    if (product && product.size) {
-                                        const sizeNumeric = Number(product.size);
-                                        if (sizeNumeric > 0) {
-                                            const expected = item.expectedQty || 1;
-                                            const picked = item.pickedQty || 0;
-                                            const fillRatio = expected > 0 ? (picked / expected) : 1;
-                                            const actualMeasurePicked = (item as any).requestedMeasureQty * fillRatio;
-                                            deductUnits = actualMeasurePicked / sizeNumeric;
-                                        }
-                                    }
+                                    if (product) deductUnits = toTransferStockQuantity(item.pickedQty || 0, product, true);
                                 }
 
                                 await adjustStock(

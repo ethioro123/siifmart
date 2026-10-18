@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { WMSJob, Product, Site, User } from '../../../../types';
-import { getSellUnit } from '../../../../utils/units';
+import { getTransferQuantityConfig, normalizeTransferEntry, toTransferMeasureQuantity } from '../transferQuantity';
 import { logisticsZonesService } from '../../../../services/supabase.service';
 import { logger } from '../../../../utils/logger';
 
@@ -177,63 +177,44 @@ export const useSmartReplenishState = ({
 
         setDistHubAvailableSources(mappedSources);
 
-        // Calculate actual store need gap to bring it to 70% capacity (converting stock to raw measure)
+        // Inventory thresholds and stock share the same unit basis; only input precision varies by product.
         const maxStock = targetProduct.maxStock || 0;
         const minStock = targetProduct.minStock || 0;
-        
-        // Find if this SKU has a valid size/unit on any other product (e.g. at the warehouse)
-        const skuSize = targetProduct.size || allProducts.find(p => p.sku === targetProduct.sku && p.size && parseFloat(p.size) > 0)?.size;
-        const skuUnit = targetProduct.unit || allProducts.find(p => p.sku === targetProduct.sku && p.unit)?.unit;
+        const targetStock = maxStock > 0 ? maxStock * 0.7 : minStock * 2;
+        const stockGap = Math.max(0, targetStock - (targetProduct.stock || 0));
 
-        const unitDef = getSellUnit(skuUnit || '');
-        const sizeNum = parseFloat(skuSize || '0');
-        const isWeightVol = (unitDef.category === 'weight' || unitDef.category === 'volume') && sizeNum > 0;
-
-        const currentStockLiters = isWeightVol && targetProduct.size && parseFloat(targetProduct.size) > 0
-            ? targetProduct.stock * parseFloat(targetProduct.size)
-            : targetProduct.stock;
-
-        const targetStockLiters = maxStock > 0 ? maxStock * 0.7 : minStock * 2;
-        const gapLiters = Math.max(0, targetStockLiters - currentStockLiters);
-        const gapCases = isWeightVol ? gapLiters / sizeNum : gapLiters;
-
-        // Initialize allocation quantities based on the store need gap (in cases/packages)
+        // Initialize allocation quantities using the source product's stock unit and decimal rules.
         const initialQty: Record<string, number> = {};
         mappedSources.forEach(src => {
-            initialQty[src.id] = Math.round(Math.max(1, Math.min(src.stock, gapCases)) * 100) / 100;
+            const qty = Math.min(src.stock || 0, stockGap);
+            initialQty[src.id] = normalizeTransferEntry(String(qty), src);
         });
         setDistHubAllocQty(initialQty);
     };
 
     const incrementQty = (sourceId: string, maxStock: number) => {
+        const source = distHubAvailableSources.find(item => item.id === sourceId);
+        const config = getTransferQuantityConfig(source);
         setDistHubAllocQty(prev => {
-            const current = prev[sourceId] || 1;
-            if (current < maxStock) {
-                return { ...prev, [sourceId]: current + 1 };
-            }
-            return prev;
+            const current = prev[sourceId] || 0;
+            const next = Math.min(maxStock, current + config.step);
+            return { ...prev, [sourceId]: normalizeTransferEntry(String(next), source) };
         });
     };
 
     const decrementQty = (sourceId: string) => {
+        const source = distHubAvailableSources.find(item => item.id === sourceId);
+        const config = getTransferQuantityConfig(source);
         setDistHubAllocQty(prev => {
-            const current = prev[sourceId] || 1;
-            if (current > 1) {
-                return { ...prev, [sourceId]: current - 1 };
-            }
-            return prev;
+            const current = prev[sourceId] || 0;
+            return { ...prev, [sourceId]: normalizeTransferEntry(String(Math.max(0, current - config.step)), source) };
         });
     };
 
     const handleQtyChange = (sourceId: string, value: number, maxStock: number) => {
-        const parsed = isNaN(value) ? 1 : value;
-        if (parsed < 1) {
-            setDistHubAllocQty(prev => ({ ...prev, [sourceId]: 1 }));
-        } else if (parsed > maxStock) {
-            setDistHubAllocQty(prev => ({ ...prev, [sourceId]: maxStock }));
-        } else {
-            setDistHubAllocQty(prev => ({ ...prev, [sourceId]: parsed }));
-        }
+        const source = distHubAvailableSources.find(item => item.id === sourceId);
+        const parsed = Number.isFinite(value) ? Math.max(0, Math.min(maxStock, value)) : 0;
+        setDistHubAllocQty(prev => ({ ...prev, [sourceId]: normalizeTransferEntry(String(parsed), source) }));
     };
 
     const addToDistDraft = async (sourceProd: any, qty: number) => {
@@ -242,12 +223,11 @@ export const useSmartReplenishState = ({
             const destSiteId = distHubSelectedDestSite;
             const sourceSiteId = sourceProd.siteId || sourceProd.site_id;
 
-            const unitDef = getSellUnit(sourceProd.unit || '');
-            const sizeNum = parseFloat(sourceProd.size || '0');
-            const isWeightVol = (unitDef.category === 'weight' || unitDef.category === 'volume') && sizeNum > 0;
-
             const finalExpectedQty = qty;
-            const requestedMeasureQty = isWeightVol ? qty * sizeNum : undefined;
+            const unitConfig = getTransferQuantityConfig(sourceProd);
+            const requestedMeasureQty = unitConfig.unit.category === 'weight' || unitConfig.unit.category === 'volume'
+                ? toTransferMeasureQuantity(qty, sourceProd)
+                : undefined;
 
             // Search for existing draft manifest for this source/destination pair
             const existing = dbDraftJobs.find(j => j.sourceSiteId === sourceSiteId && j.destSiteId === destSiteId);
@@ -259,14 +239,23 @@ export const useSmartReplenishState = ({
 
                 if (existingItemIdx > -1) {
                     lineItems[existingItemIdx].expectedQty = finalExpectedQty;
-                    if (isWeightVol) {
+                    if (requestedMeasureQty !== undefined) {
                         (lineItems[existingItemIdx] as any).requestedMeasureQty = requestedMeasureQty;
                     }
+                    Object.assign(lineItems[existingItemIdx], {
+                        unit: sourceProd.unit || 'UNIT', size: sourceProd.size || '', packQuantity: sourceProd.packQuantity,
+                        packageType: sourceProd.packageType, customAttributes: sourceProd.customAttributes
+                    });
                 } else {
                     lineItems.push({
                         productId: sourceProd.id,
                         sku: sourceProd.sku,
                         name: sourceProd.name,
+                        unit: sourceProd.unit || 'UNIT',
+                        size: sourceProd.size || '',
+                        packQuantity: sourceProd.packQuantity,
+                        packageType: sourceProd.packageType,
+                        customAttributes: sourceProd.customAttributes,
                         expectedQty: finalExpectedQty,
                         requestedMeasureQty,
                         pickedQty: 0,
@@ -371,13 +360,11 @@ export const useSmartReplenishState = ({
             if (item) {
                 const product = allProducts.find(p => p.id === item.productId || p.sku === item.sku);
                 const resolvedSize = product?.size || allProducts.find(p => p.sku === item.sku && p.size && parseFloat(p.size) > 0)?.size;
-                const unitDef = getSellUnit(item.unit || product?.unit || '');
-                const sizeNum = parseFloat(resolvedSize || '0');
-                const isWeightVol = (unitDef.category === 'weight' || unitDef.category === 'volume') && sizeNum > 0;
-
                 item.expectedQty = newQty;
-                if (isWeightVol) {
-                    (item as any).requestedMeasureQty = newQty * sizeNum;
+                const quantityProduct = { ...product, ...item, size: resolvedSize };
+                const unitConfig = getTransferQuantityConfig(quantityProduct);
+                if (unitConfig.unit.category === 'weight' || unitConfig.unit.category === 'volume') {
+                    item.requestedMeasureQty = toTransferMeasureQuantity(newQty, quantityProduct);
                 }
             }
 
@@ -431,6 +418,11 @@ export const useSmartReplenishState = ({
                         sku: item.sku,
                         name: item.name,
                         expectedQty: item.expectedQty,
+                        unit: item.unit,
+                        size: item.size,
+                        packQuantity: item.packQuantity,
+                        packageType: item.packageType,
+                        customAttributes: item.customAttributes,
                         pickedQty: 0,
                         status: 'Pending',
                         requestedMeasureQty: (item as any).requestedMeasureQty

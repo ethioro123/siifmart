@@ -3,11 +3,11 @@ import { createPortal } from 'react-dom';
 import { Truck, X, ArrowRight } from 'lucide-react';
 import { Product, Site, User } from '../../../types';
 import { formatJobId } from '../../../utils/jobIdFormatter';
-import { getSellUnit } from '../../../utils/units';
 import { useData } from '../../../contexts/DataContext';
 import { logisticsZonesService, productsService } from '../../../services/supabase.service';
 import { useLanguage } from '../../../contexts/LanguageContext';
 import { logger } from '../../../utils/logger';
+import { toTransferStockQuantity } from './transferQuantity';
 import { TransferRequestReview } from './components/TransferRequestReview';
 import { TransferItemsSection } from './components/TransferItemsSection';
 
@@ -97,6 +97,16 @@ export const TransferRequestModal: React.FC<TransferRequestModalProps> = ({
         return products.length > 0 ? products : allProducts;
     }, [fetchedSourceProducts, actualSourceSite, activeSite?.id, products, allProducts]);
 
+    const resolveSourceProduct = (productId: string, sourceSiteId = actualSourceSite) => {
+        const selected = availableProducts.find(p => p.id === productId)
+            || products.find(p => p.id === productId)
+            || allProducts.find(p => p.id === productId);
+        return availableProducts.find(p => p.sku === selected?.sku && (p.siteId || (p as any).site_id) === sourceSiteId)
+            || products.find(p => p.sku === selected?.sku && (p.siteId || (p as any).site_id) === sourceSiteId)
+            || allProducts.find(p => p.sku === selected?.sku && (p.siteId || (p as any).site_id) === sourceSiteId)
+            || selected;
+    };
+
     useEffect(() => {
         if (isOpen) {
             setTransferSourceSite(isRestricted ? (user?.siteId || '') : (activeSite?.id || ''));
@@ -143,6 +153,10 @@ export const TransferRequestModal: React.FC<TransferRequestModalProps> = ({
             addNotification('alert', 'Please select source and destination sites');
             return;
         }
+        if (transferItems.length === 0 || transferItems.some(item => item.quantity <= 0)) {
+            addNotification('alert', 'Add at least one product and enter a quantity greater than zero.');
+            return;
+        }
         if (actualSourceSite === transferDestSite) {
             addNotification('alert', 'Source and destination cannot be the same');
             return;
@@ -150,6 +164,18 @@ export const TransferRequestModal: React.FC<TransferRequestModalProps> = ({
 
         const sourceSiteObj = sites.find(s => s.id === actualSourceSite);
         const destSiteObj = sites.find(s => s.id === transferDestSite);
+
+        const overAllocated = transferItems.find(item => {
+            const product = resolveSourceProduct(item.productId, actualSourceSite);
+            if (!product) return false;
+            const stockQty = toTransferStockQuantity(item.quantity, product, item.isMeasure);
+            const sourceStock = product.stock || 0;
+            return stockQty > sourceStock + 1e-9;
+        });
+        if (overAllocated) {
+            addNotification('alert', 'A requested quantity exceeds the available source stock.');
+            return;
+        }
 
         // Sovereign Cross-Border Protection
         if (sourceSiteObj && destSiteObj && (sourceSiteObj.country || 'ET').toUpperCase() !== (destSiteObj.country || 'ET').toUpperCase()) {
@@ -175,19 +201,18 @@ export const TransferRequestModal: React.FC<TransferRequestModalProps> = ({
             const actualSourceSite = transferSourceSite || activeSite?.id;
 
             const lineItems = transferItems.map(item => {
-                const p = availableProducts.find(prod => prod.id === item.productId)
-                    || products.find(prod => prod.id === item.productId)
-                    || allProducts.find(prod => prod.id === item.productId);
+                const p = resolveSourceProduct(item.productId, actualSourceSite);
                 const baseExpectedQty = item.quantity;
-                const sizeNum = p?.size ? parseFloat(p.size as string) : 0;
-                
-                const expectedQty = (item.isMeasure && sizeNum > 0) ? baseExpectedQty / sizeNum : baseExpectedQty;
+                const expectedQty = toTransferStockQuantity(baseExpectedQty, p, item.isMeasure);
                 
                 return {
                     sku: p?.sku || '',
                     name: p?.name || '',
                     unit: p?.unit || 'pcs',
                     size: p?.size || '0',
+                    packQuantity: p?.packQuantity,
+                    packageType: p?.packageType,
+                    customAttributes: p?.customAttributes,
                     price: p?.price ?? 0,
                     retailPrice: p?.price ?? 0,
                     costPrice: (p as any)?.costPrice ?? (p as any)?.cost ?? 0,
@@ -295,7 +320,6 @@ export const TransferRequestModal: React.FC<TransferRequestModalProps> = ({
                                 availableProducts={availableProducts}
                                 products={products}
                                 getZoneName={getZoneName}
-                                getSellUnit={getSellUnit}
                             />
                         ) : (
                             <>

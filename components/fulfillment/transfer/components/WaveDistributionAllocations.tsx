@@ -2,7 +2,7 @@ import React from 'react';
 import { AlertOctagon, ArrowRight, AlertTriangle, Plus, X } from 'lucide-react';
 import { Product, Site, User } from '../../../../types';
 import { ProductSelector } from '../ProductSelector';
-import { getSellUnit } from '../../../../utils/units';
+import { formatTransferStock, getTransferQuantityConfig, normalizeTransferEntry } from '../transferQuantity';
 
 interface WaveDistributionAllocationsProps {
     isSearchingProduct: boolean;
@@ -102,17 +102,13 @@ export const WaveDistributionAllocations: React.FC<WaveDistributionAllocationsPr
                                             || allProducts.find(p => p.sku === prod?.sku && (p.siteId === actualSourceSite || (p as any).site_id === actualSourceSite))
                                             || prod;
                                         const rawStock = sourceStockItem?.stock || 0;
-                                        const unitDef = getSellUnit(sourceStockItem?.unit || prod?.unit || '');
-                                        const sizeNum = parseFloat(sourceStockItem?.size || prod?.size || '0');
-                                        const isWeightVol = unitDef.category === 'weight' || unitDef.category === 'volume';
-                                        const displayStock = isWeightVol && sizeNum > 0 ? rawStock * sizeNum : rawStock;
+                                        const unitProduct = sourceStockItem || prod;
                                         const totalAllocated = wp.allocations.reduce((acc, curr) => acc + curr.quantity, 0);
-                                        const displayRemaining = displayStock - (isWeightVol && sizeNum > 0 ? totalAllocated * sizeNum : totalAllocated);
-                                        const unitLabel = unitDef.code !== 'UNIT' ? ` ${unitDef.shortLabel}` : '';
+                                        const displayRemaining = rawStock - totalAllocated;
                                         const isWarning = displayRemaining < 0;
                                         return (
                                             <span className={`text-[11px] font-mono font-semibold px-2 py-0.5 rounded-lg flex items-center gap-1 tabular-nums ${isWarning ? 'bg-red-500/10 text-red-500 border border-red-500/20' : 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20'}`}>
-                                                Stock: {displayStock.toLocaleString()}{unitLabel} <ArrowRight size={10} /> Rem: {displayRemaining.toLocaleString()}{unitLabel}
+                                                Stock: {formatTransferStock(rawStock, unitProduct)} <ArrowRight size={10} /> Rem: {formatTransferStock(displayRemaining, unitProduct)}
                                             </span>
                                         );
                                     })()}
@@ -138,23 +134,29 @@ export const WaveDistributionAllocations: React.FC<WaveDistributionAllocationsPr
                                 ) : (
                                     wp.allocations.map(alloc => {
                                         const site = sites.find(s => s.id === alloc.storeId);
+                                        const sourceStockItem = availableProducts.find(p => p.sku === prod?.sku && (p.siteId === actualSourceSite || (p as any).site_id === actualSourceSite))
+                                            || products.find(p => p.sku === prod?.sku && (p.siteId === actualSourceSite || (p as any).site_id === actualSourceSite))
+                                            || allProducts.find(p => p.sku === prod?.sku && (p.siteId === actualSourceSite || (p as any).site_id === actualSourceSite))
+                                            || prod;
+                                        const unitConfig = getTransferQuantityConfig(sourceStockItem);
                                         return (
                                             <div key={alloc.storeId} className="flex items-center justify-between text-xs bg-[var(--theme-bg-card)] p-2.5 rounded-xl border border-[var(--theme-border)]">
-                                                <span className="text-[var(--theme-text-secondary)] truncate max-w-[90px] font-medium">{site?.name}</span>
+                                                <span className="text-[var(--theme-text-secondary)] truncate max-w-[110px] font-medium">{site?.name} ({unitConfig.quantityLabel})</span>
                                                 <input
                                                     type="number"
                                                     min="0"
+                                                    step={unitConfig.step}
                                                     className="w-16 min-h-[36px] bg-transparent border-b border-[var(--theme-border)] text-right font-mono font-bold text-sm text-[var(--theme-text-primary)] focus:outline-none focus:border-primary touch-manipulation tabular-nums"
                                                     value={alloc.quantity}
                                                     onChange={(e) => {
                                                         const newWp = [...waveProducts];
                                                         const targetIndex = newWp[idx].allocations.findIndex(a => a.storeId === alloc.storeId);
                                                         if (targetIndex !== -1) {
-                                                            newWp[idx].allocations[targetIndex].quantity = parseInt(e.target.value) || 0;
+                                                            newWp[idx].allocations[targetIndex].quantity = normalizeTransferEntry(e.target.value, sourceStockItem);
                                                             setWaveProducts(newWp);
                                                         }
                                                     }}
-                                                    aria-label={`Quantity for ${site?.name}`}
+                                                    aria-label={`Quantity in ${unitConfig.quantityLabel} for ${site?.name}`}
                                                 />
                                             </div>
                                         );

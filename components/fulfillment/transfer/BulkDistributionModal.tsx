@@ -7,6 +7,7 @@ import { logisticsZonesService } from '../../../services/supabase.service';
 import { logger } from '../../../utils/logger';
 import { SingleProductAllocation } from './components/SingleProductAllocation';
 import { WaveDistributionAllocations } from './components/WaveDistributionAllocations';
+import { buildTransferLineItem } from './transferQuantity';
 
 interface BulkDistributionModalProps {
     isOpen: boolean;
@@ -116,12 +117,48 @@ export const BulkDistributionModal: React.FC<BulkDistributionModalProps> = ({
             }
         }
 
+        const selectedProduct = bulkDistributionMode === 'single'
+            ? allProducts.find(p => p.id === bulkDistributionProductId) || products.find(p => p.id === bulkDistributionProductId)
+            : undefined;
+        const sourceProductFor = (productId: string) => {
+            const selected = allProducts.find(p => p.id === productId) || products.find(p => p.id === productId);
+            return allProducts.find(p => p.sku === selected?.sku && (p.siteId || p.site_id) === actualSourceSite)
+                || products.find(p => p.sku === selected?.sku && (p.siteId || p.site_id) === actualSourceSite)
+                || selected;
+        };
+        if (bulkDistributionMode === 'single') {
+            const sourceProduct = sourceProductFor(bulkDistributionProductId) || selectedProduct;
+            const total = bulkDistributionAllocations.reduce((sum, allocation) => sum + allocation.quantity, 0);
+            if (!sourceProduct || total <= 0 || total > (sourceProduct.stock || 0) + 1e-9) {
+                addNotification('alert', 'Enter a distribution quantity within the available source stock.');
+                return;
+            }
+        } else {
+            if (!waveProducts.some(waveProduct => waveProduct.allocations.some(allocation => allocation.quantity > 0))) {
+                addNotification('alert', 'Enter at least one product quantity to create a distribution wave.');
+                return;
+            }
+            const overAllocated = waveProducts.some(waveProduct => {
+                const sourceProduct = sourceProductFor(waveProduct.productId);
+                const total = waveProduct.allocations.reduce((sum, allocation) => sum + allocation.quantity, 0);
+                return !sourceProduct || total > (sourceProduct.stock || 0) + 1e-9;
+            });
+            if (overAllocated) {
+                addNotification('alert', 'A wave allocation exceeds the available source stock for a product.');
+                return;
+            }
+        }
+
         try {
             let createdJobs = 0;
             if (bulkDistributionMode === 'single') {
-                const product = allProducts.find(p => p.id === bulkDistributionProductId) || products.find(p => p.id === bulkDistributionProductId);
+                const selectedProduct = allProducts.find(p => p.id === bulkDistributionProductId) || products.find(p => p.id === bulkDistributionProductId);
+                const product = (allProducts.find(p => p.sku === selectedProduct?.sku && (p.siteId || p.site_id) === actualSourceSite)
+                    || products.find(p => p.sku === selectedProduct?.sku && (p.siteId || p.site_id) === actualSourceSite)
+                    || selectedProduct);
                 for (const allocation of bulkDistributionAllocations) {
                     if (allocation.quantity > 0) {
+                        const transferLineItem = buildTransferLineItem(product, allocation.quantity);
                         const transferJob: any = {
                             id: `DIST-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`,
                             siteId: actualSourceSite,
@@ -136,23 +173,7 @@ export const BulkDistributionModal: React.FC<BulkDistributionModalProps> = ({
                             location: 'Bulk Distribution',
                             assignedTo: '',
                             items: 1,
-                            lineItems: [{
-                                productId: bulkDistributionProductId,
-                                sku: product?.sku || '',
-                                name: product?.name || '',
-                                image: product?.image || '',
-                                price: product?.price ?? 0,
-                                retailPrice: product?.price ?? 0,
-                                costPrice: (product as any)?.costPrice ?? (product as any)?.cost ?? 0,
-                                category: product?.category || 'General',
-                                brand: product?.brand || '',
-                                unit: product?.unit || 'pcs',
-                                size: product?.size || '',
-                                barcode: product?.barcode || '',
-                                expectedQty: allocation.quantity,
-                                pickedQty: 0,
-                                status: 'Pending'
-                            }],
+                            lineItems: [transferLineItem],
                             orderRef: `${Date.now()}`,
                             transferStatus: 'Approved',
                             requestedBy: user?.name || 'System',
@@ -171,12 +192,7 @@ export const BulkDistributionModal: React.FC<BulkDistributionModalProps> = ({
                             orderRef: createdBulkJob.id,
                             items: 1,
                             lineItems: [{
-                                productId: bulkDistributionProductId,
-                                sku: product?.sku || '',
-                                name: product?.name || '',
-                                expectedQty: allocation.quantity,
-                                pickedQty: 0,
-                                status: 'Pending'
+                                ...transferLineItem
                             }],
                             jobNumber: createdBulkJob.job_number
                         };
@@ -217,24 +233,11 @@ export const BulkDistributionModal: React.FC<BulkDistributionModalProps> = ({
                         country_code: siteCountry,
                         items: items.length,
                         lineItems: items.map(item => {
-                            const product = allProducts.find(p => p.id === item.productId) || products.find(p => p.id === item.productId);
-                            return {
-                                productId: item.productId,
-                                sku: product?.sku || '',
-                                name: product?.name || '',
-                                image: product?.image || '',
-                                price: product?.price ?? 0,
-                                retailPrice: product?.price ?? 0,
-                                costPrice: (product as any)?.costPrice ?? (product as any)?.cost ?? 0,
-                                category: product?.category || 'General',
-                                brand: product?.brand || '',
-                                unit: product?.unit || 'pcs',
-                                size: product?.size || '',
-                                barcode: product?.barcode || '',
-                                expectedQty: item.quantity,
-                                pickedQty: 0,
-                                status: 'Pending'
-                            };
+                            const selected = allProducts.find(p => p.id === item.productId) || products.find(p => p.id === item.productId);
+                            const product = allProducts.find(p => p.sku === selected?.sku && (p.siteId || p.site_id) === actualSourceSite)
+                                || products.find(p => p.sku === selected?.sku && (p.siteId || p.site_id) === actualSourceSite)
+                                || selected;
+                            return buildTransferLineItem(product, item.quantity);
                         }),
                         orderRef: `${Date.now()}`,
                         transferStatus: 'Approved',
@@ -256,14 +259,15 @@ export const BulkDistributionModal: React.FC<BulkDistributionModalProps> = ({
                         orderRef: createdWaveJob.id,
                         items: items.length,
                         lineItems: items.map(item => {
-                            const prod = allProducts.find(p => p.id === item.productId) || products.find(p => p.id === item.productId);
+                            const selected = allProducts.find(p => p.id === item.productId) || products.find(p => p.id === item.productId);
+                            const prod = allProducts.find(p => p.sku === selected?.sku && (p.siteId || p.site_id) === actualSourceSite)
+                                || products.find(p => p.sku === selected?.sku && (p.siteId || p.site_id) === actualSourceSite)
+                                || selected;
                             return {
-                                productId: item.productId,
+                                ...buildTransferLineItem(prod, item.quantity),
+                                productId: prod?.id || item.productId,
                                 sku: prod?.sku || '',
                                 name: prod?.name || '',
-                                expectedQty: item.quantity,
-                                pickedQty: 0,
-                                status: 'Pending'
                             };
                         }),
                         jobNumber: createdWaveJob.jobNumber || createdWaveJob.job_number

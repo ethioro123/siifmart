@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { ArrowDown, Box, ShieldCheck } from 'lucide-react';
 import { WMSJob, Site, ReceivingItem, Product } from '../../../types';
 import { formatJobId } from '../../../utils/jobIdFormatter';
-import { getSellUnit } from '../../../utils/units';
+import { getTransferQuantityConfig, toTransferStockQuantity } from './transferQuantity';
 import { supabase } from '../../../lib/supabase';
 import { useLanguage } from '../../../contexts/LanguageContext';
 import { logger } from '../../../utils/logger';
@@ -76,7 +76,6 @@ export const TransferReceiving: React.FC<TransferReceivingProps> = ({
                     const itemName = item.productName || (item as any).name || '';
                     const itemUnit = (item as any).unit || 'pcs';
                     const itemSize = (item as any).size || '';
-
                     // Find source product to get product details
                     let sourceProduct: Product | null | undefined = allProducts.find(p => p.id === item.productId || (item.barcode && p.barcode === item.barcode))
                         || products.find(p => p.id === item.productId || (item.barcode && p.barcode === item.barcode));
@@ -89,6 +88,21 @@ export const TransferReceiving: React.FC<TransferReceivingProps> = ({
                             logger.warn('TransferReceiving', `Source product lookup notice for SKU ${itemSku}: ${e?.message || String(e)}`);
                         }
                     }
+
+                    const transferProduct = {
+                        ...sourceProduct,
+                        unit: item.unit || sourceProduct?.unit,
+                        size: item.size || sourceProduct?.size,
+                        packQuantity: item.packQuantity || sourceProduct?.packQuantity,
+                        packageType: item.packageType || sourceProduct?.packageType,
+                        customAttributes: item.customAttributes || sourceProduct?.customAttributes
+                    };
+                    const unitConfig = getTransferQuantityConfig(transferProduct);
+                    const receivedStockQty = toTransferStockQuantity(
+                        item.receivedQty || 0,
+                        transferProduct,
+                        item.requestedMeasureQty !== undefined || unitConfig.isLooseMeasure
+                    );
 
                     // Look up existing destination product record
                     let destProduct: Product | null | undefined = sourceProduct ? (
@@ -126,6 +140,9 @@ export const TransferReceiving: React.FC<TransferReceivingProps> = ({
                                 category: effectiveCategory,
                                 brand: sourceProduct?.brand || (item as any).brand || '',
                                 size: sourceProduct?.size || itemSize,
+                                packQuantity: sourceProduct?.packQuantity || item.packQuantity,
+                                packageType: sourceProduct?.packageType || item.packageType,
+                                customAttributes: sourceProduct?.customAttributes || item.customAttributes,
                                 productId: sourceProduct?.productId || sourceProduct?.id || item.productId,
                                 countryCode: (sourceProduct as any)?.countryCode || (sourceProduct as any)?.country_code,
                                 country_code: (sourceProduct as any)?.countryCode || (sourceProduct as any)?.country_code,
@@ -144,7 +161,7 @@ export const TransferReceiving: React.FC<TransferReceivingProps> = ({
                             productName: destProduct?.name || sourceProduct?.name || item.productName || 'Unknown',
                             productSku: destProduct?.sku || sourceProduct?.sku || 'N/A',
                             siteId: destSiteId || activeSite?.id || '',
-                            quantity: item.receivedQty,
+                            quantity: receivedStockQty,
                             type: 'IN',
                             reason: `Transfer Receipt ${activeTransferJob.orderRef || activeTransferJob.jobNumber || activeTransferJob.id}`,
                             canApprove: true
@@ -170,8 +187,25 @@ export const TransferReceiving: React.FC<TransferReceivingProps> = ({
                         brand: matchingLineItem?.brand || '',
                         unit: matchingLineItem?.unit || i.unit || 'pcs',
                         size: matchingLineItem?.size || i.size || '',
+                        packQuantity: matchingLineItem?.packQuantity || i.packQuantity,
+                        packageType: matchingLineItem?.packageType || i.packageType,
+                        customAttributes: matchingLineItem?.customAttributes || i.customAttributes,
                         barcode: matchingLineItem?.barcode || i.barcode || '',
-                        expectedQty: i.receivedQty || 0,
+                        expectedQty: toTransferStockQuantity(
+                            i.receivedQty || 0,
+                            {
+                                unit: matchingLineItem?.unit || i.unit,
+                                size: matchingLineItem?.size || i.size,
+                                packQuantity: matchingLineItem?.packQuantity || i.packQuantity,
+                                packageType: matchingLineItem?.packageType || i.packageType,
+                                customAttributes: matchingLineItem?.customAttributes || i.customAttributes
+                            },
+                            i.requestedMeasureQty !== undefined || getTransferQuantityConfig({
+                                unit: matchingLineItem?.unit || i.unit,
+                                size: matchingLineItem?.size || i.size,
+                                customAttributes: matchingLineItem?.customAttributes || i.customAttributes
+                            }).isLooseMeasure
+                        ),
                         pickedQty: 0,
                         status: 'Pending' as const
                     };
@@ -202,7 +236,7 @@ export const TransferReceiving: React.FC<TransferReceivingProps> = ({
                     ...li,
                     receivedQty: recItem ? (recItem.receivedQty ?? 0) : (li.receivedQty ?? li.quantity ?? 0),
                     condition: recItem?.condition || 'Good',
-                    status: recItem && (recItem.receivedQty || 0) < (li.expectedQty || li.quantity || 0) ? 'Short' : 'Received'
+                    status: recItem && (recItem.receivedQty || 0) < (li.requestedMeasureQty ?? li.expectedQty ?? li.quantity ?? 0) ? 'Short' : 'Received'
                 };
             });
 

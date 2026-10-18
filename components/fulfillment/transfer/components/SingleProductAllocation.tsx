@@ -2,7 +2,7 @@ import React from 'react';
 import { Search, ArrowRight, AlertTriangle } from 'lucide-react';
 import { Product, Site, User } from '../../../../types';
 import { ProductSelector } from '../ProductSelector';
-import { getSellUnit } from '../../../../utils/units';
+import { formatTransferStock, getTransferQuantityConfig, normalizeTransferEntry } from '../transferQuantity';
 
 interface SingleProductAllocationProps {
     isSearchingProduct: boolean;
@@ -100,21 +100,18 @@ export const SingleProductAllocation: React.FC<SingleProductAllocationProps> = (
                                     || allProducts.find(p => p.sku === prod?.sku && (p.siteId === actualSourceSite || (p as any).site_id === actualSourceSite))
                                     || prod;
                                 const rawStock = sourceStockItem?.stock || 0;
-                                const unitDef = getSellUnit(sourceStockItem?.unit || prod?.unit || '');
-                                const sizeNum = parseFloat(sourceStockItem?.size || prod?.size || '0');
-                                const isWeightVol = unitDef.category === 'weight' || unitDef.category === 'volume';
-                                const displayStock = isWeightVol && sizeNum > 0 ? rawStock * sizeNum : rawStock;
+                                const unitProduct = sourceStockItem || prod;
+                                const unitConfig = getTransferQuantityConfig(unitProduct);
                                 const totalAllocated = bulkDistributionAllocations.reduce((acc, curr) => acc + curr.quantity, 0);
-                                const displayRemaining = displayStock - (isWeightVol && sizeNum > 0 ? totalAllocated * sizeNum : totalAllocated);
-                                const unitLabel = unitDef.code !== 'UNIT' ? ` ${unitDef.shortLabel}` : '';
+                                const displayRemaining = rawStock - totalAllocated;
                                 const isWarning = displayRemaining < 0;
                                 return (
                                     <span className={`text-[11px] font-mono font-semibold px-2 py-0.5 rounded-lg flex items-center gap-1 tabular-nums ${isWarning ? 'bg-red-500/10 text-red-500 border border-red-500/20' : 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20'}`}>
-                                        Stock: {displayStock.toLocaleString()}{unitLabel} <ArrowRight size={10} /> Rem: {displayRemaining.toLocaleString()}{unitLabel}
+                                        Stock: {formatTransferStock(rawStock, unitProduct)} <ArrowRight size={10} /> Rem: {formatTransferStock(displayRemaining, unitProduct)}
                                     </span>
                                 );
                             })()}
-                            <span className="text-[var(--theme-text-secondary)] font-mono text-[11px]">Total: {bulkDistributionAllocations.reduce((acc, curr) => acc + curr.quantity, 0)} Units</span>
+                            <span className="text-[var(--theme-text-secondary)] font-mono text-[11px]">Total: {bulkDistributionAllocations.reduce((acc, curr) => acc + curr.quantity, 0)} {(() => { const p = availableProducts.find(item => item.id === bulkDistributionProductId) || products.find(item => item.id === bulkDistributionProductId) || allProducts.find(item => item.id === bulkDistributionProductId); return getTransferQuantityConfig(p).quantityLabel; })()}</span>
                         </div>
                     </div>
                     <div className="divide-y divide-[var(--theme-border)] max-h-[300px] overflow-y-auto custom-scrollbar">
@@ -126,21 +123,30 @@ export const SingleProductAllocation: React.FC<SingleProductAllocationProps> = (
                         ) : (
                             bulkDistributionAllocations.map(alloc => {
                                 const site = sites.find(s => s.id === alloc.storeId);
+                                const selectedProduct = availableProducts.find(p => p.id === bulkDistributionProductId)
+                                    || products.find(p => p.id === bulkDistributionProductId)
+                                    || allProducts.find(p => p.id === bulkDistributionProductId);
+                                const sourceProduct = availableProducts.find(p => p.sku === selectedProduct?.sku && (p.siteId === actualSourceSite || (p as any).site_id === actualSourceSite))
+                                    || products.find(p => p.sku === selectedProduct?.sku && (p.siteId === actualSourceSite || (p as any).site_id === actualSourceSite))
+                                    || allProducts.find(p => p.sku === selectedProduct?.sku && (p.siteId === actualSourceSite || (p as any).site_id === actualSourceSite))
+                                    || selectedProduct;
+                                const unitConfig = getTransferQuantityConfig(sourceProduct);
                                 return (
                                     <div key={alloc.storeId} className="p-3.5 flex items-center justify-between hover:bg-[var(--theme-bg-card)] transition-colors">
-                                        <span className="text-sm font-medium text-[var(--theme-text-primary)]">{site?.name}</span>
+                                        <span className="text-sm font-medium text-[var(--theme-text-primary)]">{site?.name} <span className="text-[11px] text-[var(--theme-text-secondary)]">({unitConfig.quantityLabel})</span></span>
                                         <input
                                             type="number"
                                             min="0"
+                                            step={unitConfig.step}
                                             value={alloc.quantity}
                                             onChange={(e) => {
                                                 const newAllocs = [...bulkDistributionAllocations];
                                                 const target = newAllocs.find(a => a.storeId === alloc.storeId);
-                                                if (target) target.quantity = parseInt(e.target.value) || 0;
+                                                if (target) target.quantity = normalizeTransferEntry(e.target.value, sourceProduct);
                                                 setBulkDistributionAllocations(newAllocs);
                                             }}
                                             className="w-24 min-h-[44px] bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl px-3 py-1.5 text-right font-mono font-bold text-sm text-[var(--theme-text-primary)] focus:border-primary focus:outline-none touch-manipulation tabular-nums"
-                                            aria-label={`Quantity for ${site?.name}`}
+                                            aria-label={`Quantity in ${unitConfig.quantityLabel} for ${site?.name}`}
                                         />
                                     </div>
                                 );
