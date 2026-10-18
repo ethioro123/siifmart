@@ -100,10 +100,10 @@ export const Step1PackItems: React.FC<Step1PackItemsProps> = ({
                                 type="button"
                                 onClick={onOpenScanner}
                                 title="Open Camera Scanner"
-                                className="min-h-[44px] px-3 bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card)] border border-[var(--theme-border)] hover:border-[var(--theme-accent)]/30 rounded-xl text-xs font-semibold uppercase tracking-wider text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] flex items-center gap-1.5 shrink-0 transition-colors touch-manipulation cursor-pointer"
+                                className="min-h-[44px] px-3 bg-[var(--theme-accent)] hover:opacity-90 border border-[var(--theme-accent)] rounded-xl text-[11px] sm:text-xs font-bold uppercase tracking-wide text-white flex items-center justify-center gap-1.5 shrink-0 transition-colors touch-manipulation cursor-pointer"
                             >
-                                <Scan size={15} />
-                                <span className="hidden md:inline">Camera Scan</span>
+                                <Scan size={16} />
+                                <span>Camera Scan</span>
                             </button>
                         )}
                     </div>
