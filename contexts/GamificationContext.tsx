@@ -7,7 +7,7 @@ import {
     DEFAULT_POS_BONUS_TIERS,
     DEFAULT_POS_ROLE_DISTRIBUTION
 } from '../types';
-import { workerPointsService, pointsTransactionsService } from '../services/supabase.service';
+import { workerPointsService } from '../services/supabase.service';
 import { useData } from './DataContext';
 import { calculateStoreBonus } from '../components/StoreBonusDisplay';
 import { calculateBonus, getLevelInfo } from '../components/settings/gamification/workerPointsHelpers';
@@ -187,42 +187,8 @@ export const GamificationProvider = ({ children }: { children: ReactNode }) => {
                 };
             }
 
-            setWorkerPoints(prev => {
-                const index = prev.findIndex(wp => wp.employeeId === employeeId);
-                if (index >= 0) {
-                    const newArr = [...prev];
-                    newArr[index] = optimisticUpdate;
-                    return newArr;
-                }
-                return [...prev, optimisticUpdate];
-            });
-
-            // Persist to Supabase
-            if (currentPoints) {
-                await workerPointsService.update(currentPoints.id, {
-                    totalPoints: optimisticUpdate.totalPoints,
-                    todayPoints: optimisticUpdate.todayPoints,
-                    weeklyPoints: optimisticUpdate.weeklyPoints,
-                    monthlyPoints: optimisticUpdate.monthlyPoints,
-                    totalJobsCompleted: optimisticUpdate.totalJobsCompleted,
-                    totalItemsPicked: optimisticUpdate.totalItemsPicked,
-                    currentStreak: optimisticUpdate.currentStreak,
-                    longestStreak: optimisticUpdate.longestStreak,
-                    level: optimisticUpdate.level,
-                    levelTitle: optimisticUpdate.levelTitle,
-                    currentBonusTier: optimisticUpdate.currentBonusTier,
-                    estimatedBonus: optimisticUpdate.estimatedBonus,
-                    bonusPeriodPoints: optimisticUpdate.bonusPeriodPoints,
-                    achievements: optimisticUpdate.achievements,
-                    lastJobCompletedAt: optimisticUpdate.lastJobCompletedAt,
-                    lastUpdated: timestamp
-                });
-            } else {
-                await workerPointsService.create(optimisticUpdate);
-            }
-
-            // Audit transaction record
-            await pointsTransactionsService.create({
+            // Save totals and audit together; failed awards never enter the local leaderboard.
+            const persisted = await workerPointsService.saveAward(optimisticUpdate, {
                 id: crypto.randomUUID(),
                 employeeId,
                 points: totalPointsToAdd,
@@ -230,6 +196,11 @@ export const GamificationProvider = ({ children }: { children: ReactNode }) => {
                 description,
                 jobId,
                 timestamp
+            });
+            setWorkerPoints(prev => {
+                const index = prev.findIndex(wp => wp.employeeId === employeeId);
+                if (index >= 0) return prev.map((wp, i) => i === index ? persisted : wp);
+                return [...prev, persisted];
             });
 
             // Trigger notification for streak milestone or achievement

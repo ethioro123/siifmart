@@ -2,7 +2,73 @@ import { supabase } from '../lib/supabase';
 import type { WorkerPoints, PointsTransaction, StorePoints } from '../types';
 import { logger } from '../utils/logger';
 
+const toWorkerPointsRow = (points: WorkerPoints) => ({
+    site_id: points.siteId,
+    employee_id: points.employeeId,
+    employee_name: points.employeeName,
+    employee_avatar: points.employeeAvatar,
+    total_points: points.totalPoints,
+    weekly_points: points.weeklyPoints,
+    monthly_points: points.monthlyPoints,
+    today_points: points.todayPoints,
+    total_jobs_completed: points.totalJobsCompleted,
+    total_items_picked: points.totalItemsPicked,
+    average_accuracy: points.averageAccuracy,
+    average_time_per_job: points.averageTimePerJob,
+    current_streak: points.currentStreak,
+    longest_streak: points.longestStreak,
+    last_job_completed_at: points.lastJobCompletedAt,
+    last_updated: points.lastUpdated,
+    achievements: points.achievements || [],
+    rank: points.rank,
+    level: points.level,
+    level_title: points.levelTitle,
+    current_bonus_tier: points.currentBonusTier,
+    estimated_bonus: points.estimatedBonus,
+    bonus_period_points: points.bonusPeriodPoints
+});
+
+const mapWorkerPointsRow = (wp: ReturnType<typeof toWorkerPointsRow> & { id: string }): WorkerPoints => ({
+    id: wp.id,
+    siteId: wp.site_id,
+    employeeId: wp.employee_id,
+    employeeName: wp.employee_name,
+    employeeAvatar: wp.employee_avatar,
+    totalPoints: wp.total_points,
+    weeklyPoints: wp.weekly_points,
+    monthlyPoints: wp.monthly_points,
+    todayPoints: wp.today_points,
+    totalJobsCompleted: wp.total_jobs_completed,
+    totalItemsPicked: wp.total_items_picked,
+    averageAccuracy: wp.average_accuracy,
+    averageTimePerJob: wp.average_time_per_job,
+    currentStreak: wp.current_streak,
+    longestStreak: wp.longest_streak,
+    lastJobCompletedAt: wp.last_job_completed_at,
+    lastUpdated: wp.last_updated,
+    achievements: wp.achievements || [],
+    rank: wp.rank || 0,
+    level: wp.level || 1,
+    levelTitle: wp.level_title || 'Rookie',
+    currentBonusTier: wp.current_bonus_tier,
+    estimatedBonus: wp.estimated_bonus,
+    bonusPeriodPoints: wp.bonus_period_points
+});
+
 export const workerPointsService = {
+    async saveAward(points: WorkerPoints, transaction: PointsTransaction): Promise<WorkerPoints> {
+        const { data, error } = await supabase.rpc('record_worker_points_award', {
+            p_worker: toWorkerPointsRow(points),
+            p_points: transaction.points,
+            p_type: transaction.type,
+            p_description: transaction.description,
+            p_job_id: transaction.jobId || null
+        });
+        if (error) throw error;
+        if (!data?.id) throw new Error('Points award returned no persisted worker record');
+        return mapWorkerPointsRow(data);
+    },
+
     async getAll(siteId?: string) {
         let query = supabase.from('worker_points').select('*');
         if (siteId) {
@@ -15,32 +81,7 @@ export const workerPointsService = {
             return [];
         }
 
-        return data.map((wp: any) => ({
-            id: wp.id,
-            siteId: wp.site_id,
-            employeeId: wp.employee_id,
-            employeeName: wp.employee_name,
-            employeeAvatar: wp.employee_avatar,
-            totalPoints: wp.total_points,
-            weeklyPoints: wp.weekly_points,
-            monthlyPoints: wp.monthly_points,
-            todayPoints: wp.today_points,
-            totalJobsCompleted: wp.total_jobs_completed,
-            totalItemsPicked: wp.total_items_picked,
-            averageAccuracy: wp.average_accuracy,
-            averageTimePerJob: wp.average_time_per_job,
-            currentStreak: wp.current_streak,
-            longestStreak: wp.longest_streak,
-            lastJobCompletedAt: wp.last_job_completed_at,
-            lastUpdated: wp.last_updated,
-            achievements: wp.achievements || [],
-            rank: wp.rank || 0,
-            level: wp.level || 1,
-            levelTitle: wp.level_title || 'Rookie',
-            currentBonusTier: wp.current_bonus_tier,
-            estimatedBonus: wp.estimated_bonus,
-            bonusPeriodPoints: wp.bonus_period_points
-        }));
+        return data.map(mapWorkerPointsRow);
     },
 
     async getByEmployee(employeeId: string) {
@@ -53,60 +94,11 @@ export const workerPointsService = {
         if (error) throw error;
         if (!data) return null;
 
-        return {
-            id: data.id,
-            siteId: data.site_id,
-            employeeId: data.employee_id,
-            employeeName: data.employee_name,
-            employeeAvatar: data.employee_avatar,
-            totalPoints: data.total_points,
-            weeklyPoints: data.weekly_points,
-            monthlyPoints: data.monthly_points,
-            todayPoints: data.today_points,
-            totalJobsCompleted: data.total_jobs_completed,
-            totalItemsPicked: data.total_items_picked,
-            averageAccuracy: data.average_accuracy,
-            averageTimePerJob: data.average_time_per_job,
-            currentStreak: data.current_streak,
-            longestStreak: data.longest_streak,
-            lastJobCompletedAt: data.last_job_completed_at,
-            lastUpdated: data.last_updated,
-            achievements: data.achievements || [],
-            rank: data.rank || 0,
-            level: data.level || 1,
-            levelTitle: data.level_title || 'Rookie',
-            currentBonusTier: data.current_bonus_tier,
-            estimatedBonus: data.estimated_bonus,
-            bonusPeriodPoints: data.bonus_period_points
-        };
+        return mapWorkerPointsRow(data);
     },
 
     async create(points: WorkerPoints) {
-        const dbPoints = {
-            site_id: points.siteId,
-            employee_id: points.employeeId,
-            employee_name: points.employeeName,
-            employee_avatar: points.employeeAvatar,
-            total_points: points.totalPoints,
-            weekly_points: points.weeklyPoints,
-            monthly_points: points.monthlyPoints,
-            today_points: points.todayPoints,
-            total_jobs_completed: points.totalJobsCompleted,
-            total_items_picked: points.totalItemsPicked,
-            average_accuracy: points.averageAccuracy,
-            average_time_per_job: points.averageTimePerJob,
-            current_streak: points.currentStreak,
-            longest_streak: points.longestStreak,
-            last_job_completed_at: points.lastJobCompletedAt,
-            last_updated: points.lastUpdated,
-            achievements: points.achievements || [],
-            rank: points.rank,
-            level: points.level,
-            level_title: points.levelTitle,
-            current_bonus_tier: points.currentBonusTier,
-            estimated_bonus: points.estimatedBonus,
-            bonus_period_points: points.bonusPeriodPoints
-        };
+        const dbPoints = toWorkerPointsRow(points);
 
         const { data, error } = await supabase
             .from('worker_points')

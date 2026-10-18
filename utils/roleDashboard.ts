@@ -11,11 +11,13 @@ import type { UserRole } from '../types';
 export function getRoleDashboardRoute(role?: UserRole | string, siteType?: string): string {
     if (!role) return '/profile';
 
-    // 0. Clean Mobile / Android Mode: strictly route to WMS Fulfillment or POS Terminal
+    // Site hydration can lag authentication; never assume a missing site means POS.
     if (native.isCleanMobileMode()) {
-        const isWarehouse = siteType && ['Warehouse', 'Distribution Center', 'WMS', 'Fulfillment Center'].includes(siteType);
-        if (isWarehouse) return '/wms-ops';
-        return '/pos';
+        const isWarehouse = ['Warehouse', 'Distribution Center', 'WMS', 'Fulfillment Center'].includes(siteType || '');
+        const isStore = ['Store', 'Dark Store', 'Retail', 'POS'].includes(siteType || '');
+        if ((isWarehouse || !siteType) && canAccessModule(role as UserRole, 'warehouse')) return '/wms-ops';
+        if ((isStore || !siteType) && canAccessModule(role as UserRole, 'pos')) return '/pos';
+        return '/profile';
     }
 
     const isWarehouseSite = siteType && ['Warehouse', 'Distribution Center', 'WMS', 'Fulfillment Center'].includes(siteType);

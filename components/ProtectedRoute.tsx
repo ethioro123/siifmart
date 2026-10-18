@@ -42,11 +42,15 @@ export function ProtectedRoute({
 
   // 1.5. Clean Mobile / Android Mode: Strictly limit to Fulfillment for WMS and POS for stores
   if (native.isCleanMobileMode()) {
-    const allowedMobileModules = isWarehouse
+    const mobileRoute = getRoleDashboardRoute(user.role, activeSite?.type);
+    const allowedMobileModules = mobileRoute === '/wms-ops'
       ? ['warehouse', 'inventory', 'profile', 'location']
-      : ['pos', 'sales', 'customers', 'profile', 'location'];
+      : mobileRoute === '/pos'
+        ? ['pos', 'sales', 'customers', 'profile', 'location']
+        : ['profile', 'location'];
     if (module && !allowedMobileModules.includes(module)) {
-      return <Navigate to={redirectTo || (isWarehouse ? "/wms-ops" : "/pos")} replace />;
+      const fallback = redirectTo || mobileRoute;
+      return <Navigate to={fallback === location.pathname ? '/profile' : fallback} replace />;
     }
   }
 
@@ -96,7 +100,7 @@ export function ProtectedRoute({
   // 3. Check module access
   if (module && !canAccessModule(user.role, module)) {
     const dashboardRoute = getRoleDashboardRoute(user.role, activeSite?.type);
-    logger.warn('ProtectedRoute', `User ${user.name} (${user.role}) attempted to access module: ${module}`);
+    logger.warn('ProtectedRoute', `Role ${user.role} attempted to access module: ${module}`);
     const fallback = redirectTo || dashboardRoute;
     return <Navigate to={fallback === location.pathname ? "/profile" : fallback} replace />;
   }
@@ -104,7 +108,7 @@ export function ProtectedRoute({
   // 4. Check specific permission
   if (permission && !hasPermission(user.role, permission)) {
     const dashboardRoute = getRoleDashboardRoute(user.role, activeSite?.type);
-    logger.warn('ProtectedRoute', `User ${user.name} (${user.role}) lacks permission: ${permission}`);
+    logger.warn('ProtectedRoute', `Role ${user.role} lacks permission: ${permission}`);
     const fallback = redirectTo || dashboardRoute;
     return <Navigate to={fallback === location.pathname ? "/profile" : fallback} replace />;
   }

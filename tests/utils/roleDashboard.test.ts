@@ -1,5 +1,9 @@
-import { describe, it, expect, vi } from 'vitest';
+import { afterEach, describe, it, expect, vi } from 'vitest';
+import { native } from '../../utils/native';
+
 import { getRoleDashboardRoute } from '../../utils/roleDashboard';
+
+afterEach(() => vi.restoreAllMocks());
 
 describe('getRoleDashboardRoute Sovereign Navigation', () => {
   it('routes Oscar Kennedy (procurement_manager) strictly to /procurement and never /admin', () => {
@@ -30,7 +34,7 @@ describe('getRoleDashboardRoute Sovereign Navigation', () => {
   it('routes Executive Leadership to Central Operations (/admin) unless scoped to a physical site', () => {
     expect(getRoleDashboardRoute('super_admin', 'Administration')).toBe('/admin');
     expect(getRoleDashboardRoute('CEO', 'Administration')).toBe('/admin');
-    expect(getRoleDashboardRoute('regional_manager', 'Administration')).toBe('/admin');
+    expect(getRoleDashboardRoute('regional_manager', 'Administration')).toBe('/regional-ops');
     expect(getRoleDashboardRoute('operations_manager', 'Administration')).toBe('/admin');
 
     // Executive scoped to a Warehouse moves to WMS ops
@@ -39,7 +43,7 @@ describe('getRoleDashboardRoute Sovereign Navigation', () => {
 
     // Executive scoped to a Store moves to POS command
     expect(getRoleDashboardRoute('super_admin', 'Store')).toBe('/pos-dashboard');
-    expect(getRoleDashboardRoute('regional_manager', 'Retail')).toBe('/pos-dashboard');
+    expect(getRoleDashboardRoute('regional_manager', 'Retail')).toBe('/regional-ops');
   });
 
   it('routes Warehouse and Floor Operations workers to /wms-ops', () => {
@@ -71,5 +75,23 @@ describe('getRoleDashboardRoute Sovereign Navigation', () => {
     // Completely unrecognized role falls back to safe universal route
     expect(getRoleDashboardRoute('non_existent_role_xyz', undefined)).toBe('/profile');
     expect(getRoleDashboardRoute('non_existent_role_xyz', undefined)).not.toBe('/admin');
+  });
+});
+
+
+describe('clean mobile role routing while the site loads', () => {
+  it('routes warehouse workers to fulfillment without assuming POS', () => {
+    vi.spyOn(native, 'isCleanMobileMode').mockReturnValue(true);
+    for (const role of ['warehouse_manager', 'picker', 'packer', 'receiver', 'driver']) {
+      expect(getRoleDashboardRoute(role, undefined)).toBe('/wms-ops');
+      expect(getRoleDashboardRoute(role, 'Warehouse')).toBe('/wms-ops');
+    }
+    expect(getRoleDashboardRoute('cashier', undefined)).toBe('/pos');
+  });
+
+  it('does not route a warehouse worker to POS at a store or grant operations to unknown roles', () => {
+    vi.spyOn(native, 'isCleanMobileMode').mockReturnValue(true);
+    expect(getRoleDashboardRoute('warehouse_manager', 'Store')).toBe('/profile');
+    expect(getRoleDashboardRoute('unknown_role', undefined)).toBe('/profile');
   });
 });
