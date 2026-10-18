@@ -129,6 +129,8 @@ export const PackTab: React.FC = () => {
             if (packJobFilter === 'completed') return j.status === 'Completed';
             return true;
         }).sort((a, b) => {
+            const activeOrder = Number(b.status === 'In-Progress') - Number(a.status === 'In-Progress');
+            if (activeOrder !== 0) return activeOrder;
             if (packSortBy === 'priority') {
                 const priorityOrder: Record<string, number> = { 'Critical': 0, 'High': 1, 'Normal': 2 };
                 return (priorityOrder[a.priority] ?? 3) - (priorityOrder[b.priority] ?? 3);
@@ -289,7 +291,7 @@ export const PackTab: React.FC = () => {
 
     return (
         <>
-            <div className="flex-1 overflow-hidden flex flex-col gap-4">
+            <div className="flex-1 overflow-hidden flex flex-col gap-1.5 md:gap-4">
                 <PackHeader
                     viewMode={viewMode}
                     setViewMode={setViewMode}

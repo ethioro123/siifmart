@@ -144,6 +144,8 @@ export const PutawayTab: React.FC<PutawayTabProps> = ({
         }
 
         return filtered.sort((a, b) => {
+            const activeOrder = Number(b.status === 'In-Progress') - Number(a.status === 'In-Progress');
+            if (activeOrder !== 0) return activeOrder;
             if (putawaySortBy === 'priority') {
                 const priorityOrder: Record<string, number> = { 'Critical': 0, 'High': 1, 'Normal': 2 };
                 return (priorityOrder[a.priority] || 2) - (priorityOrder[b.priority] || 2);
@@ -379,7 +381,7 @@ export const PutawayTab: React.FC<PutawayTabProps> = ({
     };
 
     return (
-        <div className="flex-1 overflow-hidden flex flex-col space-y-6">
+        <div className="flex-1 overflow-hidden flex flex-col space-y-2 md:space-y-6">
             {/* PUTAWAY CONTROL HUB */}
             <PutawayHeader
                 filteredJobsCount={filteredJobsCount}

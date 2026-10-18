@@ -24,7 +24,7 @@ export const PackList: React.FC<PackListProps> = ({
     return (
         <div className="flex flex-col h-full bg-[var(--theme-bg-app)] text-[var(--theme-text-primary)] transition-colors duration-200">
             {/* Mobile sort bar */}
-            <div className="flex justify-end mb-3 px-1 md:hidden">
+            <div className="hidden">
                 <SortDropdown
                     label={t('warehouse.sortByLabel')}
                     options={[

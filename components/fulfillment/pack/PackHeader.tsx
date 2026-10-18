@@ -65,14 +65,10 @@ export const PackHeader: React.FC<PackHeaderProps> = ({
 
                     {/* Mobile Dot Numbers */}
                     {filteredJobsCount && (
-                        <div className="flex sm:hidden items-center gap-2 px-2.5 py-1 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl text-[11px] font-mono shrink-0">
+                        <div className="flex sm:hidden items-center gap-1.5 px-2 py-1 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-lg text-[10px] font-mono shrink-0">
                             <span className="inline-flex items-center gap-1 text-emerald-500 font-bold" title="Active">
                                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
                                 {filteredJobsCount.active}
-                            </span>
-                            <span className="inline-flex items-center gap-1 text-amber-500 font-bold" title="Pending">
-                                <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
-                                {filteredJobsCount.pending}
                             </span>
                         </div>
                     )}

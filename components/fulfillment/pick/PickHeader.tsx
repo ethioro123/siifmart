@@ -71,15 +71,9 @@ export const PickHeader: React.FC<PickHeaderProps> = ({
                         </div>
 
                         {/* Mobile Inline Dot Numbers */}
-                        <div className="flex sm:hidden items-center gap-2 px-2.5 py-1 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl text-[11px] font-mono shrink-0">
-                            <span className="inline-flex items-center gap-1 text-amber-500 font-bold" title="Pending">
-                                <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />{pendingCount}
-                            </span>
-                            <span className="inline-flex items-center gap-1 text-[var(--theme-accent)] font-bold" title="In Progress">
+                        <div className="flex sm:hidden items-center gap-1.5 px-2 py-1 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-lg text-[10px] font-mono shrink-0">
+                            <span className="inline-flex items-center gap-1 text-[var(--theme-accent)] font-bold" title="Active jobs">
                                 <span className="w-1.5 h-1.5 rounded-full bg-[var(--theme-accent)] animate-pulse" />{inProgressCount}
-                            </span>
-                            <span className="inline-flex items-center gap-1 text-emerald-500 font-bold" title="Completed">
-                                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />{completedCount}
                             </span>
                         </div>
                     </div>

@@ -12,6 +12,7 @@ import { generateBatchNumber } from '../../../utils/batchNumber';
 import { resolveReceivingPolicy } from '../../../utils/receivingPolicy';
 import { buildPOJobsReceivedMap, resolvePOLineItemProgress } from './receiveQuantityResolver';
 import { ItemAttributeBadges } from '../ItemAttributeBadges';
+import { useIsMobile } from '../../../hooks/useIsMobile';
 
 interface ReceiveListProps {
     paginatedReceiveOrders: PurchaseOrder[];
@@ -66,6 +67,7 @@ export const ReceiveList: React.FC<ReceiveListProps> = ({
 }) => {
     const { settings, effectiveCountry } = useData();
     const isBlindReceiving = resolveReceivingPolicy(settings, effectiveCountry).blind;
+    const isMobile = useIsMobile();
 
     if (filteredReceiveOrdersLength === 0) {
         return (
@@ -89,6 +91,11 @@ export const ReceiveList: React.FC<ReceiveListProps> = ({
         <div className="flex-1 overflow-y-auto pr-1 sm:pr-2 custom-scrollbar space-y-2 sm:space-y-4 pb-6">
             <div className="grid grid-cols-1 gap-2 sm:gap-4">
                 {paginatedReceiveOrders.map(po => {
+                    const isActiveReceiveJob = jobs.some(job =>
+                        job.type === 'RECEIVE' &&
+                        job.status === 'In-Progress' &&
+                        (job.orderRef === po.id || job.orderRef === po.poNumber || job.orderRef === po.po_number)
+                    );
                     const poJobs = jobs.filter(j => (j.orderRef === po.id || (po.po_number && j.orderRef === po.po_number) || (po.poNumber && j.orderRef === po.poNumber)) && j.type === 'PUTAWAY');
                     const receivedMaps = buildPOJobsReceivedMap(poJobs);
                     const allItemsReceived = (po.lineItems || []).length > 0 && po.lineItems.every(item => {
@@ -97,15 +104,18 @@ export const ReceiveList: React.FC<ReceiveListProps> = ({
                     });
 
                     return (
-                        <div
+                        <details
                             key={po.id}
-                            className={`group bg-[var(--theme-bg-card)] p-2.5 sm:p-5 md:p-6 rounded-xl sm:rounded-2xl border transition-all shadow-xs ${
+                            open={!isMobile || isActiveReceiveJob}
+                            className={`group bg-[var(--theme-bg-card)] p-2 sm:p-5 md:p-6 rounded-lg sm:rounded-2xl border transition-all shadow-xs ${
                                 allItemsReceived
                                     ? 'border-emerald-500/40 dark:border-emerald-500/30 ring-1 ring-emerald-500/20'
+                                    : isActiveReceiveJob
+                                        ? 'border-[var(--theme-accent)]/60 bg-[var(--theme-accent)]/5 ring-1 ring-[var(--theme-accent)]/20'
                                     : 'border-[var(--theme-border)] hover:border-[var(--theme-border-strong)]'
                             }`}
                         >
-                            <div className="flex flex-col sm:flex-row justify-between items-start gap-2 md:gap-4 mb-2 sm:mb-5">
+                            <summary className="list-none cursor-pointer min-h-[44px] flex flex-col sm:flex-row justify-between items-start gap-1.5 sm:gap-2 md:gap-4 mb-1.5 sm:mb-5">
                                 <div className="flex items-center gap-2.5 sm:gap-3.5 flex-1 min-w-0">
                                     <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl flex items-center justify-center shrink-0 border transition-all ${
                                         allItemsReceived
@@ -126,6 +136,12 @@ export const ReceiveList: React.FC<ReceiveListProps> = ({
                                             <span className="text-[11px] text-[var(--theme-text-secondary)] font-medium">
                                                 {po.lineItems?.length || 0} {t('warehouse.itemPlural')}
                                             </span>
+                                            {isActiveReceiveJob && (
+                                                <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-[var(--theme-accent)] uppercase">
+                                                    <span className="h-1.5 w-1.5 rounded-full bg-[var(--theme-accent)]" />
+                                                    Active
+                                                </span>
+                                            )}
                                         </div>
                                     </div>
                                 </div>
@@ -143,9 +159,9 @@ export const ReceiveList: React.FC<ReceiveListProps> = ({
                                         t('warehouse.awaitingProcessing')
                                     )}
                                 </div>
-                            </div>
+                            </summary>
 
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-1.5 sm:gap-3 md:gap-4">
                                 {(po.lineItems || []).map((item, idx) => {
                                     const progress = resolvePOLineItemProgress(item, receivedMaps, allProducts);
                                     const { effectiveReceived: receivedQty, expectedSellable, remaining: remainingQty, isComplete, product, resolvedSku } = progress;
@@ -162,13 +178,13 @@ export const ReceiveList: React.FC<ReceiveListProps> = ({
                                     return (
                                         <div
                                             key={item.productId || idx}
-                                            className={`p-2.5 sm:p-4 rounded-xl border transition-all ${
+                                            className={`p-2 sm:p-4 rounded-lg sm:rounded-xl border transition-all ${
                                                 isComplete
                                                     ? 'bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] opacity-75'
                                                     : 'bg-[var(--theme-bg-card)] border-[var(--theme-border)] hover:border-[var(--theme-border-strong)] shadow-[var(--shadow-sm)]'
                                             }`}
                                         >
-                                            <div className="flex flex-col gap-2.5 sm:gap-4">
+                                            <div className="flex flex-col gap-1.5 sm:gap-4">
                                                 <div className="flex justify-between items-start gap-3">
                                                     <div className="flex-1 min-w-0">
                                                         <p className={`text-xs font-semibold tracking-tight truncate ${
@@ -184,10 +200,10 @@ export const ReceiveList: React.FC<ReceiveListProps> = ({
                                                                 </span>
                                                             ) : null;
                                                         })()}
-                                                        <p className="text-[11px] text-[var(--theme-text-secondary)] font-mono mt-1">
+                                                        <p className="hidden sm:block text-[11px] text-[var(--theme-text-secondary)] font-mono mt-1">
                                                             SKU: {resolvedSku || finalizedSkus[item.productId || ''] || product?.sku || item.sku || 'PENDING'}
                                                         </p>
-                                                        <ItemAttributeBadges item={item} allProducts={allProducts} className="mt-1.5" />
+                                                        <ItemAttributeBadges item={item} allProducts={allProducts} className="mt-0.5 sm:mt-1.5" />
                                                     </div>
                                                     <div className="flex flex-col items-end shrink-0">
                                                         {(() => {
@@ -215,7 +231,7 @@ export const ReceiveList: React.FC<ReceiveListProps> = ({
                                                             }
 
                                                             return (
-                                                                <span className={`text-lg font-semibold font-mono tabular-nums leading-none ${
+                                                                <span className={`text-base sm:text-lg font-semibold font-mono tabular-nums leading-none ${
                                                                     isComplete ? 'text-[var(--theme-text-secondary)]' : 'text-[var(--theme-text-primary)]'
                                                                 }`}>
                                                                     {receivedQty}
@@ -231,7 +247,7 @@ export const ReceiveList: React.FC<ReceiveListProps> = ({
                                                 </div>
 
                                                 {!isBlindReceiving && (
-                                                    <div className="space-y-1.5">
+                                                    <div className="hidden sm:block space-y-1.5">
                                                         <div className="flex justify-between items-center text-[11px] font-medium text-[var(--theme-text-secondary)]">
                                                             <span>{t('warehouse.inboundVelocity')}</span>
                                                             <span className="font-mono tabular-nums">
@@ -376,7 +392,7 @@ export const ReceiveList: React.FC<ReceiveListProps> = ({
                                     </div>
                                 </div>
                             )}
-                        </div>
+                        </details>
                     );
                 })}
             </div>

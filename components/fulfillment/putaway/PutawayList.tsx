@@ -80,7 +80,7 @@ export const PutawayList: React.FC<PutawayListProps> = ({
                                     isCritical 
                                         ? 'border-red-500/40' 
                                         : job.status === 'In-Progress' 
-                                            ? 'border-[var(--theme-accent)]/50' 
+                                            ? 'border-[var(--theme-accent)]/60 bg-[var(--theme-accent)]/5 ring-1 ring-[var(--theme-accent)]/20'
                                             : 'border-[var(--theme-border)]'
                                 }`}
                                 onClick={() => handleStartJob(job)}

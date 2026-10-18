@@ -118,6 +118,10 @@ export const ReceiveTab: React.FC = () => {
     const filteredReceiveOrders = useMemo(() => {
         const employeeId = employees.find((e: any) => e.email === user?.email || e.name === user?.name || e.id === user?.id)?.id;
         const isStaffWithLimitedAccess = !['admin', 'warehouse_manager', 'super_admin', 'dispatcher', 'inventory_specialist'].includes(user?.role || '');
+        const activeReceiveRefs = new Set(jobs
+            .filter(job => job.type === 'RECEIVE' && job.status === 'In-Progress')
+            .map(job => job.orderRef)
+            .filter((ref): ref is string => Boolean(ref)));
 
         return orders.filter(o => {
             const isPendingManifest = o.status === 'Approved' || o.status === 'Partially Received';
@@ -147,6 +151,10 @@ export const ReceiveTab: React.FC = () => {
             }
 
             return true;
+        }).sort((a, b) => {
+            const activeA = activeReceiveRefs.has(a.id) || activeReceiveRefs.has(a.poNumber || '') || activeReceiveRefs.has(a.po_number || '');
+            const activeB = activeReceiveRefs.has(b.id) || activeReceiveRefs.has(b.poNumber || '') || activeReceiveRefs.has(b.po_number || '');
+            return Number(activeB) - Number(activeA);
         });
     }, [orders, receiveSearch, jobs, employees, user]);
 

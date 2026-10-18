@@ -62,7 +62,7 @@ export const PickList: React.FC<PickListProps> = ({
     return (
         <>
             {/* Sort Controls */}
-            <div className="flex justify-end px-1">
+            <div className="hidden md:flex justify-end px-1">
                 <SortDropdown
                     label={t('warehouse.sortByLabel')}
                     options={[
@@ -83,7 +83,9 @@ export const PickList: React.FC<PickListProps> = ({
                 {filteredPickJobs.length > 0 ? (
                     <>
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-4 pb-20 md:pb-0">
-                            {paginatedPickJobs.sort((a, b) => {
+                            {[...paginatedPickJobs].sort((a, b) => {
+                                const activeOrder = Number(b.status === 'In-Progress') - Number(a.status === 'In-Progress');
+                                if (activeOrder !== 0) return activeOrder;
                                 switch (pickSortBy) {
                                     case 'priority': {
                                         const p: Record<string, number> = { 'Critical': 4, 'High': 3, 'Medium': 2, 'Normal': 1, 'Low': 0 };
@@ -117,7 +119,7 @@ export const PickList: React.FC<PickListProps> = ({
                                                 job.priority === 'Critical' 
                                                     ? 'border-red-500/40' 
                                                     : job.status === 'In-Progress' 
-                                                        ? 'border-[var(--theme-accent)]/50' 
+                                                        ? 'border-[var(--theme-accent)]/60 bg-[var(--theme-accent)]/5 ring-1 ring-[var(--theme-accent)]/20'
                                                         : 'border-[var(--theme-border)]'
                                             }`}
                                             onClick={() => handleStartJob(job)}

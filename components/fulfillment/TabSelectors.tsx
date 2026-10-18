@@ -67,9 +67,9 @@ export const MobileTabSelector: React.FC<TabSelectorProps> = ({
     const otherActiveCount = otherTabs.reduce((acc, tab) => acc + getTabActiveCount(tab), 0);
 
     return (
-        <div className="md:hidden relative z-[60] mb-2 space-y-1.5">
+        <div className="md:hidden relative z-[60] mb-1 space-y-1">
             {/* 1-Tap Core Operational Segments (Receive, Putaway, Pick, Pack) */}
-            <div className="flex items-center gap-1 overflow-x-auto no-scrollbar p-1 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-2xl">
+            <div className="flex items-center gap-1 overflow-x-auto no-scrollbar p-0.5 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl">
                 {CORE_TABS.filter(t => visibleTabs.includes(t)).map(tab => {
                     const isActive = activeTab === tab;
                     const count = getTabActiveCount(tab);

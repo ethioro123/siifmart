@@ -247,11 +247,14 @@ export const PickTab: React.FC = () => {
     const pickJobsTotalPages = Math.ceil(filteredPickJobs.length / PICK_ITEMS_PER_PAGE);
     const paginatedPickJobs = useMemo(() => {
         const start = (pickCurrentPage - 1) * PICK_ITEMS_PER_PAGE;
-        return filteredPickJobs.slice(start, start + PICK_ITEMS_PER_PAGE);
+        const activeFirst = [...filteredPickJobs].sort((a, b) =>
+            Number(b.status === 'In-Progress') - Number(a.status === 'In-Progress')
+        );
+        return activeFirst.slice(start, start + PICK_ITEMS_PER_PAGE);
     }, [filteredPickJobs, pickCurrentPage]);
 
     return (
-        <div className="flex-1 flex flex-col gap-2 sm:gap-6 px-1 sm:px-4">
+        <div className="flex-1 flex flex-col gap-1.5 sm:gap-6 px-0.5 sm:px-4">
             <PickHeader
                 pendingCount={filteredJobs.filter(j => j.type === 'PICK' && j.status === 'Pending').length}
                 inProgressCount={filteredJobs.filter(j => j.type === 'PICK' && j.status === 'In-Progress').length}
