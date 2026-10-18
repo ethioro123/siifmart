@@ -27,7 +27,6 @@ interface PackJobModalProps {
     isSubmitting: boolean;
     resolveOrderRef: (ref?: string) => string;
     onOpenScanner?: () => void;
-    onPrintItemLabel?: (item: any, product?: any, boxSize?: string) => void;
     onFlagDiscrepancy?: () => void;
     onDeleteJob?: (jobId: string) => void;
 }
@@ -45,7 +44,6 @@ export const PackJobModal: React.FC<PackJobModalProps> = ({
     isSubmitting,
     resolveOrderRef,
     onOpenScanner,
-    onPrintItemLabel,
     onFlagDiscrepancy,
     onDeleteJob,
 }) => {
@@ -236,12 +234,10 @@ export const PackJobModal: React.FC<PackJobModalProps> = ({
                         <Step1PackItems
                             job={job}
                             products={products}
-                            boxSize={boxSize}
                             totalItems={totalItems}
                             completedItems={completedItems}
                             progressPercent={progressPercent}
                             isFullyPacked={isFullyPacked}
-                            onPrintItemLabel={onPrintItemLabel}
                         />
                     )}
 

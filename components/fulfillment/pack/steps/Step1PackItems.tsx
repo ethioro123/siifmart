@@ -7,23 +7,19 @@ import { PackJobItemCard } from '../components/PackJobItemCard';
 interface Step1PackItemsProps {
     job: WMSJob;
     products: Product[];
-    boxSize: string;
     totalItems: number;
     completedItems: number;
     progressPercent: number;
     isFullyPacked: boolean;
-    onPrintItemLabel?: (item: any, product?: any, boxSize?: string) => void;
 }
 
 export const Step1PackItems: React.FC<Step1PackItemsProps> = ({
     job,
     products,
-    boxSize,
     totalItems,
     completedItems,
     progressPercent,
     isFullyPacked,
-    onPrintItemLabel,
 }) => (
     <div className="flex-1 min-h-0 flex flex-col overflow-hidden bg-[var(--theme-bg-app)]">
         <div className="shrink-0 border-b border-[var(--theme-border)] bg-[var(--theme-bg-card)] px-4 py-3 md:px-6">
@@ -57,8 +53,6 @@ export const Step1PackItems: React.FC<Step1PackItemsProps> = ({
                     item={item}
                     job={job}
                     products={products}
-                    boxSize={boxSize}
-                    onPrintItemLabel={onPrintItemLabel}
                 />
             ))}
             {!job.lineItems?.length && (

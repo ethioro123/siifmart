@@ -22,6 +22,7 @@ test('PACK opens its full-screen scanner from the bottom job action and returns 
     await page.locator('button[aria-label]').first().click();
     await expect(page.getByLabel('Scan barcode')).toHaveCount(0);
     await expect(page.getByText('Camera Scan')).toHaveCount(0);
+    await expect(page.getByTitle('Print label')).toHaveCount(0);
     await expect(page.getByText('Playwright Test Milk')).toBeVisible();
     const resumeAction = page.getByRole('button', { name: 'Resume Item Scanning' });
     await expect(resumeAction).toBeVisible();

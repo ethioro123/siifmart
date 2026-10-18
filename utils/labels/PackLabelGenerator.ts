@@ -46,7 +46,8 @@ export const generatePackLabelHTML = async (
     }
 ): Promise<string> => {
     const { size, format } = options;
-    const validSize = normalizeLabelSize(size as string);
+    const requestedSize = normalizeLabelSize(size as string);
+    const validSize = requestedSize === 'Tiny' ? 'Small' : requestedSize;
     const normalizedFormat = (f: string): LabelFormat => {
         const lower = (f || '').toLowerCase();
         if (lower === 'barcode') return 'Barcode';
@@ -58,6 +59,20 @@ export const generatePackLabelHTML = async (
 
     // Format the order reference for display (convert UUID to short ID)
     const formattedOrderRef = formatOrderRef(data.orderRef);
+    const safeOrderRef = escapeHtml(formattedOrderRef);
+    const safeTrackingNumber = escapeHtml(data.trackingNumber);
+    const displayTrackingNumber = safeTrackingNumber || safeOrderRef;
+    const safeRecipient = escapeHtml(data.customerName || data.destSiteName || 'RECIPIENT');
+    const safeAddress = escapeHtml(data.shippingAddress);
+    const safeFromName = escapeHtml(data.fromName || 'SiifMart Logistics Center');
+    const safeFromAddress = escapeHtml(data.fromAddress?.replace(/<br\s*\/?\s*>/gi, ', '));
+    const safeCity = escapeHtml(data.city);
+    const safeLineItems = (data.lineItems || []).map(item => ({
+        name: escapeHtml(item.name || 'ITEM'),
+        sku: escapeHtml(item.sku || ''),
+        quantity: escapeHtml(item.quantity),
+        unit: escapeHtml(item.unit)
+    }));
 
     // Create QR data with all order info (use formatted ref)
     const qrData = JSON.stringify({
@@ -152,22 +167,22 @@ export const generatePackLabelHTML = async (
     let contentHTML = '';
 
     if (validSize === 'Small') {
-        const formattedOrderRef = data.orderRef?.slice(-6).toUpperCase() || 'N/A';
+        const compactOrderRef = safeOrderRef.slice(-6).toUpperCase() || 'N/A';
         const displayDate = data.packDate ? new Date(data.packDate).toLocaleDateString('en-GB') : new Date().toLocaleDateString('en-GB');
 
-        // SMALL LABEL (74mm x 41mm): Compact, high-density, perfectly fit
+        // SMALL LABEL (50.8mm x 25.4mm): Compact 2 x 1 inch thermal label
         contentHTML = `
             <div style="display: flex; flex-direction: column; min-height: 100%; border: 1.5px solid #000; font-family: 'SF Mono', 'Fira Code', 'Inter', monospace; color: #000; background: #fff; box-sizing: border-box; padding: 6px; line-height: 1.1;">
                 <!-- TOP BANNER -->
                 <div style="display: flex; justify-content: space-between; align-items: center; background: #000; color: #fff; padding: 2px 4px; margin-bottom: 4px;">
                     <span style="font-weight: 900; font-size: 8px; letter-spacing: 0.1em;">SIIFMART EXPRESS</span>
-                    <span style="font-weight: 900; font-size: 8.5px; font-mono;">TRK: ${data.trackingNumber || formattedOrderRef}</span>
+                    <span style="font-weight: 900; font-size: 8.5px; font-mono;">TRK: ${displayTrackingNumber || compactOrderRef}</span>
                 </div>
                 
                 <!-- DESTINATION -->
                 <div style="margin-bottom: 3px;">
-                    <div style="font-weight: 900; font-size: 12px; text-transform: uppercase; line-height: 1.0; margin-bottom: 2px; word-break: break-word;">${data.customerName || data.destSiteName || 'RECIPIENT'}</div>
-                    ${data.shippingAddress ? `<div style="font-size: 8px; font-weight: 700; text-transform: uppercase; word-break: break-word; line-height: 1.1; color: #333;">${data.shippingAddress}</div>` : ''}
+                    <div style="font-weight: 900; font-size: 12px; text-transform: uppercase; line-height: 1.0; margin-bottom: 2px; word-break: break-word;">${safeRecipient}</div>
+                    ${safeAddress ? `<div style="font-size: 8px; font-weight: 700; text-transform: uppercase; word-break: break-word; line-height: 1.1; color: #333;">${safeAddress}</div>` : ''}
                 </div>
 
                 <!-- SPECIAL HANDLING BADGES -->
@@ -175,9 +190,9 @@ export const generatePackLabelHTML = async (
 
                 <!-- COMPLETE MANIFEST -->
                 <div style="padding: 3px 0; margin-bottom: 4px; border-top: 1px dashed #000; border-bottom: 1px dashed #000;">
-                    <div style="font-size: 7.5px; font-weight: 900; text-transform: uppercase; margin-bottom: 2px; letter-spacing: 0.05em; color: #555;">ITEMS (${(data.lineItems || []).length}):</div>
+                    <div style="font-size: 7.5px; font-weight: 900; text-transform: uppercase; margin-bottom: 2px; letter-spacing: 0.05em; color: #555;">ITEMS (${safeLineItems.length}):</div>
                     <div style="font-size: 8px; font-weight: 700;">
-                        ${(data.lineItems || []).map(item => `
+                        ${safeLineItems.map(item => `
                             <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1.5px; text-transform: uppercase;">
                                 <span style="word-break: break-word; flex: 1; padding-right: 4px;">${item.name || 'ITEM'}</span>
                                 <span style="font-weight: 900; white-space: nowrap; font-mono;">[${item.quantity}${item.unit ? ` ${item.unit}` : ''}]</span>
@@ -190,7 +205,7 @@ export const generatePackLabelHTML = async (
                 <div style="margin-top: auto; padding-top: 2px; text-align: center;">
                     <div class="barcode-container" style="height: 28px; width: 100%; display:flex; justify-content:center;">${barcode || 'ERROR'}</div>
                     <div style="display: flex; justify-content: space-between; font-size: 7.5px; font-weight: 900; text-transform: uppercase; margin-top: 2px;">
-                        <span>* ${data.trackingNumber || formattedOrderRef} *</span>
+                        <span>* ${displayTrackingNumber || compactOrderRef} *</span>
                         <span>${displayDate}</span>
                     </div>
                 </div>
@@ -199,7 +214,7 @@ export const generatePackLabelHTML = async (
     } else if (validSize === 'Medium') {
         const displayDate = data.packDate ? new Date(data.packDate).toLocaleDateString('en-GB') : new Date().toLocaleDateString('en-GB');
 
-        // MEDIUM LABEL (98mm x 66mm): Clean 4x3 parcel format
+        // MEDIUM LABEL (76.2mm x 50.8mm): Standard 3 x 2 inch parcel format
         contentHTML = `
             <div style="display: flex; flex-direction: column; min-height: 100%; border: 2px solid #000; font-family: 'SF Mono', 'Fira Code', 'Inter', monospace; color: #000; background: #fff; box-sizing: border-box; padding: 10px; line-height: 1.15;">
                 <!-- HEADER BAR -->
@@ -214,8 +229,8 @@ export const generatePackLabelHTML = async (
                 <!-- DESTINATION SECTION -->
                 <div style="margin-bottom: 6px; flex-shrink: 0;">
                     <div style="font-weight: 900; font-size: 8.5px; text-transform: uppercase; letter-spacing: 0.1em; color: #666; margin-bottom: 2px;">SHIP TO:</div>
-                    <div style="font-weight: 900; font-size: 18px; text-transform: uppercase; line-height: 1.0; margin-bottom: 3px; word-break: break-word;">${data.customerName || data.destSiteName || 'RECIPIENT'}</div>
-                    ${data.shippingAddress ? `<div style="font-size: 10px; font-weight: 700; text-transform: uppercase; word-break: break-word; line-height: 1.15; color: #222;">${data.shippingAddress}</div>` : ''}
+                    <div style="font-weight: 900; font-size: 18px; text-transform: uppercase; line-height: 1.0; margin-bottom: 3px; word-break: break-word;">${safeRecipient}</div>
+                    ${safeAddress ? `<div style="font-size: 10px; font-weight: 700; text-transform: uppercase; word-break: break-word; line-height: 1.15; color: #222;">${safeAddress}</div>` : ''}
                 </div>
 
                 <!-- SPECIAL HANDLING BADGES -->
@@ -223,9 +238,9 @@ export const generatePackLabelHTML = async (
 
                 <!-- COMPLETE PRODUCT MANIFEST -->
                 <div style="padding: 4px 0; margin-bottom: 6px; border-top: 1.5px dashed #000; border-bottom: 1.5px dashed #000;">
-                    <div style="font-weight: 900; font-size: 8.5px; text-transform: uppercase; margin-bottom: 3px; letter-spacing: 0.1em; color: #444;">MANIFEST — ${(data.lineItems || []).length} ITEM${(data.lineItems || []).length !== 1 ? 'S' : ''}</div>
+                    <div style="font-weight: 900; font-size: 8.5px; text-transform: uppercase; margin-bottom: 3px; letter-spacing: 0.1em; color: #444;">MANIFEST — ${safeLineItems.length} ITEM${safeLineItems.length !== 1 ? 'S' : ''}</div>
                     <div style="font-size: 9px; font-weight: 700;">
-                        ${(data.lineItems || []).map(item => `
+                        ${safeLineItems.map(item => `
                             <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 2px; text-transform: uppercase; border-bottom: 1px dotted #e5e5e5; padding-bottom: 1px;">
                                 <span style="word-break: break-word; flex: 1; padding-right: 6px;">${item.name || 'ITEM'}</span>
                                 <span style="font-weight: 900; font-mono; white-space: nowrap;">[${item.quantity}${item.unit ? ` ${item.unit}` : ''}]</span>
@@ -237,9 +252,9 @@ export const generatePackLabelHTML = async (
                 <!-- BOTTOM INFO BAND -->
                 <div style="flex-shrink: 0; margin-top: auto; border-top: 2px solid #000; padding-top: 6px;">
                     <div class="barcode-container" style="height: 36px; margin-bottom: 3px; display:flex; justify-content:center;">${barcode}</div>
-                    <div style="text-align: center; font-family:'SF Mono', 'Fira Code', monospace; font-size: 12px; font-weight: 900; letter-spacing: 1.5px; margin-bottom: 4px; color: #000;">${data.trackingNumber || formattedOrderRef}</div>
+                    <div style="text-align: center; font-family:'SF Mono', 'Fira Code', monospace; font-size: 12px; font-weight: 900; letter-spacing: 1.5px; margin-bottom: 4px; color: #000;">${displayTrackingNumber}</div>
                     <div style="display: flex; justify-content: space-between; font-weight: 900; font-size: 9px; text-transform: uppercase;">
-                        <span>TRK: ${data.trackingNumber || formattedOrderRef}</span>
+                        <span>TRK: ${displayTrackingNumber}</span>
                         <span>${data.packageNumber ? `PKG: ${data.packageNumber}/${data.totalPackages || 1}` : `${data.totalPackages || 1} PACKAGE${(data.totalPackages || 1) > 1 ? 'S' : ''}`}</span>
                     </div>
                 </div>
@@ -248,7 +263,7 @@ export const generatePackLabelHTML = async (
     } else if (validSize === 'Large') {
         const displayDate = data.packDate ? new Date(data.packDate).toLocaleDateString('en-GB') : new Date().toLocaleDateString('en-GB');
 
-        // LARGE LABEL (130mm x 97mm): Courier freight format
+        // LARGE LABEL (101.6mm x 76.2mm): 4 x 3 inch courier format
         contentHTML = `
             <div style="display: flex; flex-direction: column; min-height: 100%; border: 3px solid #000; font-family: 'SF Mono', 'Fira Code', 'Inter', monospace; color: #000; background: #fff; box-sizing: border-box; padding: 14px; line-height: 1.15;">
                 <!-- HEADER BAR -->
@@ -264,12 +279,12 @@ export const generatePackLabelHTML = async (
                 <div style="display: flex; flex-direction: column; border-bottom: 2px solid #000; padding-bottom: 8px; margin-bottom: 8px;">
                     <div style="margin-bottom: 6px;">
                         <span style="font-weight: 900; font-size: 9px; text-transform: uppercase; color: #666;">FROM: </span>
-                        <span style="font-size: 10px; font-weight: 700; text-transform: uppercase; color: #333;">${data.fromName || 'SiifMart Logistics Center'}</span>
+                        <span style="font-size: 10px; font-weight: 700; text-transform: uppercase; color: #333;">${safeFromName}</span>
                     </div>
                     <div>
                         <div style="font-weight: 900; font-size: 9.5px; text-transform: uppercase; letter-spacing: 0.1em; color: #000; margin-bottom: 2px;">SHIP TO:</div>
-                        <div style="font-weight: 900; font-size: 22px; text-transform: uppercase; line-height: 1.0; margin-bottom: 4px; word-break: break-word;">${data.customerName || data.destSiteName || 'RECIPIENT'}</div>
-                        ${data.shippingAddress ? `<div style="font-size: 12px; font-weight: 700; text-transform: uppercase; word-break: break-word; line-height: 1.2;">${data.shippingAddress}</div>` : ''}
+                        <div style="font-weight: 900; font-size: 22px; text-transform: uppercase; line-height: 1.0; margin-bottom: 4px; word-break: break-word;">${safeRecipient}</div>
+                        ${safeAddress ? `<div style="font-size: 12px; font-weight: 700; text-transform: uppercase; word-break: break-word; line-height: 1.2;">${safeAddress}</div>` : ''}
                     </div>
                 </div>
 
@@ -278,9 +293,9 @@ export const generatePackLabelHTML = async (
 
                 <!-- COMPLETE PRODUCT MANIFEST -->
                 <div style="padding: 6px 0; margin-bottom: 8px; border-top: 1.5px dashed #000; border-bottom: 1.5px dashed #000;">
-                    <div style="font-weight: 900; font-size: 10px; text-transform: uppercase; margin-bottom: 4px; letter-spacing: 0.1em; color: #333;">MANIFEST — ${(data.lineItems || []).length} ITEM${(data.lineItems || []).length !== 1 ? 'S' : ''}</div>
+                    <div style="font-weight: 900; font-size: 10px; text-transform: uppercase; margin-bottom: 4px; letter-spacing: 0.1em; color: #333;">MANIFEST — ${safeLineItems.length} ITEM${safeLineItems.length !== 1 ? 'S' : ''}</div>
                     <div style="font-size: 10.5px; font-weight: 700;">
-                        ${(data.lineItems || []).map(item => `
+                        ${safeLineItems.map(item => `
                             <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 3px; text-transform: uppercase; border-bottom: 1px dotted #ccc; padding-bottom: 2px;">
                                 <span style="word-break: break-word; flex: 1; padding-right: 8px;">${item.name || 'ITEM'}</span>
                                 <span style="font-weight: 900; font-mono; white-space: nowrap;">[${item.quantity}${item.unit ? ` ${item.unit}` : ''}]</span>
@@ -292,16 +307,16 @@ export const generatePackLabelHTML = async (
                 <!-- BOTTOM INFO BAND -->
                 <div style="flex-shrink: 0; margin-top: auto; border-top: 2px solid #000; padding-top: 8px;">
                     <div class="barcode-container" style="height: 46px; margin-bottom: 4px; display:flex; justify-content:center;">${barcode}</div>
-                    <div style="text-align: center; font-family:'SF Mono', 'Fira Code', monospace; font-size: 14px; font-weight: 900; letter-spacing: 2px; margin-bottom: 4px; color: #000;">* ${data.trackingNumber || formattedOrderRef} *</div>
+                    <div style="text-align: center; font-family:'SF Mono', 'Fira Code', monospace; font-size: 14px; font-weight: 900; letter-spacing: 2px; margin-bottom: 4px; color: #000;">* ${displayTrackingNumber} *</div>
                     <div style="display: flex; justify-content: space-between; font-weight: 900; font-size: 10px; text-transform: uppercase;">
-                        <span>TRK: ${data.trackingNumber || formattedOrderRef}</span>
+                        <span>TRK: ${displayTrackingNumber}</span>
                         <span>${data.packageNumber ? `PKG: ${data.packageNumber}/${data.totalPackages || 1}` : `${data.totalPackages || 1} PACKAGE${(data.totalPackages || 1) > 1 ? 'S' : ''}`}</span>
                     </div>
                 </div>
             </div>
         `;
     } else {
-        // XL LABEL (130mm x 195mm): Full Master 4x6 / 5x8 Logistics Standard
+        // XL LABEL (101.6mm x 152.4mm): Standard 4 x 6 inch shipping label
         const pSize = '24px';
         const showQR = validFormat === 'QR' || validFormat === 'Both';
 
@@ -325,7 +340,7 @@ export const generatePackLabelHTML = async (
                     <div style="margin-bottom: 8px;">
                         <div style="font-weight: 900; font-size: 10px; margin-bottom: 3px; text-transform: uppercase; letter-spacing: 0.1em; color: #666;">FROM:</div>
                         <div style="font-size: 11px; font-weight: 700; line-height: 1.2; text-transform: uppercase; color: #333; word-break: break-word;">
-                            ${data.fromName || 'SiifMart Logistics Center'} // ${data.fromAddress?.replace(/<br>/g, ', ') || 'Bole Sub-City, Woreda 03, Addis Ababa'}
+                            ${safeFromName}${safeFromAddress ? ` // ${safeFromAddress}` : ''}
                         </div>
                     </div>
 
@@ -333,23 +348,23 @@ export const generatePackLabelHTML = async (
                     <div>
                         <div style="font-weight: 900; font-size: 12px; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.2em; color: #000;">SHIP TO:</div>
                         <div style="font-weight: 900; font-size: 30px; text-transform: uppercase; line-height: 1.0; margin-bottom: 6px; word-break: break-word;">
-                            ${data.customerName || data.destSiteName || 'RECIPIENT'}
+                            ${safeRecipient}
                         </div>
                         <div style="font-size: 18px; font-weight: 700; text-transform: uppercase; line-height: 1.2; margin-bottom: 4px; word-break: break-word;">
-                            ${data.shippingAddress || ''}
+                            ${safeAddress}
                         </div>
                         <div style="font-weight: 900; font-size: 26px; text-transform: uppercase; letter-spacing: 1px;">
-                            ${data.city || ''}
+                            ${safeCity}
                         </div>
                     </div>
                 </div>
 
                 <!-- COMPLETE PRODUCT MANIFEST -->
-                ${(data.lineItems && data.lineItems.length > 0) ? `
+                ${(safeLineItems.length > 0) ? `
                 <div style="margin-top: 12px; padding: 10px 0; border-bottom: 3px solid #000;">
-                    <div style="font-weight: 900; font-size: 12px; text-transform: uppercase; margin-bottom: 8px; letter-spacing: 0.15em; color: #222;">MANIFEST — ${data.lineItems.length} ITEM${data.lineItems.length > 1 ? 'S' : ''}</div>
+                    <div style="font-weight: 900; font-size: 12px; text-transform: uppercase; margin-bottom: 8px; letter-spacing: 0.15em; color: #222;">MANIFEST — ${safeLineItems.length} ITEM${safeLineItems.length > 1 ? 'S' : ''}</div>
                     <div style="font-size: 13px; font-weight: 700;">
-                        ${data.lineItems.map(item => `
+                        ${safeLineItems.map(item => `
                             <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 4px; text-transform: uppercase; border-bottom: 1px dotted #ccc; padding-bottom: 3px;">
                                 <span style="word-break: break-word; flex: 1; padding-right: 12px;">${item.name || 'ITEM'}</span>
                                 <span style="margin-left: 12px; min-width: 50px; text-align: right; font-weight: 900; font-mono;">${item.sku || ''}</span>
@@ -364,7 +379,7 @@ export const generatePackLabelHTML = async (
                 <div style="margin-top: 16px; text-align: center;">
                     <div class="barcode-container" style="height: 68px; margin-bottom: 8px; display:flex; justify-content:center;">${barcode}</div>
                     <div style="font-weight: 900; font-size: 18px; letter-spacing: 0.25em; text-transform: uppercase; font-family:'SF Mono', 'Fira Code', monospace; margin-top:6px; color: #000;">
-                        * TRK :: ${data.trackingNumber || formattedOrderRef} *
+                        * TRK :: ${displayTrackingNumber} *
                     </div>
                 </div>
 
@@ -383,7 +398,7 @@ export const generatePackLabelHTML = async (
         <!DOCTYPE html>
         <html>
         <head>
-            <title>TRK-${data.orderRef}</title>
+            <title>TRK-${safeOrderRef}</title>
             <link rel="preconnect" href="https://fonts.googleapis.com">
             <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
             <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&family=Fira+Code:wght@700&display=swap" rel="stylesheet">

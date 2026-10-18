@@ -72,10 +72,9 @@ export const PackModalsContainer: React.FC<PackModalsContainerProps> = ({
 
     const [isSubmitting, setIsSubmitting] = useState(false);
 
-    const { handlePrintLabel, handleReprintLabel, handlePrintItemLabel, getLabelQtyAndUnit, isPrinting } = usePackLabelPrint({
+    const { handlePrintLabel, handleReprintLabel, getLabelQtyAndUnit, isPrinting } = usePackLabelPrint({
         products,
         sites,
-        user,
         resolveOrderRef,
         generateTrackingNumber,
         addNotification
@@ -183,7 +182,6 @@ export const PackModalsContainer: React.FC<PackModalsContainerProps> = ({
                             setIsPackModalOpen(false);
                             setIsScannerOpen(true);
                         }}
-                        onPrintItemLabel={(item, product, boxSize) => handlePrintItemLabel(selectedPackJob, item, product, boxSize)}
                         onFlagDiscrepancy={() => setIsDiscrepancyModalOpen(true)}
                         onDeleteJob={deleteJob}
                     />

@@ -342,7 +342,7 @@ export const PackDetailsModal: React.FC<PackDetailsModalProps> = ({
 
                             {isPrintMenuOpen && (
                                 <div className="absolute bottom-full left-0 mb-2 w-36 md:w-44 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl shadow-xl overflow-hidden p-1.5 z-50 animate-in slide-in-from-bottom-2 duration-150">
-                                    {(['TINY', 'SMALL', 'MEDIUM', 'LARGE', 'XL'] as const).map(size => (
+                                    {(['SMALL', 'MEDIUM', 'LARGE', 'XL'] as const).map(size => (
                                         <button
                                             key={size}
                                             onClick={() => {

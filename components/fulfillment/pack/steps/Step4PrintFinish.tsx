@@ -164,6 +164,7 @@ export const Step4PrintFinish: React.FC<Step4PrintFinishProps> = ({
                     >
                         <Printer size={18} className="text-[var(--theme-accent)]" />
                         <span>{t('warehouse.printLabel') || 'Print Shipping Label'}</span>
+                        <span className="text-xs font-medium normal-case opacity-75">4 × 6 in · 1 parcel</span>
                     </button>
 
                 </div>

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Package, CheckCircle, Barcode, Printer } from 'lucide-react';
+import { Package, CheckCircle, Barcode } from 'lucide-react';
 import { WMSJob, Product } from '../../../../types';
 import { getProductForItem, getItemMeasureQty as getItemMeasureQtyShared } from '../utils/packItemHelpers';
 import { getSellUnit, formatProductSize, formatPackagingDescription } from '../../../../utils/units';
@@ -8,16 +8,12 @@ interface PackJobItemCardProps {
     item: any;
     job: WMSJob;
     products: Product[];
-    boxSize: string;
-    onPrintItemLabel?: (item: any, product?: any, boxSize?: string) => void;
 }
 
 export const PackJobItemCard: React.FC<PackJobItemCardProps> = ({
     item,
     job,
     products,
-    boxSize,
-    onPrintItemLabel,
 }) => {
     const product = getProductForItem(item, job, products);
     const measureQty = getItemMeasureQtyShared(item, job, products, product);
@@ -105,16 +101,6 @@ export const PackJobItemCard: React.FC<PackJobItemCardProps> = ({
                     </div>
 
                     <div className="flex items-center gap-1.5">
-                        {onPrintItemLabel && (
-                            <button
-                                type="button"
-                                onClick={() => onPrintItemLabel(item, product, boxSize)}
-                                title="Print label"
-                                className="w-9 h-9 min-h-[36px] min-w-[36px] rounded-xl bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-app)] border border-[var(--theme-border)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] transition-colors flex items-center justify-center cursor-pointer touch-manipulation"
-                            >
-                                <Printer size={14} />
-                            </button>
-                        )}
                         {/* Desktop-only status badge */}
                         <span className={`hidden sm:flex px-2.5 py-1 rounded-full text-[11px] font-semibold uppercase tracking-wider border items-center gap-1 ${
                             isDone
