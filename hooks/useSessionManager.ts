@@ -2,10 +2,9 @@ import { useEffect, useRef, useState } from 'react';
 import { authService } from '../services/auth.service';
 import { APP_CONFIG } from '../config/app.config';
 import { logger } from '../utils/logger';
+import { supabase } from '../lib/supabase';
 import {
     getActiveRolePolicy,
-    checkTimeRestriction,
-    checkIpRestriction,
     checkMfaRequirement,
 } from '../services/zeroTrustPolicies.service';
 
@@ -26,6 +25,7 @@ export function useSessionManager(
     const expirationCheckRef = useRef<NodeJS.Timeout | null>(null);
     const [hasWarned, setHasWarned] = useState(false);
     const hasCheckedRef = useRef(false);
+    const mfaCheckedForRef = useRef<string | null>(null);
     const lastActivityRef = useRef<number>(Date.now());
 
     // Activity tracking: update lastActivity timestamp on user interactions
@@ -73,28 +73,18 @@ export function useSessionManager(
                     return;
                 }
 
-                // 2. Zero-Trust Operational Time Restriction
-                const timeCheck = checkTimeRestriction(userRole);
-                if (!timeCheck.allowed) {
-                    logger.warn('useSessionManager', timeCheck.reason || 'Operational time restriction violated');
-                    onSessionTimeout?.();
-                    return;
-                }
-
-                // 3. Zero-Trust Network / Geo-IP Restriction
-                const ipCheck = checkIpRestriction(userRole);
-                if (!ipCheck.allowed) {
-                    logger.warn('useSessionManager', ipCheck.reason || 'Network IP restriction violated');
-                    onSessionTimeout?.();
-                    return;
-                }
-
-                // 4. Zero-Trust MFA Requirement Check
-                const mfaCheck = checkMfaRequirement(userRole, session.user);
-                if (mfaCheck.required && !mfaCheck.satisfied && !hasWarned) {
-                    logger.warn('useSessionManager', mfaCheck.reason || 'MFA requirement not satisfied');
-                    setHasWarned(true);
-                    onSessionWarning?.(0);
+                // 2. Enforce MFA using Supabase's current session assurance level.
+                // Browser metadata and a configured factor do not prove an AAL2 session.
+                const mfaCheckKey = `${session.user.id}:${userRole || ''}`;
+                if (policy?.mfa_required && mfaCheckedForRef.current !== mfaCheckKey) {
+                    const { data: assurance, error: assuranceError } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+                    const mfaCheck = checkMfaRequirement(userRole, assuranceError ? 'aal1' : (assurance?.currentLevel ?? undefined));
+                    if (mfaCheck.required && !mfaCheck.satisfied) {
+                        logger.warn('useSessionManager', mfaCheck.reason || 'MFA requirement not satisfied');
+                        onSessionTimeout?.();
+                        return;
+                    }
+                    mfaCheckedForRef.current = mfaCheckKey;
                 }
 
                 // Warn when 1 minute remains before inactivity timeout
@@ -104,7 +94,7 @@ export function useSessionManager(
                     onSessionWarning?.(1);
                 }
 
-                // 5. JWT Token Expiration Check
+                // 3. JWT Token Expiration Check
                 if (session.expires_at) {
                     const expiresAt = new Date(session.expires_at * 1000);
                     const timeUntilExpiry = expiresAt.getTime() - now;

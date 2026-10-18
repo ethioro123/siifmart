@@ -98,33 +98,47 @@ export const AssignLabelHub: React.FC<AssignLabelHubProps> = ({
             format: labelFormat === 'QR' ? 'QR' : 'Barcode'
         });
 
-        printHtmlContent(labelHTML);
-        addNotification('success', `Location label ${humanLocationLabel} ready!`);
+        const res = await printHtmlContent(labelHTML);
+        if (res && !res.success && res.error) {
+            addNotification('alert', `Printing alert: ${res.error}`);
+        } else {
+            addNotification('success', `Location label ${humanLocationLabel} ready!`);
+        }
     };
 
     const handlePrintProduct = async () => {
         if (!searchSku.trim()) return;
+        const canonicalCode = (matchedProduct?.barcode || matchedProduct?.sku || searchSku).trim();
         const labelHTML = await generateUnifiedBatchLabelsHTML([{
-            value: matchedProduct?.sku || searchSku.trim(),
+            value: canonicalCode,
+            sku: matchedProduct?.sku || searchSku.trim(),
+            barcode: matchedProduct?.barcode,
+            barcodeType: matchedProduct?.barcodeType,
             label: matchedProduct?.name || 'Manual Product Entry',
             quantity: printQty,
             price: matchedProduct?.price?.toString(),
+            currency: activeCurrency,
             category: matchedProduct?.category
         }], {
             size: labelSize,
             format: labelFormat === 'QR' ? 'QR' : 'Barcode',
+            currency: activeCurrency,
             showPrice: true,
             showCategory: true
         });
 
-        printHtmlContent(labelHTML);
-        addNotification('success', `${printQty} Product label${printQty > 1 ? 's' : ''} ready!`);
+        const res = await printHtmlContent(labelHTML);
+        if (res && !res.success && res.error) {
+            addNotification('alert', `Printing alert: ${res.error}`);
+        } else {
+            addNotification('success', `${printQty} Product label${printQty > 1 ? 's' : ''} ready!`);
+        }
     };
 
     const activePreviewData = labelMode === 'PRODUCT' ? {
         type: 'PRODUCT' as const,
         title: matchedProduct?.name || (searchSku.trim() ? 'Manual Product Entry' : 'Awaiting SKU'),
-        code: matchedProduct?.sku || searchSku.trim(),
+        code: (matchedProduct?.barcode || matchedProduct?.sku || searchSku).trim(),
         format: labelFormat,
         size: labelSize,
         price: matchedProduct?.price,
@@ -365,7 +379,7 @@ export const AssignLabelHub: React.FC<AssignLabelHubProps> = ({
                                             <BarcodeLabelPreviewCard
                                                 type="PRODUCT"
                                                 title={matchedProduct ? matchedProduct.name : searchSku}
-                                                code={matchedProduct?.sku || searchSku.trim()}
+                                                code={(matchedProduct?.barcode || matchedProduct?.sku || searchSku).trim()}
                                                 format={labelFormat}
                                                 size={labelSize}
                                                 price={matchedProduct?.price}

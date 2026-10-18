@@ -14,39 +14,12 @@ export const systemConfigService = {
             }
         }
 
-        try {
-            // First attempt to read via server-side sanitized RPC (enforces national boundaries)
-            if (typeof (supabase as any)?.rpc === 'function') {
-                const { data: rpcData, error: rpcError } = await supabase
-                    .rpc('get_sanitized_system_config');
-
-                if (!rpcError && rpcData && typeof rpcData === 'object' && Object.keys(rpcData).length > 0) {
-                    return this._mapSettings(rpcData);
-                }
-            }
-
-            const { data, error } = await supabase
-                .from('system_config')
-                .select('*')
-                .eq('id', '00000000-0000-0000-0000-000000000001')
-                .maybeSingle();
-
-            if (error) {
-                console.error('⚠️ Supabase error loading settings:', error);
-                throw error;
-            }
-
-            // If no record found, return the default mapped object
-            if (!data) {
-                console.warn('⚠️ No system_config record found. Using default application settings.');
-                return this._mapSettings({});
-            }
-
-            return this._mapSettings(data);
-        } catch (err) {
-            console.warn('⚠️ Settings load failed, using fallback logic:', err);
-            return this._mapSettings({});
+        const { data, error } = await supabase.rpc('get_sanitized_system_config');
+        if (error) throw error;
+        if (!data || typeof data !== 'object' || Array.isArray(data)) {
+            throw new Error('The secure settings endpoint returned an invalid response.');
         }
+        return this._mapSettings(data);
     },
 
     async updateSettings(updates: Partial<SystemConfig>, userName: string): Promise<SystemConfig> {
@@ -68,15 +41,17 @@ export const systemConfigService = {
         try {
             const { data, error } = await supabase
                 .from('system_config')
-                .upsert(finalUpdates)
-                .select()
-                .single();
+                .update(finalUpdates)
+                .eq('id', '00000000-0000-0000-0000-000000000001')
+                .select('id')
+                .maybeSingle();
 
             if (error) {
                 console.error('Failed to update system_config in Supabase:', error);
                 throw error;
             }
-            return this._mapSettings(data, updates);
+            if (!data) throw new Error('System settings could not be updated for this account.');
+            return this._mapSettings(finalUpdates, updates);
         } catch (err) {
             console.error('Failed to update system_config:', err);
             throw err;

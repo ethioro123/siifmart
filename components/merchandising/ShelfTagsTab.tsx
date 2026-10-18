@@ -5,6 +5,8 @@ import {
 } from 'lucide-react';
 import { useMerchandising } from './MerchandisingContext';
 import type { Product } from '../../types';
+import { generateShelfTagsHTML, ShelfTagItem, isProductHalal } from '../../utils/labels/ShelfTagGenerator';
+import { printHtmlContent } from '../../utils/printHelper';
 
 export const ShelfTagsTab: React.FC = () => {
     const {
@@ -108,12 +110,37 @@ export const ShelfTagsTab: React.FC = () => {
     };
 
     // Trigger Print
-    const handlePrintSelected = () => {
+    const handlePrintSelected = async () => {
         if (selectedProductIds.size === 0) {
             addNotification('info', 'Please select at least one item to generate shelf tags.');
             return;
         }
-        window.print();
+
+        const itemsToPrint: ShelfTagItem[] = selectedProductsList.map(p => ({
+            id: p.id,
+            name: p.name,
+            sku: p.sku,
+            barcode: p.barcode,
+            barcodeType: p.barcodeType,
+            category: p.category,
+            shelfPosition: p.shelfPosition,
+            regularPrice: p.price,
+            salePrice: p.salePrice,
+            isOnSale: p.isOnSale,
+            isHalal: isProductHalal(p)
+        }));
+
+        const html = generateShelfTagsHTML(itemsToPrint, {
+            currency: currencySymbol,
+            storeName: 'SIIFMART RETAIL'
+        });
+
+        const res = await printHtmlContent(html);
+        if (res && !res.success && res.error) {
+            addNotification('alert', `Printing alert: ${res.error}`);
+        } else {
+            addNotification('success', `${itemsToPrint.length} shelf tag${itemsToPrint.length > 1 ? 's' : ''} dispatched for printing`);
+        }
     };
 
     const selectedProductsList = useMemo(() => {
@@ -367,7 +394,11 @@ export const ShelfTagsTab: React.FC = () => {
                                                     <span className="text-[11px] font-mono font-bold text-[var(--theme-accent)]">
                                                         {currencySymbol} {effectivePrice.toFixed(2)}
                                                     </span>
-                                                    <span className="text-[7px] uppercase font-bold text-emerald-500">Halal</span>
+                                                    {isProductHalal(p) ? (
+                                                        <span className="text-[7px] uppercase font-bold text-emerald-500">Halal</span>
+                                                    ) : (
+                                                        <span className="text-[7px] uppercase font-bold text-[var(--theme-text-muted)]">Verified</span>
+                                                    )}
                                                 </div>
                                             </div>
                                         </td>
@@ -383,36 +414,6 @@ export const ShelfTagsTab: React.FC = () => {
                             )}
                         </tbody>
                     </table>
-                </div>
-            </div>
-
-            {/* Print Section (rendered specifically for print stylesheets) */}
-            <div className="hidden print:block print:p-0">
-                <div className="grid grid-cols-3 gap-3 p-4 bg-white text-black">
-                    {selectedProductsList.map(p => {
-                        const effectivePrice = p.isOnSale && p.salePrice && p.salePrice > 0 ? p.salePrice : p.price;
-                        return (
-                            <div key={`print-${p.id}`} className="border-2 border-dashed border-black p-3 rounded-lg flex flex-col justify-between h-36 page-break-inside-avoid">
-                                <div className="flex justify-between items-start">
-                                    <div>
-                                        <p className="text-[10px] font-bold uppercase tracking-wider">{p.category || 'SIIFMART'}</p>
-                                        <h4 className="text-xs font-bold leading-tight line-clamp-2 mt-0.5">{p.name}</h4>
-                                    </div>
-                                    <span className="text-[8px] font-bold px-1.5 py-0.5 border border-black rounded">HALAL</span>
-                                </div>
-                                <div className="border-t border-b border-black py-1 my-1 flex justify-between items-baseline">
-                                    <span className="text-[9px] font-mono">SHELF: {p.shelfPosition || 'STD'}</span>
-                                    <span className="text-xl font-bold font-mono">
-                                        {currencySymbol} {effectivePrice.toFixed(2)}
-                                    </span>
-                                </div>
-                                <div className="flex justify-between items-center text-[8px] font-mono">
-                                    <span>SKU: {p.sku}</span>
-                                    <span>SIIFMART RETAIL</span>
-                                </div>
-                            </div>
-                        );
-                    })}
                 </div>
             </div>
         </div>

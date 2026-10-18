@@ -181,6 +181,8 @@ export const ReceiveTab: React.FC = () => {
             sku: string;
             name: string;
             qty: number;
+            barcode?: string;
+            barcodeType?: string;
             price?: string | number;
             category?: string;
             expiry?: string;
@@ -193,48 +195,75 @@ export const ReceiveTab: React.FC = () => {
         targetType: 'LPN' | 'ITEM' = reprintLabelType
     ) => {
         setIsSubmitting(true);
+        const activeCurrency = effectiveCountry === 'KE' || settings?.country === 'KE' ? 'KSh' : 'ETB';
         try {
             if (targetType === 'LPN') {
-                const lpnItems: InboundPutawayLabelItem[] = printItems.map(item => ({
-                    sku: item.sku,
-                    productName: item.name,
-                    barcode: item.sku,
-                    poNumber: item.poNumber || receivingPO?.poNumber || (receivingPO as any)?.po_number,
-                    quantity: item.qty,
-                    packQuantity: item.packQuantity || 1,
-                    batchNumber: item.batchNumber,
-                    expiryDate: item.expiry,
-                    targetLocation: item.targetLocation,
-                    targetZone: item.targetZone || item.category || 'General',
-                    receivedBy: user?.name,
-                    receiverCode: (user as any)?.employeeCode || (user as any)?.employee_code,
-                    receivedDate: new Date().toISOString().slice(0, 10),
-                    condition: 'QC-PASSED'
-                }));
+                const lpnItems: InboundPutawayLabelItem[] = printItems.map(item => {
+                    const matchedProd = (products || []).find((p: Product) => p.sku === item.sku || p.barcode === item.sku) ||
+                                        (allProducts || []).find((p: Product) => p.sku === item.sku || p.barcode === item.sku);
+                    const canonicalBarcode = item.barcode || matchedProd?.barcode || item.sku;
+                    return {
+                        sku: item.sku,
+                        productName: item.name,
+                        barcode: canonicalBarcode,
+                        poNumber: item.poNumber || receivingPO?.poNumber || (receivingPO as any)?.po_number,
+                        quantity: item.qty,
+                        packQuantity: item.packQuantity || 1,
+                        batchNumber: item.batchNumber,
+                        expiryDate: item.expiry,
+                        targetLocation: item.targetLocation,
+                        targetZone: item.targetZone || item.category || 'General',
+                        receivedBy: user?.name,
+                        receiverCode: (user as any)?.employeeCode || (user as any)?.employee_code,
+                        receivedDate: new Date().toISOString().slice(0, 10),
+                        condition: 'QC-PASSED'
+                    };
+                });
                 const html = await generateInboundPutawayLabelHTML(lpnItems, {
                     size: reprintSize as LabelSize,
                     format: reprintFormat as LabelFormat
                 });
-                printHtmlContent(html);
+                const res = await printHtmlContent(html);
+                if (res && !res.success && res.error) {
+                    addNotification('alert', `Printing alert: ${res.error}`);
+                } else {
+                    addNotification('success', `Dispatched ${lpnItems.length} putaway label${lpnItems.length > 1 ? 's' : ''} to printer`);
+                }
             } else {
-                const labelsToPrint = printItems.map(item => ({
-                    value: item.sku,
-                    label: item.name,
-                    quantity: item.qty,
-                    price: (item.price || '0.00').toString(),
-                    category: item.category || 'General',
-                    date: item.expiry || ''
-                }));
+                const labelsToPrint = printItems.map(item => {
+                    const matchedProd = (products || []).find((p: Product) => p.sku === item.sku || p.barcode === item.sku) ||
+                                        (allProducts || []).find((p: Product) => p.sku === item.sku || p.barcode === item.sku);
+                    const canonicalBarcode = item.barcode || matchedProd?.barcode || item.sku;
+                    const canonicalFormat = item.barcodeType || matchedProd?.barcodeType;
+                    return {
+                        value: canonicalBarcode,
+                        label: item.name,
+                        sku: item.sku,
+                        barcode: canonicalBarcode,
+                        barcodeType: canonicalFormat,
+                        quantity: item.qty,
+                        price: (item.price ?? matchedProd?.price ?? '0.00').toString(),
+                        currency: activeCurrency,
+                        category: item.category || matchedProd?.category || 'General',
+                        date: item.expiry || ''
+                    };
+                });
                 const printOptions = {
                     size: reprintSize as LabelSize,
                     format: reprintFormat as LabelFormat,
+                    currency: activeCurrency,
                     showPrice: reprintOptions.showPrice,
                     showCategory: reprintOptions.showCategory,
                     showName: reprintOptions.showName
                 };
 
                 const html = await generateUnifiedBatchLabelsHTML(labelsToPrint, printOptions);
-                printHtmlContent(html);
+                const res = await printHtmlContent(html);
+                if (res && !res.success && res.error) {
+                    addNotification('alert', `Printing alert: ${res.error}`);
+                } else {
+                    addNotification('success', `Dispatched ${labelsToPrint.length} item label${labelsToPrint.length > 1 ? 's' : ''} to printer`);
+                }
             }
         } catch (e) {
             logger.error('ReceiveTab', 'caught error', e as Error);

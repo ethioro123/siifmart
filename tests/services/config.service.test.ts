@@ -4,9 +4,11 @@ import { supabase } from '../../lib/supabase';
 
 vi.mock('../../lib/supabase', () => {
     const mockFrom = vi.fn();
+    const mockRpc = vi.fn();
     return {
         supabase: {
-            from: mockFrom
+            from: mockFrom,
+            rpc: mockRpc
         },
         isSupabaseConfigured: () => true
     };
@@ -19,18 +21,11 @@ describe('systemConfigService', () => {
 
     describe('updateSettings', () => {
         it('safely filters out columns not in LIVE_SYSTEM_CONFIG_COLUMNS to prevent PGRST204', async () => {
-            const mockSingle = vi.fn().mockResolvedValue({
-                data: {
-                    id: '00000000-0000-0000-0000-000000000001',
-                    store_name: 'SIIFMART Kenya',
-                    currency: 'KSh',
-                    tax_rate: 16
-                },
-                error: null
-            });
-            const mockSelect = vi.fn().mockReturnValue({ single: mockSingle });
-            const mockUpsert = vi.fn().mockReturnValue({ select: mockSelect });
-            (supabase.from as any).mockReturnValue({ upsert: mockUpsert });
+            const mockMaybeSingle = vi.fn().mockResolvedValue({ data: { id: '00000000-0000-0000-0000-000000000001' }, error: null });
+            const mockSelect = vi.fn().mockReturnValue({ maybeSingle: mockMaybeSingle });
+            const mockEq = vi.fn().mockReturnValue({ select: mockSelect });
+            const mockUpdate = vi.fn().mockReturnValue({ eq: mockEq });
+            (supabase.from as any).mockReturnValue({ update: mockUpdate });
 
             const result = await systemConfigService.updateSettings({
                 country: 'KE',
@@ -42,8 +37,8 @@ describe('systemConfigService', () => {
                 eTimsEnabled: true
             }, 'CEO');
 
-            // Verify upsert call: must NOT contain complianceStandard, taxAuthority, or non-existent columns
-            const sentPayload = mockUpsert.mock.calls[0][0];
+            // Verify update payload: must NOT contain complianceStandard, taxAuthority, or non-existent columns
+            const sentPayload = mockUpdate.mock.calls[0][0];
             expect(sentPayload).toBeDefined();
             expect(sentPayload.store_name).toBe('SIIFMART Kenya');
             expect(sentPayload.currency).toBe('KSh');
@@ -68,18 +63,11 @@ describe('systemConfigService', () => {
         });
 
         it('maps camelCase properties to snake_case column names correctly', async () => {
-            const mockSingle = vi.fn().mockResolvedValue({
-                data: {
-                    id: '00000000-0000-0000-0000-000000000001',
-                    pos_terminal_id: 'TERM-009',
-                    pos_guest_checkout: false,
-                    default_vat_rate: 15
-                },
-                error: null
-            });
-            const mockSelect = vi.fn().mockReturnValue({ single: mockSingle });
-            const mockUpsert = vi.fn().mockReturnValue({ select: mockSelect });
-            (supabase.from as any).mockReturnValue({ upsert: mockUpsert });
+            const mockMaybeSingle = vi.fn().mockResolvedValue({ data: { id: '00000000-0000-0000-0000-000000000001' }, error: null });
+            const mockSelect = vi.fn().mockReturnValue({ maybeSingle: mockMaybeSingle });
+            const mockEq = vi.fn().mockReturnValue({ select: mockSelect });
+            const mockUpdate = vi.fn().mockReturnValue({ eq: mockEq });
+            (supabase.from as any).mockReturnValue({ update: mockUpdate });
 
             await systemConfigService.updateSettings({
                 posTerminalId: 'TERM-009',
@@ -87,7 +75,7 @@ describe('systemConfigService', () => {
                 defaultVatRate: 15
             }, 'Admin');
 
-            const sentPayload = mockUpsert.mock.calls[0][0];
+            const sentPayload = mockUpdate.mock.calls[0][0];
             expect(sentPayload.pos_terminal_id).toBe('TERM-009');
             expect(sentPayload.pos_guest_checkout).toBe(false);
             expect(sentPayload.default_vat_rate).toBe(15);
@@ -96,19 +84,13 @@ describe('systemConfigService', () => {
 
     describe('getSettings', () => {
         it('correctly maps snake_case DB columns to SystemConfig and derives defaults', async () => {
-            const mockMaybeSingle = vi.fn().mockResolvedValue({
-                data: {
+            (supabase.rpc as any).mockResolvedValue({ data: {
                     id: '00000000-0000-0000-0000-000000000001',
                     store_name: 'SIIFMART Addis',
                     currency: 'ETB',
                     tax_rate: 15,
                     date_format: 'DD/MM/YYYY'
-                },
-                error: null
-            });
-            const mockEq = vi.fn().mockReturnValue({ maybeSingle: mockMaybeSingle });
-            const mockSelect = vi.fn().mockReturnValue({ eq: mockEq });
-            (supabase.from as any).mockReturnValue({ select: mockSelect });
+                }, error: null });
 
             const config = await systemConfigService.getSettings();
 
@@ -118,19 +100,20 @@ describe('systemConfigService', () => {
             expect(config.taxAuthority).toContain('ERCA');
         });
 
+        it('fails closed when the sanitized settings RPC fails instead of reading the table directly', async () => {
+            (supabase.rpc as any).mockResolvedValue({ data: null, error: new Error('RPC unavailable') });
+
+            await expect(systemConfigService.getSettings()).rejects.toThrow('RPC unavailable');
+            expect(supabase.from).not.toHaveBeenCalled();
+        });
+
         it('correctly maps Uganda currency and timezone to UG and configures URA without defaulting to ET', async () => {
-            const mockMaybeSingle = vi.fn().mockResolvedValue({
-                data: {
+            (supabase.rpc as any).mockResolvedValue({ data: {
                     id: '00000000-0000-0000-0000-000000000001',
                     currency: 'USh',
                     timezone: 'Africa/Kampala',
                     tax_rate: 18
-                },
-                error: null
-            });
-            const mockEq = vi.fn().mockReturnValue({ maybeSingle: mockMaybeSingle });
-            const mockSelect = vi.fn().mockReturnValue({ eq: mockEq });
-            (supabase.from as any).mockReturnValue({ select: mockSelect });
+                }, error: null });
 
             const config = await systemConfigService.getSettings();
 

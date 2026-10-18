@@ -84,19 +84,19 @@ describe('zeroTrustPolicies.service runtime enforcement', () => {
             });
 
             // Without MFA
-            const unverified = checkMfaRequirement('admin', { app_metadata: { aal: 'aal1' } });
+            const unverified = checkMfaRequirement('admin', 'aal1');
             expect(unverified.required).toBe(true);
             expect(unverified.satisfied).toBe(false);
 
             // With AAL2 MFA
-            const verifiedAal2 = checkMfaRequirement('admin', { app_metadata: { aal: 'aal2' } });
+            const verifiedAal2 = checkMfaRequirement('admin', 'aal2');
             expect(verifiedAal2.required).toBe(true);
             expect(verifiedAal2.satisfied).toBe(true);
 
-            // With verified factor
-            const verifiedFactor = checkMfaRequirement('admin', { factors: [{ status: 'verified' }] });
-            expect(verifiedFactor.required).toBe(true);
-            expect(verifiedFactor.satisfied).toBe(true);
+            // An enrolled factor or user-editable metadata alone is not an AAL2 session.
+            const enrolledOnly = checkMfaRequirement('admin', undefined);
+            expect(enrolledOnly.required).toBe(true);
+            expect(enrolledOnly.satisfied).toBe(false);
         });
     });
 

@@ -92,9 +92,12 @@ export function usePOSSettingsMutation() {
 
       // ── FIELD ALLOWLIST FILTERING ──
       const allowed = ALLOWED_FIELDS[section];
+      const secretFields = new Set(['mpesaPasskey', 'mpesaConsumerKey', 'mpesaConsumerSecret']);
       const safePayload = allowed.reduce<Partial<SystemConfig>>(
         (acc, key) => {
-          if (data[key] !== undefined) {
+          // Secret values are never returned by the settings read RPC. A blank
+          // field means "keep the existing credential", not "erase it".
+          if (data[key] !== undefined && !(secretFields.has(key) && data[key] === '')) {
             (acc as Record<string, unknown>)[key] = data[key];
           }
           return acc;

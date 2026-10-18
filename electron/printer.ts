@@ -47,6 +47,23 @@ export async function getSystemPrinters(window: BrowserWindow): Promise<Electron
     }
 }
 
+function extractPageDimensionsMicrons(html: string): { width: number; height: number } | null {
+    const match = html.match(/@page[^{]*\{[^}]*size:\s*([0-9.]+)(mm|in)\s+([0-9.]+)(mm|in)/i);
+    if (!match) return null;
+
+    const wVal = parseFloat(match[1]);
+    const wUnit = match[2].toLowerCase();
+    const hVal = parseFloat(match[3]);
+    const hUnit = match[4].toLowerCase();
+
+    if (isNaN(wVal) || isNaN(hVal) || wVal <= 0 || hVal <= 0) return null;
+
+    const widthMicrons = Math.round(wUnit === 'in' ? wVal * 25400 : wVal * 1000);
+    const heightMicrons = Math.round(hUnit === 'in' ? hVal * 25400 : hVal * 1000);
+
+    return { width: widthMicrons, height: heightMicrons };
+}
+
 export async function printHtmlDirect(html: string, options: ElectronPrintOptions = {}): Promise<{ success: boolean; error?: string }> {
     return new Promise((resolve) => {
         let printWindow: BrowserWindow | null = new BrowserWindow({
@@ -72,6 +89,7 @@ export async function printHtmlDirect(html: string, options: ElectronPrintOption
                 return resolve({ success: false, error: 'Print window destroyed before printing' });
             }
 
+            const detectedPageSize = extractPageDimensionsMicrons(html);
             const printSettings: Electron.WebContentsPrintOptions = {
                 silent: options.silent ?? true,
                 printBackground: options.printBackground ?? true,
@@ -84,7 +102,7 @@ export async function printHtmlDirect(html: string, options: ElectronPrintOption
                 copies: options.copies ?? 1,
                 header: options.header,
                 footer: options.footer,
-                pageSize: options.pageSize as any || { width: 80000, height: 297000 } // Default ~80mm receipt width
+                pageSize: (options.pageSize as any) || detectedPageSize || { width: 80000, height: 297000 }
             };
 
             printWindow.webContents.print(printSettings, (success, failureReason) => {

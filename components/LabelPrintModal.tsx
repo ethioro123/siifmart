@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { X, Printer, Package, Settings, Search, Plus, Minus, Trash2 } from 'lucide-react';
 import Barcode from 'react-barcode';
 import { Product } from '../types';
@@ -34,11 +34,11 @@ interface LabelPrintModalProps {
     onPrint: () => void;
 }
 
-// Fixed label dimensions in mm for precise printing
+// Standardized label dimensions across SIIFMART (2"x1", 3"x2", 4"x3")
 const LABEL_SIZES = {
-    small: { width: 50, height: 25, barcodeHeight: 18, fontSize: 7 },   // 2" x 1"
-    medium: { width: 100, height: 50, barcodeHeight: 30, fontSize: 9 }, // 4" x 2"
-    large: { width: 100, height: 75, barcodeHeight: 45, fontSize: 11 }, // 4" x 3"
+    small: { width: 50.8, height: 25.4, barcodeHeight: 18, fontSize: 7, label: '2" × 1" (50.8 × 25.4 mm)' },
+    medium: { width: 76.2, height: 50.8, barcodeHeight: 30, fontSize: 9, label: '3" × 2" (76.2 × 50.8 mm)' },
+    large: { width: 101.6, height: 76.2, barcodeHeight: 45, fontSize: 11, label: '4" × 3" (101.6 × 76.2 mm)' },
 };
 
 export default function LabelPrintModal({ isOpen, onClose, labels, onPrint }: LabelPrintModalProps) {
@@ -47,7 +47,6 @@ export default function LabelPrintModal({ isOpen, onClose, labels, onPrint }: La
     const [labelSize, setLabelSize] = useState<LabelSize>('medium');
     const [activeLabels, setActiveLabels] = useState<LabelData[]>(labels || []);
     const [searchQuery, setSearchQuery] = useState('');
-    const printRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
         if (isOpen) {
@@ -97,14 +96,18 @@ export default function LabelPrintModal({ isOpen, onClose, labels, onPrint }: La
     };
 
     const totalLabels = activeLabels.reduce((sum, label) => sum + label.quantity, 0);
-    const config = LABEL_SIZES[labelSize];
 
     const handlePrint = async () => {
+        if (activeLabels.length === 0) return;
         const items = activeLabels.map(l => ({
-            value: l.product.sku || l.product.barcode || '',
+            value: (l.product.barcode || l.product.sku || '').trim(),
             label: l.product.name,
+            sku: l.product.sku,
+            barcode: l.product.barcode,
+            barcodeType: l.product.barcodeType,
             quantity: l.quantity,
             price: (l.product.price || '0.00').toString(),
+            currency: activeCurrency,
             category: l.product.category || 'General',
             date: ''
         }));
@@ -112,87 +115,22 @@ export default function LabelPrintModal({ isOpen, onClose, labels, onPrint }: La
         const printOptions = {
             size: labelSize === 'small' ? 'Small' : labelSize === 'large' ? 'Large' : 'Medium',
             format: 'Barcode' as const,
+            currency: activeCurrency,
             showPrice: true,
             showCategory: true,
             showName: true
         };
 
         const html = await generateUnifiedBatchLabelsHTML(items, printOptions);
-        printHtmlContent(html);
-        onPrint();
+        const res = await printHtmlContent(html);
+        if (res && !res.success && res.error) {
+            console.error('Print direct failed:', res.error);
+        } else {
+            onPrint();
+            onClose();
+        }
     };
 
-    // Generate all label elements
-    const renderLabels = () => {
-        const allLabels: React.ReactElement[] = [];
-
-        activeLabels.forEach((labelData: LabelData, labelIndex: number) => {
-            for (let i = 0; i < labelData.quantity; i++) {
-                const key = `${labelIndex}-${i}`;
-                const barcodeValue = labelData.product.barcode || labelData.product.sku;
-
-                if (labelSize === 'small') {
-                    // Compact layout for small labels - just name and barcode
-                    allLabels.push(
-                        <div key={key} className="label label-small">
-                            <div className="name">{labelData.product.name.substring(0, 20)}</div>
-                            <div className="barcode-container">
-                                {barcodeValue ? (
-                                    <Barcode
-                                        value={barcodeValue}
-                                        format={getBarcodeFormat(labelData.product.barcodeType || 'CODE128')}
-                                        width={1}
-                                        height={config.barcodeHeight}
-                                        fontSize={6}
-                                        margin={0}
-                                        displayValue={false}
-                                    />
-                                ) : (
-                                    <span className="text-red-500 text-[8pt]">NO BARCODE</span>
-                                )}
-                            </div>
-                            <div className="sku">{barcodeValue}</div>
-                        </div>
-                    );
-                } else {
-                    // Full layout for medium/large labels - no price, no duplicate details
-                    allLabels.push(
-                        <div key={key} className="label">
-                            <div className="label-header">
-                                <div>
-                                    <h3>{labelData.product.name}</h3>
-                                    <div className="category">{labelData.product.category}</div>
-                                </div>
-                            </div>
-                            <div className="barcode-container">
-                                {barcodeValue ? (
-                                    <Barcode
-                                        value={barcodeValue}
-                                        format={getBarcodeFormat(labelData.product.barcodeType || 'CODE128')}
-                                        width={labelSize === 'medium' ? 1.5 : 2}
-                                        height={config.barcodeHeight}
-                                        fontSize={config.fontSize - 1}
-                                        margin={0}
-                                        displayValue={false}
-                                    />
-                                ) : (
-                                    <div className="text-red-500 text-center">
-                                        <div className="font-bold">NO BARCODE</div>
-                                    </div>
-                                )}
-                            </div>
-                            <div className="label-footer">
-                                <span><strong>SKU:</strong> {labelData.product.sku}</span>
-                                {labelData.location && <span><strong>LOC:</strong> {labelData.location}</span>}
-                            </div>
-                        </div>
-                    );
-                }
-            }
-        });
-
-        return allLabels;
-    };
 
     return (
         <>
@@ -430,10 +368,6 @@ export default function LabelPrintModal({ isOpen, onClose, labels, onPrint }: La
                 </div>
             </div>
 
-            {/* Hidden container for print content */}
-            <div ref={printRef} className="hidden">
-                {renderLabels()}
-            </div>
         </>
     );
 }

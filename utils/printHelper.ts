@@ -263,7 +263,7 @@ const printViaIOSOverlay = (htmlContent: string): void => {
  * Main entry point — routes to the appropriate print strategy
  * based on the detected device/browser environment.
  */
-export const printHtmlContent = (htmlContent: string): void => {
+export const printHtmlContent = async (htmlContent: string): Promise<{ success: boolean; error?: string }> => {
     // Strip any embedded auto-print scripts to avoid double-dialog triggers
     const sanitized = htmlContent.replace(
         /<script\b[^>]*>([\s\S]*?)window\.print\(\)[\s\S]*?<\/script>/gi,
@@ -272,32 +272,45 @@ export const printHtmlContent = (htmlContent: string): void => {
 
     // ⚡️ Electron Desktop: Direct silent hardware printing (no browser dialogs!)
     if (typeof window !== 'undefined' && window.electronAPI?.isElectron) {
-        window.electronAPI.printDirect(sanitized, {
-            silent: true,
-            printBackground: true
-        }).catch((err) => {
-            console.error('[Electron:PrintHelper] Silent print failed, falling back to iframe:', err);
+        try {
+            const res = await window.electronAPI.printDirect(sanitized, {
+                silent: true,
+                printBackground: true
+            });
+            if (res && !res.success) {
+                console.warn('[Electron:PrintHelper] Silent print failed, trying browser iframe fallback:', res.error);
+                printViaIframe(sanitized);
+                return { success: false, error: res.error || 'Electron silent print failed' };
+            }
+            return { success: true };
+        } catch (err: any) {
+            console.error('[Electron:PrintHelper] Silent print exception, falling back to iframe:', err);
             printViaIframe(sanitized);
-        });
-        return;
+            return { success: false, error: err?.message || 'Electron print error' };
+        }
     }
 
-    if (!isMobileBrowser()) {
-        // ✅ Desktop Browser: iframe strategy (most reliable on all desktop browsers)
-        printViaIframe(sanitized);
-        return;
-    }
+    try {
+        if (!isMobileBrowser()) {
+            // ✅ Desktop Browser: iframe strategy (most reliable on all desktop browsers)
+            printViaIframe(sanitized);
+            return { success: true };
+        }
 
-    if (isIOS()) {
-        // ✅ iOS Safari: overlay strategy (popup is blocked or doesn't support print())
-        printViaIOSOverlay(sanitized);
-        return;
-    }
+        if (isIOS()) {
+            // ✅ iOS Safari: overlay strategy (popup is blocked or doesn't support print())
+            printViaIOSOverlay(sanitized);
+            return { success: true };
+        }
 
-    // ✅ Android / other mobile: try popup first, fall back to iOS overlay strategy
-    const popupSucceeded = printViaPopup(sanitized);
-    if (!popupSucceeded) {
-        // Popup was blocked (e.g. strict browser settings) — use overlay fallback
-        printViaIOSOverlay(sanitized);
+        // ✅ Android / other mobile: try popup first, fall back to iOS overlay strategy
+        const popupSucceeded = printViaPopup(sanitized);
+        if (!popupSucceeded) {
+            // Popup was blocked (e.g. strict browser settings) — use overlay fallback
+            printViaIOSOverlay(sanitized);
+        }
+        return { success: true };
+    } catch (err: any) {
+        return { success: false, error: err?.message || 'Browser print failed' };
     }
 };

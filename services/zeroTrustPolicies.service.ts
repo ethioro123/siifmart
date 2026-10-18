@@ -214,17 +214,16 @@ export function checkIpRestriction(userRole?: string, hostOrIp?: string): { allo
 /**
  * Evaluates whether Multi-Factor Authentication is required for the user's role.
  */
-export function checkMfaRequirement(userRole?: string, authUser?: any): { required: boolean; satisfied: boolean; reason?: string } {
+export function checkMfaRequirement(userRole?: string, assuranceLevel?: string): { required: boolean; satisfied: boolean; reason?: string } {
     if (!userRole) return { required: false, satisfied: true };
     const norm = userRole.toLowerCase().trim().replace(/[\s-]/g, '_');
 
     const policy = getActiveRolePolicy(userRole);
     if (!policy.mfa_required) return { required: false, satisfied: true };
 
-    // Check if session or user has AAL2 / MFA verified
-    const isAal2 = authUser?.app_metadata?.aal === 'aal2';
-    const hasVerifiedFactor = Array.isArray(authUser?.factors) && authUser.factors.some((f: any) => f.status === 'verified');
-    const isMfaActive = isAal2 || hasVerifiedFactor || authUser?.user_metadata?.mfa_verified === true;
+    // Only Supabase's current session assurance level proves that MFA was completed.
+    // User metadata and enrolled factors alone are not proof of an AAL2 session.
+    const isMfaActive = assuranceLevel === 'aal2';
 
     if (!isMfaActive) {
         return {
