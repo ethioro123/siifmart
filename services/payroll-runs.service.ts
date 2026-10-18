@@ -45,6 +45,7 @@ const mapDBToPayrollRun = (row: any): PayrollRun => ({
   initiatedByRole: row.initiated_by_role || '',
   initiatedAt: row.initiated_at || new Date().toISOString(),
   regionalAttestedBy: row.regional_attested_by || undefined,
+  regionalAttestedById: row.regional_attested_by_id || undefined,
   regionalAttestedByRole: row.regional_attested_by_role || undefined,
   regionalAttestedAt: row.regional_attested_at || undefined,
   regionalNotes: row.regional_notes || undefined,
@@ -231,8 +232,6 @@ export const payrollRunsService = {
 
   async attestAsRegionalHR(
     runId: string,
-    signatoryName: string,
-    signatoryRole: string,
     notes?: string
   ): Promise<PayrollRun> {
     const runs = await this.getAll();
@@ -240,36 +239,23 @@ export const payrollRunsService = {
     if (!target) throw new Error(`Payroll run ${runId} not found`);
 
     const now = new Date().toISOString();
-    const updated: PayrollRun = {
-      ...target,
-      regionalAttestedBy: signatoryName,
-      regionalAttestedByRole: signatoryRole,
-      regionalAttestedAt: now,
-      regionalNotes: notes || target.regionalNotes,
-      updatedAt: now
-    };
-
-    const { error } = await supabase
-      .from('payroll_runs')
-      .update({
-        regional_attested_by: signatoryName,
-        regional_attested_by_role: signatoryRole,
-        regional_attested_at: now,
-        regional_notes: notes || target.regionalNotes || null,
-        updated_at: now
-      })
-      .eq('id', runId);
+    const { data, error } = await supabase.rpc('attest_payroll_regional_hr', {
+      p_run_id: runId,
+      p_notes: notes || null
+    });
     if (error) {
       logger.error('payrollRunsService', 'Remote attestAsRegionalHR failed:', error as Error);
       throw new Error(`Failed to record Regional HR attestation on server: ${error.message || 'Database error'}`);
     }
+    if (!data) throw new Error('Failed to record Regional HR attestation: no record returned by server');
+    const updated = mapDBToPayrollRun(Array.isArray(data) ? data[0] : data);
 
     saveLocalBackup([updated]);
 
     await systemLogsService.create({
-      user_name: signatoryName,
+      user_name: updated.regionalAttestedBy || 'Regional HR',
       action: 'PAYROLL_REGIONAL_HR_ATTESTED',
-      details: `Regional HR attested payroll roster for ${target.period} (${target.employeeCount} staff). Signed by ${signatoryName} [${signatoryRole}].`,
+      details: `Regional HR attested payroll roster for ${target.period} (${target.employeeCount} staff). Signed by ${updated.regionalAttestedBy} [${updated.regionalAttestedByRole}].`,
       module: 'Payroll'
     });
 

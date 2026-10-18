@@ -100,16 +100,27 @@ export function useRoleSettingsMutation() {
       );
 
       // ── TAMPER-PROOF AUDIT LOGGING (system_logs) ──
-      try {
-        await supabase.from('system_logs').insert({
-          action: section === 'policies' ? 'Role Security Policy Update' : 'Role Access Rights Update',
-          details: `Role ${roleId || 'ALL'} ${section} updated for country ${targetCountry} by ${user?.name || user?.email}`,
-          user_name: user?.name || user?.email || 'System Admin',
-          module: 'Settings',
-          ip_address: typeof window !== 'undefined' ? window.location.hostname : 'localhost',
-        });
-      } catch (logErr) {
-        logger.warn('useRoleSettingsMutation', 'Audit logging to system_logs failed silently:', { error: String(logErr) });
+      const { error: logError } = await supabase.from('system_logs').insert({
+        action: section === 'policies' ? 'Role Security Policy Update' : 'Role Access Rights Update',
+        entity_type: 'system_config',
+        entity_id: null,
+        details: JSON.stringify({
+          roleId: roleId || 'ALL',
+          section,
+          targetCountry,
+          updatedBy: user?.name || user?.email,
+        }),
+        user_name: user?.name || user?.email || 'System Admin',
+        performed_by: user?.id ?? null,
+        site_id: user?.siteId ?? null,
+        country_code: targetCountry,
+        module: 'Settings',
+        created_at: new Date().toISOString(),
+      });
+
+      if (logError) {
+        logger.error('useRoleSettingsMutation', `Mandatory audit log failed: ${logError.message}`);
+        throw new Error(`Security Exception: Mandatory audit logging failed (${logError.message}). Role policy change halted.`);
       }
     },
 

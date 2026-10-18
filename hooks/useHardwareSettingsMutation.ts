@@ -102,12 +102,16 @@ export function useHardwareSettingsMutation() {
           entity_id: null,
           details: JSON.stringify({ targetCountry, changes: safePayload }),
           performed_by: user?.id ?? null,
+          user_name: user?.name || user?.email || 'Hardware Admin',
           site_id: user?.siteId ?? null,
+          country_code: targetCountry,
+          module: 'Hardware',
           created_at: new Date().toISOString(),
         });
 
       if (logError) {
-        logger.warn('useHardwareSettingsMutation', `Audit log failed for hardware settings: ${logError.message}`);
+        logger.error('useHardwareSettingsMutation', `Audit log failed for hardware settings: ${logError.message}`);
+        throw new Error(`Security Exception: Mandatory audit logging failed (${logError.message}). Hardware settings save halted.`);
       }
     },
     onSuccess: () => {

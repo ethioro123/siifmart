@@ -160,12 +160,16 @@ export function usePOSSettingsMutation() {
           entity_id: null,
           details: JSON.stringify({ section, targetCountry, changes: sanitizedChanges }),
           performed_by: user?.id ?? null,
+          user_name: user?.name || user?.email || 'POS Admin',
           site_id: user?.siteId ?? null,
+          country_code: targetCountry,
+          module: 'POS',
           created_at: new Date().toISOString(),
         });
 
       if (logError) {
-        logger.warn('usePOSSettingsMutation', `Audit log failed for ${section}: ${logError.message}`);
+        logger.error('usePOSSettingsMutation', `Audit log failed for ${section}: ${logError.message}`);
+        throw new Error(`Security Exception: Mandatory audit logging failed (${logError.message}). POS settings save halted.`);
       }
     },
 

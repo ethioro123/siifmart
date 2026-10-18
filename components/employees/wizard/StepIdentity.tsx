@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { Upload, MapPin, Eye, EyeOff, Camera, Mail, AlertTriangle } from 'lucide-react';
+import { Upload, MapPin, Eye, EyeOff, Camera, Mail, AlertTriangle, ShieldCheck } from 'lucide-react';
 import { Site } from '../../../types';
+import { getActiveRolePolicy } from '../../../services/zeroTrustPolicies.service';
 
 interface StepIdentityProps {
     newEmpData: any;
@@ -136,7 +137,13 @@ export default function StepIdentity({
                                 className="w-full bg-white dark:bg-black/30 border border-[#E2DCCE] dark:border-white/10 rounded-xl px-3 py-2 pr-10 text-stone-900 dark:text-white focus:border-[#2C5E3B] dark:focus:border-emerald-500 outline-none text-sm font-mono"
                                 value={newEmpData.password}
                                 onChange={e => setNewEmpData({ ...newEmpData, password: e.target.value })}
-                                placeholder="Minimum 6 characters"
+                                placeholder={
+                                    getActiveRolePolicy(newEmpData.role).password_complexity === 'high'
+                                        ? 'Min 12 chars (Upper, lower, num, symbol)'
+                                        : getActiveRolePolicy(newEmpData.role).password_complexity === 'medium'
+                                        ? 'Min 8 chars (letters and numbers)'
+                                        : 'Minimum 6 characters'
+                                }
                                 aria-label="Password"
                             />
                             <button
@@ -148,6 +155,12 @@ export default function StepIdentity({
                                 {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                             </button>
                         </div>
+                        <p className="text-[10px] text-stone-500 dark:text-stone-400 mt-1 flex items-center gap-1">
+                            <ShieldCheck size={11} className="text-[#0071E3] dark:text-[#2997FF]" />
+                            <span>
+                                Policy: {getActiveRolePolicy(newEmpData.role).password_complexity.toUpperCase()} complexity required for this role
+                            </span>
+                        </p>
                     </div>
                 </div>
             </div>

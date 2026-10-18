@@ -5,6 +5,19 @@ let inMemoryPayrollDb: any[] = [];
 
 vi.mock('../../lib/supabase', () => ({
   supabase: {
+    rpc: vi.fn().mockImplementation(async (_functionName: string, args: { p_run_id: string; p_notes: string | null }) => {
+      const index = inMemoryPayrollDb.findIndex(run => run.id === args.p_run_id);
+      if (index === -1) return { data: null, error: { message: 'Payroll run not found' } };
+      inMemoryPayrollDb[index] = {
+        ...inMemoryPayrollDb[index],
+        regional_attested_by: 'Verified Regional Officer',
+        regional_attested_by_id: 'auth-user-001',
+        regional_attested_by_role: 'regional_hr_officer',
+        regional_attested_at: new Date().toISOString(),
+        regional_notes: args.p_notes || null
+      };
+      return { data: inMemoryPayrollDb[index], error: null };
+    }),
     from: vi.fn().mockImplementation((table: string) => {
       let filtered = [...inMemoryPayrollDb];
       const chainable: any = {
@@ -287,12 +300,11 @@ describe('Zero-Trust Multi-Department Payroll Approval Service', () => {
 
     const attested = await payrollRunsService.attestAsRegionalHR(
       run.id,
-      'Regional Officer Yohannes',
-      'regional_hr_officer',
       'Audited site headcounts, attendance and approved leaves.'
     );
 
-    expect(attested.regionalAttestedBy).toBe('Regional Officer Yohannes');
+    expect(attested.regionalAttestedBy).toBe('Verified Regional Officer');
+    expect(attested.regionalAttestedById).toBe('auth-user-001');
     expect(attested.regionalAttestedByRole).toBe('regional_hr_officer');
     expect(attested.regionalAttestedAt).toBeDefined();
     expect(attested.regionalNotes).toContain('Audited site headcounts');

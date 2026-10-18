@@ -174,7 +174,7 @@ export default function Employees() {
    const handleAttestRegionalPayroll = async () => {
       if (!pendingPayrollRun) return;
       try {
-         await payrollRunsService.attestAsRegionalHR(pendingPayrollRun.id, user?.name || 'Regional HR', user?.role || 'regional_hr_officer', 'Regional HR audited regional headcount, active roster, and leave telemetry.');
+         await payrollRunsService.attestAsRegionalHR(pendingPayrollRun.id, 'Regional HR audited regional headcount, active roster, and leave telemetry.');
          addNotification('success', `Regional audit attested for ${pendingPayrollRun.period}. Recorded on payroll run.`);
          refreshPayrollRun();
       } catch (err: any) {

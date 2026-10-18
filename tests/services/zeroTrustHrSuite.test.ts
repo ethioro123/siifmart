@@ -8,6 +8,7 @@ import { calculateNetSalary, getEmployeeLeaveRequests } from '../../utils/employ
 
 let inMemoryDocs: any[] = [];
 let inMemoryLeaves: any[] = [];
+let inMemoryTerminations: any[] = [];
 
 vi.mock('../../lib/supabase', () => {
   const docChainable: any = {};
@@ -62,6 +63,22 @@ vi.mock('../../lib/supabase', () => {
   });
   leaveChainable.order = vi.fn().mockImplementation(() => Promise.resolve({ data: inMemoryLeaves, error: null }));
 
+  const terminationChainable: any = {};
+  terminationChainable.select = vi.fn().mockReturnValue(terminationChainable);
+  terminationChainable.insert = vi.fn().mockImplementation((records: any[] | any) => {
+    const raw = Array.isArray(records) ? records[0] : records;
+    const record = { ...raw, created_at: raw.created_at || new Date().toISOString(), updated_at: raw.updated_at || new Date().toISOString() };
+    inMemoryTerminations.push(record);
+    return { select: vi.fn().mockReturnValue({ single: vi.fn().mockResolvedValue({ data: record, error: null }) }) };
+  });
+  terminationChainable.update = vi.fn().mockImplementation((updates: any) => ({
+    eq: vi.fn().mockImplementation((col: string, val: any) => {
+      const idx = inMemoryTerminations.findIndex(r => r[col] === val || r.id === val);
+      if (idx !== -1) inMemoryTerminations[idx] = { ...inMemoryTerminations[idx], ...updates };
+      return Promise.resolve({ data: inMemoryTerminations[idx] || updates, error: null });
+    })
+  }));
+
   const defaultChainable: any = {};
   defaultChainable.select = vi.fn().mockReturnValue(defaultChainable);
   defaultChainable.insert = vi.fn().mockReturnValue(defaultChainable);
@@ -79,6 +96,7 @@ vi.mock('../../lib/supabase', () => {
       from: vi.fn().mockImplementation((table: string) => {
         if (table === 'employee_documents') return docChainable;
         if (table === 'leave_requests') return leaveChainable;
+        if (table === 'termination_requests') return terminationChainable;
         return defaultChainable;
       })
     }
@@ -92,6 +110,8 @@ describe('Zero-Trust HR Suite Tests', () => {
     }
     inMemoryDocs = [];
     inMemoryLeaves = [];
+    inMemoryTerminations = [];
+    terminationsService._clearCache();
     (leaveRequestsService as any)._clearCache();
   });
 

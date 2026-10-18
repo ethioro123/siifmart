@@ -92,12 +92,16 @@ export function useGeneralSettingsMutation() {
             changes: data,
           }),
           performed_by: user?.id ?? null,
+          user_name: user?.name || user?.email || 'Admin',
           site_id: user?.siteId ?? null,
+          country_code: targetCountry,
+          module: 'Settings',
           created_at: new Date().toISOString(),
         });
 
       if (logError) {
-        logger.warn('useGeneralSettingsMutation', `Audit log failed for ${section}: ${logError.message}`);
+        logger.error('useGeneralSettingsMutation', `Audit log failed for ${section}: ${logError.message}`);
+        throw new Error(`Security Exception: Mandatory audit logging failed (${logError.message}). Corporate settings save halted.`);
       }
     },
 

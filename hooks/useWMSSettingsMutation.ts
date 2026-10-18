@@ -110,12 +110,16 @@ export function useWMSSettingsMutation() {
             changes: safePayload,
           }),
           performed_by: user?.id ?? null,
+          user_name: user?.name || user?.email || 'WMS Admin',
           site_id: user?.siteId ?? null,
+          country_code: targetCountry,
+          module: 'WMS',
           created_at: new Date().toISOString(),
         });
 
       if (logError) {
-        logger.warn('useWMSSettingsMutation', `Audit log failed for ${section}: ${logError.message}`);
+        logger.error('useWMSSettingsMutation', `Audit log failed for ${section}: ${logError.message}`);
+        throw new Error(`Security Exception: Mandatory audit logging failed (${logError.message}). WMS settings save halted.`);
       }
     },
 

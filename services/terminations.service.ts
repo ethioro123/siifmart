@@ -5,32 +5,23 @@ import { logger } from '../utils/logger';
 
 const LOCAL_STORAGE_KEY = 'siifmart_terminations_backup';
 
+// Remove legacy sensitive offboarding records from persistent browser storage.
+if (typeof localStorage !== 'undefined') {
+    try {
+        localStorage.removeItem(LOCAL_STORAGE_KEY);
+    } catch {
+        // Safe ignore
+    }
+}
+
+// Session-only cache for the active view; authoritative records remain in Supabase.
 let inMemoryTerminations: TerminationRequestRecord[] = [];
 
-const getLocalBackup = (): TerminationRequestRecord[] => {
-    try {
-        if (typeof localStorage !== 'undefined') {
-            const raw = localStorage.getItem(LOCAL_STORAGE_KEY);
-            if (raw) return JSON.parse(raw);
-        }
-    } catch {
-        // Fallback
-    }
-    return inMemoryTerminations;
-};
-
-const saveLocalBackup = (records: TerminationRequestRecord[]): void => {
+const cacheInMemory = (records: TerminationRequestRecord[]): void => {
     const map = new Map<string, TerminationRequestRecord>();
     for (const r of inMemoryTerminations) map.set(r.id, r);
     for (const r of records) map.set(r.id, r);
     inMemoryTerminations = Array.from(map.values());
-    try {
-        if (typeof localStorage !== 'undefined') {
-            localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(inMemoryTerminations));
-        }
-    } catch {
-        // Safe
-    }
 };
 
 const mapDBToTermination = (row: any): TerminationRequestRecord => ({
@@ -64,6 +55,17 @@ const mapDBToTermination = (row: any): TerminationRequestRecord => ({
 });
 
 export const terminationsService = {
+    _clearCache(): void {
+        inMemoryTerminations = [];
+        if (typeof localStorage !== 'undefined') {
+            try {
+                localStorage.removeItem(LOCAL_STORAGE_KEY);
+            } catch {
+                // Safe ignore
+            }
+        }
+    },
+
     async fetchTerminations(countryCode: string = 'ET'): Promise<TerminationRequestRecord[]> {
         const country = (countryCode || 'ET').toUpperCase();
         try {
@@ -74,16 +76,16 @@ export const terminationsService = {
                 .order('created_at', { ascending: false });
 
             if (error) {
-                logger.warn('terminationsService', 'Supabase fetch error, fallback to local', { message: error.message });
-                return getLocalBackup().filter(t => (t.country_code || 'ET').toUpperCase() === country);
+                logger.warn('terminationsService', 'Supabase fetch error, using session cache', { message: error.message });
+                return inMemoryTerminations.filter(t => (t.country_code || 'ET').toUpperCase() === country);
             }
 
             const mapped = (data || []).map(mapDBToTermination);
-            saveLocalBackup(mapped);
+            inMemoryTerminations = mapped;
             return mapped;
         } catch (err) {
             logger.warn('terminationsService', 'Exception fetching terminations', { error: String(err) });
-            return getLocalBackup().filter(t => (t.country_code || 'ET').toUpperCase() === country);
+            return inMemoryTerminations.filter(t => (t.country_code || 'ET').toUpperCase() === country);
         }
     },
 
@@ -147,14 +149,15 @@ export const terminationsService = {
                 .single();
 
             if (error) {
-                logger.warn('terminationsService', 'Supabase insert error, saved locally', { message: error.message });
-                saveLocalBackup([newRecord]);
-            } else if (dbData) {
-                saveLocalBackup([mapDBToTermination(dbData)]);
+                logger.error('terminationsService', 'Supabase insert failed', new Error(error.message || 'Database error'));
+                throw new Error(`Failed to submit termination request: ${error.message || 'Database error'}`);
             }
+            if (!dbData) throw new Error('Failed to submit termination request: no record returned by server');
+            const savedRecord = mapDBToTermination(dbData);
+            cacheInMemory([savedRecord]);
         } catch (err) {
-            logger.warn('terminationsService', 'Exception proposing termination, saved locally', { error: String(err) });
-            saveLocalBackup([newRecord]);
+            logger.error('terminationsService', 'Termination submission failed', err as Error);
+            throw err;
         }
 
         // Synaptic Neural Mesh: Audit log
@@ -176,14 +179,14 @@ export const terminationsService = {
             logger.warn('terminationsService', 'Audit log failed', { error: String(logErr) });
         }
 
-        return newRecord;
+        return inMemoryTerminations.find(record => record.id === newRecord.id) || newRecord;
     },
 
     async approveTermination(
         requestId: string,
         approver: { id: string; name: string; role: string }
     ): Promise<boolean> {
-        const records = getLocalBackup();
+        const records = inMemoryTerminations;
         const request = records.find(r => r.id === requestId);
 
         // 4-Eyes Principle: Proposer cannot approve their own termination
@@ -206,7 +209,7 @@ export const terminationsService = {
                 .eq('id', requestId);
 
             if (error) {
-                logger.warn('terminationsService', 'Supabase approve error', { message: error.message });
+                throw new Error(`Failed to approve termination request: ${error.message || 'Database error'}`);
             }
 
             // Synaptic Neural Mesh: Update employee status in Supabase
@@ -217,7 +220,8 @@ export const terminationsService = {
                     .eq('id', request.employee_id);
             }
         } catch (err) {
-            logger.warn('terminationsService', 'Exception approving termination', { error: String(err) });
+            logger.error('terminationsService', 'Termination approval failed', err as Error);
+            throw err;
         }
 
         const updated = records.map(r => {
@@ -234,7 +238,7 @@ export const terminationsService = {
             }
             return r;
         });
-        saveLocalBackup(updated);
+        inMemoryTerminations = updated;
 
         // Synaptic Neural Mesh: Audit log
         try {

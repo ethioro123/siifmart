@@ -1,19 +1,36 @@
-import React from 'react';
-import { AlertTriangle, CheckCircle2 } from 'lucide-react';
+import React, { useState } from 'react';
+import { AlertTriangle, CheckCircle2, ShieldCheck, Loader2 } from 'lucide-react';
+import type { Country } from '../../../utils/localization';
+import type { useFinanceSettingsMutation } from '../../../hooks/useFinanceSettingsMutation';
 
 interface FinanceBaselineBannerProps {
     countryName: string;
+    targetCountry?: Country;
     isPolicyPersisted: boolean;
     isLimitsPersisted: boolean;
     isForexPersisted: boolean;
+    isAuthorized?: boolean;
+    policy?: any;
+    limits?: any;
+    exchangeRates?: any;
+    mutation?: ReturnType<typeof useFinanceSettingsMutation>;
+    showToast?: (msg: string, type: 'success' | 'error' | 'info' | 'warning') => void;
 }
 
 export function FinanceBaselineBanner({
     countryName,
+    targetCountry = 'ET',
     isPolicyPersisted,
     isLimitsPersisted,
     isForexPersisted,
+    isAuthorized = false,
+    policy,
+    limits,
+    exchangeRates,
+    mutation,
+    showToast,
 }: FinanceBaselineBannerProps) {
+    const [isConfirming, setIsConfirming] = useState(false);
     const isAnySectionUnverified = !isPolicyPersisted || !isLimitsPersisted || !isForexPersisted;
 
     if (!isAnySectionUnverified) {
@@ -25,26 +42,87 @@ export function FinanceBaselineBanner({
     if (!isLimitsPersisted) unverifiedSections.push('Financial Limits');
     if (!isForexPersisted) unverifiedSections.push('Exchange Rates');
 
+    const handleConfirmBaseline = async () => {
+        if (!isAuthorized || !mutation) {
+            showToast?.('Unauthorized: Approving financial baseline requires CEO or Finance Manager credentials.', 'error');
+            return;
+        }
+
+        setIsConfirming(true);
+        try {
+            if (!isPolicyPersisted && policy) {
+                await mutation.mutateAsync({
+                    section: 'policy',
+                    targetCountry,
+                    data: policy,
+                });
+            }
+            if (!isLimitsPersisted && limits) {
+                await mutation.mutateAsync({
+                    section: 'limits',
+                    targetCountry,
+                    data: limits,
+                });
+            }
+            if (!isForexPersisted && exchangeRates) {
+                await mutation.mutateAsync({
+                    section: 'currency',
+                    targetCountry,
+                    data: { exchangeRates },
+                });
+            }
+            showToast?.(`Approved & confirmed baseline financial policies for ${countryName}.`, 'success');
+        } catch (err: any) {
+            showToast?.(err.message || 'Failed to approve country financial baseline.', 'error');
+        } finally {
+            setIsConfirming(false);
+        }
+    };
+
     return (
-        <div className="p-4 bg-amber-500/10 border border-amber-500/20 rounded-2xl flex items-start gap-3.5 shadow-xs">
-            <div className="w-8 h-8 rounded-xl bg-amber-500/15 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0 mt-0.5">
-                <AlertTriangle size={17} />
-            </div>
-            <div className="flex-1">
-                <div className="flex items-center gap-2">
-                    <h4 className="text-xs font-semibold text-amber-700 dark:text-amber-300 uppercase tracking-wide">
-                        Statutory Template Baseline (Unverified)
-                    </h4>
-                    <span className="text-[10px] bg-amber-500/20 text-amber-800 dark:text-amber-200 px-2 py-0.5 rounded-full font-medium">
-                        Action Required
-                    </span>
+        <div className="p-4 bg-amber-500/10 border border-amber-500/20 rounded-2xl flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-xs">
+            <div className="flex items-start gap-3.5">
+                <div className="w-8 h-8 rounded-xl bg-amber-500/15 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0 mt-0.5">
+                    <AlertTriangle size={17} />
                 </div>
-                <p className="text-xs text-amber-800/90 dark:text-amber-200/90 mt-1 leading-relaxed">
-                    No confirmed corporate configuration is persisted in the database for <strong>{countryName}</strong> for:{' '}
-                    <span className="font-semibold underline decoration-amber-500/40">{unverifiedSections.join(', ')}</span>.
-                    The values currently shown in these sections are statutory system defaults. Please review them carefully and click &ldquo;Save&rdquo; to persist authorized corporate financial policies.
-                </p>
+                <div className="flex-1">
+                    <div className="flex items-center gap-2">
+                        <h4 className="text-xs font-semibold text-amber-700 dark:text-amber-300 uppercase tracking-wide">
+                            Statutory Template Baseline (Pending Confirmation)
+                        </h4>
+                        <span className="text-[10px] bg-amber-500/20 text-amber-800 dark:text-amber-200 px-2 py-0.5 rounded-full font-medium">
+                            Action Required
+                        </span>
+                    </div>
+                    <p className="text-xs text-amber-800/90 dark:text-amber-200/90 mt-1 leading-relaxed">
+                        No confirmed corporate configuration is persisted in the database for <strong>{countryName}</strong> for:{' '}
+                        <span className="font-semibold underline decoration-amber-500/40">{unverifiedSections.join(', ')}</span>.
+                        The values shown below are statutory defaults. Click &ldquo;Confirm &amp; Approve Country Baseline&rdquo; or save individual sections to establish this country&apos;s authoritative ledger baseline.
+                    </p>
+                </div>
             </div>
+            {isAuthorized && mutation && (
+                <div className="shrink-0 self-end md:self-center">
+                    <button
+                        type="button"
+                        onClick={handleConfirmBaseline}
+                        disabled={isConfirming}
+                        className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold text-white bg-amber-600 hover:bg-amber-700 active:bg-amber-800 transition-colors shadow-xs disabled:opacity-50 cursor-pointer"
+                    >
+                        {isConfirming ? (
+                            <>
+                                <Loader2 size={13} className="animate-spin" />
+                                <span>Persisting Baseline...</span>
+                            </>
+                        ) : (
+                            <>
+                                <ShieldCheck size={14} />
+                                <span>Confirm &amp; Approve Country Baseline</span>
+                            </>
+                        )}
+                    </button>
+                </div>
+            )}
         </div>
     );
 }

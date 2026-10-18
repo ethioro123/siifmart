@@ -2,7 +2,12 @@ import { useEffect, useRef, useState } from 'react';
 import { authService } from '../services/auth.service';
 import { APP_CONFIG } from '../config/app.config';
 import { logger } from '../utils/logger';
-import { getActiveRolePolicy } from '../services/zeroTrustPolicies.service';
+import {
+    getActiveRolePolicy,
+    checkTimeRestriction,
+    checkIpRestriction,
+    checkMfaRequirement,
+} from '../services/zeroTrustPolicies.service';
 
 /**
  * Session Manager Hook (Enhanced with Zero-Trust Inactivity Enforcement)
@@ -68,6 +73,30 @@ export function useSessionManager(
                     return;
                 }
 
+                // 2. Zero-Trust Operational Time Restriction
+                const timeCheck = checkTimeRestriction(userRole);
+                if (!timeCheck.allowed) {
+                    logger.warn('useSessionManager', timeCheck.reason);
+                    onSessionTimeout?.();
+                    return;
+                }
+
+                // 3. Zero-Trust Network / Geo-IP Restriction
+                const ipCheck = checkIpRestriction(userRole);
+                if (!ipCheck.allowed) {
+                    logger.warn('useSessionManager', ipCheck.reason);
+                    onSessionTimeout?.();
+                    return;
+                }
+
+                // 4. Zero-Trust MFA Requirement Check
+                const mfaCheck = checkMfaRequirement(userRole, session.user);
+                if (mfaCheck.required && !mfaCheck.satisfied && !hasWarned) {
+                    logger.warn('useSessionManager', mfaCheck.reason);
+                    setHasWarned(true);
+                    onSessionWarning?.(0);
+                }
+
                 // Warn when 1 minute remains before inactivity timeout
                 const idleRemainingMs = timeoutMs - idleDuration;
                 if (idleRemainingMs <= 60000 && idleRemainingMs > 0 && !hasWarned) {
@@ -75,7 +104,7 @@ export function useSessionManager(
                     onSessionWarning?.(1);
                 }
 
-                // 2. JWT Token Expiration Check
+                // 5. JWT Token Expiration Check
                 if (session.expires_at) {
                     const expiresAt = new Date(session.expires_at * 1000);
                     const timeUntilExpiry = expiresAt.getTime() - now;

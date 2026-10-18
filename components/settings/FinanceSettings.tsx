@@ -259,9 +259,16 @@ export default function FinanceSettings() {
             {/* STATUTORY TEMPLATE BASELINE (UNVERIFIED) BANNER */}
             <FinanceBaselineBanner
                 countryName={countryProfile.name}
+                targetCountry={activeCountry}
                 isPolicyPersisted={isPolicyPersisted}
                 isLimitsPersisted={isLimitsPersisted}
                 isForexPersisted={isForexPersisted}
+                isAuthorized={isAuthorized}
+                policy={policy}
+                limits={limits}
+                exchangeRates={exchangeRates}
+                mutation={mutation}
+                showToast={showToast}
             />
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

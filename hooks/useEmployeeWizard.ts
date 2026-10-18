@@ -11,6 +11,7 @@ import { saveEmployeeDraft } from '../utils/employeeDrafts';
 import { systemLogsService } from '../services/system-logs.service';
 import { createAuthAccountForNewHire } from '../utils/employeeAuthHelper';
 import { headcountQuotaService, QuotaEvaluationResult } from '../services/headcountQuota.service';
+import { getActiveRolePolicy, validatePasswordAgainstPolicy } from '../services/zeroTrustPolicies.service';
 
 export interface NewEmployeeFormData {
    firstName: string;
@@ -312,8 +313,10 @@ export function useEmployeeWizard({
          : (quotaResult ? 'EXCEEDED_QUOTA' : 'WITHIN_QUOTA');
 
       try {
-         if (!newEmpData.password || newEmpData.password.length < 6) {
-            throw new Error("A valid password (minimum 6 characters) is required.");
+         const rolePolicy = getActiveRolePolicy(newEmpData.role);
+         const pwdValidation = validatePasswordAgainstPolicy(newEmpData.password, rolePolicy.password_complexity);
+         if (!pwdValidation.valid) {
+            throw new Error(pwdValidation.reason || "Password does not meet Zero-Trust role security requirements.");
          }
          if (!newEmpData.siteId || !newEmpData.siteId.trim()) {
             throw new Error("Workplace location is mandatory. Every employee must be assigned to an operating location.");

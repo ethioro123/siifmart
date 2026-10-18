@@ -138,12 +138,16 @@ export function useFinanceSettingsMutation() {
           entity_id: null,
           details: JSON.stringify({ section, targetCountry, changes: safePayload }),
           performed_by: user?.id ?? null,
+          user_name: user?.name || user?.email || 'Finance Admin',
           site_id: user?.siteId ?? null,
+          country_code: targetCountry,
+          module: 'Settings',
           created_at: new Date().toISOString(),
         });
 
       if (logError) {
-        logger.warn('useFinanceSettingsMutation', `Audit log failed for ${section}: ${logError.message}`);
+        logger.error('useFinanceSettingsMutation', `Audit log failed for ${section}`, logError);
+        throw new Error(`Security Exception: Mandatory audit logging failed (${logError.message}). Finance settings change halted.`);
       }
     },
     onSuccess: (_, variables) => {
@@ -188,12 +192,16 @@ export function useFinanceSettingsMutation() {
           entity_id: siteId,
           details: JSON.stringify({ siteId, siteName: site.name, taxJurisdictionId }),
           performed_by: user?.id ?? null,
+          user_name: user?.name || user?.email || 'Finance Admin',
           site_id: siteId,
+          country_code: (site.country || 'ET'),
+          module: 'Settings',
           created_at: new Date().toISOString(),
         });
 
       if (logError) {
-        logger.warn('useFinanceSettingsMutation', `Site tax jurisdiction audit log failed: ${logError.message}`);
+        logger.error('useFinanceSettingsMutation', `Site tax jurisdiction audit log failed: ${logError.message}`);
+        throw new Error(`Security Exception: Mandatory audit logging failed (${logError.message}). Site assignment halted.`);
       }
     },
     onSuccess: (_, variables) => {

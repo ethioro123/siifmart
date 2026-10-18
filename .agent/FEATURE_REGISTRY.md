@@ -4,6 +4,12 @@
 
 ## Active Features
 
+### HR Payroll Attestation & Termination Submission Hardening (2026-10-18)
+- Regional payroll attestation now derives signer identity and role from the authenticated employee record and enforces country/site-region scope in Postgres; termination requests no longer persist sensitive backups in browser storage and failed submissions surface as errors.
+- **Files**: `services/payroll-runs.service.ts`, `services/terminations.service.ts`, `types/payroll-run.ts`, `pages/Employees.tsx`, `migrations/20261018_secure_regional_payroll_attestation.sql`
+- **Root Cause**: Client-supplied signer fields and local fallback behavior could create false or unverifiable HR records.
+- **Database**: `public.payroll_runs` regional attestation columns and `attest_payroll_regional_hr` RPC (migration not yet applied).
+
 ### Three-Level Facility Hierarchy & 55-Role Canonical Workforce Filtering
 - **Status**: ✅ IMPLEMENTED (2026-10-18)
 - Establishes 3 facility levels (`HQ`, `Regional Administration`, `Operation Sites` -> `Store`, `Warehouse`, `Distribution Center`, `Online Store`) and all 55 canonical `SYSTEM_ROLES` per country (`ET` and `KE`) across Staging Database, Quick Login panels, and Employee Directory filtering.
