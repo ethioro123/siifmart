@@ -8,7 +8,6 @@ import { logger } from '../../../utils/logger';
 import { SingleProductAllocation } from './components/SingleProductAllocation';
 import { WaveDistributionAllocations } from './components/WaveDistributionAllocations';
 import { buildTransferLineItem } from './transferQuantity';
-import { isTransferManager } from '../../../utils/transferGovernance';
 
 interface BulkDistributionModalProps {
     isOpen: boolean;
@@ -40,7 +39,6 @@ export const BulkDistributionModal: React.FC<BulkDistributionModalProps> = ({
     renderTabs
 }) => {
     const { settings } = useData();
-    const canApproveTransfers = isTransferManager(user);
     const isRestricted = !['super_admin', 'admin'].includes(user?.role || '') && !!user?.siteId;
     const [logisticsZones, setLogisticsZones] = useState<any[]>([]);
 
@@ -177,31 +175,12 @@ export const BulkDistributionModal: React.FC<BulkDistributionModalProps> = ({
                             items: 1,
                             lineItems: [transferLineItem],
                             orderRef: `${Date.now()}`,
-                            transferStatus: canApproveTransfers ? 'Approved' : 'Requested',
+                            transferStatus: 'Requested',
                             requestedBy: user?.name || 'System',
-                            approvedBy: canApproveTransfers ? user?.name : undefined,
                             jobNumber: undefined
                         };
 
-                        const createdBulkJob = await wmsJobsService.create(transferJob);
-                        if (canApproveTransfers) {
-                            const pickJob: any = {
-                            site_id: actualSourceSite,
-                            siteId: actualSourceSite,
-                            type: 'PICK',
-                            sourceSiteId: actualSourceSite,
-                            destSiteId: allocation.storeId,
-                            priority: 'Normal',
-                            status: 'Pending',
-                            orderRef: createdBulkJob.id,
-                            items: 1,
-                            lineItems: [{
-                                ...transferLineItem
-                            }],
-                            jobNumber: createdBulkJob.job_number
-                        };
-                            await wmsJobsService.create(pickJob);
-                        }
+                        await wmsJobsService.create(transferJob);
                         createdJobs++;
                     }
                 }
@@ -245,42 +224,12 @@ export const BulkDistributionModal: React.FC<BulkDistributionModalProps> = ({
                             return buildTransferLineItem(product, item.quantity);
                         }),
                         orderRef: `${Date.now()}`,
-                        transferStatus: canApproveTransfers ? 'Approved' : 'Requested',
+                        transferStatus: 'Requested',
                         requestedBy: user?.name || 'System',
-                        approvedBy: canApproveTransfers ? user?.name : undefined,
                         jobNumber: undefined
                     };
 
-                    const createdWaveJob = await wmsJobsService.create(transferJob);
-                    if (canApproveTransfers) {
-                        const pickJob: any = {
-                        site_id: actualSourceSite,
-                        siteId: actualSourceSite,
-                        type: 'PICK',
-                        sourceSiteId: actualSourceSite,
-                        destSiteId: storeId,
-                        priority: 'Normal',
-                        status: 'Pending',
-                        countryCode: siteCountry,
-                        country_code: siteCountry,
-                        orderRef: createdWaveJob.id,
-                        items: items.length,
-                        lineItems: items.map(item => {
-                            const selected = allProducts.find(p => p.id === item.productId) || products.find(p => p.id === item.productId);
-                            const prod = allProducts.find(p => p.sku === selected?.sku && (p.siteId || p.site_id) === actualSourceSite)
-                                || products.find(p => p.sku === selected?.sku && (p.siteId || p.site_id) === actualSourceSite)
-                                || selected;
-                            return {
-                                ...buildTransferLineItem(prod, item.quantity),
-                                productId: prod?.id || item.productId,
-                                sku: prod?.sku || '',
-                                name: prod?.name || '',
-                            };
-                        }),
-                        jobNumber: createdWaveJob.jobNumber || createdWaveJob.job_number
-                    };
-                        await wmsJobsService.create(pickJob);
-                    }
+                    await wmsJobsService.create(transferJob);
                     createdJobs++;
                 }
             }
@@ -292,9 +241,7 @@ export const BulkDistributionModal: React.FC<BulkDistributionModalProps> = ({
                 'Inventory'
             );
 
-            addNotification('success', canApproveTransfers
-                ? `Created and authorized ${createdJobs} distribution transfers!`
-                : `Submitted ${createdJobs} distribution transfers for warehouse manager approval.`);
+            addNotification('success', `Submitted ${createdJobs} distribution transfers for warehouse manager approval.`);
             onClose();
             setBulkDistributionAllocations([]);
             setWaveProducts([]);
@@ -492,7 +439,7 @@ export const BulkDistributionModal: React.FC<BulkDistributionModalProps> = ({
                                 }`}
                         >
                             <Truck size={16} />
-                            {canApproveTransfers ? 'Create Distribution' : 'Submit for Approval'}
+                            Submit for Approval
                         </button>
                     </div>
                 </div>

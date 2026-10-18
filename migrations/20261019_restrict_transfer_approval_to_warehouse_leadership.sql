@@ -20,6 +20,9 @@ BEGIN
      AND lower(COALESCE(NEW.type, '')) <> 'transfer' THEN
     RETURN NEW;
   END IF;
+  IF TG_OP = 'INSERT' AND lower(COALESCE(NEW.type, '')) <> 'transfer' THEN
+    RETURN NEW;
+  END IF;
 
   IF auth.uid() IS NULL THEN
     RAISE EXCEPTION 'Authenticated employee session required';
@@ -67,9 +70,16 @@ BEGIN
     IF NEW.requested_by IS DISTINCT FROM v_actor.name THEN
       RAISE EXCEPTION 'Inventory Specialist may only edit their own transfer drafts';
     END IF;
+    IF TG_OP = 'UPDATE' AND OLD.requested_by IS DISTINCT FROM v_actor.name THEN
+      RAISE EXCEPTION 'Inventory Specialist may only edit their own transfer drafts';
+    END IF;
     IF TG_OP = 'UPDATE' AND lower(COALESCE(OLD.type, '')) <> 'transfer' THEN
       RAISE EXCEPTION 'Inventory Specialists may only edit transfer drafts';
     END IF;
+  ELSIF TG_OP = 'UPDATE' AND lower(COALESCE(OLD.type, '')) = 'transfer'
+        AND lower(COALESCE(OLD.transfer_status, '')) IN ('draft', 'requested')
+        AND NOT v_can_approve THEN
+    RAISE EXCEPTION 'Only the requesting Inventory Specialist or warehouse leadership may edit a transfer draft';
   ELSIF lower(COALESCE(NEW.type, '')) = 'transfer'
         AND NOT v_can_approve AND TG_OP = 'INSERT' THEN
     RAISE EXCEPTION 'Only Inventory Specialists and warehouse leadership may create transfer requests';
@@ -79,8 +89,7 @@ BEGIN
 END;
 $function$;
 
-REVOKE ALL ON FUNCTION public.guard_wms_transfer_approval() FROM PUBLIC, anon;
-GRANT EXECUTE ON FUNCTION public.guard_wms_transfer_approval() TO authenticated, service_role;
+REVOKE ALL ON FUNCTION public.guard_wms_transfer_approval() FROM PUBLIC, anon, authenticated, service_role;
 
 DROP TRIGGER IF EXISTS guard_wms_transfer_approval ON public.wms_jobs;
 CREATE TRIGGER guard_wms_transfer_approval
@@ -112,9 +121,7 @@ USING (
          OR public.is_site_in_my_authorized_scope(wms_jobs.dest_site_id::text, wms_jobs.country_code))
     AND (public.is_manager() OR public.is_admin()
          OR wms_jobs.assigned_to IN (auth.uid()::text, public.get_my_employee_id()::text, public.get_my_employee_code())
-         OR EXISTS (SELECT 1 FROM public.job_assignments ja
-                    WHERE ja.job_id = wms_jobs.id
-                      AND ja.employee_id IN (auth.uid(), public.get_my_employee_id()))
+         OR private.is_current_user_assigned_to_wms_job(wms_jobs.id)
          OR (lower(public.get_my_role()) = 'inventory_specialist'
              AND lower(COALESCE(wms_jobs.type, '')) = 'transfer'
              AND lower(COALESCE(wms_jobs.transfer_status, '')) IN ('draft', 'requested')))
@@ -128,9 +135,7 @@ WITH CHECK (
          OR public.is_site_in_my_authorized_scope(wms_jobs.dest_site_id::text, wms_jobs.country_code))
     AND (public.is_manager() OR public.is_admin()
          OR wms_jobs.assigned_to IN (auth.uid()::text, public.get_my_employee_id()::text, public.get_my_employee_code())
-         OR EXISTS (SELECT 1 FROM public.job_assignments ja
-                    WHERE ja.job_id = wms_jobs.id
-                      AND ja.employee_id IN (auth.uid(), public.get_my_employee_id()))
+         OR private.is_current_user_assigned_to_wms_job(wms_jobs.id)
          OR (lower(public.get_my_role()) = 'inventory_specialist'
              AND lower(COALESCE(wms_jobs.type, '')) = 'transfer'
              AND lower(COALESCE(wms_jobs.status, '')) IN ('draft', 'pending')
@@ -181,13 +186,13 @@ BEGIN
          AND (NEW.source_region_code IS DISTINCT FROM v_actor_region OR NEW.dest_region_code IS DISTINCT FROM v_actor_region) THEN
         RAISE EXCEPTION 'Regional approval is limited to the employee region';
       END IF;
-      IF NOT v_hq AND lower(v_actor.role) NOT IN ('regional_manager','operations_manager','logistics_manager','regional_logistics_lead','supply_chain_manager')
+    IF NOT v_hq AND lower(v_actor.role) NOT IN ('admin','regional_manager','operations_manager','logistics_manager','regional_logistics_lead','supply_chain_manager')
          AND NEW.source_site_id IS DISTINCT FROM v_actor.site_id THEN
         RAISE EXCEPTION 'Transfer approval is limited to the employee site';
       END IF;
       IF (COALESCE(NEW.is_inter_region,false)
           OR (NEW.source_region_code IS NOT NULL AND NEW.dest_region_code IS NOT NULL AND NEW.source_region_code <> NEW.dest_region_code))
-         AND NOT v_hq AND lower(v_actor.role) NOT IN ('operations_manager','logistics_manager','supply_chain_manager') THEN
+         AND NOT v_hq AND lower(v_actor.role) NOT IN ('admin','operations_manager','logistics_manager','supply_chain_manager') THEN
         RAISE EXCEPTION 'Inter-region transfer requires executive operations approval';
       END IF;
     ELSIF OLD.transfer_status IS DISTINCT FROM NEW.transfer_status AND NEW.transfer_status = 'Received' THEN
@@ -296,7 +301,7 @@ BEGIN
     v_is_inter_regional := COALESCE(v_transfer.is_inter_region, false)
       OR (v_transfer.source_region_code IS NOT NULL AND v_transfer.dest_region_code IS NOT NULL
           AND v_transfer.source_region_code <> v_transfer.dest_region_code);
-    v_is_hq_role := v_approver_role IN ('super_admin','ceo','operations_manager','logistics_manager','supply_chain_manager');
+    v_is_hq_role := v_approver_role IN ('super_admin','ceo','admin','operations_manager','logistics_manager','supply_chain_manager');
     IF v_is_inter_regional AND NOT v_is_hq_role THEN
       RAISE EXCEPTION 'Authority Boundary Violation: Inter-Regional transfers require national operations leadership approval';
     END IF;
@@ -304,7 +309,8 @@ BEGIN
     UPDATE public.transfers SET status='Approved', transfer_status='Approved', approved_by=v_approver_name,
       approved_at=NOW(), approved_by_role=v_approver_role, approval_notes=COALESCE(p_notes,''), updated_at=NOW()
     WHERE id=p_transfer_id;
-    UPDATE public.wms_jobs SET transfer_status='Approved', status=CASE WHEN status='Draft' THEN 'Pending' ELSE status END, updated_at=NOW()
+    UPDATE public.wms_jobs SET transfer_status='Approved', approved_by=v_approver_name,
+      status=CASE WHEN status='Draft' THEN 'Pending' ELSE status END, updated_at=NOW()
     WHERE (order_ref=p_transfer_id::text OR id::text=p_transfer_id::text OR order_ref=v_transfer.order_ref) AND type='TRANSFER';
     INSERT INTO public.system_logs (user_name,action,module,details,site_id,country_code,entity_type,entity_id,performed_by)
     VALUES (v_approver_name,'TRANSFER_APPROVED','Inventory',json_build_object(

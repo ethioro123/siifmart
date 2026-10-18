@@ -44,6 +44,7 @@ export const AllocationSidebar: React.FC<AllocationSidebarProps> = ({
     addToDistDraft,
     dbDraftJobs,
     settings,
+    user,
     sites,
     allProducts,
     distHubLoading,

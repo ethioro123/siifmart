@@ -138,7 +138,7 @@ describe('Transfer Manifest Governance & Deletion Lifecycle', () => {
         const managerUser: User = {
             id: 'usr-mgr',
             name: 'Store Manager Sarah',
-            role: 'store_manager',
+            role: 'warehouse_manager',
             avatar: '',
             title: 'Store Manager'
         };
