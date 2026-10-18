@@ -200,7 +200,7 @@ export function useFinanceSettingsMutation() {
         });
 
       if (logError) {
-        logger.error('useFinanceSettingsMutation', `Site tax jurisdiction audit log failed: ${logError.message}`);
+        logger.error('useFinanceSettingsMutation', 'Site tax jurisdiction audit log failed', logError);
         throw new Error(`Security Exception: Mandatory audit logging failed (${logError.message}). Site assignment halted.`);
       }
     },

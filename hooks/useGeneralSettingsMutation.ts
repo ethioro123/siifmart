@@ -100,7 +100,7 @@ export function useGeneralSettingsMutation() {
         });
 
       if (logError) {
-        logger.error('useGeneralSettingsMutation', `Audit log failed for ${section}: ${logError.message}`);
+        logger.error('useGeneralSettingsMutation', `Audit log failed for ${section}`, logError);
         throw new Error(`Security Exception: Mandatory audit logging failed (${logError.message}). Corporate settings save halted.`);
       }
     },
