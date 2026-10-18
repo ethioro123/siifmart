@@ -110,7 +110,7 @@ export function useHardwareSettingsMutation() {
         });
 
       if (logError) {
-        logger.error('useHardwareSettingsMutation', `Audit log failed for hardware settings: ${logError.message}`);
+        logger.error('useHardwareSettingsMutation', 'Audit log failed for hardware settings', logError);
         throw new Error(`Security Exception: Mandatory audit logging failed (${logError.message}). Hardware settings save halted.`);
       }
     },
