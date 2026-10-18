@@ -52,6 +52,7 @@ interface UsePOSCheckoutActionsProps {
     // Discount code props
     cartDiscount: number;
     setCartDiscount: React.Dispatch<React.SetStateAction<number>>;
+    appliedDiscountCode: string | null;
     setAppliedDiscountCode: React.Dispatch<React.SetStateAction<string | null>>;
     setAppliedDiscountCodeDetails: React.Dispatch<React.SetStateAction<any>>;
     setIsDiscountModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
@@ -108,6 +109,7 @@ export const usePOSCheckoutActions = ({
     activeShift,
     cartDiscount,
     setCartDiscount,
+    appliedDiscountCode,
     setAppliedDiscountCode,
     setAppliedDiscountCodeDetails,
     setIsDiscountModalOpen,
@@ -199,7 +201,7 @@ export const usePOSCheckoutActions = ({
             localStorage.setItem(counterKey, String(nextCount));
             
             const receiptNumber = `${siteCode}${terminalId}${nextCount.toString().padStart(5, '0')}`;
-            const { saleId, pointsResult } = await processSale(cart, selectedPaymentMethod, user?.name || 'Cashier', tendered, change, selectedCustomer?.id, undefined, 'In-Store', taxBreakdown, receiptNumber, total);
+            const { saleId, pointsResult } = await processSale(cart, selectedPaymentMethod, user?.name || 'Cashier', tendered, change, selectedCustomer?.id, undefined, 'In-Store', taxBreakdown, receiptNumber, total, appliedDiscountCode);
 
             const saleObj: SaleRecord = {
                 id: saleId,

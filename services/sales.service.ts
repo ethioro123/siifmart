@@ -87,99 +87,60 @@ export const salesService = {
         return mapSaleRow(data);
     },
 
-    async create(sale: Omit<SaleRecord, 'created_at' | 'updated_at'>, items: any[]) {
-        // Create sale
-        const dbSale = {
-            id: sale.id, // Use provided ID if available
-            site_id: sale.siteId,
-            customer_id: sale.customerId,
-            sale_date: sale.date || new Date().toISOString(),
-            subtotal: sale.subtotal,
-            tax: sale.tax,
-            total: sale.total,
-            payment_method: sale.method,
-            status: sale.status,
-            amount_tendered: sale.amountTendered,
-            change: sale.change,
-            cashier_name: sale.cashierName,
-            receipt_number: (sale as any).receiptNumber // Will be populated below if not present
-        };
+    async create(sale: Omit<SaleRecord, 'created_at' | 'updated_at'>, items: any[], discountCodeId?: string | null) {
+        const { data, error } = await supabase.rpc('create_pos_sale_atomic', {
+            p_sale: {
+                id: sale.id,
+                site_id: sale.siteId,
+                customer_id: sale.customerId,
+                payment_method: sale.method,
+                amount_tendered: sale.amountTendered,
+                total: sale.total,
+                type: sale.type,
+                receipt_number: sale.receiptNumber,
+                discount_code_id: discountCodeId || null
+            },
+            p_items: items.map(item => ({
+                product_id: item.productId || item.id,
+                quantity: item.quantity
+            }))
+        });
 
-        // Generate receipt number if not provided by the POS client
-        if (!(dbSale as any).receipt_number) {
-            const now = new Date();
-            const dp = `${String(now.getFullYear()).slice(-2)}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}`;
-            const tp = `${String(now.getHours()).padStart(2, '0')}${String(now.getMinutes()).padStart(2, '0')}${String(now.getSeconds()).padStart(2, '0')}`;
-            (dbSale as any).receipt_number = `SRV-${dp}-${tp}`;
-        }
+        if (error) throw error;
+        if (!data) throw new Error('Sale RPC returned no result');
 
-        const { data: saleData, error: saleError } = await supabase
-            .from('sales')
-            .insert(dbSale)
-            .select()
-            .single();
-
-        if (saleError) throw saleError;
-
-        // Create sale items
-        const itemsWithSaleId = items.map(item => ({
-            sale_id: saleData.id,
-            product_id: item.id,
-            product_name: item.name,
+        const result = data as any;
+        const itemsWithSaleId = (Array.isArray(result.items) ? result.items : []).map((item: any) => ({
+            id: item.product_id,
+            product_id: item.product_id,
+            product_name: item.product_name,
+            name: item.product_name,
             quantity: item.quantity,
             price: item.price,
-            cost_price: item.costPrice
+            cost_price: item.cost_price,
+            costPrice: item.cost_price
         }));
-
-        const { error: itemsError } = await supabase
-            .from('sale_items')
-            .insert(itemsWithSaleId);
-
-        if (itemsError) throw itemsError;
 
         // NOTE: Stock is NOT deducted here. Stock is deducted during the PICK process
         // in WarehouseOperations.tsx when items are physically picked from shelves.
         // This is proper WMS flow: Sale → PICK Job → Physical Pick → Stock Deducted
 
-        // Update customer if provided - wrapped in try-catch to prevent blocking
-        if ((sale as any).customer_id) {
-            try {
-                const customerId = (sale as any).customer_id;
-                const customer = await customersService.getById(customerId);
-                if (customer) {
-                    await customersService.update(customerId, {
-                        total_spent: (customer.totalSpent || 0) + sale.total,
-                        last_visit: new Date().toISOString().split('T')[0]
-                    } as any);
-                }
-            } catch (customerError) {
-                console.warn('Failed to update customer stats (non-blocking):', customerError);
-                // Non-critical: sale still completes even if customer update fails
-            }
-        }
-
         return {
-            ...saleData,
-            id: saleData.id,
-            siteId: saleData.site_id,
-            customerId: saleData.customer_id,
-            date: saleData.sale_date,
-            subtotal: saleData.subtotal,
-            tax: saleData.tax,
-            total: saleData.total,
-            method: saleData.payment_method,
-            status: saleData.status,
-            amountTendered: saleData.amount_tendered,
-            change: saleData.change,
-            cashierName: saleData.cashier_name,
-            receiptNumber: saleData.receipt_number,
-            items: itemsWithSaleId.map(i => ({
-                id: i.product_id,
-                name: i.product_name,
-                quantity: i.quantity,
-                price: i.price,
-                costPrice: i.cost_price
-            }))
+            ...result,
+            id: result.id,
+            siteId: result.site_id,
+            customerId: result.customer_id,
+            date: result.sale_date,
+            subtotal: result.subtotal,
+            tax: result.tax,
+            total: result.total,
+            method: result.payment_method,
+            status: result.status,
+            amountTendered: result.amount_tendered,
+            change: result.change,
+            cashierName: result.cashier_name,
+            receiptNumber: result.receipt_number,
+            items: itemsWithSaleId
         };
     },
 

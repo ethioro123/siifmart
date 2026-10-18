@@ -48,7 +48,8 @@ export function useSaleActions(deps: UseSaleActionsDeps) {
         type: 'In-Store' | 'Delivery' | 'Pickup' = 'In-Store',
         taxBreakdown: { name: string; rate: number; amount: number; compound: boolean }[] = [],
         receiptNumber?: string,
-        roundedTotal?: number
+        roundedTotal?: number,
+        discountCodeId?: string | null
     ): Promise<{ saleId: string; pointsResult?: any }> => {
         try {
             const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
@@ -74,7 +75,7 @@ export function useSaleActions(deps: UseSaleActionsDeps) {
                 image: ''
             })) as CartItem[];
 
-            const saleRecord: SaleRecord = {
+            const saleRecord: SaleRecord & { discountCodeId?: string | null } = {
                 id: saleId,
                 siteId: activeSite?.id || '',
                 customerId: customerId,
@@ -90,6 +91,7 @@ export function useSaleActions(deps: UseSaleActionsDeps) {
                 change,
                 cashierName: user,
                 type,
+                discountCodeId: discountCodeId || null,
                 fulfillmentStatus: type === 'In-Store' ? 'Delivered' : 'Picking',
                 receiptNumber: receiptNumber || `TX-${Date.now()}`
             };
@@ -188,7 +190,7 @@ export function useSaleActions(deps: UseSaleActionsDeps) {
             // 5. Fallback direct sale creation if IDB queue was unavailable, otherwise triggerSync
             if (!queued && navigator.onLine) {
                 const { items, ...saleData } = saleRecord;
-                await salesService.create(saleData as any, items);
+                await salesService.create(saleData as any, items, discountCodeId);
             } else if (navigator.onLine) {
                 triggerSync();
             }

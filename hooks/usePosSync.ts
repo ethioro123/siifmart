@@ -121,10 +121,10 @@ export const usePosSync = (onSyncComplete?: (count: number) => void): UsePosSync
                             processedSaleIdsRef.current.add(saleId);
                         }
 
-                        const { items, pointsRedeemed, loyaltyRate, enableLoyalty, ...saleData } = salePayload;
+                        const { items, pointsRedeemed, loyaltyRate, enableLoyalty, discountCodeId, ...saleData } = salePayload;
 
                         // 1. Send sale to Supabase
-                        await salesService.create(saleData, items);
+                        await salesService.create(saleData, items, discountCodeId);
 
                         // 2. Atomic stock decrement per item
                         if (items && Array.isArray(items)) {

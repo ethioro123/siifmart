@@ -271,7 +271,7 @@ export const POSProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         isReceiptPreviewOpen, setIsReceiptPreviewOpen, receiptPreviewHTML, setReceiptPreviewHTML,
         activeSite, user, settings, subtotal, tax, taxBreakdown, total, changeDue, isPaymentValid,
         processSale, clearCart, setShowCart, addNotification, sales, activeShift,
-        cartDiscount, setCartDiscount, setAppliedDiscountCode, setAppliedDiscountCodeDetails,
+        cartDiscount, setCartDiscount, appliedDiscountCode, setAppliedDiscountCode, setAppliedDiscountCodeDetails,
         setIsDiscountModalOpen, discountCodeInput, setDiscountCodeInput, setDiscountCodeError,
         setIsValidatingCode, validateDiscountCode, useDiscountCode
     });

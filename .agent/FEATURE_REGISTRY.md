@@ -4,6 +4,12 @@
 
 ## Active Features
 
+### Server-Verified POS Sales (2026-10-19)
+- POS sales now use one trusted database transaction that recalculates line prices, tax, discounts, and cash change from database records. Authenticated browser inserts into `sales` and `sale_items` are denied, and financial sale fields cannot be edited after creation.
+- **Files**: `services/sales.service.ts`, `contexts/hooks/useSaleActions.ts`, `hooks/usePosSync.ts`, `components/pos/hooks/usePOSCheckoutActions.ts`, `migrations/20261019_secure_pos_sale_authority.sql`
+- **Database**: Applied to staging (`utykzifrblpyxlvlknsm`) and production (`zdgzpxvorwinugjufkvb`)
+- **Root Cause**: The browser wrote sale totals and item prices directly, so a modified client could tamper with persisted transaction values.
+
 ### Fulfillment Auth-Ready Data Loading (2026-10-18)
 - Fulfillment table reads and realtime subscriptions wait for a signed-in employee profile. Logout clears cached fulfillment items so the client does not issue anonymous requests or retain the prior user's view.
 - **Files**: `components/fulfillment/FulfillmentDataProvider.tsx`
