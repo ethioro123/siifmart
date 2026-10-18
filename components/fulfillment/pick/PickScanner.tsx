@@ -4,20 +4,19 @@ import { WMSJob, Product } from '../../../types';
 import { playBeep } from '../../../utils/audioUtils';
 import { normalizeLocation } from '../../../utils/locationTracking';
 import { formatJobId } from '../../../utils/jobIdFormatter';
-import { decodeLocation, isLocationBarcode, extractPrefixFromBarcode, extractSkuFromScan } from '../../../utils/locationEncoder';
+import { decodeLocation, extractLocationBarcodeFromScan, extractPrefixFromBarcode, extractSkuFromScan } from '../../../utils/locationEncoder';
 import { useScanOnly } from '../../../hooks/useScanOnly';
 import { isWeightBased, isVolumeBased, getSellUnit, getEffectivePackageSize, SELL_UNITS } from '../../../utils/units';
 import { useLanguage } from '../../../contexts/LanguageContext';
 import { useData } from '../../../contexts/DataContext';
 import { validateCrossBorderSku } from '../../../utils/skuValidation';
+import { matchesExpectedPickItemScan } from '../../../utils/pickScanValidation';
 import { PickScannerPickedList } from './components/PickScannerPickedList';
 import { PickScannerSummary } from './components/PickScannerSummary';
 import { PickScannerInstructionPanel } from './components/PickScannerInstructionPanel';
 import { PickScannerSubmitButton } from './components/PickScannerSubmitButton';
 import { PickScannerHeader } from './components/PickScannerHeader';
 import { PickScannerForm } from './components/PickScannerForm';
-
-const normalizeSku = (s: string) => s.replace(/[-\/\s]/g, '').toUpperCase();
 
 interface PickScannerProps {
     job: WMSJob;
@@ -130,10 +129,15 @@ export const PickScanner: React.FC<PickScannerProps> = ({
     }, [inputVal, step, expectedPrefix, isProcessing]);
 
     const isStrictlyValid = useMemo(() => {
-        if (step === 'QUANTITY') return Number.isFinite(Number(qtyVal)) && Number(qtyVal) > 0;
-        if (step !== 'LOCATION') return inputVal.trim().length > 0;
-        return isLocationBarcode(inputVal.trim().toUpperCase());
-    }, [inputVal, qtyVal, step]);
+        if (step === 'QUANTITY') return /^(?:\d+(?:\.\d*)?|\.\d+)$/.test(qtyVal.trim()) && Number.isFinite(Number(qtyVal)) && Number(qtyVal) > 0;
+        if (step === 'ITEM') {
+            const product = currentItem ? getProduct(currentItem) : undefined;
+            return !!currentItem && matchesExpectedPickItemScan(inputVal, currentItem.sku, product?.barcode);
+        }
+        const barcode = extractLocationBarcodeFromScan(inputVal);
+        if (!barcode) return false;
+        return !expectedPrefix || extractPrefixFromBarcode(barcode) === expectedPrefix.trim();
+    }, [inputVal, qtyVal, step, currentItem, currentProduct, expectedPrefix, products, job]);
 
     const totalItems = job.lineItems?.length || 0;
     const completedItems = job.lineItems?.filter((item: any) =>
@@ -161,18 +165,19 @@ export const PickScanner: React.FC<PickScannerProps> = ({
         if (isProcessing) return;
 
         const val = rawVal.toUpperCase();
+        let locationBarcode = '';
 
         if (step === 'LOCATION') {
-            if (!isLocationBarcode(val)) {
+            locationBarcode = extractLocationBarcodeFromScan(rawVal) || '';
+            if (!locationBarcode) {
                 playBeep('error');
                 setErrorMsg(t('warehouse.picking.encodedBarcodeRequired'));
                 setShowError(true);
                 setTimeout(() => setShowError(false), 2000);
                 return;
             }
-            const scanPrefix = extractPrefixFromBarcode(val);
-            const isMatch = expectedPrefix === scanPrefix;
-            if (expectedPrefix && !isMatch) {
+            const scanPrefix = extractPrefixFromBarcode(locationBarcode);
+            if (expectedPrefix && expectedPrefix.trim() !== scanPrefix) {
                 playBeep('error');
                 setErrorMsg(t('warehouse.picking.wrongSite').replace('{site}', scanPrefix || ''));
                 setShowError(true);
@@ -184,7 +189,7 @@ export const PickScanner: React.FC<PickScannerProps> = ({
         if (step === 'LOCATION') {
             const targetLoc = currentItem?.location || currentProduct?.location || '';
             const normalizedTarget = normalizeLocation(targetLoc) || targetLoc.trim().toUpperCase();
-            const decodedScanned = decodeLocation(val);
+            const decodedScanned = decodeLocation(locationBarcode);
 
             if (!decodedScanned) {
                 playBeep('error');
@@ -208,7 +213,6 @@ export const PickScanner: React.FC<PickScannerProps> = ({
             playBeep('success');
         } else if (step === 'ITEM') {
             const product = getProduct(currentItem);
-            const targetSku = currentItem.sku ? normalizeSku(currentItem.sku) : '';
             const decodedSku = extractSkuFromScan(val);
 
             // Sovereign Multi-Country SKU check (§4 Architecture)
@@ -222,12 +226,7 @@ export const PickScanner: React.FC<PickScannerProps> = ({
                 return;
             }
 
-            const scannedVal = normalizeSku(decodedSku);
-            
-            const matchesSku = scannedVal === targetSku;
-            const matchesBarcode = product?.barcode && normalizeSku(product.barcode) === scannedVal;
-
-            if (!matchesSku && !matchesBarcode) {
+            if (!matchesExpectedPickItemScan(val, currentItem.sku, product?.barcode)) {
                 playBeep('error');
                 setErrorMsg(t('warehouse.picking.incorrectItemScanned'));
                 setShowError(true);

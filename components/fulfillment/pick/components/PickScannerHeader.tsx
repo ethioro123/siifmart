@@ -2,7 +2,7 @@ import React from 'react';
 import { CheckCircle, AlertTriangle, Map as MapIcon, Package } from 'lucide-react';
 import { PickScannerSummary } from './PickScannerSummary';
 import { PickScannerInstructionPanel } from './PickScannerInstructionPanel';
-import { isLocationBarcode } from '../../../../utils/locationEncoder';
+import { extractLocationBarcodeFromScan } from '../../../../utils/locationEncoder';
 
 interface PickScannerHeaderProps {
     showSuccess: boolean;
@@ -51,6 +51,8 @@ export const PickScannerHeader: React.FC<PickScannerHeaderProps> = ({
         );
     }
 
+    const hasValidLocationScan = !!extractLocationBarcodeFromScan(inputVal);
+
     return (
         <>
             {/* Status Icon */}
@@ -76,9 +78,9 @@ export const PickScannerHeader: React.FC<PickScannerHeaderProps> = ({
 
             {/* Instruction Header */}
             <h1 className={`text-xl sm:text-2xl md:text-3xl font-bold text-[var(--theme-text-primary)] text-center uppercase tracking-tight mb-1 sm:mb-2 z-10 transition-colors px-2 max-w-full ${
-                isLocationBarcode(inputVal.trim().toUpperCase()) ? 'text-[var(--theme-accent)]' : showError ? 'text-rose-500' : ''
+                hasValidLocationScan ? 'text-[var(--theme-accent)]' : showError ? 'text-rose-500' : ''
             }`}>
-                {showSuccess ? t('warehouse.picking.successCaps') : showError ? t('warehouse.picking.errorCaps') : step === 'LOCATION' ? (isLocationBarcode(inputVal.trim().toUpperCase()) ? t('warehouse.picking.locationIdentified') : t('warehouse.scanLocation')) : step === 'QUANTITY' ? t('warehouse.confirmQty') : t('warehouse.scanSkuToConfirm')}
+                {showSuccess ? t('warehouse.picking.successCaps') : showError ? t('warehouse.picking.errorCaps') : step === 'LOCATION' ? (hasValidLocationScan ? t('warehouse.picking.locationIdentified') : t('warehouse.scanLocation')) : step === 'QUANTITY' ? t('warehouse.confirmQty') : t('warehouse.scanSkuToConfirm')}
             </h1>
 
             {showSuccess ? (

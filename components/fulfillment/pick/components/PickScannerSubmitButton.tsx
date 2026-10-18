@@ -23,7 +23,7 @@ export const PickScannerSubmitButton: React.FC<PickScannerSubmitButtonProps> = (
     t,
 }) => {
     const hasValue = step === 'QUANTITY' ? qtyVal.trim().length > 0 : inputVal.trim().length > 0;
-    const isReady = !currentItem || hasValue;
+    const isReady = !currentItem || (hasValue && isStrictlyValid);
 
     return (
         <button

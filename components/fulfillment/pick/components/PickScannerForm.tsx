@@ -1,7 +1,7 @@
 import React from 'react';
 import { RotateCcw, CheckCircle } from 'lucide-react';
 import { SELL_UNITS, getSellUnit, formatPackagingDescription } from '../../../../utils/units';
-import { isLocationBarcode, decodeLocation } from '../../../../utils/locationEncoder';
+import { extractLocationBarcodeFromScan, decodeLocation } from '../../../../utils/locationEncoder';
 import { PickScannerSubmitButton } from './PickScannerSubmitButton';
 
 interface PickScannerFormProps {
@@ -146,7 +146,10 @@ export const PickScannerForm: React.FC<PickScannerFormProps> = ({
                     {step === 'LOCATION' && inputVal.trim() && (
                         <div className="text-center animate-in fade-in duration-200">
                             <p className="text-base font-bold uppercase tracking-wider text-[var(--theme-accent)] flex items-center justify-center gap-2">
-                                {isLocationBarcode(inputVal.trim().toUpperCase()) ? `IDENTIFIED: ${decodeLocation(inputVal.trim().toUpperCase())}` : t('warehouse.picking.encodedBarcodeProtocolRequired')}
+                                {(() => {
+                                    const barcode = extractLocationBarcodeFromScan(inputVal);
+                                    return barcode ? `IDENTIFIED: ${decodeLocation(barcode)}` : t('warehouse.picking.encodedBarcodeProtocolRequired');
+                                })()}
                             </p>
                         </div>
                     )}

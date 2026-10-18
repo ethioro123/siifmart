@@ -214,11 +214,48 @@ export const extractPrefixFromBarcode = (barcode: string): string | null => {
  * Check if a scanned string looks like our location barcode
  */
 export const isLocationBarcode = (scan: string): boolean => {
-    // Verify 14 or 15 characters (alphanumeric) and valid checksum
-    if (!/^[A-Z0-9]{14,15}$/.test(scan)) return false;
+    // Location labels contain a numeric site prefix, zone, aisle, bay, reserved
+    // field, and check digit. Reject other 14/15-character strings before use.
+    if (!/^\d{14,15}$/.test(scan)) return false;
+    const prefixLength = scan.length === 15 ? 4 : 3;
+    const zone = Number(scan.slice(prefixLength, prefixLength + 2));
+    const aisle = Number(scan.slice(prefixLength + 2, prefixLength + 4));
+    const bay = Number(scan.slice(prefixLength + 4, prefixLength + 6));
+    const reserved = scan.slice(prefixLength + 6, prefixLength + 10);
+    if (zone < 1 || zone > 26 || aisle < 1 || aisle > 99 || bay < 1 || bay > 99 || reserved !== RESERVED) return false;
     const payload = scan.substring(0, scan.length - 1);
     const check = scan.substring(scan.length - 1);
     return generateCheckDigit(payload) === check;
+};
+
+/** Extracts a valid location barcode from raw scans and this app's QR label payload. */
+export const extractLocationBarcodeFromScan = (scan: string): string | null => {
+    const value = scan.trim();
+    if (isLocationBarcode(value)) return value;
+
+    let code: string | undefined;
+    if (value.startsWith('{')) {
+        try {
+            const payload: unknown = JSON.parse(value);
+            if (payload && typeof payload === 'object' && 'code' in payload && typeof payload.code === 'string') {
+                code = payload.code.trim();
+            }
+        } catch {
+            return null;
+        }
+    } else if (value.startsWith('https://')) {
+        try {
+            const url = new URL(value);
+            const match = url.hostname === 'ops.siifmart.com'
+                ? url.pathname.match(/^\/locations\/(\d{14,15})\/audit\/?$/)
+                : null;
+            code = match?.[1];
+        } catch {
+            return null;
+        }
+    }
+
+    return code && isLocationBarcode(code) ? code : null;
 };
 
 /**
@@ -229,9 +266,11 @@ export const extractSkuFromScan = (val: string): string => {
     const trimmed = val.trim();
     if (trimmed.startsWith('{')) {
         try {
-            const parsed = JSON.parse(trimmed);
-            if (parsed.sku) return parsed.sku;
-            if (parsed.barcode) return parsed.barcode;
+            const parsed: unknown = JSON.parse(trimmed);
+            if (parsed && typeof parsed === 'object') {
+                if ('sku' in parsed && typeof parsed.sku === 'string' && parsed.sku.trim()) return parsed.sku.trim();
+                if ('barcode' in parsed && typeof parsed.barcode === 'string' && parsed.barcode.trim()) return parsed.barcode.trim();
+            }
         } catch (e) {
             // ignore
         }

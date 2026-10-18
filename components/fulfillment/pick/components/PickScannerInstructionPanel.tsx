@@ -1,7 +1,7 @@
 import React from 'react';
 import { AlertTriangle, Package } from 'lucide-react';
 import { Product } from '../../../../types';
-import { isLocationBarcode, decodeLocation } from '../../../../utils/locationEncoder';
+import { extractLocationBarcodeFromScan, decodeLocation } from '../../../../utils/locationEncoder';
 import { normalizeLocation } from '../../../../utils/locationTracking';
 import { getSellUnit, formatProductSize, formatPackagingDescription } from '../../../../utils/units';
 
@@ -30,6 +30,7 @@ export const PickScannerInstructionPanel: React.FC<PickScannerInstructionPanelPr
 }) => {
     if (step === 'LOCATION') {
         const targetLoc = currentItem?.location || currentProduct?.location || '';
+        const scannedLocationBarcode = extractLocationBarcodeFromScan(inputVal);
         return (
             <div className="text-center z-10 mb-4 sm:mb-6 w-full max-w-full px-2">
                 <div className="text-center mb-4 sm:mb-6">
@@ -40,8 +41,8 @@ export const PickScannerInstructionPanel: React.FC<PickScannerInstructionPanelPr
                     <div className="block w-full mx-auto px-4 sm:px-8 py-5 sm:py-7 rounded-3xl border bg-[var(--theme-accent)]/10 border-[var(--theme-accent)]/30 text-[var(--theme-accent)] max-w-2xl">
                         <p className="text-sm sm:text-base font-bold uppercase tracking-widest text-[var(--theme-text-secondary)] mb-2">Pick from this location</p>
                         <p className="font-mono font-bold tracking-wide break-words text-4xl sm:text-6xl md:text-7xl leading-tight">
-                            {isLocationBarcode(inputVal.trim().toUpperCase())
-                                ? decodeLocation(inputVal.trim().toUpperCase())
+                            {scannedLocationBarcode
+                                ? decodeLocation(scannedLocationBarcode)
                                 : (normalizeLocation(inputVal) || targetLoc || t('warehouse.picking.unknownBay'))}
                         </p>
                     </div>
