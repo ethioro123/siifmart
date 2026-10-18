@@ -5,9 +5,9 @@
 ## Active Features
 
 ### Fulfillment Role-Specific Tab Permissions (2026-10-19)
-- Floor workers can access the shared Receive, Putaway, Pick, and Pack operations; only drivers receive the Driver tab, while Transfer and specialist tabs remain limited to their authorized roles. Fulfillment content checks the selected tab against the role's allowed tab list and returns to an allowed tab if the role changes.
-- **Files**: `utils/fulfillmentTabPermissions.ts`, `components/fulfillment/FulfillmentContent.tsx`
-- **Root Cause**: Floor worker roles were spread across tabs without distinction by responsibility, and tab bodies rendered from selected state without an access check.
+- Floor workers can access the shared Receive, Putaway, Pick, and Pack operations; only drivers receive the Driver tab, while Transfer and specialist tabs remain limited to their authorized roles. WMS roles missing the Fulfillment sidebar or explicit route permission were added, and all route roles have a non-empty role-appropriate tab set. Fulfillment content checks the selected tab and returns to an allowed tab if the role changes.
+- **Files**: `utils/fulfillmentTabPermissions.ts`, `components/fulfillment/FulfillmentContent.tsx`, `components/Sidebar.tsx`, `utils/permissions.ts`
+- **Root Cause**: Floor worker roles were spread across tabs without distinction by responsibility; some WMS titles lacked navigation or explicit route access; tab bodies rendered from selected state without an access check.
 
 ### Server-Verified POS Sales (2026-10-19)
 - POS sales now use one trusted database transaction that recalculates line prices, tax, discounts, and cash change from database records. Authenticated browser inserts into `sales` and `sale_items` are denied, and financial sale fields cannot be edited after creation.

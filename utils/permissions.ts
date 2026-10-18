@@ -102,7 +102,7 @@ export const PERMISSIONS = {
     APPROVE_PRICE_CHANGE: ['super_admin', 'merchandising_manager', 'regional_manager', 'finance_manager'],
 
     // Warehouse
-    ACCESS_WAREHOUSE: ['super_admin', 'regional_manager', 'operations_manager', 'warehouse_manager', 'dispatcher', 'picker', 'driver', 'inventory_specialist', 'packer', 'receiver', 'logistics_manager', 'inventory_manager', 'inbound_qc_inspector', 'fleet_maintenance_supervisor', 'replenishment_planner', 'regional_logistics_lead'],
+    ACCESS_WAREHOUSE: ['super_admin', 'regional_manager', 'operations_manager', 'warehouse_manager', 'dispatch_manager', 'dispatcher', 'picker', 'packer', 'receiver', 'driver', 'forklift_operator', 'stock_clerk', 'returns_clerk', 'inventory_specialist', 'logistics_manager', 'inventory_manager', 'inbound_qc_inspector', 'fleet_maintenance_supervisor', 'replenishment_planner', 'regional_logistics_lead', 'supply_chain_manager'],
     MANAGE_WAREHOUSE: ['super_admin', 'warehouse_manager', 'inventory_specialist'],
     ASSIGN_TASKS: ['super_admin', 'warehouse_manager', 'dispatcher', 'inventory_specialist', 'logistics_manager', 'fleet_maintenance_supervisor'],
     COMPLETE_TASKS: ['super_admin', 'warehouse_manager', 'dispatcher', 'picker', 'driver', 'packer', 'receiver'],

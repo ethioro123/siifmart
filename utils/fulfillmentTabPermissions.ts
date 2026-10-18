@@ -14,9 +14,10 @@ const SPECIALIST_TAB_ACCESS: Record<string, OpTab[]> = {
     replenishment_planner: ['TRANSFER', 'REPLENISH'],
     returns_clerk: ['RETURNS'],
     dispatch_manager: ['DOCKS', 'DRIVER', 'TRANSFER', 'ASSIGN'],
-    dispatcher: ['DOCKS', 'DRIVER', 'TRANSFER', 'ASSIGN'],
+    dispatcher: ['DOCKS', 'DRIVER', 'ASSIGN'],
     fleet_maintenance_supervisor: ['DOCKS', 'DRIVER', 'ASSIGN'],
-    regional_logistics_lead: ['DOCKS', 'RECEIVE', 'PUTAWAY', 'TRANSFER', 'PICK', 'PACK', 'REPLENISH', 'COUNT', 'WASTE', 'RETURNS', 'DRIVER', 'ASSIGN', 'LABELS'],
+    regional_logistics_lead: ['DOCKS', 'DRIVER', 'RECEIVE', 'TRANSFER'],
+    supply_chain_manager: ['DOCKS', 'RECEIVE', 'PUTAWAY', 'TRANSFER', 'PICK', 'PACK', 'DRIVER', 'REPLENISH', 'COUNT'],
 };
 
 const TAB_PERMISSIONS: Record<OpTab, string[]> = {
