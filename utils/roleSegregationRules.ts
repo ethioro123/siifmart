@@ -31,7 +31,7 @@ export const ROLE_SEGREGATION_RULES: RoleSegregationRule[] = [
         role: 'admin',
         siteType: 'Administration',
         department: 'Management',
-        description: 'System Administrator - Central IT operations at HQ'
+        description: 'Country Managing Director - National executive leadership at Country HQ'
     },
     {
         role: 'hr',

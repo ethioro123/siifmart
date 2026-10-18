@@ -9,7 +9,7 @@ export const SYSTEM_ROLES: {
 }[] = [
    // ═══ LEVEL 1 - EXECUTIVE ═══
    { id: 'super_admin', label: 'Chief Executive Officer', desc: 'Enterprise Ownership and Sovereign Executive Governance', level: 1, styles: { text: 'text-yellow-600 dark:text-yellow-400', bg: 'bg-yellow-100 dark:bg-yellow-400/10', border: 'border-yellow-200 dark:border-yellow-400/20', badge: 'bg-yellow-100 dark:bg-yellow-400/20 text-yellow-700 dark:text-yellow-400' } },
-   { id: 'admin', label: 'System Administrator', desc: 'Enterprise Deputy and System Administration', level: 1, styles: { text: 'text-purple-600 dark:text-purple-400', bg: 'bg-purple-100 dark:bg-purple-400/10', border: 'border-purple-200 dark:border-purple-400/20', badge: 'bg-purple-100 dark:bg-purple-400/20 text-purple-700 dark:text-purple-400' } },
+   { id: 'admin', label: 'Country Managing Director', desc: 'National Executive Leadership and Country Operations Governance', level: 1, styles: { text: 'text-purple-600 dark:text-purple-400', bg: 'bg-purple-100 dark:bg-purple-400/10', border: 'border-purple-200 dark:border-purple-400/20', badge: 'bg-purple-100 dark:bg-purple-400/20 text-purple-700 dark:text-purple-400' } },
 
    // ═══ LEVEL 2 - CORPORATE & REGIONAL DIRECTORS ═══
    { id: 'operations_manager', label: 'Head of Operations', desc: 'Enterprise Operations Directorate and Network Standards', level: 2, styles: { text: 'text-blue-600 dark:text-blue-400', bg: 'bg-blue-50 dark:bg-blue-400/10', border: 'border-blue-200 dark:border-blue-400/20', badge: 'bg-blue-50 dark:bg-blue-400/20 text-blue-700 dark:text-blue-400' } },

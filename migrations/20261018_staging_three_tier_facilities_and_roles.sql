@@ -82,8 +82,8 @@ DECLARE
 BEGIN
   FOR rec IN
     SELECT * FROM (VALUES
-    ('e1000000-0000-4000-8000-000000000001'::uuid, 'bb0425bc-3119-449a-a685-b871e552bee0'::uuid, 'Abebe Bikila', 'admin', 'System Administrator', 'et.admin@staging.siifmart.com', '+251911000001', 'Management', 'ET-STG-001', NULL, 'HQ', 95000),
-    ('e2000000-0000-4000-8000-000000000001'::uuid, '6c38f106-4590-4ff3-ae68-b9ab657fff99'::uuid, 'Kipchoge Keino', 'admin', 'System Administrator', 'ke.admin@staging.siifmart.com', '+254711000001', 'Management', 'KE-STG-001', NULL, 'HQ', 260000),
+    ('e1000000-0000-4000-8000-000000000001'::uuid, 'bb0425bc-3119-449a-a685-b871e552bee0'::uuid, 'Abebe Bikila', 'admin', 'Country Managing Director', 'et.admin@staging.siifmart.com', '+251911000001', 'Management', 'ET-STG-001', NULL, 'HQ', 95000),
+    ('e2000000-0000-4000-8000-000000000001'::uuid, '6c38f106-4590-4ff3-ae68-b9ab657fff99'::uuid, 'Kipchoge Keino', 'admin', 'Country Managing Director', 'ke.admin@staging.siifmart.com', '+254711000001', 'Management', 'KE-STG-001', NULL, 'HQ', 260000),
     ('e1000000-0000-4000-8000-000000000002'::uuid, 'bb0425bc-3119-449a-a685-b871e552bee0'::uuid, 'Sara Tesfaye', 'operations_manager', 'Head of Operations', 'et.operationsmanager@staging.siifmart.com', '+251911000002', 'Management', 'ET-STG-002', NULL, 'HQ', 75000),
     ('e2000000-0000-4000-8000-000000000002'::uuid, '6c38f106-4590-4ff3-ae68-b9ab657fff99'::uuid, 'Omondi Samuel', 'operations_manager', 'Head of Operations', 'ke.operationsmanager@staging.siifmart.com', '+254711000002', 'Management', 'KE-STG-002', NULL, 'HQ', 195000),
     ('e1000000-0000-4000-8000-000000000003'::uuid, 'bb0425bc-3119-449a-a685-b871e552bee0'::uuid, 'Dawit Haile', 'finance_manager', 'Head of Finance', 'et.financemanager@staging.siifmart.com', '+251911000003', 'Finance', 'ET-STG-003', NULL, 'HQ', 75000),

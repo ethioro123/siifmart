@@ -246,7 +246,7 @@ export function CountryQuickLoginPanel({
         {(
           [
             { key: 'ALL', label: 'All Ranks' },
-            { key: 1, label: 'L1 Admin' },
+            { key: 1, label: 'L1 Exec' },
             { key: 2, label: 'L2 Director' },
             { key: 3, label: 'L3 Manager' },
             { key: 4, label: 'L4 Staff' },
