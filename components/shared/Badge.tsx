@@ -14,12 +14,12 @@ export default function Badge({
     className = ''
 }: BadgeProps) {
     const variants = {
-        primary: 'bg-cyber-primary/20 text-cyber-primary border-cyber-primary/50',
-        success: 'bg-green-500/20 text-green-400 border-green-500/50',
-        warning: 'bg-yellow-500/20 text-yellow-400 border-yellow-500/50',
-        danger: 'bg-red-500/20 text-red-400 border-red-500/50',
-        info: 'bg-blue-500/20 text-blue-400 border-blue-500/50',
-        neutral: 'bg-gray-500/20 text-gray-400 border-gray-500/50'
+        primary: 'bg-[var(--theme-accent-muted)] text-[var(--theme-accent)] border-[var(--theme-border)]',
+        success: 'bg-[var(--theme-status-success-bg)] text-[var(--theme-status-success-text)] border-[var(--theme-status-success-border)]',
+        warning: 'bg-[var(--theme-status-warning-bg)] text-[var(--theme-status-warning-text)] border-[var(--theme-status-warning-border)]',
+        danger: 'bg-[var(--theme-status-danger-bg)] text-[var(--theme-status-danger-text)] border-[var(--theme-status-danger-border)]',
+        info: 'bg-[var(--theme-status-info-bg)] text-[var(--theme-status-info-text)] border-[var(--theme-status-info-border)]',
+        neutral: 'bg-[var(--theme-status-neutral-bg)] text-[var(--theme-status-neutral-text)] border-[var(--theme-status-neutral-border)]'
     };
 
     const sizes = {
@@ -30,7 +30,7 @@ export default function Badge({
 
     return (
         <span
-            className={`inline-flex items-center font-bold rounded-lg border ${variants[variant]} ${sizes[size]} ${className}`}
+            className={`inline-flex items-center font-medium rounded-lg border ${variants[variant]} ${sizes[size]} ${className}`}
         >
             {children}
         </span>

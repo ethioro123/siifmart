@@ -41,6 +41,32 @@
   --color-theme-text-secondary: var(--theme-text-secondary);
   --color-theme-text-muted: var(--theme-text-muted);
 
+  /* Calm & Clear Semantic Status Color Tokens */
+  --color-theme-status-success: var(--theme-status-success);
+  --color-theme-status-success-bg: var(--theme-status-success-bg);
+  --color-theme-status-success-border: var(--theme-status-success-border);
+  --color-theme-status-success-text: var(--theme-status-success-text);
+
+  --color-theme-status-warning: var(--theme-status-warning);
+  --color-theme-status-warning-bg: var(--theme-status-warning-bg);
+  --color-theme-status-warning-border: var(--theme-status-warning-border);
+  --color-theme-status-warning-text: var(--theme-status-warning-text);
+
+  --color-theme-status-danger: var(--theme-status-danger);
+  --color-theme-status-danger-bg: var(--theme-status-danger-bg);
+  --color-theme-status-danger-border: var(--theme-status-danger-border);
+  --color-theme-status-danger-text: var(--theme-status-danger-text);
+
+  --color-theme-status-info: var(--theme-status-info);
+  --color-theme-status-info-bg: var(--theme-status-info-bg);
+  --color-theme-status-info-border: var(--theme-status-info-border);
+  --color-theme-status-info-text: var(--theme-status-info-text);
+
+  --color-theme-status-neutral: var(--theme-status-neutral);
+  --color-theme-status-neutral-bg: var(--theme-status-neutral-bg);
+  --color-theme-status-neutral-border: var(--theme-status-neutral-border);
+  --color-theme-status-neutral-text: var(--theme-status-neutral-text);
+
   /* Legacy Cyber Tokens Mapped to Neutral Elegance */
   --color-cyber-black: var(--theme-bg-app);
   --color-cyber-dark: var(--theme-bg-panel);

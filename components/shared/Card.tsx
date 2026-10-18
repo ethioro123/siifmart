@@ -24,7 +24,7 @@ export default function Card({
 
     return (
         <div
-            className={`bg-cyber-gray border border-white/5 rounded-2xl ${paddingClasses[padding]} ${hover ? 'hover:bg-white/5 transition-colors cursor-pointer' : ''
+            className={`bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl ${paddingClasses[padding]} ${hover ? 'hover:bg-[var(--theme-bg-card-hover)] transition-colors cursor-pointer' : ''
                 } ${onClick ? 'cursor-pointer' : ''} ${className}`}
             onClick={onClick}
         >

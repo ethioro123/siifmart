@@ -10,6 +10,8 @@ describe('Modern CSS Token Layer & Aesthetic Architecture', () => {
   const topbarPath = path.join(rootDir, 'components', 'TopBar.tsx');
   const agentsRulePath = path.join(rootDir, '.agents', 'AGENTS.md');
   const rulesPath = path.join(rootDir, '.agent', 'RULES.md');
+  const designGuidePath = path.join(rootDir, 'docs', 'APPLE_DESIGN_GUIDE.md');
+  const engineeringRulesPath = path.join(rootDir, '.agent', 'rules', '04-engineering-and-performance.md');
 
   it('verifies all theme stylesheets and rule docs exist', () => {
     expect(fs.existsSync(themeCssPath)).toBe(true);
@@ -17,6 +19,8 @@ describe('Modern CSS Token Layer & Aesthetic Architecture', () => {
     expect(fs.existsSync(indexCssPath)).toBe(true);
     expect(fs.existsSync(agentsRulePath)).toBe(true);
     expect(fs.existsSync(rulesPath)).toBe(true);
+    expect(fs.existsSync(designGuidePath)).toBe(true);
+    expect(fs.existsSync(engineeringRulesPath)).toBe(true);
   });
 
   it('enforces Rule 2 (all style files strictly under 500 lines)', () => {
@@ -33,70 +37,55 @@ describe('Modern CSS Token Layer & Aesthetic Architecture', () => {
     expect(agentsLines).toBeLessThan(500);
   });
 
-  it('verifies Rule 20, Rule 21, Rule 22, and Rule 23 are codified in project rules', () => {
+  it('verifies UI standards and Apple minimalist design rules are codified', () => {
     const agentsContent = fs.readFileSync(agentsRulePath, 'utf8');
     const rulesContent = fs.readFileSync(rulesPath, 'utf8');
-    const allRulesContent = agentsContent + '\n' + rulesContent;
+    const designGuideContent = fs.readFileSync(designGuidePath, 'utf8');
+    const engineeringRulesContent = fs.readFileSync(engineeringRulesPath, 'utf8');
+    const allRulesContent = [agentsContent, rulesContent, designGuideContent, engineeringRulesContent].join('\n');
 
-    // Rule 20: Mandatory Apple Minimalist & Liquid Glass Design Standard Audit
-    expect(allRulesContent).toContain('Mandatory Apple Minimalist & Liquid Glass Design Standard');
-    expect(rulesContent).toContain('Mandatory Apple Minimalist & Liquid Glass Design Standard');
+    // UI standards and Apple design guide alignment
+    expect(allRulesContent).toContain('APPLE_DESIGN_GUIDE.md');
+    expect(allRulesContent).toContain('docs/APPLE_DESIGN_GUIDE.md');
+    expect(agentsContent).toContain('Use semantic theme tokens');
+    expect(designGuideContent).toContain('Use semantic theme tokens');
 
-    // Rule 21: Mandatory Low-End Mobile Performance & Warehouse Ergonomics Standard Audit
-    expect(allRulesContent).toContain('Mandatory Low-End Mobile Performance & Warehouse Ergonomics Standard');
-    expect(rulesContent).toContain('Mandatory Low-End Mobile Performance & Warehouse Ergonomics Standard');
+    // Performance and hardware constraints
+    expect(agentsContent).toContain('Fulfillment scanning has the strictest low-end device constraints');
+    expect(engineeringRulesContent).toContain('Scope of Hardware Overrides');
 
-    // Rule 22: Mandatory Zero-Hardcoded Aesthetic & Semantic Tokenization Standard Audit
-    expect(allRulesContent).toContain('Mandatory Zero-Hardcoded Aesthetic & Semantic Tokenization Standard');
-    expect(rulesContent).toContain('Mandatory Zero-Hardcoded Aesthetic & Semantic Tokenization Standard');
+    // Semantic tokens & Layered Charcoal Architecture
+    expect(engineeringRulesContent).toContain('Design Tokens (Apple Liquid Glass & Pure Contrast Architecture)');
+    expect(engineeringRulesContent).toContain('Softened Charcoal Surfaces');
 
-    // Rule 23: Mandatory Zero-Emoji & Professional Vector Iconography Standard Audit
-    expect(allRulesContent).toContain('Mandatory Zero-Emoji & Professional Vector Iconography Standard');
-    expect(rulesContent).toContain('Mandatory Zero-Emoji & Professional Vector Iconography Standard (SF Symbols Philosophy)');
+    // Zero-emoji standard
+    expect(agentsContent).toContain("don't rely on color alone or use emoji as interface decoration");
 
-    // Rule 24: Mandatory Universal Theme & Aesthetic Application Audit Across All Domains
-    expect(allRulesContent).toContain('Mandatory Universal Theme & Aesthetic Application');
-    expect(rulesContent).toContain('Mandatory Universal Theme & Aesthetic Application Across All Domains');
-
-    // Rule 25: Mandatory 6-Month Autonomous Apple Aesthetic Re-Alignment Cycle Audit
-    expect(allRulesContent).toContain('Mandatory 6-Month Autonomous Apple Aesthetic Re-Alignment Cycle');
-    expect(rulesContent).toContain('Mandatory 6-Month Autonomous Apple Aesthetic Re-Alignment Cycle');
-
-    // Don'ts rules
-    expect(allRulesContent).toContain("decorative gradients, glow blobs, or multi-colo");
-    expect(allRulesContent).toContain("backdrop-filter: blur()");
-    expect(rulesContent).toContain("Don't use expensive `backdrop-filter: blur()` or heavy animations in Fulfillment mobile viewports");
-    expect(agentsContent).not.toContain("use sand/emerald/amber palette");
-    expect(rulesContent).not.toContain("use sand/emerald/amber palette");
-    expect(rulesContent).not.toContain("### Design Tokens (Sand / Emerald / Amber)");
-    expect(rulesContent).toContain("### Design Tokens (Apple Liquid Glass & Pure Contrast Architecture)");
-    expect(allRulesContent).toContain("Don't hardcode aesthetic styling (raw hex colors, font families, static card fills, fixed borders, or shadows)");
-    expect(allRulesContent).toContain("Don't use raw Unicode emojis");
-    expect(rulesContent).toContain("Don't use raw Unicode emojis (e.g. ⚠️, 🔒, •, ✅, ❌, 🎉, 📦, 🏷️, ⚖️, ⚡️) anywhere in the UI");
-    expect(allRulesContent).toContain("Don't review, create, or edit code in any domain");
-    expect(rulesContent).toContain("Don't review, create, or edit code in any domain (e.g. Procurement, Financials, WMS, POS, HR) without simultaneously verifying");
-    expect(allRulesContent).toContain("Don't allow the design system or UI components to drift or lag behind");
-    expect(rulesContent).toContain("Don't allow the design system or UI components to drift or lag behind Apple's latest aesthetic standard");
-    expect(allRulesContent).toContain("Don't use muddy gray cards");
-    expect(rulesContent).toContain("Don't use muddy gray cards (#1C1C1E / #2C2C2E)");
-    expect(allRulesContent).toContain("Don't treat interfaces as a \"collection of boxes\" or card traps");
-    expect(rulesContent).toContain("Don't treat interfaces as a \"collection of boxes\" or card traps");
-    expect(allRulesContent).toContain("Don't place Liquid Glass materials everywhere");
-    expect(rulesContent).toContain("Don't place Liquid Glass materials everywhere");
+    // Prohibited anti-patterns
+    expect(designGuideContent).toContain('Avoid decorative gradients, glow, stacked glass');
+    expect(allRulesContent).not.toContain('use sand/emerald/amber palette');
   });
 
-  it('verifies Rule 20 Apple Web Minimalist tokens in styles/theme.css', () => {
+  it('verifies Apple Minimalist & Softened Charcoal tokens in styles/theme.css', () => {
     const themeContent = fs.readFileSync(themeCssPath, 'utf8');
 
-    // Dark Mode tokens: Apple OLED Black & Studio Pure Contrast Architecture
-    expect(themeContent).toContain('--theme-bg-app: #000000;');
-    expect(themeContent).toContain('--theme-bg-panel: #000000;');
-    expect(themeContent).toContain('--theme-bg-card: #000000;');
-    expect(themeContent).not.toContain('--theme-bg-card: #1C1C1E;');
+    // Dark Mode tokens: Softened Layered Charcoal Architecture
+    expect(themeContent).toContain('--theme-bg-app: #121316;');
+    expect(themeContent).toContain('--theme-bg-panel: #18191E;');
+    expect(themeContent).toContain('--theme-bg-card: #1F2128;');
+    expect(themeContent).toContain('--theme-bg-card-hover: #272A33;');
     expect(themeContent).toContain('--theme-primary: #FFFFFF;');
-    expect(themeContent).toContain('--theme-primary-text: #000000;');
+    expect(themeContent).toContain('--theme-primary-text: #121316;');
     expect(themeContent).toContain('--theme-text-primary: #F5F5F7;');
-    expect(themeContent).toContain('--theme-text-secondary: #86868B;');
+    expect(themeContent).toContain('--theme-text-secondary: #A1A1AA;');
+    expect(themeContent).toContain('--theme-text-muted: #80828D;');
+
+    // Status color tokens (calm Apple HIG tones)
+    expect(themeContent).toContain('--theme-status-success: #34C759;');
+    expect(themeContent).toContain('--theme-status-warning: #FF9F0A;');
+    expect(themeContent).toContain('--theme-status-danger: #FF453A;');
+    expect(themeContent).toContain('--theme-status-info: #64D2FF;');
+    expect(themeContent).toContain('--theme-status-neutral: #8E8E93;');
 
     // Light Mode tokens: Apple Web Canvas & Pure White Cards
     expect(themeContent).toContain('[data-theme="light"]');
@@ -345,15 +334,17 @@ describe('Modern CSS Token Layer & Aesthetic Architecture', () => {
     }
   });
 
-  it('verifies October 2026 Apple Design System specification tokens and rules', () => {
+  it('verifies Apple Design System specification tokens and design system rules', () => {
     const themeContent = fs.readFileSync(themeCssPath, 'utf8');
     const agentsContent = fs.readFileSync(agentsRulePath, 'utf8');
     const rulesContent = fs.readFileSync(rulesPath, 'utf8');
-    const allRulesContent = agentsContent + '\n' + rulesContent;
+    const designGuideContent = fs.readFileSync(designGuidePath, 'utf8');
+    const engineeringRulesContent = fs.readFileSync(engineeringRulesPath, 'utf8');
+    const allRulesContent = [agentsContent, rulesContent, designGuideContent, engineeringRulesContent].join('\n');
 
-    // 70 / 20 / 8 / 2 Golden Ratio Rule
-    expect(allRulesContent).toContain('70 / 20 / 8 / 2 Golden Ratio');
-    expect(rulesContent).toContain('70 / 20 / 8 / 2 Golden Ratio');
+    // Design System rules & architecture
+    expect(allRulesContent).toContain('APPLE_DESIGN_GUIDE.md');
+    expect(engineeringRulesContent).toContain('Design Tokens (Apple Liquid Glass & Pure Contrast Architecture)');
 
     // 3 Liquid Glass Tiers
     expect(themeContent).toContain('--theme-glass-clear-bg:');
@@ -362,8 +353,7 @@ describe('Modern CSS Token Layer & Aesthetic Architecture', () => {
     expect(themeContent).toContain('.glass-clear');
     expect(themeContent).toContain('.glass-standard');
     expect(themeContent).toContain('.glass-strong');
-    expect(allRulesContent).toContain('Tier 1: Glass Clear');
-    expect(rulesContent).toContain('Tier 1: Glass Clear');
+    expect(engineeringRulesContent).toContain('Liquid Glass 3 Tiers');
 
     // Standardized Corner Radii System
     expect(themeContent).toContain('--radius-xs: 6px;');
@@ -396,16 +386,12 @@ describe('Modern CSS Token Layer & Aesthetic Architecture', () => {
     expect(themeContent).toContain('--shadow-lg:');
     expect(themeContent).toContain('--shadow-modal:');
 
-    // 11-Point "Apple Test" Checklist
-    expect(allRulesContent).toContain('11-Point "Apple Test" Audit');
-    expect(rulesContent).toContain('11-Point "Apple Test" Audit Checklist');
+    // Visual Review Checklist in Apple Design Guide
+    expect(designGuideContent).toContain('Visual review checklist');
+    expect(designGuideContent).toContain('Is the user\'s main task obvious');
 
-    // Enterprise Retail & WMS Synthesis Doctrine
-    expect(allRulesContent).toContain('Enterprise Retail & WMS Synthesis Doctrine');
-    expect(rulesContent).toContain('Enterprise Retail & WMS Synthesis Doctrine');
-
-    // Anti-patterns codified
-    expect(rulesContent).toContain('Aesthetic Anti-Patterns (Strictly Prohibited)');
+    // Prohibited anti-patterns in Apple Design Guide
+    expect(designGuideContent).toContain('Avoid decorative gradients, glow, stacked glass, heavy shadows');
   });
 });
 
