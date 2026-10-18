@@ -31,9 +31,9 @@ export const PackJobFooter: React.FC<PackJobFooterProps> = ({
     t
 }) => {
     return (
-        <div className="p-3 md:p-4 border-t border-[var(--theme-border)] bg-[var(--theme-bg-card)] flex items-center justify-between gap-3 shrink-0">
+        <div className="p-3 md:p-4 border-t border-[var(--theme-border)] bg-[var(--theme-bg-card)] flex items-center justify-between gap-2 sm:gap-3 shrink-0">
             {/* Back / Dismiss / Delete Buttons */}
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 shrink-0">
                 {step === 'DETAILS' ? (
                     <button
                         type="button"
@@ -77,14 +77,14 @@ export const PackJobFooter: React.FC<PackJobFooterProps> = ({
             </div>
 
             {/* Next / Action Button */}
-            <div className="flex items-center gap-2">
+            <div className="flex min-w-0 flex-1 sm:flex-none items-center justify-end gap-2">
                 {step === 'DETAILS' && (
                     <button
                         type="button"
                         onClick={() => void onAdvanceToScanning()}
-                        className="min-h-[44px] px-5 md:px-7 rounded-xl bg-[var(--theme-accent)] hover:opacity-90 text-white font-semibold text-xs md:text-sm uppercase tracking-wider flex items-center gap-2 shadow-sm transition-all active:scale-95 cursor-pointer touch-manipulation"
+                        className="min-h-[48px] w-full sm:w-auto min-w-0 px-3 sm:px-5 md:px-7 rounded-xl bg-[var(--theme-accent)] hover:opacity-90 text-white font-bold text-[11px] sm:text-xs md:text-sm uppercase tracking-wide sm:tracking-wider flex items-center justify-center gap-1.5 sm:gap-2 shadow-sm transition-all active:scale-95 cursor-pointer touch-manipulation whitespace-nowrap"
                     >
-                        <span>Start Scanning & Pack</span>
+                        <span>Start Scanning &amp; Pack</span>
                         <ArrowRight size={16} />
                     </button>
                 )}
