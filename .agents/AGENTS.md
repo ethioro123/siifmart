@@ -7,7 +7,7 @@
 2. **Verify**: confirm database columns/types from the schema registry, generated types, or live schema before changing queries. Diagnose from evidence.
 3. **Split before changing**: split a target over 500 lines before changing behavior, preserving imports and functionality.
 4. **Verify code changes**: run `npx tsc --noEmit` and relevant regression checks; report anything that could not be run.
-5. **Auto-commit changes**: once checks pass, automatically stage the files changed for the task (never staging secrets/env files or unrelated pre-existing work unless requested) and commit locally with a clear Conventional Commits message. Do not `git push` unless explicitly asked.
+5. **Mandatory auto-commit**: Whenever you write or modify code, migrations, or config, you MUST automatically stage and commit all changes (`git add -A` excluding `.env*` secrets, then `git commit`) before finishing your turn—without the user touching anything, even if follow-up fixes will be addressed later. Do not `git push` unless explicitly asked.
 6. **Report clearly**: explain the user-visible result, verification, and commit hash in plain English without code dumps. Give a full audit checklist only when requested or needed.
 
 ## 2. Invariants (never violate)

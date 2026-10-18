@@ -1,0 +1,11 @@
+{
+  "auto-commit-on-stop": {
+    "Stop": [
+      {
+        "type": "command",
+        "command": "../scripts/auto-commit-on-stop.sh",
+        "timeout": 15
+      }
+    ]
+  }
+}

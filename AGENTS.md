@@ -8,7 +8,7 @@ Follow these rules for all work in this repository. `.agent/RULES.md` is the can
 2. Check the target file's size. Split files over 500 lines before changing behavior; keep source and guidance files under 500 lines.
 3. Inspect existing patterns, types, and schema. For Supabase errors, verify the live schema or authoritative types first.
 4. Make the smallest complete change. Run `npx tsc --noEmit` after code changes and relevant regression checks required by the task.
-5. Auto-commit verified changes: once verification passes, stage the task's modified/created files (excluding secrets or unrelated pre-existing dirty files unless requested) and create a local `git commit` with a clear Conventional Commits message. Do not `git push` unless asked.
+5. **Mandatory auto-commit before finishing**: Whenever you write or modify any code, migration, or configuration, you MUST automatically stage and commit all changes (`git add -A` excluding `.env*` secrets, then `git commit`) before ending your turn—without waiting for the user to ask or touch anything, and even if non-blocking issues remain to be fixed later. Do not `git push` unless asked.
 
 ## Architecture and data
 
