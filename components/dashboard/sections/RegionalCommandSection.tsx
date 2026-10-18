@@ -6,7 +6,7 @@ import {
     Store, Warehouse, MapPin, Briefcase, ArrowUpRight
 } from 'lucide-react';
 import { Region, Site, Employee, SaleRecord, PurchaseOrder, TransferRecord } from '../../../types';
-import { Country } from '../../../utils/localization';
+import { Country, getCountryProfile } from '../../../utils/localization';
 import { formatCompactNumber } from '../../../utils/formatting';
 import { useData } from '../../../contexts/DataContext';
 
@@ -159,7 +159,7 @@ export const RegionalCommandSection: React.FC<RegionalCommandSectionProps> = ({
                         {totalRegionsCount}
                     </div>
                     <p className="text-[11px] text-[var(--theme-text-secondary)] mt-1 font-medium">
-                        Autonomous Territorial Hubs in {activeCountry === 'KE' ? 'Kenya' : 'Ethiopia'}
+                        Autonomous Territorial Hubs in {getCountryProfile(activeCountry).name || activeCountry}
                     </p>
                 </div>
 

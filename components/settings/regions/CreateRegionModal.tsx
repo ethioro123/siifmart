@@ -105,7 +105,7 @@ export const CreateRegionModal: React.FC<CreateRegionModalProps> = ({
         try {
             const payload: CreateRegionInput = {
                 name: name.trim(),
-                code: code.trim().toLowerCase(),
+                code: code.trim().toUpperCase(),
                 country: normCountry,
                 city: city.trim() || undefined,
                 default_currency: currency,
@@ -143,7 +143,7 @@ export const CreateRegionModal: React.FC<CreateRegionModalProps> = ({
                                 Provision Operational Region
                             </h3>
                             <p className="text-[11px] text-[var(--theme-text-secondary)]">
-                                Establish decentralized administrative authority for {country === 'KE' ? 'Kenya' : 'Ethiopia'}
+                                Establish decentralized administrative authority for {countryProfile.name || normCountry}
                             </p>
                         </div>
                     </div>
@@ -210,7 +210,7 @@ export const CreateRegionModal: React.FC<CreateRegionModalProps> = ({
                                 Sovereign Jurisdiction
                             </label>
                             <div className="px-3 py-2 text-xs bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl text-[var(--theme-text-secondary)] flex items-center justify-between">
-                                <span>{country === 'KE' ? 'Kenya' : 'Ethiopia'}</span>
+                                <span>{countryProfile.name || normCountry}</span>
                                 <span className="font-mono text-[10px] font-semibold text-[var(--theme-text-primary)]">{currency}</span>
                             </div>
                         </div>

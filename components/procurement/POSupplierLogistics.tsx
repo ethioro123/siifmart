@@ -3,6 +3,7 @@ import { Supplier, Site } from '../../types';
 import { Truck, MapPin, ChevronDown, ChevronUp, Check, Info, X } from 'lucide-react';
 import { logger } from '../../utils/logger';
 import { formatDisplaySiteId } from '../../utils/siteIdGenerator';
+import { getCountryProfile } from '../../utils/localization';
 
 interface POSupplierLogisticsProps {
     // Supplier State
@@ -170,7 +171,7 @@ export const POSupplierLogistics: React.FC<POSupplierLogisticsProps> = ({
                             <div className="absolute z-50 w-full mt-2 bg-[var(--theme-bg-panel)] border border-[var(--theme-border)] rounded-2xl shadow-xl p-2 max-h-56 overflow-y-auto">
                                 <div className="flex justify-between items-center px-2 py-1 border-b border-[var(--theme-border-subtle)] mb-1.5">
                                     <span className="text-[10px] text-[var(--theme-text-secondary)] font-bold uppercase">
-                                        Storage Hubs & DCs {sites.length > 0 && `(${sites[0]?.country === 'KE' ? 'Kenya Hub' : 'Ethiopia HQ'})`}
+                                        Storage Hubs & DCs {sites.length > 0 && `(${getCountryProfile(sites[0]?.country || 'ET').name || sites[0]?.country})`}
                                     </span>
                                     <div className="flex gap-2">
                                         <button
