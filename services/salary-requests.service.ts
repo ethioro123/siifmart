@@ -42,9 +42,30 @@ const mapDBToSalaryRequest = (row: any): SalaryChangeRequest => ({
 export const salaryRequestsService = {
     async getAll(siteId?: string, countryCode?: string, limit: number = 25): Promise<SalaryChangeRequest[]> {
         try {
+            let shouldFilterSite = Boolean(siteId && siteId !== 'All' && siteId !== 'all');
+            if (shouldFilterSite && siteId) {
+                try {
+                    const { data: siteRecord } = await supabase
+                        .from('sites')
+                        .select('type, code')
+                        .eq('id', siteId)
+                        .maybeSingle();
+
+                    if (siteRecord) {
+                        const isHq = ['Administration', 'Administrative', 'HQ', 'Headquarters', 'Central Operations'].includes(siteRecord.type || '') ||
+                            siteRecord.code?.endsWith('-HQ') || siteRecord.code === 'HQ' || siteRecord.code === 'HQ-GLOBAL';
+                        if (isHq) {
+                            shouldFilterSite = false;
+                        }
+                    }
+                } catch {
+                    // Safe fallback
+                }
+            }
+
             // RULE 10: 25-record shelf limit
             let query = supabase.from('salary_requests').select('*').limit(limit);
-            if (siteId) query = query.eq('site_id', siteId);
+            if (shouldFilterSite && siteId) query = query.eq('site_id', siteId);
             if (countryCode) query = query.eq('country_code', countryCode.toUpperCase());
 
             const { data, error } = await query.order('requested_at', { ascending: false });
@@ -57,7 +78,12 @@ export const salaryRequestsService = {
             logger.error('salaryRequestsService', 'Remote fetch failed for salary requests:', error as Error);
             // Return in-memory session cache if available, otherwise empty
             let results = inMemoryBackup;
-            if (siteId) results = results.filter(r => r.siteId === siteId);
+            if (siteId && siteId !== 'All' && siteId !== 'all') {
+                const isHqId = siteId.toLowerCase().includes('hq') || siteId.toLowerCase().includes('admin');
+                if (!isHqId) {
+                    results = results.filter(r => r.siteId === siteId);
+                }
+            }
             if (countryCode) results = results.filter(r => r.countryCode.toUpperCase() === countryCode.toUpperCase());
             return results.sort((a, b) => new Date(b.requestedAt).getTime() - new Date(a.requestedAt).getTime());
         }
