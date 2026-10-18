@@ -91,12 +91,35 @@ describe('Role Hierarchy Hiring Rules (canEmployRole)', () => {
             expect(canEmployRole('super_admin', 'super_admin')).toBe(false);
         });
 
-        it('can employ anyone below CEO across Level 2, Level 3, and Level 4', () => {
+        it('can employ Country Managing Director (admin) and anyone across Level 2, Level 3, and Level 4', () => {
+            expect(canEmployRole('super_admin', 'admin')).toBe(true);
             expect(canEmployRole('super_admin', 'regional_manager')).toBe(true);
             expect(canEmployRole('super_admin', 'operations_manager')).toBe(true);
             expect(canEmployRole('super_admin', 'hr_manager')).toBe(true);
             expect(canEmployRole('super_admin', 'store_manager')).toBe(true);
             expect(canEmployRole('super_admin', 'cashier')).toBe(true);
+        });
+    });
+
+    describe('Country Managing Director (admin, Level 1, Rank 98)', () => {
+        it('cannot employ Global CEO (super_admin) or another Country Managing Director (admin)', () => {
+            expect(getRoleHierarchy('admin')).toBe(98);
+            expect(canEmployRole('admin', 'super_admin')).toBe(false);
+            expect(canEmployRole('admin', 'admin')).toBe(false);
+        });
+
+        it('can employ all Level 2 Directors, Level 3 Site Managers, and Level 4 Staff in their country', () => {
+            expect(canEmployRole('admin', 'operations_manager')).toBe(true);
+            expect(canEmployRole('admin', 'regional_manager')).toBe(true);
+            expect(canEmployRole('admin', 'finance_manager')).toBe(true);
+            expect(canEmployRole('admin', 'hr_manager')).toBe(true);
+            expect(canEmployRole('admin', 'procurement_manager')).toBe(true);
+            expect(canEmployRole('admin', 'supply_chain_manager')).toBe(true);
+            expect(canEmployRole('admin', 'merchandising_manager')).toBe(true);
+            expect(canEmployRole('admin', 'store_manager')).toBe(true);
+            expect(canEmployRole('admin', 'warehouse_manager')).toBe(true);
+            expect(canEmployRole('admin', 'cashier')).toBe(true);
+            expect(canEmployRole('admin', 'picker')).toBe(true);
         });
     });
 
