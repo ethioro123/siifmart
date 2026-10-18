@@ -31,6 +31,12 @@ export const picking: any = {
     // Pick
     pickJobs: { en: 'Pick Jobs', am: 'የመምረጫ ስራዎች', or: 'Hojiiwwan Filannoo' },
     itemsToPick: { en: 'Items to Pick', am: 'ለመምረጥ ዕቃዎች', or: 'Meeshalee Filachuu' },
+    pickRoute: { en: 'Pick Route', am: 'የመምረጫ መንገድ', or: 'Karaa Filannoo' },
+    pickItems: { en: 'Scan & Collect', am: 'ቃኝ እና ሰብስብ', or: 'Iskaanii fi Fidi' },
+    stagingHandover: { en: 'Staging Handover', am: 'የዝግጅት ርክክብ', or: 'Dabarsa Staging' },
+    zone: { en: 'Zone', am: 'ዞን', or: 'Naannoo' },
+    aisle: { en: 'Aisle', am: 'መተላለፊያ', or: 'Daandii' },
+    bay: { en: 'Bay', am: 'ሳጥን', or: 'Kuusaa' },
 
     // Picking Section
     pickAllAdmin: { en: 'Pick All (Admin)', am: 'ሁሉንም ዝርዝ (አስተዳዳሪ)', or: 'Hunda Filadhu (Bulchiinsa)' },

@@ -40,24 +40,7 @@ import { productsService } from '../../services/supabase.service'; // Needed for
 import { inventoryRequestsService } from '../../services/supabase.service'; // Needed for CountTab, ReturnsTab
 import { generatePackLabelHTML } from '../../utils/labels/PackLabelGenerator'; // Needed for DocksTab
 import { logger } from '../../utils/logger';
-
-const FLOOR_OPS_ROLES = ['picker', 'packer', 'receiver', 'inventory_specialist', 'forklift_operator', 'driver', 'inbound_qc_inspector'];
-
-const TAB_PERMISSIONS: Record<OpTab, string[]> = {
-    RECEIVE: ['super_admin', 'admin', 'manager', 'regional_manager', 'operations_manager', 'warehouse_manager', 'dispatcher', 'logistics_manager', 'inventory_manager', ...FLOOR_OPS_ROLES],
-    PUTAWAY: ['super_admin', 'admin', 'manager', 'regional_manager', 'operations_manager', 'warehouse_manager', 'dispatcher', 'logistics_manager', 'inventory_manager', ...FLOOR_OPS_ROLES],
-    TRANSFER: ['super_admin', 'admin', 'manager', 'regional_manager', 'operations_manager', 'warehouse_manager', 'dispatcher', 'retail_manager', 'logistics_manager', 'inventory_manager', 'demand_planner', 'replenishment_planner', ...FLOOR_OPS_ROLES],
-    PICK: ['super_admin', 'admin', 'manager', 'regional_manager', 'operations_manager', 'warehouse_manager', 'dispatcher', 'logistics_manager', ...FLOOR_OPS_ROLES],
-    PACK: ['super_admin', 'admin', 'manager', 'regional_manager', 'operations_manager', 'warehouse_manager', 'dispatcher', 'logistics_manager', ...FLOOR_OPS_ROLES],
-    DOCKS: ['super_admin', 'admin', 'operations_manager', 'regional_manager', 'warehouse_manager', 'dispatcher', 'logistics_manager', 'fleet_maintenance_supervisor'],
-    DRIVER: ['super_admin', 'admin', 'manager', 'regional_manager', 'operations_manager', 'warehouse_manager', 'dispatcher', 'driver', 'logistics_manager', 'fleet_maintenance_supervisor'], // Strict Delivery Lockdown: only drivers and dispatch leadership
-    REPLENISH: ['super_admin', 'admin', 'manager', 'regional_manager', 'operations_manager', 'warehouse_manager', 'dispatcher', 'logistics_manager', 'inventory_manager', 'replenishment_planner', ...FLOOR_OPS_ROLES],
-    COUNT: ['super_admin', 'admin', 'manager', 'regional_manager', 'operations_manager', 'warehouse_manager', 'logistics_manager', 'inventory_manager', ...FLOOR_OPS_ROLES],
-    WASTE: ['super_admin', 'admin', 'manager', 'regional_manager', 'operations_manager', 'warehouse_manager', 'logistics_manager', 'inventory_manager', ...FLOOR_OPS_ROLES],
-    RETURNS: ['super_admin', 'admin', 'manager', 'regional_manager', 'operations_manager', 'warehouse_manager', 'dispatcher', 'logistics_manager', 'inventory_manager', ...FLOOR_OPS_ROLES],
-    ASSIGN: ['super_admin', 'admin', 'manager', 'regional_manager', 'operations_manager', 'warehouse_manager', 'dispatcher', 'logistics_manager', 'inventory_manager', 'fleet_maintenance_supervisor'], // Job assignment center
-    LABELS: ['super_admin', 'admin', 'manager', 'regional_manager', 'operations_manager', 'warehouse_manager', 'dispatcher', 'logistics_manager', 'inventory_manager', 'fleet_maintenance_supervisor', 'replenishment_planner', ...FLOOR_OPS_ROLES], // Label printing hub
-};
+import { getVisibleFulfillmentTabs } from '../../utils/fulfillmentTabPermissions';
 
 export const FulfillmentContent: React.FC = () => {
     const {
@@ -119,15 +102,17 @@ export const FulfillmentContent: React.FC = () => {
         refreshJobs();
     };
 
-    const canAccessTab = (tab: OpTab) => {
-        const allowedRoles = TAB_PERMISSIONS[tab];
-        return allowedRoles.includes(user?.role || '');
-    };
-
     const visibleTabs = useMemo(() => {
-        const tabs = Object.keys(TAB_PERMISSIONS) as OpTab[];
-        return tabs.filter(tab => canAccessTab(tab));
+        return getVisibleFulfillmentTabs(user?.role);
     }, [user?.role]);
+
+    const canAccessTab = (tab: OpTab) => visibleTabs.includes(tab);
+
+    useEffect(() => {
+        if (!canAccessTab(activeTab)) {
+            setActiveTab(visibleTabs[0] ?? 'RECEIVE');
+        }
+    }, [activeTab, setActiveTab, visibleTabs]);
 
     const isMobile = useIsMobile();
 
@@ -161,6 +146,8 @@ export const FulfillmentContent: React.FC = () => {
                 />
             )}
 
+            {canAccessTab(activeTab) && (
+                <>
             {/* --- DOCKS TAB --- */}
             {activeTab === 'DOCKS' && (
                 <DocksTab
@@ -371,6 +358,8 @@ export const FulfillmentContent: React.FC = () => {
                     />
                 )
             }
+                </>
+            )}
         </div >
     );
 };

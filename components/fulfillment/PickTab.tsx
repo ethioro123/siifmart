@@ -14,6 +14,7 @@ import { FulfillmentSuccessScreen } from './FulfillmentSuccessScreen';
 import { isWeightBased, isVolumeBased } from '../../utils/units';
 import { logger } from '../../utils/logger';
 import { formatJobId } from '../../utils/jobIdFormatter';
+import { sortPickItemsByOptimalRoute } from '../../utils/fulfillmentRoute';
 
 const PICK_ITEMS_PER_PAGE = 12;
 
@@ -55,14 +56,12 @@ export const PickTab: React.FC = () => {
         );
         if (pending.length === 0) return null;
 
-        // Smart Location Path Sequencing (Zone -> Aisle -> Bay)
-        return [...pending].sort((a: any, b: any) => {
-            const prodA = products.find(p => (p.id === a.productId || p.sku === a.sku) && (p.siteId === targetSiteId || p.site_id === targetSiteId));
-            const prodB = products.find(p => (p.id === b.productId || p.sku === b.sku) && (p.siteId === targetSiteId || p.site_id === targetSiteId));
-            const locA = a.location || prodA?.location || 'ZZZ';
-            const locB = b.location || prodB?.location || 'ZZZ';
-            return locA.localeCompare(locB, undefined, { numeric: true });
-        })[0];
+        // Smart Serpentine Pick Path Sequencing (Zone -> Aisle -> S-curve Bay -> Shelf Level)
+        const sorted = sortPickItemsByOptimalRoute(pending, (item: any) => {
+            const prod = products.find(p => (p.id === item.productId || p.sku === item.sku) && (p.siteId === targetSiteId || p.site_id === targetSiteId));
+            return item.location || prod?.location;
+        });
+        return sorted[0] || null;
     }, [selectedJob, products]);
 
     const currentScannerProduct = useMemo(() => {

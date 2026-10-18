@@ -4,6 +4,11 @@
 
 ## Active Features
 
+### Fulfillment Picker/Packer Tab Permissions (2026-10-19)
+- Picker and packer accounts see only Receive, Putaway, Pick, and Pack in both the mobile and desktop tab selectors. Fulfillment content also checks the selected tab against the role's allowed tab list and returns to an allowed tab if the role changes.
+- **Files**: `utils/fulfillmentTabPermissions.ts`, `components/fulfillment/FulfillmentContent.tsx`
+- **Root Cause**: Floor worker roles were spread across every tab permission, and tab bodies rendered from selected state without an access check.
+
 ### Server-Verified POS Sales (2026-10-19)
 - POS sales now use one trusted database transaction that recalculates line prices, tax, discounts, and cash change from database records. Authenticated browser inserts into `sales` and `sale_items` are denied, and financial sale fields cannot be edited after creation.
 - **Files**: `services/sales.service.ts`, `contexts/hooks/useSaleActions.ts`, `hooks/usePosSync.ts`, `components/pos/hooks/usePOSCheckoutActions.ts`, `migrations/20261019_secure_pos_sale_authority.sql`

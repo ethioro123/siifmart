@@ -29,6 +29,7 @@ export const PickScannerInstructionPanel: React.FC<PickScannerInstructionPanelPr
     t,
 }) => {
     if (step === 'LOCATION') {
+        const targetLoc = currentItem?.location || currentProduct?.location || '';
         return (
             <div className="text-center z-10 mb-4 sm:mb-6 w-full max-w-full px-2">
                 <div className="text-center mb-4 sm:mb-6">
@@ -40,11 +41,11 @@ export const PickScannerInstructionPanel: React.FC<PickScannerInstructionPanelPr
                         <p className={`font-mono font-bold tracking-wider break-words ${
                             isLocationBarcode(inputVal.trim().toUpperCase()) 
                                 ? 'text-2xl sm:text-4xl md:text-5xl text-[var(--theme-accent)]' 
-                                : ((currentProduct?.location?.length || 0) > 10 ? 'text-lg sm:text-xl md:text-2xl' : 'text-2xl sm:text-3xl md:text-4xl')
+                                : ((targetLoc.length || 0) > 10 ? 'text-lg sm:text-xl md:text-2xl' : 'text-2xl sm:text-3xl md:text-4xl')
                         }`}>
                             {isLocationBarcode(inputVal.trim().toUpperCase())
                                 ? decodeLocation(inputVal.trim().toUpperCase())
-                                : (normalizeLocation(inputVal) || currentProduct?.location || t('warehouse.picking.unknownBay'))}
+                                : (normalizeLocation(inputVal) || targetLoc || t('warehouse.picking.unknownBay'))}
                         </p>
                     </div>
                 </div>

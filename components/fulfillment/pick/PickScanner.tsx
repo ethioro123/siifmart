@@ -175,7 +175,7 @@ export const PickScanner: React.FC<PickScannerProps> = ({
         }
 
         if (step === 'LOCATION') {
-            const targetLoc = currentProduct?.location || '';
+            const targetLoc = currentItem?.location || currentProduct?.location || '';
             const normalizedTarget = normalizeLocation(targetLoc) || targetLoc.trim().toUpperCase();
             const decodedScanned = decodeLocation(val);
 
