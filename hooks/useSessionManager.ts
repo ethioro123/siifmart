@@ -79,10 +79,10 @@ export function useSessionManager(
                 if (policy?.mfa_required && mfaCheckedForRef.current !== mfaCheckKey) {
                     const { data: assurance, error: assuranceError } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
                     const mfaCheck = checkMfaRequirement(userRole, assuranceError ? 'aal1' : (assurance?.currentLevel ?? undefined));
-                    if (mfaCheck.required && !mfaCheck.satisfied) {
+                    if (mfaCheck.required && !mfaCheck.satisfied && !hasWarned) {
                         logger.warn('useSessionManager', mfaCheck.reason || 'MFA requirement not satisfied');
-                        onSessionTimeout?.();
-                        return;
+                        setHasWarned(true);
+                        onSessionWarning?.(0);
                     }
                     mfaCheckedForRef.current = mfaCheckKey;
                 }

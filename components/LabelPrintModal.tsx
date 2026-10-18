@@ -96,6 +96,7 @@ export default function LabelPrintModal({ isOpen, onClose, labels, onPrint }: La
     };
 
     const totalLabels = activeLabels.reduce((sum, label) => sum + label.quantity, 0);
+    const activeSizeConfig = LABEL_SIZES[labelSize];
 
     const handlePrint = async () => {
         if (activeLabels.length === 0) return;
@@ -239,7 +240,7 @@ export default function LabelPrintModal({ isOpen, onClose, labels, onPrint }: La
                         </div>
 
                         <div className="p-3 bg-[var(--theme-accent)]/10 border border-[var(--theme-accent)]/20 rounded-xl text-xs text-[var(--theme-text-primary)] flex items-center gap-2 font-medium">
-                            <strong className="text-[var(--theme-accent)]">Tip:</strong> Label size: {config.width}mm × {config.height}mm ({labelSize === 'small' ? '2" × 1"' : labelSize === 'medium' ? '4" × 2"' : '4" × 3"'})
+                            <strong className="text-[var(--theme-accent)]">Tip:</strong> Label size: {activeSizeConfig.label}
                         </div>
 
                         <div className="space-y-3">
