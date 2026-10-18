@@ -112,6 +112,7 @@ export const generateUnifiedBatchLabelsHTML = async (
         const nameEscaped = escapeHtml(item.label);
         const skuEscaped = escapeHtml(itemSkuDisplay);
         const catEscaped = escapeHtml(item.category);
+        const catUpperEscaped = escapeHtml((item.category || '').toUpperCase());
 
         let contentHTML = '';
 
@@ -120,7 +121,7 @@ export const generateUnifiedBatchLabelsHTML = async (
             const useQR = validFormat === 'QR';
             const chips: string[] = [];
             if (showPrice && itemPriceFormatted) chips.push(`<span class="chip">${escapeHtml(itemPriceFormatted)}</span>`);
-            if (showCategory && catEscaped) chips.push(`<span class="chip">${catEscaped.slice(0, 10).toUpperCase()}</span>`);
+            if (showCategory && item.category) chips.push(`<span class="chip">${escapeHtml(item.category.slice(0, 10).toUpperCase())}</span>`);
             const chipsHTML = chips.length ? `<div class="chip-row">${chips.join('')}</div>` : '';
             const nameBar = showName && nameEscaped ? `<div class="name-bar name-bar-tiny">${nameEscaped}</div>` : '';
 
@@ -172,7 +173,7 @@ export const generateUnifiedBatchLabelsHTML = async (
             const nameBar = showName && nameEscaped ? `<div class="name-bar">${nameEscaped}</div>` : '';
             const infoItems: string[] = [];
             if (showPrice && itemPriceFormatted) infoItems.push(`<div class="info-cell"><span class="info-key">PRICE</span><span class="info-val">${escapeHtml(itemPriceFormatted)}</span></div>`);
-            if (showCategory && catEscaped) infoItems.push(`<div class="info-cell"><span class="info-key">CAT</span><span class="info-val">${catEscaped.toUpperCase()}</span></div>`);
+            if (showCategory && item.category) infoItems.push(`<div class="info-cell"><span class="info-key">CAT</span><span class="info-val">${catUpperEscaped}</span></div>`);
             const infoStrip = infoItems.length ? `<div class="info-strip">${infoItems.join('')}</div>` : '';
 
             if (showQR && showBarcode) {
@@ -237,7 +238,7 @@ export const generateUnifiedBatchLabelsHTML = async (
             const cells: string[] = [];
             cells.push(`<div class="info-cell"><span class="info-key">SKU</span><span class="info-val">${skuEscaped}</span></div>`);
             if (showPrice && itemPriceFormatted) cells.push(`<div class="info-cell"><span class="info-key">PRICE</span><span class="info-val">${escapeHtml(itemPriceFormatted)}</span></div>`);
-            if (showCategory && catEscaped) cells.push(`<div class="info-cell"><span class="info-key">CATEGORY</span><span class="info-val">${catEscaped.toUpperCase()}</span></div>`);
+            if (showCategory && item.category) cells.push(`<div class="info-cell"><span class="info-key">CATEGORY</span><span class="info-val">${catUpperEscaped}</span></div>`);
             const infoGrid = `<div class="info-grid">${cells.join('')}</div>`;
 
             if (showQR && showBarcode) {
