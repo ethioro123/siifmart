@@ -163,6 +163,18 @@ export const FulfillmentDataProvider = ({ children }: { children: ReactNode }) =
     useEffect(() => {
         if (!activeSiteId) return;
 
+        // The provider mounts before CentralStore finishes restoring Supabase Auth.
+        // Don't send protected table requests with the publishable key as `anon`.
+        if (!user?.id) {
+            setJobs([]);
+            setTransfers([]);
+            setJobAssignments([]);
+            setZones([]);
+            setBarcodeApprovals([]);
+            setHistoricalJobs([]);
+            return;
+        }
+
         const loadFulfillmentData = async () => {
             try {
                 // Global-queue roles (super_admin, managers, dispatchers) see ALL site jobs.
@@ -219,11 +231,11 @@ export const FulfillmentDataProvider = ({ children }: { children: ReactNode }) =
         };
 
         loadFulfillmentData();
-    }, [activeSiteId, refreshCounter, user?.email, user?.id]);
+    }, [activeSiteId, refreshCounter, user?.email, user?.id, user?.name, user?.employeeId, user?.role]);
 
     // --- REALTIME SUBSCRIPTIONS ---
     useEffect(() => {
-        if (!activeSiteId) return;
+        if (!activeSiteId || !user?.id) return;
 
         const currentWorker = employees.find((e: any) =>
             (user?.email && e.email === user.email) ||
@@ -371,7 +383,7 @@ export const FulfillmentDataProvider = ({ children }: { children: ReactNode }) =
             logger.debug('FulfillmentDataProvider', 'Unsubscribing from fulfillment real-time updates...');
             realtimeService.unsubscribeAll(subscriptions);
         };
-    }, [activeSiteId, employees, user?.id, user?.email, user?.employeeId, queryClient, addNotification]);
+    }, [activeSiteId, employees, user?.id, user?.email, user?.name, user?.employeeId, queryClient, addNotification]);
 
     // --- AUTO CLEANUP OF GHOST JOBS ---
     useGhostJobCleanup({ jobs, orders, user, setJobs });

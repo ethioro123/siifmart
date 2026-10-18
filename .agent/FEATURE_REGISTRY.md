@@ -4,6 +4,11 @@
 
 ## Active Features
 
+### Fulfillment Auth-Ready Data Loading (2026-10-18)
+- Fulfillment table reads and realtime subscriptions wait for a signed-in employee profile. Logout clears cached fulfillment items so the client does not issue anonymous requests or retain the prior user's view.
+- **Files**: `components/fulfillment/FulfillmentDataProvider.tsx`
+- **Root Cause**: The provider mounted globally and began loading after site selection, before Supabase Auth session restoration had populated the user profile.
+
 ### Notification Cards - Clearer Issue Guidance and Responsive Presentation (2026-10-18)
 - Error notifications now recognize common account, permission, barcode, duplicate SKU, inventory, pricing, validation, missing-record, connection, and data-service signals. Guidance avoids claiming that unsaved work will sync or assuming a specific approval path.
 - Notifications expose optional technical details on demand, use clearer status hierarchy, fit mobile safe areas, and honor reduced-motion preferences. Auto-dismiss pauses while the page is hidden.
