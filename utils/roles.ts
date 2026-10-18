@@ -102,7 +102,7 @@ export const getRoleHierarchy = (role: UserRole | string): number => {
         'super_admin': 100,
         'CEO': 100,
         'ceo': 100,
-        'admin': 95, // System administration access
+        'admin': 98, // Country Managing Director (National Executive below Global CEO)
 
         // Level 2: Directors & Regional
         'operations_manager': 95,
@@ -179,11 +179,11 @@ export const canViewLocation = (
     if (isOwn) return true;
     if (!userRole) return false;
 
-    // CEO / Super Admin can see everyone
+    // Global CEO can see everyone
     if (userRole === 'super_admin') return true;
 
-    // HR / HR Manager can see anyone except CEO (super_admin)
-    if (userRole === 'hr' || userRole === 'hr_manager') {
+    // Country Managing Director and HR leadership can see anyone in their country except Global CEO
+    if (userRole === 'admin' || userRole === 'hr' || userRole === 'hr_manager') {
         return targetRole !== 'super_admin';
     }
 
@@ -197,8 +197,10 @@ export const canViewLocation = (
 export const canViewCostPrice = (role: string | undefined): boolean => {
     if (!role) return false;
 
-    // Explicitly allow regional/operations directors, finance, procurement, and merchandising leadership
+    // Explicitly allow executive, regional/operations directors, finance, procurement, and merchandising leadership
     if (
+        role === 'super_admin' ||
+        role === 'admin' ||
         role === 'regional_manager' ||
         role === 'regional_procurement_lead' ||
         role === 'regional_finance_officer' ||

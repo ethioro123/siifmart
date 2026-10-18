@@ -124,7 +124,7 @@ export const APPROVAL_WORKFLOWS: Record<string, ApprovalWorkflow> = {
         levels: [
             { roles: ['procurement_manager', 'regional_procurement_lead'], threshold: 10000 },
             { roles: ['procurement_manager', 'regional_procurement_lead', 'finance_manager', 'regional_finance_officer'], threshold: 50000 },
-            { roles: ['procurement_manager', 'finance_manager', 'regional_manager', 'operations_manager', 'super_admin'], threshold: Infinity }
+            { roles: ['procurement_manager', 'finance_manager', 'regional_manager', 'operations_manager', 'admin', 'super_admin'], threshold: Infinity }
         ]
     },
     expense: {
@@ -132,32 +132,32 @@ export const APPROVAL_WORKFLOWS: Record<string, ApprovalWorkflow> = {
         levels: [
             { roles: ['store_manager', 'warehouse_manager', 'regional_manager', 'operations_manager', 'regional_finance_officer'], threshold: 1000 },
             { roles: ['finance_manager', 'regional_finance_officer'], threshold: 5000 },
-            { roles: ['finance_manager', 'super_admin'], threshold: Infinity }
+            { roles: ['finance_manager', 'admin', 'super_admin'], threshold: Infinity }
         ]
     },
     employee_hire: {
         name: 'Employee Hiring Approval',
-        levels: [{ roles: ['hr', 'hr_manager', 'regional_hr_officer', 'regional_manager', 'operations_manager', 'super_admin'] }]
+        levels: [{ roles: ['hr', 'hr_manager', 'regional_hr_officer', 'regional_manager', 'operations_manager', 'admin', 'super_admin'] }]
     },
     inventory_adjustment: {
         name: 'Inventory Adjustment Approval',
         levels: [
             { roles: ['warehouse_manager'], threshold: 100 },
-            { roles: ['warehouse_manager', 'regional_manager', 'operations_manager', 'super_admin'], threshold: Infinity }
+            { roles: ['warehouse_manager', 'regional_manager', 'operations_manager', 'admin', 'super_admin'], threshold: Infinity }
         ]
     },
     price_change: {
         name: 'Price Change Approval',
         levels: [
             { roles: ['store_manager', 'regional_manager'], threshold: 10 },
-            { roles: ['regional_manager', 'super_admin'], threshold: Infinity }
+            { roles: ['regional_manager', 'admin', 'super_admin'], threshold: Infinity }
         ]
     },
     refund: {
         name: 'Refund Approval',
         levels: [
             { roles: ['store_manager', 'cs_manager'], threshold: 500 },
-            { roles: ['store_manager', 'cs_manager', 'regional_manager', 'operations_manager', 'super_admin'], threshold: Infinity }
+            { roles: ['store_manager', 'cs_manager', 'regional_manager', 'operations_manager', 'admin', 'super_admin'], threshold: Infinity }
         ]
     }
 };

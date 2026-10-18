@@ -209,8 +209,8 @@ const PERMISSION_MAP: Record<string, Permission> = {
 export function hasPermission(userRole: UserRole | undefined, permission: keyof typeof PERMISSIONS): boolean {
     if (!userRole) return false;
 
-    // Super admin bypass
-    if (userRole === 'super_admin' || (userRole as string)?.toLowerCase() === 'ceo') return true;
+    // Global CEO and Country Managing Director have full module & action access within their authorized country scope
+    if (userRole === 'super_admin' || userRole === 'admin' || (userRole as string)?.toLowerCase() === 'ceo') return true;
 
     // Check direct legacy/explicit permission list if specified
     const explicitRoles = PERMISSIONS[permission];
@@ -284,7 +284,7 @@ export function getAccessibleModules(userRole: UserRole | undefined): string[] {
  * Check if user is admin level (super_admin or admin)
  */
 export function isAdmin(userRole: UserRole | undefined): boolean {
-    return userRole === 'super_admin';
+    return userRole === 'super_admin' || userRole === 'admin';
 }
 
 /**

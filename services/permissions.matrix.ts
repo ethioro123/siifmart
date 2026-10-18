@@ -26,14 +26,8 @@ export const ACTION_PERMISSIONS: Record<UserRole, Permission[]> = {
     CEO: FULL_ACCESS_PERMISSIONS,
     ceo: FULL_ACCESS_PERMISSIONS,
 
-    admin: [
-        'dashboard.view', 'admin.view',
-        'settings.view', 'settings.edit', 'settings.manage_sites', 'settings.manage_roles', 'settings.view_logs', 'settings.manage_integrations',
-        'employees.view', 'employees.create', 'employees.edit',
-        'procurement.view', 'procurement.create_po', 'procurement.edit_po', 'procurement.approve_po', 'procurement.delete_po',
-        'inventory.view', 'inventory.create', 'inventory.edit',
-        'finance.view'
-    ],
+    // Country Managing Director — Full executive access within their authorized country
+    admin: FULL_ACCESS_PERMISSIONS,
 
     warehouse_manager: [
         'dashboard.view',

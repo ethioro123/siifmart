@@ -209,7 +209,7 @@ export default function TopBar() {
       const isStore = ['Store', 'Dark Store', 'Retail', 'POS'].includes(siteType);
       const isWarehouse = ['Warehouse', 'Distribution Center', 'WMS', 'Fulfillment Center'].includes(siteType);
       const isHQ = !isStore && !isWarehouse;
-      const isCeo = userRole === 'super_admin' || (userRole as string)?.toLowerCase() === 'ceo' || userRole === 'regional_manager' || userRole === 'operations_manager';
+      const isCeo = userRole === 'super_admin' || userRole === 'admin' || (userRole as string)?.toLowerCase() === 'ceo' || userRole === 'regional_manager' || userRole === 'operations_manager';
 
       const navigation = NAVIGATION_TARGETS.filter(nav => {
          if (!canAccessModule(userRole, nav.module)) return false;
