@@ -3,6 +3,7 @@ import { generateQRCode } from '../qrCodeGenerator';
 import { formatOrderRef } from '../jobIdFormatter';
 import { LabelSize, LabelFormat, SIZE_CSS, normalizeLabelSize } from './types';
 import { escapeHtml } from './escapeHtml';
+import { buildPackShippingLabel, packShippingLabelStyles } from './packShippingLabelTemplate';
 
 export interface PackLabelData {
     orderRef: string;
@@ -317,80 +318,23 @@ export const generatePackLabelHTML = async (
         `;
     } else {
         // XL LABEL (101.6mm x 152.4mm): Standard 4 x 6 inch shipping label
-        const pSize = '24px';
         const showQR = validFormat === 'QR' || validFormat === 'Both';
-
-        contentHTML = `
-            <div style="display: flex; flex-direction: column; min-height: 100%; border: 4px solid #000; font-family: 'SF Mono', 'Fira Code', 'Inter', monospace; color: #000; background: #fff; box-sizing: border-box; padding: ${pSize}; line-height: 1.15;">
-                <!-- TOP HEADER -->
-                <div style="display: flex; justify-content: space-between; border-bottom: 3px solid #000; padding-bottom: 10px; margin-bottom: 12px; flex-shrink: 0;">
-                    <div>
-                        <div style="font-weight: 900; font-size: 28px; letter-spacing: 0.1em;">SIIFMART LOGISTICS</div>
-                        <div style="font-size: 13px; font-weight: 900; margin-top: 3px;">DOMESTIC PRIORITY SERVICE // 2026 EDITION</div>
-                    </div>
-                    ${showQR ? `<div class="qr-container" style="width: 1.0in; height: 1.0in; border: 4px solid #000; padding: 5px;">${qr}</div>` : ''}
-                </div>
-
-                <!-- SPECIAL HANDLING BADGES -->
-                ${handlingHTML}
-
-                <!-- MAIN SHIP BLOCK -->
-                <div style="display: flex; flex-direction: column; border-bottom: 3px solid #000; padding-bottom: 12px;">
-                    <!-- SENDER (TOP LEFT, SMALL) -->
-                    <div style="margin-bottom: 8px;">
-                        <div style="font-weight: 900; font-size: 10px; margin-bottom: 3px; text-transform: uppercase; letter-spacing: 0.1em; color: #666;">FROM:</div>
-                        <div style="font-size: 11px; font-weight: 700; line-height: 1.2; text-transform: uppercase; color: #333; word-break: break-word;">
-                            ${safeFromName}${safeFromAddress ? ` // ${safeFromAddress}` : ''}
-                        </div>
-                    </div>
-
-                    <!-- RECIPIENT (CENTER, BOLD) -->
-                    <div>
-                        <div style="font-weight: 900; font-size: 12px; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.2em; color: #000;">SHIP TO:</div>
-                        <div style="font-weight: 900; font-size: 30px; text-transform: uppercase; line-height: 1.0; margin-bottom: 6px; word-break: break-word;">
-                            ${safeRecipient}
-                        </div>
-                        <div style="font-size: 18px; font-weight: 700; text-transform: uppercase; line-height: 1.2; margin-bottom: 4px; word-break: break-word;">
-                            ${safeAddress}
-                        </div>
-                        <div style="font-weight: 900; font-size: 26px; text-transform: uppercase; letter-spacing: 1px;">
-                            ${safeCity}
-                        </div>
-                    </div>
-                </div>
-
-                <!-- COMPLETE PRODUCT MANIFEST -->
-                ${(safeLineItems.length > 0) ? `
-                <div style="margin-top: 12px; padding: 10px 0; border-bottom: 3px solid #000;">
-                    <div style="font-weight: 900; font-size: 12px; text-transform: uppercase; margin-bottom: 8px; letter-spacing: 0.15em; color: #222;">MANIFEST — ${safeLineItems.length} ITEM${safeLineItems.length > 1 ? 'S' : ''}</div>
-                    <div style="font-size: 13px; font-weight: 700;">
-                        ${safeLineItems.map(item => `
-                            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 4px; text-transform: uppercase; border-bottom: 1px dotted #ccc; padding-bottom: 3px;">
-                                <span style="word-break: break-word; flex: 1; padding-right: 12px;">${item.name || 'ITEM'}</span>
-                                <span style="margin-left: 12px; min-width: 50px; text-align: right; font-weight: 900; font-mono;">${item.sku || ''}</span>
-                                <span style="margin-left: 12px; font-weight: 900; font-mono; white-space: nowrap;">[${item.quantity}${item.unit ? ` ${item.unit}` : ''}]</span>
-                            </div>
-                        `).join('')}
-                    </div>
-                </div>
-                ` : ''}
-
-                <!-- BARCODE & TRACKING -->
-                <div style="margin-top: 16px; text-align: center;">
-                    <div class="barcode-container" style="height: 68px; margin-bottom: 8px; display:flex; justify-content:center;">${barcode}</div>
-                    <div style="font-weight: 900; font-size: 18px; letter-spacing: 0.25em; text-transform: uppercase; font-family:'SF Mono', 'Fira Code', monospace; margin-top:6px; color: #000;">
-                        * TRK :: ${displayTrackingNumber} *
-                    </div>
-                </div>
-
-                <!-- FOOTER DATA -->
-                <div style="margin-top: auto; display: flex; justify-content: space-between; font-weight: 900; font-size: 11px; border-top: 2px solid #000; padding-top: 8px;">
-                    <span>DATE: ${data.packDate ? new Date(data.packDate).toLocaleDateString('en-GB') : new Date().toLocaleDateString('en-GB')}</span>
-                    <span>${data.packageNumber ? `PACKAGE: ${data.packageNumber} OF ${data.totalPackages || 1}` : `${data.totalPackages || 1} PACKAGE${(data.totalPackages || 1) > 1 ? 'S' : ''}`}</span>
-                    <span>ITEMS: [ ${data.itemCount} ]</span>
-                </div>
-            </div>
-        `;
+        contentHTML = buildPackShippingLabel({
+            fromName: safeFromName,
+            fromAddress: safeFromAddress,
+            recipient: safeRecipient,
+            address: safeAddress,
+            city: safeCity,
+            orderRef: safeOrderRef,
+            trackingNumber: displayTrackingNumber,
+            packDate: data.packDate ? new Date(data.packDate).toLocaleDateString('en-GB') : new Date().toLocaleDateString('en-GB'),
+            itemCount: data.itemCount,
+            packageNumber: data.packageNumber || 1,
+            totalPackages: data.totalPackages || 1,
+            qr: showQR ? qr : '',
+            barcode,
+            handlingHtml: handlingHTML
+        });
     }
 
 
@@ -399,9 +343,6 @@ export const generatePackLabelHTML = async (
         <html>
         <head>
             <title>TRK-${safeOrderRef}</title>
-            <link rel="preconnect" href="https://fonts.googleapis.com">
-            <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-            <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&family=Fira+Code:wght@700&display=swap" rel="stylesheet">
             <style>
                 @page {
                     size: ${css.page};
@@ -416,12 +357,12 @@ export const generatePackLabelHTML = async (
                 .label {
                     width: ${css.width};
                     min-height: ${css.height};
-                    height: auto;
+                    height: ${validSize === 'XL' ? css.height : 'auto'};
                     border: none;
                     box-sizing: border-box;
                     page-break-inside: avoid;
                     break-inside: avoid;
-                    overflow: visible;
+                    overflow: ${validSize === 'XL' ? 'hidden' : 'visible'};
                     margin: 0 auto;
                     background: #fff;
                 }
@@ -435,23 +376,18 @@ export const generatePackLabelHTML = async (
                 .qr-container svg { width: 100%; height: auto; display: block; }
                 .barcode-container svg { width: auto; height: auto; max-width: 100%; display: block; margin: 0 auto; }
                 
-                .no-print {
-                    position: fixed; top: 10px; left: 50%; transform: translateX(-50%);
-                    background: #000; padding: 12px; border: 4px solid #fff; border-radius: 0;
-                    z-index: 9999;
-                    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-                }
+                ${validSize === 'XL' ? packShippingLabelStyles : ''}
+                .no-print { display: flex; justify-content: center; padding: 8px; background: #f3f4f6; }
                 
                 .no-print button {
-                    font-family: 'Fira Code', 'Inter', monospace;
-                    font-size: 14px; padding: 10px 20px; font-weight: 900; 
-                    cursor: pointer; background: #000; color: #fff; 
-                    border: 2px solid #fff; text-transform: uppercase; 
-                    letter-spacing: 2px; transition: all 0.2s;
+                    font-family: Arial, Helvetica, sans-serif;
+                    font-size: 13px; padding: 8px 14px; font-weight: 700;
+                    cursor: pointer; background: #fff; color: #111;
+                    border: 1px solid #bbb; border-radius: 6px;
                 }
                 
                 .no-print button:hover {
-                    background: #fff; color: #000;
+                    background: #e5e7eb;
                 }
 
                 @media print {
@@ -462,7 +398,7 @@ export const generatePackLabelHTML = async (
         </head>
         <body>
             <div class="no-print">
-                <button onclick="window.print()">[ EXECUTE PRINT ]</button>
+                <button onclick="window.print()">Print label</button>
             </div>
             <div class="label">
                 ${contentHTML}

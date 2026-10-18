@@ -10,8 +10,8 @@
 - **Database**: None
 
 ### PACK Shipping Label Output (2026-10-19)
-- Standard pack printing now produces one 4 × 6 shipping label for the single carton, independent of carton size. Reprints retain supported media sizes; the unsupported tiny size maps to the compact layout. Removed the item-row print action because it generated a misleading shipping label for one SKU. Label text is escaped and the XL template no longer inserts a hard-coded Ethiopian origin address.
-- **Files**: `components/fulfillment/pack/hooks/usePackLabelPrint.ts`, `components/fulfillment/pack/steps/Step4PrintFinish.tsx`, `components/fulfillment/pack/components/PackJobItemCard.tsx`, `components/fulfillment/pack/PackJobModal.tsx`, `components/fulfillment/pack/steps/Step1PackItems.tsx`, `components/fulfillment/pack/components/PackModalsContainer.tsx`, `components/fulfillment/pack/PackDetailsModal.tsx`, `utils/labels/PackLabelGenerator.ts`, `tests/utils/packLabelGenerator.test.ts`
+- Standard pack printing produces a fixed-height 4 × 6 shipping label for one carton, independent of carton size. The label prioritizes origin, destination, handling, job reference, and tracking barcode; it omits the long item manifest, which previously forced the print content beyond the paper size. Reprints retain supported media sizes; the unsupported tiny size maps to the compact layout. Removed the item-row action because it generated a misleading shipping label for one SKU. Text is escaped and missing origin addresses are left blank rather than fabricated.
+- **Files**: `components/fulfillment/pack/hooks/usePackLabelPrint.ts`, `components/fulfillment/pack/steps/Step4PrintFinish.tsx`, `components/fulfillment/pack/components/PackJobItemCard.tsx`, `components/fulfillment/pack/PackJobModal.tsx`, `components/fulfillment/pack/steps/Step1PackItems.tsx`, `components/fulfillment/pack/components/PackModalsContainer.tsx`, `components/fulfillment/pack/PackDetailsModal.tsx`, `utils/labels/PackLabelGenerator.ts`, `utils/labels/packShippingLabelTemplate.ts`, `tests/utils/packLabelGenerator.test.ts`, `tests/e2e/pack-label-output.spec.ts`
 - **Database**: None
 
 ### Secure PICK-to-PACK Handoff (2026-10-19)

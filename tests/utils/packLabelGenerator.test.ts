@@ -19,12 +19,12 @@ describe('PackLabelGenerator', () => {
         const html = await generatePackLabelHTML(labelData, { size: 'XL', format: 'Both' });
 
         expect(html).toContain('size: 101.6mm 152.4mm;');
-        expect(html).toContain('PACKAGE: 1 OF 1');
+        expect(html).toContain('PARCEL 1 OF 1');
         expect(html).not.toContain('2 PACKAGES');
     });
 
     it('escapes recipient and item text before placing it in printable HTML', async () => {
-        const html = await generatePackLabelHTML(labelData, { size: 'XL', format: 'Both' });
+        const html = await generatePackLabelHTML(labelData, { size: 'Medium', format: 'Both' });
 
         expect(html).toContain('Market &amp; Store &lt;North&gt;');
         expect(html).toContain('Milk &amp; Cream &lt;1L&gt;');

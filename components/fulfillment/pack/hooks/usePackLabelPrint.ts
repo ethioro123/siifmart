@@ -58,7 +58,7 @@ export const usePackLabelPrint = (deps: UsePackLabelPrintDeps) => {
             const totalItems = selectedPackJob.lineItems?.length || 0;
 
             const packLabelData: any = {
-                orderRef: selectedPackJob.orderRef || selectedPackJob.id,
+                orderRef: selectedPackJob.jobNumber || selectedPackJob.orderRef || selectedPackJob.id,
                 originalOrderRef: resolveOrderRef(selectedPackJob.orderRef) || (selectedPackJob as any).poNumber,
                 fromName: sourceSite?.name,
                 fromAddress: sourceSite?.address,
@@ -110,7 +110,7 @@ export const usePackLabelPrint = (deps: UsePackLabelPrintDeps) => {
             const totalItems = job.lineItems?.length || 0;
 
             const packLabelData: any = {
-                orderRef: job.orderRef || job.id,
+                orderRef: job.jobNumber || job.orderRef || job.id,
                 originalOrderRef: resolveOrderRef(job.orderRef) || (job as any).poNumber,
                 fromName: sourceSite?.name,
                 fromAddress: sourceSite?.address,
