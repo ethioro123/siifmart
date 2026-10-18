@@ -149,11 +149,10 @@ export const PackJobModal: React.FC<PackJobModalProps> = ({
         return 'Extra Large';
     }, [hasColdItems, expectedWeightKg]);
 
-    // Auto-select step and smart presets when modal opens
+    // Apply recommended packing presets when the modal opens; preserve wizard step on scanner return.
     const prevOpenRef = useRef(false);
     useEffect(() => {
         if (isOpen && !prevOpenRef.current) {
-            setStep(isFullyPacked ? 'BOX' : 'ITEMS');
             if (recommendedBoxSize) {
                 setBoxSize(recommendedBoxSize);
                 if (hasColdItems) setHasIcePack(true);

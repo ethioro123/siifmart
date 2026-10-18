@@ -6,7 +6,7 @@
 
 ### Floor-Friendly PACK Scanner (2026-10-19)
 - The bottom action in PACK job details starts the full-screen scanner after the job is moved to In-Progress, matching the PICK modal-to-scanner handoff. The job modal closes while scanning and returns to its item step when the scanner closes or all lines are verified, ready for carton and label steps. Product identity and required quantities are large and glanceable, the scanner fits without vertical scrolling, scans must match a line in the job, and only the exact required quantity can be confirmed.
-- **Files**: `components/fulfillment/pack/PackJobModal.tsx`, `components/fulfillment/pack/PackScanner.tsx`, `components/fulfillment/pack/PackScannerStatusView.tsx`, `components/fulfillment/pack/components/PackJobFooter.tsx`, `components/fulfillment/pack/steps/Step1PackDetails.tsx`, `components/fulfillment/pack/components/PackModalsContainer.tsx`, `utils/packScanValidation.ts`, `tests/utils/packScanValidation.test.ts`
+- **Files**: `components/fulfillment/pack/PackJobModal.tsx`, `components/fulfillment/pack/PackScanner.tsx`, `components/fulfillment/pack/PackScannerStatusView.tsx`, `components/fulfillment/pack/components/PackJobFooter.tsx`, `components/fulfillment/pack/steps/Step1PackDetails.tsx`, `components/fulfillment/pack/components/PackModalsContainer.tsx`, `utils/packScanValidation.ts`, `tests/utils/packScanValidation.test.ts`, `playwright.config.ts`, `tests/e2e/pack-scanner.spec.ts`, `tests/e2e/pack-flow-harness.html`, `tests/e2e/pack-flow-harness.tsx`
 - **Database**: None
 
 ### Secure PICK-to-PACK Handoff (2026-10-19)
