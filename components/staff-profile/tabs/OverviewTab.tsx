@@ -58,11 +58,11 @@ export default function OverviewTab({ employee, employeeTasks, sites, isOwnProfi
     const taskPercent = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 100;
 
     return (
-        <div className="space-y-6 animate-in fade-in">
+        <div className="space-y-4 sm:space-y-6 animate-in fade-in">
             {/* Executive KPI Metrics */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-6">
                 {/* Performance Score */}
-                <div className="relative overflow-hidden bg-[var(--theme-bg-card)] p-5 sm:p-6 rounded-2xl border border-[var(--theme-border)] shadow-xs transition-all group">
+                <div className="relative overflow-hidden bg-[var(--theme-bg-card)] p-4 sm:p-6 rounded-2xl border border-[var(--theme-border)] shadow-xs transition-all group">
                     <div className="flex items-center justify-between mb-3">
                         <span className="text-[11px] text-[var(--theme-text-secondary)] uppercase font-bold tracking-wider">
                             Performance Score
@@ -89,7 +89,7 @@ export default function OverviewTab({ employee, employeeTasks, sites, isOwnProfi
                 </div>
 
                 {/* Attendance Rate */}
-                <div className="relative overflow-hidden bg-[var(--theme-bg-card)] p-5 sm:p-6 rounded-2xl border border-[var(--theme-border)] shadow-xs transition-all group">
+                <div className="relative overflow-hidden bg-[var(--theme-bg-card)] p-4 sm:p-6 rounded-2xl border border-[var(--theme-border)] shadow-xs transition-all group">
                     <div className="flex items-center justify-between mb-3">
                         <span className="text-[11px] text-[var(--theme-text-secondary)] uppercase font-bold tracking-wider">
                             Attendance Rate
@@ -116,7 +116,7 @@ export default function OverviewTab({ employee, employeeTasks, sites, isOwnProfi
                 </div>
 
                 {/* Tasks Completed */}
-                <div className="relative overflow-hidden bg-[var(--theme-bg-card)] p-5 sm:p-6 rounded-2xl border border-[var(--theme-border)] shadow-xs transition-all group">
+                <div className="relative overflow-hidden bg-[var(--theme-bg-card)] p-4 sm:p-6 rounded-2xl border border-[var(--theme-border)] shadow-xs transition-all group">
                     <div className="flex items-center justify-between mb-3">
                         <span className="text-[11px] text-[var(--theme-text-secondary)] uppercase font-bold tracking-wider">
                             Tasks Completed
@@ -144,9 +144,9 @@ export default function OverviewTab({ employee, employeeTasks, sites, isOwnProfi
             </div>
 
             {/* Info Sections */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
                 {/* Personal Information */}
-                <div className="bg-[var(--theme-bg-card)] p-6 sm:p-7 rounded-2xl border border-[var(--theme-border)] shadow-xs">
+                <div className="bg-[var(--theme-bg-card)] p-4 sm:p-7 rounded-2xl border border-[var(--theme-border)] shadow-xs">
                     <div className="flex items-center justify-between mb-5 pb-3 border-b border-[var(--theme-border)]">
                         <h4 className="text-base font-bold text-[var(--theme-text-primary)] flex items-center gap-2.5">
                             <div className="p-2 bg-[var(--theme-bg-subtle)] rounded-xl text-[var(--theme-primary)]">

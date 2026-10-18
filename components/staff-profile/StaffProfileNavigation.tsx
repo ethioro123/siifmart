@@ -1,5 +1,5 @@
 import React from 'react';
-import { ChevronDown, LayoutDashboard, Trophy, ClipboardList, Calendar, FileText, DollarSign, Settings } from 'lucide-react';
+import { LayoutDashboard, Trophy, ClipboardList, Calendar, FileText, DollarSign, Settings } from 'lucide-react';
 
 export const PROFILE_TABS = [
     { id: 'overview', label: 'Overview', icon: LayoutDashboard },
@@ -14,20 +14,18 @@ export const PROFILE_TABS = [
 interface StaffProfileNavigationProps {
     activeProfileTab: string;
     setActiveProfileTab: (id: string) => void;
-    isMobileTabsOpen: boolean;
-    setIsMobileTabsOpen: (val: boolean) => void;
     canViewPayroll: boolean;
 }
 
 export default function StaffProfileNavigation({
-    activeProfileTab, setActiveProfileTab, isMobileTabsOpen, setIsMobileTabsOpen, canViewPayroll
+    activeProfileTab, setActiveProfileTab, canViewPayroll
 }: StaffProfileNavigationProps) {
     const activeTab = PROFILE_TABS.find(t => t.id === activeProfileTab) || PROFILE_TABS[0];
 
     return (
-        <div className="mb-5">
+        <div className="mb-4 sm:mb-5">
             {/* Desktop Segmented Control Dock */}
-            <div className="hidden md:flex items-center gap-1 p-1 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl overflow-x-auto no-scrollbar select-none" role="tablist">
+            <div className="hidden md:flex items-center gap-1 p-1 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl overflow-x-auto no-scrollbar select-none" role="tablist" aria-label="Profile sections">
                 {PROFILE_TABS.map((tab) => {
                     const isSelected = activeProfileTab === tab.id;
                     if (tab.id === 'payroll' && !canViewPayroll) return null;
@@ -51,45 +49,31 @@ export default function StaffProfileNavigation({
                 })}
             </div>
 
-            {/* Mobile Dropdown */}
-            <div className="md:hidden relative">
-                <button 
-                    type="button"
-                    onClick={() => setIsMobileTabsOpen(!isMobileTabsOpen)}
-                    className="w-full flex items-center justify-between px-4 py-2.5 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl text-[var(--theme-text-primary)] font-semibold text-xs shadow-xs"
-                >
-                    <div className="flex items-center gap-2">
-                        <div className="w-6 h-6 rounded-lg bg-blue-500/10 text-[var(--theme-accent)] flex items-center justify-center">
-                            <activeTab.icon size={13} />
-                        </div>
-                        <span>{activeTab.label}</span>
-                    </div>
-                    <ChevronDown size={14} className={`text-[var(--theme-text-muted)] transition-transform duration-200 ${isMobileTabsOpen ? 'rotate-180' : ''}`} />
-                </button>
-
-                {isMobileTabsOpen && (
-                    <div className="absolute top-full left-0 right-0 mt-2 bg-[var(--theme-bg-panel)] border border-[var(--theme-border)] rounded-2xl shadow-[var(--shadow-modal)] z-50 overflow-hidden divide-y divide-[var(--theme-border-subtle)] animate-in fade-in duration-150">
-                        {PROFILE_TABS.map((tab) => {
-                            if (tab.id === 'payroll' && !canViewPayroll) return null;
-                            const isSelected = activeProfileTab === tab.id;
-                            return (
-                                <button
-                                    key={tab.id}
-                                    type="button"
-                                    onClick={() => { setActiveProfileTab(tab.id); setIsMobileTabsOpen(false); }}
-                                    className={`w-full flex items-center gap-2.5 px-4 py-3 text-xs transition-colors text-left ${
-                                        isSelected 
-                                            ? 'bg-blue-500/10 text-[var(--theme-accent)] font-semibold' 
-                                            : 'text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-subtle)] font-medium'
-                                    }`}
-                                >
-                                    <tab.icon size={15} className={isSelected ? 'text-[var(--theme-accent)]' : 'text-[var(--theme-text-muted)]'} />
-                                    <span>{tab.label}</span>
-                                </button>
-                            );
-                        })}
-                    </div>
-                )}
+            {/* Mobile section switcher: swipeable, always visible, and avoids a menu layer. */}
+            <div className="md:hidden -mx-1 overflow-x-auto no-scrollbar overscroll-x-contain" role="tablist" aria-label="Profile sections">
+                <div className="flex w-max min-w-full gap-2 px-1 pb-1">
+                    {PROFILE_TABS.map((tab) => {
+                        if (tab.id === 'payroll' && !canViewPayroll) return null;
+                        const isSelected = activeProfileTab === tab.id;
+                        return (
+                            <button
+                                key={tab.id}
+                                type="button"
+                                role="tab"
+                                aria-selected={isSelected}
+                                onClick={() => setActiveProfileTab(tab.id)}
+                                className={`inline-flex min-h-11 shrink-0 items-center gap-2 rounded-xl border px-3.5 text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-accent)] ${
+                                    isSelected
+                                        ? 'border-[var(--theme-accent)] bg-[var(--theme-accent)]/10 text-[var(--theme-accent)] font-semibold'
+                                        : 'border-[var(--theme-border)] bg-[var(--theme-bg-card)] text-[var(--theme-text-secondary)] font-medium'
+                                }`}
+                            >
+                                <tab.icon size={16} aria-hidden="true" />
+                                <span>{tab.label}</span>
+                            </button>
+                        );
+                    })}
+                </div>
             </div>
         </div>
     );

@@ -124,7 +124,6 @@ export default function StaffProfileView(props: StaffProfileViewProps) {
 
             <StaffProfileNavigation 
                 activeProfileTab={profile.activeProfileTab} setActiveProfileTab={profile.setActiveProfileTab}
-                isMobileTabsOpen={profile.isMobileTabsOpen} setIsMobileTabsOpen={profile.setIsMobileTabsOpen}
                 canViewPayroll={canViewPayroll}
             />
 

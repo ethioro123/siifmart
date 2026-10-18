@@ -46,7 +46,6 @@ export function useStaffProfile({
     const [isDeleteDocumentModalOpen, setIsDeleteDocumentModalOpen] = useState(false);
     const [documentToDelete, setDocumentToDelete] = useState<{ docIndex: number, docName: string } | null>(null);
     const [idCardOpen, setIdCardOpen] = useState(false);
-    const [isMobileTabsOpen, setIsMobileTabsOpen] = useState(false);
 
     // Password fields
     const [newPasswordInput, setNewPasswordInput] = useState('');
@@ -298,7 +297,6 @@ export function useStaffProfile({
         isDeleteDocumentModalOpen, setIsDeleteDocumentModalOpen,
         documentToDelete, setDocumentToDelete,
         idCardOpen, setIdCardOpen,
-        isMobileTabsOpen, setIsMobileTabsOpen,
         newPasswordInput, setNewPasswordInput,
         confirmPasswordInput, setConfirmPasswordInput,
         passwordInput, setPasswordInput,

@@ -35,11 +35,11 @@ export default function StaffProfileHeader({
     const isActive = employee.status === 'Active';
 
     return (
-        <div className="rounded-2xl bg-[var(--theme-bg-card)] border border-[var(--theme-border)] p-5 sm:p-6 mb-5 shadow-[var(--shadow-sm)]">
-            <div className="flex flex-col md:flex-row items-center md:items-start gap-5 sm:gap-6">
+        <div className="rounded-2xl bg-[var(--theme-bg-card)] border border-[var(--theme-border)] p-4 sm:p-6 mb-4 sm:mb-5 shadow-[var(--shadow-sm)]">
+            <div className="flex flex-col md:flex-row items-center md:items-start gap-4 sm:gap-6">
                 {/* Avatar with Presence Ring */}
                 <div className="relative shrink-0 group select-none">
-                    <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-2xl overflow-hidden border border-[var(--theme-border)] bg-[var(--theme-bg-subtle)] shadow-xs relative">
+                    <div className="w-20 h-20 sm:w-28 sm:h-28 rounded-2xl overflow-hidden border border-[var(--theme-border)] bg-[var(--theme-bg-subtle)] shadow-xs relative">
                         {employee.avatar ? (
                             <img src={employee.avatar} className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" alt={employee.name} />
                         ) : (
@@ -51,11 +51,12 @@ export default function StaffProfileHeader({
                             <button
                                 type="button"
                                 onClick={onPhotoRequest}
-                                className="absolute inset-0 bg-black/50 backdrop-blur-xs flex flex-col items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
+                                className="absolute bottom-1 right-1 flex h-11 w-11 items-center justify-center rounded-xl border border-white/40 bg-black/65 text-white transition-opacity cursor-pointer md:inset-0 md:h-auto md:w-auto md:flex-col md:rounded-none md:border-0 md:bg-black/50 md:opacity-0 md:group-hover:opacity-100 md:group-focus-within:opacity-100"
                                 title="Change Profile Photo"
+                                aria-label="Change profile photo"
                             >
-                                <Camera size={20} className="mb-1" />
-                                <span className="text-xs font-semibold">Edit</span>
+                                <Camera size={18} className="md:mb-1 md:h-5 md:w-5" />
+                                <span className="sr-only md:not-sr-only md:text-xs md:font-semibold">Edit</span>
                             </button>
                         )}
                     </div>
@@ -83,7 +84,7 @@ export default function StaffProfileHeader({
                             <h2 className="text-2xl sm:text-3xl font-bold text-[var(--theme-text-primary)] tracking-tight truncate">
                                 {employee.name}
                             </h2>
-                            <div className="flex flex-wrap items-center justify-center md:justify-start gap-2 mt-2">
+                    <div className="flex flex-wrap items-center justify-center md:justify-start gap-2 mt-2">
                                 <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-blue-500/10 text-[var(--theme-accent)] border border-blue-500/20">
                                     <ShieldCheck size={13} />
                                     {getEmployeeJobTitle(employee)}
@@ -120,7 +121,7 @@ export default function StaffProfileHeader({
                         <button
                             type="button"
                             onClick={onIdCard}
-                            className="h-9 px-3 rounded-xl bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-panel-hover)] border border-[var(--theme-border)] text-xs font-semibold text-[var(--theme-text-primary)] transition-all active:scale-[0.98] cursor-pointer flex items-center gap-1.5"
+                            className="min-h-11 px-3 rounded-xl bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-panel-hover)] border border-[var(--theme-border)] text-xs font-semibold text-[var(--theme-text-primary)] transition-all active:scale-[0.98] cursor-pointer flex items-center gap-1.5"
                         >
                             <CreditCard size={14} className="text-[var(--theme-text-secondary)]" />
                             <span>ID Card</span>
@@ -132,7 +133,7 @@ export default function StaffProfileHeader({
                                     <button
                                         type="button"
                                         onClick={onApprove}
-                                        className="h-9 px-3.5 rounded-xl bg-[var(--theme-accent)] hover:opacity-95 text-white text-xs font-semibold transition-all active:scale-[0.98] cursor-pointer flex items-center gap-1.5 shadow-xs"
+                                        className="min-h-11 px-3.5 rounded-xl bg-[var(--theme-accent)] hover:opacity-95 text-white text-xs font-semibold transition-all active:scale-[0.98] cursor-pointer flex items-center gap-1.5 shadow-xs"
                                     >
                                         <UserCheck size={14} />
                                         <span>Approve & Activate</span>
@@ -142,7 +143,7 @@ export default function StaffProfileHeader({
                                 <button
                                     type="button"
                                     onClick={onMessage}
-                                    className="h-9 px-3 rounded-xl bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-panel-hover)] border border-[var(--theme-border)] text-xs font-semibold text-[var(--theme-text-primary)] transition-all active:scale-[0.98] cursor-pointer flex items-center gap-1.5"
+                                    className="min-h-11 px-3 rounded-xl bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-panel-hover)] border border-[var(--theme-border)] text-xs font-semibold text-[var(--theme-text-primary)] transition-all active:scale-[0.98] cursor-pointer flex items-center gap-1.5"
                                 >
                                     <MessageSquare size={14} className="text-[var(--theme-text-secondary)]" />
                                     <span>Message</span>
@@ -152,7 +153,7 @@ export default function StaffProfileHeader({
                                     <button
                                         type="button"
                                         onClick={onResetPassword}
-                                        className="h-9 px-3 rounded-xl bg-amber-500/10 hover:bg-amber-500/15 border border-amber-500/20 text-xs font-semibold text-amber-600 dark:text-amber-400 transition-all active:scale-[0.98] cursor-pointer flex items-center gap-1.5"
+                                        className="min-h-11 px-3 rounded-xl bg-amber-500/10 hover:bg-amber-500/15 border border-amber-500/20 text-xs font-semibold text-amber-600 dark:text-amber-400 transition-all active:scale-[0.98] cursor-pointer flex items-center gap-1.5"
                                     >
                                         <Key size={14} />
                                         <span>Reset</span>
@@ -163,7 +164,7 @@ export default function StaffProfileHeader({
                                     <button
                                         type="button"
                                         onClick={onTerminate}
-                                        className="h-9 px-3 rounded-xl bg-rose-500/10 hover:bg-rose-500/15 border border-rose-500/20 text-xs font-semibold text-rose-600 dark:text-rose-400 transition-all active:scale-[0.98] cursor-pointer flex items-center gap-1.5"
+                                        className="min-h-11 px-3 rounded-xl bg-rose-500/10 hover:bg-rose-500/15 border border-rose-500/20 text-xs font-semibold text-rose-600 dark:text-rose-400 transition-all active:scale-[0.98] cursor-pointer flex items-center gap-1.5"
                                     >
                                         <AlertTriangle size={14} />
                                         <span>Terminate</span>
@@ -174,7 +175,7 @@ export default function StaffProfileHeader({
                                     <button
                                         type="button"
                                         onClick={onDelete}
-                                        className="h-9 px-3 rounded-xl bg-rose-500/10 hover:bg-rose-500/15 border border-rose-500/20 text-xs font-semibold text-rose-600 dark:text-rose-400 transition-all active:scale-[0.98] cursor-pointer flex items-center gap-1.5"
+                                        className="min-h-11 px-3 rounded-xl bg-rose-500/10 hover:bg-rose-500/15 border border-rose-500/20 text-xs font-semibold text-rose-600 dark:text-rose-400 transition-all active:scale-[0.98] cursor-pointer flex items-center gap-1.5"
                                     >
                                         <Trash2 size={14} />
                                         <span>Delete</span>
