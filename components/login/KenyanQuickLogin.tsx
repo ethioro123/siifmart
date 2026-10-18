@@ -11,13 +11,13 @@ export interface StagingQuickAccount {
   country: 'KE' | 'ET' | 'GLOBAL';
   siteCode: string;
   siteName: string;
-  siteType: 'HQ' | 'Administration' | 'Warehouse' | 'Store';
+  siteType: 'HQ' | 'Administration' | 'Regional Administration' | 'Warehouse' | 'Store' | 'Distribution Center' | 'Online Store';
 }
 
 export interface StagingSiteGroup {
   siteCode: string;
   siteName: string;
-  siteType: 'HQ' | 'Administration' | 'Warehouse' | 'Store';
+  siteType: 'HQ' | 'Administration' | 'Regional Administration' | 'Warehouse' | 'Store' | 'Distribution Center' | 'Online Store';
   country?: 'KE' | 'ET' | 'GLOBAL';
   accounts: StagingQuickAccount[];
 }

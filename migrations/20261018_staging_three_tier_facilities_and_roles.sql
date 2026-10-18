@@ -59,6 +59,7 @@ ON CONFLICT (id) DO UPDATE SET
 
 -- 3. Clean old non-CEO staging employees & auth accounts before seeding canonical 110 country accounts
 DELETE FROM public.employees WHERE email LIKE '%@staging.siifmart.com' AND email <> 'admin@staging.siifmart.com';
+DELETE FROM public.wallets WHERE user_id IN (SELECT id FROM public.users WHERE email LIKE '%@staging.siifmart.com' AND email <> 'admin@staging.siifmart.com');
 DELETE FROM public.users WHERE email LIKE '%@staging.siifmart.com' AND email <> 'admin@staging.siifmart.com';
 DELETE FROM auth.users WHERE email LIKE '%@staging.siifmart.com' AND email <> 'admin@staging.siifmart.com';
 
@@ -226,11 +227,14 @@ BEGIN
     ) VALUES (
       rec.id, rec.id, rec.email, rec.phone, rec.name, 'en', rec.region_code,
       true, true, true, now(), now()
-    ) ON CONFLICT (id) DO UPDATE SET
+    ) ON CONFLICT (auth_id) DO UPDATE SET
       email = EXCLUDED.email,
       phone = EXCLUDED.phone,
       full_name = EXCLUDED.full_name,
       region_code = EXCLUDED.region_code,
+      verified_phone = true,
+      verified_id = true,
+      verified_face = true,
       updated_at = now();
 
     INSERT INTO public.employees (

@@ -2,48 +2,65 @@ import { describe, it, expect } from 'vitest';
 import stagingAccountsData from '../../components/login/stagingAccounts.json';
 import { type StagingQuickAccount } from '../../components/login/CountryQuickLoginPanel';
 import { SYSTEM_ROLES } from '../../utils/roles';
+import {
+  isHqFacilitySite,
+  isRegionalAdminFacilitySite,
+  isOperationFacilitySite,
+  matchesFacilityFilter,
+} from '../../utils/roleSegregation';
 
-describe('Staging Accounts Dataset & Canonical Role Hierarchy', () => {
+describe('Staging Accounts Dataset & Three-Level Facility Hierarchy', () => {
   const accounts = stagingAccountsData as StagingQuickAccount[];
 
-  it('contains exactly 85 accounts (42 Ethiopia, 42 Kenya, 1 Global CEO)', () => {
-    expect(accounts).toHaveLength(85);
+  it('contains exactly 111 accounts (55 Ethiopia, 55 Kenya, 1 Global CEO)', () => {
+    expect(accounts).toHaveLength(111);
 
     const etAccounts = accounts.filter(a => a.country === 'ET');
     const keAccounts = accounts.filter(a => a.country === 'KE');
     const globalAccounts = accounts.filter(a => a.country === 'GLOBAL');
 
-    expect(etAccounts).toHaveLength(42);
-    expect(keAccounts).toHaveLength(42);
+    expect(etAccounts).toHaveLength(55);
+    expect(keAccounts).toHaveLength(55);
     expect(globalAccounts).toHaveLength(1);
   });
 
   it('enforces exact canonical role naming and role IDs from SYSTEM_ROLES', () => {
     accounts.forEach(account => {
-      // Find matching system role definition
-      const sysRole = SYSTEM_ROLES.find(r => r.id === account.roleId || (account.roleId === 'super_admin' && r.id === 'super_admin'));
+      const sysRole = SYSTEM_ROLES.find(r => r.id === account.roleId);
       expect(sysRole, `Role ID ${account.roleId} must exist in SYSTEM_ROLES`).toBeDefined();
       expect(account.role).toBe(sysRole?.label);
       expect(account.level).toBe(sysRole?.level);
     });
   });
 
-  it('enforces canonical hierarchy distribution (7 L2 Directors, 11 L3 Leads, 24 L4 Staff per country)', () => {
-    ['KE', 'ET'].forEach(country => {
+  it('enforces the 3-Level Facility Hierarchy per country (23 HQ, 6 Regional Admin, 26 Operation Sites)', () => {
+    (['ET', 'KE'] as const).forEach(country => {
       const countryAccounts = accounts.filter(a => a.country === country);
-      expect(countryAccounts).toHaveLength(42);
+      expect(countryAccounts).toHaveLength(55);
 
-      const l2 = countryAccounts.filter(a => a.level === 2);
-      const l3 = countryAccounts.filter(a => a.level === 3);
-      const l4 = countryAccounts.filter(a => a.level === 4);
+      // Level 1: HQ
+      const hqAccounts = countryAccounts.filter(a => a.facilityTier === 'HQ');
+      expect(hqAccounts).toHaveLength(23);
+      hqAccounts.forEach(a => expect(a.siteType).toBe('HQ'));
 
-      expect(l2).toHaveLength(7);
-      expect(l3).toHaveLength(11);
-      expect(l4).toHaveLength(24);
+      // Level 2: Regional Administration
+      const regAccounts = countryAccounts.filter(a => a.facilityTier === 'Regional Administration');
+      expect(regAccounts).toHaveLength(6);
+      regAccounts.forEach(a => expect(a.siteType).toBe('Regional Administration'));
 
-      l2.forEach(a => expect(a.levelTag).toBe('L2 Director'));
-      l3.forEach(a => expect(a.levelTag).toBe('L3 Supervisor'));
-      l4.forEach(a => expect(a.levelTag).toBe('L4 Specialist'));
+      // Level 3: Operation Sites (Store, Warehouse, Distribution Center, Online Store)
+      const opsAccounts = countryAccounts.filter(a => a.facilityTier === 'Operation Sites');
+      expect(opsAccounts).toHaveLength(26);
+
+      const storeAccounts = opsAccounts.filter(a => a.siteType === 'Store');
+      const whAccounts = opsAccounts.filter(a => a.siteType === 'Warehouse');
+      const dcAccounts = opsAccounts.filter(a => a.siteType === 'Distribution Center');
+      const onlineAccounts = opsAccounts.filter(a => a.siteType === 'Online Store');
+
+      expect(storeAccounts).toHaveLength(7);
+      expect(whAccounts).toHaveLength(7);
+      expect(dcAccounts).toHaveLength(7);
+      expect(onlineAccounts).toHaveLength(5);
     });
 
     const globalCEO = accounts.find(a => a.country === 'GLOBAL');
@@ -51,17 +68,18 @@ describe('Staging Accounts Dataset & Canonical Role Hierarchy', () => {
     expect(globalCEO?.levelTag).toBe('L1 Executive');
     expect(globalCEO?.role).toBe('Chief Executive Officer');
     expect(globalCEO?.roleId).toBe('super_admin');
+    expect(globalCEO?.facilityTier).toBe('HQ');
   });
 
-  it('verifies strict country prefix isolation for employee codes', () => {
+  it('verifies strict country prefix isolation for employee and site codes', () => {
     accounts.forEach(account => {
       if (account.country === 'ET') {
-        expect(account.code).toMatch(/^ET-STG-/);
-        expect(account.siteCode).toMatch(/^(ET-|ADD-)/);
+        expect(account.code).toMatch(/^ET-STG-\d{3}$/);
+        expect(account.siteCode).toMatch(/^ET-(HQ|ADD|ADD-STR-01|ADD-WH-01|ADD-DC-01|ADD-ONL-01)$/);
         expect(account.email).toContain('@staging.siifmart.com');
       } else if (account.country === 'KE') {
-        expect(account.code).toMatch(/^KE-STG-/);
-        expect(account.siteCode).toMatch(/^(KE-|NBO-)/);
+        expect(account.code).toMatch(/^KE-STG-\d{3}$/);
+        expect(account.siteCode).toMatch(/^KE-(HQ|NRB|NRB-STR-01|NRB-WH-01|NRB-DC-01|NRB-ONL-01)$/);
         expect(account.email).toContain('@staging.siifmart.com');
       } else if (account.country === 'GLOBAL') {
         expect(account.code).toBe('EMP-STG-001');
@@ -71,19 +89,34 @@ describe('Staging Accounts Dataset & Canonical Role Hierarchy', () => {
     });
   });
 
-  it('verifies all operational site types are present for both countries', () => {
-    const etSites = new Set(accounts.filter(a => a.country === 'ET').map(a => a.siteCode));
-    const keSites = new Set(accounts.filter(a => a.country === 'KE').map(a => a.siteCode));
+  it('correctly classifies all 3 facility tiers in roleSegregation helper functions', () => {
+    const mockSites = [
+      { id: 's-et-hq', code: 'ET-HQ', name: 'Central Operations', type: 'Administration' as const },
+      { id: 's-et-add', code: 'ET-ADD', name: 'Addis Ababa Regional Administration', type: 'Administration' as const },
+      { id: 's-et-str', code: 'ET-ADD-STR-01', name: 'Bole Supermarket', type: 'Store' as const },
+      { id: 's-et-wh', code: 'ET-ADD-WH-01', name: 'Kality Storage Warehouse', type: 'Warehouse' as const },
+      { id: 's-et-dc', code: 'ET-ADD-DC-01', name: 'Addis Ababa Distribution Center', type: 'Distribution Center' as const },
+      { id: 's-et-onl', code: 'ET-ADD-ONL-01', name: 'Addis Ababa Online Store', type: 'Dark Store' as const },
+    ];
 
-    // Ethiopia facilities
-    expect(etSites).toContain('ET-ADD'); // Addis Ababa HQ
-    expect(etSites).toContain('ADD-DC01'); // Kality Central DC (Warehouse)
-    expect(etSites).toContain('ADD-RET01'); // Bole Flagship (Store)
+    expect(isHqFacilitySite(mockSites[0])).toBe(true);
+    expect(isRegionalAdminFacilitySite(mockSites[0])).toBe(false);
 
-    // Kenya facilities
-    expect(keSites).toContain('KE-NRB'); // Kenya Regional HQ (Administration)
-    expect(keSites).toContain('NBO-DC01'); // Embakasi Central DC (Warehouse)
-    expect(keSites).toContain('NBO-RET01'); // Westlands Flagship (Store)
+    expect(isRegionalAdminFacilitySite(mockSites[1])).toBe(true);
+    expect(isHqFacilitySite(mockSites[1])).toBe(false);
+
+    expect(isOperationFacilitySite(mockSites[2])).toBe(true);
+    expect(isOperationFacilitySite(mockSites[3])).toBe(true);
+    expect(isOperationFacilitySite(mockSites[4])).toBe(true);
+    expect(isOperationFacilitySite(mockSites[5])).toBe(true);
+
+    expect(matchesFacilityFilter(mockSites[0], 'TIER:HQ')).toBe(true);
+    expect(matchesFacilityFilter(mockSites[1], 'TIER:REGIONAL')).toBe(true);
+    expect(matchesFacilityFilter(mockSites[2], 'TIER:OPERATIONS')).toBe(true);
+    expect(matchesFacilityFilter(mockSites[2], 'TYPE:Store')).toBe(true);
+    expect(matchesFacilityFilter(mockSites[3], 'TYPE:Warehouse')).toBe(true);
+    expect(matchesFacilityFilter(mockSites[4], 'TYPE:Distribution Center')).toBe(true);
+    expect(matchesFacilityFilter(mockSites[5], 'TYPE:Online Store')).toBe(true);
   });
 
   it('verifies all passwords and required properties are valid', () => {
@@ -91,7 +124,14 @@ describe('Staging Accounts Dataset & Canonical Role Hierarchy', () => {
       expect(acc.name.trim().length).toBeGreaterThan(0);
       expect(acc.role.trim().length).toBeGreaterThan(0);
       expect(acc.password).toBe('StagingPassword123!');
-      expect(['HQ', 'Administration', 'Warehouse', 'Store']).toContain(acc.siteType);
+      expect([
+        'HQ',
+        'Regional Administration',
+        'Store',
+        'Warehouse',
+        'Distribution Center',
+        'Online Store',
+      ]).toContain(acc.siteType);
     });
   });
 });

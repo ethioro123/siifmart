@@ -4,6 +4,21 @@
 
 ## Active Features
 
+### Three-Level Facility Hierarchy & 55-Role Canonical Workforce Filtering
+- **Status**: ✅ IMPLEMENTED (2026-10-18)
+- Establishes 3 facility levels (`HQ`, `Regional Administration`, `Operation Sites` -> `Store`, `Warehouse`, `Distribution Center`, `Online Store`) and all 55 canonical `SYSTEM_ROLES` per country (`ET` and `KE`) across Staging Database, Quick Login panels, and Employee Directory filtering.
+- **Files Modified**:
+  - `migrations/20261018_staging_three_tier_facilities_and_roles.sql`
+  - `components/login/stagingAccounts.json`
+  - `components/login/CountryQuickLoginPanel.tsx`
+  - `utils/roleSegregation.ts`
+  - `services/employees.service.ts`
+  - `hooks/useEmployeeData.ts`
+  - `components/employees/DirectoryHeader.tsx`
+  - `components/employees/WorkforceScopeBadge.tsx`
+  - `tests/utils/stagingAccounts.test.ts`
+- **Database**: `public.sites`, `public.employees`, `public.users`, `auth.users`, `auth.identities`
+
 ### Fulfillment Module - Completed By Display
 - **Status**: ✅ FIXED (2026-02-05)
 - Shows who completed each job and when in all history tabs

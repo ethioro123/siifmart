@@ -7,6 +7,8 @@ import { Country } from '../utils/localization';
 import { logger } from '../utils/logger';
 import type { EmployeeFilters } from '../services/employees.service';
 
+import { isFacilityTierOrTypeFilter, matchesFacilityFilter } from '../utils/roleSegregation';
+
 interface UseEmployeeDataProps {
    user: { id?: string; role?: UserRole; siteId?: string } | null;
    activeSite: Site | null;
@@ -53,22 +55,28 @@ export function useEmployeeData({
       const fetchEmployees = async () => {
          setIsLoadingEmployees(true);
          try {
+            const isTierOrType = !restricted && isFacilityTierOrTypeFilter(filterSite);
+
             // Apply Site Context/Filter
             let querySiteId: string | undefined = undefined;
             if (restricted) {
                querySiteId = user?.siteId || 'NONE';
-            } else if (filterSite && filterSite !== 'All') {
+            } else if (filterSite && filterSite !== 'All' && !isTierOrType) {
                querySiteId = filterSite;
             }
 
-            // Derive site IDs belonging to the active country and optional regional lens
-            const scopedSites = regionCode 
+            // Derive site IDs belonging to the active country and optional regional/tier lens
+            let scopedSites = regionCode 
                ? countrySites.filter(s => s.regionCode === regionCode || (s as any).region_code === regionCode)
                : countrySites;
+
+            if (isTierOrType) {
+               scopedSites = scopedSites.filter(s => matchesFacilityFilter(s, filterSite));
+            }
             const countrySiteIds = scopedSites.map(s => s.id);
 
-            // Selective loading: Only load managers & leadership at first unless filtering by store/warehouse, searching, or role
-            const isLocationFiltered = Boolean((querySiteId && querySiteId !== 'All') || (restricted && user?.siteId) || regionCode);
+            // Selective loading: Only load managers & leadership at first unless filtering by facility/tier, searching, or role
+            const isLocationFiltered = Boolean((filterSite && filterSite !== 'All') || (restricted && user?.siteId) || regionCode);
             const isSearchActive = Boolean(searchTerm && searchTerm.trim() !== '');
             const isSpecificRole = Boolean(filterRole && filterRole !== 'All');
             const isStatusFiltered = Boolean(filterStatus && filterStatus !== 'All');
@@ -82,7 +90,8 @@ export function useEmployeeData({
                country,
                countrySiteIds,
                onlyManagers,
-               regionCode
+               regionCode,
+               strictSiteList: isTierOrType
             };
 
             const { data, count } = await employeesService.getPaginated(
@@ -109,7 +118,14 @@ export function useEmployeeData({
             if (restricted && user?.siteId) {
                filtered = filtered.filter(e => e.siteId === user.siteId);
             } else if (filterSite && filterSite !== 'All') {
-               filtered = filtered.filter(e => e.siteId === filterSite);
+               if (isFacilityTierOrTypeFilter(filterSite)) {
+                  const matchingSiteIds = new Set(
+                     countrySites.filter(s => matchesFacilityFilter(s, filterSite)).map(s => s.id)
+                  );
+                  filtered = filtered.filter(e => matchingSiteIds.has(e.siteId));
+               } else {
+                  filtered = filtered.filter(e => e.siteId === filterSite);
+               }
             }
 
             const isLocationFiltered = Boolean((filterSite && filterSite !== 'All') || (restricted && user?.siteId) || regionCode);

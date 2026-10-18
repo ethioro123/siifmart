@@ -1,7 +1,16 @@
 import React, { useState, useMemo } from 'react';
-import { Building2, Warehouse, Store, UserCheck, Search, ShieldCheck } from 'lucide-react';
+import { Building2, Landmark, Warehouse, Store, Truck, ShoppingBag, UserCheck, Search, ShieldCheck } from 'lucide-react';
 import stagingAccountsData from './stagingAccounts.json';
 import { checkIsLocalhost } from './KenyanQuickLogin';
+
+export type FacilityTierType = 'HQ' | 'Regional Administration' | 'Operation Sites';
+export type StagingSiteType =
+  | 'HQ'
+  | 'Regional Administration'
+  | 'Store'
+  | 'Warehouse'
+  | 'Distribution Center'
+  | 'Online Store';
 
 export interface StagingQuickAccount {
   name: string;
@@ -13,9 +22,10 @@ export interface StagingQuickAccount {
   email: string;
   password: string;
   country: 'KE' | 'ET' | 'GLOBAL';
+  facilityTier: FacilityTierType;
   siteCode: string;
   siteName: string;
-  siteType: 'HQ' | 'Administration' | 'Warehouse' | 'Store';
+  siteType: StagingSiteType;
 }
 
 interface CountryQuickLoginPanelProps {
@@ -25,6 +35,9 @@ interface CountryQuickLoginPanelProps {
   disabled?: boolean;
 }
 
+type TierFilter = 'ALL' | 'HQ' | 'REGIONAL' | 'OPS';
+type OpsSiteFilter = 'ALL_OPS' | 'Store' | 'Warehouse' | 'Distribution Center' | 'Online Store';
+
 export function CountryQuickLoginPanel({
   country,
   title,
@@ -32,8 +45,9 @@ export function CountryQuickLoginPanel({
   disabled = false,
 }: CountryQuickLoginPanelProps) {
   const [searchQuery, setSearchQuery] = useState('');
-  const [facilityFilter, setFacilityFilter] = useState<'ALL' | 'HQ' | 'DC' | 'STORE'>('ALL');
-  const [levelFilter, setLevelFilter] = useState<'ALL' | 2 | 3 | 4>('ALL');
+  const [tierFilter, setTierFilter] = useState<TierFilter>('ALL');
+  const [opsSiteFilter, setOpsSiteFilter] = useState<OpsSiteFilter>('ALL_OPS');
+  const [levelFilter, setLevelFilter] = useState<'ALL' | 1 | 2 | 3 | 4>('ALL');
   const isLocalhost = checkIsLocalhost();
 
   const accounts = useMemo(() => {
@@ -45,53 +59,74 @@ export function CountryQuickLoginPanel({
   const filteredGroups = useMemo(() => {
     const q = searchQuery.toLowerCase().trim();
     const matches = accounts.filter(acc => {
-      // Facility filter
-      if (facilityFilter === 'HQ' && acc.siteType !== 'HQ' && acc.siteType !== 'Administration') return false;
-      if (facilityFilter === 'DC' && acc.siteType !== 'Warehouse') return false;
-      if (facilityFilter === 'STORE' && acc.siteType !== 'Store') return false;
+      // 1. Facility Tier Filter (HQ vs Regional Administration vs Operation Sites)
+      if (tierFilter === 'HQ' && acc.facilityTier !== 'HQ') return false;
+      if (tierFilter === 'REGIONAL' && acc.facilityTier !== 'Regional Administration') return false;
+      if (tierFilter === 'OPS') {
+        if (acc.facilityTier !== 'Operation Sites') return false;
+        if (opsSiteFilter !== 'ALL_OPS' && acc.siteType !== opsSiteFilter) return false;
+      }
 
-      // Hierarchy level filter
+      // 2. Hierarchy Level Filter
       if (levelFilter !== 'ALL' && acc.level !== levelFilter) return false;
 
+      // 3. Search Query
       if (!q) return true;
       return (
         acc.name.toLowerCase().includes(q) ||
         acc.role.toLowerCase().includes(q) ||
-        (acc.roleId && acc.roleId.toLowerCase().includes(q)) ||
+        acc.roleId.toLowerCase().includes(q) ||
         acc.siteName.toLowerCase().includes(q) ||
+        acc.siteType.toLowerCase().includes(q) ||
         acc.code.toLowerCase().includes(q) ||
         acc.email.toLowerCase().includes(q)
       );
     });
 
-    const groups: Record<string, { siteCode: string; siteName: string; siteType: StagingQuickAccount['siteType']; accounts: StagingQuickAccount[] }> = {};
+    const groups: Record<
+      string,
+      {
+        siteCode: string;
+        siteName: string;
+        siteType: StagingSiteType;
+        facilityTier: FacilityTierType;
+        accounts: StagingQuickAccount[];
+      }
+    > = {};
+
     for (const acc of matches) {
       if (!groups[acc.siteCode]) {
         groups[acc.siteCode] = {
           siteCode: acc.siteCode,
           siteName: acc.siteName,
           siteType: acc.siteType,
-          accounts: []
+          facilityTier: acc.facilityTier,
+          accounts: [],
         };
       }
       groups[acc.siteCode].accounts.push(acc);
     }
     return Object.values(groups);
-  }, [accounts, searchQuery, facilityFilter, levelFilter]);
+  }, [accounts, searchQuery, tierFilter, opsSiteFilter, levelFilter]);
 
   if (!isLocalhost) {
     return null;
   }
 
-  const getSiteIcon = (type: StagingQuickAccount['siteType']) => {
+  const getSiteIcon = (type: StagingSiteType) => {
     switch (type) {
       case 'HQ':
-      case 'Administration':
         return <Building2 size={13} className="shrink-0 text-[#2C5E3B] dark:text-[#A9CBA2]" />;
+      case 'Regional Administration':
+        return <Landmark size={13} className="shrink-0 text-violet-700 dark:text-violet-400" />;
+      case 'Store':
+        return <Store size={13} className="shrink-0 text-emerald-700 dark:text-emerald-400" />;
       case 'Warehouse':
         return <Warehouse size={13} className="shrink-0 text-amber-700 dark:text-amber-400" />;
-      case 'Store':
-        return <Store size={13} className="shrink-0 text-blue-700 dark:text-blue-400" />;
+      case 'Distribution Center':
+        return <Truck size={13} className="shrink-0 text-cyan-700 dark:text-cyan-400" />;
+      case 'Online Store':
+        return <ShoppingBag size={13} className="shrink-0 text-orange-700 dark:text-orange-400" />;
       default:
         return <Building2 size={13} className="shrink-0 text-stone-500" />;
     }
@@ -117,7 +152,7 @@ export function CountryQuickLoginPanel({
     : 'bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border-emerald-500/30';
 
   return (
-    <div className="w-full lg:w-[340px] xl:w-[370px] bg-white/80 dark:bg-[#18201B]/55 border border-[#E2DCCE] dark:border-emerald-950/20 rounded-[28px] p-4 sm:p-5 shadow-[0_16px_50px_-10px_rgba(34,50,38,0.04)] dark:shadow-[0_20px_60px_-10px_rgba(5,8,6,0.5)] lg:backdrop-blur-xl flex flex-col h-[700px] max-h-[88vh] transition-all duration-300">
+    <div className="w-full lg:w-[350px] xl:w-[380px] bg-white/80 dark:bg-[#18201B]/55 border border-[#E2DCCE] dark:border-emerald-950/20 rounded-[28px] p-4 sm:p-5 shadow-[0_16px_50px_-10px_rgba(34,50,38,0.04)] dark:shadow-[0_20px_60px_-10px_rgba(5,8,6,0.5)] lg:backdrop-blur-xl flex flex-col h-[720px] max-h-[88vh] transition-all duration-300">
       {/* Header */}
       <div className="flex items-center justify-between pb-3 border-b border-[#E2DCCE]/50 dark:border-white/[0.06]">
         <div className="flex items-center gap-2">
@@ -127,7 +162,7 @@ export function CountryQuickLoginPanel({
           </h3>
         </div>
         <span className={`text-[9px] font-bold tracking-wider uppercase px-2 py-0.5 rounded-full border ${badgeColor}`}>
-          {isEthiopia ? 'ETB • 42 Roles' : 'KES • 42 Roles'}
+          {isEthiopia ? 'ETB • 55 Roles' : 'KES • 55 Roles'}
         </span>
       </div>
 
@@ -138,28 +173,31 @@ export function CountryQuickLoginPanel({
           type="text"
           value={searchQuery}
           onChange={e => setSearchQuery(e.target.value)}
-          placeholder={`Search ${isEthiopia ? 'Ethiopia' : 'Kenya'} roles (e.g. cashier, picker, operations_manager)...`}
+          placeholder={`Search ${isEthiopia ? 'Ethiopia' : 'Kenya'} roles, titles, or sites...`}
           className="w-full pl-8 pr-3 py-1.5 text-xs rounded-xl bg-stone-100/70 dark:bg-black/30 border border-[#E2DCCE]/60 dark:border-white/[0.06] focus:outline-none focus:border-[#2C5E3B] dark:focus:border-[#A9CBA2] text-stone-800 dark:text-stone-100 placeholder:text-stone-400"
         />
       </div>
 
-      {/* Facility Filter Tabs */}
-      <div className="flex items-center gap-1 mb-1.5">
+      {/* 3-Level Facility Hierarchy Filter Tabs */}
+      <div className="grid grid-cols-4 gap-1 mb-1.5">
         {(
           [
-            { key: 'ALL', label: 'All Sites' },
-            { key: 'HQ', label: 'HQ (17)' },
-            { key: 'DC', label: 'DC (13)' },
-            { key: 'STORE', label: 'Store (12)' },
+            { key: 'ALL', label: 'All (55)' },
+            { key: 'HQ', label: 'HQ (23)' },
+            { key: 'REGIONAL', label: 'Regional (6)' },
+            { key: 'OPS', label: 'Ops Sites (26)' },
           ] as const
         ).map(tab => {
-          const active = facilityFilter === tab.key;
+          const active = tierFilter === tab.key;
           return (
             <button
               key={tab.key}
               type="button"
-              onClick={() => setFacilityFilter(tab.key)}
-              className={`flex-1 py-1 text-[10px] font-semibold rounded-lg transition-colors cursor-pointer text-center ${
+              onClick={() => {
+                setTierFilter(tab.key);
+                if (tab.key !== 'OPS') setOpsSiteFilter('ALL_OPS');
+              }}
+              className={`py-1 px-1 text-[10px] font-semibold rounded-lg transition-colors cursor-pointer text-center truncate ${
                 active
                   ? 'bg-[#224429] dark:bg-[#EAE5D9] text-[#FAF8F5] dark:text-[#1E3B24]'
                   : 'bg-stone-100 dark:bg-white/[0.05] text-stone-600 dark:text-stone-300 hover:bg-stone-200 dark:hover:bg-white/[0.08]'
@@ -171,13 +209,46 @@ export function CountryQuickLoginPanel({
         })}
       </div>
 
+      {/* Operation Site Sub-Filters (Store, Warehouse, Distribution Center, Online Store) */}
+      <div className="grid grid-cols-5 gap-1 mb-1.5">
+        {(
+          [
+            { key: 'ALL_OPS', label: 'All Ops' },
+            { key: 'Store', label: 'Store (7)' },
+            { key: 'Warehouse', label: 'WH (7)' },
+            { key: 'Distribution Center', label: 'DC (7)' },
+            { key: 'Online Store', label: 'Online (5)' },
+          ] as const
+        ).map(sub => {
+          const active = tierFilter === 'OPS' && opsSiteFilter === sub.key;
+          return (
+            <button
+              key={sub.key}
+              type="button"
+              onClick={() => {
+                setTierFilter('OPS');
+                setOpsSiteFilter(sub.key);
+              }}
+              className={`py-0.5 px-1 text-[9px] font-semibold rounded-md transition-colors cursor-pointer text-center truncate border ${
+                active
+                  ? 'bg-emerald-700 dark:bg-emerald-300 text-white dark:text-stone-950 border-transparent'
+                  : 'bg-stone-50/80 dark:bg-white/[0.03] text-stone-600 dark:text-stone-400 border-stone-200/80 dark:border-white/[0.07] hover:bg-stone-100 dark:hover:bg-white/[0.06]'
+              }`}
+            >
+              {sub.label}
+            </button>
+          );
+        })}
+      </div>
+
       {/* Hierarchy Level Filter Tabs */}
-      <div className="flex items-center gap-1 mb-2.5">
+      <div className="grid grid-cols-5 gap-1 mb-2.5">
         {(
           [
             { key: 'ALL', label: 'All Ranks' },
+            { key: 1, label: 'L1 Admin' },
             { key: 2, label: 'L2 Director' },
-            { key: 3, label: 'L3 Lead' },
+            { key: 3, label: 'L3 Manager' },
             { key: 4, label: 'L4 Staff' },
           ] as const
         ).map(tab => {
@@ -187,7 +258,7 @@ export function CountryQuickLoginPanel({
               key={tab.key}
               type="button"
               onClick={() => setLevelFilter(tab.key)}
-              className={`flex-1 py-0.5 text-[9px] font-semibold rounded-md transition-colors cursor-pointer text-center border ${
+              className={`py-0.5 text-[9px] font-semibold rounded-md transition-colors cursor-pointer text-center border ${
                 active
                   ? 'bg-stone-800 dark:bg-stone-200 text-white dark:text-stone-900 border-transparent'
                   : 'bg-transparent text-stone-500 dark:text-stone-400 border-stone-200 dark:border-white/[0.08] hover:bg-stone-100 dark:hover:bg-white/[0.04]'
@@ -207,15 +278,20 @@ export function CountryQuickLoginPanel({
           filteredGroups.map(site => (
             <div key={site.siteCode} className="space-y-1.5">
               <div className="flex items-center justify-between pt-1 pb-1 border-b border-[#E2DCCE]/30 dark:border-white/[0.04]">
-                <div className="flex items-center gap-1.5">
+                <div className="flex items-center gap-1.5 min-w-0">
                   {getSiteIcon(site.siteType)}
-                  <span className="text-[11px] font-bold text-[#1E3F27] dark:text-[#EAE5D9]">
+                  <span className="text-[11px] font-bold text-[#1E3F27] dark:text-[#EAE5D9] truncate">
                     {site.siteName}
                   </span>
                 </div>
-                <span className="text-[9px] font-mono tabular-nums font-semibold text-stone-400 dark:text-stone-500">
-                  {site.siteCode}
-                </span>
+                <div className="flex items-center gap-1 shrink-0">
+                  <span className="text-[8px] font-semibold px-1.5 py-0.2 rounded bg-stone-100 dark:bg-white/[0.06] text-stone-600 dark:text-stone-300">
+                    {site.siteType}
+                  </span>
+                  <span className="text-[9px] font-mono tabular-nums font-semibold text-stone-400 dark:text-stone-500">
+                    {site.siteCode}
+                  </span>
+                </div>
               </div>
 
               <div className="space-y-1.5">
@@ -230,15 +306,15 @@ export function CountryQuickLoginPanel({
                     <div className="flex flex-col min-w-0 pr-2">
                       <div className="flex items-center gap-1.5">
                         <span className="text-[11px] font-semibold text-[#1E3F27] dark:text-[#EAE5D9] group-hover:text-[#2C5E3B] dark:group-hover:text-white transition-colors truncate">
-                          {acc.name}
+                          {acc.role}
                         </span>
                         <span className={`text-[8px] font-bold px-1.5 py-0.2 rounded-md shrink-0 ${getLevelBadgeStyle(acc.level)}`}>
                           L{acc.level}
                         </span>
                       </div>
-                      <div className="flex items-center gap-1 mt-0.5">
-                        <span className="text-[10px] font-semibold text-[#2C5E3B] dark:text-[#A9CBA2] truncate">
-                          {acc.role}
+                      <div className="flex items-center gap-1.5 mt-0.5">
+                        <span className="text-[10px] font-medium text-stone-600 dark:text-stone-400 truncate">
+                          {acc.name}
                         </span>
                         <span className="text-[8px] font-mono text-stone-400 dark:text-stone-500 truncate">
                           ({acc.roleId})

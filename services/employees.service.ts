@@ -13,6 +13,7 @@ export interface EmployeeFilters {
     countrySiteIds?: string[];
     onlyManagers?: boolean;
     regionCode?: string;
+    strictSiteList?: boolean;
 }
 
 interface RawDbEmployee {
@@ -175,6 +176,11 @@ export const employeesService = {
         // Specific site filter takes precedence (e.g. branch manager lock or dropdown selection)
         if (siteId && siteId !== 'All') {
             query = query.eq('site_id', siteId);
+        } else if (filters?.strictSiteList) {
+            if (!filters.countrySiteIds || filters.countrySiteIds.length === 0) {
+                return { data: [], count: 0 };
+            }
+            query = query.in('site_id', filters.countrySiteIds);
         } else if (filters?.country) {
             // Country tenant isolation
             if (filters.country === 'ET') {

@@ -172,6 +172,38 @@ export default function DirectoryHeader({
             </div>
          </div>
 
+         {/* 3-Level Facility Hierarchy & Operation Site Filter Pills */}
+         {canViewAll && !restricted && (
+            <div className="flex flex-wrap items-center gap-1.5 pt-0.5">
+               {[
+                  { value: 'All', label: 'All Facilities' },
+                  { value: 'TIER:HQ', label: 'HQ' },
+                  { value: 'TIER:REGIONAL', label: 'Regional Administration' },
+                  { value: 'TIER:OPS', label: 'Operation Sites' },
+                  { value: 'TYPE:Store', label: 'Store' },
+                  { value: 'TYPE:Warehouse', label: 'Warehouse' },
+                  { value: 'TYPE:Distribution Center', label: 'Distribution Center' },
+                  { value: 'TYPE:Online Store', label: 'Online Store' },
+               ].map((pill) => {
+                  const isActive = filterSite === pill.value;
+                  return (
+                     <button
+                        key={pill.value}
+                        type="button"
+                        onClick={() => { setFilterSite(pill.value); setCurrentPage(1); }}
+                        className={`h-8 px-3 rounded-xl text-xs font-semibold transition-all border cursor-pointer active:scale-[0.98] ${
+                           isActive
+                              ? 'bg-[#0071E3] dark:bg-[#2997FF] text-white border-transparent shadow-xs'
+                              : 'bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-panel-hover)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] border-[var(--theme-border)]'
+                        }`}
+                     >
+                        {pill.label}
+                     </button>
+                  );
+               })}
+            </div>
+         )}
+
          {/* Search & Filter Bar */}
          <div className="flex flex-col lg:flex-row gap-3">
             {/* Apple Search Field */}

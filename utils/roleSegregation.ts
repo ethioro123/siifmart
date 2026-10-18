@@ -33,6 +33,58 @@ export function resolveEmployeeScopeLevel(
     return siteRegionCode ? 'REGIONAL' : 'HQ';
 }
 
+export function isHqFacilitySite(
+    site?: { code?: string; name?: string; type?: string; regionCode?: string; region_code?: string } | null
+): boolean {
+    if (!site) return false;
+    const code = (site.code || '').trim().toUpperCase();
+    if (code.endsWith('-HQ') || code === 'HQ' || code === 'HQ-GLOBAL') return true;
+    const nameLower = (site.name || '').trim().toLowerCase();
+    if (nameLower.includes('regional')) return false;
+    if (/^(ET|KE)-(ADD|NRB|ORO|AMH|TIG|SOM|SID|MSA|KSM|NAK)$/.test(code)) return false;
+    const hasRegion = Boolean(site.regionCode || site.region_code);
+    return !hasRegion && ['Administration', 'Administrative', 'HQ', 'Headquarters', 'Central Operations'].includes(site.type || '');
+}
+
+export function isRegionalAdminFacilitySite(
+    site?: { code?: string; name?: string; type?: string; regionCode?: string; region_code?: string } | null
+): boolean {
+    if (!site || isHqFacilitySite(site)) return false;
+    const isAdminType = ['Administration', 'Administrative', 'Regional Administration'].includes(site.type || '');
+    if (!isAdminType) return false;
+    const hasRegion = Boolean(site.regionCode || site.region_code);
+    const nameLower = (site.name || '').trim().toLowerCase();
+    const code = (site.code || '').trim().toUpperCase();
+    return hasRegion || nameLower.includes('regional') || /^(ET|KE)-[A-Z]{3}$/.test(code);
+}
+
+export function isOperationFacilitySite(
+    site?: { code?: string; name?: string; type?: string; regionCode?: string; region_code?: string } | null
+): boolean {
+    if (!site || isHqFacilitySite(site) || isRegionalAdminFacilitySite(site)) return false;
+    return ['Store', 'Warehouse', 'Distribution Center', 'Dark Store', 'Online Store'].includes(site.type || '');
+}
+
+export function isFacilityTierOrTypeFilter(filterSite?: string): boolean {
+    if (!filterSite) return false;
+    return filterSite.startsWith('TIER:') || filterSite.startsWith('TYPE:');
+}
+
+export function matchesFacilityFilter(
+    site: { id: string; code?: string; name?: string; type?: string; regionCode?: string; region_code?: string },
+    filterSite: string
+): boolean {
+    if (!filterSite || filterSite === 'All') return true;
+    if (filterSite === 'TIER:HQ') return isHqFacilitySite(site);
+    if (filterSite === 'TIER:REGIONAL') return isRegionalAdminFacilitySite(site);
+    if (filterSite === 'TIER:OPS' || filterSite === 'TIER:OPERATIONS') return isOperationFacilitySite(site);
+    if (filterSite === 'TYPE:Store') return site.type === 'Store';
+    if (filterSite === 'TYPE:Warehouse') return site.type === 'Warehouse';
+    if (filterSite === 'TYPE:Distribution Center') return site.type === 'Distribution Center';
+    if (filterSite === 'TYPE:Online Store') return site.type === 'Dark Store' || site.type === 'Online Store';
+    return site.id === filterSite;
+}
+
 /**
  * AUTOMATIC ROLE SEGREGATION SYSTEM
  * 
