@@ -7,7 +7,6 @@ import { WMSJob } from '../../types';
 import { playBeep } from '../../utils/audioUtils';
 
 // --- Subcomponents ---
-import { PackGlobalScanBar } from './pack/components/PackGlobalScanBar';
 import { PackModalsContainer } from './pack/components/PackModalsContainer';
 
 export const PackTab: React.FC = () => {
@@ -56,8 +55,7 @@ export const PackTab: React.FC = () => {
     const [showSuccessScreen, setShowSuccessScreen] = useState(false);
     const [completedJobInfo, setCompletedJobInfo] = useState<any>(null);
 
-    // Scan bar state
-    const [scanInput, setScanInput] = useState('');
+    // Scan feedback state
     const [scanError, setScanError] = useState('');
     const [scanSuccess, setScanSuccess] = useState('');
     const [isScanning, setIsScanning] = useState(false);
@@ -170,9 +168,12 @@ export const PackTab: React.FC = () => {
     // --- HANDLERS ---
 
     // GLOBAL SCAN: Scan an Order Ref, Job Number, Tracking Number, or Item Barcode → launch scanning mode
-    const handleGlobalScan = async (e: React.FormEvent) => {
-        e.preventDefault();
-        const scanCode = scanInput.trim().toUpperCase();
+    const handleGlobalScan = async (rawCode?: string | React.FormEvent) => {
+        if (rawCode && typeof rawCode !== 'string' && 'preventDefault' in rawCode) {
+            rawCode.preventDefault();
+        }
+        const codeToScan = typeof rawCode === 'string' ? rawCode : packSearch;
+        const scanCode = codeToScan.trim().toUpperCase();
         if (!scanCode || isScanning) return;
 
         setScanError('');
@@ -228,7 +229,6 @@ export const PackTab: React.FC = () => {
             if (!matchedJob) {
                 playBeep('error');
                 setScanError(`No Pack job found for scan: ${scanCode}`);
-                setScanInput('');
                 setTimeout(() => setScanError(''), 3000);
                 setIsScanning(false);
                 return;
@@ -254,7 +254,7 @@ export const PackTab: React.FC = () => {
 
             playBeep('success');
             setScanSuccess(`Matched: ${formatJobId(matchedJob)}`);
-            setScanInput('');
+            setPackSearch('');
 
             // Open in Job Modal (starts on Job Details overview)
             setSelectedPackJob(jobForScanner as WMSJob);
@@ -307,22 +307,15 @@ export const PackTab: React.FC = () => {
                     setPackSearch={setPackSearch}
                     filteredJobsCount={packStats}
                     t={t}
+                    isScanning={isScanning}
+                    scanSuccess={scanSuccess}
+                    scanError={scanError}
+                    onGlobalScan={handleGlobalScan}
                 />
 
                 <div className="flex-1 overflow-hidden flex flex-col">
                     {viewMode === 'Process' ? (
-                        <>
-                            <PackGlobalScanBar
-                                scanInput={scanInput}
-                                setScanInput={setScanInput}
-                                isScanning={isScanning}
-                                scanSuccess={scanSuccess}
-                                scanError={scanError}
-                                onSubmit={handleGlobalScan}
-                                t={t}
-                            />
-
-                            <div className="flex-1 overflow-hidden">
+                        <div className="flex-1 overflow-hidden">
                                 <PackList
                                     filteredPackJobs={filteredPackJobs}
                                     paginatedPackJobs={paginatedPackJobs}
@@ -339,7 +332,6 @@ export const PackTab: React.FC = () => {
                                     t={t}
                                 />
                             </div>
-                        </>
                     ) : (
                         <PackHistory
                             historicalJobs={historicalJobs}

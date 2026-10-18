@@ -1,5 +1,5 @@
 import React from 'react';
-import { Package, Filter, ChevronDown, CheckCircle, AlertTriangle, Clock, List, Search, X } from 'lucide-react';
+import { Package, Filter, ChevronDown, CheckCircle, AlertTriangle, Clock, List, Search, X, ScanLine, Loader2 } from 'lucide-react';
 import { SortDropdown } from '../../shared';
 
 interface PackHeaderProps {
@@ -20,22 +20,26 @@ interface PackHeaderProps {
     packSearch: string;
     setPackSearch: (val: string) => void;
     t: (key: string) => string;
+    isScanning?: boolean;
+    scanSuccess?: string;
+    scanError?: string;
+    onGlobalScan?: (code?: string) => Promise<void>;
 }
 
 export const PackHeader: React.FC<PackHeaderProps> = ({
     viewMode, setViewMode, packJobFilter, setPackJobFilter, isPackFilterDropdownOpen, setIsPackFilterDropdownOpen,
     packSortBy, setPackSortBy, isPackSortDropdownOpen, setIsPackSortDropdownOpen, packSearch, setPackSearch, t,
-    filteredJobsCount
+    filteredJobsCount, isScanning, scanSuccess, scanError, onGlobalScan
 }) => {
     return (
-        <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl sm:rounded-2xl p-2.5 sm:p-6 mb-2 sm:mb-4 shadow-sm">
+        <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl sm:rounded-2xl p-2.5 sm:p-5 mb-1.5 sm:mb-4 shadow-xs">
             {/* Title row — hidden on mobile to maximize screen real estate */}
-            <div className="hidden sm:flex items-center gap-4 mb-5">
-                <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-[var(--theme-accent)]/10 border border-[var(--theme-accent)]/20 flex items-center justify-center text-[var(--theme-accent)] shrink-0">
-                    <Package size={24} strokeWidth={1.75} />
+            <div className="hidden sm:flex items-center gap-4 mb-4">
+                <div className="w-12 h-12 rounded-2xl bg-[var(--theme-accent)]/10 border border-[var(--theme-accent)]/20 flex items-center justify-center text-[var(--theme-accent)] shrink-0">
+                    <Package size={22} strokeWidth={1.75} />
                 </div>
                 <div>
-                    <h2 className="text-xl sm:text-2xl font-bold text-[var(--theme-text-primary)] uppercase tracking-tight">{t('warehouse.tabs.pack')}</h2>
+                    <h2 className="text-xl font-bold text-[var(--theme-text-primary)] uppercase tracking-tight">{t('warehouse.tabs.pack')}</h2>
                     <p className="text-xs font-medium text-[var(--theme-text-secondary)] uppercase tracking-wider mt-0.5">{t('warehouse.packDesc')}</p>
                 </div>
             </div>
@@ -44,19 +48,19 @@ export const PackHeader: React.FC<PackHeaderProps> = ({
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3 w-full">
                 <div className="flex items-center justify-between sm:justify-start gap-2 shrink-0">
                     {/* View mode toggle */}
-                    <div className="bg-[var(--theme-bg-subtle)] p-0.5 sm:p-1 rounded-xl border border-[var(--theme-border)] flex gap-1 shrink-0 min-h-[38px] sm:min-h-[44px] items-center">
+                    <div className="bg-[var(--theme-bg-subtle)] p-0.5 sm:p-1 rounded-xl border border-[var(--theme-border)] flex gap-1 shrink-0 min-h-[36px] sm:min-h-[42px] items-center">
                         <button
                             onClick={() => setViewMode('Process')}
-                            className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs font-semibold uppercase tracking-wider transition-colors min-h-[32px] sm:min-h-[36px] ${
-                                viewMode === 'Process' ? 'bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)] shadow-sm' : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)]'
+                            className={`px-3 sm:px-4 py-1 sm:py-1.5 rounded-lg text-xs font-semibold uppercase tracking-wider transition-colors min-h-[30px] sm:min-h-[34px] cursor-pointer ${
+                                viewMode === 'Process' ? 'bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)] shadow-xs' : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)]'
                             }`}
                         >
                             {t('warehouse.process')}
                         </button>
                         <button
                             onClick={() => setViewMode('History')}
-                            className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs font-semibold uppercase tracking-wider transition-colors min-h-[32px] sm:min-h-[36px] ${
-                                viewMode === 'History' ? 'bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)] shadow-sm' : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)]'
+                            className={`px-3 sm:px-4 py-1 sm:py-1.5 rounded-lg text-xs font-semibold uppercase tracking-wider transition-colors min-h-[30px] sm:min-h-[34px] cursor-pointer ${
+                                viewMode === 'History' ? 'bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)] shadow-xs' : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)]'
                             }`}
                         >
                             {t('warehouse.history')}
@@ -77,7 +81,7 @@ export const PackHeader: React.FC<PackHeaderProps> = ({
                     <div className="relative shrink-0">
                         <button
                             onClick={() => setIsPackFilterDropdownOpen(!isPackFilterDropdownOpen)}
-                            className="flex items-center gap-1.5 px-3 py-1.5 sm:px-3.5 sm:py-2.5 bg-[var(--theme-bg-card)] rounded-xl border border-[var(--theme-border)] text-xs font-semibold text-[var(--theme-text-primary)] uppercase tracking-wider transition-colors min-h-[38px] sm:min-h-[44px]"
+                            className="flex items-center gap-1.5 px-3 py-1.5 sm:px-3.5 sm:py-2 bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card)] rounded-xl border border-[var(--theme-border)] text-xs font-semibold text-[var(--theme-text-primary)] uppercase tracking-wider transition-colors min-h-[36px] sm:min-h-[42px] cursor-pointer"
                         >
                             <Filter size={13} className={packJobFilter !== 'all' ? 'text-[var(--theme-accent)]' : 'text-[var(--theme-text-secondary)]'} />
                             <span className="inline truncate max-w-[80px] sm:max-w-[90px]">{packJobFilter === 'all' ? t('warehouse.allStatus') : packJobFilter}</span>
@@ -91,7 +95,7 @@ export const PackHeader: React.FC<PackHeaderProps> = ({
                                         <button
                                             key={status}
                                             onClick={() => { setPackJobFilter(status as any); setIsPackFilterDropdownOpen(false); }}
-                                            className={`w-full text-left px-3.5 py-2.5 rounded-xl text-xs font-semibold tracking-wider uppercase transition-colors flex items-center justify-between min-h-[38px] ${
+                                            className={`w-full text-left px-3.5 py-2.5 rounded-xl text-xs font-semibold tracking-wider uppercase transition-colors flex items-center justify-between min-h-[38px] cursor-pointer ${
                                                 packJobFilter === status ? 'bg-[var(--theme-accent)] text-white' : 'text-[var(--theme-text-secondary)] hover:bg-[var(--theme-bg-subtle)] hover:text-[var(--theme-text-primary)]'
                                             }`}
                                         >
@@ -121,28 +125,81 @@ export const PackHeader: React.FC<PackHeaderProps> = ({
                     </div>
                 </div>
 
-                {/* Search */}
+                {/* Smart Unified Search & Barcode Scan Bar */}
                 <div className="relative flex-1 min-w-0">
-                    <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
-                        <Search size={16} className="text-[var(--theme-text-secondary)]" />
+                    <div className={`relative flex items-center rounded-xl border transition-colors ${
+                        scanSuccess
+                            ? 'border-emerald-500/50 bg-emerald-500/5'
+                            : scanError
+                                ? 'border-red-500/50 bg-red-500/5'
+                                : 'border-[var(--theme-border)] bg-[var(--theme-bg-subtle)] focus-within:border-[var(--theme-accent)] focus-within:ring-2 focus-within:ring-[var(--theme-accent-muted)]'
+                    }`}>
+                        <div className="pl-3.5 flex items-center pointer-events-none shrink-0">
+                            {isScanning ? (
+                                <Loader2 size={16} className="text-[var(--theme-accent)] animate-spin" />
+                            ) : scanSuccess ? (
+                                <CheckCircle size={16} className="text-emerald-500" />
+                            ) : scanError ? (
+                                <AlertTriangle size={16} className="text-red-500" />
+                            ) : (
+                                <ScanLine size={16} className="text-[var(--theme-accent)]" />
+                            )}
+                        </div>
+                        <input
+                            type="text"
+                            placeholder="Scan barcode / job # or search SKU, order..."
+                            aria-label="Scan barcode or search product, SKU, order"
+                            title="Scan barcode or search product, SKU, order"
+                            value={packSearch}
+                            onChange={(e) => setPackSearch(e.target.value)}
+                            onKeyDown={(e) => {
+                                if (e.key === 'Enter') {
+                                    const val = packSearch.trim();
+                                    if (val && onGlobalScan) {
+                                        onGlobalScan(val);
+                                    }
+                                }
+                            }}
+                            autoComplete="off"
+                            className="w-full bg-transparent border-0 pl-2.5 pr-2 py-2 text-[var(--theme-text-primary)] text-xs font-medium outline-none placeholder:text-[var(--theme-text-secondary)]/60 min-h-[36px] sm:min-h-[42px]"
+                        />
+                        <div className="flex items-center gap-1 pr-2 shrink-0">
+                            {packSearch && (
+                                <button
+                                    type="button"
+                                    onClick={() => setPackSearch('')}
+                                    aria-label="Clear search"
+                                    className="p-1 text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] transition-colors rounded-lg cursor-pointer"
+                                >
+                                    <X size={14} />
+                                </button>
+                            )}
+                            {packSearch && onGlobalScan && (
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        const val = packSearch.trim();
+                                        if (val) onGlobalScan(val);
+                                    }}
+                                    disabled={isScanning}
+                                    className="h-7 sm:h-8 px-2.5 sm:px-3 bg-[var(--theme-accent)] hover:opacity-90 text-white rounded-lg text-xs font-semibold uppercase tracking-wider transition-all active:scale-95 disabled:opacity-50 flex items-center gap-1 cursor-pointer"
+                                >
+                                    {isScanning ? <Loader2 size={12} className="animate-spin" /> : <span>{t('warehouse.auxiliary.go') || 'Go'}</span>}
+                                </button>
+                            )}
+                        </div>
                     </div>
-                    <input
-                        type="text"
-                        placeholder="Search SKU, barcode, order..."
-                        aria-label="Search product, SKU, barcode, order"
-                        title="Search product, SKU, barcode, order"
-                        value={packSearch}
-                        onChange={(e) => setPackSearch(e.target.value)}
-                        className="w-full bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl pl-10 pr-9 py-2.5 text-[var(--theme-text-primary)] text-xs font-medium focus:border-[var(--theme-accent)] outline-none transition-colors placeholder:text-[var(--theme-text-secondary)] min-h-[44px]"
-                    />
-                    {packSearch && (
-                        <button
-                            onClick={() => setPackSearch('')}
-                            aria-label="Clear search"
-                            className="absolute inset-y-0 right-0 pr-3 flex items-center text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] transition-colors min-h-[44px] min-w-[36px] justify-center"
-                        >
-                            <X size={14} />
-                        </button>
+
+                    {/* Status Feedback Pill */}
+                    {(scanSuccess || scanError) && (
+                        <div className={`mt-1.5 px-3 py-1 rounded-lg text-xs font-semibold flex items-center gap-1.5 animate-in fade-in duration-150 ${
+                            scanSuccess
+                                ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20'
+                                : 'bg-red-500/10 text-red-600 dark:text-red-400 border border-red-500/20'
+                        }`}>
+                            {scanSuccess ? <CheckCircle size={13} className="shrink-0" /> : <AlertTriangle size={13} className="shrink-0" />}
+                            <span className="truncate">{scanSuccess || scanError}</span>
+                        </div>
                     )}
                 </div>
             </div>
