@@ -169,16 +169,6 @@ export default defineConfig(({ mode }) => {
             clientsClaim: true,
             skipWaiting: true,
             navigateFallback: '/index.html',
-            runtimeCaching: [
-              {
-                urlPattern: ({ request }) => request.mode === 'navigate',
-                handler: 'NetworkFirst',
-                options: {
-                  cacheName: 'html-cache',
-                  networkTimeoutSeconds: 3,
-                }
-              }
-            ]
           },
           devOptions: {
             enabled: false

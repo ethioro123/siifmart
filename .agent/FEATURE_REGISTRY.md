@@ -4,6 +4,11 @@
 
 ## Active Features
 
+### Mobile Web Deployment Recovery (2026-10-18)
+- Prevents a stale service-worker or mobile browser asset cache from causing repeat reloads after a deployment. A chunk failure now clears only SIIFMART Workbox caches and retries once; HTML navigations no longer use an unversioned runtime cache.
+- **Files**: `index.tsx`, `vite.config.ts`
+- **Database**: None
+
 ### Mobile-Friendly Staff Profile (2026-10-18)
 - Profile sections use a swipeable mobile tab strip, touch-sized controls, and a persistent mobile photo action. The self-profile page and overview use responsive spacing and semantic theme tokens.
 - **Files**: `pages/Profile.tsx`, `components/StaffProfileView.tsx`, `components/staff-profile/StaffProfileHeader.tsx`, `components/staff-profile/StaffProfileNavigation.tsx`, `components/staff-profile/tabs/OverviewTab.tsx`, `hooks/useStaffProfile.ts`

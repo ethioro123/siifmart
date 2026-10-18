@@ -28,11 +28,54 @@ const queryClient = new QueryClient({
 
 const persister = createIDBPersister();
 
-// 1. Auto-recover from chunk 404s when a new version is pushed to live web
+const ASSET_RECOVERY_KEY = 'siifmart:asset-recovery-at';
+const SW_RELOAD_KEY = 'siifmart:sw-reload-at';
+const RELOAD_COOLDOWN_MS = 60_000;
+
+const canReloadOnce = (key: string) => {
+  const now = Date.now();
+  try {
+    const previousReload = Number(sessionStorage.getItem(key) || 0);
+    if (previousReload && now - previousReload < RELOAD_COOLDOWN_MS) return false;
+    sessionStorage.setItem(key, String(now));
+  } catch {
+    // Continue with an in-memory guard if browser storage is unavailable.
+    const guard = window as typeof window & Record<string, unknown>;
+    if (guard[key]) return false;
+    guard[key] = true;
+  }
+  return true;
+};
+
+// 1. Recover from old mobile browser/PWA caches after a deployment changes chunk names.
 if (typeof window !== 'undefined') {
   window.addEventListener('vite:preloadError', (event) => {
-    console.warn('Vite chunk preload error detected (new live deployment), reloading...', event);
-    window.location.reload();
+    event.preventDefault();
+    if (!canReloadOnce(ASSET_RECOVERY_KEY)) {
+      console.error('Asset recovery stopped after a repeated chunk load failure.');
+      return;
+    }
+
+    console.warn('Chunk load failed. Clearing this app’s stale caches before one recovery reload.');
+    void (async () => {
+      try {
+        const registration = await navigator.serviceWorker?.getRegistration();
+        await registration?.unregister();
+        if ('caches' in window) {
+          const cacheNames = await caches.keys();
+          const appPrecache = registration ? `workbox-precache-v2-${registration.scope}` : '';
+          await Promise.all(cacheNames
+            .filter((name) => name === 'html-cache' || (appPrecache && name.startsWith(appPrecache)))
+            .map((name) => caches.delete(name)));
+        }
+      } catch (error) {
+        console.warn('Could not clear the stale app cache before recovery.', error);
+      }
+
+      const recoveryUrl = new URL(window.location.href);
+      recoveryUrl.searchParams.set('__asset_recovery', String(Date.now()));
+      window.location.replace(recoveryUrl.toString());
+    })();
   });
 }
 
@@ -47,7 +90,7 @@ if (typeof window !== 'undefined' && 'serviceWorker' in navigator) {
     });
   } else {
     navigator.serviceWorker.addEventListener('controllerchange', () => {
-      if (!(window as any).__swReloading) {
+      if (!(window as any).__swReloading && canReloadOnce(SW_RELOAD_KEY)) {
         (window as any).__swReloading = true;
         window.location.reload();
       }
