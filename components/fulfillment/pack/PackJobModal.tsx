@@ -60,10 +60,8 @@ export const PackJobModal: React.FC<PackJobModalProps> = ({
     const [step, setStep] = useState<PackStep>('DETAILS');
 
     useEffect(() => {
-        if (isOpen) {
-            setStep('DETAILS');
-        }
-    }, [isOpen, job?.id]);
+        setStep('DETAILS');
+    }, [job?.id]);
 
     const handleStartScanning = async () => {
         try {

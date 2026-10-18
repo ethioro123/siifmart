@@ -221,6 +221,7 @@ export const PackModalsContainer: React.FC<PackModalsContainerProps> = ({
                         isSubmitting={isSubmitting || isPrinting}
                         resolveOrderRef={resolveOrderRef}
                         onOpenScanner={() => {
+                            setIsPackModalOpen(false);
                             setIsScannerOpen(true);
                         }}
                         onPrintItemLabel={(item, product, boxSize) => handlePrintItemLabel(selectedPackJob, item, product, boxSize)}
@@ -234,6 +235,7 @@ export const PackModalsContainer: React.FC<PackModalsContainerProps> = ({
                             products={filteredProducts}
                             onClose={() => {
                                 setIsScannerOpen(false);
+                                setIsPackModalOpen(true);
                             }}
                             onConfirmPack={handleScanConfirmPack}
                             onCompleteJob={handleScannerComplete}

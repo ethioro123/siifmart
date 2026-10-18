@@ -5,7 +5,7 @@
 ## Active Features
 
 ### Floor-Friendly PACK Scanner (2026-10-19)
-- Opening a PACK from job details starts the full-screen scanner after the job is moved to In-Progress. The scanner keeps the job modal at its item step underneath so workers return directly to carton and label steps. Product identity and required quantities are large and glanceable, the scanner fits without vertical scrolling, scans must match a line in the job, and only the exact required quantity can be confirmed.
+- Opening a PACK from job details starts the full-screen scanner after the job is moved to In-Progress, matching the PICK modal-to-scanner handoff. The job modal closes while scanning and returns to its item step when the scanner closes or all lines are verified, ready for carton and label steps. Product identity and required quantities are large and glanceable, the scanner fits without vertical scrolling, scans must match a line in the job, and only the exact required quantity can be confirmed.
 - **Files**: `components/fulfillment/pack/PackJobModal.tsx`, `components/fulfillment/pack/PackScanner.tsx`, `components/fulfillment/pack/PackScannerStatusView.tsx`, `components/fulfillment/pack/components/PackJobFooter.tsx`, `components/fulfillment/pack/steps/Step1PackDetails.tsx`, `components/fulfillment/pack/components/PackModalsContainer.tsx`, `utils/packScanValidation.ts`, `tests/utils/packScanValidation.test.ts`
 - **Database**: None
 
