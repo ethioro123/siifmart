@@ -11,6 +11,11 @@ CREATE EXTENSION IF NOT EXISTS pgcrypto WITH SCHEMA extensions;
 
 BEGIN;
 
+
+-- Clean out previous test accounts except admin
+DELETE FROM public.employees WHERE email != 'admin@staging.siifmart.com';
+DELETE FROM auth.users WHERE email != 'admin@staging.siifmart.com';
+
 CREATE TEMP TABLE temp_all_staging_accounts (
   id UUID, email TEXT, name TEXT, role TEXT, scope_level TEXT,
   site_id UUID, region_code TEXT, country_code TEXT,
