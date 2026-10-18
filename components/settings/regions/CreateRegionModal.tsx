@@ -5,6 +5,8 @@ import type { CreateRegionInput } from '../../../services/regions.service';
 import { useCreateRegionMutation } from '../../../hooks/useRegionMutations';
 import { normalizeCountryCode } from '../../../utils/siteIdGenerator';
 import { getCountryProfile } from '../../../utils/localization';
+import { useStore } from '../../../contexts/CentralStore';
+import { canSwitchCountry } from '../../../utils/userCountry';
 
 interface CreateRegionModalProps {
     isOpen: boolean;
@@ -27,7 +29,13 @@ export const CreateRegionModal: React.FC<CreateRegionModalProps> = ({
     employees,
     addNotification
 }) => {
+    const { user } = useStore();
+    const canSwitch = canSwitchCountry(user);
     const createRegionMutation = useCreateRegionMutation();
+    const normCountry = normalizeCountryCode(country);
+
+    const [selectedCountry, setSelectedCountry] = useState<string>(normCountry);
+    const [currencyState, setCurrencyState] = useState<string>(currency);
     const [name, setName] = useState('');
     const [code, setCode] = useState('');
     const [city, setCity] = useState('');
@@ -41,27 +49,39 @@ export const CreateRegionModal: React.FC<CreateRegionModalProps> = ({
 
     if (!isOpen) return null;
 
-    const normCountry = normalizeCountryCode(country);
-    const countryProfile = getCountryProfile(normCountry as any);
+    const activeProfile = getCountryProfile(selectedCountry as any);
 
     // Filter sites to current sovereign country
-    const countrySites = sites.filter(s => normalizeCountryCode(s.country) === normCountry);
+    const countrySites = sites.filter(s => normalizeCountryCode(s.country) === selectedCountry);
 
     // Filter potential regional managers
     const countryEmployees = employees.filter(e => {
         const empCountry = normalizeCountryCode(e.country || e.country_code);
-        return empCountry === normCountry;
+        return empCountry === selectedCountry;
     });
+
+    const handleCountryChange = (newCountry: string) => {
+        const norm = normalizeCountryCode(newCountry);
+        setSelectedCountry(norm);
+        const prof = getCountryProfile(norm as any);
+        setCurrencyState(prof.currency);
+        setAdminHubSiteId('');
+        setRegionalManagerId('');
+        const cleanSlug = name
+            ? name.toUpperCase().replace(/[^A-Z0-9]/g, '_').replace(/_+/g, '_').slice(0, 15)
+            : '';
+        setCode(cleanSlug ? `${norm}-${cleanSlug}` : `${norm}-`);
+    };
 
     const handleGenerateCode = (regionName: string) => {
         setName(regionName);
-        if (!code || code.startsWith(`${normCountry}-`)) {
+        if (!code || code.startsWith(`${selectedCountry}-`)) {
             const cleanSlug = regionName
                 .toUpperCase()
                 .replace(/[^A-Z0-9]/g, '_')
                 .replace(/_+/g, '_')
                 .slice(0, 15);
-            setCode(`${normCountry}-${cleanSlug}`);
+            setCode(`${selectedCountry}-${cleanSlug}`);
         }
     };
 

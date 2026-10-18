@@ -29,6 +29,7 @@ export function CountryQuickLoginPanel({
   disabled = false,
 }: CountryQuickLoginPanelProps) {
   const [searchQuery, setSearchQuery] = useState('');
+  const [facilityFilter, setFacilityFilter] = useState<'ALL' | 'HQ' | 'DC' | 'STORE'>('ALL');
   const isLocalhost = checkIsLocalhost();
 
   const accounts = useMemo(() => {
@@ -40,6 +41,10 @@ export function CountryQuickLoginPanel({
   const filteredGroups = useMemo(() => {
     const q = searchQuery.toLowerCase().trim();
     const matches = accounts.filter(acc => {
+      if (facilityFilter === 'HQ' && acc.siteType !== 'HQ' && acc.siteType !== 'Administration') return false;
+      if (facilityFilter === 'DC' && acc.siteType !== 'Warehouse') return false;
+      if (facilityFilter === 'STORE' && acc.siteType !== 'Store') return false;
+
       if (!q) return true;
       return (
         acc.name.toLowerCase().includes(q) ||
@@ -63,7 +68,7 @@ export function CountryQuickLoginPanel({
       groups[acc.siteCode].accounts.push(acc);
     }
     return Object.values(groups);
-  }, [accounts, searchQuery]);
+  }, [accounts, searchQuery, facilityFilter]);
 
   if (!isLocalhost) {
     return null;
@@ -71,6 +76,7 @@ export function CountryQuickLoginPanel({
 
   const getSiteIcon = (type: StagingQuickAccount['siteType']) => {
     switch (type) {
+      case 'HQ':
       case 'Administration':
         return <Building2 size={13} className="shrink-0 text-[#2C5E3B] dark:text-[#A9CBA2]" />;
       case 'Warehouse':
@@ -112,6 +118,34 @@ export function CountryQuickLoginPanel({
           placeholder={`Search ${isEthiopia ? 'Ethiopia' : 'Kenya'} roles (e.g. cashier, picker)...`}
           className="w-full pl-8 pr-3 py-1.5 text-xs rounded-xl bg-stone-100/70 dark:bg-black/30 border border-[#E2DCCE]/60 dark:border-white/[0.06] focus:outline-none focus:border-[#2C5E3B] dark:focus:border-[#A9CBA2] text-stone-800 dark:text-stone-100 placeholder:text-stone-400"
         />
+      </div>
+
+      {/* Facility Filter Tabs */}
+      <div className="flex items-center gap-1 mb-2">
+        {(
+          [
+            { key: 'ALL', label: 'All (42)' },
+            { key: 'HQ', label: 'HQ (17)' },
+            { key: 'DC', label: 'DC (13)' },
+            { key: 'STORE', label: 'Store (12)' },
+          ] as const
+        ).map(tab => {
+          const active = facilityFilter === tab.key;
+          return (
+            <button
+              key={tab.key}
+              type="button"
+              onClick={() => setFacilityFilter(tab.key)}
+              className={`flex-1 py-1 text-[10px] font-semibold rounded-lg transition-colors cursor-pointer text-center ${
+                active
+                  ? 'bg-[#224429] dark:bg-[#EAE5D9] text-[#FAF8F5] dark:text-[#1E3B24]'
+                  : 'bg-stone-100 dark:bg-white/[0.05] text-stone-600 dark:text-stone-300 hover:bg-stone-200 dark:hover:bg-white/[0.08]'
+              }`}
+            >
+              {tab.label}
+            </button>
+          );
+        })}
       </div>
 
       {/* Scrollable Role List */}
