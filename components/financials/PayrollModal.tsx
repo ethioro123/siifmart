@@ -235,6 +235,40 @@ export const PayrollModal: React.FC = () => {
           </div>
         </div>
 
+        {/* Division of Responsibility Callout */}
+        <div className="p-3.5 rounded-xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-xs space-y-1.5">
+          <div className="flex items-center justify-between">
+            <span className="font-semibold text-[var(--theme-text-primary)] flex items-center gap-1.5">
+              <ShieldCheck size={14} className="text-[#0071E3] dark:text-[#2997FF]" />
+              Division of Responsibility: HR & Payroll Governance
+            </span>
+            {isRegionalHR && (
+              <span className="text-[10px] font-semibold text-[#0071E3] dark:text-[#2997FF] bg-[#0071E3]/10 px-2 py-0.5 rounded-full border border-[#0071E3]/20">
+                Regional Auditor
+              </span>
+            )}
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-2 pt-1 text-[11px] text-[var(--theme-text-secondary)]">
+            <div className="p-2 rounded-lg bg-[var(--theme-bg-card)] border border-[var(--theme-border)]">
+              <strong className="text-[var(--theme-text-primary)] block font-medium">1. Regional HR</strong>
+              Audits site clock-ins, shift rosters, and approved leave deductions.
+            </div>
+            <div className="p-2 rounded-lg bg-[var(--theme-bg-card)] border border-[var(--theme-border)]">
+              <strong className="text-[var(--theme-text-primary)] block font-medium">2. HQ HR / Managing Director</strong>
+              Performs sovereign country verification and certifies the payroll batch.
+            </div>
+            <div className="p-2 rounded-lg bg-[var(--theme-bg-card)] border border-[var(--theme-border)]">
+              <strong className="text-[var(--theme-text-primary)] block font-medium">3. Finance Division</strong>
+              Authorizes statutory tax, bank liquidity, and dispatches disbursements.
+            </div>
+          </div>
+          {isRegionalHR && (
+            <p className="text-[11px] text-[#0071E3] dark:text-[#2997FF] font-medium pt-1">
+              Notice: As a Regional HR Officer, your local site attendance and leave logs feed directly into this sovereign cycle. Final country-level certification is centralized at Country HQ / Managing Director.
+            </p>
+          )}
+        </div>
+
         {/* Financial Highlights */}
         <div className="grid grid-cols-3 gap-2.5">
           <div className="p-3 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl text-center">
