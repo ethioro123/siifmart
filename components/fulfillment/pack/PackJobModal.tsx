@@ -297,7 +297,6 @@ export const PackJobModal: React.FC<PackJobModalProps> = ({
                             expectedWeightKg={expectedWeightKg}
                             getProduct={getProduct}
                             getItemMeasureQty={getItemMeasureQty}
-                            onAdvanceToScanning={handleStartScanning}
                             resolveOrderRef={resolveOrderRef}
                             t={t}
                         />
