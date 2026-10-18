@@ -21,34 +21,51 @@ export function useSiteActions(deps: UseSiteActionsDeps) {
     const { sites, activeSiteId, settings, setSites, setSettings, setActiveSiteId, addNotification, logSystemEvent } = deps;
 
     const updateSettings = useCallback(async (newSettings: Partial<SystemConfig>, user: string) => {
+        let previousSettings: SystemConfig = settings;
         setSettings(prev => {
-            const updated = { ...prev, ...newSettings };
+            previousSettings = prev;
+            return { ...prev, ...newSettings };
+        });
+
+        try {
+            const savedSettings = await systemConfigService.updateSettings(newSettings, user);
+            
+            // Persist to local state & storage on confirmed server save
+            setSettings(savedSettings);
             try {
                 if (typeof window !== 'undefined') {
-                    localStorage.setItem('siifmart_system_config', JSON.stringify(updated));
+                    localStorage.setItem('siifmart_system_config', JSON.stringify(savedSettings));
                 }
             } catch (e) {
                 logger.error('useSiteActions', 'Failed to save settings to localStorage', e as Error);
             }
-            if (updated.currency === 'KES' || updated.currency === 'KSh' || updated.country === 'KE') {
+
+            if (savedSettings.currency === 'KES' || savedSettings.currency === 'KSh' || savedSettings.country === 'KE') {
                 setCurrencySymbol('KSh');
-            } else if (updated.currency) {
-                setCurrencySymbol(updated.currency);
-            } else if (updated.country) {
-                const prof = getCountryProfile(updated.country);
+            } else if (savedSettings.currency) {
+                setCurrencySymbol(savedSettings.currency);
+            } else if (savedSettings.country) {
+                const prof = getCountryProfile(savedSettings.country);
                 setCurrencySymbol(prof.currencySymbol);
             }
-            return updated;
-        });
 
-        try {
-            await systemConfigService.updateSettings(newSettings, user);
             logSystemEvent('Settings Updated', 'System configuration changed', user, 'Settings');
-        } catch (error) {
+        } catch (error: any) {
+            // Rollback optimistic state on server failure
+            setSettings(previousSettings);
+            try {
+                if (typeof window !== 'undefined') {
+                    localStorage.setItem('siifmart_system_config', JSON.stringify(previousSettings));
+                }
+            } catch {
+                // Ignore storage error
+            }
+
             logger.error('useSiteActions', 'Failed to persist settings to database', error as Error);
-            addNotification('alert', 'Failed to save settings to server. Changes kept locally.');
+            addNotification('alert', `Failed to save settings: ${error?.message || 'Server error'}`);
+            throw error;
         }
-    }, []);
+    }, [settings, logSystemEvent, addNotification]);
 
     const setActiveSite = useCallback((id: string) => setActiveSiteId(id), []);
 

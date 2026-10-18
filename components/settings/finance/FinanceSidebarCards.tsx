@@ -1,6 +1,7 @@
 import React from 'react';
 import { CreditCard, Layers, ShieldCheck, DollarSign, ArrowRightLeft, Save } from 'lucide-react';
 import { InputGroup, SectionHeader, ToggleRow } from './FinanceInputControls';
+import { BaselineBadge } from './FinanceBaselineBanner';
 
 interface FinanceSidebarCardsProps {
     limits: {
@@ -30,6 +31,8 @@ interface FinanceSidebarCardsProps {
     exchangeRates: { code: string; rate: number }[];
     setExchangeRates: React.Dispatch<React.SetStateAction<{ code: string; rate: number }[]>>;
     isAuthorized: boolean;
+    isLimitsPersisted?: boolean;
+    isForexPersisted?: boolean;
 }
 
 export const FinanceSidebarCards: React.FC<FinanceSidebarCardsProps> = ({
@@ -46,6 +49,8 @@ export const FinanceSidebarCards: React.FC<FinanceSidebarCardsProps> = ({
     exchangeRates,
     setExchangeRates,
     isAuthorized,
+    isLimitsPersisted,
+    isForexPersisted,
 }) => {
     return (
         <div className="space-y-6">
@@ -53,7 +58,10 @@ export const FinanceSidebarCards: React.FC<FinanceSidebarCardsProps> = ({
             <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-5 shadow-xs">
                 <div className="mb-4 border-b border-[var(--theme-border)] pb-3 flex justify-between items-center">
                     <div>
-                        <h3 className="text-xs font-semibold text-[var(--theme-text-primary)] uppercase tracking-wider">Limits & Approvals</h3>
+                        <div className="flex items-center gap-2">
+                            <h3 className="text-xs font-semibold text-[var(--theme-text-primary)] uppercase tracking-wider">Limits & Approvals</h3>
+                            {isLimitsPersisted !== undefined && <BaselineBadge isPersisted={isLimitsPersisted} />}
+                        </div>
                         <p className="text-[11px] text-[var(--theme-text-secondary)] mt-0.5">Drawer & B2B credit caps ({baseCurrency})</p>
                     </div>
                     <button
@@ -147,7 +155,10 @@ export const FinanceSidebarCards: React.FC<FinanceSidebarCardsProps> = ({
             <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-5 shadow-xs">
                 <div className="flex justify-between items-center mb-4 pb-3 border-b border-[var(--theme-border)]">
                     <div>
-                        <h3 className="text-xs font-semibold text-[var(--theme-text-primary)] uppercase tracking-wider">Exchange Rates</h3>
+                        <div className="flex items-center gap-2">
+                            <h3 className="text-xs font-semibold text-[var(--theme-text-primary)] uppercase tracking-wider">Exchange Rates</h3>
+                            {isForexPersisted !== undefined && <BaselineBadge isPersisted={isForexPersisted} />}
+                        </div>
                         <p className="text-[11px] text-[var(--theme-text-secondary)] mt-0.5">Forex benchmark relative to {baseCurrency}</p>
                     </div>
                     <button

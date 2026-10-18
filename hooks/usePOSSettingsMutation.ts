@@ -121,15 +121,36 @@ export function usePOSSettingsMutation() {
         countryConfigs: newCountryConfigs,
       };
 
-      // If updating the active market profile, also mirror root fields for compatibility
+      // If updating the active market profile, also mirror root fields for compatibility (exclude gateways/credentials)
       const activeSystemCountry = settings?.country || 'ET';
-      if (targetCountry === activeSystemCountry) {
+      if (targetCountry === activeSystemCountry && section !== 'gateways') {
         Object.assign(finalPayload, safePayload);
       }
 
       await updateSettings(finalPayload, user?.name || 'System');
 
       // ── TAMPER-PROOF AUDIT TRAIL (RULES.md §4 / AGENTS.md §5) ──
+      // Sanitize changes to strictly redact passkeys, API secrets, and tokens from system_logs
+      const sanitizedChanges = Object.entries(safePayload).reduce<Record<string, unknown>>(
+        (acc, [k, v]) => {
+          const lower = k.toLowerCase();
+          if (
+            lower.includes('secret') ||
+            lower.includes('passkey') ||
+            lower.includes('consumerkey') ||
+            lower.includes('token') ||
+            lower.includes('password') ||
+            (lower.includes('key') && (lower.includes('api') || lower.includes('consumer')))
+          ) {
+            acc[k] = v ? '[REDACTED]' : null;
+          } else {
+            acc[k] = v;
+          }
+          return acc;
+        },
+        {}
+      );
+
       // Insert-only — do NOT chain .select('*') to avoid SELECT RLS 403.
       const { error: logError } = await supabase
         .from('system_logs')
@@ -137,7 +158,7 @@ export function usePOSSettingsMutation() {
           action: `POS_SETTINGS_SAVED_${section.toUpperCase()}`,
           entity_type: 'system_config',
           entity_id: null,
-          details: JSON.stringify({ section, targetCountry, changes: safePayload }),
+          details: JSON.stringify({ section, targetCountry, changes: sanitizedChanges }),
           performed_by: user?.id ?? null,
           site_id: user?.siteId ?? null,
           created_at: new Date().toISOString(),

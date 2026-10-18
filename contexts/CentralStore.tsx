@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
 import { authService } from '../services/auth.service';
 import { UserRole, User } from '../types';
 import { employeesService } from '../services/employees.service';
@@ -62,12 +62,14 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     );
   };
 
-  // Activate session management with warning callback
-  useSessionManager(handleSessionWarning);
+  const handleSessionTimeout = useCallback(() => {
+    showToast('Session expired due to inactivity per Zero-Trust role security policy.', 'warning');
+    setUser(null);
+    void authService.signOut();
+  }, []);
 
-  // Activate periodic data refresh (every 5 minutes)
-  // TEMPORARILY DISABLED - causing page blinking on load
-  // const { refresh } = useDataRefresh(5);
+  // Activate session management with warning callback & Zero-Trust inactivity timeout
+  useSessionManager(handleSessionWarning, handleSessionTimeout, user?.role);
 
   // Monitor network status
   const { isOnline, wasOffline } = useNetworkStatus();

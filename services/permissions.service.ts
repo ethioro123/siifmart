@@ -5,6 +5,7 @@
 
 import type { UserRole } from './auth.service';
 import { ACTION_PERMISSIONS } from './permissions.matrix';
+import { checkDynamicRolePermission } from './zeroTrustPolicies.service';
 
 // ============================================================================
 // ACTION-LEVEL PERMISSIONS
@@ -167,6 +168,11 @@ export const APPROVAL_WORKFLOWS: Record<string, ApprovalWorkflow> = {
 // ============================================================================
 
 export function hasPermission(userRole: UserRole, permission: Permission): boolean {
+    const dynamicCheck = checkDynamicRolePermission(userRole as string, permission as string);
+    if (dynamicCheck !== undefined) {
+        return dynamicCheck;
+    }
+
     const normalizedRole = ((userRole as string) || '').toLowerCase().trim().replace(/[\s-]/g, '_') as UserRole;
     const rolePermissions = ACTION_PERMISSIONS[normalizedRole] || ACTION_PERMISSIONS[userRole];
     if (!rolePermissions) {

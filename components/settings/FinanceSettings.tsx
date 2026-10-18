@@ -10,6 +10,7 @@ import { InputGroup, RadioCard, ToggleRow } from './finance/FinanceInputControls
 import { TaxZoneCard } from './finance/TaxZoneCard';
 import { FinanceModals } from './finance/FinanceModals';
 import { FinanceSidebarCards } from './finance/FinanceSidebarCards';
+import { FinanceBaselineBanner, BaselineBadge } from './finance/FinanceBaselineBanner';
 import { useFinanceSettingsMutation, FinanceSettingsSection } from '../../hooks/useFinanceSettingsMutation';
 import type { TaxJurisdiction, TaxRule, Site, SystemConfig } from '../../types';
 
@@ -30,18 +31,28 @@ export default function FinanceSettings() {
     // Filter sites to current country to prevent cross-border leakage
     const countrySites = sites.filter((s: Site) => (s.country || 'ET') === activeCountry);
 
+    // Determine whether configuration is explicitly persisted or unverified fallback templates
+    const countryConfigs = (settings?.countryConfigs || {}) as Record<string, Partial<SystemConfig>>;
+    const activeConfig = countryConfigs[activeCountry] || {};
+    const isCountryActiveInSettings = settings?.country === activeCountry;
+
+    const isPolicyPersisted = Boolean(
+        activeConfig.fiscalYearStart || activeConfig.taxRate !== undefined ||
+        (isCountryActiveInSettings && (settings?.fiscalYearStart || settings?.taxRate !== undefined))
+    );
+    const isLimitsPersisted = Boolean(
+        activeConfig.maxPettyCash !== undefined || activeConfig.expenseApprovalLimit !== undefined ||
+        (isCountryActiveInSettings && (settings?.maxPettyCash !== undefined || settings?.expenseApprovalLimit !== undefined))
+    );
+    const isForexPersisted = Boolean(
+        (activeConfig.exchangeRates && activeConfig.exchangeRates.length > 0) ||
+        (isCountryActiveInSettings && settings?.exchangeRates && settings?.exchangeRates.length > 0)
+    );
+
     // Local States
-    const [policy, setPolicy] = useState<{
-        fiscalYearStart: string;
-        accountingMethod: 'accrual' | 'cash';
-        taxInclusive: boolean;
-        taxOnSelling: boolean;
-        taxOnPurchasing: boolean;
-        taxRate: number;
-        withholdingTax: number;
-    }>({
+    const [policy, setPolicy] = useState({
         fiscalYearStart: activeCountry === 'KE' ? '2026-07' : '2026-01',
-        accountingMethod: 'accrual',
+        accountingMethod: 'accrual' as 'accrual' | 'cash',
         taxInclusive: true,
         taxOnSelling: false,
         taxOnPurchasing: false,
@@ -245,13 +256,24 @@ export default function FinanceSettings() {
                 </div>
             </div>
 
+            {/* STATUTORY TEMPLATE BASELINE (UNVERIFIED) BANNER */}
+            <FinanceBaselineBanner
+                countryName={countryProfile.name}
+                isPolicyPersisted={isPolicyPersisted}
+                isLimitsPersisted={isLimitsPersisted}
+                isForexPersisted={isForexPersisted}
+            />
+
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 {/* COLUMN 1: FISCAL & GLOBAL TAX */}
                 <div className="lg:col-span-2 space-y-6">
                     <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-5 lg:p-6 shadow-xs">
                         <div className="mb-5 border-b border-[var(--theme-border)] pb-3.5 flex justify-between items-center">
                             <div>
-                                <h3 className="text-sm font-semibold tracking-tight text-[var(--theme-text-primary)]">Fiscal & Tax Policy</h3>
+                                <div className="flex items-center gap-2">
+                                    <h3 className="text-sm font-semibold tracking-tight text-[var(--theme-text-primary)]">Fiscal & Tax Policy</h3>
+                                    <BaselineBadge isPersisted={isPolicyPersisted} />
+                                </div>
                                 <p className="text-xs text-[var(--theme-text-secondary)] mt-0.5">Foundational accounting rules</p>
                             </div>
                             <button
@@ -442,6 +464,8 @@ export default function FinanceSettings() {
                     exchangeRates={exchangeRates}
                     setExchangeRates={setExchangeRates}
                     isAuthorized={isAuthorized}
+                    isLimitsPersisted={isLimitsPersisted}
+                    isForexPersisted={isForexPersisted}
                 />
             </div>
 

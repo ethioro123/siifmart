@@ -5,33 +5,17 @@ import { logger } from '../utils/logger';
 
 const LOCAL_STORAGE_KEY = 'siifmart_leave_requests_backup';
 
+// Security Cleanup: Purge any legacy unencrypted sensitive medical/leave records from browser storage
+if (typeof localStorage !== 'undefined') {
+    try {
+        localStorage.removeItem(LOCAL_STORAGE_KEY);
+    } catch {
+        // Safe ignore
+    }
+}
+
+// In-memory session cache only (transient read cache, never written to disk)
 let inMemoryLeaves: LeaveRequestRecord[] = [];
-
-const getLocalBackup = (): LeaveRequestRecord[] => {
-    try {
-        if (typeof localStorage !== 'undefined') {
-            const raw = localStorage.getItem(LOCAL_STORAGE_KEY);
-            if (raw) return JSON.parse(raw);
-        }
-    } catch {
-        // Fallback
-    }
-    return inMemoryLeaves;
-};
-
-const saveLocalBackup = (leaves: LeaveRequestRecord[]): void => {
-    const map = new Map<string, LeaveRequestRecord>();
-    for (const l of inMemoryLeaves) map.set(l.id, l);
-    for (const l of leaves) map.set(l.id, l);
-    inMemoryLeaves = Array.from(map.values());
-    try {
-        if (typeof localStorage !== 'undefined') {
-            localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(inMemoryLeaves));
-        }
-    } catch {
-        // Safe quota
-    }
-};
 
 export const STATUTORY_LEAVE_POLICIES: Record<string, StatutoryLeaveConfig> = {
     ET: {
@@ -97,20 +81,14 @@ export const leaveRequestsService = {
             }
 
             const { data, error } = await query;
-            if (error) {
-                logger.warn('leaveRequestsService', 'Supabase fetch error, using local fallback', { message: error.message });
-                return getLocalBackup().filter(l => 
-                    (l.country_code || 'ET').toUpperCase() === country &&
-                    (!employeeId || l.employee_id === employeeId)
-                );
-            }
+            if (error) throw error;
 
             const mapped = (data || []).map(mapDBToLeave);
-            saveLocalBackup(mapped);
+            inMemoryLeaves = mapped;
             return mapped;
         } catch (err) {
-            logger.warn('leaveRequestsService', 'Exception fetching leaves, using local fallback', { error: String(err) });
-            return getLocalBackup().filter(l => 
+            logger.error('leaveRequestsService', 'Exception fetching leaves from server:', err as Error);
+            return inMemoryLeaves.filter(l => 
                 (l.country_code || 'ET').toUpperCase() === country &&
                 (!employeeId || l.employee_id === employeeId)
             );
@@ -140,37 +118,33 @@ export const leaveRequestsService = {
             updated_at: new Date().toISOString()
         };
 
-        try {
-            const { data: dbData, error } = await supabase
-                .from('leave_requests')
-                .insert([{
-                    id: newRecord.id,
-                    country_code: country,
-                    site_id: newRecord.site_id,
-                    employee_id: newRecord.employee_id,
-                    employee_name: newRecord.employee_name,
-                    leave_type: newRecord.leave_type,
-                    start_date: newRecord.start_date,
-                    end_date: newRecord.end_date,
-                    days: newRecord.days,
-                    reason: newRecord.reason,
-                    status: 'Pending',
-                    requested_by: newRecord.requested_by,
-                    requested_at: newRecord.requested_at
-                }])
-                .select()
-                .single();
+        const { data: dbData, error } = await supabase
+            .from('leave_requests')
+            .insert([{
+                id: newRecord.id,
+                country_code: country,
+                site_id: newRecord.site_id,
+                employee_id: newRecord.employee_id,
+                employee_name: newRecord.employee_name,
+                leave_type: newRecord.leave_type,
+                start_date: newRecord.start_date,
+                end_date: newRecord.end_date,
+                days: newRecord.days,
+                reason: newRecord.reason,
+                status: 'Pending',
+                requested_by: newRecord.requested_by,
+                requested_at: newRecord.requested_at
+            }])
+            .select()
+            .single();
 
-            if (error) {
-                logger.warn('leaveRequestsService', 'Supabase insert error, saved locally', { message: error.message });
-                saveLocalBackup([newRecord]);
-            } else if (dbData) {
-                saveLocalBackup([mapDBToLeave(dbData)]);
-            }
-        } catch (err) {
-            logger.warn('leaveRequestsService', 'Exception inserting leave, saved locally', { error: String(err) });
-            saveLocalBackup([newRecord]);
+        if (error) {
+            logger.error('leaveRequestsService', 'Supabase leave insert failed:', error as Error);
+            throw new Error(`Failed to submit leave request to server: ${error.message || 'Database error'}`);
         }
+
+        const savedRecord = dbData ? mapDBToLeave(dbData) : newRecord;
+        inMemoryLeaves = [savedRecord, ...inMemoryLeaves.filter(l => l.id !== savedRecord.id)];
 
         // Synaptic Neural Mesh: Audit log
         try {
@@ -179,7 +153,7 @@ export const leaveRequestsService = {
                 action: 'LEAVE_REQUEST_SUBMITTED',
                 module: 'Human Resources',
                 details: JSON.stringify({
-                    leaveId: newRecord.id,
+                    leaveId: savedRecord.id,
                     employeeId: data.employee_id,
                     employeeName: data.employee_name,
                     type: data.leave_type,
@@ -188,10 +162,10 @@ export const leaveRequestsService = {
                 })
             });
         } catch (logErr) {
-            logger.warn('leaveRequestsService', 'Audit log failed', { error: String(logErr) });
+            logger.warn('leaveRequestsService', 'Audit log non-blocking notice', { error: String(logErr) });
         }
 
-        return newRecord;
+        return savedRecord;
     },
 
     async reviewLeave(
@@ -200,36 +174,43 @@ export const leaveRequestsService = {
         decision: 'Approved' | 'Rejected',
         rejectionReason?: string
     ): Promise<boolean> {
-        const list = getLocalBackup();
-        const existing = list.find(l => l.id === leaveId);
-        if (existing && (existing.employee_id === reviewer.id || existing.requested_by === reviewer.id)) {
+        // Fetch current record from server to verify maker-checker
+        const { data: currentData, error: fetchErr } = await supabase
+            .from('leave_requests')
+            .select('*')
+            .eq('id', leaveId)
+            .single();
+
+        if (fetchErr || !currentData) {
+            logger.error('leaveRequestsService', 'Leave request not found on server:', fetchErr as Error);
+            throw new Error(`Leave request ${leaveId} not found on server.`);
+        }
+
+        const existing = mapDBToLeave(currentData);
+        if (existing.employee_id === reviewer.id || existing.requested_by === reviewer.id) {
             throw new Error('Maker-Checker violation: Employees cannot review or approve their own leave request.');
         }
 
         const now = new Date().toISOString();
-        try {
-            const { error } = await supabase
-                .from('leave_requests')
-                .update({
-                    status: decision,
-                    reviewed_by: reviewer.id,
-                    reviewed_by_name: reviewer.name,
-                    reviewed_by_role: reviewer.role,
-                    reviewed_at: now,
-                    rejection_reason: rejectionReason || null,
-                    updated_at: now
-                })
-                .eq('id', leaveId);
+        const { error } = await supabase
+            .from('leave_requests')
+            .update({
+                status: decision,
+                reviewed_by: reviewer.id,
+                reviewed_by_name: reviewer.name,
+                reviewed_by_role: reviewer.role,
+                reviewed_at: now,
+                rejection_reason: rejectionReason || null,
+                updated_at: now
+            })
+            .eq('id', leaveId);
 
-            if (error) {
-                logger.warn('leaveRequestsService', 'Supabase review update failed, updating local', { message: error.message });
-            }
-        } catch (err) {
-            logger.warn('leaveRequestsService', 'Exception in reviewLeave', { error: String(err) });
+        if (error) {
+            logger.error('leaveRequestsService', 'Supabase review update failed:', error as Error);
+            throw new Error(`Failed to record leave decision on server: ${error.message}`);
         }
 
-        // Update local backup
-        const updatedList = getLocalBackup().map(l => {
+        inMemoryLeaves = inMemoryLeaves.map(l => {
             if (l.id === leaveId) {
                 return {
                     ...l,
@@ -244,7 +225,6 @@ export const leaveRequestsService = {
             }
             return l;
         });
-        saveLocalBackup(updatedList);
 
         // Synaptic Neural Mesh: Audit log
         try {
@@ -260,7 +240,7 @@ export const leaveRequestsService = {
                 })
             });
         } catch (logErr) {
-            logger.warn('leaveRequestsService', 'Audit log failed', { error: String(logErr) });
+            // Non-blocking log
         }
 
         return true;

@@ -6,37 +6,17 @@ import { logger } from '../utils/logger';
 
 const LOCAL_STORAGE_KEY = 'siifmart_employee_change_requests_backup';
 
+// Security Cleanup: Purge any legacy unencrypted sensitive employee change records from browser storage
+if (typeof localStorage !== 'undefined') {
+    try {
+        localStorage.removeItem(LOCAL_STORAGE_KEY);
+    } catch {
+        // Safe ignore
+    }
+}
+
+// In-memory session cache only (transient read cache, never written to disk)
 let inMemoryBackup: EmployeeProfileChangeRequest[] = [];
-
-const getLocalBackup = (): EmployeeProfileChangeRequest[] => {
-    try {
-        if (typeof localStorage !== 'undefined') {
-            const raw = localStorage.getItem(LOCAL_STORAGE_KEY);
-            if (raw) return JSON.parse(raw);
-        }
-    } catch {
-        // Fallback to memory
-    }
-    return inMemoryBackup;
-};
-
-const saveLocalBackup = (requests: EmployeeProfileChangeRequest[]): void => {
-    const map = new Map<string, EmployeeProfileChangeRequest>();
-    for (const r of inMemoryBackup) {
-        map.set(r.id, r);
-    }
-    for (const r of requests) {
-        map.set(r.id, r);
-    }
-    inMemoryBackup = Array.from(map.values());
-    try {
-        if (typeof localStorage !== 'undefined') {
-            localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(inMemoryBackup));
-        }
-    } catch {
-        // Ignore quota errors
-    }
-};
 
 const mapDBToChangeRequest = (row: any): EmployeeProfileChangeRequest => ({
     id: row.id,
@@ -73,15 +53,15 @@ export const employeeChangesService = {
             if (error) throw error;
 
             const mapped = (data || []).map(mapDBToChangeRequest);
-            saveLocalBackup(mapped);
+            inMemoryBackup = mapped;
+            return mapped;
         } catch (error) {
-            logger.warn('employeeChangesService', 'Remote fetch fallback to local store:', { error: String(error) });
+            logger.error('employeeChangesService', 'Remote fetch failed for change requests:', error as Error);
+            let results = inMemoryBackup;
+            if (siteId) results = results.filter(r => r.siteId === siteId);
+            if (countryCode) results = results.filter(r => r.countryCode.toUpperCase() === countryCode.toUpperCase());
+            return results.sort((a, b) => new Date(b.requestedAt).getTime() - new Date(a.requestedAt).getTime());
         }
-
-        let results = getLocalBackup();
-        if (siteId) results = results.filter(r => r.siteId === siteId);
-        if (countryCode) results = results.filter(r => r.countryCode.toUpperCase() === countryCode.toUpperCase());
-        return results.sort((a, b) => new Date(b.requestedAt).getTime() - new Date(a.requestedAt).getTime());
     },
 
     async getPending(siteId?: string, countryCode?: string): Promise<EmployeeProfileChangeRequest[]> {
@@ -116,21 +96,20 @@ export const employeeChangesService = {
             reason: request.reason
         };
 
-        saveLocalBackup([newRecord]);
+        const { data, error } = await supabase
+            .from('employee_change_requests')
+            .insert([dbRecord])
+            .select()
+            .single();
 
-        try {
-            const { data, error } = await supabase
-                .from('employee_change_requests')
-                .insert([dbRecord])
-                .select()
-                .single();
-
-            if (error) throw error;
-            return mapDBToChangeRequest(data);
-        } catch (error) {
-            logger.warn('employeeChangesService', 'Supabase insert failed, operating via local store:', { error: String(error) });
-            return newRecord;
+        if (error) {
+            logger.error('employeeChangesService', 'Supabase insert failed:', error as Error);
+            throw new Error(`Failed to submit profile change request to server: ${error.message || 'Database error'}`);
         }
+
+        const result = mapDBToChangeRequest(data);
+        inMemoryBackup = [result, ...inMemoryBackup.filter(r => r.id !== result.id)];
+        return result;
     },
 
     async approve(
@@ -139,22 +118,22 @@ export const employeeChangesService = {
         approverRole: string,
         notes?: string
     ): Promise<EmployeeProfileChangeRequest> {
-        const all = getLocalBackup();
-        const target = all.find(r => r.id === requestId);
-        if (!target) {
-            throw new Error(`Employee profile change request ${requestId} not found.`);
+        // 1. Fetch current record from server
+        const { data: currentData, error: fetchErr } = await supabase
+            .from('employee_change_requests')
+            .select('*')
+            .eq('id', requestId)
+            .single();
+
+        if (fetchErr || !currentData) {
+            logger.error('employeeChangesService', 'Change request not found on server:', fetchErr as Error);
+            throw new Error(`Employee profile change request ${requestId} not found on server.`);
         }
 
+        const target = mapDBToChangeRequest(currentData);
         const approvedAt = new Date().toISOString();
-        const updatedRecord: EmployeeProfileChangeRequest = {
-            ...target,
-            status: 'approved',
-            approvedBy: approverName,
-            approvedByRole: approverRole,
-            approvedAt
-        };
 
-        // 1. Apply changes to the actual employee record via employeesService
+        // 2. Apply changes to the actual employee record via employeesService
         try {
             await employeesService.update(target.employeeId, target.fullProposedEmployee);
             logger.info('employeeChangesService', `Applied profile updates for employee ${target.employeeName} (${target.employeeId})`);
@@ -163,24 +142,33 @@ export const employeeChangesService = {
             throw new Error(`Failed to apply changes to employee: ${(updateErr as Error).message}`);
         }
 
-        // 2. Persist approval state
-        saveLocalBackup([updatedRecord]);
+        // 3. Persist approval state on server
+        const { error: reqErr } = await supabase
+            .from('employee_change_requests')
+            .update({
+                status: 'approved',
+                approved_by: approverName,
+                approved_by_role: approverRole,
+                approved_at: approvedAt
+            })
+            .eq('id', requestId);
 
-        try {
-            await supabase
-                .from('employee_change_requests')
-                .update({
-                    status: 'approved',
-                    approved_by: approverName,
-                    approved_by_role: approverRole,
-                    approved_at: approvedAt
-                })
-                .eq('id', requestId);
-        } catch (err) {
-            logger.warn('employeeChangesService', 'Remote update failed, operating locally:', { error: String(err) });
+        if (reqErr) {
+            logger.error('employeeChangesService', 'Remote update failed:', reqErr as Error);
+            throw new Error(`Failed to record approval on server: ${reqErr.message}`);
         }
 
-        // 3. Log to system audit trail
+        const updatedRecord: EmployeeProfileChangeRequest = {
+            ...target,
+            status: 'approved',
+            approvedBy: approverName,
+            approvedByRole: approverRole,
+            approvedAt
+        };
+
+        inMemoryBackup = inMemoryBackup.map(r => r.id === requestId ? updatedRecord : r);
+
+        // 4. Log to system audit trail
         try {
             await systemLogsService.create({
                 action: 'APPROVE_EMPLOYEE_PROFILE_CHANGE',
@@ -203,13 +191,36 @@ export const employeeChangesService = {
         rejectedByName: string,
         rejectionReason: string
     ): Promise<EmployeeProfileChangeRequest> {
-        const all = getLocalBackup();
-        const target = all.find(r => r.id === requestId);
-        if (!target) {
-            throw new Error(`Employee profile change request ${requestId} not found.`);
+        // 1. Fetch current record from server
+        const { data: currentData, error: fetchErr } = await supabase
+            .from('employee_change_requests')
+            .select('*')
+            .eq('id', requestId)
+            .single();
+
+        if (fetchErr || !currentData) {
+            logger.error('employeeChangesService', 'Change request not found on server:', fetchErr as Error);
+            throw new Error(`Employee profile change request ${requestId} not found on server.`);
         }
 
+        const target = mapDBToChangeRequest(currentData);
         const rejectedAt = new Date().toISOString();
+
+        const { error: reqErr } = await supabase
+            .from('employee_change_requests')
+            .update({
+                status: 'rejected',
+                rejected_by: rejectedByName,
+                rejected_at: rejectedAt,
+                rejection_reason: rejectionReason
+            })
+            .eq('id', requestId);
+
+        if (reqErr) {
+            logger.error('employeeChangesService', 'Remote update failed:', reqErr as Error);
+            throw new Error(`Failed to record rejection on server: ${reqErr.message}`);
+        }
+
         const updatedRecord: EmployeeProfileChangeRequest = {
             ...target,
             status: 'rejected',
@@ -218,21 +229,7 @@ export const employeeChangesService = {
             rejectionReason
         };
 
-        saveLocalBackup([updatedRecord]);
-
-        try {
-            await supabase
-                .from('employee_change_requests')
-                .update({
-                    status: 'rejected',
-                    rejected_by: rejectedByName,
-                    rejected_at: rejectedAt,
-                    rejection_reason: rejectionReason
-                })
-                .eq('id', requestId);
-        } catch (err) {
-            logger.warn('employeeChangesService', 'Remote update failed, operating locally:', { error: String(err) });
-        }
+        inMemoryBackup = inMemoryBackup.map(r => r.id === requestId ? updatedRecord : r);
 
         try {
             await systemLogsService.create({

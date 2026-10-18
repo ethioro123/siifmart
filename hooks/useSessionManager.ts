@@ -2,55 +2,94 @@ import { useEffect, useRef, useState } from 'react';
 import { authService } from '../services/auth.service';
 import { APP_CONFIG } from '../config/app.config';
 import { logger } from '../utils/logger';
+import { getActiveRolePolicy } from '../services/zeroTrustPolicies.service';
 
 /**
- * Session Manager Hook (Enhanced)
+ * Session Manager Hook (Enhanced with Zero-Trust Inactivity Enforcement)
  * - Auto-refresh sessions
  * - Expiration detection
+ * - Zero-Trust Role Policy Inactivity Timeout
  * - User warnings before expiry
  * - Visibility API integration
  */
-export function useSessionManager(onSessionWarning?: (minutesLeft: number) => void) {
+export function useSessionManager(
+    onSessionWarning?: (minutesLeft: number) => void,
+    onSessionTimeout?: () => void,
+    userRole?: string
+) {
     const refreshIntervalRef = useRef<NodeJS.Timeout | null>(null);
     const expirationCheckRef = useRef<NodeJS.Timeout | null>(null);
     const [hasWarned, setHasWarned] = useState(false);
     const hasCheckedRef = useRef(false);
+    const lastActivityRef = useRef<number>(Date.now());
+
+    // Activity tracking: update lastActivity timestamp on user interactions
+    useEffect(() => {
+        const updateActivity = () => {
+            lastActivityRef.current = Date.now();
+        };
+
+        const events = ['mousedown', 'keydown', 'touchstart', 'scroll'];
+        events.forEach(evt => window.addEventListener(evt, updateActivity, { passive: true }));
+
+        return () => {
+            events.forEach(evt => window.removeEventListener(evt, updateActivity));
+        };
+    }, []);
 
     useEffect(() => {
         let isActive = true;
 
         const checkAndRefreshSession = async () => {
-            // Only check if user is logged in (avoid checking on login page)
+            // Only check if user is logged in
             if (!hasCheckedRef.current) {
                 hasCheckedRef.current = true;
-                return; // Skip first check to avoid issues on mount
+                return;
             }
 
             try {
                 const session = await authService.getSession();
 
                 if (!session) {
-                    // No session - user is not logged in, don't do anything
-                    // The app will show login page automatically
                     return;
                 }
 
-                // Check if session is close to expiring
+                const now = Date.now();
+
+                // 1. Zero-Trust Inactivity Policy Check
+                const policy = getActiveRolePolicy(userRole);
+                const timeoutMinutes = policy?.session_timeout && policy.session_timeout > 0 ? policy.session_timeout : 30;
+                const timeoutMs = timeoutMinutes * 60 * 1000;
+                const idleDuration = now - lastActivityRef.current;
+
+                if (idleDuration >= timeoutMs) {
+                    logger.warn('useSessionManager', `Zero-Trust: Session expired after ${timeoutMinutes}m of inactivity`);
+                    onSessionTimeout?.();
+                    return;
+                }
+
+                // Warn when 1 minute remains before inactivity timeout
+                const idleRemainingMs = timeoutMs - idleDuration;
+                if (idleRemainingMs <= 60000 && idleRemainingMs > 0 && !hasWarned) {
+                    setHasWarned(true);
+                    onSessionWarning?.(1);
+                }
+
+                // 2. JWT Token Expiration Check
                 if (session.expires_at) {
                     const expiresAt = new Date(session.expires_at * 1000);
-                    const now = new Date();
-                    const timeUntilExpiry = expiresAt.getTime() - now.getTime();
+                    const timeUntilExpiry = expiresAt.getTime() - now;
 
-                    // Warn user if session expires in less than 5 minutes
+                    // Warn user if token expires in less than configured warning threshold
                     if (timeUntilExpiry < APP_CONFIG.SESSION_EXPIRY_WARNING_TIME && !hasWarned) {
                         const minutesLeft = Math.floor(timeUntilExpiry / 60000);
-                        logger.warn('useSessionManager', `Session expires in ${minutesLeft} minutes`);
+                        logger.warn('useSessionManager', `Session token expires in ${minutesLeft} minutes`);
                         setHasWarned(true);
                         onSessionWarning?.(minutesLeft);
                     }
 
                     // Reset warning flag if session was refreshed
-                    if (timeUntilExpiry > APP_CONFIG.SESSION_EXPIRY_WARNING_TIME) {
+                    if (timeUntilExpiry > APP_CONFIG.SESSION_EXPIRY_WARNING_TIME && idleRemainingMs > 60000) {
                         setHasWarned(false);
                     }
                 }
@@ -60,7 +99,6 @@ export function useSessionManager(onSessionWarning?: (minutesLeft: number) => vo
         };
 
         const startTimers = () => {
-            // Clear any existing timers first
             if (refreshIntervalRef.current) clearInterval(refreshIntervalRef.current);
             if (expirationCheckRef.current) clearInterval(expirationCheckRef.current);
 
@@ -71,44 +109,39 @@ export function useSessionManager(onSessionWarning?: (minutesLeft: number) => vo
                 }
             }, APP_CONFIG.SESSION_REFRESH_INTERVAL);
 
-            // Check for session expiration every 5 minutes
+            // Check for inactivity & session expiration every 15 seconds for responsive Zero-Trust enforcement
             expirationCheckRef.current = setInterval(async () => {
                 if (!document.hidden && isActive) {
                     await checkAndRefreshSession();
                 }
-            }, APP_CONFIG.SESSION_EXPIRY_CHECK_INTERVAL);
+            }, 15000);
         };
 
-        // Visibility API: Pause when tab is hidden
+        // Visibility API: Pause when tab is hidden, resume when visible
         const handleVisibilityChange = () => {
             if (document.hidden) {
-                // Tab hidden - pause timers
                 if (refreshIntervalRef.current) clearInterval(refreshIntervalRef.current);
                 if (expirationCheckRef.current) clearInterval(expirationCheckRef.current);
             } else {
-                // Tab visible - resume timers (don't check immediately to avoid spam)
                 if (isActive) {
                     startTimers();
                 }
             }
         };
 
-        // Start timers after a short delay to avoid initial check
         setTimeout(() => {
             if (isActive) {
                 startTimers();
             }
         }, 2000);
 
-        // Listen for visibility changes
         document.addEventListener('visibilitychange', handleVisibilityChange);
 
-        // Cleanup on unmount
         return () => {
             isActive = false;
             if (refreshIntervalRef.current) clearInterval(refreshIntervalRef.current);
             if (expirationCheckRef.current) clearInterval(expirationCheckRef.current);
             document.removeEventListener('visibilitychange', handleVisibilityChange);
         };
-    }, [hasWarned, onSessionWarning]);
+    }, [hasWarned, onSessionWarning, onSessionTimeout, userRole]);
 }

@@ -8,6 +8,7 @@ import { UserRole } from '../types';
 import { authService } from '../services/auth.service';
 import type { Permission } from '../services/permissions.service';
 import { canSwitchCountry, getUserCountry, canSwitchRegion, getUserRegion } from './userCountry';
+import { checkDynamicRolePermission } from '../services/zeroTrustPolicies.service';
 
 // ============================================================================
 // RE-EXPORT NEW PERMISSION SYSTEM
@@ -211,6 +212,12 @@ export function hasPermission(userRole: UserRole | undefined, permission: keyof 
 
     // Global CEO and Country Managing Director have full module & action access within their authorized country scope
     if (userRole === 'super_admin' || userRole === 'admin' || (userRole as string)?.toLowerCase() === 'ceo') return true;
+
+    // Zero-Trust dynamic policy override from RoleSettings
+    const dynamicCheck = checkDynamicRolePermission(userRole as string, permission as string);
+    if (dynamicCheck !== undefined) {
+        return dynamicCheck;
+    }
 
     // Check direct legacy/explicit permission list if specified
     const explicitRoles = PERMISSIONS[permission];

@@ -235,7 +235,7 @@ export default function POSSettings() {
                         setPayments={setPayments}
                         isSavingPayments={isSavingPayments}
                         handleSaveSection={handleSaveSection}
-                        settings={settings}
+                        settings={settings?.countryConfigs?.[activeCountry] || settings}
                         onSaveGateways={handleSaveGateways}
                         isSavingGateways={isSavingGateways}
                     />

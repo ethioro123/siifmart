@@ -29,6 +29,7 @@ import { useDataInitialization } from './hooks/useDataInitialization';
 import { usePromotionsAndPOSState } from './hooks/usePromotionsAndPOSState';
 import { useLoadingProgress } from './hooks/useLoadingProgress';
 import { useCountryScoping } from './hooks/useCountryScoping';
+import { useZeroTrustSync } from '../hooks/useZeroTrustSync';
 import { logger } from '../utils/logger';
 
 const isUUID = (id: string) => /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
@@ -335,6 +336,8 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
     discountCodes
   });
 
+  useZeroTrustSync(scopedSettings || settings, effectiveCountry);
+
   const value = useMemo<DataContextType>(() => ({
     settings: scopedSettings || settings,
     products: scopedProducts,
@@ -378,7 +381,7 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
     loadError,
 
     // Site Actions (from hook)
-    updateSettings: siteActions.updateSettings,
+    updateSettings: async (settings, user) => { await siteActions.updateSettings(settings, user); },
     setActiveSite: siteActions.setActiveSite,
     addSite: siteActions.addSite,
     updateSite: siteActions.updateSite,

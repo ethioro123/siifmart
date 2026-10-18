@@ -5,37 +5,17 @@ import { logger } from '../utils/logger';
 
 const LOCAL_STORAGE_KEY = 'siifmart_salary_requests_backup';
 
+// Security Cleanup: Purge any legacy unencrypted sensitive compensation records from browser storage
+if (typeof localStorage !== 'undefined') {
+    try {
+        localStorage.removeItem(LOCAL_STORAGE_KEY);
+    } catch {
+        // Safe ignore
+    }
+}
+
+// In-memory session cache only (transient read cache, never written to disk)
 let inMemoryBackup: SalaryChangeRequest[] = [];
-
-const getLocalBackup = (): SalaryChangeRequest[] => {
-    try {
-        if (typeof localStorage !== 'undefined') {
-            const raw = localStorage.getItem(LOCAL_STORAGE_KEY);
-            if (raw) return JSON.parse(raw);
-        }
-    } catch {
-        // Fallback to inMemoryBackup
-    }
-    return inMemoryBackup;
-};
-
-const saveLocalBackup = (requests: SalaryChangeRequest[]): void => {
-    const map = new Map<string, SalaryChangeRequest>();
-    for (const r of inMemoryBackup) {
-        map.set(r.id, r);
-    }
-    for (const r of requests) {
-        map.set(r.id, r);
-    }
-    inMemoryBackup = Array.from(map.values());
-    try {
-        if (typeof localStorage !== 'undefined') {
-            localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(inMemoryBackup));
-        }
-    } catch {
-        // Ignore local storage quota errors
-    }
-};
 
 const mapDBToSalaryRequest = (row: any): SalaryChangeRequest => ({
     id: row.id,
@@ -71,15 +51,16 @@ export const salaryRequestsService = {
             if (error) throw error;
 
             const mapped = (data || []).map(mapDBToSalaryRequest);
-            saveLocalBackup(mapped);
+            inMemoryBackup = mapped;
+            return mapped;
         } catch (error) {
-            logger.warn('salaryRequestsService', 'Remote fetch failed, falling back to local store:', { error: String(error) });
+            logger.error('salaryRequestsService', 'Remote fetch failed for salary requests:', error as Error);
+            // Return in-memory session cache if available, otherwise empty
+            let results = inMemoryBackup;
+            if (siteId) results = results.filter(r => r.siteId === siteId);
+            if (countryCode) results = results.filter(r => r.countryCode.toUpperCase() === countryCode.toUpperCase());
+            return results.sort((a, b) => new Date(b.requestedAt).getTime() - new Date(a.requestedAt).getTime());
         }
-
-        let results = getLocalBackup();
-        if (siteId) results = results.filter(r => r.siteId === siteId);
-        if (countryCode) results = results.filter(r => r.countryCode.toUpperCase() === countryCode.toUpperCase());
-        return results.sort((a, b) => new Date(b.requestedAt).getTime() - new Date(a.requestedAt).getTime());
     },
 
     async getPending(siteId?: string, countryCode?: string): Promise<SalaryChangeRequest[]> {
@@ -107,32 +88,31 @@ export const salaryRequestsService = {
             requested_at: request.requestedAt || new Date().toISOString()
         };
 
-        let result: SalaryChangeRequest = mapDBToSalaryRequest(dbRecord);
+        const { data, error } = await supabase
+            .from('salary_requests')
+            .insert(dbRecord)
+            .select()
+            .single();
 
-        try {
-            const { data, error } = await supabase
-                .from('salary_requests')
-                .insert(dbRecord)
-                .select()
-                .single();
-
-            if (error) throw error;
-            result = mapDBToSalaryRequest(data);
-        } catch (error) {
-            logger.warn('salaryRequestsService', 'Remote insert failed, saved to local cache:', { error: String(error) });
+        if (error) {
+            logger.error('salaryRequestsService', 'Remote salary request insert failed:', error as Error);
+            throw new Error(`Failed to submit salary adjustment to server: ${error.message || 'Database error'}`);
         }
 
-        // Cache locally
-        const backup = getLocalBackup();
-        saveLocalBackup([result, ...backup.filter(r => r.id !== result.id)]);
+        const result: SalaryChangeRequest = mapDBToSalaryRequest(data);
+        inMemoryBackup = [result, ...inMemoryBackup.filter(r => r.id !== result.id)];
 
         // Log audit event
-        await systemLogsService.create({
-            user_name: request.requestedBy,
-            action: 'SALARY_CHANGE_REQUESTED',
-            details: `HR (${request.requestedBy}) requested salary adjustment for ${request.employeeName}: ${request.currentSalary} -> ${request.proposedSalary} ${request.currency}. Reason: ${request.reason}`,
-            module: 'HR'
-        });
+        try {
+            await systemLogsService.create({
+                user_name: request.requestedBy,
+                action: 'SALARY_CHANGE_REQUESTED',
+                details: `HR (${request.requestedBy}) requested salary adjustment for ${request.employeeName}: ${request.currentSalary} -> ${request.proposedSalary} ${request.currency}. Reason: ${request.reason}`,
+                module: 'HR'
+            });
+        } catch {
+            // Non-blocking log
+        }
 
         if (typeof window !== 'undefined') {
             window.dispatchEvent(new CustomEvent('salary:request-created', { detail: result }));
@@ -146,30 +126,48 @@ export const salaryRequestsService = {
         approver: { id?: string; name: string; role: string }
     ): Promise<SalaryChangeRequest> {
         const now = new Date().toISOString();
-        let targetRequest: SalaryChangeRequest | null = null;
 
-        // Fetch current record
-        try {
-            const { data, error } = await supabase
-                .from('salary_requests')
-                .select('*')
-                .eq('id', requestId)
-                .single();
-            if (!error && data) targetRequest = mapDBToSalaryRequest(data);
-        } catch {
-            // fallback
+        // 1. Fetch current record from server
+        const { data: currentData, error: fetchErr } = await supabase
+            .from('salary_requests')
+            .select('*')
+            .eq('id', requestId)
+            .single();
+
+        if (fetchErr || !currentData) {
+            logger.error('salaryRequestsService', 'Salary request not found on server:', fetchErr as Error);
+            throw new Error(`Salary request ${requestId} not found on server.`);
         }
 
-        if (!targetRequest) {
-            const backup = getLocalBackup();
-            targetRequest = backup.find(r => r.id === requestId) || null;
+        const targetRequest = mapDBToSalaryRequest(currentData);
+
+        // 2. Persist approval status on server
+        const { error: updateErr } = await supabase
+            .from('salary_requests')
+            .update({
+                status: 'approved',
+                approved_by: approver.name,
+                approved_by_role: approver.role,
+                approved_at: now
+            })
+            .eq('id', requestId);
+
+        if (updateErr) {
+            logger.error('salaryRequestsService', 'Remote approval status update failed:', updateErr as Error);
+            throw new Error(`Failed to record salary approval on server: ${updateErr.message}`);
         }
 
-        if (!targetRequest) {
-            throw new Error(`Salary request ${requestId} not found.`);
+        // 3. Update employee master compensation in database
+        const { error: empErr } = await supabase
+            .from('employees')
+            .update({ salary: targetRequest.proposedSalary })
+            .eq('id', targetRequest.employeeId);
+
+        if (empErr) {
+            logger.error('salaryRequestsService', 'Failed to update employee salary in database:', empErr as Error);
+            throw new Error(`Failed to update employee salary in database: ${empErr.message}`);
         }
 
-        // Apply approval updates
         const updatedRequest: SalaryChangeRequest = {
             ...targetRequest,
             status: 'approved',
@@ -178,37 +176,19 @@ export const salaryRequestsService = {
             approvedAt: now
         };
 
-        try {
-            await supabase
-                .from('salary_requests')
-                .update({
-                    status: 'approved',
-                    approved_by: approver.name,
-                    approved_by_role: approver.role,
-                    approved_at: now
-                })
-                .eq('id', requestId);
-
-            // Update employee master record in Supabase
-            await supabase
-                .from('employees')
-                .update({ salary: targetRequest.proposedSalary })
-                .eq('id', targetRequest.employeeId);
-        } catch (error) {
-            logger.warn('salaryRequestsService', 'Remote approval update failed, continuing with local updates:', { error: String(error) });
-        }
-
-        // Update local backup
-        const backup = getLocalBackup();
-        saveLocalBackup(backup.map(r => r.id === requestId ? updatedRequest : r));
+        inMemoryBackup = inMemoryBackup.map(r => r.id === requestId ? updatedRequest : r);
 
         // Audit Trail
-        await systemLogsService.create({
-            user_name: approver.name,
-            action: 'SALARY_CHANGE_APPROVED',
-            details: `Approved salary adjustment for ${targetRequest.employeeName}: ${targetRequest.currentSalary} -> ${targetRequest.proposedSalary} ${targetRequest.currency}. Approver: ${approver.name} (${approver.role})`,
-            module: 'Finance'
-        });
+        try {
+            await systemLogsService.create({
+                user_name: approver.name,
+                action: 'SALARY_CHANGE_APPROVED',
+                details: `Approved salary adjustment for ${targetRequest.employeeName}: ${targetRequest.currentSalary} -> ${targetRequest.proposedSalary} ${targetRequest.currency}. Approver: ${approver.name} (${approver.role})`,
+                module: 'Finance'
+            });
+        } catch {
+            // Non-blocking
+        }
 
         if (typeof window !== 'undefined') {
             window.dispatchEvent(new CustomEvent('salary:request-approved', {
@@ -229,26 +209,35 @@ export const salaryRequestsService = {
         rejectionReason: string
     ): Promise<SalaryChangeRequest> {
         const now = new Date().toISOString();
-        let targetRequest: SalaryChangeRequest | null = null;
 
-        try {
-            const { data, error } = await supabase
-                .from('salary_requests')
-                .select('*')
-                .eq('id', requestId)
-                .single();
-            if (!error && data) targetRequest = mapDBToSalaryRequest(data);
-        } catch {
-            // fallback
+        // 1. Fetch current record from server
+        const { data: currentData, error: fetchErr } = await supabase
+            .from('salary_requests')
+            .select('*')
+            .eq('id', requestId)
+            .single();
+
+        if (fetchErr || !currentData) {
+            logger.error('salaryRequestsService', 'Salary request not found on server:', fetchErr as Error);
+            throw new Error(`Salary request ${requestId} not found on server.`);
         }
 
-        if (!targetRequest) {
-            const backup = getLocalBackup();
-            targetRequest = backup.find(r => r.id === requestId) || null;
-        }
+        const targetRequest = mapDBToSalaryRequest(currentData);
 
-        if (!targetRequest) {
-            throw new Error(`Salary request ${requestId} not found.`);
+        // 2. Persist rejection on server
+        const { error: rejErr } = await supabase
+            .from('salary_requests')
+            .update({
+                status: 'rejected',
+                rejected_by: rejector.name,
+                rejection_reason: rejectionReason,
+                rejected_at: now
+            })
+            .eq('id', requestId);
+
+        if (rejErr) {
+            logger.error('salaryRequestsService', 'Remote reject update failed:', rejErr as Error);
+            throw new Error(`Failed to record salary rejection on server: ${rejErr.message}`);
         }
 
         const updatedRequest: SalaryChangeRequest = {
@@ -259,29 +248,18 @@ export const salaryRequestsService = {
             rejectedAt: now
         };
 
+        inMemoryBackup = inMemoryBackup.map(r => r.id === requestId ? updatedRequest : r);
+
         try {
-            await supabase
-                .from('salary_requests')
-                .update({
-                    status: 'rejected',
-                    rejected_by: rejector.name,
-                    rejection_reason: rejectionReason,
-                    rejected_at: now
-                })
-                .eq('id', requestId);
-        } catch (error) {
-            logger.warn('salaryRequestsService', 'Remote reject update failed:', { error: String(error) });
+            await systemLogsService.create({
+                user_name: rejector.name,
+                action: 'SALARY_CHANGE_REJECTED',
+                details: `Rejected salary adjustment for ${targetRequest.employeeName} (${targetRequest.currentSalary} -> ${targetRequest.proposedSalary}). Reason: ${rejectionReason}`,
+                module: 'Finance'
+            });
+        } catch {
+            // Non-blocking
         }
-
-        const backup = getLocalBackup();
-        saveLocalBackup(backup.map(r => r.id === requestId ? updatedRequest : r));
-
-        await systemLogsService.create({
-            user_name: rejector.name,
-            action: 'SALARY_CHANGE_REJECTED',
-            details: `Rejected salary adjustment for ${targetRequest.employeeName} (${targetRequest.currentSalary} -> ${targetRequest.proposedSalary}). Reason: ${rejectionReason}`,
-            module: 'Finance'
-        });
 
         if (typeof window !== 'undefined') {
             window.dispatchEvent(new CustomEvent('salary:request-rejected', {
@@ -294,12 +272,5 @@ export const salaryRequestsService = {
 
     _clearCache(): void {
         inMemoryBackup = [];
-        try {
-            if (typeof localStorage !== 'undefined') {
-                localStorage.removeItem(LOCAL_STORAGE_KEY);
-            }
-        } catch {
-            // Ignore
-        }
     }
 };

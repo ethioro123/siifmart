@@ -5,6 +5,7 @@ import {
 } from 'lucide-react';
 import { useStore } from '../contexts/CentralStore';
 import { Protected } from '../components/Protected';
+import { canSwitchCountry } from '../utils/permissions';
 
 import GeneralSettings from '../components/settings/GeneralSettings';
 import WMSSettings from '../components/settings/WMSSettings';
@@ -131,7 +132,7 @@ export default function SettingsPage() {
                                 <TabButton id="infrastructure" icon={Printer} label="Infrastructure & Devices" />
                             </Protected>
 
-                            {(user?.role === 'super_admin' || user?.role === 'admin' || user?.role === 'auditor') && (
+                            {(user?.role === 'super_admin' || user?.role === 'admin' || user?.role === 'auditor' || (user?.role || '').toLowerCase() === 'ceo' || canSwitchCountry(user)) && (
                                 <>
                                     <p className="text-[11px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider mt-4 mb-2 px-2">Enterprise Security</p>
                                     <Protected permission="MANAGE_ROLES">
