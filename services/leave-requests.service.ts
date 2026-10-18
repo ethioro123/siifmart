@@ -247,6 +247,6 @@ export const leaveRequestsService = {
     },
 
     _clearCache(): void {
-        inMemoryBackup = [];
+        inMemoryLeaves = [];
     }
 };

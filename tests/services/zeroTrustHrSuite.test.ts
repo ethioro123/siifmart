@@ -23,7 +23,8 @@ vi.mock('../../lib/supabase', () => {
   const leaveChainable: any = {};
   leaveChainable.select = vi.fn().mockReturnValue(leaveChainable);
   leaveChainable.insert = vi.fn().mockImplementation((record: any) => {
-    const rec = { id: `LR-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`, ...record };
+    const raw = Array.isArray(record) ? record[0] : record;
+    const rec = { ...raw, id: raw.id || `LR-${Date.now()}` };
     inMemoryLeaves.push(rec);
     return {
       select: vi.fn().mockReturnValue({
