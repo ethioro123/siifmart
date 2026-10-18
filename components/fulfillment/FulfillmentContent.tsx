@@ -109,7 +109,7 @@ export const FulfillmentContent: React.FC = () => {
     const canAccessTab = (tab: OpTab) => visibleTabs.includes(tab);
 
     useEffect(() => {
-        if (!canAccessTab(activeTab)) {
+        if (!visibleTabs.includes(activeTab)) {
             setActiveTab(visibleTabs[0] ?? 'RECEIVE');
         }
     }, [activeTab, setActiveTab, visibleTabs]);
