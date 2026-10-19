@@ -4,6 +4,11 @@
 
 ## Active Features
 
+### Staging Operational Role Coverage (2026-10-19)
+- Filled 168 missing employee slots in staging across four warehouses, four distribution centers, twelve retail stores and four online/dark stores. Each WMS site has active coverage for 17 operational roles; each POS site has coverage for 12. Existing employees satisfy coverage and remain unchanged. Added employees are labelled `[TEST]`, use country-scoped employee codes and linked Auth/profile records, and have unique random password hashes, empty wallets in the site's currency, no invented salary/identity facts and pending credential handover. A staging migration-history guard prevents these fictitious records from being seeded into main.
+- **Files**: `migrations/20261019_staging_complete_site_role_coverage.sql`, `migrations/20261019_staging_fixture_quota_cleanup.sql`, `tests/security/staging-site-role-coverage.sql`
+- **Database**: Applied to SIIFMART Staging only, as explicitly selected by the user.
+
 ### Supervised Fulfillment Points and Mobile Startup (2026-10-19)
 - Supervisor points awards save totals and their audit in one invoker RPC, with employee/site checks, completed-job attribution, duplicate-job protection, and stale-total rejection. Audit policies now match existing manager scope. The verified missing audit for PACK VYUU9L was recovered without changing its 95-point balance. Warehouse mobile startup uses role permissions while the site is loading, including redirects from stale POS URLs.
 - **Files**: `services/gamification.service.ts`, `contexts/GamificationContext.tsx`, `utils/roleDashboard.ts`, `components/ProtectedRoute.tsx`, `migrations/20261019_fix_supervised_points_awards.sql`, `migrations/20261019_reconcile_pack_points_audit.sql`, `tests/security/`, `tests/services/gamification.service.test.ts`, `tests/components/ProtectedRoute.test.tsx`, `tests/utils/roleDashboard.test.ts`
