@@ -4,6 +4,12 @@
 
 ## Active Features
 
+### Transfer Receipt Stock Intake Fix (2026-10-19)
+  - Store transfer receipt no longer halts with "Inventory intake failed" (403 / RLS 42501 on products). The destination product is now looked up from the database (branch users have an empty global product cache, so receipt wrongly tried to INSERT products that already existed). Genuinely missing products are created at zero stock by a guarded server function, then stock is added.
+  - Files: components/pos-command/hooks/utils/receivingIntake.ts, components/pos-command/hooks/usePOSReceiving.ts, services/products/products-transfer-receipt.ts, services/products.service.ts, tests/services/receivingIntake.test.ts
+  - Database: RPC `ensure_transfer_receipt_product` (manager at destination, SKU on open transfer, same country, audit in system_logs); `products_update` RLS no longer reads `auth.users`; `products.pos_received_at/by` columns restored. Migrations: 20261019_transfer_receipt_destination_product_stub, 20261019_fix_products_update_rls_auth_users, 20261019_restore_products_pos_received_columns
+  - Root Cause: stale-cache product lookup, plus `products_update` RLS referencing `auth.users` (permission denied for every non-CEO update) and receiving writes to columns missing from the live schema
+
 ### Reliable Staff Shift Scheduling & Roster Management (2026-10-19)
 - Staff shift scheduling in `RosterManager` guarantees synchronized UUID assignment between client cache and Supabase `staff_schedules`. Fixes staff reassignment updates to persist `employee_id` and `employee_name`, adds national boundary scoping (`country_code`), enforces shift start/end validation (`startTime < endTime`), introduces submit loading state with double-click prevention, and adds deletion confirmation.
 - **Files**: `components/RosterManager.tsx`, `contexts/RosterContext.tsx`, `services/schedules.service.ts`, `tests/services/schedules.service.test.ts`

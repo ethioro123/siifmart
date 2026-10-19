@@ -12,6 +12,7 @@ import {
     adjustStock,
     updatePriceBySku
 } from './products/products-mutations';
+import { ensureTransferReceiptProduct } from './products/products-transfer-receipt';
 
 export const productsService = {
     // Re-export helper methods for backward compatibility / context usages
@@ -19,6 +20,7 @@ export const productsService = {
     _calculateStatus,
     handleAutoReplenish,
     updatePriceBySku,
+    ensureTransferReceiptProduct,
 
     async getAll(siteId?: string, limit?: number, offset?: number, filters?: any, sort?: { key: string, direction: 'asc' | 'desc' }, includeExactCount: boolean = true) {
         let query = supabase

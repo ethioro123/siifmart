@@ -331,14 +331,13 @@ export const usePOSReceiving = ({
             // 1. Process and verify stock intake BEFORE marking transfer completed
             if (destSiteId) {
                 intakeResult = await processReceivingStockIntake({
+                    transferId: targetTransferId,
                     destSiteId,
                     transferReceivingItems,
                     allProducts,
                     receiverName,
                     timestampStr,
-                    addProduct,
-                    addNotification,
-                    t
+                    addNotification
                 });
                 if (!intakeResult.success && intakeResult.failedItems.length > 0) {
                     throw new Error(`Inventory intake failed for: ${intakeResult.failedItems.join(', ')}. Receipt halted to prevent inventory drift.`);
