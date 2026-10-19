@@ -6,16 +6,16 @@ interface CountHeaderProps {
     countViewMode: 'Operations' | 'Reports';
     setCountViewMode: (mode: 'Operations' | 'Reports') => void;
     countSessionStatus: 'Idle' | 'Active' | 'Review';
-    setCountSessionStatus: (status: 'Idle' | 'Active' | 'Review') => void;
-    setCountSessionItems: (items: any[]) => void;
+    onCancelSession: () => void;
+    isSubmitting: boolean;
 }
 
 export const CountHeader: React.FC<CountHeaderProps> = ({
     countViewMode,
     setCountViewMode,
     countSessionStatus,
-    setCountSessionStatus,
-    setCountSessionItems
+    onCancelSession,
+    isSubmitting
 }) => {
     const { t } = useLanguage();
 
@@ -67,11 +67,9 @@ export const CountHeader: React.FC<CountHeaderProps> = ({
                     {countSessionStatus !== 'Idle' && countViewMode === 'Operations' && (
                         <button
                             onClick={() => {
-                                if (confirm(t('warehouse.cancelCurrentSessionPrompt'))) {
-                                    setCountSessionStatus('Idle');
-                                    setCountSessionItems([]);
-                                }
+                                if (confirm(t('warehouse.cancelCurrentSessionPrompt'))) onCancelSession();
                             }}
+                            disabled={isSubmitting}
                             className="text-red-600 dark:text-red-400 hover:bg-red-500/10 text-xs font-semibold border border-red-500/20 px-3.5 py-2 rounded-xl transition-colors min-h-[44px]"
                         >
                             {t('warehouse.cancelSession')}
@@ -118,11 +116,9 @@ export const CountHeader: React.FC<CountHeaderProps> = ({
                     {countSessionStatus !== 'Idle' && countViewMode === 'Operations' && (
                         <button
                             onClick={() => {
-                                if (confirm(t('warehouse.cancelCurrentSessionPrompt'))) {
-                                    setCountSessionStatus('Idle');
-                                    setCountSessionItems([]);
-                                }
+                                if (confirm(t('warehouse.cancelCurrentSessionPrompt'))) onCancelSession();
                             }}
+                            disabled={isSubmitting}
                             className="text-red-500 text-[10px] font-semibold border border-red-500/20 px-2 py-1 rounded-lg min-h-[30px]"
                         >
                             Cancel

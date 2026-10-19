@@ -45,6 +45,11 @@ describe('Receiving Policy, Blind Verification & Price Tag Strategy', () => {
         expect(kePolicy.printPriceTagAt).toBe('store');
     });
 
+    it('fails closed to blind receiving when an obsolete mode is loaded', () => {
+        expect(resolveReceivingPolicy({ receivingLogic: 'standard' as any }, 'ET').blind).toBe(true);
+        expect(resolveReceivingPolicy({ receivingLogic: 'verified' }, 'ET').blind).toBe(false);
+    });
+
     it('calculates maxReceivable with configured country tolerance', () => {
         // Zero tolerance (default)
         expect(maxReceivable(100, 0)).toBe(100);

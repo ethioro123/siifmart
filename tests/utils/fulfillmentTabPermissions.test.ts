@@ -18,6 +18,12 @@ describe('Fulfillment tab permissions', () => {
         expect(getVisibleFulfillmentTabs(role)).toEqual(['RECEIVE', 'PUTAWAY', 'PICK', 'PACK']);
     });
 
+    it.each(['picker', 'packer', 'receiver', 'forklift_operator', 'driver', 'inbound_qc_inspector', 'supply_chain_manager'])(
+        '%s cannot open site inventory counts without the count role', role => {
+            expect(getVisibleFulfillmentTabs(role)).not.toContain('COUNT');
+        }
+    );
+
     it.each([
         ['receiver', ['RECEIVE', 'PUTAWAY', 'PICK', 'PACK', 'TRANSFER']],
         ['forklift_operator', ['RECEIVE', 'PUTAWAY', 'PICK', 'PACK']],
@@ -28,7 +34,7 @@ describe('Fulfillment tab permissions', () => {
         ['replenishment_planner', ['TRANSFER', 'REPLENISH']],
         ['returns_clerk', ['RETURNS']],
         ['dispatcher', ['DOCKS', 'DRIVER', 'ASSIGN']],
-        ['supply_chain_manager', ['DOCKS', 'RECEIVE', 'PUTAWAY', 'TRANSFER', 'PICK', 'PACK', 'DRIVER', 'REPLENISH', 'COUNT']],
+        ['supply_chain_manager', ['DOCKS', 'RECEIVE', 'PUTAWAY', 'TRANSFER', 'PICK', 'PACK', 'DRIVER', 'REPLENISH']],
         ['regional_logistics_lead', ['DOCKS', 'DRIVER', 'RECEIVE', 'TRANSFER']],
     ])('%s sees its shared floor tabs and authorized specialist tabs', (role, tabs) => {
         expect(getVisibleFulfillmentTabs(role as string)).toEqual(tabs);

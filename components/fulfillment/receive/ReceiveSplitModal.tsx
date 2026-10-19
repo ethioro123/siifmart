@@ -142,7 +142,8 @@ export const ReceiveSplitModal: React.FC<ReceiveSplitModalProps> = ({
                 skuType: 'existing',
                 productId: splitReceivingItem?.productId || splitReceivingItem?.id,
                 productName: splitReceivingItem?.name || splitReceivingItem?.productName,
-                quantity: Math.max(1, remaining),
+                // Blind receiving must start every split with an empty physical count.
+                quantity: isBlindReceiving ? 0 : Math.max(1, remaining),
                 batchNumber: newLot,
                 condition: 'Good',
                 barcodes: []

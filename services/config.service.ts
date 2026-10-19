@@ -120,6 +120,17 @@ export const systemConfigService = {
         });
         const profile = getCountryProfile(country);
         const isKe = country === 'KE';
+        const configuredCountryConfigs = overrides?.countryConfigs ?? data.country_configs ?? {};
+        const countryConfigs = Object.fromEntries(
+            Object.entries(configuredCountryConfigs as Record<string, Partial<SystemConfig> | null>).map(([code, config]) => {
+                const safeConfig = config || {};
+                return [code, {
+                    ...safeConfig,
+                    receivingLogic: safeConfig.receivingLogic === 'verified' ? 'verified' : 'blind',
+                }];
+            })
+        ) as Record<string, Partial<SystemConfig>>;
+        const configuredReceivingLogic = overrides?.receivingLogic ?? data.receiving_logic;
 
         return {
             storeName: overrides?.storeName ?? data.store_name ?? 'SiifMart',
@@ -143,7 +154,7 @@ export const systemConfigService = {
             taxAuthority: overrides?.taxAuthority ?? data.tax_authority ?? profile.taxAuthority,
             complianceStandard: overrides?.complianceStandard ?? data.compliance_standard ?? profile.complianceStandard,
             eTimsEnabled: overrides?.eTimsEnabled ?? data.e_tims_enabled ?? isKe,
-            countryConfigs: overrides?.countryConfigs ?? data.country_configs,
+            countryConfigs,
             rolePolicies: overrides?.rolePolicies ?? data.role_policies,
             rolePermissions: overrides?.rolePermissions ?? data.role_permissions,
             lowStockThreshold: overrides?.lowStockThreshold ?? data.low_stock_threshold ?? 10,
@@ -173,7 +184,7 @@ export const systemConfigService = {
             maxPettyCash: overrides?.maxPettyCash ?? data.max_petty_cash ?? 5000,
             expenseApprovalLimit: overrides?.expenseApprovalLimit ?? data.expense_approval_limit ?? 10000,
             defaultCreditLimit: overrides?.defaultCreditLimit ?? data.default_credit_limit ?? 50000,
-            receivingLogic: overrides?.receivingLogic ?? data.receiving_logic ?? 'blind',
+            receivingLogic: configuredReceivingLogic === 'verified' ? 'verified' : 'blind',
             qcSamplingRate: overrides?.qcSamplingRate ?? data.qc_sampling_rate ?? 10,
             qcBlockOnFailure: overrides?.qcBlockOnFailure ?? data.qc_block_on_failure ?? true,
             putawayLogic: overrides?.putawayLogic ?? data.putaway_logic ?? 'system',

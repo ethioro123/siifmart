@@ -97,6 +97,7 @@ export interface WMSJob {
   external_carrier_name?: string;
   assignedBy?: string;
   assigned_by?: string;
+  packSecuritySealSerial?: string;
 }
 
 export type JobAssignmentStatus = 'Assigned' | 'Accepted' | 'In-Progress' | 'Paused' | 'Completed' | 'Cancelled';

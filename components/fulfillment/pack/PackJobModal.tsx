@@ -96,14 +96,6 @@ export const PackJobModal: React.FC<PackJobModalProps> = ({
     }).length || 0;
     const progressPercent = totalItems > 0 ? (completedItems / totalItems) * 100 : 0;
     const isFullyPacked = completedItems === totalItems && totalItems > 0;
-    const totalUnits = useMemo(() => {
-        return (job?.lineItems || []).reduce((sum, item) => {
-            const prod = getProduct(item);
-            const measureQty = getItemMeasureQty(item, prod);
-            return sum + (measureQty || item.expectedQty || 1);
-        }, 0);
-    }, [job?.lineItems, products]);
-
     const hasColdItems = job?.lineItems?.some(item => ['Frozen', 'Dairy'].includes(getProduct(item)?.category || ''));
     const hasFragileItems = job?.lineItems?.some(item => {
         const cat = getProduct(item)?.category || '';
@@ -148,8 +140,12 @@ export const PackJobModal: React.FC<PackJobModalProps> = ({
 
     const boxDetails = {
         boxSize,
-        packingMaterials,
+        packingMaterials: {
+            ...packingMaterials,
+            securitySeal: packingMaterials.securitySeal || packPolicy.requirePackSecuritySeal,
+        },
         sealSerialNumber: sealSerialNumber.trim() || undefined,
+        requirePackSecuritySeal: packPolicy.requirePackSecuritySeal,
         scaleWeight: parseFloat(scaleWeight) || undefined,
         expectedWeightKg,
         hasIcePack,
@@ -166,7 +162,7 @@ export const PackJobModal: React.FC<PackJobModalProps> = ({
             setStep('BOX');
             return;
         }
-        if (packPolicy.requirePackSecuritySeal && packingMaterials.securitySeal && !sealSerialNumber.trim()) {
+        if (packPolicy.requirePackSecuritySeal && !sealSerialNumber.trim()) {
             alert('Security Tamper Seal serial number is required before completing packing.');
             setStep('WEIGH');
             return;
@@ -219,12 +215,10 @@ export const PackJobModal: React.FC<PackJobModalProps> = ({
                             job={job}
                             destSite={destSite}
                             totalItems={totalItems}
-                            totalUnits={totalUnits}
                             hasColdItems={hasColdItems}
                             hasFragileItems={hasFragileItems}
                             expectedWeightKg={expectedWeightKg}
                             getProduct={getProduct}
-                            getItemMeasureQty={getItemMeasureQty}
                             resolveOrderRef={resolveOrderRef}
                             t={t}
                         />

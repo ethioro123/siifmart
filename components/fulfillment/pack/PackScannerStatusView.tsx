@@ -2,7 +2,7 @@ import React from 'react';
 import { AlertTriangle, CheckCircle, Package, ScanLine } from 'lucide-react';
 import { Product } from '../../../types';
 import { useLanguage } from '../../../contexts/LanguageContext';
-import { formatProductSize, formatPackagingDescription, getSellUnit } from '../../../utils/units';
+import { formatProductSize } from '../../../utils/units';
 
 interface PackScannerStatusViewProps {
     step: 'SCAN' | 'CONFIRM_QTY';
@@ -34,11 +34,6 @@ export const PackScannerStatusView: React.FC<PackScannerStatusViewProps> = ({
     const { t } = useLanguage();
     const item = step === 'CONFIRM_QTY' ? matchedItem : nextUnpackedItem;
     const product = step === 'CONFIRM_QTY' ? matchedProduct : getProduct(item);
-    const requiredQty = item?.expectedQty || item?.quantity || 1;
-    const unitDefinition = getSellUnit(product?.unit || item?.unit);
-    const unitLabel = unitDefinition.category === 'count' && unitDefinition.code !== 'UNIT'
-        ? unitDefinition.shortLabel
-        : 'packs';
 
     if (isFullyPacked) {
         return (
@@ -75,7 +70,7 @@ export const PackScannerStatusView: React.FC<PackScannerStatusViewProps> = ({
                 </div>
                 <div className="min-w-0 flex-1">
                     <p className="text-[11px] sm:text-sm font-bold uppercase tracking-widest text-[var(--theme-text-secondary)]">
-                        {step === 'CONFIRM_QTY' ? 'Verify the required quantity' : 'Scan the displayed SKU or barcode'}
+                        {step === 'CONFIRM_QTY' ? 'Count the physical quantity in the carton' : 'Scan the displayed SKU or barcode'}
                     </p>
                     <h1 className="mt-1 text-xl sm:text-3xl md:text-5xl leading-tight font-bold text-[var(--theme-text-primary)] line-clamp-2 break-words">
                         {item?.name || product?.name || 'No remaining items'}
@@ -100,28 +95,18 @@ export const PackScannerStatusView: React.FC<PackScannerStatusViewProps> = ({
 
             <div className="mt-3 sm:mt-5 grid grid-cols-2 gap-2 sm:gap-3">
                 <div className="rounded-2xl border border-[var(--theme-border)] bg-[var(--theme-bg-subtle)] px-3 py-2 sm:px-4 sm:py-3">
-                    <p className="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-[var(--theme-text-secondary)]">Required quantity</p>
-                    <p className="mt-0.5 text-2xl sm:text-4xl font-bold font-mono tabular-nums text-[var(--theme-text-primary)]">
-                        {requiredQty} <span className="text-xs sm:text-base font-sans uppercase text-[var(--theme-text-secondary)]">{unitLabel}</span>
-                    </p>
-                    {formatPackagingDescription(product, requiredQty) && (
-                        <p className="text-[10px] sm:text-xs text-[var(--theme-text-secondary)]">{formatPackagingDescription(product, requiredQty)}</p>
-                    )}
+                    <p className="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-[var(--theme-text-secondary)]">Physical count</p>
+                    <p className="mt-0.5 text-base sm:text-lg font-semibold text-[var(--theme-text-primary)]">Enter what is in the carton</p>
                 </div>
                 <div className={`rounded-2xl border px-3 py-2 sm:px-4 sm:py-3 ${showError ? 'border-red-500/30 bg-red-500/10' : showSuccess ? 'border-green-500/30 bg-green-500/10' : 'border-[var(--theme-border)] bg-[var(--theme-bg-subtle)]'}`} role={showError ? 'alert' : 'status'}>
                     <p className="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-[var(--theme-text-secondary)]">
                         {showError ? 'Scan issue' : showSuccess ? 'Saved' : 'Packing status'}
                     </p>
                     <p className={`mt-1 text-sm sm:text-lg font-semibold line-clamp-2 ${showError ? 'text-red-600 dark:text-red-400' : showSuccess ? 'text-green-700 dark:text-green-400' : 'text-[var(--theme-text-primary)]'}`}>
-                        {showError ? errorMsg : showSuccess ? successMsg : step === 'CONFIRM_QTY' ? `Confirm ${requiredQty} required` : t('warehouse.scanProductBarcode')}
+                        {showError ? errorMsg : showSuccess ? successMsg : step === 'CONFIRM_QTY' ? 'Record the physical count' : t('warehouse.scanProductBarcode')}
                     </p>
                 </div>
             </div>
-            {item?.orderedQty && item.orderedQty > requiredQty && (
-                <p className="mt-2 flex items-center gap-2 rounded-xl border border-amber-500/20 bg-amber-500/10 px-3 py-2 text-xs sm:text-sm font-semibold text-amber-700 dark:text-amber-400">
-                    <AlertTriangle size={16} /> Picked quantity is {requiredQty}; pack only what was picked.
-                </p>
-            )}
         </section>
     );
 };

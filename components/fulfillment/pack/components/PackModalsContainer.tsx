@@ -127,6 +127,12 @@ export const PackModalsContainer: React.FC<PackModalsContainerProps> = ({
                 selectedPackJob.trackingNumber = trackingNum;
             }
 
+            if (boxDetails?.requirePackSecuritySeal) {
+                await wmsJobsService.update(selectedPackJob.id, {
+                    packSecuritySealSerial: boxDetails.sealSerialNumber,
+                });
+            }
+
             const result = await completeJob(selectedPackJob.id, user?.name || 'Packer', false, selectedPackJob.lineItems);
             if (result && result.points > 0) {
                 setEarnedPoints({ points: result.points, message: `Order Packed!`, bonuses: result.breakdown });

@@ -27,7 +27,7 @@ export const generateTransferId = (): string => {
     return `TR-${result}`;
 };
 
-const WMS_JOB_COLUMNS = 'id, country_code, site_id, type, priority, status, items_count, assigned_to, location, order_ref, completed_at, completed_by, created_at, updated_at, line_items, source_site_id, dest_site_id, transfer_status, requested_by, approved_by, job_number, delivery_method, tracking_number, external_carrier_name, assigned_by, notes, has_discrepancy, discrepancy_details, shipped_at, delivered_at, received_at, received_by';
+const WMS_JOB_COLUMNS = 'id, country_code, site_id, type, priority, status, items_count, assigned_to, location, order_ref, completed_at, completed_by, created_at, updated_at, line_items, source_site_id, dest_site_id, transfer_status, requested_by, approved_by, job_number, delivery_method, tracking_number, external_carrier_name, assigned_by, notes, has_discrepancy, discrepancy_details, shipped_at, delivered_at, received_at, received_by, pack_security_seal_serial';
 
 export const wmsJobsService = {
     async createPackAfterCompletedPick(pickJobId: string): Promise<WMSJob> {
@@ -292,7 +292,8 @@ export const wmsJobsService = {
             trackingNumber: 'tracking_number', tracking_number: 'tracking_number', completedBy: 'completed_by',
             completed_by: 'completed_by', completedAt: 'completed_at', completed_at: 'completed_at',
             externalCarrierName: 'external_carrier_name', external_carrier_name: 'external_carrier_name',
-            assignedBy: 'assigned_by', assigned_by: 'assigned_by', jobNumber: 'job_number'
+            assignedBy: 'assigned_by', assigned_by: 'assigned_by', jobNumber: 'job_number',
+            packSecuritySealSerial: 'pack_security_seal_serial'
         };
         const dbUpdates: Record<string, unknown> = {};
         for (const key of Object.keys(fields) as (keyof WMSJob)[]) {

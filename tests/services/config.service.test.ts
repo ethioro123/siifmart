@@ -100,6 +100,19 @@ describe('systemConfigService', () => {
             expect(config.taxAuthority).toContain('ERCA');
         });
 
+        it('normalizes stale receiving modes to blind in root and country settings', async () => {
+            (supabase.rpc as any).mockResolvedValue({ data: {
+                id: '00000000-0000-0000-0000-000000000001',
+                receiving_logic: 'standard',
+                country_configs: { ET: { receivingLogic: 'standard' }, KE: { receivingLogic: 'verified' } },
+            }, error: null });
+
+            const config = await systemConfigService.getSettings();
+            expect(config.receivingLogic).toBe('blind');
+            expect(config.countryConfigs?.ET?.receivingLogic).toBe('blind');
+            expect(config.countryConfigs?.KE?.receivingLogic).toBe('verified');
+        });
+
         it('fails closed when the sanitized settings RPC fails instead of reading the table directly', async () => {
             (supabase.rpc as any).mockResolvedValue({ data: null, error: new Error('RPC unavailable') });
 

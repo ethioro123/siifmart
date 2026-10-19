@@ -80,7 +80,7 @@ export default function WMSSettings() {
             const isCountryActive = settings.country === activeCountry;
 
             setInbound({
-                receivingLogic: countryPartition?.receivingLogic || (isCountryActive ? settings.receivingLogic : undefined) || 'verified',
+                receivingLogic: (countryPartition?.receivingLogic ?? (isCountryActive ? settings.receivingLogic : undefined)) === 'verified' ? 'verified' : 'blind',
                 qcSamplingRate: countryPartition?.qcSamplingRate ?? (isCountryActive ? settings.qcSamplingRate : undefined) ?? 10,
                 qcBlockOnFailure: countryPartition?.qcBlockOnFailure ?? (isCountryActive ? settings.qcBlockOnFailure : undefined) ?? true,
                 putawayLogic: countryPartition?.putawayLogic || (isCountryActive ? settings.putawayLogic : undefined) || 'system',

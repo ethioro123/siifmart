@@ -200,16 +200,19 @@ export const PackJobMaterialsPanel: React.FC<PackJobMaterialsPanelProps> = ({
                     {/* 4. Security Tape / Seal Toggle */}
                     <button
                         type="button"
-                        onClick={() => setPackingMaterials({ ...packingMaterials, securitySeal: !packingMaterials.securitySeal })}
+                        onClick={() => {
+                            if (!requireSeal) setPackingMaterials({ ...packingMaterials, securitySeal: !packingMaterials.securitySeal });
+                        }}
+                        disabled={requireSeal}
                         className={`w-full min-h-[48px] p-2.5 rounded-xl border flex items-center justify-between transition-colors cursor-pointer ${
-                            packingMaterials.securitySeal
+                            (packingMaterials.securitySeal || requireSeal)
                                 ? 'bg-purple-500/10 border-purple-500/30 text-purple-600 dark:text-purple-400'
                                 : 'bg-[var(--theme-bg-subtle)] border-[var(--theme-border)] text-[var(--theme-text-secondary)] hover:border-[var(--theme-accent)]/30'
                         }`}
                     >
                         <div className="flex items-center gap-2.5 min-w-0">
                             <div className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 ${
-                                packingMaterials.securitySeal ? 'bg-purple-600 text-white' : 'bg-[var(--theme-bg-card)] text-[var(--theme-text-secondary)] border border-[var(--theme-border)]'
+                                (packingMaterials.securitySeal || requireSeal) ? 'bg-purple-600 text-white' : 'bg-[var(--theme-bg-card)] text-[var(--theme-text-secondary)] border border-[var(--theme-border)]'
                             }`}>
                                 <Lock size={13} />
                             </div>
@@ -219,14 +222,14 @@ export const PackJobMaterialsPanel: React.FC<PackJobMaterialsPanelProps> = ({
                             </div>
                         </div>
                         <div className={`w-4 h-4 rounded-md border flex items-center justify-center shrink-0 ${
-                            packingMaterials.securitySeal ? 'bg-purple-600 border-purple-600 text-white' : 'border-[var(--theme-border)]'
+                            (packingMaterials.securitySeal || requireSeal) ? 'bg-purple-600 border-purple-600 text-white' : 'border-[var(--theme-border)]'
                         }`}>
-                            {packingMaterials.securitySeal && <Check size={11} />}
+                            {(packingMaterials.securitySeal || requireSeal) && <Check size={11} />}
                         </div>
                     </button>
 
                     {/* Security Seal Serial Input */}
-                    {packingMaterials.securitySeal && (
+                    {(packingMaterials.securitySeal || requireSeal) && (
                         <div className="p-2.5 bg-purple-500/10 border border-purple-500/20 rounded-xl space-y-1.5">
                             <label className="text-[11px] font-semibold text-purple-700 dark:text-purple-300 flex items-center justify-between uppercase">
                                 <span className="flex items-center gap-1.5"><Lock size={12} /> Seal Serial Number</span>

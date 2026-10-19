@@ -57,6 +57,7 @@ export const mapWmsJobRow = (row: any): WMSJob => {
         completedAt: row.completed_at,
         externalCarrierName: row.external_carrier_name,
         assignedBy: row.assigned_by,
+        packSecuritySealSerial: row.pack_security_seal_serial,
         notes: row.notes
     };
 };

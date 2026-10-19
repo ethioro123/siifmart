@@ -99,6 +99,38 @@ describe('WMS Jobs Zero-Trust Architecture & Country Scoping', () => {
         expect(created.type).toBe('PACK');
     });
 
+    it('persists only the pack seal attestation through the WMS update allowlist', async () => {
+        const { mockQueryBuilder } = await import('../../lib/supabase') as any;
+        mockQueryBuilder.single.mockResolvedValueOnce({ data: {
+            id: 'pack-1', site_id: 'site-et-1', country_code: 'ET', type: 'PACK',
+            status: 'In-Progress', line_items: [], pack_security_seal_serial: 'SEAL-001'
+        }, error: null });
+
+        const updated = await wmsJobsService.update('pack-1', {
+            packSecuritySealSerial: 'SEAL-001',
+            injected: 'ignored',
+        } as never);
+
+        expect(mockQueryBuilder.update).toHaveBeenCalledWith({ pack_security_seal_serial: 'SEAL-001' });
+        expect(updated.packSecuritySealSerial).toBe('SEAL-001');
+    });
+
+    it('persists only the pack seal attestation through the WMS update allowlist', async () => {
+        const { mockQueryBuilder } = await import('../../lib/supabase') as any;
+        mockQueryBuilder.single.mockResolvedValueOnce({ data: {
+            id: 'pack-1', site_id: 'site-et-1', country_code: 'ET', type: 'PACK',
+            status: 'In-Progress', line_items: [], pack_security_seal_serial: 'SEAL-001'
+        }, error: null });
+
+        const updated = await wmsJobsService.update('pack-1', {
+            packSecuritySealSerial: 'SEAL-001',
+            injected: 'ignored',
+        } as never);
+
+        expect(mockQueryBuilder.update).toHaveBeenCalledWith({ pack_security_seal_serial: 'SEAL-001' });
+        expect(updated.packSecuritySealSerial).toBe('SEAL-001');
+    });
+
     describe('Tenant Isolation & Country-Code Scoping', () => {
         it('queries jobs with country_code filter when countryCode is provided', async () => {
             const { mockQueryBuilder } = await import('../../lib/supabase') as any;

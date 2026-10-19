@@ -168,9 +168,8 @@ export const PackScanner: React.FC<PackScannerProps> = ({
                 setSelectedUnit(effectiveUnit);
                 playBeep('success');
                 setStep('CONFIRM_QTY');
-                // Always pre-fill with expected sellable unit count (e.g. 20 packs)
-                const expectedCases = matchedItem.expectedQty || 1;
-                setQtyVal(expectedCases.toString());
+                // Count what is physically in the carton before confirming.
+                setQtyVal('');
             } else {
                 playBeep('error');
                 setErrorMsg('Item not found in this Pack job.');
@@ -190,7 +189,7 @@ export const PackScanner: React.FC<PackScannerProps> = ({
             const finalQty = qty;
             if (!Number.isFinite(finalQty) || finalQty <= 0) {
                 playBeep('error');
-                setErrorMsg(`Enter the required quantity: ${expectedCases}`);
+                setErrorMsg('Enter the quantity physically packed.');
                 setShowError(true);
                 setTimeout(() => setShowError(false), 2000);
                 return;
@@ -198,7 +197,7 @@ export const PackScanner: React.FC<PackScannerProps> = ({
 
             if (!isExactPackQuantity(finalQty, expectedCases)) {
                 playBeep('error');
-                setErrorMsg(`This job requires exactly ${expectedCases}. Report quantity differences as a discrepancy.`);
+                setErrorMsg('The packed quantity does not match this job. Report the difference to a supervisor.');
                 setShowError(true);
                 setTimeout(() => setShowError(false), 2500);
                 return;
@@ -308,8 +307,6 @@ export const PackScanner: React.FC<PackScannerProps> = ({
                                                 className="flex-1 bg-transparent py-2.5 px-3 text-center text-3xl sm:text-4xl font-mono tabular-nums font-bold text-[var(--theme-text-primary)] placeholder:text-[var(--theme-text-secondary)]/30 outline-none"
                                                 placeholder="QTY"
                                                 autoFocus
-                                                readOnly
-                                                onFocus={(e) => e.target.select()}
                                             />
                                             <div className="bg-[var(--theme-bg-subtle)] text-[var(--theme-accent)] border-l border-[var(--theme-border)] px-3.5 py-2.5 text-xs font-mono font-bold uppercase flex items-center justify-center shrink-0">
                                                 {(() => {

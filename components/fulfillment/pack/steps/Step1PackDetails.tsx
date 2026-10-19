@@ -2,18 +2,15 @@ import React from 'react';
 import { Package, MapPin, Box, ShieldCheck, ThermometerSnowflake, AlertTriangle, FileText, Clock, UserCheck } from 'lucide-react';
 import { WMSJob, Site, Product } from '../../../../types';
 import { formatJobId } from '../../../../utils/jobIdFormatter';
-import { formatProductSize } from '../../../../utils/units';
 
 interface Step1PackDetailsProps {
     job: WMSJob;
     destSite: Site | undefined;
     totalItems: number;
-    totalUnits: number;
     hasColdItems: boolean;
     hasFragileItems: boolean;
     expectedWeightKg: number;
     getProduct: (item: any) => Product | undefined;
-    getItemMeasureQty: (item: any, product?: any) => number | null | undefined;
     resolveOrderRef: (ref?: string) => string;
     t: (key: string) => string;
 }
@@ -22,12 +19,10 @@ export const Step1PackDetails: React.FC<Step1PackDetailsProps> = ({
     job,
     destSite,
     totalItems,
-    totalUnits,
     hasColdItems,
     hasFragileItems,
     expectedWeightKg,
     getProduct,
-    getItemMeasureQty,
     resolveOrderRef,
     t,
 }) => {
@@ -108,10 +103,6 @@ export const Step1PackDetails: React.FC<Step1PackDetailsProps> = ({
                             <span className="text-[10px] uppercase font-bold text-[var(--theme-text-secondary)] block">Line Items</span>
                             <span className="text-base font-mono font-bold text-[var(--theme-text-primary)]">{totalItems} Lines</span>
                         </div>
-                        <div className="p-2 rounded-xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)]">
-                            <span className="text-[10px] uppercase font-bold text-[var(--theme-text-secondary)] block">Total Units</span>
-                            <span className="text-base font-mono font-bold text-[var(--theme-text-primary)]">{totalUnits} Units</span>
-                        </div>
                     </div>
                 </div>
 
@@ -167,10 +158,6 @@ export const Step1PackDetails: React.FC<Step1PackDetailsProps> = ({
                 <div className="divide-y divide-[var(--theme-border)] max-h-[380px] overflow-y-auto custom-scrollbar">
                     {(job?.lineItems || []).map((item: any, idx: number) => {
                         const product = getProduct(item);
-                        const measureQty = getItemMeasureQty(item, product);
-                        const requiredQty = measureQty || item.expectedQty || 1;
-                        const unitName = formatProductSize(product) || 'units';
-
                         return (
                             <div key={idx} className="py-2.5 flex items-center justify-between gap-3">
                                 <div className="flex items-center gap-3 min-w-0 flex-1">
@@ -195,9 +182,6 @@ export const Step1PackDetails: React.FC<Step1PackDetailsProps> = ({
                                 </div>
 
                                 <div className="text-right shrink-0">
-                                    <span className="text-xs font-mono font-bold text-[var(--theme-text-primary)] block">
-                                        {requiredQty} {unitName}
-                                    </span>
                                     <span className="text-[10px] text-amber-600 dark:text-amber-400 font-semibold uppercase tracking-wider block">
                                         Scan Required
                                     </span>

@@ -2,7 +2,7 @@ import React from 'react';
 import { Package, CheckCircle, Barcode } from 'lucide-react';
 import { WMSJob, Product } from '../../../../types';
 import { getProductForItem, getItemMeasureQty as getItemMeasureQtyShared } from '../utils/packItemHelpers';
-import { getSellUnit, formatProductSize, formatPackagingDescription } from '../../../../utils/units';
+import { formatProductSize } from '../../../../utils/units';
 
 interface PackJobItemCardProps {
     item: any;
@@ -21,10 +21,6 @@ export const PackJobItemCard: React.FC<PackJobItemCardProps> = ({
     const packed = (item as any).packedQty ?? 0;
     const isDone = job.status === 'Completed' || (item as any).packed === true || packed >= requiredAmount - 0.001;
 
-    const expected = item.expectedQty || (item as any).quantity || 0;
-    const packDesc = formatPackagingDescription(product, expected);
-    const unitDef = getSellUnit(product?.unit || item.unit);
-    const unitLabel = unitDef.category === 'count' && unitDef.code !== 'UNIT' ? unitDef.shortLabel : 'pk';
 
     return (
         <div className={`group relative bg-[var(--theme-bg-card)] border ${
@@ -91,13 +87,8 @@ export const PackJobItemCard: React.FC<PackJobItemCardProps> = ({
                 <div className="flex items-center justify-between sm:justify-end gap-2.5 pt-2 sm:pt-0 border-t sm:border-0 border-[var(--theme-border)]/60 shrink-0">
                     <div className="text-left sm:text-right">
                         <span className={`text-xs font-mono tabular-nums font-semibold ${isDone ? 'text-green-600 dark:text-green-400' : 'text-[var(--theme-text-primary)]'}`}>
-                            {packed} <span className="text-[var(--theme-text-secondary)] font-normal">/ {expected} {unitLabel}</span>
+                            {packed} <span className="text-[var(--theme-text-secondary)] font-normal">packed</span>
                         </span>
-                        {packDesc && (
-                            <span className="text-[11px] text-[var(--theme-text-secondary)] font-medium uppercase block leading-none mt-0.5">
-                                ({packDesc})
-                            </span>
-                        )}
                     </div>
 
                     <div className="flex items-center gap-1.5">

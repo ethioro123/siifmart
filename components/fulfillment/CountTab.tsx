@@ -1,8 +1,10 @@
-import React, { useState } from 'react';
-import { Product, StockMovement, User } from '../../types';
+import React, { useCallback, useEffect, useState } from 'react';
+import type { Product, StockMovement, User } from '../../types';
 import { CountHeader } from './count/CountHeader';
 import { CountOperations } from './count/CountOperations';
 import { CountHistory } from './count/CountHistory';
+import { wmsCountsService, type WMSCountSession } from '../../services/wms-counts.service';
+import { logger } from '../../utils/logger';
 
 interface CountTabProps {
     products: Product[];
@@ -17,55 +19,107 @@ interface CountTabProps {
 }
 
 export const CountTab: React.FC<CountTabProps> = ({
-    products,
-    movements,
-    user,
-    setSelectedJob,
-    setIsDetailsOpen,
-    inventoryRequestsService,
-    addNotification
+    products, movements, user, isSubmitting, setIsSubmitting,
+    setSelectedJob, setIsDetailsOpen, addNotification,
 }) => {
-    // --- COUNT TAB STATE ---
     const [countViewMode, setCountViewMode] = useState<'Operations' | 'Reports'>('Operations');
-    const [countSessionStatus, setCountSessionStatus] = useState<'Idle' | 'Active' | 'Review'>('Idle');
-    const [countSessionType, setCountSessionType] = useState<'Cycle' | 'Spot'>('Cycle');
-    const [countSessionItems, setCountSessionItems] = useState<{
-        productId: string;
-        systemQty: number;
-        countedQty?: number;
-        status: 'Pending' | 'Counted' | 'Approved' | 'Rejected';
-        variance?: number;
-    }[]>([]);
+    const [session, setSession] = useState<WMSCountSession | null>(null);
+    const [sessionLoading, setSessionLoading] = useState(true);
+    const [loadError, setLoadError] = useState(false);
+
+    const refreshSession = useCallback(async (sessionId?: string) => {
+        const active = sessionId
+            ? await wmsCountsService.getSession(sessionId)
+            : await wmsCountsService.getActiveSession();
+        setSession(active?.status === 'Active' ? active : null);
+        return active;
+    }, []);
+
+    useEffect(() => {
+        let active = true;
+        setSessionLoading(true);
+        wmsCountsService.getActiveSession()
+            .then((current) => { if (active) setSession(current); })
+            .catch((error) => {
+                logger.error('CountTab', 'Failed to restore count session', error);
+                if (active) setLoadError(true);
+            })
+            .finally(() => { if (active) setSessionLoading(false); });
+        return () => { active = false; };
+    }, [user?.id, user?.siteId]);
+
+    const startSession = async (type: WMSCountSession['countType']) => {
+        if (!user?.siteId) throw new Error('Your account has no assigned site.');
+        setIsSubmitting(true);
+        setSessionLoading(true);
+        try {
+            const next = await wmsCountsService.startSession(user.siteId, type);
+            setSession(next);
+            setLoadError(false);
+        } finally {
+            setIsSubmitting(false);
+            setSessionLoading(false);
+        }
+    };
+
+    const recordCount = async (productId: string, quantity: number) => {
+        if (!session) throw new Error('No active count session.');
+        await wmsCountsService.recordCount(session.id, productId, quantity);
+        await refreshSession(session.id);
+    };
+
+    const completeSession = async () => {
+        if (!session) return;
+        setIsSubmitting(true);
+        try {
+            const result = await wmsCountsService.finishSession(session.id);
+            setSession(null);
+            addNotification('success', result.varianceCount
+                ? `${result.varianceCount} variance request(s) sent for HQ approval.`
+                : 'Blind count completed with no variances.');
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+
+    const cancelSession = async () => {
+        if (!session) return;
+        setIsSubmitting(true);
+        try {
+            await wmsCountsService.cancelSession(session.id);
+            setSession(null);
+            addNotification('info', 'Count session cancelled and retained in the audit history.');
+        } catch (error) {
+            addNotification('alert', error instanceof Error ? error.message : 'Unable to cancel this count session.');
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+
+    const countStatus = session ? 'Active' : 'Idle';
 
     return (
-        <div className="flex-1 overflow-y-auto space-y-2 sm:space-y-4">
-            {/* Header */}
+        <div className="flex-1 space-y-2 overflow-y-auto sm:space-y-4">
             <CountHeader
                 countViewMode={countViewMode}
                 setCountViewMode={setCountViewMode}
-                countSessionStatus={countSessionStatus}
-                setCountSessionStatus={setCountSessionStatus}
-                setCountSessionItems={setCountSessionItems}
+                countSessionStatus={countStatus}
+                onCancelSession={cancelSession}
+                isSubmitting={isSubmitting}
             />
-
-            {/* OPERATIONS VIEW */}
-            {countViewMode === 'Operations' && (
+            {loadError && <p role="alert" className="rounded-xl border border-red-500/30 bg-red-500/10 p-3 text-sm text-[var(--theme-text-primary)]">Could not restore the active count. Refresh and try again.</p>}
+            {countViewMode === 'Operations' ? (
                 <CountOperations
                     products={products}
                     user={user}
-                    countSessionStatus={countSessionStatus}
-                    setCountSessionStatus={setCountSessionStatus}
-                    countSessionItems={countSessionItems}
-                    setCountSessionItems={setCountSessionItems}
-                    countSessionType={countSessionType}
-                    setCountSessionType={setCountSessionType}
+                    session={session}
+                    isLoading={sessionLoading || isSubmitting}
+                    onStart={startSession}
+                    onRecordCount={recordCount}
+                    onComplete={completeSession}
                     addNotification={addNotification}
-                    inventoryRequestsService={inventoryRequestsService}
                 />
-            )}
-
-            {/* REPORTS VIEW */}
-            {countViewMode === 'Reports' && (
+            ) : (
                 <CountHistory
                     movements={movements}
                     products={products}

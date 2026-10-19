@@ -33,7 +33,9 @@ export const resolveReceivingPolicy = (
     const logic = pick('receivingLogic');
     const tol = Number(pick('overReceiveTolerancePct'));
     return {
-        blind: logic ? logic === 'blind' : true,
+        // Old/global configs may still contain the removed `standard` value.
+        // Treat unknown values as blind so a stale setting cannot expose PO quantities.
+        blind: logic !== 'verified',
         overReceiveTolerancePct: Number.isFinite(tol) ? Math.min(100, Math.max(0, tol)) : 0,
         poPriceApplyAt: pick('poPriceApplyAt') === 'receive' ? 'receive' : 'putaway',
         printPriceTagAt: (pick('printPriceTagAt') as PriceTagAt | undefined) || 'store',

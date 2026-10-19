@@ -11,6 +11,7 @@ import { useLanguage } from '../../../contexts/LanguageContext';
 import { useData } from '../../../contexts/DataContext';
 import { validateCrossBorderSku } from '../../../utils/skuValidation';
 import { matchesExpectedPickItemScan, matchesExpectedPickLocationScan } from '../../../utils/pickScanValidation';
+import { resolveFulfillmentScanningPolicy } from '../../../utils/receivingPolicy';
 import { PickScannerHeader } from './components/PickScannerHeader';
 import { PickScannerForm } from './components/PickScannerForm';
 
@@ -40,7 +41,8 @@ export const PickScanner: React.FC<PickScannerProps> = ({
     expectedPrefix
 }) => {
     const { t } = useLanguage();
-    const { effectiveCountry } = useData();
+    const { effectiveCountry, settings } = useData();
+    const { requirePickQuantityEntry } = resolveFulfillmentScanningPolicy(settings, effectiveCountry);
     const [step, setStep] = useState<'LOCATION' | 'ITEM' | 'QUANTITY'>('LOCATION');
     const [inputVal, setInputVal] = useState('');
     const [qtyVal, setQtyVal] = useState('');
@@ -232,9 +234,8 @@ export const PickScanner: React.FC<PickScannerProps> = ({
 
             playBeep('success');
             const prod = product || getProduct(currentItem);
-            const measureQty = getItemMeasureQty(currentItem, prod);
-            setQtyVal(measureQty !== null ? measureQty.toString() : (currentItem?.expectedQty || 1).toString());
-            if (shortPickMode) {
+            setQtyVal('');
+            if (shortPickMode || requirePickQuantityEntry) {
                 setIsItemMatched(true);
                 setMatchedBarcode(val);
                 setSelectedUnit(prod?.unit || currentItem?.unit || 'UNIT');
