@@ -4,6 +4,7 @@ import { logger } from '../../../utils/logger';
 import { repairShipmentInventoryHelper } from './utils/receivingRepair';
 import { processReceivingStockIntake, rollbackReceivingStockIntake, ReceivingStockIntakeResult } from './utils/receivingIntake';
 import { verifyPOSTransferReceipt } from './utils/verifyPOSTransferReceipt';
+import { transferReceiptVerificationService } from '../../../services/transfer-receipt-verification.service';
 
 interface UsePOSReceivingProps {
     user: any;
@@ -173,6 +174,19 @@ export const usePOSReceiving = ({
             };
         });
 
+        try {
+            const verification = await transferReceiptVerificationService.get(targetId);
+            if (verification.status === 'verified' && verification.items.length === items.length) {
+                setTransferReceivingItems(items.map((item: any, index: number) => ({
+                    ...item,
+                    receivedQty: verification.items[index].receivedQty,
+                    condition: verification.items[index].condition || 'Good'
+                })));
+                return;
+            }
+        } catch (error) {
+            logger.warn('usePOSReceiving', 'Could not restore saved transfer receipt count', { error: String(error) });
+        }
         setTransferReceivingItems(items);
     };
 
@@ -301,10 +315,16 @@ export const usePOSReceiving = ({
                 throw new Error('This shipment has already been received and completed.');
             }
 
+            const targetTransferId = transferJob?.id || selectedId;
+            // Recover the saved physical count if an earlier receipt attempt
+            // stopped after verification but before inventory/status updates.
+            const receivedItems = await verifyPOSTransferReceipt(targetTransferId, transferReceivingItems);
+            setTransferReceivingItems(receivedItems);
+
             const rawLineItems = finalTransfer.lineItems || finalTransfer.items || [];
             const updatedLineItems = rawLineItems.map((item: any) => {
                 const itemSku = (item.sku || '').trim().toUpperCase();
-                const rx = transferReceivingItems.find(i =>
+                const rx = receivedItems.find(i =>
                     i.sku?.trim()?.toUpperCase() === itemSku ||
                     i.productId === (item.productId || item.product_id)
                 );
@@ -321,19 +341,14 @@ export const usePOSReceiving = ({
 
             const timestampStr = new Date().toISOString();
             const receiverName = user?.name || t('posCommand.posUser');
-            const targetTransferId = transferJob?.id || selectedId;
             const destSiteId = transfer.destSiteId || activeSite?.id;
-
-            // Record the receiver's count before accepting custody. On retry,
-            // only the same saved count may complete the receipt.
-            await verifyPOSTransferReceipt(targetTransferId, transferReceivingItems);
 
             // 1. Process and verify stock intake BEFORE marking transfer completed
             if (destSiteId) {
                 intakeResult = await processReceivingStockIntake({
                     transferId: targetTransferId,
                     destSiteId,
-                    transferReceivingItems,
+                    transferReceivingItems: receivedItems,
                     allProducts,
                     receiverName,
                     timestampStr,
@@ -344,7 +359,7 @@ export const usePOSReceiving = ({
                 }
             }
 
-            const hasDiscrepancies = transferReceivingItems.some(i => {
+            const hasDiscrepancies = receivedItems.some(i => {
                 const sizeNum = i.productSize || 0;
                 const isWV = sizeNum > 0 && (isWeightBased(i.unit || '') || isVolumeBased(i.unit || ''));
                 const rawExpected = isWV ? (i.displayExpectedQty || i.expectedQty) * sizeNum : (i.displayExpectedQty || i.expectedQty);
@@ -411,7 +426,7 @@ export const usePOSReceiving = ({
             setReceivingSummary({
                 orderRef: transfer.orderRef || selectedId,
                 jobNumber: transfer.jobNumber || (transfer as any).job_number,
-                items: transferReceivingItems.map(i => ({
+                items: receivedItems.map(i => ({
                     sku: i.sku,
                     name: i.name,
                     expectedQty: i.expectedQty,
