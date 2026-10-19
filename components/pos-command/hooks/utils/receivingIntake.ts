@@ -103,7 +103,7 @@ export const processReceivingStockIntake = async ({
                     : ((templateProduct?.category && templateProduct.category !== 'Uncategorized') ? templateProduct.category : t('posCommand.uncategorized'));
 
                 try {
-                    await addProduct({
+                    const createdProduct = await addProduct({
                         name: item.name || templateProduct?.name || t('posCommand.newProduct'),
                         sku: item.sku,
                         price: effectivePrice,
@@ -122,6 +122,13 @@ export const processReceivingStockIntake = async ({
                         posReceivedBy: receiverName,
                         posReceivedAt: timestampStr
                     } as any);
+                    // Product creation can be denied by RLS and reported as
+                    // `undefined` by useProductActions. Do not treat that as a
+                    // successful receipt or allow the transfer to complete.
+                    if (!createdProduct?.id) {
+                        addNotification('alert', `Product ${item.sku || item.name || 'in this transfer'} is missing at the destination or you do not have catalog access. Ask an inventory administrator to add it, then retry receipt.`);
+                        failedItems.push(item.sku || item.name || 'Unknown Item');
+                    }
                 } catch (err) {
                     logger.error('usePOSReceiving', 'Failed to auto-create product:', err as Error);
                     failedItems.push(item.sku || item.name || 'Unknown Item');

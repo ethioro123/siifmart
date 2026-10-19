@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import {
     Calendar, Clock, User, Plus, Trash2, Edit2,
-    ChevronLeft, ChevronRight, Briefcase
+    ChevronLeft, ChevronRight, Briefcase, Loader2
 } from 'lucide-react';
 import { useData } from '../contexts/DataContext';
 import { useRoster } from '../contexts/RosterContext';
@@ -37,6 +37,8 @@ export default function RosterManager({ className = "" }: RosterManagerProps) {
     const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingSchedule, setEditingSchedule] = useState<StaffSchedule | null>(null);
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [timeError, setTimeError] = useState<string | null>(null);
 
     // New Schedule Form State
     const [formState, setFormState] = useState({
@@ -64,6 +66,7 @@ export default function RosterManager({ className = "" }: RosterManagerProps) {
     }, [schedules, selectedDate, activeSite, siteEmployees]);
 
     const handleOpenModal = (schedule?: StaffSchedule) => {
+        setTimeError(null);
         if (schedule) {
             setEditingSchedule(schedule);
             setFormState({
@@ -88,32 +91,66 @@ export default function RosterManager({ className = "" }: RosterManagerProps) {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!activeSite || !user) return;
+        if (!activeSite || !user || isSubmitting) return;
 
         const employee = siteEmployees.find(emp => emp.id === formState.employeeId);
-        if (!employee) return;
-
-        if (editingSchedule) {
-            await updateSchedule(editingSchedule.id, {
-                ...formState,
-                employeeName: employee.name
-            }, user.name);
-        } else {
-            const newSchedule: StaffSchedule = {
-                id: crypto.randomUUID(),
-                siteId: activeSite.id,
-                employeeId: formState.employeeId,
-                employeeName: employee.name,
-                date: selectedDate,
-                startTime: formState.startTime,
-                endTime: formState.endTime,
-                role: formState.role || employee.role.replace('_', ' '),
-                notes: formState.notes,
-                status: 'Scheduled'
-            };
-            await addSchedule(newSchedule, user.name);
+        if (!employee) {
+            setTimeError('Please select an appointed staff member');
+            return;
         }
-        setIsModalOpen(false);
+
+        if (formState.startTime >= formState.endTime) {
+            setTimeError('Shift end time must be after shift start time');
+            return;
+        }
+
+        setTimeError(null);
+        setIsSubmitting(true);
+
+        try {
+            let success = false;
+            if (editingSchedule) {
+                success = await updateSchedule(editingSchedule.id, {
+                    ...formState,
+                    employeeId: employee.id,
+                    employeeName: employee.name,
+                    siteId: activeSite.id,
+                    countryCode: activeSite.country,
+                    regionCode: activeSite.region_code || (activeSite as any).regionCode
+                }, user.name);
+            } else {
+                const newSchedule: StaffSchedule = {
+                    id: crypto.randomUUID(),
+                    siteId: activeSite.id,
+                    employeeId: formState.employeeId,
+                    employeeName: employee.name,
+                    date: selectedDate,
+                    startTime: formState.startTime,
+                    endTime: formState.endTime,
+                    role: formState.role || employee.role.replace('_', ' '),
+                    notes: formState.notes,
+                    status: 'Scheduled',
+                    countryCode: activeSite.country,
+                    country_code: activeSite.country,
+                    regionCode: activeSite.region_code || (activeSite as any).regionCode,
+                    region_code: activeSite.region_code || (activeSite as any).regionCode
+                };
+                success = await addSchedule(newSchedule, user.name);
+            }
+
+            if (success) {
+                setIsModalOpen(false);
+            }
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+
+    const handleDelete = async (schedule: StaffSchedule) => {
+        if (!window.confirm(`Delete shift for ${schedule.employeeName} (${schedule.startTime} - ${schedule.endTime})?`)) {
+            return;
+        }
+        await deleteSchedule(schedule.id, user?.name || 'Manager');
     };
 
     const changeDate = (days: number) => {
@@ -213,7 +250,7 @@ export default function RosterManager({ className = "" }: RosterManagerProps) {
                                 </button>
                                 <button
                                     type="button"
-                                    onClick={() => deleteSchedule(schedule.id, user?.name || 'Manager')}
+                                    onClick={() => handleDelete(schedule)}
                                     title="Delete Shift"
                                     aria-label="Delete Shift"
                                     className="p-2 rounded-xl bg-red-500/10 border border-red-500/20 text-red-600 dark:text-red-400 hover:bg-red-500/20 transition-all cursor-pointer"
@@ -338,21 +375,37 @@ export default function RosterManager({ className = "" }: RosterManagerProps) {
                                 title="Shift Notes"
                             />
                         </div>
+
+                        {/* Error Alert */}
+                        {timeError && (
+                            <div className="p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-xs text-red-600 dark:text-red-400 font-medium">
+                                {timeError}
+                            </div>
+                        )}
                     </div>
 
                     <div className="flex gap-3 pt-3 border-t border-[var(--theme-border)]">
                         <button
                             type="button"
                             onClick={() => setIsModalOpen(false)}
-                            className="flex-1 h-10 bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card-hover)] border border-[var(--theme-border)] rounded-xl text-xs font-semibold text-[var(--theme-text-secondary)] transition-all cursor-pointer"
+                            disabled={isSubmitting}
+                            className="flex-1 h-10 bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card-hover)] disabled:opacity-50 border border-[var(--theme-border)] rounded-xl text-xs font-semibold text-[var(--theme-text-secondary)] transition-all cursor-pointer"
                         >
                             Cancel
                         </button>
                         <button
                             type="submit"
-                            className="flex-1 h-10 bg-[#0071E3] dark:bg-[#2997FF] hover:opacity-90 active:scale-95 text-white rounded-xl text-xs font-semibold transition-all shadow-xs cursor-pointer"
+                            disabled={isSubmitting}
+                            className="flex-1 h-10 bg-[#0071E3] dark:bg-[#2997FF] hover:opacity-90 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-xl text-xs font-semibold transition-all shadow-xs cursor-pointer flex items-center justify-center gap-1.5"
                         >
-                            Save Shift
+                            {isSubmitting ? (
+                                <>
+                                    <Loader2 size={14} className="animate-spin" />
+                                    <span>Saving...</span>
+                                </>
+                            ) : (
+                                <span>Save Shift</span>
+                            )}
                         </button>
                     </div>
                 </form>

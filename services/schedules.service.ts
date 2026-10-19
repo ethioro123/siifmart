@@ -2,9 +2,11 @@ import { supabase } from '../lib/supabase';
 import type { StaffSchedule } from '../types';
 import { logger } from '../utils/logger';
 
+const SCHEDULE_COLUMNS = 'id, site_id, employee_id, employee_name, date, start_time, end_time, role, notes, status, region_code, country_code, created_at, updated_at';
+
 export const schedulesService = {
     async getAll(siteId?: string, regionCode?: string, countryCode?: string): Promise<StaffSchedule[]> {
-        let query = supabase.from('staff_schedules').select('*');
+        let query = supabase.from('staff_schedules').select(SCHEDULE_COLUMNS);
         if (siteId) query = query.eq('site_id', siteId);
         if (regionCode) query = query.eq('region_code', regionCode);
         if (countryCode) query = query.eq('country_code', countryCode.toUpperCase());
@@ -17,7 +19,7 @@ export const schedulesService = {
         return (data || []).map(this._mapSchedule);
     },
 
-    async create(schedule: Omit<StaffSchedule, 'id'>): Promise<StaffSchedule | null> {
+    async create(schedule: Partial<StaffSchedule> & { siteId: string; employeeId: string; date: string }): Promise<StaffSchedule | null> {
         let regionCode = schedule.regionCode || (schedule as any).region_code;
         let countryCode = schedule.countryCode || (schedule as any).country_code;
 
@@ -37,16 +39,19 @@ export const schedulesService = {
             }
         }
 
+        const scheduleId = schedule.id || crypto.randomUUID();
+
         const dbSchedule = {
+            id: scheduleId,
             site_id: schedule.siteId,
             employee_id: schedule.employeeId,
-            employee_name: schedule.employeeName,
+            employee_name: schedule.employeeName || 'Staff Member',
             date: schedule.date,
-            start_time: schedule.startTime,
-            end_time: schedule.endTime,
-            role: schedule.role,
-            notes: schedule.notes,
-            status: schedule.status,
+            start_time: schedule.startTime || '08:00',
+            end_time: schedule.endTime || '17:00',
+            role: schedule.role || 'Staff',
+            notes: schedule.notes || '',
+            status: schedule.status || 'Scheduled',
             region_code: regionCode || null,
             country_code: countryCode ? countryCode.toUpperCase() : null
         };
@@ -54,7 +59,7 @@ export const schedulesService = {
         const { data, error } = await supabase
             .from('staff_schedules')
             .insert(dbSchedule)
-            .select()
+            .select(SCHEDULE_COLUMNS)
             .single();
 
         if (error) throw error;
@@ -62,22 +67,30 @@ export const schedulesService = {
     },
 
     async update(id: string, updates: Partial<StaffSchedule>): Promise<StaffSchedule | null> {
-        const dbUpdates: any = {};
+        const dbUpdates: any = {
+            updated_at: new Date().toISOString()
+        };
+        if (updates.employeeId) dbUpdates.employee_id = updates.employeeId;
+        if (updates.employeeName) dbUpdates.employee_name = updates.employeeName;
+        if (updates.siteId) dbUpdates.site_id = updates.siteId;
         if (updates.date) dbUpdates.date = updates.date;
         if (updates.startTime) dbUpdates.start_time = updates.startTime;
         if (updates.endTime) dbUpdates.end_time = updates.endTime;
         if (updates.role) dbUpdates.role = updates.role;
-        if (updates.notes) dbUpdates.notes = updates.notes;
+        if (updates.notes !== undefined) dbUpdates.notes = updates.notes;
         if (updates.status) dbUpdates.status = updates.status;
         if (updates.regionCode || (updates as any).region_code) {
             dbUpdates.region_code = updates.regionCode || (updates as any).region_code;
+        }
+        if (updates.countryCode || (updates as any).country_code) {
+            dbUpdates.country_code = (updates.countryCode || (updates as any).country_code).toUpperCase();
         }
 
         const { data, error } = await supabase
             .from('staff_schedules')
             .update(dbUpdates)
             .eq('id', id)
-            .select()
+            .select(SCHEDULE_COLUMNS)
             .single();
 
         if (error) throw error;
@@ -86,7 +99,7 @@ export const schedulesService = {
 
     async getByDateRange(startDate: string, endDate: string, siteId?: string, regionCode?: string, countryCode?: string): Promise<StaffSchedule[]> {
         let query = supabase.from('staff_schedules')
-            .select('*')
+            .select(SCHEDULE_COLUMNS)
             .gte('date', startDate)
             .lte('date', endDate);
         if (siteId && siteId !== 'All') {
