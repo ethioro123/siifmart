@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { createPortal } from 'react-dom';
 import { ShieldCheck, AlertTriangle, CheckCircle, Truck, UserCheck, X } from 'lucide-react';
 import { WMSJob, ReceivingItem, Product, User } from '../../../types';
@@ -7,7 +7,7 @@ import { formatJobId } from '../../../utils/jobIdFormatter';
 interface CustodyHandshakeModalProps {
     isOpen: boolean;
     onClose: () => void;
-    onConfirm: (discrepancyDetails?: { hasDiscrepancy: boolean; discrepancyCount: number; driverAcknowledged: boolean }) => Promise<void>;
+    onConfirm: (discrepancyDetails?: { hasDiscrepancy: boolean; discrepancyCount: number }) => Promise<void>;
     activeTransferJob: WMSJob;
     transferReceiveItems: ReceivingItem[];
     allProducts: Product[];
@@ -16,6 +16,7 @@ interface CustodyHandshakeModalProps {
     driverName?: string;
     isSubmitting: boolean;
     verifiedHasDiscrepancy?: boolean;
+    verifiedDiscrepancyCount?: number;
 }
 
 export const CustodyHandshakeModal: React.FC<CustodyHandshakeModalProps> = ({
@@ -29,38 +30,28 @@ export const CustodyHandshakeModal: React.FC<CustodyHandshakeModalProps> = ({
     currentUser,
     driverName = 'Assigned Driver / Logistics Courier',
     isSubmitting,
-    verifiedHasDiscrepancy
+    verifiedHasDiscrepancy,
+    verifiedDiscrepancyCount
 }) => {
     const isBlindReceiving = true;
-    const [receiverCertified, setReceiverCertified] = useState(false);
-    const [driverAcknowledged, setDriverAcknowledged] = useState(false);
 
     if (!isOpen) return null;
 
     // Evaluate discrepancies
-    const discrepantItems = transferReceiveItems.filter(item => {
-        const expected = item.expectedQty || 0;
-        const received = item.receivedQty || 0;
-        const isQtyMismatch = received !== expected;
-        const isDamaged = item.condition === 'Damaged' || item.condition === 'Short';
-        return isQtyMismatch || isDamaged;
-    });
+    const discrepantItems = transferReceiveItems.filter(item => item.condition === 'Damaged' || item.condition === 'Short');
 
     const hasDiscrepancy = verifiedHasDiscrepancy ?? discrepantItems.length > 0;
     const displayedDiscrepantItems = discrepantItems;
-    const totalDiscrepantUnits = discrepantItems.reduce((sum, item) => {
+    const totalDiscrepantUnits = verifiedDiscrepancyCount ?? discrepantItems.reduce((sum, item) => {
         const diff = Math.abs((item.expectedQty || 0) - (item.receivedQty || 0));
         return sum + (diff > 0 ? diff : (item.condition === 'Damaged' ? item.receivedQty || 1 : 0));
     }, 0);
 
-    const canSubmit = receiverCertified && (!hasDiscrepancy || driverAcknowledged);
-
     const handleExecute = async () => {
-        if (!canSubmit || isSubmitting) return;
+        if (isSubmitting) return;
         await onConfirm({
             hasDiscrepancy,
-            discrepancyCount: totalDiscrepantUnits,
-            driverAcknowledged
+            discrepancyCount: totalDiscrepantUnits
         });
     };
 
@@ -76,10 +67,10 @@ export const CustodyHandshakeModal: React.FC<CustodyHandshakeModalProps> = ({
                         </div>
                         <div>
                             <h3 className="text-base font-bold text-[var(--theme-text-primary)] tracking-tight">
-                                Digital Dual-Handshake
+                                Receipt Accountability
                             </h3>
                             <p className="text-[11px] text-[var(--theme-text-secondary)] font-semibold uppercase tracking-wider">
-                                Chain of Custody & Acceptance Responsibility
+                                Blind count recorded to the signed-in receiver
                             </p>
                         </div>
                     </div>
@@ -98,8 +89,8 @@ export const CustodyHandshakeModal: React.FC<CustodyHandshakeModalProps> = ({
                     
                     {/* Legal Custody Notice */}
                     <div className="p-3.5 rounded-xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-[var(--theme-text-secondary)] leading-relaxed font-normal">
-                        <span className="font-bold text-[var(--theme-text-primary)] uppercase mr-1">Custody Principle:</span>
-                        You inspect before you accept. By certifying receipt, custody of this cargo is legally transferred to you. Any unrecorded shortage or damage becomes the accepting receiver's administrative liability.
+                            <span className="font-bold text-[var(--theme-text-primary)] uppercase mr-1">Receipt record:</span>
+                            The quantities and condition you entered will be saved under your employee identity when you accept this delivery.
                     </div>
 
                     {/* Parties Handshake Card */}
@@ -126,7 +117,7 @@ export const CustodyHandshakeModal: React.FC<CustodyHandshakeModalProps> = ({
                         <div className="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-800 dark:text-emerald-300 flex items-center gap-3">
                             <CheckCircle size={20} className="text-emerald-600 dark:text-emerald-400 shrink-0" />
                             <div>
-                                <p className="font-bold text-sm tracking-tight">100% Count Match — Zero Discrepancies</p>
+                                <p className="font-bold text-sm tracking-tight">Count matched the dispatch record</p>
                                 <p className="text-[11px] text-emerald-700/80 dark:text-emerald-300/80 mt-0.5">
                                     All units received in Good Condition matching manifest ({formatJobId(activeTransferJob)}).
                                 </p>
@@ -138,17 +129,17 @@ export const CustodyHandshakeModal: React.FC<CustodyHandshakeModalProps> = ({
                                 <AlertTriangle size={18} className="text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
                                 <div>
                                     <p className="font-bold tracking-tight">
-                                        {isBlindReceiving
-                                            ? `Discrepancy Detected (${discrepantItems.length} Line Item${discrepantItems.length > 1 ? 's' : ''} Affected)`
-                                            : `Discrepancy Detected (${totalDiscrepantUnits} Units Affected)`}
+                                        {totalDiscrepantUnits > 0
+                                            ? `Receipt variance recorded (${totalDiscrepantUnits} unit${totalDiscrepantUnits === 1 ? '' : 's'})`
+                                            : `Condition issue recorded (${discrepantItems.length} line item${discrepantItems.length === 1 ? '' : 's'})`}
                                     </p>
                                     <p className="text-[11px] text-amber-800/80 dark:text-amber-300/80 mt-0.5">
-                                        This variance will be permanently recorded in enterprise audit logs. Transit driver's accuracy score on the national gamification leaderboard will be penalized.
+                                        The quantities and condition you entered will be saved as received and attributed to you.
                                     </p>
                                 </div>
                             </div>
 
-                            {/* Discrepant Items List */}
+                            {/* Item condition notes */}
                             {displayedDiscrepantItems.length > 0 && <div className="border border-[var(--theme-border)] rounded-xl overflow-hidden divide-y divide-[var(--theme-border)]">
                                 {displayedDiscrepantItems.map((item, idx) => {
                                     const product = allProducts.find(p => p.id === item.productId) || products.find(p => p.id === item.productId);
@@ -176,36 +167,6 @@ export const CustodyHandshakeModal: React.FC<CustodyHandshakeModalProps> = ({
                         </div>
                     )}
 
-                    {/* Dual-Signoff Checkboxes */}
-                    <div className="space-y-3 pt-2 border-t border-[var(--theme-border)]">
-                        <label className="flex items-start gap-3 p-3.5 rounded-xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] cursor-pointer hover:border-primary/40 transition-colors touch-manipulation">
-                            <input
-                                type="checkbox"
-                                checked={receiverCertified}
-                                onChange={(e) => setReceiverCertified(e.target.checked)}
-                                className="mt-0.5 h-4 w-4 rounded text-primary focus:ring-primary border-[var(--theme-border)]"
-                            />
-                            <span className="text-[11px] text-[var(--theme-text-secondary)] font-normal leading-relaxed">
-                                <strong className="text-[var(--theme-text-primary)] font-bold block mb-0.5">Receiver Certification</strong>
-                                I certify that I have physically counted and inspected this load. I assume 100% custody and responsibility for the accepted items.
-                            </span>
-                        </label>
-
-                        {hasDiscrepancy && (
-                            <label className="flex items-start gap-3 p-3.5 rounded-xl bg-amber-500/5 border border-amber-500/20 cursor-pointer hover:border-amber-500/40 transition-colors touch-manipulation">
-                                <input
-                                    type="checkbox"
-                                    checked={driverAcknowledged}
-                                    onChange={(e) => setDriverAcknowledged(e.target.checked)}
-                                    className="mt-0.5 h-4 w-4 rounded text-amber-600 focus:ring-amber-500 border-amber-300 dark:border-amber-700"
-                                />
-                                <span className="text-[11px] text-amber-900 dark:text-amber-200 font-normal leading-relaxed">
-                                    <strong className="text-[var(--theme-text-primary)] font-bold block mb-0.5">Driver Discrepancy Acknowledgement</strong>
-                                    Delivering driver co-signs and acknowledges the recorded cargo variance before departing dock.
-                                </span>
-                            </label>
-                        )}
-                    </div>
                 </div>
 
                 {/* Footer Actions */}
@@ -219,8 +180,8 @@ export const CustodyHandshakeModal: React.FC<CustodyHandshakeModalProps> = ({
                     </button>
                     <button
                         onClick={handleExecute}
-                        disabled={!canSubmit || isSubmitting}
-                        className={`min-h-[44px] flex-1 py-2.5 px-4 rounded-xl text-xs font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-2 shadow-sm touch-manipulation ${canSubmit && !isSubmitting
+                        disabled={isSubmitting}
+                        className={`min-h-[44px] flex-1 py-2.5 px-4 rounded-xl text-xs font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-2 shadow-sm touch-manipulation ${!isSubmitting
                             ? hasDiscrepancy 
                                 ? 'bg-amber-600 hover:bg-amber-500 text-white active:scale-[0.99] cursor-pointer'
                                 : 'bg-[var(--theme-primary)] hover:opacity-90 text-[var(--theme-primary-text)] active:scale-[0.99] cursor-pointer'
@@ -228,7 +189,7 @@ export const CustodyHandshakeModal: React.FC<CustodyHandshakeModalProps> = ({
                         }`}
                     >
                         <ShieldCheck size={16} />
-                        {isSubmitting ? 'Sealing Custody...' : hasDiscrepancy ? 'Seal Discrepancy Handshake' : 'Execute Clean Custody Handshake'}
+                        {isSubmitting ? 'Recording Receipt...' : hasDiscrepancy ? 'Accept Variance & Take Custody' : 'Confirm Receipt & Take Custody'}
                     </button>
                 </div>
             </div>

@@ -82,10 +82,6 @@ export const TransferReceiving: React.FC<TransferReceivingProps> = ({
         try {
             const result = await verificationMutation.mutateAsync({ jobId: activeTransferJob.id, items: transferReceiveItems });
             setReceiptVerification(result);
-            if (result.status === 'awaiting_recount') {
-                addNotification('warning', 'Count saved. A different signed-in store employee must independently recount this transfer.');
-                return;
-            }
             setTransferReceiveItems(result.items.map((item, index) => ({
                 ...transferReceiveItems[index],
                 ...item,
@@ -103,7 +99,7 @@ export const TransferReceiving: React.FC<TransferReceivingProps> = ({
     const assignedDriver = employees.find(e => e.id === activeTransferJob.assignedTo);
     const driverName = (activeTransferJob as any).carrierName || (activeTransferJob as any).carrier || assignedDriver?.name || 'Assigned Driver / Courier';
 
-    const handleConfirmReceipt = async (discrepancyDetails?: { hasDiscrepancy: boolean; discrepancyCount: number; driverAcknowledged: boolean }) => {
+    const handleConfirmReceipt = async (discrepancyDetails?: { hasDiscrepancy: boolean; discrepancyCount: number }) => {
         if (!activeTransferJob) return;
         if (activeTransferJob.transferStatus === 'Received' || activeTransferJob.status === 'Completed') {
             addNotification('alert', 'This shipment has already been received and completed.');
@@ -303,28 +299,14 @@ export const TransferReceiving: React.FC<TransferReceivingProps> = ({
                 receivedBy: receiverName
             } as any);
 
-            // The database trigger records the linked transfer summary with this acceptance.
-            // If discrepancy occurred, dispatch event to penalize gamification accuracy & log audit
+            // The database binds this receipt to the authenticated receiver.
+            // Record any variance in the audit log without requiring a second signer.
             if (hasDiscrepancy) {
-                const responsibleEmployeeId = activeTransferJob.assignedTo || assignedDriver?.id;
-                if (responsibleEmployeeId) {
-                    window.dispatchEvent(new CustomEvent('fulfillment:chain-of-custody-discrepancy', {
-                        detail: {
-                            employeeId: responsibleEmployeeId,
-                            employeeName: driverName,
-                            siteId: activeTransferJob.sourceSiteId || activeSite?.id,
-                            discrepancyCount,
-                            totalExpected: activeTransferJob.items || 10,
-                            transferId: activeTransferJob.id
-                        }
-                    }));
-                }
-
                 if (logSystemEvent) {
                     try {
                         await logSystemEvent(
                             'CHAIN_OF_CUSTODY_DISCREPANCY',
-                            `Transfer ${formatJobId(activeTransferJob)} received with ${discrepancyCount} unit variance. Relinquished by ${driverName}, accepted by ${user?.name || 'Receiver'}. Driver co-sign: ${discrepancyDetails?.driverAcknowledged ? 'Acknowledged' : 'Unacknowledged'}`,
+                            `Transfer ${formatJobId(activeTransferJob)} received with ${discrepancyCount} unit variance. Relinquished by ${driverName}, accepted and attested by ${user?.name || 'Receiver'}.`,
                             user?.name || 'Receiver',
                             'WMS_TRANSFERS'
                         );
@@ -422,27 +404,17 @@ export const TransferReceiving: React.FC<TransferReceivingProps> = ({
                         );
                     })}
                 </div>
-                {receiptVerification?.status === 'awaiting_recount' && (
-                    <div className="mb-3 rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-xs text-[var(--theme-text-primary)]" role="status">
-                        <strong className="block mb-1">Independent recount required</strong>
-                        {receiptVerification.canCount
-                            ? 'You are signed in as a different employee. Recount every line without consulting the first count.'
-                            : 'The first count is saved. Sign in as a different authorized employee at this destination site to continue.'}
-                    </div>
-                )}
                 <div className="pt-4 border-t border-[var(--theme-border)] mt-2">
                     <button
                         onClick={receiptVerification?.status === 'verified' ? () => setIsHandshakeModalOpen(true) : handleCountSubmission}
-                        disabled={isLoadingVerification || !receiptVerification?.canCount && receiptVerification?.status !== 'verified' || verificationMutation.isPending}
+                        disabled={isLoadingVerification || (!receiptVerification?.canCount && receiptVerification?.status !== 'verified') || verificationMutation.isPending}
                         className="w-full min-h-[44px] py-3.5 bg-[var(--theme-primary)] text-[var(--theme-primary-text)] hover:opacity-90 rounded-xl text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 shadow-sm transition-all touch-manipulation active:scale-[0.99] cursor-pointer"
                     >
                         <ShieldCheck size={16} />
                         {isLoadingVerification ? 'Loading transfer count…'
                             : verificationMutation.isPending ? 'Saving verified count…'
-                            : receiptVerification?.status === 'verified' ? 'Review & Sign Transfer Receipt'
-                            : receiptVerification?.status === 'awaiting_recount' && !receiptVerification.canCount ? 'Waiting for Independent Recount'
-                            : receiptVerification?.status === 'awaiting_recount' ? 'Submit Independent Recount'
-                            : 'Submit Blind Count'}
+                            : receiptVerification?.status === 'verified' ? 'Review & Accept Receipt'
+                            : 'Submit Count & Accept Responsibility'}
                     </button>
                 </div>
             </div>
@@ -460,6 +432,7 @@ export const TransferReceiving: React.FC<TransferReceivingProps> = ({
                 driverName={driverName}
                 isSubmitting={isSubmittingReceipt}
                 verifiedHasDiscrepancy={receiptVerification?.hasDiscrepancy}
+                verifiedDiscrepancyCount={receiptVerification?.discrepancyCount}
             />
         </div>
     );

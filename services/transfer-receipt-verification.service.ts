@@ -5,6 +5,7 @@ export interface TransferReceiptVerification {
     status: 'awaiting_first_count' | 'awaiting_recount' | 'verified';
     canCount: boolean;
     hasDiscrepancy?: boolean;
+    discrepancyCount?: number;
     firstCounterId?: string;
     secondCounterId?: string;
     items: ReceivingItem[];
