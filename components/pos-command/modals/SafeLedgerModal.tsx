@@ -5,8 +5,8 @@ import { useData } from '../../../contexts/DataContext';
 import { cashDropsService } from '../../../services/cash-drops.service';
 import { realtimeService } from '../../../services/realtime.service';
 import type { CashDropRecord } from '../../../types/pos-zero-trust';
-import { CURRENCY_SYMBOL } from '../../../constants';
-import { Vault, ShieldCheck, Truck, CheckCircle2, AlertTriangle, FileText, ArrowRight } from 'lucide-react';
+import { Vault, Truck, CheckCircle2, RefreshCw, Loader2 } from 'lucide-react';
+import { logger } from '../../../utils/logger';
 
 interface SafeLedgerModalProps {
     isOpen: boolean;
@@ -21,10 +21,21 @@ export const SafeLedgerModal: React.FC<SafeLedgerModalProps> = ({ isOpen, onClos
     const [armoredManifest, setArmoredManifest] = useState('');
     const [isTransferring, setIsTransferring] = useState(false);
     const [isTransferModalOpen, setIsTransferModalOpen] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
+
+    const countryCode = ((activeSite?.country || effectiveCountry || 'ET') as string).toUpperCase();
+    const currency = countryCode === 'KE' ? 'KSh' : 'ETB';
 
     const loadDrops = async () => {
-        const data = await cashDropsService.getSafeLedger(activeSite?.id || 'All', activeSite?.country || effectiveCountry || 'ET');
-        setDrops(data);
+        setIsLoading(true);
+        try {
+            const data = await cashDropsService.getSafeLedger(activeSite?.id || 'All', countryCode);
+            setDrops(data);
+        } catch (err) {
+            logger.warn('SafeLedgerModal', 'Failed to load safe drops', { error: String(err) });
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     useEffect(() => {
@@ -38,10 +49,10 @@ export const SafeLedgerModal: React.FC<SafeLedgerModalProps> = ({ isOpen, onClos
             }, activeSite?.id);
             return () => sub.unsubscribe();
         }
-    }, [isOpen, activeSite?.id, effectiveCountry]);
+    }, [isOpen, activeSite?.id, countryCode]);
 
     const activeSafeDrops = drops.filter(d => d.status === 'deposited_in_safe');
-    const totalInSafe = activeSafeDrops.reduce((sum, d) => sum + d.amount, 0);
+    const totalInSafe = activeSafeDrops.reduce((sum, d) => sum + Number(d.amount || 0), 0);
 
     const handleSelectAll = () => {
         if (selectedDrops.length === activeSafeDrops.length) {
@@ -78,12 +89,35 @@ export const SafeLedgerModal: React.FC<SafeLedgerModalProps> = ({ isOpen, onClos
             size="lg"
         >
             <div className="p-4 sm:p-6 space-y-6">
+                {/* Header Action & Site Indicator */}
+                <div className="flex items-center justify-between gap-3 pb-1">
+                    <div className="flex items-center gap-2">
+                        <span className="text-xs font-semibold text-[var(--theme-text-primary)]">
+                            {activeSite?.name || 'Store Location'}
+                        </span>
+                        <span className="text-[10px] font-mono px-2 py-0.5 rounded-md bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-[var(--theme-text-secondary)] font-medium">
+                            {countryCode}
+                        </span>
+                    </div>
+                    <button
+                        type="button"
+                        onClick={loadDrops}
+                        disabled={isLoading}
+                        title="Refresh Safe Ledger"
+                        aria-label="Refresh Safe Ledger"
+                        className="p-1.5 rounded-lg border border-[var(--theme-border)] bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card-hover)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] transition-all cursor-pointer flex items-center gap-1.5 text-xs font-medium"
+                    >
+                        <RefreshCw size={13} className={isLoading ? "animate-spin" : ""} />
+                        <span>Refresh</span>
+                    </button>
+                </div>
+
                 {/* Summary Card */}
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     <div className="p-4 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-2xl">
                         <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--theme-text-secondary)] block mb-1">Total Cash in Drop Safe</span>
                         <p className="text-2xl font-mono font-bold text-[var(--theme-text-primary)]">
-                            {CURRENCY_SYMBOL} {totalInSafe.toLocaleString()}
+                            {currency} {totalInSafe.toLocaleString()}
                         </p>
                     </div>
                     <div className="p-4 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-2xl">
@@ -105,7 +139,7 @@ export const SafeLedgerModal: React.FC<SafeLedgerModalProps> = ({ isOpen, onClos
                                 onClick={() => setIsTransferModalOpen(true)}
                                 className="px-3.5 py-2 bg-[var(--theme-primary)] hover:opacity-90 text-[var(--theme-primary-text)] rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-xs cursor-pointer uppercase tracking-wider"
                             >
-                                <Truck size={14} className="text-teal-300" />
+                                <Truck size={14} className="text-[var(--theme-primary-text)] opacity-90" />
                                 Transit
                             </button>
                         )}
@@ -134,57 +168,74 @@ export const SafeLedgerModal: React.FC<SafeLedgerModalProps> = ({ isOpen, onClos
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-[var(--theme-border)] font-mono">
-                            {drops.length === 0 ? (
+                            {isLoading && drops.length === 0 ? (
+                                <tr>
+                                    <td colSpan={7} className="py-12 text-center text-[var(--theme-text-muted)] font-sans text-xs">
+                                        <div className="flex items-center justify-center gap-2">
+                                            <Loader2 size={16} className="animate-spin text-[var(--theme-text-secondary)]" />
+                                            <span>Loading drop safe ledger...</span>
+                                        </div>
+                                    </td>
+                                </tr>
+                            ) : drops.length === 0 ? (
                                 <tr>
                                     <td colSpan={7} className="py-8 text-center text-[var(--theme-text-muted)] font-sans text-xs">
                                         No cash drops recorded in the safe ledger.
                                     </td>
                                 </tr>
                             ) : (
-                                drops.map((drop) => (
-                                    <tr key={drop.id} className="hover:bg-[var(--theme-table-row-hover)] transition-colors">
-                                        <td className="py-3 px-3">
-                                            {drop.status === 'deposited_in_safe' ? (
-                                                <input
-                                                    type="checkbox"
-                                                    checked={selectedDrops.includes(drop.id)}
-                                                    onChange={() => {
-                                                        setSelectedDrops(prev =>
-                                                            prev.includes(drop.id) ? prev.filter(id => id !== drop.id) : [...prev, drop.id]
-                                                        );
-                                                    }}
-                                                    className="rounded border-[var(--theme-border)]"
-                                                />
-                                            ) : (
-                                                <CheckCircle2 size={14} className="text-emerald-500" />
-                                            )}
-                                        </td>
-                                        <td className="py-3 px-3 font-bold text-[var(--theme-text-primary)]">
-                                            {drop.safe_bag_number || drop.drop_number}
-                                        </td>
-                                        <td className="py-3 px-3 font-sans text-[var(--theme-text-secondary)]">
-                                            {drop.cashier_name}
-                                        </td>
-                                        <td className="py-3 px-3 font-sans text-[var(--theme-text-muted)]">
-                                            {drop.supervisor_name} ({drop.supervisor_role})
-                                        </td>
-                                        <td className="py-3 px-3 text-right font-bold text-[var(--theme-primary)]">
-                                            {drop.currency} {drop.amount.toLocaleString()}
-                                        </td>
-                                        <td className="py-3 px-3 text-center">
-                                            <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-semibold font-sans uppercase border ${
-                                                drop.status === 'deposited_in_safe'
-                                                    ? 'bg-amber-500/10 text-amber-500 border-amber-500/20'
-                                                    : 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20'
-                                            }`}>
-                                                {drop.status === 'deposited_in_safe' ? 'In Safe' : 'Transferred to Bank'}
-                                            </span>
-                                        </td>
-                                        <td className="py-3 px-3 text-right text-[var(--theme-text-muted)] text-[11px]">
-                                            {new Date(drop.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                                        </td>
-                                    </tr>
-                                ))
+                                drops.map((drop) => {
+                                    const dropDate = new Date(drop.created_at);
+                                    const isToday = dropDate.toDateString() === new Date().toDateString();
+                                    const timeLabel = isToday
+                                        ? dropDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                                        : `${dropDate.toLocaleDateString([], { month: 'short', day: 'numeric' })} ${dropDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
+
+                                    return (
+                                        <tr key={drop.id} className="hover:bg-[var(--theme-table-row-hover)] transition-colors">
+                                            <td className="py-3 px-3">
+                                                {drop.status === 'deposited_in_safe' ? (
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={selectedDrops.includes(drop.id)}
+                                                        onChange={() => {
+                                                            setSelectedDrops(prev =>
+                                                                prev.includes(drop.id) ? prev.filter(id => id !== drop.id) : [...prev, drop.id]
+                                                            );
+                                                        }}
+                                                        className="rounded border-[var(--theme-border)]"
+                                                    />
+                                                ) : (
+                                                    <CheckCircle2 size={14} className="text-emerald-500" />
+                                                )}
+                                            </td>
+                                            <td className="py-3 px-3 font-bold text-[var(--theme-text-primary)]">
+                                                {drop.safe_bag_number || drop.drop_number}
+                                            </td>
+                                            <td className="py-3 px-3 font-sans text-[var(--theme-text-secondary)]">
+                                                {drop.cashier_name}
+                                            </td>
+                                            <td className="py-3 px-3 font-sans text-[var(--theme-text-muted)]">
+                                                {drop.supervisor_name} ({drop.supervisor_role})
+                                            </td>
+                                            <td className="py-3 px-3 text-right font-bold text-[var(--theme-primary)]">
+                                                {drop.currency || currency} {Number(drop.amount || 0).toLocaleString()}
+                                            </td>
+                                            <td className="py-3 px-3 text-center">
+                                                <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-semibold font-sans uppercase border ${
+                                                    drop.status === 'deposited_in_safe'
+                                                        ? 'bg-amber-500/10 text-amber-500 border-amber-500/20'
+                                                        : 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20'
+                                                }`}>
+                                                    {drop.status === 'deposited_in_safe' ? 'In Safe' : 'Transferred to Bank'}
+                                                </span>
+                                            </td>
+                                            <td className="py-3 px-3 text-right text-[var(--theme-text-muted)] text-[11px]">
+                                                {timeLabel}
+                                            </td>
+                                        </tr>
+                                    );
+                                })
                             )}
                         </tbody>
                     </table>

@@ -10,6 +10,8 @@ import type { CashDropRecord } from '../types/pos-zero-trust';
 import { shiftsService } from './shifts.service';
 import { logger } from '../utils/logger';
 
+const CASH_DROP_COLUMNS = 'id, country_code, site_id, shift_id, drop_number, amount, currency, safe_bag_number, denominations, reason, notes, cashier_id, cashier_name, supervisor_id, supervisor_name, supervisor_role, device_id, gps_coordinates, status, created_at, updated_at';
+
 class CashDropsService {
     private localCache: CashDropRecord[] = [];
 
@@ -38,21 +40,23 @@ class CashDropsService {
             throw new Error('4-Eyes Violation: Cashier cannot supervise or co-sign their own cash drop.');
         }
 
-        if (!params.amount || params.amount <= 0) {
+        const dropAmount = Number(params.amount);
+        if (!dropAmount || dropAmount <= 0) {
             throw new Error('Invalid cash drop amount: must be greater than zero.');
         }
 
         const dropNumber = `DROP-${Date.now().toString().slice(-6)}`;
         const now = new Date().toISOString();
+        const countryCode = (params.country_code || 'ET').toUpperCase();
 
         const dropRecord: CashDropRecord = {
             id: crypto.randomUUID(),
-            country_code: params.country_code || 'ET',
+            country_code: countryCode,
             site_id: params.site_id,
             shift_id: params.shift_id,
             drop_number: dropNumber,
-            amount: params.amount,
-            currency: params.currency || (params.country_code === 'KE' ? 'KSh' : 'ETB'),
+            amount: dropAmount,
+            currency: params.currency || (countryCode === 'KE' ? 'KSh' : 'ETB'),
             safe_bag_number: params.safe_bag_number,
             denominations: params.denominations || {},
             reason: params.reason || 'threshold_exceeded',
@@ -110,7 +114,7 @@ class CashDropsService {
         try {
             const shift = await shiftsService.getById(params.shift_id);
             if (shift) {
-                const updatedDrops = (shift.cashDrops || shift.cash_drops || 0) + params.amount;
+                const updatedDrops = (shift.cashDrops || shift.cash_drops || 0) + dropAmount;
                 const updatedDropCount = (shift.dropCount || 0) + 1;
                 const newExpectedCash = (shift.openingFloat + shift.cashSales) - updatedDrops;
 
@@ -148,12 +152,16 @@ class CashDropsService {
         try {
             const { data, error } = await supabase
                 .from('pos_cash_drops')
-                .select('*')
+                .select(CASH_DROP_COLUMNS)
                 .eq('shift_id', shiftId)
                 .order('created_at', { ascending: false });
 
             if (error) throw error;
-            if (data && data.length > 0) return data as CashDropRecord[];
+            if (data) {
+                const remoteIds = new Set(data.map((d: any) => d.id));
+                const pendingLocal = this.localCache.filter(d => !remoteIds.has(d.id) && d.shift_id === shiftId);
+                return [...(data as CashDropRecord[]), ...pendingLocal];
+            }
         } catch {
             // Fallback to local cache
         }
@@ -164,38 +172,49 @@ class CashDropsService {
      * Retrieve all active drops in the drop safe for a site (Safe Ledger)
      */
     async getSafeLedger(siteId: string, countryCode?: string): Promise<CashDropRecord[]> {
+        const normalizedCountry = countryCode ? countryCode.toUpperCase() : undefined;
         try {
             let query = supabase
                 .from('pos_cash_drops')
-                .select('*')
+                .select(CASH_DROP_COLUMNS)
                 .order('created_at', { ascending: false });
 
             if (siteId && siteId !== 'All') {
                 query = query.eq('site_id', siteId);
             }
-            if (countryCode) {
-                query = query.eq('country_code', countryCode);
+            if (normalizedCountry) {
+                query = query.eq('country_code', normalizedCountry);
             }
 
             const { data, error } = await query;
             if (error) throw error;
-            if (data && data.length > 0) return data as CashDropRecord[];
+            if (data) {
+                const remoteIds = new Set(data.map((d: any) => d.id));
+                const pendingLocal = this.localCache.filter(d => 
+                    !remoteIds.has(d.id) && 
+                    (!siteId || siteId === 'All' || d.site_id === siteId) && 
+                    (!normalizedCountry || d.country_code.toUpperCase() === normalizedCountry)
+                );
+                return [...(data as CashDropRecord[]), ...pendingLocal];
+            }
         } catch {
             // Fallback to local cache
         }
-        return this.localCache.filter(d => (!siteId || siteId === 'All' || d.site_id === siteId) && (!countryCode || d.country_code === countryCode));
+        return this.localCache.filter(d => (!siteId || siteId === 'All' || d.site_id === siteId) && (!normalizedCountry || d.country_code.toUpperCase() === normalizedCountry));
     }
 
     /**
      * Authorize transit of safe drop bags to armored vehicle / bank
      */
     async transferSafeToBank(dropIds: string[], bankManifest: string, manager: { id: string; name: string }): Promise<void> {
+        if (!dropIds.length) return;
+        const now = new Date().toISOString();
         const { error } = await supabase
             .from('pos_cash_drops')
             .update({
                 status: 'transferred_to_bank',
                 notes: `Transferred to armored bank carrier. Manifest #${bankManifest} signed by ${manager.name}`,
-                updated_at: new Date().toISOString()
+                updated_at: now
             })
             .in('id', dropIds);
 
@@ -204,7 +223,20 @@ class CashDropsService {
             throw new Error(error.message || 'Failed to authorize bank transfer');
         }
 
-        this.localCache = this.localCache.map(d => dropIds.includes(d.id) ? { ...d, status: 'transferred_to_bank' } : d);
+        this.localCache = this.localCache.map(d => dropIds.includes(d.id) ? { ...d, status: 'transferred_to_bank', updated_at: now } : d);
+
+        // Tamper-Proof Audit Trail for armored courier transit
+        try {
+            const { systemLogsService } = await import('./supabase.service');
+            await systemLogsService.create({
+                module: 'POS_CASH_GOVERNANCE',
+                action: 'SAFE_BAGS_TRANSFERRED_TO_BANK',
+                user_name: manager.name,
+                details: `${dropIds.length} safe deposit bag(s) released to armored transit. Manifest #${bankManifest}. Drops: [${dropIds.join(', ')}]`
+            });
+        } catch {
+            // Non-blocking log
+        }
     }
 }
 
