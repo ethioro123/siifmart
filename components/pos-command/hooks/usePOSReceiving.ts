@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { isWeightBased, isVolumeBased } from '../../../utils/units';
 import { logger } from '../../../utils/logger';
 import { repairShipmentInventoryHelper } from './utils/receivingRepair';
-import { processReceivingStockIntake, rollbackReceivingStockIntake, ReceivingStockIntakeResult } from './utils/receivingIntake';
+import { processReceivingStockIntake, rollbackReceivingStockIntake, ReceivingStockIntakeResult, summarizeTransferReceiptDiscrepancies } from './utils/receivingIntake';
 import { verifyPOSTransferReceipt } from './utils/verifyPOSTransferReceipt';
 import { transferReceiptVerificationService } from '../../../services/transfer-receipt-verification.service';
 
@@ -335,7 +335,7 @@ export const usePOSReceiving = ({
                     receivedQty: rx ? rx.receivedQty : 0,
                     received_qty: rx ? rx.receivedQty : 0,
                     condition: rx ? rx.condition : 'Good',
-                    status: isComplete ? 'Completed' : 'Discrepancy'
+                    status: isComplete && (rx?.condition || 'Good') === 'Good' ? 'Completed' : 'Discrepancy'
                 };
             });
 
@@ -363,9 +363,9 @@ export const usePOSReceiving = ({
                 const sizeNum = i.productSize || 0;
                 const isWV = sizeNum > 0 && (isWeightBased(i.unit || '') || isVolumeBased(i.unit || ''));
                 const rawExpected = isWV ? (i.displayExpectedQty || i.expectedQty) * sizeNum : (i.displayExpectedQty || i.expectedQty);
-                return i.receivedQty !== rawExpected;
+                return i.receivedQty !== rawExpected || (i.condition || 'Good') !== 'Good';
             });
-
+            const discrepancyDetails = hasDiscrepancies ? summarizeTransferReceiptDiscrepancies(receivedItems) : undefined;
             // 2. Update WMS job with verified quantities
             try {
                 await wmsJobsService.update(targetTransferId, {
@@ -374,7 +374,8 @@ export const usePOSReceiving = ({
                     receivedBy: receiverName,
                     status: 'Completed',
                     lineItems: updatedLineItems,
-                    hasDiscrepancy: hasDiscrepancies
+                    hasDiscrepancy: hasDiscrepancies,
+                    discrepancyDetails
                 } as any);
             } catch (updateErr: any) {
                 logger.error('usePOSReceiving', `Failed to update TRANSFER job ${targetTransferId}:`, updateErr);
@@ -418,7 +419,8 @@ export const usePOSReceiving = ({
                 const { transfersService } = await import('../../../services/transfers.service');
                 await transfersService.receiveAtomic(targetTransferId, {
                     receiverName,
-                    hasDiscrepancy: hasDiscrepancies
+                    hasDiscrepancy: hasDiscrepancies,
+                    discrepancyDetails
                 });
             } catch {
                 // If record was only in wms_jobs, transfersService update failure is safe to ignore

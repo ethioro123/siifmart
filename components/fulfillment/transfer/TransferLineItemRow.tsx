@@ -34,7 +34,7 @@ export const TransferLineItemRow: React.FC<TransferLineItemRowProps> = ({
     const showsPhysicalMeasure = item.requestedMeasureQty !== undefined || (isWeightVol && !product?.size && !item.size);
     const showReceived = item.receivedQty !== undefined &&
         ['Received', 'Delivered', 'Completed'].some(s => s === selectedJob.transferStatus || s === selectedJob.status);
-    const hasDiscrepancy = showReceived && item.receivedQty !== expectedMeasure;
+    const hasDiscrepancy = showReceived && (item.receivedQty !== expectedMeasure || item.condition === 'Damaged');
     const isDone = showReceived && !hasDiscrepancy;
 
     return (

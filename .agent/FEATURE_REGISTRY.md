@@ -4,6 +4,11 @@
 
 ## Active Features
 
+### Transfer Discrepancy Handling (2026-10-19)
+- POS and warehouse transfer receipts now keep damaged units out of saleable stock and putaway, while retaining the recorded count and condition for follow-up. POS sends line-level variance details to the linked WMS/transfer records. Warehouse transfer details expose resolution for quantity and damage-condition variances; the resolution flow no longer adds nonexistent shortage units to stock and now exposes claim submission with role-gated actions.
+- **Files**: `components/pos-command/hooks/usePOSReceiving.ts`, `components/pos-command/hooks/utils/receivingIntake.ts`, `components/fulfillment/transfer/TransferReceiving.tsx`, `components/fulfillment/transfer/TransferLineItemRow.tsx`, `components/fulfillment/DiscrepancyResolutionModal.tsx`
+- **Database**: `discrepancy_resolutions` and `discrepancy_claims` have site-scoped authenticated policies restored after tenant hardening removed the former global policies. Higher-impact resolution actions and claim writes are role-gated in both UI and RLS.
+
 ### Store Drop Safe Ledger & Cash Skim Custody (2026-10-19)
 - Zero-Trust mid-day cash safe drops and drop safe ledger tracking (SOP-POS-002, SOP-FIN-012). Stores surplus cash in sealed tamper-evident deposit bags, synchronizes in real time with Supabase `pos_cash_drops` via websockets, handles multi-bag armored transport transit handshakes with manifest tracking, provides instant manual refresh, and records tamper-proof audit trails in `system_logs`.
 - **Files**: `components/pos-command/modals/SafeLedgerModal.tsx`, `services/cash-drops.service.ts`, `components/pos/modals/CashDropModal.tsx`, `tests/services/posZeroTrust.test.ts`

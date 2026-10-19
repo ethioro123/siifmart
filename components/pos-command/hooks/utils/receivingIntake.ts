@@ -22,6 +22,22 @@ export interface ReceivingStockIntakeResult {
     appliedItems: AppliedStockItem[];
 }
 
+export function summarizeTransferReceiptDiscrepancies(items: any[]): string | undefined {
+    const discrepancies = items.filter(item => {
+        const expected = Number(item.displayExpectedQty ?? item.expectedQty ?? 0);
+        const received = Number(item.receivedQty ?? 0);
+        return received !== expected || (item.condition || 'Good') !== 'Good';
+    });
+    if (discrepancies.length === 0) return undefined;
+
+    return discrepancies.map(item => {
+        const expected = Number(item.displayExpectedQty ?? item.expectedQty ?? 0);
+        const received = Number(item.receivedQty ?? 0);
+        const identity = item.sku || item.name || item.productId || 'Item';
+        return `${identity}: expected ${expected}, received ${received}, condition ${item.condition || 'Good'}`;
+    }).join('; ').slice(0, 1500);
+}
+
 export const rollbackReceivingStockIntake = async (appliedItems: AppliedStockItem[]) => {
     if (!appliedItems || appliedItems.length === 0) return;
     try {
@@ -55,7 +71,9 @@ export const processReceivingStockIntake = async ({
     const { productsService } = await import('../../../../services/supabase.service');
 
     for (const item of transferReceivingItems) {
-        if (item.receivedQty > 0) {
+        // Damaged units remain on the receipt record for resolution, but never
+        // enter saleable on-hand stock through the POS receiving path.
+        if (item.receivedQty > 0 && item.condition !== 'Damaged') {
             const itemSku = item.sku?.trim()?.toUpperCase();
             const itemLabel = item.sku || item.name || 'Unknown Item';
 

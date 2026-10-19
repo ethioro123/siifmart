@@ -87,18 +87,19 @@ export function DiscrepancyResolutionModal({
     const RESOLUTION_ACTIONS: { id: ResolutionType, label: string, desc: string, icon: any, color: string, reqAuth: boolean }[] = [
         { id: 'accept', label: 'Accept As-Is', desc: 'Update inventory to match received qty.', icon: CheckCircle, color: 'text-emerald-500', reqAuth: false },
         { id: 'investigate', label: 'Request Investigation', desc: 'Flag for warehouse team to check.', icon: Search, color: 'text-amber-500', reqAuth: false },
+        { id: 'claim', label: 'File Loss Claim', desc: 'Record a carrier or internal loss claim.', icon: FileText, color: 'text-amber-600', reqAuth: true },
         { id: 'replace', label: 'Resend Missing Items', desc: 'Generate a new transfer from warehouse.', icon: FileText, color: 'text-primary', reqAuth: true },
-        { id: 'adjust', label: 'Adjust Inventory', desc: 'Accept with manual adjustment record.', icon: RefreshCw, color: 'text-primary', reqAuth: false },
+        { id: 'adjust', label: 'Adjust Inventory', desc: 'Accept with manual adjustment record.', icon: RefreshCw, color: 'text-primary', reqAuth: true },
         { id: 'reject', label: 'Reject & Return', desc: 'Send items back to source.', icon: RotateCcw, color: 'text-red-500', reqAuth: true },
         { id: 'dispose', label: 'Dispose / Destroy', desc: 'Remove from inventory (Waste).', icon: Trash2, color: 'text-red-500', reqAuth: true },
         { id: 'recount', label: 'Request Recount', desc: 'Ask source to count again.', icon: Hash, color: 'text-primary', reqAuth: false },
     ];
 
     const canDoAction = (action: ResolutionType) => {
-        if (action === 'claim' || action === 'reject') {
-            return ['store_manager', 'warehouse_manager', 'super_admin', 'regional_manager', 'operations_manager'].includes(currentUser?.role || '');
-        }
-        return true;
+        const actionConfig = RESOLUTION_ACTIONS.find(candidate => candidate.id === action);
+        if (!actionConfig?.reqAuth) return true;
+        return ['store_manager', 'warehouse_manager', 'inventory_manager', 'super_admin', 'ceo', 'admin', 'regional_manager', 'operations_manager']
+            .includes((currentUser?.role || '').toLowerCase());
     };
 
     const handleSubmit = async () => {
@@ -106,6 +107,10 @@ export function DiscrepancyResolutionModal({
         setIsSubmitting(true);
         try {
             const qty = resolveQty ? parseInt(resolveQty) : 0;
+            const amount = Number(claimAmount);
+            if (resolutionAction === 'claim' && (!Number.isFinite(amount) || amount <= 0)) {
+                throw new Error('Enter a claim amount greater than zero.');
+            }
             let replacementJobId: string | undefined = undefined;
             const isHqApprover = ['super_admin', 'ceo', 'admin', 'regional_manager', 'operations_manager'].includes((currentUser?.role || '').toLowerCase());
 
@@ -117,7 +122,7 @@ export function DiscrepancyResolutionModal({
             };
 
             if (qty > 0) {
-                if (resolutionAction === 'reject') {
+                if (resolutionAction === 'reject' && discrepancyType !== 'shortage' && item.item.condition !== 'Damaged') {
                     const product = products.find((p: any) => p.id === (item.item.productId || item.item.id));
                     await adjustStockMutation.mutateAsync({
                         productId: item.item.productId || item.item.id,
@@ -130,7 +135,7 @@ export function DiscrepancyResolutionModal({
                         canApprove: isHqApprover
                     });
                 }
-                if (resolutionAction === 'dispose') {
+                if (resolutionAction === 'dispose' && item.item.condition !== 'Damaged') {
                     const product = products.find((p: any) => p.id === (item.item.productId || item.item.id));
                     await adjustStockMutation.mutateAsync({
                         productId: item.item.productId || item.item.id,
@@ -140,19 +145,6 @@ export function DiscrepancyResolutionModal({
                         quantity: qty,
                         type: 'OUT',
                         reason: reasons.waste,
-                        canApprove: isHqApprover
-                    });
-                }
-                if (resolutionAction === 'adjust' && discrepancyType === 'shortage') {
-                    const product = products.find((p: any) => p.id === (item.item.productId || item.item.id));
-                    await adjustStockMutation.mutateAsync({
-                        productId: item.item.productId || item.item.id,
-                        productName: product?.name || item.item.name || 'Unknown',
-                        productSku: product?.sku || item.item.sku || 'N/A',
-                        siteId: activeSite?.id || '',
-                        quantity: qty,
-                        type: 'IN',
-                        reason: reasons.shortage,
                         canApprove: isHqApprover
                     });
                 }
@@ -184,7 +176,7 @@ export function DiscrepancyResolutionModal({
                 }
             }
 
-            await discrepancyService.createResolution({
+            const resolution = await discrepancyService.createResolution({
                 transferId: job.id,
                 lineItemIndex: item.index,
                 productId: item.item.productId || item.item.id,
@@ -202,6 +194,18 @@ export function DiscrepancyResolutionModal({
                 resolveQty: qty,
                 replacementJobId: replacementJobId
             });
+
+            if (resolutionAction === 'claim') {
+                await discrepancyService.createClaim({
+                    resolutionId: resolution.id,
+                    claimType: job.deliveryMethod === 'External' ? 'carrier' : 'internal',
+                    claimStatus: 'submitted',
+                    claimAmount: amount,
+                    carrierName: job.deliveryMethod === 'External' ? job.externalCarrierName : undefined,
+                    trackingNumber: job.trackingNumber,
+                    notes
+                });
+            }
 
             if (['accept', 'reject', 'adjust', 'dispose', 'replace'].includes(resolutionAction)) {
                 const updatedLineItems = (job.lineItems || []).map((li: any, i: number) =>
@@ -384,7 +388,7 @@ export function DiscrepancyResolutionModal({
                             <div className="pt-4 flex justify-end">
                                 <Button
                                     onClick={() => setStep('REVIEW')}
-                                    disabled={!notes || (['claim', 'adjust', 'reject'].includes(resolutionAction || '') && !reasonCode)}
+                                    disabled={!notes || (['claim', 'adjust', 'reject'].includes(resolutionAction || '') && !reasonCode) || (resolutionAction === 'claim' && (!Number.isFinite(Number(claimAmount)) || Number(claimAmount) <= 0))}
                                 >
                                     Review Resolution <ArrowRight size={16} className="ml-2" />
                                 </Button>

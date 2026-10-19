@@ -117,7 +117,9 @@ export const TransferReceiving: React.FC<TransferReceivingProps> = ({
 
             // 1. Process stock intake at destination site BEFORE marking transfer complete
             for (const item of transferReceiveItems) {
-                if ((item.receivedQty || 0) > 0) {
+                // Keep damaged units out of saleable stock. The transfer line
+                // remains recorded so a manager can resolve or dispose of it.
+                if ((item.receivedQty || 0) > 0 && item.condition !== 'Damaged') {
                     const itemSku = (item as any).sku || '';
                     const itemName = item.productName || (item as any).name || '';
                     const itemUnit = (item as any).unit || 'pcs';
@@ -219,7 +221,7 @@ export const TransferReceiving: React.FC<TransferReceivingProps> = ({
 
             // 2. Auto-create PUTAWAY job at destination store (must finish before completing transfer)
             const putawayItems = transferReceiveItems
-                .filter(i => (i.receivedQty || 0) > 0)
+                .filter(i => (i.receivedQty || 0) > 0 && i.condition !== 'Damaged')
                 .map((i: any) => {
                     const matchingLineItem = (activeTransferJob.lineItems || []).find((li: any) => li.productId === i.productId || li.sku === i.sku);
                     return {
@@ -282,7 +284,7 @@ export const TransferReceiving: React.FC<TransferReceivingProps> = ({
                     ...li,
                     receivedQty: recItem ? (recItem.receivedQty ?? 0) : (li.receivedQty ?? li.quantity ?? 0),
                     condition: recItem?.condition || 'Good',
-                    status: recItem && (recItem.receivedQty || 0) < (li.requestedMeasureQty ?? li.expectedQty ?? li.quantity ?? 0) ? 'Short' : 'Received'
+                    status: recItem && ((recItem.receivedQty || 0) < (li.requestedMeasureQty ?? li.expectedQty ?? li.quantity ?? 0) || recItem.condition === 'Damaged') ? 'Discrepancy' : 'Received'
                 };
             });
 
