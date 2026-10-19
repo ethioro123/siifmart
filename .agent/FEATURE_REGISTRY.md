@@ -4,6 +4,12 @@
 
 ## Active Features
 
+### Independent Store Transfer Receipt Recount (2026-10-19)
+- Destination transfer counts are persisted through authenticated site-scoped database functions. The count RPC returns item details without manifest quantities. A variance blocks acceptance until a different employee performs a second blind count; Postgres binds the final accepted quantities and employee to that verification. The recount requirement resumes after reload/sign-in.
+- **Files**: `components/fulfillment/transfer/TransferReceiving.tsx`, `components/fulfillment/transfer/CustodyHandshakeModal.tsx`, `hooks/useTransferReceiptVerification.ts`, `services/transfer-receipt-verification.service.ts`, `migrations/20261019_independent_transfer_receipt_recount.sql`, `migrations/20261019_transfer_receipt_measure_units.sql`, `migrations/20261019_guard_transfer_receipt_condition_attestation.sql`
+- **Database**: `transfer_receipt_verifications`; direct table access is revoked and RPCs validate employee role/site scope.
+- **Root Cause Fixed**: UI discrepancy detection and driver acknowledgement did not require a second store employee to recount; the transfer receipt lacked server-enforced count attestation.
+
 ### Persisted Blind WMS Counts, Independent Pack Checks, and Safe Scan Handoffs (2026-10-19)
 - Count sessions and blind expected quantities are stored behind authenticated, site-scoped database functions. Sessions resume after refresh; variance recounts require another authenticated employee and final adjustments remain pending HQ approval. Receive split counts start empty in blind mode, pick requires an explicit quantity, pack quantities start empty, and required seal serials are checked by Postgres before completion. Production PICK completion can now create its PACK job using the same idempotent RPC already present in staging.
 - **Files**: `components/fulfillment/CountTab.tsx`, `components/fulfillment/count/CountOperations.tsx`, `components/fulfillment/count/CountHeader.tsx`, `components/fulfillment/receive/ReceiveSplitModal.tsx`, `components/fulfillment/pick/PickScanner.tsx`, `components/fulfillment/pack/`, `services/wms-counts.service.ts`, `services/wms-jobs.service.ts`, `services/wms-jobs.mapper.ts`, `utils/fulfillmentTabPermissions.ts`, `utils/receivingPolicy.ts`, `services/config.service.ts`, `migrations/20261019_secure_persisted_wms_counts.sql`, `migrations/20261019_fix_wms_count_response_states.sql`, `migrations/20261019_prioritize_uncounted_wms_products.sql`, `migrations/20261019_guard_wms_count_session_actions.sql`, `migrations/20261019_guard_pack_completion_attestation.sql`, `migrations/20261019_restore_pack_handoff_on_production.sql`
@@ -104,6 +110,11 @@
 ### Accurate Session Warning Messages (2026-10-19)
 - MFA requirements now show a verification warning only when an enrolled factor requires step-up verification (`nextLevel === 'aal2'`), and `store_manager` no longer defaults to requiring MFA. Short-lived access tokens no longer trigger a misleading countdown because Supabase refreshes them automatically; only the app's inactivity sign-out warns users to save work.
 - **Files**: `hooks/useSessionManager.ts`, `services/zeroTrustPolicies.service.ts`, `components/settings/RoleSettings.tsx`, `contexts/CentralStore.tsx`
+- **Database**: None
+
+### Store Bonus & Leaderboard Modernization (2026-10-19)
+- Modernized StoreBonusDisplay and LeaderboardWidget using Apple Design System tokens (`var(--theme-bg-card)`, `var(--theme-border)`, `var(--theme-text-primary)`). Added active site fallback initialization so new branches display live tier progression (Starting/Bronze) rather than an unhelpful "Unavailable" error state. Added dedicated empty state to LeaderboardWidget and removed decorative UI emojis.
+- **Files**: `components/StoreBonusDisplay.tsx`, `components/WorkerPointsDisplay.tsx`, `components/gamification/LeaderboardWidget.tsx`, `pages/POSCommand.tsx`, `tests/utils/storeGamification.test.ts`
 - **Database**: None
 
 ### Mobile Web Deployment Recovery (2026-10-18)

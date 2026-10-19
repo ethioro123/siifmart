@@ -33,6 +33,11 @@ describe('storeGamification', () => {
             expect(tier.tierName).toBe('Diamond');
             expect(bonus).toBe(40000 + (12000 * 1.5)); // 58000
         });
+        it('handles 0 points correctly at performance cycle initiation', () => {
+            const { tier, bonus } = calculateStoreBonus(0, DEFAULT_POS_BONUS_TIERS);
+            expect(tier.tierName).toBe('Starting');
+            expect(bonus).toBe(0);
+        });
     });
 
     describe('role distribution calculation', () => {
@@ -50,6 +55,13 @@ describe('storeGamification', () => {
 
             expect(managerShare).toBe(4200); // 30% of 14,000
             expect(cashierShare).toBe(1680); // 12% of 14,000
+        });
+
+        it('yields 0 personal bonus when pool is 0', () => {
+            const { bonus } = calculateStoreBonus(0, DEFAULT_POS_BONUS_TIERS);
+            const cashierRole = DEFAULT_POS_ROLE_DISTRIBUTION.find(r => r.role === 'Cashier');
+            const cashierShare = (bonus * (cashierRole?.percentage || 0)) / 100;
+            expect(cashierShare).toBe(0);
         });
     });
 });

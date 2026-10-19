@@ -438,6 +438,8 @@ const POSCommandContent: React.FC = () => {
               <div className="lg:col-span-2">
                 <StoreBonusDisplay
                   storePoints={storePoints.find(sp => sp.siteId === activeSite?.id)}
+                  siteName={activeSite?.name}
+                  siteId={activeSite?.id}
                   currentUserRole={user?.role}
                   workerPoints={myPoints}
                   leaderboard={siteWorkerPoints}

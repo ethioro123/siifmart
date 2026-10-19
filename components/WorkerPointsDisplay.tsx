@@ -353,65 +353,8 @@ function AchievementBadge({ achievement }: { achievement: WorkerAchievement }) {
     );
 }
 
-// Compact leaderboard widget
-export function LeaderboardWidget({ workers, currentUserId }: { workers: WorkerPoints[]; currentUserId?: string }) {
-    const sortedWorkers = useMemo(() =>
-        [...workers].sort((a, b) => {
-            const diffWeekly = (b.weeklyPoints || 0) - (a.weeklyPoints || 0);
-            if (diffWeekly !== 0) return diffWeekly;
-            return (b.totalPoints || 0) - (a.totalPoints || 0);
-        }).slice(0, 5),
-        [workers]
-    );
-
-    return (
-        <div className="bg-white/95 dark:bg-[#18201B]/60 backdrop-blur-2xl rounded-2xl border border-[#E2DCCE] dark:border-emerald-950/20 shadow-md overflow-hidden">
-            <div className="p-4 border-b border-[#E2DCCE] dark:border-white/5 flex items-center justify-between">
-                <h4 className="font-bold text-[#1E3F27] dark:text-white flex items-center gap-2">
-                    <Crown className="text-amber-500" size={18} />
-                    Top Performers
-                </h4>
-                <span className="text-xs text-stone-400 dark:text-gray-400">This Week</span>
-            </div>
-            <div className="divide-y divide-[#E2DCCE] dark:divide-white/5">
-                {sortedWorkers.map((worker, index) => {
-                    const rank = index + 1;
-                    const isCurrentUser = worker.employeeId === currentUserId;
-                    const rankStyle = getRankStyle(rank);
-
-                    return (
-                        <div
-                            key={worker.id}
-                            className={`flex items-center gap-3 p-3 transition-colors ${isCurrentUser ? 'bg-[#2C5E3B]/10' : 'hover:bg-[#2C5E3B]/5 dark:hover:bg-white/5'}`}
-                        >
-                            {/* Rank */}
-                            <div className={`w-8 h-8 rounded-full bg-gradient-to-r ${rankStyle.bg} flex items-center justify-center font-bold text-sm ${rankStyle.text}`}>
-                                {rank <= 3 ? rankStyle.icon : rank}
-                            </div>
-                            {/* Avatar */}
-                            {/* Avatar Replaced with Icon */}
-                            <div className="w-8 h-8 rounded-full bg-stone-100 dark:bg-white/10 flex items-center justify-center border border-[#E2DCCE] dark:border-white/10">
-                                <UserIcon size={16} className="text-stone-400 dark:text-gray-400" />
-                            </div>
-                            {/* Name & Level */}
-                            <div className="flex-1 min-w-0">
-                                <p className={`text-sm font-medium truncate ${isCurrentUser ? 'text-[#2C5E3B] dark:text-[#A9CBA2] font-semibold' : 'text-[#1E3F27] dark:text-white'}`}>
-                                    {worker.employeeName} {isCurrentUser && '(You)'}
-                                </p>
-                                <p className="text-[10px] text-stone-400 dark:text-gray-400">Lv.{worker.level} {worker.levelTitle}</p>
-                            </div>
-                            {/* Points */}
-                            <div className="text-right">
-                                <p className="text-sm font-bold text-amber-600 dark:text-amber-400">{worker.weeklyPoints.toLocaleString()}</p>
-                                <p className="text-[10px] text-stone-400 dark:text-gray-500">pts</p>
-                            </div>
-                        </div>
-                    );
-                })}
-            </div>
-        </div>
-    );
-}
+// Re-export modern Apple Design LeaderboardWidget
+export { LeaderboardWidget } from './gamification/LeaderboardWidget';
 
 // Points earned toast/popup
 export function PointsEarnedPopup({
@@ -432,23 +375,23 @@ export function PointsEarnedPopup({
 
     return (
         <div className="fixed top-24 right-6 z-50 animate-in slide-in-from-right fade-in duration-300">
-            <div className="bg-gradient-to-r from-[#224429]/95 to-[#2C5E3B]/95 text-white shadow-xl shadow-[#2C5E3B]/15 backdrop-blur-lg rounded-2xl p-4 border border-[#E2DCCE]/25 dark:border-white/20 min-w-[280px]">
+            <div className="bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)] shadow-xl backdrop-blur-lg rounded-2xl p-4 border border-[var(--theme-border)] min-w-[280px]">
                 <div className="flex items-center gap-3">
-                    <div className="w-14 h-14 rounded-full bg-white/10 flex items-center justify-center border border-white/15 animate-bounce">
-                        <span className="text-3xl">🎉</span>
+                    <div className="w-12 h-12 rounded-2xl bg-[#0071E3]/10 dark:bg-[#2997FF]/15 text-[#0071E3] dark:text-[#2997FF] flex items-center justify-center border border-[#0071E3]/20 shrink-0">
+                        <Sparkles size={24} />
                     </div>
                     <div className="flex-1">
-                        <p className="text-xs text-[#FAF8F5]/80 font-medium">{message}</p>
-                        <p className="text-3xl font-black text-amber-300">+{points}</p>
-                        <p className="text-xs text-[#FAF8F5]/70">points earned!</p>
+                        <p className="text-xs text-[var(--theme-text-secondary)] font-medium">{message}</p>
+                        <p className="text-2xl font-black font-mono text-amber-500">+{points}</p>
+                        <p className="text-[11px] text-[var(--theme-text-secondary)]">points earned!</p>
                     </div>
                 </div>
                 {bonuses.length > 0 && (
-                    <div className="mt-3 pt-3 border-t border-white/10 space-y-1">
+                    <div className="mt-3 pt-3 border-t border-[var(--theme-border)] space-y-1">
                         {bonuses.map((bonus, i) => (
                             <div key={i} className="flex justify-between text-xs">
-                                <span className="text-[#FAF8F5]/70">{bonus.label}</span>
-                                <span className="text-amber-300 font-bold">+{bonus.points}</span>
+                                <span className="text-[var(--theme-text-secondary)]">{bonus.label}</span>
+                                <span className="text-amber-500 font-bold font-mono">+{bonus.points}</span>
                             </div>
                         ))}
                     </div>
