@@ -7,6 +7,7 @@ import { VitePWA } from 'vite-plugin-pwa';
 import tailwindcss from '@tailwindcss/vite';
 import electron from 'vite-plugin-electron';
 import renderer from 'vite-plugin-electron-renderer';
+import { stagingQuickLoginPlugin } from './dev/stagingQuickLoginPlugin';
 
 // Custom HTTPS agent that resolves Supabase to its reachable Cloudflare IPv4 edge (172.64.149.246)
 // when the local mobile hotspot / ISP DNS64 returns unreachable IPv6 addresses.
@@ -34,6 +35,7 @@ process.on('uncaughtException', (err: any) => {
 
 export default defineConfig(({ mode }) => {
   const modeEnv = loadEnv(mode, process.cwd(), 'VITE_');
+  const privateStagingEnv = loadEnv(mode, process.cwd(), 'SIIFMART_');
   const supabaseUrl = modeEnv.VITE_SUPABASE_URL;
   if (!supabaseUrl) {
     throw new Error(`VITE_SUPABASE_URL must be set for the ${mode} environment.`);
@@ -101,6 +103,11 @@ export default defineConfig(({ mode }) => {
       },
     },
     plugins: [
+      stagingQuickLoginPlugin({
+        url: supabaseUrl, publicKey: modeEnv.VITE_SUPABASE_ANON_KEY,
+        email: privateStagingEnv.SIIFMART_STAGING_ADMIN_EMAIL,
+        password: privateStagingEnv.SIIFMART_STAGING_ADMIN_PASSWORD
+      }),
       react(),
       tailwindcss(),
       ...(isElectron ? [
