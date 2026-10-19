@@ -136,7 +136,7 @@ const DEFAULT_PERMISSIONS: RolePermissionCategory = {
 
 const DEFAULT_POLICIES: Record<ManagedRoleId, RolePolicy> = {
     admin: { mfa_required: true, session_timeout: 15, ip_restriction: false, time_restriction: false, password_complexity: 'high' },
-    store_manager: { mfa_required: true, session_timeout: 30, ip_restriction: true, time_restriction: true, password_complexity: 'medium' },
+    store_manager: { mfa_required: false, session_timeout: 30, ip_restriction: true, time_restriction: true, password_complexity: 'medium' },
     cashier: { mfa_required: false, session_timeout: 30, ip_restriction: true, time_restriction: true, password_complexity: 'medium' },
     warehouse: { mfa_required: false, session_timeout: 30, ip_restriction: true, time_restriction: true, password_complexity: 'medium' }
 };

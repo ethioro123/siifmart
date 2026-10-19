@@ -77,21 +77,24 @@ export function useSessionManager(
                     return;
                 }
 
-                // 2. Enforce MFA using Supabase's current session assurance level.
+                // 2. Enforce MFA using Supabase's current session assurance level when an MFA factor is enrolled.
                 // Browser metadata and a configured factor do not prove an AAL2 session.
                 const mfaCheckKey = `${session.user.id}:${userRole || ''}`;
                 if (policy?.mfa_required && mfaCheckedForRef.current !== mfaCheckKey) {
+                    mfaCheckedForRef.current = mfaCheckKey;
                     const { data: assurance, error: assuranceError } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
-                    const mfaCheck = checkMfaRequirement(userRole, assuranceError ? 'aal1' : (assurance?.currentLevel ?? undefined));
-                    if (mfaCheck.required && !mfaCheck.satisfied && !hasWarned) {
+                    const mfaCheck = checkMfaRequirement(
+                        userRole,
+                        assuranceError ? 'aal1' : (assurance?.currentLevel ?? undefined),
+                        assuranceError ? 'aal1' : (assurance?.nextLevel ?? undefined)
+                    );
+                    if (mfaCheck.required && !mfaCheck.satisfied) {
                         logger.warn('useSessionManager', mfaCheck.reason || 'MFA requirement not satisfied');
-                        setHasWarned(true);
                         onSessionWarning?.({
                             type: 'mfa_required',
                             message: 'Your role requires multi-factor authentication, but this session has not completed verification.'
                         });
                     }
-                    mfaCheckedForRef.current = mfaCheckKey;
                 }
 
                 // Warn when 1 minute remains before inactivity timeout

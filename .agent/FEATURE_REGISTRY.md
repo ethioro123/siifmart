@@ -101,9 +101,9 @@
 - **Files**: `components/topbar/UserMenu.tsx`
 - **Database**: None
 
-### Accurate Session Warning Messages (2026-10-18)
-- MFA requirements now show a verification warning instead of a false expiry message. Short-lived access tokens no longer trigger a misleading countdown because Supabase refreshes them automatically; only the app's inactivity sign-out warns users to save work.
-- **Files**: `hooks/useSessionManager.ts`, `contexts/CentralStore.tsx`
+### Accurate Session Warning Messages (2026-10-19)
+- MFA requirements now show a verification warning only when an enrolled factor requires step-up verification (`nextLevel === 'aal2'`), and `store_manager` no longer defaults to requiring MFA. Short-lived access tokens no longer trigger a misleading countdown because Supabase refreshes them automatically; only the app's inactivity sign-out warns users to save work.
+- **Files**: `hooks/useSessionManager.ts`, `services/zeroTrustPolicies.service.ts`, `components/settings/RoleSettings.tsx`, `contexts/CentralStore.tsx`
 - **Database**: None
 
 ### Mobile Web Deployment Recovery (2026-10-18)

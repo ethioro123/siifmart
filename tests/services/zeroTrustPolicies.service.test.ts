@@ -83,13 +83,13 @@ describe('zeroTrustPolicies.service runtime enforcement', () => {
                 admin: { ...DEFAULT_ROLE_POLICIES.admin, mfa_required: true }
             });
 
-            // Without MFA
-            const unverified = checkMfaRequirement('admin', 'aal1');
+            // Without MFA (factor enrolled: nextLevel === 'aal2', currentLevel === 'aal1')
+            const unverified = checkMfaRequirement('admin', 'aal1', 'aal2');
             expect(unverified.required).toBe(true);
             expect(unverified.satisfied).toBe(false);
 
             // With AAL2 MFA
-            const verifiedAal2 = checkMfaRequirement('admin', 'aal2');
+            const verifiedAal2 = checkMfaRequirement('admin', 'aal2', 'aal2');
             expect(verifiedAal2.required).toBe(true);
             expect(verifiedAal2.satisfied).toBe(true);
 
@@ -97,6 +97,17 @@ describe('zeroTrustPolicies.service runtime enforcement', () => {
             const enrolledOnly = checkMfaRequirement('admin', undefined);
             expect(enrolledOnly.required).toBe(true);
             expect(enrolledOnly.satisfied).toBe(false);
+
+            // When no verified MFA factor is enrolled on the account (nextLevel === 'aal1'), do not emit a false session warning.
+            const noFactorEnrolled = checkMfaRequirement('admin', 'aal1', 'aal1');
+            expect(noFactorEnrolled.required).toBe(false);
+            expect(noFactorEnrolled.satisfied).toBe(true);
+
+            // Store managers do not require MFA by default
+            setActiveRolePolicies(null);
+            const storeManagerCheck = checkMfaRequirement('store_manager', 'aal1');
+            expect(storeManagerCheck.required).toBe(false);
+            expect(storeManagerCheck.satisfied).toBe(true);
         });
     });
 
