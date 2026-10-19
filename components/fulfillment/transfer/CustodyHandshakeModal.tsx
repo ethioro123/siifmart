@@ -3,8 +3,6 @@ import { createPortal } from 'react-dom';
 import { ShieldCheck, AlertTriangle, CheckCircle, Truck, UserCheck, X } from 'lucide-react';
 import { WMSJob, ReceivingItem, Product, User } from '../../../types';
 import { formatJobId } from '../../../utils/jobIdFormatter';
-import { useData } from '../../../contexts/DataContext';
-import { resolveReceivingPolicy } from '../../../utils/receivingPolicy';
 
 interface CustodyHandshakeModalProps {
     isOpen: boolean;
@@ -17,6 +15,7 @@ interface CustodyHandshakeModalProps {
     currentUser: User | null;
     driverName?: string;
     isSubmitting: boolean;
+    verifiedHasDiscrepancy?: boolean;
 }
 
 export const CustodyHandshakeModal: React.FC<CustodyHandshakeModalProps> = ({
@@ -29,10 +28,10 @@ export const CustodyHandshakeModal: React.FC<CustodyHandshakeModalProps> = ({
     products = [],
     currentUser,
     driverName = 'Assigned Driver / Logistics Courier',
-    isSubmitting
+    isSubmitting,
+    verifiedHasDiscrepancy
 }) => {
-    const { settings, effectiveCountry } = useData();
-    const isBlindReceiving = resolveReceivingPolicy(settings, effectiveCountry).blind;
+    const isBlindReceiving = true;
     const [receiverCertified, setReceiverCertified] = useState(false);
     const [driverAcknowledged, setDriverAcknowledged] = useState(false);
 
@@ -47,7 +46,8 @@ export const CustodyHandshakeModal: React.FC<CustodyHandshakeModalProps> = ({
         return isQtyMismatch || isDamaged;
     });
 
-    const hasDiscrepancy = discrepantItems.length > 0;
+    const hasDiscrepancy = verifiedHasDiscrepancy ?? discrepantItems.length > 0;
+    const displayedDiscrepantItems = discrepantItems;
     const totalDiscrepantUnits = discrepantItems.reduce((sum, item) => {
         const diff = Math.abs((item.expectedQty || 0) - (item.receivedQty || 0));
         return sum + (diff > 0 ? diff : (item.condition === 'Damaged' ? item.receivedQty || 1 : 0));
@@ -149,8 +149,8 @@ export const CustodyHandshakeModal: React.FC<CustodyHandshakeModalProps> = ({
                             </div>
 
                             {/* Discrepant Items List */}
-                            <div className="border border-[var(--theme-border)] rounded-xl overflow-hidden divide-y divide-[var(--theme-border)]">
-                                {discrepantItems.map((item, idx) => {
+                            {displayedDiscrepantItems.length > 0 && <div className="border border-[var(--theme-border)] rounded-xl overflow-hidden divide-y divide-[var(--theme-border)]">
+                                {displayedDiscrepantItems.map((item, idx) => {
                                     const product = allProducts.find(p => p.id === item.productId) || products.find(p => p.id === item.productId);
                                     const expected = item.expectedQty || 0;
                                     const received = item.receivedQty || 0;
@@ -172,7 +172,7 @@ export const CustodyHandshakeModal: React.FC<CustodyHandshakeModalProps> = ({
                                         </div>
                                     );
                                 })}
-                            </div>
+                            </div>}
                         </div>
                     )}
 

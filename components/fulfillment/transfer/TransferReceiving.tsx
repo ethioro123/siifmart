@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { ArrowDown, Box, ShieldCheck } from 'lucide-react';
 import { WMSJob, Site, ReceivingItem, Product } from '../../../types';
 import { formatJobId } from '../../../utils/jobIdFormatter';
@@ -8,9 +8,10 @@ import { logger } from '../../../utils/logger';
 import { useFulfillment } from '../FulfillmentContext';
 import { CustodyHandshakeModal } from './CustodyHandshakeModal';
 import { useData } from '../../../contexts/DataContext';
-import { resolveReceivingPolicy } from '../../../utils/receivingPolicy';
 import { productsService } from '../../../services/supabase.service';
 import { TransferReceiveItemCard } from './TransferReceiveItemCard';
+import { transferReceiptVerificationService, type TransferReceiptVerification } from '../../../services/transfer-receipt-verification.service';
+import { useTransferReceiptVerification } from '../../../hooks/useTransferReceiptVerification';
 
 interface TransferReceivingProps {
     activeTransferJob: WMSJob;
@@ -43,10 +44,60 @@ export const TransferReceiving: React.FC<TransferReceivingProps> = ({
 }) => {
     const { t } = useLanguage();
     const { user, employees, logSystemEvent } = useFulfillment();
-    const { settings, effectiveCountry, products } = useData();
-    const isBlindReceiving = resolveReceivingPolicy(settings, effectiveCountry).blind;
+    const { products } = useData();
+    // Store transfer acceptance is always a blind physical count, independent of PO receiving settings.
+    const isBlindReceiving = true;
     const [isHandshakeModalOpen, setIsHandshakeModalOpen] = useState(false);
     const [isSubmittingReceipt, setIsSubmittingReceipt] = useState(false);
+    const [receiptVerification, setReceiptVerification] = useState<TransferReceiptVerification | null>(null);
+    const [isLoadingVerification, setIsLoadingVerification] = useState(true);
+    const verificationMutation = useTransferReceiptVerification();
+
+    useEffect(() => {
+        let active = true;
+        setIsLoadingVerification(true);
+        transferReceiptVerificationService.get(activeTransferJob.id)
+            .then(result => {
+                if (!active) return;
+                setReceiptVerification(result);
+                setTransferReceiveItems(result.items.map((item, index) => ({
+                    ...transferReceiveItems[index],
+                    ...item,
+                    productName: item.productName || transferReceiveItems[index]?.productName,
+                    expectedQty: transferReceiveItems[index]?.expectedQty,
+                    receivedQty: result.status === 'verified' ? item.receivedQty : 0
+                })));
+            })
+            .catch(error => {
+                if (!active) return;
+                logger.error('TransferReceiving', 'Failed to load receipt verification', error as Error);
+                addNotification('alert', 'Could not load transfer verification. Refresh and try again.');
+            })
+            .finally(() => { if (active) setIsLoadingVerification(false); });
+        return () => { active = false; };
+    }, [activeTransferJob.id, user?.id]);
+
+    const handleCountSubmission = async () => {
+        if (!receiptVerification?.canCount || isLoadingVerification || verificationMutation.isPending) return;
+        try {
+            const result = await verificationMutation.mutateAsync({ jobId: activeTransferJob.id, items: transferReceiveItems });
+            setReceiptVerification(result);
+            if (result.status === 'awaiting_recount') {
+                addNotification('warning', 'Count saved. A different signed-in store employee must independently recount this transfer.');
+                return;
+            }
+            setTransferReceiveItems(result.items.map((item, index) => ({
+                ...transferReceiveItems[index],
+                ...item,
+                productName: item.productName || transferReceiveItems[index]?.productName,
+                expectedQty: transferReceiveItems[index]?.expectedQty
+            })));
+            setIsHandshakeModalOpen(true);
+        } catch (error) {
+            logger.error('TransferReceiving', 'Transfer count verification failed', error as Error);
+            addNotification('alert', error instanceof Error ? error.message : 'Could not save transfer count');
+        }
+    };
 
     // Delivering driver lookup
     const assignedDriver = employees.find(e => e.id === activeTransferJob.assignedTo);
@@ -360,6 +411,7 @@ export const TransferReceiving: React.FC<TransferReceivingProps> = ({
                                 idx={idx}
                                 product={product}
                                 isBlindReceiving={isBlindReceiving}
+                                readOnly={isLoadingVerification || !receiptVerification?.canCount || receiptVerification.status === 'verified'}
                                 onUpdateItem={(targetIdx, updates) => {
                                     const newItems = [...transferReceiveItems];
                                     newItems[targetIdx] = { ...newItems[targetIdx], ...updates };
@@ -370,13 +422,27 @@ export const TransferReceiving: React.FC<TransferReceivingProps> = ({
                         );
                     })}
                 </div>
+                {receiptVerification?.status === 'awaiting_recount' && (
+                    <div className="mb-3 rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-xs text-[var(--theme-text-primary)]" role="status">
+                        <strong className="block mb-1">Independent recount required</strong>
+                        {receiptVerification.canCount
+                            ? 'You are signed in as a different employee. Recount every line without consulting the first count.'
+                            : 'The first count is saved. Sign in as a different authorized employee at this destination site to continue.'}
+                    </div>
+                )}
                 <div className="pt-4 border-t border-[var(--theme-border)] mt-2">
                     <button
-                        onClick={() => setIsHandshakeModalOpen(true)}
+                        onClick={receiptVerification?.status === 'verified' ? () => setIsHandshakeModalOpen(true) : handleCountSubmission}
+                        disabled={isLoadingVerification || !receiptVerification?.canCount && receiptVerification?.status !== 'verified' || verificationMutation.isPending}
                         className="w-full min-h-[44px] py-3.5 bg-[var(--theme-primary)] text-[var(--theme-primary-text)] hover:opacity-90 rounded-xl text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 shadow-sm transition-all touch-manipulation active:scale-[0.99] cursor-pointer"
                     >
                         <ShieldCheck size={16} />
-                        Review & Sign Digital Handshake (Chain of Custody)
+                        {isLoadingVerification ? 'Loading transfer count…'
+                            : verificationMutation.isPending ? 'Saving verified count…'
+                            : receiptVerification?.status === 'verified' ? 'Review & Sign Transfer Receipt'
+                            : receiptVerification?.status === 'awaiting_recount' && !receiptVerification.canCount ? 'Waiting for Independent Recount'
+                            : receiptVerification?.status === 'awaiting_recount' ? 'Submit Independent Recount'
+                            : 'Submit Blind Count'}
                     </button>
                 </div>
             </div>
@@ -393,6 +459,7 @@ export const TransferReceiving: React.FC<TransferReceivingProps> = ({
                 currentUser={user}
                 driverName={driverName}
                 isSubmitting={isSubmittingReceipt}
+                verifiedHasDiscrepancy={receiptVerification?.hasDiscrepancy}
             />
         </div>
     );

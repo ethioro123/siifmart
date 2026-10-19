@@ -308,6 +308,26 @@
 | `external_carrier_name` | |
 | `assigned_by` | |
 
+## `transfer_receipt_verifications`
+
+Destination receipt counts are stored behind authenticated, site-scoped RPCs. Direct `anon` and `authenticated` table access is revoked.
+
+| Column | Notes |
+|--------|-------|
+| `job_id` | PK / FK → wms_jobs |
+| `site_id` | FK → sites (destination) |
+| `country_code` | Destination country scope |
+| `status` | awaiting_first_count / awaiting_recount / verified |
+| `first_counts` | Initial blind physical count (JSONB) |
+| `first_counter_id` | FK → employees |
+| `first_counted_at` | Initial count time |
+| `second_counts` | Independent blind recount (JSONB) |
+| `second_counter_id` | FK → employees; must differ from first counter |
+| `second_counted_at` | Recount time |
+| `final_counts` | Verified quantities used for receipt |
+| `has_discrepancy` | Server-computed variance or count disagreement |
+| `created_at`, `updated_at` | Audit timestamps |
+
 ---
 
 ## `job_assignments`
