@@ -1,4 +1,10 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
+import { useFulfillment } from './FulfillmentContext';
+import { OutboundJobModal } from '../OutboundJobModal';
+import { useInboundDockAssignment } from '../../hooks/useInboundDockAssignment';
+import { DOCK_BAYS, getShipmentPhase, isInboundPurchaseOrder } from '../../utils/shipmentWorkflow';
+import { getVisibleFulfillmentTabs } from '../../utils/fulfillmentTabPermissions';
 import { Upload, Download } from 'lucide-react';
 import { WMSJob, User, Site, PurchaseOrder, Product } from '../../types';
 import { DocksOutboundView } from './docks/DocksOutboundView';
@@ -49,42 +55,39 @@ export const DocksTab: React.FC<DocksTabProps> = ({
     completeJob,
     products,
 }) => {
-    const [dockCategory, setDockCategory] = useState<'INBOUND' | 'OUTBOUND'>('INBOUND');
+    const [params, setParams] = useSearchParams();
+    const { selectedJob, isDetailsOpen } = useFulfillment();
+    const canInbound = getVisibleFulfillmentTabs(user?.role).includes('RECEIVE');
+    const dockCategory = canInbound && params.get('dock') !== 'outbound' ? 'INBOUND' : 'OUTBOUND';
+    const setDockCategory = (category: 'INBOUND' | 'OUTBOUND') => setParams(previous => {
+        const next = new URLSearchParams(previous);
+        next.set('dock', category.toLowerCase());
+        return next;
+    }, { replace: true });
     const [viewMode, setViewMode] = useState<'Process' | 'History'>('Process');
-
-    // Inbound Dock State
-    const [dockStatus, setDockStatus] = useState<Record<string, { status: 'Empty' | 'Occupied' | 'Maintenance'; assignedPoId?: string; vesselName?: string; eta?: string }>>({
-        'D1': { status: 'Empty' },
-        'D2': { status: 'Empty' },
-        'D3': { status: 'Empty' },
-        'D4': { status: 'Empty' },
-        'D5': { status: 'Empty' },
-        'D6': { status: 'Empty' },
-    });
-    const [selectedQueueVessel, setSelectedQueueVessel] = useState<any | null>(null);
+    const [selectedQueueVessel, setSelectedQueueVessel] = useState<PurchaseOrder | null>(null);
     const [selectedDockId, setSelectedDockId] = useState<string | null>(null);
     const [manifestModalOpen, setManifestModalOpen] = useState(false);
     const [selectedManifestPO, setSelectedManifestPO] = useState<PurchaseOrder | null>(null);
-
-    const inboundQueue = useMemo(() => {
-        return (orders || []).filter(o => 
-            o.status === 'Approved' && 
-            (o.lineItems || []).some(i => (i.quantity - (i.receivedQty || 0)) > 0)
-        );
-    }, [orders]);
-
-    const assignVesselToDock = (dockId: string, vessel: any) => {
-        setDockStatus(prev => ({
-            ...prev,
-            [dockId]: {
-                status: 'Occupied',
-                assignedPoId: vessel.id,
-                vesselName: vessel.supplierName || vessel.poNumber || `PO #${vessel.id?.slice(-4)}`,
-                eta: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-            }
-        }));
-        setSelectedQueueVessel(null);
-        addNotification('success', `Assigned ${vessel.poNumber || 'PO'} to Dock ${dockId}`);
+    const assignment = useInboundDockAssignment(activeSite?.id, refreshData);
+    const outstandingOrders = orders.filter(order => isInboundPurchaseOrder(order, activeSite?.id));
+    const inboundQueue = outstandingOrders.filter(order => !DOCK_BAYS.some(dock => order.dockSlot === dock));
+    const dockStatus = Object.fromEntries(DOCK_BAYS.map(dock => {
+        const order = outstandingOrders.find(po => po.dockSlot === dock);
+        return [dock, { status: order ? 'Occupied' as const : 'Empty' as const,
+            assignedPoId: order?.id, vesselName: order?.supplierName || order?.poNumber }];
+    }));
+    const incomingTransfers = jobs.filter(job => job.type === 'TRANSFER' && job.destSiteId === activeSite?.id &&
+        ['in-transit', 'awaiting-receipt'].includes(getShipmentPhase(job)));
+    const assignVesselToDock = async (dockId: string, vessel: PurchaseOrder) => {
+        if (assignment.isPending) return;
+        try {
+            await assignment.mutateAsync({ order: vessel, dock: dockId });
+            setSelectedQueueVessel(null);
+            addNotification('success', `Assigned ${vessel.poNumber || 'PO'} to inbound dock ${dockId}.`);
+        } catch (error) {
+            addNotification('alert', error instanceof Error ? error.message : 'Could not assign the inbound dock.');
+        }
     };
 
     const handleOpenManifest = (dockId: string) => {
@@ -106,7 +109,6 @@ export const DocksTab: React.FC<DocksTabProps> = ({
             if (po) {
                 setReceivingPO(po);
                 setActiveTab('RECEIVE');
-                setDockStatus(prev => ({ ...prev, [dockId]: { status: 'Empty' } }));
                 addNotification('info', `Unloading ${po.poNumber || 'PO'} at Receiving Dock`);
             }
         }
@@ -116,9 +118,6 @@ export const DocksTab: React.FC<DocksTabProps> = ({
         if (selectedManifestPO) {
             setReceivingPO(selectedManifestPO);
             setActiveTab('RECEIVE');
-            if (selectedDockId) {
-                setDockStatus(prev => ({ ...prev, [selectedDockId]: { status: 'Empty' } }));
-            }
             setManifestModalOpen(false);
             addNotification('info', `Switched to Receiving Terminal for ${selectedManifestPO.poNumber || 'PO'}`);
         }
@@ -129,7 +128,7 @@ export const DocksTab: React.FC<DocksTabProps> = ({
             <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-2">
                 {/* DOCK CATEGORY SWITCHER (INBOUND / OUTBOUND) */}
                 <div className="flex items-center gap-1 bg-[var(--theme-bg-subtle)] p-0.5 sm:p-1 rounded-xl sm:rounded-2xl border border-[var(--theme-border)] shadow-xs">
-                    <button
+                    {canInbound && <button
                         onClick={() => setDockCategory('INBOUND')}
                         className={`flex-1 sm:flex-initial flex items-center justify-center gap-1.5 px-3 sm:px-4 py-1.5 sm:py-2 min-h-[34px] sm:min-h-[44px] rounded-lg sm:rounded-xl text-xs font-semibold uppercase tracking-wider transition-colors touch-manipulation cursor-pointer ${
                             dockCategory === 'INBOUND'
@@ -146,9 +145,9 @@ export const DocksTab: React.FC<DocksTabProps> = ({
                                 : 'bg-[var(--theme-text-muted)]/15 text-[var(--theme-text-primary)]'
                         }`}>
                             <span className="w-1 h-1 rounded-full bg-emerald-400" />
-                            {inboundQueue.length}
+                            {outstandingOrders.length + incomingTransfers.length}
                         </span>
-                    </button>
+                    </button>}
                     <button
                         onClick={() => setDockCategory('OUTBOUND')}
                         className={`flex-1 sm:flex-initial flex items-center justify-center gap-1.5 px-3 sm:px-4 py-1.5 sm:py-2 min-h-[34px] sm:min-h-[44px] rounded-lg sm:rounded-xl text-xs font-semibold uppercase tracking-wider transition-colors touch-manipulation cursor-pointer ${
@@ -180,6 +179,18 @@ export const DocksTab: React.FC<DocksTabProps> = ({
                 </div>
             </div>
 
+            {dockCategory === 'INBOUND' && viewMode === 'Process' && incomingTransfers.length > 0 && (
+                <section className="space-y-2 rounded-xl border border-[var(--theme-border)] bg-[var(--theme-bg-card)] p-3">
+                    <h3 className="text-sm font-semibold text-[var(--theme-text-primary)]">Incoming transfers</h3>
+                    {incomingTransfers.map(job => <button key={job.id} type="button"
+                        disabled={getShipmentPhase(job) !== 'awaiting-receipt'}
+                        onClick={() => { setSelectedJob(job); setIsDetailsOpen(true); setActiveTab('TRANSFER'); }}
+                        className="flex min-h-11 w-full flex-wrap items-center justify-between gap-2 rounded-lg bg-[var(--theme-bg-subtle)] px-3 text-xs text-[var(--theme-text-primary)] disabled:opacity-60">
+                        <span>#{formatJobId(job)} · {sites.find(site => site.id === job.sourceSiteId)?.name || 'Origin site'}</span>
+                        <span>{getShipmentPhase(job) === 'awaiting-receipt' ? 'Inspect & receive →' : 'On the road · awaiting arrival'}</span>
+                    </button>)}
+                </section>
+            )}
             {dockCategory === 'INBOUND' ? (
                 <DocksInboundView
                     dockStatus={dockStatus}
@@ -208,15 +219,14 @@ export const DocksTab: React.FC<DocksTabProps> = ({
                     setSelectedJob={setSelectedJob}
                     setIsDetailsOpen={setIsDetailsOpen}
                     formatJobId={formatJobId}
-                    wmsJobsService={wmsJobsService}
                     refreshData={refreshData}
                     addNotification={addNotification}
-                    generatePackLabelHTML={generatePackLabelHTML}
-                    completeJob={completeJob}
                     viewMode={viewMode}
-                    t={t}
-                    products={products}
                 />
+            )}
+            {dockCategory === 'OUTBOUND' && selectedJob && isDetailsOpen && (
+                <OutboundJobModal isOpen={isDetailsOpen} job={selectedJob} user={user} sites={sites} products={products}
+                    onClose={() => { setIsDetailsOpen(false); setSelectedJob(null); }} onRefresh={refreshData} activeTab="docks" />
             )}
         </div>
     );

@@ -17,10 +17,10 @@ interface DockStatus {
 interface DocksInboundViewProps {
     dockStatus: Record<string, DockStatus>;
     orders: PurchaseOrder[];
-    inboundQueue: any[];
-    selectedQueueVessel: any | null;
-    setSelectedQueueVessel: (vessel: any | null) => void;
-    assignVesselToDock: (dockId: string, vessel: any) => void;
+    inboundQueue: PurchaseOrder[];
+    selectedQueueVessel: PurchaseOrder | null;
+    setSelectedQueueVessel: (vessel: PurchaseOrder | null) => void;
+    assignVesselToDock: (dockId: string, vessel: PurchaseOrder) => void;
     setSelectedDockId: (dockId: string | null) => void;
     quickConfirmUnload: (dockId: string) => void;
     handleOpenManifest: (dockId: string) => void;
@@ -68,7 +68,7 @@ export const DocksInboundView: React.FC<DocksInboundViewProps> = ({
                                 </h3>
                                 <p className="text-[11px] text-[var(--theme-text-muted)] font-medium uppercase tracking-wider mt-1.5 flex items-center gap-2">
                                     <span className="h-1.5 w-1.5 rounded-full bg-green-500 animate-pulse" />
-                                    Live Terminal Telemetry Active
+                                    Dock stays occupied until receiving finishes
                                 </p>
                             </div>
                         </div>
@@ -137,7 +137,7 @@ export const DocksInboundView: React.FC<DocksInboundViewProps> = ({
                                                         className="w-full min-h-[44px] px-3 py-2 bg-[var(--theme-primary)] hover:opacity-90 text-[var(--theme-primary-text)] text-[11px] font-semibold uppercase tracking-wider rounded-xl shadow-sm transition-colors active:scale-[0.98] whitespace-nowrap flex items-center justify-center gap-1.5 touch-manipulation cursor-pointer"
                                                     >
                                                         <Check size={13} />
-                                                        Confirm Unload
+                                                        Open receiving
                                                     </button>
                                                     {/* View Manifest */}
                                                     <button
@@ -225,7 +225,7 @@ export const DocksInboundView: React.FC<DocksInboundViewProps> = ({
                                     className="flex-1 min-h-[44px] py-2.5 rounded-xl bg-[var(--theme-primary)] hover:opacity-90 text-[var(--theme-primary-text)] text-xs font-semibold uppercase tracking-wider transition-colors active:scale-[0.98] flex items-center justify-center gap-2 shadow-sm touch-manipulation cursor-pointer"
                                 >
                                     <Download size={15} />
-                                    Confirm Unload & Receive
+                                    Open receiving inspection
                                 </button>
                             </div>
                         </div>
@@ -250,12 +250,12 @@ export const DocksInboundView: React.FC<DocksInboundViewProps> = ({
                                     <div className="flex justify-between items-start mb-3">
                                         <div>
                                             <div className="flex items-center gap-2">
-                                                <p className="text-xs font-semibold text-[var(--theme-text-primary)] uppercase tracking-wider truncate">{vessel.vesselName}</p>
+                                                <p className="text-xs font-semibold text-[var(--theme-text-primary)] uppercase tracking-wider truncate">{vessel.supplierName || vessel.poNumber}</p>
                                                 {vessel.priority === 'High' && <div className="px-1.5 py-0.5 bg-amber-500/10 text-amber-600 dark:text-amber-400 text-[11px] font-semibold rounded-full border border-amber-500/20">{t('warehouse.priority')}</div>}
                                             </div>
                                         </div>
                                         <div className="text-right">
-                                            <span className="text-[11px] font-mono font-semibold text-primary bg-primary/10 px-2 py-0.5 rounded-full border border-primary/20 tabular-nums">ETA {vessel.eta}</span>
+                                            <span className="text-[11px] font-mono font-semibold text-primary bg-primary/10 px-2 py-0.5 rounded-full border border-primary/20 tabular-nums">{vessel.poNumber || vessel.id.slice(-6)}</span>
                                         </div>
                                     </div>
 

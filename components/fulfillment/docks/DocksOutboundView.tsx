@@ -1,485 +1,87 @@
-import React, { useState } from 'react';
-import { Upload, Truck, X, User as UserIcon, Package, Navigation } from 'lucide-react';
-import { WMSJob, Site, User, Product } from '../../../types';
+import React, { useEffect } from 'react';
+import { Truck, ArrowRight } from 'lucide-react';
+import type { WMSJob, Site, User } from '../../../types';
 import { DocksOutboundHistory } from './DocksOutboundHistory';
 import { useFulfillment } from '../FulfillmentContext';
-import { DocksOutboundDepartures } from './components/DocksOutboundDepartures';
-import { DocksOutboundStaging } from './components/DocksOutboundStaging';
-import { DockAssignModal } from './components/DockAssignModal';
-
-// CONSTANTS — single source of truth for dock bay identifiers
-const OUTBOUND_DOCKS = ['D1', 'D2', 'D3', 'D4', 'D5', 'D6'] as const;
+import { OutboundDockCard } from './components/OutboundDockCard';
+import { useShipmentWorkflow, type ShipmentAction } from '../../../hooks/useShipmentWorkflow';
+import { canManageDispatch, DOCK_BAYS, getShipmentPhase, getShipmentUnits, isShipment } from '../../../utils/shipmentWorkflow';
 
 interface DocksOutboundViewProps {
     jobs: WMSJob[];
     sites: Site[];
     activeSite: Site | null;
-    employees: User[];
+    employees: (User & { status?: string })[];
     user: User | null;
     setSelectedJob: (job: WMSJob | null) => void;
-    setIsDetailsOpen: (isOpen: boolean) => void;
+    setIsDetailsOpen: (open: boolean) => void;
     formatJobId: (job: WMSJob) => string;
-    wmsJobsService: any;
     refreshData: () => Promise<void>;
     addNotification: (type: 'success' | 'alert' | 'info', message: string) => void;
-    generatePackLabelHTML?: (data: any, options: any) => Promise<string>;
-    completeJob?: (jobId: string, employeeName: string) => Promise<any>;
     viewMode: 'Process' | 'History';
-    t: (key: string) => string;
-    products?: Product[];
 }
 
-/** A DISPATCH job sitting at a specific dock bay (active, not completed/cancelled) */
-const findDockJob = (jobs: WMSJob[], dock: string): WMSJob | undefined =>
-    jobs.find(j =>
-        j.location === `Dock ${dock}` &&
-        j.type === 'DISPATCH' &&
-        j.status !== 'Completed' &&
-        j.status !== 'Cancelled'
-    );
-
-/** All DISPATCH jobs in the staging area (not yet assigned to a dock) */
-const getStagingJobs = (jobs: WMSJob[]): WMSJob[] =>
-    jobs.filter(j =>
-        j.type === 'DISPATCH' &&
-        ['Packed', 'Staged'].includes(j.transferStatus || '') &&
-        j.status !== 'Completed' &&
-        j.status !== 'Cancelled' &&
-        !OUTBOUND_DOCKS.some(d => j.location === `Dock ${d}`)
-    );
-
-/** All DISPATCH jobs that have departed (shipped / in-transit) */
-const getShippedJobs = (jobs: WMSJob[]): WMSJob[] =>
-    jobs.filter(j =>
-        j.type === 'DISPATCH' &&
-        ['Shipped', 'In-Transit'].includes(j.transferStatus || '') &&
-        j.status !== 'Completed' &&
-        j.status !== 'Cancelled'
-    );
-
 export const DocksOutboundView: React.FC<DocksOutboundViewProps> = ({
-    jobs,
-    sites,
-    activeSite,
-    employees,
-    setSelectedJob,
-    setIsDetailsOpen,
-    formatJobId,
-    wmsJobsService,
-    user,
-    refreshData,
-    addNotification,
-    viewMode,
-    t,
+    jobs, sites, activeSite, employees, user, setSelectedJob, setIsDetailsOpen,
+    formatJobId, refreshData, addNotification, viewMode
 }) => {
-    const stagingJobs = getStagingJobs(jobs);
-    const shippedJobs = getShippedJobs(jobs);
-    const { deleteJob } = useFulfillment();
-    const isMgr = ['super_admin', 'admin', 'regional_manager', 'operations_manager', 'warehouse_manager'].includes((user?.role || '').toLowerCase());
-    const isOpStaff = isMgr || (user?.role || '').toLowerCase() === 'dispatcher';
-
-    const [selectedEmptyDock, setSelectedEmptyDock] = useState<string | null>(null);
-    const [isAssigning, setIsAssigning] = useState(false);
-
-    const checkControlAccess = (actionName = 'Control actions') => {
-        if (!isOpStaff) { addNotification('alert', `${actionName} requires Dispatcher or Warehouse Manager role.`); return false; }
-        return true;
-    };
-
-    const handleAssignJobToDock = async (jobId: string, dockName: string) => {
-        if (!checkControlAccess('Dock loading')) return;
-        setIsAssigning(true);
+    const { historicalJobs, loadHistoricalJobs, setActiveTab } = useFulfillment();
+    const workflow = useShipmentWorkflow(refreshData);
+    const canManage = canManageDispatch(user?.role);
+    const origin = activeSite?.id;
+    const scoped = jobs.filter(job => isShipment(job) && Boolean(origin) && (job.sourceSiteId || job.siteId) === origin);
+    const staged = scoped.filter(job => getShipmentPhase(job) === 'ready');
+    const inTransit = scoped.filter(job => getShipmentPhase(job) === 'in-transit');
+    const queue = staged.filter(job => !DOCK_BAYS.some(dock => job.location === 'Dock ' + dock));
+    const drivers = employees.filter(employee => employee.role === 'driver' && employee.siteId === origin && employee.status?.toLowerCase() === 'active');
+    useEffect(() => { if (viewMode === 'History') void loadHistoricalJobs(); }, [viewMode, loadHistoricalJobs]);
+    const open = (job: WMSJob) => { setSelectedJob(job); setIsDetailsOpen(true); };
+    const run = async (job: WMSJob, action: ShipmentAction) => {
         try {
-            await wmsJobsService.update(jobId, {
-                status: 'In-Progress',
-                location: `Dock ${dockName}`,
-                transferStatus: 'Packed'
-            } as any);
-            await refreshData();
-            addNotification('success', `Assigned shipment to Dock ${dockName}`);
-        } catch (err) {
-            addNotification('alert', 'Failed to assign dock');
-        } finally {
-            setIsAssigning(false);
+            await workflow.mutateAsync({ job, action });
+            addNotification('success', action.type === 'depart' ? 'Shipment released to transport. The driver can now record arrival.' : 'Dispatch updated.');
+        } catch (error) {
+            addNotification('alert', error instanceof Error ? error.message : 'Dispatch update failed.');
         }
     };
 
-    const handleDelete = async (e: React.MouseEvent, jobId: string) => {
-        e.stopPropagation();
-        if (!isMgr) { addNotification('alert', 'Job deletion requires Warehouse Manager role.'); return; }
-        if (window.confirm('Are you sure you want to permanently delete this job?')) await deleteJob(jobId);
-    };
+    if (viewMode === 'History') return <DocksOutboundHistory jobs={historicalJobs.filter(job => (job.sourceSiteId || job.siteId) === origin)} sites={sites} employees={employees}
+        setSelectedJob={setSelectedJob} setIsDetailsOpen={setIsDetailsOpen} formatJobId={formatJobId} />;
 
-    return (
-        <div className="flex flex-col lg:flex-row gap-4 sm:gap-6 flex-1 min-h-0 overflow-y-auto lg:overflow-hidden custom-scrollbar pr-1">
-            {viewMode === 'Process' ? (
-                <>
-                    <div className="flex-1 flex flex-col gap-4 sm:gap-6 lg:overflow-y-auto pr-1">
-                        {/* DOCK BAYS */}
-                        <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-4 sm:p-6 shrink-0 shadow-sm">
-                            <h3 className="text-base sm:text-lg font-bold text-[var(--theme-text-primary)] tracking-tight uppercase flex items-center gap-2.5 mb-6">
-                                <div className="p-2 bg-primary/10 rounded-xl border border-primary/20">
-                                    <Upload className="text-primary" size={18} />
-                                </div>
-                                {t('warehouse.docks.outboundTitle')}
-                            </h3>
-
-                            <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-3 sm:gap-4 mb-8">
-                                {OUTBOUND_DOCKS.map(dock => {
-                                    const assignedJob = findDockJob(jobs, dock);
-                                    const isOccupied = !!assignedJob;
-                                    const destSite = sites.find(s => s.id === assignedJob?.destSiteId);
-
-                                    return (
-                                        <div
-                                            key={dock}
-                                            onClick={() => {
-                                                if (assignedJob) {
-                                                    setSelectedJob(assignedJob);
-                                                    setIsDetailsOpen(true);
-                                                } else {
-                                                    if (!checkControlAccess('Dock loading')) return;
-                                                    setSelectedEmptyDock(dock);
-                                                }
-                                            }}
-                                            className={`relative flex flex-col rounded-2xl border transition-colors overflow-hidden shadow-sm cursor-pointer touch-manipulation ${
-                                                !isOccupied
-                                                    ? 'border-dashed border-[var(--theme-border)] bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-bg-card)]'
-                                                    : 'border-primary/30 bg-primary/5 hover:bg-primary/10'
-                                            }`}
-                                        >
-                                            <span className="absolute top-3 left-3.5 font-bold font-mono text-[var(--theme-text-muted)] text-sm tracking-tight z-0">{dock}</span>
-
-                                            {!isOccupied ? (
-                                                <div className="flex-1 flex flex-col items-center justify-center p-6 gap-3 opacity-60 hover:opacity-100 transition-opacity">
-                                                    <div className="w-14 h-14 rounded-2xl border border-dashed border-[var(--theme-border)] flex items-center justify-center bg-[var(--theme-bg-card)]">
-                                                        <Upload size={22} className="text-[var(--theme-text-muted)]" />
-                                                    </div>
-                                                    <div className="text-center">
-                                                        <span className="text-[11px] font-semibold uppercase tracking-wider text-[var(--theme-text-muted)] block">{t('warehouse.docks.empty')}</span>
-                                                        <span className="text-[11px] font-semibold text-primary uppercase tracking-wider block mt-1">+ Load</span>
-                                                    </div>
-                                                </div>
-                                            ) : (
-                                                <div className="flex-1 flex flex-col p-4 z-10">
-                                                    <div className="flex justify-between items-start mb-3">
-                                                        <div className="p-2 bg-primary/10 rounded-xl border border-primary/20">
-                                                            <Truck size={20} className="text-primary" />
-                                                        </div>
-                                                        <button
-                                                            onClick={async (e) => {
-                                                                e.stopPropagation();
-                                                                if (!assignedJob) return;
-                                                                if (!checkControlAccess('Dock release')) return;
-                                                                try {
-                                                                    await wmsJobsService.update(assignedJob.id, {
-                                                                        location: 'Dispatch Bay',
-                                                                        status: 'Pending',
-                                                                        assignedBy: user?.name || 'System'
-                                                                    } as any);
-                                                                    await refreshData();
-                                                                    addNotification('info', `${formatJobId(assignedJob)} returned to Staging`);
-                                                                } catch (err) {
-                                                                    addNotification('alert', 'Failed to release dock');
-                                                                }
-                                                            }}
-                                                            className="w-7 h-7 flex items-center justify-center rounded-lg bg-[var(--theme-bg-card)] hover:bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-[var(--theme-text-muted)] hover:text-[var(--theme-text-primary)] transition-colors touch-manipulation"
-                                                            title="Return to Staging"
-                                                        >
-                                                            <X size={14} />
-                                                        </button>
-                                                    </div>
-
-                                                    <div className="mb-3 flex justify-between items-start gap-1">
-                                                        <div className="min-w-0">
-                                                            <p className="text-[11px] text-primary font-mono font-medium tracking-wider uppercase mb-0.5 truncate">{formatJobId(assignedJob)}</p>
-                                                            <p className="text-xs font-semibold text-[var(--theme-text-primary)] uppercase truncate">
-                                                                {destSite ? destSite.name : 'In-Transport'}
-                                                            </p>
-                                                        </div>
-                                                    </div>
-
-                                                    <div className="grid grid-cols-2 gap-2 mb-4">
-                                                        <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl p-2 text-center">
-                                                            <p className="text-[11px] text-[var(--theme-text-muted)] uppercase tracking-wider mb-0.5">Payload</p>
-                                                            <p className="text-xs font-mono font-bold tabular-nums text-[var(--theme-text-primary)]">
-                                                                {(assignedJob.lineItems?.length || 0) > 0
-                                                                    ? assignedJob.lineItems.length
-                                                                    : (assignedJob.items || 0)} Units
-                                                            </p>
-                                                        </div>
-                                                        <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl p-2 text-center">
-                                                            <p className="text-[11px] text-[var(--theme-text-muted)] uppercase tracking-wider mb-0.5">Status</p>
-                                                            <p className="text-[11px] font-semibold text-primary uppercase tracking-wider">LOADED</p>
-                                                        </div>
-                                                    </div>
-
-                                                    <div className="mt-auto space-y-2.5" onClick={e => e.stopPropagation()}>
-                                                        {/* Driver Assignment Type Toggle */}
-                                                        <div className="flex bg-[var(--theme-bg-card)] border border-[var(--theme-border)] p-1 rounded-xl gap-1">
-                                                            <button
-                                                                onClick={async () => {
-                                                                    if (!checkControlAccess('Delivery mode toggle')) return;
-                                                                    try {
-                                                                        await wmsJobsService.update(assignedJob.id, { 
-                                                                            deliveryMethod: 'Internal', 
-                                                                            externalCarrierName: null,
-                                                                            assignedBy: user?.name || 'Unknown'
-                                                                        } as any);
-                                                                        if (assignedJob.orderRef) {
-                                                                            const parentJob = jobs.find(j => (j.id === assignedJob.orderRef || j.jobNumber === assignedJob.orderRef) && j.type === 'TRANSFER');
-                                                                            if (parentJob) {
-                                                                                await wmsJobsService.update(parentJob.id, { deliveryMethod: 'Internal' } as any);
-                                                                            }
-                                                                        }
-                                                                        await refreshData();
-                                                                    } catch (err) {
-                                                                        addNotification('alert', 'Toggle Failed');
-                                                                    }
-                                                                }}
-                                                                className={`flex-1 py-1 text-[11px] font-semibold rounded-lg transition-colors min-h-[32px] touch-manipulation cursor-pointer ${assignedJob.deliveryMethod !== 'External' ? 'bg-[var(--theme-primary)] text-[var(--theme-primary-text)] shadow-xs' : 'text-[var(--theme-text-muted)] hover:text-[var(--theme-text-primary)]'}`}
-                                                            >
-                                                                INTERNAL
-                                                            </button>
-                                                            <button
-                                                                onClick={async () => {
-                                                                    if (!checkControlAccess('Delivery mode toggle')) return;
-                                                                    try {
-                                                                        await wmsJobsService.update(assignedJob.id, { 
-                                                                            deliveryMethod: 'External', 
-                                                                            assignedTo: null,
-                                                                            assignedBy: user?.name || 'Unknown'
-                                                                        } as any);
-                                                                        if (assignedJob.orderRef) {
-                                                                            const parentJob = jobs.find(j => (j.id === assignedJob.orderRef || j.jobNumber === assignedJob.orderRef) && j.type === 'TRANSFER');
-                                                                            if (parentJob) {
-                                                                                await wmsJobsService.update(parentJob.id, { deliveryMethod: 'External' } as any);
-                                                                            }
-                                                                        }
-                                                                        await refreshData();
-                                                                    } catch (err) {
-                                                                        addNotification('alert', 'Toggle Failed');
-                                                                    }
-                                                                }}
-                                                                className={`flex-1 py-1 text-[11px] font-semibold rounded-lg transition-colors min-h-[32px] touch-manipulation cursor-pointer ${assignedJob.deliveryMethod === 'External' ? 'bg-[var(--theme-primary)] text-[var(--theme-primary-text)] shadow-xs' : 'text-[var(--theme-text-muted)] hover:text-[var(--theme-text-primary)]'}`}
-                                                            >
-                                                                EXTERNAL
-                                                            </button>
-                                                        </div>
-
-                                                        {/* Driver Assignment Input/Select */}
-                                                        <div>
-                                                            <div className="flex items-center gap-1.5 mb-1.5">
-                                                                <UserIcon size={12} className="text-[var(--theme-text-muted)]" />
-                                                                <span className="text-[11px] text-[var(--theme-text-muted)] font-medium uppercase tracking-wider">
-                                                                    {assignedJob.deliveryMethod === 'External' ? 'Courier / 3PL' : 'Driver'}
-                                                                </span>
-                                                            </div>
-                                                            
-                                                            {assignedJob.deliveryMethod === 'External' ? (
-                                                                <div>
-                                                                    <input
-                                                                        type="text"
-                                                                        list={`couriers-${assignedJob.id}`}
-                                                                        placeholder="Courier name..."
-                                                                        aria-label="External Courier Name"
-                                                                        title="External Courier Name"
-                                                                        defaultValue={assignedJob.externalCarrierName || ''}
-                                                                        key={`carrier-${assignedJob.id}-${assignedJob.deliveryMethod}`}
-                                                                        onBlur={async (e) => {
-                                                                            if (!checkControlAccess('External carrier update')) return;
-                                                                            const carrierName = e.target.value.trim();
-                                                                            try {
-                                                                                await wmsJobsService.update(assignedJob.id, { 
-                                                                                    externalCarrierName: carrierName,
-                                                                                    assignedBy: user?.name || 'Unknown'
-                                                                                } as any);
-                                                                                if (assignedJob.orderRef) {
-                                                                                    const parentJob = jobs.find(j => (j.id === assignedJob.orderRef || j.jobNumber === assignedJob.orderRef) && j.type === 'TRANSFER');
-                                                                                    if (parentJob) {
-                                                                                        await wmsJobsService.update(parentJob.id, { externalCarrierName: carrierName } as any);
-                                                                                    }
-                                                                                }
-                                                                                await refreshData();
-                                                                            } catch (err) {
-                                                                                addNotification('alert', 'Save Failed');
-                                                                            }
-                                                                        }}
-                                                                        className="w-full bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl px-2.5 py-1.5 text-xs text-[var(--theme-text-primary)] placeholder:text-[var(--theme-text-muted)] focus:outline-none focus:border-primary transition-colors min-h-[38px]"
-                                                                    />
-                                                                    <datalist id={`couriers-${assignedJob.id}`}>
-                                                                        <option value="DHL Express" />
-                                                                        <option value="FedEx / TNT" />
-                                                                        <option value="EMS Ethiopia" />
-                                                                        <option value="Aramex" />
-                                                                        <option value="Local 3PL Freight" />
-                                                                        <option value="External Private Driver" />
-                                                                    </datalist>
-                                                                </div>
-                                                            ) : (
-                                                                (() => {
-                                                                    const targetSiteId = assignedJob.siteId || activeSite?.id;
-                                                                    const siteDrivers = employees.filter(e => {
-                                                                        const isDriverRole = ['driver', 'dispatcher'].includes(e.role?.toLowerCase() || '');
-                                                                        const isActive = (e as any).status !== 'Inactive' && (e as any).status !== 'Terminated';
-                                                                        const isSiteMatch = !e.siteId || e.siteId === targetSiteId;
-                                                                        return isDriverRole && isActive && isSiteMatch;
-                                                                    });
-
-                                                                    return (
-                                                                        <select
-                                                                            title="Assign Warehouse Driver"
-                                                                            aria-label="Assign Warehouse Driver"
-                                                                            value={assignedJob.assignedTo || ''}
-                                                                            onChange={async (e) => {
-                                                                                if (!checkControlAccess('Driver assignment')) return;
-                                                                                const driverId = e.target.value || null;
-                                                                                try {
-                                                                                    await wmsJobsService.update(assignedJob.id, { 
-                                                                                        assignedTo: driverId,
-                                                                                        assignedBy: user?.name || 'Unknown'
-                                                                                    } as any);
-                                                                                    if (assignedJob.orderRef) {
-                                                                                        const parentJob = jobs.find(j => (j.id === assignedJob.orderRef || j.jobNumber === assignedJob.orderRef) && j.type === 'TRANSFER');
-                                                                                        if (parentJob) {
-                                                                                            await wmsJobsService.update(parentJob.id, { assignedTo: driverId } as any);
-                                                                                        }
-                                                                                    }
-                                                                                    await refreshData();
-                                                                                    addNotification('success', `Assigned to Warehouse Driver`);
-                                                                                } catch (err) {
-                                                                                    addNotification('alert', 'Assignment Failed');
-                                                                                }
-                                                                            }}
-                                                                            className="w-full bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl px-2.5 py-1.5 text-xs text-[var(--theme-text-primary)] focus:outline-none focus:border-primary transition-colors min-h-[38px] cursor-pointer touch-manipulation"
-                                                                        >
-                                                                            <option value="" className="bg-[var(--theme-bg-card)]">Select Driver...</option>
-                                                                            {siteDrivers.length === 0 ? (
-                                                                                <option value="" disabled className="bg-[var(--theme-bg-card)]">No drivers found</option>
-                                                                            ) : (
-                                                                                siteDrivers.map(e => (
-                                                                                    <option key={e.id} value={e.id} className="bg-[var(--theme-bg-card)]">{e.name} ({e.role.toUpperCase()})</option>
-                                                                                ))
-                                                                            )}
-                                                                        </select>
-                                                                    );
-                                                                })()
-                                                            )}
-                                                        </div>
-
-                                                        {['Packed', 'Staged'].includes(assignedJob.transferStatus || '') && (
-                                                            <button
-                                                                onClick={async (e) => {
-                                                                    e.stopPropagation();
-                                                                    if (!checkControlAccess('Departure controls')) return;
-                                                                    if (assignedJob.deliveryMethod === 'External') {
-                                                                        if (!assignedJob.externalCarrierName || !assignedJob.externalCarrierName.trim()) {
-                                                                            addNotification('alert', 'Please enter a courier/carrier name before marking departure.');
-                                                                            return;
-                                                                        }
-                                                                    } else if (!assignedJob.assignedTo) {
-                                                                        addNotification('alert', 'Please assign a driver before marking departure.');
-                                                                        return;
-                                                                    }
-                                                                    try {
-                                                                        const departureTime = new Date().toISOString();
-                                                                        await wmsJobsService.update(assignedJob.id, {
-                                                                            status: 'In-Progress',
-                                                                            transferStatus: 'Shipped',
-                                                                            location: 'In-Transit',
-                                                                            shippedAt: departureTime,
-                                                                            assignedBy: user?.name || 'System'
-                                                                        } as any);
-                                                                        if (assignedJob.orderRef) {
-                                                                            const parentJob = jobs.find(j => (j.id === assignedJob.orderRef || j.jobNumber === assignedJob.orderRef) && j.type === 'TRANSFER');
-                                                                            const parentId = parentJob ? parentJob.id : assignedJob.orderRef;
-                                                                            await wmsJobsService.update(parentId, { 
-                                                                                transferStatus: 'Shipped',
-                                                                                shippedAt: departureTime,
-                                                                                assignedTo: assignedJob.assignedTo || parentJob?.assignedTo,
-                                                                                deliveryMethod: assignedJob.deliveryMethod,
-                                                                                externalCarrierName: assignedJob.externalCarrierName,
-                                                                                assignedBy: user?.name || 'System'
-                                                                            } as any);
-                                                                        }
-                                                                        await refreshData();
-                                                                        addNotification('success', 'Shipment Departed');
-                                                                    } catch (err) {
-                                                                        addNotification('alert', 'Status Update Failed');
-                                                                    }
-                                                                }}
-                                                                className="w-full min-h-[44px] bg-[var(--theme-primary)] hover:opacity-90 text-[var(--theme-primary-text)] text-xs font-semibold uppercase tracking-wider py-2 rounded-xl flex items-center justify-center gap-2 transition-colors active:scale-[0.98] shadow-sm touch-manipulation cursor-pointer"
-                                                            >
-                                                                <Navigation size={14} /> Mark Departure
-                                                            </button>
-                                                        )}
-                                                    </div>
-                                                </div>
-                                            )}
-                                        </div>
-                                    );
-                                })}
-                            </div>
-
-                            {/* STAGING AREA */}
-                            <DocksOutboundStaging
-                                stagingJobs={stagingJobs}
-                                sites={sites}
-                                employees={employees}
-                                user={user}
-                                jobs={jobs}
-                                OUTBOUND_DOCKS={OUTBOUND_DOCKS}
-                                findDockJob={findDockJob}
-                                setSelectedJob={setSelectedJob}
-                                setIsDetailsOpen={setIsDetailsOpen}
-                                formatJobId={formatJobId}
-                                handleDelete={handleDelete}
-                                checkControlAccess={checkControlAccess}
-                                wmsJobsService={wmsJobsService}
-                                refreshData={refreshData}
-                                addNotification={addNotification}
-                                t={t}
-                            />
-                        </div>
-
-                        {/* OUTBOUND SCHEDULE (Shipped / In-Transit) */}
-                        <DocksOutboundDepartures
-                            shippedJobs={shippedJobs}
-                            sites={sites}
-                            employees={employees}
-                            user={user}
-                            formatJobId={formatJobId}
-                            handleDelete={handleDelete}
-                            t={t}
-                        />
-
-                    </div>
-                </>
-            ) : (
-                <div className="w-full mt-4">
-                    <DocksOutboundHistory
-                        jobs={jobs}
-                        sites={sites}
-                        employees={employees}
-                        setSelectedJob={setSelectedJob}
-                        setIsDetailsOpen={setIsDetailsOpen}
-                        formatJobId={formatJobId}
-                    />
-                </div>
-            )}
-
-            {/* Quick Dock Bay Assignment Modal */}
-            <DockAssignModal
-                isOpen={!!selectedEmptyDock}
-                onClose={() => setSelectedEmptyDock(null)}
-                targetDock={selectedEmptyDock}
-                stagingJobs={stagingJobs}
-                sites={sites}
-                employees={employees}
-                formatJobId={formatJobId}
-                onAssignJobToDock={handleAssignJobToDock}
-                isSubmitting={isAssigning}
-            />
+    return <div className="space-y-4 overflow-y-auto">
+        <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-[var(--theme-text-secondary)]">
+            <p>Pack → Staging → Dock & transport → Dispatch release → Driver arrival → Receiving inspection</p>
+            <button type="button" onClick={() => setActiveTab('DRIVER')} className="flex min-h-11 items-center gap-1 text-[var(--theme-primary)] font-semibold">Driver deliveries <ArrowRight size={14} /></button>
         </div>
-    );
+        <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 xl:grid-cols-3">
+            {DOCK_BAYS.map(dock => <OutboundDockCard key={dock} dock={dock} job={staged.find(job => job.location === 'Dock ' + dock)}
+                drivers={drivers} canManage={canManage} busy={workflow.isPending} onOpen={open} onAction={run} />)}
+        </div>
+        <section className="space-y-2">
+            <h3 className="text-sm font-semibold text-[var(--theme-text-primary)]">Packed and waiting for a dock ({queue.length})</h3>
+            {queue.length === 0 && <p className="p-3 text-xs text-[var(--theme-text-secondary)]">Completed packing appears here automatically.</p>}
+            {queue.map(job => <div key={job.id} className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-[var(--theme-border)] bg-[var(--theme-bg-card)] p-3">
+                <button type="button" onClick={() => open(job)} className="min-h-11 text-left text-xs text-[var(--theme-text-primary)]">
+                    <span className="block font-mono font-semibold">#{formatJobId(job)} · {getShipmentUnits(job)} units</span>
+                    <span className="text-[var(--theme-text-secondary)]">{sites.find(site => site.id === job.destSiteId)?.name || 'Customer'}</span>
+                </button>
+                <select aria-label={'Load shipment ' + formatJobId(job)} value="" disabled={!canManage || workflow.isPending}
+                    onChange={event => { if (event.target.value) void run(job, { type: 'load', dock: event.target.value }); }}
+                    className="min-h-11 rounded-lg border border-[var(--theme-border)] bg-[var(--theme-bg-subtle)] px-3 text-xs text-[var(--theme-text-primary)] disabled:opacity-50">
+                    <option value="" disabled>Load dock</option>
+                    {DOCK_BAYS.map(dock => <option key={dock} disabled={staged.some(candidate => candidate.location === 'Dock ' + dock)}>{dock}</option>)}
+                </select>
+            </div>)}
+        </section>
+        <section className="space-y-2">
+            <h3 className="text-sm font-semibold text-[var(--theme-text-primary)]">On the road ({inTransit.length})</h3>
+            {inTransit.length === 0 && <p className="p-3 text-xs text-[var(--theme-text-secondary)]">Released shipments appear here until arrival is recorded.</p>}
+            {inTransit.map(job => <button key={job.id} type="button" onClick={() => open(job)}
+                className="flex min-h-14 w-full items-center gap-3 rounded-xl border border-[var(--theme-border)] bg-[var(--theme-bg-card)] p-3 text-left text-xs text-[var(--theme-text-primary)]">
+                <Truck size={18} className="text-[var(--theme-primary)]" />
+                <span className="flex-1"><span className="block font-mono font-semibold">#{formatJobId(job)}</span><span className="text-[var(--theme-text-secondary)]">{sites.find(site => site.id === job.destSiteId)?.name || 'Customer'} · {job.deliveryMethod === 'External' ? job.externalCarrierName : employees.find(employee => employee.id === job.assignedTo)?.name || 'Assigned driver'}</span></span>
+                <ArrowRight size={16} />
+            </button>)}
+        </section>
+    </div>;
 };

@@ -2,6 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { History as HistoryIcon, Search, Clock, User as UserIcon } from 'lucide-react';
 import Pagination from '../../shared/Pagination';
 import { WMSJob, Site, User } from '../../../types';
+import { isShipment } from '../../../utils/shipmentWorkflow';
 import { useLanguage } from '../../../contexts/LanguageContext';
 import { formatDisplayEmployeeId } from '../../../utils/employeeIdGenerator';
 import { resolveFulfillmentWorker } from '../../../utils/fulfillmentUserResolver';
@@ -32,9 +33,9 @@ export const DocksOutboundHistory: React.FC<DocksOutboundHistoryProps> = ({
     // Filter for Completed/Shipped Dispatch Jobs
     const filteredHistory = useMemo(() => {
         const historyJobs = jobs.filter(job => {
-            if (job.type !== 'DISPATCH') return false;
+            if (!isShipment(job)) return false;
             // Consider "History" as Shipped, Completed, or Cancelled
-            return job.status === 'Completed' || job.status === 'Cancelled' || job.transferStatus === 'Shipped';
+            return job.status === 'Completed' || job.status === 'Cancelled' || job.transferStatus === 'Received';
         });
 
         const mapped = historyJobs.map(job => {

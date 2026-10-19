@@ -12,6 +12,9 @@ import { getSellUnit, formatPackagingDescription, isWeightBased, isVolumeBased }
 import Button from './shared/Button';
 import { logger } from '../utils/logger';
 import { printHtmlContent } from '../utils/printHelper';
+import { ShipmentActions } from './fulfillment/drivers/ShipmentActions';
+import { PartialDeliveryModal } from './fulfillment/drivers/PartialDeliveryModal';
+import { useData } from '../contexts/DataContext';
 
 interface OutboundJobModalProps {
     isOpen: boolean;
@@ -20,7 +23,7 @@ interface OutboundJobModalProps {
     user: User | null;
     sites: Site[];
     products: Product[];
-    onUpdateJob: (id: string, updates: Partial<WMSJob>) => Promise<void>;
+    onUpdateJob?: (id: string, updates: Partial<WMSJob>) => Promise<void>;
     onRefresh: () => Promise<void>;
     activeTab?: string;
     onStartPicking?: (job: WMSJob) => void;
@@ -41,6 +44,8 @@ export const OutboundJobModal: React.FC<OutboundJobModalProps> = ({
     onStartPacking
 }) => {
     const { t, language } = useLanguage();
+    const { addNotification } = useData();
+    const [arrivalOpen, setArrivalOpen] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isManifestExpanded, setIsManifestExpanded] = useState(false);
 
@@ -48,11 +53,15 @@ export const OutboundJobModal: React.FC<OutboundJobModalProps> = ({
     const isDriverView = user?.role === 'driver' || activeTab.includes('driver');
 
     if (!isOpen) return null;
+    if (arrivalOpen) return <PartialDeliveryModal t={t} isOpen job={job} user={user} products={products} sites={sites}
+        onClose={() => { setArrivalOpen(false); onClose(); }} addNotification={addNotification} refreshData={onRefresh} />;
+
 
     // --- LOGIC: STATUS MAPPING (2-step: PICKUP → DELIVERED) ---
     const getStatusStep = () => {
         const statuses = (job.transferStatus || job.status || '').toLowerCase();
-        if (statuses === 'delivered' || statuses === 'completed' || statuses === 'received') return 3;
+        if (statuses === 'completed' || statuses === 'received') return 4;
+        if (statuses === 'delivered' || statuses === 'partially delivered') return 3;
         if (statuses === 'in-transit' || statuses === 'shipped') return 2;
         return 1; // Assigned / Pending / Packed
     };
@@ -187,13 +196,14 @@ export const OutboundJobModal: React.FC<OutboundJobModalProps> = ({
                         <div className="absolute top-[20px] sm:top-[24px] left-[40px] sm:left-[60px] right-[40px] sm:right-[60px] h-0.5 bg-[var(--theme-border)]" />
                         <div 
                             className="absolute top-[20px] sm:top-[24px] left-[40px] sm:left-[60px] h-0.5 bg-[var(--theme-primary)] transition-all duration-500 ease-out"
-                            ref={(el) => { if (el) el.style.width = `${Math.max(0, (currentStep - 1) * 50)}%`; }}
+                            ref={(el) => { if (el) el.style.width = `${Math.max(0, (currentStep - 1) * (100 / 3))}%`; }}
                         />
                         <div className="flex justify-between relative z-10">
                             {[
-                                { label: 'Assigned', icon: ClipboardList, step: 1 },
-                                { label: 'Picked Up', icon: Truck, step: 2 },
-                                { label: 'Delivered', icon: CheckCircle, step: 3 }
+                                { label: 'Staged', icon: ClipboardList, step: 1 },
+                                { label: 'Released', icon: Truck, step: 2 },
+                                { label: 'Arrived', icon: MapPin, step: 3 },
+                                { label: 'Received', icon: CheckCircle, step: 4 }
                             ].map((s, i) => (
                                 <div key={i} className="flex flex-col items-center gap-1.5">
                                     <div className={`w-10 h-10 sm:w-11 sm:h-11 rounded-full flex items-center justify-center border-2 transition-all ${
@@ -340,110 +350,8 @@ export const OutboundJobModal: React.FC<OutboundJobModalProps> = ({
                 {/* --- FOOTER ACTION BAR --- */}
                 <div className="p-4 sm:p-5 border-t border-[var(--theme-border)] bg-[var(--theme-bg-subtle)] shrink-0">
                     <div className="flex flex-row items-center justify-center gap-3 w-full">
-                        {(() => {
-                            const isOutboundMission = job.type === 'DISPATCH' || job.type === 'DRIVER' || (isDriverView && job.type === 'TRANSFER');
-                            const isManagerRole = ['super_admin', 'admin', 'manager', 'regional_manager', 'operations_manager', 'warehouse_manager', 'dispatcher'].includes((user?.role || '').toLowerCase());
-                            const isAssignedDriver = !job.assignedTo || job.assignedTo === user?.id || (job as any).assigned_to === user?.id;
-                            const canOperateDelivery = isManagerRole || (user?.role === 'driver' && isAssignedDriver);
-
-                            return (
-                                <>
-                                    {/* STEP 1: PICKUP */}
-                                    {isOutboundMission && job.transferStatus !== 'In-Transit' && job.transferStatus !== 'Shipped' && job.transferStatus !== 'Delivered' && job.transferStatus !== 'Received' && job.status !== 'Completed' && (
-                                        <button
-                                            onClick={async () => {
-                                                if (!canOperateDelivery) return;
-                                                setIsSubmitting(true);
-                                                try {
-                                                    const now = new Date().toISOString();
-                                                    await onUpdateJob(job.id, {
-                                                        status: 'In-Progress' as any,
-                                                        transferStatus: 'In-Transit',
-                                                        assignedTo: job.assignedTo || user?.id,
-                                                        shippedAt: now
-                                                    });
-
-                                                    if (job.orderRef) {
-                                                        try {
-                                                            const { wmsJobsService } = await import('../services/supabase.service');
-                                                            await wmsJobsService.update(job.orderRef, {
-                                                                transferStatus: 'In-Transit',
-                                                                assignedTo: job.assignedTo || user?.id,
-                                                                shippedAt: now
-                                                            } as any);
-                                                        } catch (e) {
-                                                            logger.warn('OutboundJobModal', `Failed to sync pickup to parent transfer: ${e instanceof Error ? e.message : String(e)}`);
-                                                        }
-                                                    }
-                                                } finally {
-                                                    setIsSubmitting(false);
-                                                }
-                                            }}
-                                            disabled={isSubmitting || !canOperateDelivery}
-                                            className="min-h-[44px] h-11 w-full bg-[var(--theme-primary)] hover:opacity-90 text-[var(--theme-primary-text)] rounded-xl font-semibold text-xs flex items-center justify-center gap-2 shadow-sm transition-all active:scale-[0.98] disabled:opacity-50 touch-manipulation cursor-pointer"
-                                        >
-                                            <Truck size={16} />
-                                            {canOperateDelivery ? 'Pick Up Shipment' : 'Assigned to Another Driver'}
-                                        </button>
-                                    )}
-
-                                    {/* STEP 2: DELIVERED */}
-                                    {isOutboundMission && (job.transferStatus === 'In-Transit' || job.transferStatus === 'Shipped') && (
-                                        <>
-                                            <button
-                                                onClick={handleNavigate}
-                                                className="min-h-[44px] h-11 px-5 border border-[var(--theme-border)] bg-[var(--theme-bg-card)] hover:bg-[var(--theme-bg-subtle)] text-[var(--theme-text-primary)] rounded-xl flex items-center gap-1.5 font-semibold text-xs transition-all active:scale-[0.98] touch-manipulation"
-                                            >
-                                                <Navigation size={14} className="text-[var(--theme-primary)]" />
-                                                Navigate
-                                            </button>
-                                            <button
-                                                onClick={async () => {
-                                                    if (!canOperateDelivery) return;
-                                                    setIsSubmitting(true);
-                                                    try {
-                                                        const now = new Date().toISOString();
-                                                        await onUpdateJob(job.id, {
-                                                            status: 'Completed' as any,
-                                                            transferStatus: 'Delivered',
-                                                            deliveredAt: now,
-                                                            receivedBy: user?.name || 'Driver'
-                                                        } as any);
-
-                                                        if (job.orderRef) {
-                                                            try {
-                                                                const { wmsJobsService } = await import('../services/supabase.service');
-                                                                await wmsJobsService.update(job.orderRef, {
-                                                                    transferStatus: 'Delivered',
-                                                                    deliveredAt: now
-                                                                } as any);
-                                                            } catch (e) {
-                                                                logger.warn('OutboundJobModal', `Failed to sync delivery to parent transfer: ${e instanceof Error ? e.message : String(e)}`);
-                                                            }
-                                                        }
-                                                    } finally {
-                                                        setIsSubmitting(false);
-                                                    }
-                                                }}
-                                                disabled={isSubmitting || !canOperateDelivery}
-                                                className={`min-h-[44px] h-11 flex-1 rounded-xl font-semibold text-xs shadow-sm transition-all flex items-center justify-center gap-2 active:scale-[0.98] disabled:opacity-50 touch-manipulation ${canOperateDelivery ? 'bg-emerald-600 hover:bg-emerald-700 text-white' : 'bg-[var(--theme-bg-card)] text-[var(--theme-text-muted)] cursor-not-allowed border border-[var(--theme-border)]'}`}
-                                                title={canOperateDelivery ? "Complete Delivery" : "Only the assigned driver or manager can complete this delivery"}
-                                            >
-                                                <CheckCircle size={16} />
-                                                {canOperateDelivery ? 'Confirm Delivery' : 'Assigned to Driver'}
-                                            </button>
-                                        </>
-                                    )}
-
-                                    {/* DONE — Completed status badge */}
-                                    {isOutboundMission && (job.transferStatus === 'Delivered' || job.transferStatus === 'Received' || job.status === 'Completed') && (
-                                        <div className="min-h-[44px] h-11 w-full bg-emerald-500/10 border border-emerald-500/20 rounded-xl text-xs font-semibold text-emerald-600 dark:text-emerald-400 flex items-center justify-center gap-2">
-                                            <CheckCircle size={16} /> Delivery Complete
-                                        </div>
-                                    )}
-                                </>
-                            );
-                        })()}
+                        <ShipmentActions job={job} user={user} onRefresh={onRefresh} onArrival={() => setArrivalOpen(true)}
+                            onNavigate={handleNavigate} onDeparted={onClose} />
 
                         {/* CLOSE */}
                         <button

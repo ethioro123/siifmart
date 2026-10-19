@@ -1,3 +1,4 @@
+import { canInspectTransferArrival } from '../../../utils/shipmentWorkflow';
 import React, { useState } from 'react';
 import { X, Package, CheckCircle, XCircle, Trash2, Truck, Clock, ArrowRight, Loader2 } from 'lucide-react';
 import { WMSJob, Product, User, Site, ReceivingItem } from '../../../types';
@@ -375,7 +376,7 @@ export const TransferJobDetails: React.FC<TransferJobDetailsProps> = ({
                                 <span>Delete Manifest</span>
                             </button>
                         )}
-                        {['In-Transit', 'Shipped', 'Delivered', 'Partially Delivered'].includes(transferStatus) && (selectedJob.destSiteId === activeSite?.id || ['super_admin', 'admin', 'warehouse_manager', 'inventory_specialist', 'stock_clerk', 'receiver', 'store_manager'].includes(user?.role || '')) && (
+                        {canInspectTransferArrival(selectedJob, user?.role, activeSite?.id) && (
                             <button
                                 onClick={() => {
                                     const itemsToReceive: ReceivingItem[] = resolvedLineItems.map((item: any) => ({

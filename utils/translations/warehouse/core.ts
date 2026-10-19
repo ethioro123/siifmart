@@ -2,7 +2,7 @@ import { TranslationBlock } from '../types';
 
 export const core: TranslationBlock = {
     tabs: {
-        docks: { en: 'Docks', am: 'መርከቦች', or: 'Buufata Fe\'umsaa' },
+        docks: { en: 'Docks & Dispatch', am: 'መርከቦች', or: 'Buufata Fe\'umsaa' },
         receive: { en: 'Receive', am: 'ተቀበል', or: 'Fudhachuu' },
         putaway: { en: 'Putaway', am: 'አስቀምጥ', or: 'Kuusaa Keessatti Galiinsa' },
         pick: { en: 'Pick', am: 'ምረጥ', or: 'Fiduu / Filachuu' },
@@ -15,7 +15,7 @@ export const core: TranslationBlock = {
         labels: { en: 'Labels', am: 'የመለያ ማተሚያ', or: 'Maxxansa Maqaalee' },
         transfer: { en: 'Transfer', am: 'ማስተላለፍ', or: 'Gara Birootti Dabarsuu' },
         my_points: { en: 'My Points', am: 'የእኔ ነጥቦች', or: 'Qabxiiwwan Koo' },
-        driver: { en: 'Driver', am: 'የአሽከርካሪ ማእከል', or: 'Wiirtuu Konkolaachisaa' },
+        driver: { en: 'Driver Deliveries', am: 'የአሽከርካሪ ማእከል', or: 'Wiirtuu Konkolaachisaa' },
     },
 
     // Status & General labels

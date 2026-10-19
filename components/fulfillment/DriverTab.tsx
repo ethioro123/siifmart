@@ -3,7 +3,8 @@ import {
     Activity, ChevronDown, Search, X
 } from 'lucide-react';
 import { WMSJob, User, Site, Product } from '../../types';
-import { useAdjustStockMutation } from '../../hooks/useAdjustStockMutation';
+import { useSearchParams } from 'react-router-dom';
+import { getVisibleFulfillmentTabs } from '../../utils/fulfillmentTabPermissions';
 import { inventoryRequestsService } from '../../services/supabase.service';
 import { DriversHistory } from './drivers/DriversHistory';
 import { DriverHeader } from './drivers/DriverHeader';
@@ -17,6 +18,7 @@ import { IncidentReportModal } from './drivers/IncidentReportModal';
 import { authService } from '../../services/auth.service';
 import { tasksService } from '../../services/tasks.service';
 import { logger } from '../../utils/logger';
+import { canManageDispatch, getDriverMissions } from '../../utils/shipmentWorkflow';
 
 interface DriverTabProps {
     filteredJobs: WMSJob[];
@@ -44,7 +46,7 @@ interface DriverTabProps {
 }
 
 export const DriverTab: React.FC<DriverTabProps> = ({
-    filteredJobs,
+    filteredJobs: allFilteredJobs,
     historicalJobs,
     employees,
     user,
@@ -80,47 +82,11 @@ export const DriverTab: React.FC<DriverTabProps> = ({
     const [globalSearch, setGlobalSearch] = useState('');
     const [showControlCenter, setShowControlCenter] = useState(false);
 
-    const adjustStockMutation = useAdjustStockMutation();
+    const [, setParams] = useSearchParams();
 
-    const handleUpdateJob = async (id: string, updates: Partial<WMSJob>) => {
-        try {
-            await wmsJobsService.update(id, updates);
-
-            // Side-effects for DELIVERY completion
-            if (updates.transferStatus === 'Delivered') {
-                const job = jobs.find(j => j.id === id) || filteredJobs.find(j => j.id === id);
-                if (job) {
-                    // 1. Update parent transfer job (keep active until destination store receives)
-                    if (job.orderRef) {
-                        const parentJob = jobs.find(j => j.id === job.orderRef);
-                        const deliveredTimestamp = new Date().toISOString();
-                        if (parentJob) {
-                            await wmsJobsService.update(parentJob.id, {
-                                status: 'Pending',
-                                transferStatus: 'Delivered',
-                                deliveredAt: deliveredTimestamp
-                            } as any);
-                        }
-                        try {
-                            const { transfersService } = await import('../../services/transfers.service');
-                            await transfersService.update(job.orderRef, {
-                                transferStatus: 'Delivered',
-                                deliveredAt: deliveredTimestamp
-                            });
-                        } catch {}
-                    }
-                    // Note: Stock intake is authoritatively handled by destination store receiver
-                    // during TransferReceiving and Digital Dual-Handshake (Zero-Trust Acceptance Policy).
-                }
-            }
-
-            await refreshData();
-            addNotification('success', 'Shipment updated.');
-        } catch (err) {
-            logger.error('DriverTab', 'caught error', err as Error);
-            addNotification('alert', 'Update failed.');
-        }
-    };
+    const currentEmployee = employees.find(employee => employee.id === user?.id ||
+        (user?.email && employee.email?.toLowerCase() === user.email.toLowerCase()));
+    const filteredJobs = getDriverMissions(allFilteredJobs, user, currentEmployee?.id, activeSite?.id || user?.siteId);
 
     const handleReportIssue = async (data: { type: string; description: string; priority: 'High' | 'Critical'; jobId?: string }) => {
         const managerRoles = ['warehouse_manager', 'operations_manager', 'regional_manager', 'admin', 'super_admin'];
@@ -144,24 +110,7 @@ export const DriverTab: React.FC<DriverTabProps> = ({
     };
 
     const handleViewDocs = () => {
-        const canSeeGlobalQueue = [
-            'super_admin', 'admin', 'manager', 'regional_manager',
-            'operations_manager', 'warehouse_manager', 'dispatcher'
-        ].includes((user?.role || '').toLowerCase());
-
-        const currentEmployee = employees.find(e =>
-            (user?.email && e.email === user.email) ||
-            (user?.name && e.name?.toLowerCase() === user.name.toLowerCase()) ||
-            ((user as any)?.employeeId && e.id === (user as any).employeeId) ||
-            e.id === user?.id
-        );
-        const employeeId = currentEmployee?.id || user?.id;
-
-        const activeMission = filteredJobs.find(j =>
-            (j.type === 'DISPATCH' || j.type === 'TRANSFER' || j.type === 'DRIVER') &&
-            (canSeeGlobalQueue ? !!j.assignedTo : j.assignedTo === employeeId) &&
-            j.status !== 'Completed'
-        );
+        const activeMission = filteredJobs.find(job => job.transferStatus === 'In-Transit' || job.transferStatus === 'Shipped') || filteredJobs[0];
 
         if (activeMission) {
             setSelectedJob(activeMission);
@@ -193,6 +142,11 @@ export const DriverTab: React.FC<DriverTabProps> = ({
                 isSubmitting={isSubmitting}
                 refreshData={refreshData}
                 activeCount={activeJobsCount}
+                onDispatch={canManageDispatch(user?.role) && getVisibleFulfillmentTabs(user?.role).includes('DOCKS') ? () => setParams(previous => {
+                    const next = new URLSearchParams(previous);
+                    next.set('tab', 'DOCKS'); next.set('dock', 'outbound');
+                    return next;
+                }) : undefined}
             />
 
             {/* HYPER-OPTIMIZED MOBILE DASHBOARD */}
@@ -266,18 +220,14 @@ export const DriverTab: React.FC<DriverTabProps> = ({
                             employees={employees}
                             user={user}
                             sites={sites}
-                            jobs={jobs}
                             products={products}
                             setSelectedJob={setSelectedJob}
                             setIsDetailsOpen={setIsDetailsOpen}
                             processingJobIds={processingJobIds}
                             setProcessingJobIds={setProcessingJobIds}
-                            wmsJobsService={wmsJobsService}
                             refreshData={refreshData}
                             refreshJobs={refreshJobs}
                             addNotification={addNotification}
-                            adjustStockMutation={adjustStockMutation}
-                            addProduct={addProduct}
                             globalSearch={globalSearch}
                         />
                     </div>
@@ -285,20 +235,8 @@ export const DriverTab: React.FC<DriverTabProps> = ({
                     {/* COLLAPSED JOB BOARD */}
                     <div className="mt-4 border-t border-[var(--theme-border)] pt-4">
                         <DriverJobBoard
-                            t={t}
-                            filteredJobs={filteredJobs}
-                            sites={sites}
-                            employees={employees}
-                            user={user}
-                            setSelectedJob={setSelectedJob}
-                            setIsDetailsOpen={setIsDetailsOpen}
-                            processingJobIds={processingJobIds}
-                            setProcessingJobIds={setProcessingJobIds}
-                            wmsJobsService={wmsJobsService}
-                            refreshData={refreshData}
-                            addNotification={addNotification}
-                            globalSearch={globalSearch}
-                            jobs={jobs}
+                            filteredJobs={filteredJobs} sites={sites} setSelectedJob={setSelectedJob}
+                            setIsDetailsOpen={setIsDetailsOpen} globalSearch={globalSearch}
                         />
                     </div>
                 </div>
@@ -323,14 +261,8 @@ export const DriverTab: React.FC<DriverTabProps> = ({
 
             {/* DRIVER SCANNER OVERLAY */}
             {driverScannerOpen && (
-                <DriverScanner
-                    t={t}
-                    setDriverScannerOpen={setDriverScannerOpen}
-                    selectedJob={selectedJob}
-                    wmsJobsService={wmsJobsService}
-                    addNotification={addNotification}
-                    refreshData={refreshData}
-                    setSelectedJob={setSelectedJob}
+                <DriverScanner jobs={filteredJobs} onClose={() => setDriverScannerOpen(false)}
+                    onSelect={job => { setSelectedJob(job); setDriverScannerOpen(false); setIsDetailsOpen(true); }}
                 />
             )}
 
@@ -346,7 +278,6 @@ export const DriverTab: React.FC<DriverTabProps> = ({
                     user={user}
                     sites={sites}
                     products={products}
-                    onUpdateJob={handleUpdateJob}
                     onRefresh={refreshData}
                     activeTab="driver"
                 />

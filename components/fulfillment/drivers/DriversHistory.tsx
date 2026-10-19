@@ -6,6 +6,7 @@ import { formatJobId } from '../../../utils/jobIdFormatter';
 import { formatDateTime } from '../../../utils/formatting';
 import { formatDisplayEmployeeId } from '../../../utils/employeeIdGenerator';
 import { ReturnToWarehouseModal } from '../returns/ReturnToWarehouseModal';
+import { canManageDispatch, isShipment } from '../../../utils/shipmentWorkflow';
 import { resolveFulfillmentWorker } from '../../../utils/fulfillmentUserResolver';
 
 interface DriversHistoryProps {
@@ -28,19 +29,12 @@ export const DriversHistory: React.FC<DriversHistoryProps> = ({
 
     const currentEmployee = useMemo(() => employees.find(e => (user?.email && e.email === user.email) || (user?.name && e.name?.toLowerCase() === user.name.toLowerCase()) || ((user as any)?.employeeId && e.id === (user as any).employeeId) || e.id === user?.id), [employees, user]);
     const filteredHistory = useMemo(() => {
-        const canSeeGlobalQueue = ['super_admin', 'admin', 'manager', 'regional_manager', 'operations_manager', 'warehouse_manager', 'dispatcher'].includes((user?.role || '').toLowerCase());
+        const canSeeGlobalQueue = canManageDispatch(user?.role);
         const employeeId = currentEmployee?.id || user?.id;
         
         const filteredByTypeAndRole = historicalJobs.filter((j: WMSJob) => {
-            const isTypeMatch = (j.type === 'DISPATCH' || j.type === 'TRANSFER' || j.type === 'DRIVER');
-            if (!isTypeMatch) return false;
+            if (!isShipment(j) || j.deliveryMethod === 'External') return false;
             if (j.status === 'Cancelled' || j.transferStatus === 'Cancelled' || j.transferStatus === 'Rejected') return false;
-            if (j.type === 'TRANSFER') {
-                const hasChildDispatch = historicalJobs.some(d =>
-                    d.type === 'DISPATCH' && (d.orderRef === j.id || d.orderRef === j.jobNumber) && d.status !== 'Cancelled'
-                );
-                if (hasChildDispatch) return false;
-            }
             const isRoleMatch = canSeeGlobalQueue ? true : j.assignedTo === employeeId;
             return isRoleMatch;
         });

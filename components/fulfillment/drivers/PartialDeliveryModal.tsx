@@ -5,7 +5,8 @@ import {
 } from 'lucide-react';
 import { WMSJob, User, Product, Site } from '../../../types';
 import { formatJobId } from '../../../utils/jobIdFormatter';
-import { logger } from '../../../utils/logger';
+import { useShipmentWorkflow } from '../../../hooks/useShipmentWorkflow';
+import { getShipmentQuantity } from '../../../utils/shipmentWorkflow';
 
 type RejectReason = 'customer_refused' | 'damaged_in_transit' | 'address_not_found' | 'partial_acceptance' | 'other';
 
@@ -27,13 +28,9 @@ interface PartialDeliveryModalProps {
     user: User | null;
     products: Product[];
     sites: Site[];
-    wmsJobsService: any;
-    adjustStockMutation: any;
-    addProduct: any;
     addNotification: (type: 'success' | 'alert' | 'info', msg: string) => void;
     refreshData: () => Promise<void>;
     refreshJobs?: () => void;
-    jobs: WMSJob[];
 }
 
 const REJECT_REASONS: { id: RejectReason; label: string; desc: string }[] = [
@@ -52,13 +49,11 @@ export const PartialDeliveryModal: React.FC<PartialDeliveryModalProps> = ({
     user,
     products,
     sites,
-    wmsJobsService,
-    adjustStockMutation,
     addNotification,
     refreshData,
     refreshJobs,
-    jobs,
 }) => {
+    const workflow = useShipmentWorkflow(refreshData);
     const dynamicReasons = [
         { id: 'customer_refused', label: t('warehouse.driverHub.rejectReasonCustomerRefused'), desc: t('warehouse.driverHub.rejectReasonCustomerRefusedDesc') },
         { id: 'damaged_in_transit', label: t('warehouse.driverHub.rejectReasonDamaged'), desc: t('warehouse.driverHub.rejectReasonDamagedDesc') },
@@ -83,17 +78,7 @@ export const PartialDeliveryModal: React.FC<PartialDeliveryModalProps> = ({
         setLines(
             (job.lineItems as any[]).map((item: any, idx: number) => {
                 const templateProduct = products.find(p => p.sku === item.sku || p.id === item.productId);
-                const qty = (
-                    (typeof item.dispatchedQty === 'number' && item.dispatchedQty > 0 ? item.dispatchedQty : null) ??
-                    (typeof item.shippedQty === 'number' && item.shippedQty > 0 ? item.shippedQty : null) ??
-                    (typeof item.packedQty === 'number' && item.packedQty > 0 ? item.packedQty : null) ??
-                    (typeof item.pickedQty === 'number' && item.pickedQty > 0 ? item.pickedQty : null) ??
-                    (typeof item.expectedQty === 'number' && item.expectedQty > 0 ? item.expectedQty : null) ??
-                    (typeof item.quantity === 'number' && item.quantity > 0 ? item.quantity : null) ??
-                    (typeof (item as any).qty === 'number' && (item as any).qty > 0 ? (item as any).qty : null) ??
-                    (typeof item.receivedQty === 'number' && item.receivedQty > 0 ? item.receivedQty : null) ??
-                    0
-                );
+                const qty = getShipmentQuantity(item);
                 return {
                     index: idx,
                     name: item.name || templateProduct?.name || 'Unknown',
@@ -110,11 +95,11 @@ export const PartialDeliveryModal: React.FC<PartialDeliveryModalProps> = ({
     if (!isOpen || !job) return null;
 
     const hasUndelivered = lines.some(l => {
-        const v = parseInt(l.delivered);
+        const v = Number(l.delivered);
         return !isNaN(v) && v < l.dispatched;
     });
 
-    const totalDelivered = lines.reduce((sum, l) => sum + (parseInt(l.delivered) || 0), 0);
+    const totalDelivered = lines.reduce((sum, l) => sum + (Number(l.delivered) || 0), 0);
     const totalDispatched = lines.reduce((sum, l) => sum + l.dispatched, 0);
 
     const setLineDelivered = (idx: number, val: string) => {
@@ -125,7 +110,7 @@ export const PartialDeliveryModal: React.FC<PartialDeliveryModalProps> = ({
         setIsSubmitting(true);
         try {
             const hasUndelivered = lines.some(l => {
-                const v = parseInt(l.delivered);
+                const v = Number(l.delivered);
                 return !isNaN(v) && v < l.dispatched;
             });
 
@@ -133,82 +118,12 @@ export const PartialDeliveryModal: React.FC<PartialDeliveryModalProps> = ({
                 ? `[PARTIAL DELIVERY by ${user?.name || 'Driver'} at ${new Date().toLocaleString()}] Reason: ${REJECT_REASONS.find(r => r.id === rejectReason)?.label || rejectReason}. ${notes}`
                 : `[DELIVERY by ${user?.name || 'Driver'} at ${new Date().toLocaleString()}] ${notes}`;
 
-            const finalStatus = 'Completed';
-            const finalTransferStatus = hasUndelivered ? 'Partially Delivered' : 'Delivered';
+            await workflow.mutateAsync({ job, action: {
+                type: 'arrive',
+                delivered: lines.map(line => line.delivered.trim() ? Number(line.delivered) : Number.NaN),
+                note: auditNote
+            } });
 
-            // Build updated line items
-            const updatedLineItems = (job.lineItems as any[]).map((item: any, idx: number) => {
-                const line = lines[idx];
-                const parsed = parseInt(line.delivered);
-                const deliveredQty = isNaN(parsed) ? line.dispatched : parsed;
-                return {
-                    ...item,
-                    deliveredQty,
-                    receivedQty: deliveredQty,
-                    undeliveredQty: line.dispatched - deliveredQty,
-                };
-            });
-
-            // 1. Mark job as Completed and Delivered/Partially Delivered
-            await wmsJobsService.update(job.id, {
-                status: finalStatus,
-                transferStatus: finalTransferStatus,
-                deliveredAt: new Date().toISOString(),
-                receivedBy: user?.name || 'Driver',
-                lineItems: updatedLineItems,
-                notes: job.notes ? `${job.notes}\n${auditNote}` : auditNote,
-                hasDiscrepancy: hasUndelivered,
-            } as any);
-
-            // 2. Update parent Transfer job if linked (keep active until store receives)
-            if (job.orderRef) {
-                const parentJob = jobs.find(j => j.id === job.orderRef);
-                if (parentJob) {
-                    await wmsJobsService.update(parentJob.id, {
-                        status: 'Pending',
-                        transferStatus: finalTransferStatus,
-                        deliveredAt: new Date().toISOString(),
-                    } as any);
-                }
-            }
-
-            // 3. Return undelivered units back to source warehouse inventory
-            if (hasUndelivered && adjustStockMutation) {
-                const sourceSiteId = job.sourceSiteId || (job as any).source_site_id;
-                if (sourceSiteId) {
-                    for (const line of lines) {
-                        const parsed = parseInt(line.delivered);
-                        const deliveredQty = isNaN(parsed) ? line.dispatched : parsed;
-                        const undeliveredQty = line.dispatched - deliveredQty;
-                        if (undeliveredQty > 0) {
-                            try {
-                                const sourceProduct = products.find(p =>
-                                    (p.sku === line.sku || p.id === line.productId) &&
-                                    (p.siteId === sourceSiteId || (p as any).site_id === sourceSiteId)
-                                ) || products.find(p => p.sku === line.sku || p.id === line.productId);
-
-                                const targetProdId = sourceProduct?.id || line.productId;
-                                if (targetProdId) {
-                                    await adjustStockMutation.mutateAsync({
-                                        productId: targetProdId,
-                                        productName: line.name,
-                                        productSku: line.sku,
-                                        siteId: sourceSiteId,
-                                        quantity: undeliveredQty,
-                                        type: 'IN',
-                                        reason: `Undelivered return from ${formatJobId(job)} (${dynamicReasons.find(r => r.id === rejectReason)?.label || rejectReason})`,
-                                        canApprove: true
-                                    });
-                                }
-                            } catch (stockErr) {
-                                logger.warn('PartialDeliveryModal', `Failed to return undelivered stock to warehouse: ${String(stockErr)}`);
-                            }
-                        }
-                    }
-                }
-            }
-
-            await refreshData();
             if (refreshJobs) {
                 refreshJobs();
             }
@@ -261,7 +176,7 @@ export const PartialDeliveryModal: React.FC<PartialDeliveryModalProps> = ({
                         <p className="text-xs text-[var(--theme-text-secondary)] max-w-xs leading-relaxed">
                             <strong className="text-emerald-500 font-mono tabular-nums">{totalDelivered}</strong> {t('warehouse.driverHub.to')} <strong className="text-[var(--theme-text-primary)] font-mono tabular-nums">{totalDispatched}</strong> {t('warehouse.driverHub.units').toLowerCase()} {t('warehouse.driverHub.delivered').toLowerCase()} {t('warehouse.driverHub.to').toLowerCase()} {destSite?.name || t('warehouse.driverHub.localHub')}.
                         </p>
-                        <p className="text-[11px] text-[var(--theme-text-muted)] mt-2">Delivered to receiving dock. Awaiting store digital handshake certification.</p>
+                        <p className="text-[11px] text-[var(--theme-text-muted)] mt-2">Arrival recorded. Destination inspection is still required. Undelivered goods remain in transport custody until a return is received.</p>
                         <button
                             onClick={onClose}
                             className="mt-6 min-h-[44px] px-8 py-2.5 bg-[var(--theme-primary)] hover:opacity-90 text-[var(--theme-primary-text)] font-semibold text-xs rounded-xl transition-all active:scale-[0.98] touch-manipulation cursor-pointer"
@@ -287,7 +202,7 @@ export const PartialDeliveryModal: React.FC<PartialDeliveryModalProps> = ({
                         <div className="flex-1 overflow-y-auto p-4 sm:p-5 space-y-3 custom-scrollbar">
                             <p className="text-xs font-semibold text-[var(--theme-text-secondary)] mb-1">{t('warehouse.driverHub.deliveredQuantities')}</p>
                             {lines.map((line, i) => {
-                                const deliveredVal = parseInt(line.delivered);
+                                const deliveredVal = Number(line.delivered);
                                 const isShort = !isNaN(deliveredVal) && deliveredVal < line.dispatched;
                                 const isFull = !isNaN(deliveredVal) && deliveredVal === line.dispatched;
                                 return (
@@ -331,7 +246,7 @@ export const PartialDeliveryModal: React.FC<PartialDeliveryModalProps> = ({
                                         {isShort && (
                                             <div className="mt-2 flex justify-end">
                                                 <span className="text-[11px] font-medium text-amber-600 dark:text-amber-400 bg-amber-500/10 px-2.5 py-0.5 rounded-full border border-amber-500/20">
-                                                    {line.dispatched - (deliveredVal || 0)} {t('warehouse.driverHub.undeliveredReturned')}
+                                                    {line.dispatched - (deliveredVal || 0)} units remain in transport custody until inspected
                                                 </span>
                                             </div>
                                         )}

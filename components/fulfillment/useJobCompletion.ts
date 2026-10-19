@@ -86,6 +86,10 @@ export const useJobCompletion = (deps: UseJobCompletionDeps) => {
                 return;
             }
 
+            if (job.type === 'DISPATCH' || job.type === 'DRIVER') {
+                throw new Error('Release shipments from Outbound dispatch and record arrival from Driver deliveries.');
+            }
+
             // Use Optimistic Items if provided (Fixes Race Condition where state isn't updated yet)
             let itemsToValidate = optimisticLineItems || job.lineItems;
 
@@ -383,21 +387,6 @@ export const useJobCompletion = (deps: UseJobCompletionDeps) => {
                     await wmsJobsService.update(tId, { transferStatus: 'Packed' });
                     setJobs(prev => prev.map(j => j.id === tId ? { ...j, transferStatus: 'Packed' } : j));
                     setTransfers((prev: any[]) => prev.map(t => t.id === tId ? { ...t, transferStatus: 'Packed' } : t));
-                }
-            } else if (job && job.type === 'DISPATCH') {
-                stage('Dispatch Completion');
-                const sale = sales.find(s => s.id === job.orderRef);
-                const transfer = jobs.find(j => (j.id === job!.orderRef || j.jobNumber === job!.orderRef) && j.type === 'TRANSFER');
-                const isTransfer = !!transfer || (job.orderRef && (job.orderRef.startsWith('TRF-')));
-                const tId = transfer?.id || job.orderRef;
-
-                if (sale) {
-                    await salesService.update(sale.id, { fulfillmentStatus: 'Delivered' });
-                    setSales(prev => prev.map(s => s.id === sale.id ? { ...s, fulfillmentStatus: 'Delivered' } : s));
-                } else if (isTransfer) {
-                    await wmsJobsService.update(tId, { transferStatus: 'Shipped' });
-                    setJobs(prev => prev.map(j => j.id === tId ? { ...j, transferStatus: 'Shipped' } : j));
-                    setTransfers((prev: any[]) => prev.map(t => t.id === tId ? { ...t, transferStatus: 'Shipped' } : t));
                 }
             }
 

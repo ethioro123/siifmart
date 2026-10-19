@@ -3,11 +3,12 @@ import type { JobItem, WMSJob } from '../types';
 import { wmsJobsService } from '../services/wms-jobs.service';
 import { DOCK_BAYS, getShipmentDepartureError, getShipmentPhase, getShipmentQuantity, isShipment } from '../utils/shipmentWorkflow';
 
-type ShipmentAction =
+export type ShipmentAction =
     | { type: 'load'; dock: string }
     | { type: 'assign'; driverId: string }
     | { type: 'transport'; method: 'Internal' | 'External' }
     | { type: 'carrier'; name: string }
+    | { type: 'unstage' }
     | { type: 'depart' }
     | { type: 'arrive'; delivered: number[]; note: string };
 
@@ -43,6 +44,8 @@ export function useShipmentWorkflow(onRefresh: () => Promise<void>) {
                     Object.assign(updates, { deliveryMethod: action.method, assignedTo: '', externalCarrierName: '' });
                 } else if (action.type === 'carrier') {
                     updates.externalCarrierName = action.name.trim();
+                } else if (action.type === 'unstage') {
+                    updates.location = 'Dispatch Bay';
                 } else {
                     const error = getShipmentDepartureError(job);
                     if (error) throw new Error(error);

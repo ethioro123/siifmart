@@ -76,7 +76,7 @@ export const TransferHeader: React.FC<TransferHeaderProps> = ({
                         </span>
                     </div>
 
-                    <button
+                    {user?.role !== 'receiver' && <button
                         onClick={() => {
                             const isHQ = activeSite?.type === 'HQ' || activeSite?.type === 'Administration' || ['super_admin', 'admin'].includes(user?.role || '');
                             const isWarehouse = activeSite?.type === 'Warehouse' || activeSite?.type === 'Distribution Center';
@@ -87,7 +87,7 @@ export const TransferHeader: React.FC<TransferHeaderProps> = ({
                     >
                         <Truck size={14} />
                         <span>{t('warehouse.transferCenter')}</span>
-                    </button>
+                    </button>}
                 </div>
             </div>
 

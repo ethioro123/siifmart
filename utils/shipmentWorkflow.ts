@@ -7,6 +7,13 @@ export const DISPATCH_LEADERSHIP = ['super_admin', 'ceo', 'admin', 'manager', 'r
 
 export type ShipmentPhase = 'not-ready' | 'ready' | 'in-transit' | 'awaiting-receipt' | 'closed' | 'cancelled';
 
+export function canInspectTransferArrival(job: WMSJob, role?: string, siteId?: string): boolean {
+    return job.type === 'TRANSFER' && Boolean(siteId && job.destSiteId === siteId) &&
+        ['Delivered', 'Partially Delivered'].includes(job.transferStatus || '') &&
+        ['super_admin', 'ceo', 'regional_manager', 'warehouse_manager', 'store_manager', 'receiver', 'inventory_manager']
+            .includes(role?.trim().toLowerCase() || '');
+}
+
 export function canManageDispatch(role?: string | null): boolean {
     return DISPATCH_LEADERSHIP.includes(role?.trim().toLowerCase() || '');
 }
@@ -35,10 +42,11 @@ export function getShipmentUnits(job: WMSJob): number {
     return job.lineItems?.length ? job.lineItems.reduce((sum, item) => sum + getShipmentQuantity(item), 0) : job.items || 0;
 }
 
-export function getDriverMissions(jobs: WMSJob[], user: User | null, employeeId?: string): WMSJob[] {
+export function getDriverMissions(jobs: WMSJob[], user: User | null, employeeId?: string, originSiteId?: string): WMSJob[] {
     if (!user) return [];
     const supervisor = canManageDispatch(user.role);
     return jobs.filter(job => isShipment(job) && job.deliveryMethod !== 'External' &&
+        (!supervisor || !originSiteId || (job.sourceSiteId || job.siteId) === originSiteId) &&
         ['ready', 'in-transit'].includes(getShipmentPhase(job)) &&
         (supervisor || (Boolean(job.assignedTo) && [user.id, employeeId].includes(job.assignedTo))));
 }

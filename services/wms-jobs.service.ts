@@ -279,28 +279,25 @@ export const wmsJobsService = {
     },
 
     async update(id: string, updates: Partial<WMSJob>) {
-        const dbUpdates: any = { ...updates };
-        if (updates.countryCode !== undefined) { dbUpdates.country_code = updates.countryCode; delete dbUpdates.countryCode; }
-        if (updates.country_code !== undefined) { dbUpdates.country_code = updates.country_code; }
-        if (updates.siteId !== undefined) { dbUpdates.site_id = updates.siteId; delete dbUpdates.siteId; }
-        if (updates.items !== undefined) { dbUpdates.items_count = Math.round(updates.items || 0); delete dbUpdates.items; }
-        if (updates.assignedTo !== undefined) { dbUpdates.assigned_to = updates.assignedTo; delete dbUpdates.assignedTo; }
-        if (updates.orderRef !== undefined) { dbUpdates.order_ref = updates.orderRef; delete dbUpdates.orderRef; }
-        if (updates.lineItems !== undefined) { dbUpdates.line_items = updates.lineItems; delete dbUpdates.lineItems; }
-        if (updates.transferStatus !== undefined) { dbUpdates.transfer_status = updates.transferStatus; delete dbUpdates.transferStatus; }
-        if (updates.approvedBy !== undefined) { dbUpdates.approved_by = updates.approvedBy; delete dbUpdates.approvedBy; }
-        if (updates.shippedAt !== undefined) { dbUpdates.shipped_at = updates.shippedAt; delete dbUpdates.shippedAt; }
-        if (updates.deliveredAt !== undefined) { dbUpdates.delivered_at = updates.deliveredAt; delete dbUpdates.deliveredAt; }
-        if (updates.receivedAt !== undefined) { dbUpdates.received_at = updates.receivedAt; delete dbUpdates.receivedAt; }
-        if (updates.receivedBy !== undefined) { dbUpdates.received_by = updates.receivedBy; delete dbUpdates.receivedBy; }
-        if (updates.deliveryMethod !== undefined) { dbUpdates.delivery_method = updates.deliveryMethod; delete dbUpdates.deliveryMethod; }
-        if (updates.hasDiscrepancy !== undefined) { dbUpdates.has_discrepancy = updates.hasDiscrepancy; delete dbUpdates.hasDiscrepancy; }
-        if (updates.discrepancyDetails !== undefined) { dbUpdates.discrepancy_details = updates.discrepancyDetails; delete dbUpdates.discrepancyDetails; }
-        if (updates.trackingNumber !== undefined) { dbUpdates.tracking_number = updates.trackingNumber; delete dbUpdates.trackingNumber; }
-        if (updates.completedBy !== undefined) { dbUpdates.completed_by = updates.completedBy; delete dbUpdates.completedBy; }
-        if (updates.completedAt !== undefined) { dbUpdates.completed_at = updates.completedAt; delete dbUpdates.completedAt; }
-        if (updates.externalCarrierName !== undefined) { dbUpdates.external_carrier_name = updates.externalCarrierName; delete dbUpdates.externalCarrierName; }
-        if (updates.assignedBy !== undefined) { dbUpdates.assigned_by = updates.assignedBy; delete dbUpdates.assignedBy; }
+        const fields: Partial<Record<keyof WMSJob, string>> = {
+            status: 'status', priority: 'priority', type: 'type', location: 'location', notes: 'notes',
+            countryCode: 'country_code', country_code: 'country_code', siteId: 'site_id', site_id: 'site_id',
+            items: 'items_count', items_count: 'items_count', assignedTo: 'assigned_to', orderRef: 'order_ref',
+            lineItems: 'line_items', line_items: 'line_items', transferStatus: 'transfer_status',
+            approvedBy: 'approved_by', requestedBy: 'requested_by', sourceSiteId: 'source_site_id',
+            source_site_id: 'source_site_id', destSiteId: 'dest_site_id', dest_site_id: 'dest_site_id',
+            shippedAt: 'shipped_at', shipped_at: 'shipped_at', deliveredAt: 'delivered_at', delivered_at: 'delivered_at',
+            receivedAt: 'received_at', receivedBy: 'received_by', received_by: 'received_by',
+            deliveryMethod: 'delivery_method', hasDiscrepancy: 'has_discrepancy', discrepancyDetails: 'discrepancy_details',
+            trackingNumber: 'tracking_number', tracking_number: 'tracking_number', completedBy: 'completed_by',
+            completed_by: 'completed_by', completedAt: 'completed_at', completed_at: 'completed_at',
+            externalCarrierName: 'external_carrier_name', external_carrier_name: 'external_carrier_name',
+            assignedBy: 'assigned_by', assigned_by: 'assigned_by', jobNumber: 'job_number'
+        };
+        const dbUpdates: Record<string, unknown> = {};
+        for (const key of Object.keys(fields) as (keyof WMSJob)[]) {
+            if (updates[key] !== undefined) dbUpdates[fields[key]!] = key === 'items' ? Math.round(updates.items || 0) : updates[key];
+        }
 
         const { data, error } = await supabase
             .from('wms_jobs')

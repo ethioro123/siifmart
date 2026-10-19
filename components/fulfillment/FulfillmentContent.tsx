@@ -133,6 +133,7 @@ export const FulfillmentContent: React.FC = () => {
                     visibleTabs={visibleTabs}
                     t={t}
                     filteredJobs={filteredJobs}
+                    siteId={activeSite?.id}
                 />
             ) : (
                 <DesktopTabSelector
@@ -141,6 +142,7 @@ export const FulfillmentContent: React.FC = () => {
                     visibleTabs={visibleTabs}
                     t={t}
                     filteredJobs={filteredJobs}
+                    siteId={activeSite?.id}
                     showPointsPopup={showPointsPopup}
                     setShowPointsPopup={setShowPointsPopup}
                     earnedPoints={earnedPoints}

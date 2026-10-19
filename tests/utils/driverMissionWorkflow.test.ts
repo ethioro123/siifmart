@@ -1,138 +1,59 @@
-import { describe, it, expect } from 'vitest';
+import { describe, expect, it } from 'vitest';
+import type { PurchaseOrder, User, WMSJob } from '../../types';
+import { canInspectTransferArrival, getDriverMissions, getShipmentDepartureError, getShipmentPhase, getShipmentUnits, isInboundPurchaseOrder } from '../../utils/shipmentWorkflow';
 
-export function filterDriverAvailableJobs(
-    filteredJobs: any[],
-    user: any,
-    employees: any[],
-    globalSearch: string = ''
-): any[] {
-    const canSeeGlobalQueue = ['super_admin', 'admin', 'manager', 'regional_manager', 'operations_manager', 'warehouse_manager', 'dispatcher'].includes((user?.role || '').toLowerCase());
-    const currentEmployee = employees.find(e => (user?.email && e.email === user.email) || (user?.name && e.name?.toLowerCase() === user.name.toLowerCase()) || (e.id === user?.id));
-    const employeeId = currentEmployee?.id || user?.id;
+const driver: User = { id: 'driver-1', role: 'driver', name: 'Driver', avatar: '', title: 'Driver' };
+const job = (overrides: Partial<WMSJob> = {}): WMSJob => ({
+    id: 'shipment-1', siteId: 'origin', sourceSiteId: 'origin', destSiteId: 'destination',
+    countryCode: 'KE', type: 'DISPATCH', status: 'Pending', priority: 'Normal',
+    transferStatus: 'Packed', assignedTo: driver.id, items: 10, location: 'Dispatch Bay', orderRef: 'transfer-1',
+    lineItems: [{ productId: 'product-1', sku: 'KE-FR001', name: 'Carrots', expectedQty: 10, pickedQty: 0, packedQty: 0, status: 'Pending' }],
+    ...overrides
+});
 
-    let baseJobs = filteredJobs.filter(j => {
-        if (j.type !== 'DISPATCH' && j.type !== 'TRANSFER' && j.type !== 'DRIVER') return false;
-        if (j.status === 'Cancelled' || j.transferStatus === 'Cancelled' || j.transferStatus === 'Rejected') return false;
-
-        // If it's a TRANSFER, suppress it if a child DISPATCH job exists, and only allow if packed/ready
-        if (j.type === 'TRANSFER') {
-            const hasChildDispatch = filteredJobs.some(d =>
-                d.type === 'DISPATCH' &&
-                (d.orderRef === j.id || d.orderRef === j.jobNumber) &&
-                d.status !== 'Cancelled'
-            );
-            if (hasChildDispatch) return false;
-
-            const isReadyToShip = ['Packed', 'Approved', 'Ready', 'In-Transit', 'Shipped'].includes(j.transferStatus || '');
-            if (!isReadyToShip) return false;
-        }
-
-        const isUnassigned = !j.assignedTo && j.status === 'Pending';
-        const isNotPickedUp = j.transferStatus !== 'In-Transit' && j.transferStatus !== 'Shipped' && j.transferStatus !== 'Delivered' && j.transferStatus !== 'Received' && j.status !== 'Completed';
-        return isUnassigned || (j.assignedTo === employeeId && isNotPickedUp) || (canSeeGlobalQueue && j.assignedTo && isNotPickedUp);
+describe('shipment handoffs', () => {
+    it('shows one delivery instead of its parent transfer and never offers an approved transfer for pickup', () => {
+        expect(getDriverMissions([job({ type: 'TRANSFER', id: 'transfer-1' }), job(), job({ id: 'approved', type: 'TRANSFER', transferStatus: 'Approved' })], driver)).toEqual([job()]);
     });
-
-    return baseJobs;
-}
-
-export function computeJobTotalUnits(job: any): number {
-    if (job.lineItems && Array.isArray(job.lineItems) && job.lineItems.length > 0) {
-        return job.lineItems.reduce((sum: number, it: any) => sum + (it.packedQty || it.expectedQty || it.quantity || it.pickedQty || 1), 0);
-    }
-    return job.items || job.items_count || 0;
-}
-
-describe('Driver Hub Mission Board Filtering & Deduplication', () => {
-    const mockDriver = { id: 'DRV-001', name: 'John Driver', email: 'driver@siifmart.com', role: 'driver' };
-    const mockEmployees = [mockDriver];
-
-    it('suppresses parent TRANSFER job when a child DISPATCH job is present (prevents duplicate RTPA1Y)', () => {
-        const jobs = [
-            {
-                id: 'trf-rtpa1y',
-                jobNumber: 'RTPA1Y',
-                type: 'TRANSFER',
-                status: 'Pending',
-                transferStatus: 'Packed',
-                lineItems: [
-                    { sku: 'TS001', expectedQty: 200 },
-                    { sku: 'KEEL001', expectedQty: 53 },
-                    { sku: 'KEGR001', expectedQty: 88 },
-                ]
-            },
-            {
-                id: 'disp-rtpa1y',
-                jobNumber: 'RTPA1Y',
-                orderRef: 'trf-rtpa1y',
-                type: 'DISPATCH',
-                status: 'Pending',
-                transferStatus: 'Packed',
-                lineItems: [
-                    { sku: 'TS001', expectedQty: 200 },
-                    { sku: 'KEEL001', expectedQty: 53 },
-                    { sku: 'KEGR001', expectedQty: 88 },
-                ]
-            }
-        ];
-
-        const available = filterDriverAvailableJobs(jobs, mockDriver, mockEmployees);
-        expect(available.length).toBe(1);
-        expect(available[0].id).toBe('disp-rtpa1y');
-        expect(available[0].type).toBe('DISPATCH');
+    it('keeps unassigned, other-driver, and external-carrier missions out of the driver queue', () => {
+        expect(getDriverMissions([job({ assignedTo: '' }), job({ assignedTo: 'driver-2' }), job({ deliveryMethod: 'External' })], driver)).toEqual([]);
     });
-
-    it('excludes rejected transfers (5OHHVC regression)', () => {
-        const jobs = [
-            {
-                id: 'trf-5ohhvc',
-                jobNumber: '5OHHVC',
-                type: 'TRANSFER',
-                status: 'Pending',
-                transferStatus: 'Rejected',
-                lineItems: [{ sku: 'TS001', expectedQty: 1 }]
-            }
-        ];
-
-        const available = filterDriverAvailableJobs(jobs, mockDriver, mockEmployees);
-        expect(available.length).toBe(0);
+    it('lets dispatch leadership see transport at its origin, without mixing incoming deliveries', () => {
+        const dispatcher = { ...driver, role: 'dispatcher' as const };
+        expect(getDriverMissions([job(), job({ id: 'incoming', sourceSiteId: 'another-site' })], dispatcher, undefined, 'origin')).toEqual([job()]);
     });
-
-    it('excludes transfers in draft, requested, or picking state that are not packed/ready', () => {
-        const jobs = [
-            {
-                id: 'trf-draft',
-                jobNumber: 'DRAFT01',
-                type: 'TRANSFER',
-                status: 'Pending',
-                transferStatus: 'Draft'
-            },
-            {
-                id: 'trf-picking',
-                jobNumber: 'PICK01',
-                type: 'TRANSFER',
-                status: 'Pending',
-                transferStatus: 'Picking'
-            }
-        ];
-
-        const available = filterDriverAvailableJobs(jobs, mockDriver, mockEmployees);
-        expect(available.length).toBe(0);
+    it('requires a dock and driver or named external carrier before departure', () => {
+        expect(getShipmentDepartureError(job())).toContain('dock');
+        expect(getShipmentDepartureError(job({ location: 'Dock D1', assignedTo: '' }))).toContain('verified driver');
+        expect(getShipmentDepartureError(job({ location: 'Dock D1' }))).toBeNull();
+        expect(getShipmentDepartureError(job({ location: 'Dock D1', deliveryMethod: 'External', externalCarrierName: '' }))).toContain('carrier');
+        expect(getShipmentDepartureError(job({ location: 'Dock D1', deliveryMethod: 'External', externalCarrierName: 'Courier' }))).toBeNull();
     });
-
-    it('computes accurate physical cargo units instead of line item array length', () => {
-        const job = {
-            id: 'disp-rtpa1y',
-            jobNumber: 'RTPA1Y',
-            type: 'DISPATCH',
-            items: 3, // Array length
-            lineItems: [
-                { sku: 'TS001', expectedQty: 200 },
-                { sku: 'KEEL001', expectedQty: 53 },
-                { sku: 'KEGR001', expectedQty: 88 },
-            ]
-        };
-
-        const totalUnits = computeJobTotalUnits(job);
-        expect(totalUnits).toBe(341);
+    it('distinguishes transport arrival from destination acceptance', () => {
+        expect(getShipmentPhase(job({ status: 'Completed', transferStatus: 'Delivered' }))).toBe('awaiting-receipt');
+        expect(getShipmentPhase(job({ status: 'Completed', transferStatus: 'Partially Delivered' }))).toBe('awaiting-receipt');
+        expect(getShipmentPhase(job({ status: 'Completed', transferStatus: 'Received' }))).toBe('closed');
+        expect(getShipmentPhase(job({ transferStatus: 'Rejected' }))).toBe('cancelled');
+    });
+    it('opens receiving only for an arrived transfer at the receiving site', () => {
+        const arrived = job({ type: 'TRANSFER', transferStatus: 'Delivered' });
+        expect(canInspectTransferArrival(arrived, 'receiver', 'destination')).toBe(true);
+        expect(canInspectTransferArrival(arrived, 'warehouse_manager', 'origin')).toBe(false);
+        expect(canInspectTransferArrival(arrived, 'driver', 'destination')).toBe(false);
+        expect(canInspectTransferArrival({ ...arrived, transferStatus: 'Shipped' }, 'receiver', 'destination')).toBe(false);
+    });
+    it('counts physical quantities while respecting zero-valued reset pack fields', () => {
+        expect(getShipmentUnits(job())).toBe(10);
+        expect(getShipmentUnits(job({ lineItems: [
+            { ...job().lineItems[0], expectedQty: 200 }, { ...job().lineItems[0], expectedQty: 53 }, { ...job().lineItems[0], expectedQty: 88 }
+        ] }))).toBe(341);
+        expect(getShipmentUnits(job({ lineItems: [{ ...job().lineItems[0], expectedQty: 0 }] }))).toBe(0);
+    });
+    it('retains outstanding partial purchase receipts only at the receiving site', () => {
+        const po = { id: 'po-1', siteId: 'origin', status: 'Partially Received', lineItems: [{ quantity: 10, receivedQty: 4 }] } as PurchaseOrder;
+        expect(isInboundPurchaseOrder(po, 'origin')).toBe(true);
+        expect(isInboundPurchaseOrder(po, 'destination')).toBe(false);
+        expect(isInboundPurchaseOrder({ ...po, status: 'Received' }, 'origin')).toBe(false);
+        expect(isInboundPurchaseOrder({ ...po, lineItems: [{ ...po.lineItems[0], receivedQty: 10 }] }, 'origin')).toBe(false);
     });
 });

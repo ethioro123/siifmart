@@ -12,6 +12,7 @@ interface DriverHeaderProps {
     isSubmitting: boolean;
     refreshData: () => Promise<void>;
     activeCount?: number;
+    onDispatch?: () => void;
 }
 
 export const DriverHeader: React.FC<DriverHeaderProps> = ({
@@ -22,7 +23,8 @@ export const DriverHeader: React.FC<DriverHeaderProps> = ({
     setViewMode,
     isSubmitting,
     refreshData,
-    activeCount
+    activeCount,
+    onDispatch
 }) => {
     return (
         <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl p-2 sm:p-4 shadow-xs flex flex-col sm:flex-row items-stretch sm:items-center justify-between sticky top-0 z-40 gap-2 sm:gap-3 mb-2">
@@ -62,6 +64,7 @@ export const DriverHeader: React.FC<DriverHeaderProps> = ({
             </div>
 
             <div className="flex items-center gap-2 w-full sm:w-auto">
+                {onDispatch && <button type="button" onClick={onDispatch} className="min-h-11 shrink-0 rounded-xl border border-[var(--theme-border)] px-3 text-xs font-semibold text-[var(--theme-primary)]">Outbound dispatch</button>}
                 <div className="bg-[var(--theme-bg-subtle)] p-0.5 sm:p-1 rounded-full border border-[var(--theme-border)] flex gap-1 w-full sm:w-auto flex-1 sm:flex-initial">
                     <button
                         onClick={() => setViewMode('Active')}

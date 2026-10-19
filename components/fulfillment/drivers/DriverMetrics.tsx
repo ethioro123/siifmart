@@ -1,5 +1,6 @@
 import React from 'react';
 import { WMSJob, User } from '../../../types';
+import { canManageDispatch, getShipmentUnits, isShipment } from '../../../utils/shipmentWorkflow';
 
 interface DriverMetricsProps {
     t: (key: string) => string;
@@ -16,29 +17,18 @@ export const DriverMetrics: React.FC<DriverMetricsProps> = ({
     employees,
     user
 }) => {
-    const canSeeGlobalQueue = [
-        'super_admin', 'admin', 'manager', 'regional_manager',
-        'operations_manager', 'warehouse_manager', 'dispatcher'
-    ].includes((user?.role || '').toLowerCase());
+    const canSeeGlobalQueue = canManageDispatch(user?.role);
 
     const currentEmployee = employees.find(e => 
         (user?.email && e.email === user.email) ||
-        (user?.name && e.name?.toLowerCase() === user.name.toLowerCase()) ||
         ((user as any)?.employeeId && e.id === (user as any).employeeId) ||
         e.id === user?.id
     );
     const employeeId = currentEmployee?.id || user?.id;
 
     const shouldInclude = (j: WMSJob) => {
-        if (j.type !== 'DISPATCH' && j.type !== 'TRANSFER' && j.type !== 'DRIVER') return false;
+        if (!isShipment(j) || j.deliveryMethod === 'External') return false;
         if (j.status === 'Cancelled' || j.transferStatus === 'Cancelled' || j.transferStatus === 'Rejected') return false;
-        if (j.type === 'TRANSFER') {
-            const allCurrentJobs = [...filteredJobs, ...historicalJobs];
-            const hasChildDispatch = allCurrentJobs.some(d =>
-                d.type === 'DISPATCH' && (d.orderRef === j.id || d.orderRef === j.jobNumber) && d.status !== 'Cancelled'
-            );
-            if (hasChildDispatch) return false;
-        }
         return canSeeGlobalQueue ? !!j.assignedTo : j.assignedTo === employeeId;
     };
 
@@ -46,9 +36,7 @@ export const DriverMetrics: React.FC<DriverMetricsProps> = ({
         completed: historicalJobs.filter(j => shouldInclude(j) && j.status === 'Completed').length,
         active: filteredJobs.filter(j => shouldInclude(j) && j.status !== 'Completed').length,
         items: [...filteredJobs, ...historicalJobs].filter(j => shouldInclude(j)).reduce((sum, j) => {
-            const units = (j.lineItems && Array.isArray(j.lineItems) && j.lineItems.length > 0)
-                ? j.lineItems.reduce((acc: number, it: any) => acc + (it.packedQty || it.expectedQty || it.quantity || it.pickedQty || 1), 0)
-                : (j.items || (j as any).items_count || 0);
+            const units = getShipmentUnits(j);
             return sum + units;
         }, 0)
     };

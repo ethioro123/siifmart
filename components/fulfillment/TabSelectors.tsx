@@ -5,6 +5,7 @@ import { OpTab } from './FulfillmentContext';
 import WorkerPointsDisplay, { PointsEarnedPopup } from '../WorkerPointsDisplay';
 import { useStore } from '../../contexts/CentralStore';
 import { useGamification } from '../../contexts/GamificationContext';
+import { getDriverMissions } from '../../utils/shipmentWorkflow';
 import { getDefaultFulfillmentTab } from '../../utils/fulfillmentTabPermissions';
 
 interface TabSelectorProps {
@@ -13,6 +14,7 @@ interface TabSelectorProps {
     visibleTabs: OpTab[];
     t: (key: string) => string;
     filteredJobs: WMSJob[];
+    siteId?: string;
 }
 
 interface DesktopTabSelectorProps extends TabSelectorProps {
@@ -26,8 +28,10 @@ export const MobileTabSelector: React.FC<TabSelectorProps> = ({
     setActiveTab,
     visibleTabs,
     t,
-    filteredJobs
+    filteredJobs,
+    siteId
 }) => {
+    const { user } = useStore();
     const [isMobileTabMenuOpen, setIsMobileTabMenuOpen] = useState(false);
 
     const getTabActiveCount = (tab: OpTab) => {
@@ -41,7 +45,7 @@ export const MobileTabSelector: React.FC<TabSelectorProps> = ({
             case 'TRANSFER':
                 return filteredJobs.filter(j => j.type === 'TRANSFER' && j.status !== 'Cancelled' && j.transferStatus !== 'Received').length;
             case 'DRIVER':
-                return filteredJobs.filter(j => (j.type === 'DISPATCH' || j.type === 'DRIVER') && j.status !== 'Completed' && j.status !== 'Cancelled').length;
+                return getDriverMissions(filteredJobs, user, user?.employeeId, siteId).length;
             case 'RECEIVE':
                 return filteredJobs.filter(j => j.type === 'RECEIVE' && j.status !== 'Completed' && j.status !== 'Cancelled').length;
             case 'REPLENISH':
@@ -61,8 +65,6 @@ export const MobileTabSelector: React.FC<TabSelectorProps> = ({
         }
     };
     const currentActiveCount = getTabActiveCount(activeTab);
-
-    const { user } = useStore();
     const defaultTab = getDefaultFulfillmentTab(user?.role);
 
     const quickTabs = React.useMemo(() => {

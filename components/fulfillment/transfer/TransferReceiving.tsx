@@ -3,14 +3,13 @@ import { ArrowDown, Box, ShieldCheck } from 'lucide-react';
 import { WMSJob, Site, ReceivingItem, Product } from '../../../types';
 import { formatJobId } from '../../../utils/jobIdFormatter';
 import { getTransferQuantityConfig, toTransferStockQuantity } from './transferQuantity';
-import { supabase } from '../../../lib/supabase';
 import { useLanguage } from '../../../contexts/LanguageContext';
 import { logger } from '../../../utils/logger';
 import { useFulfillment } from '../FulfillmentContext';
 import { CustodyHandshakeModal } from './CustodyHandshakeModal';
 import { useData } from '../../../contexts/DataContext';
 import { resolveReceivingPolicy } from '../../../utils/receivingPolicy';
-import { productsService, transfersService } from '../../../services/supabase.service';
+import { productsService } from '../../../services/supabase.service';
 import { TransferReceiveItemCard } from './TransferReceiveItemCard';
 
 interface TransferReceivingProps {
@@ -253,40 +252,7 @@ export const TransferReceiving: React.FC<TransferReceivingProps> = ({
                 receivedBy: receiverName
             } as any);
 
-            // Complete child DISPATCH job if exists
-            try {
-                const { data: dispatchJobs } = await supabase
-                    .from('wms_jobs')
-                    .select('id')
-                    .or(`order_ref.eq.${activeTransferJob.id},order_ref.eq.${activeTransferJob.jobNumber}`);
-
-                if (dispatchJobs && dispatchJobs.length > 0) {
-                    for (const dj of dispatchJobs) {
-                        await wmsJobsService.update(dj.id, {
-                            status: 'Completed',
-                            transferStatus: 'Received',
-                            receivedAt: timestamp
-                        });
-                    }
-                }
-            } catch (err) {
-                logger.warn('TransferReceiving', `Failed to complete child DISPATCH job: ${String(err)}`);
-            }
-
-            // 5. Complete transfers table record atomically
-            const targetTransferId = activeTransferJob.orderRef || activeTransferJob.id;
-            if (targetTransferId) {
-                try {
-                    await transfersService.receiveAtomic(targetTransferId, {
-                        receiverName,
-                        hasDiscrepancy,
-                        discrepancyDetails: hasDiscrepancy ? `${discrepancyCount} units variance` : undefined
-                    });
-                } catch (syncErr) {
-                    logger.warn('TransferReceiving', `Transfers atomic receive notice: ${String(syncErr)}`);
-                }
-            }
-
+            // The database trigger records the linked transfer summary with this acceptance.
             // If discrepancy occurred, dispatch event to penalize gamification accuracy & log audit
             if (hasDiscrepancy) {
                 const responsibleEmployeeId = activeTransferJob.assignedTo || assignedDriver?.id;

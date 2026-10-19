@@ -4,18 +4,19 @@ import { WMSJob, Site, User, Product } from '../../../types';
 import { formatJobId } from '../../../utils/jobIdFormatter';
 import Pagination from '../../shared/Pagination';
 import { PartialDeliveryModal } from './PartialDeliveryModal';
+import { canManageDispatch, getShipmentPhase, getShipmentQuantity } from '../../../utils/shipmentWorkflow';
 
 interface DriverActiveMissionProps {
     t: (key: string) => string; filteredJobs: WMSJob[]; employees: any[];
-    user: User | null; sites: Site[]; jobs: WMSJob[]; products: Product[];
+    user: User | null; sites: Site[]; products: Product[];
     setSelectedJob: (job: WMSJob | null) => void; setIsDetailsOpen: (val: boolean) => void;
     processingJobIds: Set<string>; setProcessingJobIds: React.Dispatch<React.SetStateAction<Set<string>>>;
-    wmsJobsService: any; refreshData: () => Promise<void>; refreshJobs?: () => void; addNotification: (type: string, message: string) => void;
-    adjustStockMutation: any; addProduct: any; globalSearch: string;
+    refreshData: () => Promise<void>; refreshJobs?: () => void; addNotification: (type: string, message: string) => void;
+    globalSearch: string;
 }
 
 export const DriverActiveMission: React.FC<DriverActiveMissionProps> = ({
-    t, filteredJobs, employees, user, sites, jobs, products, setSelectedJob, setIsDetailsOpen, processingJobIds, setProcessingJobIds, wmsJobsService, refreshData, refreshJobs, addNotification, adjustStockMutation, addProduct, globalSearch
+    t, filteredJobs, employees, user, sites, products, setSelectedJob, setIsDetailsOpen, processingJobIds, setProcessingJobIds, refreshData, refreshJobs, addNotification, globalSearch
 }) => {
     const [currentPage, setCurrentPage] = useState(1);
     const ITEMS_PER_PAGE = 5;
@@ -26,33 +27,14 @@ export const DriverActiveMission: React.FC<DriverActiveMissionProps> = ({
     }, [globalSearch]);
 
     const myJobs = useMemo(() => {
-        const canSeeGlobalQueue = ['super_admin', 'admin', 'manager', 'regional_manager', 'operations_manager', 'warehouse_manager', 'dispatcher'].includes((user?.role || '').toLowerCase());
-        const currentEmployee = employees.find(e => (user?.email && e.email === user.email) || (user?.name && e.name?.toLowerCase() === user.name.toLowerCase()) || ((user as any)?.employeeId && e.id === (user as any).employeeId) || e.id === user?.id);
-        const employeeId = currentEmployee?.id || user?.id;
-        const result = filteredJobs.filter(j => {
-            if (j.type !== 'DISPATCH' && j.type !== 'TRANSFER' && j.type !== 'DRIVER') return false;
-            if (j.status === 'Cancelled' || j.transferStatus === 'Cancelled' || j.transferStatus === 'Rejected') return false;
-
-            // Suppress parent TRANSFER if a child DISPATCH exists
-            if (j.type === 'TRANSFER') {
-                const hasChildDispatch = filteredJobs.some(d =>
-                    d.type === 'DISPATCH' &&
-                    (d.orderRef === j.id || d.orderRef === j.jobNumber) &&
-                    d.status !== 'Cancelled'
-                );
-                if (hasChildDispatch) return false;
-            }
-
-            if (canSeeGlobalQueue ? !j.assignedTo : j.assignedTo !== employeeId) return false;
-            if (j.status === 'Completed' || j.transferStatus === 'Delivered' || j.transferStatus === 'Received') return false;
-            return (j.transferStatus === 'In-Transit' || j.transferStatus === 'Shipped');
-        });
+        const result = filteredJobs.filter(job => getShipmentPhase(job) === 'in-transit');
         const query = globalSearch.toLowerCase().trim();
         if (!query) return result;
         return result.filter(j => formatJobId(j).toLowerCase().includes(query) || sites.find(s => s.id === j.destSiteId)?.name?.toLowerCase().includes(query) || j.trackingNumber?.toLowerCase().includes(query));
     }, [filteredJobs, employees, user, globalSearch, sites]);
 
     const totalPages = Math.ceil(myJobs.length / ITEMS_PER_PAGE);
+    useEffect(() => setCurrentPage(page => Math.min(page, Math.max(1, totalPages))), [totalPages]);
     const paginatedJobs = useMemo(() => myJobs.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE), [myJobs, currentPage]);
 
     return (
@@ -108,7 +90,7 @@ export const DriverActiveMission: React.FC<DriverActiveMissionProps> = ({
                                             <div className="p-2 sm:p-3 bg-[var(--theme-bg-subtle)] rounded-lg sm:rounded-xl border border-[var(--theme-border)]">
                                                 <div className="flex flex-wrap gap-1 sm:gap-1.5">
                                                     {lineItems.slice(0, 3).map((item: any, idxItem: number) => {
-                                                        const qty = item.expectedQty || item.packedQty || item.pickedQty || item.quantity || 1;
+                                                        const qty = getShipmentQuantity(item);
                                                         return (
                                                             <span key={idxItem} className="inline-flex items-center gap-1 bg-[var(--theme-bg-card)] px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-md sm:rounded-lg text-[10px] sm:text-xs text-[var(--theme-text-secondary)] font-medium border border-[var(--theme-border)] max-w-[140px] sm:max-w-[170px] truncate">
                                                                 <span className="truncate">{item.name || item.sku}</span>
@@ -129,7 +111,7 @@ export const DriverActiveMission: React.FC<DriverActiveMissionProps> = ({
                                     {/* Actions & Driver Info */}
                                     <div className="flex flex-wrap items-center justify-between gap-1.5 sm:gap-2 pt-1.5 sm:pt-2 border-t border-[var(--theme-border)]">
                                         {(() => {
-                                            const canSeeGlobalQueue = ['super_admin', 'admin', 'manager', 'regional_manager', 'operations_manager', 'warehouse_manager', 'dispatcher'].includes((user?.role || '').toLowerCase());
+                                            const canSeeGlobalQueue = canManageDispatch(user?.role);
                                             if (canSeeGlobalQueue && job.assignedTo) {
                                                 const assignedEmployee = employees.find(e => e.id === job.assignedTo);
                                                 return (
@@ -153,8 +135,8 @@ export const DriverActiveMission: React.FC<DriverActiveMissionProps> = ({
                                                 (() => {
                                                     const currentEmp = employees.find(e => (user?.email && e.email === user.email) || (user?.name && e.name?.toLowerCase() === user.name.toLowerCase()) || ((user as any)?.employeeId && e.id === (user as any).employeeId) || e.id === user?.id);
                                                     const empId = currentEmp?.id || user?.id;
-                                                    const isAssigned = !job.assignedTo || job.assignedTo === empId || job.assignedTo === user?.id;
-                                                    const isManagerRole = ['super_admin', 'admin', 'manager', 'regional_manager', 'operations_manager', 'warehouse_manager'].includes((user?.role || '').toLowerCase());
+                                                    const isAssigned = Boolean(job.assignedTo) && (job.assignedTo === empId || job.assignedTo === user?.id);
+                                                    const isManagerRole = canManageDispatch(user?.role);
                                                     const canComplete = isAssigned || isManagerRole;
 
                                                     if (!canComplete) {
@@ -175,7 +157,7 @@ export const DriverActiveMission: React.FC<DriverActiveMissionProps> = ({
                                                             onClick={(e) => { e.stopPropagation(); setPartialDeliveryJob(job); }}
                                                             className="px-3 sm:px-5 py-1.5 sm:py-2 min-h-[34px] sm:min-h-[44px] bg-[var(--theme-primary)] hover:opacity-90 text-[var(--theme-primary-text)] rounded-lg sm:rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 shadow-xs active:scale-[0.98] transition-all touch-manipulation cursor-pointer"
                                                         >
-                                                            <CheckCircle size={14} className="sm:w-[15px] sm:h-[15px]" /> {t('warehouse.driverHub.completeDeliveryBtn') || 'Complete Delivery'}
+                                                            <CheckCircle size={14} className="sm:w-[15px] sm:h-[15px]" /> Record arrival
                                                         </button>
                                                     );
                                                 })()
@@ -204,13 +186,9 @@ export const DriverActiveMission: React.FC<DriverActiveMissionProps> = ({
                     user={user}
                     products={products}
                     sites={sites}
-                    wmsJobsService={wmsJobsService}
-                    adjustStockMutation={adjustStockMutation}
-                    addProduct={addProduct}
                     addNotification={addNotification as any}
                     refreshData={refreshData}
                     refreshJobs={refreshJobs}
-                    jobs={jobs}
                 />
             )}
         </div>

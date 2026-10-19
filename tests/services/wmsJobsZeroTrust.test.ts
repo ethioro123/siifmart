@@ -63,6 +63,18 @@ describe('WMS Jobs Zero-Trust Architecture & Country Scoping', () => {
         vi.clearAllMocks();
     });
 
+    it('updates a delivery once and leaves linked receipt synchronization to the database', async () => {
+        const { mockQueryBuilder } = await import('../../lib/supabase') as any;
+        mockQueryBuilder.single.mockResolvedValueOnce({ data: {
+            id: 'dispatch-1', site_id: 'source', type: 'DISPATCH', status: 'Completed', transfer_status: 'Delivered',
+            order_ref: 'parent-1', items_count: 10, line_items: [], country_code: 'KE'
+        }, error: null });
+        await wmsJobsService.update('dispatch-1', { status: 'Completed', transferStatus: 'Delivered', injected: 'unsafe' } as never);
+        expect(supabase.from).toHaveBeenCalledTimes(1);
+        expect(supabase.from).toHaveBeenCalledWith('wms_jobs');
+        expect(mockQueryBuilder.update).toHaveBeenCalledWith({ status: 'Completed', transfer_status: 'Delivered' });
+    });
+
     it('creates a PACK through the completed-PICK database function and maps the returned row', async () => {
         const { mockRpc } = await import('../../lib/supabase') as any;
         const packRow = {

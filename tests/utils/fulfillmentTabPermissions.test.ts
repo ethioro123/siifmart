@@ -19,7 +19,7 @@ describe('Fulfillment tab permissions', () => {
     });
 
     it.each([
-        ['receiver', ['RECEIVE', 'PUTAWAY', 'PICK', 'PACK']],
+        ['receiver', ['RECEIVE', 'PUTAWAY', 'PICK', 'PACK', 'TRANSFER']],
         ['forklift_operator', ['RECEIVE', 'PUTAWAY', 'PICK', 'PACK']],
         ['inventory_specialist', ['RECEIVE', 'PUTAWAY', 'PICK', 'PACK', 'TRANSFER', 'REPLENISH', 'COUNT', 'WASTE', 'RETURNS', 'LABELS']],
         ['driver', ['RECEIVE', 'PUTAWAY', 'PICK', 'PACK', 'DRIVER']],
@@ -38,8 +38,13 @@ describe('Fulfillment tab permissions', () => {
         expect(getVisibleFulfillmentTabs(' Driver ')).toEqual(['RECEIVE', 'PUTAWAY', 'PICK', 'PACK', 'DRIVER']);
     });
 
-    it.each(FLOOR_WORKER_ROLES.filter(role => role !== 'inventory_specialist'))('keeps floor worker %s out of the transfer tab', role => {
+    it.each(FLOOR_WORKER_ROLES.filter(role => role !== 'inventory_specialist' && role !== 'receiver'))('keeps floor worker %s out of the transfer tab', role => {
         expect(getVisibleFulfillmentTabs(role)).not.toContain('TRANSFER');
+    });
+
+    it('lets receivers inspect incoming transfers without approval authority', () => {
+        expect(getVisibleFulfillmentTabs('receiver')).toContain('TRANSFER');
+        expect(isTransferManager({ id: 'receiver', name: 'Receiver', role: 'receiver', avatar: '', title: '' })).toBe(false);
     });
 
     it('lets inventory specialists prepare transfers without approval authority', () => {
@@ -76,9 +81,9 @@ describe('Fulfillment tab permissions', () => {
             ['inventory_specialist', 'COUNT'],
             ['returns_clerk', 'RETURNS'],
             ['replenishment_planner', 'REPLENISH'],
-            ['dispatcher', 'ASSIGN'],
-            ['dispatch_manager', 'ASSIGN'],
-            ['fleet_maintenance_supervisor', 'DRIVER'],
+            ['dispatcher', 'DOCKS'],
+            ['dispatch_manager', 'DOCKS'],
+            ['fleet_maintenance_supervisor', 'DOCKS'],
             ['warehouse_manager', 'DOCKS'],
             ['logistics_manager', 'DOCKS'],
         ])('routes %s directly to their main working tab %s', (role, expectedTab) => {
