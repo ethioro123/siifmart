@@ -23,6 +23,10 @@ export interface JobItem {
   location?: string;
   suggestedLocation?: string;
   returnedQty?: number;
+  dispatchedQty?: number;
+  shippedQty?: number;
+  deliveredQty?: number;
+  undeliveredQty?: number;
   returnedAt?: string;
   size?: string;
   brand?: string;

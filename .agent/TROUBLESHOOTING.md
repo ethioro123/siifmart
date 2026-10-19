@@ -19,6 +19,7 @@
 | Permission denied on action | RBAC check failing | `services/permissions.service.ts` | Check role hierarchy (L1-L4) |
 | Session expired | Token refresh failing | `hooks/useSessionManager.ts`, `services/auth.service.ts` | Check Supabase token refresh |
 | RLS blocking query | Policy, grant, role, or JWT scope mismatch | Migration, Supabase schema/policies, service | Identify the failing operation and role; update only the needed policy after review |
+| New staging employees missing from Quick Login | An old fixed roster or the wrong project environment | `hooks/useStagingQuickLogin.ts`, local staging bridge, `docs/STAGING_QUICK_LOGIN.md` | Run local staging and refresh the live roster. Check private server setup if loading fails; never add passwords to the UI or a tracked account list |
 
 ## POS Issues
 

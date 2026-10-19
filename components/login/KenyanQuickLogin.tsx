@@ -1,153 +1,19 @@
 import React, { useState, useMemo } from 'react';
 import { Building2, Warehouse, Store, ChevronDown, ChevronUp, ShieldCheck, UserCheck, Crown, Search } from 'lucide-react';
-import stagingAccountsData from './stagingAccounts.json';
+import { useStagingAccounts } from '../../hooks/useStagingQuickLogin';
+import { isStagingQuickLoginAvailable, type StagingQuickAccount } from '../../utils/stagingQuickLogin';
+export { checkIsLocalhost } from '../../utils/stagingQuickLogin';
 
-export interface StagingQuickAccount {
-  name: string;
-  role: string;
-  code: string;
-  email: string;
-  password: string;
-  country: 'KE' | 'ET' | 'GLOBAL';
+interface StagingSiteGroup {
   siteCode: string;
   siteName: string;
-  siteType: 'HQ' | 'Administration' | 'Regional Administration' | 'Warehouse' | 'Store' | 'Distribution Center' | 'Online Store';
-}
-
-export interface StagingSiteGroup {
-  siteCode: string;
-  siteName: string;
-  siteType: 'HQ' | 'Administration' | 'Regional Administration' | 'Warehouse' | 'Store' | 'Distribution Center' | 'Online Store';
-  country?: 'KE' | 'ET' | 'GLOBAL';
+  siteType: StagingQuickAccount['siteType'];
+  country: StagingQuickAccount['country'];
   accounts: StagingQuickAccount[];
 }
 
-export type KenyanQuickAccount = StagingQuickAccount;
-export type KenyanSiteGroup = StagingSiteGroup;
-
-/**
- * Backward compatibility export for Kenyan worker topology tests.
- */
-export const KENYAN_QUICK_SITES: KenyanSiteGroup[] = [
-  {
-    siteCode: 'KE-01',
-    siteName: 'Kenya Central Operations',
-    siteType: 'Administration',
-    country: 'KE',
-    accounts: [
-      {
-        name: 'Kamau Ndenga',
-        role: 'Regional Manager',
-        code: 'KE-SIIF0040',
-        email: 'ke-siif0040@siifmart.com',
-        password: 'kenya123',
-        country: 'KE',
-        siteCode: 'KE-01',
-        siteName: 'Kenya Central Operations',
-        siteType: 'Administration'
-      },
-      {
-        name: 'Omondi Samuel',
-        role: 'Operations Manager',
-        code: 'KE-SIIF0041',
-        email: 'ke-siif0041@siifmart.com',
-        password: 'kenya123',
-        country: 'KE',
-        siteCode: 'KE-01',
-        siteName: 'Kenya Central Operations',
-        siteType: 'Administration'
-      },
-      {
-        name: 'Musyoka Kioko',
-        role: 'HR Manager',
-        code: 'KE-SIIF0043',
-        email: 'ke-siif0043@siifmart.com',
-        password: 'kenya123',
-        country: 'KE',
-        siteCode: 'KE-01',
-        siteName: 'Kenya Central Operations',
-        siteType: 'Administration'
-      },
-      {
-        name: 'Oscar Kennedy',
-        role: 'Procurement Manager',
-        code: 'KE-SIIF0045',
-        email: 'ke-siif0045@siifmart.com',
-        password: 'kenya123',
-        country: 'KE',
-        siteCode: 'KE-01',
-        siteName: 'Kenya Central Operations',
-        siteType: 'Administration'
-      }
-    ]
-  },
-  {
-    siteCode: 'KE-02',
-    siteName: 'Eastleigh 01',
-    siteType: 'Warehouse',
-    country: 'KE',
-    accounts: [
-      {
-        name: 'Kennedy Odhiambo Odhiambo',
-        role: 'Warehouse Manager',
-        code: 'KE-SIIF0044',
-        email: 'ke-siif0044@siifmart.com',
-        password: 'kenya123',
-        country: 'KE',
-        siteCode: 'KE-02',
-        siteName: 'Eastleigh 01',
-        siteType: 'Warehouse'
-      }
-    ]
-  },
-  {
-    siteCode: 'KE-03',
-    siteName: 'Kileleshwa',
-    siteType: 'Store',
-    country: 'KE',
-    accounts: [
-      {
-        name: 'Makena Benson',
-        role: 'Store Manager',
-        code: 'KE-SIIF0042',
-        email: 'ke-siif0042@siifmart.com',
-        password: 'kenya123',
-        country: 'KE',
-        siteCode: 'KE-03',
-        siteName: 'Kileleshwa',
-        siteType: 'Store'
-      }
-    ]
-  }
-];
-
-export const ALL_STAGING_ACCOUNTS: StagingQuickAccount[] = stagingAccountsData as StagingQuickAccount[];
-
-export function checkIsLocalhost(hostname?: string, isDev?: boolean): boolean {
-  const currentDev = isDev !== undefined ? isDev : Boolean(import.meta.env.DEV);
-  if (!currentDev) return false;
-
-  const currentHost = hostname !== undefined 
-    ? hostname 
-    : (typeof window !== 'undefined' ? window.location.hostname : '');
-  
-  if (!currentHost) return false;
-
-  const blockedDomains = ['vercel.app', 'siifmart.com', 'netlify.app', 'github.io', 'onrender.com'];
-  if (blockedDomains.some(domain => currentHost.includes(domain))) {
-    return false;
-  }
-
-  return (
-    currentHost === 'localhost' ||
-    currentHost === '127.0.0.1' ||
-    currentHost === '::1' ||
-    currentHost.endsWith('.localhost')
-  );
-}
-
 interface StagingQuickLoginProps {
-  onSelectAccount: (email: string, password: string) => void;
+  onSelectAccount: (email: string) => void;
   disabled?: boolean;
 }
 
@@ -155,20 +21,19 @@ export function KenyanQuickLogin({ onSelectAccount, disabled = false }: StagingQ
   const [isOpen, setIsOpen] = useState(false);
   const [countryFilter, setCountryFilter] = useState<'ALL' | 'KE' | 'ET'>('ALL');
   const [searchQuery, setSearchQuery] = useState('');
-  const isLocalhost = checkIsLocalhost();
-
-  if (!isLocalhost) {
-    return null;
-  }
+  const isLocalhost = isStagingQuickLoginAvailable();
+  const { data: accounts = [], isLoading, error } = useStagingAccounts();
 
   const getSiteIcon = (type: StagingQuickAccount['siteType']) => {
     switch (type) {
       case 'HQ':
         return <Crown size={13} className="shrink-0 text-amber-600 dark:text-amber-400" />;
-      case 'Administration':
+      case 'Regional Administration':
         return <Building2 size={13} className="shrink-0 text-[#2C5E3B] dark:text-[#A9CBA2]" />;
+      case 'Distribution Center':
       case 'Warehouse':
         return <Warehouse size={13} className="shrink-0 text-amber-700 dark:text-amber-400" />;
+      case 'Online Store':
       case 'Store':
         return <Store size={13} className="shrink-0 text-blue-700 dark:text-blue-400" />;
     }
@@ -176,7 +41,7 @@ export function KenyanQuickLogin({ onSelectAccount, disabled = false }: StagingQ
 
   const groupedSites = useMemo(() => {
     const q = searchQuery.toLowerCase().trim();
-    const filtered = ALL_STAGING_ACCOUNTS.filter(acc => {
+    const filtered = accounts.filter(acc => {
       if (countryFilter !== 'ALL' && acc.country !== 'GLOBAL' && acc.country !== countryFilter) {
         return false;
       }
@@ -185,6 +50,7 @@ export function KenyanQuickLogin({ onSelectAccount, disabled = false }: StagingQ
         acc.name.toLowerCase().includes(q) ||
         acc.role.toLowerCase().includes(q) ||
         acc.siteName.toLowerCase().includes(q) ||
+        acc.siteCode.toLowerCase().includes(q) ||
         acc.code.toLowerCase().includes(q) ||
         acc.email.toLowerCase().includes(q)
       );
@@ -204,7 +70,9 @@ export function KenyanQuickLogin({ onSelectAccount, disabled = false }: StagingQ
       groups[acc.siteCode].accounts.push(acc);
     }
     return Object.values(groups);
-  }, [countryFilter, searchQuery]);
+  }, [accounts, countryFilter, searchQuery]);
+
+  if (!isLocalhost) return null;
 
   return (
     <div className="mt-6 pt-5 border-t border-[#E2DCCE]/50 dark:border-white/[0.06]">
@@ -220,7 +88,7 @@ export function KenyanQuickLogin({ onSelectAccount, disabled = false }: StagingQ
             Staging Quick Login
           </span>
           <span className="text-[9px] font-bold tracking-wider uppercase px-1.5 py-0.5 rounded-md bg-[#2C5E3B]/10 dark:bg-[#A9CBA2]/15 text-[#2C5E3B] dark:text-[#A9CBA2]">
-            84 Roles Available
+            {accounts.length} Employees Available
           </span>
         </div>
         {isOpen ? (
@@ -246,7 +114,7 @@ export function KenyanQuickLogin({ onSelectAccount, disabled = false }: StagingQ
                       : 'bg-stone-100 dark:bg-white/[0.05] text-stone-600 dark:text-stone-300 hover:bg-stone-200 dark:hover:bg-white/[0.1]'
                   }`}
                 >
-                  {f === 'ALL' ? 'All (84 Roles)' : f === 'KE' ? 'Kenya (42)' : 'Ethiopia (42)'}
+                  {f === 'ALL' ? `All (${accounts.length})` : `${f === 'KE' ? 'Kenya' : 'Ethiopia'} (${accounts.filter(a => a.country === f).length})`}
                 </button>
               ))}
             </div>
@@ -264,7 +132,7 @@ export function KenyanQuickLogin({ onSelectAccount, disabled = false }: StagingQ
           </div>
 
           <div className="space-y-4 max-h-80 overflow-y-auto pr-1 custom-scrollbar">
-            {groupedSites.length === 0 ? (
+            {isLoading ? <p className="text-xs text-[var(--theme-text-secondary)] py-4">Loading test employees…</p> : error ? <p role="alert" className="text-xs text-[var(--theme-text-secondary)] py-4">{error.message}</p> : groupedSites.length === 0 ? (
               <p className="text-xs text-stone-400 text-center py-4">No matching roles found.</p>
             ) : (
               groupedSites.map((site) => (
@@ -287,7 +155,7 @@ export function KenyanQuickLogin({ onSelectAccount, disabled = false }: StagingQ
                         key={acc.email}
                         type="button"
                         disabled={disabled}
-                        onClick={() => onSelectAccount(acc.email, acc.password)}
+                        onClick={() => onSelectAccount(acc.email)}
                         className="p-2 text-left bg-white/70 dark:bg-black/30 hover:bg-stone-50 dark:hover:bg-white/[0.05] border border-[#E2DCCE]/60 dark:border-white/[0.06] hover:border-[#2C5E3B] dark:hover:border-[#A9CBA2] rounded-xl transition-all duration-200 flex flex-col justify-between group active:scale-[0.98] cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                       >
                         <div className="flex items-start justify-between gap-1 w-full">

@@ -4,6 +4,11 @@
 
 ## Active Features
 
+### Live Staging Quick Login (2026-10-19)
+- Desktop and mobile Quick Login now load all active staging test employees, including the 168 added role-coverage accounts, with live counts and search by role, employee or facility. Removed the obsolete fixed roster and frontend passwords. A loopback-only Vite bridge keeps the staging executive credential in ignored server configuration; a JWT-protected staging-only function verifies executive authority and returns the selected test employee's session using a one-time token. Country/site permissions remain those of the selected employee. Credential handover fields are unchanged.
+- **Files**: `components/LoginPage.tsx`, `components/login/`, `hooks/useStagingQuickLogin.ts`, `services/staging-quick-login.service.ts`, `utils/stagingQuickLogin.ts`, `dev/stagingQuickLoginPlugin.ts`, `dev/stagingQuickLoginPolicy.ts`, `supabase/functions/staging-quick-login/`, `docs/STAGING_QUICK_LOGIN.md`, related service/component/policy tests and `tests/e2e/staging-quick-login.spec.ts`
+- **Deployment**: `staging-quick-login` deployed to SIIFMART Staging only, with JWT verification enabled. Private local credentials are excluded from Git and the client bundle.
+
 ### Recoverable Employee Onboarding Drafts (2026-10-19)
 - Shared HR, POS, and WMS onboarding now saves candidate progress automatically, flushes pending progress when the wizard closes or the page leaves, and provides a country-scoped saved-drafts drawer for resuming or deleting work. Drafts remain on the current device; candidate passwords are stripped when saving and cleared from legacy drafts on read, so they must be entered again after resuming.
 - **Files**: `hooks/useEmployeeWizard.ts`, `hooks/useEmployeeDrafts.ts`, `utils/employeeDrafts.ts`, `components/employees/modals/AddEmployeeWizard.tsx`, `components/employees/OnboardTalentModal.tsx`, `components/employees/wizard/EmployeeDraftsDrawer.tsx`

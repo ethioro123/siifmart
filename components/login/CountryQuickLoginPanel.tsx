@@ -1,37 +1,13 @@
 import React, { useState, useMemo } from 'react';
 import { Building2, Landmark, Warehouse, Store, Truck, ShoppingBag, UserCheck, Search, ShieldCheck } from 'lucide-react';
-import stagingAccountsData from './stagingAccounts.json';
-import { checkIsLocalhost } from './KenyanQuickLogin';
-
-export type FacilityTierType = 'HQ' | 'Regional Administration' | 'Operation Sites';
-export type StagingSiteType =
-  | 'HQ'
-  | 'Regional Administration'
-  | 'Store'
-  | 'Warehouse'
-  | 'Distribution Center'
-  | 'Online Store';
-
-export interface StagingQuickAccount {
-  name: string;
-  role: string;
-  roleId: string;
-  level: number;
-  levelTag: string;
-  code: string;
-  email: string;
-  password: string;
-  country: 'KE' | 'ET' | 'GLOBAL';
-  facilityTier: FacilityTierType;
-  siteCode: string;
-  siteName: string;
-  siteType: StagingSiteType;
-}
+import { useStagingAccounts } from '../../hooks/useStagingQuickLogin';
+import { isStagingQuickLoginAvailable, type FacilityTierType, type StagingSiteType, type StagingQuickAccount } from '../../utils/stagingQuickLogin';
+export type { StagingQuickAccount } from '../../utils/stagingQuickLogin';
 
 interface CountryQuickLoginPanelProps {
   country: 'ET' | 'KE';
   title: string;
-  onSelectAccount: (email: string, password: string) => void;
+  onSelectAccount: (email: string) => void;
   disabled?: boolean;
 }
 
@@ -48,13 +24,14 @@ export function CountryQuickLoginPanel({
   const [tierFilter, setTierFilter] = useState<TierFilter>('ALL');
   const [opsSiteFilter, setOpsSiteFilter] = useState<OpsSiteFilter>('ALL_OPS');
   const [levelFilter, setLevelFilter] = useState<'ALL' | 1 | 2 | 3 | 4>('ALL');
-  const isLocalhost = checkIsLocalhost();
+  const isLocalhost = isStagingQuickLoginAvailable();
+  const { data: roster = [], isLoading, error } = useStagingAccounts();
 
   const accounts = useMemo(() => {
-    return (stagingAccountsData as StagingQuickAccount[]).filter(
+    return roster.filter(
       acc => acc.country === country
     );
-  }, [country]);
+  }, [country, roster]);
 
   const filteredGroups = useMemo(() => {
     const q = searchQuery.toLowerCase().trim();
@@ -77,6 +54,7 @@ export function CountryQuickLoginPanel({
         acc.role.toLowerCase().includes(q) ||
         acc.roleId.toLowerCase().includes(q) ||
         acc.siteName.toLowerCase().includes(q) ||
+        acc.siteCode.toLowerCase().includes(q) ||
         acc.siteType.toLowerCase().includes(q) ||
         acc.code.toLowerCase().includes(q) ||
         acc.email.toLowerCase().includes(q)
@@ -152,7 +130,7 @@ export function CountryQuickLoginPanel({
     : 'bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border-emerald-500/30';
 
   return (
-    <div className="w-full lg:w-[350px] xl:w-[380px] bg-white/80 dark:bg-[#18201B]/55 border border-[#E2DCCE] dark:border-emerald-950/20 rounded-[28px] p-4 sm:p-5 shadow-[0_16px_50px_-10px_rgba(34,50,38,0.04)] dark:shadow-[0_20px_60px_-10px_rgba(5,8,6,0.5)] lg:backdrop-blur-xl flex flex-col h-[720px] max-h-[88vh] transition-all duration-300">
+    <div role="region" aria-label={title} className="w-full lg:w-[350px] xl:w-[380px] bg-white/80 dark:bg-[#18201B]/55 border border-[#E2DCCE] dark:border-emerald-950/20 rounded-[28px] p-4 sm:p-5 shadow-[0_16px_50px_-10px_rgba(34,50,38,0.04)] dark:shadow-[0_20px_60px_-10px_rgba(5,8,6,0.5)] lg:backdrop-blur-xl flex flex-col h-[720px] max-h-[88vh] transition-all duration-300">
       {/* Header */}
       <div className="flex items-center justify-between pb-3 border-b border-[#E2DCCE]/50 dark:border-white/[0.06]">
         <div className="flex items-center gap-2">
@@ -162,7 +140,7 @@ export function CountryQuickLoginPanel({
           </h3>
         </div>
         <span className={`text-[9px] font-bold tracking-wider uppercase px-2 py-0.5 rounded-full border ${badgeColor}`}>
-          {isEthiopia ? 'ETB • 55 Roles' : 'KES • 55 Roles'}
+          {accounts.length} Employees
         </span>
       </div>
 
@@ -182,10 +160,10 @@ export function CountryQuickLoginPanel({
       <div className="grid grid-cols-4 gap-1 mb-1.5">
         {(
           [
-            { key: 'ALL', label: 'All (55)' },
-            { key: 'HQ', label: 'HQ (23)' },
-            { key: 'REGIONAL', label: 'Regional (6)' },
-            { key: 'OPS', label: 'Ops Sites (26)' },
+            { key: 'ALL', label: `All (${accounts.length})` },
+            { key: 'HQ', label: `HQ (${accounts.filter(a => a.facilityTier === 'HQ').length})` },
+            { key: 'REGIONAL', label: `Regional (${accounts.filter(a => a.facilityTier === 'Regional Administration').length})` },
+            { key: 'OPS', label: `Ops (${accounts.filter(a => a.facilityTier === 'Operation Sites').length})` },
           ] as const
         ).map(tab => {
           const active = tierFilter === tab.key;
@@ -214,10 +192,10 @@ export function CountryQuickLoginPanel({
         {(
           [
             { key: 'ALL_OPS', label: 'All Ops' },
-            { key: 'Store', label: 'Store (7)' },
-            { key: 'Warehouse', label: 'WH (7)' },
-            { key: 'Distribution Center', label: 'DC (7)' },
-            { key: 'Online Store', label: 'Online (5)' },
+            { key: 'Store', label: `Store (${accounts.filter(a => a.siteType === 'Store').length})` },
+            { key: 'Warehouse', label: `WH (${accounts.filter(a => a.siteType === 'Warehouse').length})` },
+            { key: 'Distribution Center', label: `DC (${accounts.filter(a => a.siteType === 'Distribution Center').length})` },
+            { key: 'Online Store', label: `Online (${accounts.filter(a => a.siteType === 'Online Store').length})` },
           ] as const
         ).map(sub => {
           const active = tierFilter === 'OPS' && opsSiteFilter === sub.key;
@@ -272,7 +250,7 @@ export function CountryQuickLoginPanel({
 
       {/* Scrollable Role List */}
       <div className="flex-1 overflow-y-auto pr-1 space-y-4 custom-scrollbar">
-        {filteredGroups.length === 0 ? (
+        {isLoading ? <p className="text-xs text-[var(--theme-text-secondary)] py-4">Loading test employees…</p> : error ? <p role="alert" className="text-xs text-[var(--theme-text-secondary)] py-4">{error.message}</p> : filteredGroups.length === 0 ? (
           <p className="text-xs text-stone-400 text-center py-8">No matching roles found.</p>
         ) : (
           filteredGroups.map(site => (
@@ -300,7 +278,7 @@ export function CountryQuickLoginPanel({
                     key={acc.email}
                     type="button"
                     disabled={disabled}
-                    onClick={() => onSelectAccount(acc.email, acc.password)}
+                    onClick={() => onSelectAccount(acc.email)}
                     className="w-full p-2.5 text-left bg-white/60 dark:bg-white/[0.02] hover:bg-stone-50 dark:hover:bg-white/[0.06] border border-[#E2DCCE]/50 dark:border-white/[0.05] hover:border-[#2C5E3B] dark:hover:border-[#A9CBA2] rounded-xl transition-all duration-150 flex items-center justify-between group active:scale-[0.98] cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     <div className="flex flex-col min-w-0 pr-2">
@@ -338,7 +316,7 @@ export function CountryQuickLoginPanel({
       {/* Footer hint */}
       <div className="pt-2 border-t border-[#E2DCCE]/40 dark:border-white/[0.05] text-center">
         <span className="text-[9px] text-stone-400 dark:text-stone-500 font-mono">
-          Click any role to 1-click authenticate
+          Select an employee to sign in to staging
         </span>
       </div>
     </div>

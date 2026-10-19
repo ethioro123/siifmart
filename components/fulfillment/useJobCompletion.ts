@@ -377,8 +377,8 @@ export const useJobCompletion = (deps: UseJobCompletionDeps) => {
                 }
 
                 if (sale) {
-                    await salesService.update(sale.id, { fulfillmentStatus: 'Shipped' });
-                    setSales(prev => prev.map(s => s.id === sale.id ? { ...s, fulfillmentStatus: 'Shipped' } : s));
+                    await salesService.update(sale.id, { fulfillmentStatus: 'Packing' });
+                    setSales(prev => prev.map(s => s.id === sale.id ? { ...s, fulfillmentStatus: 'Packing' } : s));
                 } else if (isTransfer) {
                     await wmsJobsService.update(tId, { transferStatus: 'Packed' });
                     setJobs(prev => prev.map(j => j.id === tId ? { ...j, transferStatus: 'Packed' } : j));

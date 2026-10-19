@@ -4,9 +4,11 @@ import { useStore } from '../contexts/CentralStore';
 import { useData } from '../contexts/DataContext';
 import { authService } from '../services/auth.service';
 import { logger } from '../utils/logger';
-import { KenyanQuickLogin, checkIsLocalhost } from './login/KenyanQuickLogin';
+import { KenyanQuickLogin } from './login/KenyanQuickLogin';
 import { CountryQuickLoginPanel } from './login/CountryQuickLoginPanel';
 import Logo from './Logo';
+import { useStagingAccounts, useStagingQuickLogin } from '../hooks/useStagingQuickLogin';
+import { isStagingQuickLoginAvailable } from '../utils/stagingQuickLogin';
 
 type Mode = 'login' | 'forgot';
 
@@ -20,6 +22,9 @@ export default function LoginPage() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const quickLogin = useStagingQuickLogin();
+  const { data: stagingAccounts = [] } = useStagingAccounts();
+  const stagingExecutive = stagingAccounts.find(account => account.country === 'GLOBAL');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -53,20 +58,16 @@ export default function LoginPage() {
     setPassword('');
   };
 
-  const handleQuickLogin = async (quickEmail: string, quickPass: string) => {
+  const handleQuickLogin = async (quickEmail: string) => {
     setEmail(quickEmail);
-    setPassword(quickPass);
+    setPassword('');
     setError('');
     setSuccess('');
     setLoading(true);
 
     try {
-      const success = await login(quickEmail, quickPass);
-      if (success) {
-        window.location.hash = '#/';
-      } else {
-        setError('Invalid credentials. Please check your email and password.');
-      }
+      await quickLogin.mutateAsync(quickEmail);
+      window.location.hash = '#/';
     } catch (err: any) {
       logger.error('LoginPage', 'Quick login error:', err);
       setError(err.message || 'Authentication failed. Please try again.');
@@ -127,18 +128,18 @@ export default function LoginPage() {
           </div>
 
           {/* Quick Login for Global CEO on localhost */}
-          {mode === 'login' && checkIsLocalhost() && (
+          {mode === 'login' && isStagingQuickLoginAvailable() && stagingExecutive && (
             <button
               type="button"
               disabled={loading}
-              onClick={() => handleQuickLogin('admin@staging.siifmart.com', 'StagingPassword123!')}
+              onClick={() => handleQuickLogin(stagingExecutive.email)}
               className="w-full mb-4 py-2 px-3 rounded-xl bg-amber-500/10 dark:bg-amber-500/15 border border-amber-500/20 hover:border-amber-500/40 text-amber-800 dark:text-amber-200 text-xs font-semibold flex items-center justify-between transition-all active:scale-[0.99] cursor-pointer"
             >
               <div className="flex items-center gap-2">
                 <Crown size={14} className="text-amber-600 dark:text-amber-400" />
                 <span>Global CEO (All Access)</span>
               </div>
-              <span className="text-[10px] font-mono opacity-70">admin@staging.siifmart.com</span>
+              <span className="text-[10px] font-mono opacity-70">{stagingExecutive.email}</span>
             </button>
           )}
 
