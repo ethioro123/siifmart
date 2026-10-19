@@ -1,5 +1,5 @@
-import React from 'react';
-import { ArrowLeft, ArrowRight, CheckCircle, Loader2, Save } from 'lucide-react';
+import React, { useState } from 'react';
+import { ArrowLeft, ArrowRight, CheckCircle, FileText, Loader2, Save } from 'lucide-react';
 import Modal from '../../Modal';
 import { UserRole } from '../../../types';
 import { CURRENCY_SYMBOL } from '../../../constants';
@@ -12,6 +12,8 @@ import StepDetails from '../wizard/StepDetails';
 import StepDocuments from '../wizard/StepDocuments';
 import StepReview from '../wizard/StepReview';
 import { getOnboardingSubmitLabel, getOnboardingModalTitle, isDirectOnboardingAuthorized } from '../../../utils/employeeOnboardingGovernance';
+import type { EmployeeDraft } from '../../../utils/employeeDrafts';
+import { EmployeeDraftsDrawer } from '../wizard/EmployeeDraftsDrawer';
 
 interface AddEmployeeWizardProps {
     isOpen: boolean;
@@ -35,6 +37,14 @@ interface AddEmployeeWizardProps {
     resetWizard: () => void;
     canAdjustPayroll: boolean;
     handleSaveDraft?: () => void;
+    drafts?: EmployeeDraft[];
+    activeDraftId?: string | null;
+    onResumeDraft?: (draftId: string) => void;
+    onDeleteDraft?: (draftId: string) => void;
+    onStartNewCandidate?: () => void;
+    isSavingDraft?: boolean;
+    draftSaveError?: boolean;
+    lastSavedAt?: string | null;
     quotaResult?: any;
 }
 
@@ -58,13 +68,23 @@ export default function AddEmployeeWizard({
     resetWizard,
     canAdjustPayroll,
     handleSaveDraft,
+    drafts = [],
+    activeDraftId = null,
+    onResumeDraft,
+    onDeleteDraft,
+    onStartNewCandidate,
+    isSavingDraft = false,
+    draftSaveError = false,
+    lastSavedAt,
     quotaResult
 }: AddEmployeeWizardProps) {
     const { settings, activeSite, addNotification } = useData();
+    const [isDraftsOpen, setIsDraftsOpen] = useState(false);
     const currencySymbol = (activeSite as any)?.currency || settings?.currency || CURRENCY_SYMBOL;
     const isDirect = isDirectOnboardingAuthorized(user?.role, newEmpData.role, Boolean(quotaResult?.canAutoActivate));
 
     return (
+        <>
         <Modal
             isOpen={isOpen}
             onClose={resetWizard}
@@ -85,7 +105,7 @@ export default function AddEmployeeWizard({
                     </button>
 
                     <div className="flex items-center gap-2">
-                        {handleSaveDraft && !isDirect && (
+                        {handleSaveDraft && (
                             <button
                                 type="button"
                                 onClick={handleSaveDraft}
@@ -121,6 +141,21 @@ export default function AddEmployeeWizard({
             }
         >
             <div className="flex flex-col">
+                <>
+                    <div className="mb-3 flex flex-wrap items-center justify-between gap-2 rounded-xl border border-[var(--theme-border)] bg-[var(--theme-bg-card)] px-3 py-2">
+                        <div className="text-xs text-[var(--theme-text-secondary)]" role="status" aria-live="polite">
+                            {draftSaveError ? 'Could not save on this device. Check browser storage.' :
+                                isSavingDraft ? 'Saving draft…' : lastSavedAt ? 'Progress saved on this device' : 'Progress saves automatically as you work'}
+                        </div>
+                        <button
+                            type="button"
+                            onClick={() => setIsDraftsOpen(true)}
+                            className="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-semibold text-[var(--theme-text-primary)] hover:bg-[var(--theme-bg-subtle)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--theme-accent)]"
+                        >
+                            <FileText size={14} /> Saved drafts ({drafts.length})
+                        </button>
+                    </div>
+                </>
                 {/* 5-Step Stepper */}
                 <WizardStepper currentStep={addStep} steps={WIZARD_STEPS} />
 
@@ -175,5 +210,23 @@ export default function AddEmployeeWizard({
                 </div>
             </div>
         </Modal>
+        {onResumeDraft && onDeleteDraft && onStartNewCandidate && (
+            <EmployeeDraftsDrawer
+                isOpen={isDraftsOpen}
+                onClose={() => setIsDraftsOpen(false)}
+                drafts={drafts}
+                activeDraftId={activeDraftId}
+                onResumeDraft={draftId => {
+                    onResumeDraft(draftId);
+                    setIsDraftsOpen(false);
+                }}
+                onDeleteDraft={onDeleteDraft}
+                onStartNewCandidate={() => {
+                    onStartNewCandidate();
+                    setIsDraftsOpen(false);
+                }}
+            />
+        )}
+        </>
     );
 }

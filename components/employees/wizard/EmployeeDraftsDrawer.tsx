@@ -103,7 +103,7 @@ export const EmployeeDraftsDrawer: React.FC<EmployeeDraftsDrawerProps> = ({
                                     No Saved Drafts
                                 </h4>
                                 <p className="text-xs text-[var(--theme-text-secondary)] max-w-sm mx-auto mt-1">
-                                    Click "Save Draft" at any step during onboarding to preserve candidate progress and resume anytime.
+                                    Onboarding progress is saved automatically after you enter candidate details.
                                 </p>
                             </div>
                         </div>
@@ -197,7 +197,7 @@ export const EmployeeDraftsDrawer: React.FC<EmployeeDraftsDrawerProps> = ({
 
                 {/* Footer info */}
                 <div className="p-3 px-5 border-t border-[var(--theme-border)] bg-[var(--theme-bg-card)] flex items-center justify-between text-[11px] text-[var(--theme-text-secondary)]">
-                    <span>Drafts are securely isolated per country and stored locally.</span>
+                    <span>Drafts stay on this device and are separated by country. Passwords must be entered again.</span>
                     <button
                         type="button"
                         onClick={onClose}

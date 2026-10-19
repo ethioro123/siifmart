@@ -7,7 +7,7 @@ import { employeesService } from '../services/employees.service';
 import { normalizeCountryCode, generateEmployeeEmail } from '../utils/employeeIdGenerator';
 import { getSiteCountryId } from '../utils/siteIdGenerator';
 import { isDirectOnboardingAuthorized, persistCandidateDocuments } from '../utils/employeeOnboardingGovernance';
-import { saveEmployeeDraft } from '../utils/employeeDrafts';
+import { useEmployeeDrafts } from './useEmployeeDrafts';
 import { systemLogsService } from '../services/system-logs.service';
 import { createAuthAccountForNewHire } from '../utils/employeeAuthHelper';
 import { headcountQuotaService, QuotaEvaluationResult } from '../services/headcountQuota.service';
@@ -139,7 +139,7 @@ export function useEmployeeWizard({
       setAddStep(1);
    };
 
-   const handleOpenWizard = () => {
+   const openBlankWizard = () => {
       const validRoles = getCreatableRoles();
       const validDepts = getAvailableDepartments();
       const initialRole = validRoles.length > 0 ? validRoles[0] : 'pos';
@@ -172,6 +172,29 @@ export function useEmployeeWizard({
       });
       setIsAddModalOpen(true);
       setAddStep(1);
+   };
+
+   const assignedDraftSite = sites.find(site => site.id === newEmpData.siteId);
+   const draftCountryCode = normalizeCountryCode(
+      getSiteCountryId(assignedDraftSite) || activeSite?.country || 'ET'
+   );
+   const draftManager = useEmployeeDrafts({
+      countryCode: draftCountryCode,
+      sites,
+      newEmpData,
+      setNewEmpData,
+      addStep,
+      setAddStep,
+      addNotification,
+      resetWizard,
+      isWizardOpen: isAddModalOpen,
+      onResumeDraft: () => setIsAddModalOpen(true),
+      onStartNewCandidate: openBlankWizard
+   });
+
+   const handleOpenWizard = () => {
+      draftManager.setActiveDraftId(null);
+      openBlankWizard();
    };
 
    const handleRoleChange = (newRole: UserRole) => {
@@ -387,6 +410,7 @@ export function useEmployeeWizard({
 
          const result = addEmployee(newEmp);
          if (result instanceof Promise) await result;
+         draftManager.handleFinalSubmitSuccess();
 
          if (typeof window !== 'undefined' && newEmpData.password) {
             localStorage.setItem(`siifmart_temp_pwd_${employeeId}`, newEmpData.password);
@@ -440,17 +464,6 @@ export function useEmployeeWizard({
       }
    };
 
-   const handleSaveDraft = () => {
-      if (!newEmpData.firstName.trim() && !newEmpData.role) {
-         addNotification('alert', 'Please enter at least candidate name or role before saving a draft.');
-         return;
-      }
-      const assignedSite = sites.find(s => s.id === newEmpData.siteId);
-      const targetCountry = normalizeCountryCode(getSiteCountryId(assignedSite) || activeSite?.country || 'ET');
-      const draft = saveEmployeeDraft(newEmpData, addStep, undefined, targetCountry, assignedSite?.name);
-      addNotification('success', `Draft saved: "${draft.title}" at Step ${addStep}. You can resume anytime.`);
-   };
-
    const canAdjustPayroll = ['super_admin', 'hr_manager', 'hr', 'admin'].includes(user?.role || '');
 
    return {
@@ -458,7 +471,7 @@ export function useEmployeeWizard({
       newEmpData, setNewEmpData, availableRoles, availableDepartments,
       resetWizard, handleOpenWizard, handleRoleChange, handleFinalSubmit,
       getCreatableRoles, handleWizardNext, handleWizardBack, canAdjustPayroll,
-      handleSaveDraft,
+      ...draftManager,
       quotaResult,
       isDirectOnboarding: isDirectOnboardingAuthorized(user?.role, newEmpData.role, Boolean(quotaResult?.canAutoActivate))
    };

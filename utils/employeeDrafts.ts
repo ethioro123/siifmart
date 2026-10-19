@@ -1,4 +1,4 @@
-import { NewEmployeeFormData } from '../hooks/useEmployeeWizard';
+import type { NewEmployeeFormData } from '../hooks/useEmployeeWizard';
 import { UserRole } from '../types';
 
 export interface EmployeeDraft {
@@ -29,7 +29,19 @@ export function getEmployeeDrafts(countryCode?: string): EmployeeDraft[] {
         const raw = localStorage.getItem(getStorageKey(countryCode));
         if (!raw) return [];
         const parsed = JSON.parse(raw);
-        return Array.isArray(parsed) ? parsed : [];
+        if (!Array.isArray(parsed)) return [];
+        const sanitized = parsed.map((draft: EmployeeDraft) => ({
+            ...draft,
+            data: { ...draft.data, password: '' }
+        }));
+        if (JSON.stringify(sanitized) !== raw) {
+            try {
+                localStorage.setItem(getStorageKey(countryCode), JSON.stringify(sanitized));
+            } catch {
+                // Keep returning the sanitized in-memory drafts if storage is temporarily full.
+            }
+        }
+        return sanitized;
     } catch {
         return [];
     }
@@ -67,7 +79,8 @@ export function saveEmployeeDraft(
         step,
         savedAt: new Date().toISOString(),
         attachedDocsCount,
-        data: { ...data }
+        // Passwords are deliberately not recoverable from onboarding drafts.
+        data: { ...data, password: '' }
     };
 
     // If updating existing draft, replace it; otherwise prepend
@@ -84,8 +97,8 @@ export function saveEmployeeDraft(
         if (typeof window !== 'undefined') {
             localStorage.setItem(getStorageKey(countryCode), JSON.stringify(updated));
         }
-    } catch {
-        // Handle storage quota gracefully
+    } catch (error) {
+        throw new Error(`Could not save onboarding draft: ${error instanceof Error ? error.message : 'device storage is unavailable'}`);
     }
 
     return draft;

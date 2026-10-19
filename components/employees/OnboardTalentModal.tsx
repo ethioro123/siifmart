@@ -144,6 +144,14 @@ export function OnboardTalentModal({ isOpen, onClose, onSuccess }: OnboardTalent
                 resetWizard={handleModalClose}
                 canAdjustPayroll={wizard.canAdjustPayroll}
                 handleSaveDraft={wizard.handleSaveDraft}
+                drafts={wizard.drafts}
+                activeDraftId={wizard.activeDraftId}
+                onResumeDraft={wizard.handleResumeDraft}
+                onDeleteDraft={wizard.handleDeleteDraft}
+                onStartNewCandidate={wizard.handleStartNewCandidate}
+                isSavingDraft={wizard.isSavingDraft}
+                draftSaveError={wizard.draftSaveError}
+                lastSavedAt={wizard.lastSavedAt}
                 quotaResult={wizard.quotaResult}
             />
         </>

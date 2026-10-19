@@ -4,6 +4,11 @@
 
 ## Active Features
 
+### Recoverable Employee Onboarding Drafts (2026-10-19)
+- Shared HR, POS, and WMS onboarding now saves candidate progress automatically, flushes pending progress when the wizard closes or the page leaves, and provides a country-scoped saved-drafts drawer for resuming or deleting work. Drafts remain on the current device; candidate passwords are stripped when saving and cleared from legacy drafts on read, so they must be entered again after resuming.
+- **Files**: `hooks/useEmployeeWizard.ts`, `hooks/useEmployeeDrafts.ts`, `utils/employeeDrafts.ts`, `components/employees/modals/AddEmployeeWizard.tsx`, `components/employees/OnboardTalentModal.tsx`, `components/employees/wizard/EmployeeDraftsDrawer.tsx`
+- **Database**: None
+
 ### Staging Operational Role Coverage (2026-10-19)
 - Filled 168 missing employee slots in staging across four warehouses, four distribution centers, twelve retail stores and four online/dark stores. Each WMS site has active coverage for 17 operational roles; each POS site has coverage for 12. Existing employees satisfy coverage and remain unchanged. Added employees are labelled `[TEST]`, use country-scoped employee codes and linked Auth/profile records, and have unique random password hashes, empty wallets in the site's currency, no invented salary/identity facts and pending credential handover. A staging migration-history guard prevents these fictitious records from being seeded into main.
 - **Files**: `migrations/20261019_staging_complete_site_role_coverage.sql`, `migrations/20261019_staging_fixture_quota_cleanup.sql`, `tests/security/staging-site-role-coverage.sql`
