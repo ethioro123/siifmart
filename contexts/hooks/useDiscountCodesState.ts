@@ -102,17 +102,14 @@ export function useDiscountCodesState({ addNotification }: UseDiscountCodesState
 
   const addDiscountCode = useCallback((code: DiscountCode) => {
     setDiscountCodes(prev => [...prev, code]);
-    addNotification('success', `Discount code "${code.code}" created`);
   }, [addNotification]);
 
   const updateDiscountCode = useCallback((code: DiscountCode) => {
     setDiscountCodes(prev => prev.map(c => c.id === code.id ? code : c));
-    addNotification('success', `Discount code "${code.code}" updated`);
   }, [addNotification]);
 
   const deleteDiscountCode = useCallback((id: string) => {
     setDiscountCodes(prev => prev.filter(c => c.id !== id));
-    addNotification('info', 'Discount code deleted');
   }, [addNotification]);
 
   const validateDiscountCode = useCallback((

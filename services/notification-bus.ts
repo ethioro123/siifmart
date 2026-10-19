@@ -6,6 +6,8 @@
  * appear directly on screen instead of being buried in notification dropdowns.
  */
 
+import { logger } from '../utils/logger';
+
 export type NotificationPopupType = 'alert' | 'error' | 'warning' | 'info' | 'success';
 
 export interface NotificationToastItem {
@@ -23,6 +25,22 @@ type ToastListener = (item: NotificationToastItem) => void;
 
 class NotificationBus {
   private listeners: Set<ToastListener> = new Set();
+  private clearListeners = new Set<() => void>();
+
+  subscribeClear(listener: () => void): () => void {
+    this.clearListeners.add(listener);
+    return () => { this.clearListeners.delete(listener); };
+  }
+
+  clear(): void {
+    this.clearListeners.forEach(listener => {
+      try {
+        listener();
+      } catch (error) {
+        logger.error('NotificationBus', 'Failed to clear displayed notifications', error);
+      }
+    });
+  }
 
   /**
    * Subscribe to new notification popup events.
@@ -68,7 +86,7 @@ class NotificationBus {
       try {
         listener(fullItem);
       } catch (err) {
-        console.error('NotificationBus listener failure:', err);
+        logger.error('NotificationBus', 'Listener failed', err);
       }
     });
 

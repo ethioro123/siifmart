@@ -3,7 +3,6 @@ import { useQueryClient } from '@tanstack/react-query';
 import type { ExpenseRecord, Employee, Product, Supplier, SystemLog } from '../../types';
 import { productsService, suppliersService } from '../../services/supabase.service';
 import { supabase } from '../../lib/supabase';
-import { CURRENCY_SYMBOL } from '../../constants';
 import { logger } from '../../utils/logger';
 
 interface UseFinanceActionsDeps {
@@ -82,7 +81,7 @@ export function useFinanceActions(deps: UseFinanceActionsDeps) {
                     logger.error('useFinanceActions', '❌ Failed to log stock movement to DB:', movementError);
                 }
             } else {
-                logger.error('useFinanceActions', `❌ adjustStock failed: Product ${productId} not found in products or allProducts`, new Error(String(`❌ adjustStock failed: Product ${productId} not found in products or allProducts`)));
+                throw new Error('Product not found. Stock adjustment was not saved.');
             }
 
             addNotification('success', 'Stock adjusted successfully');
@@ -98,7 +97,7 @@ export function useFinanceActions(deps: UseFinanceActionsDeps) {
     const addExpense = useCallback(async (expense: ExpenseRecord) => {
         try {
             setExpenses(prev => [expense, ...prev]);
-            addNotification('success', 'Expense recorded');
+            // In-memory state is not confirmation of a saved financial record.
         } catch (error) {
             logger.error('useFinanceActions', 'Failed to add expense:', error);
             addNotification('alert', 'Failed to add expense');
@@ -108,7 +107,6 @@ export function useFinanceActions(deps: UseFinanceActionsDeps) {
     const deleteExpense = useCallback(async (id: string) => {
         try {
             setExpenses(prev => prev.filter(e => e.id !== id));
-            addNotification('info', 'Expense deleted');
         } catch (error) {
             logger.error('useFinanceActions', 'Failed to delete expense:', error);
             addNotification('alert', 'Failed to delete expense');
@@ -138,8 +136,7 @@ export function useFinanceActions(deps: UseFinanceActionsDeps) {
             };
 
             await addExpense(expense);
-            addNotification('success', `Payroll processed: ${CURRENCY_SYMBOL}${totalSalary.toLocaleString()}`);
-            logSystemEvent('Payroll', `Processed payroll for ${activeEmployees.length} employees`, user, 'Finance');
+            // Preparing a local expense does not prove payroll was processed or paid.
         } catch (error) {
             logger.error('useFinanceActions', 'Payroll failed:', error);
             addNotification('alert', 'Failed to process payroll');

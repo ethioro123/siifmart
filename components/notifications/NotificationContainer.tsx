@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import { notificationBus, NotificationToastItem } from '../../services/notification-bus';
 import { NotificationCard } from './NotificationCard';
@@ -19,6 +19,14 @@ interface NotificationContainerProps {
 export const NotificationContainer: React.FC<NotificationContainerProps> = ({ toasts, onRemoveToast }) => {
   const [items, setItems] = useState<NotificationToastItem[]>([]);
   const reduceMotion = useReducedMotion();
+  const legacyRef = useRef({ toasts, onRemoveToast });
+  legacyRef.current = { toasts, onRemoveToast };
+
+  useEffect(() => notificationBus.subscribeClear(() => {
+    setItems([]);
+    const legacy = legacyRef.current;
+    legacy.toasts?.forEach(toast => legacy.onRemoveToast?.(toast.id));
+  }), []);
 
   const handleDismiss = useCallback((id: string) => {
     setItems(prev => prev.filter(item => item.id !== id));

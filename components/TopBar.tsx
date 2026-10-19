@@ -195,7 +195,8 @@ export default function TopBar() {
       return { tasksAssignedToMe: assigned, tasksICreated: created, myTasks: [...assigned, ...created] };
    }, [tasks, currentEmployee, user]);
 
-   const totalAlerts = filteredNotifications.length + tasksAssignedToMe.length;
+   const totalAlerts = filteredNotifications.filter(notification => !notification.read).length
+      + tasksAssignedToMe.filter(task => task.status === 'Pending').length;
 
    // Search Logic
    const searchResults = useMemo(() => {
@@ -340,7 +341,6 @@ export default function TopBar() {
             return;
          }
          await refreshData();
-         addNotification('success', 'Data refreshed successfully');
       } catch {
          window.location.reload();
       } finally {

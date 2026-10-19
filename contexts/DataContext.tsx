@@ -75,7 +75,7 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
     clearNotification,
     clearAllNotifications,
     markNotificationsRead
-  } = useNotificationState({ user: user || undefined });
+  } = useNotificationState({ user: user || undefined, activeSiteId, countryCode: settings.country });
 
   const {
     discountCodes, setDiscountCodes, addDiscountCode, updateDiscountCode,
@@ -296,7 +296,6 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
   const resetData = useCallback(() => {
     if (activeSiteId) {
       queries.refetchAll();
-      addNotification('info', 'Data reloaded from server');
     } else {
       loadSites();
     }

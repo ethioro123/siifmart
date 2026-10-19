@@ -1,68 +1,43 @@
 // @vitest-environment jsdom
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { notificationBus } from '../../services/notification-bus';
 import { inferCardMeta } from '../../components/notifications/NotificationCard';
-import { renderHook, act } from '@testing-library/react';
+import { renderHook, act, cleanup } from '@testing-library/react';
 import { useNotificationState } from '../../contexts/hooks/useNotificationState';
 
-describe('Notification Popups & Barcode Conflict On-Screen Cards', () => {
+describe('Factual notification popups', () => {
   beforeEach(() => {
     vi.restoreAllMocks();
+    localStorage.clear();
   });
 
+  afterEach(cleanup);
+
   describe('inferCardMeta', () => {
-    it('detects barcode conflict and provides explanatory card metadata', () => {
-      const message = 'This barcode is flagged because it is already registered under SKU KEGR001 (Juma Ugali Flour)';
-      const meta = inferCardMeta('alert', message);
-
-      expect(meta.title).toBe('Barcode Conflict Flagged');
-      expect(meta.badge).toBe('CONFLICT');
-      expect(meta.subtitle).toBe('What went wrong:');
-      expect(meta.tip).toContain('already assigned to another catalog SKU');
-    });
-
-    it('detects duplicate SKU errors', () => {
-      const message = 'Duplicate SKU! A product with SKU "KE-GR001" already exists';
-      const meta = inferCardMeta('alert', message);
-
-      expect(meta.title).toBe('Duplicate SKU Detected');
-      expect(meta.badge).toBe('DUPLICATE');
-      expect(meta.subtitle).toBe('What went wrong:');
-    });
-
-    it('detects inventory and stock alerts', () => {
-      const message = 'Insufficient stock available for allocation';
-      const meta = inferCardMeta('alert', message);
-
-      expect(meta.title).toBe('Inventory Alert');
-      expect(meta.badge).toBe('INVENTORY');
-      expect(meta.subtitle).toBe('What went wrong:');
-    });
-
-    it('detects permission / role restriction errors', () => {
-      const message = 'Unauthorized: Permission denied for stock write-off';
-      const meta = inferCardMeta('alert', message);
-
-      expect(meta.title).toBe('Access Restricted');
-      expect(meta.badge).toBe('SECURITY');
-      expect(meta.subtitle).toBe('What went wrong:');
-    });
-
-    it('provides clear fallback card metadata for general errors', () => {
-      const message = 'Network request timed out';
-      const meta = inferCardMeta('alert', message);
-
-      expect(meta.title).toBe('Connection Notice');
-      expect(meta.subtitle).toBe('What went wrong:');
-    });
-
-    it('provides clear card metadata for success events', () => {
-      const message = 'Product created successfully';
+    it.each([
+      'Product created successfully',
+      'Stock updated successfully',
+      'Barcode registered for SKU KEGR001',
+      'Login settings saved',
+      'Required price field updated',
+    ])('does not turn success into a failure diagnosis: %s', message => {
       const meta = inferCardMeta('success', message);
-
-      expect(meta.title).toBe('Operation Completed');
+      expect(meta.title).toBe('Success');
       expect(meta.badge).toBe('SUCCESS');
-      expect(meta.subtitle).toBe('Result:');
+      expect(meta.tip).toBeUndefined();
+    });
+
+    it.each([
+      'Network request timed out',
+      'Database statement timeout',
+      'Permission denied for stock write-off',
+      'This barcode is registered under SKU KEGR001',
+      'Session settings could not be saved',
+    ])('does not invent a cause or recovery step: %s', message => {
+      const meta = inferCardMeta('alert', message);
+      expect(meta.title).toBe('Notice');
+      expect(meta.subtitle).toBe('Message:');
+      expect(meta.tip).toBeUndefined();
     });
   });
 
@@ -102,7 +77,7 @@ describe('Notification Popups & Barcode Conflict On-Screen Cards', () => {
 
       expect(notifySpy).toHaveBeenCalledWith(
         expect.objectContaining({
-          type: 'error',
+          type: 'alert',
           message: 'This barcode is flagged because it is already registered under SKU KEGR001 (Juma Ugali Flour)'
         })
       );
@@ -116,6 +91,26 @@ describe('Notification Popups & Barcode Conflict On-Screen Cards', () => {
   });
 
   describe('NotificationCard interactions', () => {
+    it('shows the source message without invented advice and retains explicit advice', async () => {
+      const { NotificationCard } = await import('../../components/notifications/NotificationCard');
+      const { render, screen } = await import('@testing-library/react');
+      const React = await import('react');
+      const item = {
+        id: 'session-notice', type: 'warning' as const,
+        message: 'Session settings changed.', timestamp: new Date().toISOString()
+      };
+      const view = render(React.createElement(NotificationCard, { item, onDismiss: vi.fn() }));
+      expect(screen.getByText(item.message)).toBeDefined();
+      expect(screen.queryByText('Sign-in Needed')).toBeNull();
+      expect(screen.queryByText('Next step')).toBeNull();
+
+      view.rerender(React.createElement(NotificationCard, {
+        item: { ...item, title: 'Configuration notice', tip: 'Review the displayed configuration.' }, onDismiss: vi.fn()
+      }));
+      expect(screen.getByText('Configuration notice')).toBeDefined();
+      expect(screen.getByText('Review the displayed configuration.')).toBeDefined();
+    });
+
     it('calls onDismiss when the dismiss button is clicked or Escape is pressed', async () => {
       const { NotificationCard } = await import('../../components/notifications/NotificationCard');
       const { render, screen, fireEvent } = await import('@testing-library/react');

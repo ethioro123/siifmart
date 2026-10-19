@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useCallback, useState } from 'react';
 import { motion, useAnimationControls } from 'framer-motion';
-import { AlertTriangle, CheckCircle2, Info, X, ShieldAlert, ChevronDown, FileText } from 'lucide-react';
+import { AlertTriangle, CheckCircle2, Info, X, ChevronDown, FileText } from 'lucide-react';
 import type { NotificationToastItem } from '../../services/notification-bus';
 
 interface NotificationCardProps {
@@ -8,160 +8,26 @@ interface NotificationCardProps {
   onDismiss: (id: string) => void;
 }
 
-export function inferCardMeta(type: string, message: string): {
+// Presentation follows the caller's explicit severity, never keywords in its message.
+// A message cannot prove a diagnosis, outcome, or recovery action on its own.
+export function inferCardMeta(type: string, _message?: string): {
   title: string;
   badge: string;
   subtitle: string;
   tip?: string;
 } {
-  const lower = (message || '').toLowerCase();
-
-  // Recognize concrete failure signals and avoid advice that assumes app behavior.
-  if (lower.includes('permission') || lower.includes('denied') || lower.includes('forbidden') || lower.includes('unauthorized') || lower.includes('role restriction')) {
-    return {
-      title: 'Access Restricted',
-      badge: 'SECURITY',
-      subtitle: 'What went wrong:',
-      tip: 'Check that you are signed in with the role and site access required for this action.'
-    };
+  switch (type) {
+    case 'error':
+      return { title: 'Error', badge: 'ERROR', subtitle: 'Message:' };
+    case 'alert':
+      return { title: 'Notice', badge: 'NOTICE', subtitle: 'Message:' };
+    case 'warning':
+      return { title: 'Warning', badge: 'WARNING', subtitle: 'Message:' };
+    case 'success':
+      return { title: 'Success', badge: 'SUCCESS', subtitle: 'Result:' };
+    default:
+      return { title: 'Information', badge: 'INFO', subtitle: 'Message:' };
   }
-
-  // Barcode specific conflict
-  if (lower.includes('barcode') && (lower.includes('registered') || lower.includes('flagged') || lower.includes('sku') || lower.includes('conflict'))) {
-    return {
-      title: 'Barcode Conflict Flagged',
-      badge: 'CONFLICT',
-      subtitle: 'What went wrong:',
-      tip: 'Check the existing product record before changing the barcode assignment.'
-    };
-  }
-
-  // Barcode format / scan alert
-  if (lower.includes('barcode')) {
-    return {
-      title: 'Barcode Validation Alert',
-      badge: 'BARCODE',
-      subtitle: 'What went wrong:',
-      tip: 'Rescan the label and check that its barcode is complete and readable.'
-    };
-  }
-
-  // SKU duplicate
-  if (lower.includes('sku') && (lower.includes('duplicate') || lower.includes('exists') || lower.includes('conflict'))) {
-    return {
-      title: 'Duplicate SKU Detected',
-      badge: 'DUPLICATE',
-      subtitle: 'What went wrong:',
-      tip: 'Open the matching product record to confirm whether it is the item you need.'
-    };
-  }
-
-  // Inventory / Stock
-  if (lower.includes('stock') || lower.includes('inventory') || lower.includes('deplet') || lower.includes('insufficient')) {
-    return {
-      title: 'Inventory Alert',
-      badge: 'INVENTORY',
-      subtitle: 'What went wrong:',
-      tip: 'Review the latest stock balance and the quantity requested before trying again.'
-    };
-  }
-
-  // Pricing / cost input
-  if (lower.includes('price') || lower.includes('cost') || lower.includes('margin')) {
-    return {
-      title: lower.includes('margin') ? 'Margin Check' : 'Pricing Issue',
-      badge: 'PRICING',
-      subtitle: 'What went wrong:',
-      tip: 'Check the entered amount, currency, and any pricing limits shown on this screen.'
-    };
-  }
-
-
-  // Network / Connection
-  if (lower.includes('network') || lower.includes('offline') || lower.includes('connection') || (lower.includes('timeout') && !lower.includes('statement timeout') && !lower.includes('database') && !lower.includes('supabase') && !lower.includes('pgrst'))) {
-    return {
-      title: 'Connection Notice',
-      badge: 'NETWORK',
-      subtitle: 'What went wrong:',
-      tip: 'Check your connection, then retry. Confirm whether the action completed before submitting it again.'
-    };
-  }
-
-  if (lower.includes('57014') || lower.includes('statement timeout') || lower.includes('database') || lower.includes('supabase') || lower.includes('pgrst') || lower.includes('query timed out')) {
-    return {
-      title: 'Data Service Issue',
-      badge: 'DATA',
-      subtitle: 'What went wrong:',
-      tip: 'Wait briefly and retry. If it continues, share this message with your support or system administrator.'
-    };
-  }
-
-  if (lower.includes('session') || lower.includes('token expired') || lower.includes('sign in') || lower.includes('login')) {
-    return {
-      title: 'Sign-in Needed',
-      badge: 'ACCOUNT',
-      subtitle: 'What happened:',
-      tip: 'Sign in again to continue. If you were saving work, check whether it was saved before repeating the action.'
-    };
-  }
-
-  if (lower.includes('required') || lower.includes('invalid') || lower.includes('validation') || lower.includes('must be')) {
-    return {
-      title: 'Check the Entered Information',
-      badge: 'INPUT',
-      subtitle: 'What needs attention:',
-      tip: 'Review the highlighted fields and correct the value before submitting again.'
-    };
-  }
-
-  if (lower.includes('not found') || lower.includes('no longer exists') || lower.includes('missing record')) {
-    return {
-      title: 'Record Not Found',
-      badge: 'RECORD',
-      subtitle: 'What happened:',
-      tip: 'Refresh the list and check that the record is still available to your account.'
-    };
-  }
-
-  if (lower.includes('save') || lower.includes('update') || lower.includes('create') || lower.includes('submit') || lower.includes('failed')) {
-    return {
-      title: 'Could Not Complete Action',
-      badge: 'ACTION',
-      subtitle: 'What went wrong:',
-      tip: 'Check the details and try again. If it repeats, share the message with your support or system administrator.'
-    };
-  }
-
-  // Default by type
-  if (type === 'error' || type === 'alert') {
-    return {
-      title: 'Action Blocked — Issue Detected',
-      badge: 'FLAGGED',
-      subtitle: 'What went wrong:'
-    };
-  }
-
-  if (type === 'warning') {
-    return {
-      title: 'Attention Required',
-      badge: 'WARNING',
-      subtitle: 'Notice:'
-    };
-  }
-
-  if (type === 'success') {
-    return {
-      title: 'Operation Completed',
-      badge: 'SUCCESS',
-      subtitle: 'Result:'
-    };
-  }
-
-  return {
-    title: 'System Notice',
-    badge: 'INFO',
-    subtitle: 'Details:'
-  };
 }
 
 const THEMES = {
@@ -172,7 +38,7 @@ const THEMES = {
     titleColor: 'text-[var(--theme-text-primary)]',
     explanationBg: 'bg-[var(--theme-bg-subtle)] border border-[var(--theme-status-danger-border)]',
     subtitleColor: 'text-[var(--theme-status-danger-text)]', progress: 'bg-[var(--theme-status-danger)]',
-    Icon: ShieldAlert
+    Icon: AlertTriangle
   },
   warning: {
     border: 'border-[var(--theme-status-warning-border)]', rail: 'bg-[var(--theme-status-warning)]',
@@ -211,7 +77,7 @@ export const NotificationCard: React.FC<NotificationCardProps> = ({ item, onDism
 
   const meta = inferCardMeta(item.type, item.message);
   const displayTitle = item.title || meta.title;
-  const tipText = item.tip || meta.tip;
+  const tipText = item.tip;
   // Errors and warnings explain what went wrong; success/info stay compact.
   const showExplanation = isError || isWarning;
 

@@ -32,5 +32,6 @@ Follow these rules for all work in this repository. `.agent/RULES.md` is the can
 - New routes use lazy loading and `ModuleErrorBoundary`. New services/utils and bug fixes follow the testing rules in `.agent/rules/05-delivery-and-verification.md`.
 - Update `.agent/FEATURE_REGISTRY.md` for new features or significant bug fixes. Keep documentation below 500 lines.
 - Finish in plain language: explain the user-visible change and verification, without code dumps or line-by-line diffs.
+- Alerts and notifications must report observed facts. Do not infer causes or recovery steps from message keywords, present cached estimates as current balances, or claim success before the relevant save is confirmed. Distinguish queued work from server completion; omit unverified notices. Keep notification history within the current user, site, country, and session.
 
 See `.agent/RULES.md`, `.agent/TROUBLESHOOTING.md`, and `docs/APPLE_DESIGN_GUIDE.md` for the full guidance.

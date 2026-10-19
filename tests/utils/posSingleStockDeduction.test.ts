@@ -63,11 +63,12 @@ vi.mock('../../utils/audioFeedback', () => ({
 describe('POS Single Stock Deduction (No 2x / 3x Deduction)', () => {
     beforeEach(() => {
         vi.clearAllMocks();
+        mockEnqueueOperation.mockResolvedValue(true);
         realtimeHandlers = {};
         vi.stubGlobal('navigator', { onLine: true });
     });
 
-    it('deducts stock exactly once across optimistic update, sync queue, and realtime events', async () => {
+    it.each([88, 1])('deducts stock exactly once without issuing unconfirmed stock alerts (cached stock: %s)', async stock => {
         const initialProduct: Product = {
             id: 'prod-ugali-1',
             siteId: 'site-kileleshwa',
@@ -76,7 +77,7 @@ describe('POS Single Stock Deduction (No 2x / 3x Deduction)', () => {
             category: 'Grains, Pasta & Rice',
             price: 150,
             costPrice: 110,
-            stock: 88,
+            stock,
             status: 'active',
             image: ''
         };
@@ -105,6 +106,7 @@ describe('POS Single Stock Deduction (No 2x / 3x Deduction)', () => {
 
         const triggerSync = vi.fn();
         const posCheckQueue = vi.fn().mockResolvedValue(undefined);
+        const addNotification = vi.fn();
 
         useRealtimeUpdates({
             activeSiteId: 'site-kileleshwa',
@@ -128,7 +130,7 @@ describe('POS Single Stock Deduction (No 2x / 3x Deduction)', () => {
             setProducts,
             setAllProducts,
             setCustomers,
-            addNotification: vi.fn(),
+            addNotification,
             logSystemEvent: vi.fn(),
             triggerSync,
             posCheckQueue,
@@ -150,8 +152,11 @@ describe('POS Single Stock Deduction (No 2x / 3x Deduction)', () => {
         );
 
         // Optimistic state must be 87 (88 - 1), NOT 86 or 85
-        expect(products[0].stock).toBe(87);
-        expect(allProducts[0].stock).toBe(87);
+        expect(products[0].stock).toBe(stock - 1);
+        expect(allProducts[0].stock).toBe(stock - 1);
+        expect(addNotification).toHaveBeenCalledWith('info', 'Sale queued on this device for synchronization.');
+        expect(addNotification).not.toHaveBeenCalledWith('success', expect.anything());
+        expect(addNotification).not.toHaveBeenCalledWith('alert', expect.anything());
 
         // Because the sale was queued into posDB for usePosSync (which runs pos_decrement_stock),
         // useSaleActions must NOT also call productsService.update directly!
@@ -167,7 +172,7 @@ describe('POS Single Stock Deduction (No 2x / 3x Deduction)', () => {
             site_id: 'site-kileleshwa',
             name: 'Juma Ugali Flour 1kg',
             sku: 'KEGR001',
-            stock: 87,
+            stock: stock - 1,
             status: 'active'
         });
         realtimeHandlers.onStockChange('INSERT', {
@@ -177,7 +182,47 @@ describe('POS Single Stock Deduction (No 2x / 3x Deduction)', () => {
         });
 
         // Stock must remain 87 (deducted once), never 86 (2x) or 85 (3x)!
-        expect(products[0].stock).toBe(87);
-        expect(allProducts[0].stock).toBe(87);
+        expect(products[0].stock).toBe(stock - 1);
+        expect(allProducts[0].stock).toBe(stock - 1);
+    });
+
+    it('does not report a completed sale when offline storage and the queue are unavailable', async () => {
+        vi.stubGlobal('navigator', { onLine: false });
+        mockEnqueueOperation.mockResolvedValue(false);
+        const addNotification = vi.fn();
+        const setSales = vi.fn();
+        const actions = useSaleActions({
+            activeSite: undefined, settings: { posBonusEnabled: false } as any,
+            products: [], sites: [], employees: [], customers: [], storePoints: [],
+            setSales, setAllSales: vi.fn(), setProducts: vi.fn(), setCustomers: vi.fn(),
+            addNotification, logSystemEvent: vi.fn(), triggerSync: vi.fn(),
+            posCheckQueue: vi.fn(), awardStorePoints: vi.fn()
+        });
+        await expect(actions.processSale([], 'Cash', 'Cashier', 0, 0)).rejects.toThrow('could not be queued');
+        expect(setSales).not.toHaveBeenCalled();
+        expect(addNotification).not.toHaveBeenCalledWith('success', expect.anything());
+        expect(mockCreateSale).not.toHaveBeenCalled();
+    });
+
+    it.each([true, false])('requires a confirmed server save when the local queue is unavailable (save succeeds: %s)', async succeeds => {
+        mockEnqueueOperation.mockResolvedValue(false);
+        if (succeeds) mockCreateSale.mockResolvedValue({});
+        else mockCreateSale.mockRejectedValue(new Error('Server save rejected'));
+        const addNotification = vi.fn();
+        const actions = useSaleActions({
+            activeSite: undefined, settings: { posBonusEnabled: false } as any,
+            products: [], sites: [], employees: [], customers: [], storePoints: [],
+            setSales: vi.fn(), setAllSales: vi.fn(), setProducts: vi.fn(), setCustomers: vi.fn(),
+            addNotification, logSystemEvent: vi.fn(), triggerSync: vi.fn(),
+            posCheckQueue: vi.fn(), awardStorePoints: vi.fn()
+        });
+        const pending = actions.processSale([], 'Cash', 'Cashier', 0, 0);
+        if (succeeds) {
+            await pending;
+            expect(addNotification).toHaveBeenCalledWith('success', 'Sale saved to the server.');
+        } else {
+            await expect(pending).rejects.toThrow('Server save rejected');
+            expect(addNotification).not.toHaveBeenCalledWith('success', expect.anything());
+        }
     });
 });

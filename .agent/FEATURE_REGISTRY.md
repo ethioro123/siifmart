@@ -4,6 +4,12 @@
 
 ## Active Features
 
+### Notification Accuracy (2026-10-20)
+- Shared popup cards retain the source severity and message without guessing diagnoses or recovery advice. Notification history stays in memory within the current user/site/country session; old device-wide history is removed. The activity badge counts unread events and pending tasks, and history is labeled Recent events.
+- Cached POS stock estimates no longer generate stock warnings. Queued sales are distinguished from server saves; failed PO writes no longer appear as successful local orders. Site-load errors do not guess a network cause, and refresh requests no longer announce unconfirmed completion.
+- Local expense/payroll, promotion, discount-code, and hold-state changes no longer announce an unconfirmed save or payment. Stock adjustment for an unknown product cannot report success.
+- **Files**: `components/notifications/NotificationCard.tsx`, `contexts/hooks/useNotificationState.ts`, `components/TopBar.tsx`, `components/topbar/ActivityCenter.tsx`, `contexts/hooks/useSaleActions.ts`, `contexts/hooks/usePOActions.ts`, `contexts/hooks/useDataInitialization.ts`, `contexts/DataContext.tsx`
+
 ### Transfer Discrepancy Handling (2026-10-19)
 - POS and warehouse transfer receipts now keep damaged units out of saleable stock and putaway, while retaining the recorded count and condition for follow-up. POS sends line-level variance details to the linked WMS/transfer records. Warehouse transfer details expose resolution for quantity and damage-condition variances; the resolution flow no longer adds nonexistent shortage units to stock and now exposes claim submission with role-gated actions.
 - **Files**: `components/pos-command/hooks/usePOSReceiving.ts`, `components/pos-command/hooks/utils/receivingIntake.ts`, `components/fulfillment/transfer/TransferReceiving.tsx`, `components/fulfillment/transfer/TransferLineItemRow.tsx`, `components/fulfillment/DiscrepancyResolutionModal.tsx`

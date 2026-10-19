@@ -104,6 +104,9 @@ export function useSaleActions(deps: UseSaleActionsDeps) {
                 loyaltyRate: settings.loyaltyPointsRate || 0,
                 enableLoyalty: settings.enableLoyalty !== false
             });
+            if (!queued && !navigator.onLine) {
+                throw new Error('Sale could not be queued for synchronization while offline.');
+            }
             posCheckQueue();
 
             // 2. Optimistic Sale Record Update
@@ -150,11 +153,7 @@ export function useSaleActions(deps: UseSaleActionsDeps) {
                         }
                     }
 
-                    if (newStock <= settings.lowStockThreshold && newStock > 0) {
-                        addNotification('alert', `Low Stock: ${product.name} (${newStock} remaining)`);
-                    } else if (newStock === 0) {
-                        addNotification('alert', `Out of Stock: ${product.name}`);
-                    }
+                    // Cached optimistic balances are not evidence for stock alerts.
                 }
             }
 
@@ -188,7 +187,7 @@ export function useSaleActions(deps: UseSaleActionsDeps) {
             }
 
             // 5. Fallback direct sale creation if IDB queue was unavailable, otherwise triggerSync
-            if (!queued && navigator.onLine) {
+            if (!queued) {
                 const { items, ...saleData } = saleRecord;
                 await salesService.create(saleData as any, items, discountCodeId);
             } else if (navigator.onLine) {
@@ -241,7 +240,11 @@ export function useSaleActions(deps: UseSaleActionsDeps) {
             }
 
             audioFeedback.playSaleComplete();
-            addNotification('success', 'Sale processed successfully');
+            if (queued) {
+                addNotification('info', 'Sale queued on this device for synchronization.');
+            } else {
+                addNotification('success', 'Sale saved to the server.');
+            }
             return { saleId, pointsResult };
 
         } catch (error) {

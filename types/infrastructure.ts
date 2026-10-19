@@ -8,6 +8,7 @@ export interface Notification {
   id: string;
   type: 'alert' | 'success' | 'info' | 'warning';
   message: string;
+  title?: string;
   timestamp: string;
   read: boolean;
   userId?: string;     // [NEW] Target user ID

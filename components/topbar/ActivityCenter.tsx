@@ -147,7 +147,7 @@ export function ActivityCenter({
                            className={`flex-1 flex items-center justify-center gap-2 py-1.5 text-[10px] font-black uppercase tracking-wider rounded-lg transition-all cursor-pointer ${notifTab === 'all' ? 'bg-[var(--theme-primary)] text-[var(--theme-primary-text)]' : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)]'}`}
                         >
                            <Bell size={12} />
-                           Alerts
+                           Recent events
                            {filteredNotifications.length > 0 && (
                               <span className={`ml-1 px-1.5 py-0.5 rounded-full text-[9px] ${notifTab === 'all' ? 'bg-white/20' : 'bg-red-500 text-white'}`}>
                                  {filteredNotifications.length}
@@ -180,12 +180,12 @@ export function ActivityCenter({
                                  {displayedNotifications.map(notif => (
                                     <div key={notif.id} className={`p-4 hover:bg-stone-50 dark:hover:bg-white/5 transition-colors relative group ${!notif.read ? 'bg-[#2C5E3B]/5 dark:bg-[#A9CBA2]/5' : ''}`}>
                                        <div className="flex gap-3">
-                                          <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${notif.type === 'error' ? 'bg-red-500/10 text-red-500 border border-red-500/20' :
+                                          <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${(notif.type === 'error' || notif.type === 'alert') ? 'bg-red-500/10 text-red-500 border border-red-500/20' :
                                              notif.type === 'warning' ? 'bg-yellow-500/10 text-yellow-500 border border-yellow-500/20' :
                                                 notif.type === 'success' ? 'bg-green-500/10 text-green-500 border border-green-500/20' :
                                                    'bg-blue-500/10 text-blue-500 border border-blue-500/20'
                                              }`}>
-                                             {notif.type === 'error' ? <X size={16} /> :
+                                             {(notif.type === 'error' || notif.type === 'alert') ? <AlertTriangle size={16} /> :
                                                 notif.type === 'warning' ? <AlertTriangle size={16} /> :
                                                    notif.type === 'success' ? <CheckCircle2 size={16} /> :
                                                       <Info size={16} />
@@ -193,12 +193,12 @@ export function ActivityCenter({
                                           </div>
                                           <div className="flex-1 min-w-0">
                                              <div className="flex items-center justify-between gap-2 mb-0.5">
-                                                <p className="text-xs font-bold text-white truncate">{notif.title}</p>
+                                                <p className="text-xs font-bold text-[var(--theme-text-primary)] truncate">{notif.title}</p>
                                                 <span className="text-[10px] text-gray-500 font-mono whitespace-nowrap">
                                                    {formatRelativeTime(getSafeTime(notif))}
                                                 </span>
                                              </div>
-                                             <p className="text-[11px] text-gray-400 line-clamp-2 leading-relaxed">{notif.message}</p>
+                                             <p className="text-[11px] text-[var(--theme-text-secondary)] leading-relaxed break-words">{notif.message}</p>
                                              {formatExactTime(getSafeTime(notif)) && (
                                                 <p className="text-[9px] text-gray-600 font-mono mt-1 flex items-center gap-1.5">
                                                    <Clock size={8} /> {formatExactTime(getSafeTime(notif))}
@@ -220,8 +220,8 @@ export function ActivityCenter({
                            ) : (
                               <div className="p-10 text-center flex-1">
                                  <Bell size={32} className="mx-auto text-gray-700 mb-3" />
-                                 <p className="text-xs font-bold text-gray-500 uppercase tracking-widest">No activities recorded</p>
-                                 <p className="text-[10px] text-gray-600 mt-1">Your notifications will appear here</p>
+                                 <p className="text-xs font-bold text-[var(--theme-text-primary)] uppercase tracking-widest">No recent events</p>
+                                 <p className="text-[10px] text-[var(--theme-text-secondary)] mt-1">Messages for this session and location appear here.</p>
                               </div>
                            )}
                         </div>

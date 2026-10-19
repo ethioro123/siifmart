@@ -34,18 +34,8 @@ export function usePOActions(deps: UsePOActionsDeps) {
             return newPO;
         } catch (error) {
             logger.error('usePOActions', 'Error creating PO:', error as Error);
-            logger.error('usePOActions', 'Error details', new Error(JSON.stringify(error)));
-            logger.error('usePOActions', 'PO data that failed', new Error(JSON.stringify(po)));
-
-            const localPO: PurchaseOrder = {
-                ...po,
-                id: po.id || `REF-${Date.now()}`,
-                siteId: po.siteId || activeSite?.id || 'SITE-001'
-            };
-
-            setOrders(prev => [localPO, ...prev]);
-            setAllOrders(prev => [localPO, ...prev]);
-            addNotification('success', `PO #${localPO.id.slice(0, 8)} created (local - DB Failed: ${error instanceof Error ? error.message : String(error)})`);
+            addNotification('alert', 'PO save was not confirmed. Check the order list before trying again.');
+            throw error;
         }
     }, [activeSite, activeSiteId, addNotification]);
 
@@ -58,6 +48,7 @@ export function usePOActions(deps: UsePOActionsDeps) {
         } catch (error) {
             logger.error('usePOActions', 'caught error', error as Error);;
             addNotification('alert', 'Failed to update PO');
+            throw error;
         }
     }, [addNotification]);
 
@@ -70,6 +61,7 @@ export function usePOActions(deps: UsePOActionsDeps) {
         } catch (error) {
             logger.error('usePOActions', 'caught error', error as Error);;
             addNotification('alert', 'Failed to delete PO');
+            throw error;
         }
     }, [addNotification]);
 

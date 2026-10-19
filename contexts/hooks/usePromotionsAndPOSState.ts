@@ -27,7 +27,6 @@ export function usePromotionsAndPOSState({ addNotification }: UsePromotionsAndPO
       posDB.saveHeldOrders(updated).catch(() => {});
       return updated;
     });
-    addNotification('info', 'Order placed on hold');
   }, [addNotification]);
 
   const releaseHold = useCallback((orderId: string) => {
@@ -41,17 +40,14 @@ export function usePromotionsAndPOSState({ addNotification }: UsePromotionsAndPO
 
   const addPromotion = useCallback((promo: Promotion) => {
     setPromotions(prev => [...prev, promo]);
-    addNotification('success', `Promotion ${promo.code} Created`);
   }, [addNotification]);
 
   const updatePromotion = useCallback((promotion: Partial<Promotion> & { id: string }) => {
     setPromotions(prev => prev.map(p => p.id === promotion.id ? { ...p, ...promotion } : p));
-    addNotification('success', 'Promotion updated');
   }, [addNotification]);
 
   const deletePromotion = useCallback((id: string) => {
     setPromotions(prev => prev.filter(p => p.id !== id));
-    addNotification('info', 'Promotion Deleted');
   }, [addNotification]);
 
   return {

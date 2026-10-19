@@ -163,12 +163,12 @@ export function useDataInitialization({
       } catch (e) {}
       if (cached) {
         setSites(JSON.parse(cached));
-        addNotification('info', 'Network unreachable. Loaded sites from local cache.');
+        addNotification('info', 'Could not load the latest sites. Showing cached site data.');
         return;
       }
 
-      const errorMsg = `Unable to connect to the logistics server (${error?.message || 'Network Error'}).`;
-      addNotification('alert', `System Error: ${errorMsg} Retrying...`);
+      const errorMsg = 'Could not load sites. Try refreshing.';
+      addNotification('alert', errorMsg);
       setLoadError(errorMsg);
 
       if (navigator.onLine) {
