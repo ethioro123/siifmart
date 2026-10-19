@@ -4,6 +4,12 @@
 
 ## Active Features
 
+### Store Drop Safe Ledger & Cash Skim Custody (2026-10-19)
+- Zero-Trust mid-day cash safe drops and drop safe ledger tracking (SOP-POS-002, SOP-FIN-012). Stores surplus cash in sealed tamper-evident deposit bags, synchronizes in real time with Supabase `pos_cash_drops` via websockets, handles multi-bag armored transport transit handshakes with manifest tracking, provides instant manual refresh, and records tamper-proof audit trails in `system_logs`.
+- **Files**: `components/pos-command/modals/SafeLedgerModal.tsx`, `services/cash-drops.service.ts`, `components/pos/modals/CashDropModal.tsx`, `tests/services/posZeroTrust.test.ts`
+- **Database**: `pos_cash_drops` with RLS policies `pos_cash_drops_insert`, `pos_cash_drops_read`, `pos_cash_drops_update`.
+- **Root Cause Fixed**: Enhanced with explicit column projection (Rule 10), sovereign country code normalization (`country_code.toUpperCase()`), robust numeric handling for PostgreSQL `numeric` types, real-time live channel subscription, and tamper-proof audit logging upon armored transit release.
+
 ### Transfer Receipt Stock Intake Fix (2026-10-19)
   - Store transfer receipt no longer halts with "Inventory intake failed" (403 / RLS 42501 on products). The destination product is now looked up from the database (branch users have an empty global product cache, so receipt wrongly tried to INSERT products that already existed). Genuinely missing products are created at zero stock by a guarded server function, then stock is added.
   - Files: components/pos-command/hooks/utils/receivingIntake.ts, components/pos-command/hooks/usePOSReceiving.ts, services/products/products-transfer-receipt.ts, services/products.service.ts, tests/services/receivingIntake.test.ts
