@@ -5,9 +5,9 @@
 ## Active Features
 
 ### Independent Store Transfer Receipt Recount (2026-10-19)
-- Destination transfer counts are persisted through authenticated site-scoped database functions. The count RPC returns item details without manifest quantities. A variance blocks acceptance until a different employee performs a second blind count; Postgres binds the final accepted quantities and employee to that verification. The recount requirement resumes after reload/sign-in.
-- **Files**: `components/fulfillment/transfer/TransferReceiving.tsx`, `components/fulfillment/transfer/CustodyHandshakeModal.tsx`, `hooks/useTransferReceiptVerification.ts`, `services/transfer-receipt-verification.service.ts`, `migrations/20261019_independent_transfer_receipt_recount.sql`, `migrations/20261019_transfer_receipt_measure_units.sql`, `migrations/20261019_guard_transfer_receipt_condition_attestation.sql`
-- **Database**: `transfer_receipt_verifications`; direct table access is revoked and RPCs validate employee role/site scope.
+- Destination transfer counts are persisted through authenticated site-scoped database functions. Public WMS and transport rows strip expected and delivered quantities after arrival; a private arrival manifest holds the comparison quantities. A variance blocks acceptance until a different employee performs a second blind count; Postgres binds the final accepted quantities and employee to that verification. The recount requirement resumes after reload/sign-in.
+- **Files**: `components/fulfillment/transfer/TransferReceiving.tsx`, `components/fulfillment/transfer/CustodyHandshakeModal.tsx`, `hooks/useTransferReceiptVerification.ts`, `services/transfer-receipt-verification.service.ts`, `migrations/20261019_independent_transfer_receipt_recount.sql`, `migrations/20261019_transfer_receipt_measure_units.sql`, `migrations/20261019_guard_transfer_receipt_condition_attestation.sql`, `migrations/20261019_private_transfer_receipt_manifest.sql`
+- **Database**: `transfer_receipt_verifications` and `private.transfer_receipt_manifests`; direct table access is revoked and RPCs validate employee role/site scope.
 - **Root Cause Fixed**: UI discrepancy detection and driver acknowledgement did not require a second store employee to recount; the transfer receipt lacked server-enforced count attestation.
 
 ### Persisted Blind WMS Counts, Independent Pack Checks, and Safe Scan Handoffs (2026-10-19)
