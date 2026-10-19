@@ -3,7 +3,7 @@ import { isWeightBased, isVolumeBased } from '../../../utils/units';
 import { logger } from '../../../utils/logger';
 import { repairShipmentInventoryHelper } from './utils/receivingRepair';
 import { processReceivingStockIntake, rollbackReceivingStockIntake, ReceivingStockIntakeResult } from './utils/receivingIntake';
-import { transferReceiptVerificationService } from '../../../services/transfer-receipt-verification.service';
+import { verifyPOSTransferReceipt } from './utils/verifyPOSTransferReceipt';
 
 interface UsePOSReceivingProps {
     user: any;
@@ -324,26 +324,9 @@ export const usePOSReceiving = ({
             const targetTransferId = transferJob?.id || selectedId;
             const destSiteId = transfer.destSiteId || activeSite?.id;
 
-            // The database requires a destination receipt count before it will
-            // accept the status change. Persist this receiver's count first;
-            // on retries, require the saved count to match the submitted one.
-            const currentVerification = await transferReceiptVerificationService.get(targetTransferId);
-            if (currentVerification.canCount) {
-                await transferReceiptVerificationService.recordCount(targetTransferId, transferReceivingItems);
-            } else if (currentVerification.status !== 'verified') {
-                throw new Error('Transfer receipt verification is not ready. Refresh the transfer and try again.');
-            } else {
-                const savedCountMatches = currentVerification.items.length === transferReceivingItems.length &&
-                    currentVerification.items.every((savedItem, index) => {
-                        const submittedItem = transferReceivingItems[index];
-                        return savedItem.productId === submittedItem.productId &&
-                            Number(savedItem.receivedQty || 0) === Number(submittedItem.receivedQty || 0) &&
-                            (savedItem.condition || 'Good') === (submittedItem.condition || 'Good');
-                    });
-                if (!savedCountMatches) {
-                    throw new Error('A receipt count is already recorded for this transfer. Reload it to continue with the saved count.');
-                }
-            }
+            // Record the receiver's count before accepting custody. On retry,
+            // only the same saved count may complete the receipt.
+            await verifyPOSTransferReceipt(targetTransferId, transferReceivingItems);
 
             // 1. Process and verify stock intake BEFORE marking transfer completed
             if (destSiteId) {
