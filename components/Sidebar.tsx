@@ -207,13 +207,13 @@ export default function Sidebar() {
       } else if (isHQ) {
         // ═══ ADMINISTRATION / HQ SITE CONTEXT ═══
         // Executive leadership & central administration deck.
-        // HIDE local physical site floor terminals: POS Terminal, POS Command, WMS Dashboard, WMS Ops.
-        // Central Procurement, Network Inventory, Merchandising, Financials, and HR are fully active at Administration.
-        if (['warehouse', 'pos'].includes(item.section) || item.to === '/sales') {
+        // HIDE physical floor operational tools: POS Terminal and WMS Fulfillment scanning.
+        // Management overviews (WMS Dashboard, POS Command, Sales History, Network View, Procurement, Financials, HR) remain accessible.
+        if (item.to === '/pos' || item.to === '/wms-ops') {
           isAllowedForSite = false;
         }
         if (item.to === '/inventory') {
-          // In HQ, local inventory is replaced by Network View
+          // In HQ, local single-facility inventory is replaced by Network View
           isAllowedForSite = false;
         }
       }
