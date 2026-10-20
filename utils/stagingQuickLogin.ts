@@ -45,3 +45,38 @@ export function mapStagingEmployee(row: StagingEmployeeRow): StagingQuickAccount
         siteCode: row.site?.code || 'HQ-GLOBAL', siteName: row.site?.name || 'Global Headquarters'
     };
 }
+
+const QUICK_LOGIN_SITE_TYPES: StagingSiteType[] = [
+    'HQ', 'Regional Administration', 'Store', 'Warehouse', 'Distribution Center', 'Online Store'
+];
+
+/** Keep one representative site per country and facility type in the staging picker. */
+export function selectRepresentativeStagingAccounts(accounts: StagingQuickAccount[]): StagingQuickAccount[] {
+    const selected = new Set<string>();
+    const groups = new Map<string, StagingQuickAccount[]>();
+
+    for (const account of accounts) {
+        if (account.country === 'GLOBAL') {
+            selected.add(account.id);
+            continue;
+        }
+        if (!QUICK_LOGIN_SITE_TYPES.includes(account.siteType)) continue;
+        const key = `${account.country}:${account.siteType}:${account.siteCode}`;
+        const group = groups.get(key) || [];
+        group.push(account);
+        groups.set(key, group);
+    }
+
+    for (const country of ['ET', 'KE'] as const) {
+        for (const siteType of QUICK_LOGIN_SITE_TYPES) {
+            const candidates = [...groups.entries()]
+                .filter(([key]) => key.startsWith(`${country}:${siteType}:`))
+                .sort(([keyA, accountsA], [keyB, accountsB]) =>
+                    accountsB.length - accountsA.length || keyA.localeCompare(keyB));
+            const representative = candidates[0]?.[1] || [];
+            for (const account of representative) selected.add(account.id);
+        }
+    }
+
+    return accounts.filter(account => selected.has(account.id));
+}

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { mapStagingEmployee, type StagingEmployeeRow } from '../../utils/stagingQuickLogin';
+import { mapStagingEmployee, selectRepresentativeStagingAccounts, type StagingEmployeeRow } from '../../utils/stagingQuickLogin';
 
 const row: StagingEmployeeRow = {
     id: 'test-employee', name: '[TEST] DC Picker', role: 'picker', job_title: 'Warehouse Order Picker',
@@ -33,5 +33,32 @@ describe('live staging roster mapping', () => {
     });
     it('excludes unsupported country records rather than classifying them as Ethiopia', () => {
         expect(mapStagingEmployee({ ...row, site: { ...row.site!, country: 'ZZ' } })).toBeNull();
+    });
+    it('keeps one representative site per country and facility type, including administration', () => {
+        const makeAccount = (id: string, country: 'ET' | 'KE', code: string, type: string, regionCode: string | null = null, name = type) =>
+            mapStagingEmployee({ ...row, id, site: { code, name, type, country, region_code: regionCode } })!;
+        const roster = [
+            makeAccount('et-hq', 'ET', 'ET-HQ', 'Administration'),
+            makeAccount('et-region', 'ET', 'ET-ADD', 'Administration', 'ET-ADD', 'Regional Administration'),
+            makeAccount('et-store-1a', 'ET', 'ET-ADD-STORE-01', 'Store', 'ET-ADD'),
+            makeAccount('et-store-1b', 'ET', 'ET-ADD-STORE-01', 'Store', 'ET-ADD'),
+            makeAccount('et-store-2', 'ET', 'ET-ADD-STORE-02', 'Store', 'ET-ADD'),
+            makeAccount('et-wh', 'ET', 'ET-ADD-WH-01', 'Warehouse', 'ET-ADD'),
+            makeAccount('et-dc', 'ET', 'ET-ADD-DC-01', 'Distribution Center', 'ET-ADD'),
+            makeAccount('et-online', 'ET', 'ET-ADD-ONLINE-01', 'Dark Store', 'ET-ADD'),
+            makeAccount('ke-hq', 'KE', 'KE-HQ', 'Administration'),
+            makeAccount('ke-region', 'KE', 'KE-NRB', 'Administration', 'KE-NRB', 'Regional Administration'),
+            makeAccount('ke-store', 'KE', 'KE-NRB-STORE-01', 'Store', 'KE-NRB'),
+            makeAccount('ke-wh', 'KE', 'KE-NRB-WH-01', 'Warehouse', 'KE-NRB'),
+            makeAccount('ke-dc', 'KE', 'KE-NRB-DC-01', 'Distribution Center', 'KE-NRB'),
+            makeAccount('ke-online', 'KE', 'KE-NRB-ONLINE-01', 'Dark Store', 'KE-NRB'),
+            mapStagingEmployee({ ...row, id: 'global-admin', role: 'super_admin', site: null })!
+        ];
+
+        const selected = selectRepresentativeStagingAccounts(roster);
+        expect(selected.map(account => account.id)).toEqual([
+            'et-hq', 'et-region', 'et-store-1a', 'et-store-1b', 'et-wh', 'et-dc', 'et-online',
+            'ke-hq', 'ke-region', 'ke-store', 'ke-wh', 'ke-dc', 'ke-online', 'global-admin'
+        ]);
     });
 });

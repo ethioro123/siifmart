@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { supabase } from '../lib/supabase';
-import { isStagingQuickLoginAvailable, mapStagingEmployee } from '../utils/stagingQuickLogin';
+import { isStagingQuickLoginAvailable, mapStagingEmployee, selectRepresentativeStagingAccounts, type StagingQuickAccount } from '../utils/stagingQuickLogin';
 
 const rosterSchema = z.object({ accounts: z.array(z.object({
     id: z.string(), name: z.string(), role: z.string(), job_title: z.string(),
@@ -23,7 +23,8 @@ export const stagingQuickLoginService = {
     async getAccounts() {
         requireStaging();
         const result = rosterSchema.parse(await readResponse(await fetch('/__staging/accounts', { cache: 'no-store' })));
-        return result.accounts.map(mapStagingEmployee).filter(account => account !== null);
+        return selectRepresentativeStagingAccounts(result.accounts.map(mapStagingEmployee)
+            .filter((account): account is StagingQuickAccount => account !== null));
     },
     async signIn(email: string): Promise<void> {
         requireStaging();
