@@ -100,6 +100,12 @@ export default function SettingsPage() {
                             <Protected permission="EDIT_SYSTEM_SETTINGS">
                                 <TabButton id="infrastructure" icon={Printer} label="Infrastructure & Devices" />
                             </Protected>
+                            <Protected permission="VIEW_AUDIT_LOGS">
+                                <TabButton id="audit" icon={FileText} label="System Audit Log" />
+                            </Protected>
+                            <Protected permission="ACCESS_SETTINGS">
+                                <TabButton id="notifications" icon={Bell} label="Alert Notifications" />
+                            </Protected>
                         </>
                     ) : (
                         <>

@@ -288,34 +288,40 @@ export const ACTION_PERMISSIONS: Record<UserRole, Permission[]> = {
     ],
 
     regional_procurement_lead: [
-        'dashboard.view',
+        'dashboard.view', 'admin.view',
         'procurement.view', 'procurement.create_po', 'procurement.edit_po', 'procurement.approve_po', 'procurement.delete_po', 'procurement.receive',
         'inventory.view', 'inventory.transfer',
         'pricing.view',
-        'customers.view'
+        'customers.view', 'customers.view_history'
     ],
 
     regional_finance_officer: [
-        'dashboard.view',
+        'dashboard.view', 'admin.view',
         'finance.view', 'finance.view_reports', 'finance.create_expense', 'finance.approve_expense', 'finance.reconcile_drawer', 'finance.view_payroll',
-        'sales.view', 'sales.view_reports'
+        'sales.view', 'sales.view_reports',
+        'pos.view'
     ],
 
     regional_hr_officer: [
-        'dashboard.view',
-        'employees.view', 'employees.create', 'employees.edit', 'employees.approve', 'employees.manage_attendance', 'employees.view_salary', 'employees.propose_salary'
+        'dashboard.view', 'admin.view',
+        'employees.view', 'employees.create', 'employees.edit', 'employees.approve', 'employees.manage_attendance', 'employees.view_salary', 'employees.propose_salary',
+        'finance.view_payroll'
     ],
 
     regional_logistics_lead: [
-        'dashboard.view',
-        'warehouse.view', 'warehouse.view_tasks', 'warehouse.dispatch', 'warehouse.receive',
+        'dashboard.view', 'admin.view',
+        'warehouse.view', 'warehouse.view_tasks', 'warehouse.dispatch', 'warehouse.receive', 'warehouse.putaway',
         'inventory.view', 'inventory.transfer',
+        'procurement.view', 'procurement.receive',
         'employees.view', 'employees.manage_attendance'
     ],
 
     regional_security_supervisor: [
-        'dashboard.view',
-        'settings.view_logs',
+        'dashboard.view', 'admin.view',
+        'settings.view', 'settings.view_logs',
+        'pos.view',
+        'sales.view', 'sales.view_reports',
+        'inventory.view',
         'employees.view', 'employees.manage_attendance'
     ],
 

@@ -7,6 +7,7 @@ export interface NavigationTarget {
 
 export const NAVIGATION_TARGETS: NavigationTarget[] = [
     { title: 'Central Operations', path: '/admin', module: 'admin', keywords: ['hq', 'dashboard', 'control', 'central'] },
+    { title: 'Regional Command', path: '/regional-ops', module: 'regional-ops', keywords: ['region', 'territory', 'regional command', 'regional operations', 'hub'] },
     { title: 'POS Terminal', path: '/pos', module: 'pos', keywords: ['register', 'sale', 'checkout', 'till'] },
     { title: 'POS Operations', path: '/pos-dashboard', module: 'pos', keywords: ['command center', 'store', 'retail'] },
     { title: 'Inventory Management', path: '/inventory', module: 'inventory', keywords: ['stock', 'items', 'products', 'inventory'] },

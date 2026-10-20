@@ -210,22 +210,23 @@ export default function TopBar() {
       const isStore = ['Store', 'Dark Store', 'Retail', 'POS'].includes(siteType);
       const isWarehouse = ['Warehouse', 'Distribution Center', 'WMS', 'Fulfillment Center'].includes(siteType);
       const isHQ = !isStore && !isWarehouse;
-      const isCeo = userRole === 'super_admin' || userRole === 'admin' || (userRole as string)?.toLowerCase() === 'ceo' || userRole === 'regional_manager' || userRole === 'operations_manager';
+      const isCeo = ['super_admin', 'admin', 'country_managing_director', 'regional_manager', 'head_of_operations', 'operations_head', 'operations_manager'].includes(userRole) || (userRole as string)?.toLowerCase() === 'ceo';
+      const isRegionalLead = userRole.startsWith('regional_');
 
       const navigation = NAVIGATION_TARGETS.filter(nav => {
          if (!canAccessModule(userRole, nav.module)) return false;
          
-         if (isWarehouse) {
+         if (isWarehouse && !isCeo && !isRegionalLead) {
             if (['pos', 'customers', 'sales', 'pricing', 'finance', 'settings'].includes(nav.module)) return false;
             if (nav.path === '/network-inventory' || nav.path === '/roadmap') return false;
-            if (nav.module === 'admin' && nav.path === '/admin' && !isCeo) return false;
-         } else if (isStore) {
+            if (nav.module === 'admin' && nav.path === '/admin') return false;
+         } else if (isStore && !isCeo && !isRegionalLead) {
             if (['warehouse', 'procurement', 'pricing', 'finance', 'settings'].includes(nav.module)) return false;
             if (nav.path === '/network-inventory' || nav.path === '/roadmap') return false;
-            if (nav.module === 'admin' && nav.path === '/admin' && !isCeo) return false;
+            if (nav.module === 'admin' && nav.path === '/admin') return false;
          } else if (isHQ) {
-            if (nav.path === '/pos' || nav.path === '/wms-ops') return false;
-            if (nav.path === '/inventory') return false; // In HQ, local inventory is replaced by Network Inventory
+            if (nav.path === '/pos' || (nav.path === '/wms-ops' && userRole !== 'regional_logistics_lead')) return false;
+            if (nav.path === '/inventory' && !['regional_logistics_lead', 'regional_security_supervisor'].includes(userRole)) return false; // In HQ, local inventory is replaced by Network Inventory
          }
 
          return nav.title.toLowerCase().includes(query) || nav.keywords.some(k => k.toLowerCase().includes(query));

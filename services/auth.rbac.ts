@@ -25,25 +25,25 @@ export const ROLE_PERMISSIONS: Record<string, string[]> = {
 
     // ═══ LEVEL 2 - REGIONAL/DIRECTORS ═══
     regional_manager: [
-        'dashboard', 'admin', 'pos', 'inventory', 'warehouse', 'sales', 'customers', 'employees', 'pricing', 'finance', 'procurement', 'settings', 'profile'
+        'dashboard', 'admin', 'regional-ops', 'pos', 'inventory', 'warehouse', 'sales', 'customers', 'employees', 'pricing', 'finance', 'procurement', 'settings', 'profile'
     ],
     head_of_operations: [
-        'dashboard', 'admin', 'pos', 'inventory', 'warehouse', 'sales', 'customers', 'employees', 'pricing', 'finance', 'procurement', 'settings', 'profile'
+        'dashboard', 'admin', 'regional-ops', 'pos', 'inventory', 'warehouse', 'sales', 'customers', 'employees', 'pricing', 'finance', 'procurement', 'settings', 'profile'
     ],
     operations_head: [
-        'dashboard', 'admin', 'pos', 'inventory', 'warehouse', 'sales', 'customers', 'employees', 'pricing', 'finance', 'procurement', 'settings', 'profile'
+        'dashboard', 'admin', 'regional-ops', 'pos', 'inventory', 'warehouse', 'sales', 'customers', 'employees', 'pricing', 'finance', 'procurement', 'settings', 'profile'
     ],
     operations_manager: [
-        'dashboard', 'admin', 'pos', 'inventory', 'warehouse', 'sales', 'customers', 'employees', 'pricing', 'finance', 'procurement', 'settings', 'profile'
+        'dashboard', 'admin', 'regional-ops', 'pos', 'inventory', 'warehouse', 'sales', 'customers', 'employees', 'pricing', 'finance', 'procurement', 'settings', 'profile'
     ],
     head_of_finance: [
-        'dashboard', 'finance', 'sales', 'procurement', 'employees', 'profile'
+        'dashboard', 'finance', 'sales', 'procurement', 'employees', 'pricing', 'profile'
     ],
     finance_head: [
-        'dashboard', 'finance', 'sales', 'procurement', 'employees', 'profile'
+        'dashboard', 'finance', 'sales', 'procurement', 'employees', 'pricing', 'profile'
     ],
     finance_manager: [
-        'dashboard', 'finance', 'sales', 'procurement', 'employees', 'profile'
+        'dashboard', 'finance', 'sales', 'procurement', 'employees', 'pricing', 'profile'
     ],
     head_of_hr: [
         'dashboard', 'employees', 'finance', 'profile'
@@ -88,25 +88,25 @@ export const ROLE_PERMISSIONS: Record<string, string[]> = {
         'dashboard', 'settings', 'employees', 'profile'
     ],
     head_of_audit: [
-        'dashboard', 'sales', 'inventory', 'finance', 'settings', 'profile'
+        'dashboard', 'regional-ops', 'sales', 'inventory', 'finance', 'settings', 'pos', 'profile'
     ],
     audit_head: [
-        'dashboard', 'sales', 'inventory', 'finance', 'settings', 'profile'
+        'dashboard', 'regional-ops', 'sales', 'inventory', 'finance', 'settings', 'pos', 'profile'
     ],
     regional_procurement_lead: [
-        'dashboard', 'procurement', 'inventory', 'pricing', 'customers', 'profile'
+        'dashboard', 'regional-ops', 'procurement', 'inventory', 'pricing', 'customers', 'profile'
     ],
     regional_finance_officer: [
-        'dashboard', 'finance', 'sales', 'pos', 'profile'
+        'dashboard', 'regional-ops', 'finance', 'sales', 'pos', 'profile'
     ],
     regional_hr_officer: [
-        'dashboard', 'employees', 'profile'
+        'dashboard', 'regional-ops', 'employees', 'profile'
     ],
     regional_logistics_lead: [
-        'dashboard', 'warehouse', 'inventory', 'procurement', 'profile'
+        'dashboard', 'regional-ops', 'warehouse', 'inventory', 'procurement', 'employees', 'profile'
     ],
     regional_security_supervisor: [
-        'dashboard', 'settings', 'pos', 'inventory', 'sales', 'employees', 'profile'
+        'dashboard', 'regional-ops', 'settings', 'pos', 'inventory', 'sales', 'employees', 'profile'
     ],
 
     // ═══ LEVEL 3 - SITE MANAGERS ═══
