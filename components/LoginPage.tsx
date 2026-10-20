@@ -108,14 +108,14 @@ export default function LoginPage() {
         )}
 
         {/* Center: Main Login Card */}
-        <div className="max-w-[440px] w-full shrink-0 bg-white/85 dark:bg-[#18201B]/75 border border-[#E2DCCE] dark:border-[var(--theme-border)] rounded-[32px] p-8 sm:p-10 relative z-10 shadow-[0_24px_80px_-12px_rgba(34,50,38,0.06)] dark:shadow-[0_32px_96px_-12px_rgba(5,8,6,0.65)] lg:backdrop-blur-2xl transition-all duration-300">
+        <div className="max-w-[440px] w-full shrink-0 bg-white dark:bg-[#111111] border border-stone-200 dark:border-white/10 rounded-[32px] p-8 sm:p-10 relative z-10 shadow-2xl transition-all duration-300">
           
           {/* Header Branding section */}
           <div className="flex flex-col items-center justify-center mb-6">
             <div className="mb-2 select-none flex flex-col items-center">
               <Logo variant="stacked" size={40} className="justify-center" />
             </div>
-            <p className="text-[10px] text-[var(--theme-text-secondary)] uppercase tracking-[0.25em] font-bold mt-1 select-none text-center px-4">
+            <p className="text-[10px] text-stone-500 dark:text-stone-400 uppercase tracking-[0.25em] font-bold mt-1 select-none text-center px-4">
               {mode === 'login' ? (settings?.slogan || 'Operations Access Portal') : 'Security Recovery'}
             </p>
           </div>
@@ -152,7 +152,7 @@ export default function LoginPage() {
 
           <form onSubmit={handleSubmit} className="space-y-5">
             <div>
-              <label className="block text-xs font-semibold text-[#2C4D35] dark:text-[#A9CBA2] uppercase tracking-wider mb-2 select-none">
+              <label className="block text-xs font-semibold text-stone-700 dark:text-stone-300 uppercase tracking-wider mb-2 select-none">
                 Email Address
               </label>
               <div className="relative">
@@ -160,24 +160,24 @@ export default function LoginPage() {
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full bg-white/90 dark:bg-black/25 border border-[#E2DCCE] dark:border-[var(--theme-border)] hover:border-[#CFC6B4] dark:hover:border-[var(--theme-border-strong)] rounded-2xl px-4 py-3.5 pl-11 text-[#1E3F27] dark:text-[#EAE5D9] placeholder-stone-400 dark:placeholder-stone-500 focus:border-[#2C5E3B] dark:focus:border-[#A9CBA2] focus:ring-4 focus:ring-[#2C5E3B]/10 dark:focus:ring-[#A9CBA2]/10 focus:outline-none transition-all duration-300 text-sm"
+                  className="w-full bg-stone-50 dark:bg-white/5 border border-stone-200 dark:border-white/10 hover:border-stone-400 dark:hover:border-white/20 rounded-2xl px-4 py-3.5 pl-11 text-stone-900 dark:text-white placeholder-stone-400 dark:placeholder-stone-500 focus:border-black dark:focus:border-white focus:ring-4 focus:ring-black/5 dark:focus:ring-white/10 focus:outline-none transition-all duration-300 text-sm"
                   placeholder="name@company.com"
                   required
                 />
-                <Mail className="absolute left-4 top-4 text-[#4D6E56] dark:text-[#7A9E83]" size={16} />
+                <Mail className="absolute left-4 top-4 text-stone-400 dark:text-stone-500" size={16} />
               </div>
             </div>
 
             {mode !== 'forgot' && (
               <div>
                 <div className="flex justify-between items-center mb-2 select-none">
-                  <label className="block text-xs font-semibold text-[#2C4D35] dark:text-[#A9CBA2] uppercase tracking-wider">
+                  <label className="block text-xs font-semibold text-stone-700 dark:text-stone-300 uppercase tracking-wider">
                     Password
                   </label>
                   <button
                     type="button"
                     onClick={() => { setMode('forgot'); resetForm(); }}
-                    className="text-xs font-semibold text-[#4D6E56] dark:text-[#A9CBA2] hover:text-[#2C5E3B] dark:hover:text-[#EAE5D9] transition-colors cursor-pointer"
+                    className="text-xs font-semibold text-stone-500 dark:text-stone-400 hover:text-black dark:hover:text-white transition-colors cursor-pointer"
                   >
                     Forgot?
                   </button>
@@ -187,15 +187,15 @@ export default function LoginPage() {
                     type={showPassword ? "text" : "password"}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="w-full bg-white/90 dark:bg-black/25 border border-[#E2DCCE] dark:border-[var(--theme-border)] hover:border-[#CFC6B4] dark:hover:border-[var(--theme-border-strong)] rounded-2xl px-4 py-3.5 pl-11 pr-11 text-[#1E3F27] dark:text-[#EAE5D9] placeholder-stone-400 dark:placeholder-stone-500 focus:border-[#2C5E3B] dark:focus:border-[#A9CBA2] focus:ring-4 focus:ring-[#2C5E3B]/10 dark:focus:ring-[#A9CBA2]/10 focus:outline-none transition-all duration-300 text-sm"
+                    className="w-full bg-stone-50 dark:bg-white/5 border border-stone-200 dark:border-white/10 hover:border-stone-400 dark:hover:border-white/20 rounded-2xl px-4 py-3.5 pl-11 pr-11 text-stone-900 dark:text-white placeholder-stone-400 dark:placeholder-stone-500 focus:border-black dark:focus:border-white focus:ring-4 focus:ring-black/5 dark:focus:ring-white/10 focus:outline-none transition-all duration-300 text-sm"
                     placeholder="••••••••"
                     required
                   />
-                  <Lock className="absolute left-4 top-4 text-[#4D6E56] dark:text-[#7A9E83]" size={16} />
+                  <Lock className="absolute left-4 top-4 text-stone-400 dark:text-stone-500" size={16} />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-4 top-4 text-[#4D6E56] dark:text-[#7A9E83] hover:text-[#2C5E3B] dark:hover:text-[#EAE5D9] transition-colors cursor-pointer"
+                    className="absolute right-4 top-4 text-stone-400 dark:text-stone-500 hover:text-stone-600 dark:hover:text-stone-300 transition-colors cursor-pointer"
                   >
                     {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                   </button>
@@ -229,7 +229,7 @@ export default function LoginPage() {
                 <button
                   type="button"
                   onClick={() => { setMode('login'); resetForm(); }}
-                  className="text-xs font-semibold text-[#4D6E56] dark:text-[#A9CBA2] hover:text-[#224429] dark:hover:text-white transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
+                  className="text-xs font-semibold text-stone-500 dark:text-stone-400 hover:text-black dark:hover:text-white transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
                 >
                   <ArrowLeft size={14} />
                   Back to Sign In
