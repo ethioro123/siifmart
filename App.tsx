@@ -31,6 +31,46 @@ const LocationSelect = lazy(() => import('./pages/LocationSelect'));
 const Profile = lazy(() => import('./pages/Profile'));
 const MigrationPanel = lazy(() => import('./pages/MigrationPanel'));
 
+/**
+ * Minimal Apple boot-style progress indicator.
+ * Progressively and smoothly advances forward, syncing with real data hydration.
+ */
+function AppleBootProgress({ realProgress }: { realProgress: number }) {
+  const [progress, setProgress] = React.useState(8);
+
+  React.useEffect(() => {
+    const timer = setInterval(() => {
+      setProgress(prev => {
+        // If real data progress is higher, smoothly catch up towards it
+        if (realProgress > 0 && realProgress > prev) {
+          return Math.min(100, prev + Math.max(2, (realProgress - prev) * 0.35));
+        }
+        // Continuous organic Apple startup pacing
+        if (prev < 35) return prev + 2.5;
+        if (prev < 65) return prev + 1.8;
+        if (prev < 85) return prev + 1.0;
+        if (prev < 95) return prev + 0.3;
+        return prev;
+      });
+    }, 70);
+
+    return () => clearInterval(timer);
+  }, [realProgress]);
+
+  const activePercent = Math.min(100, Math.max(progress, realProgress || 0));
+
+  return (
+    <div className="w-48 sm:w-56 mt-10">
+      <div className="w-full h-[3px] bg-black/10 dark:bg-white/20 rounded-full overflow-hidden">
+        <div
+          style={{ width: `${activePercent}%` }}
+          className="h-full bg-black dark:bg-white rounded-full transition-all duration-200 ease-out"
+        />
+      </div>
+    </div>
+  );
+}
+
 // Fallback loader for code splitting
 function ModuleLoader() {
   return (
@@ -136,16 +176,7 @@ export default function App() {
         </div>
 
         {/* Minimal Apple Precision Progress Bar */}
-        <div className="w-48 sm:w-56 mt-10">
-          <div className="w-full h-[3px] bg-black/10 dark:bg-white/20 rounded-full overflow-hidden">
-            <div
-              style={{
-                width: `${loading ? (progressPercent > 0 ? progressPercent : 35) : (progressPercent || 100)}%`,
-              }}
-              className="h-full bg-black dark:bg-white rounded-full transition-all duration-300 ease-out"
-            />
-          </div>
-        </div>
+        <AppleBootProgress realProgress={progressPercent} />
 
         {/* Error Display with Retry */}
         {loadError && (
