@@ -5,6 +5,11 @@
 
 ## Active Features
 
+### Pet Supplies Category Decommissioning (2026-10-20)
+- Removed 'Pet Supplies' and its subcategories ('Dog Food & Accessories', 'Cat Food & Accessories', 'Small Pet Supplies') from catalog categories, SKU generation prefixes, procurement specification groups, packaging configurations, and POS classification utilities.
+- Any unmapped or legacy references gracefully fall back to 'general_merchandise'.
+- **Files**: `constants/categories.ts`, `components/procurement/categoryAttributes.ts`, `components/procurement/categorySpecGroups.ts`, `components/procurement/categoryPackaging.ts`, `utils/skuGenerator.ts`, `components/pos/utils/posUtils.ts`, `components/pos/hooks/usePOSProductFilters.ts`, `tests/utils/categoryAttributes.test.ts`, `tests/services/categoryAttributesPO.test.ts`.
+
 ### Procurement Administration Support Scope (2026-10-20)
 - Buyers and vendor support at HQ prepare supplier and purchase records within their country. Regional Administration staff work within their assigned region and can read country-shared suppliers but edit only region-assigned suppliers.
 - Supplier creation now persists before the form closes. New suppliers remain pending independent lead verification; a purchase order cannot be approved against an unverified supplier. Procurement leads retain purchase order decision rights.
