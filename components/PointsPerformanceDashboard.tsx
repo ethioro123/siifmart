@@ -167,9 +167,9 @@ const PointsPerformanceDashboard: React.FC<PointsPerformanceDashboardProps> = ({
                     <div className="space-y-4">
                         {topIndividual.map((w, i) => (
                             <div key={w.id} className="flex items-center gap-3 p-3 bg-white/5 hover:bg-white/10 rounded-2xl border border-white/5 transition-all duration-300 group/item hover:-translate-x-1">
-                                <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm ${i === 0 ? 'bg-yellow-500 text-black' :
-                                    i === 1 ? 'bg-gray-300 text-black' :
-                                        i === 2 ? 'bg-amber-600 text-white' : 'bg-white/10 text-gray-400'
+                                <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm ${i === 0 ? 'bg-amber-500 text-stone-950' :
+                                    i === 1 ? 'bg-stone-300 dark:bg-stone-700 text-stone-900 dark:text-stone-100' :
+                                        i === 2 ? 'bg-amber-700 dark:bg-amber-800 text-white' : 'bg-white/10 text-[var(--theme-text-muted)]'
                                     }`}>
                                     {i + 1}
                                 </div>
@@ -198,9 +198,9 @@ const PointsPerformanceDashboard: React.FC<PointsPerformanceDashboardProps> = ({
                     <div className="space-y-4">
                         {topTeams.map((s, i) => (
                             <div key={s.id} className="flex items-center gap-3 p-3 bg-white/5 hover:bg-white/10 rounded-2xl border border-white/5 transition-all duration-300 group/item hover:-translate-x-1">
-                                <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm ${i === 0 ? 'bg-emerald-500 text-stone-900' : 'bg-white/10 text-gray-400'
+                                <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm ${i === 0 ? 'bg-emerald-500 text-stone-950' : 'bg-white/10 text-[var(--theme-text-muted)]'
                                     }`}>
-                                    <Shield size={14} className={i === 0 ? 'text-stone-900' : 'text-gray-400'} />
+                                    <Shield size={14} className={i === 0 ? 'text-stone-950' : 'text-[var(--theme-text-muted)]'} />
                                 </div>
                                 <div className="flex-1 min-w-0">
                                     <p className="font-bold text-white text-sm truncate">{s.siteName}</p>

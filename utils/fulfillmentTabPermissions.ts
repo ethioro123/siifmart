@@ -65,6 +65,8 @@ export const ROLE_DEFAULT_TABS: Record<string, OpTab> = {
     fleet_maintenance_supervisor: 'DOCKS',
     warehouse_manager: 'DOCKS',
     logistics_manager: 'DOCKS',
+    wms: 'RECEIVE',
+    manager: 'DOCKS',
 };
 
 export function getDefaultFulfillmentTab(role?: string | null): OpTab {

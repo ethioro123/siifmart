@@ -43,14 +43,17 @@ export function ProtectedRoute({
   // 1.5. Clean Mobile / Android Mode: Strictly limit to Fulfillment for WMS and POS for stores
   if (native.isCleanMobileMode()) {
     const mobileRoute = getRoleDashboardRoute(user.role, activeSite?.type);
-    const allowedMobileModules = mobileRoute === '/wms-ops'
+    const isWmsMobile = mobileRoute.startsWith('/wms-ops');
+    const isPosMobile = mobileRoute.startsWith('/pos');
+    const allowedMobileModules = isWmsMobile
       ? ['warehouse', 'inventory', 'profile', 'location']
-      : mobileRoute === '/pos'
+      : isPosMobile
         ? ['pos', 'sales', 'customers', 'profile', 'location']
         : ['profile', 'location'];
     if (module && !allowedMobileModules.includes(module)) {
       const fallback = redirectTo || mobileRoute;
-      return <Navigate to={fallback === location.pathname ? '/profile' : fallback} replace />;
+      const fallbackPath = fallback.split('?')[0];
+      return <Navigate to={fallbackPath === location.pathname ? '/profile' : fallback} replace />;
     }
   }
 
@@ -76,7 +79,8 @@ export function ProtectedRoute({
       if (module && blockedInWms.includes(module)) {
         logger.warn('ProtectedRoute', `Blocked module "${module}" while active site is WMS (${activeSite.name})`);
         const fallback = redirectTo || getRoleDashboardRoute(user.role, activeSite?.type);
-        return <Navigate to={fallback === location.pathname ? "/profile" : fallback} replace />;
+        const fallbackPath = fallback.split('?')[0];
+        return <Navigate to={fallbackPath === location.pathname ? "/profile" : fallback} replace />;
       }
     }
 
@@ -92,7 +96,8 @@ export function ProtectedRoute({
       if (module && blockedInStore.includes(module)) {
         logger.warn('ProtectedRoute', `Blocked module "${module}" while active site is POS Store (${activeSite.name})`);
         const fallback = redirectTo || getRoleDashboardRoute(user.role, activeSite?.type);
-        return <Navigate to={fallback === location.pathname ? "/profile" : fallback} replace />;
+        const fallbackPath = fallback.split('?')[0];
+        return <Navigate to={fallbackPath === location.pathname ? "/profile" : fallback} replace />;
       }
     }
   }
@@ -102,7 +107,8 @@ export function ProtectedRoute({
     const dashboardRoute = getRoleDashboardRoute(user.role, activeSite?.type);
     logger.warn('ProtectedRoute', `Role ${user.role} attempted to access module: ${module}`);
     const fallback = redirectTo || dashboardRoute;
-    return <Navigate to={fallback === location.pathname ? "/profile" : fallback} replace />;
+    const fallbackPath = fallback.split('?')[0];
+    return <Navigate to={fallbackPath === location.pathname ? "/profile" : fallback} replace />;
   }
 
   // 4. Check specific permission
@@ -110,7 +116,8 @@ export function ProtectedRoute({
     const dashboardRoute = getRoleDashboardRoute(user.role, activeSite?.type);
     logger.warn('ProtectedRoute', `Role ${user.role} lacks permission: ${permission}`);
     const fallback = redirectTo || dashboardRoute;
-    return <Navigate to={fallback === location.pathname ? "/profile" : fallback} replace />;
+    const fallbackPath = fallback.split('?')[0];
+    return <Navigate to={fallbackPath === location.pathname ? "/profile" : fallback} replace />;
   }
 
   // Access granted

@@ -315,6 +315,11 @@
   border-color: var(--theme-input-border);
 }
 
+[data-theme="dark"] select option {
+  background-color: var(--theme-bg-panel);
+  color: var(--theme-text-primary);
+}
+
 /* Normalizing standard Tailwind gray & stone tone classes to Apple theme tokens */
 [data-theme="light"] .text-gray-400,
 [data-theme="light"] .text-stone-400,
@@ -348,8 +353,8 @@
   color: var(--theme-text-secondary);
 }
 
-[data-theme="dark"] .text-white,
-[data-theme="dark"] .text-stone-100 {
+[data-theme="dark"] .text-white:not([class*="dark:text-"]),
+[data-theme="dark"] .text-stone-100:not([class*="dark:text-"]) {
   color: var(--theme-text-primary);
 }
 
@@ -466,4 +471,25 @@
   backdrop-filter: blur(var(--theme-glass-strong-blur)) saturate(180%);
   border: 1px solid var(--theme-border);
   box-shadow: var(--shadow-modal);
+}
+
+/* Leaflet Map Dark Mode Normalization */
+[data-theme="dark"] .leaflet-popup-content-wrapper {
+  background-color: var(--theme-bg-panel);
+  color: var(--theme-text-primary);
+  border: 1px solid var(--theme-border);
+  box-shadow: var(--shadow-md);
+  border-radius: var(--radius-lg);
+}
+
+[data-theme="dark"] .leaflet-popup-tip {
+  background-color: var(--theme-bg-panel);
+}
+
+[data-theme="dark"] .leaflet-container {
+  background-color: var(--theme-bg-app);
+}
+
+[data-theme="dark"] .leaflet-tile-pane {
+  filter: brightness(0.65) invert(1) contrast(2.2) hue-rotate(185deg) saturate(0.35) brightness(0.9);
 }

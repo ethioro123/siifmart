@@ -118,7 +118,20 @@ export default function StepIdentity({
                         </p>
                     </div>
 
-                    <div>
+                    <label className="flex items-start gap-2 text-xs text-stone-700 dark:text-stone-300">
+                        <input
+                            type="checkbox"
+                            checked={newEmpData.createAppAccount !== false}
+                            onChange={e => setNewEmpData({ ...newEmpData, createAppAccount: e.target.checked, password: e.target.checked ? newEmpData.password : '' })}
+                            className="mt-0.5 accent-[#2C5E3B]"
+                        />
+                        <span>
+                            <span className="block font-semibold">Create app login</span>
+                            <span className="block text-[11px] text-stone-500 dark:text-stone-400">Turn this off for employees who need a workforce record but no SiifMart account.</span>
+                        </span>
+                    </label>
+
+                    {newEmpData.createAppAccount !== false && <div>
                         <label className="text-[11px] text-stone-600 dark:text-stone-300 uppercase font-bold mb-1 block">
                             Password (For System Login) <span className="text-rose-500">*</span>
                         </label>
@@ -161,7 +174,7 @@ export default function StepIdentity({
                                 Policy: {getActiveRolePolicy(newEmpData.role).password_complexity.toUpperCase()} complexity required for this role
                             </span>
                         </p>
-                    </div>
+                    </div>}
                 </div>
             </div>
 

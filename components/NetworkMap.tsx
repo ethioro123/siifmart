@@ -145,20 +145,20 @@ export default function NetworkMap({ sites, products, onSiteClick }: NetworkMapP
                                         <Store className="text-green-500" size={20} />
                                     )}
                                     <div>
-                                        <h3 className="font-bold text-gray-900">{site.name}</h3>
-                                        <p className="text-xs text-gray-500">{site.address}</p>
+                                        <h3 className="font-bold text-[var(--theme-text-primary)]">{site.name}</h3>
+                                        <p className="text-xs text-[var(--theme-text-secondary)]">{site.address}</p>
                                     </div>
                                 </div>
 
                                 {/* Metrics */}
                                 <div className="grid grid-cols-2 gap-2 mb-3">
-                                    <div className="bg-gray-50 rounded p-2">
-                                        <p className="text-xs text-gray-500 uppercase font-bold">Products</p>
-                                        <p className="text-lg font-bold text-gray-900">{productCount}</p>
+                                    <div className="bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-lg p-2">
+                                        <p className="text-[10px] text-[var(--theme-text-muted)] uppercase font-semibold">Products</p>
+                                        <p className="text-base font-bold text-[var(--theme-text-primary)] font-mono">{productCount}</p>
                                     </div>
-                                    <div className="bg-gray-50 rounded p-2">
-                                        <p className="text-xs text-gray-500 uppercase font-bold">Value</p>
-                                        <p className="text-sm font-bold text-gray-900">
+                                    <div className="bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-lg p-2">
+                                        <p className="text-[10px] text-[var(--theme-text-muted)] uppercase font-semibold">Value</p>
+                                        <p className="text-sm font-bold text-[var(--theme-text-primary)] font-mono">
                                             {formatCompactNumber(totalValue, { currency: CURRENCY_SYMBOL })}
                                         </p>
                                     </div>
@@ -166,24 +166,24 @@ export default function NetworkMap({ sites, products, onSiteClick }: NetworkMapP
 
                                 {/* Alerts */}
                                 {hasAlerts && (
-                                    <div className="bg-red-50 border border-red-200 rounded p-2 flex items-start gap-2">
+                                    <div className="bg-red-500/10 border border-red-500/20 text-red-600 dark:text-red-400 rounded-lg p-2 flex items-start gap-2">
                                         <AlertTriangle className="text-red-500 shrink-0 mt-0.5" size={16} />
-                                        <div className="text-xs">
+                                        <div className="text-xs font-medium">
                                             {outOfStockCount > 0 && (
-                                                <p className="text-red-700 font-bold">{outOfStockCount} out of stock</p>
+                                                <p className="font-bold">{outOfStockCount} out of stock</p>
                                             )}
                                             {lowStockCount > 0 && (
-                                                <p className="text-orange-700">{lowStockCount} low stock</p>
+                                                <p>{lowStockCount} low stock</p>
                                             )}
                                         </div>
                                     </div>
                                 )}
 
                                 {/* Status */}
-                                <div className="mt-3 pt-2 border-t border-gray-200">
-                                    <span className={`inline-block px-2 py-1 rounded text-xs font-bold ${site.status === 'Active' ? 'bg-green-100 text-green-700' :
-                                        site.status === 'Maintenance' ? 'bg-yellow-100 text-yellow-700' :
-                                            'bg-red-100 text-red-700'
+                                <div className="mt-3 pt-2 border-t border-[var(--theme-border)]">
+                                    <span className={`inline-block px-2 py-0.5 rounded text-[11px] font-semibold border ${site.status === 'Active' ? 'badge-status-success' :
+                                        site.status === 'Maintenance' ? 'badge-status-warning' :
+                                            'badge-status-danger'
                                         }`}>
                                         {site.status}
                                     </span>
@@ -195,20 +195,20 @@ export default function NetworkMap({ sites, products, onSiteClick }: NetworkMapP
             </MapContainer>
 
             {/* Legend */}
-            <div className="absolute bottom-4 left-4 bg-white rounded-lg shadow-lg p-3 z-[1000]">
-                <p className="text-xs font-bold text-gray-700 mb-2">Legend</p>
-                <div className="space-y-1">
+            <div className="absolute bottom-4 left-4 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl shadow-lg p-3 z-[1000] backdrop-blur-md">
+                <p className="text-xs font-bold text-[var(--theme-text-primary)] mb-2">Legend</p>
+                <div className="space-y-1.5">
                     <div className="flex items-center gap-2">
-                        <div className="w-4 h-4 rounded-full bg-blue-500"></div>
-                        <span className="text-xs text-gray-600">Warehouse</span>
+                        <div className="w-3.5 h-3.5 rounded-full bg-blue-500 shrink-0"></div>
+                        <span className="text-xs text-[var(--theme-text-secondary)]">Warehouse</span>
                     </div>
                     <div className="flex items-center gap-2">
-                        <div className="w-4 h-4 rounded-full bg-green-500"></div>
-                        <span className="text-xs text-gray-600">Store</span>
+                        <div className="w-3.5 h-3.5 rounded-full bg-emerald-500 shrink-0"></div>
+                        <span className="text-xs text-[var(--theme-text-secondary)]">Store</span>
                     </div>
                     <div className="flex items-center gap-2">
-                        <div className="w-4 h-4 rounded-full bg-red-500"></div>
-                        <span className="text-xs text-gray-600">Has Alerts</span>
+                        <div className="w-3.5 h-3.5 rounded-full bg-rose-500 shrink-0"></div>
+                        <span className="text-xs text-[var(--theme-text-secondary)]">Has Alerts</span>
                     </div>
                 </div>
             </div>

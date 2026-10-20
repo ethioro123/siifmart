@@ -56,6 +56,7 @@ export default function SettingsTab({
     const [editNationalIdNumber, setEditNationalIdNumber] = useState(employee.nationalIdNumber || '');
 
     const [editRole, setEditRole] = useState<UserRole>(employee.role);
+    const [editJobTitle, setEditJobTitle] = useState(employee.jobTitle || employee.job_title || '');
     const [editDepartment, setEditDepartment] = useState(employee.department || 'Retail Operations');
     const [editSiteId, setEditSiteId] = useState(employee.siteId || employee.site_id || '');
     const [editSalary, setEditSalary] = useState(employee.salary?.toString() || '0');
@@ -78,6 +79,7 @@ export default function SettingsTab({
         setEditDateOfBirth(employee.dateOfBirth || '');
         setEditNationalIdNumber(employee.nationalIdNumber || '');
         setEditRole(employee.role);
+        setEditJobTitle(employee.jobTitle || employee.job_title || '');
         setEditDepartment(employee.department || 'Retail Operations');
         setEditSiteId(employee.siteId || employee.site_id || '');
         setEditSalary(employee.salary?.toString() || '0');
@@ -115,6 +117,7 @@ export default function SettingsTab({
         dateOfBirth: editDateOfBirth,
         nationalIdNumber: editNationalIdNumber.trim(),
         role: editRole,
+        jobTitle: editJobTitle.trim(),
         department: editDepartment,
         siteId: editSiteId,
         salary: parseFloat(editSalary) || 0,
@@ -125,7 +128,7 @@ export default function SettingsTab({
         emergencyContact: editEmergencyContact.trim()
     }), [
         editName, editAge, editDateOfBirth, editNationalIdNumber,
-        editRole, editDepartment, editSiteId, editSalary, editSpecialization, editStatus,
+        editRole, editJobTitle, editDepartment, editSiteId, editSalary, editSpecialization, editStatus,
         editPhone, editAddress, editEmergencyContact
     ]);
 
@@ -135,6 +138,7 @@ export default function SettingsTab({
         editDateOfBirth !== (employee.dateOfBirth || '') ||
         editNationalIdNumber.trim() !== (employee.nationalIdNumber || '').trim() ||
         editRole !== employee.role ||
+        editJobTitle.trim() !== (employee.jobTitle || employee.job_title || '').trim() ||
         editDepartment !== (employee.department || 'Retail Operations') ||
         editSiteId !== (employee.siteId || employee.site_id || '') ||
         editSalary !== (employee.salary?.toString() || '0') ||
@@ -267,6 +271,8 @@ export default function SettingsTab({
                         assignableRoles={assignableRoles}
                         role={editRole}
                         onRoleChange={handleRoleChange}
+                    jobTitle={editJobTitle}
+                    setJobTitle={setEditJobTitle}
                         department={editDepartment}
                         setDepartment={setEditDepartment}
                         siteId={editSiteId}

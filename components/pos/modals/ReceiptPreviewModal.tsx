@@ -14,12 +14,14 @@ export const ReceiptPreviewModal: React.FC = () => {
     return (
         <Modal isOpen={isReceiptPreviewOpen} onClose={() => setIsReceiptPreviewOpen(false)} title="Receipt Preview" size="md">
             <div className="space-y-4">
-                <div className="bg-white p-4 rounded-lg shadow-inner h-96 overflow-y-auto">
-                    <iframe
-                        srcDoc={receiptPreviewHTML}
-                        title="Receipt Preview"
-                        className="w-full h-full border-none bg-white"
-                    />
+                <div className="bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] p-4 rounded-2xl shadow-xs">
+                    <div className="bg-white p-4 rounded-xl shadow-md h-96 overflow-y-auto max-w-sm mx-auto border border-black/10">
+                        <iframe
+                            srcDoc={receiptPreviewHTML}
+                            title="Receipt Preview"
+                            className="w-full h-full border-none bg-white"
+                        />
+                    </div>
                 </div>
                 <div className="flex justify-end gap-3 pt-4 border-t border-[var(--theme-border)]">
                     <button

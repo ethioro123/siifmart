@@ -423,7 +423,7 @@ export function CountryQuickLoginPanel({
                           <span className="text-[8.5px] font-mono tabular-nums font-semibold text-stone-500 dark:text-stone-400">
                             {acc.code}
                           </span>
-                          <UserCheck size={11} className="text-stone-300 dark:text-stone-600 group-hover:text-[#2C5E3B] dark:group-hover:text-[#A9CBA2] transition-colors" />
+                          <UserCheck size={11} className="text-stone-300 dark:text-stone-400 group-hover:text-[#2C5E3B] dark:group-hover:text-[#A9CBA2] transition-colors" />
                         </div>
                       </button>
                     );
@@ -437,7 +437,7 @@ export function CountryQuickLoginPanel({
 
       {/* Footer hint */}
       <div className="pt-2 border-t border-[#E2DCCE]/40 dark:border-white/[0.05] text-center">
-        <span className="text-[9px] text-stone-400 dark:text-stone-500 font-mono">
+        <span className="text-[9px] text-stone-400 dark:text-stone-400 font-mono">
           Select an employee to sign in to staging
         </span>
       </div>

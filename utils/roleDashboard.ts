@@ -6,6 +6,7 @@
 
 import { native } from './native';
 import { canAccessModule } from './permissions';
+import { getDefaultFulfillmentTab } from './fulfillmentTabPermissions';
 import type { UserRole } from '../types';
 
 export function getRoleDashboardRoute(role?: UserRole | string, siteType?: string): string {
@@ -15,7 +16,10 @@ export function getRoleDashboardRoute(role?: UserRole | string, siteType?: strin
     if (native.isCleanMobileMode()) {
         const isWarehouse = ['Warehouse', 'Distribution Center', 'WMS', 'Fulfillment Center'].includes(siteType || '');
         const isStore = ['Store', 'Dark Store', 'Retail', 'POS'].includes(siteType || '');
-        if ((isWarehouse || !siteType) && canAccessModule(role as UserRole, 'warehouse')) return '/wms-ops';
+        if ((isWarehouse || !siteType) && canAccessModule(role as UserRole, 'warehouse')) {
+            const defaultTab = getDefaultFulfillmentTab(role);
+            return `/wms-ops?tab=${defaultTab}`;
+        }
         if ((isStore || !siteType) && canAccessModule(role as UserRole, 'pos')) return '/pos';
         return '/profile';
     }
@@ -82,7 +86,7 @@ export function getRoleDashboardRoute(role?: UserRole | string, siteType?: strin
         case 'store_operations_auditor':
             return isStoreSite ? '/pos-dashboard' : '/sales';
 
-        // 3. Level 3 & 4 - Warehouse & Logistics Roles
+        // 3. Level 3 & 4 - Warehouse & Logistics Roles (Direct sovereign role landing)
         case 'warehouse_manager':
         case 'logistics_manager':
         case 'dispatch_manager':
@@ -97,11 +101,15 @@ export function getRoleDashboardRoute(role?: UserRole | string, siteType?: strin
         case 'forklift_operator':
         case 'returns_clerk':
         case 'dispatcher':
-        case 'wms':
-            return '/wms-ops';
+        case 'wms': {
+            const defaultTab = getDefaultFulfillmentTab(role);
+            return `/wms-ops?tab=${defaultTab}`;
+        }
+
+        case 'replenishment_planner':
+            return '/wms-ops?tab=REPLENISH';
 
         case 'inventory_manager':
-        case 'replenishment_planner':
             return '/inventory';
 
         // 4. Store Operations Roles
@@ -122,14 +130,20 @@ export function getRoleDashboardRoute(role?: UserRole | string, siteType?: strin
     }
 
     // 5. Site-type fallback for non-specialized roles
-    if (isWarehouseSite) return '/wms-ops';
+    if (isWarehouseSite) {
+        const defaultTab = getDefaultFulfillmentTab(role);
+        return `/wms-ops?tab=${defaultTab}`;
+    }
     if (isStoreSite) return '/pos-dashboard';
 
     // 6. Dynamic Permission-Gated Fallback (ensures user never loops to an inaccessible module)
     if (canAccessModule(role as UserRole, 'procurement')) return '/procurement';
     if (canAccessModule(role as UserRole, 'finance')) return '/finance';
     if (canAccessModule(role as UserRole, 'employees')) return '/employees';
-    if (canAccessModule(role as UserRole, 'warehouse')) return '/wms-ops';
+    if (canAccessModule(role as UserRole, 'warehouse')) {
+        const defaultTab = getDefaultFulfillmentTab(role);
+        return `/wms-ops?tab=${defaultTab}`;
+    }
     if (canAccessModule(role as UserRole, 'pos')) return '/pos-dashboard';
     if (canAccessModule(role as UserRole, 'inventory')) return '/inventory';
     if (canAccessModule(role as UserRole, 'sales')) return '/sales';

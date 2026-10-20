@@ -84,11 +84,15 @@ export const AuditLogViewer: React.FC = () => {
 
     const getSeverityColor = (severity: LogSeverity) => {
         switch (severity) {
-            case 'CRITICAL': return 'text-red-600 bg-red-100';
-            case 'ERROR': return 'text-red-500 bg-red-50';
-            case 'WARNING': return 'text-orange-500 bg-orange-50';
-            case 'INFO': return 'text-blue-500 bg-blue-50';
-            default: return 'text-gray-500 bg-gray-50';
+            case 'CRITICAL':
+            case 'ERROR':
+                return 'badge-status-danger';
+            case 'WARNING':
+                return 'badge-status-warning';
+            case 'INFO':
+                return 'badge-status-info';
+            default:
+                return 'badge-status-neutral';
         }
     };
 
@@ -103,44 +107,44 @@ export const AuditLogViewer: React.FC = () => {
     };
 
     return (
-        <div className="bg-white rounded-lg shadow-lg p-6 max-w-7xl mx-auto">
-            <div className="flex justify-between items-center mb-6">
+        <div className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-2xl shadow-[var(--shadow-sm)] p-6 max-w-7xl mx-auto space-y-6">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
-                    <h2 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
-                        <Shield className="text-blue-600" />
+                    <h2 className="text-xl sm:text-2xl font-bold text-[var(--theme-text-primary)] flex items-center gap-2">
+                        <Shield className="text-[#0071E3] dark:text-[#2997FF]" />
                         Security Audit Logs
                     </h2>
-                    <p className="text-gray-500 text-sm mt-1">
+                    <p className="text-[var(--theme-text-secondary)] text-xs sm:text-sm mt-1">
                         Monitoring system access, security events, and policy violations.
                     </p>
                 </div>
                 <button
                     onClick={handleExport}
-                    className="flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
+                    className="flex items-center gap-2 px-4 py-2 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-[var(--theme-text-primary)] rounded-xl hover:bg-[var(--theme-bg-card-hover)] transition-all font-semibold text-xs cursor-pointer shadow-xs shrink-0"
                 >
-                    <Download size={18} />
+                    <Download size={15} />
                     Export CSV
                 </button>
             </div>
 
             {/* Filters */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6 bg-gray-50 p-4 rounded-lg">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-3 bg-[var(--theme-bg-subtle)] p-4 rounded-xl border border-[var(--theme-border)]">
                 <div className="relative">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--theme-text-secondary)]" size={16} />
                     <input
                         type="text"
                         placeholder="Search logs..."
-                        className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        className="w-full pl-9 pr-3.5 py-2 bg-[var(--theme-input-bg)] border border-[var(--theme-border)] rounded-xl text-xs text-[var(--theme-text-primary)] placeholder:[var(--theme-text-muted)] focus:border-[#0071E3] dark:focus:border-[#2997FF] outline-none transition-colors"
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                     />
                 </div>
 
                 <div className="relative">
-                    <Filter className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
+                    <Filter className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--theme-text-secondary)]" size={16} />
                     <select
                         aria-label="Filter by Category"
-                        className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none"
+                        className="w-full pl-9 pr-4 py-2 bg-[var(--theme-input-bg)] border border-[var(--theme-border)] rounded-xl text-xs text-[var(--theme-text-primary)] focus:border-[#0071E3] dark:focus:border-[#2997FF] outline-none transition-colors appearance-none cursor-pointer"
                         value={categoryFilter}
                         onChange={(e) => setCategoryFilter(e.target.value as any)}
                     >
@@ -154,14 +158,13 @@ export const AuditLogViewer: React.FC = () => {
                 </div>
 
                 <div className="relative">
-                    <AlertTriangle className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
+                    <AlertTriangle className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--theme-text-secondary)]" size={16} />
                     <select
                         aria-label="Filter by Severity"
-                        className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none"
+                        className="w-full pl-9 pr-4 py-2 bg-[var(--theme-input-bg)] border border-[var(--theme-border)] rounded-xl text-xs text-[var(--theme-text-primary)] focus:border-[#0071E3] dark:focus:border-[#2997FF] outline-none transition-colors appearance-none cursor-pointer"
                         value={severityFilter}
                         onChange={(e) => setSeverityFilter(e.target.value as any)}
                     >
-
                         <option value="ALL">All Severities</option>
                         <option value="INFO">Info</option>
                         <option value="WARNING">Warning</option>
@@ -170,28 +173,28 @@ export const AuditLogViewer: React.FC = () => {
                     </select>
                 </div>
 
-                <div className="flex items-center justify-end text-sm text-gray-500">
+                <div className="flex items-center justify-end text-xs text-[var(--theme-text-secondary)] font-mono">
                     Showing {filteredLogs.length} events
                 </div>
             </div>
 
             {/* Logs Table */}
-            <div className="overflow-x-auto border rounded-lg">
+            <div className="overflow-x-auto border border-[var(--theme-border)] rounded-xl">
                 <table className="w-full text-left border-collapse">
                     <thead>
-                        <tr className="bg-gray-50 text-gray-600 text-sm uppercase tracking-wider">
-                            <th className="p-4 border-b">Timestamp</th>
-                            <th className="p-4 border-b">Severity</th>
-                            <th className="p-4 border-b">Category</th>
-                            <th className="p-4 border-b">Action</th>
-                            <th className="p-4 border-b">User</th>
-                            <th className="p-4 border-b">Details</th>
+                        <tr className="bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] text-[11px] font-semibold uppercase tracking-wider border-b border-[var(--theme-border)]">
+                            <th className="p-3.5">Timestamp</th>
+                            <th className="p-3.5">Severity</th>
+                            <th className="p-3.5">Category</th>
+                            <th className="p-3.5">Action</th>
+                            <th className="p-3.5">User</th>
+                            <th className="p-3.5">Details</th>
                         </tr>
                     </thead>
-                    <tbody className="divide-y divide-gray-200">
+                    <tbody className="divide-y divide-[var(--theme-border)]">
                         {filteredLogs.length === 0 ? (
                             <tr>
-                                <td colSpan={6} className="p-8 text-center text-gray-500">
+                                <td colSpan={6} className="p-8 text-center text-xs text-[var(--theme-text-muted)] font-medium">
                                     No logs found matching your criteria.
                                 </td>
                             </tr>
@@ -199,36 +202,36 @@ export const AuditLogViewer: React.FC = () => {
                             filteredLogs.map((log) => (
                                 <tr
                                     key={log.id}
-                                    className="hover:bg-gray-50 cursor-pointer transition-colors"
+                                    className="hover:bg-[var(--theme-table-row-hover)] cursor-pointer transition-colors"
                                     onClick={() => setSelectedLog(log)}
                                 >
-                                    <td className="p-4 text-sm text-gray-600 whitespace-nowrap">
-                                        <div className="flex items-center gap-2">
-                                            <Clock size={14} />
+                                    <td className="p-3.5 text-xs text-[var(--theme-text-secondary)] font-mono whitespace-nowrap">
+                                        <div className="flex items-center gap-1.5">
+                                            <Clock size={13} className="text-[var(--theme-text-muted)]" />
                                             {formatDateTime(log.timestamp, { showTime: true })}
                                         </div>
                                     </td>
-                                    <td className="p-4">
-                                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${getSeverityColor(log.severity)}`}>
+                                    <td className="p-3.5">
+                                        <span className={`px-2 py-0.5 rounded-full text-[10px] font-semibold ${getSeverityColor(log.severity)}`}>
                                             {log.severity}
                                         </span>
                                     </td>
-                                    <td className="p-4">
-                                        <div className="flex items-center gap-2 text-sm text-gray-700">
+                                    <td className="p-3.5">
+                                        <div className="flex items-center gap-1.5 text-xs text-[var(--theme-text-primary)] font-medium">
                                             {getCategoryIcon(log.category)}
                                             {log.category}
                                         </div>
                                     </td>
-                                    <td className="p-4 text-sm font-medium text-gray-800">
+                                    <td className="p-3.5 text-xs font-semibold text-[var(--theme-text-primary)]">
                                         {log.action}
                                     </td>
-                                    <td className="p-4 text-sm text-gray-600">
+                                    <td className="p-3.5 text-xs text-[var(--theme-text-secondary)]">
                                         <div className="flex flex-col">
-                                            <span className="font-medium">{log.userName}</span>
-                                            <span className="text-xs text-gray-400">{log.userRole}</span>
+                                            <span className="font-medium text-[var(--theme-text-primary)]">{log.userName}</span>
+                                            <span className="text-[11px] text-[var(--theme-text-muted)]">{log.userRole}</span>
                                         </div>
                                     </td>
-                                    <td className="p-4 text-sm text-gray-600 max-w-xs truncate" title={log.details}>
+                                    <td className="p-3.5 text-xs text-[var(--theme-text-secondary)] max-w-xs truncate" title={log.details}>
                                         {log.details}
                                     </td>
                                 </tr>
@@ -240,78 +243,79 @@ export const AuditLogViewer: React.FC = () => {
 
             {/* Detail Modal */}
             {selectedLog && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-                    <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full p-6 animate-in fade-in zoom-in duration-200">
+                <div className="fixed inset-0 bg-black/60 backdrop-blur-xs flex items-center justify-center z-50 p-4">
+                    <div className="bg-[var(--theme-bg-panel)] border border-[var(--theme-border)] rounded-3xl shadow-[var(--shadow-modal)] max-w-2xl w-full p-6 animate-in fade-in zoom-in duration-200">
                         <div className="flex justify-between items-start mb-6">
-                            <h3 className="text-xl font-bold text-gray-900 flex items-center gap-2">
-                                <Info className="text-blue-600" />
+                            <h3 className="text-lg font-bold text-[var(--theme-text-primary)] flex items-center gap-2">
+                                <Info className="text-[#0071E3] dark:text-[#2997FF]" size={18} />
                                 Log Details
                             </h3>
                             <button
                                 onClick={() => setSelectedLog(null)}
-                                className="text-gray-400 hover:text-gray-600"
+                                className="text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] text-xl leading-none cursor-pointer"
+                                aria-label="Close modal"
                             >
                                 ×
                             </button>
                         </div>
 
                         <div className="space-y-4">
-                            <div className="grid grid-cols-2 gap-4">
-                                <div className="p-3 bg-gray-50 rounded-lg">
-                                    <span className="text-xs text-gray-500 uppercase block mb-1">Timestamp</span>
-                                    <span className="text-sm font-medium">{formatDateTime(selectedLog.timestamp, { showTime: true })}</span>
+                            <div className="grid grid-cols-2 gap-3">
+                                <div className="p-3 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl">
+                                    <span className="text-[11px] text-[var(--theme-text-muted)] font-semibold uppercase block mb-0.5">Timestamp</span>
+                                    <span className="text-xs font-mono font-medium text-[var(--theme-text-primary)]">{formatDateTime(selectedLog.timestamp, { showTime: true })}</span>
                                 </div>
-                                <div className="p-3 bg-gray-50 rounded-lg">
-                                    <span className="text-xs text-gray-500 uppercase block mb-1">Log Reference</span>
-                                    <span className="text-sm font-mono text-gray-600">LR-{selectedLog.id.substring(0, 8).toUpperCase()}</span>
-                                </div>
-                            </div>
-
-                            <div className="flex gap-4">
-                                <div className={`flex-1 p-3 rounded-lg border ${getSeverityColor(selectedLog.severity)} border-opacity-20`}>
-                                    <span className="text-xs opacity-70 uppercase block mb-1">Severity</span>
-                                    <span className="font-bold">{selectedLog.severity}</span>
-                                </div>
-                                <div className="flex-1 p-3 bg-gray-50 rounded-lg border border-gray-200">
-                                    <span className="text-xs text-gray-500 uppercase block mb-1">Category</span>
-                                    <span className="font-bold text-gray-700">{selectedLog.category}</span>
+                                <div className="p-3 bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl">
+                                    <span className="text-[11px] text-[var(--theme-text-muted)] font-semibold uppercase block mb-0.5">Log Reference</span>
+                                    <span className="text-xs font-mono text-[var(--theme-text-secondary)]">LR-{selectedLog.id.substring(0, 8).toUpperCase()}</span>
                                 </div>
                             </div>
 
-                            <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
-                                <span className="text-xs text-gray-500 uppercase block mb-2">User Information</span>
+                            <div className="flex gap-3">
+                                <div className={`flex-1 p-3 rounded-xl ${getSeverityColor(selectedLog.severity)}`}>
+                                    <span className="text-[10px] font-semibold uppercase block mb-0.5">Severity</span>
+                                    <span className="font-bold text-xs">{selectedLog.severity}</span>
+                                </div>
+                                <div className="flex-1 p-3 bg-[var(--theme-bg-subtle)] rounded-xl border border-[var(--theme-border)]">
+                                    <span className="text-[10px] font-semibold text-[var(--theme-text-muted)] uppercase block mb-0.5">Category</span>
+                                    <span className="font-bold text-xs text-[var(--theme-text-primary)]">{selectedLog.category}</span>
+                                </div>
+                            </div>
+
+                            <div className="p-3.5 bg-[var(--theme-bg-subtle)] rounded-xl border border-[var(--theme-border)]">
+                                <span className="text-[11px] text-[var(--theme-text-muted)] font-semibold uppercase block mb-1.5">User Information</span>
                                 <div className="flex justify-between items-center">
                                     <div>
-                                        <div className="font-medium text-gray-900">{selectedLog.userName}</div>
-                                        <div className="text-sm text-gray-500">UID-{selectedLog.userId.substring(0, 8).toUpperCase()}</div>
+                                        <div className="font-semibold text-xs text-[var(--theme-text-primary)]">{selectedLog.userName}</div>
+                                        <div className="text-[11px] font-mono text-[var(--theme-text-muted)]">UID-{selectedLog.userId.substring(0, 8).toUpperCase()}</div>
                                     </div>
-                                    <span className="px-3 py-1 bg-white border rounded text-sm font-medium text-gray-600">
+                                    <span className="px-2.5 py-1 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-lg text-xs font-semibold text-[var(--theme-text-secondary)]">
                                         {selectedLog.userRole}
                                     </span>
                                 </div>
                             </div>
 
                             <div>
-                                <span className="text-xs text-gray-500 uppercase block mb-2">Event Details</span>
-                                <div className="p-4 bg-gray-900 text-gray-100 rounded-lg font-mono text-sm whitespace-pre-wrap">
+                                <span className="text-[11px] text-[var(--theme-text-muted)] font-semibold uppercase block mb-1.5">Event Details</span>
+                                <div className="p-3.5 bg-[var(--theme-bg-app)] border border-[var(--theme-border)] text-[var(--theme-text-primary)] rounded-xl font-mono text-xs whitespace-pre-wrap">
                                     {selectedLog.details}
                                 </div>
                             </div>
 
                             {selectedLog.metadata && (
                                 <div>
-                                    <span className="text-xs text-gray-500 uppercase block mb-2">Metadata</span>
-                                    <pre className="p-4 bg-gray-50 rounded-lg text-xs overflow-auto border border-gray-200">
+                                    <span className="text-[11px] text-[var(--theme-text-muted)] font-semibold uppercase block mb-1.5">Metadata</span>
+                                    <pre className="p-3.5 bg-[var(--theme-bg-app)] text-[var(--theme-text-secondary)] rounded-xl text-xs overflow-auto border border-[var(--theme-border)]">
                                         {JSON.stringify(selectedLog.metadata, null, 2)}
                                     </pre>
                                 </div>
                             )}
                         </div>
 
-                        <div className="mt-8 flex justify-end">
+                        <div className="mt-6 flex justify-end">
                             <button
                                 onClick={() => setSelectedLog(null)}
-                                className="px-4 py-2 bg-gray-800 text-white rounded-lg hover:bg-gray-700 transition-colors"
+                                className="px-4 py-2 bg-[var(--theme-primary)] text-[var(--theme-primary-text)] rounded-xl font-semibold text-xs hover:opacity-90 transition-all cursor-pointer shadow-xs"
                             >
                                 Close
                             </button>

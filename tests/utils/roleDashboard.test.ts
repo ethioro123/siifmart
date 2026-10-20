@@ -46,16 +46,20 @@ describe('getRoleDashboardRoute Sovereign Navigation', () => {
     expect(getRoleDashboardRoute('regional_manager', 'Retail')).toBe('/regional-ops');
   });
 
-  it('routes Warehouse and Floor Operations workers to /wms-ops', () => {
-    expect(getRoleDashboardRoute('warehouse_manager', 'Warehouse')).toBe('/wms-ops');
-    expect(getRoleDashboardRoute('logistics_manager', 'Warehouse')).toBe('/wms-ops');
-    expect(getRoleDashboardRoute('dispatch_manager', 'Warehouse')).toBe('/wms-ops');
-    expect(getRoleDashboardRoute('picker', 'Warehouse')).toBe('/wms-ops');
-    expect(getRoleDashboardRoute('packer', 'Warehouse')).toBe('/wms-ops');
-    expect(getRoleDashboardRoute('receiver', 'Warehouse')).toBe('/wms-ops');
-    expect(getRoleDashboardRoute('driver', 'Warehouse')).toBe('/wms-ops');
-    expect(getRoleDashboardRoute('forklift_operator', 'Warehouse')).toBe('/wms-ops');
-    expect(getRoleDashboardRoute('inventory_specialist', 'Warehouse')).toBe('/wms-ops');
+  it('routes Warehouse and Floor Operations workers to their specific role landing tab on /wms-ops', () => {
+    expect(getRoleDashboardRoute('warehouse_manager', 'Warehouse')).toBe('/wms-ops?tab=DOCKS');
+    expect(getRoleDashboardRoute('logistics_manager', 'Warehouse')).toBe('/wms-ops?tab=DOCKS');
+    expect(getRoleDashboardRoute('dispatch_manager', 'Warehouse')).toBe('/wms-ops?tab=DOCKS');
+    expect(getRoleDashboardRoute('picker', 'Warehouse')).toBe('/wms-ops?tab=PICK');
+    expect(getRoleDashboardRoute('packer', 'Warehouse')).toBe('/wms-ops?tab=PACK');
+    expect(getRoleDashboardRoute('receiver', 'Warehouse')).toBe('/wms-ops?tab=RECEIVE');
+    expect(getRoleDashboardRoute('driver', 'Warehouse')).toBe('/wms-ops?tab=DRIVER');
+    expect(getRoleDashboardRoute('forklift_operator', 'Warehouse')).toBe('/wms-ops?tab=PUTAWAY');
+    expect(getRoleDashboardRoute('inventory_specialist', 'Warehouse')).toBe('/wms-ops?tab=COUNT');
+    expect(getRoleDashboardRoute('stock_clerk', 'Warehouse')).toBe('/wms-ops?tab=COUNT');
+    expect(getRoleDashboardRoute('returns_clerk', 'Warehouse')).toBe('/wms-ops?tab=RETURNS');
+    expect(getRoleDashboardRoute('inbound_qc_inspector', 'Warehouse')).toBe('/wms-ops?tab=RECEIVE');
+    expect(getRoleDashboardRoute('replenishment_planner', 'Warehouse')).toBe('/wms-ops?tab=REPLENISH');
   });
 
   it('routes Store Operations staff to POS or POS Dashboard', () => {
@@ -80,12 +84,20 @@ describe('getRoleDashboardRoute Sovereign Navigation', () => {
 
 
 describe('clean mobile role routing while the site loads', () => {
-  it('routes warehouse workers to fulfillment without assuming POS', () => {
+  it('routes warehouse workers to fulfillment role tab without assuming POS', () => {
     vi.spyOn(native, 'isCleanMobileMode').mockReturnValue(true);
-    for (const role of ['warehouse_manager', 'picker', 'packer', 'receiver', 'driver']) {
-      expect(getRoleDashboardRoute(role, undefined)).toBe('/wms-ops');
-      expect(getRoleDashboardRoute(role, 'Warehouse')).toBe('/wms-ops');
-    }
+    expect(getRoleDashboardRoute('warehouse_manager', undefined)).toBe('/wms-ops?tab=DOCKS');
+    expect(getRoleDashboardRoute('picker', undefined)).toBe('/wms-ops?tab=PICK');
+    expect(getRoleDashboardRoute('packer', undefined)).toBe('/wms-ops?tab=PACK');
+    expect(getRoleDashboardRoute('receiver', undefined)).toBe('/wms-ops?tab=RECEIVE');
+    expect(getRoleDashboardRoute('driver', undefined)).toBe('/wms-ops?tab=DRIVER');
+
+    expect(getRoleDashboardRoute('warehouse_manager', 'Warehouse')).toBe('/wms-ops?tab=DOCKS');
+    expect(getRoleDashboardRoute('picker', 'Warehouse')).toBe('/wms-ops?tab=PICK');
+    expect(getRoleDashboardRoute('packer', 'Warehouse')).toBe('/wms-ops?tab=PACK');
+    expect(getRoleDashboardRoute('receiver', 'Warehouse')).toBe('/wms-ops?tab=RECEIVE');
+    expect(getRoleDashboardRoute('driver', 'Warehouse')).toBe('/wms-ops?tab=DRIVER');
+
     expect(getRoleDashboardRoute('cashier', undefined)).toBe('/pos');
   });
 

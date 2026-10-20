@@ -18,6 +18,20 @@ export default function StepDetails({
 }: StepDetailsProps) {
     return (
         <div className="space-y-5 animate-in fade-in slide-in-from-right-4">
+            <div>
+                <label className="text-[11px] text-stone-600 dark:text-stone-300 uppercase font-bold mb-1 block">Job Title</label>
+                <input
+                    type="text"
+                    maxLength={120}
+                    className="w-full bg-white dark:bg-black/30 border border-[#E2DCCE] dark:border-white/10 rounded-xl px-3 py-2 text-stone-900 dark:text-white focus:border-[#2C5E3B] dark:focus:border-emerald-500 outline-none text-sm font-medium"
+                    value={newEmpData.jobTitle || ''}
+                    onChange={e => setNewEmpData({ ...newEmpData, jobTitle: e.target.value })}
+                    placeholder="Enter the employee's job title"
+                    aria-label="Job Title"
+                />
+                <p className="mt-1 text-[11px] text-stone-500 dark:text-stone-400">This HR title is independent of the app access profile.</p>
+            </div>
+
             {/* Department */}
             <div>
                 <label className="text-[11px] text-stone-600 dark:text-stone-300 uppercase font-bold mb-2 flex items-center gap-1.5">

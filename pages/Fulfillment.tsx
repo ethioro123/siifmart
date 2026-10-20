@@ -189,11 +189,16 @@ export default function WarehouseOperations() {
         const queryTab = (searchParams.get('tab') || '').toUpperCase() as OpTab;
         if (queryTab && visibleTabs.includes(queryTab)) {
             if (activeTab !== queryTab) setActiveTab(queryTab);
+        } else if (!searchParams.get('tab')) {
+            const roleDefault = defaultRoleTab && visibleTabs.includes(defaultRoleTab) ? defaultRoleTab : (visibleTabs[0] ?? 'RECEIVE');
+            if (activeTab !== roleDefault) {
+                setActiveTab(roleDefault);
+            }
         } else if (!visibleTabs.includes(activeTab)) {
             const nextTab = visibleTabs.includes(defaultRoleTab) ? defaultRoleTab : (visibleTabs[0] ?? 'RECEIVE');
             setActiveTab(nextTab);
         }
-    }, [user?.role, user?.id, searchParams, visibleTabs, defaultRoleTab]);
+    }, [user?.role, user?.id, searchParams, visibleTabs, defaultRoleTab, activeTab]);
 
     const handleSelectTab = (tab: OpTab) => {
         setActiveTab(tab);

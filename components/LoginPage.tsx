@@ -93,7 +93,7 @@ export default function LoginPage() {
       <button 
         onClick={toggleTheme} 
         aria-label="Toggle Theme"
-        className="absolute right-6 p-3 rounded-2xl bg-white/80 dark:bg-[#18201B]/70 border border-[#E2DCCE] dark:border-emerald-950/20 text-[#2C4D35] dark:text-[#A9CBA2] hover:text-[#1E3F27] dark:hover:text-white hover:scale-105 active:scale-95 transition-all shadow-[0_2px_12px_rgba(44,94,59,0.03)] dark:shadow-none lg:backdrop-blur-md z-20 cursor-pointer"
+        className="absolute right-6 p-3 rounded-2xl bg-white/80 dark:bg-[var(--theme-bg-panel)] border border-[#E2DCCE] dark:border-[var(--theme-border)] text-[#2C4D35] dark:text-[#A9CBA2] hover:text-[#1E3F27] dark:hover:text-white hover:scale-105 active:scale-95 transition-all shadow-[0_2px_12px_rgba(44,94,59,0.03)] dark:shadow-none lg:backdrop-blur-md z-20 cursor-pointer"
         style={{ top: 'calc(1.5rem + env(safe-area-inset-top, 0px))' }}
       >
         {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
@@ -115,7 +115,7 @@ export default function LoginPage() {
         )}
 
         {/* Center: Main Login Card */}
-        <div className="max-w-[440px] w-full shrink-0 bg-white/85 dark:bg-[#18201B]/60 border border-[#E2DCCE] dark:border-emerald-950/20 rounded-[32px] p-8 sm:p-10 relative z-10 shadow-[0_24px_80px_-12px_rgba(34,50,38,0.06)] dark:shadow-[0_32px_96px_-12px_rgba(5,8,6,0.65)] lg:backdrop-blur-2xl transition-all duration-300">
+        <div className="max-w-[440px] w-full shrink-0 bg-white/85 dark:bg-[#18201B]/75 border border-[#E2DCCE] dark:border-[var(--theme-border)] rounded-[32px] p-8 sm:p-10 relative z-10 shadow-[0_24px_80px_-12px_rgba(34,50,38,0.06)] dark:shadow-[0_32px_96px_-12px_rgba(5,8,6,0.65)] lg:backdrop-blur-2xl transition-all duration-300">
           
           {/* Header Branding section */}
           <div className="flex flex-col items-center justify-center mb-6">
@@ -167,7 +167,7 @@ export default function LoginPage() {
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full bg-white/90 dark:bg-black/25 border border-[#E2DCCE] dark:border-emerald-950/20 hover:border-[#CFC6B4] dark:hover:border-emerald-900/15 rounded-2xl px-4 py-3.5 pl-11 text-[#1E3F27] dark:text-[#EAE5D9] placeholder-stone-400 dark:placeholder-stone-500 focus:border-[#2C5E3B] dark:focus:border-[#A9CBA2] focus:ring-4 focus:ring-[#2C5E3B]/10 dark:focus:ring-[#A9CBA2]/10 focus:outline-none transition-all duration-300 text-sm"
+                  className="w-full bg-white/90 dark:bg-black/25 border border-[#E2DCCE] dark:border-[var(--theme-border)] hover:border-[#CFC6B4] dark:hover:border-[var(--theme-border-strong)] rounded-2xl px-4 py-3.5 pl-11 text-[#1E3F27] dark:text-[#EAE5D9] placeholder-stone-400 dark:placeholder-stone-500 focus:border-[#2C5E3B] dark:focus:border-[#A9CBA2] focus:ring-4 focus:ring-[#2C5E3B]/10 dark:focus:ring-[#A9CBA2]/10 focus:outline-none transition-all duration-300 text-sm"
                   placeholder="name@company.com"
                   required
                 />
@@ -194,7 +194,7 @@ export default function LoginPage() {
                     type={showPassword ? "text" : "password"}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="w-full bg-white/90 dark:bg-black/25 border border-[#E2DCCE] dark:border-emerald-950/20 hover:border-[#CFC6B4] dark:hover:border-emerald-900/15 rounded-2xl px-4 py-3.5 pl-11 pr-11 text-[#1E3F27] dark:text-[#EAE5D9] placeholder-stone-400 dark:placeholder-stone-500 focus:border-[#2C5E3B] dark:focus:border-[#A9CBA2] focus:ring-4 focus:ring-[#2C5E3B]/10 dark:focus:ring-[#A9CBA2]/10 focus:outline-none transition-all duration-300 text-sm"
+                    className="w-full bg-white/90 dark:bg-black/25 border border-[#E2DCCE] dark:border-[var(--theme-border)] hover:border-[#CFC6B4] dark:hover:border-[var(--theme-border-strong)] rounded-2xl px-4 py-3.5 pl-11 pr-11 text-[#1E3F27] dark:text-[#EAE5D9] placeholder-stone-400 dark:placeholder-stone-500 focus:border-[#2C5E3B] dark:focus:border-[#A9CBA2] focus:ring-4 focus:ring-[#2C5E3B]/10 dark:focus:ring-[#A9CBA2]/10 focus:outline-none transition-all duration-300 text-sm"
                     placeholder="••••••••"
                     required
                   />

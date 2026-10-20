@@ -33,7 +33,7 @@ describe('Regional Operations Architecture & RBAC', () => {
 
     it('routes floor staff to terminal interfaces (POS or WMS)', () => {
       expect(getRoleDashboardRoute('cashier', 'Store')).toBe('/pos');
-      expect(getRoleDashboardRoute('picker', 'Warehouse')).toBe('/wms-ops');
+      expect(getRoleDashboardRoute('picker', 'Warehouse')).toBe('/wms-ops?tab=PICK');
     });
   });
 

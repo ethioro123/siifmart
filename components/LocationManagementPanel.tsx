@@ -163,15 +163,15 @@ export default function LocationManagementPanel({ products, sites, currentSiteId
                                         </h3>
                                     ) : (
                                         <>
-                                            <h3 className="font-bold text-white flex items-center gap-2">
-                                                <Layers size={18} className="text-cyber-primary" />
+                                            <h3 className="font-bold text-[var(--theme-text-primary)] flex items-center gap-2">
+                                                <Layers size={18} className="text-[var(--theme-accent)]" />
                                                 Zone {selectedZone}
                                             </h3>
-                                            <div className="h-4 w-px bg-white/20"></div>
+                                            <div className="h-4 w-px bg-[var(--theme-border)]"></div>
                                             <div className="flex gap-2 overflow-x-auto">
                                                 <button
                                                     onClick={() => setSelectedAisle(null)}
-                                                    className={`px-3 py-1 rounded-full text-xs font-bold transition-colors ${!selectedAisle ? 'bg-white text-black' : 'bg-black/40 text-gray-400 hover:text-white'}`}
+                                                    className={`px-3 py-1 rounded-full text-xs font-bold transition-colors cursor-pointer ${!selectedAisle ? 'bg-[var(--theme-primary)] text-[var(--theme-primary-text)] shadow-xs' : 'bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] border border-[var(--theme-border)]'}`}
                                                 >
                                                     All Aisles
                                                 </button>
@@ -179,7 +179,7 @@ export default function LocationManagementPanel({ products, sites, currentSiteId
                                                     <button
                                                         key={aisle}
                                                         onClick={() => setSelectedAisle(aisle)}
-                                                        className={`px-3 py-1 rounded-full text-xs font-bold transition-colors ${selectedAisle === aisle ? 'bg-cyber-primary text-black' : 'bg-black/40 text-gray-400 hover:text-white'}`}
+                                                        className={`px-3 py-1 rounded-full text-xs font-bold transition-colors cursor-pointer ${selectedAisle === aisle ? 'bg-[var(--theme-accent)] text-white shadow-xs' : 'bg-[var(--theme-bg-subtle)] text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] border border-[var(--theme-border)]'}`}
                                                     >
                                                         {aisle}
                                                     </button>
@@ -188,7 +188,7 @@ export default function LocationManagementPanel({ products, sites, currentSiteId
                                         </>
                                     )}
                                 </div>
-                                <span className="text-xs text-gray-500 font-mono">{filteredProducts.length} items found</span>
+                                <span className="text-xs text-[var(--theme-text-secondary)] font-mono">{filteredProducts.length} items found</span>
                             </div>
                         ) : (
                             // Empty State

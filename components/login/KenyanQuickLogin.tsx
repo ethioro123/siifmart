@@ -276,13 +276,13 @@ export function KenyanQuickLogin({ onSelectAccount, disabled = false }: StagingQ
                                   {acc.name}
                                 </span>
                               </div>
-                              <UserCheck size={10} className="shrink-0 text-stone-400 group-hover:text-[#2C5E3B] dark:group-hover:text-[#A9CBA2] transition-colors mt-0.5" />
+                              <UserCheck size={10} className="shrink-0 text-stone-400 dark:text-stone-400 group-hover:text-[#2C5E3B] dark:group-hover:text-[#A9CBA2] transition-colors mt-0.5" />
                             </div>
                             <div className="flex items-center justify-between w-full mt-1">
                               <span className={`text-[9px] font-bold px-1 py-0.2 rounded border truncate max-w-[130px] ${roleTheme.badge}`}>
                                 {acc.role}
                               </span>
-                              <span className="text-[8px] font-mono tabular-nums text-stone-400 dark:text-stone-500 shrink-0">
+                              <span className="text-[8px] font-mono tabular-nums text-stone-400 dark:text-stone-400 shrink-0">
                                 {acc.code}
                               </span>
                             </div>

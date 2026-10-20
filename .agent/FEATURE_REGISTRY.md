@@ -1,8 +1,13 @@
 # Feature Registry
+
 # This file records selected implementation history; it is not a source of current policy.
 # Update it for new features or significant fixes, and verify the current code before relying on older notes.
 
 ## Active Features
+
+### Workforce Job Titles and App Login Separation (2026-10-20)
+- Employee job titles can now be entered and edited independently from the system access profile. Onboarding can create an active workforce record without creating app credentials; password policy checks and temporary-password storage apply only when app login is enabled. The existing `employees.job_title` column supports this change, so no database migration was needed.
+- **Files**: `components/employees/wizard/StepIdentity.tsx`, `components/employees/wizard/StepRole.tsx`, `components/employees/wizard/StepDetails.tsx`, `components/employees/wizard/StepReview.tsx`, `components/staff-profile/tabs/SettingsTab.tsx`, `components/staff-profile/tabs/settings/ProfileRoleDeptCard.tsx`, `hooks/useEmployeeWizard.ts`
 
 ### Notification Accuracy (2026-10-20)
 - Shared popup cards retain the source severity and message without guessing diagnoses or recovery advice. Notification history stays in memory within the current user/site/country session; old device-wide history is removed. The activity badge counts unread events and pending tasks, and history is labeled Recent events.

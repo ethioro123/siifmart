@@ -1,7 +1,7 @@
 import React from 'react';
 import { Shield, Briefcase, Building, DollarSign, UserCheck, Star, ChevronDown, DollarSign as FinanceIcon } from 'lucide-react';
 import { Employee, UserRole } from '../../../../types';
-import { getEmployeeJobTitle, SYSTEM_ROLES } from '../../../../utils/roles';
+import { SYSTEM_ROLES } from '../../../../utils/roles';
 import { formatRole } from '../../../../utils/formatting';
 
 const DEPARTMENTS = [
@@ -26,6 +26,8 @@ interface ProfileRoleDeptCardProps {
     assignableRoles: UserRole[];
     role: UserRole;
     onRoleChange: (newRole: UserRole) => void;
+    jobTitle: string;
+    setJobTitle: (title: string) => void;
     department: string;
     setDepartment: (dept: string) => void;
     siteId: string;
@@ -46,6 +48,8 @@ export const ProfileRoleDeptCard: React.FC<ProfileRoleDeptCardProps> = ({
     assignableRoles,
     role,
     onRoleChange,
+    jobTitle,
+    setJobTitle,
     department,
     setDepartment,
     siteId,
@@ -84,6 +88,23 @@ export const ProfileRoleDeptCard: React.FC<ProfileRoleDeptCardProps> = ({
                 </div>
             </div>
 
+            {/* HR Job Title */}
+            <div>
+                <label className={labelClasses}>
+                    <Briefcase size={12} className="inline mr-1" /> HR Job Title
+                </label>
+                {canEdit ? (
+                    <input
+                        type="text"
+                        maxLength={120}
+                        value={jobTitle}
+                        onChange={event => setJobTitle(event.target.value)}
+                        className={inputClasses}
+                        aria-label="HR Job Title"
+                    />
+                ) : <div className={readOnlyClasses}><p className="text-xs font-bold text-[var(--theme-text-primary)]">{jobTitle || 'Not set'}</p></div>}
+            </div>
+
             {/* Access Role */}
             <div>
                 <label className={labelClasses}>
@@ -109,7 +130,7 @@ export const ProfileRoleDeptCard: React.FC<ProfileRoleDeptCardProps> = ({
                     </div>
                 ) : (
                     <div className={readOnlyClasses}>
-                        <p className="text-xs font-bold text-[var(--theme-text-primary)]">{getEmployeeJobTitle(employee)}</p>
+                        <p className="text-xs font-bold text-[var(--theme-text-primary)]">{SYSTEM_ROLES.find(item => item.id === role)?.label || formatRole(role)}</p>
                         <Shield size={15} className="text-blue-500" />
                     </div>
                 )}

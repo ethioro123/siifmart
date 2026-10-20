@@ -19,7 +19,9 @@ export interface NewEmployeeFormData {
    email: string;
    phone: string;
    password: string;
+   createAppAccount: boolean;
    role: UserRole;
+   jobTitle: string;
    department: string;
    salary: string;
    specialization: string;
@@ -70,7 +72,9 @@ export function useEmployeeWizard({
    
    const [newEmpData, setNewEmpData] = useState<NewEmployeeFormData>({
       firstName: '', lastName: '', email: '', phone: '', password: '',
+      createAppAccount: true,
       role: 'pos' as UserRole,
+      jobTitle: getJobTitleForRole('pos'),
       department: 'Retail Operations',
       salary: '', specialization: '', address: '',
       emergencyContact: '', joinDate: new Date().toISOString().split('T')[0],
@@ -158,7 +162,9 @@ export function useEmployeeWizard({
 
       setNewEmpData({
          firstName: '', lastName: '', email: '', phone: '', password: '',
+         createAppAccount: true,
          role: initialRole,
+         jobTitle: getJobTitleForRole(initialRole),
          department: validDepts.length > 0 ? validDepts[0] : 'Retail Operations',
          salary: '', specialization: '', address: '',
          emergencyContact: '', joinDate: new Date().toISOString().split('T')[0],
@@ -215,7 +221,7 @@ export function useEmployeeWizard({
       }
 
       const recommendedDept = getRecommendedDepartment(newRole);
-      setNewEmpData(prev => ({ ...prev, role: newRole, siteId: nextSiteId, department: recommendedDept }));
+      setNewEmpData(prev => ({ ...prev, role: newRole, jobTitle: getJobTitleForRole(newRole), siteId: nextSiteId, department: recommendedDept }));
       const locationDesc = getRoleLocationDescription(newRole);
       if (locationDesc) addNotification('info', `Role Selected: ${locationDesc}`);
    };
@@ -227,7 +233,7 @@ export function useEmployeeWizard({
             addNotification('alert', 'First Name is required.');
             return;
          }
-         if (!newEmpData.password || newEmpData.password.length < 6) {
+         if (newEmpData.createAppAccount !== false && (!newEmpData.password || newEmpData.password.length < 6)) {
             addNotification('alert', 'A valid password (minimum 6 characters) is required.');
             return;
          }
@@ -336,10 +342,12 @@ export function useEmployeeWizard({
          : (quotaResult ? 'EXCEEDED_QUOTA' : 'WITHIN_QUOTA');
 
       try {
-         const rolePolicy = getActiveRolePolicy(newEmpData.role);
-         const pwdValidation = validatePasswordAgainstPolicy(newEmpData.password, rolePolicy.password_complexity);
-         if (!pwdValidation.valid) {
-            throw new Error(pwdValidation.reason || "Password does not meet Zero-Trust role security requirements.");
+         if (newEmpData.createAppAccount !== false) {
+            const rolePolicy = getActiveRolePolicy(newEmpData.role);
+            const pwdValidation = validatePasswordAgainstPolicy(newEmpData.password, rolePolicy.password_complexity);
+            if (!pwdValidation.valid) {
+               throw new Error(pwdValidation.reason || "Password does not meet Zero-Trust role security requirements.");
+            }
          }
          if (!newEmpData.siteId || !newEmpData.siteId.trim()) {
             throw new Error("Workplace location is mandatory. Every employee must be assigned to an operating location.");
@@ -359,7 +367,7 @@ export function useEmployeeWizard({
          let employeeId: string = crypto.randomUUID();
 
          // Direct authorized executives or quota-approved frontline hires register live credentials
-         if (isAutoApproved) {
+         if (isAutoApproved && newEmpData.createAppAccount !== false) {
             const authRes = await createAuthAccountForNewHire({
                signupEmail,
                password: newEmpData.password,
@@ -385,7 +393,7 @@ export function useEmployeeWizard({
             region_code: assignedRegionCode,
             scopeLevel,
             name: `${newEmpData.firstName} ${newEmpData.lastName}`,
-            jobTitle: getJobTitleForRole(newEmpData.role),
+            jobTitle: (newEmpData.jobTitle || '').trim() || getJobTitleForRole(newEmpData.role),
             role: newEmpData.role,
             email: signupEmail,
             phone: newEmpData.phone || 'N/A',
@@ -412,7 +420,7 @@ export function useEmployeeWizard({
          if (result instanceof Promise) await result;
          draftManager.handleFinalSubmitSuccess();
 
-         if (typeof window !== 'undefined' && newEmpData.password) {
+         if (typeof window !== 'undefined' && newEmpData.createAppAccount !== false && newEmpData.password) {
             localStorage.setItem(`siifmart_temp_pwd_${employeeId}`, newEmpData.password);
             localStorage.setItem(`siifmart_temp_pwd_by_code_${employeeCode.toLowerCase()}`, newEmpData.password);
             localStorage.setItem(`siifmart_temp_pwd_by_name_${newEmp.name.toLowerCase()}`, newEmpData.password);
