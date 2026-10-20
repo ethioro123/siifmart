@@ -162,6 +162,19 @@
 - **Files**: `components/fulfillment/FulfillmentContent.tsx`, `components/fulfillment/TabSelectors.tsx`, `components/fulfillment/ReceiveTab.tsx`, `components/fulfillment/receive/ReceiveList.tsx`, `components/fulfillment/PutawayTab.tsx`, `components/fulfillment/putaway/PutawayList.tsx`, `components/fulfillment/PickTab.tsx`, `components/fulfillment/pick/PickList.tsx`, `components/fulfillment/PickHeader.tsx`, `components/fulfillment/PackTab.tsx`, `components/fulfillment/pack/PackList.tsx`, `components/fulfillment/pack/PackHeader.tsx`, `components/fulfillment/putaway/PutawayHeader.tsx`
 - **Database**: None
 
+### Quick Login Visual Theming & Role Filter Chips
+- **Status**: ✅ IMPLEMENTED (2026-10-20)
+- Visual distinction by facility site types (Stores in Emerald, Warehouses in Amber, Distribution Centers in Cyan, Online Stores in Rose, Regional Admin in Violet, HQ in Purple) with matching site header accents and badges.
+- Uniform role color theming across all sites (Cashiers in Emerald, Pickers in Orange, Packers in Amber, Receivers in Cyan, Drivers in Blue, Inventory in Yellow, Managers in Indigo, Finance in Teal, etc.).
+- One-click popular role filter chips (`Cashier`, `Picker`, `Packer`, `WH Mgr`, `Store Mgr`, `Driver`, `Receiver`, `Inventory`, `Admin`) with live counts and active indicator lights.
+- Search with instant clear ("X") button, active filter counters, and unified mobile & desktop experience.
+- **Files Modified**:
+  - `components/login/quickLoginTheme.ts`
+  - `components/login/CountryQuickLoginPanel.tsx`
+  - `components/login/KenyanQuickLogin.tsx`
+  - `tests/components/quickLoginTheming.test.tsx`
+  - `tests/components/KenyanQuickLogin.test.tsx`
+
 ### HR Payroll Attestation & Termination Submission Hardening (2026-10-18)
 - Regional payroll attestation now derives signer identity and role from the authenticated employee record and enforces country/site-region scope in Postgres; termination requests no longer persist sensitive backups in browser storage and failed submissions surface as errors.
 - **Files**: `services/payroll-runs.service.ts`, `services/terminations.service.ts`, `types/payroll-run.ts`, `pages/Employees.tsx`, `migrations/20261018_secure_regional_payroll_attestation.sql`
