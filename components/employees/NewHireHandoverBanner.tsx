@@ -3,6 +3,7 @@ import { Key, Sparkles, ChevronRight, X, ChevronLeft } from 'lucide-react';
 import { useStore } from '../../contexts/CentralStore';
 import { useData } from '../../contexts/DataContext';
 import { isManagerialRole } from '../../utils/roles';
+import { formatRole } from '../../utils/formatting';
 import { Employee } from '../../types';
 import { CredentialHandoverModal } from './CredentialHandoverModal';
 
@@ -102,7 +103,7 @@ export function NewHireHandoverBanner({ className = '' }: NewHireHandoverBannerP
                                 )}
                             </div>
                             <p className="text-xs text-[var(--theme-text-primary)] font-medium mt-0.5">
-                                <span className="font-bold">{currentEmployee.name}</span> ({currentEmployee.role.replace('_', ' ')}) has been approved by HR & Finance. Hand over their system credentials to start shift.
+                                <span className="font-bold">{currentEmployee.name}</span> ({formatRole(currentEmployee.role)}) has been approved by HR & Finance. Hand over their system credentials to start shift.
                             </p>
                         </div>
                     </div>
