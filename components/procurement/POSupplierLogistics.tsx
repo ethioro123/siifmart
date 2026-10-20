@@ -107,7 +107,7 @@ export const POSupplierLogistics: React.FC<POSupplierLogisticsProps> = ({
                                     title="Select Supplier"
                                 >
                                     <option value="" className="text-[var(--theme-text-secondary)] bg-[var(--theme-bg-panel)]">Choose from vendor directory...</option>
-                                    {allSuppliers.map(s => <option key={s.id} value={s.id} className="text-[var(--theme-text-primary)] bg-[var(--theme-bg-panel)] font-medium">{s.name}</option>)}
+                                    {allSuppliers.map(s => <option key={s.id} value={s.id} className="text-[var(--theme-text-primary)] bg-[var(--theme-bg-panel)] font-medium">{s.name}{s.verificationStatus !== 'verified' ? ' (pending verification)' : ''}</option>)}
                                 </select>
                                 <ChevronDown size={14} className="absolute right-4 top-1/2 -translate-y-1/2 text-[var(--theme-text-secondary)] pointer-events-none" />
                             </div>
@@ -129,7 +129,9 @@ export const POSupplierLogistics: React.FC<POSupplierLogisticsProps> = ({
                         <div className="flex items-start gap-2.5 text-[11px] text-emerald-700 dark:text-emerald-400 bg-emerald-500/10 p-3 rounded-xl border border-emerald-500/20">
                             <Info size={14} className="mt-0.5 shrink-0" />
                             <p className="leading-relaxed font-medium">
-                                Vendor selected. Standard procurement terms and default tax rules will apply.
+                                {isManualVendor || allSuppliers.find(s => s.id === newPOSupplier)?.verificationStatus !== 'verified'
+                                    ? 'This supplier must be verified by a separate procurement lead before the order can be approved.'
+                                    : 'Vendor selected. Standard procurement terms and default tax rules will apply.'}
                             </p>
                         </div>
                     )}

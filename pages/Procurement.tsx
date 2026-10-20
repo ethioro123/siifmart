@@ -18,9 +18,11 @@ import { VendorRelationsTab } from '../components/procurement/VendorRelationsTab
 import { CustomsImportTab } from '../components/procurement/CustomsImportTab';
 import { InboundQCTab } from '../components/procurement/InboundQCTab';
 import { RegionalScopeBanner } from '../components/regional-ops/RegionalScopeBanner';
+import { useSupplierMutations } from '../hooks/useSupplierMutations';
 
 export default function Procurement() {
     const { user } = useStore();
+    const { createSupplier, verifySupplier } = useSupplierMutations();
     const { suppliers: allSuppliers, sites, settings, effectiveCountry, isRegionalUser } = useData(); // Global suppliers validation & sites
 
     const isRegionalStaff = isRegionalUser || user?.scopeLevel === 'REGIONAL' || (user as any)?.scope_level === 'REGIONAL' || [
@@ -35,9 +37,10 @@ export default function Procurement() {
     const currencySymbol = countryProfile.currencySymbol;
     const countrySiteIds = useMemo(() => {
         return sites
-            .filter(s => (s.country || 'ET') === activeCountry)
+            .filter(s => (s.country || 'ET') === activeCountry
+                && (!isRegionalStaff || (user?.regionCode && s.regionCode === user.regionCode)))
             .map(s => s.id);
-    }, [sites, activeCountry]);
+    }, [sites, activeCountry, isRegionalStaff, user?.regionCode]);
     const countrySiteIdsKey = countrySiteIds.join(',');
 
     // UI State
@@ -231,7 +234,7 @@ export default function Procurement() {
                 <div className="flex items-center gap-3">
                     {/* Maker-Checker Sign-off Hub Badge */}
                     {(() => {
-                        const isApproverRole = Boolean(user?.role && ['procurement_manager', 'finance_manager', 'regional_manager', 'operations_manager', 'super_admin', 'CEO', 'ceo', 'admin'].includes(user.role));
+                        const isApproverRole = Boolean(user?.role && ['procurement_manager', 'regional_procurement_lead', 'super_admin', 'CEO', 'ceo'].includes(user.role));
                         if (pendingSignOffsCount === 0) return null;
 
                         return isApproverRole ? (
@@ -349,7 +352,18 @@ export default function Procurement() {
                         totalCount={totalSuppliersCount}
                         currentPage={supplierPage}
                         onPageChange={setSupplierPage}
-                        onAddSupplier={() => fetchData()}
+                        onAddSupplier={async supplier => {
+                            await createSupplier.mutateAsync(supplier);
+                            await fetchData();
+                        }}
+                        onVerifySupplier={async supplier => {
+                            if (!user?.id) throw new Error('Employee identity is required');
+                            await verifySupplier.mutateAsync({ id: supplier.id, employeeId: user.id });
+                            await fetchData();
+                        }}
+                        canVerify={Boolean(user?.role && ['super_admin', 'ceo', 'CEO', 'admin',
+                            'procurement_manager', 'regional_procurement_lead'].includes(user.role))}
+                        viewerEmployeeId={user?.id}
                         onOpenCreatePO={handleCreatePOOpen}
                     />
                 )}

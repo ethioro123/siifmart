@@ -267,6 +267,8 @@ export interface Supplier {
   location?: string;   // Farm Location / Address
   countryCode?: string;
   verificationStatus?: string;
+  regionCode?: string;
+  createdBy?: string;
   bankName?: string;
   bankAccountName?: string;
   bankAccountNumber?: string;

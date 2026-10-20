@@ -164,8 +164,6 @@ export async function resolvePOVendor({
             email: '',
             phone: '',
             category: 'Other',
-            status: 'Active',
-            rating: 3,
             location: 'Manual Entry',
             leadTime: 0,
             taxId: '',

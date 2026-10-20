@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
 import Modal from '../../components/Modal';
-import { Supplier, SupplierType } from '../../types';
+import { SupplierType } from '../../types';
 import { useData } from '../../contexts/DataContext';
+import type { SupplierDraft } from '../../services/suppliers.service';
 
 interface AddSupplierModalProps {
     isOpen: boolean;
     onClose: () => void;
-    onAdd: (supplier: Omit<Supplier, 'id' | 'status' | 'rating' | 'leadTime' | 'contact'> & { countryCode?: string; bankName?: string; bankAccountNumber?: string; bankAccountName?: string }) => void;
+    onAdd: (supplier: SupplierDraft) => Promise<unknown>;
     countryCode?: string;
 }
 
@@ -15,6 +16,9 @@ export const AddSupplierModal: React.FC<AddSupplierModalProps> = ({ isOpen, onCl
     const activeCountry = countryCode || effectiveCountry || 'ET';
 
     const [newSupName, setNewSupName] = useState('');
+    const [newSupContact, setNewSupContact] = useState('');
+    const [saving, setSaving] = useState(false);
+    const [error, setError] = useState('');
     const [newSupType, setNewSupType] = useState<SupplierType>('Business');
     const [newSupEmail, setNewSupEmail] = useState('');
     const [newSupPhone, setNewSupPhone] = useState('');
@@ -25,14 +29,19 @@ export const AddSupplierModal: React.FC<AddSupplierModalProps> = ({ isOpen, onCl
     const [newSupBankAccountNumber, setNewSupBankAccountNumber] = useState('');
     const [newSupBankAccountName, setNewSupBankAccountName] = useState('');
 
-    const handleSubmit = () => {
-        if (!newSupName) {
+    const handleSubmit = async () => {
+        if (!newSupName.trim() || !newSupContact.trim() || saving) {
+            setError('Supplier name and contact are required.');
             return;
         }
 
-        onAdd({
+        setSaving(true);
+        setError('');
+        try {
+        await onAdd({
             name: newSupName,
             type: newSupType,
+            contact: newSupContact,
             email: newSupEmail,
             phone: newSupPhone,
             category: newSupCategory,
@@ -47,6 +56,7 @@ export const AddSupplierModal: React.FC<AddSupplierModalProps> = ({ isOpen, onCl
 
         // Reset form
         setNewSupName('');
+        setNewSupContact('');
         setNewSupEmail('');
         setNewSupPhone('');
         setNewSupCategory('');
@@ -56,10 +66,15 @@ export const AddSupplierModal: React.FC<AddSupplierModalProps> = ({ isOpen, onCl
         setNewSupBankAccountNumber('');
         setNewSupBankAccountName('');
         onClose();
+        } catch (saveError) {
+            setError(saveError instanceof Error ? saveError.message : 'Supplier could not be saved.');
+        } finally {
+            setSaving(false);
+        }
     };
 
     return (
-        <Modal isOpen={isOpen} onClose={onClose} title="Add New Supplier (Zero-Trust Verified)" size="md">
+        <Modal isOpen={isOpen} onClose={onClose} title="Add New Supplier" size="md">
             <div className="space-y-4">
                 <div>
                     <label className="text-[11px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider mb-1.5 block">Supplier Name *</label>
@@ -70,6 +85,12 @@ export const AddSupplierModal: React.FC<AddSupplierModalProps> = ({ isOpen, onCl
                         value={newSupName}
                         onChange={e => setNewSupName(e.target.value)}
                     />
+                </div>
+                <div>
+                    <label className="text-[11px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider mb-1.5 block">Contact person *</label>
+                    <input type="text" value={newSupContact} onChange={e => setNewSupContact(e.target.value)}
+                        className="w-full h-11 px-3.5 rounded-2xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] text-xs text-[var(--theme-text-primary)]"
+                        placeholder="Supplier contact name" />
                 </div>
                 <div>
                     <label className="text-[11px] font-semibold text-[var(--theme-text-secondary)] uppercase tracking-wider mb-1.5 block">Supplier Type</label>
@@ -163,18 +184,22 @@ export const AddSupplierModal: React.FC<AddSupplierModalProps> = ({ isOpen, onCl
                         onChange={e => setNewSupLocation(e.target.value)}
                     />
                 </div>
+                {error && <p role="alert" className="text-xs text-rose-600 dark:text-rose-400">{error}</p>}
+                <p className="text-xs text-[var(--theme-text-secondary)]">New suppliers are pending verification by a procurement lead.</p>
                 <div className="pt-3 flex gap-3">
                     <button
                         onClick={onClose}
+                        disabled={saving}
                         className="flex-1 h-11 rounded-full border border-[var(--theme-border)] bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-border)]/40 text-xs font-semibold text-[var(--theme-text-secondary)] active:scale-[0.98] transition-all cursor-pointer"
                     >
                         Cancel
                     </button>
                     <button
                         onClick={handleSubmit}
+                        disabled={saving}
                         className="flex-1 h-11 rounded-full bg-[var(--theme-primary)] text-[var(--theme-primary-text)] font-semibold text-xs active:scale-[0.98] transition-all shadow-sm cursor-pointer"
                     >
-                        Register Supplier
+                        {saving ? 'Saving…' : 'Register Supplier'}
                     </button>
                 </div>
             </div>

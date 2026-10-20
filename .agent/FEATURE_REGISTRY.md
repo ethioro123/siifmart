@@ -5,6 +5,12 @@
 
 ## Active Features
 
+### Procurement Administration Support Scope (2026-10-20)
+- Buyers and vendor support at HQ prepare supplier and purchase records within their country. Regional Administration staff work within their assigned region and can read country-shared suppliers but edit only region-assigned suppliers.
+- Supplier creation now persists before the form closes. New suppliers remain pending independent lead verification; a purchase order cannot be approved against an unverified supplier. Procurement leads retain purchase order decision rights.
+- **Database**: Four procurement migrations applied to SIIFMART Staging and linked production: `20261020_procurement_administration_scope.sql`, `20261020_procurement_supplier_region_and_verification.sql`, `20261020_require_verified_supplier_for_po_approval.sql`, and `20261020_supplier_creator_separation.sql`.
+- **Files**: `services/suppliers.service.ts`, `hooks/useSupplierMutations.ts`, procurement screens, and role permissions.
+
 ### Executive Governance & Role Hierarchy Anti-Tamper Hardening (2026-10-20)
 - Fixed sovereign role classification flaw where Country Managing Director (`admin`, Level 98) was misclassified as a sovereign CEO (`isSovereignCEO`). Sovereign universal override authority is strictly restricted to Global CEO (`super_admin` / `ceo`, Level 100).
 - Subordinate roles (including Country MD and HR) can no longer adjust, propose compensation changes for, or directly edit the Global CEO's profile or salary.

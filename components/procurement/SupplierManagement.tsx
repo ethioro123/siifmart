@@ -6,6 +6,7 @@ import { getSupplierIcon } from './utils';
 import { AddSupplierModal } from './AddSupplierModal';
 import { SupplierDetailsModal } from './SupplierDetailsModal';
 import { ProductCatalogModal } from './ProductCatalogModal';
+import type { SupplierDraft } from '../../services/suppliers.service';
 
 interface SupplierManagementProps {
     suppliers: Supplier[];
@@ -13,7 +14,10 @@ interface SupplierManagementProps {
     totalCount: number;
     currentPage: number;
     onPageChange: (page: number) => void;
-    onAddSupplier: (supplier: Omit<Supplier, 'id' | 'status' | 'rating' | 'leadTime' | 'contact'>) => void;
+    onAddSupplier: (supplier: SupplierDraft) => Promise<unknown>;
+    onVerifySupplier: (supplier: Supplier) => Promise<unknown>;
+    canVerify: boolean;
+    viewerEmployeeId?: string;
     onOpenCreatePO: (product?: Product) => void;
 }
 
@@ -24,6 +28,9 @@ export const SupplierManagement: React.FC<SupplierManagementProps> = ({
     currentPage,
     onPageChange,
     onAddSupplier,
+    onVerifySupplier,
+    canVerify,
+    viewerEmployeeId,
     onOpenCreatePO
 }) => {
     const ITEMS_PER_PAGE = 20;
@@ -37,6 +44,20 @@ export const SupplierManagement: React.FC<SupplierManagementProps> = ({
     const [isContactModalOpen, setIsContactModalOpen] = useState(false);
     const [isProductCatalogOpen, setIsProductCatalogOpen] = useState(false);
     const [selectedSupplier, setSelectedSupplier] = useState<Supplier | null>(null);
+    const [verificationError, setVerificationError] = useState('');
+    const [verifyingId, setVerifyingId] = useState<string | null>(null);
+
+    const handleVerify = async (supplier: Supplier) => {
+        setVerificationError('');
+        setVerifyingId(supplier.id);
+        try {
+            await onVerifySupplier(supplier);
+        } catch (error) {
+            setVerificationError(error instanceof Error ? error.message : 'Verification failed.');
+        } finally {
+            setVerifyingId(null);
+        }
+    };
 
     // Filter suppliers
     const filteredSuppliers = useMemo(() => {
@@ -87,7 +108,7 @@ export const SupplierManagement: React.FC<SupplierManagementProps> = ({
                     <div>
                         <h2 className="text-xl font-bold tracking-tight text-[var(--theme-text-primary)]">Supplier Directory</h2>
                         <p className="text-xs text-[var(--theme-text-secondary)] font-medium mt-0.5">
-                            <span className="font-mono tabular-nums font-semibold">{totalCount}</span> verified sourcing partners across East Africa
+                            <span className="font-mono tabular-nums font-semibold">{totalCount}</span> suppliers in your authorized country and region
                         </p>
                     </div>
                 </div>
@@ -100,6 +121,7 @@ export const SupplierManagement: React.FC<SupplierManagementProps> = ({
                     </button>
                 </Protected>
             </div>
+            {verificationError && <p role="alert" className="text-xs text-rose-600 dark:text-rose-400">{verificationError}</p>}
 
             {/* Filter and Search Bar */}
             <div className="p-4 rounded-3xl bg-[var(--theme-bg-panel)] border border-[var(--theme-border)] shadow-sm flex flex-col md:flex-row gap-3 items-stretch md:items-center justify-between">
@@ -184,24 +206,22 @@ export const SupplierManagement: React.FC<SupplierManagementProps> = ({
                                     </td>
                                     <td className="py-4 px-4">
                                         <div className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold border ${
-                                            sup.status === 'Active'
+                                            sup.status === 'Active' && sup.verificationStatus === 'verified'
                                                 ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20'
                                                 : 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/20'
                                         }`}>
-                                            <span className={`w-1.5 h-1.5 rounded-full ${sup.status === 'Active' ? 'bg-emerald-500' : 'bg-rose-500'}`} />
-                                            {sup.status}
+                                            <span className={`w-1.5 h-1.5 rounded-full ${sup.status === 'Active' && sup.verificationStatus === 'verified' ? 'bg-emerald-500' : 'bg-rose-500'}`} />
+                                            {sup.verificationStatus === 'verified' ? sup.status : 'Pending verification'}
                                         </div>
                                     </td>
                                     <td className="py-4 px-4">
                                         <div className="flex flex-col gap-1.5">
                                             <div className="flex items-center gap-1.5">
                                                 <Star size={12} className="text-amber-500 fill-amber-500" />
-                                                <span className="text-xs font-bold font-mono tabular-nums text-[var(--theme-text-primary)]">{sup.rating}</span>
-                                                <span className="text-[11px] text-[var(--theme-text-secondary)]">/ 5.0</span>
+                                                <span className="text-xs font-bold font-mono tabular-nums text-[var(--theme-text-primary)]">{sup.rating ?? 'Unrated'}</span>
+                                                {sup.rating != null && <span className="text-[11px] text-[var(--theme-text-secondary)]">/ 5.0</span>}
                                             </div>
-                                            <span className="text-[10px] font-mono font-semibold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">
-                                                98% OTIF Score
-                                            </span>
+                                            <span className="text-[10px] text-[var(--theme-text-secondary)]">{sup.regionCode || 'Country shared'}</span>
                                         </div>
                                     </td>
                                     <td className="py-4 px-4">
@@ -224,6 +244,13 @@ export const SupplierManagement: React.FC<SupplierManagementProps> = ({
                                         </div>
                                     </td>
                                     <td className="py-4 px-6 text-right">
+                                        {canVerify && sup.createdBy !== viewerEmployeeId && sup.verificationStatus === 'pending' && (
+                                            <button type="button" disabled={verifyingId === sup.id}
+                                                onClick={e => { e.stopPropagation(); void handleVerify(sup); }}
+                                                className="mr-2 h-8 px-3.5 rounded-full text-xs font-semibold border border-[var(--theme-border)] text-[var(--theme-text-primary)] disabled:opacity-50">
+                                                {verifyingId === sup.id ? 'Verifying…' : 'Verify'}
+                                            </button>
+                                        )}
                                         <button
                                             onClick={(e) => handleCatalogClick(e, sup)}
                                             className="h-8 px-3.5 rounded-full text-xs font-semibold bg-[var(--theme-bg-subtle)] text-[var(--theme-text-primary)] hover:bg-[var(--theme-border)]/50 border border-[var(--theme-border)] active:scale-[0.98] transition-all inline-flex items-center gap-1.5 cursor-pointer ml-auto"
@@ -258,11 +285,11 @@ export const SupplierManagement: React.FC<SupplierManagementProps> = ({
                                         </div>
                                     </div>
                                     <div className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold border ${
-                                        sup.status === 'Active'
+                                        sup.status === 'Active' && sup.verificationStatus === 'verified'
                                             ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20'
                                             : 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/20'
                                     }`}>
-                                        {sup.status}
+                                        {sup.verificationStatus === 'verified' ? sup.status : 'Pending verification'}
                                     </div>
                                 </div>
 
@@ -276,10 +303,10 @@ export const SupplierManagement: React.FC<SupplierManagementProps> = ({
                                         <span className="text-[10px] text-[var(--theme-text-secondary)] font-semibold uppercase tracking-wider">Rating</span>
                                         <div className="flex items-center gap-1 mt-0.5">
                                             <Star size={11} className="text-amber-500 fill-amber-500" />
-                                            <span className="text-xs text-[var(--theme-text-primary)] font-bold font-mono tabular-nums">{sup.rating}</span>
-                                            <span className="text-[10px] text-[var(--theme-text-secondary)]">/ 5.0</span>
+                                            <span className="text-xs text-[var(--theme-text-primary)] font-bold font-mono tabular-nums">{sup.rating ?? 'Unrated'}</span>
+                                            {sup.rating != null && <span className="text-[10px] text-[var(--theme-text-secondary)]">/ 5.0</span>}
                                         </div>
-                                        <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-mono font-semibold block mt-0.5">98% OTIF</span>
+                                        <span className="text-[10px] text-[var(--theme-text-secondary)] block mt-0.5">{sup.regionCode || 'Country shared'}</span>
                                     </div>
                                 </div>
 
@@ -298,6 +325,13 @@ export const SupplierManagement: React.FC<SupplierManagementProps> = ({
                                     >
                                         <Package size={12} strokeWidth={1.5} /> Catalog
                                     </button>
+                                    {canVerify && sup.createdBy !== viewerEmployeeId && sup.verificationStatus === 'pending' && (
+                                        <button type="button" disabled={verifyingId === sup.id}
+                                            onClick={e => { e.stopPropagation(); void handleVerify(sup); }}
+                                            className="h-8 px-3 rounded-full text-xs font-semibold border border-[var(--theme-border)] text-[var(--theme-text-primary)] disabled:opacity-50">
+                                            {verifyingId === sup.id ? 'Verifying…' : 'Verify'}
+                                        </button>
+                                    )}
                                 </div>
                             </div>
                         );

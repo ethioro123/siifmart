@@ -70,10 +70,11 @@ export const CreatePOModal: React.FC<CreatePOModalProps> = ({
     const countryWarehouses = useMemo(() => {
         return sites.filter(s =>
             (s.country || 'ET') === activeCountry &&
+            (!user?.regionCode || s.regionCode === user.regionCode) &&
             (s.type === 'Warehouse' || s.type === 'Distribution Center') &&
             s.status !== 'Closed'
         );
-    }, [sites, activeCountry]);
+    }, [sites, activeCountry, user?.regionCode]);
 
     const isPurchasingTaxEnabled = Boolean(settings?.countryConfigs?.[activeCountry]?.taxOnPurchasing ?? settings?.taxOnPurchasing);
     const defaultTaxRate = isPurchasingTaxEnabled ? (countryProfile.taxRate ?? (activeCountry === 'KE' ? 16 : 15)) : 0;

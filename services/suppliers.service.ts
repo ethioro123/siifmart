@@ -1,195 +1,114 @@
 import { supabase } from '../lib/supabase';
 import type { Supplier } from '../types';
-import { logger } from '../utils/logger';
+
+export type SupplierDraft = Pick<Supplier, 'name' | 'type' | 'contact' | 'category'> &
+  Partial<Pick<Supplier, 'email' | 'phone' | 'taxId' | 'nationalId' | 'location' |
+    'leadTime' | 'bankName' | 'bankAccountName' | 'bankAccountNumber' |
+    'status' | 'rating'>> & {
+    countryCode: string;
+  };
+
+const supplierColumns = 'id,name,type,contact,email,phone,category,status,rating,lead_time,tax_id,national_id,location,country_code,region_code,created_by,verification_status,bank_name,bank_account_name,bank_account_number,created_at,updated_at';
+
+function mapSupplier(row: any): Supplier {
+  return {
+    id: row.id, name: row.name, type: row.type, contact: row.contact,
+    email: row.email, phone: row.phone, category: row.category,
+    status: row.status, rating: row.rating, leadTime: row.lead_time,
+    taxId: row.tax_id, nationalId: row.national_id, location: row.location,
+    countryCode: row.country_code, regionCode: row.region_code,
+    createdBy: row.created_by,
+    verificationStatus: row.verification_status,
+    bankName: row.bank_name, bankAccountName: row.bank_account_name,
+    bankAccountNumber: row.bank_account_number
+  };
+}
 
 export const suppliersService = {
-    async getAll(limit: number = 50, offset: number = 0, countryCode?: string, includeExactCount: boolean = true) {
-        let query = supabase
-            .from('suppliers')
-            .select('*', includeExactCount ? { count: 'exact' } : undefined);
+  async getAll(limit = 50, offset = 0, countryCode?: string, includeExactCount = true) {
+    let query = supabase.from('suppliers')
+      .select(supplierColumns, includeExactCount ? { count: 'exact' } : undefined);
+    if (countryCode) query = query.eq('country_code', countryCode);
+    const { data, error, count } = await query
+      .order('created_at', { ascending: false })
+      .range(offset, offset + limit - 1);
+    if (error) throw error;
+    return { data: (data || []).map(mapSupplier), count: count || 0 };
+  },
 
-        if (countryCode) {
-            query = query.eq('country_code', countryCode);
-        }
+  async getById(id: string) {
+    const { data, error } = await supabase.from('suppliers')
+      .select(supplierColumns).eq('id', id).single();
+    if (error) throw error;
+    return mapSupplier(data);
+  },
 
-        const { data, error, count } = await query
-            .order('created_at', { ascending: false })
-            .range(offset, offset + limit - 1);
-
-        if (error) {
-            // Graceful fallback if country_code column was not queried properly
-            if (error.code === '42703' && countryCode) {
-                logger.warn('SuppliersService', 'country_code column not on suppliers table, retrying unpartitioned');
-                const fallback = await supabase
-                    .from('suppliers')
-                    .select('*', includeExactCount ? { count: 'exact' } : undefined)
-                    .order('created_at', { ascending: false })
-                    .range(offset, offset + limit - 1);
-                if (fallback.error) throw fallback.error;
-                return {
-                    data: (fallback.data || []).map((s: any) => ({
-                        ...s,
-                        countryCode: s.country_code || countryCode || 'ET',
-                        leadTime: s.lead_time,
-                        taxId: s.tax_id,
-                        nationalId: s.national_id
-                    })),
-                    count: fallback.count || 0
-                };
-            }
-            throw error;
-        }
-
-        const mappedData = (data || []).map((s: any) => ({
-            ...s,
-            countryCode: s.country_code || countryCode || 'ET',
-            leadTime: s.lead_time,
-            taxId: s.tax_id,
-            nationalId: s.national_id,
-            verificationStatus: s.verification_status || 'verified',
-            bankName: s.bank_name,
-            bankAccountName: s.bank_account_name,
-            bankAccountNumber: s.bank_account_number
-        }));
-
-        return { data: mappedData, count: count || 0 };
-    },
-
-    async getById(id: string) {
-        const { data, error } = await supabase
-            .from('suppliers')
-            .select('*')
-            .eq('id', id)
-            .single();
-
-        if (error) throw error;
-        return {
-            ...data,
-            countryCode: data.country_code,
-            leadTime: data.lead_time,
-            taxId: data.tax_id,
-            nationalId: data.national_id,
-            verificationStatus: data.verification_status || 'verified',
-            bankName: data.bank_name,
-            bankAccountName: data.bank_account_name,
-            bankAccountNumber: data.bank_account_number
-        };
-    },
-
-    async create(supplier: Omit<Supplier, 'id' | 'created_at' | 'updated_at'> & { countryCode?: string; bankName?: string; bankAccountNumber?: string; bankAccountName?: string }) {
-        const country = supplier.countryCode || 'ET';
-
-        // Zero-Trust Duplicate Tax ID / TIN Guard
-        if (supplier.taxId && supplier.taxId.trim()) {
-            const { data: existing } = await supabase
-                .from('suppliers')
-                .select('id, name')
-                .eq('tax_id', supplier.taxId.trim())
-                .eq('country_code', country)
-                .maybeSingle();
-
-            if (existing) {
-                throw new Error(`Zero-Trust Vendor Guard: Tax ID / TIN "${supplier.taxId}" is already registered under supplier "${existing.name}".`);
-            }
-        }
-
-        const dbSupplier: any = {
-            name: supplier.name,
-            type: supplier.type,
-            contact: supplier.contact,
-            email: supplier.email,
-            phone: supplier.phone,
-            category: supplier.category,
-            status: supplier.status || 'Active',
-            rating: supplier.rating || 5,
-            lead_time: supplier.leadTime,
-            tax_id: supplier.taxId,
-            national_id: supplier.nationalId,
-            location: supplier.location,
-            country_code: country,
-            verification_status: 'verified',
-            bank_name: supplier.bankName,
-            bank_account_name: supplier.bankAccountName,
-            bank_account_number: supplier.bankAccountNumber
-        };
-
-        let { data, error } = await supabase
-            .from('suppliers')
-            .insert(dbSupplier)
-            .select()
-            .single();
-
-        if (error && (error.code === '42703' || error.message?.includes('country_code') || error.message?.includes('bank_name'))) {
-            // Column compatibility retry
-            const { country_code: _, verification_status: __, bank_name: ___, bank_account_name: ____, bank_account_number: _____, ...basic } = dbSupplier;
-            const retry = await supabase.from('suppliers').insert(basic).select().single();
-            data = retry.data;
-            error = retry.error;
-        }
-
-        if (error) {
-            // If RLS blocked insert, check if supplier already exists by name for this country
-            if (error.code === '42501' && supplier.name) {
-                const { data: existingByName } = await supabase
-                    .from('suppliers')
-                    .select('*')
-                    .ilike('name', supplier.name.trim())
-                    .eq('country_code', country)
-                    .maybeSingle();
-
-                if (existingByName) {
-                    return {
-                        ...existingByName,
-                        countryCode: existingByName.country_code || country,
-                        leadTime: existingByName.lead_time,
-                        taxId: existingByName.tax_id,
-                        nationalId: existingByName.national_id
-                    };
-                }
-            }
-            throw error;
-        }
-        return {
-            ...data,
-            countryCode: data.country_code || country,
-            leadTime: data.lead_time,
-            taxId: data.tax_id,
-            nationalId: data.national_id
-        };
-    },
-
-    async update(id: string, updates: Partial<Supplier> & { countryCode?: string; bankName?: string; bankAccountNumber?: string }) {
-        const dbUpdates: any = { ...updates };
-        if (updates.leadTime !== undefined) { dbUpdates.lead_time = updates.leadTime; delete dbUpdates.leadTime; }
-        if (updates.taxId !== undefined) { dbUpdates.tax_id = updates.taxId; delete dbUpdates.taxId; }
-        if (updates.nationalId !== undefined) { dbUpdates.national_id = updates.nationalId; delete dbUpdates.nationalId; }
-        if (updates.countryCode !== undefined) { dbUpdates.country_code = updates.countryCode; delete dbUpdates.countryCode; }
-        if (updates.bankName !== undefined) { dbUpdates.bank_name = updates.bankName; delete dbUpdates.bankName; }
-        if (updates.bankAccountNumber !== undefined) { dbUpdates.bank_account_number = updates.bankAccountNumber; delete dbUpdates.bankAccountNumber; }
-
-        const { data, error } = await supabase
-            .from('suppliers')
-            .update(dbUpdates)
-            .eq('id', id)
-            .select()
-            .single();
-
-        if (error) throw error;
-        return {
-            ...data,
-            countryCode: data.country_code,
-            leadTime: data.lead_time,
-            taxId: data.tax_id,
-            nationalId: data.national_id
-        };
-    },
-
-    async delete(id: string) {
-        const { error } = await supabase
-            .from('suppliers')
-            .delete()
-            .eq('id', id);
-
-        if (error) throw error;
+  async create(supplier: SupplierDraft) {
+    const name = supplier.name.trim();
+    const contact = supplier.contact.trim();
+    if (!name || !contact || !supplier.countryCode) {
+      throw new Error('Supplier name, contact, and country are required');
     }
+    if (supplier.taxId?.trim()) {
+      const { data: existing, error: lookupError } = await supabase.from('suppliers')
+        .select('id,name').eq('tax_id', supplier.taxId.trim())
+        .eq('country_code', supplier.countryCode).maybeSingle();
+      if (lookupError) throw lookupError;
+      if (existing) throw new Error(`Zero-Trust Vendor Guard: Tax ID / TIN "${supplier.taxId.trim()}" is already registered under supplier "${existing.name}".`);
+    }
+    const { data, error } = await supabase.from('suppliers').insert({
+      name, type: supplier.type, contact,
+      email: supplier.email?.trim() || null,
+      phone: supplier.phone?.trim() || null,
+      category: supplier.category.trim(), status: 'Active',
+      lead_time: supplier.leadTime ?? null,
+      tax_id: supplier.taxId?.trim() || null,
+      national_id: supplier.nationalId?.trim() || null,
+      location: supplier.location?.trim() || null,
+      country_code: supplier.countryCode,
+      verification_status: 'pending',
+      bank_name: supplier.bankName?.trim() || null,
+      bank_account_name: supplier.bankAccountName?.trim() || null,
+      bank_account_number: supplier.bankAccountNumber?.trim() || null
+    }).select(supplierColumns).single();
+    if (error) throw error;
+    return mapSupplier(data);
+  },
+
+  async update(id: string, updates: Partial<SupplierDraft>) {
+    const fields: Record<string, unknown> = {};
+    if (updates.name !== undefined) fields.name = updates.name.trim();
+    if (updates.type !== undefined) fields.type = updates.type;
+    if (updates.contact !== undefined) fields.contact = updates.contact.trim();
+    if (updates.email !== undefined) fields.email = updates.email?.trim() || null;
+    if (updates.phone !== undefined) fields.phone = updates.phone?.trim() || null;
+    if (updates.category !== undefined) fields.category = updates.category.trim();
+    if (updates.leadTime !== undefined) fields.lead_time = updates.leadTime;
+    if (updates.taxId !== undefined) fields.tax_id = updates.taxId?.trim() || null;
+    if (updates.nationalId !== undefined) fields.national_id = updates.nationalId?.trim() || null;
+    if (updates.location !== undefined) fields.location = updates.location?.trim() || null;
+    if (updates.bankName !== undefined) fields.bank_name = updates.bankName?.trim() || null;
+    if (updates.bankAccountName !== undefined) fields.bank_account_name = updates.bankAccountName?.trim() || null;
+    if (updates.bankAccountNumber !== undefined) fields.bank_account_number = updates.bankAccountNumber?.trim() || null;
+    if (!Object.keys(fields).length) throw new Error('No supplier changes provided');
+    const { data, error } = await supabase.from('suppliers')
+      .update(fields).eq('id', id).select(supplierColumns).single();
+    if (error) throw error;
+    return mapSupplier(data);
+  },
+
+  async verify(id: string, employeeId: string) {
+    const { data, error } = await supabase.from('suppliers')
+      .update({ verification_status: 'verified', verified_by: employeeId,
+        verified_at: new Date().toISOString() })
+      .eq('id', id).eq('verification_status', 'pending')
+      .select(supplierColumns).single();
+    if (error) throw error;
+    return mapSupplier(data);
+  },
+
+  async delete(id: string) {
+    const { error } = await supabase.from('suppliers').delete().eq('id', id);
+    if (error) throw error;
+  }
 };

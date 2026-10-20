@@ -29,7 +29,10 @@ export function useFinanceActions(deps: UseFinanceActionsDeps) {
 
     const addSupplier = useCallback(async (supplier: Supplier) => {
         try {
-            const newSupplier = await suppliersService.create(supplier);
+            const newSupplier = await suppliersService.create({
+                ...supplier,
+                countryCode: supplier.countryCode || activeSite?.country
+            });
             setSuppliers(prev => [newSupplier, ...prev]);
 
             queryClient.setQueryData(['suppliers'], (old: Supplier[] | undefined) =>
@@ -42,7 +45,7 @@ export function useFinanceActions(deps: UseFinanceActionsDeps) {
             logger.error('useFinanceActions', 'Failed to add supplier:', error);
             addNotification('alert', 'Failed to add supplier');
         }
-    }, [addNotification, logSystemEvent, queryClient]);
+    }, [activeSite, addNotification, logSystemEvent, queryClient]);
 
     const adjustStock = useCallback(async (productId: string, qty: number, type: 'IN' | 'OUT', reason: string, user: string) => {
         try {

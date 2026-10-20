@@ -53,7 +53,7 @@ describe('Zero-Trust Procurement & 4-Eyes Governance Suite', () => {
           approverRole: 'warehouse_manager',
           reasonCode: 'STANDARD_REPLENISHMENT'
         })
-      ).rejects.toThrow(/Segregation of duties violation: Role "warehouse_manager" is not authorized to approve purchase orders/);
+      ).rejects.toThrow(/Purchase order approval requires a procurement lead/);
     });
 
     it('mandates structured reason codes on PO approval', async () => {

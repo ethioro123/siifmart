@@ -81,10 +81,10 @@ export const PERMISSIONS = {
     // Procurement
     ACCESS_PROCUREMENT: ['super_admin', 'admin', 'regional_manager', 'operations_manager', 'procurement_manager', 'supply_chain_manager', 'buyer', 'demand_planner', 'vendor_relations_manager', 'customs_import_specialist', 'replenishment_planner', 'credit_control_officer', 'inbound_qc_inspector', 'regional_procurement_lead'],
     CREATE_PO: ['super_admin', 'admin', 'procurement_manager', 'buyer', 'supply_chain_manager'],
-    APPROVE_PO: ['super_admin', 'admin', 'regional_manager', 'operations_manager', 'procurement_manager'],
+    APPROVE_PO: ['super_admin', 'procurement_manager', 'regional_procurement_lead'],
     RECEIVE_PO: ['super_admin', 'warehouse_manager', 'dispatcher', 'inventory_specialist', 'receiver'],
     DELETE_PO: ['super_admin', 'admin', 'procurement_manager'],
-    MANAGE_SUPPLIERS: ['super_admin', 'admin', 'procurement_manager', 'vendor_relations_manager'],
+    MANAGE_SUPPLIERS: ['super_admin', 'admin', 'procurement_manager', 'regional_procurement_lead', 'buyer', 'vendor_relations_manager'],
 
     // Finance
     ACCESS_FINANCE: ['super_admin', 'admin', 'regional_manager', 'operations_manager', 'auditor', 'finance_manager', 'accountant', 'payroll_specialist', 'treasury_officer', 'tax_compliance_officer', 'credit_control_officer', 'regional_finance_officer', 'procurement_manager'],

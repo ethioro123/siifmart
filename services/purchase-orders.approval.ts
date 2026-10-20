@@ -23,8 +23,8 @@ export const purchaseOrdersApprovalService = {
       throw new Error(`Cannot approve PO with status "${currentPO.status}". Must be Draft or Pending.`);
     }
 
-    if (['warehouse_manager', 'store_manager', 'cashier', 'driver', 'picker', 'packer'].includes(approverRole)) {
-      throw new Error(`Segregation of duties violation: Role "${approverRole}" is not authorized to approve purchase orders.`);
+    if (!['super_admin', 'CEO', 'ceo', 'procurement_manager', 'regional_procurement_lead'].includes(approverRole)) {
+      throw new Error('Purchase order approval requires a procurement lead.');
     }
 
     // 4-Eyes rule: Creator cannot approve their own PO
