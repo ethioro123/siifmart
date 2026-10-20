@@ -40,7 +40,7 @@ describe('HR & Talent Directorate Team Roles & Hierarchy', () => {
             expect(getRoleDept(role)).toBe('hr');
             const sysRole = SYSTEM_ROLES.find(r => r.id === role);
             expect(sysRole?.level).toBe(2);
-            expect(sysRole?.label).toBe('HR Manager');
+            expect(sysRole?.label).toBe('Head of Human Resources');
         });
 
         it('can employ Level 3 and Level 4 staff, but cannot hire peers (Level 2) or CEO (Level 1)', () => {

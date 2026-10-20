@@ -94,11 +94,11 @@ describe('Zero-Trust Site Scoping & Assignment Formatting', () => {
         expect(result.isHQ).toBe(false);
     });
 
-    it('assigns unassigned corporate/HQ executive roles to Ethiopia HQ (Central)', () => {
-        const hqRoles = ['super_admin', 'ceo', 'operations_manager', 'finance_manager', 'hr_manager', 'procurement_manager'];
+    it('assigns unassigned corporate/HQ executive roles to Central Operations', () => {
+        const hqRoles = ['super_admin', 'ceo', 'operations_manager', 'head_of_operations', 'finance_manager', 'head_of_finance', 'hr_manager', 'head_of_hr', 'procurement_manager', 'head_of_procurement'];
         for (const role of hqRoles) {
             const result = formatSiteAssignment(undefined, role, sites);
-            expect(result.label).toBe('Ethiopia HQ (Central)');
+            expect(result.label).toBe('Central Operations');
             expect(result.isWarning).toBe(false);
             expect(result.isHQ).toBe(true);
         }
@@ -108,7 +108,7 @@ describe('Zero-Trust Site Scoping & Assignment Formatting', () => {
         const branchRoles = ['store_manager', 'warehouse_manager', 'cashier', 'picker', 'packer', 'driver'];
         for (const role of branchRoles) {
             const result = formatSiteAssignment(undefined, role, sites);
-            expect(result.label).toBe('Unassigned Branch Staff');
+            expect(result.label).toBe('Unassigned Facility');
             expect(result.isWarning).toBe(true);
             expect(result.isHQ).toBe(false);
         }
