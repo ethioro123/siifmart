@@ -2,7 +2,7 @@ import React, { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Store, Warehouse, ShieldAlert, CheckCircle2, Clock,
-  ArrowUpRight, Users, CreditCard, CalendarCheck2, AlertTriangle
+  ArrowUpRight, Users, CreditCard, CalendarCheck2, AlertTriangle, Building2
 } from 'lucide-react';
 import type { Site, ShiftRecord, SaleRecord } from '../../types';
 import { formatCompactNumber } from '../../utils/formatting';
@@ -38,6 +38,7 @@ export const TerritoryFacilityGrid: React.FC<TerritoryFacilityGridProps> = ({
       const type = (site.type || '').toLowerCase();
       const isWarehouse = type.includes('warehouse') || type.includes('distribution') || type.includes('wms');
       const isDarkStore = type.includes('dark');
+      const isAdministration = type.includes('admin');
 
       // Tuesday weekly cycle count status check (SOP-INV-012 Enforcement)
       const isTuesday = dayOfWeek === 2;
@@ -55,6 +56,7 @@ export const TerritoryFacilityGrid: React.FC<TerritoryFacilityGridProps> = ({
         site,
         isWarehouse,
         isDarkStore,
+        isAdministration,
         openRegisters,
         todayRevenue,
         todayOrderCount,
@@ -109,7 +111,7 @@ export const TerritoryFacilityGrid: React.FC<TerritoryFacilityGridProps> = ({
       )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-4 gap-4">
-        {facilityStats.map(({ site, isWarehouse, isDarkStore, openRegisters, todayRevenue, todayOrderCount, cycleCountStatus }) => (
+        {facilityStats.map(({ site, isWarehouse, isDarkStore, isAdministration, openRegisters, todayRevenue, todayOrderCount, cycleCountStatus }) => (
           <div
             key={site.id}
             className="p-5 rounded-2xl bg-[var(--theme-bg-card)] border border-[var(--theme-border)] hover:border-[var(--theme-accent)] transition-all duration-200 flex flex-col justify-between"
@@ -119,7 +121,7 @@ export const TerritoryFacilityGrid: React.FC<TerritoryFacilityGridProps> = ({
               <div className="flex items-start justify-between gap-2">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] flex items-center justify-center text-[var(--theme-accent)]">
-                    {isWarehouse ? <Warehouse className="w-5 h-5" /> : <Store className="w-5 h-5" />}
+                    {isAdministration ? <Building2 className="w-5 h-5" /> : isWarehouse ? <Warehouse className="w-5 h-5" /> : <Store className="w-5 h-5" />}
                   </div>
                   <div>
                     <h4 className="text-sm font-semibold text-[var(--theme-text-primary)] line-clamp-1">
@@ -132,13 +134,15 @@ export const TerritoryFacilityGrid: React.FC<TerritoryFacilityGridProps> = ({
                 </div>
 
                 <span className={`text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-md border ${
-                  isDarkStore
-                    ? 'bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-500/20'
-                    : isWarehouse
-                      ? 'bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20'
-                      : 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20'
+                  isAdministration
+                    ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20'
+                    : isDarkStore
+                      ? 'bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-500/20'
+                      : isWarehouse
+                        ? 'bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20'
+                        : 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20'
                 }`}>
-                  {isDarkStore ? 'Dark Store' : isWarehouse ? 'Distribution' : 'Retail Store'}
+                  {isAdministration ? 'Administration' : isDarkStore ? 'Dark Store' : isWarehouse ? 'Distribution' : 'Retail Store'}
                 </span>
               </div>
 
@@ -150,7 +154,7 @@ export const TerritoryFacilityGrid: React.FC<TerritoryFacilityGridProps> = ({
                     <span>Open Tills</span>
                   </div>
                   <div className="text-sm font-bold font-mono text-[var(--theme-text-primary)] mt-1">
-                    {openRegisters} Active
+                    {isAdministration ? 'N/A (HQ)' : `${openRegisters} Active`}
                   </div>
                 </div>
 
@@ -160,7 +164,7 @@ export const TerritoryFacilityGrid: React.FC<TerritoryFacilityGridProps> = ({
                     <span>Today Sales</span>
                   </div>
                   <div className="text-sm font-bold font-mono text-[var(--theme-text-primary)] mt-1 truncate">
-                    {formatCompactNumber(todayRevenue, { currency: currencySymbol })}
+                    {isAdministration ? 'N/A' : formatCompactNumber(todayRevenue, { currency: currencySymbol })}
                   </div>
                 </div>
               </div>
@@ -201,10 +205,18 @@ export const TerritoryFacilityGrid: React.FC<TerritoryFacilityGridProps> = ({
             {/* Launchpad Button */}
             <button
               type="button"
-              onClick={() => navigate(isWarehouse ? '/wms-dashboard' : '/pos-dashboard')}
+              onClick={() => {
+                if (isAdministration) {
+                  navigate('/admin');
+                } else if (isWarehouse) {
+                  navigate('/wms-dashboard');
+                } else {
+                  navigate('/pos-dashboard');
+                }
+              }}
               className="mt-4 w-full flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl bg-[var(--theme-bg-subtle)] hover:bg-[var(--theme-accent)] hover:text-white border border-[var(--theme-border)] text-xs font-semibold text-[var(--theme-text-primary)] transition-all duration-200"
             >
-              <span>{isWarehouse ? 'Inspect WMS Hub' : 'Inspect POS Command'}</span>
+              <span>{isAdministration ? 'Inspect Command Hub' : isWarehouse ? 'Inspect WMS Hub' : 'Inspect POS Command'}</span>
               <ArrowUpRight className="w-3.5 h-3.5" />
             </button>
           </div>
