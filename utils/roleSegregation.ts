@@ -27,9 +27,15 @@ export function resolveEmployeeScopeLevel(
 
     const normalizedRole = (role || '').trim().toLowerCase();
     if ([
-        'super_admin', 'ceo', 'admin', 'operations_manager', 'finance_manager',
-        'hr_manager', 'hr', 'procurement_manager', 'supply_chain_manager',
-        'merchandising_manager', 'it_support', 'auditor', 'store_operations_auditor',
+        'super_admin', 'ceo', 'country_managing_director', 'admin',
+        'head_of_operations', 'operations_head', 'operations_manager',
+        'head_of_finance', 'finance_head', 'finance_manager',
+        'head_of_hr', 'hr_head', 'hr_manager', 'hr',
+        'head_of_procurement', 'procurement_head', 'procurement_manager',
+        'head_of_supply_chain', 'supply_chain_head', 'supply_chain_manager',
+        'head_of_merchandising', 'merchandising_head', 'merchandising_manager',
+        'head_of_it', 'it_head', 'it_support',
+        'head_of_audit', 'audit_head', 'auditor', 'store_operations_auditor',
         'security_manager', 'logistics_manager', 'inventory_manager',
         'buyer', 'demand_planner', 'replenishment_planner', 'vendor_relations_manager',
         'customs_import_specialist', 'inbound_qc_inspector', 'treasury_officer',

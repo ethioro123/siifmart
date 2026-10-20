@@ -42,7 +42,7 @@ export const PERMISSIONS = {
     VIEW_ALL_TRANSACTIONS: ['super_admin', 'regional_manager', 'operations_manager', 'store_manager', 'assistant_manager', 'shift_lead', 'auditor', 'finance_manager', 'store_supervisor', 'treasury_officer', 'store_operations_auditor'],
 
     // Inventory - Strictly Warehouse & Distribution Center Only
-    ACCESS_INVENTORY: ['super_admin', 'admin', 'regional_manager', 'operations_manager', 'procurement_manager', 'warehouse_manager', 'dispatcher', 'auditor', 'inventory_specialist', 'inventory_manager', 'demand_planner', 'inbound_qc_inspector', 'replenishment_planner', 'store_operations_auditor', 'regional_procurement_lead', 'regional_logistics_lead', 'fleet_maintenance_supervisor'],
+    ACCESS_INVENTORY: ['super_admin', 'admin', 'country_managing_director', 'regional_manager', 'operations_manager', 'head_of_operations', 'operations_head', 'procurement_manager', 'head_of_procurement', 'procurement_head', 'warehouse_manager', 'dispatcher', 'auditor', 'head_of_audit', 'audit_head', 'inventory_specialist', 'inventory_manager', 'demand_planner', 'inbound_qc_inspector', 'replenishment_planner', 'store_operations_auditor', 'regional_procurement_lead', 'regional_logistics_lead'],
     ADD_PRODUCT: ['super_admin', 'admin', 'warehouse_manager'],
     EDIT_PRODUCT: ['super_admin', 'admin', 'warehouse_manager'],
     DELETE_PRODUCT: ['super_admin'],
@@ -79,7 +79,7 @@ export const PERMISSIONS = {
     APPROVE_EMPLOYEE: ['super_admin', 'admin', 'hr', 'hr_manager', 'regional_manager', 'operations_manager', 'regional_hr_officer'],
 
     // Procurement
-    ACCESS_PROCUREMENT: ['super_admin', 'admin', 'regional_manager', 'operations_manager', 'procurement_manager', 'supply_chain_manager', 'buyer', 'demand_planner', 'vendor_relations_manager', 'customs_import_specialist', 'replenishment_planner', 'credit_control_officer', 'inbound_qc_inspector', 'regional_procurement_lead'],
+    ACCESS_PROCUREMENT: ['super_admin', 'admin', 'country_managing_director', 'regional_manager', 'operations_manager', 'head_of_operations', 'operations_head', 'procurement_manager', 'head_of_procurement', 'procurement_head', 'supply_chain_manager', 'head_of_supply_chain', 'supply_chain_head', 'buyer', 'demand_planner', 'vendor_relations_manager', 'customs_import_specialist', 'replenishment_planner', 'credit_control_officer', 'regional_procurement_lead'],
     CREATE_PO: ['super_admin', 'admin', 'procurement_manager', 'buyer', 'supply_chain_manager'],
     APPROVE_PO: ['super_admin', 'procurement_manager', 'regional_procurement_lead'],
     RECEIVE_PO: ['super_admin', 'warehouse_manager', 'dispatcher', 'inventory_specialist', 'receiver'],
@@ -211,7 +211,7 @@ export function hasPermission(userRole: UserRole | undefined, permission: keyof 
     if (!userRole) return false;
 
     // Global CEO and Country Managing Director have full module & action access within their authorized country scope
-    if (userRole === 'super_admin' || userRole === 'admin' || (userRole as string)?.toLowerCase() === 'ceo') return true;
+    if (userRole === 'super_admin' || userRole === 'admin' || userRole === 'country_managing_director' || (userRole as string)?.toLowerCase() === 'ceo') return true;
 
     // Zero-Trust dynamic policy override from RoleSettings
     const dynamicCheck = checkDynamicRolePermission(userRole as string, permission as string);
@@ -315,14 +315,41 @@ export { getRoleDisplayName, getRoleDescription, getRoleColor };
  * Check if user should see all sites or just their own
  */
 export function canViewAllSites(userRole: UserRole | undefined): boolean {
-    return ['super_admin', 'admin', 'regional_manager', 'operations_manager', 'finance_manager', 'hr_manager', 'supply_chain_manager', 'hr', 'auditor', 'it_support', 'cs_manager', 'logistics_manager', 'inventory_manager', 'security_manager', 'treasury_officer', 'tax_compliance_officer', 'credit_control_officer', 'store_operations_auditor', 'regional_procurement_lead', 'regional_finance_officer', 'regional_hr_officer', 'regional_logistics_lead', 'regional_security_supervisor', 'hr_generalist', 'talent_recruiter', 'training_coordinator', 'payroll_specialist'].includes(userRole || '');
+    return [
+        'super_admin', 'country_managing_director', 'admin',
+        'head_of_operations', 'operations_head', 'operations_manager',
+        'head_of_finance', 'finance_head', 'finance_manager',
+        'head_of_hr', 'hr_head', 'hr_manager', 'hr',
+        'head_of_procurement', 'procurement_head', 'procurement_manager',
+        'head_of_supply_chain', 'supply_chain_head', 'supply_chain_manager',
+        'head_of_merchandising', 'merchandising_head', 'merchandising_manager',
+        'head_of_it', 'it_head', 'it_support',
+        'head_of_audit', 'audit_head', 'auditor', 'store_operations_auditor',
+        'regional_manager', 'regional_procurement_lead', 'regional_finance_officer',
+        'regional_hr_officer', 'regional_logistics_lead', 'regional_security_supervisor',
+        'cs_manager', 'logistics_manager', 'inventory_manager', 'security_manager',
+        'treasury_officer', 'tax_compliance_officer', 'credit_control_officer',
+        'hr_generalist', 'talent_recruiter', 'training_coordinator', 'payroll_specialist'
+    ].includes(userRole || '');
 }
 
 /**
  * Check if user should see all employees or filtered
  */
 export function canViewAllEmployees(userRole: UserRole | undefined): boolean {
-    return ['super_admin', 'admin', 'regional_manager', 'operations_manager', 'finance_manager', 'hr_manager', 'supply_chain_manager', 'hr', 'it_support', 'logistics_manager', 'inventory_manager', 'security_manager', 'regional_procurement_lead', 'regional_finance_officer', 'regional_hr_officer', 'regional_logistics_lead', 'regional_security_supervisor', 'hr_generalist', 'talent_recruiter', 'training_coordinator', 'payroll_specialist'].includes(userRole || '');
+    return [
+        'super_admin', 'country_managing_director', 'admin',
+        'head_of_operations', 'operations_head', 'operations_manager',
+        'head_of_finance', 'finance_head', 'finance_manager',
+        'head_of_hr', 'hr_head', 'hr_manager', 'hr',
+        'head_of_procurement', 'procurement_head', 'procurement_manager',
+        'head_of_supply_chain', 'supply_chain_head', 'supply_chain_manager',
+        'head_of_it', 'it_head', 'it_support',
+        'regional_manager', 'regional_procurement_lead', 'regional_finance_officer',
+        'regional_hr_officer', 'regional_logistics_lead', 'regional_security_supervisor',
+        'logistics_manager', 'inventory_manager', 'security_manager',
+        'hr_generalist', 'talent_recruiter', 'training_coordinator', 'payroll_specialist'
+    ].includes(userRole || '');
 }
 
 /**

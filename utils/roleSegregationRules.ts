@@ -21,36 +21,32 @@ export const ROLE_SEGREGATION_RULES: RoleSegregationRule[] = [
     // ========================================
     // HQ ROLES - Must be at SIIFMART HQ
     // ========================================
-    {
-        role: 'super_admin',
-        siteType: 'Administration',
-        department: 'Management',
-        description: 'CEO - Executive leadership at headquarters'
-    },
-    {
-        role: 'admin',
-        siteType: 'Administration',
-        department: 'Management',
-        description: 'Country Managing Director - National executive leadership at Country HQ'
-    },
-    {
-        role: 'hr',
-        siteType: 'Administration',
-        department: 'Human Resources',
-        description: 'HR Manager - Workforce management at HQ'
-    },
-    {
-        role: 'hr_manager',
-        siteType: 'Administration',
-        department: 'Human Resources',
-        description: 'HR Director - Workforce management at HQ'
-    },
-    {
-        role: 'finance_manager',
-        siteType: 'Administration',
-        department: 'Finance',
-        description: 'Finance Manager - Financial oversight at HQ'
-    },
+    { role: 'super_admin', siteType: 'Administration', department: 'Management', description: 'CEO - Executive leadership at headquarters' },
+    { role: 'country_managing_director', siteType: 'Administration', department: 'Management', description: 'Country Managing Director - National executive leadership at Country HQ' },
+    { role: 'admin', siteType: 'Administration', department: 'Management', description: 'Country Managing Director - National executive leadership at Country HQ' },
+    { role: 'head_of_operations', siteType: 'Administration', department: 'Management', description: 'Head of Operations - Enterprise operations directorate at HQ' },
+    { role: 'operations_head', siteType: 'Administration', department: 'Management', description: 'Head of Operations - Enterprise operations directorate at HQ' },
+    { role: 'operations_manager', siteType: 'Administration', department: 'Management', description: 'Head of Operations - Enterprise operations directorate at HQ' },
+    { role: 'head_of_finance', siteType: 'Administration', department: 'Finance', description: 'Head of Finance - Financial strategy and fiscal governance at HQ' },
+    { role: 'finance_head', siteType: 'Administration', department: 'Finance', description: 'Head of Finance - Financial strategy and fiscal governance at HQ' },
+    { role: 'finance_manager', siteType: 'Administration', department: 'Finance', description: 'Head of Finance - Financial oversight at HQ' },
+    { role: 'head_of_hr', siteType: 'Administration', department: 'Human Resources', description: 'Head of Human Resources - People operations and workforce governance at HQ' },
+    { role: 'hr_head', siteType: 'Administration', department: 'Human Resources', description: 'Head of Human Resources - People operations and workforce governance at HQ' },
+    { role: 'hr_manager', siteType: 'Administration', department: 'Human Resources', description: 'Head of Human Resources - Workforce governance at HQ' },
+    { role: 'hr', siteType: 'Administration', department: 'Human Resources', description: 'HR Manager - Workforce management at HQ' },
+    { role: 'head_of_procurement', siteType: 'Administration', department: 'Procurement', description: 'Head of Procurement - Enterprise strategic sourcing and supplier contracts at HQ' },
+    { role: 'procurement_head', siteType: 'Administration', department: 'Procurement', description: 'Head of Procurement - Enterprise strategic sourcing and supplier contracts at HQ' },
+    { role: 'procurement_manager', siteType: 'Administration', department: 'Procurement', description: 'Head of Procurement - Strategic sourcing at HQ' },
+    { role: 'head_of_supply_chain', siteType: 'Administration', department: 'Management', description: 'Head of Supply Chain - Enterprise fulfillment networks at HQ' },
+    { role: 'supply_chain_head', siteType: 'Administration', department: 'Management', description: 'Head of Supply Chain - Enterprise fulfillment networks at HQ' },
+    { role: 'supply_chain_manager', siteType: 'Administration', department: 'Management', description: 'Head of Supply Chain - Supply chain oversight' },
+    { role: 'head_of_merchandising', siteType: 'Administration', department: 'Management', description: 'Head of Merchandising - Corporate pricing, margins & planograms at HQ' },
+    { role: 'merchandising_head', siteType: 'Administration', department: 'Management', description: 'Head of Merchandising - Corporate pricing, margins & planograms at HQ' },
+    { role: 'merchandising_manager', siteType: 'Administration', department: 'Management', description: 'Head of Merchandising - Corporate pricing, margins & planograms at HQ' },
+    { role: 'head_of_it', siteType: 'Administration', department: 'Management', description: 'Head of IT - Enterprise systems and security at HQ' },
+    { role: 'it_head', siteType: 'Administration', department: 'Management', description: 'Head of IT - Enterprise systems and security at HQ' },
+    { role: 'head_of_audit', siteType: 'Administration', department: 'Management', description: 'Head of Internal Audit - Compliance, risk, and fraud governance at HQ' },
+    { role: 'audit_head', siteType: 'Administration', department: 'Management', description: 'Head of Internal Audit - Compliance, risk, and fraud governance at HQ' },
     {
         role: 'accountant',
         siteType: 'Administration',

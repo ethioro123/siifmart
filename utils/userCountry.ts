@@ -72,20 +72,38 @@ export function canSwitchRegion(user: { role?: string; title?: string } | null |
     return (
         role === 'ceo' ||
         role === 'super_admin' ||
+        role === 'country_managing_director' ||
         role === 'admin' ||
+        role === 'head_of_operations' ||
+        role === 'operations_head' ||
         role === 'operations_manager' ||
+        role === 'head_of_finance' ||
+        role === 'finance_head' ||
         role === 'finance_manager' ||
+        role === 'head_of_hr' ||
+        role === 'hr_head' ||
         role === 'hr_manager' ||
         role === 'hr' ||
+        role === 'head_of_procurement' ||
+        role === 'procurement_head' ||
         role === 'procurement_manager' ||
+        role === 'head_of_supply_chain' ||
+        role === 'supply_chain_head' ||
         role === 'supply_chain_manager' ||
+        role === 'head_of_merchandising' ||
+        role === 'merchandising_head' ||
         role === 'merchandising_manager' ||
+        role === 'head_of_it' ||
+        role === 'it_head' ||
         role === 'it_support' ||
+        role === 'head_of_audit' ||
+        role === 'audit_head' ||
         role === 'auditor' ||
         role === 'store_operations_auditor' ||
         title.includes('ceo') ||
         title.includes('chief executive') ||
-        title.includes('managing director')
+        title.includes('managing director') ||
+        title.includes('head of')
     );
 }
 
