@@ -42,7 +42,7 @@ export const PERMISSIONS = {
     VIEW_ALL_TRANSACTIONS: ['super_admin', 'regional_manager', 'operations_manager', 'store_manager', 'assistant_manager', 'shift_lead', 'auditor', 'finance_manager', 'store_supervisor', 'treasury_officer', 'store_operations_auditor'],
 
     // Inventory - Strictly Warehouse & Distribution Center Only
-    ACCESS_INVENTORY: ['super_admin', 'admin', 'country_managing_director', 'regional_manager', 'operations_manager', 'head_of_operations', 'operations_head', 'procurement_manager', 'head_of_procurement', 'procurement_head', 'warehouse_manager', 'dispatcher', 'auditor', 'head_of_audit', 'audit_head', 'inventory_specialist', 'inventory_manager', 'demand_planner', 'inbound_qc_inspector', 'replenishment_planner', 'store_operations_auditor', 'regional_procurement_lead', 'regional_logistics_lead'],
+    ACCESS_INVENTORY: ['super_admin', 'admin', 'country_managing_director', 'regional_manager', 'operations_manager', 'head_of_operations', 'operations_head', 'warehouse_manager', 'dispatcher', 'auditor', 'head_of_audit', 'audit_head', 'inventory_specialist', 'inventory_manager', 'demand_planner', 'inbound_qc_inspector', 'replenishment_planner', 'store_operations_auditor', 'regional_logistics_lead'],
     ADD_PRODUCT: ['super_admin', 'admin', 'warehouse_manager'],
     EDIT_PRODUCT: ['super_admin', 'admin', 'warehouse_manager'],
     DELETE_PRODUCT: ['super_admin'],
@@ -79,7 +79,7 @@ export const PERMISSIONS = {
     APPROVE_EMPLOYEE: ['super_admin', 'admin', 'hr', 'hr_manager', 'regional_manager', 'operations_manager', 'regional_hr_officer'],
 
     // Procurement
-    ACCESS_PROCUREMENT: ['super_admin', 'admin', 'country_managing_director', 'regional_manager', 'operations_manager', 'head_of_operations', 'operations_head', 'procurement_manager', 'head_of_procurement', 'procurement_head', 'supply_chain_manager', 'head_of_supply_chain', 'supply_chain_head', 'buyer', 'demand_planner', 'vendor_relations_manager', 'customs_import_specialist', 'replenishment_planner', 'credit_control_officer', 'regional_procurement_lead'],
+    ACCESS_PROCUREMENT: ['super_admin', 'admin', 'country_managing_director', 'regional_manager', 'operations_manager', 'head_of_operations', 'operations_head', 'procurement_manager', 'head_of_procurement', 'procurement_head', 'supply_chain_manager', 'head_of_supply_chain', 'supply_chain_head', 'buyer', 'demand_planner', 'vendor_relations_manager', 'customs_import_specialist', 'replenishment_planner', 'regional_procurement_lead'],
     CREATE_PO: ['super_admin', 'admin', 'procurement_manager', 'buyer', 'supply_chain_manager'],
     APPROVE_PO: ['super_admin', 'procurement_manager', 'regional_procurement_lead'],
     RECEIVE_PO: ['super_admin', 'warehouse_manager', 'dispatcher', 'inventory_specialist', 'receiver'],
@@ -87,7 +87,7 @@ export const PERMISSIONS = {
     MANAGE_SUPPLIERS: ['super_admin', 'admin', 'procurement_manager', 'regional_procurement_lead', 'buyer', 'vendor_relations_manager'],
 
     // Finance
-    ACCESS_FINANCE: ['super_admin', 'admin', 'regional_manager', 'operations_manager', 'auditor', 'finance_manager', 'accountant', 'payroll_specialist', 'treasury_officer', 'tax_compliance_officer', 'credit_control_officer', 'regional_finance_officer', 'procurement_manager'],
+    ACCESS_FINANCE: ['super_admin', 'admin', 'country_managing_director', 'head_of_finance', 'finance_head', 'regional_manager', 'operations_manager', 'head_of_operations', 'operations_head', 'auditor', 'head_of_audit', 'audit_head', 'finance_manager', 'accountant', 'payroll_specialist', 'treasury_officer', 'tax_compliance_officer', 'credit_control_officer', 'regional_finance_officer'],
     VIEW_REVENUE: ['super_admin', 'regional_manager', 'operations_manager', 'auditor', 'finance_manager', 'treasury_officer', 'tax_compliance_officer', 'credit_control_officer'],
     VIEW_EXPENSES: ['super_admin', 'admin', 'regional_manager', 'operations_manager', 'auditor', 'finance_manager', 'treasury_officer', 'tax_compliance_officer', 'credit_control_officer'],
     ADD_EXPENSE: ['super_admin', 'finance_manager'],
