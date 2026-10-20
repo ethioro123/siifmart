@@ -55,7 +55,7 @@ export const shiftsService = {
     /**
      * Get all shifts (optionally scoped by siteId)
      */
-    async getAll(siteId?: string, limit: number = 25): Promise<ShiftRecord[]> {
+    async getAll(siteId?: string | string[], limit: number = 25): Promise<ShiftRecord[]> {
         try {
             let query = supabase
                 .from('shifts')
@@ -63,7 +63,10 @@ export const shiftsService = {
                 .order('created_at', { ascending: false })
                 .limit(limit);
 
-            if (siteId && siteId !== 'All') {
+            if (Array.isArray(siteId)) {
+                if (siteId.length === 0) return [];
+                query = query.in('site_id', siteId);
+            } else if (siteId && siteId !== 'All') {
                 query = query.eq('site_id', siteId);
             }
 

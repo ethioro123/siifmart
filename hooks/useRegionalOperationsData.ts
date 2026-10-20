@@ -6,6 +6,7 @@ import { getUserRegion } from '../utils/userCountry';
 import type { Region, Site, Employee, SaleRecord, PurchaseOrder, TransferRecord, ShiftRecord, Product } from '../types';
 import { Country, getCountryProfile } from '../utils/localization';
 import { normalizeCountryCode } from '../utils/siteIdGenerator';
+import { useRegionalDataQueries } from './useRegionalDataQueries';
 
 export interface OverrideVelocityBreach {
   siteId: string;
@@ -178,30 +179,47 @@ export function useRegionalOperationsData(): RegionalOperationsData {
     };
   }, [regionalSites]);
 
-  // Filter Regional Workforce
+  const siteIdsArray = useMemo(() => Array.from(regionalSiteIds), [regionalSiteIds]);
+
+  const {
+    regionalProducts: queriedProducts,
+    regionalEmployees: queriedEmployees,
+    regionalShifts: queriedShifts,
+    regionalOrders: queriedOrders,
+    regionalSales: queriedSales
+  } = useRegionalDataQueries({
+    regionCode: effectiveRegionCode,
+    siteIds: siteIdsArray,
+    enabled: siteIdsArray.length > 0
+  });
+
+  // Filter Regional Workforce (prioritizing direct territorial query)
   const regionalEmployees = useMemo(() => {
+    if (queriedEmployees.length > 0) return queriedEmployees;
     return employees.filter(e => {
       const empRegion = e.regionCode || (e as any).region_code;
       if (empRegion && empRegion === effectiveRegionCode) return true;
       if (e.siteId && regionalSiteIds.has(e.siteId)) return true;
       return false;
     });
-  }, [employees, effectiveRegionCode, regionalSiteIds]);
+  }, [queriedEmployees, employees, effectiveRegionCode, regionalSiteIds]);
 
-  // Filter Regional Sales
+  // Filter Regional Sales (prioritizing direct territorial query)
   const regionalSales = useMemo(() => {
+    if (queriedSales.length > 0) return queriedSales;
     return allSales.filter(s => regionalSiteIds.has(s.siteId));
-  }, [allSales, regionalSiteIds]);
+  }, [queriedSales, allSales, regionalSiteIds]);
 
-  // Filter Regional Purchase Orders
+  // Filter Regional Purchase Orders (prioritizing direct territorial query)
   const regionalOrders = useMemo(() => {
+    if (queriedOrders.length > 0) return queriedOrders;
     return allOrders.filter(o => {
       const poRegion = o.regionCode || (o as any).region_code;
       if (poRegion && poRegion === effectiveRegionCode) return true;
       if (o.siteId && regionalSiteIds.has(o.siteId)) return true;
       return false;
     });
-  }, [allOrders, effectiveRegionCode, regionalSiteIds]);
+  }, [queriedOrders, allOrders, effectiveRegionCode, regionalSiteIds]);
 
   // Filter Regional Transfers
   const regionalTransfers = useMemo(() => {
@@ -218,10 +236,11 @@ export function useRegionalOperationsData(): RegionalOperationsData {
     });
   }, [regionalTransfers, effectiveRegionCode, regionalSiteIds]);
 
-  // Filter Regional Shifts
+  // Filter Regional Shifts (prioritizing direct territorial query)
   const regionalShifts = useMemo(() => {
+    if (queriedShifts.length > 0) return queriedShifts;
     return shifts.filter(s => regionalSiteIds.has(s.siteId));
-  }, [shifts, regionalSiteIds]);
+  }, [queriedShifts, shifts, regionalSiteIds]);
 
   // Real-time Metrics Aggregation
   const todayPrefix = useMemo(() => new Date().toISOString().split('T')[0], []);
@@ -332,10 +351,11 @@ export function useRegionalOperationsData(): RegionalOperationsData {
     return breaches;
   }, [regionalSites, regionalShifts, regionalSales]);
 
-  // Regional Catalog & Stock Valuation
+  // Regional Catalog & Stock Valuation (prioritizing direct territorial query)
   const regionalProducts = useMemo(() => {
+    if (queriedProducts.length > 0) return queriedProducts;
     return allProducts.filter(p => !p.siteId || regionalSiteIds.has(p.siteId));
-  }, [allProducts, regionalSiteIds]);
+  }, [queriedProducts, allProducts, regionalSiteIds]);
 
   const inventoryMetrics = useMemo(() => {
     const totalValue = regionalProducts.reduce((sum, p) => sum + ((p.price || 0) * (p.stock || 0)), 0);

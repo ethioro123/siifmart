@@ -97,13 +97,16 @@ function mapDbEmployeeToEmployee(e: RawDbEmployee): Employee {
 }
 
 export const employeesService = {
-    async getAll(siteId?: string, onlyManagers: boolean = false) {
+    async getAll(siteId?: string | string[], onlyManagers: boolean = false) {
         let query = supabase
             .from('employees')
             .select('*')
             .order('created_at', { ascending: false });
 
-        if (siteId && siteId !== 'All') {
+        if (Array.isArray(siteId)) {
+            if (siteId.length === 0) return [];
+            query = query.in('site_id', siteId);
+        } else if (siteId && siteId !== 'All') {
             query = query.eq('site_id', siteId);
         }
 

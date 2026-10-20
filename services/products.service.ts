@@ -40,7 +40,10 @@ export const productsService = {
             query = query.order('created_at', { ascending: false });
         }
 
-        if (siteId && siteId !== 'All') {
+        if (filters?.siteIds && Array.isArray(filters.siteIds)) {
+            if (filters.siteIds.length === 0) return { data: [], count: 0 };
+            query = query.in('site_id', filters.siteIds);
+        } else if (siteId && siteId !== 'All') {
             query = query.eq('site_id', siteId);
         }
 
