@@ -15,6 +15,7 @@ import { logger } from '../../utils/logger';
 import { calculateWarehousePoints } from '../../utils/warehouseGamification';
 import { checkAndSyncPOCompletion } from './receive/utils/poCompletionHelper';
 import { toTransferStockQuantity } from './transfer/transferQuantity';
+import { onlineStoreService } from '../../services/online-store.service';
 
 // Helper for translations
 const getTranslation = (path: string): string => {
@@ -85,6 +86,10 @@ export const useJobCompletion = (deps: UseJobCompletionDeps) => {
                 logger.error('useJobCompletion', `❌ Job ${jobId} not found in local state`, new Error(String(`❌ Job ${jobId} not found in local state`)));
                 return;
             }
+
+            const isOnlinePick = job.type === 'PICK' && Boolean(job.orderRef)
+                ? await onlineStoreService.isOnlinePickJob(job.id, job.siteId, job.countryCode || job.country_code || 'ET')
+                : false;
 
             if (job.type === 'DISPATCH' || job.type === 'DRIVER') {
                 throw new Error('Release shipments from Outbound dispatch and record arrival from Driver deliveries.');
@@ -298,7 +303,7 @@ export const useJobCompletion = (deps: UseJobCompletionDeps) => {
                 }
 
                 // --- INVENTORY DEDUCTION (Internal & Sales) ---
-                if (itemsToValidate && itemsToValidate.length > 0) {
+                if (!isOnlinePick && itemsToValidate && itemsToValidate.length > 0) {
                     const sourceSiteId = job.sourceSiteId || (job as any).source_site_id || job.siteId;
                     for (const item of itemsToValidate) {
                         if ((item.pickedQty || 0) > 0) {
@@ -415,6 +420,7 @@ export const useJobCompletion = (deps: UseJobCompletionDeps) => {
             }
 
             queryClient.invalidateQueries({ queryKey: ['jobs'] });
+            if (isOnlinePick) queryClient.invalidateQueries({ queryKey: ['products'] });
             console.timeEnd(`completeJob-${jobId}`);
             return pointsResult;
         } catch (error) {

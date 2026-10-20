@@ -15,6 +15,8 @@ import { printHtmlContent } from '../utils/printHelper';
 import { ShipmentActions } from './fulfillment/drivers/ShipmentActions';
 import { PartialDeliveryModal } from './fulfillment/drivers/PartialDeliveryModal';
 import { useData } from '../contexts/DataContext';
+import { useQuery } from '@tanstack/react-query';
+import { onlineStoreService } from '../services/online-store.service';
 
 interface OutboundJobModalProps {
     isOpen: boolean;
@@ -51,6 +53,13 @@ export const OutboundJobModal: React.FC<OutboundJobModalProps> = ({
 
     const destSite = useMemo(() => sites.find(s => s.id === job.destSiteId), [sites, job.destSiteId]);
     const isDriverView = user?.role === 'driver' || activeTab.includes('driver');
+    const onlineOrderRef = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(job.orderRef || '') ? job.orderRef : null;
+    const { data: onlineDelivery } = useQuery({
+        queryKey: ['online-delivery', user?.id, job.siteId, job.countryCode, onlineOrderRef],
+        queryFn: () => onlineStoreService.getDeliveryDetails(onlineOrderRef!, job.siteId, job.countryCode || job.country_code || 'ET'),
+        enabled: isOpen && job.type === 'DISPATCH' && Boolean(onlineOrderRef && user?.id),
+        gcTime: 0,
+    });
 
     if (!isOpen) return null;
     if (arrivalOpen) return <PartialDeliveryModal t={t} isOpen job={job} user={user} products={products} sites={sites}
@@ -134,8 +143,9 @@ export const OutboundJobModal: React.FC<OutboundJobModalProps> = ({
 
     // Helper: Navigate to Destination
     const handleNavigate = () => {
-        if (destSite?.address) {
-            window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(destSite.address)}`, '_blank');
+        const address = onlineDelivery?.delivery_address || destSite?.address;
+        if (address) {
+            window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`, '_blank');
         } else {
             alert('No address found for destination');
         }
@@ -234,7 +244,7 @@ export const OutboundJobModal: React.FC<OutboundJobModalProps> = ({
                                         <MapPin size={14} className="text-[var(--theme-primary)]" />
                                         Destination
                                     </h3>
-                                    {destSite?.address && (
+                                    {(onlineDelivery?.delivery_address || destSite?.address) && (
                                         <button onClick={handleNavigate} className="px-2.5 py-1 bg-[var(--theme-primary)]/10 text-[var(--theme-primary)] hover:bg-[var(--theme-primary)]/20 text-xs font-semibold rounded-lg border border-[var(--theme-primary)]/20 transition-all flex items-center gap-1 touch-manipulation min-h-[32px]">
                                             Open Maps <ExternalLink size={11} />
                                         </button>
@@ -243,28 +253,28 @@ export const OutboundJobModal: React.FC<OutboundJobModalProps> = ({
 
                                 <div className="space-y-3">
                                     <div>
-                                        <span className="text-[11px] text-[var(--theme-text-muted)] font-medium">Site Name</span>
-                                        <p className="text-base font-semibold text-[var(--theme-text-primary)]">{destSite?.name || '-'}</p>
+                                        <span className="text-[11px] text-[var(--theme-text-muted)] font-medium">{onlineDelivery ? 'Recipient' : 'Site Name'}</span>
+                                        <p className="text-base font-semibold text-[var(--theme-text-primary)]">{onlineDelivery?.customer_name || destSite?.name || '-'}</p>
                                     </div>
 
                                     <div>
                                         <span className="text-[11px] text-[var(--theme-text-muted)] font-medium">Address</span>
-                                        <p className="text-xs text-[var(--theme-text-secondary)] leading-relaxed">{destSite?.address || '-'}</p>
+                                        <p className="text-xs text-[var(--theme-text-secondary)] leading-relaxed">{onlineDelivery?.delivery_address || destSite?.address || '-'}</p>
                                     </div>
 
                                     <div className="grid grid-cols-2 gap-2 pt-2 border-t border-[var(--theme-border)]">
                                         <div>
-                                            <span className="text-[11px] text-[var(--theme-text-muted)] font-medium">Site Admin</span>
+                                                <span className="text-[11px] text-[var(--theme-text-muted)] font-medium">{onlineDelivery ? 'Customer' : 'Site Admin'}</span>
                                             <div className="flex items-center gap-1 text-xs font-semibold text-[var(--theme-text-primary)] mt-0.5">
                                                 <UserIcon size={12} className="text-[var(--theme-text-muted)]" />
-                                                <span className="truncate">{destSite?.manager || '-'}</span>
+                                                <span className="truncate">{onlineDelivery?.customer_name || destSite?.manager || '-'}</span>
                                             </div>
                                         </div>
                                         <div>
                                             <span className="text-[11px] text-[var(--theme-text-muted)] font-medium">Contact</span>
                                             <div className="flex items-center gap-1 text-xs font-semibold text-[var(--theme-primary)] mt-0.5">
                                                 <Phone size={12} className="text-[var(--theme-text-muted)]" />
-                                                <span className="truncate">{destSite?.contact || '-'}</span>
+                                                <span className="truncate">{onlineDelivery?.customer_phone || destSite?.contact || '-'}</span>
                                             </div>
                                         </div>
                                     </div>

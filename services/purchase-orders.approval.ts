@@ -23,12 +23,12 @@ export const purchaseOrdersApprovalService = {
       throw new Error(`Cannot approve PO with status "${currentPO.status}". Must be Draft or Pending.`);
     }
 
-    if (!['super_admin', 'CEO', 'ceo', 'procurement_manager', 'regional_procurement_lead'].includes(approverRole)) {
+    if (!['super_admin', 'CEO', 'ceo', 'country_managing_director', 'admin', 'head_of_procurement', 'procurement_head', 'procurement_manager', 'regional_procurement_lead'].includes(approverRole)) {
       throw new Error('Purchase order approval requires a procurement lead.');
     }
 
     // 4-Eyes rule: Creator cannot approve their own PO
-    if (approverRole !== 'super_admin') {
+    if (!['super_admin', 'CEO', 'ceo'].includes(approverRole)) {
       const creatorName = currentPO.createdBy?.toLowerCase().trim();
       const requesterName = currentPO.requestedBy?.toLowerCase().trim();
       const approverLower = approverName.toLowerCase().trim();
@@ -53,7 +53,12 @@ export const purchaseOrdersApprovalService = {
       if (currentPO.totalAmount > autonomousLimit) {
         isEscalatedToHq = true;
         const isRegionalRole = ['regional_manager', 'regional_procurement_lead', 'regional_finance_officer'].includes(approverRole);
-        const isHqRole = ['super_admin', 'CEO', 'ceo', 'admin', 'procurement_manager', 'finance_manager', 'operations_manager'].includes(approverRole);
+        const isHqRole = [
+          'super_admin', 'CEO', 'ceo', 'country_managing_director', 'admin',
+          'head_of_procurement', 'procurement_head', 'procurement_manager',
+          'head_of_finance', 'finance_head', 'finance_manager',
+          'head_of_operations', 'operations_head', 'operations_manager'
+        ].includes(approverRole);
 
         if (isRegionalRole && !isHqRole) {
           throw new Error(

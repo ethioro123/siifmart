@@ -34,7 +34,6 @@ export function Storefront() {
   const [checkoutOpen, setCheckoutOpen] = useState(false);
   const [customerName, setCustomerName] = useState('');
   const [customerPhone, setCustomerPhone] = useState('');
-  const [fulfillment, setFulfillment] = useState<'delivery' | 'pickup'>('delivery');
   const [deliveryAddress, setDeliveryAddress] = useState('');
 
   useEffect(() => {
@@ -98,8 +97,8 @@ export function Storefront() {
         siteId: selectedSite.id,
         customerName,
         customerPhone,
-        fulfillmentMethod: fulfillment,
-        deliveryAddress: fulfillment === 'delivery' ? deliveryAddress : null,
+        fulfillmentMethod: 'delivery',
+        deliveryAddress,
         items: cartLines.map((line) => ({ productId: line.product.id, quantity: line.quantity })),
       },
     });
@@ -131,13 +130,13 @@ export function Storefront() {
 
       <main>
         <section className="store-hero">
-          <div><p className="eyebrow">LOCAL SHOPPING, MADE SIMPLE</p><h1>Everyday essentials,<br /><em>closer to home.</em></h1><p>Browse products from your local SIIFMART store and send an order request for delivery or pickup.</p></div>
+          <div><p className="eyebrow">LOCAL SHOPPING, MADE SIMPLE</p><h1>Everyday essentials,<br /><em>closer to home.</em></h1><p>Browse warehouse stock in your area and request delivery from the SIIFMART fulfillment team.</p></div>
           <div className="hero-stamp"><span>ET</span><span className="stamp-line" /><span>KE</span><small>Two local markets</small></div>
         </section>
 
         <section className="catalog-section" aria-labelledby="catalog-title">
           <div className="catalog-heading"><div><p className="eyebrow">THE CATALOG</p><h2 id="catalog-title">Shop your area</h2></div>
-            <label className="site-select">Your store<select value={siteId} onChange={(event) => { setSiteId(event.target.value); setCategory('All'); }} disabled={!sites.length}>
+            <label className="site-select">Fulfillment area<select value={siteId} onChange={(event) => { setSiteId(event.target.value); setCategory('All'); }} disabled={!sites.length}>
               {sites.map((site) => <option value={site.id} key={site.id}>{site.name}</option>)}
             </select></label>
           </div>
@@ -151,11 +150,11 @@ export function Storefront() {
                 <div className="product-footer"><strong>{formatMoney(product.price, product.currency, country)}</strong><button onClick={() => addToCart(product)} aria-label={`Add ${product.name} to basket`}>Add <span aria-hidden="true">+</span></button></div>
               </div>
             </article>)}</div>
-          ) : <div className="catalog-state"><span className="empty-mark">S</span><h3>{sites.length ? 'We are getting this store ready.' : 'Online shopping is not available here yet.'}</h3><p>{sites.length ? 'Products will appear here when the local team publishes the catalog.' : 'Choose another market or check back soon.'}</p></div>}
+          ) : <div className="catalog-state"><span className="empty-mark">S</span><h3>{sites.length ? 'We are getting this warehouse catalog ready.' : 'Online shopping is not available here yet.'}</h3><p>{sites.length ? 'Products will appear here when the fulfillment team publishes the catalog.' : 'Choose another market or check back soon.'}</p></div>}
         </section>
       </main>
 
-      <footer className="store-footer"><span>SIIFMART · Local by design</span><span>Online payment is not available yet. Orders are confirmed by the store.</span></footer>
+      <footer className="store-footer"><span>SIIFMART · Local by design</span><span>Online payment is not available yet. Orders are confirmed by the warehouse team.</span></footer>
 
       {checkoutOpen && <div className="checkout-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) setCheckoutOpen(false); }}>
         <section className="checkout-panel" role="dialog" aria-modal="true" aria-labelledby="checkout-title">
@@ -166,8 +165,8 @@ export function Storefront() {
           <form className="checkout-form" onSubmit={submitOrder}>
             <label>Your name<input required minLength={2} maxLength={120} value={customerName} onChange={(event) => setCustomerName(event.target.value)} autoComplete="name" /></label>
             <label>Phone number<input required minLength={7} maxLength={32} value={customerPhone} onChange={(event) => setCustomerPhone(event.target.value)} autoComplete="tel" inputMode="tel" /></label>
-            <fieldset><legend>How would you like your order?</legend><label className="radio-row"><input type="radio" checked={fulfillment === 'delivery'} onChange={() => setFulfillment('delivery')} /> Delivery · cash on delivery</label><label className="radio-row"><input type="radio" checked={fulfillment === 'pickup'} onChange={() => setFulfillment('pickup')} /> Pickup · pay at store</label></fieldset>
-            {fulfillment === 'delivery' && <label>Delivery address<textarea required minLength={5} maxLength={500} rows={2} value={deliveryAddress} onChange={(event) => setDeliveryAddress(event.target.value)} autoComplete="street-address" /></label>}
+            <p>Delivery · cash on delivery after warehouse confirmation</p>
+            <label>Delivery address<textarea required minLength={5} maxLength={500} rows={2} value={deliveryAddress} onChange={(event) => setDeliveryAddress(event.target.value)} autoComplete="street-address" /></label>
             {error && <div className="notice error" role="alert">{error}</div>}
             <button className="submit-order" type="submit" disabled={submitting || !cartLines.length}>{submitting ? 'Sending request…' : 'Send order request'}</button>
           </form>

@@ -30,7 +30,7 @@ Deno.serve(async (req) => {
 
     const { data: sites, error: sitesError } = await db.from('sites')
       .select('id,name,country,currency,region_code')
-      .eq('status', 'Active').eq('type', 'Dark Store').eq('country', country)
+      .eq('status', 'Active').eq('type', 'Warehouse').eq('country', country)
       .order('name').limit(20)
     if (sitesError) return json({ error: 'Store locations could not be loaded.' }, 500)
     const siteIds = (sites || []).map((site) => site.id)
@@ -79,7 +79,7 @@ Deno.serve(async (req) => {
     if (!uuid.test(siteId) || !['ET', 'KE'].includes(countryCode) ||
         customerName.length < 2 || customerName.length > 120 ||
         customerPhone.length < 7 || customerPhone.length > 32 ||
-        !['delivery', 'pickup'].includes(String(fulfillmentMethod)) ||
+        fulfillmentMethod !== 'delivery' ||
         (fulfillmentMethod === 'delivery' && (!deliveryAddress || deliveryAddress.length < 5 || deliveryAddress.length > 500))) {
       return json({ error: 'Check your contact, location, and fulfillment details.' }, 400)
     }

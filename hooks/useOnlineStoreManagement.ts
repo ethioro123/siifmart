@@ -2,12 +2,12 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Product } from '../types';
 import { onlineStoreService } from '../services/online-store.service';
 
-export function useOnlineStoreManagement(siteId: string | undefined) {
+export function useOnlineStoreManagement(siteId: string | undefined, includeOrders: boolean) {
   const queryClient = useQueryClient();
-  const queryKey = ['online-store-management', siteId];
+  const queryKey = ['online-store-management', siteId, includeOrders];
   const data = useQuery({
     queryKey,
-    queryFn: () => onlineStoreService.getManagementData(siteId!),
+    queryFn: () => onlineStoreService.getManagementData(siteId!, includeOrders),
     enabled: Boolean(siteId),
     staleTime: 30_000,
   });
@@ -20,7 +20,10 @@ export function useOnlineStoreManagement(siteId: string | undefined) {
   const orderMutation = useMutation({
     mutationFn: ({ orderId, status }: { orderId: string; status: 'accepted' | 'rejected' }) =>
       onlineStoreService.updateOrderStatus(orderId, status),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey });
+      queryClient.invalidateQueries({ queryKey: ['jobs'] });
+    },
   });
 
   return { ...data, publishMutation, orderMutation };

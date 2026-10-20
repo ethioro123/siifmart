@@ -362,7 +362,7 @@ export default function Procurement() {
                             await verifySupplier.mutateAsync({ id: supplier.id, employeeId: user.id });
                             await fetchData();
                         }}
-                        canVerify={Boolean(user?.role && ['super_admin', 'ceo', 'CEO', 'admin',
+                        canVerify={Boolean(user?.role && ['super_admin', 'ceo', 'CEO', 'country_managing_director', 'admin',
                             'head_of_procurement', 'procurement_head', 'procurement_manager', 'regional_procurement_lead'].includes(user.role))}
                         viewerEmployeeId={user?.id}
                         onOpenCreatePO={handleCreatePOOpen}
