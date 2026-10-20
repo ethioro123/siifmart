@@ -144,9 +144,9 @@ export default defineConfig(({ mode }) => {
           registerType: 'autoUpdate',
           includeAssets: ['favicon.svg', 'robots.txt'],
           manifest: {
-            name: 'SiifMart Retail & Warehouse',
-            short_name: 'SiifMart',
-            description: 'SiifMart Retail & Warehouse Management System',
+            name: 'SIIFMART Retail & Warehouse',
+            short_name: 'SIIFMART',
+            description: 'SIIFMART Retail & Warehouse Management System',
             theme_color: '#000000',
             background_color: '#000000',
             display: 'standalone',
@@ -176,6 +176,7 @@ export default defineConfig(({ mode }) => {
             clientsClaim: true,
             skipWaiting: true,
             navigateFallback: '/index.html',
+            navigateFallbackDenylist: [/^\/shop(?:\/|$)/],
           },
           devOptions: {
             enabled: false
@@ -188,6 +189,12 @@ export default defineConfig(({ mode }) => {
     // define: { ... } — removed for security
     build: {
       sourcemap: false, // Never expose source maps in production
+      rollupOptions: {
+        input: {
+          app: path.resolve(__dirname, 'index.html'),
+          shop: path.resolve(__dirname, 'shop/index.html'),
+        },
+      },
     },
     optimizeDeps: {
       exclude: ['lucide-react'],

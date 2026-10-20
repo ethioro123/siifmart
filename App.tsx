@@ -25,6 +25,7 @@ const SalesHistory = lazy(() => import('./pages/SalesHistory'));
 const Employees = lazy(() => import('./pages/Employees'));
 const Fulfillment = lazy(() => import('./pages/Fulfillment'));
 const Merchandising = lazy(() => import('./pages/Merchandising'));
+const OnlineStoreManagement = lazy(() => import('./pages/OnlineStoreManagement'));
 const Financials = lazy(() => import('./pages/Financials'));
 const LocationSelect = lazy(() => import('./pages/LocationSelect'));
 const Profile = lazy(() => import('./pages/Profile'));
@@ -33,15 +34,12 @@ const MigrationPanel = lazy(() => import('./pages/MigrationPanel'));
 // Fallback loader for code splitting
 function ModuleLoader() {
   return (
-    <div className="flex flex-col items-center justify-center min-h-[50vh] p-8 text-center animate-pulse-slow">
-      <div className="relative mb-4">
-        <div className="hidden lg:block absolute inset-0 bg-cyber-primary/20 blur-xl rounded-full animate-pulse" />
-        <div className="w-12 h-12 bg-black/30 lg:backdrop-blur-xl border border-cyber-primary/30 rounded-xl flex items-center justify-center relative z-10 shadow-[0_0_20px_rgba(0,255,157,0.1)]">
-          <div className="w-6 h-6 border-t-2 border-r-2 border-cyber-primary rounded-full animate-spin" />
-        </div>
+    <div className="flex flex-col items-center justify-center min-h-[50vh] p-8 text-center select-none">
+      <div className="relative mb-3">
+        <div className="w-7 h-7 rounded-full border-2 border-stone-200 dark:border-white/10 border-t-black dark:border-t-white animate-spin" />
       </div>
-      <p className="text-xs text-cyber-primary/70 font-mono uppercase tracking-[0.2em]">
-        Hydrating Module...
+      <p className="text-[11px] text-[var(--theme-text-muted)] font-mono uppercase tracking-[0.2em]">
+        Loading Module...
       </p>
     </div>
   );
@@ -131,55 +129,65 @@ export default function App() {
       : 0;
 
     return (
-      <div className="min-h-screen bg-black flex flex-col items-center justify-center p-4 relative overflow-hidden">
-        {/* Background Effects */}
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-gray-800 via-gray-900 to-black z-0" />
-        <div className="absolute inset-0 bg-grid-white/[0.02] bg-[length:30px_30px] z-0" />
+      <div className="min-h-screen bg-black flex flex-col items-center justify-center p-6 relative overflow-hidden select-none">
+        {/* Futuristic Ambient Monochrome Lighting & Spatial Backdrop */}
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_60%_at_50%_42%,rgba(255,255,255,0.06)_0%,rgba(16,16,16,0.75)_50%,#000000_100%)] pointer-events-none z-0" />
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.015)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.015)_1px,transparent_1px)] bg-[size:40px_40px] pointer-events-none z-0" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[340px] h-[340px] bg-white/[0.03] rounded-full blur-[100px] pointer-events-none z-0" />
 
-        {/* Brand mark (monochrome, forced dark variant on the black loading screen) */}
-        <div className="dark relative z-10 mb-8 animate-pulse-slow">
-          <Logo variant="stacked" size={44} />
+        {/* Brand Display — Bold, Futuristic Apple Monochrome Presentation */}
+        <div className="dark relative z-10 flex flex-col items-center text-center">
+          {/* Subtle Floating Ambient Halo */}
+          <div className="relative mb-5 flex items-center justify-center">
+            <div className="absolute -inset-4 rounded-[32px] bg-white/[0.03] border border-white/[0.08] backdrop-blur-2xl shadow-[0_24px_64px_rgba(0,0,0,0.8)] pointer-events-none" />
+            <div className="relative p-5 sm:p-6 flex flex-col items-center">
+              <Logo variant="stacked" size={54} />
+            </div>
+          </div>
+
+          {/* Futuristic Editorial Brand Subtitle */}
+          <p className="text-[11px] font-semibold text-white/50 tracking-[0.32em] uppercase mt-1 select-none">
+            Enterprise Operating System
+          </p>
         </div>
 
-        {/* Status Text */}
-        <h2 className="text-2xl font-black text-white tracking-[0.2em] uppercase italic mb-6 animate-pulse">
-          {loading ? 'Authenticating Pulse' : 'Hydrating Neural Link'}
-        </h2>
+        {/* Futuristic Precision Progress Bar — Monochrome Apple Laser Line */}
+        <div className="relative z-10 w-full max-w-[280px] sm:max-w-[320px] mt-10">
+          <div className="w-full bg-white/10 rounded-full h-[2.5px] overflow-hidden backdrop-blur-md">
+            <div
+              style={{
+                width: `${loading ? (progressPercent > 0 ? progressPercent : 35) : (progressPercent || 100)}%`,
+              }}
+              className="h-full bg-gradient-to-r from-white/30 via-white/80 to-white transition-all duration-300 ease-out shadow-[0_0_10px_rgba(255,255,255,0.45)]"
+            />
+          </div>
 
-        {/* Progress Bar Container */}
-        <div className="w-full max-w-md bg-white/5 border border-white/10 rounded-full h-1.5 mb-2 overflow-hidden lg:backdrop-blur-sm relative">
-          {/* Animated Progress Fill */}
-          <div
-            ref={(el) => el?.style.setProperty('--loading-progress', `${loading ? 100 : progressPercent}%`)}
-            className="absolute top-0 left-0 h-full w-[var(--loading-progress)] bg-gradient-to-r from-cyber-primary to-cyan-400 transition-all duration-300 ease-out shadow-[0_0_10px_rgba(0,255,157,0.5)]"
-          />
-        </div>
-
-        {/* Detail Status */}
-        <div className="flex justify-between w-full max-w-md px-1">
-          <p className="text-[10px] text-cyber-primary/60 font-mono uppercase tracking-widest">
-            {loadingProgress?.current || 'Initializing System...'}
-          </p>
-          <p className="text-[10px] text-white/40 font-mono">
-            {loading ? '...' : `${progressPercent}%`}
-          </p>
+          {/* Clean Telemetry Readout (No pulsating text, pure monochrome) */}
+          <div className="flex items-center justify-between mt-3 px-0.5 text-[10px] font-mono tracking-wider">
+            <span className="text-white/40 uppercase">
+              {loading ? 'Securing Gateway' : (loadingProgress?.current || 'Initializing Workspace')}
+            </span>
+            <span className="text-white/80 font-semibold tabular-nums">
+              {loading ? '' : `${progressPercent}%`}
+            </span>
+          </div>
         </div>
 
         {/* Error Display with Retry */}
         {loadError && (
-          <div className="mt-8 p-4 bg-red-500/10 border border-red-500/20 rounded-xl max-w-sm w-full backdrop-blur-md animate-in slide-in-from-bottom-4 fade-in duration-500">
+          <div className="relative z-10 mt-8 p-4 bg-red-950/40 border border-red-500/20 rounded-2xl max-w-sm w-full backdrop-blur-xl">
             <div className="flex items-start gap-3">
-              <div className="p-2 bg-red-500/20 rounded-lg">
+              <div className="p-2 bg-red-500/10 text-red-400 rounded-xl border border-red-500/20">
                 <svg className="w-4 h-4 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                 </svg>
               </div>
               <div className="flex-1">
-                <p className="text-[10px] text-red-400 font-mono uppercase tracking-tighter mb-1">Connection Disrupted</p>
+                <p className="text-[10px] text-red-400 font-mono uppercase tracking-wider mb-1">Connection Disrupted</p>
                 <p className="text-xs text-gray-300 leading-relaxed">{loadError}</p>
                 <button
                   onClick={() => window.location.reload()}
-                  className="mt-3 px-4 py-1.5 bg-red-500/20 hover:bg-red-500/30 text-red-400 text-[10px] font-bold uppercase tracking-wider rounded-lg transition-colors border border-red-500/20"
+                  className="mt-3 px-4 py-1.5 bg-red-500/20 hover:bg-red-500/30 text-red-300 text-[10px] font-bold uppercase tracking-wider rounded-xl transition-all border border-red-500/30 active:scale-95 cursor-pointer"
                 >
                   Retry Connection
                 </button>
@@ -304,6 +312,15 @@ export default function App() {
               <ProtectedRoute module="pricing">
                 <ModuleErrorBoundary moduleName="Merchandising">
                   <Merchandising />
+                </ModuleErrorBoundary>
+              </ProtectedRoute>
+            } />
+
+            {/* Online Store Catalog & Order Requests */}
+            <Route path="/online-store" element={
+              <ProtectedRoute module="pricing">
+                <ModuleErrorBoundary moduleName="Online Store">
+                  <OnlineStoreManagement />
                 </ModuleErrorBoundary>
               </ProtectedRoute>
             } />

@@ -318,7 +318,6 @@ export const canEmployRole = (
         'regional_procurement_lead',
         'regional_merchandising_lead',
         'regional_finance_officer',
-        'regional_merchandising_lead',
         'regional_hr_officer',
         'regional_logistics_lead',
         'regional_security_supervisor'

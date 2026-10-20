@@ -218,7 +218,7 @@ export default function LoginPage() {
               {loading ? (
                 <>
                   <Loader className="animate-spin" size={18} />
-                  <span>{mode === 'forgot' ? 'Sending...' : 'Authenticating...'}</span>
+                  <span>{mode === 'forgot' ? 'Sending...' : 'Signing In...'}</span>
                 </>
               ) : (
                 <span>{mode === 'login' ? 'Sign In' : 'Send Reset Link'}</span>

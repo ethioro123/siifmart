@@ -128,6 +128,7 @@ export default function Sidebar() {
 
       // MERCHANDISING
       { to: "/pricing", icon: Tags, label: "Merchandising", section: "pricing", roles: ['super_admin', 'country_managing_director', 'admin', 'head_of_merchandising', 'merchandising_head', 'merchandising_manager', 'merchandising_specialist', 'regional_merchandising_lead', 'head_of_finance', 'finance_head', 'finance_manager', 'head_of_operations', 'operations_head', 'operations_manager', 'merchandiser', 'regional_manager', 'regional_procurement_lead', 'store_operations_auditor'] },
+      { to: "/online-store", icon: Globe, label: "Online Store", section: "pricing", roles: ['head_of_merchandising', 'merchandising_head', 'merchandising_manager', 'merchandising_specialist', 'regional_merchandising_lead'] },
 
       // FINANCE
       { to: "/finance", icon: DollarSign, label: "Financials", section: "finance", roles: ['super_admin', 'country_managing_director', 'admin', 'head_of_finance', 'finance_head', 'finance_manager', 'head_of_audit', 'audit_head', 'auditor', 'head_of_operations', 'operations_head', 'operations_manager', 'regional_manager', 'regional_finance_officer', 'accountant', 'payroll_specialist', 'treasury_officer', 'tax_compliance_officer', 'credit_control_officer'] },

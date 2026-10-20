@@ -92,7 +92,7 @@ export const L1_L3_REPORTING_REGISTRY: Record<string, RoleReportingMeta> = {
         levelTag: 'L2 Merchandising Director',
         reportsToRole: 'super_admin',
         reportsToLabel: 'CEO',
-        managesRoles: ['merchandiser'],
+        managesRoles: ['regional_merchandising_lead', 'merchandising_specialist', 'merchandiser'],
         isManagerial: true
     },
     head_of_it: {
@@ -138,7 +138,7 @@ export const L1_L3_REPORTING_REGISTRY: Record<string, RoleReportingMeta> = {
         reportsToLabel: 'Operations Manager (Corporate HQ)',
         dottedLineRole: 'super_admin',
         dottedLineLabel: 'CEO (Executive Oversight)',
-        managesRoles: ['store_manager', 'warehouse_manager', 'regional_procurement_lead', 'regional_finance_officer', 'regional_hr_officer', 'regional_logistics_lead', 'regional_security_supervisor'],
+        managesRoles: ['store_manager', 'warehouse_manager', 'regional_procurement_lead', 'regional_finance_officer', 'regional_merchandising_lead', 'regional_hr_officer', 'regional_logistics_lead', 'regional_security_supervisor'],
         isManagerial: true
     },
     supply_chain_manager: {
@@ -192,7 +192,19 @@ export const L1_L3_REPORTING_REGISTRY: Record<string, RoleReportingMeta> = {
         reportsToLabel: 'CEO',
         dottedLineRole: 'finance_manager',
         dottedLineLabel: 'Finance Manager (Margin Protection & Pricing Rules)',
-        managesRoles: ['merchandiser'],
+        managesRoles: ['merchandising_specialist', 'merchandiser'],
+        isManagerial: true
+    },
+    regional_merchandising_lead: {
+        role: 'regional_merchandising_lead',
+        level: 2,
+        levelCategory: 'director',
+        levelTag: 'L2 Regional Merchandising',
+        reportsToRole: 'regional_manager',
+        reportsToLabel: 'Regional Manager (Territory Administration)',
+        dottedLineRole: 'head_of_merchandising',
+        dottedLineLabel: 'Head of Merchandising (Country Pricing & Campaigns)',
+        managesRoles: ['merchandising_specialist'],
         isManagerial: true
     },
     regional_procurement_lead: {

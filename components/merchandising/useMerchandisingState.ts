@@ -9,6 +9,8 @@ import { logger } from '../../utils/logger';
 import { getCountryProfile, Country } from '../../utils/localization';
 import { usePricingRules } from '../../hooks/usePricingRules';
 import { useSubmitPriceChanges, type PriceChangeInput } from '../../hooks/useSubmitPriceChanges';
+import { useSubmitMerchandisingChanges } from '../../hooks/useSubmitMerchandisingChanges';
+import { useMerchandisingCampaigns } from '../../hooks/useMerchandisingCampaigns';
 import { buildCatalogSalesMetricsIndex } from '../../utils/merchandisingAnalytics';
 
 const getMargin = (price: number, cost: number) => {
@@ -46,6 +48,8 @@ export const useMerchandisingState = (): MerchandisingContextType => {
    const [activeTab, setActiveTab] = useState<MerchandisingTab>('pricing');
    const { rules: pricingRules, createRule, toggleRule, deleteRule } = usePricingRules(activeCountry);
    const { submit: submitPriceChanges } = useSubmitPriceChanges(activeCountry);
+   const { submitPlanogram } = useSubmitMerchandisingChanges(activeCountry);
+   const { create: createCampaignProposal } = useMerchandisingCampaigns(activeCountry);
    const salesMetricsIndex = useMemo(() => buildCatalogSalesMetricsIndex(products || [], sales || []), [products, sales]);
 
    // Filtering and Sorting custom hook
@@ -121,28 +125,20 @@ export const useMerchandisingState = (): MerchandisingContextType => {
    // --- ACTIONS ---
 
    const handleCreatePromo = async () => {
-      if (!newPromo.code || !newPromo.value || !newPromo.type) return;
+      if (!newPromo.code || !newPromo.value || !newPromo.type || !newPromo.expiryDate) {
+         addNotification('alert', 'Enter a code, discount, and future expiry date.');
+         return;
+      }
 
       setIsSubmitting(true);
       try {
-         addPromotion({
-            id: `promo-${Date.now()}`,
-            code: newPromo.code.toUpperCase(),
-            type: newPromo.type,
-            value: newPromo.value,
-            expiryDate: newPromo.expiryDate,
-            usageCount: 0,
-            status: 'Active',
-            country: activeCountry,
-            country_code: activeCountry
-         } as any);
-
-         addNotification('success', `Campaign '${newPromo.code}' launched successfully.`);
+         await createCampaignProposal.mutateAsync({ code: newPromo.code, type: newPromo.type, value: newPromo.value, expiryDate: newPromo.expiryDate });
+         addNotification('success', `Campaign '${newPromo.code}' submitted for lead approval.`);
          setIsPromoModalOpen(false);
          setNewPromo({ type: 'PERCENTAGE' });
       } catch (error) {
          logger.error('useMerchandisingState', 'Failed to create promotion:', error as Error);
-         addNotification('alert', 'Failed to launch promotion campaign');
+         addNotification('alert', 'Failed to submit campaign proposal');
       } finally {
          setIsSubmitting(false);
       }
@@ -334,7 +330,7 @@ export const useMerchandisingState = (): MerchandisingContextType => {
       addNotification('success', `Simulation complete: Analyzed ${impactedCount} affected SKUs.`);
    };
 
-   const handleShelfSwap = (productId: string) => {
+   const handleShelfSwap = async (productId: string) => {
       if (swapSource === null) {
          setSwapSource(productId);
          addNotification('info', 'Select destination shelf position to place product');
@@ -345,20 +341,20 @@ export const useMerchandisingState = (): MerchandisingContextType => {
          const p2 = products.find(p => p.id === productId);
          if (p1 && p2) {
             const s1 = p1.shelfPosition, s2 = p2.shelfPosition;
-            updateProduct({ ...p1, shelfPosition: s2 });
-            updateProduct({ ...p2, shelfPosition: s1 });
-            addNotification('success', `Swapped layout positions for '${p1.name}' and '${p2.name}'`);
-            setSwapSource(null);
+            try {
+               await submitPlanogram([{ product: p1, shelfPosition: s2 || 'Bottom Shelf' }, { product: p2, shelfPosition: s1 || 'Bottom Shelf' }]);
+               setSwapSource(null);
+            } catch (error) { addNotification('alert', (error as Error).message); }
          }
       }
    };
 
-   const handleMoveToShelf = (shelfName: string) => {
+   const handleMoveToShelf = async (shelfName: string) => {
       if (swapSource) {
          const p = products.find(prod => prod.id === swapSource);
          if (p) {
-            updateProduct({ ...p, shelfPosition: shelfName as any });
-            addNotification('success', `Placed '${p.name}' on ${shelfName}`);
+            try { await submitPlanogram([{ product: p, shelfPosition: shelfName }]); }
+            catch (error) { addNotification('alert', (error as Error).message); }
          }
          setSwapSource(null);
       }
@@ -455,6 +451,7 @@ export const useMerchandisingState = (): MerchandisingContextType => {
       handleRunSimulation,
       handleShelfSwap,
       handleMoveToShelf,
+      submitPlanogram,
 
       runPricingRule,
       toggleRuleStatus,

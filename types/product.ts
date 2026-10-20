@@ -147,6 +147,7 @@ export interface PendingInventoryChange {
   approved_by?: string; // Supabase compatibility
   approvedAt?: string;
   approved_at?: string; // Supabase compatibility
+  financeApprovedByEmployeeId?: string | null;
   rejectionReason?: string;
   rejection_reason?: string; // Supabase compatibility
   rejectedBy?: string;

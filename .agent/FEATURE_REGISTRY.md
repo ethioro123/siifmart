@@ -5,6 +5,18 @@
 
 ## Active Features
 
+### HQ and Regional Merchandising Proposals (2026-10-21)
+- Added Merchandising Specialist and Regional Merchandising Lead to the role hierarchy and administration assignment flow.
+- Scoped product, price, planogram, and campaign preparation to assigned countries or regions. Merchandising leads approve product and price proposals; Finance independently signs off below-floor prices.
+- Approval RPCs apply product proposals atomically. Campaign approvals record a plan; POS discount activation is a separate workflow.
+- Files: `components/merchandising/`, `hooks/useSubmitMerchandisingChanges.ts`, `services/merchandising-campaigns.service.ts`, `services/inventory-requests.service.ts`, `migrations/20261021_merchandising_*.sql`.
+
+### Country-Scoped Online Storefront Foundation (2026-10-21)
+- Adds a standalone public `/shop/` experience for Ethiopia and Kenya, with local dark-store selection, a safe published catalog, and guest delivery or pickup order requests. Product pricing is recalculated server-side; customer requests are kept separate from POS sales and remain unpaid while awaiting store confirmation. Staff with merchandising scope can publish approved, active products and authorized site staff can accept or decline order requests.
+- Online payment remains unavailable until a real merchant gateway is configured. Tax and delivery charges are confirmed by staff before acceptance. The live catalog starts empty and requires staff to publish real products.
+- **Files**: `shop/`, `supabase/functions/storefront-api/index.ts`, `pages/OnlineStoreManagement.tsx`, `migrations/20261021_online_storefront_foundation.sql`, `migrations/20261021_online_storefront_fk_indexes.sql`, `migrations/20261021_online_storefront_executive_catalog_scope.sql`, `vite.config.ts`, `App.tsx`, `components/Sidebar.tsx`
+- **Database**: `20261021_online_storefront_foundation.sql` and `20261021_online_storefront_fk_indexes.sql` applied to linked SIIFMART production (`zdgzpxvorwinugjufkvb`). `20261021_online_storefront_executive_catalog_scope.sql` is saved but was not applied: automatic production review rejected the broader CEO/super-admin catalog policy. Catalog publishing remains limited to the existing merchandising scope.
+
 ### Regional Administration & Corporate HQ Role Access Harmonization (2026-10-20)
 - Unblocked all regional roles (`regional_manager`, `regional_procurement_lead`, `regional_finance_officer`, `regional_hr_officer`, `regional_logistics_lead`, `regional_security_supervisor`) across route guards, sidebar navigation, global Cmd+K search, and settings tabs regardless of whether their active facility is an Administration hub, Warehouse, or Store.
 - Fixed dynamic `scopeLevel` (`'HQ' | 'REGIONAL'`) and regional boundary resolution for shared general roles (`accountant`, `buyer`, `hr`, `hr_generalist`, `talent_recruiter`, `payroll_specialist`, `training_coordinator`, `it_support`, `auditor`, `store_operations_auditor`, `treasury_officer`, `tax_compliance_officer`, `credit_control_officer`, `demand_planner`, `replenishment_planner`, `vendor_relations_manager`, `customs_import_specialist`, `inbound_qc_inspector`, `logistics_manager`, `inventory_manager`, `security_manager`, `merchandiser`, `data_analyst`, `cs_manager`). When assigned to National HQ they operate country-wide (`scopeLevel = 'HQ'`); when assigned to Regional Administration or a regional facility they automatically lock to their region (`scopeLevel = 'REGIONAL'`, `canSwitchRegion = false`).

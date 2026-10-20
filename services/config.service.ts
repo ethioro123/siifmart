@@ -133,7 +133,7 @@ export const systemConfigService = {
         const configuredReceivingLogic = overrides?.receivingLogic ?? data.receiving_logic;
 
         return {
-            storeName: overrides?.storeName ?? data.store_name ?? 'SiifMart',
+            storeName: overrides?.storeName ?? data.store_name ?? 'SIIFMART',
             slogan: overrides?.slogan ?? data.slogan ?? 'Little Grocery • Big Care',
             logoUrl: overrides?.logoUrl ?? data.logo_url,
             brandColor: overrides?.brandColor ?? data.brand_color,
@@ -205,7 +205,7 @@ export const systemConfigService = {
             scannerComPort: overrides?.scannerComPort ?? data.scanner_com_port,
             posReceiptLogo: overrides?.posReceiptLogo ?? data.pos_receipt_logo,
             posReceiptShowLogo: overrides?.posReceiptShowLogo ?? data.pos_receipt_show_logo ?? true,
-            posReceiptHeader: overrides?.posReceiptHeader ?? data.pos_receipt_header ?? 'SiifMart Retail',
+            posReceiptHeader: overrides?.posReceiptHeader ?? data.pos_receipt_header ?? 'SIIFMART Retail',
             posReceiptFooter: overrides?.posReceiptFooter ?? data.pos_receipt_footer ?? 'Thank you for shopping with us!',
             posReceiptAddress: overrides?.posReceiptAddress ?? data.pos_receipt_address,
             posReceiptPhone: overrides?.posReceiptPhone ?? data.pos_receipt_phone,
@@ -233,7 +233,7 @@ export const systemConfigService = {
             // Mobile payment gateways
             mpesaTillEnabled: overrides?.mpesaTillEnabled ?? data.mpesa_till_enabled ?? true,
             mpesaTillNumber: overrides?.mpesaTillNumber ?? data.mpesa_till_number ?? '882910',
-            mpesaTillName: overrides?.mpesaTillName ?? data.mpesa_till_name ?? 'SiifMart Main Store',
+            mpesaTillName: overrides?.mpesaTillName ?? data.mpesa_till_name ?? 'SIIFMART Main Store',
             mpesaStkEnabled: overrides?.mpesaStkEnabled ?? data.mpesa_stk_enabled ?? true,
             mpesaStkShortcode: overrides?.mpesaStkShortcode ?? data.mpesa_stk_shortcode ?? '174379',
             mpesaPasskey: overrides?.mpesaPasskey ?? data.mpesa_passkey ?? '',
@@ -242,10 +242,10 @@ export const systemConfigService = {
             mpesaEnvironment: overrides?.mpesaEnvironment ?? data.mpesa_environment ?? 'sandbox',
             mpesaPaybillEnabled: overrides?.mpesaPaybillEnabled ?? data.mpesa_paybill_enabled ?? false,
             mpesaPaybillNumber: overrides?.mpesaPaybillNumber ?? data.mpesa_paybill_number ?? '400200',
-            mpesaPaybillAccount: overrides?.mpesaPaybillAccount ?? data.mpesa_paybill_account ?? 'SiifMart',
+            mpesaPaybillAccount: overrides?.mpesaPaybillAccount ?? data.mpesa_paybill_account ?? 'SIIFMART',
             airtelMoneyEnabled: overrides?.airtelMoneyEnabled ?? data.airtel_money_enabled ?? true,
             airtelTillNumber: overrides?.airtelTillNumber ?? data.airtel_till_number ?? '554433',
-            airtelMerchantName: overrides?.airtelMerchantName ?? data.airtel_merchant_name ?? 'SiifMart Airtel',
+            airtelMerchantName: overrides?.airtelMerchantName ?? data.airtel_merchant_name ?? 'SIIFMART Airtel',
             telebirrEnabled: overrides?.telebirrEnabled ?? data.telebirr_enabled ?? true,
             telebirrMerchantId: overrides?.telebirrMerchantId ?? data.telebirr_merchant_id ?? 'TB-998811',
             cbeBirrEnabled: overrides?.cbeBirrEnabled ?? data.cbe_birr_enabled ?? true,

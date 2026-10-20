@@ -146,7 +146,7 @@ function SiifWordmark({
       {/* PART 2: MART — Elegant Modern Market Typography with Basket Smile Arc */}
       <span
         aria-hidden="true"
-        className="relative inline-flex items-baseline font-medium tracking-[0.14em] text-[0.86em]"
+        className="relative inline-flex items-baseline font-bold tracking-[0.14em] text-[0.88em]"
       >
         <span>M</span>
         <span>A</span>

@@ -47,6 +47,12 @@ export function useApproveInventoryRequestMutation(createPutawayJob?: Function) 
                 throw new Error('Regional Governance Violation: You can only approve inventory adjustments within your assigned region.');
             }
 
+            if (change.adjustmentReason?.startsWith('PRICE_CHANGE') ||
+                change.adjustmentReason?.startsWith('MERCHANDISING:')) {
+                await inventoryRequestsService.approveMerchandising(change.id);
+                return { success: true, change };
+            }
+
             // SOP-MER-037: price changes below the margin floor need Finance Manager / CEO sign-off
             if (requiresFinanceCoApproval(change) && !canApproveBelowFloor(user?.role)) {
                 throw new Error(`Price change is below the ${MARGIN_FLOOR_PCT}% margin floor: Finance Manager or CEO approval is required.`);

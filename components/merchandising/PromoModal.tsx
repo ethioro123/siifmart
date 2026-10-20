@@ -23,7 +23,7 @@ export const PromoModal: React.FC<PromoModalProps> = ({
    currencySymbol = 'ETB',
 }) => {
    return (
-      <Modal isOpen={isOpen} onClose={onClose} title="Create Promotional Campaign">
+      <Modal isOpen={isOpen} onClose={onClose} title="Propose Promotional Campaign">
          <div className="space-y-4">
             <div className="space-y-1">
                <label className="text-xs font-medium text-[var(--theme-text-secondary)] block mb-1">Promo Code</label>
@@ -80,12 +80,12 @@ export const PromoModal: React.FC<PromoModalProps> = ({
                   {isSubmitting ? (
                      <>
                         <Loader2 size={15} className="animate-spin" />
-                        <span>Launching...</span>
+                        <span>Submitting...</span>
                      </>
                   ) : (
                      <>
                         <Tags size={15} />
-                        <span>Launch Promotion Campaign</span>
+                        <span>Submit Campaign Proposal</span>
                      </>
                   )}
                </button>

@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { Tags, Target, TrendingUp, DollarSign, LineChart as LineChartIcon, TrendingDown, BrainCircuit, Layers, Percent, Tag } from 'lucide-react';
+import { Tags, Target, TrendingUp, DollarSign, LineChart as LineChartIcon, TrendingDown, BrainCircuit, Layers, Percent, Tag, ClipboardCheck } from 'lucide-react';
 
 // Split Modals
 import { PromoModal } from '../components/merchandising/PromoModal';
@@ -17,6 +17,7 @@ import { RulesTab } from '../components/merchandising/RulesTab';
 import { PlanogramTab } from '../components/merchandising/PlanogramTab';
 import { PromosTab } from '../components/merchandising/PromosTab';
 import { ShelfTagsTab } from '../components/merchandising/ShelfTagsTab';
+import { MerchandisingReviewsTab } from '../components/merchandising/MerchandisingReviewsTab';
 
 // Hooks
 import { useMerchandisingState } from '../components/merchandising/useMerchandisingState';
@@ -33,6 +34,7 @@ export default function Pricing() {
       'regional_manager',
       'regional_procurement_lead',
       'regional_finance_officer',
+      'regional_merchandising_lead',
       'store_manager'
    ].includes(user?.role || '');
 
@@ -139,6 +141,9 @@ export default function Pricing() {
 
             {/* Segmented Control Tabs */}
             <div className="inline-flex p-1 rounded-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border-subtle)] gap-1 flex-wrap w-fit">
+               <button onClick={() => setActiveTab('reviews')} className={`flex items-center gap-2 px-4 py-2 rounded-full text-xs cursor-pointer ${activeTab === 'reviews' ? 'bg-[var(--theme-bg-card)] text-[var(--theme-text-primary)] font-semibold shadow-xs border border-[var(--theme-border)]' : 'text-[var(--theme-text-secondary)] hover:text-[var(--theme-text-primary)] border border-transparent'}`}>
+                  <ClipboardCheck size={14} /> Proposals
+               </button>
                <button
                   onClick={() => setActiveTab('pricing')}
                   className={`flex items-center gap-2 px-4 py-2 rounded-full text-xs transition-all duration-200 cursor-pointer ${
@@ -226,6 +231,7 @@ export default function Pricing() {
             {activeTab === 'planogram' && <PlanogramTab />}
             {activeTab === 'promos' && <PromosTab />}
             {activeTab === 'shelf-tags' && <ShelfTagsTab />}
+            {activeTab === 'reviews' && <MerchandisingReviewsTab />}
 
             {/* New Promo Modal */}
             <PromoModal

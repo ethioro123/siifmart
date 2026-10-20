@@ -3,6 +3,35 @@ import type { PendingInventoryChange } from '../types';
 import { logger } from '../utils/logger';
 
 export const inventoryRequestsService = {
+    async approveMerchandising(requestId: string): Promise<void> {
+        const { error } = await supabase.rpc('approve_merchandising_request', { p_request_id: requestId });
+        if (error) throw error;
+    },
+
+    async signoffMerchandisingPrice(requestId: string): Promise<void> {
+        const { error } = await supabase.rpc('finance_signoff_merchandising_price', { p_request_id: requestId });
+        if (error) throw error;
+    },
+
+    async getMerchandisingPending(countryCode: string, limit = 100): Promise<PendingInventoryChange[]> {
+        const { data, error } = await supabase.from('inventory_requests')
+            .select('id,product_id,product_name,product_sku,site_id,country_code,region_code,change_type,requested_by,requested_at,status,proposed_changes,adjustment_reason,finance_approved_by_employee_id')
+            .eq('country_code', countryCode.toUpperCase())
+            .eq('status', 'pending')
+            .or('adjustment_reason.like.PRICE_CHANGE%,adjustment_reason.like.MERCHANDISING:%')
+            .order('requested_at', { ascending: false })
+            .limit(limit);
+        if (error) throw error;
+        return (data || []).map((r: any) => ({
+            id: r.id, productId: r.product_id, productName: r.product_name,
+            productSku: r.product_sku, siteId: r.site_id,
+            countryCode: r.country_code, regionCode: r.region_code,
+            changeType: r.change_type, requestedBy: r.requested_by,
+            requestedAt: r.requested_at, status: r.status,
+            proposedChanges: r.proposed_changes, adjustmentReason: r.adjustment_reason,
+            financeApprovedByEmployeeId: r.finance_approved_by_employee_id
+        }));
+    },
     async getAll(siteId?: string, countryCode?: string, limit: number = 25, regionCode?: string): Promise<PendingInventoryChange[]> {
         // RULE 10: 25-record shelf limit
         let query = supabase.from('inventory_requests').select('*').limit(limit);

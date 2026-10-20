@@ -61,6 +61,16 @@ export const L4_REPORTING_REGISTRY: Record<string, RoleReportingMeta> = {
         managesRoles: [],
         isManagerial: false
     },
+    merchandising_specialist: {
+        role: 'merchandising_specialist',
+        level: 4,
+        levelCategory: 'specialist',
+        levelTag: 'L4 Merchandising Specialist',
+        reportsToRole: 'regional_merchandising_lead',
+        reportsToLabel: 'Regional Merchandising Lead / Head of Merchandising',
+        managesRoles: [],
+        isManagerial: false
+    },
     returns_clerk: {
         role: 'returns_clerk',
         level: 4,

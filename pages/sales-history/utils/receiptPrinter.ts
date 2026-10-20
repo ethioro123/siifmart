@@ -5,11 +5,11 @@ import { printHtmlContent } from '../../../utils/printHelper';
 
 export const triggerReceiptPrint = (selectedSale: SaleRecord, settings: any, sites: Site[], currencySymbol: string = CURRENCY_SYMBOL) => {
       const {
-         storeName = 'SiifMart',
+         storeName = 'SIIFMART',
          logoUrl,
          posReceiptLogo,
          posReceiptShowLogo = true,
-         posReceiptHeader = 'SiifMart Retail',
+         posReceiptHeader = 'SIIFMART Retail',
          posReceiptFooter = 'Thank you for shopping with us!',
          posReceiptAddress,
          posReceiptPhone,
@@ -25,9 +25,9 @@ export const triggerReceiptPrint = (selectedSale: SaleRecord, settings: any, sit
       } = settings;
 
       const saleSite = sites.find(s => s.id === selectedSale.siteId);
-      const displayStoreName = storeName || saleSite?.name || 'SiifMart';
+      const displayStoreName = storeName || saleSite?.name || 'SIIFMART';
       const displayLogo = posReceiptLogo || logoUrl || '/brand/siifmart-emblem-light.png';
-      const displayHeader = posReceiptHeader || 'SiifMart Retail';
+      const displayHeader = posReceiptHeader || 'SIIFMART Retail';
       const displaySlogan = slogan && slogan !== displayHeader ? slogan : '';
       const is80mm = posReceiptWidth === '80mm';
       const paperWidth = is80mm ? '80mm' : '58mm';

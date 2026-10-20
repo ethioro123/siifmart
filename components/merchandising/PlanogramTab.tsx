@@ -11,7 +11,7 @@ export const PlanogramTab: React.FC = () => {
       products,
       handleShelfSwap,
       handleMoveToShelf,
-      updateProduct,
+      submitPlanogram,
       addNotification
    } = useMerchandising();
 
@@ -48,16 +48,10 @@ export const PlanogramTab: React.FC = () => {
       }
 
       try {
-         const updates: Promise<any>[] = [];
-         highVelocityToPromote.forEach(p => {
-            updates.push(updateProduct({ ...p, shelfPosition: 'Eye Level' }));
-         });
-         lowVelocityToDemote.forEach(p => {
-            updates.push(updateProduct({ ...p, shelfPosition: 'Bottom Shelf' }));
-         });
-
-         await Promise.all(updates);
-         addNotification('success', `Planogram optimized: Promoted ${highVelocityToPromote.length} high-velocity items to Eye Level.`);
+         await submitPlanogram([
+            ...highVelocityToPromote.map(product => ({ product, shelfPosition: 'Eye Level' })),
+            ...lowVelocityToDemote.map(product => ({ product, shelfPosition: 'Bottom Shelf' }))
+         ]);
       } catch (err: any) {
          addNotification('alert', `Failed to optimize shelf layout: ${err.message || 'Unknown error'}`);
       }

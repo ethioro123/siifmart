@@ -2,7 +2,7 @@ import React, { createContext, useContext } from 'react';
 import type { Product, Promotion, PricingRule } from '../../types';
 import type { ProductSalesMetrics } from '../../utils/merchandisingAnalytics';
 
-export type MerchandisingTab = 'pricing' | 'rules' | 'promos' | 'planogram' | 'markdown' | 'forecast' | 'shelf-tags';
+export type MerchandisingTab = 'pricing' | 'rules' | 'promos' | 'planogram' | 'markdown' | 'forecast' | 'shelf-tags' | 'reviews';
 
 export interface MerchandisingFilters {
    categories: string[];
@@ -112,6 +112,7 @@ export interface MerchandisingContextType {
    handleRunSimulation: () => void;
    handleShelfSwap: (productId: string) => void;
    handleMoveToShelf: (shelfName: string) => void;
+   submitPlanogram: (changes: Array<{ product: Product; shelfPosition: string }>) => Promise<void>;
 
    runPricingRule: (rule: PricingRule) => Promise<void>;
    toggleRuleStatus: (id: string) => void;
