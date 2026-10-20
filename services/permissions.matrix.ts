@@ -189,7 +189,7 @@ export const ACTION_PERMISSIONS: Record<UserRole, Permission[]> = {
 
     accountant: [
         'dashboard.view',
-        'finance.view', 'finance.view_reports', 'finance.create_expense', 'finance.reconcile_drawer', 'finance.manage_ap', 'finance.manage_gl', 'finance.manage_budget', 'finance.view_payroll',
+        'finance.view', 'finance.view_reports', 'finance.create_expense', 'finance.reconcile_drawer', 'finance.manage_ap', 'finance.view_payroll',
         'sales.view', 'sales.view_reports'
     ],
 
@@ -377,7 +377,7 @@ export const ACTION_PERMISSIONS: Record<UserRole, Permission[]> = {
 
     treasury_officer: [
         'dashboard.view',
-        'finance.view', 'finance.view_reports', 'finance.reconcile_drawer', 'finance.manage_budget',
+        'finance.view', 'finance.view_reports', 'finance.reconcile_drawer',
         'sales.view', 'sales.view_reports',
         'pos.view'
     ],

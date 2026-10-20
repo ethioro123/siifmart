@@ -3,6 +3,7 @@ import { ShieldCheck, AlertCircle, Loader2 } from 'lucide-react';
 import { useFinance } from './FinanceContext';
 import { budgetReconciliationService } from '../../services/budget-reconciliation.service';
 import Modal from '../Modal';
+import { isAdminSite } from '../../utils/countryAdmin';
 
 interface TenderReconciliationModalProps {
     isOpen: boolean;
@@ -15,7 +16,7 @@ export const TenderReconciliationModal: React.FC<TenderReconciliationModalProps>
     onClose,
     onSuccess
 }) => {
-    const { user, currencySymbol, effectiveCountry, activeSite, addNotification } = useFinance();
+    const { user, currencySymbol, effectiveCountry, activeSite, sites, addNotification } = useFinance();
     const defaultTender = effectiveCountry === 'KE' ? 'M_Pesa' : 'Telebirr';
 
     const [tenderType, setTenderType] = useState<'Telebirr' | 'CBE_Birr' | 'M_Pesa' | 'Card' | 'Cash'>(defaultTender as any);
@@ -26,6 +27,17 @@ export const TenderReconciliationModal: React.FC<TenderReconciliationModalProps>
     const [statementReference, setStatementReference] = useState('');
     const [notes, setNotes] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [selectedSiteId, setSelectedSiteId] = useState('');
+    const regionCode = user?.regionCode || user?.region_code || activeSite?.regionCode || activeSite?.region_code;
+    const eligibleSites = sites.filter(site =>
+        site.country === effectiveCountry &&
+        (isAdminSite(activeSite)
+            ? (!regionCode || (site.regionCode || site.region_code) === regionCode)
+            : site.id === activeSite?.id)
+    );
+    const siteId = eligibleSites.some(site => site.id === selectedSiteId)
+        ? selectedSiteId
+        : (eligibleSites.find(site => site.id === activeSite?.id)?.id || eligibleSites[0]?.id);
 
     const calculatedVariance = Number(statementAmount || 0) - Number(posReportedAmount || 0) - Number(feeDeductions || 0);
 
@@ -34,13 +46,17 @@ export const TenderReconciliationModal: React.FC<TenderReconciliationModalProps>
             addNotification('alert', 'Please enter both POS amount and Statement amount.');
             return;
         }
+        if (!siteId) {
+            addNotification('alert', 'Select an authorized site for this reconciliation.');
+            return;
+        }
 
         setIsSubmitting(true);
         try {
             await budgetReconciliationService.submitTenderReconciliation(
                 {
                     countryCode: effectiveCountry,
-                    siteId: activeSite?.id || 'SITE-0001',
+                    siteId,
                     reconciliationDate,
                     tenderType,
                     posReportedAmount: Number(posReportedAmount),
@@ -111,6 +127,19 @@ export const TenderReconciliationModal: React.FC<TenderReconciliationModalProps>
                             aria-label="Reconciliation Date"
                         />
                     </div>
+                </div>
+
+                <div>
+                    <label className={labelBase} htmlFor="tender-reconciliation-site">Site to reconcile</label>
+                    <select
+                        id="tender-reconciliation-site"
+                        value={siteId || ''}
+                        onChange={event => setSelectedSiteId(event.target.value)}
+                        className={`${inputBase} cursor-pointer`}
+                    >
+                        {eligibleSites.length === 0 && <option value="">No authorized site</option>}
+                        {eligibleSites.map(site => <option key={site.id} value={site.id}>{site.name}</option>)}
+                    </select>
                 </div>
 
                 <div className="grid grid-cols-3 gap-2.5">

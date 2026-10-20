@@ -27,6 +27,7 @@ import { useFinance } from './FinanceContext';
 import { budgetReconciliationService } from '../../services/budget-reconciliation.service';
 import TenderReconciliationModal from './TenderReconciliationModal';
 import type { TenderReconciliationRecord, DepartmentBudgetRecord } from '../../types';
+import { isAdminSite } from '../../utils/countryAdmin';
 
 export const BudgetTab: React.FC = () => {
     const {
@@ -45,8 +46,8 @@ export const BudgetTab: React.FC = () => {
 
     const loadReconciliations = async () => {
         const [tData, bData] = await Promise.all([
-            budgetReconciliationService.getTenderReconciliations(effectiveCountry, activeSite?.id),
-            budgetReconciliationService.getBudgets(effectiveCountry, activeSite?.id)
+            budgetReconciliationService.getTenderReconciliations(effectiveCountry, isAdminSite(activeSite) ? undefined : activeSite?.id),
+            budgetReconciliationService.getBudgets(effectiveCountry, isAdminSite(activeSite) ? undefined : activeSite?.id)
         ]);
         setTenderRecords(tData);
         setBudgets(bData);

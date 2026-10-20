@@ -17,6 +17,7 @@ import { accountsPayableService } from '../../services/accounts-payable.service'
 import type { VendorInvoice } from '../../types';
 import { InvoiceDetailsModal } from './InvoiceDetailsModal';
 import { InvoiceOverrideModal } from './InvoiceOverrideModal';
+import { isAdminSite } from '../../utils/countryAdmin';
 
 export const AccountsPayableTab: React.FC = () => {
     const { user, currencySymbol, effectiveCountry, activeSite, addNotification } = useFinance();
@@ -29,15 +30,15 @@ export const AccountsPayableTab: React.FC = () => {
     const [isActionLoading, setIsActionLoading] = useState(false);
     const [selectedInvoiceIds, setSelectedInvoiceIds] = useState<string[]>([]);
 
-    const canManageAP = ['finance_manager', 'super_admin', 'CEO', 'ceo', 'admin', 'accountant'].includes(user?.role);
-    const canOverride = ['finance_manager', 'super_admin', 'CEO', 'ceo'].includes(user?.role);
+    const canCreatePaymentRun = ['finance_manager', 'super_admin', 'CEO', 'ceo', 'admin', 'cfo'].includes(user?.role);
+    const canOverride = ['finance_manager', 'regional_finance_officer', 'cfo', 'super_admin', 'CEO', 'ceo'].includes(user?.role);
 
     const loadInvoices = async () => {
         setLoading(true);
         try {
             const data = await accountsPayableService.getInvoices({
                 countryCode: effectiveCountry,
-                siteId: activeSite?.id,
+                siteId: isAdminSite(activeSite) ? undefined : activeSite?.id,
                 status: statusFilter === 'All' ? undefined : statusFilter
             });
             setInvoices(data);
@@ -251,7 +252,7 @@ export const AccountsPayableTab: React.FC = () => {
                     </div>
 
                     <div className="flex items-center gap-2">
-                        {selectedInvoiceIds.length > 0 && canManageAP && (
+                        {selectedInvoiceIds.length > 0 && canCreatePaymentRun && (
                             <button
                                 onClick={handleCreatePaymentRun}
                                 disabled={isActionLoading}
@@ -316,7 +317,7 @@ export const AccountsPayableTab: React.FC = () => {
                                                     type="checkbox"
                                                     checked={selectedInvoiceIds.includes(inv.id)}
                                                     onChange={() => toggleSelect(inv.id)}
-                                                    disabled={!isMatched || inv.status === 'Paid'}
+                                                    disabled={!canCreatePaymentRun || !isMatched || inv.status === 'Paid'}
                                                     className="rounded text-[#0071E3] dark:text-[#2997FF] focus:ring-0 disabled:opacity-30 cursor-pointer"
                                                 />
                                             </td>

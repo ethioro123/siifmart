@@ -5,6 +5,13 @@
 
 ## Active Features
 
+### Finance Administration Support Scope (2026-10-20)
+- Accountants and treasury officers assigned to HQ Administration can work with site-based finance records across their country; when assigned to a regional Administration office, their scope follows that region. Existing site staff retain site scope. Regional finance leads use their existing regional boundary.
+- Finance policies distinguish read, preparation, reconciliation, approval, and period close. Support staff can prepare pending invoices, expenses, and unposted journals and reconcile tender records. Budget approvals, period changes, posted journals, credit decisions, and payment-run creation stay with designated leads. Country-only customer credit data remains HQ scoped for accountants.
+- Expense and payment-run policies now enforce country and site/region boundaries. Finance AP and budget screens show records from the database-authorized area, and tender reconciliation requires an explicit authorized site.
+- **Database**: All five finance migrations applied to SIIFMART Staging and the linked production project. The rollback-only regional/HQ RLS regression passed on Staging.
+- **Files**: `migrations/20261020_finance_administration_support_scope.sql`, `migrations/20261020_finance_records_least_privilege.sql`, `migrations/20261020_finance_payment_run_lead_creation.sql`, `migrations/20261020_finance_journal_preparation_boundary.sql`, `migrations/20261020_finance_support_site_directory.sql`, `components/financials/AccountsPayableTab.tsx`, `components/financials/BudgetTab.tsx`, `components/financials/TenderReconciliationModal.tsx`, `services/permissions.matrix.ts`, `tests/security/finance-administration-scope.sql`
+
 ### Warehouse Zero-Trust Governance & RBAC Harmonization (2026-10-20)
 - All warehouse positions (`packer`, `receiver`, `forklift_operator`, `stock_clerk`, `returns_clerk`, `inbound_qc_inspector`, `dispatch_manager`, `logistics_manager`, `fleet_maintenance_supervisor`, `replenishment_planner`) are now registered under the `warehouse` Zero-Trust managed role profile in `services/zeroTrustPolicies.service.ts` and counted in `RoleSettings.tsx`.
 - `returns_clerk` is registered in `FLOOR_WORKER_ROLES` to allow assignment and execution of reverse logistics tasks without rejection.
