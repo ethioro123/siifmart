@@ -46,13 +46,13 @@ export const ROLE_PERMISSIONS: Record<string, string[]> = {
         'dashboard', 'finance', 'sales', 'pricing', 'profile'
     ],
     head_of_hr: [
-        'dashboard', 'employees', 'profile'
+        'dashboard', 'employees', 'finance', 'profile'
     ],
     hr_head: [
-        'dashboard', 'employees', 'profile'
+        'dashboard', 'employees', 'finance', 'profile'
     ],
     hr_manager: [
-        'dashboard', 'employees', 'profile'
+        'dashboard', 'employees', 'finance', 'profile'
     ],
     head_of_procurement: [
         'dashboard', 'procurement', 'warehouse', 'profile'
