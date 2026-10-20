@@ -176,7 +176,6 @@ export default defineConfig(({ mode }) => {
             clientsClaim: true,
             skipWaiting: true,
             navigateFallback: '/index.html',
-            navigateFallbackDenylist: [/^\/shop(?:\/|$)/],
           },
           devOptions: {
             enabled: false
@@ -192,7 +191,6 @@ export default defineConfig(({ mode }) => {
       rollupOptions: {
         input: {
           app: path.resolve(__dirname, 'index.html'),
-          shop: path.resolve(__dirname, 'shop/index.html'),
         },
       },
     },

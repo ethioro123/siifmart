@@ -311,10 +311,10 @@ export default function App() {
               </ProtectedRoute>
             } />
 
-            {/* Online catalog and warehouse order desk */}
+            {/* Internal warehouse online order desk */}
             <Route path="/online-store" element={
               <ProtectedRoute>
-                <ModuleErrorBoundary moduleName="Online Store">
+                <ModuleErrorBoundary moduleName="Online Operations">
                   <OnlineStoreManagement />
                 </ModuleErrorBoundary>
               </ProtectedRoute>

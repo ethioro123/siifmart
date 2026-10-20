@@ -5,6 +5,12 @@ import { generatePackLabelHTML } from '../../../../utils/labels/PackLabelGenerat
 import { wmsJobsService } from '../../../../services/supabase.service';
 import { logger } from '../../../../utils/logger';
 import { printHtmlContent } from '../../../../utils/printHelper';
+import { onlineStoreService } from '../../../../services/online-store.service';
+
+async function getOnlineRecipient(job: WMSJob) {
+    if (!job.orderRef || !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(job.orderRef)) return null;
+    return onlineStoreService.getDeliveryDetails(job.orderRef, job.siteId, job.countryCode || job.country_code || 'ET');
+}
 
 interface UsePackLabelPrintDeps {
     products: Product[];
@@ -65,6 +71,7 @@ export const usePackLabelPrint = (deps: UsePackLabelPrintDeps) => {
             }
 
             const sourceSite = sites.find(s => s.id === selectedPackJob.siteId);
+            const onlineRecipient = await getOnlineRecipient(selectedPackJob);
             const totalItems = selectedPackJob.lineItems?.length || 0;
 
             const packLabelData: any = {
@@ -76,8 +83,8 @@ export const usePackLabelPrint = (deps: UsePackLabelPrintDeps) => {
                 itemCount: totalItems,
                 packageNumber: 1,
                 totalPackages: 1,
-                customerName: (selectedPackJob as any).customerName,
-                shippingAddress: (selectedPackJob as any).shippingAddress || boxDetails.destSite?.address,
+                customerName: onlineRecipient?.customer_name || (selectedPackJob as any).customerName,
+                shippingAddress: onlineRecipient?.delivery_address || (selectedPackJob as any).shippingAddress || boxDetails.destSite?.address,
                 specialHandling: {
                     coldChain: !!boxDetails.hasIcePack || boxDetails.boxSize === 'Thermal Cool Box',
                     fragile: !!boxDetails.packingMaterials?.fragileStickers,
@@ -86,7 +93,7 @@ export const usePackLabelPrint = (deps: UsePackLabelPrintDeps) => {
                     securitySeal: !!boxDetails.packingMaterials?.securitySeal,
                     perishable: false
                 },
-                destSiteName: boxDetails.destSite?.name || boxDetails.destSiteName,
+                destSiteName: onlineRecipient?.customer_name || boxDetails.destSite?.name || boxDetails.destSiteName,
                 lineItems: selectedPackJob.lineItems?.map((i: any) => {
                     const product = products.find(p => p.sku === i.sku || p.id === i.productId);
                     const qtyInfo = getLabelQtyAndUnit(i, product);
@@ -117,6 +124,7 @@ export const usePackLabelPrint = (deps: UsePackLabelPrintDeps) => {
         try {
             const sourceSite = sites.find(s => s.id === job.siteId);
             const destSite = job.destSiteId ? sites.find(s => s.id === job.destSiteId) : undefined;
+            const onlineRecipient = await getOnlineRecipient(job);
             const totalItems = job.lineItems?.length || 0;
 
             const packLabelData: any = {
@@ -126,8 +134,8 @@ export const usePackLabelPrint = (deps: UsePackLabelPrintDeps) => {
                 fromAddress: sourceSite?.address,
                 trackingNumber: job.trackingNumber,
                 itemCount: totalItems,
-                customerName: (job as any).customerName,
-                shippingAddress: (job as any).shippingAddress || destSite?.address,
+                customerName: onlineRecipient?.customer_name || (job as any).customerName,
+                shippingAddress: onlineRecipient?.delivery_address || (job as any).shippingAddress || destSite?.address,
                 city: (job as any).city,
                 packDate: new Date(job.updatedAt || job.createdAt || '').toISOString(),
                 packerName: (job as any).user || 'System',
@@ -136,7 +144,7 @@ export const usePackLabelPrint = (deps: UsePackLabelPrintDeps) => {
                     coldChain: job.lineItems?.some((i: any) => i.category === 'Frozen' || i.category === 'Dairy'),
                     perishable: job.lineItems?.some((i: any) => i.category === 'Frozen' || i.category === 'Dairy')
                 },
-                destSiteName: destSite?.name,
+                destSiteName: onlineRecipient?.customer_name || destSite?.name,
                 lineItems: job.lineItems?.map((i: any) => {
                     const product = products.find(p => p.sku === i.sku || p.id === i.productId);
                     const qtyInfo = getLabelQtyAndUnit(i, product);

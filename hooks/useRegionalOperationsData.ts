@@ -287,11 +287,11 @@ export function useRegionalOperationsData(): RegionalOperationsData {
   const isNearCap = monthlyBudget > 0 && monthlySpent >= monthlyBudget * 0.85;
 
   const pendingAutonomousPOs = useMemo(() => {
-    return regionalOrders.filter(o => o.status === 'Pending' && (o.totalAmount || 0) <= autonomousLimit);
+    return regionalOrders.filter(o => (o.status === 'Pending' || o.status === 'Draft') && (o.totalAmount || 0) <= autonomousLimit);
   }, [regionalOrders, autonomousLimit]);
 
   const pendingEscalatedPOs = useMemo(() => {
-    return regionalOrders.filter(o => o.status === 'Pending' && (o.totalAmount || 0) > autonomousLimit);
+    return regionalOrders.filter(o => (o.status === 'Pending' || o.status === 'Draft') && (o.totalAmount || 0) > autonomousLimit);
   }, [regionalOrders, autonomousLimit]);
 
   // Frontline Talent Drafts

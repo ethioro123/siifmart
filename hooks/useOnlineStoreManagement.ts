@@ -1,6 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Product } from '../types';
-import { onlineStoreService } from '../services/online-store.service';
+import { OnlineOrderIntake, onlineStoreService } from '../services/online-store.service';
 
 export function useOnlineStoreManagement(siteId: string | undefined, includeOrders: boolean) {
   const queryClient = useQueryClient();
@@ -12,9 +11,8 @@ export function useOnlineStoreManagement(siteId: string | undefined, includeOrde
     staleTime: 30_000,
   });
 
-  const publishMutation = useMutation({
-    mutationFn: ({ product, published }: { product: Product; published: boolean }) =>
-      onlineStoreService.setProductPublished(siteId!, product, published),
+  const intakeMutation = useMutation({
+    mutationFn: (order: OnlineOrderIntake) => onlineStoreService.createOrder(siteId!, order),
     onSuccess: () => queryClient.invalidateQueries({ queryKey }),
   });
   const orderMutation = useMutation({
@@ -26,5 +24,5 @@ export function useOnlineStoreManagement(siteId: string | undefined, includeOrde
     },
   });
 
-  return { ...data, publishMutation, orderMutation };
+  return { ...data, intakeMutation, orderMutation };
 }

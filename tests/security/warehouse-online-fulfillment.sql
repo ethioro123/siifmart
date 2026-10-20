@@ -3,33 +3,81 @@ begin;
 
 select set_config('request.jwt.claim.role', 'service_role', true);
 
-insert into public.storefront_catalog (site_id, product_id, is_published)
-values ('a1111111-1111-4000-8000-000000000005', '10017275-4dc5-44f4-9b41-eeec04f36a92', true)
-on conflict (site_id, product_id) do update set is_published = excluded.is_published;
-
 update public.products set stock = 1
 where id = '10017275-4dc5-44f4-9b41-eeec04f36a92';
 
 do $$
 declare
   v_first uuid;
+  v_number text;
   v_second uuid;
   v_pick uuid;
   v_pack uuid;
   v_failed boolean := false;
 begin
-  select order_id into v_first from public.submit_storefront_order(
-    'a1111111-1111-4000-8000-000000000005', 'ET',
-    'Warehouse Test', '251911000001', 'delivery', 'Test street, Addis Ababa',
-    '[{"product_id":"10017275-4dc5-44f4-9b41-eeec04f36a92","quantity":1}]'::jsonb
-  );
-  select order_id into v_second from public.submit_storefront_order(
-    'a1111111-1111-4000-8000-000000000005', 'ET',
-    'Warehouse Test', '251911000002', 'delivery', 'Test street, Addis Ababa',
-    '[{"product_id":"10017275-4dc5-44f4-9b41-eeec04f36a92","quantity":1}]'::jsonb
-  );
+  perform set_config('request.jwt.claim.role', 'authenticated', true);
+  perform set_config('request.jwt.claim.sub', 'e2000000-0000-4000-8000-000000000037', true);
+  perform set_config('request.jwt.claims',
+    '{"role":"authenticated","sub":"e2000000-0000-4000-8000-000000000037"}', true);
+  begin
+    perform public.create_online_operations_order(
+      'a1111111-1111-4000-8000-000000000005',
+      'Warehouse Test', '251911000001', 'Test street, Addis Ababa',
+      '[{"product_id":"10017275-4dc5-44f4-9b41-eeec04f36a92","quantity":1}]'::jsonb);
+  exception when others then v_failed := true; end;
+  if not v_failed then raise exception 'Kenya manager entered an Ethiopia order'; end if;
+
+  v_failed := false;
+  perform set_config('request.jwt.claim.sub', 'e1000000-0000-4000-8000-000000000040', true);
+  perform set_config('request.jwt.claims',
+    '{"role":"authenticated","sub":"e1000000-0000-4000-8000-000000000040"}', true);
+  begin
+    perform public.create_online_operations_order(
+      'a1111111-1111-4000-8000-000000000005',
+      'Warehouse Test', '251911000001', 'Test street, Addis Ababa',
+      '[{"product_id":"10017275-4dc5-44f4-9b41-eeec04f36a92","quantity":1}]'::jsonb);
+  exception when others then v_failed := true; end;
+  if not v_failed then raise exception 'Picker entered an online order'; end if;
+
+  v_failed := false;
+  perform set_config('request.jwt.claim.role', 'authenticated', true);
+  perform set_config('request.jwt.claim.sub', 'e1000000-0000-4000-8000-000000000037', true);
+  perform set_config('request.jwt.claims',
+    '{"role":"authenticated","sub":"e1000000-0000-4000-8000-000000000037"}', true);
+  v_number := public.create_online_operations_order(
+      'a1111111-1111-4000-8000-000000000005',
+      'Warehouse Test', '251911000001', 'Test street, Addis Ababa',
+      '[{"product_id":"10017275-4dc5-44f4-9b41-eeec04f36a92","quantity":1}]'::jsonb);
+  select id into v_first from public.storefront_orders where order_number = v_number;
+  v_number := public.create_online_operations_order(
+      'a1111111-1111-4000-8000-000000000005',
+      'Warehouse Test', '251911000002', 'Test street, Addis Ababa',
+      '[{"product_id":"10017275-4dc5-44f4-9b41-eeec04f36a92","quantity":1}]'::jsonb);
+  select id into v_second from public.storefront_orders where order_number = v_number;
+  if v_first is null or v_second is null then raise exception 'Staff order intake failed'; end if;
 
   perform set_config('request.jwt.claim.role', 'authenticated', true);
+  perform set_config('request.jwt.claim.sub', 'e2000000-0000-4000-8000-000000000037', true);
+  perform set_config('request.jwt.claims',
+    '{"role":"authenticated","sub":"e2000000-0000-4000-8000-000000000037"}', true);
+  begin
+    perform public.decide_storefront_order(v_first, 'accepted');
+  exception when others then
+    v_failed := true;
+  end;
+  if not v_failed then raise exception 'Kenya manager accepted an Ethiopia order'; end if;
+
+  v_failed := false;
+  perform set_config('request.jwt.claim.sub', 'e1000000-0000-4000-8000-000000000040', true);
+  perform set_config('request.jwt.claims',
+    '{"role":"authenticated","sub":"e1000000-0000-4000-8000-000000000040"}', true);
+  begin
+    perform public.decide_storefront_order(v_first, 'accepted');
+  exception when others then
+    v_failed := true;
+  end;
+  if not v_failed then raise exception 'Picker accepted an online order'; end if;
+
   perform set_config('request.jwt.claim.sub', 'e1000000-0000-4000-8000-000000000037', true);
   perform set_config('request.jwt.claims',
     '{"role":"authenticated","sub":"e1000000-0000-4000-8000-000000000037"}', true);
