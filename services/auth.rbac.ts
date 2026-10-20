@@ -16,6 +16,9 @@ import type { UserRole } from './auth.service';
 export const ROLE_PERMISSIONS: Record<string, string[]> = {
     // ═══ LEVEL 1 - EXECUTIVE ═══
     super_admin: ['*'], // CEO / Owner - Full Access to EVERYTHING
+    country_managing_director: [
+        'dashboard', 'admin', 'regional-ops', 'pos', 'inventory', 'warehouse', 'sales', 'customers', 'employees', 'pricing', 'finance', 'procurement', 'settings', 'profile'
+    ],
     admin: [
         'dashboard', 'admin', 'regional-ops', 'pos', 'inventory', 'warehouse', 'sales', 'customers', 'employees', 'pricing', 'finance', 'procurement', 'settings', 'profile'
     ],
@@ -24,23 +27,71 @@ export const ROLE_PERMISSIONS: Record<string, string[]> = {
     regional_manager: [
         'dashboard', 'admin', 'pos', 'inventory', 'warehouse', 'sales', 'customers', 'employees', 'pricing', 'finance', 'procurement', 'settings', 'profile'
     ],
+    head_of_operations: [
+        'dashboard', 'admin', 'pos', 'inventory', 'warehouse', 'sales', 'customers', 'employees', 'pricing', 'finance', 'procurement', 'settings', 'profile'
+    ],
+    operations_head: [
+        'dashboard', 'admin', 'pos', 'inventory', 'warehouse', 'sales', 'customers', 'employees', 'pricing', 'finance', 'procurement', 'settings', 'profile'
+    ],
     operations_manager: [
         'dashboard', 'admin', 'pos', 'inventory', 'warehouse', 'sales', 'customers', 'employees', 'pricing', 'finance', 'procurement', 'settings', 'profile'
+    ],
+    head_of_finance: [
+        'dashboard', 'finance', 'sales', 'procurement', 'employees', 'profile'
+    ],
+    finance_head: [
+        'dashboard', 'finance', 'sales', 'procurement', 'employees', 'profile'
     ],
     finance_manager: [
         'dashboard', 'finance', 'sales', 'procurement', 'employees', 'profile'
     ],
+    head_of_hr: [
+        'dashboard', 'employees', 'finance', 'profile'
+    ],
+    hr_head: [
+        'dashboard', 'employees', 'finance', 'profile'
+    ],
     hr_manager: [
         'dashboard', 'employees', 'finance', 'profile'
+    ],
+    head_of_procurement: [
+        'dashboard', 'procurement', 'inventory', 'warehouse', 'finance', 'profile'
+    ],
+    procurement_head: [
+        'dashboard', 'procurement', 'inventory', 'warehouse', 'finance', 'profile'
     ],
     procurement_manager: [
         'dashboard', 'procurement', 'inventory', 'warehouse', 'finance', 'profile'
     ],
+    head_of_supply_chain: [
+        'dashboard', 'inventory', 'warehouse', 'procurement', 'finance', 'sales', 'profile'
+    ],
+    supply_chain_head: [
+        'dashboard', 'inventory', 'warehouse', 'procurement', 'finance', 'sales', 'profile'
+    ],
     supply_chain_manager: [
-        'dashboard', 'inventory', 'warehouse', 'procurement', 'finance', 'profile'
+        'dashboard', 'inventory', 'warehouse', 'procurement', 'finance', 'sales', 'profile'
+    ],
+    head_of_merchandising: [
+        'dashboard', 'admin', 'pricing', 'inventory', 'sales', 'procurement', 'profile'
+    ],
+    merchandising_head: [
+        'dashboard', 'admin', 'pricing', 'inventory', 'sales', 'procurement', 'profile'
     ],
     merchandising_manager: [
         'dashboard', 'admin', 'pricing', 'inventory', 'sales', 'procurement', 'profile'
+    ],
+    head_of_it: [
+        'dashboard', 'settings', 'employees', 'profile'
+    ],
+    it_head: [
+        'dashboard', 'settings', 'employees', 'profile'
+    ],
+    head_of_audit: [
+        'dashboard', 'sales', 'inventory', 'finance', 'settings', 'profile'
+    ],
+    audit_head: [
+        'dashboard', 'sales', 'inventory', 'finance', 'settings', 'profile'
     ],
     regional_procurement_lead: [
         'dashboard', 'procurement', 'inventory', 'pricing', 'customers', 'profile'

@@ -1,10 +1,17 @@
 export type UserRole =
   // Level 1 - Executive
   | 'super_admin' | 'CEO' | 'ceo'
-  // Level 2 - Regional/Directors
-  | 'regional_manager' | 'operations_manager' | 'finance_manager'
-  | 'hr_manager' | 'procurement_manager' | 'supply_chain_manager'
-  | 'merchandising_manager'
+  | 'country_managing_director' | 'admin'
+  // Level 2 - Corporate Directorate (Head of... / Direct Titles)
+  | 'head_of_operations' | 'operations_head' | 'operations_manager'
+  | 'head_of_finance' | 'finance_head' | 'finance_manager'
+  | 'head_of_hr' | 'hr_head' | 'hr_manager'
+  | 'head_of_procurement' | 'procurement_head' | 'procurement_manager'
+  | 'head_of_supply_chain' | 'supply_chain_head' | 'supply_chain_manager'
+  | 'head_of_merchandising' | 'merchandising_head' | 'merchandising_manager'
+  | 'head_of_it' | 'it_head' | 'it_support'
+  | 'head_of_audit' | 'audit_head' | 'auditor'
+  | 'regional_manager'
   // Level 3 - Site Managers & Supervisors
   | 'store_manager' | 'warehouse_manager' | 'dispatch_manager'
   | 'assistant_manager' | 'shift_lead' | 'store_supervisor'
