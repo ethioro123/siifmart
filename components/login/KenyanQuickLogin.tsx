@@ -2,7 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { Building2, Warehouse, Store, Truck, ShoppingBag, ChevronDown, ChevronUp, ShieldCheck, UserCheck, Search, X } from 'lucide-react';
 import { useStagingAccounts } from '../../hooks/useStagingQuickLogin';
 import { isStagingQuickLoginAvailable, type StagingQuickAccount, type StagingSiteType } from '../../utils/stagingQuickLogin';
-import { getSiteTheme, getRoleTheme, POPULAR_ROLE_CHIPS } from './quickLoginTheme';
+import { getSiteTheme, POPULAR_ROLE_CHIPS } from './quickLoginTheme';
 export { checkIsLocalhost } from '../../utils/stagingQuickLogin';
 
 interface StagingSiteGroup {
@@ -41,6 +41,20 @@ export function KenyanQuickLogin({ onSelectAccount, disabled = false }: StagingQ
       case 'Store':
       default:
         return <Store size={13} className={`shrink-0 ${iconColor}`} />;
+    }
+  };
+
+  const getLevelBadgeStyle = (level: number) => {
+    switch (level) {
+      case 1:
+        return 'bg-purple-500/10 dark:bg-purple-500/20 text-purple-700 dark:text-purple-300 border border-purple-500/30';
+      case 2:
+        return 'bg-indigo-500/10 dark:bg-indigo-500/20 text-indigo-700 dark:text-indigo-300 border border-indigo-500/30';
+      case 3:
+        return 'bg-amber-500/10 dark:bg-amber-500/20 text-amber-700 dark:text-amber-300 border border-amber-500/30';
+      case 4:
+      default:
+        return 'bg-teal-500/10 dark:bg-teal-500/20 text-teal-700 dark:text-teal-300 border border-teal-500/30';
     }
   };
 
@@ -137,7 +151,7 @@ export function KenyanQuickLogin({ onSelectAccount, disabled = false }: StagingQ
                   onClick={() => setCountryFilter(f)}
                   className={`px-2.5 py-1 rounded-lg text-[10px] font-semibold transition-colors cursor-pointer ${
                     countryFilter === f
-                      ? 'bg-[#224429] dark:bg-[#EAE5D9] text-[#FAF8F5] dark:text-[#1E3B24]'
+                      ? 'bg-[#224429] dark:bg-[#EAE5D9] text-[#FAF8F5] dark:text-[#1E3B24] font-bold'
                       : 'bg-stone-100 dark:bg-white/[0.05] text-stone-600 dark:text-stone-300 hover:bg-stone-200 dark:hover:bg-white/[0.1]'
                   }`}
                 >
@@ -167,14 +181,14 @@ export function KenyanQuickLogin({ onSelectAccount, disabled = false }: StagingQ
               )}
             </div>
 
-            {/* Popular Role Chips ("Same Roles with Same Colors") */}
+            {/* Popular Role Chips (Clean, Uncluttered) */}
             <div className="flex items-center gap-1 overflow-x-auto pb-1 custom-scrollbar">
               <button
                 type="button"
                 onClick={() => setRoleFilter('ALL')}
                 className={`py-0.5 px-2 text-[9px] font-semibold rounded-md transition-colors cursor-pointer shrink-0 border ${
                   roleFilter === 'ALL'
-                    ? 'bg-[#224429] dark:bg-[#EAE5D9] text-[#FAF8F5] dark:text-[#1E3B24] border-transparent'
+                    ? 'bg-[#224429] dark:bg-[#EAE5D9] text-[#FAF8F5] dark:text-[#1E3B24] border-transparent font-bold'
                     : 'bg-stone-100 dark:bg-white/[0.04] text-stone-600 dark:text-stone-400 border-stone-200/60 dark:border-white/[0.06]'
                 }`}
               >
@@ -183,7 +197,6 @@ export function KenyanQuickLogin({ onSelectAccount, disabled = false }: StagingQ
               {POPULAR_ROLE_CHIPS.map(chip => {
                 const count = roleCounts[chip.id] || 0;
                 if (count === 0) return null;
-                const theme = getRoleTheme(chip.id);
                 const active = roleFilter.toLowerCase() === chip.id.toLowerCase();
                 return (
                   <button
@@ -192,13 +205,12 @@ export function KenyanQuickLogin({ onSelectAccount, disabled = false }: StagingQ
                     aria-label={`Filter by ${chip.label}`}
                     aria-pressed={active}
                     onClick={() => setRoleFilter(active ? 'ALL' : chip.id)}
-                    className={`py-0.5 px-1.5 text-[9px] font-semibold rounded-md transition-all cursor-pointer shrink-0 flex items-center gap-1 border ${
+                    className={`py-0.5 px-2 text-[9px] font-semibold rounded-md transition-all cursor-pointer shrink-0 flex items-center gap-1 border ${
                       active
-                        ? `${theme.badge} ring-1 font-bold shadow-xs`
+                        ? 'bg-[#224429] dark:bg-[#EAE5D9] text-[#FAF8F5] dark:text-[#1E3B24] border-transparent font-bold shadow-xs'
                         : 'bg-stone-100/70 dark:bg-white/[0.03] text-stone-600 dark:text-stone-400 border-stone-200/50 dark:border-white/[0.05]'
                     }`}
                   >
-                    <span className={`w-1.5 h-1.5 rounded-full ${theme.dot}`} />
                     <span>{chip.label}</span>
                     <span className="text-[8px] opacity-70">({count})</span>
                   </button>
@@ -249,17 +261,20 @@ export function KenyanQuickLogin({ onSelectAccount, disabled = false }: StagingQ
                     key={site.siteCode}
                     className={`rounded-xl border border-[#E2DCCE]/60 dark:border-white/[0.06] ${siteTheme.borderLeft} ${siteTheme.bgLight} p-2 space-y-1.5`}
                   >
-                    {/* Site Header: Color-coded */}
+                    {/* Site Header: Color on site name, site type badge, and prominent worker count */}
                     <div className="flex items-center justify-between pb-1 border-b border-[#E2DCCE]/40 dark:border-white/[0.05]">
                       <div className="flex items-center gap-1.5 min-w-0">
                         {getSiteIcon(site.siteType, siteTheme.iconColor)}
-                        <span className="text-[11px] font-bold text-[#1E3F27] dark:text-[#EAE5D9] truncate">
+                        <span className={`text-[11px] font-bold ${siteTheme.nameColor} truncate`}>
                           {site.siteName}
                         </span>
                       </div>
                       <div className="flex items-center gap-1 shrink-0">
                         <span className={`text-[8px] font-bold px-1.5 py-0.2 rounded border ${siteTheme.badge}`}>
                           {siteTheme.shortLabel}
+                        </span>
+                        <span className={`text-[8.5px] font-bold px-1.5 py-0.2 rounded-full border ${siteTheme.countBadge}`}>
+                          {site.accounts.length} {site.accounts.length === 1 ? 'Worker' : 'Workers'}
                         </span>
                         <span className="text-[9px] font-mono tabular-nums font-semibold text-stone-500 dark:text-stone-400">
                           {site.siteCode}
@@ -268,36 +283,35 @@ export function KenyanQuickLogin({ onSelectAccount, disabled = false }: StagingQ
                     </div>
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
-                      {site.accounts.map(acc => {
-                        const roleTheme = getRoleTheme(acc.roleId);
-                        return (
-                          <button
-                            key={acc.email}
-                            type="button"
-                            disabled={disabled}
-                            onClick={() => onSelectAccount(acc.email)}
-                            className={`p-2 text-left bg-white/80 dark:bg-black/35 hover:bg-stone-50 dark:hover:bg-white/[0.05] border border-[#E2DCCE]/60 dark:border-white/[0.06] ${roleTheme.borderHover} rounded-xl transition-all duration-200 flex flex-col justify-between group active:scale-[0.98] cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed`}
-                          >
-                            <div className="flex items-start justify-between gap-1 w-full">
-                              <div className="flex items-center gap-1.5 min-w-0">
-                                <span className={`w-1.5 h-4 rounded-full shrink-0 ${roleTheme.dot}`} />
-                                <span className="text-[11px] font-semibold text-[#1E3F27] dark:text-[#EAE5D9] group-hover:text-[#2C5E3B] dark:group-hover:text-white transition-colors truncate">
-                                  {acc.name}
-                                </span>
-                              </div>
-                              <UserCheck size={10} className="shrink-0 text-stone-400 dark:text-stone-400 group-hover:text-[#2C5E3B] dark:group-hover:text-[#A9CBA2] transition-colors mt-0.5" />
-                            </div>
-                            <div className="flex items-center justify-between w-full mt-1">
-                              <span className={`text-[9px] font-bold px-1 py-0.2 rounded border truncate max-w-[130px] ${roleTheme.badge}`}>
-                                {acc.role}
+                      {site.accounts.map(acc => (
+                        <button
+                          key={acc.email}
+                          type="button"
+                          disabled={disabled}
+                          onClick={() => onSelectAccount(acc.email)}
+                          className={`p-2 text-left bg-white/85 dark:bg-black/35 hover:bg-stone-50 dark:hover:bg-white/[0.05] border border-[#E2DCCE]/60 dark:border-white/[0.06] ${siteTheme.borderCard} rounded-xl transition-all duration-200 flex flex-col justify-between group active:scale-[0.98] cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed`}
+                        >
+                          <div className="flex items-start justify-between gap-1 w-full">
+                            <span className="text-[11px] font-semibold text-[#1E3F27] dark:text-[#EAE5D9] group-hover:text-[#2C5E3B] dark:group-hover:text-white transition-colors truncate">
+                              {acc.role}
+                            </span>
+                            <div className="flex items-center gap-1 shrink-0">
+                              <span className={`text-[8px] font-bold px-1 py-0.2 rounded shrink-0 ${getLevelBadgeStyle(acc.level)}`}>
+                                L{acc.level}
                               </span>
-                              <span className="text-[8px] font-mono tabular-nums text-stone-400 dark:text-stone-400 shrink-0">
-                                {acc.code}
-                              </span>
+                              <UserCheck size={10} className="text-stone-400 group-hover:text-[#2C5E3B] dark:group-hover:text-[#A9CBA2] transition-colors" />
                             </div>
-                          </button>
-                        );
-                      })}
+                          </div>
+                          <div className="flex items-center justify-between w-full mt-1">
+                            <span className="text-[10px] font-medium text-stone-600 dark:text-stone-300 truncate max-w-[130px]">
+                              {acc.name}
+                            </span>
+                            <span className="text-[8px] font-mono tabular-nums text-stone-400 dark:text-stone-500 shrink-0">
+                              {acc.code}
+                            </span>
+                          </div>
+                        </button>
+                      ))}
                     </div>
                   </div>
                 );

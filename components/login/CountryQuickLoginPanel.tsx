@@ -2,7 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { Building2, Landmark, Warehouse, Store, Truck, ShoppingBag, UserCheck, Search, ShieldCheck, X } from 'lucide-react';
 import { useStagingAccounts } from '../../hooks/useStagingQuickLogin';
 import { isStagingQuickLoginAvailable, type FacilityTierType, type StagingSiteType, type StagingQuickAccount } from '../../utils/stagingQuickLogin';
-import { getSiteTheme, getRoleTheme, POPULAR_ROLE_CHIPS } from './quickLoginTheme';
+import { getSiteTheme, POPULAR_ROLE_CHIPS } from './quickLoginTheme';
 export type { StagingQuickAccount } from '../../utils/stagingQuickLogin';
 
 interface CountryQuickLoginPanelProps {
@@ -185,7 +185,7 @@ export function CountryQuickLoginPanel({
         )}
       </div>
 
-      {/* Quick Role Filter Chips ("Same Roles with Same Colors") */}
+      {/* Quick Role Filter Chips (Clean, Uncluttered) */}
       <div className="mb-2">
         <div className="flex items-center gap-1 overflow-x-auto pb-1 custom-scrollbar">
           <button
@@ -193,7 +193,7 @@ export function CountryQuickLoginPanel({
             onClick={() => setRoleFilter('ALL')}
             className={`py-0.5 px-2 text-[9px] font-semibold rounded-md transition-colors cursor-pointer shrink-0 border ${
               roleFilter === 'ALL'
-                ? 'bg-[#224429] dark:bg-[#EAE5D9] text-[#FAF8F5] dark:text-[#1E3B24] border-transparent'
+                ? 'bg-[#224429] dark:bg-[#EAE5D9] text-[#FAF8F5] dark:text-[#1E3B24] border-transparent font-bold'
                 : 'bg-stone-100 dark:bg-white/[0.04] text-stone-600 dark:text-stone-400 border-stone-200/60 dark:border-white/[0.06] hover:bg-stone-200 dark:hover:bg-white/[0.08]'
             }`}
           >
@@ -202,7 +202,6 @@ export function CountryQuickLoginPanel({
           {POPULAR_ROLE_CHIPS.map(chip => {
             const count = roleCounts[chip.id] || 0;
             if (count === 0) return null;
-            const theme = getRoleTheme(chip.id);
             const active = roleFilter.toLowerCase() === chip.id.toLowerCase();
             return (
               <button
@@ -213,11 +212,10 @@ export function CountryQuickLoginPanel({
                 onClick={() => setRoleFilter(active ? 'ALL' : chip.id)}
                 className={`py-0.5 px-2 text-[9px] font-semibold rounded-md transition-all cursor-pointer shrink-0 flex items-center gap-1 border ${
                   active
-                    ? `${theme.badge} ring-1 ring-offset-0 font-bold shadow-xs`
-                    : 'bg-stone-100/70 dark:bg-white/[0.03] text-stone-600 dark:text-stone-400 border-stone-200/50 dark:border-white/[0.05] hover:bg-stone-100 dark:hover:bg-white/[0.06]'
+                    ? 'bg-[#224429] dark:bg-[#EAE5D9] text-[#FAF8F5] dark:text-[#1E3B24] border-transparent font-bold shadow-xs'
+                    : 'bg-stone-100/70 dark:bg-white/[0.03] text-stone-600 dark:text-stone-400 border-stone-200/50 dark:border-white/[0.05] hover:bg-stone-200/60 dark:hover:bg-white/[0.06]'
                 }`}
               >
-                <span className={`w-1.5 h-1.5 rounded-full ${theme.dot}`} />
                 <span>{chip.label}</span>
                 <span className="text-[8px] opacity-70">({count})</span>
               </button>
@@ -282,8 +280,10 @@ export function CountryQuickLoginPanel({
                 active
                   ? siteTheme
                     ? `${siteTheme.badge} font-bold shadow-xs`
-                    : 'bg-emerald-700 dark:bg-emerald-300 text-white dark:text-stone-950 border-transparent'
-                  : 'bg-stone-50/80 dark:bg-white/[0.03] text-stone-600 dark:text-stone-400 border-stone-200/80 dark:border-white/[0.07] hover:bg-stone-100 dark:hover:bg-white/[0.06]'
+                    : 'bg-[#224429] dark:bg-[#EAE5D9] text-[#FAF8F5] dark:text-[#1E3B24] border-transparent'
+                  : siteTheme
+                    ? `${siteTheme.bgLight} ${siteTheme.nameColor} border-stone-200/60 dark:border-white/[0.06] hover:bg-stone-100 dark:hover:bg-white/[0.06]`
+                    : 'bg-stone-50/80 dark:bg-white/[0.03] text-stone-600 dark:text-stone-400 border-stone-200/80 dark:border-white/[0.07] hover:bg-stone-100 dark:hover:bg-white/[0.06]'
               }`}
             >
               {sub.label}
@@ -343,7 +343,7 @@ export function CountryQuickLoginPanel({
         </div>
       )}
 
-      {/* Scrollable Role List */}
+      {/* Scrollable Site & Role List */}
       <div className="flex-1 overflow-y-auto pr-1 space-y-3.5 custom-scrollbar">
         {isLoading ? (
           <p className="text-xs text-[var(--theme-text-secondary)] py-4">Loading test employees…</p>
@@ -371,13 +371,13 @@ export function CountryQuickLoginPanel({
                 key={site.siteCode}
                 className={`rounded-2xl border border-[#E2DCCE]/60 dark:border-white/[0.06] ${siteTheme.borderLeft} ${siteTheme.bgLight} p-2.5 space-y-2 transition-all`}
               >
-                {/* Site Header: Color-coded by facility type */}
+                {/* Site Header: Color on site name, site type badge, and prominent worker count */}
                 <div className="flex items-center justify-between pb-1.5 border-b border-[#E2DCCE]/40 dark:border-white/[0.06]">
                   <div className="flex items-center gap-1.5 min-w-0">
                     <span className="p-1 rounded-md bg-white/70 dark:bg-black/30 shadow-xs">
                       {getSiteIcon(site.siteType, siteTheme.iconColor)}
                     </span>
-                    <span className="text-[11px] font-bold text-[#1E3F27] dark:text-[#EAE5D9] truncate">
+                    <span className={`text-[11.5px] font-bold ${siteTheme.nameColor} truncate`}>
                       {site.siteName}
                     </span>
                   </div>
@@ -385,58 +385,53 @@ export function CountryQuickLoginPanel({
                     <span className={`text-[8.5px] font-bold px-1.5 py-0.2 rounded-md border ${siteTheme.badge}`}>
                       {siteTheme.shortLabel}
                     </span>
+                    <span className={`text-[9px] font-bold px-2 py-0.2 rounded-full border ${siteTheme.countBadge}`}>
+                      {site.accounts.length} {site.accounts.length === 1 ? 'Worker' : 'Workers'}
+                    </span>
                     <span className="text-[9px] font-mono tabular-nums font-semibold text-stone-400 dark:text-stone-500">
                       {site.siteCode}
                     </span>
                   </div>
                 </div>
 
-                {/* Account Cards: Roles of the same type share the exact same color */}
+                {/* Worker Cards: Clean, readable titles without rainbow title pills */}
                 <div className="space-y-1.5">
-                  {site.accounts.map(acc => {
-                    const roleTheme = getRoleTheme(acc.roleId);
-                    return (
-                      <button
-                        key={acc.email}
-                        type="button"
-                        disabled={disabled}
-                        onClick={() => onSelectAccount(acc.email)}
-                        className={`w-full p-2 text-left bg-white/80 dark:bg-black/35 hover:bg-stone-50 dark:hover:bg-white/[0.06] border border-[#E2DCCE]/60 dark:border-white/[0.06] ${roleTheme.borderHover} rounded-xl transition-all duration-150 flex items-center justify-between group active:scale-[0.98] cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed shadow-xs`}
-                      >
-                        <div className="flex items-center gap-2 min-w-0 pr-2">
-                          {/* Role Color Dot Indicator */}
-                          <span className={`w-1.5 h-6 rounded-full shrink-0 ${roleTheme.dot}`} />
-
-                          <div className="flex flex-col min-w-0">
-                            <div className="flex items-center gap-1.5">
-                              {/* Uniform Role Pill with Same Color for Same Role */}
-                              <span className={`text-[9.5px] font-bold px-1.5 py-0.2 rounded border shrink-0 truncate max-w-[150px] ${roleTheme.badge}`}>
-                                {acc.role}
-                              </span>
-                              <span className={`text-[8px] font-bold px-1 py-0.2 rounded shrink-0 ${getLevelBadgeStyle(acc.level)}`}>
-                                L{acc.level}
-                              </span>
-                            </div>
-                            <div className="flex items-center gap-1.5 mt-0.5">
-                              <span className="text-[10px] font-medium text-stone-700 dark:text-stone-300 truncate">
-                                {acc.name}
-                              </span>
-                              <span className="text-[8px] font-mono text-stone-400 dark:text-stone-500 truncate">
-                                ({acc.roleId})
-                              </span>
-                            </div>
-                          </div>
-                        </div>
-
-                        <div className="flex items-center gap-1.5 shrink-0">
-                          <span className="text-[8.5px] font-mono tabular-nums font-semibold text-stone-500 dark:text-stone-400">
-                            {acc.code}
+                  {site.accounts.map(acc => (
+                    <button
+                      key={acc.email}
+                      type="button"
+                      disabled={disabled}
+                      onClick={() => onSelectAccount(acc.email)}
+                      className={`w-full p-2.5 text-left bg-white/90 dark:bg-black/40 hover:bg-stone-50 dark:hover:bg-white/[0.06] border border-[#E2DCCE]/70 dark:border-white/[0.07] ${siteTheme.borderCard} rounded-xl transition-all duration-150 flex items-center justify-between group active:scale-[0.98] cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed shadow-xs`}
+                    >
+                      <div className="flex flex-col min-w-0 pr-2">
+                        <div className="flex items-center gap-1.5">
+                          {/* Clean Worker Role Title without rainbow color pills */}
+                          <span className="text-[11px] font-semibold text-[#1E3F27] dark:text-[#EAE5D9] group-hover:text-[#2C5E3B] dark:group-hover:text-white transition-colors truncate">
+                            {acc.role}
                           </span>
-                          <UserCheck size={11} className="text-stone-300 dark:text-stone-400 group-hover:text-[#2C5E3B] dark:group-hover:text-[#A9CBA2] transition-colors" />
+                          <span className={`text-[8px] font-bold px-1.5 py-0.2 rounded-md shrink-0 ${getLevelBadgeStyle(acc.level)}`}>
+                            L{acc.level}
+                          </span>
                         </div>
-                      </button>
-                    );
-                  })}
+                        <div className="flex items-center gap-1.5 mt-0.5">
+                          <span className="text-[10.5px] font-medium text-stone-600 dark:text-stone-300 truncate">
+                            {acc.name}
+                          </span>
+                          <span className="text-[8px] font-mono text-stone-400 dark:text-stone-500 truncate">
+                            ({acc.roleId})
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-1.5 shrink-0">
+                        <span className="text-[8.5px] font-mono tabular-nums font-semibold text-stone-500 dark:text-stone-400">
+                          {acc.code}
+                        </span>
+                        <UserCheck size={11} className="text-stone-300 dark:text-stone-600 group-hover:text-[#2C5E3B] dark:group-hover:text-[#A9CBA2] transition-colors" />
+                      </div>
+                    </button>
+                  ))}
                 </div>
               </div>
             );
@@ -446,7 +441,7 @@ export function CountryQuickLoginPanel({
 
       {/* Footer hint */}
       <div className="pt-2 border-t border-[#E2DCCE]/40 dark:border-white/[0.05] text-center">
-        <span className="text-[9px] text-stone-400 dark:text-stone-400 font-mono">
+        <span className="text-[9px] text-stone-400 dark:text-stone-500 font-mono">
           Select an employee to sign in to staging
         </span>
       </div>

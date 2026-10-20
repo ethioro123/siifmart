@@ -3,7 +3,7 @@ import React from 'react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { CountryQuickLoginPanel } from '../../components/login/CountryQuickLoginPanel';
-import { getSiteTheme, getRoleTheme } from '../../components/login/quickLoginTheme';
+import { getSiteTheme } from '../../components/login/quickLoginTheme';
 import { mapStagingEmployee } from '../../utils/stagingQuickLogin';
 
 const mockRoster = [
@@ -46,7 +46,7 @@ const mockRoster = [
 ];
 
 vi.mock('../../hooks/useStagingQuickLogin', () => ({
-  useStagingAccounts: () => ({ data: mockRoster, isLoading: false, error: null })
+  useStagingAccounts: () => ({ data: mockRoster, isLoading: false, error: null, refetch: vi.fn() })
 }));
 
 vi.mock('../../utils/stagingQuickLogin', async importOriginal => ({
@@ -72,29 +72,13 @@ describe('quick login theming and filtering', () => {
       // Site themes have unique border and icon colors
       expect(store.iconColor).not.toEqual(warehouse.iconColor);
       expect(warehouse.iconColor).not.toEqual(dc.iconColor);
-    });
-
-    it('assigns identical color theme to same roles across sites', () => {
-      const cashier1 = getRoleTheme('cashier');
-      const cashier2 = getRoleTheme('cashier');
-      const pos = getRoleTheme('pos');
-      const picker = getRoleTheme('picker');
-      const driver = getRoleTheme('driver');
-
-      // Same roles have exact same badges and dot colors
-      expect(cashier1.badge).toEqual(cashier2.badge);
-      expect(cashier1.dot).toEqual(cashier2.dot);
-      expect(cashier1.badge).toEqual(pos.badge); // POS and cashier share the cashier theme
-
-      // Different roles have different themes
-      expect(cashier1.badge).toContain('emerald');
-      expect(picker.badge).toContain('orange');
-      expect(driver.badge).toContain('blue');
+      expect(store.countBadge).toContain('emerald');
+      expect(warehouse.countBadge).toContain('amber');
     });
   });
 
   describe('CountryQuickLoginPanel interactive role filtering and badges', () => {
-    it('renders color-coded site badges and role badges', () => {
+    it('renders color-coded site badges, site names, and exact worker counts per site', () => {
       const select = vi.fn();
       render(<CountryQuickLoginPanel country="KE" title="Kenya Staging Roles" onSelectAccount={select} />);
 
@@ -102,6 +86,10 @@ describe('quick login theming and filtering', () => {
       expect(screen.getByText('Store')).toBeTruthy();
       expect(screen.getByText('WH')).toBeTruthy();
       expect(screen.getByText('DC')).toBeTruthy();
+
+      // Worker counts per site
+      expect(screen.getByText('2 Workers')).toBeTruthy(); // Nairobi Flagship Store has 2 workers
+      expect(screen.getAllByText('1 Worker').length).toBe(2); // WH and DC each have 1 worker
 
       // Employee names & roles
       expect(screen.getByText('Jane Cashier')).toBeTruthy();
