@@ -9,6 +9,7 @@
 - Added Merchandising Specialist and Regional Merchandising Lead to the role hierarchy and administration assignment flow.
 - Scoped product, price, planogram, and campaign preparation to assigned countries or regions. Merchandising leads approve product and price proposals; Finance independently signs off below-floor prices.
 - Approval RPCs apply product proposals atomically. Campaign approvals record a plan; POS discount activation is a separate workflow.
+- Staging includes one HQ specialist, one regional specialist, and one regional merchandising lead in each country for quick-login testing; these fixtures are excluded from production.
 - Files: `components/merchandising/`, `hooks/useSubmitMerchandisingChanges.ts`, `services/merchandising-campaigns.service.ts`, `services/inventory-requests.service.ts`, `migrations/20261021_merchandising_*.sql`.
 
 ### Country-Scoped Online Storefront Foundation (2026-10-21)

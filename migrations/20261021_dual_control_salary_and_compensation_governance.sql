@@ -131,3 +131,38 @@ CREATE TRIGGER trg_handle_salary_request_approval
   FOR EACH ROW
   WHEN (NEW.status = 'approved')
   EXECUTE FUNCTION public.handle_salary_request_approval();
+
+
+-- 5. Fix legacy log_sensitive_change trigger on public.employees to match live system_logs schema
+CREATE OR REPLACE FUNCTION public.log_sensitive_change()
+RETURNS trigger
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public, auth, pg_temp
+AS $$
+BEGIN
+  IF OLD.salary IS DISTINCT FROM NEW.salary THEN
+    INSERT INTO public.system_logs (
+      performed_by,
+      employee_id,
+      user_name,
+      action,
+      details,
+      module,
+      site_id,
+      created_at
+    )
+    VALUES (
+      (SELECT auth.uid())::text,
+      NEW.id::text,
+      COALESCE((SELECT name FROM public.employees WHERE id = auth.uid()), 'System'),
+      'SALARY_UPDATE',
+      'Salary changed for employee ' || NEW.name || ' (' || NEW.id || '): ' || COALESCE(OLD.salary, 0) || ' -> ' || COALESCE(NEW.salary, 0),
+      'HR',
+      NEW.site_id::text,
+      NOW()
+    );
+  END IF;
+  RETURN NEW;
+END;
+$$;
