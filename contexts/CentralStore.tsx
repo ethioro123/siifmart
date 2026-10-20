@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { authService } from '../services/auth.service';
 import { UserRole, User } from '../types';
 import { employeesService } from '../services/employees.service';
@@ -46,6 +47,7 @@ interface StoreContextType {
 const StoreContext = createContext<StoreContextType | undefined>(undefined);
 
 export function StoreProvider({ children }: { children: ReactNode }) {
+  const queryClient = useQueryClient();
   const [user, setUser] = useState<User | null>(null);
   const [theme, setTheme] = useState<'dark' | 'light'>('light');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -399,9 +401,11 @@ export function StoreProvider({ children }: { children: ReactNode }) {
 
   const logout = async () => {
     await authService.signOut();
+    queryClient.clear();
     setUser(null);
     try {
       sessionStorage.removeItem('siifmart_login_location');
+      localStorage.removeItem('siifmart_sites_cache');
     } catch (e) {}
   };
 

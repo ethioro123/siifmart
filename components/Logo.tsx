@@ -13,52 +13,62 @@ interface LogoProps {
 }
 
 /**
- * Pure Black & White Architectural Monolith Emblem.
- * Combines a bold geometric 'S' silhouette with the signature twin 'II' pillars in negative space.
+ * Pure Black & White Vector S-Cart & Twin Organic Leaves Emblem.
+ * Faithfully renders SIIFMART's iconic ribbon-'S' grocery cart, twin wheels,
+ * and asymmetric organic leaves in a crisp monochrome vector for light and dark mode.
  */
-function SiifMonochromeEmblem({ size }: { size: number }) {
+function SiifGroceryEmblem({ size }: { size: number }) {
   return (
     <svg
       width={size}
       height={size}
-      viewBox="0 0 40 40"
+      viewBox="0 0 100 100"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
       className="shrink-0 text-[#09090B] dark:text-[#FFFFFF] transition-colors duration-200"
       aria-hidden="true"
     >
-      {/* Solid Monochrome Squircle Monolith */}
-      <rect width="40" height="40" rx="10" fill="currentColor" />
-
-      {/* Crisp Subtle Inner Architectural Frame */}
-      <rect
-        x="1.5"
-        y="1.5"
-        width="37"
-        height="37"
-        rx="8.5"
-        className="stroke-white/15 dark:stroke-black/15"
-        strokeWidth="1"
+      {/* Left Organic Leaf (Tilting Up-Left) with Subtle Midrib Cutout */}
+      <path
+        fillRule="evenodd"
+        clipRule="evenodd"
+        d="M59.5 34.2C48.8 28.0 41.8 18.8 40.0 7.8C51.8 13.0 58.8 22.2 59.5 34.2ZM57.8 31.4C54.0 24.8 49.6 19.0 45.2 14.0C49.0 19.6 53.2 25.4 56.8 31.8L57.8 31.4Z"
+        fill="currentColor"
       />
 
-      {/* Negative-Space Geometric 'S' + Twin 'II' Pillar Lockup */}
-      <g className="fill-[#FFFFFF] dark:fill-[#09090B]">
-        {/* Upper Cantilevered Crown (Top of S) */}
-        <path d="M11 9.5H29L26.2 14H15.5V17.5H11V9.5Z" />
-        {/* Signature Twin 'II' Center Pillars (Angled Architectural Cut) */}
-        <polygon points="15.5,16.2 19.3,14.8 19.3,25.2 15.5,23.8" />
-        <polygon points="20.7,14.8 24.5,16.2 24.5,23.8 20.7,25.2" />
-        {/* Lower Cantilevered Base (Bottom of S) */}
-        <path d="M29 30.5H11L13.8 26H24.5V22.5H29V30.5Z" />
-      </g>
+      {/* Right Signature Leaf (Sweeping Up-Right) with Sculpted Vein Cutout */}
+      <path
+        fillRule="evenodd"
+        clipRule="evenodd"
+        d="M62.8 35.0C61.0 18.6 72.8 5.8 95.8 0.8C89.8 19.2 78.8 30.2 62.8 35.0ZM64.8 33.4C68.6 23.6 75.4 14.8 85.0 7.6C74.0 16.2 67.4 24.8 63.6 33.6L64.8 33.4Z"
+        fill="currentColor"
+      />
+
+      {/* Calligraphic Ribbon 'S' Forming the Upper & Inner Grocery Cart Body */}
+      <path
+        d="M57.0 34.0C44.2 23.0 24.2 19.8 11.4 25.8C3.2 29.8 3.0 40.8 14.2 46.2C26.4 52.0 48.0 58.0 56.2 64.0C63.0 69.0 61.2 76.8 52.0 80.0C65.8 79.0 72.8 70.2 71.0 60.0C69.2 50.0 50.2 44.0 31.0 37.8C19.0 33.8 16.2 27.8 26.2 25.0C36.0 22.2 48.0 26.8 57.0 34.0Z"
+        fill="currentColor"
+      />
+
+      {/* Grocery Cart Basket Frame, Angled Front Wall & Tapered Handlebar */}
+      <path
+        d="M11.0 53.8C6.2 69.2 12.2 83.2 29.0 83.2H65.0C72.0 83.2 76.2 80.2 79.2 74.0L98.2 38.0L52.0 39.0V40.4L82.0 42.0C86.0 42.3 87.0 44.5 85.4 48.2L71.0 76.0C68.6 79.6 64.0 80.4 58.0 80.4H33.0C19.2 80.4 12.2 70.0 11.0 53.8Z"
+        fill="currentColor"
+      />
+
+      {/* Twin Grocery Cart Wheels */}
+      <circle cx="30.0" cy="92.0" r="6.2" fill="currentColor" />
+      <circle cx="63.0" cy="92.0" r="6.2" fill="currentColor" />
     </svg>
   );
 }
 
 /**
- * Bespoke SIIFMART Wordmark — Pure Black & White Editorial Typography.
- * Pairs ultra-heavy 'SIIF' (with sculpted twin 'II' monolith pillars)
- * against wide-tracked architectural 'M Λ R T' with a custom apex 'A' and square terminal point.
+ * Bespoke SIIFMART Grocery Brand Wordmark — Pure Black & White.
+ * - 'SIIF' is set in bold, commanding modern letterforms where the twin 'II' stems
+ *   blossom with SIIFMART's signature pair of fresh organic grocery leaves.
+ * - 'MART' is set in airy, elegant modern contrast and cradled by a sleek
+ *   tapered market-basket smile arc.
  */
 function SiifWordmark({
   fontSize,
@@ -88,64 +98,74 @@ function SiifWordmark({
     >
       <span className="sr-only">SIIFMART</span>
 
-      {/* PART 1: SIIF — Ultra-Bold Monumental Core with Sculpted Twin 'II' Pillars */}
+      {/* PART 1: SIIF — Bold Modern Core with Twin Organic Leaf-Crowned 'II' Stems */}
       <span
         aria-hidden="true"
         className="inline-flex items-baseline font-black tracking-[-0.03em]"
       >
         <span>S</span>
-        {/* Custom Twin 'II' Architectural Pillars with Diagonal Crown Cut */}
+
+        {/* Custom Twin 'II' Pillars Crowned with Fresh Organic Grocery Leaves */}
         <svg
-          viewBox="0 0 13 18"
+          viewBox="0 0 18 25"
           fill="none"
           xmlns="http://www.w3.org/2000/svg"
-          className="inline-block self-baseline mx-[0.03em] overflow-visible"
-          style={{ height: '0.73em', width: 'auto' }}
+          className="inline-block self-baseline mx-[0.025em] overflow-visible"
+          style={{ height: '0.95em', width: 'auto' }}
         >
-          {/* Left Pillar I with diagonal ascending bevel */}
-          <polygon points="0.8,2.4 5.2,0.4 5.2,18 0.8,18" fill="currentColor" />
-          {/* Right Pillar I with diagonal crown & precision negative-space notch */}
-          <polygon points="7.8,0.4 12.2,2.4 12.2,18 7.8,18" fill="currentColor" />
+          {/* Left Sprouting Leaf above First 'I' */}
+          <path
+            d="M6.8 6.4C3.8 6.0 1.6 3.8 1.0 0.8C4.2 1.2 6.4 3.2 6.8 6.4Z"
+            fill="currentColor"
+          />
+          {/* Right Signature Leaf with Vein Cutout above Second 'I' */}
+          <path
+            fillRule="evenodd"
+            clipRule="evenodd"
+            d="M9.6 6.4C9.4 2.4 12.6 -0.2 17.6 0.2C16.6 4.2 13.6 6.2 9.6 6.4ZM10.6 5.2C12.2 3.4 14.0 2.0 15.8 1.0C13.6 2.0 11.8 3.4 10.2 5.0L10.6 5.2Z"
+            fill="currentColor"
+          />
+          {/* First 'I' Stem with Soft Organic Top Bevel */}
+          <path
+            d="M2.0 8.2C2.0 7.4 2.6 6.8 3.4 6.8H6.6V25H2.0V8.2Z"
+            fill="currentColor"
+          />
+          {/* Second 'I' Stem with Soft Organic Top Bevel */}
+          <path
+            d="M9.8 6.8H13.0C13.8 6.8 14.4 7.4 14.4 8.2V25H9.8V6.8Z"
+            fill="currentColor"
+          />
         </svg>
+
         <span>F</span>
       </span>
 
-      {/* Micro-Architectural Divider Space */}
-      <span aria-hidden="true" className="inline-block w-[0.14em]" />
+      {/* Refined Editorial Breath Space */}
+      <span aria-hidden="true" className="inline-block w-[0.11em]" />
 
-      {/* PART 2: MART — Ultra-Modern High-Contrast Architectural Lockup */}
+      {/* PART 2: MART — Elegant Modern Market Typography with Basket Smile Arc */}
       <span
         aria-hidden="true"
-        className="relative inline-flex items-baseline font-medium tracking-[0.16em] text-[0.86em]"
+        className="relative inline-flex items-baseline font-medium tracking-[0.14em] text-[0.86em]"
       >
         <span>M</span>
-        {/* Custom Crossbar-Free Architectural Apex 'A' (Λ) */}
+        <span>A</span>
+        <span>R</span>
+        <span className="tracking-[0.02em]">T</span>
+
+        {/* Tapered Organic Market-Basket Cradle Arc beneath MART */}
         <svg
-          viewBox="0 0 15 18"
+          viewBox="0 0 80 8"
           fill="none"
           xmlns="http://www.w3.org/2000/svg"
-          className="inline-block self-baseline mr-[0.14em] overflow-visible"
-          style={{ height: '0.72em', width: 'auto' }}
+          className="absolute -bottom-[0.22em] left-0 w-full h-[0.22em] overflow-visible"
         >
           <path
-            d="M7.5 0.6L14.4 18H11.2L7.5 8.1L3.8 18H0.6L7.5 0.6Z"
+            d="M2 1.8C22 6.8 58 6.8 78 1.8C58 4.8 22 4.8 2 1.8Z"
             fill="currentColor"
           />
-          {/* Floating Precision Keystone Dot inside the Apex */}
-          <rect x="6.35" y="13.2" width="2.3" height="2.3" fill="currentColor" />
         </svg>
-        <span>R</span>
-        <span className="tracking-[0.04em]">T</span>
-
-        {/* Signature Architectural Under-Rule */}
-        <span className="absolute -bottom-[0.13em] left-0 right-[0.04em] h-[1.5px] bg-[#09090B] dark:bg-[#FFFFFF] opacity-90" />
       </span>
-
-      {/* Precision Monochrome Square Terminal Point */}
-      <span
-        aria-hidden="true"
-        className="inline-block w-[0.15em] h-[0.15em] bg-[#09090B] dark:bg-[#FFFFFF] ml-[0.12em] self-baseline mb-[0.04em]"
-      />
     </span>
   );
 }
@@ -194,14 +214,14 @@ export default function Logo({
     );
   }
 
-  // Stacked variant: Centered Monochrome Emblem + Sculpted Brand Wordmark
+  // Stacked variant: Centered Monochrome S-Cart Emblem + Botanical SIIFMART Wordmark
   if (variant === 'stacked') {
     return (
-      <div className={`inline-flex flex-col items-center gap-2.5 select-none ${className}`.trim()}>
-        <SiifMonochromeEmblem size={Math.round(size * 1.35)} />
+      <div className={`inline-flex flex-col items-center gap-2 select-none ${className}`.trim()}>
+        <SiifGroceryEmblem size={Math.round(size * 1.5)} />
         <SiifWordmark fontSize={fontSize} storeName={effectiveStoreName} />
         {showTagline && (
-          <span className="text-[9px] text-[#09090B]/60 dark:text-white/60 tracking-[0.28em] uppercase font-semibold">
+          <span className="text-[9px] text-[#09090B]/65 dark:text-white/65 tracking-[0.28em] uppercase font-semibold mt-1">
             Little Grocery • Big Care
           </span>
         )}
@@ -213,18 +233,18 @@ export default function Logo({
   if (variant === 'emblem' || !showText) {
     return (
       <div className={containerClass}>
-        <SiifMonochromeEmblem size={size} />
+        <SiifGroceryEmblem size={size} />
       </div>
     );
   }
 
-  // Standard horizontal lockup: Monochrome architectural emblem + SIIFMART bespoke wordmark
+  // Standard horizontal lockup: Monochrome S-Cart & Leaves Emblem + Magical SIIFMART Brand Wordmark
   return (
     <div className={`${containerClass} gap-2.5`}>
-      <SiifMonochromeEmblem size={size} />
+      <SiifGroceryEmblem size={size} />
       <SiifWordmark fontSize={fontSize} storeName={effectiveStoreName} />
       {showTagline && (
-        <span className="text-[10px] text-[#09090B]/60 dark:text-white/60 tracking-[0.24em] uppercase font-semibold ml-1.5">
+        <span className="text-[10px] text-[#09090B]/65 dark:text-white/65 tracking-[0.24em] uppercase font-semibold ml-1.5">
           Little Grocery • Big Care
         </span>
       )}

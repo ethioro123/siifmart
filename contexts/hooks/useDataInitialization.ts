@@ -94,14 +94,14 @@ export function useDataInitialization({
 
   const loadSites = useCallback(async () => {
     try {
+      const activeCountry = (settings?.country || 'ET') as Country;
       const loadedSites = await queryClient.fetchQuery({
-        queryKey: ['sites'],
+        queryKey: ['sites', user?.id || 'anon', activeCountry],
         queryFn: () => sitesService.getAll(),
         staleTime: 5 * 60 * 1000
       });
 
       // Ensure active country has its Administration HQ provisioned
-      const activeCountry = (settings?.country || 'ET') as Country;
       const hasActiveAdmin = loadedSites.some(s => (s.country || 'ET').toUpperCase() === activeCountry.toUpperCase() && isAdminSite(s));
       if (!hasActiveAdmin) {
         try {
@@ -147,7 +147,7 @@ export function useDataInitialization({
       setSites(loadedSites);
 
       try {
-        localStorage.setItem('siifmart_sites_cache', JSON.stringify(loadedSites));
+        localStorage.setItem(`siifmart_sites_cache_${user?.id || 'anon'}`, JSON.stringify(loadedSites));
       } catch (e) {
         logger.warn('useDataInitialization', 'Failed to cache sites');
       }
@@ -159,7 +159,7 @@ export function useDataInitialization({
       logger.error('useDataInitialization', '❌ Failed to load sites:', error);
       let cached = null;
       try {
-        cached = localStorage.getItem('siifmart_sites_cache');
+        cached = localStorage.getItem(`siifmart_sites_cache_${user?.id || 'anon'}`);
       } catch (e) {}
       if (cached) {
         setSites(JSON.parse(cached));
@@ -175,7 +175,7 @@ export function useDataInitialization({
         setTimeout(loadSites, 5000);
       }
     }
-  }, [setSites, addNotification, setLoadError, queryClient]);
+  }, [setSites, addNotification, setLoadError, queryClient, user?.id, settings?.country]);
 
   const loadSettings = useCallback(async () => {
     try {
