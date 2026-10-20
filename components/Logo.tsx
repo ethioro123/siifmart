@@ -8,7 +8,7 @@ interface LogoProps {
   logoUrl?: string;
   storeName?: string;
   accentColor?: string;
-  variant?: 'horizontal' | 'stacked' | 'emblem';
+  variant?: 'horizontal' | 'stacked' | 'emblem' | 'wordmark';
   showTagline?: boolean;
 }
 
@@ -198,6 +198,15 @@ export default function Logo({
 
   const hasDisplayOverride = /\b(hidden|block|inline-block|flex|inline-flex)\b/.test(className);
   const containerClass = `${hasDisplayOverride ? '' : 'inline-flex '}items-center select-none ${className}`.trim();
+
+  // Wordmark-only variant: brand name without the emblem (e.g. top bar)
+  if (variant === 'wordmark') {
+    return (
+      <div className={containerClass}>
+        <SiifWordmark fontSize={fontSize} storeName={effectiveStoreName} />
+      </div>
+    );
+  }
 
   // If a custom image logo is uploaded by the user and loads successfully, display it in monochrome
   if (effectiveLogoUrl && !imgError) {

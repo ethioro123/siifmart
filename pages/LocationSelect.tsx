@@ -68,7 +68,7 @@ export default function LocationSelect() {
                 {/* Header */}
                 <div className="flex flex-col md:flex-row justify-between items-center gap-4 border-b border-[#E2DCCE] dark:border-emerald-950/20 pb-6">
                     <div>
-                        <Logo size={26} className="mb-4" />
+                        <Logo size={26} variant="wordmark" className="mb-4" />
                         <h1 className="text-3xl font-bold text-[var(--theme-text-primary)] tracking-tight">
                             Location Command
                         </h1>

@@ -365,8 +365,7 @@ export default function TopBar() {
                <Menu size={22} className="md:w-6 md:h-6" />
             </button>
 
-            <Logo size={24} variant="emblem" className="mr-1 sm:hidden" />
-             <Logo size={22} className="mr-1 hidden sm:inline-flex" />
+            <Logo size={22} variant="wordmark" className="mr-1" />
 
             <DesktopSearch 
                searchValue={searchValue}
