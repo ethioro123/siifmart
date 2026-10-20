@@ -6,7 +6,10 @@ export function useStagingAccounts() {
     return useQuery({
         queryKey: ['staging-quick-login', 'utykzifrblpyxlvlknsm'],
         queryFn: () => stagingQuickLoginService.getAccounts(),
-        enabled: isStagingQuickLoginAvailable(), staleTime: 30_000, retry: false
+        enabled: isStagingQuickLoginAvailable(),
+        staleTime: 60_000,
+        retry: 2,
+        retryDelay: attempt => Math.min(attempt * 1000, 3000),
     });
 }
 

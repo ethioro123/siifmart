@@ -28,24 +28,43 @@ export function stagingQuickLoginPlugin(config: QuickLoginConfig): Plugin {
             let expiresAt = 0;
             const inFlight = new Set<string>();
             let rosterCache: { accounts: unknown[]; expires: number } | undefined;
+            let pendingRoster: Promise<unknown[]> | undefined;
 
-            async function callStaging(body: Record<string, unknown>) {
+            async function authenticate(force = false) {
                 if (!config.email || !config.password) throw new Error('Private staging login setup is missing');
                 const address = server.httpServer?.address();
                 if (!address || typeof address === 'string') throw new Error('Local server is unavailable');
                 administrator ??= createClient(`http://127.0.0.1:${address.port}/supabase-proxy`, config.publicKey, {
                     auth: { autoRefreshToken: false, persistSession: false, detectSessionInUrl: false }
                 });
-                if (expiresAt < Date.now() + 30_000) {
+                if (force || expiresAt < Date.now() + 30_000) {
                     pendingAuthentication ??= (async () => {
                         const { data, error } = await administrator!.auth.signInWithPassword({ email: config.email!, password: config.password! });
-                        if (error || !data.session) throw new Error('Private staging login could not authenticate');
+                        if (error || !data.session) throw new Error(error?.message || 'Private staging login could not authenticate');
                         expiresAt = (data.session.expires_at || 0) * 1000;
                     })().finally(() => { pendingAuthentication = undefined; });
                     await pendingAuthentication;
                 }
-                const { data, error } = await administrator.functions.invoke('staging-quick-login', { body });
-                if (error || data?.error) throw new Error(data?.error || 'Staging login service is unavailable');
+            }
+
+            async function callStaging(body: Record<string, unknown>, retryOnAuth = true): Promise<any> {
+                await authenticate();
+                const { data, error, response } = await administrator!.functions.invoke('staging-quick-login', { body });
+                if (retryOnAuth && (response?.status === 401 || (error as any)?.context?.status === 401)) {
+                    expiresAt = 0;
+                    await authenticate(true);
+                    return callStaging(body, false);
+                }
+                if (error || data?.error) {
+                    let details = data?.error;
+                    if (!details && error && 'context' in (error as any)) {
+                        try {
+                            const errJson = await (error as any).context.json();
+                            details = errJson?.error || errJson?.message;
+                        } catch {}
+                    }
+                    throw new Error(details || (error as Error)?.message || 'Staging login service is unavailable');
+                }
                 return data;
             }
 
@@ -54,16 +73,24 @@ export function stagingQuickLoginPlugin(config: QuickLoginConfig): Plugin {
                 try {
                     const pathname = new URL(request.url || '/', 'http://localhost').pathname;
                     if (pathname === '/accounts' && request.method === 'GET') {
-                        if (!rosterCache || rosterCache.expires < Date.now()) {
+                        if (rosterCache && rosterCache.expires > Date.now()) {
+                            return respond(response, 200, { accounts: rosterCache.accounts });
+                        }
+                        pendingRoster ??= (async () => {
                             const accounts: unknown[] = [];
                             for (let offset = 0; offset < 5000; offset += 100) {
                                 const page = await callStaging({ action: 'list', offset });
                                 accounts.push(...page.accounts);
                                 if (page.accounts.length < 100) break;
                             }
-                            rosterCache = { accounts, expires: Date.now() + 30_000 };
-                        }
-                        return respond(response, 200, { accounts: rosterCache.accounts });
+                            rosterCache = { accounts, expires: Date.now() + 60_000 };
+                            return accounts;
+                        })().finally(() => {
+                            pendingRoster = undefined;
+                        });
+
+                        const accounts = await pendingRoster;
+                        return respond(response, 200, { accounts });
                     }
                     if (pathname !== '/quick-login' || request.method !== 'POST') return respond(response, 404, { error: 'Not found' });
                     if (!request.headers['content-type']?.startsWith('application/json')) return respond(response, 415, { error: 'JSON required' });

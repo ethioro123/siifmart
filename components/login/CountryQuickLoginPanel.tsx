@@ -27,7 +27,7 @@ export function CountryQuickLoginPanel({
   const [levelFilter, setLevelFilter] = useState<'ALL' | 1 | 2 | 3 | 4>('ALL');
   const [roleFilter, setRoleFilter] = useState<string>('ALL');
   const isLocalhost = isStagingQuickLoginAvailable();
-  const { data: roster = [], isLoading, error } = useStagingAccounts();
+  const { data: roster = [], isLoading, error, refetch } = useStagingAccounts();
 
   const accounts = useMemo(() => {
     return roster.filter(acc => acc.country === country);
@@ -348,7 +348,16 @@ export function CountryQuickLoginPanel({
         {isLoading ? (
           <p className="text-xs text-[var(--theme-text-secondary)] py-4">Loading test employees…</p>
         ) : error ? (
-          <p role="alert" className="text-xs text-[var(--theme-text-secondary)] py-4">{error.message}</p>
+          <div role="alert" className="text-center py-6 px-3 space-y-2">
+            <p className="text-xs text-red-600 dark:text-red-400 font-medium">{error.message}</p>
+            <button
+              type="button"
+              onClick={() => refetch()}
+              className="px-3 py-1 text-xs font-semibold rounded-lg bg-stone-100 dark:bg-white/[0.08] hover:bg-stone-200 dark:hover:bg-white/[0.12] text-[#1E3F27] dark:text-[#EAE5D9] transition-colors cursor-pointer border border-[#E2DCCE]/60 dark:border-white/[0.06]"
+            >
+              Retry loading
+            </button>
+          </div>
         ) : filteredGroups.length === 0 ? (
           <div className="text-center py-8">
             <p className="text-xs text-stone-400">No matching roles found.</p>

@@ -24,7 +24,7 @@ export function KenyanQuickLogin({ onSelectAccount, disabled = false }: StagingQ
   const [roleFilter, setRoleFilter] = useState<string>('ALL');
   const [searchQuery, setSearchQuery] = useState('');
   const isLocalhost = isStagingQuickLoginAvailable();
-  const { data: accounts = [], isLoading, error } = useStagingAccounts();
+  const { data: accounts = [], isLoading, error, refetch } = useStagingAccounts();
 
   const getSiteIcon = (type: StagingQuickAccount['siteType'], iconColor: string) => {
     switch (type) {
@@ -229,7 +229,16 @@ export function KenyanQuickLogin({ onSelectAccount, disabled = false }: StagingQ
             {isLoading ? (
               <p className="text-xs text-[var(--theme-text-secondary)] py-4">Loading test employees…</p>
             ) : error ? (
-              <p role="alert" className="text-xs text-[var(--theme-text-secondary)] py-4">{error.message}</p>
+              <div role="alert" className="text-center py-4 space-y-1.5">
+                <p className="text-xs text-red-600 dark:text-red-400 font-medium">{error.message}</p>
+                <button
+                  type="button"
+                  onClick={() => refetch()}
+                  className="px-2.5 py-1 text-xs font-semibold rounded-lg bg-stone-100 dark:bg-white/[0.08] hover:bg-stone-200 dark:hover:bg-white/[0.12] text-[#1E3F27] dark:text-[#EAE5D9] transition-colors cursor-pointer border border-[#E2DCCE]/60 dark:border-white/[0.06]"
+                >
+                  Retry loading
+                </button>
+              </div>
             ) : groupedSites.length === 0 ? (
               <p className="text-xs text-stone-400 text-center py-4">No matching roles found.</p>
             ) : (
