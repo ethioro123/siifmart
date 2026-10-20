@@ -188,14 +188,11 @@ export default function EmployeeIDCard({ employee, siteCode, onClose }: Employee
                         ></div>
                         {/* Header */}
                         <div className="relative z-10 flex justify-between items-start p-4 pb-2">
-                            <div className="flex items-center gap-2">
-                                <div className="w-7 h-7 rounded-md bg-cyber-primary/20 flex items-center justify-center">
-                                    <div className="w-4 h-4 bg-cyber-primary rounded-sm" />
+                            <div className="flex flex-col">
+                                <div className="dark">
+                                    <Logo size={22} />
                                 </div>
-                                <div>
-                                    <h1 className="text-white font-bold text-base leading-none tracking-wide">SIIFMART</h1>
-                                    <p className="text-[7px] text-gray-400 tracking-widest uppercase mt-0.5">Official Staff ID</p>
-                                </div>
+                                <p className="text-[7px] text-gray-400 tracking-widest uppercase mt-1">Official Staff ID</p>
                             </div>
                             <div className="flex flex-col items-end">
                                 <div className="flex items-center gap-1">
@@ -255,7 +252,7 @@ export default function EmployeeIDCard({ employee, siteCode, onClose }: Employee
                         {/* Footer / Barcode Strip */}
                         <div className="relative z-10 mt-auto bg-white/5 backdrop-blur-sm border-t border-white/5 py-2 px-5 flex justify-between items-center">
                             <div className="text-[7px] text-gray-500 uppercase tracking-widest">
-                                Authorized Personnel Only • Property of Siifmart
+                                Authorized Personnel Only • Property of SIIFMART
                             </div>
                             <div className="flex gap-1">
                                 {[...Array(12)].map((_, i) => (

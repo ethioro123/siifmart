@@ -137,7 +137,7 @@ export default function StepIdentity({
                         />
                         <span>
                             <span className="block font-semibold">Create app login</span>
-                            <span className="block text-[11px] text-stone-500 dark:text-stone-400">Turn this off for employees who need a workforce record but no SiifMart account.</span>
+                            <span className="block text-[11px] text-stone-500 dark:text-stone-400">Turn this off for employees who need a workforce record but no SIIFMART account.</span>
                         </span>
                     </label>
 
