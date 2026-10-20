@@ -5,6 +5,10 @@
 
 ## Active Features
 
+### Warehouse Worker Sovereign Role Landing Routes (2026-10-20)
+- Warehouse workers now route directly to their sovereign operational tab upon login (e.g. receivers land on `/wms-ops?tab=RECEIVE`, pickers on `?tab=PICK`, packers on `?tab=PACK`, forklift operators on `?tab=PUTAWAY`, drivers on `?tab=DRIVER`, and dispatchers on `?tab=DOCKS`). `pages/Fulfillment.tsx` and `components/ProtectedRoute.tsx` synchronize and preserve role tabs cleanly without redirect loops.
+- **Files**: `utils/roleDashboard.ts`, `pages/Fulfillment.tsx`, `components/ProtectedRoute.tsx`, `utils/fulfillmentTabPermissions.ts`, `tests/utils/roleDashboard.test.ts`, `tests/utils/regionalOperations.test.ts`
+
 ### Workforce Job Titles and App Login Separation (2026-10-20)
 - Employee job titles can now be entered and edited independently from the system access profile. Onboarding can create an active workforce record without creating app credentials; password policy checks and temporary-password storage apply only when app login is enabled. The existing `employees.job_title` column supports this change, so no database migration was needed.
 - **Files**: `components/employees/wizard/StepIdentity.tsx`, `components/employees/wizard/StepRole.tsx`, `components/employees/wizard/StepDetails.tsx`, `components/employees/wizard/StepReview.tsx`, `components/staff-profile/tabs/SettingsTab.tsx`, `components/staff-profile/tabs/settings/ProfileRoleDeptCard.tsx`, `hooks/useEmployeeWizard.ts`
