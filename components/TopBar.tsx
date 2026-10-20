@@ -224,7 +224,7 @@ export default function TopBar() {
             if (nav.path === '/network-inventory' || nav.path === '/roadmap') return false;
             if (nav.module === 'admin' && nav.path === '/admin' && !isCeo) return false;
          } else if (isHQ) {
-            if (['pos', 'warehouse', 'procurement', 'sales'].includes(nav.module)) return false;
+            if (nav.path === '/pos' || nav.path === '/wms-ops') return false;
             if (nav.path === '/inventory') return false; // In HQ, local inventory is replaced by Network Inventory
          }
 

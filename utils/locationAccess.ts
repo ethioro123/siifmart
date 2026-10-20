@@ -19,37 +19,43 @@ import { UserRole } from '../types';
  * ============================================================================
  */
 const MULTI_SITE_ROLES: UserRole[] = [
-    'super_admin',      // CEO - sees everything. The ONLY multi-site role.
-];
-
-/**
- * Roles that are restricted to their assigned site (Workers)
- * Note: ALL ROLES except super_admin must go here.
- */
-const SINGLE_SITE_ROLES: UserRole[] = [
-    // Executive / Management (but still restricted to home base unless CEO)
-    'regional_manager',
+    'super_admin',      // CEO - Global sovereign authority
+    'admin',            // Country Managing Director - National sovereign authority
     'operations_manager',
+    'supply_chain_manager',
     'finance_manager',
     'hr_manager',
     'procurement_manager',
-    'supply_chain_manager',
     'merchandising_manager',
-    'admin',
-    'hr',
-    'cs_manager',
-    'it_support',
     'auditor',
+    'it_support',
+    'regional_manager'
+];
 
+/**
+ * Roles that are restricted to their assigned site (Frontline Branch Workers)
+ */
+const SINGLE_SITE_ROLES: UserRole[] = [
     // Warehouse workers
     'warehouse_manager',
     'dispatcher',
+    'dispatch_manager',
     'picker',
+    'packer',
+    'receiver',
     'driver',
+    'forklift_operator',
     'inventory_specialist',
+    'stock_clerk',
+    'returns_clerk',
 
     // Store workers
+    'store_manager',
+    'assistant_manager',
     'shift_lead',
+    'store_supervisor',
+    'cashier',
+    'sales_associate',
     'pos'
 ];
 

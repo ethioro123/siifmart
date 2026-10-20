@@ -145,6 +145,7 @@ export default function Sidebar() {
     // Filter by role AND site-type context
     let filteredItems = allItems.filter(item => {
       const isExecutive = userRole === 'super_admin' || userRole === 'admin' || (userRole as string)?.toLowerCase() === 'ceo';
+      const isSuperAdminOrCeo = userRole === 'super_admin' || (userRole as string)?.toLowerCase() === 'ceo';
       const hasRole = item.roles.includes(userRole) || isExecutive;
 
       const siteType = activeSite?.type || '';

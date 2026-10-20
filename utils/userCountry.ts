@@ -75,9 +75,17 @@ export function canSwitchRegion(user: { role?: string; title?: string } | null |
         role === 'admin' ||
         role === 'operations_manager' ||
         role === 'finance_manager' ||
+        role === 'hr_manager' ||
+        role === 'hr' ||
+        role === 'procurement_manager' ||
+        role === 'supply_chain_manager' ||
+        role === 'merchandising_manager' ||
+        role === 'it_support' ||
         role === 'auditor' ||
+        role === 'store_operations_auditor' ||
         title.includes('ceo') ||
-        title.includes('chief executive')
+        title.includes('chief executive') ||
+        title.includes('managing director')
     );
 }
 

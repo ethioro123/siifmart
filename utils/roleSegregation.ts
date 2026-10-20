@@ -26,7 +26,17 @@ export function resolveEmployeeScopeLevel(
     if (isRegionalWorkforceRole(role)) return 'REGIONAL';
 
     const normalizedRole = (role || '').trim().toLowerCase();
-    if (['super_admin', 'ceo', 'admin', 'operations_manager'].includes(normalizedRole)) {
+    if ([
+        'super_admin', 'ceo', 'admin', 'operations_manager', 'finance_manager',
+        'hr_manager', 'hr', 'procurement_manager', 'supply_chain_manager',
+        'merchandising_manager', 'it_support', 'auditor', 'store_operations_auditor',
+        'security_manager', 'logistics_manager', 'inventory_manager',
+        'buyer', 'demand_planner', 'replenishment_planner', 'vendor_relations_manager',
+        'customs_import_specialist', 'inbound_qc_inspector', 'treasury_officer',
+        'tax_compliance_officer', 'credit_control_officer', 'accountant',
+        'data_analyst', 'payroll_specialist', 'talent_recruiter',
+        'training_coordinator', 'hr_generalist', 'cs_manager'
+    ].includes(normalizedRole)) {
         return 'HQ';
     }
 
