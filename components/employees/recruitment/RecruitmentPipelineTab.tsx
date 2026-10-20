@@ -30,7 +30,7 @@ export default function RecruitmentPipelineTab() {
     const isSiteManager = userRoleLevel === 3;
     const canManageHiring = recruitmentService.canManageHiring(user?.role || '');
     const canManageCandidates = recruitmentService.canManageCandidates(user?.role || '');
-    const isHQ = userRoleLevel <= 2;
+    const canApproveRequisition = ['super_admin', 'CEO', 'ceo', 'admin', 'hr', 'hr_manager', 'regional_hr_officer'].includes(user?.role || '');
 
     const loadData = async () => {
         setIsLoading(true);
@@ -211,7 +211,7 @@ export default function RecruitmentPipelineTab() {
 
                                 <div className="flex items-center justify-between text-xs text-[var(--theme-text-muted)] pt-3 border-t border-[var(--theme-border-subtle)]">
                                     <span className="font-mono tabular-nums">Budget: {req.target_salary?.toLocaleString()} {country === 'KE' ? 'KSh' : 'ETB'}</span>
-                                    {req.status === 'pending_hq_approval' && isHQ && (
+                                    {req.status === 'pending_hq_approval' && canApproveRequisition && (
                                         <button
                                             type="button"
                                             onClick={(e) => { e.stopPropagation(); handleApproveRequisition(req.id); }}

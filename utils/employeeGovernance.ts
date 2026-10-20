@@ -302,8 +302,10 @@ export function canApproveChangeRequest(
     }
 
     switch (authority) {
+        case 'Human Resources':
+            return ['hr_manager', 'regional_hr_officer', 'hr'].includes(userRole);
         case 'Finance Department':
-            return ['finance_manager', 'cfo', 'accountant'].includes(userRole);
+            return ['finance_manager', 'regional_finance_officer', 'cfo'].includes(userRole);
         case 'Operations Management':
             return ['operations_manager', 'regional_manager', 'store_manager'].includes(userRole);
         case 'Logistics & Warehouse':

@@ -10,6 +10,7 @@ export type GovernanceCategory =
     | 'composite';           // Multiple categories combined
 
 export type ApprovingAuthority =
+    | 'Human Resources'
     | 'Executive / Compliance'
     | 'Finance Department'
     | 'Operations Management'

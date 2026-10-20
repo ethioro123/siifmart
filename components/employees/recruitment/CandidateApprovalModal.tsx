@@ -36,8 +36,8 @@ export const CandidateApprovalModal: React.FC<CandidateApprovalModalProps> = ({
     if (!isOpen || !candidate) return null;
 
     const userRole = user?.role || '';
-    const isHR = ['hr_manager', 'hr', 'super_admin', 'admin'].includes(userRole);
-    const isFinance = ['finance_manager', 'super_admin', 'admin'].includes(userRole);
+    const isHR = ['hr_manager', 'regional_hr_officer', 'hr', 'super_admin', 'admin'].includes(userRole);
+    const isFinance = ['finance_manager', 'regional_finance_officer', 'super_admin', 'admin'].includes(userRole);
     const isCEO = userRole === 'super_admin' || userRole.toLowerCase() === 'ceo';
 
     const targetRole = candidate.role || requisition?.role || 'stock_clerk';

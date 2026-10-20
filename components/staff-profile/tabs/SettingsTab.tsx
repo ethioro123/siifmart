@@ -152,6 +152,10 @@ export default function SettingsTab({
     const governanceResult = useMemo(() => {
         return evaluateEmployeeProfileChanges(employee, proposedChanges, currentUser?.role, currentUser?.id);
     }, [employee, proposedChanges, currentUser?.role, currentUser?.id]);
+    const requiresReview = governanceResult.requiresApproval || currentUser?.role === 'hr_generalist';
+    const requiredApprovers = governanceResult.requiredApprovers.length
+        ? governanceResult.requiredApprovers
+        : (['Human Resources'] as const);
 
     // Handle Direct Save (CEO or HR non-governed changes)
     const handleDirectSave = async () => {
@@ -181,7 +185,7 @@ export default function SettingsTab({
     // Handle primary action click
     const handleSaveClick = () => {
         if (!hasChanges || governanceResult.blockedReason) return;
-        if (governanceResult.requiresApproval && !isCEO) {
+        if (requiresReview && !isCEO) {
             setIsApprovalModalOpen(true);
         } else {
             handleDirectSave();
@@ -203,8 +207,8 @@ export default function SettingsTab({
                 status: 'pending',
                 governanceCategory: governanceResult.governanceCategories.length === 1 
                     ? governanceResult.governanceCategories[0] 
-                    : 'composite',
-                requiredApprovers: governanceResult.requiredApprovers,
+                    : (governanceResult.governanceCategories.length ? 'composite' : 'contact_general'),
+                requiredApprovers: [...requiredApprovers],
                 diffs: governanceResult.diffs,
                 fullProposedEmployee: proposedChanges,
                 reason
@@ -306,8 +310,8 @@ export default function SettingsTab({
                             <span className="text-rose-500 font-semibold">{governanceResult.blockedReason}</span>
                         ) : isCEO ? (
                             <span>CEO Sovereign Authority: Changes apply directly to personnel ledger.</span>
-                        ) : governanceResult.requiresApproval && hasChanges ? (
-                            <span>Governed fields detected: Request will route to {governanceResult.requiredApprovers.join(', ')}.</span>
+                        ) : requiresReview && hasChanges ? (
+                            <span>Change request will route to {requiredApprovers.join(', ')}.</span>
                         ) : (
                             <span>No governed fields modified: Changes will apply immediately.</span>
                         )}
@@ -319,7 +323,7 @@ export default function SettingsTab({
                         className={`w-full sm:w-auto px-6 py-2.5 rounded-xl font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition-all cursor-pointer shadow-xs disabled:opacity-40 ${
                             saveSuccess
                                 ? 'bg-emerald-600 text-white'
-                                : governanceResult.requiresApproval && !isCEO
+                                : requiresReview && !isCEO
                                     ? 'bg-amber-500 hover:bg-amber-600 text-black'
                                     : 'bg-[var(--theme-primary)] hover:opacity-90 text-[var(--theme-primary-text)]'
                         }`}
@@ -327,8 +331,8 @@ export default function SettingsTab({
                         {isSaving ? (
                             <Loader2 size={16} className="animate-spin" />
                         ) : saveSuccess ? (
-                            <><Check size={16} /> {governanceResult.requiresApproval && !isCEO ? 'Request Submitted' : 'Saved Successfully'}</>
-                        ) : governanceResult.requiresApproval && !isCEO ? (
+                            <><Check size={16} /> {requiresReview && !isCEO ? 'Request Submitted' : 'Saved Successfully'}</>
+                        ) : requiresReview && !isCEO ? (
                             <><Save size={15} /> Submit for Department Sign-Off</>
                         ) : (
                             <><Save size={15} /> Save Changes (Direct Update)</>
