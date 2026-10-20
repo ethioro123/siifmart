@@ -201,7 +201,12 @@ export const POSupplierLogistics: React.FC<POSupplierLogisticsProps> = ({
                                         </button>
                                     </div>
                                 </div>
-                                {sites.filter(s => (s.type === 'Warehouse' || s.type === 'Distribution Center') && s.status !== 'Closed').map(s => (
+                                {sites.length === 0 ? (
+                                    <div className="p-4 text-center text-xs text-[var(--theme-text-secondary)]">
+                                        No active Warehouses or Distribution Centers available for receiving.
+                                    </div>
+                                ) : (
+                                    sites.map(s => (
                                     <div
                                         key={s.id}
                                         onClick={() => {
@@ -237,7 +242,7 @@ export const POSupplierLogistics: React.FC<POSupplierLogisticsProps> = ({
                                             {s.country === 'KE' ? 'KE' : 'ET'}
                                         </span>
                                     </div>
-                                ))}
+                                )))}
                             </div>
                         )}
 

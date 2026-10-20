@@ -43,11 +43,6 @@ export const GROCERY_CATEGORIES: Record<string, string[]> = {
     'Tissues, Paper & Foils',
     'Pest Control & Garden Care'
   ],
-  'Pet Supplies': [
-    'Dog Food & Accessories',
-    'Cat Food & Accessories',
-    'Small Pet Supplies'
-  ],
   'General Merchandise & Apparel': [
     'Stationery, Office & Books',
     'Electronics & Batteries',

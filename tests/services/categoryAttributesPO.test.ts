@@ -57,7 +57,7 @@ describe('PO Category-Specific Attributes System', () => {
             expect(getCategorySpecGroup('Dental & Oral Care').id).toBe('health_beauty');
             expect(getCategorySpecGroup('Cleaning Products & Tools').id).toBe('household_cleaning');
             expect(getCategorySpecGroup('Tissues, Paper & Foils').id).toBe('household_cleaning');
-            expect(getCategorySpecGroup('Dog Food & Accessories').id).toBe('pet_supplies');
+            expect(getCategorySpecGroup('Dog Food & Accessories').id).toBe('general_merchandise');
 
             // General Merchandise, Apparel & Homewares
             expect(getCategorySpecGroup('Clothing & Accessories').id).toBe('apparel');
@@ -163,7 +163,7 @@ describe('PO Category-Specific Attributes System', () => {
             expect(keys).toContain('Baby & Toddler');
             expect(keys).toContain('Health & Beauty');
             expect(keys).toContain('Household & Cleaning');
-            expect(keys).toContain('Pet Supplies');
+            expect(keys).not.toContain('Pet Supplies');
             expect(keys).toContain('General Merchandise & Apparel');
         });
 

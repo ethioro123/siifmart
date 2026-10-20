@@ -112,11 +112,6 @@ export const CATEGORY_CONTAINERS_BY_DOMAIN: Record<string, string[]> = {
         'Nappy / Diaper Bulk Master Bale',
         'Formula Protective Tin Outer Box'
     ],
-    pet_supplies: [
-        'Heavy Multi-Wall Pet Food Sack',
-        'Reinforced Pet Food Master Case',
-        'Tear-Resistant Woven Outer Bag'
-    ],
     stationery_toys: [
         'Clear Window Display Box',
         'Corrugated Master Toy Shipper',

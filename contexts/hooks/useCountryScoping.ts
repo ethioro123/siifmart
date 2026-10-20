@@ -126,12 +126,15 @@ export function useCountryScoping({
   }, [sites]);
 
   // 2. Scoped Sites: facilities in effective country matching activeRegionCode (if selected)
+  const countrySites = useMemo(() => {
+    return sites.filter(s => getSiteCountry(s) === effectiveCountry);
+  }, [sites, effectiveCountry]);
+
   const scopedSites = useMemo(() => {
-    const countrySites = sites.filter(s => getSiteCountry(s) === effectiveCountry);
     if (!activeRegionCode) return countrySites;
     const regionalSites = countrySites.filter(s => s.regionCode === activeRegionCode || s.region_code === activeRegionCode);
     return regionalSites.length > 0 ? regionalSites : countrySites;
-  }, [sites, effectiveCountry, activeRegionCode]);
+  }, [countrySites, activeRegionCode]);
 
   // 3. Auto-switch active site when effective country changes
   const prevCountryRef = useRef<Country>(effectiveCountry);
@@ -360,6 +363,7 @@ export function useCountryScoping({
   }, [effectiveCountry, settings?.countryConfigs]);
 
   return {
+    countrySites,
     scopedSites,
     scopedAllOrders,
     scopedAllSales,

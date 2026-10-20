@@ -226,23 +226,6 @@ export const CATEGORY_SPEC_GROUPS: Record<string, CategorySpecGroup> = {
         ]
     },
 
-    // 13. Pet Supplies & Nutrition
-    pet_supplies: {
-        id: 'pet_supplies',
-        domainTitle: 'Pet Nutrition & Animal Care',
-        iconType: 'dog',
-        badgeLabel: 'Pet Care',
-        description: 'Species targeting, life stage nutrition, formulation, and shelf life',
-        fields: [
-            { key: 'targetAnimal', label: 'Target Species', type: 'select', options: ['Canine (Dog)', 'Feline (Cat)', 'Avian (Bird)', 'Small Pet / Rodent', 'Aquarium Fish'], colSpan: 2, role: 'display' },
-            { key: 'lifeStage', label: 'Nutritional Life Stage', type: 'select', options: ['Puppy / Kitten (Growth)', 'Adult Maintenance', 'Senior / Mature', 'All Life Stages'], colSpan: 2, role: 'display' },
-            { key: 'feedForm', label: 'Feed Formulation', type: 'select', options: ['Dry Extruded Kibble', 'Wet Canned Food / Pate', 'Pouch Gravy / Loaf', 'Treats & Chews', 'Non-Food Accessory / Litter'], colSpan: 2, role: 'display' },
-            { key: 'primaryProtein', label: 'Primary Protein / Base', type: 'text', placeholder: 'e.g. Chicken, Salmon, Lamb & Rice, Beef', colSpan: 2, role: 'display' },
-            { key: 'specialDiet', label: 'Special Dietary Formula', type: 'select', options: ['Standard Complete', 'Grain-Free Formula', 'Sensitive Stomach & Skin', 'Weight Management'], colSpan: 2, role: 'display' },
-            { key: 'shelfLifeDays', label: 'Sealed Shelf Life (Days)', type: 'text', placeholder: 'e.g. 365 Days, 540 Days', colSpan: 2, role: 'handling' },
-        ]
-    },
-
     // 14. Apparel, Textiles & Footwear
     apparel: {
         id: 'apparel',

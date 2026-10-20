@@ -23,6 +23,7 @@ export interface DataContextType {
   shifts: ShiftRecord[];
   heldOrders: HeldOrder[];
   sites: Site[];
+  countrySites?: Site[];
   activeSite: Site | undefined;
   effectiveCountry?: Country;
   isCeo?: boolean;

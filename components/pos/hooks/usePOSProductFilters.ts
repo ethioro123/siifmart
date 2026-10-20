@@ -43,8 +43,7 @@ const getParentCategory = (category: string): string => {
         'dental & oral care', 'hair & body care', 'cosmetics & skin care', 
         'vitamins & supplements', 'pharmacy & first aid', 'household & cleaning',
         'laundry & dishwashing', 'cleaning products & tools', 'tissues, paper & foils',
-        'pest control & garden care', 'pet supplies', 'dog food & accessories',
-        'cat food & accessories', 'small pet supplies'
+        'pest control & garden care'
     ].includes(cat)) {
         return 'Household & Personal';
     }

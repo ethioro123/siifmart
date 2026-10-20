@@ -310,7 +310,8 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
     scopedShifts,
     scopedExpenses, scopedAllProducts, scopedProducts, scopedCustomers, scopedSuppliers,
     scopedDiscountCodes, scopedSettings, effectiveCountry, isCeo,
-    regions, activeRegionCode, setActiveRegionCode, canSwitchRegion, isRegionalUser
+    regions, activeRegionCode, setActiveRegionCode, canSwitchRegion, isRegionalUser,
+    countrySites
   } = useCountryScoping({
     country: settings?.country || 'ET',
     settings,
@@ -347,6 +348,7 @@ export const DataProvider = ({ children }: { children?: ReactNode }) => {
     shifts: scopedShifts,
     heldOrders,
     sites: scopedSites,
+    countrySites,
     activeSite,
     effectiveCountry,
     isCeo,

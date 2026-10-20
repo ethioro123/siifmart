@@ -13,22 +13,19 @@ describe('Category-Driven Product Attributes System', () => {
         it('resolves Electronics specs for Kindle, Samsung phones, and Batteries', () => {
             const groupKindle = getCategorySpecGroup('General Merchandise & Apparel', 'Electronics & Batteries');
             expect(groupKindle.id).toBe('electronics');
-            expect(groupKindle.badgeLabel).toBe('GS1 Tech Attributes');
+            expect(groupKindle.badgeLabel).toBe('Tech Attributes');
 
             const keys = groupKindle.fields.map(f => f.key);
             expect(keys).toContain('modelNumber');
-            expect(keys).toContain('screenSize');
-            expect(keys).toContain('storageRam');
-            expect(keys).toContain('batteryType');
-            expect(keys).toContain('connectivity');
-            expect(keys).toContain('voltage');
+            expect(keys).toContain('deviceType');
+            expect(keys).toContain('plugType');
             expect(keys).toContain('warrantyPeriod');
         });
 
         it('resolves Apparel specs for Clothing & Accessories', () => {
             const group = getCategorySpecGroup('General Merchandise & Apparel', 'Clothing & Accessories');
             expect(group.id).toBe('apparel');
-            expect(group.badgeLabel).toBe('Soft Goods Master');
+            expect(group.badgeLabel).toBe('Apparel Master');
 
             const keys = group.fields.map(f => f.key);
             expect(keys).toContain('apparelSize');
@@ -45,14 +42,14 @@ describe('Category-Driven Product Attributes System', () => {
             const keys = group.fields.map(f => f.key);
             expect(keys).toContain('origin');
             expect(keys).toContain('grade');
-            expect(keys).toContain('ripenessVariety');
-            expect(keys).toContain('perishableStorage');
+            expect(keys).toContain('produceVariety');
+            expect(keys).toContain('coldChainRequired');
         });
 
         it('resolves Meat & Poultry specs with mandatory Halal certification field', () => {
             const group = getCategorySpecGroup('Fresh Food & Deli', 'Meat & Poultry');
             expect(group.id).toBe('meat_poultry');
-            expect(group.badgeLabel).toBe('Halal Meat Master');
+            expect(group.badgeLabel).toBe('Halal Protein');
 
             const halalField = group.fields.find(f => f.key === 'halalCertified');
             expect(halalField).toBeDefined();
@@ -62,7 +59,7 @@ describe('Category-Driven Product Attributes System', () => {
         it('resolves Non-Alcoholic Beverage specs for Drinks & Beverages', () => {
             const group = getCategorySpecGroup('Pantry & Groceries', 'Drinks & Beverages');
             expect(group.id).toBe('beverages');
-            expect(group.badgeLabel).toBe('Non-Alcoholic Halal');
+            expect(group.badgeLabel).toBe('Halal Drinks');
 
             const keys = group.fields.map(f => f.key);
             expect(keys).toContain('beverageType');
@@ -74,7 +71,7 @@ describe('Category-Driven Product Attributes System', () => {
         it('resolves Household & Cleaning specs with chemical safety and formulation', () => {
             const group = getCategorySpecGroup('Household & Cleaning', 'Laundry & Dishwashing');
             expect(group.id).toBe('household_cleaning');
-            expect(group.badgeLabel).toBe('Home & Chemical Care');
+            expect(group.badgeLabel).toBe('Home Care');
 
             const keys = group.fields.map(f => f.key);
             expect(keys).toContain('cleaningForm');
@@ -89,15 +86,15 @@ describe('Category-Driven Product Attributes System', () => {
             expect(group.badgeLabel).toBe('Pediatric Grade');
 
             const keys = group.fields.map(f => f.key);
-            expect(keys).toContain('babyStage');
-            expect(keys).toContain('specialDietFormula');
+            expect(keys).toContain('babyCategory');
+            expect(keys).toContain('stageOrSize');
             expect(keys).toContain('hypoallergenicCert');
         });
 
         it('resolves Automotive specs for automotive parts and fitment', () => {
             const group = getCategorySpecGroup('Automotive Spare Parts', 'Engine Filters');
             expect(group.id).toBe('automotive_industrial');
-            expect(group.badgeLabel).toBe('Technical / OEM Parts');
+            expect(group.badgeLabel).toBe('Technical Parts');
 
             const keys = group.fields.map(f => f.key);
             expect(keys).toContain('vehicleFitment');
@@ -108,7 +105,7 @@ describe('Category-Driven Product Attributes System', () => {
         it('falls back to General Merchandise specs for unspecified categories', () => {
             const group = getCategorySpecGroup('Other Items');
             expect(group.id).toBe('general_merchandise');
-            expect(group.badgeLabel).toBe('General Master');
+            expect(group.badgeLabel).toBe('General Goods');
         });
     });
 
@@ -127,6 +124,16 @@ describe('Category-Driven Product Attributes System', () => {
             expect(allGroupsStr).not.toContain('liquor');
             expect(allGroupsStr).not.toContain('vodka');
             expect(allGroupsStr).not.toContain('whiskey');
+        });
+
+        it('guarantees Pet Supplies is completely excluded from catalog categories', () => {
+            const allCategoriesStr = JSON.stringify(PRODUCT_CATEGORIES).toLowerCase();
+            expect(allCategoriesStr).not.toContain('pet supplies');
+            expect(allCategoriesStr).not.toContain('dog food');
+            expect(allCategoriesStr).not.toContain('cat food');
+
+            const allGroupsStr = JSON.stringify(CATEGORY_SPEC_GROUPS).toLowerCase();
+            expect(allGroupsStr).not.toContain('pet_supplies');
         });
     });
 
@@ -149,8 +156,8 @@ describe('Category-Driven Product Attributes System', () => {
             };
 
             const summary = getPOItemCategorySpecsSummary(item);
-            expect(summary.domainTitle).toBe('Consumer Electronics & Hardware Specs');
-            expect(summary.badgeLabel).toBe('GS1 Tech Attributes');
+            expect(summary.domainTitle).toBe('Electronics & Hardware Specs');
+            expect(summary.badgeLabel).toBe('Tech Attributes');
             expect(summary.specs.length).toBeGreaterThanOrEqual(4);
             expect(summary.summaryText).toContain('Model: B08KTZ8249');
             expect(summary.summaryText).toContain('Display: 6.8" E-Ink');
@@ -173,7 +180,7 @@ describe('Category-Driven Product Attributes System', () => {
             };
 
             const summary = getPOItemCategorySpecsSummary(item);
-            expect(summary.domainTitle).toBe('Apparel, Footwear & Fashion Specs');
+            expect(summary.domainTitle).toBe('Apparel, Footwear & Textiles');
             expect(summary.summaryText).toContain('Apparel Size: L');
             expect(summary.summaryText).toContain('Demographic Cut: Men');
             expect(summary.summaryText).toContain('Fiber: 100% Cotton');
@@ -195,7 +202,7 @@ describe('Category-Driven Product Attributes System', () => {
             };
 
             const summary = getPOItemCategorySpecsSummary(item);
-            expect(summary.badgeLabel).toBe('Halal Meat Master');
+            expect(summary.badgeLabel).toBe('Halal Protein');
             expect(summary.summaryText).toContain('Butchery Cut Type: Bone-In Ribeye');
             expect(summary.summaryText).toContain('Halal Certification: 100% Certified Halal (Mandatory)');
         });
@@ -203,7 +210,7 @@ describe('Category-Driven Product Attributes System', () => {
         it('resolves Confectionery & Snack specs for Snacks & Confectionery', () => {
             const group = getCategorySpecGroup('Pantry & Groceries', 'Snacks & Confectionery');
             expect(group.id).toBe('confectionery_snacks');
-            expect(group.badgeLabel).toBe('Confectionery Master');
+            expect(group.badgeLabel).toBe('Snack Master');
 
             const keys = group.fields.map(f => f.key);
             expect(keys).toContain('confectioneryType');
@@ -221,7 +228,7 @@ describe('Category-Driven Product Attributes System', () => {
         it('resolves Deep Frozen specs for Ice Cream & Desserts instead of misidentifying as dairy', () => {
             const group = getCategorySpecGroup('Frozen Food', 'Ice Cream & Desserts');
             expect(group.id).toBe('frozen_food');
-            expect(group.badgeLabel).toBe('Deep Frozen Chain');
+            expect(group.badgeLabel).toBe('Deep Frozen');
 
             const keys = group.fields.map(f => f.key);
             expect(keys).toContain('frozenCategory');
@@ -233,7 +240,7 @@ describe('Category-Driven Product Attributes System', () => {
         it('resolves Bakery & Deli specs for fresh baked goods and deli meals', () => {
             const groupBakery = getCategorySpecGroup('Fresh Food & Deli', 'Bakery & Bread');
             expect(groupBakery.id).toBe('bakery_deli');
-            expect(groupBakery.badgeLabel).toBe('Fresh Baked & Deli');
+            expect(groupBakery.badgeLabel).toBe('Fresh Baked');
 
             const groupDeli = getCategorySpecGroup('Fresh Food & Deli', 'Deli & Prepared Meals');
             expect(groupDeli.id).toBe('bakery_deli');
@@ -245,22 +252,15 @@ describe('Category-Driven Product Attributes System', () => {
             expect(keys).toContain('shelfLifeDays');
         });
 
-        it('resolves Pet Supplies specs for pet nutrition', () => {
+        it('falls back to general merchandise for decommissioned pet supplies', () => {
             const group = getCategorySpecGroup('Pet Supplies', 'Dog Food & Accessories');
-            expect(group.id).toBe('pet_supplies');
-            expect(group.badgeLabel).toBe('Pet Care Standard');
-
-            const keys = group.fields.map(f => f.key);
-            expect(keys).toContain('targetAnimal');
-            expect(keys).toContain('lifeStage');
-            expect(keys).toContain('feedForm');
-            expect(keys).toContain('primaryProtein');
+            expect(group.id).toBe('general_merchandise');
         });
 
         it('resolves Stationery & Toy specs for toys, games and books', () => {
             const group = getCategorySpecGroup('General Merchandise & Apparel', 'Toys & Recreation');
             expect(group.id).toBe('stationery_toys');
-            expect(group.badgeLabel).toBe('General Goods Master');
+            expect(group.badgeLabel).toBe('Stationery & Toys');
 
             const keys = group.fields.map(f => f.key);
             expect(keys).toContain('goodsCategory');
@@ -287,8 +287,8 @@ describe('Category-Driven Product Attributes System', () => {
             };
 
             const summary = getPOItemCategorySpecsSummary(item);
-            expect(summary.domainTitle).toBe('Confectionery, Sweets & Snack Foods');
-            expect(summary.badgeLabel).toBe('Confectionery Master');
+            expect(summary.domainTitle).toBe('Confectionery, Sweets & Snacks');
+            expect(summary.badgeLabel).toBe('Snack Master');
             expect(summary.summaryText).toContain('Confectionery Type: Chocolate Bar / Slab');
             expect(summary.summaryText).toContain('Cocoa Solids: 70% Dark Cocoa');
             expect(summary.summaryText).toContain('Halal Certification: 100% Certified Halal (Mandatory)');

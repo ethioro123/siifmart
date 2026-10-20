@@ -67,11 +67,6 @@ const SUBCATEGORY_TO_GROUP: Record<string, string> = {
     'tissues, paper & foils': 'household_cleaning',
     'pest control & garden care': 'household_cleaning',
 
-    // Pet Supplies
-    'dog food & accessories': 'pet_supplies',
-    'cat food & accessories': 'pet_supplies',
-    'small pet supplies': 'pet_supplies',
-
     // Consumer Electronics & Tech Hardware
     'tech': 'electronics',
     'technology': 'electronics',
@@ -160,7 +155,6 @@ const PARENT_CATEGORY_TO_GROUP: Record<string, string> = {
     'beauty & personal care': 'health_beauty',
     'household & cleaning': 'household_cleaning',
     'household': 'household_cleaning',
-    'pet supplies': 'pet_supplies',
     'general merchandise & apparel': 'general_merchandise',
     'homewares, kitchen & dining': 'homewares_kitchen',
     'homewares': 'homewares_kitchen',
@@ -220,9 +214,6 @@ export const getCategorySpecGroup = (category?: string, subcategory?: string): C
     }
     if (/\b(frozen|ice cream|icecream|gelato|sorbet|deep freeze)\b/i.test(combined)) {
         return CATEGORY_SPEC_GROUPS.frozen_food;
-    }
-    if (/\b(pet|dog|cat|feline|canine|kibble|aquarium)\b/i.test(combined)) {
-        return CATEGORY_SPEC_GROUPS.pet_supplies;
     }
     if (/\b(stationery|office|toy|game|puzzle|book|paper|pencil|pen)\b/i.test(combined)) {
         return CATEGORY_SPEC_GROUPS.stationery_toys;
@@ -332,11 +323,6 @@ export const PRODUCT_CATEGORIES = {
         "Tissues, Paper & Foils",
         "Pest Control & Garden Care"
     ],
-    "Pet Supplies": [
-        "Dog Food & Accessories",
-        "Cat Food & Accessories",
-        "Small Pet Supplies"
-    ],
     "General Merchandise & Apparel": [
         "Stationery, Office & Books",
         "Electronics & Batteries",
@@ -373,8 +359,7 @@ export const isConsumableCategory = (category?: string): boolean => {
         'breakfast & cereals',
         'tea, coffee & cocoa',
         'baby food & formula',
-        'ice cream & desserts',
-        'pet supplies'
+        'ice cream & desserts'
     ];
     return consumableKeywords.some(keyword => cat.includes(keyword));
 };

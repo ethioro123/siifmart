@@ -52,11 +52,6 @@ const CATEGORY_PREFIXES: Record<string, string> = {
     'Tissues, Paper & Foils': 'TS',
     'Pest Control & Garden Care': 'GD',
 
-    // Pet Supplies
-    'Dog Food & Accessories': 'PT',
-    'Cat Food & Accessories': 'PT',
-    'Small Pet Supplies': 'PT',
-
     // General Merchandise & Apparel
     'Stationery, Office & Books': 'ST',
     'Electronics & Batteries': 'EL',
@@ -81,7 +76,6 @@ const CATEGORY_PREFIXES: Record<string, string> = {
     'Furniture': 'FN',
     'Garden': 'GD',
     'Automotive': 'AU',
-    'Pet': 'PT',
     'Baby': 'BB',
     'Tools': 'TL',
     'General': 'GN',

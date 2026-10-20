@@ -54,7 +54,7 @@ export default function RegionalOperations() {
   const regionName = currentRegion?.name || regionCode || 'Territory';
 
   return (
-    <div className="space-y-6 max-w-7xl mx-auto p-4 md:p-6 pb-24">
+    <div className="space-y-6 w-full max-w-full p-2 sm:p-4 md:p-6 pb-24 animate-in fade-in duration-300">
       {/* Executive Inspection Banner (for CEO / Operations Manager auditing the region) */}
       {isAuditInspection && (
         <div className="p-3.5 rounded-2xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
