@@ -49,6 +49,10 @@ interface UseEmployeeWizardProps {
 const DEPARTMENTS = ['Retail Operations', 'Logistics & Warehouse', 'Finance', 'Management', 'Human Resources', 'Security', 'Transport', 'Procurement'];
 
 const ROLE_POOLS: Partial<Record<UserRole, UserRole[]>> = {
+   regional_procurement_lead: ['vendor_relations_manager', 'buyer', 'demand_planner', 'replenishment_planner', 'customs_import_specialist', 'inbound_qc_inspector', 'merchandiser', 'inventory_specialist'],
+   regional_finance_officer: ['accountant', 'treasury_officer', 'tax_compliance_officer', 'credit_control_officer', 'payroll_specialist', 'auditor', 'store_operations_auditor'],
+   regional_logistics_lead: ['warehouse_manager', 'logistics_manager', 'inventory_manager', 'dispatch_manager', 'fleet_maintenance_supervisor', 'assistant_manager', 'shift_lead', 'dispatcher', 'picker', 'packer', 'receiver', 'driver', 'forklift_operator', 'stock_clerk', 'returns_clerk', 'inventory_specialist', 'inbound_qc_inspector', 'replenishment_planner'],
+   regional_security_supervisor: ['security_manager', 'loss_prevention', 'store_operations_auditor', 'auditor'],
    store_manager: ['assistant_manager', 'shift_lead', 'cashier', 'sales_associate', 'stock_clerk', 'customer_service', 'pos', 'cs_manager', 'store_supervisor', 'merchandiser'],
    warehouse_manager: ['assistant_manager', 'shift_lead', 'picker', 'packer', 'receiver', 'driver', 'forklift_operator', 'inventory_specialist', 'dispatcher'],
    dispatch_manager: ['driver', 'dispatcher'],
@@ -106,15 +110,15 @@ export function useEmployeeWizard({
          return SYSTEM_ROLES.map(r => r.id).filter(id => id !== 'super_admin');
       }
 
+      if (ROLE_POOLS[user.role]) {
+         return ROLE_POOLS[user.role]!.filter(roleId => canEmployRole(user.role, roleId));
+      }
+
       const userLevel = SYSTEM_ROLES.find(r => r.id === user.role)?.level || 4;
       const userHierarchy = getRoleHierarchy(user.role);
 
-      if (userLevel <= 2 || userHierarchy >= 82) {
+      if (userLevel <= 2 || userHierarchy >= 81) {
          return SYSTEM_ROLES.filter(r => canEmployRole(user.role, r.id)).map(r => r.id);
-      }
-
-      if (ROLE_POOLS[user.role]) {
-         return ROLE_POOLS[user.role]!.filter(roleId => canEmployRole(user.role, roleId));
       }
 
       return [];
@@ -122,9 +126,19 @@ export function useEmployeeWizard({
 
    const getAvailableDepartments = () => {
       if (!user?.role) return [];
-      if (['super_admin', 'admin', 'hr', 'hr_manager', 'regional_manager', 'regional_hr_officer', 'operations_manager', 'finance_manager', 'supply_chain_manager', 'procurement_manager'].includes(user.role)) return DEPARTMENTS;
+      if ([
+         'super_admin', 'admin', 'country_managing_director',
+         'hr', 'hr_manager', 'head_of_hr', 'hr_head', 'talent_recruiter', 'hr_generalist',
+         'regional_manager', 'regional_hr_officer',
+         'operations_manager', 'head_of_operations', 'operations_head',
+         'finance_manager', 'head_of_finance', 'finance_head',
+         'supply_chain_manager', 'head_of_supply_chain', 'supply_chain_head',
+         'procurement_manager', 'head_of_procurement', 'procurement_head',
+         'merchandising_manager', 'head_of_merchandising', 'merchandising_head',
+         'head_of_it', 'it_head', 'head_of_audit', 'audit_head'
+      ].includes(user.role)) return DEPARTMENTS;
       if (user.role === 'regional_procurement_lead') return ['Procurement', 'Logistics & Warehouse'];
-      if (user.role === 'regional_finance_officer') return ['Management'];
+      if (user.role === 'regional_finance_officer') return ['Finance', 'Management'];
       if (user.role === 'regional_logistics_lead') return ['Transport', 'Logistics & Warehouse'];
       if (user.role === 'regional_security_supervisor') return ['Security'];
       if (user.role === 'store_manager') return ['Retail Operations', 'Logistics & Warehouse', 'Transport'];

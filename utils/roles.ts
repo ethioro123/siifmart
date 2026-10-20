@@ -309,6 +309,27 @@ export const canEmployRole = (
         ].includes(userRole as string);
     }
 
+    // Regional Functional Leads (hierarchy 81) can be employed by Executive Leadership, Operations Director, Regional Manager, HR Leadership, or their Corporate Directorate Head
+    const isRegionalFunctionalLead = [
+        'regional_procurement_lead',
+        'regional_finance_officer',
+        'regional_hr_officer',
+        'regional_logistics_lead',
+        'regional_security_supervisor'
+    ].includes(candidateRole as string);
+    if (isRegionalFunctionalLead) {
+        return [
+            'super_admin', 'ceo', 'CEO', 'admin', 'country_managing_director',
+            'operations_manager', 'head_of_operations', 'operations_head',
+            'regional_manager',
+            'hr_manager', 'head_of_hr', 'hr_head', 'hr',
+            'procurement_manager', 'head_of_procurement', 'procurement_head',
+            'finance_manager', 'head_of_finance', 'finance_head',
+            'supply_chain_manager', 'head_of_supply_chain', 'supply_chain_head',
+            'head_of_audit', 'audit_head', 'head_of_it', 'it_head'
+        ].includes(userRole as string);
+    }
+
     // HR and above (Level 2 & above, hierarchy >= 82) cannot employ their level or above
     // They can ONLY employ roles strictly less than their role (Level 3 Site Managers & Level 4 Staff)
     const isHrOrAbove = userLevel <= 2 || userHierarchy >= 82;
