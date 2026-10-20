@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Employee, Site, UserRole } from '../types';
-import { autoSelectSiteForRole, getRecommendedDepartment, validateRoleSiteAssignment, getRoleLocationDescription, canRoleBeAtSiteType, validateRegionalBoundary, isRegionalWorkforceRole, resolveEmployeeScopeLevel } from '../utils/roleSegregation';
+import { autoSelectSiteForRole, getRecommendedDepartment, validateRoleSiteAssignment, getRoleLocationDescription, canRoleBeAtSiteType, validateRegionalBoundary, isRegionalWorkforceRole, isCorporateHqDirectorateRole, resolveEmployeeScopeLevel } from '../utils/roleSegregation';
 import { SYSTEM_ROLES, canEmployRole, getJobTitleForRole, getRoleHierarchy } from '../utils/roles';
 import { logger } from '../utils/logger';
 import { employeesService } from '../services/employees.service';
@@ -126,24 +126,13 @@ export function useEmployeeWizard({
 
    const getAvailableDepartments = () => {
       if (!user?.role) return [];
-      if ([
-         'super_admin', 'admin', 'country_managing_director',
-         'hr', 'hr_manager', 'head_of_hr', 'hr_head', 'talent_recruiter', 'hr_generalist',
-         'regional_manager', 'regional_hr_officer',
-         'operations_manager', 'head_of_operations', 'operations_head',
-         'finance_manager', 'head_of_finance', 'finance_head',
-         'supply_chain_manager', 'head_of_supply_chain', 'supply_chain_head',
-         'procurement_manager', 'head_of_procurement', 'procurement_head',
-         'merchandising_manager', 'head_of_merchandising', 'merchandising_head',
-         'head_of_it', 'it_head', 'head_of_audit', 'audit_head'
-      ].includes(user.role)) return DEPARTMENTS;
+      if (isCorporateHqDirectorateRole(user.role) || ['hr', 'talent_recruiter', 'hr_generalist', 'regional_manager', 'regional_hr_officer'].includes(user.role)) return DEPARTMENTS;
       if (user.role === 'regional_procurement_lead') return ['Procurement', 'Logistics & Warehouse'];
       if (user.role === 'regional_finance_officer') return ['Finance', 'Management'];
       if (user.role === 'regional_logistics_lead') return ['Transport', 'Logistics & Warehouse'];
       if (user.role === 'regional_security_supervisor') return ['Security'];
       if (user.role === 'store_manager') return ['Retail Operations', 'Logistics & Warehouse', 'Transport'];
-      if (user.role === 'warehouse_manager') return ['Logistics & Warehouse', 'Transport'];
-      if (user.role === 'logistics_manager') return ['Transport', 'Logistics & Warehouse'];
+      if (user.role === 'warehouse_manager' || user.role === 'logistics_manager') return ['Transport', 'Logistics & Warehouse'];
       if (user.role === 'inventory_manager') return ['Logistics & Warehouse', 'Management'];
       if (user.role === 'security_manager') return ['Security'];
       return [];
