@@ -209,7 +209,7 @@ export const ProductControlModal: React.FC<Props> = ({ product, isOpen, onClose,
             };
 
             if (!canDirectEdit) {
-                // Zero Autonomous Price Changes: Branch staff submit for CEO approval
+                // Scoped staff prepare a price proposal for a merchandising lead.
                 const priceRequest = buildPriceChangeRequest({
                     product,
                     proposal: {
@@ -222,10 +222,7 @@ export const ProductControlModal: React.FC<Props> = ({ product, isOpen, onClose,
                     countryCode: activeCountry,
                     source: 'Product control pricing update',
                 });
-                await inventoryRequestsService.create({
-                    ...priceRequest,
-                    proposedChanges: { ...priceRequest.proposedChanges, competitorPrice: pricingCfg.competitorPrice },
-                });
+                await inventoryRequestsService.create(priceRequest);
 
                 try {
                     await systemLogsService.create({
@@ -249,7 +246,7 @@ export const ProductControlModal: React.FC<Props> = ({ product, isOpen, onClose,
                     logger.warn('ProductControlModal', 'Failed to log pricing request', { error: String(logErr) });
                 }
 
-                showToast('Pricing changes submitted for CEO approval', 'info');
+                showToast('Pricing proposal submitted for merchandising lead approval', 'info');
             } else {
                 // CEO direct edit: strictly partitioned by country
                 if (pricingCfg.scope === 'single') {
@@ -447,6 +444,7 @@ export const ProductControlModal: React.FC<Props> = ({ product, isOpen, onClose,
                             sites={sites || []}
                             allProducts={allProducts || []}
                             currencySymbol={dynamicCurrency}
+                            canDirectEdit={canDirectEdit}
                         />
                     )}
 

@@ -16,6 +16,8 @@ export type StoreOrder = {
   status: 'awaiting_confirmation' | 'accepted' | 'rejected';
   merchandise_subtotal: number;
   created_at: string;
+  status_updated_at: string | null;
+  status_updated_by: string | null;
 };
 export type StoreOrderItem = {
   order_id: string;
@@ -46,7 +48,7 @@ export const onlineStoreService = {
         .eq('site_id', siteId).neq('status', 'archived').order('name').limit(500),
       supabase.from('storefront_catalog').select('product_id,is_published').eq('site_id', siteId).limit(500),
       supabase.from('storefront_orders')
-        .select('id,order_number,country_code,currency,customer_name,customer_phone,fulfillment_method,delivery_address,payment_method,status,merchandise_subtotal,created_at')
+        .select('id,order_number,country_code,currency,customer_name,customer_phone,fulfillment_method,delivery_address,payment_method,status,merchandise_subtotal,created_at,status_updated_at,status_updated_by')
         .eq('site_id', siteId).order('created_at', { ascending: false }).limit(50),
     ]);
     if (productResult.error) throw productResult.error;

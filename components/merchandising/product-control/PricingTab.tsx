@@ -27,6 +27,7 @@ interface Props {
     sites: Site[];
     allProducts: Product[];
     currencySymbol?: string;
+    canDirectEdit: boolean;
 }
 
 export const PricingTab: React.FC<Props> = ({
@@ -36,6 +37,7 @@ export const PricingTab: React.FC<Props> = ({
     handleSavePricing,
     isSaving,
     showCost,
+    canDirectEdit,
     sites,
     allProducts,
     currencySymbol = 'ETB'
@@ -103,7 +105,7 @@ export const PricingTab: React.FC<Props> = ({
                     <label className="text-xs font-medium text-[var(--theme-text-secondary)] block mb-1.5">Competitor Price</label>
                     <div className="relative">
                         <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--theme-text-secondary)] font-mono">{currencySymbol}</span>
-                        <input type="number" min="0" step="0.01" value={pricingCfg.competitorPrice || ''}
+                        <input type="number" min="0" step="0.01" value={pricingCfg.competitorPrice || ''} disabled={!canDirectEdit}
                             onChange={e => setPricingCfg(c => ({ ...c, competitorPrice: parseFloat(e.target.value) || 0 }))}
                             placeholder="0"
                             className="w-full bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] rounded-xl pl-8 pr-3 py-2 text-sm font-mono tabular-nums text-right text-[var(--theme-text-primary)] focus:outline-none focus:border-[var(--theme-accent)] focus:ring-1 focus:ring-[var(--theme-accent)] transition-colors" />
@@ -131,7 +133,7 @@ export const PricingTab: React.FC<Props> = ({
             </div>
 
             {/* Location Target Scope */}
-            <div className="space-y-3 pt-2 border-t border-[var(--theme-border)]">
+            {canDirectEdit ? <div className="space-y-3 pt-2 border-t border-[var(--theme-border)]">
                 <label className="text-xs font-medium text-[var(--theme-text-secondary)] block">Pricing Target Scope (Locations)</label>
                 <div className="grid grid-cols-3 gap-2">
                     <button
@@ -279,12 +281,12 @@ export const PricingTab: React.FC<Props> = ({
                         )}
                     </div>
                 )}
-            </div>
+            </div> : <p className="text-xs text-[var(--theme-text-secondary)]">This proposal applies to the selected product location. Use Price Manager to propose changes across your authorized territory.</p>}
 
             <button onClick={handleSavePricing} disabled={isSaving}
                 className="w-full py-2.5 bg-[var(--theme-accent)] hover:opacity-90 text-white rounded-xl font-semibold text-xs transition-colors shadow-sm disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer">
                 {isSaving ? <RefreshCw size={14} className="animate-spin" /> : <Save size={14} />}
-                {isSaving ? 'Saving...' : 'Save Pricing'}
+                {isSaving ? 'Saving...' : canDirectEdit ? 'Save Pricing' : 'Submit Price Proposal'}
             </button>
         </div>
     );

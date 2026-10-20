@@ -129,70 +129,34 @@ export default function App() {
       : 0;
 
     return (
-      <div className="min-h-screen bg-black flex flex-col items-center justify-center p-6 relative overflow-hidden select-none">
-        {/* Futuristic Ambient Monochrome Lighting & Spatial Backdrop */}
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_60%_at_50%_42%,rgba(255,255,255,0.06)_0%,rgba(16,16,16,0.75)_50%,#000000_100%)] pointer-events-none z-0" />
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.015)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.015)_1px,transparent_1px)] bg-[size:40px_40px] pointer-events-none z-0" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[340px] h-[340px] bg-white/[0.03] rounded-full blur-[100px] pointer-events-none z-0" />
-
-        {/* Brand Display — Bold, Futuristic Apple Monochrome Presentation */}
-        <div className="dark relative z-10 flex flex-col items-center text-center">
-          {/* Subtle Floating Ambient Halo */}
-          <div className="relative mb-5 flex items-center justify-center">
-            <div className="absolute -inset-4 rounded-[32px] bg-white/[0.03] border border-white/[0.08] backdrop-blur-2xl shadow-[0_24px_64px_rgba(0,0,0,0.8)] pointer-events-none" />
-            <div className="relative p-5 sm:p-6 flex flex-col items-center">
-              <Logo variant="stacked" size={54} />
-            </div>
-          </div>
-
-          {/* Futuristic Editorial Brand Subtitle */}
-          <p className="text-[11px] font-semibold text-white/50 tracking-[0.32em] uppercase mt-1 select-none">
-            Enterprise Operating System
-          </p>
+      <div className="min-h-screen bg-white dark:bg-black text-[#09090B] dark:text-white flex flex-col items-center justify-center p-6 select-none transition-colors duration-200">
+        {/* Brand Display — Pure, Simple, Elegant Apple Presentation */}
+        <div className="flex flex-col items-center text-center">
+          <Logo variant="stacked" size={48} />
         </div>
 
-        {/* Futuristic Precision Progress Bar — Monochrome Apple Laser Line */}
-        <div className="relative z-10 w-full max-w-[280px] sm:max-w-[320px] mt-10">
-          <div className="w-full bg-white/10 rounded-full h-[2.5px] overflow-hidden backdrop-blur-md">
+        {/* Minimal Apple Precision Progress Bar */}
+        <div className="w-48 sm:w-56 mt-10">
+          <div className="w-full h-[3px] bg-black/10 dark:bg-white/20 rounded-full overflow-hidden">
             <div
               style={{
                 width: `${loading ? (progressPercent > 0 ? progressPercent : 35) : (progressPercent || 100)}%`,
               }}
-              className="h-full bg-gradient-to-r from-white/30 via-white/80 to-white transition-all duration-300 ease-out shadow-[0_0_10px_rgba(255,255,255,0.45)]"
+              className="h-full bg-black dark:bg-white rounded-full transition-all duration-300 ease-out"
             />
-          </div>
-
-          {/* Clean Telemetry Readout (No pulsating text, pure monochrome) */}
-          <div className="flex items-center justify-between mt-3 px-0.5 text-[10px] font-mono tracking-wider">
-            <span className="text-white/40 uppercase">
-              {loading ? 'Securing Gateway' : (loadingProgress?.current || 'Initializing Workspace')}
-            </span>
-            <span className="text-white/80 font-semibold tabular-nums">
-              {loading ? '' : `${progressPercent}%`}
-            </span>
           </div>
         </div>
 
         {/* Error Display with Retry */}
         {loadError && (
-          <div className="relative z-10 mt-8 p-4 bg-red-950/40 border border-red-500/20 rounded-2xl max-w-sm w-full backdrop-blur-xl">
-            <div className="flex items-start gap-3">
-              <div className="p-2 bg-red-500/10 text-red-400 rounded-xl border border-red-500/20">
-                <svg className="w-4 h-4 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                </svg>
-              </div>
-              <div className="flex-1">
-                <p className="text-[10px] text-red-400 font-mono uppercase tracking-wider mb-1">Connection Disrupted</p>
-                <p className="text-xs text-gray-300 leading-relaxed">{loadError}</p>
-                <button
-                  onClick={() => window.location.reload()}
-                  className="mt-3 px-4 py-1.5 bg-red-500/20 hover:bg-red-500/30 text-red-300 text-[10px] font-bold uppercase tracking-wider rounded-xl transition-all border border-red-500/30 active:scale-95 cursor-pointer"
-                >
-                  Retry Connection
-                </button>
-              </div>
-            </div>
+          <div className="mt-8 p-4 border border-red-500/30 rounded-2xl max-w-sm w-full text-center">
+            <p className="text-xs text-red-500 mb-2">{loadError}</p>
+            <button
+              onClick={() => window.location.reload()}
+              className="px-4 py-1.5 bg-black dark:bg-white text-white dark:text-black text-xs font-semibold rounded-lg transition-opacity hover:opacity-80 active:scale-95 cursor-pointer"
+            >
+              Retry
+            </button>
           </div>
         )}
       </div>

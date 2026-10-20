@@ -78,22 +78,15 @@ export default function LoginPage() {
 
   return (
     <div
-      className="min-h-screen w-full flex items-center justify-center p-4 relative overflow-hidden bg-gradient-to-br from-[#FAF8F5] via-[#F4F0E6] to-[#FAF8F5] dark:from-[#0B0F0D] dark:via-[#131915] dark:to-[#0B0F0D] transition-colors duration-500"
+      className="min-h-screen w-full flex items-center justify-center p-4 relative overflow-hidden bg-[#FAF8F5] dark:bg-[#000000] transition-colors duration-300"
       style={{ paddingTop: 'max(env(safe-area-inset-top, 0px), 1rem)' }}
     >
-      
-      {/* Premium Decorative Ambient Glows — DESKTOP ONLY (blur kills mobile GPU) */}
-      <div className="hidden lg:block absolute top-[-10%] left-[10%] w-[45vw] h-[45vw] rounded-full bg-[#2C5E3B]/10 dark:bg-[#1E3F27]/5 blur-[120px] pointer-events-none animate-pulse-slow" />
-      <div className="hidden lg:block absolute bottom-[-10%] right-[10%] w-[50vw] h-[50vw] rounded-full bg-amber-600/10 dark:bg-amber-700/3 blur-[140px] pointer-events-none animate-pulse-slow" />
-
-      {/* Grid Pattern — DESKTOP ONLY */}
-      <div className="hidden lg:block absolute inset-0 bg-[linear-gradient(to_right,rgba(44,94,59,0.02)_1px,transparent_1px),linear-gradient(to_bottom,rgba(44,94,59,0.02)_1px,transparent_1px)] dark:bg-[linear-gradient(to_right,rgba(169,203,162,0.012)_1px,transparent_1px),linear-gradient(to_bottom,rgba(169,203,162,0.012)_1px,transparent_1px)] bg-[size:32px_32px] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_50%,#000_70%,transparent_100%)] pointer-events-none" />
 
       {/* Premium Theme Switcher */}
       <button 
         onClick={toggleTheme} 
         aria-label="Toggle Theme"
-        className="absolute right-6 p-3 rounded-2xl bg-white/80 dark:bg-[var(--theme-bg-panel)] border border-[#E2DCCE] dark:border-[var(--theme-border)] text-[#2C4D35] dark:text-[#A9CBA2] hover:text-[#1E3F27] dark:hover:text-white hover:scale-105 active:scale-95 transition-all shadow-[0_2px_12px_rgba(44,94,59,0.03)] dark:shadow-none lg:backdrop-blur-md z-20 cursor-pointer"
+        className="absolute right-6 p-2.5 rounded-full bg-black/5 dark:bg-white/10 text-stone-800 dark:text-stone-200 hover:text-black dark:hover:text-white hover:scale-105 active:scale-95 transition-all z-20 cursor-pointer"
         style={{ top: 'calc(1.5rem + env(safe-area-inset-top, 0px))' }}
       >
         {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
@@ -213,7 +206,7 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-[#224429] dark:bg-[#EAE5D9] hover:bg-[#1B3520] dark:hover:bg-[#DFD9CA] active:scale-[0.98] text-[#FAF8F5] dark:text-[#1E3B24] font-semibold py-3.5 rounded-2xl transition-all duration-300 flex items-center justify-center gap-2 mt-8 shadow-sm hover:shadow-md dark:shadow-none disabled:opacity-50 disabled:cursor-not-allowed select-none cursor-pointer"
+              className="w-full bg-black dark:bg-white hover:bg-stone-800 dark:hover:bg-stone-200 active:scale-[0.98] text-white dark:text-black font-semibold py-3.5 rounded-2xl transition-all duration-300 flex items-center justify-center gap-2 mt-8 shadow-sm hover:shadow-md dark:shadow-none disabled:opacity-50 disabled:cursor-not-allowed select-none cursor-pointer"
             >
               {loading ? (
                 <>
@@ -228,7 +221,7 @@ export default function LoginPage() {
             {/* Mode switching links */}
             <div className="flex flex-col gap-3 mt-6 text-center select-none">
               {mode === 'login' && (
-                <div className="text-xs text-[#4D6E56] dark:text-[#7A9E83] leading-normal">
+                <div className="text-xs text-stone-500 dark:text-stone-400 leading-normal">
                   Need access? Contact your systems manager.
                 </div>
               )}
@@ -256,7 +249,7 @@ export default function LoginPage() {
           )}
 
           <div className="mt-8 pt-6 border-t border-[#E2DCCE]/40 dark:border-white/[0.04] text-center select-none">
-            <p className="text-[10px] text-[#4D6E56] dark:text-[#7A9E83] font-bold tracking-[0.16em] uppercase">SIIFMART Operations v3.6.1</p>
+            <p className="text-[10px] text-stone-500 dark:text-stone-400 font-bold tracking-[0.16em] uppercase">SIIFMART Operations v3.6.1</p>
           </div>
         </div>
 

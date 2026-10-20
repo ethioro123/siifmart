@@ -12,7 +12,7 @@ export interface PriceChangeInput {
 }
 
 /**
- * Submits price changes as HQ-approval requests (inventory_requests). No direct product writes.
+ * Submits price changes for the authorized merchandising lead (inventory_requests).
  * Returns the number of requests submitted and how many need Finance co-approval.
  */
 export function useSubmitPriceChanges(countryCode: string) {
@@ -38,7 +38,7 @@ export function useSubmitPriceChanges(countryCode: string) {
             if (submitted > 0) {
                 addNotification(
                     'success',
-                    `${submitted} price change${submitted === 1 ? '' : 's'} sent for HQ approval${financeFlagged ? ` (${financeFlagged} need Finance co-approval)` : ''}.`
+                    `${submitted} price change${submitted === 1 ? '' : 's'} sent for merchandising approval${financeFlagged ? ` (${financeFlagged} need Finance co-approval)` : ''}.`
                 );
             }
             return { submitted, financeFlagged };
