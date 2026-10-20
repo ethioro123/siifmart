@@ -120,7 +120,7 @@ export default function LoginPage() {
           {/* Header Branding section */}
           <div className="flex flex-col items-center justify-center mb-6">
             <div className="mb-2 select-none flex flex-col items-center">
-              <Logo size={42} className="justify-center" />
+              <Logo variant="stacked" size={40} className="justify-center" />
             </div>
             <p className="text-[10px] text-[var(--theme-text-secondary)] uppercase tracking-[0.25em] font-bold mt-1 select-none text-center px-4">
               {mode === 'login' ? (settings?.slogan || 'Operations Access Portal') : 'Security Recovery'}

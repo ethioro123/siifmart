@@ -4,6 +4,7 @@ import {
   Lock, ArrowLeft, Printer, Box, Power, Play, PackageCheck, Vault, UserPlus,
   ReceiptText, ShieldCheck, Users2, LayoutGrid, ChevronDown, Tags
 } from 'lucide-react';
+import Logo from '../components/Logo';
 import { useLanguage } from '../contexts/LanguageContext';
 import Protected from '../components/Protected';
 import PinPad from '../components/pos/PinPad';
@@ -116,9 +117,10 @@ const POSCommandContent: React.FC = () => {
       <div className="min-h-screen w-full flex items-center justify-center p-4 relative bg-[var(--theme-bg-app)] transition-colors duration-300">
         <div className="max-w-[400px] w-full bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-3xl p-10 relative z-10 shadow-lg flex flex-col items-center">
           {/* Logo */}
-          <div className="relative mb-6 select-none">
-            <div className="w-16 h-16 rounded-2xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] flex items-center justify-center text-[var(--theme-text-primary)]">
-              <Lock size={28} />
+          <div className="relative mb-6 select-none flex flex-col items-center gap-4">
+            <Logo variant="stacked" size={34} />
+            <div className="w-12 h-12 rounded-2xl bg-[var(--theme-bg-subtle)] border border-[var(--theme-border)] flex items-center justify-center text-[var(--theme-text-primary)]">
+              <Lock size={22} />
             </div>
           </div>
           <h2 className="text-2xl font-bold tracking-tight text-[var(--theme-text-primary)] mb-1">{t('pos.sessionLocked')}</h2>

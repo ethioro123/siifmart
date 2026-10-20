@@ -4,7 +4,8 @@ import { POSProvider, usePOS } from '../components/pos/POSContext';
 import { POSProductGrid } from '../components/pos/POSProductGrid';
 import { POSCartPanel } from '../components/pos/POSCartPanel';
 import { POSModals } from '../components/pos/POSModals';
-import { MapPin, Store } from 'lucide-react';
+import { Store } from 'lucide-react';
+import Logo from '../components/Logo';
 
 const POSTerminalContent: React.FC = () => {
   const { needsStoreSelection } = usePOS();
@@ -15,9 +16,7 @@ const POSTerminalContent: React.FC = () => {
     return (
       <div className="h-full flex items-center justify-center p-4">
         <div className="text-center p-8 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-3xl max-w-md shadow-xl transition-all duration-300">
-          <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-amber-500/10 flex items-center justify-center">
-            <MapPin size={32} className="text-amber-500" />
-          </div>
+          <Logo variant="emblem" size={44} className="mx-auto mb-4 flex justify-center" />
           <h2 className="text-xl font-bold text-[var(--theme-text-primary)] mb-2">Select a Store</h2>
           <p className="text-xs text-[var(--theme-text-secondary)] mb-6">
             To access POS, tap your store below or select from the dropdown in the top bar.

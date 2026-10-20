@@ -57,6 +57,7 @@ import { useData } from './contexts/DataContext';
 import { systemConfigService } from './services/supabase.service';
 import { initializeAvatarsBucket } from './services/imageStorage.service';
 import StagingEnvironmentBanner from './components/StagingEnvironmentBanner';
+import Logo from './components/Logo';
 
 export default function App() {
   useCapacitor();
@@ -135,12 +136,9 @@ export default function App() {
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-gray-800 via-gray-900 to-black z-0" />
         <div className="absolute inset-0 bg-grid-white/[0.02] bg-[length:30px_30px] z-0" />
 
-        {/* Logo/Icon */}
-        <div className="relative mb-8 transform hover:scale-105 transition-transform duration-700">
-          <div className="hidden lg:block absolute inset-0 bg-cyber-primary/20 blur-3xl rounded-full animate-pulse" />
-          <div className="w-20 h-20 bg-black/50 lg:backdrop-blur-xl border border-cyber-primary/30 rounded-2xl flex items-center justify-center relative z-10 shadow-[0_0_30px_rgba(0,255,157,0.1)]">
-            <div className="w-10 h-10 border-t-2 border-r-2 border-cyber-primary rounded-full animate-spin" />
-          </div>
+        {/* Brand mark (monochrome, forced dark variant on the black loading screen) */}
+        <div className="dark relative z-10 mb-8 animate-pulse-slow">
+          <Logo variant="stacked" size={44} />
         </div>
 
         {/* Status Text */}
