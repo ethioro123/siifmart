@@ -32,7 +32,8 @@ export const FLOOR_WORKER_ROLES = [
     'inventory_specialist',
     'forklift_operator',
     'stock_clerk',
-    'inbound_qc_inspector'
+    'inbound_qc_inspector',
+    'returns_clerk'
 ] as const;
 
 export const DRIVER_ROLES = [

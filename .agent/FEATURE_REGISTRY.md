@@ -5,6 +5,14 @@
 
 ## Active Features
 
+### Warehouse Zero-Trust Governance & RBAC Harmonization (2026-10-20)
+- All warehouse positions (`packer`, `receiver`, `forklift_operator`, `stock_clerk`, `returns_clerk`, `inbound_qc_inspector`, `dispatch_manager`, `logistics_manager`, `fleet_maintenance_supervisor`, `replenishment_planner`) are now registered under the `warehouse` Zero-Trust managed role profile in `services/zeroTrustPolicies.service.ts` and counted in `RoleSettings.tsx`.
+- `returns_clerk` is registered in `FLOOR_WORKER_ROLES` to allow assignment and execution of reverse logistics tasks without rejection.
+- Static SoD picking/packing permission conflicts are reconciled to rely on transaction-level 4-eyes attestation guards (`guard_pack_completion_attestation`), eliminating false-positive audit log alarms while preserving dual-control pack verification.
+- `receiver` is granted `procurement.receive` in `ACTION_PERMISSIONS` and `PERMISSIONS.RECEIVE_PO` for direct dock PO intake.
+- `stock_clerk` is aligned in `auth.rbac.ts` to include `'warehouse'` in `ROLE_PERMISSIONS`.
+- **Files**: `services/zeroTrustPolicies.service.ts`, `components/settings/RoleSettings.tsx`, `utils/fulfillmentRoles.ts`, `utils/fulfillmentTabPermissions.ts`, `services/permissions.service.ts`, `services/permissions.matrix.ts`, `utils/permissions.ts`, `services/auth.rbac.ts`
+
 ### Warehouse Worker Sovereign Role Landing Routes (2026-10-20)
 - Warehouse workers now route directly to their sovereign operational tab upon login (e.g. receivers land on `/wms-ops?tab=RECEIVE`, pickers on `?tab=PICK`, packers on `?tab=PACK`, forklift operators on `?tab=PUTAWAY`, drivers on `?tab=DRIVER`, and dispatchers on `?tab=DOCKS`). `pages/Fulfillment.tsx` and `components/ProtectedRoute.tsx` synchronize and preserve role tabs cleanly without redirect loops.
 - **Files**: `utils/roleDashboard.ts`, `pages/Fulfillment.tsx`, `components/ProtectedRoute.tsx`, `utils/fulfillmentTabPermissions.ts`, `tests/utils/roleDashboard.test.ts`, `tests/utils/regionalOperations.test.ts`

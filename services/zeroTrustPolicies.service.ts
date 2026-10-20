@@ -66,7 +66,13 @@ export function mapUserRoleToManagedRole(userRole?: string): ManagedRoleId | nul
     if (['super_admin', 'admin', 'ceo'].includes(r)) return 'admin';
     if (['store_manager', 'assistant_manager', 'store_supervisor'].includes(r)) return 'store_manager';
     if (['cashier', 'pos', 'shift_lead'].includes(r)) return 'cashier';
-    if (['warehouse_manager', 'dispatcher', 'picker', 'driver', 'inventory_specialist', 'inventory_manager', 'warehouse'].includes(r)) return 'warehouse';
+    if ([
+        'warehouse_manager', 'logistics_manager', 'dispatch_manager',
+        'fleet_maintenance_supervisor', 'dispatcher', 'picker', 'packer',
+        'receiver', 'driver', 'forklift_operator', 'stock_clerk',
+        'returns_clerk', 'inbound_qc_inspector', 'inventory_specialist',
+        'inventory_manager', 'replenishment_planner', 'warehouse'
+    ].includes(r)) return 'warehouse';
     return null;
 }
 

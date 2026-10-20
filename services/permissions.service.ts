@@ -67,9 +67,10 @@ export const CONFLICTING_DUTIES: Record<Permission, Permission[]> = {
     'warehouse.receive': ['warehouse.count', 'inventory.count'],
     'warehouse.count': ['warehouse.receive'],
     'inventory.count': ['warehouse.receive'],
-    // Warehouse Controls
-    'warehouse.pick': ['warehouse.pack'],
-    'warehouse.pack': ['warehouse.pick'],
+    // Warehouse Controls (Segregation of duties between picking and packing is enforced at transaction runtime
+    // via 4-eyes attestation guards e.g. guard_pack_completion_attestation, allowing agile floor cross-training)
+    'warehouse.pick': [],
+    'warehouse.pack': [],
     // HR & Salary Controls (Dual-Control 4-Eyes Governance)
     'employees.create': ['employees.approve'],
     'employees.approve': ['employees.create'],

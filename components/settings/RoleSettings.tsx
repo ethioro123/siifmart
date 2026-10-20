@@ -14,6 +14,7 @@ import type {
     RoleDefinition
 } from '../../types/roles';
 import { useRoleSettingsMutation } from '../../hooks/useRoleSettingsMutation';
+import { mapUserRoleToManagedRole } from '../../services/zeroTrustPolicies.service';
 
 // --- SUB-COMPONENTS ---
 interface PermissionToggleProps {
@@ -160,8 +161,8 @@ export default function RoleSettings() {
         const counts: Record<ManagedRoleId, number> = { admin: 0, store_manager: 0, cashier: 0, warehouse: 0 };
         if (employees) {
             employees.forEach(emp => {
-                const r = emp.role as ManagedRoleId;
-                if (counts[r] !== undefined) counts[r]++;
+                const r = mapUserRoleToManagedRole(emp.role);
+                if (r && counts[r] !== undefined) counts[r]++;
             });
         }
 

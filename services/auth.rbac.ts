@@ -78,7 +78,7 @@ export const ROLE_PERMISSIONS: Record<string, string[]> = {
     // ═══ LEVEL 4 - STAFF ═══
     cashier: ['dashboard', 'pos', 'profile'],
     sales_associate: ['dashboard', 'pos', 'customers', 'inventory', 'profile'],
-    stock_clerk: ['dashboard', 'inventory', 'profile'],
+    stock_clerk: ['dashboard', 'warehouse', 'inventory', 'profile'],
     picker: ['dashboard', 'warehouse', 'inventory', 'profile'],
     packer: ['dashboard', 'warehouse', 'inventory', 'profile'],
     receiver: ['dashboard', 'warehouse', 'inventory', 'profile'],

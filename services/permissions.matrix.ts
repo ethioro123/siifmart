@@ -129,7 +129,8 @@ export const ACTION_PERMISSIONS: Record<UserRole, Permission[]> = {
     receiver: [
         'dashboard.view',
         'warehouse.view', 'warehouse.receive', 'warehouse.pick', 'warehouse.pack', 'warehouse.putaway',
-        'inventory.view'
+        'inventory.view',
+        'procurement.receive'
     ],
 
     forklift_operator: [
