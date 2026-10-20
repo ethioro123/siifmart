@@ -24,8 +24,10 @@ export type UserRole =
   | 'admin' | 'hr' | 'pos' | 'dispatcher'
   | 'cs_manager' | 'returns_clerk' | 'merchandiser' | 'loss_prevention'
   | 'accountant' | 'data_analyst' | 'training_coordinator' | 'hr_generalist'
+  | 'merchandising_specialist'
   // Regional Administration Roles (Flexible Territorial Team)
   | 'regional_procurement_lead' | 'regional_finance_officer' | 'regional_hr_officer'
+  | 'regional_merchandising_lead'
   | 'regional_logistics_lead' | 'regional_security_supervisor'
   // New roles
   | 'buyer' | 'demand_planner' | 'inventory_manager' | 'logistics_manager' | 'security_manager'

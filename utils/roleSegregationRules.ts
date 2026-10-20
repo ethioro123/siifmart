@@ -43,6 +43,7 @@ export const ROLE_SEGREGATION_RULES: RoleSegregationRule[] = [
     { role: 'head_of_merchandising', siteType: 'Administration', department: 'Management', description: 'Head of Merchandising - Corporate pricing, margins & planograms at HQ' },
     { role: 'merchandising_head', siteType: 'Administration', department: 'Management', description: 'Head of Merchandising - Corporate pricing, margins & planograms at HQ' },
     { role: 'merchandising_manager', siteType: 'Administration', department: 'Management', description: 'Head of Merchandising - Corporate pricing, margins & planograms at HQ' },
+    { role: 'merchandising_specialist', siteType: 'Administration', department: 'Merchandising', description: 'Merchandising Specialist - Country or regional product and campaign preparation' },
     { role: 'head_of_it', siteType: 'Administration', department: 'Management', description: 'Head of IT - Enterprise systems and security at HQ' },
     { role: 'it_head', siteType: 'Administration', department: 'Management', description: 'Head of IT - Enterprise systems and security at HQ' },
     { role: 'head_of_audit', siteType: 'Administration', department: 'Management', description: 'Head of Internal Audit - Compliance, risk, and fraud governance at HQ' },
@@ -286,6 +287,12 @@ export const ROLE_SEGREGATION_RULES: RoleSegregationRule[] = [
         siteType: 'Any',
         department: 'Procurement',
         description: 'Regional Procurement Lead - Territorial sourcing & local farm/port vendor POs'
+    },
+    {
+        role: 'regional_merchandising_lead',
+        siteType: 'Administration',
+        department: 'Merchandising',
+        description: 'Regional Merchandising Lead - Territory pricing, promotions, and planogram approvals'
     },
     {
         role: 'regional_finance_officer',

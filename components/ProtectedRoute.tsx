@@ -65,7 +65,7 @@ export function ProtectedRoute({
 
     const isSpecialistForModule = (mod: string): boolean => {
       if (isExecutive) return true;
-      if (mod === 'pricing') return ['head_of_merchandising', 'merchandising_head', 'merchandising_manager', 'merchandiser'].includes(normalizedRole);
+      if (mod === 'pricing') return ['head_of_merchandising', 'merchandising_head', 'merchandising_manager', 'merchandising_specialist', 'regional_merchandising_lead', 'merchandiser'].includes(normalizedRole);
       if (mod === 'finance') return ['head_of_finance', 'finance_head', 'finance_manager', 'accountant', 'treasury_officer', 'tax_compliance_officer', 'credit_control_officer', 'head_of_audit', 'audit_head', 'auditor'].includes(normalizedRole);
       if (mod === 'procurement') return ['head_of_procurement', 'procurement_head', 'procurement_manager', 'head_of_supply_chain', 'supply_chain_head', 'supply_chain_manager', 'buyer', 'demand_planner', 'vendor_relations_manager', 'customs_import_specialist'].includes(normalizedRole);
       return false;

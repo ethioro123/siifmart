@@ -14,7 +14,8 @@ export const UserRoleSchema = z.enum([
     'packer', 'receiver', 'driver', 'forklift_operator', 'inventory_specialist',
     'customer_service', 'auditor', 'it_support', 'admin', 'hr', 'pos',
     'dispatcher', 'cs_manager', 'returns_clerk', 'merchandiser', 'loss_prevention',
-    'accountant', 'data_analyst', 'training_coordinator'
+    'accountant', 'data_analyst', 'training_coordinator', 'merchandising_specialist',
+    'regional_merchandising_lead'
 ]);
 
 // --- Core App Entities ---

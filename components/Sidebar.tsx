@@ -51,6 +51,7 @@ export default function Sidebar() {
     'regional_manager',
     'regional_procurement_lead',
     'regional_finance_officer',
+    'regional_merchandising_lead',
     'regional_hr_officer',
     'regional_logistics_lead',
     'regional_security_supervisor'
@@ -104,7 +105,7 @@ export default function Sidebar() {
           icon: Activity,
           label: `Regional Command (${regionDisplayName})`,
           section: "dashboard",
-          roles: ['super_admin', 'country_managing_director', 'admin', 'head_of_operations', 'operations_head', 'operations_manager', 'regional_manager', 'regional_procurement_lead', 'regional_finance_officer', 'regional_hr_officer', 'regional_logistics_lead', 'regional_security_supervisor', 'store_operations_auditor', 'auditor', 'hr', 'hr_generalist', 'talent_recruiter', 'payroll_specialist', 'training_coordinator', 'it_support', 'security_manager', 'accountant', 'treasury_officer', 'tax_compliance_officer', 'credit_control_officer', 'buyer', 'demand_planner', 'replenishment_planner', 'vendor_relations_manager', 'customs_import_specialist', 'inbound_qc_inspector', 'logistics_manager', 'inventory_manager', 'merchandiser', 'data_analyst', 'cs_manager']
+          roles: ['super_admin', 'country_managing_director', 'admin', 'head_of_operations', 'operations_head', 'operations_manager', 'regional_manager', 'regional_procurement_lead', 'regional_finance_officer', 'regional_merchandising_lead', 'regional_hr_officer', 'regional_logistics_lead', 'regional_security_supervisor', 'store_operations_auditor', 'auditor', 'hr', 'hr_generalist', 'talent_recruiter', 'payroll_specialist', 'training_coordinator', 'it_support', 'security_manager', 'accountant', 'treasury_officer', 'tax_compliance_officer', 'credit_control_officer', 'buyer', 'demand_planner', 'replenishment_planner', 'merchandising_specialist', 'vendor_relations_manager', 'customs_import_specialist', 'inbound_qc_inspector', 'logistics_manager', 'inventory_manager', 'merchandiser', 'data_analyst', 'cs_manager']
         }
       ] : [
         {
@@ -126,7 +127,7 @@ export default function Sidebar() {
       { to: "/sales", icon: FileText, label: "Sales History", section: "sales", roles: ['super_admin', 'country_managing_director', 'admin', 'head_of_operations', 'operations_head', 'operations_manager', 'head_of_finance', 'finance_head', 'finance_manager', 'head_of_supply_chain', 'supply_chain_head', 'supply_chain_manager', 'head_of_audit', 'audit_head', 'auditor', 'store_manager', 'assistant_manager', 'shift_lead', 'cs_manager', 'store_supervisor', 'regional_manager', 'regional_finance_officer', 'regional_security_supervisor', 'accountant', 'treasury_officer', 'tax_compliance_officer', 'credit_control_officer', 'demand_planner', 'replenishment_planner', 'store_operations_auditor'] },
 
       // MERCHANDISING
-      { to: "/pricing", icon: Tags, label: "Merchandising", section: "pricing", roles: ['super_admin', 'country_managing_director', 'admin', 'head_of_merchandising', 'merchandising_head', 'merchandising_manager', 'head_of_finance', 'finance_head', 'finance_manager', 'head_of_operations', 'operations_head', 'operations_manager', 'merchandiser', 'regional_manager', 'regional_procurement_lead', 'store_operations_auditor'] },
+      { to: "/pricing", icon: Tags, label: "Merchandising", section: "pricing", roles: ['super_admin', 'country_managing_director', 'admin', 'head_of_merchandising', 'merchandising_head', 'merchandising_manager', 'merchandising_specialist', 'regional_merchandising_lead', 'head_of_finance', 'finance_head', 'finance_manager', 'head_of_operations', 'operations_head', 'operations_manager', 'merchandiser', 'regional_manager', 'regional_procurement_lead', 'store_operations_auditor'] },
 
       // FINANCE
       { to: "/finance", icon: DollarSign, label: "Financials", section: "finance", roles: ['super_admin', 'country_managing_director', 'admin', 'head_of_finance', 'finance_head', 'finance_manager', 'head_of_audit', 'audit_head', 'auditor', 'head_of_operations', 'operations_head', 'operations_manager', 'regional_manager', 'regional_finance_officer', 'accountant', 'payroll_specialist', 'treasury_officer', 'tax_compliance_officer', 'credit_control_officer'] },
@@ -168,7 +169,7 @@ export default function Sidebar() {
         // Warehouse Manager view: WMS Dashboard, Fulfillment, Inventory, Procurement, Staff.
         // POS, Sales, Customers, Merchandising, Financials, and Settings are strictly hidden for floor workers.
         // Departmental specialists and regional officers retain access to their respective modules.
-        const isMerchandisingSpecialist = item.section === 'pricing' && ['head_of_merchandising', 'merchandising_head', 'merchandising_manager', 'merchandiser', 'regional_procurement_lead', 'regional_manager'].includes(userRole);
+        const isMerchandisingSpecialist = item.section === 'pricing' && ['head_of_merchandising', 'merchandising_head', 'merchandising_manager', 'merchandising_specialist', 'regional_merchandising_lead', 'merchandiser', 'regional_procurement_lead', 'regional_manager'].includes(userRole);
         const isFinanceSpecialist = item.section === 'finance' && ['head_of_finance', 'finance_head', 'finance_manager', 'regional_finance_officer', 'regional_manager', 'accountant', 'treasury_officer', 'tax_compliance_officer', 'credit_control_officer', 'head_of_audit', 'audit_head', 'auditor'].includes(userRole);
         const isSalesSpecialist = item.section === 'sales' && ['regional_finance_officer', 'regional_security_supervisor', 'regional_manager', 'head_of_audit', 'audit_head', 'auditor', 'store_operations_auditor'].includes(userRole);
         const isSettingsSpecialist = item.section === 'settings' && ['regional_security_supervisor', 'regional_manager', 'security_manager', 'head_of_it', 'it_head', 'it_support', 'head_of_audit', 'audit_head', 'auditor'].includes(userRole);
@@ -203,7 +204,7 @@ export default function Sidebar() {
           isAllowedForSite = false;
         }
 
-        const isMerchandisingSpecialist = item.section === 'pricing' && ['head_of_merchandising', 'merchandising_head', 'merchandising_manager', 'merchandiser', 'regional_procurement_lead', 'regional_manager'].includes(userRole);
+        const isMerchandisingSpecialist = item.section === 'pricing' && ['head_of_merchandising', 'merchandising_head', 'merchandising_manager', 'merchandising_specialist', 'regional_merchandising_lead', 'merchandiser', 'regional_procurement_lead', 'regional_manager'].includes(userRole);
         const isFinanceSpecialist = item.section === 'finance' && ['head_of_finance', 'finance_head', 'finance_manager', 'regional_finance_officer', 'regional_manager', 'accountant', 'treasury_officer', 'tax_compliance_officer', 'credit_control_officer', 'head_of_audit', 'audit_head', 'auditor'].includes(userRole);
         const isProcurementSpecialist = item.section === 'procurement' && ['head_of_procurement', 'procurement_head', 'procurement_manager', 'head_of_supply_chain', 'supply_chain_head', 'supply_chain_manager', 'regional_procurement_lead', 'regional_logistics_lead', 'regional_manager', 'buyer', 'vendor_relations_manager', 'inbound_qc_inspector'].includes(userRole);
         const isWarehouseSpecialist = item.section === 'warehouse' && ['regional_logistics_lead', 'regional_manager', 'head_of_supply_chain', 'supply_chain_manager', 'logistics_manager'].includes(userRole);

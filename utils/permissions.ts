@@ -96,10 +96,10 @@ export const PERMISSIONS = {
     EXPORT_FINANCIAL_DATA: ['super_admin', 'admin', 'country_managing_director', 'auditor', 'head_of_audit', 'audit_head', 'finance_manager', 'head_of_finance', 'finance_head', 'regional_finance_officer', 'regional_manager', 'tax_compliance_officer'],
 
     // Pricing
-    ACCESS_PRICING: ['super_admin', 'admin', 'country_managing_director', 'merchandising_manager', 'head_of_merchandising', 'merchandising_head', 'merchandiser', 'regional_manager', 'regional_procurement_lead', 'operations_manager', 'head_of_operations', 'operations_head', 'finance_manager', 'head_of_finance', 'finance_head', 'store_operations_auditor'],
+    ACCESS_PRICING: ['super_admin', 'admin', 'country_managing_director', 'merchandising_manager', 'head_of_merchandising', 'merchandising_head', 'merchandising_specialist', 'regional_merchandising_lead', 'merchandiser', 'regional_manager', 'regional_procurement_lead', 'operations_manager', 'head_of_operations', 'operations_head', 'finance_manager', 'head_of_finance', 'finance_head', 'store_operations_auditor'],
     EDIT_PRICE: ['super_admin', 'admin', 'country_managing_director', 'merchandising_manager', 'head_of_merchandising', 'merchandising_head', 'regional_manager', 'finance_manager', 'head_of_finance', 'finance_head'],
-    CREATE_PROMOTION: ['super_admin', 'admin', 'country_managing_director', 'merchandising_manager', 'head_of_merchandising', 'merchandising_head', 'merchandiser', 'regional_manager'],
-    APPROVE_PRICE_CHANGE: ['super_admin', 'admin', 'country_managing_director', 'merchandising_manager', 'head_of_merchandising', 'merchandising_head', 'regional_manager', 'finance_manager', 'head_of_finance', 'finance_head'],
+    CREATE_PROMOTION: ['super_admin', 'admin', 'country_managing_director', 'merchandising_manager', 'head_of_merchandising', 'merchandising_head', 'merchandising_specialist', 'regional_merchandising_lead', 'merchandiser', 'regional_manager'],
+    APPROVE_PRICE_CHANGE: ['super_admin', 'merchandising_manager', 'head_of_merchandising', 'merchandising_head', 'regional_merchandising_lead'],
 
     // Warehouse
     ACCESS_WAREHOUSE: ['super_admin', 'admin', 'country_managing_director', 'regional_manager', 'operations_manager', 'head_of_operations', 'operations_head', 'warehouse_manager', 'dispatch_manager', 'dispatcher', 'picker', 'packer', 'receiver', 'driver', 'forklift_operator', 'stock_clerk', 'returns_clerk', 'inventory_specialist', 'logistics_manager', 'inventory_manager', 'inbound_qc_inspector', 'fleet_maintenance_supervisor', 'replenishment_planner', 'regional_logistics_lead', 'supply_chain_manager', 'head_of_supply_chain', 'supply_chain_head'],

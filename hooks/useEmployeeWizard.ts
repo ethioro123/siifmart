@@ -46,9 +46,10 @@ interface UseEmployeeWizardProps {
    addNotification: (type: 'success' | 'alert' | 'info', message: string) => void;
 }
 
-const DEPARTMENTS = ['Retail Operations', 'Logistics & Warehouse', 'Finance', 'Management', 'Human Resources', 'Security', 'Transport', 'Procurement'];
+const DEPARTMENTS = ['Retail Operations', 'Logistics & Warehouse', 'Finance', 'Management', 'Human Resources', 'Security', 'Transport', 'Procurement', 'Merchandising'];
 
 const ROLE_POOLS: Partial<Record<UserRole, UserRole[]>> = {
+   regional_merchandising_lead: ['merchandising_specialist'],
    regional_procurement_lead: ['vendor_relations_manager', 'buyer', 'demand_planner', 'replenishment_planner', 'customs_import_specialist', 'inbound_qc_inspector', 'merchandiser', 'inventory_specialist'],
    regional_finance_officer: ['accountant', 'treasury_officer', 'tax_compliance_officer', 'credit_control_officer', 'payroll_specialist', 'auditor', 'store_operations_auditor'],
    regional_logistics_lead: ['warehouse_manager', 'logistics_manager', 'inventory_manager', 'dispatch_manager', 'fleet_maintenance_supervisor', 'assistant_manager', 'shift_lead', 'dispatcher', 'picker', 'packer', 'receiver', 'driver', 'forklift_operator', 'stock_clerk', 'returns_clerk', 'inventory_specialist', 'inbound_qc_inspector', 'replenishment_planner'],
@@ -129,6 +130,7 @@ export function useEmployeeWizard({
       if (isCorporateHqDirectorateRole(user.role) || ['hr', 'talent_recruiter', 'hr_generalist', 'regional_manager', 'regional_hr_officer'].includes(user.role)) return DEPARTMENTS;
       if (user.role === 'regional_procurement_lead') return ['Procurement', 'Logistics & Warehouse'];
       if (user.role === 'regional_finance_officer') return ['Finance', 'Management'];
+      if (user.role === 'regional_merchandising_lead') return ['Merchandising'];
       if (user.role === 'regional_logistics_lead') return ['Transport', 'Logistics & Warehouse'];
       if (user.role === 'regional_security_supervisor') return ['Security'];
       if (user.role === 'store_manager') return ['Retail Operations', 'Logistics & Warehouse', 'Transport'];
@@ -207,7 +209,7 @@ export function useEmployeeWizard({
    };
 
    const handleRoleChange = (newRole: UserRole) => {
-      const isRegional = ['regional_manager', 'regional_hr_officer', 'regional_procurement_lead', 'regional_finance_officer', 'regional_logistics_lead', 'regional_security_supervisor'].includes(user?.role || '');
+      const isRegional = ['regional_manager', 'regional_hr_officer', 'regional_procurement_lead', 'regional_finance_officer', 'regional_merchandising_lead', 'regional_logistics_lead', 'regional_security_supervisor'].includes(user?.role || '');
       const userRegion = (user as any)?.regionCode || (user as any)?.region_code;
       const candidateSites = isRegional && userRegion
          ? sites.filter(s => s.regionCode === userRegion || (s as any).region_code === userRegion)

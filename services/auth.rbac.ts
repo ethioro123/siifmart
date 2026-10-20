@@ -81,6 +81,9 @@ export const ROLE_PERMISSIONS: Record<string, string[]> = {
     merchandising_manager: [
         'dashboard', 'admin', 'pricing', 'inventory', 'sales', 'procurement', 'profile'
     ],
+    merchandising_specialist: [
+        'dashboard', 'regional-ops', 'pricing', 'inventory', 'sales', 'profile'
+    ],
     head_of_it: [
         'dashboard', 'settings', 'employees', 'profile'
     ],
@@ -95,6 +98,9 @@ export const ROLE_PERMISSIONS: Record<string, string[]> = {
     ],
     regional_procurement_lead: [
         'dashboard', 'regional-ops', 'procurement', 'inventory', 'pricing', 'customers', 'profile'
+    ],
+    regional_merchandising_lead: [
+        'dashboard', 'regional-ops', 'pricing', 'inventory', 'sales', 'profile'
     ],
     regional_finance_officer: [
         'dashboard', 'regional-ops', 'finance', 'sales', 'pos', 'profile'

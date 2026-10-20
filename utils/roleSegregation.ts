@@ -8,6 +8,7 @@ export const REGIONAL_WORKFORCE_ROLES = [
     'regional_manager',
     'regional_procurement_lead',
     'regional_finance_officer',
+    'regional_merchandising_lead',
     'regional_hr_officer',
     'regional_logistics_lead',
     'regional_security_supervisor'
@@ -29,7 +30,7 @@ export const SHARED_HQ_REGIONAL_ROLES = [
     'hr', 'hr_generalist', 'talent_recruiter', 'payroll_specialist', 'training_coordinator',
     'it_support', 'auditor', 'store_operations_auditor', 'security_manager',
     'accountant', 'treasury_officer', 'tax_compliance_officer', 'credit_control_officer',
-    'buyer', 'demand_planner', 'replenishment_planner', 'vendor_relations_manager',
+    'buyer', 'demand_planner', 'replenishment_planner', 'merchandising_specialist', 'vendor_relations_manager',
     'customs_import_specialist', 'inbound_qc_inspector',
     'logistics_manager', 'inventory_manager', 'merchandiser',
     'data_analyst', 'cs_manager'

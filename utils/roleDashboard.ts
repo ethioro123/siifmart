@@ -31,6 +31,7 @@ export function getRoleDashboardRoute(role?: UserRole | string, siteType?: strin
     if (role === 'regional_manager' || [
         'regional_procurement_lead',
         'regional_finance_officer',
+        'regional_merchandising_lead',
         'regional_hr_officer',
         'regional_logistics_lead',
         'regional_security_supervisor'
@@ -88,6 +89,8 @@ export function getRoleDashboardRoute(role?: UserRole | string, siteType?: strin
         case 'head_of_merchandising':
         case 'merchandising_head':
         case 'merchandising_manager':
+        case 'merchandising_specialist':
+        case 'regional_merchandising_lead':
         case 'merchandiser':
             return '/pricing';
 

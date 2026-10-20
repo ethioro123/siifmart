@@ -5,6 +5,7 @@
 
 import type { UserRole } from './auth.service';
 import type { Permission } from './permissions.service';
+import { HEAD_OF_AUDIT_PERMISSIONS } from './permissions.matrix-audit';
 
 const FULL_ACCESS_PERMISSIONS: Permission[] = [
     // Full access to everything
@@ -73,16 +74,6 @@ const HEAD_OF_IT_PERMISSIONS: Permission[] = [
     'dashboard.view',
     'settings.view', 'settings.edit', 'settings.view_logs', 'settings.manage_integrations',
     'employees.view'
-];
-
-const HEAD_OF_AUDIT_PERMISSIONS: Permission[] = [
-    'dashboard.view',
-    'sales.view', 'sales.view_reports',
-    'inventory.view',
-    'pos.view',
-    'finance.view', 'finance.view_reports', 'finance.view_payroll',
-    'employees.view',
-    'settings.view', 'settings.view_logs'
 ];
 
 export const ACTION_PERMISSIONS: Record<UserRole, Permission[]> = {
@@ -340,6 +331,14 @@ export const ACTION_PERMISSIONS: Record<UserRole, Permission[]> = {
     head_of_merchandising: HEAD_OF_MERCHANDISING_PERMISSIONS,
     merchandising_head: HEAD_OF_MERCHANDISING_PERMISSIONS,
     merchandising_manager: HEAD_OF_MERCHANDISING_PERMISSIONS,
+    merchandising_specialist: [
+        'dashboard.view', 'inventory.view', 'pricing.view', 'pricing.create_promo',
+        'sales.view', 'sales.view_reports'
+    ],
+    regional_merchandising_lead: [
+        'dashboard.view', 'inventory.view', 'pricing.view', 'pricing.edit',
+        'pricing.create_promo', 'pricing.approve_promo', 'sales.view', 'sales.view_reports'
+    ],
 
     // ============================================================================
     // LEVEL 3 - Site Managers

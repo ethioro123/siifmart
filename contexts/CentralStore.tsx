@@ -17,32 +17,17 @@ import { evaluateGeofence } from '../utils/geofence';
 import { getDeviceDetails } from '../utils/deviceHelper';
 import { formatRole } from '../utils/formatting';
 interface ToastMessage {
-  id: string;
-  message: string;
-  type: 'info' | 'warning' | 'error' | 'success';
-  duration?: number;
-  title?: string;
+  id: string; message: string; type: 'info' | 'warning' | 'error' | 'success'; duration?: number; title?: string;
 }
 interface StoreContextType {
-  user: User | null;
-  originalUser?: User | null; // For Ghost Mode
-  login: (email: string, password: string) => Promise<boolean>;
-  logout: () => void;
-  impersonateUser: (user: User) => void;
-  stopImpersonation: () => void;
-  theme: 'dark' | 'light';
-  toggleTheme: () => void;
-  isSidebarOpen: boolean;
-  toggleSidebar: () => void;
-  loading: boolean;
-  isOnline: boolean;
-  isServerDown: boolean;
+  user: User | null; originalUser?: User | null;
+  login: (email: string, password: string) => Promise<boolean>; logout: () => void;
+  impersonateUser: (user: User) => void; stopImpersonation: () => void;
+  theme: 'dark' | 'light'; toggleTheme: () => void; isSidebarOpen: boolean; toggleSidebar: () => void;
+  loading: boolean; isOnline: boolean; isServerDown: boolean;
   showToast: (message: string, type?: 'info' | 'warning' | 'error' | 'success', duration?: number, title?: string) => void;
-  updateUserAvatar: (newAvatar: string) => void; // Update current user's avatar
-  onlineIds: Set<string>;
+  updateUserAvatar: (newAvatar: string) => void; onlineIds: Set<string>;
 }
-
-
 
 const StoreContext = createContext<StoreContextType | undefined>(undefined);
 
@@ -486,10 +471,18 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   );
 }
 
+const STORE_FALLBACK: StoreContextType = {
+  user: null, originalUser: null, login: async () => false, logout: () => {},
+  impersonateUser: () => {}, stopImpersonation: () => {}, theme: 'light', toggleTheme: () => {},
+  isSidebarOpen: false, toggleSidebar: () => {}, loading: false, isOnline: true, isServerDown: false,
+  showToast: () => {}, updateUserAvatar: () => {}, onlineIds: new Set<string>()
+};
+
 export function useStore() {
   const context = useContext(StoreContext);
   if (context === undefined) {
-    throw new Error('useStore must be used within a StoreProvider');
+    logger.warn('CentralStore', 'useStore called outside StoreProvider - returning safe defaults');
+    return STORE_FALLBACK;
   }
   return context;
 }

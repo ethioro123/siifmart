@@ -38,6 +38,7 @@ export const SYSTEM_ROLES: {
    { id: 'regional_manager', label: 'Regional Operations Manager', desc: 'Territorial Multi-Site Leadership and Area Oversight', level: 2, styles: { text: 'text-blue-600 dark:text-blue-500', bg: 'bg-blue-100 dark:bg-blue-500/10', border: 'border-blue-200 dark:border-blue-500/20', badge: 'bg-blue-100 dark:bg-blue-500/20 text-blue-700 dark:text-blue-500' } },
    { id: 'regional_procurement_lead', label: 'Regional Procurement Lead', desc: 'Territorial Sourcing and Local Vendor Agreements', level: 2, styles: { text: 'text-indigo-600 dark:text-indigo-400', bg: 'bg-indigo-100 dark:bg-indigo-400/10', border: 'border-indigo-200 dark:border-indigo-400/20', badge: 'bg-indigo-100 dark:bg-indigo-400/20 text-indigo-700 dark:text-indigo-400' } },
    { id: 'regional_finance_officer', label: 'Regional Finance Officer', desc: 'Territorial Financial Audits and Till Reconciliations', level: 2, styles: { text: 'text-emerald-600 dark:text-emerald-400', bg: 'bg-emerald-100 dark:bg-emerald-400/10', border: 'border-emerald-200 dark:border-emerald-400/20', badge: 'bg-emerald-100 dark:bg-emerald-400/20 text-emerald-700 dark:text-emerald-400' } },
+   { id: 'regional_merchandising_lead', label: 'Regional Merchandising Lead', desc: 'Territorial pricing, campaigns, and planogram approvals', level: 2, styles: { text: 'text-amber-700 dark:text-amber-300', bg: 'bg-amber-100 dark:bg-amber-300/10', border: 'border-amber-200 dark:border-amber-300/20', badge: 'bg-amber-100 dark:bg-amber-300/20 text-amber-800 dark:text-amber-300' } },
    { id: 'regional_hr_officer', label: 'Regional Human Resources Officer', desc: 'Territorial Staffing and Workforce Governance', level: 2, styles: { text: 'text-pink-600 dark:text-pink-400', bg: 'bg-pink-100 dark:bg-pink-400/10', border: 'border-pink-200 dark:border-pink-400/20', badge: 'bg-pink-100 dark:bg-pink-400/20 text-pink-700 dark:text-pink-400' } },
    { id: 'regional_logistics_lead', label: 'Regional Logistics Lead', desc: 'Territorial Fleet Transit and Inter-Facility Transfers', level: 2, styles: { text: 'text-violet-600 dark:text-violet-400', bg: 'bg-violet-100 dark:bg-violet-400/10', border: 'border-violet-200 dark:border-violet-400/20', badge: 'bg-violet-100 dark:bg-violet-400/20 text-violet-700 dark:text-violet-400' } },
    { id: 'regional_security_supervisor', label: 'Regional Security Supervisor', desc: 'Territorial Asset Protection and Supervisory Audit Governance', level: 2, styles: { text: 'text-rose-600 dark:text-rose-400', bg: 'bg-rose-50 dark:bg-rose-400/10', border: 'border-rose-200 dark:border-rose-400/20', badge: 'bg-rose-50 dark:bg-rose-400/20 text-rose-700 dark:text-rose-400' } },
@@ -89,6 +90,7 @@ export const SYSTEM_ROLES: {
    { id: 'payroll_specialist', label: 'Payroll Specialist', desc: 'Employee Compensation and Statutory Benefits', level: 4, styles: { text: 'text-pink-600 dark:text-pink-400', bg: 'bg-pink-100 dark:bg-pink-400/10', border: 'border-pink-200 dark:border-pink-400/20', badge: 'bg-pink-100 dark:bg-pink-400/20 text-pink-700 dark:text-pink-400' } },
    { id: 'talent_recruiter', label: 'Talent Acquisition Specialist', desc: 'Candidate Sourcing and Recruitment', level: 4, styles: { text: 'text-pink-600 dark:text-pink-300', bg: 'bg-pink-50 dark:bg-pink-300/10', border: 'border-pink-200 dark:border-pink-300/20', badge: 'bg-pink-50 dark:bg-pink-300/20 text-pink-700 dark:text-pink-300' } },
    { id: 'hr_generalist', label: 'HR Generalist', desc: 'Employee case preparation and people operations support', level: 4, styles: { text: 'text-pink-600 dark:text-pink-300', bg: 'bg-pink-50 dark:bg-pink-300/10', border: 'border-pink-200 dark:border-pink-300/20', badge: 'bg-pink-50 dark:bg-pink-300/20 text-pink-700 dark:text-pink-300' } },
+   { id: 'merchandising_specialist', label: 'Merchandising Specialist', desc: 'Country or regional assortment and campaign preparation', level: 4, styles: { text: 'text-amber-700 dark:text-amber-300', bg: 'bg-amber-50 dark:bg-amber-300/10', border: 'border-amber-200 dark:border-amber-300/20', badge: 'bg-amber-50 dark:bg-amber-300/20 text-amber-800 dark:text-amber-300' } },
    { id: 'treasury_officer', label: 'Treasury Officer', desc: 'Cash Flow and Tender Reconciliation', level: 4, styles: { text: 'text-emerald-600 dark:text-emerald-400', bg: 'bg-emerald-100 dark:bg-emerald-400/10', border: 'border-emerald-200 dark:border-emerald-400/20', badge: 'bg-emerald-100 dark:bg-emerald-400/20 text-emerald-700 dark:text-emerald-400' } },
    { id: 'tax_compliance_officer', label: 'Tax Compliance Officer', desc: 'Sovereign Tax Filings and Statutory Compliance', level: 4, styles: { text: 'text-teal-600 dark:text-teal-400', bg: 'bg-teal-100 dark:bg-teal-400/10', border: 'border-teal-200 dark:border-teal-400/20', badge: 'bg-teal-100 dark:bg-teal-400/20 text-teal-700 dark:text-teal-400' } },
    { id: 'credit_control_officer', label: 'Credit Control Officer', desc: 'Commercial Credit and Accounts Receivable', level: 4, styles: { text: 'text-teal-700 dark:text-teal-500', bg: 'bg-teal-50 dark:bg-teal-500/10', border: 'border-teal-200 dark:border-teal-500/20', badge: 'bg-teal-50 dark:bg-teal-500/20 text-teal-800 dark:text-teal-500' } },
@@ -150,6 +152,7 @@ export const getRoleHierarchy = (role: UserRole | string): number => {
         'audit_head': 80,
         'regional_procurement_lead': 81,
         'regional_finance_officer': 81,
+        'regional_merchandising_lead': 81,
         'regional_hr_officer': 81,
         'regional_logistics_lead': 81,
         'regional_security_supervisor': 81,
@@ -180,6 +183,7 @@ export const getRoleHierarchy = (role: UserRole | string): number => {
         'training_coordinator': 35,
         'talent_recruiter': 35,
         'hr_generalist': 35,
+        'merchandising_specialist': 35,
         'customs_import_specialist': 35,
         'it_support': 35,
         'dispatcher': 35,
@@ -240,7 +244,7 @@ export const canViewCostPrice = (role: string | undefined): boolean => {
     // Explicitly allow executive, regional/operations directors, finance, procurement, and merchandising leadership
     if ([
         'super_admin', 'ceo', 'CEO', 'admin', 'country_managing_director',
-        'regional_manager', 'regional_procurement_lead', 'regional_finance_officer',
+        'regional_manager', 'regional_procurement_lead', 'regional_finance_officer', 'regional_merchandising_lead',
         'operations_manager', 'head_of_operations', 'operations_head',
         'finance_manager', 'head_of_finance', 'finance_head',
         'procurement_manager', 'head_of_procurement', 'procurement_head',
@@ -312,7 +316,9 @@ export const canEmployRole = (
     // Regional Functional Leads (hierarchy 81) can be employed by Executive Leadership, Operations Director, Regional Manager, HR Leadership, or their Corporate Directorate Head
     const isRegionalFunctionalLead = [
         'regional_procurement_lead',
+        'regional_merchandising_lead',
         'regional_finance_officer',
+        'regional_merchandising_lead',
         'regional_hr_officer',
         'regional_logistics_lead',
         'regional_security_supervisor'
@@ -325,6 +331,7 @@ export const canEmployRole = (
             'hr_manager', 'head_of_hr', 'hr_head', 'hr',
             'procurement_manager', 'head_of_procurement', 'procurement_head',
             'finance_manager', 'head_of_finance', 'finance_head',
+            'merchandising_manager', 'head_of_merchandising', 'merchandising_head',
             'supply_chain_manager', 'head_of_supply_chain', 'supply_chain_head',
             'head_of_audit', 'audit_head', 'head_of_it', 'it_head'
         ].includes(userRole as string);
@@ -350,6 +357,7 @@ export const MANAGERIAL_ROLES: readonly string[] = [
     'regional_manager',
     'regional_procurement_lead',
     'regional_finance_officer',
+    'regional_merchandising_lead',
     'regional_hr_officer',
     'regional_logistics_lead',
     'regional_security_supervisor',
