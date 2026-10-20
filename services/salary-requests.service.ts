@@ -2,6 +2,8 @@ import { supabase } from '../lib/supabase';
 import type { SalaryChangeRequest } from '../types';
 import { systemLogsService } from './system-logs.service';
 import { logger } from '../utils/logger';
+import { isSovereignCEO } from '../utils/employeeGovernance';
+import { getRoleHierarchy } from '../utils/roles';
 
 const LOCAL_STORAGE_KEY = 'siifmart_salary_requests_backup';
 
@@ -120,6 +122,27 @@ export const salaryRequestsService = {
         const country = (request.countryCode || 'ET').toUpperCase();
         const newId = crypto.randomUUID();
 
+        // Protection against subordinate modifying Global CEO
+        if (request.employeeId) {
+            try {
+                const { data: targetEmp } = await supabase
+                    .from('employees')
+                    .select('role')
+                    .eq('id', request.employeeId)
+                    .maybeSingle();
+
+                const isTargetCEO = targetEmp?.role && isSovereignCEO(targetEmp.role);
+                const isRequesterCEO = isSovereignCEO(request.requestedByRole);
+
+                if (isTargetCEO && !isRequesterCEO) {
+                    throw new Error('Access Denied: Subordinate roles cannot propose salary adjustments for the Global CEO.');
+                }
+            } catch (err: any) {
+                if (err?.message?.includes('Access Denied')) throw err;
+                // Non-blocking schema fallback
+            }
+        }
+
         const dbRecord = {
             id: newId,
             employee_id: request.employeeId,
@@ -188,6 +211,45 @@ export const salaryRequestsService = {
         }
 
         const targetRequest = mapDBToSalaryRequest(currentData);
+
+        // Fetch target employee to inspect hierarchy and role
+        const { data: targetEmp } = await supabase
+            .from('employees')
+            .select('role')
+            .eq('id', targetRequest.employeeId)
+            .maybeSingle();
+
+        const isTargetCEO = targetEmp?.role && isSovereignCEO(targetEmp.role);
+        const isApproverCEO = isSovereignCEO(approver.role);
+
+        // Guard 1: Only Global CEO can approve salary changes for the Global CEO
+        if (isTargetCEO && !isApproverCEO) {
+            throw new Error('Sovereign Authority Violation: Only the Global CEO can approve compensation changes for the Global CEO.');
+        }
+
+        // Guard 2: Anti-Self-Approval (cannot approve own compensation adjustment)
+        if (approver.id && targetRequest.employeeId === approver.id) {
+            throw new Error('Zero-Trust Anti-Fraud Violation: You cannot approve your own salary adjustment.');
+        }
+
+        // Guard 3: 4-Eyes Principle (Requester !== Approver)
+        if (
+            !isApproverCEO &&
+            targetRequest.requestedBy &&
+            approver.name &&
+            targetRequest.requestedBy.trim().toLowerCase() === approver.name.trim().toLowerCase()
+        ) {
+            throw new Error('Segregation of Duties Violation: You cannot approve a salary request you initiated (4-Eyes Principle).');
+        }
+
+        // Guard 4: Hierarchy Rank Guard (Approver must outrank target employee)
+        if (!isApproverCEO && targetEmp?.role) {
+            const approverLevel = getRoleHierarchy(approver.role);
+            const targetLevel = getRoleHierarchy(targetEmp.role);
+            if (approverLevel <= targetLevel) {
+                throw new Error(`Hierarchy Violation: Role "${approver.role}" (Level ${approverLevel}) cannot approve salary adjustment for "${targetEmp.role}" (Level ${targetLevel}).`);
+            }
+        }
 
         // 2. Persist approval status on server
         const { error: updateErr } = await supabase

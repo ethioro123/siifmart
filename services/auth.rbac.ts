@@ -95,6 +95,7 @@ export const ROLE_PERMISSIONS: Record<string, string[]> = {
     security_manager: ['dashboard', 'settings', 'employees', 'profile'],
     payroll_specialist: ['dashboard', 'employees', 'finance', 'profile'],
     talent_recruiter: ['dashboard', 'employees', 'profile'],
+    hr_generalist: ['dashboard', 'employees', 'profile'],
     treasury_officer: ['dashboard', 'finance', 'pos', 'sales', 'profile'],
     tax_compliance_officer: ['dashboard', 'finance', 'sales', 'profile'],
     credit_control_officer: ['dashboard', 'finance', 'sales', 'customers', 'procurement', 'profile'],

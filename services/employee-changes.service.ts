@@ -3,6 +3,8 @@ import { EmployeeProfileChangeRequest } from '../types/employee-change';
 import { employeesService } from './employees.service';
 import { systemLogsService } from './system-logs.service';
 import { logger } from '../utils/logger';
+import { isSovereignCEO } from '../utils/employeeGovernance';
+import { getRoleHierarchy } from '../utils/roles';
 
 const LOCAL_STORAGE_KEY = 'siifmart_employee_change_requests_backup';
 
@@ -132,6 +134,38 @@ export const employeeChangesService = {
 
         const target = mapDBToChangeRequest(currentData);
         const approvedAt = new Date().toISOString();
+
+        // Zero-Trust Governance Checks
+        const isApproverCEO = isSovereignCEO(approverRole);
+
+        // Fetch current employee to inspect target role
+        const { data: targetEmp } = await supabase
+            .from('employees')
+            .select('role')
+            .eq('id', target.employeeId)
+            .maybeSingle();
+
+        const isTargetCEO = (targetEmp?.role && isSovereignCEO(targetEmp.role)) || 
+            Boolean(target.fullProposedEmployee?.role && isSovereignCEO(target.fullProposedEmployee.role));
+
+        if (isTargetCEO && !isApproverCEO) {
+            throw new Error('Sovereign Authority Violation: Only the Global CEO can approve changes to the Global CEO profile.');
+        }
+
+        // 4-Eyes Principle: Requester cannot approve their own change request
+        if (!isApproverCEO && target.requestedBy && approverName && 
+            target.requestedBy.trim().toLowerCase() === approverName.trim().toLowerCase()) {
+            throw new Error('Zero-Trust 4-Eyes Violation: Requester cannot approve their own change request.');
+        }
+
+        // Hierarchy Rank Guard
+        if (!isApproverCEO && targetEmp?.role) {
+            const approverLevel = getRoleHierarchy(approverRole);
+            const targetLevel = getRoleHierarchy(targetEmp.role);
+            if (approverLevel <= targetLevel) {
+                throw new Error(`Hierarchy Violation: Role "${approverRole}" (Level ${approverLevel}) cannot approve changes for "${targetEmp.role}" (Level ${targetLevel}).`);
+            }
+        }
 
         // 2. Apply changes to the actual employee record via employeesService
         try {

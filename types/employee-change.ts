@@ -54,4 +54,5 @@ export interface GovernanceRuleResult {
     governanceCategories: GovernanceCategory[];
     requiredApprovers: ApprovingAuthority[];
     diffs: FieldChangeDiff[];
+    blockedReason?: string;
 }

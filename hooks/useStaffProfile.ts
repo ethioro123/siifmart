@@ -14,6 +14,8 @@ import {
 } from '../utils/employeeProfileData';
 import { leaveRequestsService } from '../services/leave-requests.service';
 import { employeeDocumentsService } from '../services/employee-documents.service';
+import { getRoleHierarchy } from '../utils/roles';
+import { isSovereignCEO } from '../utils/employeeGovernance';
 
 interface UseStaffProfileProps {
     employee: Employee;
@@ -228,6 +230,16 @@ export function useStaffProfile({
     };
 
     const handleConfirmResetPassword = async () => {
+        const isTargetCEO = isSovereignCEO(employee.role);
+        const isActorCEO = isSovereignCEO(user?.role);
+        const userLevel = user?.role ? getRoleHierarchy(user.role) : 0;
+        const targetLevel = getRoleHierarchy(employee.role);
+
+        if ((isTargetCEO && !isActorCEO) || (!isActorCEO && userLevel <= targetLevel)) {
+            addNotification('alert', 'Hierarchy Violation: You are not authorized to reset the password of this employee.');
+            return;
+        }
+
         if (passwordInput.length < 6) {
             addNotification('alert', 'Password must be at least 6 characters');
             return;

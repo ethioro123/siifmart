@@ -90,7 +90,7 @@ export const L1_L3_REPORTING_REGISTRY: Record<string, RoleReportingMeta> = {
         levelTag: 'L2 Director',
         reportsToRole: 'super_admin',
         reportsToLabel: 'CEO',
-        managesRoles: ['hr', 'training_coordinator', 'talent_recruiter', 'payroll_specialist'],
+        managesRoles: ['hr', 'hr_generalist', 'training_coordinator', 'talent_recruiter', 'payroll_specialist'],
         isManagerial: true
     },
     merchandising_manager: {
@@ -138,7 +138,7 @@ export const L1_L3_REPORTING_REGISTRY: Record<string, RoleReportingMeta> = {
         reportsToLabel: 'Regional Manager (Territory Administration)',
         dottedLineRole: 'hr_manager',
         dottedLineLabel: 'HR Manager (Corporate People & Payroll)',
-        managesRoles: ['talent_recruiter', 'training_coordinator'],
+        managesRoles: ['hr_generalist', 'talent_recruiter', 'training_coordinator', 'payroll_specialist'],
         isManagerial: true
     },
     regional_logistics_lead: {

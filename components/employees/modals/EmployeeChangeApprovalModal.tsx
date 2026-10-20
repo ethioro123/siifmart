@@ -49,6 +49,25 @@ export const EmployeeChangeApprovalModal: React.FC<EmployeeChangeApprovalModalPr
     }, [isOpen, effectiveCountry]);
 
     const handleApprove = async (req: EmployeeProfileChangeRequest) => {
+        if (req.employeeId === user?.id) {
+            addNotification('alert', 'Zero-Trust Anti-Fraud Violation: You cannot approve changes to your own profile.');
+            return;
+        }
+
+        const targetEmp = employees.find(e => e.id === req.employeeId);
+        const isTargetCEO = (targetEmp?.role && isSovereignCEO(targetEmp.role)) || 
+            Boolean(req.fullProposedEmployee?.role && isSovereignCEO(req.fullProposedEmployee.role));
+
+        if (isTargetCEO && !isCEO) {
+            addNotification('alert', 'Sovereign Authority Violation: Only the Global CEO can approve changes to the Global CEO.');
+            return;
+        }
+
+        if (!isCEO && req.requestedBy && user?.name && req.requestedBy.trim().toLowerCase() === user.name.trim().toLowerCase()) {
+            addNotification('alert', 'Separation of Duties violation: You cannot approve a request you initiated (4-Eyes Principle).');
+            return;
+        }
+
         setActionId(req.id);
         try {
             const updated = await employeeChangesService.approve(
@@ -155,10 +174,15 @@ export const EmployeeChangeApprovalModal: React.FC<EmployeeChangeApprovalModalPr
                             const targetEmp = employees.find(e => e.id === req.employeeId);
                             const targetRegion = targetEmp?.regionCode || targetEmp?.region_code;
                             const userRegion = user?.regionCode || user?.region_code;
-                            const userCanApprove = isCEO || req.requiredApprovers.some(auth => 
+                            const userCanApprove = (isCEO && req.employeeId !== user?.id) || req.requiredApprovers.some(auth => 
                                 canApproveChangeRequest(user?.role || '', auth, {
                                     userRegionCode: userRegion,
-                                    targetRegionCode: targetRegion
+                                    targetRegionCode: targetRegion,
+                                    approverId: user?.id,
+                                    targetEmployeeId: req.employeeId,
+                                    targetEmployeeRole: targetEmp?.role,
+                                    requesterName: req.requestedBy,
+                                    approverName: user?.name
                                 })
                             );
                             const isBusy = actionId === req.id;

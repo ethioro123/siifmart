@@ -4,6 +4,7 @@ import { useData } from '../contexts/DataContext';
 import { useGamification } from '../contexts/GamificationContext';
 import { hasPermission } from '../utils/permissions';
 import { getRoleHierarchy, canEmployRole } from '../utils/roles';
+import { isSovereignCEO } from '../utils/employeeGovernance';
 import { useStaffProfile } from '../hooks/useStaffProfile';
 import { AlertCircle, CheckCircle } from 'lucide-react';
 
@@ -50,17 +51,24 @@ export default function StaffProfileView(props: StaffProfileViewProps) {
 
     const isOnline = onlineIds.has(employee.id);
 
-    // Permission Logic
+    // Permission Logic & Hierarchy Enforcement
     const userRoleLevel = user ? getRoleHierarchy(user.role) : 0;
     const targetRoleLevel = getRoleHierarchy(employee.role);
-    const canManage = hasPermission(user?.role, 'EDIT_EMPLOYEE');
+    const isTargetCEO = isSovereignCEO(employee.role);
+    const isActorCEO = isSovereignCEO(user?.role);
+    const isSuperiorToTarget = userRoleLevel > targetRoleLevel;
+
+    // Subordinate roles (including Country MD) cannot manage or adjust Global CEO.
+    // Non-CEOs cannot manage anyone of equal or higher hierarchy. Self cannot manage self.
+    const canManageTarget = !isOwnProfile && (isActorCEO || (hasPermission(user?.role, 'EDIT_EMPLOYEE') && !isTargetCEO && isSuperiorToTarget));
+    const canManageTasks = hasPermission(user?.role, 'EDIT_EMPLOYEE') && (isActorCEO || !isTargetCEO);
     const canViewPayroll = hasPermission(user?.role, 'VIEW_PAYROLL') || isOwnProfile;
-    const canTerminate = (user?.role === 'super_admin' || user?.role === 'hr' || user?.role === 'hr_manager' || user?.role === 'regional_manager' || user?.role === 'operations_manager') && userRoleLevel > targetRoleLevel && !isOwnProfile;
-    const canDelete = user?.role === 'super_admin' && userRoleLevel > targetRoleLevel && !isOwnProfile;
+    const canTerminate = (user?.role === 'super_admin' || user?.role === 'hr' || user?.role === 'hr_manager' || user?.role === 'regional_manager' || user?.role === 'operations_manager') && userRoleLevel > targetRoleLevel && !isOwnProfile && !isTargetCEO;
+    const canDelete = user?.role === 'super_admin' && userRoleLevel > targetRoleLevel && !isOwnProfile && !isTargetCEO;
     const canApprove = (user?.role === 'super_admin' || user?.role === 'CEO' || user?.role === 'ceo' || user?.role === 'admin' || user?.role === 'hr' || user?.role === 'hr_manager' || user?.role === 'regional_hr_officer' || user?.role === 'regional_manager' || user?.role === 'operations_manager') &&
         canEmployRole(user?.role, employee.role) &&
         employee.status === 'Pending Approval' &&
-        !isOwnProfile;
+        !isOwnProfile && !isTargetCEO;
 
     const handleApprove = () => {
         if (props.onApprove) {
@@ -85,8 +93,8 @@ export default function StaffProfileView(props: StaffProfileViewProps) {
     return (
         <div className="space-y-5 sm:space-y-6">
             <StaffProfileHeader 
-                employee={employee} sites={sites} isOwnProfile={isOwnProfile} canManageEmployees={canManage} 
-                canResetPassword={userRoleLevel > targetRoleLevel} canTerminate={canTerminate} canDelete={canDelete}
+                employee={employee} sites={sites} isOwnProfile={isOwnProfile} canManageEmployees={canManageTarget} 
+                canResetPassword={userRoleLevel > targetRoleLevel && !isTargetCEO} canTerminate={canTerminate} canDelete={canDelete}
                 canApprove={canApprove} onApprove={handleApprove}
                 isOnline={isOnline}
                 onPhotoRequest={onRequestPhotoChange || (() => profile.profilePhotoInputRef.current?.click())}
@@ -147,7 +155,7 @@ export default function StaffProfileView(props: StaffProfileViewProps) {
                 )}
                 {profile.activeProfileTab === 'tasks' && (
                     <TasksTab
-                        canManageEmployees={canManage}
+                        canManageEmployees={canManageTasks}
                         isOwnProfile={isOwnProfile}
                         employeeTasks={allTasks.filter(t => t.assignedTo === employee.id)}
                         newTaskTitle={profile.newTaskTitle}
@@ -161,7 +169,7 @@ export default function StaffProfileView(props: StaffProfileViewProps) {
                 {profile.activeProfileTab === 'timeoff' && (
                     <TimeOffTab
                         isOwnProfile={isOwnProfile}
-                        canManageEmployees={canManage}
+                        canManageEmployees={canManageTarget}
                         leaveRequests={profile.leaveRequests}
                         onRequestTimeOff={() => profile.setIsTimeOffModalOpen(true)}
                         onApproveRequest={profile.handleApproveLeave}
@@ -175,13 +183,13 @@ export default function StaffProfileView(props: StaffProfileViewProps) {
                         documentInputRef={profile.documentInputRef}
                         handleDocumentUpload={profile.handleDocumentUpload}
                         handleDeleteDocument={profile.handleDeleteDocument}
-                        canUpload={canManage || isOwnProfile}
+                        canUpload={canManageTarget || isOwnProfile}
                     />
                 )}
                 {profile.activeProfileTab === 'payroll' && (
                     <PayrollTab
                         employee={employee}
-                        canManageEmployees={canManage && !isOwnProfile}
+                        canManageEmployees={canManageTarget}
                         handleEditSalary={() => profile.setIsSalaryModalOpen(true)}
                         onViewPayslip={profile.handleViewPayslip}
                     />
@@ -190,7 +198,7 @@ export default function StaffProfileView(props: StaffProfileViewProps) {
                     <SettingsTab
                         employee={employee}
                         sites={sites}
-                        canEditStaff={(user?.role === 'super_admin' || user?.role === 'admin' || canManage) && !isOwnProfile}
+                        canEditStaff={canManageTarget}
                         isOwnProfile={isOwnProfile}
                         currentUser={user}
                         updateEmployee={updateEmployee}

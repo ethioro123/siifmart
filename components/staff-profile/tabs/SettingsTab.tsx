@@ -150,8 +150,8 @@ export default function SettingsTab({
 
     // Evaluate governance rules
     const governanceResult = useMemo(() => {
-        return evaluateEmployeeProfileChanges(employee, proposedChanges, currentUser?.role);
-    }, [employee, proposedChanges, currentUser?.role]);
+        return evaluateEmployeeProfileChanges(employee, proposedChanges, currentUser?.role, currentUser?.id);
+    }, [employee, proposedChanges, currentUser?.role, currentUser?.id]);
 
     // Handle Direct Save (CEO or HR non-governed changes)
     const handleDirectSave = async () => {
@@ -180,7 +180,7 @@ export default function SettingsTab({
 
     // Handle primary action click
     const handleSaveClick = () => {
-        if (!hasChanges) return;
+        if (!hasChanges || governanceResult.blockedReason) return;
         if (governanceResult.requiresApproval && !isCEO) {
             setIsApprovalModalOpen(true);
         } else {
@@ -302,7 +302,9 @@ export default function SettingsTab({
             {(canEditStaff || isOwnProfile) && (
                 <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-4 rounded-2xl bg-[var(--theme-bg-card)] border border-[var(--theme-border)] shadow-sm">
                     <div className="text-xs text-[var(--theme-text-muted)]">
-                        {isCEO ? (
+                        {governanceResult.blockedReason ? (
+                            <span className="text-rose-500 font-semibold">{governanceResult.blockedReason}</span>
+                        ) : isCEO ? (
                             <span>CEO Sovereign Authority: Changes apply directly to personnel ledger.</span>
                         ) : governanceResult.requiresApproval && hasChanges ? (
                             <span>Governed fields detected: Request will route to {governanceResult.requiredApprovers.join(', ')}.</span>
@@ -313,7 +315,7 @@ export default function SettingsTab({
 
                     <button
                         onClick={handleSaveClick}
-                        disabled={isSaving || !hasChanges}
+                        disabled={isSaving || !hasChanges || Boolean(governanceResult.blockedReason)}
                         className={`w-full sm:w-auto px-6 py-2.5 rounded-xl font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition-all cursor-pointer shadow-xs disabled:opacity-40 ${
                             saveSuccess
                                 ? 'bg-emerald-600 text-white'

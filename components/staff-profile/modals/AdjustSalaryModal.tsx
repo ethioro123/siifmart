@@ -6,7 +6,7 @@ import { useData } from '../../../contexts/DataContext';
 import { useStore } from '../../../contexts/CentralStore';
 import { salaryRequestsService } from '../../../services/salary-requests.service';
 import type { Employee } from '../../../types';
-import { getEmployeeJobTitle } from '../../../utils/roles';
+import { getEmployeeJobTitle, getRoleHierarchy } from '../../../utils/roles';
 
 interface AdjustSalaryModalProps {
     isOpen: boolean;
@@ -42,6 +42,21 @@ export default function AdjustSalaryModal({
     const isExecutive = ['CEO', 'ceo', 'super_admin'].includes(user?.role || '');
     const [directOverride, setDirectOverride] = useState<boolean>(isExecutive);
 
+    const isTargetCEO = ['CEO', 'ceo', 'super_admin'].includes(employee.role || '');
+    const isSelf = Boolean(user?.id && user.id === employee.id);
+    const actorLevel = user?.role ? getRoleHierarchy(user.role) : 0;
+    const targetLevel = getRoleHierarchy(employee.role);
+    const isSubordinateOrPeer = !isExecutive && actorLevel <= targetLevel;
+
+    const isForbidden = (isTargetCEO && !isExecutive) || isSelf || isSubordinateOrPeer;
+    const forbiddenReason = (isTargetCEO && !isExecutive)
+        ? 'Access Denied: Subordinate roles (including Country MD) cannot adjust or propose compensation for the Global CEO.'
+        : isSelf
+        ? 'Zero-Trust Anti-Fraud Violation: You cannot adjust or propose an adjustment for your own salary.'
+        : isSubordinateOrPeer
+        ? `Hierarchy Violation: Subordinate/peer role "${user?.role}" (Level ${actorLevel}) cannot adjust compensation for "${employee.role}" (Level ${targetLevel}).`
+        : null;
+
     useEffect(() => {
         if (isOpen) {
             const val = salaryInput !== undefined && salaryInput !== ''
@@ -75,6 +90,11 @@ export default function AdjustSalaryModal({
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setErrorMessage('');
+
+        if (isForbidden) {
+            setErrorMessage(forbiddenReason || 'Unauthorized compensation adjustment.');
+            return;
+        }
 
         if (!isValidAmount) {
             setErrorMessage('Please enter a valid positive salary amount.');
@@ -166,6 +186,17 @@ export default function AdjustSalaryModal({
                     </div>
                 </div>
 
+                {/* Forbidden Governance Warning */}
+                {isForbidden && (
+                    <div className="p-3.5 bg-rose-50 dark:bg-rose-950/30 text-rose-700 dark:text-rose-400 rounded-xl border border-rose-200 dark:border-rose-900/40 text-xs flex items-start gap-2.5">
+                        <AlertCircle size={16} className="shrink-0 mt-0.5" />
+                        <div>
+                            <p className="font-bold">Action Prohibited Under Governance Rules</p>
+                            <p className="mt-0.5 text-[11px] leading-relaxed">{forbiddenReason}</p>
+                        </div>
+                    </div>
+                )}
+
                 {/* Proposed Salary Input */}
                 <div>
                     <label className="block text-xs text-stone-500 font-bold uppercase tracking-wider mb-2">
@@ -178,7 +209,8 @@ export default function AdjustSalaryModal({
                             step="any"
                             value={proposedSalaryStr}
                             onChange={(e) => handleInputChange(e.target.value)}
-                            className="w-full bg-stone-50 dark:bg-black/50 border border-stone-300 dark:border-white/10 rounded-xl pl-12 pr-4 py-3 text-stone-900 dark:text-white text-lg font-mono focus:border-emerald-600 dark:focus:border-emerald-500 outline-none placeholder:text-stone-400"
+                            disabled={isForbidden}
+                            className="w-full bg-stone-50 dark:bg-black/50 border border-stone-300 dark:border-white/10 rounded-xl pl-12 pr-4 py-3 text-stone-900 dark:text-white text-lg font-mono focus:border-emerald-600 dark:focus:border-emerald-500 outline-none placeholder:text-stone-400 disabled:opacity-50 disabled:cursor-not-allowed"
                             placeholder="0.00"
                             required
                         />
@@ -210,15 +242,16 @@ export default function AdjustSalaryModal({
                     <textarea
                         value={reason}
                         onChange={(e) => { setReason(e.target.value); if (errorMessage) setErrorMessage(''); }}
+                        disabled={isForbidden}
                         rows={3}
-                        className="w-full bg-stone-50 dark:bg-black/50 border border-stone-300 dark:border-white/10 rounded-xl p-3 text-sm text-stone-900 dark:text-white focus:border-emerald-600 dark:focus:border-emerald-500 outline-none resize-none placeholder:text-stone-400"
+                        className="w-full bg-stone-50 dark:bg-black/50 border border-stone-300 dark:border-white/10 rounded-xl p-3 text-sm text-stone-900 dark:text-white focus:border-emerald-600 dark:focus:border-emerald-500 outline-none resize-none placeholder:text-stone-400 disabled:opacity-50 disabled:cursor-not-allowed"
                         placeholder="Provide formal rationale (e.g. annual merit review, promotion to lead, market benchmarking)..."
                         required
                     />
                 </div>
 
                 {/* Executive Mode Toggle */}
-                {isExecutive && (
+                {isExecutive && !isForbidden && (
                     <div className="p-3 bg-stone-100 dark:bg-black/30 rounded-xl border border-stone-200 dark:border-white/10 flex items-center justify-between">
                         <div>
                             <p className="text-xs font-bold text-stone-800 dark:text-stone-200">Executive Bypass Mode</p>
@@ -266,7 +299,7 @@ export default function AdjustSalaryModal({
                     </button>
                     <button
                         type="submit"
-                        disabled={isSubmitting || !isValidAmount || diff === 0 || reason.trim().length < 5}
+                        disabled={isSubmitting || isForbidden || !isValidAmount || diff === 0 || reason.trim().length < 5}
                         className="px-6 py-2.5 bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold rounded-xl text-xs uppercase tracking-wider cursor-pointer flex items-center gap-2 transition-all shadow-sm"
                     >
                         {isSubmitting ? <Loader2 size={14} className="animate-spin" /> : <CheckCircle size={14} />}

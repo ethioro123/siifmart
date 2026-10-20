@@ -29,9 +29,9 @@ describe('Zero-Trust Employee Governance & Cross-Department Approvals', () => {
     };
 
     describe('CEO Sovereign Universal Authority', () => {
-        it('identifies CEO and super_admin as sovereign roles', () => {
+        it('identifies CEO and super_admin as sovereign roles, excluding admin (Country MD)', () => {
             expect(isSovereignCEO('super_admin')).toBe(true);
-            expect(isSovereignCEO('admin')).toBe(true);
+            expect(isSovereignCEO('admin')).toBe(false); // Country Managing Director is not Sovereign CEO
             expect(isSovereignCEO('ceo')).toBe(true);
             expect(isSovereignCEO('hr_manager')).toBe(false);
             expect(isSovereignCEO('hr')).toBe(false);
@@ -202,6 +202,77 @@ describe('Zero-Trust Employee Governance & Cross-Department Approvals', () => {
                 userRegionCode: 'ke_nairobi',
                 targetRegionCode: 'ke_mombasa'
             })).toBe(true);
+        });
+
+        it('strictly blocks Country Managing Director from modifying Global CEO salary or profile', () => {
+            const ceoEmployee: Employee = {
+                ...mockEmployee,
+                id: 'emp-ceo',
+                role: 'super_admin',
+                name: 'Global CEO'
+            };
+
+            const result = evaluateEmployeeProfileChanges(
+                ceoEmployee,
+                { salary: 999999 },
+                'admin' // Country Managing Director
+            );
+
+            expect(result.requiresApproval).toBe(true);
+            expect(result.blockedReason).toContain('Global CEO profile is sovereignly protected');
+        });
+
+        it('strictly blocks Country Managing Director from approving change requests targeting Global CEO', () => {
+            const canAdminApproveCEO = canApproveChangeRequest('admin', 'Finance Department', {
+                targetEmployeeRole: 'super_admin'
+            });
+            expect(canAdminApproveCEO).toBe(false);
+        });
+
+        it('strictly blocks self-compensation adjustments', () => {
+            const result = evaluateEmployeeProfileChanges(
+                mockEmployee,
+                { salary: 50000 },
+                'hr_manager',
+                mockEmployee.id // Acting user is modifying their own record
+            );
+
+            expect(result.requiresApproval).toBe(true);
+            expect(result.blockedReason).toContain('Zero-Trust Anti-Fraud Violation');
+        });
+
+        it('strictly blocks self-approval of change requests', () => {
+            const canSelfApprove = canApproveChangeRequest('finance_manager', 'Finance Department', {
+                approverId: 'emp-fin-001',
+                targetEmployeeId: 'emp-fin-001'
+            });
+            expect(canSelfApprove).toBe(false);
+        });
+
+        it('strictly blocks requester from approving own request under 4-eyes principle', () => {
+            const canRequesterApprove = canApproveChangeRequest('finance_manager', 'Finance Department', {
+                approverName: 'Jane Doe',
+                requesterName: 'Jane Doe'
+            });
+            expect(canRequesterApprove).toBe(false);
+        });
+
+        it('strictly blocks subordinate role from modifying superior role salary or profile', () => {
+            const directorEmployee: Employee = {
+                ...mockEmployee,
+                id: 'emp-dir',
+                role: 'operations_manager', // Level 95
+                name: 'Head of Operations'
+            };
+
+            const result = evaluateEmployeeProfileChanges(
+                directorEmployee,
+                { salary: 45000 },
+                'hr_manager' // Level 85
+            );
+
+            expect(result.requiresApproval).toBe(true);
+            expect(result.blockedReason).toContain('Hierarchy Violation');
         });
     });
 });

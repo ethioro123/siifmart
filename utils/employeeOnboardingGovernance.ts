@@ -3,6 +3,7 @@
  * Pure helper functions (no hooks, no I/O).
  */
 import { saveEmployeeDocument } from './employeeProfileData';
+import { canEmployRole } from './roles';
 
 /**
  * Executive and HR roles authorized to directly onboard and activate workers.
@@ -28,6 +29,12 @@ export const isDirectOnboardingAuthorized = (
 ): boolean => {
     if (!role) return false;
     const cleanRole = role.toLowerCase().trim();
+
+    // Hierarchy boundary: Nobody can directly onboard a candidate of equal or superior hierarchy rank
+    if (candidateRole && !canEmployRole(role, candidateRole)) {
+        return false;
+    }
+
     if (DIRECT_ONBOARDING_ROLES.some(r => r.toLowerCase() === cleanRole)) {
         return true;
     }

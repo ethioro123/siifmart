@@ -101,6 +101,11 @@ export default function SalaryApprovalQueueModal({
             return;
         }
 
+        if (request.employeeId === user?.id) {
+            addNotification('alert', 'Zero-Trust Anti-Fraud Violation: You cannot approve your own salary adjustment.');
+            return;
+        }
+
         if (request.requestedBy === user?.name && !['CEO', 'ceo', 'super_admin'].includes(user?.role || '')) {
             addNotification('alert', 'Separation of Duties violation: You cannot approve a request you initiated.');
             return;
@@ -230,9 +235,9 @@ export default function SalaryApprovalQueueModal({
                             const pctChange = req.currentSalary > 0
                                 ? ((diff / req.currentSalary) * 100).toFixed(1)
                                 : '100.0';
-                            const isSelf = req.requestedBy === user?.name;
-                            const canSelfApprove = ['CEO', 'ceo', 'super_admin'].includes(user?.role || '');
-                            const isActionDisabled = processingId === req.id || (!canSelfApprove && isSelf);
+                            const isRequester = req.requestedBy === user?.name;
+                            const isOwnRecord = req.employeeId === user?.id;
+                            const isActionDisabled = processingId === req.id || isOwnRecord || (!['CEO', 'ceo', 'super_admin'].includes(user?.role || '') && isRequester);
 
                             return (
                                 <div
@@ -334,13 +339,13 @@ export default function SalaryApprovalQueueModal({
                                                 </div>
                                             ) : (
                                                 <div className="flex items-center justify-between pt-2 border-t border-stone-200 dark:border-white/10">
-                                                    {isSelf && !canSelfApprove && (
+                                                    {isActionDisabled && processingId !== req.id && (
                                                         <p className="text-[11px] text-amber-600 dark:text-amber-400 flex items-center gap-1">
                                                             <AlertTriangle size={13} />
                                                             Separation of Duties: Another manager must approve
                                                         </p>
                                                     )}
-                                                    {!isSelf && <div />}
+                                                    {!isActionDisabled && <div />}
                                                     <div className="flex items-center gap-2 ml-auto">
                                                         <button
                                                             type="button"

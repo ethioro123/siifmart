@@ -5,13 +5,15 @@ import {
     GovernanceCategory, 
     GovernanceRuleResult 
 } from '../types/employee-change';
+import { getRoleHierarchy } from './roles';
 
 /**
  * Checks if the acting user is the CEO or Super Admin with sovereign universal override authority.
+ * Country Managing Director ('admin') is Level 98 and NOT sovereign CEO (Level 100).
  */
 export function isSovereignCEO(role?: string): boolean {
     if (!role) return false;
-    return ['super_admin', 'admin', 'ceo'].includes(role.toLowerCase());
+    return ['super_admin', 'ceo'].includes(role.toLowerCase().trim());
 }
 
 /**
@@ -51,16 +53,77 @@ export function getDepartmentApprovingAuthority(department?: string): ApprovingA
 export function evaluateEmployeeProfileChanges(
     original: Employee,
     proposed: Partial<Employee>,
-    actingUserRole?: string
+    actingUserRole?: string,
+    actingUserId?: string
 ): GovernanceRuleResult {
-    // 1. CEO Sovereign Override: always bypasses approval
-    if (isSovereignCEO(actingUserRole)) {
+    const isTargetCEO = isSovereignCEO(original.role);
+    const isActorCEO = isSovereignCEO(actingUserRole);
+
+    // 1. CEO Sovereign Override: Global CEO editing anyone (including themselves) always bypasses approval
+    if (isActorCEO) {
         return {
             requiresApproval: false,
             governanceCategories: [],
             requiredApprovers: [],
             diffs: []
         };
+    }
+
+    // 2. Protection of Global CEO Profile: Subordinate roles (including Country MD) CANNOT modify Global CEO
+    if (isTargetCEO) {
+        return {
+            requiresApproval: true,
+            governanceCategories: ['role_privilege', 'compensation'],
+            requiredApprovers: ['Executive / Compliance'],
+            diffs: [],
+            blockedReason: 'Global CEO profile is sovereignly protected. Subordinate roles cannot modify the Global CEO.'
+        };
+    }
+
+    // 3. Anti-Self-Compensation & Anti-Self-Promotion Guard
+    if (actingUserId && original.id === actingUserId) {
+        if (proposed.salary !== undefined && Number(proposed.salary) !== Number(original.salary || 0)) {
+            return {
+                requiresApproval: true,
+                governanceCategories: ['compensation'],
+                requiredApprovers: ['Finance Department'],
+                diffs: [],
+                blockedReason: 'Zero-Trust Anti-Fraud Violation: You cannot alter or propose your own salary.'
+            };
+        }
+        if (proposed.role !== undefined && proposed.role !== original.role) {
+            return {
+                requiresApproval: true,
+                governanceCategories: ['role_privilege'],
+                requiredApprovers: ['Executive / Compliance'],
+                diffs: [],
+                blockedReason: 'Zero-Trust Anti-Fraud Violation: You cannot alter or escalate your own role clearance.'
+            };
+        }
+    }
+
+    // 4. Hierarchy Rank Guard: Non-CEOs cannot modify compensation or role of superiors or equal peers
+    if (actingUserRole && original.role) {
+        const actorLevel = getRoleHierarchy(actingUserRole);
+        const targetLevel = getRoleHierarchy(original.role);
+        if (actorLevel <= targetLevel) {
+            const hasGovernedChanges = 
+                (proposed.salary !== undefined && Number(proposed.salary) !== Number(original.salary || 0)) ||
+                (proposed.role !== undefined && proposed.role !== original.role) ||
+                (proposed.status !== undefined && proposed.status !== original.status) ||
+                (proposed.name !== undefined && proposed.name.trim() !== original.name.trim()) ||
+                (proposed.nationalIdNumber !== undefined && proposed.nationalIdNumber.trim() !== (original.nationalIdNumber || '').trim());
+
+            if (hasGovernedChanges) {
+                return {
+                    requiresApproval: true,
+                    governanceCategories: ['role_privilege', 'compensation'],
+                    requiredApprovers: ['Executive / Compliance'],
+                    diffs: [],
+                    blockedReason: `Hierarchy Violation: Subordinate or peer role "${actingUserRole}" (Level ${actorLevel}) cannot modify profile of "${original.role}" (Level ${targetLevel}).`
+                };
+            }
+        }
     }
 
     const diffs: FieldChangeDiff[] = [];
@@ -194,9 +257,40 @@ export function canApproveChangeRequest(
     context?: {
         userRegionCode?: string;
         targetRegionCode?: string;
+        approverId?: string;
+        targetEmployeeId?: string;
+        targetEmployeeRole?: string;
+        requesterName?: string;
+        approverName?: string;
     }
 ): boolean {
-    if (isSovereignCEO(userRole)) return true; // CEO can approve ANY request
+    const isActorCEO = isSovereignCEO(userRole);
+    if (isActorCEO) return true; // CEO can approve ANY request
+
+    // Target is CEO: ONLY CEO can approve changes targeting the CEO
+    if (context?.targetEmployeeRole && isSovereignCEO(context.targetEmployeeRole)) {
+        return false;
+    }
+
+    // Anti-Self-Approval: cannot approve changes to own profile
+    if (context?.approverId && context?.targetEmployeeId && context.approverId === context.targetEmployeeId) {
+        return false;
+    }
+
+    // 4-Eyes Principle: Requester cannot approve their own change request
+    if (context?.approverName && context?.requesterName && 
+        context.approverName.trim().toLowerCase() === context.requesterName.trim().toLowerCase()) {
+        return false;
+    }
+
+    // Hierarchy Rank Check: Subordinate or peer cannot approve superior or peer request
+    if (context?.targetEmployeeRole) {
+        const actorLevel = getRoleHierarchy(userRole);
+        const targetLevel = getRoleHierarchy(context.targetEmployeeRole);
+        if (actorLevel <= targetLevel) {
+            return false;
+        }
+    }
 
     // Regional Boundary Guard: Regional managers are locked to their own region
     if (userRole === 'regional_manager') {
@@ -219,7 +313,7 @@ export function canApproveChangeRequest(
         case 'Security Management':
             return ['security_manager', 'operations_manager'].includes(userRole);
         case 'Executive / Compliance':
-            return ['super_admin', 'regional_manager', 'compliance_officer'].includes(userRole);
+            return ['super_admin', 'compliance_officer'].includes(userRole);
         default:
             return false;
     }

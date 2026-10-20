@@ -5,6 +5,21 @@
 
 ## Active Features
 
+### Executive Governance & Role Hierarchy Anti-Tamper Hardening (2026-10-20)
+- Fixed sovereign role classification flaw where Country Managing Director (`admin`, Level 98) was misclassified as a sovereign CEO (`isSovereignCEO`). Sovereign universal override authority is strictly restricted to Global CEO (`super_admin` / `ceo`, Level 100).
+- Subordinate roles (including Country MD and HR) can no longer adjust, propose compensation changes for, or directly edit the Global CEO's profile or salary.
+- Self-compensation adjustments and self-promotions are blocked across the board under zero-trust anti-fraud policy.
+- Subordinate roles cannot adjust compensation, edit sensitive profile fields, or approve change requests for employees of equal or superior hierarchy rank.
+- Enforced 4-eyes separation of duties across salary requests and employee profile change requests: requesters cannot approve their own submissions.
+- **Files**: `utils/employeeGovernance.ts`, `components/StaffProfileView.tsx`, `components/staff-profile/tabs/SettingsTab.tsx`, `components/staff-profile/modals/AdjustSalaryModal.tsx`, `components/staff-profile/tabs/settings/GovernanceApprovalBadge.tsx`, `components/employees/SalaryApprovalQueueModal.tsx`, `components/employees/modals/EmployeeChangeApprovalModal.tsx`, `components/employees/recruitment/CandidateApprovalModal.tsx`, `services/salary-requests.service.ts`, `services/employee-changes.service.ts`, `services/recruitment.service.ts`, `utils/employeeOnboardingGovernance.ts`, `tests/services/employeeGovernance.test.ts`.
+
+### HR Administration Support Scope (2026-10-20)
+- HR Generalist is available as an HQ or regional Administration staff role. Generalists can review employee cases and submit scoped profile change requests; HR leads retain approval and disciplinary decisions. Existing recruiting, training, and payroll support profiles use the same country or region boundary.
+- HR directory and case reads are scoped through the assigned Administration office. Requisition insertion no longer has an unscoped bypass. Payroll specialists can prepare scoped runs, while HR certification, finance approval, and disbursement require the corresponding lead role.
+- Training coordinators can save territorial training records, and recruiters can save territorial candidates. Candidate HR and Finance approvals are restricted to their respective leads; the recruitment service reports failed server saves instead of claiming a local success.
+- **Files**: `migrations/20261020_hr_administration_directory_scope.sql`, `migrations/20261020_hr_generalist_and_record_boundaries.sql`, `migrations/20261020_hr_generalist_case_preparation.sql`, `migrations/20261020_allow_hr_generalist_employee_role.sql`, `migrations/20261020_hr_training_recruitment_support.sql`, role catalog/access and recruitment files, `tests/security/hr-administration-scope.sql`.
+- **Database**: Five migrations applied to SIIFMART Staging and production; rollback boundary regression passed on Staging.
+
 ### Finance Administration Support Scope (2026-10-20)
 - Accountants and treasury officers assigned to HQ Administration can work with site-based finance records across their country; when assigned to a regional Administration office, their scope follows that region. Existing site staff retain site scope. Regional finance leads use their existing regional boundary.
 - Finance policies distinguish read, preparation, reconciliation, approval, and period close. Support staff can prepare pending invoices, expenses, and unposted journals and reconcile tender records. Budget approvals, period changes, posted journals, credit decisions, and payment-run creation stay with designated leads. Country-only customer credit data remains HQ scoped for accountants.

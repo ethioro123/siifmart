@@ -62,7 +62,7 @@ export const recruitmentService = {
             updated_at: now
         };
 
-        try {
+        {
             const { data: dbData, error } = await supabase
                 .from('job_requisitions')
                 .insert([{
@@ -82,15 +82,10 @@ export const recruitmentService = {
                 .select()
                 .single();
 
-            if (error) {
-                logger.warn('recruitmentService', 'Supabase insert error, saved locally', { message: error.message });
-                saveLocalReqs([newRecord]);
-            } else if (dbData) {
+            if (error) throw new Error(`Failed to save requisition: ${error.message}`);
+            if (dbData) {
                 saveLocalReqs([mapDBToReq(dbData)]);
             }
-        } catch (err) {
-            logger.warn('recruitmentService', 'Exception inserting req, saved locally', { error: String(err) });
-            saveLocalReqs([newRecord]);
         }
 
         // Synaptic Neural Mesh: Audit log
@@ -126,7 +121,7 @@ export const recruitmentService = {
         }
 
         const now = new Date().toISOString();
-        try {
+        {
             const { error } = await supabase
                 .from('job_requisitions')
                 .update({
@@ -137,11 +132,7 @@ export const recruitmentService = {
                 })
                 .eq('id', requisitionId);
 
-            if (error) {
-                logger.warn('recruitmentService', 'Supabase approve error', { message: error.message });
-            }
-        } catch (err) {
-            logger.warn('recruitmentService', 'Exception approving req', { error: String(err) });
+            if (error) throw new Error(`Failed to approve requisition: ${error.message}`);
         }
 
         const updated = reqs.map(r => r.id === requisitionId ? {
@@ -202,6 +193,7 @@ export const recruitmentService = {
     async createCandidate(data: {
         country_code: string;
         requisition_id?: string;
+        site_id?: string;
         name: string;
         email: string;
         phone: string;
@@ -221,11 +213,8 @@ export const recruitmentService = {
             updated_at: now
         };
 
-        try {
-            await supabase.from('job_candidates').insert([newCandidate]);
-        } catch {
-            // Fallback handled
-        }
+        const { error } = await supabase.from('job_candidates').insert([newCandidate]);
+        if (error) throw new Error(`Failed to save candidate: ${error.message}`);
         saveLocalCands([newCandidate]);
         return newCandidate;
     },
@@ -250,11 +239,8 @@ export const recruitmentService = {
             updated_at: now
         };
 
-        try {
-            await supabase.from('job_candidates').update(updatePayload).eq('id', candidateId);
-        } catch {
-            // Fallback
-        }
+        const { error } = await supabase.from('job_candidates').update(updatePayload).eq('id', candidateId);
+        if (error) throw new Error(`Failed to update candidate: ${error.message}`);
 
         const cands = getLocalCands().map(c => c.id === candidateId ? { ...c, ...updatePayload } : c);
         saveLocalCands(cands);
@@ -303,11 +289,8 @@ export const recruitmentService = {
             updated_at: now
         };
 
-        try {
-            await supabase.from('job_candidates').update(updatePayload).eq('id', candidateId);
-        } catch (err) {
-            logger.warn('recruitmentService', 'Supabase HR approve error', { error: String(err) });
-        }
+        const { error } = await supabase.from('job_candidates').update(updatePayload).eq('id', candidateId);
+        if (error) throw new Error(`Failed to record HR candidate approval: ${error.message}`);
 
         const cands = getLocalCands().map(c => c.id === candidateId ? { ...c, ...updatePayload } : c);
         saveLocalCands(cands);
@@ -346,11 +329,8 @@ export const recruitmentService = {
             updated_at: now
         };
 
-        try {
-            await supabase.from('job_candidates').update(updatePayload).eq('id', candidateId);
-        } catch (err) {
-            logger.warn('recruitmentService', 'Supabase Finance approve error', { error: String(err) });
-        }
+        const { error } = await supabase.from('job_candidates').update(updatePayload).eq('id', candidateId);
+        if (error) throw new Error(`Failed to record Finance candidate approval: ${error.message}`);
 
         const cands = getLocalCands().map(c => c.id === candidateId ? { ...c, ...updatePayload } : c);
         saveLocalCands(cands);
@@ -375,7 +355,7 @@ export const recruitmentService = {
         const candidate = getLocalCands().find(c => c.id === candidateId);
         if (!candidate) throw new Error('Candidate not found.');
 
-        const isCEO = actor.role === 'super_admin' || actor.role === 'admin';
+        const isCEO = actor.role === 'super_admin' || (actor.role as string)?.toLowerCase() === 'ceo';
         if (!isCEO) {
             if (!candidate.hr_approved_at) {
                 throw new Error('Zero-Trust Guard: Mandatory HR identity verification required before hire activation.');

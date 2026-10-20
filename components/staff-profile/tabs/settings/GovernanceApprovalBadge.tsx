@@ -15,6 +15,29 @@ export const GovernanceApprovalBadge: React.FC<GovernanceApprovalBadgeProps> = (
 }) => {
     if (!hasChanges) return null;
 
+    if (ruleResult.blockedReason) {
+        return (
+            <div className="p-4 rounded-2xl bg-rose-500/10 border border-rose-500/30 shadow-xs flex items-start gap-3 animate-in fade-in slide-in-from-top-2">
+                <div className="w-9 h-9 rounded-xl bg-rose-500/15 text-rose-500 flex items-center justify-center shrink-0">
+                    <ShieldAlert size={18} />
+                </div>
+                <div>
+                    <div className="flex items-center gap-2">
+                        <span className="text-xs font-bold text-rose-600 dark:text-rose-400">
+                            Governance Action Blocked
+                        </span>
+                        <span className="px-2 py-0.5 rounded-full text-[11px] font-semibold bg-rose-500/15 text-rose-600 dark:text-rose-400 border border-rose-500/25">
+                            Zero-Trust Enforcement
+                        </span>
+                    </div>
+                    <p className="text-[11px] text-[var(--theme-text-secondary)] mt-0.5">
+                        {ruleResult.blockedReason}
+                    </p>
+                </div>
+            </div>
+        );
+    }
+
     if (isCEO) {
         return (
             <div className="p-4 rounded-2xl bg-[var(--theme-bg-card)] border border-[var(--theme-border)] shadow-xs flex items-center justify-between gap-4 animate-in fade-in slide-in-from-top-2">

@@ -65,9 +65,9 @@ export const PERMISSIONS = {
     VIEW_CUSTOMER_HISTORY: ['super_admin', 'store_manager', 'assistant_manager', 'shift_lead', 'auditor', 'cs_manager', 'credit_control_officer'],
 
     // Employees
-    ACCESS_EMPLOYEES: ['super_admin', 'admin', 'regional_manager', 'operations_manager', 'hr', 'hr_manager', 'warehouse_manager', 'store_manager', 'assistant_manager', 'shift_lead', 'store_supervisor', 'security_manager', 'logistics_manager', 'inventory_manager', 'training_coordinator', 'payroll_specialist', 'talent_recruiter', 'fleet_maintenance_supervisor', 'regional_hr_officer'],
+    ACCESS_EMPLOYEES: ['super_admin', 'admin', 'regional_manager', 'operations_manager', 'hr', 'hr_manager', 'warehouse_manager', 'store_manager', 'assistant_manager', 'shift_lead', 'store_supervisor', 'security_manager', 'logistics_manager', 'inventory_manager', 'training_coordinator', 'payroll_specialist', 'talent_recruiter', 'hr_generalist', 'fleet_maintenance_supervisor', 'regional_hr_officer'],
     ADD_EMPLOYEE: ['super_admin', 'admin', 'hr', 'hr_manager', 'talent_recruiter', 'operations_manager', 'regional_manager', 'regional_hr_officer'],
-    EDIT_EMPLOYEE: ['super_admin', 'admin', 'hr', 'hr_manager', 'it_support', 'payroll_specialist', 'talent_recruiter', 'regional_hr_officer'],
+    EDIT_EMPLOYEE: ['super_admin', 'admin', 'hr', 'hr_manager', 'it_support', 'payroll_specialist', 'talent_recruiter', 'hr_generalist', 'regional_hr_officer'],
     DELETE_EMPLOYEE: ['super_admin'],
     TERMINATE_EMPLOYEE: ['super_admin', 'hr', 'hr_manager'],
     MANAGE_SHIFTS: ['super_admin', 'regional_manager', 'operations_manager', 'hr', 'store_manager', 'assistant_manager', 'shift_lead', 'warehouse_manager', 'dispatcher', 'store_supervisor'],
@@ -315,14 +315,14 @@ export { getRoleDisplayName, getRoleDescription, getRoleColor };
  * Check if user should see all sites or just their own
  */
 export function canViewAllSites(userRole: UserRole | undefined): boolean {
-    return ['super_admin', 'admin', 'regional_manager', 'operations_manager', 'finance_manager', 'hr_manager', 'supply_chain_manager', 'hr', 'auditor', 'it_support', 'cs_manager', 'logistics_manager', 'inventory_manager', 'security_manager', 'treasury_officer', 'tax_compliance_officer', 'credit_control_officer', 'store_operations_auditor', 'regional_procurement_lead', 'regional_finance_officer', 'regional_hr_officer', 'regional_logistics_lead', 'regional_security_supervisor'].includes(userRole || '');
+    return ['super_admin', 'admin', 'regional_manager', 'operations_manager', 'finance_manager', 'hr_manager', 'supply_chain_manager', 'hr', 'auditor', 'it_support', 'cs_manager', 'logistics_manager', 'inventory_manager', 'security_manager', 'treasury_officer', 'tax_compliance_officer', 'credit_control_officer', 'store_operations_auditor', 'regional_procurement_lead', 'regional_finance_officer', 'regional_hr_officer', 'regional_logistics_lead', 'regional_security_supervisor', 'hr_generalist', 'talent_recruiter', 'training_coordinator', 'payroll_specialist'].includes(userRole || '');
 }
 
 /**
  * Check if user should see all employees or filtered
  */
 export function canViewAllEmployees(userRole: UserRole | undefined): boolean {
-    return ['super_admin', 'admin', 'regional_manager', 'operations_manager', 'finance_manager', 'hr_manager', 'supply_chain_manager', 'hr', 'it_support', 'logistics_manager', 'inventory_manager', 'security_manager', 'regional_procurement_lead', 'regional_finance_officer', 'regional_hr_officer', 'regional_logistics_lead', 'regional_security_supervisor'].includes(userRole || '');
+    return ['super_admin', 'admin', 'regional_manager', 'operations_manager', 'finance_manager', 'hr_manager', 'supply_chain_manager', 'hr', 'it_support', 'logistics_manager', 'inventory_manager', 'security_manager', 'regional_procurement_lead', 'regional_finance_officer', 'regional_hr_officer', 'regional_logistics_lead', 'regional_security_supervisor', 'hr_generalist', 'talent_recruiter', 'training_coordinator', 'payroll_specialist'].includes(userRole || '');
 }
 
 /**

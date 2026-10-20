@@ -16,7 +16,7 @@ export type UserRole =
   // Legacy roles (for backwards compatibility during migration)
   | 'admin' | 'hr' | 'pos' | 'dispatcher'
   | 'cs_manager' | 'returns_clerk' | 'merchandiser' | 'loss_prevention'
-  | 'accountant' | 'data_analyst' | 'training_coordinator'
+  | 'accountant' | 'data_analyst' | 'training_coordinator' | 'hr_generalist'
   // Regional Administration Roles (Flexible Territorial Team)
   | 'regional_procurement_lead' | 'regional_finance_officer' | 'regional_hr_officer'
   | 'regional_logistics_lead' | 'regional_security_supervisor'

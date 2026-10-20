@@ -10,10 +10,10 @@ vi.mock('../../lib/supabase', () => {
   chainable.delete = vi.fn().mockReturnValue(chainable);
   chainable.eq = vi.fn().mockReturnValue(chainable);
   chainable.order = vi.fn().mockReturnValue(chainable);
-  chainable.single = vi.fn().mockResolvedValue({ data: null, error: { message: 'Mock' } });
-  chainable.limit = vi.fn().mockResolvedValue({ data: null, error: { message: 'Mock' } });
+  chainable.single = vi.fn().mockResolvedValue({ data: null, error: null });
+  chainable.limit = vi.fn().mockResolvedValue({ data: null, error: null });
   chainable.then = (onfulfilled: any, onrejected: any) =>
-    Promise.resolve({ data: null, error: { message: 'Mock' } }).then(onfulfilled, onrejected);
+    Promise.resolve({ data: null, error: null }).then(onfulfilled, onrejected);
 
   return {
     supabase: {
@@ -27,7 +27,7 @@ describe('Delegated Recruitment & 4-Eyes Dual Approval Pipeline', () => {
     if (typeof localStorage !== 'undefined') {
       localStorage.clear();
     }
-    vi.restoreAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('1. Delegated Role Level Hierarchy', () => {

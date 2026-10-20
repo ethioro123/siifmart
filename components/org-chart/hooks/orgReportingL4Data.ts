@@ -317,6 +317,16 @@ export const L4_REPORTING_REGISTRY: Record<string, RoleReportingMeta> = {
         managesRoles: [],
         isManagerial: false
     },
+    hr_generalist: {
+        role: 'hr_generalist',
+        level: 4,
+        levelCategory: 'specialist',
+        levelTag: 'L4 HR Generalist',
+        reportsToRole: 'hr_manager',
+        reportsToLabel: 'HR Manager',
+        managesRoles: [],
+        isManagerial: false
+    },
     training_coordinator: {
         role: 'training_coordinator',
         level: 4,

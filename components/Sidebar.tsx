@@ -136,7 +136,7 @@ export default function Sidebar() {
       { to: "/customers", icon: Users, label: "Customers", section: "customers", roles: ['super_admin', 'store_manager', 'assistant_manager', 'shift_lead', 'pos', 'cs_manager', 'store_supervisor', 'operations_manager', 'regional_manager', 'credit_control_officer'] },
 
       // EMPLOYEES - Corporate HR & Operations Executive Suite only (Site managers onboard via POS Command & WMS Dashboard)
-      { to: "/employees", icon: Briefcase, label: "Employees", section: "employees", roles: ['super_admin', 'admin', 'hr', 'hr_manager', 'operations_manager', 'regional_manager', 'training_coordinator', 'payroll_specialist', 'talent_recruiter'] },
+      { to: "/employees", icon: Briefcase, label: "Employees", section: "employees", roles: ['super_admin', 'admin', 'hr', 'hr_manager', 'operations_manager', 'regional_manager', 'training_coordinator', 'payroll_specialist', 'talent_recruiter', 'hr_generalist'] },
 
       // SETTINGS
       { to: "/settings", icon: Settings, label: "Settings", section: "settings", roles: ['super_admin', 'admin', 'it_support', 'security_manager', 'regional_manager', 'operations_manager', 'auditor'] },

@@ -206,6 +206,11 @@ export const ACTION_PERMISSIONS: Record<UserRole, Permission[]> = {
         'employees.view', 'employees.edit', 'employees.manage_attendance'
     ],
 
+    hr_generalist: [
+        'dashboard.view',
+        'employees.view', 'employees.edit'
+    ],
+
     // ============================================================================
     // LEVEL 2 - Regional/Directors
     // ============================================================================

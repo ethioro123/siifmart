@@ -135,6 +135,12 @@ export const ROLE_SEGREGATION_RULES: RoleSegregationRule[] = [
         department: 'Human Resources',
         description: 'Talent Recruiter - Candidate Sourcing & Hiring'
     },
+    {
+        role: 'hr_generalist',
+        siteType: 'Administration',
+        department: 'Human Resources',
+        description: 'HR Generalist - Employee case preparation and people operations'
+    },
 
     // ========================================
     // WAREHOUSE ROLES - Must be at Warehouse/DC

@@ -63,6 +63,7 @@ export const CandidateModal: React.FC<CandidateModalProps> = ({
             await recruitmentService.createCandidate({
                 country_code: country,
                 requisition_id: reqId || undefined,
+                site_id: finalSiteId,
                 name: name.trim(),
                 email: email.trim().toLowerCase(),
                 phone: phone.trim()
